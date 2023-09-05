@@ -7,17 +7,21 @@ import { Input } from '../Input';
 import { BaseItemProps, Item } from '../Item/Item';
 import { CustomLabel, NeoCustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
-import { Icon, IDisplayMenuItem, IMenuItem, IValueOption } from '../..'; // FIXME: strange import
+import { Icon, IValueOption } from '../..'; // FIXME: strange import
 
 // TODO: these type definitions should be moved out of components to menu service
 
 export enum SelectTypes {
+    /** 单选 */
     SINGLE,
     /** dropdown with input */
     INPUT,
     COLOR,
+    /** 两栏菜单，主按钮会跟着上次的选项发生变化 */
     DOUBLE,
+    /** 显示一个固定的值 */
     FIX,
+    /** 显示一个固定的值 */
     DOUBLEFIX,
 
     /** This should be the only type. The enum would be removed after we finish refactor. */
@@ -38,6 +42,8 @@ export enum DisplayTypes {
     INPUT,
 
     FONT,
+
+    CUSTOM,
 }
 
 export interface BaseSelectChildrenProps extends BaseItemProps {
@@ -76,7 +82,6 @@ interface IState {
     content: ComponentChildren;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
-    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
 }
 
 export class Select extends PureComponent<BaseSelectProps, IState> {
@@ -105,7 +110,6 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
             color: this.props.defaultColor ?? '#000',
             content: '',
             value: '',
-            menuItems: [],
         };
     }
 
@@ -399,7 +403,6 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
 
     renderNeo = () => {
         const { tooltip, onClick, display, value, icon, title, id, options, type } = this.props;
-        const { menuItems } = this.state;
 
         const onClickInner = (...args: unknown[]) => {
             onClick?.(args[1] as number | string);
@@ -409,14 +412,25 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
             onClick?.(option.value);
         };
 
+        const iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
+        const displayInSubMenu = display === DisplayTypes.ICON ? DisplayTypes.LABEL : display === DisplayTypes.INPUT ? DisplayTypes.LABEL : display;
         return (
             <div className={`${styles.selectDouble}`}>
-                {/* TODO@wzhudev: we should compose options and builtin component here. They may have different onClick callback. */}
-                {/* TODO@wzhudev: should pass in a value to set the menu's selected status. */}
-                <Dropdown tooltip={tooltip} onClick={onClick} menu={{ menuId: id, options, onClick: onClickInner, onOptionSelect, display }} icon={<Icon.NextIcon />}>
-                    {/* TODO@wzhudev: change menu props of Dropdown. Dropdown shouldn't know how to create a menu. */}
+                <Dropdown
+                    tooltip={tooltip}
+                    onClick={type === SelectTypes.NEO ? () => onClick?.(value) : onClick}
+                    menu={{
+                        menuId: id,
+                        options,
+                        onClick: onClickInner,
+                        onOptionSelect,
+                        value,
+                        display: displayInSubMenu,
+                    }}
+                    icon={<Icon.NextIcon />}
+                >
                     <div className={styles.selectLabel}>
-                        <NeoCustomLabel icon={icon} display={display} title={title!} value={value} onChange={(v) => onClick?.(v)} />
+                        <NeoCustomLabel icon={iconToDisplay} display={display} title={title!} value={value} onChange={(v) => onClick?.(v)} />
                     </div>
                 </Dropdown>
             </div>

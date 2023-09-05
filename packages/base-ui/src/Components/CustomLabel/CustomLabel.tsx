@@ -7,19 +7,22 @@ import { DisplayTypes } from '../Select';
 
 import styles from './CustomLabel.module.less';
 import { IMenuSelectorItem } from '../../services/menu/menu';
+import { Item } from '../Item/Item';
+import { Input } from '../Input/input';
 
 function getLocale(context: Partial<AppContextValues>, name: string) {
     return context.localeService?.t(name);
 }
 
-export interface INeoCustomLabelProps<T> {
-    value: T;
-    onChange?(v: T): void;
+export interface INeoCustomLabelProps {
+    value: string | number | undefined;
+    selected?: boolean;
+    onChange?(v: string | number): void;
 }
 
-export function NeoCustomLabel<T>(props: Pick<IMenuSelectorItem<unknown>, 'icon' | 'display' | 'title'> & INeoCustomLabelProps<T>): JSX.Element | null {
+export function NeoCustomLabel(props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title'> & INeoCustomLabelProps): JSX.Element | null {
     const context = useContext(AppContext);
-    const { display, value, title, icon } = props;
+    const { display, value, title, icon, label, onChange, selected } = props;
 
     if (display === DisplayTypes.COLOR) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,15 +38,27 @@ export function NeoCustomLabel<T>(props: Pick<IMenuSelectorItem<unknown>, 'icon'
     }
 
     if (display === DisplayTypes.INPUT) {
-        // TODO: implement display input
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return <Input onValueChange={(v) => onChange?.(v as unknown as string)} type="number" value={`${value}`} />;
     }
 
-    // if the render type is icon, then render value to icon
-    if (display === DisplayTypes.ICON) {
-        return <>{value}</>;
+    if (display === DisplayTypes.ICON && icon) {
+        const LabelComponent = context.componentManager?.get(icon) as any;
+        if (LabelComponent) {
+            return <LabelComponent {...props} />;
+        }
     }
 
-    return <>{value}</>;
+    if (display === DisplayTypes.CUSTOM && label) {
+        const LabelComponent = context.componentManager?.get(label) as any;
+        if (LabelComponent) {
+            return <LabelComponent {...props} />;
+        }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const LabelComponent = icon ? (context.componentManager?.get(icon) as any) : null;
+    return <Item selected={selected} label={title} suffix={LabelComponent ? <LabelComponent /> : null} disabled={false}></Item>;
 }
 
 /** @deprecated */
@@ -68,6 +83,7 @@ export function CustomLabel(props: IBaseCustomLabelProps): JSX.Element | null {
         return label;
     }
 
+    // other types of components and icon
     if (label) {
         const Label = context.componentManager?.get((label as ICustomComponent).name) as any;
         if (Label) {
@@ -89,9 +105,6 @@ export interface IColorSelectProps {
 export class ColorSelect extends Component<IColorSelectProps> {
     render() {
         const { value, icon, title } = this.props;
-
-        console.log('debug color select value', value);
-
         return (
             <div className={styles.colorSelect}>
                 <div>{icon ? <CustomLabel label={{ name: icon }} /> : title}</div>

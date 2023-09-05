@@ -122,18 +122,18 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
         }
     };
 
-    handleItemClick = (item:IMenuButtonItem) =>{
-
+    handleItemClick = (item: IMenuButtonItem) => {
         // When there is no need to execute the command, execute click
-        if(item.onClick){
-            item.onClick()
+        if (item.onClick) {
+            item.onClick();
         }
-        this.showMenu(false)
-    }
+        this.showMenu(false);
+    };
+
     // eslint-disable-next-line max-lines-per-function
     render() {
         const { context, props, state } = this;
-        const { className = '', style = '', menu, deep = 0, options, display } = props;
+        const { className = '', style = '', menu, deep = 0, options, display, value } = props;
         const { posStyle, show, menuItems } = state;
 
         return (
@@ -141,7 +141,6 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                 {/* legacy: render selections */}
                 {menu?.map((item: BaseMenuItem, index: number) => {
                     if (item.show === false) return;
-                    // TODO@wzhudev: missing a mechanism to highlight currently selected option via value.
                     return (
                         <>
                             <li
@@ -186,10 +185,16 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                                     if (option.value) {
                                         this.props.onOptionSelect!(option);
                                     }
-                                    // TODO: handle if options is a custom component
                                 }}
                             >
-                                <NeoCustomLabel value={option.value} display={display} title={option.label} />
+                                <NeoCustomLabel
+                                    selected={value === option.value}
+                                    value={option.value}
+                                    display={display}
+                                    label={option.label}
+                                    title={option.label}
+                                    icon={option.icon}
+                                />
                             </li>
                         );
                     }
@@ -209,7 +214,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                 })}
                 {/* render submenus */}
                 {menuItems?.map((item: IDisplayMenuItem<IMenuItem>, index) => (
-                    <MenuItem menuItem={item} index={index} onClick={this.handleItemClick.bind(this,item as IMenuButtonItem)} />
+                    <MenuItem menuItem={item} index={index} onClick={this.handleItemClick.bind(this, item as IMenuButtonItem)} />
                 ))}
             </ul>
         );
@@ -229,7 +234,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
         if (menuId) {
             const menuService: IMenuService = this.context.injector.get(IMenuService);
             this.setState({
-                menuItems: menuService.getSubMenuItems(menuId),
+                menuItems: menuService.getMenuItems(menuId),
             });
         }
     }
@@ -343,7 +348,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
         const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
 
         return (
-            <li className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}  onClick={(e) => this.handleClick(e, item, index)}>
+            <li className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')} onClick={(e) => this.handleClick(e, item, index)}>
                 {/* FIXME after translate title,use title for value display*/}
                 <NeoCustomLabel value={item.title} onChange={this.onChange}></NeoCustomLabel>
             </li>
@@ -363,7 +368,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
                 onMouseLeave={(e) => this.mouseLeave(e, index)}
                 onClick={(e) => this.handleClick(e, item, index)}
             >
-                <NeoCustomLabel title={item.title} value={value} onChange={this.onChange} icon={item.icon} display={item.display}></NeoCustomLabel>
+                <NeoCustomLabel title={item.title} value={value} onChange={this.onChange} icon={item.icon} display={item.display} label={item.label}></NeoCustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
                 {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
                     <Menu
@@ -391,8 +396,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
                 onMouseEnter={(e) => this.mouseEnter(e, index)}
                 onMouseLeave={(e) => this.mouseLeave(e, index)}
                 onClick={(e) => this.handleClick(e, item, index)}
-            >   
-
+            >
                 {/* FIXME after translate title,use title for value display */}
                 <NeoCustomLabel title={item.title} value={item.title} onChange={this.onChange} icon={item.icon} display={item.display}></NeoCustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
@@ -417,7 +421,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
         if (id) {
             const menuService: IMenuService = this.context.injector.get(IMenuService);
             this.setState({
-                menuItems: menuService.getSubMenuItems(id),
+                menuItems: menuService.getMenuItems(id),
             });
         }
     }

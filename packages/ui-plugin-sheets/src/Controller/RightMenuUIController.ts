@@ -4,6 +4,7 @@ import { ComponentChildren } from 'preact';
 import { Disposable, ICurrentUniverService, ObserverManager, Tools, UIObserver } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 import { CanvasView } from '@univerjs/base-sheets';
+import { IMenuItemFactory } from '@univerjs/base-ui/src/services/menu/menu';
 import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
 import styles from '../View/RightMenu/index.module.less';
@@ -304,18 +305,20 @@ export class RightMenuUIController extends Disposable {
     }
 
     private _initializeContextMenu() {
-        [
-            ClearSelectionMenuItemFactory,
-            InsertRowMenuItemFactory,
-            InsertColMenuItemFactory,
-            RemoveRowMenuItemFactory,
-            RemoveColMenuItemFactory,
-            SetRowHeightMenuItemFactory,
-            SetColWidthMenuItemFactory,
-            DeleteRangeMenuItemFactory,
-            DeleteRangeMoveLeftMenuItemFactory,
-            DeleteRangeMoveUpMenuItemFactory,
-        ].forEach((factory) => {
+        (
+            [
+                ClearSelectionMenuItemFactory,
+                InsertRowMenuItemFactory,
+                InsertColMenuItemFactory,
+                RemoveRowMenuItemFactory,
+                RemoveColMenuItemFactory,
+                SetRowHeightMenuItemFactory,
+                SetColWidthMenuItemFactory,
+                DeleteRangeMenuItemFactory,
+                DeleteRangeMoveLeftMenuItemFactory,
+                DeleteRangeMoveUpMenuItemFactory,
+            ] as IMenuItemFactory[]
+        ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

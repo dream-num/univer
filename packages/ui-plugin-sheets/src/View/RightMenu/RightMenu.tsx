@@ -1,9 +1,8 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { BaseRightMenuProps, IDisplayMenuItem, IMenuItem, Menu } from '@univerjs/base-ui';
+import { BaseRightMenuProps, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
 import { Component, createRef } from 'preact';
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
-import { RightMenuItem } from './RightMenuItem';
 
 interface IState {
     visible: boolean;
@@ -126,10 +125,6 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
     }
 
     render() {
-        // if (!this.state.children.length) {
-        //     return;
-        // }
-
         const wrapStyles = { ...this.props.style };
         const { visible } = this.state;
 
@@ -143,7 +138,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                         e.preventDefault();
                     }}
                 >
-                    <Menu ref={this.ulRef} menuId={'right-menu'} onClick={this.handleClick}></Menu>
+                    <Menu ref={this.ulRef} menuId={MenuPosition.CONTEXT_MENU} onClick={this.handleClick}></Menu>
                 </div>
             )
         );

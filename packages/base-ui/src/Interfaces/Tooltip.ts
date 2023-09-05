@@ -3,7 +3,9 @@ import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponen
 
 export interface BaseTooltipProps extends BaseComponentProps {
     [index: number]: string;
+
     title?: string;
+    shortcut?: string;
     children: ComponentChildren;
     placement?: string;
     color?: string;

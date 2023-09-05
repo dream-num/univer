@@ -10,7 +10,7 @@ export class RenderEngine extends Plugin {
 
     private _engine: Engine;
 
-    constructor(@Optional(Injector) override readonly _injector: Injector) {
+    constructor(_config: undefined, @Optional(Injector) override readonly _injector: Injector) {
         super(PLUGIN_NAMES.BASE_RENDER);
 
         this._engine = new Engine();

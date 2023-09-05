@@ -61,10 +61,11 @@ export class Input extends Component<BaseInputProps, IState> {
     };
 
     handlePressEnter = (e: KeyboardEvent) => {
-        const { onPressEnter } = this.props;
+        const { onPressEnter, onValueChange } = this.props;
         if (e.key === 'Enter') {
             onPressEnter?.(e);
             this.ref.current.blur();
+            onValueChange?.(this.getValue());
         }
     };
 
@@ -76,11 +77,13 @@ export class Input extends Component<BaseInputProps, IState> {
     onClick = (e: MouseEvent) => {
         const { onClick } = this.props;
         onClick?.(e);
+        e.stopPropagation();
     };
 
     onBlur = (e: FocusEvent) => {
-        const { onBlur } = this.props;
+        const { onBlur, onValueChange } = this.props;
         onBlur?.(e);
+        onValueChange?.(this.getValue());
     };
 
     // get input value

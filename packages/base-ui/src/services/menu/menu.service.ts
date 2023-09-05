@@ -1,17 +1,9 @@
+import { IDisposable, createIdentifier } from '@wendellhu/redi';
 import { Disposable, toDisposable } from '@univerjs/core';
-import { createIdentifier, IDisposable } from '@wendellhu/redi';
-import { Observable } from 'rxjs';
-import { ComponentChildren } from 'preact';
-import { IShortcutService } from '../shortcut/shorcut.service';
-import { ICustomLabelType } from '../../Interfaces/CustomLabel';
+import { IShortcutService } from '../shortcut/shortcut.service';
 import { BaseSelectChildrenProps } from '../../Components/Select/Select';
 
-export type OneOrMany<T> = T | T[];
-
-export const enum MenuPosition {
-    TOOLBAR,
-    CONTEXT_MENU,
-}
+import { IDisplayMenuItem, IMenuItem, MenuPosition } from './menu';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IMenuItemState {
@@ -38,42 +30,20 @@ export interface CustomLabel {
     props?: CustomLabelProps;
 }
 
-export interface IMenuItem {
-    id: string;
-    menu: OneOrMany<MenuPosition>;
-    subMenus?: string[]; // submenu id list
-    parentId?: string; // if it is submenu
-    label?: string | ICustomLabelType | ComponentChildren;
-
-    title: string;
-    icon?: string;
-    tooltip?: string;
-    description?: string;
-
-    hidden$?: Observable<boolean>;
-    activated$?: Observable<boolean>;
-    disabled$?: Observable<boolean>;
-}
-
-export interface IDisplayMenuItem extends IMenuItem {
-    /** MenuService should get responsible shortcut and display on the UI. */
-    shortcut?: string;
-    subMenuItems?: IDisplayMenuItem[];
-}
-
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
 
 export interface IMenuService {
     addMenuItem(item: IMenuItem): IDisposable;
-    /** Get menu items at a given position. */
-    getMenuItems(position: MenuPosition): IMenuItem[];
+
+    /** Get menu items for display at a given position or a submenu. */
+    getMenuItems(position: MenuPosition | string): Array<IDisplayMenuItem<IMenuItem>>;
     getMenuItem(id: string): IMenuItem | null;
 }
 
 export class DesktopMenuService extends Disposable implements IMenuService {
     private readonly _menuItemMap = new Map<string, IMenuItem>();
 
-    private readonly _menuByPositions = new Map<MenuPosition, Map<string, IMenuItem>>();
+    private readonly _menuByPositions = new Map<MenuPosition | string, Array<[string, IMenuItem]>>();
 
     constructor(@IShortcutService private readonly _shortcutService: IShortcutService) {
         super();
@@ -89,29 +59,49 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         }
 
         this._menuItemMap.set(item.id, item);
-        if (Array.isArray(item.menu)) {
-            item.menu.forEach((menu) => this.appendMenuToPosition(item, menu));
+
+        if (Array.isArray(item.positions)) {
+            item.positions.forEach((menu) => this.appendMenuToPosition(item, menu));
         } else {
-            this.appendMenuToPosition(item, item.menu);
+            this.appendMenuToPosition(item, item.positions);
         }
 
         return toDisposable(() => {
             this._menuItemMap.delete(item.id);
-            if (Array.isArray(item.menu)) {
-                item.menu.forEach((menu) => this._menuByPositions.get(menu)?.delete(item.id));
+
+            if (Array.isArray(item.positions)) {
+                item.positions.forEach((menu) => {
+                    const menus = this._menuByPositions.get(menu);
+                    if (!menus) {
+                        return;
+                    }
+
+                    const index = menus.findIndex((m) => m[0] === item.id);
+                    if (index > -1) {
+                        menus.splice(index, 1);
+                    }
+                });
             } else {
-                this._menuByPositions.get(item.menu)?.delete(item.id);
+                const menus = this._menuByPositions.get(item.positions);
+                if (!menus) {
+                    return;
+                }
+
+                const index = menus.findIndex((m) => m[0] === item.id);
+                if (index > -1) {
+                    menus.splice(index, 1);
+                }
             }
         });
     }
 
-    getMenuItems(positions: MenuPosition): IDisplayMenuItem[] {
+    getMenuItems(positions: MenuPosition | string): Array<IDisplayMenuItem<IMenuItem>> {
         // TODO: @wzhudev: compose shortcut to returned menu items.
         if (this._menuByPositions.has(positions)) {
-            return [...this._menuByPositions.get(positions)!.values()].map((menu) => this.getDisplayMenuItems(menu));
+            return [...this._menuByPositions.get(positions)!.values()].map((menu) => this.getDisplayMenuItems(menu[1]));
         }
 
-        return [] as IDisplayMenuItem[];
+        return [] as Array<IDisplayMenuItem<IMenuItem>>;
     }
 
     getMenuItem(id: string): IMenuItem | null {
@@ -122,7 +112,7 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         return null;
     }
 
-    private getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem {
+    private getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem<IMenuItem> {
         const shortcut = this._shortcutService.getCommandShortcut(menuItem.id);
         if (!shortcut) {
             return menuItem;
@@ -134,16 +124,16 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         };
     }
 
-    private appendMenuToPosition(menu: IMenuItem, position: MenuPosition) {
+    private appendMenuToPosition(menu: IMenuItem, position: MenuPosition | string) {
         if (!this._menuByPositions.has(position)) {
-            this._menuByPositions.set(position, new Map<string, IMenuItem>());
+            this._menuByPositions.set(position, []);
         }
 
-        const menuSet = this._menuByPositions.get(position)!;
-        if (menuSet.has(menu.id)) {
+        const menuList = this._menuByPositions.get(position)!;
+        if (menuList.findIndex((m) => m[0] === menu.id) > -1) {
             throw new Error(`Menu item with the same id ${menu.id} has already been added!`);
         }
 
-        menuSet.set(menu.id, menu);
+        menuList.push([menu.id, menu]);
     }
 }

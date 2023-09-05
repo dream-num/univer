@@ -3,7 +3,15 @@ export * from './Model';
 export * from './Controller';
 export * from './Basics';
 export * from './View';
+
+// #region services
+
 export { ICanvasView, ISelectionManager } from './Services/tokens';
+export { BorderStyleManagerService } from './Services/border-style-manager.service';
+
+// #endregion
+
+// #region commands
 
 // mutations
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './Commands/Mutations/remove-sheet.mutation';
@@ -26,12 +34,12 @@ export {
     SetFontSizeCommand,
     SetTextColorCommand,
     SetBackgroundColorCommand,
-    SetCellBorderCommand,
     SetTextRotationCommand,
     SetHorizontalTextAlignCommand,
-    SetSpanCommand,
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
+    ResetTextColorCommand,
+    ResetBackgroundColorCommand,
 } from './Commands/Commands/set-style.command';
 export { InsertSheetCommand } from './Commands/Commands/insert-sheet.command';
 export { SetWorksheetActivateCommand } from './Commands/Commands/set-worksheet-activate.command';
@@ -39,4 +47,24 @@ export { SetWorksheetOrderCommand } from './Commands/Commands/set-worksheet-orde
 export { SetWorksheetRowHeightCommand } from './Commands/Commands/set-worksheet-row-height.command';
 export { SetWorksheetColWidthCommand } from './Commands/Commands/set-worksheet-col-width.command';
 export { DeleteRangeCommand } from './Commands/Commands/delete-range.command';
+export { DeleteRangeMoveLeftCommand } from './Commands/Commands/delete-range-move-left.command';
+export { DeleteRangeMoveUpCommand } from './Commands/Commands/delete-range-move-up.command';
 export { RemoveRowCommand, RemoveColCommand } from './Commands/Commands/remove-row-col.command';
+export { InsertColCommand, InsertRowCommand, InsertColCommandParams, InsertRowCommandParams } from './Commands/Commands/insert-row-col.command';
+export { ClearSelectionContentCommand } from './Commands/Commands/clear-selection-content.command';
+export {
+    SetBorderColorCommand,
+    SetBorderCommand,
+    SetBorderPositionCommand,
+    SetBorderStyleCommand,
+    ISetBorderColorCommandParams,
+    ISetBorderCommandParams,
+    ISetBorderPositionCommandParams,
+    ISetBorderStyleCommandParams,
+} from './Commands/Commands/set-border-command';
+
+// #endregion
+export { SetWorksheetRowHideCommand } from './Commands/Commands/set-worksheet-row-hide.command';
+export { SetWorksheetRowShowCommand } from './Commands/Commands/set-worksheet-row-show.command';
+export { RemoveSheetCommand } from './Commands/Commands/remove-sheet.command';
+export { SetWorksheetHideCommand } from './Commands/Commands/set-worksheet-hide.command';

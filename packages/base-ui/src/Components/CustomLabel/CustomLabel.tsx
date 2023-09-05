@@ -1,28 +1,123 @@
-import { isValidElement } from 'preact';
+import { Component, isValidElement, JSX } from 'preact';
 import { useContext } from 'preact/hooks';
-import { AppContext, ICustomComponent } from '../../Common';
-import { IBaseCustomLabelProps } from '../../Interfaces';
 
+import { AppContext, AppContextValues, ICustomComponent } from '../../Common';
+import { IBaseCustomLabelProps } from '../../Interfaces';
+import { DisplayTypes } from '../Select';
+
+import styles from './CustomLabel.module.less';
+import { IMenuSelectorItem } from '../../services/menu/menu';
+import { Item } from '../Item/Item';
+import { Input } from '../Input/input';
+
+function getLocale(context: Partial<AppContextValues>, name: string) {
+    return context.localeService?.t(name);
+}
+
+export interface INeoCustomLabelProps {
+    value?: string | number | undefined;
+    selected?: boolean;
+    onChange?(v: string | number): void;
+}
+
+/**
+ * The component to render toolbar item label and menu item label.
+ * @param props
+ * @returns
+ */
+export function NeoCustomLabel(props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title'> & INeoCustomLabelProps): JSX.Element | null {
+    const context = useContext(AppContext);
+    const { display, value, title, icon, label, onChange, selected } = props;
+
+    if (display === DisplayTypes.COLOR) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return <ColorSelect value={value as any} title={title} icon={icon} />;
+    }
+
+    if (display === DisplayTypes.FONT) {
+        return (
+            <div className={styles.fontSelect} style={{ fontFamily: value as string }}>
+                {getLocale(context, value as string)}
+            </div>
+        );
+    }
+
+    if (display === DisplayTypes.INPUT) {
+        return <Input onValueChange={(v) => onChange?.(v as unknown as string)} type="number" value={`${value}`} />;
+    }
+
+    if (display === DisplayTypes.ICON && icon) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const LabelComponent = context.componentManager?.get(icon) as any;
+        if (LabelComponent) {
+            return <LabelComponent {...props} />;
+        }
+    }
+
+    if (display === DisplayTypes.CUSTOM && label) {
+        const labelName = typeof label === 'string' ? label : (label as ICustomComponent).name;
+        const customProps = (label as ICustomComponent).props ?? {};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const LabelComponent = context.componentManager?.get(labelName) as any;
+        if (LabelComponent) {
+            return <LabelComponent {...customProps} {...props} />;
+        }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const LabelComponent = icon ? (context.componentManager?.get(icon) as any) : null;
+    return <Item selected={selected} label={title} suffix={LabelComponent ? <LabelComponent /> : null} disabled={false}></Item>;
+}
+
+/** @deprecated */
 export function CustomLabel(props: IBaseCustomLabelProps): JSX.Element | null {
     const context = useContext(AppContext);
-    const { label } = props;
+    const { label, display, onChange } = props;
 
     function getLocale(name: string) {
         return context.localeService?.t(name);
     }
 
+    // the new way to render toolbar item type to replace Label prop
+    if (display === DisplayTypes.COLOR) {
+        return <ColorSelect value={props.label} title={props.label} />;
+    }
+
     if (typeof label === 'string') {
         return <>{getLocale(label)}</>;
     }
+
     if (isValidElement(label)) {
         return label;
     }
+
+    // other types of components and icon
     if (label) {
         const Label = context.componentManager?.get((label as ICustomComponent).name) as any;
         if (Label) {
             const props = (label as ICustomComponent).props ?? {};
-            return <Label {...props} />;
+            return <Label onChange={onChange} {...props} />;
         }
     }
+
     return null;
+}
+
+export interface IColorSelectProps {
+    icon?: string;
+    title: string;
+    /** color */
+    value: string;
+}
+
+export class ColorSelect extends Component<IColorSelectProps> {
+    render() {
+        const { value, icon, title } = this.props;
+        return (
+            <div className={styles.colorSelect}>
+                <div>{icon ? <CustomLabel label={{ name: icon }} /> : title}</div>
+                <div className={styles.colorSelectLine} style={{ background: value }}></div>
+            </div>
+        );
+    }
 }

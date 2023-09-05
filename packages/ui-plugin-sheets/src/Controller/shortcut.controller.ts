@@ -1,4 +1,13 @@
-import { ChangeSelectionCommand, ExpandSelectionCommand, SetBoldCommand, SetItalicCommand, SetStrikeThroughCommand, SetUnderlineCommand } from '@univerjs/base-sheets';
+import {
+    ChangeSelectionCommand,
+    ExpandSelectionCommand,
+    SetBoldCommand,
+    SetFontFamilyCommand,
+    SetFontSizeCommand,
+    SetItalicCommand,
+    SetStrikeThroughCommand,
+    SetUnderlineCommand,
+} from '@univerjs/base-sheets';
 import { IShortcutService } from '@univerjs/base-ui';
 import { Disposable, ICommandService } from '@univerjs/core';
 import {
@@ -25,7 +34,17 @@ export class DesktopSheetShortcutController extends Disposable {
     constructor(@IShortcutService private readonly _shortcutService: IShortcutService, @ICommandService private readonly _commandService: ICommandService) {
         super();
 
-        [ChangeSelectionCommand, ExpandSelectionCommand, SetBoldCommand, SetItalicCommand, SetStrikeThroughCommand, SetUnderlineCommand].forEach((c) => {
+        // NOTE@wzhudev: these commands are just here temporarily
+        [
+            ChangeSelectionCommand,
+            ExpandSelectionCommand,
+            SetBoldCommand,
+            SetItalicCommand,
+            SetStrikeThroughCommand,
+            SetUnderlineCommand,
+            SetFontFamilyCommand,
+            SetFontSizeCommand,
+        ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
 

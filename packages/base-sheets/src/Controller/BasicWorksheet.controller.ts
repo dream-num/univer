@@ -7,7 +7,18 @@ import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name
 import { SetWorksheetNameMutation } from '../Commands/Mutations/set-worksheet-name.mutation';
 import { SetWorksheetActivateCommand } from '../Commands/Commands/set-worksheet-activate.command';
 import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
-import { ISetStyleParams, SetStyleCommand } from '../Commands/Commands/set-style.command';
+import {
+    ISetStyleParams,
+    ResetBackgroundColorCommand,
+    ResetTextColorCommand,
+    SetBackgroundColorCommand,
+    SetHorizontalTextAlignCommand,
+    SetStyleCommand,
+    SetTextColorCommand,
+    SetTextRotationCommand,
+    SetTextWrapCommand,
+    SetVerticalTextAlignCommand,
+} from '../Commands/Commands/set-style.command';
 import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
 import { ISetRangeFormattedValueParams, SetRangeFormattedValueCommand } from '../Commands/Commands/set-range-formatted-value.command';
 import { TrimWhitespaceCommand } from '../Commands/Commands/trim-whitespace.command';
@@ -31,10 +42,11 @@ import { DeleteRangeMutation } from '../Commands/Mutations/delete-range.mutation
 import { SetRangeFormattedValueMutation } from '../Commands/Mutations/set-range-formatted-value.mutation';
 import { IInsertRangeMoveRightParams, InsertRangeMoveRightCommand } from '../Commands/Commands/insert-range-move-right.command';
 import { DeleteRangeMoveLeftCommand, IDeleteRangeMoveLeftParams } from '../Commands/Commands/delete-range-move-left.command';
-import { DeleteRangeMoveTopCommand, IDeleteRangeMoveTopParams } from '../Commands/Commands/delete-range-move-top.command';
+import { DeleteRangeMoveUpCommand, IDeleteRangeMoveUpParams } from '../Commands/Commands/delete-range-move-up.command';
 import { IInsertRangeMoveBottomParams, InsertRangeMoveBottomCommand } from '../Commands/Commands/insert-range-move-bottom.command';
 import { SetWorksheetOrderCommand } from '../Commands/Commands/set-worksheet-order.command';
 import { SetWorksheetOrderMutation } from '../Commands/Mutations/set-worksheet-order.mutation';
+import { SetBorderColorCommand, SetBorderCommand, SetBorderPositionCommand, SetBorderStyleCommand } from '../Commands/Commands/set-border-command';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -86,10 +98,24 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             InsertRangeMoveBottomCommand,
             InsertRangeMutation,
             DeleteRangeMoveLeftCommand,
-            DeleteRangeMoveTopCommand,
+            DeleteRangeMoveUpCommand,
             DeleteRangeMutation,
             SetRangeFormattedValueCommand,
             SetRangeFormattedValueMutation,
+
+            SetTextColorCommand,
+            SetBackgroundColorCommand,
+            SetTextWrapCommand,
+            SetTextRotationCommand,
+            ResetTextColorCommand,
+            ResetBackgroundColorCommand,
+            SetHorizontalTextAlignCommand,
+            SetVerticalTextAlignCommand,
+
+            SetBorderCommand,
+            SetBorderColorCommand,
+            SetBorderStyleCommand,
+            SetBorderPositionCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
@@ -163,13 +189,13 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         return this._commandService.executeCommand(DeleteRangeMoveLeftCommand.id, options);
     }
 
-    async deleteRangeMoveTop(workbookId: string, worksheetId: string, range: IRangeData): Promise<boolean> {
-        const options: IDeleteRangeMoveTopParams = {
+    async deleteRangeMoveUp(workbookId: string, worksheetId: string, range: IRangeData): Promise<boolean> {
+        const options: IDeleteRangeMoveUpParams = {
             workbookId,
             worksheetId,
             range,
         };
-        return this._commandService.executeCommand(DeleteRangeMoveTopCommand.id, options);
+        return this._commandService.executeCommand(DeleteRangeMoveUpCommand.id, options);
     }
 
     /**

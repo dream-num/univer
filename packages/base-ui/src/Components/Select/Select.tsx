@@ -1,26 +1,49 @@
 import { ComponentChildren, createRef, RefObject } from 'preact';
 import { PureComponent } from 'preact/compat';
-import { Icon } from '..';
-import { ICustomComponent } from '../../Common';
+import { AppContext, ICustomComponent } from '../../Common';
 import { BaseMenuItem } from '../../Interfaces';
 import { Dropdown } from '../Dropdown';
 import { Input } from '../Input';
 import { BaseItemProps, Item } from '../Item/Item';
-import { CustomLabel } from '../CustomLabel';
+import { CustomLabel, NeoCustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
+import { Icon, IValueOption } from '../..'; // FIXME: strange import
+
+// TODO: these type definitions should be moved out of components to menu service
 
 export enum SelectTypes {
-    SINGLE, // 普通下拉
+    /** 单选 */
+    SINGLE,
+    /** dropdown with input */
     INPUT,
     COLOR,
+    /** 两栏菜单，主按钮会跟着上次的选项发生变化 */
     DOUBLE,
+    /** 显示一个固定的值 */
     FIX,
+    /** 显示一个固定的值 */
     DOUBLEFIX,
+
+    /** This should be the only type. The enum would be removed after we finish refactor. */
+    NEO,
 }
 
-enum DisplayTypes {
+export enum DisplayTypes {
     LABEL,
+
+    /** @deprecated */
     SUFFIX,
+
+    ICON,
+
+    /** Label as color display. */
+    COLOR,
+
+    INPUT,
+
+    FONT,
+
+    CUSTOM,
 }
 
 export interface BaseSelectChildrenProps extends BaseItemProps {
@@ -46,20 +69,31 @@ export interface BaseSelectProps {
     name?: string;
     suffix?: any;
     tooltip?: string;
+    value?: string | number;
+    icon?: string;
+    id?: string;
+    options?: IValueOption[];
+    title?: string;
 }
 
 interface IState {
     menu: BaseMenuItem[];
-    color: string;
+    color: string; // TODO@wzhudev: this state is strange
     content: ComponentChildren;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
 }
 
 export class Select extends PureComponent<BaseSelectProps, IState> {
+    static override contextType = AppContext;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ColorRef: any;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onClick: (...arg: any) => void;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onPressEnter: (...arg: any[]) => void;
 
     constructor(props: BaseSelectProps) {
@@ -81,21 +115,26 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
 
     getType(type: SelectTypes) {
         switch (type) {
-            case 0:
+            case SelectTypes.SINGLE:
                 return this.getSingle();
-            case 1:
+            case SelectTypes.INPUT:
                 return this.getInput();
-            case 3:
+            case SelectTypes.DOUBLE:
                 return this.getDouble();
-            case 4:
+            case SelectTypes.FIX:
                 return this.getFix();
-            case 5:
+            case SelectTypes.DOUBLEFIX:
                 return this.getDoubleFix();
+            case SelectTypes.NEO:
+                return this.renderNeo();
         }
     }
 
+    // eslint-disable-next-line max-lines-per-function
     initData() {
         const { type, display, children = [], label } = this.props;
+
+        // TODO@wzhudev: the way of binding onClick is ridiculous. Fix it.
 
         // 显示值可变
         if (type === 0 || type === 3) {
@@ -221,17 +260,23 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         }
     }
 
-    componentDidMount() {
+    updateData() {
+        if (this.props.type === SelectTypes.INPUT) {
+            this.setState({ content: this.props.label });
+        }
+    }
+
+    override componentDidMount() {
         this.initData();
     }
 
-    componentWillReceiveProps(nextProps: BaseSelectProps) {
-        // this.props = Object.assign(this.props, nextProps);
-        // this.initData();
+    override componentWillReceiveProps(nextProps: BaseSelectProps) {
+        this.updateData();
     }
 
     resetMenu(children: BaseSelectChildrenProps[], hideSelectedIcon?: boolean) {
         const list: BaseMenuItem[] = [];
+        // TODO@wzhudev: ID prop is not handled
         for (let i = 0; i < children.length; i++) {
             let selected = false;
             if (!hideSelectedIcon) {
@@ -300,7 +345,12 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         return (
             <div className={`${styles.selectInput} ${className}`}>
                 <Dropdown onMainClick={onMainClick} ref={ref} tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
-                    <Input onPressEnter={(e) => this.handlePressEnter(e, ref)} onBlur={this.onPressEnter} type="number" value={content as string} />
+                    <Input
+                        onPressEnter={(e) => this.handlePressEnter(e, ref)}
+                        onBlur={this.onPressEnter}
+                        type="number"
+                        value={`${this.props.label as number}` ?? (content as string)}
+                    />
                 </Dropdown>
             </div>
         );
@@ -329,7 +379,7 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
             <div className={`${styles.selectDouble} ${className}`}>
                 <Dropdown tooltip={tooltip} menu={{ menu, onClick: this.onClick }} showArrow>
                     <div className={styles.selectLabel}>
-                        <CustomLabel label={content} />
+                        <CustomLabel label={label} />
                     </div>
                 </Dropdown>
             </div>
@@ -337,13 +387,50 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
     };
 
     getDoubleFix = () => {
-        const { label, className = '', tooltip, onClick } = this.props;
+        const { label, className = '', tooltip, onClick, display, value, icon } = this.props;
         const { menu } = this.state;
+
         return (
             <div className={`${styles.selectDouble} ${className}`}>
                 <Dropdown tooltip={tooltip} onClick={onClick} menu={{ menu, onClick: this.onClick }} icon={<Icon.NextIcon />}>
                     <div className={styles.selectLabel}>
-                        <CustomLabel label={label} />
+                        <CustomLabel display={display} label={label} value={`${value}`} icon={icon} />
+                    </div>
+                </Dropdown>
+            </div>
+        );
+    };
+
+    renderNeo = () => {
+        const { tooltip, onClick, display, value, icon, title, id, options, type } = this.props;
+
+        const onClickInner = (...args: unknown[]) => {
+            onClick?.(args[1] as number | string);
+        };
+
+        const onOptionSelect = (option: IValueOption) => {
+            onClick?.(option.value);
+        };
+
+        const iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
+        const displayInSubMenu = display === DisplayTypes.ICON ? DisplayTypes.LABEL : display === DisplayTypes.INPUT ? DisplayTypes.LABEL : display;
+        return (
+            <div className={`${styles.selectDouble}`}>
+                <Dropdown
+                    tooltip={tooltip}
+                    onClick={type === SelectTypes.NEO ? () => onClick?.(value) : onClick}
+                    menu={{
+                        menuId: id,
+                        options,
+                        onClick: onClickInner,
+                        onOptionSelect,
+                        value,
+                        display: displayInSubMenu,
+                    }}
+                    icon={<Icon.NextIcon />}
+                >
+                    <div className={styles.selectLabel}>
+                        <NeoCustomLabel icon={iconToDisplay} display={display} title={title!} value={value} onChange={(v) => onClick?.(v)} />
                     </div>
                 </Dropdown>
             </div>

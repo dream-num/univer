@@ -1,4 +1,4 @@
-import { BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, Icon, Menu } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, IDisplayMenuItem, IMenuItem, Icon, Menu } from '@univerjs/base-ui';
 import { RefObject, Component, createRef } from 'preact';
 import { SheetBarMenu, ISheetBarMenuItem } from './SheetBarMenu';
 import styles from './index.module.less';
@@ -8,6 +8,7 @@ type SheetState = {
     sheetList: BaseSheetBarProps[];
     menuList: BaseSheetBarProps[];
     sheetUl: BaseMenuItem[];
+    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
 };
 
 export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
@@ -55,6 +56,13 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     setValue = (value: any, fn?: () => void) => {
         this.setState((prevState) => ({ ...value }), fn);
     };
+
+    // TODO@Dushusir remove after refactoring
+    // setSheetUlNeo(menuItems: IMenuItem[]) {
+    //     this.setState({
+    //         menuItems: buildMenuTree(menuItems),
+    //     });
+    // }
 
     // 点击按钮左右滑动
     scrollLeft = (e: MouseEvent) => {
@@ -206,7 +214,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 </div>
 
                 {/* mouse right button context menu */}
-                <Menu className={styles.sheetUl} menu={sheetUl} ref={this.ulRef} />
+                <Menu className={styles.sheetUl} menu={sheetUl} menuId={'sheet-bar-right-menu'} ref={this.ulRef} />
 
                 {/* prev next scroll button */}
                 <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>

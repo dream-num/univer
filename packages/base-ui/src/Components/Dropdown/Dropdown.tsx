@@ -1,4 +1,4 @@
-import { createRef } from 'preact';
+import { JSX, createRef } from 'preact';
 import { PureComponent } from 'preact/compat';
 import { Icon } from '..';
 import { JSXComponent } from '../../BaseComponent';
@@ -46,7 +46,7 @@ export class Dropdown extends PureComponent<BaseDropdownProps, IState> {
         }
     };
 
-    componentDidMount() {
+    override componentDidMount() {
         const { placement } = this.props;
         const style: Record<string, string | number> = { position: 'absolute' };
         if (!placement || placement === 'Bottom') {
@@ -68,12 +68,12 @@ export class Dropdown extends PureComponent<BaseDropdownProps, IState> {
         window.addEventListener('click', this.hideMenuClick, true);
     }
 
-    componentWillUnmount() {
+    override componentWillUnmount() {
         window.removeEventListener('click', this.hideMenuClick, true);
     }
 
     render() {
-        const { children, menu, showArrow, icon, tooltip } = this.props;
+        const { children, menu, showArrow, icon, tooltip, content } = this.props;
         const { menuStyle } = this.state;
 
         return (
@@ -84,14 +84,27 @@ export class Dropdown extends PureComponent<BaseDropdownProps, IState> {
                         {showArrow ? <Icon.Format.NextIcon /> : ''}
                     </div>
                 </Tooltip>
-                {icon ? (
+                {icon && (
                     <div ref={this.IconRef} className={styles.dropIcon} onClick={this.handleSubClick}>
                         {icon}
                     </div>
-                ) : (
-                    ''
                 )}
-                <Menu onClick={menu.onClick} ref={this.MenuRef} menu={menu.menu} className={menu.className} style={{ ...menu.style, ...menuStyle }}></Menu>
+                {content}
+                <Menu
+                    menuId={menu.menuId}
+                    options={menu.options}
+                    display={menu.display}
+                    onClick={menu.onClick}
+                    ref={this.MenuRef}
+                    value={menu.value}
+                    menu={menu.menu}
+                    className={menu.className}
+                    style={{ ...menu.style, ...menuStyle }}
+                    onOptionSelect={(v) => {
+                        menu.onOptionSelect?.(v);
+                        this.hideMenu();
+                    }}
+                ></Menu>
             </div>
         );
     }

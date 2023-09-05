@@ -12,6 +12,8 @@ interface IState {
     color: string;
 }
 
+// TODO: @wzhudev: why this component is put under ui-plugin-sheet not base-ui?
+/** @deprecated use ColorSelect in base-ui plugin instead */
 export class ColorSelect extends Component<IProps, IState> {
     override componentDidMount(): void {
         this.props.getComponent?.(this);

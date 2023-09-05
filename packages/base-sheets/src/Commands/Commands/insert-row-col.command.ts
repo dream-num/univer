@@ -106,7 +106,7 @@ export const InsertColCommand: ICommand<InsertColCommandParams> = {
             };
         }
         const undoMutationParams: IRemoveColMutationParams = InsertColMutationFactory(accessor, redoMutationParams);
-        const result = commandService.executeCommand(InsertRowMutation.id, redoMutationParams);
+        const result = commandService.executeCommand(InsertColMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',

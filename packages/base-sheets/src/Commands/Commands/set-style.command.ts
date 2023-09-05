@@ -5,7 +5,6 @@ import {
     FontItalic,
     FontWeight,
     HorizontalAlign,
-    IBorderData,
     IColorStyle,
     ICommand,
     ICommandService,
@@ -115,10 +114,10 @@ export const SetStyleCommand: ICommand<ISetStyleParams> = {
  * Set bold font style to currently selected ranges. If the cell is already bold then it will cancel the bold style.
  */
 export const SetBoldCommand: ICommand = {
-    // TODO@wzhudev: toggle bold command?
+    // TODO@wzhudev: name to toggle bold command?
     type: CommandType.COMMAND,
     id: 'sheet.command.set-bold',
-    handler: async (accessor, params) => {
+    handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManager = accessor.get(ISelectionManager);
         const currentlyBold = selectionManager.getCurrentCell()?.getFontWeight() === FontWeight.BOLD;
@@ -203,7 +202,7 @@ export const SetStrikeThroughCommand: ICommand = {
 };
 
 export interface ISetFontFamilyCommandParams {
-    fontFamily: string;
+    value: string;
 }
 
 export const SetFontFamilyCommand: ICommand<ISetFontFamilyCommandParams> = {
@@ -218,7 +217,7 @@ export const SetFontFamilyCommand: ICommand<ISetFontFamilyCommandParams> = {
         const setStyleParams: ISetStyleParams<string> = {
             style: {
                 type: 'ff',
-                value: params.fontFamily,
+                value: params.value,
             },
         };
 
@@ -229,12 +228,12 @@ export const SetFontFamilyCommand: ICommand<ISetFontFamilyCommandParams> = {
 };
 
 export interface ISetFontSizeCommandParams {
-    fontSize: number;
+    value: number;
 }
 
 export const SetFontSizeCommand: ICommand<ISetFontSizeCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-font-family',
+    id: 'sheet.command.set-font-size',
     handler: async (accessor, params) => {
         if (!params) {
             return false;
@@ -244,7 +243,7 @@ export const SetFontSizeCommand: ICommand<ISetFontSizeCommandParams> = {
         const setStyleParams: ISetStyleParams<number> = {
             style: {
                 type: 'fs',
-                value: params.fontSize,
+                value: params.value,
             },
         };
 
@@ -253,12 +252,12 @@ export const SetFontSizeCommand: ICommand<ISetFontSizeCommandParams> = {
 };
 
 export interface ISetColorCommandParams {
-    color: IColorStyle;
+    value: string;
 }
 
 export const SetTextColorCommand: ICommand<ISetColorCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-font-family',
+    id: 'sheet.command.set-text-color',
     handler: async (accessor, params) => {
         if (!params) {
             return false;
@@ -268,7 +267,27 @@ export const SetTextColorCommand: ICommand<ISetColorCommandParams> = {
         const setStyleParams: ISetStyleParams<IColorStyle> = {
             style: {
                 type: 'cl',
-                value: params.color,
+                value: {
+                    rgb: params.value,
+                },
+            },
+        };
+
+        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+    },
+};
+
+export const ResetTextColorCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.reset-text-color',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        const setStyleParams: ISetStyleParams<IColorStyle> = {
+            style: {
+                type: 'cl',
+                value: {
+                    rgb: '#000',
+                },
             },
         };
 
@@ -288,7 +307,9 @@ export const SetBackgroundColorCommand: ICommand<ISetColorCommandParams> = {
         const setStyleParams: ISetStyleParams<IColorStyle> = {
             style: {
                 type: 'bg',
-                value: params.color,
+                value: {
+                    rgb: params.value,
+                },
             },
         };
 
@@ -296,23 +317,17 @@ export const SetBackgroundColorCommand: ICommand<ISetColorCommandParams> = {
     },
 };
 
-export interface ISetCellBorderCommandParams {
-    border: IBorderData;
-}
-
-export const SetCellBorderCommand: ICommand<ISetCellBorderCommandParams> = {
+export const ResetBackgroundColorCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-cell-border',
-    handler: async (accessor, params) => {
-        if (!params) {
-            return false;
-        }
-
+    id: 'sheet.command.reset-background-color',
+    handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        const setStyleParams: ISetStyleParams<IBorderData> = {
+        const setStyleParams: ISetStyleParams<IColorStyle> = {
             style: {
-                type: 'bd',
-                value: params.border,
+                type: 'bg',
+                value: {
+                    rgb: undefined,
+                },
             },
         };
 
@@ -321,7 +336,7 @@ export const SetCellBorderCommand: ICommand<ISetCellBorderCommandParams> = {
 };
 
 export interface ISetVerticalTextAlignCommandParams {
-    align: VerticalAlign;
+    value: VerticalAlign;
 }
 
 export const SetVerticalTextAlignCommand: ICommand<ISetVerticalTextAlignCommandParams> = {
@@ -336,7 +351,7 @@ export const SetVerticalTextAlignCommand: ICommand<ISetVerticalTextAlignCommandP
         const setStyleParams: ISetStyleParams<VerticalAlign> = {
             style: {
                 type: 'vt',
-                value: params.align,
+                value: params.value,
             },
         };
 
@@ -345,7 +360,7 @@ export const SetVerticalTextAlignCommand: ICommand<ISetVerticalTextAlignCommandP
 };
 
 export interface ISetHorizontalTextAlignCommandParams {
-    align: HorizontalAlign;
+    value: HorizontalAlign;
 }
 
 export const SetHorizontalTextAlignCommand: ICommand<ISetHorizontalTextAlignCommandParams> = {
@@ -360,7 +375,7 @@ export const SetHorizontalTextAlignCommand: ICommand<ISetHorizontalTextAlignComm
         const setStyleParams: ISetStyleParams<HorizontalAlign> = {
             style: {
                 type: 'ht',
-                value: params.align,
+                value: params.value,
             },
         };
 
@@ -369,7 +384,7 @@ export const SetHorizontalTextAlignCommand: ICommand<ISetHorizontalTextAlignComm
 };
 
 export interface ISetTextWrapCommandParams {
-    wrap: WrapStrategy;
+    value: WrapStrategy;
 }
 
 export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
@@ -384,7 +399,7 @@ export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
         const setStyleParams: ISetStyleParams<WrapStrategy> = {
             style: {
                 type: 'tb',
-                value: params.wrap,
+                value: params.value,
             },
         };
 
@@ -393,7 +408,7 @@ export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
 };
 
 export interface ISetTextRotationCommandParams {
-    rotation: ITextRotation;
+    value: number | string;
 }
 
 export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
@@ -408,7 +423,9 @@ export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
         const setStyleParams: ISetStyleParams<ITextRotation> = {
             style: {
                 type: 'tr',
-                value: params.rotation,
+                value: {
+                    a: params.value as number,
+                },
             },
         };
 

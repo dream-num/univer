@@ -1,13 +1,14 @@
-import { BaseComponentRender } from '@univerjs/base-ui';
+import { BaseComponentRender, ComponentManager, IMenuService, Icon } from '@univerjs/base-ui';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { Command, CommandManager, ICurrentUniverService, ObserverManager, Tools } from '@univerjs/core';
+import { Command, CommandManager, Disposable, ICurrentUniverService, ObserverManager, Tools } from '@univerjs/core';
 import { FileSelected, IOverGridImageProperty, OVER_GRID_IMAGE_PLUGIN_NAME, OverGridImageBorderType } from '../Basics';
 import { IImagePluginData } from '../Symbol';
 import { AddOverGridImageAction, IAddOverGridImageActionData } from '../Model';
+import { ImportImageMenuItemFactory } from './menu';
 
-export class OverGridImageController {
+export class OverGridImageController extends Disposable {
     protected _render: BaseComponentRender;
 
     protected _toolButton: IToolbarItemProps;
@@ -19,8 +20,11 @@ export class OverGridImageController {
         @Inject(CommandManager) private _commandManager: CommandManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(ObserverManager) private _observerManager: ObserverManager,
-        @ISelectionManager private readonly _selectionManager: SelectionManager
+        @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @IMenuService private readonly _menuService: IMenuService
     ) {
+        super();
         this._toolButton = {
             name: OVER_GRID_IMAGE_PLUGIN_NAME,
             label: '图片',
@@ -60,6 +64,19 @@ export class OverGridImageController {
                 });
             },
         };
-        this._sheetContainerUIController.getToolbarController().addToolbarConfig(this._toolButton);
+
+        this._componentManager.register('ImageIcon', Icon.View.ImageIcon);
+        // this._sheetContainerUIController.getToolbarController().addToolbarConfig(this._toolButton);
+        const toolbar = this._sheetContainerUIController.getToolbarController();
+        this._initializeContextMenu();
+        toolbar.setToolbar();
+    }
+
+    private _initializeContextMenu() {
+        [
+            ImportImageMenuItemFactory
+        ].forEach((factory) => {
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+        });
     }
 }

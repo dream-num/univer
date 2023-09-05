@@ -26,7 +26,7 @@ export function NeoCustomLabel(props: Pick<IMenuSelectorItem<unknown>, 'label' |
 
     if (display === DisplayTypes.COLOR) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return <ColorSelect value={value as any} title={title} icon={icon} />;
+        return <ColorSelect value={value as any} title={getLocale(context, title) as string} icon={icon} />;
     }
 
     if (display === DisplayTypes.FONT) {

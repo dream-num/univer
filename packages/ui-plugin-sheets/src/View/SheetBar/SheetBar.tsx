@@ -1,4 +1,4 @@
-import { BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, IDisplayMenuItem, IMenuItem, Icon, Menu } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, IDisplayMenuItem, IMenuItem, Icon, Menu, MenuPosition } from '@univerjs/base-ui';
 import { RefObject, Component, createRef } from 'preact';
 import { SheetBarMenu, ISheetBarMenuItem } from './SheetBarMenu';
 import styles from './index.module.less';
@@ -58,11 +58,11 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     };
 
     // TODO@Dushusir remove after refactoring
-    // setSheetUlNeo(menuItems: IMenuItem[]) {
-    //     this.setState({
-    //         menuItems: buildMenuTree(menuItems),
-    //     });
-    // }
+    setSheetUlNeo(menuItems: IMenuItem[]) {
+        this.setState({
+            menuItems,
+        });
+    }
 
     // 点击按钮左右滑动
     scrollLeft = (e: MouseEvent) => {
@@ -214,7 +214,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 </div>
 
                 {/* mouse right button context menu */}
-                <Menu className={styles.sheetUl} menu={sheetUl} menuId={'sheet-bar-right-menu'} ref={this.ulRef} />
+                <Menu className={styles.sheetUl} menu={sheetUl} menuId={MenuPosition.SHEET_BAR} ref={this.ulRef} />
 
                 {/* prev next scroll button */}
                 <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>

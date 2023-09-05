@@ -1,4 +1,4 @@
-import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuService, MenuPosition } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuService } from '@univerjs/base-ui';
 import {
     Nullable,
     CommandManager,
@@ -23,7 +23,14 @@ import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
 import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
-import { ChangeColorSheetMenuItemFactory, CopySheetMenuItemFactory, DeleteSheetMenuItemFactory, HideSheetMenuItemFactory, RenameSheetMenuItemFactory, UnHideSheetMenuItemFactory } from './menu';
+import {
+    ChangeColorSheetMenuItemFactory,
+    CopySheetMenuItemFactory,
+    DeleteSheetMenuItemFactory,
+    HideSheetMenuItemFactory,
+    RenameSheetMenuItemFactory,
+    UnHideSheetMenuItemFactory,
+} from './menu';
 
 interface SheetUl extends BaseMenuItem {
     label?: ICustomComponent | string;

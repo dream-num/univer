@@ -19,7 +19,7 @@ export class NumfmtController extends Disposable{
         @Inject(ISelectionManager) private readonly _selectionManager: SelectionManager,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
-        @Inject(Injector) private readonly _numfmtInjector: Injector,
+        @Inject(Injector) private readonly _injector: Injector,
         @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
         @Inject(ICurrentUniverService) private readonly _currentUniverService: ICurrentUniverService,
         @Inject(NumfmtModalController) private readonly _numfmtModalController: NumfmtModalController,
@@ -223,7 +223,7 @@ export class NumfmtController extends Disposable{
             NumfmtRangeDataMenuItemFactory,
             OpenMoreFormatsModalMenuItemFactory
         ].forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._numfmtInjector.invoke(factory)));
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }
 }

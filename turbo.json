@@ -3,6 +3,9 @@
     "pipeline": {
         "esbuild": {
         },
+        "esbuild:demo": {
+            "cache": false
+        },
         "dev": {
             "cache": false,
             "persistent": true

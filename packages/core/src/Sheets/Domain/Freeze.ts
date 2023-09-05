@@ -3,7 +3,7 @@ import { Command, CommandManager } from '../../Command';
 import { Worksheet } from './Worksheet';
 import { ACTION_NAMES } from '../../Types/Const';
 import { Inject } from '@wendellhu/redi';
-import { ICurrentUniverService } from 'src/Service/Current.service';
+import { ICurrentUniverService } from 'src/services/Current.service';
 
 export class Freeze {
     private _worksheet: Worksheet;

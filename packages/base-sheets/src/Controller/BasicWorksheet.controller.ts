@@ -1,14 +1,17 @@
-import { IDisposable } from '@wendellhu/redi';
 import { Disposable, ICommandService, IStyleData } from '@univerjs/core';
+import { IDisposable } from '@wendellhu/redi';
 
 import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selection-content.command';
-import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
-import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name.command';
-import { SetWorksheetNameMutation } from '../Commands/Mutations/set-worksheet-name.mutation';
-import { SetWorksheetActivateCommand } from '../Commands/Commands/set-worksheet-activate.command';
-import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
+import { DeleteRangeMoveLeftCommand } from '../Commands/Commands/delete-range-move-left.command';
+import { DeleteRangeMoveUpCommand } from '../Commands/Commands/delete-range-move-up.command';
+import { InsertRangeMoveDownCommand } from '../Commands/Commands/insert-range-move-down.command';
+import { InsertRangeMoveRightCommand } from '../Commands/Commands/insert-range-move-right.command';
+import { InsertColCommand } from '../Commands/Commands/insert-row-col.command';
+import { RemoveColCommand, RemoveRowCommand } from '../Commands/Commands/remove-row-col.command';
+import { SetBorderColorCommand, SetBorderCommand, SetBorderPositionCommand, SetBorderStyleCommand } from '../Commands/Commands/set-border-command';
+import { SetRangeFormattedValueCommand } from '../Commands/Commands/set-range-formatted-value.command';
+import { SetRangeValuesCommand } from '../Commands/Commands/set-range-values.command';
 import {
-    ISetStyleParams,
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
     SetBackgroundColorCommand,
@@ -19,34 +22,30 @@ import {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
 } from '../Commands/Commands/set-style.command';
-import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
-import { SetRangeFormattedValueCommand } from '../Commands/Commands/set-range-formatted-value.command';
-import { TrimWhitespaceCommand } from '../Commands/Commands/trim-whitespace.command';
-import { SetRangeValuesCommand } from '../Commands/Commands/set-range-values.command';
-import { SetWorksheetHideCommand } from '../Commands/Commands/set-worksheet-hide.command';
-import { SetWorksheetHideMutation } from '../Commands/Mutations/set-worksheet-hide.mutation';
-import { InsertColCommand } from '../Commands/Commands/insert-row-col.command';
-import { InsertColMutation, InsertRowMutation } from '../Commands/Mutations/insert-row-col.mutation';
-import { RemoveColCommand, RemoveRowCommand } from '../Commands/Commands/remove-row-col.command';
-import { RemoveColMutation, RemoveRowMutation } from '../Commands/Mutations/remove-row-col.mutation';
+import { SetWorksheetActivateCommand } from '../Commands/Commands/set-worksheet-activate.command';
 import { SetWorksheetColWidthCommand } from '../Commands/Commands/set-worksheet-col-width.command';
-import { SetWorksheetColWidthMutation } from '../Commands/Mutations/set-worksheet-col-width.mutation';
-import { SetWorksheetRowHeightCommand } from '../Commands/Commands/set-worksheet-row-height.command';
-import { SetWorksheetRowHeightMutation } from '../Commands/Mutations/set-worksheet-row-height.mutation';
-import { SetWorksheetRowHideCommand } from '../Commands/Commands/set-worksheet-row-hide.command';
-import { SetWorksheetRowHideMutation } from '../Commands/Mutations/set-worksheet-row-hide.mutation';
-import { SetWorksheetRowShowCommand } from '../Commands/Commands/set-worksheet-row-show.command';
-import { SetWorksheetRowShowMutation } from '../Commands/Mutations/set-worksheet-row-show.mutation';
-import { InsertRangeMutation } from '../Commands/Mutations/insert-range.mutation';
-import { DeleteRangeMutation } from '../Commands/Mutations/delete-range.mutation';
-import { SetRangeFormattedValueMutation } from '../Commands/Mutations/set-range-formatted-value.mutation';
-import { IInsertRangeMoveRightParams, InsertRangeMoveRightCommand } from '../Commands/Commands/insert-range-move-right.command';
-import { DeleteRangeMoveLeftCommand, IDeleteRangeMoveLeftParams } from '../Commands/Commands/delete-range-move-left.command';
+import { SetWorksheetHideCommand } from '../Commands/Commands/set-worksheet-hide.command';
+import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../Commands/Commands/set-worksheet-order.command';
+import { SetWorksheetRowHeightCommand } from '../Commands/Commands/set-worksheet-row-height.command';
+import { SetWorksheetRowHideCommand } from '../Commands/Commands/set-worksheet-row-hide.command';
+import { SetWorksheetRowShowCommand } from '../Commands/Commands/set-worksheet-row-show.command';
+import { TrimWhitespaceCommand } from '../Commands/Commands/trim-whitespace.command';
+import { DeleteRangeMutation } from '../Commands/Mutations/delete-range.mutation';
+import { InsertRangeMutation } from '../Commands/Mutations/insert-range.mutation';
+import { InsertColMutation, InsertRowMutation } from '../Commands/Mutations/insert-row-col.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../Commands/Mutations/remove-row-col.mutation';
+import { SetRangeFormattedValueMutation } from '../Commands/Mutations/set-range-formatted-value.mutation';
+import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
+import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
+import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
+import { SetWorksheetColWidthMutation } from '../Commands/Mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetHideMutation } from '../Commands/Mutations/set-worksheet-hide.mutation';
+import { SetWorksheetNameMutation } from '../Commands/Mutations/set-worksheet-name.mutation';
 import { SetWorksheetOrderMutation } from '../Commands/Mutations/set-worksheet-order.mutation';
-import { SetBorderColorCommand, SetBorderCommand, SetBorderPositionCommand, SetBorderStyleCommand } from '../Commands/Commands/set-border-command';
-import { DeleteRangeMoveUpCommand } from '../Commands/Commands/delete-range-move-up.command';
-import { InsertRangeMoveDownCommand } from '../Commands/Commands/insert-range-move-down.command';
+import { SetWorksheetRowHeightMutation } from '../Commands/Mutations/set-worksheet-row-height.mutation';
+import { SetWorksheetRowHideMutation } from '../Commands/Mutations/set-worksheet-row-hide.mutation';
+import { SetWorksheetRowShowMutation } from '../Commands/Mutations/set-worksheet-row-show.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;

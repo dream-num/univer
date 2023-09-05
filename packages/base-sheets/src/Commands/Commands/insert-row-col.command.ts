@@ -17,7 +17,7 @@ export interface InsertRowCommandBaseParams {
     rowIndex: number;
 }
 
-const InsertRowCommand: ICommand = {
+export const InsertRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row',
     handler: async (accessor: IAccessor, params: InsertRowCommandBaseParams) => {

@@ -2,7 +2,7 @@ import { createIdentifier, IAccessor, IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../Shared/Lifecycle';
-import { CommandService, CommandType, ICommand, ICommandService } from '../Command/Command.service';
+import { CommandService, CommandType, ICommand, ICommandService } from '../command/command.service';
 
 // TODO:: an undo redo element may be mergable to another undo redo element
 

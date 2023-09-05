@@ -1,10 +1,10 @@
-import { ClearRangeApply, SetRangeDataApply } from '../Apply';
-import { ICellData, IOptionData, IRangeData } from '../../Types/Interfaces';
-import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
-import { SheetActionBase, ISheetActionData } from '../../Command/SheetActionBase';
-import { ActionObservers, ActionType } from '../../Command/ActionObservers';
-import { ISetRangeDataActionData, SetRangeDataAction } from './SetRangeDataAction';
 import { CommandManager, CommandUnit } from '../../Command';
+import { ActionObservers, ActionType } from '../../Command/ActionObservers';
+import { ISheetActionData, SheetActionBase } from '../../Command/SheetActionBase';
+import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
+import { ICellData, IOptionData, IRangeData } from '../../Types/Interfaces';
+import { ClearRangeApply, SetRangeDataApply } from '../Apply';
+import { ISetRangeDataActionData, SetRangeDataAction } from './SetRangeDataAction';
 
 /**
  * @internal

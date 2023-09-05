@@ -1,5 +1,6 @@
 import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
+
 import { Disposable } from '../../Shared/Lifecycle';
 
 export interface IPermissionService {

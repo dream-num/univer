@@ -1,8 +1,9 @@
 import { createIdentifier } from '@wendellhu/redi';
-import { Nullable } from '../Shared';
+
 import { UniverDoc } from '../Basics/UniverDoc';
 import { UniverSheet } from '../Basics/UniverSheet';
 import { UniverSlide } from '../Basics/UniverSlide';
+import { Nullable } from '../Shared';
 
 export interface ICurrentUniverService {
     addSheet(sheet: UniverSheet): void;

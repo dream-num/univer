@@ -1,4 +1,5 @@
 import { createIdentifier, IAccessor, IDisposable, Inject, Injector, Optional, SkipSelf } from '@wendellhu/redi';
+
 import { ActionType, CommandManager, IActionData } from '../../Command';
 import { toDisposable } from '../../Shared/Lifecycle';
 import { ILogService } from '../log/log.service';

@@ -1,13 +1,7 @@
-import { Inject } from '@wendellhu/redi';
-
-import { CurrentUniverService, ICurrentUniverService } from '../../Service/Current.service';
-import { Command, CommandManager } from '../../Command';
-import { ISetColumnWidthActionData } from '../Action';
-import { ACTION_NAMES } from '../../Types/Const';
-import { BooleanNumber } from '../../Types/Enum';
-import { IColumnData } from '../../Types/Interfaces';
 import { Nullable, Tools } from '../../Shared';
 import { ObjectArray, ObjectArrayType } from '../../Shared/ObjectArray';
+import { BooleanNumber } from '../../Types/Enum';
+import { IColumnData } from '../../Types/Interfaces';
 import { Worksheet } from './Worksheet';
 
 /**
@@ -18,12 +12,7 @@ export class ColumnManager {
 
     private _workSheet: Worksheet;
 
-    constructor(
-        workSheet: Worksheet,
-        data: ObjectArrayType<Partial<IColumnData>>,
-        @ICurrentUniverService private readonly _currentUniverSheet: CurrentUniverService,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager
-    ) {
+    constructor(workSheet: Worksheet, data: ObjectArrayType<Partial<IColumnData>>) {
         this._workSheet = workSheet;
         this._columnData = Tools.createObjectArray(data) as ObjectArray<IColumnData>;
     }
@@ -88,28 +77,6 @@ export class ColumnManager {
         }
 
         return width;
-    }
-
-    /**
-     * set one or more column width
-     * @param columnIndex column index
-     * @param columnWidth column width Array
-     * @returns
-     */
-    setColumnWidth(columnIndex: number, columnWidth: number[]): void {
-        const setColumnWidth: ISetColumnWidthActionData = {
-            sheetId: this._workSheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_COLUMN_WIDTH_ACTION,
-            columnIndex,
-            columnWidth,
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook(),
-            },
-            setColumnWidth
-        );
-        this._commandManager.invoke(command);
     }
 
     /**

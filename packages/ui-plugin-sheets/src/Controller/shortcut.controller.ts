@@ -34,7 +34,6 @@ export class DesktopSheetShortcutController extends Disposable {
     constructor(@IShortcutService private readonly _shortcutService: IShortcutService, @ICommandService private readonly _commandService: ICommandService) {
         super();
 
-        // NOTE@wzhudev: these commands are just here temporarily
         [
             ChangeSelectionCommand,
             ExpandSelectionCommand,

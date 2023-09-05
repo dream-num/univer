@@ -1,11 +1,7 @@
-import { Command, CommandManager } from '../../Command';
-import { ISetRowHeightActionData, SetRowHeightAction } from '../Action';
+import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../../Shared';
 import { BooleanNumber } from '../../Types/Enum';
 import { IRowData } from '../../Types/Interfaces';
-import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../../Shared';
-import { Worksheet } from './Worksheet';
-import { Inject } from '@wendellhu/redi';
-import { ICurrentUniverService } from 'src/Service/Current.service';
+import type { Worksheet } from './Worksheet';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
@@ -15,12 +11,7 @@ export class RowManager {
 
     private _workSheet: Worksheet;
 
-    constructor(
-        workSheet: Worksheet,
-        data: ObjectArrayType<Partial<IRowData>>,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager,
-    ) {
+    constructor(workSheet: Worksheet, data: ObjectArrayType<Partial<IRowData>>) {
         this._workSheet = workSheet;
         this._rowData = Tools.createObjectArray(data) as ObjectArray<IRowData>;
     }
@@ -77,28 +68,6 @@ export class RowManager {
         }
 
         return height;
-    }
-
-    /**
-     * Set height of one or more rows
-     * @param rowIndex row index
-     * @param rowHeight row height array
-     * @returns
-     */
-    setRowHeight(rowIndex: number, rowHeight: number[]) {
-        const setRowHeight: ISetRowHeightActionData = {
-            sheetId: this._workSheet.getSheetId(),
-            actionName: SetRowHeightAction.NAME,
-            rowIndex,
-            rowHeight,
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
-            },
-            setRowHeight
-        );
-        this._commandManager.invoke(command);
     }
 
     /**

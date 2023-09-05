@@ -10,7 +10,7 @@ export interface SetWorksheetRowHeightCommandParams {
     workbookId?: string;
     worksheetId?: string;
     rowIndex?: number;
-    value: number | number[];
+    value: number | number[] | string | string[];
 }
 
 export const SetWorksheetRowHeightCommand: ICommand = {
@@ -45,11 +45,12 @@ export const SetWorksheetRowHeightCommand: ICommand = {
             value = new Array(range.endRow - range.startRow + 1).fill(value);
         }
 
+        value = value.map((v) => (typeof v === 'string' ? parseInt(v, 10) : v));
         const redoMutationParams: ISetWorksheetRowHeightMutationParams = {
             worksheetId,
             workbookId,
             rowIndex,
-            rowHeight: value,
+            rowHeight: value as number[],
         };
         const undoMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(SetWorksheetRowHeightMutation.id, redoMutationParams);

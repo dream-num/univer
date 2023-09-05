@@ -4,17 +4,7 @@ import { ICommandService, isRealNum } from '@univerjs/core';
 import { BaseMenuProps, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import { AppContext } from '../../Common/AppContext';
-import {
-    ICustomComponentOption,
-    IDisplayMenuItem,
-    IMenuButtonItem,
-    IMenuItem,
-    IMenuSelectorItem,
-    IValueOption,
-    MenuItemType,
-    isMenuButtonItem,
-    isValueOptions,
-} from '../../services/menu/menu';
+import { ICustomComponentOption, IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption, MenuItemType, isValueOptions } from '../../services/menu/menu';
 import { CustomLabel, NeoCustomLabel } from '../CustomLabel/CustomLabel';
 import { IMenuService } from '../../services/menu/menu.service';
 
@@ -284,17 +274,15 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
     override componentDidMount(): void {
         const { menuItem } = this.props;
 
-        if (isMenuButtonItem(menuItem)) {
-            this.disabledSubscription = menuItem.disabled$?.subscribe((disabled) => {
-                this.setState({ disabled });
-            });
-        } else {
-            this.valueSubscription = menuItem.value$?.subscribe((value) => {
-                this.setState({ value });
-            });
+        this.disabledSubscription = menuItem.disabled$?.subscribe((disabled) => {
+            this.setState({ disabled });
+        });
 
-            this.getSubMenus();
-        }
+        this.valueSubscription = menuItem.value$?.subscribe((value) => {
+            this.setState({ value });
+        });
+
+        this.getSubMenus();
     }
 
     override componentWillUnmount(): void {
@@ -332,7 +320,6 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
 
     override render(): ComponentChild {
         switch (this.props.menuItem.type) {
-            case MenuItemType.DROPDOWN:
             case MenuItemType.SELECTOR:
                 return this.renderSelectorType();
             case MenuItemType.SUBITEMS:
@@ -342,14 +329,37 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
         }
     }
 
+    // button type command should directly execute command
     private renderButtonType(): ComponentChild {
-        const { menuItem, index } = this.props;
-        const { disabled } = this.state;
+        const { menuItem, onClick } = this.props;
+        const { disabled, value } = this.state;
+        const { injector } = this.context;
+
+        const commandService: ICommandService = injector.get(ICommandService);
         const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
+        const { title, display, label } = item;
+
+        console.log('debug, value', value, title);
 
         return (
-            <li className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')} onClick={(e) => this.handleClick(e, item, index)}>
-                <NeoCustomLabel title={item.title} onChange={this.onChange}></NeoCustomLabel>
+            <li
+                className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
+                disabled={disabled}
+                onClick={() => {
+                    commandService.executeCommand(item.id);
+                    onClick();
+                }}
+            >
+                <NeoCustomLabel
+                    display={display}
+                    value={value}
+                    title={title}
+                    label={label}
+                    onChange={(v) => {
+                        commandService.executeCommand(item.id, { value: v });
+                        onClick();
+                    }}
+                ></NeoCustomLabel>
             </li>
         );
     }
@@ -385,28 +395,18 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
 
     private renderSubItemsType(): ComponentChild {
         const { menuItem, index } = this.props;
-        const { disabled, menuItems, value } = this.state;
+        const { disabled, menuItems } = this.state;
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
-        const commandService: ICommandService = this.context.injector.get(ICommandService);
 
         return (
             <li
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
                 onMouseEnter={(e) => this.mouseEnter(e, index)}
                 onMouseLeave={(e) => this.mouseLeave(e, index)}
-                onClick={(e) => this.handleClick(e, item, index)}
             >
-                <NeoCustomLabel title={item.title} onChange={this.onChange} icon={item.icon} display={item.display}></NeoCustomLabel>
-                {item.shortcut && ` (${item.shortcut})`}
+                <NeoCustomLabel title={item.title} value={item.title} icon={item.icon} display={item.display} label={item.label}></NeoCustomLabel>
                 {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
-                    <Menu
-                        ref={(ele: Menu) => (this._refs[index] = ele)}
-                        // onOptionSelect={(v) => commandService.executeCommand(item.id, { value: v.value })}
-                        menuId={item.id}
-                        // options={item.selections}
-                        // display={item.display}
-                        parent={this}
-                    ></Menu>
+                    <Menu ref={(ele: Menu) => (this._refs[index] = ele)} menuId={item.id} parent={this} display={item.display}></Menu>
                 )}
             </li>
         );

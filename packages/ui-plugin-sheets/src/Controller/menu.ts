@@ -9,7 +9,6 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
     SetRangeStyleMutation,
-    DeleteRangeCommand,
     SetWorksheetColWidthCommand,
     SetWorksheetRowHeightCommand,
     RemoveRowCommand,
@@ -31,7 +30,7 @@ import {
     SetWorksheetRowShowCommand,
     SetWorksheetHideCommand,
 } from '@univerjs/base-sheets';
-import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes, IDisplayMenuItem } from '@univerjs/base-ui';
+import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
 import {
     FontItalic,
     FontWeight,
@@ -52,8 +51,6 @@ import { ISetHorizontalTextAlignCommandParams, ISetTextWrapCommandParams, ISetVe
 import { RightMenuInput } from '../View';
 import { FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, HORIZONTAL_ALIGN_CHILDREN, TEXT_ROTATE_CHILDREN, TEXT_WRAP_CHILDREN, VERTICAL_ALIGN_CHILDREN } from '../View/Toolbar/Const';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
-
-import styles from '../View/Toolbar/index.module.less';
 
 export { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './menu/border.menu';
 
@@ -288,7 +285,6 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         display: DisplayTypes.FONT,
         positions: [MenuPosition.TOOLBAR],
         selections: FONT_FAMILY_CHILDREN,
-        className: styles.selectLabelString,
         disabled$: new Observable((subscriber) => {
             let editable = false;
             function update() {
@@ -401,7 +397,6 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         selectType: SelectTypes.NEO,
         positions: [MenuPosition.TOOLBAR],
         display: DisplayTypes.COLOR,
-        className: styles.selectColorPickerParent,
         selections: [
             {
                 id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
@@ -444,7 +439,6 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         positions: [MenuPosition.TOOLBAR],
         display: DisplayTypes.COLOR,
         icon: 'FillColorIcon',
-        className: styles.selectColorPickerParent,
         selections: [
             {
                 id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
@@ -478,7 +472,6 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
         icon: HORIZONTAL_ALIGN_CHILDREN[0].icon,
         positions: [MenuPosition.TOOLBAR],
         tooltip: 'toolbar.horizontalAlignMode.main',
-        className: styles.selectDoubleString,
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         selectType: SelectTypes.NEO,
@@ -504,7 +497,6 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
         title: 'verticalAlignMode',
         icon: VERTICAL_ALIGN_CHILDREN[0].icon,
         tooltip: 'toolbar.verticalAlignMode.main',
-        className: styles.selectDoubleString,
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR],
@@ -640,12 +632,16 @@ export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    const commandService = accessor.get(ICommandService);
+    const selectionManager = accessor.get(ISelectionManager);
+
     return {
         id: SetWorksheetRowHeightCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.rowHeight',
+        display: DisplayTypes.CUSTOM,
         label: {
             name: RightMenuInput.name,
             props: {
@@ -653,13 +649,35 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
                 suffix: 'px',
             },
         },
+        value$: new Observable((subscriber) => {
+            function update() {
+                const range = selectionManager.getCurrentCell();
+                const rowHeight = range?.getHeight();
+
+                subscriber.next(rowHeight ?? 0);
+            }
+
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id === SetRangeStyleMutation.id || id === SetSelectionsOperation.id) {
+                    return update();
+                }
+            });
+
+            update();
+            return disposable.dispose;
+        }),
     };
 }
 
-export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
+    const commandService = accessor.get(ICommandService);
+    const selectionManager = accessor.get(ISelectionManager);
+
     return {
         id: SetWorksheetColWidthCommand.id,
         type: MenuItemType.BUTTON,
+        display: DisplayTypes.CUSTOM,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.columnWidth',
         label: {
@@ -669,15 +687,35 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
                 suffix: 'px',
             },
         },
+        value$: new Observable((subscriber) => {
+            function update() {
+                const range = selectionManager.getCurrentCell();
+                const rowHeight = range?.getWidth();
+
+                subscriber.next(rowHeight ?? 0);
+            }
+
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+                if (id === SetRangeStyleMutation.id || id === SetSelectionsOperation.id) {
+                    return update();
+                }
+            });
+
+            update();
+            return disposable.dispose;
+        }),
     };
 }
 
+const DELETE_RANGE_MENU_ID = 'sheet.menu.delete-range';
 export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
-        id: DeleteRangeCommand.id,
-        type: MenuItemType.SUBITEMS, // 子菜单也需要单独command id，无法使用selector的selections
-        positions: [MenuPosition.CONTEXT_MENU],
+        id: DELETE_RANGE_MENU_ID,
+        type: MenuItemType.SUBITEMS,
         title: 'rightClick.deleteCell',
+        positions: [MenuPosition.CONTEXT_MENU],
+        selectType: SelectTypes.NEO,
     };
 }
 
@@ -686,7 +724,7 @@ export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuBu
         id: DeleteRangeMoveLeftCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveLeft',
-        positions: DeleteRangeCommand.id,
+        positions: DELETE_RANGE_MENU_ID,
     };
 }
 
@@ -695,7 +733,7 @@ export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuButt
         id: DeleteRangeMoveUpCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveUp',
-        positions: DeleteRangeCommand.id,
+        positions: DELETE_RANGE_MENU_ID,
     };
 }
 
@@ -730,8 +768,8 @@ export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         onClick: () => {
             // TODO@Dushusir 这里能监听到点击事件，但是无法触发到 this._sheetBar.reNameSheet(this._dataId);
             // 或许不应该通过这里的onClick直接更新UI？
-            console.info('rename=========')
-        }
+            console.info('rename=========');
+        },
     };
 }
 

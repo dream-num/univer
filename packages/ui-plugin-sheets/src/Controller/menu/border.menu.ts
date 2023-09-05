@@ -122,7 +122,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         icon: 'FullBorderIcon',
         display: DisplayTypes.ICON,
         positions: [MenuPosition.TOOLBAR],
-        type: MenuItemType.DROPDOWN,
+        type: MenuItemType.SELECTOR,
         selectType: SelectTypes.NEO,
         selections: [...BORDER_LINE_CHILDREN],
         value$: borderStyleManagerService.borderInfo$.pipe(map((info) => info.color)),

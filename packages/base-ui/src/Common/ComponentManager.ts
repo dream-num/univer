@@ -53,6 +53,7 @@ export interface ICustomComponent {
     name: string;
     props?: IKeyValue;
 }
+
 export type ComponentList = Map<string, Function>;
 
 export class ComponentManager {

@@ -6,26 +6,25 @@ import { ComponentChildren } from 'preact';
 import { IMenuItemFactory } from '@univerjs/base-ui/src/services/menu/menu';
 import { SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
-
 import {
-    BackgroundColorSelectorMenuItemFactory,
+    UndoMenuItemFactory,
+    RedoMenuItemFactory,
     BoldMenuItemFactory,
+    ItalicMenuItemFactory,
+    UnderlineMenuItemFactory,
+    StrikeThroughMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
-    HorizontalAlignMenuItemFactory,
-    ItalicMenuItemFactory,
-    RedoMenuItemFactory,
-    ResetBackgroundColorMenuItemFactory,
     ResetTextColorMenuItemFactory,
+    TextColorSelectorMenuItemFactory,
+    BackgroundColorSelectorMenuItemFactory,
+    ResetBackgroundColorMenuItemFactory,
     SetBorderColorMenuItemFactory,
     SetBorderStyleMenuItemFactory,
-    StrikeThroughMenuItemFactory,
-    TextColorSelectorMenuItemFactory,
-    TextRotateMenuItemFactory,
-    UnderlineMenuItemFactory,
-    UndoMenuItemFactory,
+    HorizontalAlignMenuItemFactory,
     VerticalAlignMenuItemFactory,
     WrapTextMenuItemFactory,
+    TextRotateMenuItemFactory,
 } from './menu';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 

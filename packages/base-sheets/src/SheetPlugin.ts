@@ -5,7 +5,6 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { CanvasView } from './View/CanvasView';
 import {
-    RightMenuController,
     SheetBarController,
     CellEditorController,
     SheetContainerController,
@@ -37,10 +36,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     private _config: ISheetPluginConfig;
 
     private _canvasEngine: Engine;
-
-    // TODO: @wzhudev these controllers should be removed finally after we completely refactored base-sheet plugin
-
-    private _rightMenuController: RightMenuController;
 
     private _editTooltipsController: EditTooltipsController;
 
@@ -116,7 +111,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         this._formulaBarController = this._injector.get(FormulaBarController);
         this._editTooltipsController = this._injector.get(EditTooltipsController);
         this._sheetBarController = this._injector.get(SheetBarController);
-        this._rightMenuController = this._injector.get(RightMenuController);
         this._countBarController = this._injector.get(CountBarController);
         this._hideColumnController = this._injector.get(HideColumnController);
 
@@ -158,7 +152,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         // TODO: move these init to controllers not here
         this._countBarController.listenEventManager();
         this._sheetBarController.listenEventManager();
-        this._rightMenuController.listenEventManager();
     }
 
     /** @deprecated move to DI system */
@@ -175,7 +168,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [FormulaBarController],
             [EditTooltipsController],
             [SheetBarController],
-            [RightMenuController],
             [CountBarController],
 
             // TODO@huwenzhao: this is a temporary solution

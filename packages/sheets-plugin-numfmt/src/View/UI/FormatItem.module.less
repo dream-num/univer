@@ -1,0 +1,33 @@
+.format-item {
+    padding: 0 14px 0 25px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    justify-content: space-between;
+
+    .format-item-selected {
+        display: flex;
+        align-items: center;
+        position: absolute;
+        left: 5px;
+        top: 50%;
+        transform: translateY(-50%) scale(1.5);
+    }
+
+    .format-item-content {
+        display: block;
+    }
+
+    .format-item-suffix {
+        margin-left: 10px;
+
+        span[role='img'] {
+            font-size: 24px;
+        }
+    }
+}
+
+.format-disabled-item {
+    pointer-events: none;
+    color: var(--gray-15);
+}

@@ -1,5 +1,5 @@
 import { ObjectMatrixPrimitiveType, Command, ObjectMatrix, IRangeData, Range, ACTION_NAMES as CORE_ACTION_NAME, CommandManager, ICurrentUniverService, Disposable } from '@univerjs/core';
-import { BaseComponentRender, IMenuService } from '@univerjs/base-ui';
+import { BaseComponentRender, ComponentManager, IMenuService } from '@univerjs/base-ui';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -9,6 +9,7 @@ import { NumfmtModalController } from './NumfmtModalController';
 import { INumfmtPluginData } from '../Symbol';
 import { NumfmtModel } from '../Model';
 import { NumfmtRangeDataMenuItemFactory, OpenMoreFormatsModalMenuItemFactory } from './menu';
+import { FormatItem } from '../View/UI/FormatItem';
 
 export class NumfmtController extends Disposable{
     protected _numfmtList: IToolbarItemProps;
@@ -19,6 +20,7 @@ export class NumfmtController extends Disposable{
         @Inject(ISelectionManager) private readonly _selectionManager: SelectionManager,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
         @Inject(ICurrentUniverService) private readonly _currentUniverService: ICurrentUniverService,
@@ -169,6 +171,8 @@ export class NumfmtController extends Disposable{
         };
         // TODO@Dushusir remove this after refactoring to new toolbar
         // this._sheetContainerUIController.getToolbarController().addToolbarConfig(this._numfmtList);
+
+        this._componentManager.register(NUMFMT_PLUGIN_NAME + FormatItem.name, FormatItem);
 
         this._initializeContextMenu();
     }

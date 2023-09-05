@@ -99,12 +99,13 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
     private renderButtonType(): ComponentChild {
         const { props, context, state } = this;
         const { disabled, activated } = state;
+        const { icon, title } = props
         const commandService: ICommandService = context.injector.get(ICommandService);
 
         return (
             <Tooltip title={this.getTooltip()} placement="bottom">
                 <Button active={activated} className={styles.textButton} type="text" disabled={disabled} onClick={() => commandService.executeCommand(props.id)}>
-                    <CustomLabel label={{ name: props.icon }} />
+                    <CustomLabel label={icon ? { name: icon } : title} />
                 </Button>
             </Tooltip>
         );

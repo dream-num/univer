@@ -31,9 +31,11 @@ export class FindController extends Disposable {
         };
         this._componentManager.register('SearchIcon', Icon.SearchIcon);
         const toolbar = this._uiController.getToolbarController();
-        toolbar.addToolbarConfig(this._findList);
-        toolbar.setToolbar();
+        // toolbar.addToolbarConfig(this._findList);
         this._initializeContextMenu();
+
+        // TODO@Dushusir maybe trigger once in ui-plugin-sheets?
+        toolbar.setToolbar();
     }
 
     getFindList() {

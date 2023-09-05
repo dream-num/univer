@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs';
 
+import { IAccessor } from '@wendellhu/redi';
 import { DisplayTypes, SelectTypes } from '../../Components/Select/Select';
 
 export type OneOrMany<T> = T | T[];
@@ -113,7 +114,7 @@ export interface IMenuSelectorItem<V> extends IMenuItemBase {
 }
 
 export function isMenuSelectorItem<T>(v: IMenuItem): v is IMenuSelectorItem<T> {
-    return v.type === MenuItemType.SELECTOR || v.type === MenuItemType.DROPDOWN  ||  v.type === MenuItemType.SUBITEMS;
+    return v.type === MenuItemType.SELECTOR || v.type === MenuItemType.DROPDOWN || v.type === MenuItemType.SUBITEMS;
 }
 
 export type IMenuItem = IMenuButtonItem | IMenuSelectorItem<unknown>;

@@ -1,6 +1,6 @@
 import { ComponentChildren, JSX } from 'preact';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { ICustomComponentOption, IMenuButtonItem, IValueOption } from '../services/menu/menu';
+import { ICustomComponentOption, IValueOption } from '../services/menu/menu';
 import { DisplayTypes } from '../Components/Select/Select';
 
 export interface BaseMenuItem {
@@ -37,6 +37,7 @@ export interface BaseMenuProps {
 
     display?: DisplayTypes;
     menuId?: string;
+    value?: string | number;
     options?: Array<IValueOption | ICustomComponentOption>;
     onOptionSelect?: (option: IValueOption) => void;
 }

@@ -7,7 +7,7 @@ import { Input } from '../Input';
 import { BaseItemProps, Item } from '../Item/Item';
 import { CustomLabel, NeoCustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
-import { Icon, IDisplayMenuItem, IMenuItem, IValueOption } from '../..'; // FIXME: strange import
+import { Icon, IValueOption } from '../..'; // FIXME: strange import
 
 // TODO: these type definitions should be moved out of components to menu service
 
@@ -82,7 +82,6 @@ interface IState {
     content: ComponentChildren;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
-    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
 }
 
 export class Select extends PureComponent<BaseSelectProps, IState> {
@@ -111,7 +110,6 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
             color: this.props.defaultColor ?? '#000',
             content: '',
             value: '',
-            menuItems: [],
         };
     }
 
@@ -405,7 +403,6 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
 
     renderNeo = () => {
         const { tooltip, onClick, display, value, icon, title, id, options, type } = this.props;
-        const { menuItems } = this.state;
 
         const onClickInner = (...args: unknown[]) => {
             onClick?.(args[1] as number | string);
@@ -416,6 +413,7 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         };
 
         const iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
+        const displayInSubMenu = display === DisplayTypes.ICON ? DisplayTypes.LABEL : display === DisplayTypes.INPUT ? DisplayTypes.LABEL : display;
         return (
             <div className={`${styles.selectDouble}`}>
                 <Dropdown
@@ -426,11 +424,11 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
                         options,
                         onClick: onClickInner,
                         onOptionSelect,
-                        display: display === DisplayTypes.ICON ? DisplayTypes.LABEL : display === DisplayTypes.INPUT ? DisplayTypes.LABEL : display,
+                        value,
+                        display: displayInSubMenu,
                     }}
                     icon={<Icon.NextIcon />}
                 >
-                    {/* TODO@wzhudev: change menu props of Dropdown. Dropdown shouldn't know how to create a menu. */}
                     <div className={styles.selectLabel}>
                         <NeoCustomLabel icon={iconToDisplay} display={display} title={title!} value={value} onChange={(v) => onClick?.(v)} />
                     </div>

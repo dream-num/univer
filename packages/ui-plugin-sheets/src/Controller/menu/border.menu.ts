@@ -66,69 +66,47 @@ export const BORDER_SIZE_CHILDREN = [
         value: BorderStyleTypes.NONE,
     },
     {
-        label: {
-            name: 'BorderThin',
-        },
+        label: 'BorderThin',
         value: BorderStyleTypes.THIN,
     },
     {
-        label: {
-            name: 'BorderHair',
-        },
+        label: 'BorderHair',
         value: BorderStyleTypes.HAIR,
     },
     {
-        label: {
-            name: 'BorderDotted',
-        },
+        label: 'BorderDotted',
         value: BorderStyleTypes.DOTTED,
     },
     {
-        label: {
-            name: 'BorderDashed',
-        },
+        label: 'BorderDashed',
         value: BorderStyleTypes.DASHED,
     },
     {
-        label: {
-            name: 'BorderDashDot',
-        },
+        label: 'BorderDashDot',
         value: BorderStyleTypes.DOTTED,
     },
     {
-        label: {
-            name: 'BorderDashDotDot',
-        },
+        label: 'BorderDashDotDot',
         value: BorderStyleTypes.DASH_DOT_DOT,
     },
     {
-        label: {
-            name: 'BorderMedium',
-        },
+        label: 'BorderMedium',
         value: BorderStyleTypes.MEDIUM,
     },
     {
-        label: {
-            name: 'BorderMediumDashed',
-        },
+        label: 'BorderMediumDashed',
         value: BorderStyleTypes.MEDIUM_DASHED,
     },
     {
-        label: {
-            name: 'BorderMediumDashDot',
-        },
+        label: 'BorderMediumDashDot',
         value: BorderStyleTypes.MEDIUM_DASH_DOT,
     },
     {
-        label: {
-            name: 'BorderMediumDashDotDot',
-        },
+        label: 'BorderMediumDashDotDot',
         value: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
     },
     {
-        label: {
-            name: 'BorderThick',
-        },
+        label: 'BorderThick',
         value: BorderStyleTypes.THICK,
     },
 ];
@@ -173,6 +151,7 @@ export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelecto
     };
 }
 
+// TODO@wzhudev: fix UI problems
 export function SetBorderStyleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<BorderStyleTypes> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
@@ -180,7 +159,7 @@ export function SetBorderStyleMenuItemFactory(accessor: IAccessor): IMenuSelecto
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
     return {
         id: SetBorderStyleCommand.id,
-        title: 'borderStyle',
+        title: 'borderLine.borderSize',
         label: SHEET_UI_PLUGIN_NAME + LineBold.name,
         positions: [MenuPosition.TOOLBAR],
         parentId: SetBorderPositionCommand.id,

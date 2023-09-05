@@ -15,13 +15,14 @@ function getLocale(context: Partial<AppContextValues>, name: string) {
 }
 
 export interface INeoCustomLabelProps {
-    value: string | number;
+    value: string | number | undefined;
+    selected?: boolean;
     onChange?(v: string | number): void;
 }
 
 export function NeoCustomLabel(props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title'> & INeoCustomLabelProps): JSX.Element | null {
     const context = useContext(AppContext);
-    const { display, value, title, icon, label, onChange } = props;
+    const { display, value, title, icon, label, onChange, selected } = props;
 
     if (display === DisplayTypes.COLOR) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,10 +38,10 @@ export function NeoCustomLabel(props: Pick<IMenuSelectorItem<unknown>, 'label' |
     }
 
     if (display === DisplayTypes.INPUT) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return <Input onValueChange={(v) => onChange?.(v as unknown as string)} type="number" value={`${value}`} />;
     }
 
-    // if the render type is icon, then render value to icon
     if (display === DisplayTypes.ICON && icon) {
         const LabelComponent = context.componentManager?.get(icon) as any;
         if (LabelComponent) {
@@ -55,8 +56,9 @@ export function NeoCustomLabel(props: Pick<IMenuSelectorItem<unknown>, 'label' |
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const LabelComponent = icon ? (context.componentManager?.get(icon) as any) : null;
-    return <Item selected={false} label={title} suffix={LabelComponent ? <LabelComponent /> : null} disabled={false}></Item>;
+    return <Item selected={selected} label={title} suffix={LabelComponent ? <LabelComponent /> : null} disabled={false}></Item>;
 }
 
 /** @deprecated */

@@ -1,12 +1,5 @@
 import { IDrawing, Nullable, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
-import {
-    IDocumentSkeletonDrawingAnchor,
-    IDocumentSkeletonDivide,
-    IDocumentSkeletonDrawing,
-    IDocumentSkeletonLine,
-    IDocumentSkeletonSpan,
-    LineType,
-} from '../../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonDrawingAnchor, IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonLine, LineType } from '../../../Basics/IDocumentSkeletonCached';
 
 import { Vector2 } from '../../../Basics/Vector2';
 
@@ -79,7 +72,7 @@ export function createSkeletonLine(
 
     lineSke.divides = _calculateDividesByDrawings(lineHeight, lineTop, columnWidth, paddingLeft, paddingRight, affectSkeDrawings, headersDrawings, footersDrawings);
 
-    for (let divide of lineSke.divides) {
+    for (const divide of lineSke.divides) {
         divide.parent = lineSke;
     }
 
@@ -223,7 +216,7 @@ function _calculateSplit(drawing: IDocumentSkeletonDrawing, lineHeight: number, 
             return;
         }
 
-        let points: Vector2[] = [];
+        const points: Vector2[] = [];
         points.push(new Vector2(start[0], start[1]));
         for (let i = 0; i < lineTo.length; i++) {
             const point = lineTo[i];
@@ -315,7 +308,7 @@ function __getSplitWidthNoAngle(top: number, height: number, left: number, width
 
     let resultLeft = left - distL;
     let resultWidth = width + distR;
-    let ruler = ___getWrapTextRuler(wrapText, resultLeft, resultWidth, columnWidth);
+    const ruler = ___getWrapTextRuler(wrapText, resultLeft, resultWidth, columnWidth);
 
     if (ruler === WrapTextRuler.LEFT) {
         resultWidth = columnWidth - resultLeft;
@@ -433,26 +426,4 @@ export function createAndUpdateBlockAnchor(paragraphIndex: number, line: IDocume
             top,
         });
     }
-}
-
-export function addSpanToDivide(divide: IDocumentSkeletonDivide, spanGroup: IDocumentSkeletonSpan[]) {
-    const line = divide.parent;
-    if (line != null) {
-        const isFirstLine = line.divides[0].spanGroup[0] == null;
-        const firstSpan = spanGroup[0];
-        const firstSpanContent = firstSpan.content || ' ';
-        if (isFirstLine && firstSpanContent === ' ') {
-            const width = firstSpan.width;
-            firstSpan.width = 0;
-            for (let span of spanGroup) {
-                if (span === firstSpan) {
-                    continue;
-                }
-
-                span.left -= width;
-            }
-        }
-    }
-
-    divide.spanGroup.push(...spanGroup);
 }

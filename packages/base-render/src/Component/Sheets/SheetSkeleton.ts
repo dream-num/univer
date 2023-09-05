@@ -241,7 +241,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             };
         }
         let isSearching = true;
-        let searchedMarge = new ObjectMatrix<boolean>();
+        const searchedMarge = new ObjectMatrix<boolean>();
         while (isSearching) {
             isSearching = false;
             dataMergeCache.forEach((row: number, rowArray: ObjectArray<IRangeData>) => {
@@ -720,7 +720,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             if (!cache.font![fontString]) {
                 cache.font![fontString] = new ObjectMatrix();
             }
-            let { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
+            const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
             let centerAngle = 0;
             let vertexAngle = angle;
             if (isVertical === BooleanNumber.TRUE) {
@@ -746,7 +746,8 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const fontCache = cache.font![fontString];
 
-        let { a: angle, v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
+        let { a: angle } = textRotation as ITextRotation;
+        const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
         if (isVertical === BooleanNumber.TRUE) {
             angle = 90;
         }
@@ -783,7 +784,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const paragraphs = document.body.paragraphs || [];
 
-        for (let paragraph of paragraphs) {
+        for (const paragraph of paragraphs) {
             if (!paragraph.paragraphStyle) {
                 paragraph.paragraphStyle = {};
             }

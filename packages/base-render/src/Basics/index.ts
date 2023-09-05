@@ -10,3 +10,4 @@ export * from './Vector2';
 export * from './Path2';
 export * from './Tools';
 export * from './ScrollXY';
+export * from './DocumentNodeTools';

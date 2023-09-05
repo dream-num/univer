@@ -1,6 +1,6 @@
 import { ICustomBlock, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITable, ITextRun } from '../../Types/Interfaces/IDocumentData';
 import { Nullable } from '../../Shared/Types';
-import { checkParagraphHasBullet, horizontalLineSegmentsSubtraction } from '../../Shared/DocTool';
+import { horizontalLineSegmentsSubtraction } from '../../Shared/DocTool';
 import { isSameStyleTextRun } from '../../Shared/Compare';
 import { sortRulesFactory } from '../../Shared/SortRules';
 import { DataStreamTreeTokenType } from '../Domain/Types';
@@ -297,7 +297,7 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
     return removeTextRuns;
 }
 
-export function deleteParagraphs(body: IDocumentBody, textLength: number, currentIndex: number) {
+export function deleteParagraphs(body: IDocumentBody, textLength: number, currentIndex: number, closeRemoveAfterFirstNew = false) {
     const { paragraphs } = body;
 
     const startIndex = currentIndex;
@@ -311,15 +311,18 @@ export function deleteParagraphs(body: IDocumentBody, textLength: number, curren
         for (let i = 0, len = paragraphs.length; i < len; i++) {
             const paragraph = paragraphs[i];
             const { startIndex: index } = paragraph;
-            if (startIndex === endIndex && endIndex === index) {
-                const nextParagraph = paragraphs[i + 1];
-                const isBullet = checkParagraphHasBullet(nextParagraph);
-                if (isBullet && nextParagraph != null) {
-                    delete nextParagraph.bullet;
-                    delete nextParagraph.paragraphStyle?.hanging;
-                    delete nextParagraph.paragraphStyle?.indentStart;
-                }
-            } else if (index >= startIndex && index <= endIndex) {
+            // if (startIndex === endIndex && endIndex === index) {
+            //     const nextParagraph = paragraphs[i + 1];
+            //     const isBullet = checkParagraphHasBullet(nextParagraph);
+            //     const isIndent = checkParagraphHasIndent(nextParagraph);
+            //     if (isBullet && nextParagraph != null) {
+            //         delete nextParagraph.bullet;
+            //     } else if (isIndent && nextParagraph != null) {
+            //         delete nextParagraph.paragraphStyle?.hanging;
+            //         delete nextParagraph.paragraphStyle?.indentStart;
+            //     }
+            // } else
+            if (index >= startIndex && index <= endIndex) {
                 removeParagraphs.push({
                     ...paragraph,
                     startIndex: index - currentIndex,
@@ -336,7 +339,7 @@ export function deleteParagraphs(body: IDocumentBody, textLength: number, curren
                 removeAfterFirstNew = paragraph;
             }
         }
-        if (removeAfterFirstNew != null) {
+        if (removeAfterFirstNew != null && closeRemoveAfterFirstNew === false) {
             // When deleting a paragraph, the configuration of the paragraph
             // in the beginning range should be retained. Due to the label design,
             // the paragraph mark is located after the content, so when deleting,

@@ -12,6 +12,7 @@ import { DocsEditor } from './Document.Editor';
 import { Liquid } from './Common/Liquid';
 import { Scene } from '../../Scene';
 import { TextSelection } from './Common/TextSelection';
+import { INodeInfo } from '../../Basics/Interfaces';
 
 export interface IDocumentsConfig {
     pageMarginLeft?: number;
@@ -353,12 +354,12 @@ export class Documents extends DocComponent {
                                         continue;
                                     }
 
-                                    const { width: spanWidth, left: spanLeft } = span;
+                                    const { width: spanWidth, left: spanLeft, paddingLeft } = span;
                                     const { x: translateX, y: translateY } = this._drawLiquid;
                                     const originTranslate = Vector2.create(fixLineWidthByScale(translateX, scale), fixLineWidthByScale(translateY, scale));
                                     const centerPoint = Vector2.create(fixLineWidthByScale(spanWidth / 2, scale), fixLineWidthByScale(lineHeight / 2, scale));
                                     const spanStartPoint = calculateRectRotate(
-                                        originTranslate.addByPoint(fixLineWidthByScale(spanLeft, scale), 0),
+                                        originTranslate.addByPoint(fixLineWidthByScale(spanLeft + paddingLeft, scale), 0),
                                         centerPoint,
                                         centerAngle,
                                         vertexAngle,
@@ -366,7 +367,7 @@ export class Documents extends DocComponent {
                                     );
 
                                     const spanPointWithFont = calculateRectRotate(
-                                        originTranslate.addByPoint(fixLineWidthByScale(spanLeft + maxLineAscSin, scale), fixLineWidthByScale(maxLineAscCos, scale)),
+                                        originTranslate.addByPoint(fixLineWidthByScale(spanLeft + maxLineAscSin + paddingLeft, scale), fixLineWidthByScale(maxLineAscCos, scale)),
                                         centerPoint,
                                         centerAngle,
                                         vertexAngle,
@@ -413,12 +414,12 @@ export class Documents extends DocComponent {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    override findNodeByCoord(offsetX: number, offsetY: number) {
+    override findNodeByCoord(offsetX: number, offsetY: number): Nullable<INodeInfo> {
         const scene = this.getScene() as Scene;
         const originCoord = scene.transformToSceneCoord(Vector2.FromArray([offsetX, offsetY]));
 
         if (!originCoord) {
-            return false;
+            return;
         }
 
         const coord = this._getInverseCoord(originCoord);
@@ -426,7 +427,7 @@ export class Documents extends DocComponent {
         const skeleton = this.getSkeleton();
 
         if (!skeleton) {
-            return false;
+            return;
         }
 
         this._findLiquid.reset();
@@ -434,6 +435,12 @@ export class Documents extends DocComponent {
         const skeletonData = skeleton.getSkeletonData();
 
         const pages = skeletonData.pages;
+
+        let nearestNodeList: INodeInfo[] = [];
+
+        let nearestNodeDistanceList: number[] = [];
+
+        let nearestNodeDistanceY = Infinity;
 
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
@@ -448,6 +455,7 @@ export class Documents extends DocComponent {
             this._findLiquid.translatePagePadding(page);
 
             const sections = page.sections;
+
             for (const section of sections) {
                 const { columns, height } = section;
 
@@ -455,9 +463,9 @@ export class Documents extends DocComponent {
 
                 const { y: startY } = this._findLiquid;
 
-                if (!(y >= startY && y <= startY + height)) {
-                    continue;
-                }
+                // if (!(y >= startY && y <= startY + height)) {
+                //     continue;
+                // }
 
                 for (const column of columns) {
                     const { lines, width: columnWidth } = column;
@@ -466,9 +474,9 @@ export class Documents extends DocComponent {
 
                     const { x: startX } = this._findLiquid;
 
-                    if (!(x >= startX && x <= startX + columnWidth)) {
-                        continue;
-                    }
+                    // if (!(x >= startX && x <= startX + columnWidth)) {
+                    //     continue;
+                    // }
 
                     const linesCount = lines.length;
 
@@ -488,10 +496,12 @@ export class Documents extends DocComponent {
 
                             const endY_fin = startY + lineHeight;
 
-                            if (!(y >= startY_fin && y <= endY_fin)) {
-                                this._findLiquid.translateRestore();
-                                continue;
-                            }
+                            const distanceY = Math.abs(y - endY_fin);
+
+                            // if (!(y >= startY_fin && y <= endY_fin)) {
+                            //     this._findLiquid.translateRestore();
+                            //     continue;
+                            // }
 
                             const divideLength = divides.length;
                             for (let i = 0; i < divideLength; i++) {
@@ -503,10 +513,10 @@ export class Documents extends DocComponent {
 
                                 const { x: startX } = this._findLiquid;
 
-                                if (!(x >= startX && x <= startX + divideWidth)) {
-                                    this._findLiquid.translateRestore();
-                                    continue;
-                                }
+                                // if (!(x >= startX && x <= startX + divideWidth)) {
+                                //     this._findLiquid.translateRestore();
+                                //     continue;
+                                // }
 
                                 for (const span of spanGroup) {
                                     if (!span.content || span.content.length === 0) {
@@ -519,15 +529,48 @@ export class Documents extends DocComponent {
 
                                     const endX_fin = startX + spanLeft + spanWidth;
 
-                                    if (!(x >= startX_fin && x <= endX_fin)) {
+                                    const distanceX = Math.abs(x - endX_fin);
+
+                                    if (y >= startY_fin && y <= endY_fin) {
+                                        if (x >= startX_fin && x <= endX_fin) {
+                                            return {
+                                                node: span,
+                                                ratioX: x / (startX_fin + endX_fin),
+                                                ratioY: y / (startY_fin + endY_fin),
+                                            };
+                                        }
+
+                                        if (nearestNodeDistanceY !== -Infinity) {
+                                            nearestNodeList = [];
+                                            nearestNodeDistanceList = [];
+                                        }
+                                        nearestNodeList.push({
+                                            node: span,
+                                            ratioX: x / (startX_fin + endX_fin),
+                                            ratioY: y / (startY_fin + endY_fin),
+                                        });
+
+                                        nearestNodeDistanceList.push(distanceX);
+
+                                        nearestNodeDistanceY = -Infinity;
                                         continue;
                                     }
 
-                                    return {
-                                        node: span,
-                                        ratioX: x / (startX_fin + endX_fin),
-                                        ratioY: y / (startY_fin + endY_fin),
-                                    };
+                                    if (distanceY < nearestNodeDistanceY) {
+                                        nearestNodeDistanceY = distanceY;
+                                        nearestNodeList = [];
+                                        nearestNodeDistanceList = [];
+                                    }
+
+                                    if (distanceY === nearestNodeDistanceY) {
+                                        nearestNodeList.push({
+                                            node: span,
+                                            ratioX: x / (startX_fin + endX_fin),
+                                            ratioY: y / (startY_fin + endY_fin),
+                                        });
+
+                                        nearestNodeDistanceList.push(distanceX);
+                                    }
                                 }
                                 this._findLiquid.translateRestore();
                             }
@@ -540,46 +583,52 @@ export class Documents extends DocComponent {
             this._translatePage(page);
         }
 
-        return false;
+        return this._getNearestNode(nearestNodeList, nearestNodeDistanceList);
     }
 
-    override findCoordByNode(span: IDocumentSkeletonSpan) {
-        const divide = span.parent;
-        const defaultCoordinate = {
-            x: -Infinity,
-            y: -Infinity,
-        };
-        if (divide == null) {
-            return defaultCoordinate;
-        }
+    // override findCoordByNode(span: IDocumentSkeletonSpan) {
+    //     const divide = span.parent;
+    //     const defaultCoordinate = {
+    //         x: -Infinity,
+    //         y: -Infinity,
+    //     };
+    //     if (divide == null) {
+    //         return defaultCoordinate;
+    //     }
 
-        const line = divide.parent;
+    //     const line = divide.parent;
 
-        if (line == null) {
-            return defaultCoordinate;
-        }
+    //     if (line == null) {
+    //         return defaultCoordinate;
+    //     }
 
-        const column = line.parent;
+    //     const column = line.parent;
 
-        if (column == null) {
-            return defaultCoordinate;
-        }
+    //     if (column == null) {
+    //         return defaultCoordinate;
+    //     }
 
-        const section = column.parent;
+    //     const section = column.parent;
 
-        if (section == null) {
-            return defaultCoordinate;
-        }
+    //     if (section == null) {
+    //         return defaultCoordinate;
+    //     }
 
-        const page = section.parent;
+    //     const page = section.parent;
 
-        if (page == null) {
-            return defaultCoordinate;
-        }
-    }
+    //     if (page == null) {
+    //         return defaultCoordinate;
+    //     }
+    // }
 
     protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         this.draw(ctx, bounds);
+    }
+
+    private _getNearestNode(nearestNodeList: INodeInfo[], nearestNodeDistanceList: number[]) {
+        const miniValue = Math.min(...nearestNodeDistanceList);
+        const miniValueIndex = nearestNodeDistanceList.indexOf(miniValue);
+        return nearestNodeList[miniValueIndex];
     }
 
     private _horizontalHandler(pageWidth: number, pagePaddingLeft: number, pagePaddingRight: number, horizontalAlign: HorizontalAlign) {

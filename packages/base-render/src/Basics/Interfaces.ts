@@ -139,3 +139,7 @@ export interface INodeSearch {
     section: number;
     page: number;
 }
+
+export interface INodePosition extends INodeSearch {
+    isBack: boolean;
+}

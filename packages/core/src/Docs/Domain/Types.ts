@@ -38,4 +38,6 @@ export enum DataStreamTreeTokenType {
     CUSTOM_BLOCK = '\b', // 图片 mention等不参与文档流的场景
 
     LETTER = '',
+
+    SPACE = ' ',
 }

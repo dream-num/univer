@@ -41,7 +41,7 @@ export function dealWidthParagraph(
     paragraphNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
-    skeletonResourceReference: ISkeletonResourceReference,
+    skeletonResourceReference: ISkeletonResourceReference
 ): IDocumentSkeletonPage[] {
     const {
         gridType = GridType.LINES,

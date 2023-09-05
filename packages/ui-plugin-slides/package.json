@@ -37,6 +37,7 @@
         "dev": "vite",
         "build": "tsc && vite build",
         "watch": "vite build",
+        "link": "pnpm link ./",
         "serve": "vite preview"
     },
     "devDependencies": {

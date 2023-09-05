@@ -47,6 +47,10 @@ export class DocumentModelSimple {
         return this.snapshot.lists;
     }
 
+    get body() {
+        return this.snapshot.body;
+    }
+
     getBodyModel(segmentId?: string) {
         if (segmentId == null) {
             return this.bodyModel;
@@ -172,7 +176,7 @@ export class DocumentModel extends DocumentModelSimple {
         return this;
     }
 
-    update(body: IDocumentBody, range: ITextSelectionRange, coverType = UpdateDocsAttributeType.COVER, segmentId?: string) {
+    update(updateBody: IDocumentBody, range: ITextSelectionRange, coverType = UpdateDocsAttributeType.COVER, segmentId?: string) {
         const { cursorStart, cursorEnd, isEndBack, isStartBack } = range;
         const actionList = [];
 
@@ -190,7 +194,7 @@ export class DocumentModel extends DocumentModelSimple {
             actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
             len: textEnd - textStart + 1,
             coverType,
-            body,
+            body: updateBody,
             segmentId,
         });
 

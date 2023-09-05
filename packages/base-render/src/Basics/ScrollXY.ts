@@ -1,8 +1,8 @@
 export function getCurrentScrollXY(scrollTimer: any) {
     const scene = scrollTimer.getScene();
     const viewport = scrollTimer.getViewportByCoord(scene);
-    let scrollX = 0;
-    let scrollY = 0;
+    const scrollX = 0;
+    const scrollY = 0;
     if (!viewport) {
         return {
             scrollX,

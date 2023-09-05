@@ -10,12 +10,14 @@ import {
 } from '../../../Basics/IDocumentSkeletonCached';
 import { getColor } from '../../../Basics/Tools';
 import { IPoint } from '../../../Basics/Vector2';
-import { Scene } from '../../../Scene';
+
 import { Rect } from '../../../Shape/Rect';
 import { RegularPolygon } from '../../../Shape/RegularPolygon';
 
 import { Liquid } from './Liquid';
 import { DocComponent } from '../DocComponent';
+import { INodePosition } from '../../../Basics/Interfaces';
+import { ThinScene } from '../../../ThinScene';
 
 enum NodePositionStateType {
     NORMAL,
@@ -53,15 +55,6 @@ interface ICurrentNodePositionState {
 const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
 
 const TEXT_ANCHOR_KEY_PREFIX = '__TestSelectionAnchor__';
-export interface INodePosition {
-    page: number;
-    section: number;
-    column: number;
-    line: number;
-    divide: number;
-    span: number;
-    isBack: boolean;
-}
 
 export class TextSelection {
     private _current = false;
@@ -92,7 +85,7 @@ export class TextSelection {
         span: NodePositionStateType.NORMAL,
     };
 
-    constructor(private _scene: Scene, public startNodePosition?: Nullable<INodePosition>, public endNodePosition?: Nullable<INodePosition>, public segmentId?: string) {}
+    constructor(private _scene: ThinScene, public startNodePosition?: Nullable<INodePosition>, public endNodePosition?: Nullable<INodePosition>, public segmentId?: string) {}
 
     getRange() {
         const cursorList = this._rangeList;
@@ -219,7 +212,6 @@ export class TextSelection {
             const data = this._getRangePointData(start!, start!, documents);
             const { pointGroup, cursorList } = data;
             this._setRangeList(cursorList);
-            console.log(pointGroup, cursorList);
             pointGroup.length > 0 && this._createAndUpdateAnchor(pointGroup, documents.left, documents.top);
             return;
         }
@@ -227,13 +219,12 @@ export class TextSelection {
         const data = this._getRangePointData(start!, end!, documents);
         const { pointGroup, cursorList } = data;
         this._setRangeList(cursorList);
-        console.log(pointGroup, cursorList);
         pointGroup.length > 0 && this._createAndUpdateRange(pointGroup, documents.left, documents.top);
     }
 
     getStart() {
         if (this.startNodePosition == null) {
-            return this.endNodePosition;
+            return null;
         }
 
         if (this.endNodePosition == null) {
@@ -243,6 +234,20 @@ export class TextSelection {
         const { start } = this._compareNodePosition(this.startNodePosition, this.endNodePosition);
 
         return start;
+    }
+
+    getEnd() {
+        if (this.startNodePosition == null) {
+            return this.endNodePosition;
+        }
+
+        if (this.endNodePosition == null) {
+            return null;
+        }
+
+        const { end } = this._compareNodePosition(this.startNodePosition, this.endNodePosition);
+
+        return end;
     }
 
     private _resetCurrentNodePositionState() {

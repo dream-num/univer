@@ -6,13 +6,13 @@ import { getOffsetRectForDom, transformBoundingCoord } from '../../Basics/Positi
 import { ScrollTimer } from '../../ScrollTimer';
 
 import { DocComponent } from './DocComponent';
-import { INodePosition, TextSelection } from './Common/TextSelection';
+import { TextSelection } from './Common/TextSelection';
 import { IScrollObserverParam, Viewport } from '../../Viewport';
 import { checkStyle, injectStyle } from '../../Basics/Tools';
 
 import { Vector2 } from '../../Basics/Vector2';
 import { getCurrentScrollXY } from '../../Basics/ScrollXY';
-import { INodeInfo } from '../../Basics/Interfaces';
+import { INodeInfo, INodePosition } from '../../Basics/Interfaces';
 
 export interface IEditorInputConfig {
     event: Event | CompositionEvent | KeyboardEvent;
@@ -33,7 +33,7 @@ export class DocsEditor {
 
     onCompositionendObservable = new Observable<IEditorInputConfig>();
 
-    onSelectionStartObservable = new Observable<INodeInfo | false>();
+    onSelectionStartObservable = new Observable<Nullable<INodePosition>>();
 
     private _container: HTMLDivElement;
 
@@ -299,8 +299,8 @@ export class DocsEditor {
         return this._documents?.getSkeleton()?.getSkeletonData();
     }
 
-    private _getNodePosition(node: INodeInfo | false, isStart: Boolean = true) {
-        if (node === false) {
+    private _getNodePosition(node: Nullable<INodeInfo>) {
+        if (node == null) {
             return;
         }
 
@@ -313,7 +313,8 @@ export class DocsEditor {
         }
 
         let isBack = false;
-        if (ratioX < 0.5 || (span.streamType === DataStreamTreeTokenType.PARAGRAPH && isStart)) {
+        //|| (span.streamType === DataStreamTreeTokenType.PARAGRAPH && isStart)
+        if (ratioX < 0.5) {
             isBack = true;
         }
 
@@ -469,7 +470,7 @@ export class DocsEditor {
 
         const endNode = this._documents.findNodeByCoord(moveOffsetX, moveOffsetY);
 
-        const endPosition = this._getNodePosition(endNode, false);
+        const endPosition = this._getNodePosition(endNode);
 
         // console.log('endNode', endNode, endPosition, { moveOffsetX, moveOffsetY, _viewportScrollY: this._viewportScrollY, scrollX });
 
@@ -661,6 +662,7 @@ export class DocsEditor {
         });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _attachSelectionEvent(documents: DocComponent) {
         this._moveInObserver = documents.onPointerEnterObserver.add(() => {
             documents.cursor = CURSOR_TYPE.TEXT;
@@ -687,9 +689,13 @@ export class DocsEditor {
 
             console.log('startNode', startNode, position, evtOffsetX, evtOffsetY);
 
-            if (!position) {
+            if (position == null) {
                 this._deleteAllTextSelection();
                 return;
+            }
+
+            if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
+                position.isBack = true;
             }
 
             if (evt.ctrlKey || this._isEmptyTextSelection()) {
@@ -713,15 +719,24 @@ export class DocsEditor {
             this._viewportScrollX = scrollX;
             this._viewportScrollY = scrollY;
 
-            this.onSelectionStartObservable.notifyObservers(startNode);
+            this.onSelectionStartObservable.notifyObservers(this.getActiveTextSelection()?.getStart());
+
+            let preMoveOffsetX = evtOffsetX;
+
+            let preMoveOffsetY = evtOffsetY;
 
             this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+                scene.setCursor(CURSOR_TYPE.TEXT);
+                if (Math.sqrt((moveOffsetX - preMoveOffsetX) ** 2 + (moveOffsetY - preMoveOffsetY) ** 2) < 3) {
+                    return;
+                }
                 this._moving(moveOffsetX, moveOffsetY, scrollTimer);
                 scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
                     this._moving(moveOffsetX, moveOffsetY, scrollTimer);
                 });
-                scene.setCursor(CURSOR_TYPE.TEXT);
+                preMoveOffsetX = moveOffsetX;
+                preMoveOffsetY = moveOffsetY;
             });
 
             this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {

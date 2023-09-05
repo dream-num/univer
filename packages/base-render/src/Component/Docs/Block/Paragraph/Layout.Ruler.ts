@@ -1,4 +1,4 @@
-import { BooleanNumber, GridType, HorizontalAlign, INumberUnit, IParagraphStyle, NamedStyleType, SpacingRule } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, HorizontalAlign, INumberUnit, IParagraphStyle, NamedStyleType, SpacingRule } from '@univerjs/core';
 import {
     getCharSpaceApply,
     getCharSpaceConfig,
@@ -19,8 +19,8 @@ import {
 } from '../../Common/Tools';
 // eslint-disable-next-line import/no-cycle
 import { createSkeletonPage } from '../../Common/Page';
-import { addSpanToDivide, calculateLineTopByDrawings, createAndUpdateBlockAnchor, createSkeletonLine, setDivideFullState } from '../../Common/Line';
-import { createSkeletonBulletSpan, setSpanGroupLeft } from '../../Common/Span';
+import { calculateLineTopByDrawings, createAndUpdateBlockAnchor, createSkeletonLine, setDivideFullState } from '../../Common/Line';
+import { createSkeletonBulletSpan, addSpanToDivide } from '../../Common/Span';
 import { setColumnFullState } from '../../Common/Section';
 import {
     IDocumentSkeletonBullet,
@@ -87,7 +87,9 @@ function _divideOperator(
         // const { width: pageWidth, marginLeft: pageMarginLeft, marginRight: pageMarginRight } = lastPage;
         const pageContentWidth = getPageContentWidth(lastPage);
 
-        if (preWidth + preLeft + width > divide.width) {
+        const preOffsetLeft = preWidth + preLeft;
+
+        if (preOffsetLeft + width > divide.width) {
             // w超过div宽度
             setDivideFullState(divide, true);
             const column = getColumnByDivide(divide);
@@ -95,7 +97,7 @@ function _divideOperator(
             if (width > pageContentWidth) {
                 // 一个字符超页内容宽
                 if (isBlankPage(lastPage)) {
-                    addSpanToDivide(divide, spanGroup);
+                    addSpanToDivide(divide, spanGroup, preOffsetLeft);
                     // divide.spanGroup.push(...spanGroup);
                     __makeColumnsFull(column?.parent?.columns);
                 } else {
@@ -105,15 +107,18 @@ function _divideOperator(
                 // 一个字符超列宽
                 setColumnFullState(column, true);
                 if (isBlankColumn(column)) {
-                    console.log(spanGroup);
-                    addSpanToDivide(divide, spanGroup);
+                    addSpanToDivide(divide, spanGroup, preOffsetLeft);
                     // divide.spanGroup.push(...spanGroup);
                 } else {
                     _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
                 }
             } else if (divideInfo.isLast) {
                 // 最后一个divide
-                _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+                if (spanGroup.length === 1 && spanGroup[0].content === DataStreamTreeTokenType.SPACE) {
+                    addSpanToDivide(divide, spanGroup, preOffsetLeft);
+                } else {
+                    _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+                }
             } else {
                 // 不是最后一个divide
                 _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
@@ -150,12 +155,9 @@ function _divideOperator(
                     return;
                 }
             }
-            setSpanGroupLeft(spanGroup, preWidth + preLeft);
-            for (let span of spanGroup) {
-                span.parent = divide;
-            }
+
             // console.log('spanGroup', spanGroup, spanGroup.length, spanGroup[0].content);
-            addSpanToDivide(divide, spanGroup);
+            addSpanToDivide(divide, spanGroup, preOffsetLeft);
             // divide.spanGroup.push(...spanGroup);
         }
     } else {
@@ -338,14 +340,14 @@ function __getIndentPadding(
     charSpaceApply: number
 ) {
     const { spanType = SpanType.LETTER, bBox } = span;
-    let indentFirstLineNumber = getNumberUnitValue(indentFirstLine, charSpaceApply);
-    let hangingNumber = getNumberUnitValue(hanging, charSpaceApply);
-    let indentStartNumber = getNumberUnitValue(indentStart, charSpaceApply);
-    let indentEndNumber = getNumberUnitValue(indentEnd, charSpaceApply);
+    const indentFirstLineNumber = getNumberUnitValue(indentFirstLine, charSpaceApply);
+    const hangingNumber = getNumberUnitValue(hanging, charSpaceApply);
+    const indentStartNumber = getNumberUnitValue(indentStart, charSpaceApply);
+    const indentEndNumber = getNumberUnitValue(indentEnd, charSpaceApply);
 
     let paddingLeft = indentStartNumber;
-    let paddingRight = indentEndNumber;
-    let changeBulletWidth = {
+    const paddingRight = indentEndNumber;
+    const changeBulletWidth = {
         state: false,
         hangingNumber: 0,
     };

@@ -28,4 +28,5 @@ export * from './TypeStore';
 export * from './HashAlgorithm';
 export * from './Compare';
 export * from './CommandEnum';
+export * from './DocTool';
 // @endindex

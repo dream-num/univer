@@ -24,7 +24,7 @@ export const enum MenuItemType {
     SUBITEMS, // Multiple sub-menu items have different commands
 }
 
-interface IMenuItemBase {
+interface IMenuItemBase<V> {
     /** ID of the menu item. Normally it should be the same as the ID of the command that it would invoke.  */
     id: string;
     title: string;
@@ -32,37 +32,36 @@ interface IMenuItemBase {
     icon?: string;
     tooltip?: string;
 
-    /** @deprecated this type seems unnecessary */
-    type: MenuItemType;
-
     /** In what menu should the item display. */
     positions: OneOrMany<MenuPosition | string>;
 
+    /** @deprecated this type seems unnecessary */
+    type: MenuItemType;
+    /** Determines how the label of the selector should display. */
+    display?: DisplayTypes;
     /**
      * Custom label component id.
-     *
-     * @deprecated this parameter would be removed after refactoring
      * */
-    label?: string;
-
-    /** @deprecated this parameter would be removed after refactoring */
-    className?: string;
-
-    /**
-     * If the menu is in a submenu, this property would be its parent menu item's id.
-     * @deprecated use positions instead
-     */
-    parentId?: string;
+    label?:
+        | string
+        | {
+              name: string;
+              props?: Record<string, string | number>;
+          };
 
     hidden$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
+    /** On observable value that should emit the value of the corresponding selection component. */
+    value$?: Observable<V>;
 }
 
-export interface IMenuButtonItem extends IMenuItemBase {
+export interface IMenuButtonItem<V = undefined> extends IMenuItemBase<V> {
     type: MenuItemType.BUTTON;
 
     activated$?: Observable<boolean>;
 
+    // TODO@wzhudev: I may deprecate this
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onClick?: (...arg: any) => void; // menu button click callback, does not trigger command.  e.g. sheet bar rename
 }
 
@@ -89,20 +88,17 @@ export interface ICustomComponentOption {
 
 export interface ICustomComponentProps<T> {
     value: T;
-    onValueChange: (v: T) => void;
+    onChange: (v: T) => void;
 }
 
 export function isCustomComponentOption(v: IValueOption | ICustomComponentOption): v is ICustomComponentOption {
     return typeof (v as ICustomComponentOption).id !== 'undefined';
 }
 
-export interface IMenuSelectorItem<V> extends IMenuItemBase {
+export interface IMenuSelectorItem<V> extends IMenuItemBase<V> {
     type: MenuItemType.SELECTOR | MenuItemType.DROPDOWN | MenuItemType.SUBITEMS;
 
-    /** Determines how the label of the selector should display. */
-    display?: DisplayTypes;
-
-    /** @deprecated this parameter would be removed after we complete refactoring */
+    /** @deprecated this parameter would be removed after we complete refactoring, because they will be all NEO */
     selectType: SelectTypes;
 
     // selections 子菜单可以为三种类型
@@ -111,9 +107,6 @@ export interface IMenuSelectorItem<V> extends IMenuItemBase {
     // 一个是其他 menu 的 id，直接渲染成其他的 menu
     /** Options or IDs of registered components. */
     selections?: Array<IValueOption | ICustomComponentOption>;
-
-    /** On observable value that should emit the value of the corresponding selection component. */
-    value$?: Observable<V>;
 }
 
 export function isMenuSelectorItem<T>(v: IMenuItem): v is IMenuSelectorItem<T> {

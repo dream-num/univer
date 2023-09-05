@@ -15,11 +15,16 @@ function getLocale(context: Partial<AppContextValues>, name: string) {
 }
 
 export interface INeoCustomLabelProps {
-    value: string | number | undefined;
+    value?: string | number | undefined;
     selected?: boolean;
     onChange?(v: string | number): void;
 }
 
+/**
+ * The component to render toolbar item label and menu item label.
+ * @param props
+ * @returns
+ */
 export function NeoCustomLabel(props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title'> & INeoCustomLabelProps): JSX.Element | null {
     const context = useContext(AppContext);
     const { display, value, title, icon, label, onChange, selected } = props;
@@ -38,11 +43,11 @@ export function NeoCustomLabel(props: Pick<IMenuSelectorItem<unknown>, 'label' |
     }
 
     if (display === DisplayTypes.INPUT) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return <Input onValueChange={(v) => onChange?.(v as unknown as string)} type="number" value={`${value}`} />;
     }
 
     if (display === DisplayTypes.ICON && icon) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const LabelComponent = context.componentManager?.get(icon) as any;
         if (LabelComponent) {
             return <LabelComponent {...props} />;
@@ -50,9 +55,12 @@ export function NeoCustomLabel(props: Pick<IMenuSelectorItem<unknown>, 'label' |
     }
 
     if (display === DisplayTypes.CUSTOM && label) {
-        const LabelComponent = context.componentManager?.get(label) as any;
+        const labelName = typeof label === 'string' ? label : (label as ICustomComponent).name;
+        const customProps = (label as ICustomComponent).props ?? {};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const LabelComponent = context.componentManager?.get(labelName) as any;
         if (LabelComponent) {
-            return <LabelComponent {...props} />;
+            return <LabelComponent {...customProps} {...props} />;
         }
     }
 

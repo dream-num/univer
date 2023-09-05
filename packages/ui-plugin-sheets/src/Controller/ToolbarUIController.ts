@@ -7,27 +7,27 @@ import { IMenuItemFactory } from '@univerjs/base-ui/src/services/menu/menu';
 import { SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
 
-import {
-    BackgroundColorSelectorMenuItemFactory,
-    BoldMenuItemFactory,
-    FontFamilySelectorMenuItemFactory,
-    FontSizeSelectorMenuItemFactory,
-    HorizontalAlignMenuItemFactory,
-    ItalicMenuItemFactory,
-    RedoMenuItemFactory,
-    ResetBackgroundColorMenuItemFactory,
-    ResetTextColorMenuItemFactory,
-    SetBorderColorMenuItemFactory,
-    SetBorderStyleMenuItemFactory,
-    StrikeThroughMenuItemFactory,
-    TextColorSelectorMenuItemFactory,
-    TextRotateMenuItemFactory,
-    UnderlineMenuItemFactory,
-    UndoMenuItemFactory,
-    VerticalAlignMenuItemFactory,
-    WrapTextMenuItemFactory,
-} from './menu';
-import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
+// import {
+//     BackgroundColorSelectorMenuItemFactory,
+//     BoldMenuItemFactory,
+//     FontFamilySelectorMenuItemFactory,
+//     FontSizeSelectorMenuItemFactory,
+//     HorizontalAlignMenuItemFactory,
+//     ItalicMenuItemFactory,
+//     RedoMenuItemFactory,
+//     ResetBackgroundColorMenuItemFactory,
+//     ResetTextColorMenuItemFactory,
+//     SetBorderColorMenuItemFactory,
+//     SetBorderStyleMenuItemFactory,
+//     StrikeThroughMenuItemFactory,
+//     TextColorSelectorMenuItemFactory,
+//     TextRotateMenuItemFactory,
+//     UnderlineMenuItemFactory,
+//     UndoMenuItemFactory,
+//     VerticalAlignMenuItemFactory,
+//     WrapTextMenuItemFactory,
+// } from './menu';
+// import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     children?: BaseSelectChildrenProps[];
@@ -124,25 +124,25 @@ export class ToolbarUIController extends Disposable {
         // in a single controller. I will do that layer.
         (
             [
-                UndoMenuItemFactory,
-                RedoMenuItemFactory,
-                BoldMenuItemFactory,
-                ItalicMenuItemFactory,
-                UnderlineMenuItemFactory,
-                StrikeThroughMenuItemFactory,
-                FontFamilySelectorMenuItemFactory,
-                FontSizeSelectorMenuItemFactory,
-                ResetTextColorMenuItemFactory,
-                TextColorSelectorMenuItemFactory,
-                BackgroundColorSelectorMenuItemFactory,
-                ResetBackgroundColorMenuItemFactory,
-                CellBorderSelectorMenuItemFactory,
-                SetBorderColorMenuItemFactory,
-                SetBorderStyleMenuItemFactory,
-                HorizontalAlignMenuItemFactory,
-                VerticalAlignMenuItemFactory,
-                WrapTextMenuItemFactory,
-                TextRotateMenuItemFactory,
+                // UndoMenuItemFactory,
+                // RedoMenuItemFactory,
+                // BoldMenuItemFactory,
+                // ItalicMenuItemFactory,
+                // UnderlineMenuItemFactory,
+                // StrikeThroughMenuItemFactory,
+                // FontFamilySelectorMenuItemFactory,
+                // FontSizeSelectorMenuItemFactory,
+                // ResetTextColorMenuItemFactory,
+                // TextColorSelectorMenuItemFactory,
+                // BackgroundColorSelectorMenuItemFactory,
+                // ResetBackgroundColorMenuItemFactory,
+                // CellBorderSelectorMenuItemFactory,
+                // SetBorderColorMenuItemFactory,
+                // SetBorderStyleMenuItemFactory,
+                // HorizontalAlignMenuItemFactory,
+                // VerticalAlignMenuItemFactory,
+                // WrapTextMenuItemFactory,
+                // TextRotateMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));

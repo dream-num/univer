@@ -16,6 +16,7 @@ function getLocale(context: Partial<AppContextValues>, name: string) {
 
 export interface INeoCustomLabelProps {
     value?: string | number | undefined;
+    suffix?: string;
     selected?: boolean;
     onChange?(v: string | number): void;
 }
@@ -27,7 +28,7 @@ export interface INeoCustomLabelProps {
  */
 export function NeoCustomLabel(props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title'> & INeoCustomLabelProps): JSX.Element | null {
     const context = useContext(AppContext);
-    const { display, value, title, icon, label, onChange, selected } = props;
+    const { display, value, title, icon, label, onChange, selected, suffix } = props;
 
     if (display === DisplayTypes.COLOR) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,7 +67,7 @@ export function NeoCustomLabel(props: Pick<IMenuSelectorItem<unknown>, 'label' |
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const LabelComponent = icon ? (context.componentManager?.get(icon) as any) : null;
-    return <Item selected={selected} label={title} suffix={LabelComponent ? <LabelComponent /> : null} disabled={false}></Item>;
+    return <Item selected={selected} label={title} suffix={LabelComponent ? <LabelComponent /> : suffix} disabled={false}></Item>;
 }
 
 /** @deprecated */

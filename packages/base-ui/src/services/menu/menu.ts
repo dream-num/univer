@@ -76,6 +76,7 @@ export interface IValueOption {
     tooltip?: string;
     style?: object;
     disabled?: boolean;
+    suffix?:string;
 }
 
 export function isValueOptions(v: IValueOption | ICustomComponentOption): v is IValueOption {

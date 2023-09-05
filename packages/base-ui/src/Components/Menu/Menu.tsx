@@ -184,6 +184,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                                     label={option.label}
                                     title={option.label}
                                     icon={option.icon}
+                                    suffix={option.suffix}
                                 />
                             </li>
                         );

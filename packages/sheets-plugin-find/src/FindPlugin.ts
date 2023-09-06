@@ -1,12 +1,14 @@
 import { CommandManager, ICurrentUniverService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 // import { TextFinder } from './Domain/TextFind';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
-import { FIND_PLUGIN_NAME } from './Const/PLUGIN_NAME';
+
 import { FindPluginObserve } from './Basics/Observer';
+import { FIND_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { FindController } from './Controller/FindController';
-import { en, zh } from './Locale';
-import { TextFinder } from './Domain/TextFind';
 import { FindModalController } from './Controller/FindModalController';
+import { TextFinder } from './Domain/TextFind';
+import { en, zh } from './Locale';
+import { FindService } from './services/find.service';
 // import { FindPluginObserve, install } from './Basics/Observer';
 // import { FindModalController } from './Controller/FindModalController';
 // import { TextFinder } from './Domain';
@@ -76,7 +78,7 @@ export class FindPlugin extends Plugin<FindPluginObserve> {
     }
 
     initializeDependencies(sheetInjector: Injector) {
-        const dependencies: Dependency[] = [[FindController], [TextFinder], [FindModalController]];
+        const dependencies: Dependency[] = [[FindController], [TextFinder], [FindModalController], [FindService]];
 
         dependencies.forEach((d) => {
             sheetInjector.add(d);

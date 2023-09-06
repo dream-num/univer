@@ -8,6 +8,7 @@ import { INumfmtPluginConfig } from './Interfaces';
 import en from './Locale/en';
 import zh from './Locale/zh';
 import { NumfmtModel } from './Model';
+import { NumfmtService } from './services/numfmt.service';
 import { INumfmtPluginData } from './Symbol';
 
 export class NumfmtPlugin extends Plugin<NumfmtPluginObserve> {
@@ -82,7 +83,7 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve> {
         //     [NumfmtController],
         //     [NumfmtModalController],
         // ]);
-        const dependencies: Dependency[] = [[NumfmtController], [NumfmtModalController]];
+        const dependencies: Dependency[] = [[NumfmtController], [NumfmtModalController], [NumfmtService]];
         dependencies.forEach((d) => {
             sheetInjector.add(d);
         });

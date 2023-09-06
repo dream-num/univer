@@ -4,6 +4,8 @@ import { ICommandService, IPermissionService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { DEFAULT_DATA, MORE_FORMATS_SELECTIONS } from '../Basics/Const/DEFAULT_DATA';
+import { SetNumfmtRangeDataCommand } from '../commands/set-numfmt-range-data.command';
+import { ShowModalCommand } from '../commands/show-modal.command';
 
 export function NumfmtRangeDataMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const permissionService = accessor.get(IPermissionService);
@@ -11,8 +13,7 @@ export function NumfmtRangeDataMenuItemFactory(accessor: IAccessor): IMenuSelect
     const selectionManager = accessor.get(ISelectionManager);
 
     return {
-        // TODO replace with real command
-        id: 'SetNumfmtRangeDataCommand.id',
+        id: SetNumfmtRangeDataCommand.id,
         title: 'toolbar.moreFormats',
         tooltip: 'toolbar.moreFormats',
         selectType: SelectTypes.NEO,
@@ -64,11 +65,10 @@ export function OpenMoreFormatsModalMenuItemFactory(accessor: IAccessor): IMenuS
     const commandService = accessor.get(ICommandService);
     const selectionManager = accessor.get(ISelectionManager);
     return {
-        // TODO@Dushusir 1. replace with real command
         // 2. suffix
-        id: 'OpenMoreFormatsModalCommand.id',
+        id: ShowModalCommand.id,
         title: 'defaultFmt.CustomFormats.text',
-        positions: 'SetNumfmtRangeDataCommand.id',
+        positions: SetNumfmtRangeDataCommand.id,
         display: DisplayTypes.LABEL,
         selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,

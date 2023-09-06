@@ -162,14 +162,14 @@ export const DEFAULT_DATA = [
 export const MORE_FORMATS_SELECTIONS = [
     {
         label: 'format.moreCurrency',
-        value: 'MoreCurrency',
+        value: 'currency',
     },
     {
         label: 'format.moreDateTime',
-        value: 'MoreDateTime',
+        value: 'date',
     },
     {
         label: 'format.moreNumber',
-        value: 'MoreNumber',
+        value: 'number',
     },
 ];

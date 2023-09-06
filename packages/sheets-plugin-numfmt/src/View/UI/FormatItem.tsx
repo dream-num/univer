@@ -9,7 +9,6 @@ export interface BaseFormatItemProps extends BaseMenuItem {
     labelText?: string;
     suffix?: ComponentChildren;
     border?: boolean;
-    onValueChange: (v: string | number) => void;
 }
 
 function getLocale(context: Partial<AppContextValues>, name: string) {
@@ -20,11 +19,11 @@ function getLocale(context: Partial<AppContextValues>, name: string) {
  * FormatItem
  */
 export function FormatItem(props: BaseFormatItemProps): JSX.Element {
-    const { selected, labelText, suffix, disabled, value, onValueChange } = props;
+    const { selected, labelText, suffix, disabled, value } = props;
     const context = useContext(AppContext);
 
     return (
-        <div className={joinClassNames(styles.formatItem, disabled ? styles.selectDisabledItem : '')} onClick={() => onValueChange(value)}>
+        <div className={joinClassNames(styles.formatItem, disabled ? styles.selectDisabledItem : '')}>
             {selected && (
                 <span className={styles.formatItemSelected}>
                     <Icon.CorrectIcon />

@@ -6,6 +6,7 @@ import { OverImageRender } from './View/Render';
 import { IImagePluginData } from './Symbol';
 import { OVER_GRID_IMAGE_PLUGIN_NAME, IOverGridImagePluginConfig, IOverGridImageProperty, install } from './Basics';
 import { OverGridImageController, CellImageController } from './Controller';
+import { UploadService } from './services/upload.service';
 
 /**
  * TODO: 考虑加入单元格图片的情况，
@@ -48,7 +49,7 @@ export class ImagePlugin extends Plugin {
     }
 
     private _initializeDependencies(sheetInjector: Injector) {
-        const dependencies: Dependency[] = [[OverGridImageController], [CellImageController], [OverImageRender]];
+        const dependencies: Dependency[] = [[OverGridImageController], [CellImageController], [OverImageRender],[UploadService]];
         dependencies.forEach((d) => {
             sheetInjector.add(d);
         });

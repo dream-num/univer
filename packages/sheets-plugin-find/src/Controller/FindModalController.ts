@@ -1,6 +1,7 @@
 import { ComponentManager, SlotManager } from '@univerjs/base-ui';
 import { SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
+
 import { TextFinder } from '../Domain';
 import { FindModal } from '../View/UI/FindModal';
 

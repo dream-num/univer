@@ -23,9 +23,8 @@ export const ClearSelectionContentCommand: ICommand = {
             return false;
         }
 
-        const range = selections[0];
         const clearMutationParams: ISetRangeValuesMutationParams = {
-            rangeData: range,
+            rangeData: selections,
             worksheetId: worksheet.getSheetId(),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, clearMutationParams);

@@ -1,10 +1,11 @@
 import { ComponentChildren, ComponentManager } from '@univerjs/base-ui';
 import { LocaleService, ObserverManager } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { FormatContent } from '../View/UI/FormatContent';
-import { NUMBERFORMAT, NUMFMT_PLUGIN_NAME, CURRENCYDETAIL, DATEFMTLISG } from '../Basics';
-import { NumfmtModal } from '../View/UI/NumfmtModal';
+
+import { CURRENCYDETAIL, DATEFMTLISG, NUMBERFORMAT, NUMFMT_PLUGIN_NAME } from '../Basics/Const';
 import { INumfmtPluginData } from '../Symbol';
+import { FormatContent } from '../View/UI/FormatContent';
+import { NumfmtModal } from '../View/UI/NumfmtModal';
 
 interface GroupProps {
     locale: string;

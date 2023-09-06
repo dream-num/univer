@@ -1,10 +1,12 @@
-import { Inject, Injector } from '@wendellhu/redi';
-import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { RegisterManager } from '@univerjs/base-ui';
-import { zh, en } from './Locale';
+import { LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
+
 import { IMPORT_XLSX_PLUGIN_NAME } from './Basics';
-import { ImportXlsxController } from './Controller/ImportXlsxController';
 import { DragAndDropExtensionFactory } from './Basics/Register/DragAndDropExtension';
+import { ImportXlsxController } from './Controller/ImportXlsxController';
+import { en, zh } from './Locale';
+import { UploadService } from './services/upload.service';
 
 export interface IImportXlsxPluginConfig {}
 
@@ -36,6 +38,7 @@ export class ImportXlsxPlugin extends Plugin<any> {
         // this._importXlsxController = new ImportXlsxController(this);
         this._importXlsxController = this._injector.createInstance(ImportXlsxController);
         this._injector.add([ImportXlsxController, { useValue: this._importXlsxController }]);
+        this._injector.add([UploadService]);
 
         this.registerExtension();
     }

@@ -5,7 +5,6 @@ import { ShowModalCommand } from '../commands/show-modal.command';
 
 export function FindMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        // TODO@Dushusir find command trigger open modal
         id: ShowModalCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'SearchIcon',

@@ -5,7 +5,7 @@ import { FindService } from '../services/find.service';
 
 export const ShowModalCommand: ICommand = {
     id: 'find.command.show-modal',
-    type: CommandType.COMMAND,
+    type: CommandType.OPERATION,
     handler: async (accessor: IAccessor) => {
         const findService = accessor.get(FindService);
         findService.showModal(true);
@@ -14,7 +14,7 @@ export const ShowModalCommand: ICommand = {
 };
 export const HideModalCommand: ICommand = {
     id: 'find.command.hide-modal',
-    type: CommandType.COMMAND,
+    type: CommandType.OPERATION,
     handler: async (accessor: IAccessor) => {
         const findService = accessor.get(FindService);
         findService.showModal(false);

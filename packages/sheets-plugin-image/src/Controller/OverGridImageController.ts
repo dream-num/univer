@@ -1,76 +1,32 @@
-import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { BaseComponentRender, ComponentManager, Icon, IMenuService } from '@univerjs/base-ui';
-import { Command, CommandManager, Disposable, ICurrentUniverService, ObserverManager, Tools } from '@univerjs/core';
-import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
+import { Disposable, ICommandService } from '@univerjs/core';
+import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { FileSelected, IOverGridImageProperty, OVER_GRID_IMAGE_PLUGIN_NAME, OverGridImageBorderType } from '../Basics';
-import { AddOverGridImageAction, IAddOverGridImageActionData } from '../Model';
+import { IOverGridImageProperty } from '../Basics';
+import { UploadCommand } from '../commands/upload.command';
 import { IImagePluginData } from '../Symbol';
 import { ImportImageMenuItemFactory } from './menu';
 
 export class OverGridImageController extends Disposable {
     protected _render: BaseComponentRender;
 
-    protected _toolButton: IToolbarItemProps;
-
     constructor(
         @Inject(Injector) readonly _injector: Injector,
         @Inject(IImagePluginData) _imagePluginData: Map<string, IOverGridImageProperty>,
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
-        @Inject(CommandManager) private _commandManager: CommandManager,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(ObserverManager) private _observerManager: ObserverManager,
-        @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @ICommandService private readonly _commandService: ICommandService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IMenuService private readonly _menuService: IMenuService
     ) {
         super();
-        this._toolButton = {
-            name: OVER_GRID_IMAGE_PLUGIN_NAME,
-            label: '图片',
-            toolbarType: 1,
-            show: true,
-            tooltip: '导入图片',
-            onClick: () => {
-                const rowIndex = _selectionManager.getActiveRange()?.getRowIndex();
-                const columnIndex = _selectionManager.getActiveRange()?.getColumn();
-                const workbook = _currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-                FileSelected.chooseImage().then((file) => {
-                    const reader = new FileReader();
-                    const img = new Image();
-                    reader.readAsDataURL(file);
-                    reader.onload = () => {
-                        img.src = reader.result as string;
-                    };
-                    img.onload = () => {
-                        const action: IAddOverGridImageActionData = {
-                            actionName: AddOverGridImageAction.NAME,
-                            id: Tools.generateRandomId(),
-                            borderType: OverGridImageBorderType.SOLID,
-                            row: rowIndex || 1,
-                            column: columnIndex || 1,
-                            url: img.src,
-                            radius: 0,
-                            width: img.width,
-                            height: img.height,
-                            borderColor: '#000000',
-                            borderWidth: 1,
-                            sheetId: workbook.getActiveSheet().getSheetId(),
-                            injector: _injector,
-                        };
-                        const command = new Command({ WorkBookUnit: workbook }, action);
-                        this._commandManager.invoke(command);
-                    };
-                });
-            },
-        };
 
         this._componentManager.register('ImageIcon', Icon.View.ImageIcon);
-        // this._sheetContainerUIController.getToolbarController().addToolbarConfig(this._toolButton);
         const toolbar = this._sheetContainerUIController.getToolbarController();
         this._initializeContextMenu();
         toolbar.setToolbar();
+
+        [UploadCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _initializeContextMenu() {

@@ -1,88 +1,29 @@
-import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { BaseComponentRender, ComponentManager, IMenuService } from '@univerjs/base-ui';
 import {
     ACTION_NAMES as CORE_ACTION_NAME,
     Command,
     CommandManager,
     Disposable,
+    ICommandService,
     ICurrentUniverService,
     IRangeData,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     Range,
 } from '@univerjs/core';
-import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumfmtConfig } from '../Basics';
+import { NUMFMT_PLUGIN_NAME } from '../Basics/Const';
+import { SetNumfmtRangeDataCommand } from '../commands/set-numfmt-range-data.command';
+import { ShowModalCommand } from '../commands/show-modal.command';
 import { NumfmtModel } from '../Model';
 import { INumfmtPluginData } from '../Symbol';
 import { FormatItem } from '../View/UI/FormatItem';
-import styles from '../View/UI/index.module.less';
 import { NumfmtRangeDataMenuItemFactory, OpenMoreFormatsModalMenuItemFactory } from './menu';
 import { NumfmtModalController } from './NumfmtModalController';
 
-export class NumfmtController extends Disposable {
-    protected _numfmtList: IToolbarItemProps;
-
-    protected _render: BaseComponentRender;
-
-    constructor(
-        @Inject(ISelectionManager) private readonly _selectionManager: SelectionManager,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager,
-        @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
-        @Inject(ICurrentUniverService) private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(NumfmtModalController) private readonly _numfmtModalController: NumfmtModalController,
-        @IMenuService private readonly _menuService: IMenuService
-    ) {
-        // const executeFormatter = (type: string): void => {
-        //     const manager = this._sheetPlugin.getSelectionManager();
-        //     const workbook = this._plugin.getContext().getWorkBook();
-        //     const activeSheet = workbook.getActiveSheet();
-        //     const activeRange = manager.getActiveRangeList();
-        //     const cellMatrix = activeSheet.getCellMatrix();
-        //     if (activeRange == null) {
-        //         return;
-        //     }
-        //     // update cell data
-        //     activeRange.getRangeList().forEach((range) => {
-        //         let matrix = new ObjectMatrix<ICellData>();
-        //         Range.foreach(range, (row, col) => {
-        //             const cell = cellMatrix.getValue(row, col);
-        //             if (cell) {
-        //                 const formatter = numfmt(type);
-        //                 matrix.setValue(row, col, { v: cell.v, m: formatter(cell.v) });
-        //             }
-        //         });
-        //         const setRangeDataAction: ISetRangeDataActionData = {
-        //             sheetId: activeSheet.getSheetId(),
-        //             cellValue: matrix.getData(),
-        //             actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
-        //         };
-        //         const newSetRangeDataAction = ActionOperation.make<ISetRangeDataActionData>(setRangeDataAction).removeExtension().getAction();
-        //         const cmd = new Command({ WorkBookUnit: workbook }, newSetRangeDataAction);
-        //         workbook.getCommandManager().invoke(cmd);
-        //     });
-        //     // update numfmt data
-        //     activeRange.getRangeList().forEach((range) => {
-        //         let matrix = new ObjectMatrix();
-        //         Range.foreach(range, (row, col) => {
-        //             matrix.setValue(row, col, type);
-        //         });
-        //         const setNumfmtRangeDataAction = {
-        //             sheetId: activeSheet.getSheetId(),
-        //             actionName: ACTION_NAMES.SET_NUMFMT_RANGE_DATA_ACTION,
-        //             numfmtMatrix: matrix.getData(),
-        //         };
-        //         const cmd = new Command({ WorkBookUnit: workbook }, setNumfmtRangeDataAction);
-        //         cmd.invoke();
-        //     });
-        // };
-        super();
-        const CHILDREN_DATA = DEFAULT_DATA.map((item, index) => ({
+/**
+ *         const CHILDREN_DATA = DEFAULT_DATA.map((item, index) => ({
             onClick: () => {
                 switch (index) {
                     case 0: {
@@ -129,14 +70,17 @@ export class NumfmtController extends Disposable {
                         //executeFormatter('h:mm');
                         break;
                     }
+                    // eslint-disable-next-line no-magic-numbers
                     case 11: {
                         //executeFormatter('yyyy-mm-dd h:mm AM/PM');
                         break;
                     }
+                    // eslint-disable-next-line no-magic-numbers
                     case 12: {
                         //executeFormatter('yyyy-mm-dd h:mm');
                         break;
                     }
+                    // eslint-disable-next-line no-magic-numbers
                     case 13: {
                         break;
                     }
@@ -144,48 +88,27 @@ export class NumfmtController extends Disposable {
             },
             ...item,
         }));
-        this._numfmtList = {
-            name: NUMFMT_PLUGIN_NAME,
-            type: 0,
-            label: 'toolbar.moreFormats',
-            className: styles.customFormat,
-            show: NumfmtConfig.show,
-            border: true,
-            children: [
-                ...CHILDREN_DATA,
-                {
-                    label: 'defaultFmt.CustomFormats.text',
-                    suffix: { name: 'RightIcon' },
-                    className: styles.customFormatMore,
-                    children: [
-                        {
-                            label: 'format.moreCurrency',
-                            onClick: () => {
-                                this._numfmtModalController.showModal('currency', true);
-                            },
-                        },
-                        {
-                            label: 'format.moreDateTime',
-                            onClick: () => {
-                                this._numfmtModalController.showModal('date', true);
-                            },
-                        },
-                        {
-                            label: 'format.moreNumber',
-                            onClick: () => {
-                                this._numfmtModalController.showModal('number', true);
-                            },
-                        },
-                    ],
-                },
-            ],
-        };
-        // TODO@Dushusir remove this after refactoring to new toolbar
-        // this._sheetContainerUIController.getToolbarController().addToolbarConfig(this._numfmtList);
+ */
+export class NumfmtController extends Disposable {
+    protected _render: BaseComponentRender;
+
+    constructor(
+        @Inject(CommandManager) private readonly _commandManager: CommandManager,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
+        @Inject(ICurrentUniverService) private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(NumfmtModalController) private readonly _numfmtModalController: NumfmtModalController,
+        @IMenuService private readonly _menuService: IMenuService,
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
+        super();
 
         this._componentManager.register(NUMFMT_PLUGIN_NAME + FormatItem.name, FormatItem);
 
         this._initializeContextMenu();
+
+        [ShowModalCommand, SetNumfmtRangeDataCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {

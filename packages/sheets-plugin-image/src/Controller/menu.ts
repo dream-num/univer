@@ -1,10 +1,11 @@
 import { IMenuButtonItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { IAccessor } from '@wendellhu/redi';
 
+import { UploadCommand } from '../commands/upload.command';
+
 export function ImportImageMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        // TODO@Dushusir trigger image file select
-        id: 'ImportImageCommand.id',
+        id: UploadCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'ImageIcon',
         title: 'Image', // FIXME use translation

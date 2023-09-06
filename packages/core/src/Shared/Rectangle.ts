@@ -15,12 +15,7 @@ export class Rectangle implements IRangeData {
 
     constructor();
     constructor(rectangle: IRangeData);
-    constructor(
-        startRow: number,
-        startColumn: number,
-        endRow: number,
-        endColumn: number
-    );
+    constructor(startRow: number, startColumn: number, endRow: number, endColumn: number);
     constructor(...argument: any[]) {
         if (Tools.hasLength(argument, 0)) {
             this.startRow = 0;
@@ -50,12 +45,7 @@ export class Rectangle implements IRangeData {
     }
 
     static equals(src: IRangeData, target: IRangeData): boolean {
-        return (
-            src.endRow === target.endRow &&
-            src.endColumn === target.endColumn &&
-            src.startRow === target.startRow &&
-            src.startColumn === target.startColumn
-        );
+        return src.endRow === target.endRow && src.endColumn === target.endColumn && src.startRow === target.startRow && src.startColumn === target.startColumn;
     }
 
     static intersects(src: IRangeData, target: IRangeData): boolean {
@@ -69,21 +59,10 @@ export class Rectangle implements IRangeData {
         const incomingStartColumn = target.startColumn;
         const incomingEndColumn = target.endColumn;
 
-        const zx = Math.abs(
-            currentStartColumn +
-                currentEndColumn -
-                incomingStartColumn -
-                incomingEndColumn
-        );
-        const x =
-            Math.abs(currentStartColumn - currentEndColumn) +
-            Math.abs(incomingStartColumn - incomingEndColumn);
-        const zy = Math.abs(
-            currentStartRow + currentEndRow - incomingStartRow - incomingEndRow
-        );
-        const y =
-            Math.abs(currentStartRow - currentEndRow) +
-            Math.abs(incomingStartRow - incomingEndRow);
+        const zx = Math.abs(currentStartColumn + currentEndColumn - incomingStartColumn - incomingEndColumn);
+        const x = Math.abs(currentStartColumn - currentEndColumn) + Math.abs(incomingStartColumn - incomingEndColumn);
+        const zy = Math.abs(currentStartRow + currentEndRow - incomingStartRow - incomingEndRow);
+        const y = Math.abs(currentStartRow - currentEndRow) + Math.abs(incomingStartRow - incomingEndRow);
 
         return zx <= x && zy <= y;
     }
@@ -96,9 +75,7 @@ export class Rectangle implements IRangeData {
         const { startRow, startColumn, endRow, endColumn } = this;
         return new Rectangle(
             rectangle.startRow < this.startRow ? rectangle.startRow : startRow,
-            rectangle.startColumn < startColumn
-                ? rectangle.startColumn
-                : startColumn,
+            rectangle.startColumn < startColumn ? rectangle.startColumn : startColumn,
             rectangle.endRow > endRow ? rectangle.endRow : endRow,
             rectangle.endColumn > endColumn ? rectangle.endColumn : endColumn
         );

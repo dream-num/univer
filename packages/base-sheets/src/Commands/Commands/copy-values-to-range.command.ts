@@ -13,11 +13,9 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { ISetRangeFormattedValueMutationParams, SetRangeFormattedValueMutation, SetRangeFormattedValueUndoMutationFactory } from '../Mutations/set-range-formatted-value.mutation';
+import { ISelectionManager } from '../../Services/tokens';
 
 export interface ICopyValuesToRangeCommandParams {
-    workbookId: string;
-    worksheetId: string;
-    originRange: IRangeData;
     destinationRange: IRangeData;
 }
 
@@ -25,12 +23,19 @@ export const CopyValuesToRangeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.copy-values-to-range',
     handler: async (accessor: IAccessor, params: ICopyValuesToRangeCommandParams) => {
+        const selectionManager = accessor.get(ISelectionManager);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        const selections = selectionManager.getCurrentSelections();
+        if (!selections.length) return false;
+        const originRange = selections[0];
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
-        const handleResult = handleCopyRange(accessor, params.workbookId, params.worksheetId, params.originRange, params.destinationRange);
+        const handleResult = handleCopyRange(accessor, workbookId, worksheetId, originRange, params.destinationRange);
         if (!handleResult) return false;
         const value = handleResult[0];
         const range = handleResult[1];
@@ -38,14 +43,14 @@ export const CopyValuesToRangeCommand: ICommand = {
         value.forEach((row, r) =>
             row.forEach((cell, c) => {
                 cell = cell as ICellData;
-                cellValue.setValue(r + params.destinationRange.startRow, c + params.destinationRange.startColumn, cell?.v || '');
+                cellValue.setValue(r + range.startRow, c + range.startColumn, cell?.v || '');
             })
         );
 
         const setRangeFormattedValueMutationParams: ISetRangeFormattedValueMutationParams = {
             range: [range],
-            worksheetId: params.worksheetId,
-            workbookId: params.workbookId,
+            worksheetId,
+            workbookId,
             value: cellValue.getData(),
         };
 
@@ -63,7 +68,7 @@ export const CopyValuesToRangeCommand: ICommand = {
             });
             return true;
         }
-        return true;
+        return false;
     },
 };
 

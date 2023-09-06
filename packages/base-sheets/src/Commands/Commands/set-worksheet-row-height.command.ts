@@ -7,10 +7,7 @@ import { ISelectionManager } from '../../Services/tokens';
  * TODO@Dushusir 支持多个选区
  */
 export interface SetWorksheetRowHeightCommandParams {
-    workbookId?: string;
-    worksheetId?: string;
-    rowIndex?: number;
-    value: number | number[] | string | string[];
+    rowHeight: number;
 }
 
 export const SetWorksheetRowHeightCommand: ICommand = {
@@ -21,36 +18,18 @@ export const SetWorksheetRowHeightCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
+
         const selections = selectionManager.getCurrentSelections();
-        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-        const range = selections[0];
+        if (!selections.length) return false;
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
 
-        let { worksheetId, workbookId, rowIndex, value } = params;
-        if (!workbookId) {
-            workbookId = workbook.getUnitId();
-        }
 
-        if (!worksheetId) {
-            worksheetId = workbook.getActiveSheet().getSheetId();
-        }
-
-        if (!rowIndex) {
-            rowIndex = range.startRow;
-        }
-
-        if (!Array.isArray(value)) {
-            if (typeof value === 'object') {
-                value = 1;
-            }
-            value = new Array(range.endRow - range.startRow + 1).fill(value);
-        }
-
-        value = value.map((v) => (typeof v === 'string' ? parseInt(v, 10) : v));
         const redoMutationParams: ISetWorksheetRowHeightMutationParams = {
             worksheetId,
             workbookId,
-            rowIndex,
-            rowHeight: value as number[],
+            ranges: selections,
+            rowHeight: params.rowHeight,
         };
         const undoMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(SetWorksheetRowHeightMutation.id, redoMutationParams);

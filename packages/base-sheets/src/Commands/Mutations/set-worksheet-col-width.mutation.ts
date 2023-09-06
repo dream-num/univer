@@ -1,11 +1,11 @@
-import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, IRangeData, ObjectArray } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetColWidthMutationParams {
     workbookId: string;
     worksheetId: string;
-    colIndex: number;
-    colWidth: number[];
+    ranges: IRangeData[];
+    colWidth: number | ObjectArray<number>;
 }
 
 export const SetWorksheetColWidthMutationFactory = (accessor: IAccessor, params: ISetWorksheetColWidthMutationParams): ISetWorksheetColWidthMutationParams => {
@@ -16,18 +16,26 @@ export const SetWorksheetColWidthMutationFactory = (accessor: IAccessor, params:
         throw new Error('universheet is null error!');
     }
 
-    const manager = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getColumnManager();
-    const colWidth = [];
-    for (let i = params.colIndex; i < params.colIndex + params.colWidth.length; i++) {
-        const column = manager.getColumnOrCreate(i);
-        colWidth[i - params.colIndex] = column.w;
+    const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+    if (worksheet == null) {
+        throw new Error('universheet is null error!');
+    }
+    const colWidth = new ObjectArray<number>();
+    const manager = worksheet.getColumnManager();
+    const ranges = params.ranges;
+    for (let i = 0; i < ranges.length; i++) {
+        const range = ranges[i];
+        for (let j = range.startColumn; j < range.endColumn + 1; j++) {
+            const column = manager.getColumnOrCreate(i);
+            colWidth.set(j, column.w);
+        }
     }
 
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
-        colIndex: params.colIndex,
-        colWidth: params.colWidth,
+        ranges: params.ranges,
+        colWidth,
     };
 };
 
@@ -42,11 +50,23 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
             throw new Error('universheet is null error!');
         }
 
-        const manager = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getColumnManager();
-        for (let i = params.colIndex; i < params.colIndex + params.colWidth.length; i++) {
-            const column = manager.getColumnOrCreate(i);
-            column.w = params.colWidth[i - params.colIndex];
+        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+        if (!worksheet) return false;
+        const defaultColumnWidth = worksheet.getConfig().defaultColumnWidth;
+        const manager = worksheet.getColumnManager();
+        const ranges = params.ranges;
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
+            for (let j = range.startColumn; j < range.endColumn + 1; j++) {
+                const column = manager.getColumnOrCreate(i);
+                if (typeof params.colWidth === 'number') {
+                    column.w = params.colWidth;
+                } else {
+                    column.w = params.colWidth.get(j) ?? defaultColumnWidth;
+                }
+            }
         }
+
         return true;
     },
 };

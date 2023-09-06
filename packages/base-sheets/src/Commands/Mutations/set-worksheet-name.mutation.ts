@@ -36,7 +36,7 @@ export const SetWorksheetNameMutation: IMutation<ISetWorksheetNameMutationParams
             return false;
         }
 
-        worksheet.setName(params.name);
+        worksheet.getConfig().name = params.name;
         return true;
     },
 };

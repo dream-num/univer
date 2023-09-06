@@ -1,11 +1,11 @@
-import { CommandType, ICellData, ICommand, ICommandService, IRangeData, IUndoRedoService, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '@univerjs/core';
+import { CommandType, ICellData, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
+import { ISelectionManager } from '../../Services/tokens';
 
 export interface ISetRangeValuesCommandParams {
-    worksheetId: string;
-    workbookId: string;
-    range: IRangeData;
+    worksheetId?: string;
+    workbookId?: string;
     value: ICellData | ICellData[][] | ObjectMatrixPrimitiveType<ICellData>;
 }
 
@@ -18,21 +18,33 @@ export const SetRangeValuesCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const selectionManager = accessor.get(ISelectionManager);
 
-        const { range, value, workbookId, worksheetId } = params;
-        const { startRow, startColumn, endRow, endColumn } = range;
+        const range = selectionManager.getCurrentSelections();
+        if (!range.length) {
+            return false;
+        }
+
+        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+
+        const { value } = params;
         let cellValue = new ObjectMatrix<ICellData>();
 
-        if (Tools.isArray(value)) {
-            for (let r = 0; r <= endRow - startRow; r++) {
-                for (let c = 0; c <= endColumn - startColumn; c++) {
-                    cellValue.setValue(r + startRow, c + startColumn, value[r][c]);
+        for (let i = 0; i < range.length; i++) {
+            const { startRow, startColumn, endRow, endColumn } = range[i];
+            if (Tools.isArray(value)) {
+                for (let r = 0; r <= endRow - startRow; r++) {
+                    for (let c = 0; c <= endColumn - startColumn; c++) {
+                        cellValue.setValue(r + startRow, c + startColumn, value[r][c]);
+                    }
                 }
+            } else if (Tools.isObject(value)) {
+                cellValue = value as ObjectMatrix<ICellData>;
+            } else {
+                cellValue.setValue(startRow, startColumn, value);
             }
-        } else if (Tools.isObject(value)) {
-            cellValue = value as ObjectMatrix<ICellData>;
-        } else {
-            cellValue.setValue(startRow, startColumn, value);
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {

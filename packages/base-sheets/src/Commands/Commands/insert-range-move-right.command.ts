@@ -1,16 +1,10 @@
 import { IAccessor } from '@wendellhu/redi';
-import { CommandType, Dimension, ICellData, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
+import { CommandType, Dimension, ICellData, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
 
 import { DeleteRangeMutation } from '../Mutations/delete-range.mutation';
 import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../Mutations/insert-range.mutation';
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
-
-export interface IInsertRangeMoveRightParams {
-    workbookId: string;
-    worksheetId: string;
-    range: IRangeData;
-    destination?: IRangeData;
-}
+import { ISelectionManager } from '../../Services/tokens';
 
 /**
  * The command to insert range.
@@ -19,33 +13,26 @@ export const InsertRangeMoveRightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-range-move-right',
 
-    handler: async (accessor: IAccessor, params: IInsertRangeMoveRightParams) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
+    handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const selectionManager = accessor.get(ISelectionManager);
 
-        const { destination, workbookId, worksheetId, range } = params;
-        let rangeData: IRangeData = range;
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const range = selectionManager.getCurrentSelections();
+        if (!range.length) return false;
+
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        if (!worksheet) return false;
+
         const cellValue = new ObjectMatrix<ICellData>();
-        const { startRow, endRow, startColumn, endColumn } = range;
-        if (destination) {
-            const worksheet = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook().getSheetBySheetId(worksheetId);
-            if (!worksheet) return false;
-            const sheetMatrix = worksheet.getCellMatrix();
+        for (let i = 0; i < range.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = range[i];
 
-            for (let r = startRow; r <= endRow; r++) {
-                for (let c = startColumn; c <= endColumn; c++) {
-                    cellValue.setValue(r - startRow, c - startColumn, sheetMatrix.getValue(r, c) || {});
-                }
-            }
-
-            rangeData = {
-                startRow,
-                endRow: startRow + destination.endRow - destination.startRow,
-                startColumn,
-                endColumn: startRow + destination.endColumn - destination.startColumn,
-            };
-        } else {
             for (let r = startRow; r <= endRow; r++) {
                 for (let c = startColumn; c <= endColumn; c++) {
                     cellValue.setValue(r, c, { m: '', v: '' });
@@ -54,7 +41,7 @@ export const InsertRangeMoveRightCommand: ICommand = {
         }
 
         const insertRangeMutationParams: IInsertRangeMutationParams = {
-            range: rangeData,
+            range,
             worksheetId,
             workbookId,
             shiftDimension: Dimension.COLUMNS,

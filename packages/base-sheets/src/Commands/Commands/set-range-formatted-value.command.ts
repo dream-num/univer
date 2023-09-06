@@ -1,13 +1,11 @@
 import { IAccessor } from '@wendellhu/redi';
-import { CommandType, ICellV, ICommand, ICommandService, IRangeData, IUndoRedoService, ObjectMatrix, Tools } from '@univerjs/core';
+import { CommandType, ICellV, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix, Tools } from '@univerjs/core';
 
 import { ISetRangeFormattedValueMutationParams, SetRangeFormattedValueMutation, SetRangeFormattedValueUndoMutationFactory } from '../Mutations/set-range-formatted-value.mutation';
+import { ISelectionManager } from '../../Services/tokens';
 
 export interface ISetRangeFormattedValueParams {
-    range: IRangeData[];
     value: ICellV | ICellV[][] | ObjectMatrix<ICellV>;
-    workbookId: string;
-    worksheetId: string;
 }
 
 /**
@@ -20,11 +18,26 @@ export const SetRangeFormattedValueCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ISetRangeFormattedValueParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const selectionManager = accessor.get(ISelectionManager);
+
+        const ranges = selectionManager.getCurrentSelections();
+        if (!ranges.length) {
+            return false;
+        }
+
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        if (!worksheet) return false;
 
         let cellValue = new ObjectMatrix<ICellV>();
         const value = params.value;
-        for (let i = 0; i < params.range.length; i++) {
-            const rangeData = params.range[i];
+        for (let i = 0; i < ranges.length; i++) {
+            const rangeData = ranges[i];
             const { startRow, startColumn, endRow, endColumn } = rangeData;
             if (Tools.isArray(value)) {
                 for (let r = 0; r <= endRow - startRow; r++) {
@@ -44,9 +57,9 @@ export const SetRangeFormattedValueCommand: ICommand = {
         }
 
         const setRangeFormattedValueMutationParams: ISetRangeFormattedValueMutationParams = {
-            range: params.range,
-            worksheetId: params.worksheetId,
-            workbookId: params.workbookId,
+            range: ranges,
+            worksheetId,
+            workbookId,
             value: cellValue.getData(),
         };
 

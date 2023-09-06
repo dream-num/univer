@@ -13,7 +13,7 @@ export const AddWorksheetMergeMutationFactory = (accessor: IAccessor, params: IA
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
-        rectangles: params.rectangles,
+        ranges: params.ranges,
     };
 };
 
@@ -30,7 +30,7 @@ export const AddWorksheetMergeMutation: IMutation<IAddWorksheetMergeMutationPara
 
         const config = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)?.getConfig()!;
         const mergeConfigData = config.mergeData;
-        const mergeAppendData = params.rectangles;
+        const mergeAppendData = params.ranges;
         for (let i = 0; i < mergeAppendData.length; i++) {
             mergeConfigData.push(mergeAppendData[i]);
         }

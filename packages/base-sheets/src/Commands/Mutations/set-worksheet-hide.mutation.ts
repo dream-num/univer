@@ -7,7 +7,7 @@ export interface ISetWorksheetHideMutationParams {
     worksheetId: string;
 }
 
-export const SetWorksheetHideMutationFactory = (accessor: IAccessor, params: ISetWorksheetHideMutationParams): ISetWorksheetHiddenMutationParams => {
+export const SetWorksheetHideMutationFactory = (accessor: IAccessor, params: ISetWorksheetHideMutationParams): ISetWorksheetHideMutationParams => {
     const universheet = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance();
     const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
     if (worksheet == null) {

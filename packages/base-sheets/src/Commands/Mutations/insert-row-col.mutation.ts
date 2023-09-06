@@ -13,8 +13,7 @@ export const InsertRowMutationFactory = (accessor: IAccessor, params: IInsertRow
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
-        rowIndex: params.rowIndex,
-        rowCount: params.rowCount,
+        ranges: params.ranges,
     };
 };
 
@@ -30,18 +29,38 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
         }
 
         const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
-        const manager = worksheet!.getRowManager();
+
+        if (worksheet == null) {
+            throw new Error('worksheet is null error!');
+        }
+
+        const manager = worksheet.getRowManager();
         const rowPrimitive = manager.getRowData().toJSON();
         const rowWrapper = new ObjectArray(rowPrimitive);
-        rowWrapper.inserts(params.rowIndex, new ObjectArray(params.rowCount));
+        const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
 
-        const cellPrimitive = worksheet!.getCellMatrix().toJSON();
-        const cellWrapper = new ObjectMatrix(cellPrimitive);
-        if (params.insertRowData == null) {
-            cellWrapper.insertRowCount(params.rowIndex, params.rowCount);
-        } else {
-            cellWrapper.insertRows(params.rowIndex, new ObjectMatrix(params.insertRowData));
+        for (let i = 0; i < params.ranges.length; i++) {
+            const range = params.ranges[i];
+            const rowIndex = range.startRow;
+            const rowCount = range.endRow - range.startRow + 1;
+
+            if (params.rowInfo) {
+                for (let j = rowIndex; j < rowIndex + rowCount; j++) {
+                    const defaultRowInfo = {
+                        h: defaultRowHeight,
+                        hd: 0,
+                    };
+                    rowWrapper.insert(j, params.rowInfo.get(j) ?? defaultRowInfo);
+                }
+            } else {
+                rowWrapper.inserts(rowIndex, new ObjectArray(rowCount));
+            }
+
+            const cellPrimitive = worksheet!.getCellMatrix().toJSON();
+            const cellWrapper = new ObjectMatrix(cellPrimitive);
+            cellWrapper.insertRowCount(rowIndex, rowCount);
         }
+
         return true;
     },
 };
@@ -57,8 +76,7 @@ export const InsertColMutationFactory = (accessor: IAccessor, params: IInsertCol
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
-        colIndex: params.colIndex,
-        colCount: params.colCount,
+        ranges: params.ranges,
     };
 };
 
@@ -74,18 +92,34 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
         }
 
         const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
-        const manager = worksheet!.getColumnManager();
+        if (!worksheet) return false;
+        const manager = worksheet.getColumnManager();
         const columnPrimitive = manager.getColumnData().toJSON();
         const columnWrapper = new ObjectArray(columnPrimitive);
-        columnWrapper.inserts(params.colIndex, new ObjectArray(params.colCount));
 
-        const cellPrimitive = worksheet!.getCellMatrix().toJSON();
-        const cellWrapper = new ObjectMatrix(cellPrimitive);
-        if (params.insertColData == null) {
-            cellWrapper.insertColumnCount(params.colIndex, params.colCount);
-        } else {
-            cellWrapper.insertColumns(params.colIndex, new ObjectMatrix(params.insertColData));
+        for (let i = 0; i < params.ranges.length; i++) {
+            const range = params.ranges[i];
+            const colIndex = range.startColumn;
+            const colCount = range.endColumn - range.startColumn + 1;
+            const defaultColWidth = worksheet.getConfig().defaultColumnWidth;
+
+            if (params.colInfo) {
+                for (let j = colIndex; j < colIndex + colCount; j++) {
+                    const defaultColInfo = {
+                        w: defaultColWidth,
+                        hd: 0,
+                    };
+                    columnWrapper.insert(j, params.colInfo.get(j) ?? defaultColInfo);
+                }
+            } else {
+                columnWrapper.inserts(colIndex, new ObjectArray(colCount));
+            }
+
+            const cellPrimitive = worksheet!.getCellMatrix().toJSON();
+            const cellWrapper = new ObjectMatrix(cellPrimitive);
+            cellWrapper.insertColumnCount(colIndex, colCount);
         }
+
         return true;
     },
 };

@@ -9,12 +9,12 @@ import { DefaultRightMenuConfig, SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
 import styles from '../View/RightMenu/index.module.less';
 import {
-    ClearSelectionMenuItemFactory,
-    DeleteRangeMenuItemFactory,
-    DeleteRangeMoveLeftMenuItemFactory,
-    DeleteRangeMoveUpMenuItemFactory,
-    InsertColMenuItemFactory,
-    InsertRowMenuItemFactory,
+    // ClearSelectionMenuItemFactory,
+    // DeleteRangeMenuItemFactory,
+    // DeleteRangeMoveLeftMenuItemFactory,
+    // DeleteRangeMoveUpMenuItemFactory,
+    // InsertColMenuItemFactory,
+    // InsertRowMenuItemFactory,
     RemoveColMenuItemFactory,
     RemoveRowMenuItemFactory,
     SetColWidthMenuItemFactory,
@@ -305,20 +305,18 @@ export class RightMenuUIController extends Disposable {
     }
 
     private _initializeContextMenu() {
-        (
-            [
-                ClearSelectionMenuItemFactory,
-                InsertRowMenuItemFactory,
-                InsertColMenuItemFactory,
-                RemoveRowMenuItemFactory,
-                RemoveColMenuItemFactory,
-                SetRowHeightMenuItemFactory,
-                SetColWidthMenuItemFactory,
-                DeleteRangeMenuItemFactory,
-                DeleteRangeMoveLeftMenuItemFactory,
-                DeleteRangeMoveUpMenuItemFactory,
-            ] as IMenuItemFactory[]
-        ).forEach((factory) => {
+        [
+            // ClearSelectionMenuItemFactory,
+            // InsertRowMenuItemFactory,
+            // InsertColMenuItemFactory,
+            RemoveRowMenuItemFactory,
+            RemoveColMenuItemFactory,
+            SetRowHeightMenuItemFactory,
+            SetColWidthMenuItemFactory,
+            // DeleteRangeMenuItemFactory,
+            // DeleteRangeMoveLeftMenuItemFactory,
+            // DeleteRangeMoveUpMenuItemFactory,
+        ].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

@@ -6,7 +6,7 @@ export interface ISetWorksheetActivateMutationParams {
     worksheetId: string;
 }
 
-export const SetWorksheetActivateMutationFactory = (accessor: IAccessor, params: ISetWorksheetActivateMutationParams): ISetWorksheetActivateMutationParams => {
+export const SetWorksheetUnActivateMutationFactory = (accessor: IAccessor, params: ISetWorksheetActivateMutationParams): ISetWorksheetActivateMutationParams => {
     const universheet = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
 
     if (universheet == null) {
@@ -39,17 +39,15 @@ export const SetWorksheetActivateMutation: IMutation<ISetWorksheetActivateMutati
     handler: async (accessor, params) => {
         const universheet = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
 
-        if (universheet == null) {
-            return false;
-        }
+        if (!universheet) return false;
 
         const worksheets = universheet.getWorkBook().getWorksheets();
 
         for (const [, worksheet] of worksheets) {
             if (worksheet.getSheetId() === params.worksheetId) {
-                worksheet.setStatus(BooleanNumber.TRUE);
+                worksheet.getConfig().status = BooleanNumber.TRUE;
             } else {
-                worksheet.setStatus(BooleanNumber.FALSE);
+                worksheet.getConfig().status = BooleanNumber.FALSE;
             }
         }
 

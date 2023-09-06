@@ -1,15 +1,10 @@
 import { IAccessor } from '@wendellhu/redi';
-import { CommandType, Dimension, ICommand, ICommandService, IRangeData, IUndoRedoService } from '@univerjs/core';
+import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, Nullable } from '@univerjs/core';
 
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../Mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../Mutations/insert-range.mutation';
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
-
-export interface IDeleteRangeMoveLeftParams {
-    workbookId: string;
-    worksheetId: string;
-    range: IRangeData;
-}
+import { ISelectionManager } from '../../Services/tokens';
 
 /**
  * The command to delete range.
@@ -18,10 +13,21 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.delete-range-move-left',
 
-    handler: async (accessor: IAccessor, params: IDeleteRangeMoveLeftParams) => {
+    handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const { range, workbookId, worksheetId } = params;
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const selectionManager = accessor.get(ISelectionManager);
+
+        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const range = selectionManager.getCurrentSelections();
+        if (!range.length) return false;
+
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        if (!worksheet) return false;
 
         const deleteRangeMutationParams: IDeleteRangeMutationParams = {
             range,
@@ -30,7 +36,8 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
             shiftDimension: Dimension.COLUMNS,
         };
 
-        const insertRangeMutationParams: IInsertRangeMutationParams = DeleteRangeUndoMutationFactory(accessor, deleteRangeMutationParams);
+        const insertRangeMutationParams: Nullable<IInsertRangeMutationParams> = DeleteRangeUndoMutationFactory(accessor, deleteRangeMutationParams);
+        if (!insertRangeMutationParams) return false;
 
         // execute do mutations and add undo mutations to undo stack if completed
         const result = commandService.executeCommand(DeleteRangeMutation.id, deleteRangeMutationParams);

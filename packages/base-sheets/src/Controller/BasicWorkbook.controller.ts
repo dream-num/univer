@@ -13,10 +13,7 @@ export class BasicWorkbookController extends Disposable implements IDisposable {
     constructor(@ICommandService private readonly _commandService: ICommandService, @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager) {
         super();
 
-        this.disposeWithMe(_commandService.registerCommand(InsertSheetCommand));
-        this.disposeWithMe(_commandService.registerCommand(InsertSheetMutation));
-        this.disposeWithMe(_commandService.registerCommand(RemoveSheetCommand));
-        this.disposeWithMe(_commandService.registerCommand(RemoveSheetMutation));
+        [InsertSheetCommand, InsertSheetMutation, RemoveSheetCommand, RemoveSheetMutation].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     onInitialize() {}

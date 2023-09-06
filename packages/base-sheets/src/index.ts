@@ -86,3 +86,8 @@ export { SetWorksheetHideCommand } from './Commands/Commands/set-worksheet-hide.
 export { SetWorksheetRowHideCommand } from './Commands/Commands/set-worksheet-row-hide.command';
 export { SetWorksheetRowShowCommand } from './Commands/Commands/set-worksheet-row-show.command';
 export { SetWorksheetShowCommand } from './Commands/Commands/set-worksheet-show.command';
+export { SetTabColorMutation } from './Commands/Mutations/set-tab-color.mutation';
+export { SetWorksheetActivateMutation } from './Commands/Mutations/set-worksheet-activate.mutation';
+export { SetWorksheetHideMutation } from './Commands/Mutations/set-worksheet-hide.mutation';
+export { SetWorksheetNameMutation } from './Commands/Mutations/set-worksheet-name.mutation';
+export { SetWorksheetOrderMutation } from './Commands/Mutations/set-worksheet-order.mutation';

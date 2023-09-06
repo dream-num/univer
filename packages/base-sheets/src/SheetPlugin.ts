@@ -103,6 +103,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         // this._hideColumnController = this._injector.get(HideColumnController);
 
         this._injector.get(BasicWorksheetController);
+        this._injector.get(BasicWorkbookController);
     }
 
     initCanvasView() {

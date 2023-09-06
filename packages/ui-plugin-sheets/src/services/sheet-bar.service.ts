@@ -1,0 +1,11 @@
+import { Inject } from '@wendellhu/redi';
+
+import { SheetBarUIController } from '../Controller/SheetBarUIContruller';
+
+export class SheetBarService {
+    constructor(@Inject(SheetBarUIController) private _sheetBarUIController: SheetBarUIController) {}
+
+    showMenuList(show: boolean) {
+        this._sheetBarUIController.showMenuList(show);
+    }
+}

@@ -1,9 +1,20 @@
-import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActivateCommand, SetWorksheetOrderCommand } from '@univerjs/base-sheets';
+import {
+    InsertSheetMutation,
+    RemoveSheetMutation,
+    SetTabColorMutation,
+    SetWorksheetActivateCommand,
+    SetWorksheetActivateMutation,
+    SetWorksheetHideMutation,
+    SetWorksheetNameMutation,
+    SetWorksheetOrderCommand,
+    SetWorksheetOrderMutation,
+} from '@univerjs/base-sheets';
 import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuService } from '@univerjs/base-ui';
 import { Disposable, ICommandService, ICurrentUniverService, Nullable, ObserverManager, UIObserver } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
+import { ShowMenuListCommand } from '../commands/unhide.command';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
 import { ISheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
@@ -119,6 +130,11 @@ export class SheetBarUIController extends Disposable {
                 switch (id) {
                     case InsertSheetMutation.id:
                     case RemoveSheetMutation.id:
+                    case SetWorksheetOrderMutation.id:
+                    case SetWorksheetActivateMutation.id:
+                    case SetWorksheetNameMutation.id:
+                    case SetTabColorMutation.id:
+                    case SetWorksheetHideMutation.id:
                         // update data;
                         this._refreshSheetData();
                         // set ui bar sheetList;
@@ -133,6 +149,8 @@ export class SheetBarUIController extends Disposable {
         );
 
         this._componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
+
+        [ShowMenuListCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     getComponent = (ref: SheetBar) => {
@@ -223,6 +241,10 @@ export class SheetBarUIController extends Disposable {
             }
         });
     };
+
+    showMenuList(show: boolean) {
+        this._sheetBar.showMenuList(show);
+    }
 
     protected _refreshSheetBarUI(): void {
         this._sheetBar.setValue({

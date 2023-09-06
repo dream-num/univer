@@ -31,7 +31,6 @@ import {
     SetWorksheetRowHeightCommand,
     SetWorksheetRowHideCommand,
     SetWorksheetRowShowCommand,
-    SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
 import { ISetHorizontalTextAlignCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams } from '@univerjs/base-sheets/src/Commands/Commands/set-style.command';
 import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
@@ -52,6 +51,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
+import { ShowMenuListCommand } from '../commands/unhide.command';
 import { RightMenuInput } from '../View';
 import { FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, HORIZONTAL_ALIGN_CHILDREN, TEXT_ROTATE_CHILDREN, TEXT_WRAP_CHILDREN, VERTICAL_ALIGN_CHILDREN } from '../View/Toolbar/Const';
 
@@ -752,7 +752,6 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
 export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        // TODO@Dushusir use real command id
         id: CopySheetCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
@@ -776,7 +775,6 @@ export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     };
 }
 
-// TODO@Dushusir add command
 export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: SetTabColorCommand.id,
@@ -805,7 +803,7 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 // TODO@Dushusir use show worksheet command
 export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: SetWorksheetShowCommand.id,
+        id: ShowMenuListCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',

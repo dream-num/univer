@@ -166,6 +166,11 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         this.props.getComponent?.(this);
     }
 
+    // Convenient for controller to control sheetBarMenu
+    showMenuList(show: boolean) {
+        this.ref.current.showMenu(show);
+    }
+
     render(props: BaseSheetBarProps, state: SheetState) {
         const { sheetList, menuList, sheetUl } = state;
         const { addSheet, selectSheet } = this.props;

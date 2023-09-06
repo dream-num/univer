@@ -1,28 +1,30 @@
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
-import { Plugin, Tools, PluginType, LocaleService, IUndoRedoService } from '@univerjs/core';
+import { IRenderingEngine } from '@univerjs/base-render';
 import {
     ComponentManager,
-    getRefElement,
-    KeyboardManager,
-    SlotComponent,
-    ZIndexManager,
-    SlotManager,
-    DragManager,
-    IShortcutService,
-    DesktopShortcutService,
-    SharedController,
-    IPlatformService,
-    DesktopPlatformService,
-    IMenuService,
     DesktopMenuService,
+    DesktopPlatformService,
+    DesktopShortcutService,
+    DragManager,
+    getRefElement,
+    IMenuService,
+    IPlatformService,
+    IShortcutService,
+    KeyboardManager,
+    SharedController,
+    SlotComponent,
+    SlotManager,
+    ZIndexManager,
 } from '@univerjs/base-ui';
-import { IRenderingEngine } from '@univerjs/base-render';
-import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPluginObserve, SHEET_UI_PLUGIN_NAME } from './Basics';
+import { IUndoRedoService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
+
+import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SHEET_UI_PLUGIN_NAME, SheetUIPluginObserve } from './Basics';
 import { AppUIController } from './Controller/AppUIController';
-import { Fx } from './View/FormulaBar';
-import { SlotComponentProps } from './Controller/SlotController';
-import { zh, en } from './Locale';
 import { DesktopSheetShortcutController } from './Controller/shortcut.controller';
+import { SlotComponentProps } from './Controller/SlotController';
+import { en, zh } from './Locale';
+import { SheetBarService } from './services/sheet-bar.service';
+import { Fx } from './View/FormulaBar';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     static override type = PluginType.Sheet;
@@ -156,6 +158,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
             [SharedController],
             [IMenuService, { useClass: DesktopMenuService }],
             [DesktopSheetShortcutController],
+            [SheetBarService],
         ];
         dependencies.forEach((d) => this._injector.add(d));
 

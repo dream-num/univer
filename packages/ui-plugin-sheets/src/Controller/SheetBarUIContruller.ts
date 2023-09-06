@@ -1,23 +1,6 @@
 import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActivateCommand, SetWorksheetOrderCommand } from '@univerjs/base-sheets';
 import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuService } from '@univerjs/base-ui';
-import {
-    CommandManager,
-    Disposable,
-    ICommandService,
-    ICurrentUniverService,
-    InsertSheetAction,
-    Nullable,
-    ObserverManager,
-    RemoveSheetAction,
-    SetSheetOrderAction,
-    SetTabColorAction,
-    SetWorkSheetActivateAction,
-    SetWorkSheetHideAction,
-    SetWorkSheetNameAction,
-    SetWorkSheetStatusAction,
-    SheetActionBase,
-    UIObserver,
-} from '@univerjs/core';
+import { CommandManager, Disposable, ICommandService, ICurrentUniverService, Nullable, ObserverManager, SheetActionBase, UIObserver } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
@@ -165,24 +148,6 @@ export class SheetBarUIController extends Disposable {
             const unitId = workbook.getUnitId();
             const currentWorkbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
             const currentUnitId = currentWorkbook.getUnitId();
-            if (unitId === currentUnitId) {
-                switch (data.actionName) {
-                    case SetSheetOrderAction.NAME:
-                    case SetWorkSheetActivateAction.NAME:
-                    case InsertSheetAction.NAME:
-                    case RemoveSheetAction.NAME:
-                    case SetWorkSheetNameAction.NAME:
-                    case SetTabColorAction.NAME:
-                    case SetWorkSheetStatusAction.NAME:
-                    case SetWorkSheetHideAction.NAME: {
-                        // update data;
-                        this._refreshSheetData();
-                        // set ui bar sheetList;
-                        this._refreshSheetBarUI();
-                        break;
-                    }
-                }
-            }
         });
 
         this._componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);

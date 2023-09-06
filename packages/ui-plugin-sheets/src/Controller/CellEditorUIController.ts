@@ -1,10 +1,9 @@
-import { Inject, SkipSelf } from '@wendellhu/redi';
-
-import { RefObject } from 'preact';
-import { IPointerEvent, IMouseEvent, IRenderingEngine, Engine } from '@univerjs/base-render';
+import { Engine, IMouseEvent, IPointerEvent, IRenderingEngine } from '@univerjs/base-render';
 import { CANVAS_VIEW_KEY, CanvasView, CellEditorController, ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { getRefElement, CellEditExtensionManager, $$, setLastCaretPosition, handleStringToStyle, handleDomToJson, isCtrlPressed, KeyboardManager } from '@univerjs/base-ui';
+import { $$, CellEditExtensionManager, getRefElement, handleDomToJson, handleStringToStyle, isCtrlPressed, KeyboardManager, setLastCaretPosition } from '@univerjs/base-ui';
 import { Direction, handleStyleToString, ICellData, isKeyPrintable, ObserverManager, Tools, UIObserver } from '@univerjs/core';
+import { Inject, SkipSelf } from '@wendellhu/redi';
+import { RefObject } from 'preact';
 
 import { RichText } from '../View/RichText';
 
@@ -181,7 +180,7 @@ export class CellEditorUIController {
         const value = handleDomToJson(this._richTextEditEle);
         const text = this._richTextEditEle.innerText;
 
-        let cell: ICellData = {};
+        const cell: ICellData = {};
 
         // get value
         if (typeof value === 'string') {

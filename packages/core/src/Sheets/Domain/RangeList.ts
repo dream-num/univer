@@ -1,6 +1,6 @@
 import { ICurrentUniverService } from '../../services/current.service';
 import { IRangeData, IRangeType } from '../../Types/Interfaces';
-import { Worksheet } from './Worksheet';
+import type { Worksheet } from './Worksheet';
 
 /**
  * A collection of one or more Range instances in the same sheet.
@@ -47,8 +47,6 @@ export class RangeList {
             console.error('Invalid range,default set startRow -1');
             return this;
         }
-
-        this._worksheet.getSelection().setSelection({ selection: this._rangeList });
 
         return this;
     }

@@ -1,6 +1,6 @@
 import { Nullable, Rectangle, Tuples } from '../../Shared';
 import { IRangeData } from '../../Types/Interfaces';
-import { Worksheet } from './Worksheet';
+import type { Worksheet } from './Worksheet';
 
 // NOTE: some methods are leaving here for future refactoring
 

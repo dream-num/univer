@@ -1,4 +1,5 @@
-import { Direction, IDocumentData, IRangeData, IStyleData, Nullable, ICellData, handleJsonToDom, ICurrentUniverService } from '@univerjs/core';
+import { Direction, handleJsonToDom, ICellData, ICurrentUniverService, IDocumentData, IRangeData, IStyleData, Nullable } from '@univerjs/core';
+
 import { ISelectionManager } from '../Services/tokens';
 import { SelectionManager } from './Selection';
 
@@ -54,7 +55,7 @@ export class CellEditorController {
         const { startRow, startColumn, endRow, endColumn } = this.currentEditRangeData;
         const range = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getRange(startRow, startColumn, endRow, endColumn);
 
-        range.setRangeData(cell);
+        // range.setRangeData(cell);
     }
 
     getSelectionValue(): string {
@@ -80,10 +81,10 @@ export class CellEditorController {
         if (!range) return;
 
         if (typeof value === 'string') {
-            range.setValue(value);
+            // range.setValue(value);
         }
         if (typeof value === 'object') {
-            range.setRangeData({ p: value });
+            // range.setRangeData({ p: value });
         }
     }
 

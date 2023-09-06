@@ -1,14 +1,14 @@
-import { Univer, LocaleType } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
-import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
-import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
+import { LocaleType, Univer } from '@univerjs/core';
 import { FindPlugin } from '@univerjs/sheets-plugin-find';
-import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
-import { OperationPlugin } from '@univerjs/sheets-plugin-operation';
+import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
+// import { OperationPlugin } from '@univerjs/sheets-plugin-operation';
 import { ImagePlugin } from '@univerjs/sheets-plugin-image';
+import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
+import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
+import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 
 // univer
 const univer = new Univer({
@@ -39,7 +39,7 @@ univer.registerPlugin(FindPlugin);
 univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
 univer.registerPlugin(ImportXlsxPlugin);
 univer.registerPlugin(ImagePlugin);
-univer.registerPlugin(OperationPlugin);
+// univer.registerPlugin(OperationPlugin);
 
 // use for console test
 declare global {

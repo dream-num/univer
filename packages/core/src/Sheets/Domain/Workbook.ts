@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injector } from '@wendellhu/redi';
 
-import { CommandManager } from '../../Command';
 import { ObserverManager } from '../../Observer';
 import { ICurrentUniverService } from '../../services/current.service';
 import { GenName, Nullable, Tools } from '../../Shared';
@@ -42,7 +41,6 @@ export class Workbook {
         workbookData: Partial<IWorkbookConfig> = {},
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(Injector) readonly _injector: Injector
     ) {

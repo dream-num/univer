@@ -1,22 +1,22 @@
-import { SelectionModel, ISelectionManager, SelectionManager, SelectionController } from '@univerjs/base-sheets';
-import {
-    Nullable,
-    IRemoveMergeActionData,
-    RemoveMergeAction,
-    IAddMergeActionData,
-    AddMergeAction,
-    IRangeData,
-    IActionData,
-    ObjectMatrix,
-    ICellData,
-    ISetRangeDataActionData,
-    ACTION_NAMES,
-    ISetColumnWidthActionData,
-    ISetRowHeightActionData,
-    SetRowHeightAction,
-    ICurrentUniverService,
-} from '@univerjs/core';
+import { ISelectionManager, SelectionController, SelectionManager, SelectionModel } from '@univerjs/base-sheets';
 import { handleTableMergeData } from '@univerjs/base-ui';
+import {
+    ACTION_NAMES,
+    // AddMergeAction,
+    IActionData,
+    // IAddMergeActionData,
+    ICellData,
+    ICurrentUniverService,
+    IRangeData,
+    // IRemoveMergeActionData,
+    // ISetColumnWidthActionData,
+    // ISetRangeDataActionData,
+    // ISetRowHeightActionData,
+    Nullable,
+    ObjectMatrix,
+    // RemoveMergeAction,
+    // SetRowHeightAction,
+} from '@univerjs/core';
 
 export interface PasteType {
     type: string;

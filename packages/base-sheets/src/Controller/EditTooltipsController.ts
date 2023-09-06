@@ -1,8 +1,8 @@
-import { CommandManager, ICurrentUniverService, SetWorkSheetActivateAction } from '@univerjs/core';
 import { Engine, IRenderingEngine, Layer } from '@univerjs/base-render';
+import { CommandManager, ICurrentUniverService, SetWorkSheetActivateAction } from '@univerjs/core';
 
-import { EditTooltips, EditTooltipsProps } from '../View/Views';
 import { CANVAS_VIEW_KEY } from '../View';
+import { EditTooltips, EditTooltipsProps } from '../View/Views';
 
 export class EditTooltipsController {
     _editTooltipsPage: Map<string, Map<string, EditTooltips>>;

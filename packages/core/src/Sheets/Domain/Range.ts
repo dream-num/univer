@@ -3,7 +3,7 @@ import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../../
 import { DEFAULT_RANGE, DEFAULT_STYLES } from '../../Types/Const';
 import { BooleanNumber, Dimension, Direction, FontItalic, FontWeight, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../Types/Enum';
 import { IBorderData, ICellData, IDocumentData, IRangeData, IRangeType, IStyleData, ITextDecoration } from '../../Types/Interfaces';
-import { Worksheet } from './Worksheet';
+import type { Worksheet } from './Worksheet';
 
 /**
  * getObjectValues options type

@@ -5,13 +5,12 @@ import { ICurrentUniverService } from '../../services/current.service';
 import { Nullable, ObjectMatrix, Tools } from '../../Shared';
 import { DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber, SheetTypes } from '../../Types/Enum';
-import { ICellData, IRangeStringData, IRangeType, ISelectionData, IWorksheetConfig } from '../../Types/Interfaces';
+import { ICellData, IRangeStringData, IRangeType, IWorksheetConfig } from '../../Types/Interfaces';
 import { ColumnManager } from './ColumnManager';
 import { Merges } from './Merges';
 import { Range } from './Range';
 import { RangeList } from './RangeList';
 import { RowManager } from './RowManager';
-import { Selection } from './Selection';
 
 /**
  * Access and modify spreadsheet sheets.
@@ -24,8 +23,6 @@ import { Selection } from './Selection';
  * @beta
  */
 export class Worksheet {
-    protected _selection: Selection;
-
     protected _config: IWorksheetConfig;
 
     protected _initialized: boolean;
@@ -256,43 +253,11 @@ export class Worksheet {
     }
 
     /**
-     * Returns User Selection
-     * @returns User Selection
-     */
-    getSelection(): Selection {
-        return this._selection;
-    }
-
-    /**
      * Returns WorkSheet Configures
      * @returns WorkSheet Configures
      */
     getConfig(): IWorksheetConfig {
         return this._config;
-    }
-
-    /**
-     * restore the active selection region for this sheet.
-     * @returns Range — the newly active range
-     */
-    setActiveSelection(): Range;
-    /**
-     * restore the active selection region for this sheet.
-     * @param range Range Instance of Selection
-     * @returns Range — the newly active range
-     */
-    setActiveSelection(range: Range): Range;
-    /**
-     * restore the active selection region for this sheet.
-     * @param a1Notation One of the range types, the range to set as active, as specified in A1 notation or R1C1 notation
-     * @returns Range — the newly active range
-     */
-    setActiveSelection(a1Notation: IRangeStringData): Range;
-    setActiveSelection(...argument: any): Range {
-        const range = argument[0];
-
-        // just send range, we will handle Range instance or range string in Selection class
-        return range ? this._selection.setSelection({ selection: range }) : this._selection.setSelection();
     }
 
     /**
@@ -351,42 +316,6 @@ export class Worksheet {
     }
 
     /**
-     * Clears the sheet of contents, while preserving formatting information.
-     * @returns WorkSheet Instance
-     */
-    clearContents(): Worksheet {
-        // const { _config } = this;
-        // const { rowCount, columnCount } = _config;
-        // this.getRange({
-        //     startRow: 0,
-        //     endRow: rowCount,
-        //     startColumn: 0,
-        //     endColumn: columnCount,
-        // }).clear({
-        //     contentsOnly: true,
-        // });
-        // return this;
-    }
-
-    /**
-     * Clears the sheet of formatting, while preserving contents.
-     * @returns WorkSheet Instance
-     */
-    // clearFormats(): Worksheet {
-    // const { _config } = this;
-    // const { rowCount, columnCount } = _config;
-    // this.getRange({
-    //     startRow: 0,
-    //     endRow: rowCount,
-    //     startColumn: 0,
-    //     endColumn: columnCount,
-    // }).clear({
-    //     formatOnly: true,
-    // });
-    // return this;
-    // }
-
-    /**
      * Returns Row Count
      * @returns Row Count
      */
@@ -400,39 +329,6 @@ export class Worksheet {
      */
     getColumnCount(): number {
         return this._config.columnCount;
-    }
-
-    /**
-     * Sets the specified cell as the current cell.
-     * @param cell cell range
-     * @returns Range Instance
-     */
-    // setCurrentCell(cell: Range): Range {
-    //     return cell.activateAsCurrentCell();
-    // }
-
-    /**
-     * Returns the active cell in this sheet.
-     * @returns the active cell in this sheet
-     */
-    getActiveCell(): Range {
-        return this.getSelection().getCurrentCell();
-    }
-
-    /**
-     * Returns the selected range in the active sheet
-     * @returns the selected range in the active sheet
-     */
-    getActiveRange(): Range {
-        return this.getSelection().getActiveRange();
-    }
-
-    /**
-     * Returns the list of active ranges in the active sheet
-     * @returns the list of active ranges in the active sheet
-     */
-    getActiveRangeList(): RangeList {
-        return this.getSelection().getActiveRangeList();
     }
 
     /**
@@ -456,26 +352,6 @@ export class Worksheet {
      */
     isSheetHidden(): BooleanNumber {
         return this._config.hidden;
-    }
-
-    /**
-     * Sets the specified range as the active range in the active sheet, with the top left cell in the range as the current cell.
-     * @param range active range types
-     * @return Active Range
-     */
-    setActiveRange(range: ISelectionData): Range {
-        return this.getSelection().setSelection(range);
-    }
-
-    /**
-     * Sets the specified list of ranges as the active ranges in the active sheet. The last range in the list is set as the active range.
-     * @param rangeList active range types array
-     * @return Active Range List
-     */
-    setActiveRangeList(rangeList: ISelectionData): RangeList {
-        const selection = this.getSelection();
-        selection.setSelection(rangeList);
-        return selection.getActiveRangeList();
     }
 
     /**

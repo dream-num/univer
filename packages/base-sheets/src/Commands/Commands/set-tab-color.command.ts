@@ -1,9 +1,10 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { ISetTabColorMutationParams, SetTabColorMutation, SetTabColorUndoMutationFactory } from '../Mutations/set-tab-color.mutation';
 
 export interface ISetTabColorCommandParams {
-    color: string;
+    value: string;
 }
 
 export const SetTabColorCommand: ICommand = {
@@ -24,7 +25,7 @@ export const SetTabColorCommand: ICommand = {
         if (!worksheet) return false;
 
         const setTabColorMutationParams: ISetTabColorMutationParams = {
-            color: params.color,
+            color: params.value,
             workbookId,
             worksheetId,
         };

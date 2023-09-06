@@ -27,7 +27,13 @@ import {
     WrapTextMenuItemFactory,
 } from './menu';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
-import { CellMergeAllMenuItemFactory, CellMergeCancelMenuItemFactory, CellMergeHorizontalMenuItemFactory, CellMergeMenuItemFactory, CellMergeSelectorMenuItemFactory, CellMergeVerticalMenuItemFactory } from './menu/merge.menu';
+import {
+    CellMergeAllMenuItemFactory,
+    CellMergeCancelMenuItemFactory,
+    CellMergeHorizontalMenuItemFactory,
+    CellMergeMenuItemFactory,
+    CellMergeVerticalMenuItemFactory,
+} from './menu/merge.menu';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     children?: BaseSelectChildrenProps[];

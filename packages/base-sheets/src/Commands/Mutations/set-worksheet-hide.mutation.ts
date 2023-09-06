@@ -37,6 +37,7 @@ export const SetWorksheetHideMutation: IMutation<ISetWorksheetHideMutationParams
         }
 
         worksheet.getConfig().hidden = params.hidden;
+
         return true;
     },
 };

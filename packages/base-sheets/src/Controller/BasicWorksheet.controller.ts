@@ -8,6 +8,7 @@ import {
     AddWorksheetMergeVerticalCommand,
 } from '../Commands/Commands/add-worksheet-merge.command';
 import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selection-content.command';
+import { CopySheetCommand } from '../Commands/Commands/copy-worksheet.command';
 import { DeleteRangeMoveLeftCommand } from '../Commands/Commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../Commands/Commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../Commands/Commands/insert-range-move-down.command';
@@ -29,6 +30,7 @@ import {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
 } from '../Commands/Commands/set-style.command';
+import { SetTabColorCommand } from '../Commands/Commands/set-tab-color.command';
 import { SetWorksheetActivateCommand } from '../Commands/Commands/set-worksheet-activate.command';
 import { SetWorksheetColWidthCommand } from '../Commands/Commands/set-worksheet-col-width.command';
 import { SetWorksheetHideCommand } from '../Commands/Commands/set-worksheet-hide.command';
@@ -37,6 +39,7 @@ import { SetWorksheetOrderCommand } from '../Commands/Commands/set-worksheet-ord
 import { SetWorksheetRowHeightCommand } from '../Commands/Commands/set-worksheet-row-height.command';
 import { SetWorksheetRowHideCommand } from '../Commands/Commands/set-worksheet-row-hide.command';
 import { SetWorksheetRowShowCommand } from '../Commands/Commands/set-worksheet-row-show.command';
+import { SetWorksheetShowCommand } from '../Commands/Commands/set-worksheet-show.command';
 import { TrimWhitespaceCommand } from '../Commands/Commands/trim-whitespace.command';
 import { AddWorksheetMergeMutation } from '../Commands/Mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation } from '../Commands/Mutations/delete-range.mutation';
@@ -47,6 +50,7 @@ import { RemoveWorksheetMergeMutation } from '../Commands/Mutations/remove-works
 import { SetRangeFormattedValueMutation } from '../Commands/Mutations/set-range-formatted-value.mutation';
 import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
 import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
+import { SetTabColorMutation } from '../Commands/Mutations/set-tab-color.mutation';
 import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
 import { SetWorksheetColWidthMutation } from '../Commands/Mutations/set-worksheet-col-width.mutation';
 import { SetWorksheetHideMutation } from '../Commands/Mutations/set-worksheet-hide.mutation';
@@ -130,6 +134,10 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetBorderColorCommand,
             SetBorderStyleCommand,
             SetBorderPositionCommand,
+            CopySheetCommand,
+            SetTabColorCommand,
+            SetTabColorMutation,
+            SetWorksheetShowCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

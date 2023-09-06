@@ -1,5 +1,6 @@
-import { IMutation, CommandType, ICurrentUniverService } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, Worksheet } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
 
 /**
@@ -26,8 +27,16 @@ export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean>
             return false;
         }
 
-        workbook.insertSheetByIndexSheet(index, sheet);
-        // TODO activate next sheet
+        const { sheets, sheetOrder } = workbook.getConfig();
+
+        if (sheets[index]) {
+            throw new Error(`Insert sheet fail ${index} already exists.`);
+        }
+        sheets[sheet.id] = sheet;
+        sheetOrder.splice(index, 0, sheet.id);
+
+        const worksheets = workbook.getWorksheets();
+        worksheets.set(sheet.id, new Worksheet(sheet)); // Todo: worksheet新建方式
 
         return true;
     },

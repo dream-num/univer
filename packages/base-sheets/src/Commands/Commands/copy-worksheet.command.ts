@@ -1,9 +1,10 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../Mutations/insert-sheet.mutation';
-import { ISetWorksheetActivateMutationParams, SetWorksheetActivateMutation, SetWorksheetUnActivateMutationFactory } from '../Mutations/set-worksheet-activate.mutation';
 import { RemoveSheetMutation } from '../Mutations/remove-sheet.mutation';
+import { ISetWorksheetActivateMutationParams, SetWorksheetActivateMutation, SetWorksheetUnActivateMutationFactory } from '../Mutations/set-worksheet-activate.mutation';
 
 export interface ICopySheetCommandParams {
     workbookId?: string;

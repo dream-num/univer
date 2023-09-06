@@ -1,8 +1,9 @@
-import { BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, IDisplayMenuItem, IMenuItem, Icon, Menu, MenuPosition } from '@univerjs/base-ui';
-import { RefObject, Component, createRef } from 'preact';
-import { SheetBarMenu, ISheetBarMenuItem } from './SheetBarMenu';
-import styles from './index.module.less';
+import { BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, Icon, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
+import { Component, createRef, RefObject } from 'preact';
+
 import { SlideTabBar } from '../../Basics/SlideTabBar/SlideTabBar';
+import styles from './index.module.less';
+import { ISheetBarMenuItem, SheetBarMenu } from './SheetBarMenu';
 
 type SheetState = {
     sheetList: BaseSheetBarProps[];

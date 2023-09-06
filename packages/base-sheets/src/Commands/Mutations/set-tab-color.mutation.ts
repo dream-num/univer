@@ -30,6 +30,7 @@ export const SetTabColorMutation: IMutation<ISetTabColorMutationParams> = {
         if (!worksheet) return false;
         worksheet.getConfig().tabColor = params.color;
 
+        console.log(worksheet);
         return true;
     },
 };

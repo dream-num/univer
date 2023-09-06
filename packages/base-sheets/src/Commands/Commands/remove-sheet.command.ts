@@ -1,9 +1,11 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from '../Mutations/remove-sheet.mutation';
-import { InsertSheetMutation } from '../Mutations/insert-sheet.mutation';
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
+import { InsertSheetMutation } from '../Mutations/insert-sheet.mutation';
+import { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from '../Mutations/remove-sheet.mutation';
+import { ISetWorksheetActivateMutationParams, SetWorksheetActivateMutation, SetWorksheetUnActivateMutationFactory } from '../Mutations/set-worksheet-activate.mutation';
+import { SetWorksheetHideMutation } from '../Mutations/set-worksheet-hide.mutation';
 
 export interface RemoveSheetCommandParams {
     workbookId?: string;
@@ -33,23 +35,40 @@ export const RemoveSheetCommand: ICommand = {
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
+        const index = workbook.getSheetIndex(worksheet);
+        const activateSheetId = workbook.getConfig().sheetOrder[index + 1];
+
+        const activeSheetMutationParams: ISetWorksheetActivateMutationParams = {
+            workbookId,
+            worksheetId: activateSheetId,
+        };
+
+        const unActiveMutationParams = SetWorksheetUnActivateMutationFactory(accessor, activeSheetMutationParams);
+        const activeResult = commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams);
+
         // prepare do mutations
         const RemoveSheetMutationParams: IRemoveSheetMutationParams = {
             worksheetId,
             workbookId,
         };
         const InsertSheetMutationParams: IInsertSheetMutationParams = RemoveSheetUndoMutationFactory(accessor, RemoveSheetMutationParams);
-
         // execute do mutations and add undo mutations to undo stack if completed
         const result = commandService.executeCommand(RemoveSheetMutation.id, RemoveSheetMutationParams);
-        if (result) {
+
+        if (result && activeResult) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(InsertSheetMutation.id, InsertSheetMutationParams);
+                    return (commandService.executeCommand(SetWorksheetHideMutation.id, unActiveMutationParams) as Promise<boolean>).then((res) => {
+                        if (res) commandService.executeCommand(InsertSheetMutation.id, InsertSheetMutationParams);
+                        return false;
+                    });
                 },
                 redo() {
-                    return commandService.executeCommand(RemoveSheetMutation.id, RemoveSheetMutationParams);
+                    return (commandService.executeCommand(RemoveSheetMutation.id, RemoveSheetMutationParams) as Promise<boolean>).then((res) => {
+                        if (res) commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams);
+                        return false;
+                    });
                 },
             });
 

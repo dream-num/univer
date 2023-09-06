@@ -1,9 +1,10 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
+import { ISelectionManager } from '../../Services/tokens';
 import { InsertColMutation, InsertColMutationFactory, InsertRowMutation, InsertRowMutationFactory } from '../Mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../Mutations/remove-row-col.mutation';
-import { ISelectionManager } from '../../Services/tokens';
 
 export interface InsertRowCommandParams {
     rowCount: number;

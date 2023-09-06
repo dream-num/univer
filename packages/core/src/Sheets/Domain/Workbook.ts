@@ -1,26 +1,16 @@
-import { Inject, Injector, forwardRef } from '@wendellhu/redi';
+import { forwardRef, Inject, Injector } from '@wendellhu/redi';
 
-import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
-import { Command, CommandManager } from '../../Command';
-import { BooleanNumber } from '../../Types/Enum';
-import { InsertSheetAction, ISetSheetOrderActionData, SetSheetOrderAction, IInsertSheetActionData } from '../Action';
-import {
-    IColumnStartEndData,
-    IGridRange,
-    IRangeArrayData,
-    IRangeData,
-    IRangeStringData,
-    IRangeType,
-    IRowStartEndData,
-    IWorkbookConfig,
-    IWorksheetConfig,
-} from '../../Types/Interfaces';
+import { CommandManager } from '../../Command';
+import { ObserverManager } from '../../Observer';
+import { ICurrentUniverService } from '../../Service/Current.service';
 import { GenName, Nullable, Tools } from '../../Shared';
+import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
+import { BooleanNumber } from '../../Types/Enum';
+import { IColumnStartEndData, IGridRange, IRangeArrayData, IRangeData, IRangeStringData, IRangeType, IRowStartEndData, IWorkbookConfig } from '../../Types/Interfaces';
+import { RangeList } from './RangeList';
 import { Selection } from './Selection';
 import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
-import { ObserverManager } from '../../Observer';
-import { ICurrentUniverService } from '../../Service/Current.service';
 
 /**
  * Access and create Univer Sheets files
@@ -95,289 +85,6 @@ export class Workbook {
         return this._worksheets;
     }
 
-    // TODO: @Dushusir: this function has too many function overloads
-
-    /**
-     * @deprecated
-     */
-    insertSheet(): Nullable<string>;
-    insertSheet(index: number): Nullable<string>;
-    insertSheet(name: string): Nullable<string>;
-    insertSheet(data: Partial<IWorksheetConfig>): Nullable<string>;
-    insertSheet(sheet: Worksheet): Nullable<string>;
-    insertSheet(name: string, index: number): Nullable<string>;
-    insertSheet(index: number, data: Partial<IWorksheetConfig>): Nullable<string>;
-    insertSheet(index: number, sheet: Worksheet): Nullable<string>;
-    // eslint-disable-next-line max-lines-per-function
-    insertSheet(...argument: any[]): Nullable<string> {
-        const genname = this._genName;
-        const commandManager = this._commandManager;
-        const before = this._observerManager.getObserver<{ index: number; sheetId: string }>('onBeforeInsertSheetObservable', 'core')!;
-        const after = this._observerManager.getObserver<{ index: number; sheetId: string }>('onAfterInsertSheetObservable', 'core')!;
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-
-        // insert empty sheet
-        if (Tools.hasLength(argument, 0)) {
-            const worksheetConfig = {
-                name: genname.sheetName(),
-                status: 0,
-                id: Tools.generateRandomId(6),
-            };
-            const index = this.getSheetSize();
-            before.notifyObservers({
-                index,
-                sheetId: worksheetConfig.id,
-            });
-            commandManager.invoke(
-                new Command(
-                    {
-                        WorkBookUnit: workbook,
-                    },
-                    {
-                        actionName: InsertSheetAction.NAME,
-                        sheetId: worksheetConfig.id,
-                        index,
-                        sheet: worksheetConfig as IWorksheetConfig,
-                    } as IInsertSheetActionData
-                )
-            );
-            after.notifyObservers({
-                index,
-                sheetId: worksheetConfig.id,
-            });
-            return worksheetConfig.id;
-        }
-
-        if (Tools.hasLength(argument, 1)) {
-            // insert clone worksheet instance
-            if (Tools.isAssignableFrom(argument[0], Worksheet)) {
-                const sheet = argument[0];
-                const index = this.getSheetSize();
-                const worksheetConfig = sheet.getConfig();
-                worksheetConfig.id = Tools.generateRandomId(6);
-                before.notifyObservers({
-                    index,
-                    sheetId: worksheetConfig.id,
-                });
-                commandManager.invoke(
-                    new Command(
-                        {
-                            WorkBookUnit: workbook,
-                        },
-                        {
-                            actionName: InsertSheetAction.NAME,
-                            sheetId: worksheetConfig.id,
-                            index,
-                            sheet: worksheetConfig as IWorksheetConfig,
-                        } as IInsertSheetActionData
-                    )
-                );
-                after.notifyObservers({
-                    index,
-                    sheetId: worksheetConfig.id,
-                });
-                return worksheetConfig.id;
-            }
-
-            // insert sheet to index
-            if (Tools.isNumber(argument[0])) {
-                const index = argument[0];
-                const worksheetConfig = {
-                    name: genname.sheetName(),
-                    status: 0,
-                    id: Tools.generateRandomId(6),
-                };
-                before.notifyObservers({
-                    index,
-                    sheetId: worksheetConfig.id,
-                });
-                commandManager.invoke(
-                    new Command(
-                        {
-                            WorkBookUnit: workbook,
-                        },
-                        {
-                            actionName: InsertSheetAction.NAME,
-                            sheetId: worksheetConfig.id,
-                            index,
-                            sheet: worksheetConfig as IWorksheetConfig,
-                        } as IInsertSheetActionData
-                    )
-                );
-                after.notifyObservers({
-                    index,
-                    sheetId: worksheetConfig.id,
-                });
-                return worksheetConfig.id;
-            }
-
-            // insert sheet by sheet name
-            if (Tools.isString(argument[0])) {
-                const name = argument[0];
-                const index = this.getSheetSize();
-                const worksheetConfig = {
-                    status: 0,
-                    name,
-                    id: Tools.generateRandomId(6),
-                };
-                before.notifyObservers({
-                    index,
-                    sheetId: worksheetConfig.id,
-                });
-                commandManager.invoke(
-                    new Command(
-                        {
-                            WorkBookUnit: workbook,
-                        },
-                        {
-                            actionName: InsertSheetAction.NAME,
-                            sheetId: worksheetConfig.id,
-                            index,
-                            sheet: worksheetConfig as IWorksheetConfig,
-                        } as IInsertSheetActionData
-                    )
-                );
-                after.notifyObservers({
-                    index,
-                    sheetId: worksheetConfig.id,
-                });
-                return worksheetConfig.id;
-            }
-
-            // insert sheet by sheet config
-            if (Tools.isPlainObject(argument[0])) {
-                const worksheetConfig = argument[0] as IWorksheetConfig;
-                const index = this.getSheetSize();
-                before.notifyObservers({
-                    index,
-                    sheetId: worksheetConfig.id,
-                });
-                commandManager.invoke(
-                    new Command(
-                        {
-                            WorkBookUnit: workbook,
-                        },
-                        {
-                            actionName: InsertSheetAction.NAME,
-                            sheetId: worksheetConfig.id,
-                            index,
-                            sheet: worksheetConfig as IWorksheetConfig,
-                        } as IInsertSheetActionData
-                    )
-                );
-                after.notifyObservers({
-                    index,
-                    sheetId: worksheetConfig.id,
-                });
-                return worksheetConfig.id;
-            }
-        }
-
-        if (Tools.hasLength(argument, 2)) {
-            // insert sheet name to index
-            if (Tools.isString(argument[0])) {
-                const name = argument[0];
-                const index = argument[1];
-                const worksheetConfig = {
-                    status: 0,
-                    name,
-                    id: Tools.generateRandomId(6),
-                };
-                before.notifyObservers({
-                    index,
-                    sheetId: worksheetConfig.id,
-                });
-                commandManager.invoke(
-                    new Command(
-                        {
-                            WorkBookUnit: workbook,
-                        },
-                        {
-                            actionName: InsertSheetAction.NAME,
-                            sheetId: worksheetConfig.id,
-                            index,
-                            sheet: worksheetConfig as IWorksheetConfig,
-                        } as IInsertSheetActionData
-                    )
-                );
-                after.notifyObservers({
-                    index,
-                    sheetId: worksheetConfig.id,
-                });
-                return worksheetConfig.id;
-            }
-            if (Tools.isNumber(argument[0])) {
-                // insert clone worksheet instance to index
-                if (Tools.isAssignableFrom(argument[1], Worksheet)) {
-                    const index = argument[0];
-                    const sheet = argument[1];
-                    const worksheetConfig = sheet.getConfig();
-                    worksheetConfig.id = Tools.generateRandomId(6);
-                    before.notifyObservers({
-                        index,
-                        sheetId: worksheetConfig.id,
-                    });
-                    commandManager.invoke(
-                        new Command(
-                            {
-                                WorkBookUnit: workbook,
-                            },
-                            {
-                                actionName: InsertSheetAction.NAME,
-                                sheetId: worksheetConfig.id,
-                                index,
-                                sheet: worksheetConfig as IWorksheetConfig,
-                            } as IInsertSheetActionData
-                        )
-                    );
-                    after.notifyObservers({
-                        index,
-                        sheetId: worksheetConfig.id,
-                    });
-                    return worksheetConfig.id;
-                }
-                if (Tools.isPlainObject(argument[1])) {
-                    const index = argument[0];
-                    const worksheetConfig = argument[1] as IWorksheetConfig;
-                    before.notifyObservers({
-                        index,
-                        sheetId: worksheetConfig.id,
-                    });
-                    commandManager.invoke(
-                        new Command(
-                            {
-                                WorkBookUnit: workbook,
-                            },
-                            {
-                                actionName: InsertSheetAction.NAME,
-                                sheetId: worksheetConfig.id,
-                                index,
-                                sheet: worksheetConfig as IWorksheetConfig,
-                            } as IInsertSheetActionData
-                        )
-                    );
-                    after.notifyObservers({
-                        index,
-                        sheetId: worksheetConfig.id,
-                    });
-                    return worksheetConfig.id;
-                }
-            }
-        }
-    }
-
-    insertSheetByIndexSheet(index: number, sheet: IWorksheetConfig) {
-        const { sheets, sheetOrder } = this._config;
-        if (sheets[sheet.id]) {
-            throw new Error(`Insert sheet fail ${sheet.id} already exists.`);
-        }
-        sheets[sheet.id] = sheet;
-
-        sheetOrder.splice(index, 0, sheet.id);
-        const worksheet = this._injector.createInstance(Worksheet, sheet);
-        this._worksheets.set(sheet.id, worksheet);
-    }
-
     getActiveSpreadsheet(): Workbook {
         return this;
     }
@@ -398,27 +105,6 @@ export class Workbook {
         // this._config.sheets = sheets;
         // this._config.styles = this._styles.toJSON();
         return this._config;
-    }
-
-    create(name: string, row: number, column: number): Worksheet;
-    create(name: string): Worksheet;
-    create(...argument: unknown[]): unknown {
-        if (Tools.hasLength(argument, 1)) {
-            const name = argument[0];
-            const conf = { ...DEFAULT_WORKSHEET, name };
-            const worksheet = new Worksheet(conf as Partial<IWorksheetConfig>, this._commandManager, this._observerManager, this._currentUniverService);
-            this.insertSheet(worksheet);
-            return worksheet;
-        }
-        if (Tools.hasLength(argument, 3)) {
-            const name = argument[0];
-            const rowCount = argument[1];
-            const columnCount = argument[2];
-            const conf = { ...DEFAULT_WORKSHEET, name, rowCount, columnCount };
-            const worksheet = new Worksheet(conf as Partial<IWorksheetConfig>, this._commandManager, this._observerManager, this._currentUniverService);
-            this.insertSheet(worksheet);
-            return worksheet;
-        }
     }
 
     getIndexBySheetId(sheetId: string): number {
@@ -477,6 +163,15 @@ export class Workbook {
         return null;
     }
 
+    getActiveRangeList(): Nullable<RangeList> {
+        const workSheet = this.getActiveSheet();
+        if (workSheet) {
+            const selection = workSheet.getSelection();
+            return selection.getActiveRangeList();
+        }
+        return null;
+    }
+
     getSelection(): Nullable<Selection> {
         const workSheet = this.getActiveSheet();
         if (workSheet) {
@@ -504,27 +199,6 @@ export class Workbook {
         //TDOO ..
     }
 
-    setSheetOrder(sheetId: string, order: number): void {
-        // const { _sheetOrder } = this;
-        // const exclude = _sheetOrder.filter((currentId) => currentId !== sheetId);
-        // exclude.splice(order, 0, sheetId);
-        // this._sheetOrder = exclude;
-        const observer = this._observerManager.getObserver('onSheetOrderObservable', 'core')!;
-        const config: ISetSheetOrderActionData = {
-            actionName: SetSheetOrderAction.NAME,
-            sheetId,
-            order,
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
-            },
-            config
-        );
-        this._commandManager.invoke(command);
-        observer.notifyObservers();
-    }
-
     getSheets(): Worksheet[] {
         const { sheetOrder } = this._config;
         return sheetOrder.map((sheetId) => this._worksheets.get(sheetId)) as Worksheet[];
@@ -538,23 +212,6 @@ export class Workbook {
             }
             return false;
         });
-    }
-
-    removeSheetBySheetId(sheetId: string): void {
-        const iSheets = this._worksheets;
-        const config = this._config;
-
-        const { sheets } = config;
-        if (sheets[sheetId] == null) {
-            throw new Error(`Remove sheet fail ${sheetId} does not exist`);
-        }
-        const findIndex = config.sheetOrder.findIndex((id) => id === sheetId);
-        delete sheets[sheetId];
-
-        config.sheetOrder.splice(findIndex, 1);
-        iSheets.delete(sheetId);
-
-        // this.activateSheetByIndex(index);
     }
 
     getSheetBySheetName(name: string): Nullable<Worksheet> {

@@ -379,7 +379,7 @@ export default {
     merge: {
         all: 'Merge all',
         vertical: 'Vertical merge',
-        horizontal: 'Horizontal merger',
+        horizontal: 'Horizontal merge',
         cancel: 'Cancel merge',
         overlappingError: 'Cannot merge overlapping areas',
         partiallyError: 'Cannot perform this operation on partially merged cells',

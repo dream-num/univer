@@ -63,7 +63,14 @@ export { SetWorksheetOrderCommand } from './Commands/Commands/set-worksheet-orde
 export { SetWorksheetRowHeightCommand } from './Commands/Commands/set-worksheet-row-height.command';
 
 // #endregion
+export {
+    AddWorksheetMergeAllCommand,
+    AddWorksheetMergeCommand,
+    AddWorksheetMergeHorizontalCommand,
+    AddWorksheetMergeVerticalCommand,
+} from './Commands/Commands/add-worksheet-merge.command';
 export { RemoveSheetCommand } from './Commands/Commands/remove-sheet.command';
+export { RemoveWorksheetMergeCommand } from './Commands/Commands/remove-worksheet-merge.command';
 export { SetWorksheetHideCommand } from './Commands/Commands/set-worksheet-hide.command';
 export { SetWorksheetRowHideCommand } from './Commands/Commands/set-worksheet-row-hide.command';
 export { SetWorksheetRowShowCommand } from './Commands/Commands/set-worksheet-row-show.command';

@@ -1,6 +1,12 @@
 import { Disposable, ICommandService, IStyleData } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
+import {
+    AddWorksheetMergeAllCommand,
+    AddWorksheetMergeCommand,
+    AddWorksheetMergeHorizontalCommand,
+    AddWorksheetMergeVerticalCommand,
+} from '../Commands/Commands/add-worksheet-merge.command';
 import { ClearSelectionContentCommand } from '../Commands/Commands/clear-selection-content.command';
 import { DeleteRangeMoveLeftCommand } from '../Commands/Commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../Commands/Commands/delete-range-move-up.command';
@@ -8,6 +14,7 @@ import { InsertRangeMoveDownCommand } from '../Commands/Commands/insert-range-mo
 import { InsertRangeMoveRightCommand } from '../Commands/Commands/insert-range-move-right.command';
 import { InsertColCommand } from '../Commands/Commands/insert-row-col.command';
 import { RemoveColCommand, RemoveRowCommand } from '../Commands/Commands/remove-row-col.command';
+import { RemoveWorksheetMergeCommand } from '../Commands/Commands/remove-worksheet-merge.command';
 import { SetBorderColorCommand, SetBorderCommand, SetBorderPositionCommand, SetBorderStyleCommand } from '../Commands/Commands/set-border-command';
 import { SetRangeFormattedValueCommand } from '../Commands/Commands/set-range-formatted-value.command';
 import { SetRangeValuesCommand } from '../Commands/Commands/set-range-values.command';
@@ -31,10 +38,12 @@ import { SetWorksheetRowHeightCommand } from '../Commands/Commands/set-worksheet
 import { SetWorksheetRowHideCommand } from '../Commands/Commands/set-worksheet-row-hide.command';
 import { SetWorksheetRowShowCommand } from '../Commands/Commands/set-worksheet-row-show.command';
 import { TrimWhitespaceCommand } from '../Commands/Commands/trim-whitespace.command';
+import { AddWorksheetMergeMutation } from '../Commands/Mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation } from '../Commands/Mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../Commands/Mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../Commands/Mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../Commands/Mutations/remove-row-col.mutation';
+import { RemoveWorksheetMergeMutation } from '../Commands/Mutations/remove-worksheet-merge.mutation';
 import { SetRangeFormattedValueMutation } from '../Commands/Mutations/set-range-formatted-value.mutation';
 import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
 import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
@@ -60,6 +69,13 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         super();
 
         [
+            AddWorksheetMergeCommand,
+            AddWorksheetMergeMutation,
+            AddWorksheetMergeAllCommand,
+            AddWorksheetMergeVerticalCommand,
+            AddWorksheetMergeHorizontalCommand,
+            RemoveWorksheetMergeCommand,
+            RemoveWorksheetMergeMutation,
             ClearSelectionContentCommand,
             SetRangeValuesMutation,
             SetWorksheetNameCommand,

@@ -26,7 +26,16 @@ export { SetSelectionsOperation } from './Commands/Operations/selection.operatio
 export { ClearSelectionContentCommand } from './Commands/Commands/clear-selection-content.command';
 export { DeleteRangeMoveLeftCommand } from './Commands/Commands/delete-range-move-left.command';
 export { DeleteRangeMoveUpCommand } from './Commands/Commands/delete-range-move-up.command';
-export { InsertColCommand, InsertColCommandParams, InsertRowCommand, InsertRowCommandParams } from './Commands/Commands/insert-row-col.command';
+export {
+    InsertColAfterCommand,
+    InsertColBeforeCommand,
+    InsertColCommand,
+    InsertColCommandParams,
+    InsertRowAfterCommand,
+    InsertRowBeforeCommand,
+    InsertRowCommand,
+    InsertRowCommandParams,
+} from './Commands/Commands/insert-row-col.command';
 export { InsertSheetCommand } from './Commands/Commands/insert-sheet.command';
 export { RemoveColCommand, RemoveRowCommand } from './Commands/Commands/remove-row-col.command';
 export {

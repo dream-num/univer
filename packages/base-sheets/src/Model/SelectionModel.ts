@@ -1,4 +1,4 @@
-import { ICellInfo, ICurrentUniverService, ISelection, Nullable, makeCellToSelection } from '@univerjs/core';
+import { ICellInfo, ICurrentUniverService, ISelection, makeCellToSelection, Nullable } from '@univerjs/core';
 
 import { SELECTION_TYPE } from '../Controller/Selection/SelectionController';
 

@@ -3,6 +3,8 @@ import { IDisposable, Inject, SkipSelf } from '@wendellhu/redi';
 
 import { InsertSheetCommand } from '../Commands/Commands/insert-sheet.command';
 import { RemoveSheetCommand } from '../Commands/Commands/remove-sheet.command';
+import { InsertSheetMutation } from '../Commands/Mutations/insert-sheet.mutation';
+import { RemoveSheetMutation } from '../Commands/Mutations/remove-sheet.mutation';
 
 /**
  * The controller to provide the most basic sheet CRUD methods to other modules of sheet modules.
@@ -10,6 +12,8 @@ import { RemoveSheetCommand } from '../Commands/Commands/remove-sheet.command';
 export class BasicWorkbookController extends Disposable implements IDisposable {
     constructor(@ICommandService private readonly _commandService: ICommandService, @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager) {
         super();
+
+        [InsertSheetCommand, InsertSheetMutation, RemoveSheetCommand, RemoveSheetMutation].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     onInitialize() {}

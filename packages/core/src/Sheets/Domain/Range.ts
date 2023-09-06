@@ -1,15 +1,9 @@
-import { ICurrentUniverService } from 'src/Service/Current.service';
-
-// TODO@wzhudev: here we still have some
-
-import { Inject } from '@wendellhu/redi';
-import { IClearRangeActionData, IAddMergeActionData, IRemoveMergeActionData, ISetRangeDataActionData } from '../Action';
-import { CommandManager, Command } from '../../Command';
-import { DEFAULT_RANGE, DEFAULT_STYLES, ACTION_NAMES } from '../../Types/Const';
+import { ICurrentUniverService } from '../../services/current.service';
+import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../../Shared';
+import { DEFAULT_RANGE, DEFAULT_STYLES } from '../../Types/Const';
 import { BooleanNumber, Dimension, Direction, FontItalic, FontWeight, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../Types/Enum';
-import { IBorderData, ICellData, IDocumentData, IOptionData, IRangeData, IRangeType, IStyleData, ITextDecoration } from '../../Types/Interfaces';
-import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools, Tuples } from '../../Shared';
-import { Worksheet } from './Worksheet';
+import { IBorderData, ICellData, IDocumentData, IRangeData, IRangeType, IStyleData, ITextDecoration } from '../../Types/Interfaces';
+import type { Worksheet } from './Worksheet';
 
 /**
  * getObjectValues options type
@@ -36,12 +30,7 @@ export class Range {
 
     private _worksheet: Worksheet;
 
-    constructor(
-        workSheet: Worksheet,
-        range: IRangeType,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager
-    ) {
+    constructor(workSheet: Worksheet, range: IRangeType, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         // Convert the range passed in by the user into a standard format
         this._rangeData = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().transformRangeType(range).rangeData;
         this._worksheet = workSheet;
@@ -874,7 +863,6 @@ export class Range {
      * @internal
      */
     activate(): Range {
-        // const { _commandManager } = this;
         // The user entered an invalid range
         if (this._rangeData?.startRow === -1) {
             console.error('Invalid range,default set startRow -1');
@@ -978,252 +966,7 @@ export class Range {
             offset.endColumn = offset.endColumn + numColumns - 1;
         }
 
-        return new Range(this._worksheet, offset, this._currentUniverService, this._commandManager);
-    }
-
-    /**
-     * Clears the range of contents, formats, and data validation rules.
-     * @returns This range, for chaining.
-     */
-    clear(): Range;
-    /**
-     * Clears the range of contents and/or format, as specified with the given advanced options. By default all data is cleared.
-     * @param options A JavaScript object that specifies advanced parameters, as listed below.
-     * @returns This range, for chaining.
-     */
-    clear(options: IOptionData): Range;
-    clear(...argument: any): Range {
-        const { _worksheet, _commandManager, _rangeData } = this;
-
-        // default options
-        let options = {
-            formatOnly: true,
-            contentsOnly: true,
-        };
-        if (Tuples.checkup(argument, Tuples.OBJECT_TYPE)) {
-            options = argument[0];
-        }
-
-        const setValue: IClearRangeActionData = {
-            sheetId: _worksheet.getSheetId(),
-            actionName: ACTION_NAMES.CLEAR_RANGE_ACTION,
-            options,
-            rangeData: _rangeData,
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
-            },
-            setValue
-        );
-        _commandManager.invoke(command);
-
-        return this;
-    }
-
-    /**
-     * Clears formatting for this range.
-     *
-     * This clears text formatting for the cell or cells in the range, but does not reset any number formatting rules.
-     *
-     * @returns Range This range, for chaining.
-     */
-    clearFormat(): Range {
-        return this.clear({ formatOnly: true });
-    }
-
-    /**
-     * Clears the content of the range, leaving the formatting intact.
-     *
-     * @returns Range This range, for chaining.
-     */
-    clearContent(): Range {
-        return this.clear({ contentsOnly: true });
-    }
-
-    /**
-     * Merges the cells in the range together into a single block.
-     *
-     * @returns Range — This range, for chaining.
-     */
-    merge(): Range {
-        const { _worksheet } = this;
-        const merges = _worksheet.getMerges();
-        merges.add(this._rangeData);
-        return this;
-    }
-
-    /**
-     * Merge the cells in the range across the columns of the range.
-     *
-     * @returns Range — This range, for chaining.
-     */
-    mergeAcross(): Range {
-        const { _worksheet } = this;
-        const _sheetId = _worksheet.getSheetId();
-
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
-        const rectangles = [];
-
-        for (let r = startRow; r <= endRow; r++) {
-            const data = {
-                startRow: r,
-                endRow: r,
-                startColumn,
-                endColumn,
-            };
-            rectangles.push(data);
-        }
-        const dataRowInsert: IAddMergeActionData = {
-            actionName: ACTION_NAMES.ADD_MERGE_ACTION,
-            sheetId: _sheetId,
-            rectangles,
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
-            },
-            dataRowInsert
-        );
-        this._commandManager.invoke(command);
-
-        return this;
-    }
-
-    /**
-     * Merges the cells in the range together.
-     *
-     * @returns Range — This range, for chaining.
-     */
-    mergeVertically(): Range {
-        const { _worksheet } = this;
-        const _sheetId = _worksheet.getSheetId();
-
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
-        const rectangles = [];
-
-        for (let c = startColumn; c <= endColumn; c++) {
-            const data = {
-                startRow,
-                endRow,
-                startColumn: c,
-                endColumn: c,
-            };
-            rectangles.push(data);
-        }
-        const dataRowInsert: IAddMergeActionData = {
-            actionName: ACTION_NAMES.ADD_MERGE_ACTION,
-            sheetId: _sheetId,
-            rectangles,
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
-            },
-            dataRowInsert
-        );
-        this._commandManager.invoke(command);
-
-        return this;
-    }
-
-    /**
-     * Break any multi-column cells in the range into individual cells again.
-
-        Calling this function on a range is equivalent to selecting a range and clicking Format -> Merge -> Unmerge.
-
-        @returns Range — This range, for chaining.
-     */
-    breakApart(): Range {
-        // 您必须选中某个合并范围内的所有单元格才能执行合并或撤消合并。
-        const { _worksheet } = this;
-        const _sheetId = _worksheet.getSheetId();
-
-        const rectangles = this._worksheet.getMerges().getMergedRanges(this._rangeData);
-
-        const dataRowInsert: IRemoveMergeActionData = {
-            actionName: ACTION_NAMES.REMOVE_MERGE_ACTION,
-            sheetId: _sheetId,
-            rectangles,
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
-            },
-            dataRowInsert
-        );
-        this._commandManager.invoke(command);
-
-        return this;
-    }
-
-    /**
-     * Removes rows within this range that contain values that are duplicates of values in any previous row. Rows with identical values but different letter cases, formatting, or formulas are considered to be duplicates. This method also removes duplicates rows hidden from view (for example, due to a filter). Content outside of this range isn't removed.
-     *
-     * @returns Range The resulting range after removing duplicates. The size of the range is reduced by a row for every row removed.
-     */
-    removeDuplicates(): Range;
-
-    /**
-     * Removes rows within this range that contain values in the specified columns that are duplicates of values any previous row. Rows with identical values but different letter cases, formatting, or formulas are considered to be duplicates. This method also removes duplicates rows hidden from view (for example, due to a filter). Content outside of this range isn't removed.
-     * @param columnsToCompare The columns to analyze for duplicate values. If no columns are provided then all columns are analyzed for duplicates.
-     * @returns Range The resulting range after removing duplicates. The size of the range is reduced by a row for every row removed.
-     */
-    removeDuplicates(columnsToCompare: number[]): Range;
-    removeDuplicates(...argument: any): Range {
-        const { _rangeData, _commandManager, _worksheet } = this;
-        let columnsToCompare = [];
-        // set columns
-        if (Array.isArray(argument[0])) {
-            columnsToCompare = argument[0];
-        }
-
-        const newCellValue = this.getMatrix().getData();
-
-        const rowList: number[][] = [];
-
-        for (let i = 0; i <= _rangeData.endColumn - _rangeData.startColumn; i++) {
-            const arr: number[] = [];
-            const obj: any = {};
-
-            const column = this.getColumnMatrix(i).getData();
-            for (const key in column) {
-                // if (column.hasOwnProperty(key)) {
-                const value = column[key][i].m;
-
-                if (!obj.hasOwnProperty(value)) {
-                    obj[value!] = 1;
-                    arr.push(i);
-                }
-                // }
-            }
-
-            rowList.push(arr);
-        }
-
-        const newRowList = Array.from(new Set(rowList.flat()));
-
-        const newData: { [key: number]: { [key: number]: ICellData } } = {};
-
-        newRowList.forEach((item, i) => {
-            newData[i] = newCellValue[item];
-        });
-
-        const removeDatas: ISetRangeDataActionData[] = [
-            {
-                sheetId: _worksheet.getSheetId(),
-                actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-                cellValue: newData,
-            },
-        ];
-        const command = new Command(
-            {
-                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
-            },
-            ...removeDatas
-        );
-        _commandManager.invoke(command);
-        return this;
+        return new Range(this._worksheet, offset, this._currentUniverService);
     }
 
     /**
@@ -1266,41 +1009,6 @@ export class Range {
 
     forEach(action: (row: number, column: number) => void): void {
         Range.foreach(this._rangeData, action);
-    }
-
-    /**
-     * Randomizes the order of the rows in the given range.
-     * TODO：待研究特性
-     * 1. 公式内的范围也会变化
-     * 2. 并不是所有范围都支持随机处理
-     * @returns
-     */
-    randomize() {
-        const { _worksheet, _commandManager, _rangeData } = this;
-        const { startRow, startColumn } = _rangeData;
-        const cellValue = new ObjectMatrix<ICellData>();
-
-        const value = Tools.randSort(this.getMatrix().toArray());
-
-        value.forEach((row, r) =>
-            row.forEach((cell, c) => {
-                cell = cell as ICellData;
-                cellValue.setValue(r + startRow, c + startColumn, cell || {});
-            })
-        );
-
-        const setValue: ISetRangeDataActionData = {
-            sheetId: _worksheet.getSheetId(),
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-            cellValue: cellValue.getData(),
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
-            },
-            setValue
-        );
-        _commandManager.invoke(command);
     }
 
     /**

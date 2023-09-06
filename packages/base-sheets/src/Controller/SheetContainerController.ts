@@ -1,9 +1,10 @@
-import { CommandManager, Disposable, ICommandService, ICurrentUniverService, ISheetActionData, SheetActionBase } from '@univerjs/core';
+import { CommandManager, Disposable, ICommandInfo, ICommandService, ICurrentUniverService, ISheetActionData, SheetActionBase } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
+import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
 import { ISelectionManager } from '../Services/tokens';
-import { SelectionManager } from './Selection';
 import { CanvasView } from '../View';
+import { SelectionManager } from './Selection';
 
 export class SheetContainerController extends Disposable {
     constructor(
@@ -19,8 +20,12 @@ export class SheetContainerController extends Disposable {
 
     private _initialize() {
         this.disposeWithMe(
-            this._commandService.onCommandExecuted(() => {
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 this.canvasView.getSheetView().getSpreadsheet().makeDirty(true);
+
+                if (command.id === SetWorksheetActivateMutation.id) {
+                    this.canvasView.updateToSheet(this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet());
+                }
             })
         );
 

@@ -1,20 +1,20 @@
-import { Injector, Ctor } from '@wendellhu/redi';
+import { Ctor, Injector } from '@wendellhu/redi';
 
 import { CommandManager, UndoManager } from '../Command';
-import { LocaleService } from '../Service/Locale.service';
-import { UniverSheet } from './UniverSheet';
-import { UniverDoc } from './UniverDoc';
-import { Nullable } from '../Shared';
-import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../Plugin';
-import { IDocumentData, ISlideData, IUniverData, IWorkbookConfig } from '../Types/Interfaces';
-import { UniverObserverImpl } from './UniverObserverImpl';
 import { ObserverManager } from '../Observer';
-import { CurrentUniverService, ICurrentUniverService } from '../Service/Current.service';
+import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../Plugin';
+import { CommandService, ICommandService } from '../services/command/command.service';
+import { CurrentUniverService, ICurrentUniverService } from '../services/current.service';
+import { LocaleService } from '../services/locale.service';
+import { DesktopLogService, ILogService } from '../services/log/log.service';
+import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
+import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
+import { Nullable } from '../Shared';
+import { IDocumentData, ISlideData, IUniverData, IWorkbookConfig } from '../Types/Interfaces';
+import { UniverDoc } from './UniverDoc';
+import { UniverObserverImpl } from './UniverObserverImpl';
+import { UniverSheet } from './UniverSheet';
 import { UniverSlide } from './UniverSlide';
-import { CommandService, ICommandService } from '../Service/Command/Command.service';
-import { IUndoRedoService, LocalUndoRedoService } from '../Service/UndoRedo/undoRedo.service';
-import { DesktopLogService, ILogService } from '../Service/log/log.service';
-import { DesktopPermissionService, IPermissionService } from '../Service/permission/perimission.service';
 
 /**
  * Univer.

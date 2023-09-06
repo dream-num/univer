@@ -104,7 +104,7 @@ module.exports = {
         'no-unsafe-optional-chaining': 'off',
         '@typescript-eslint/consistent-type-assertions': 'off',
         '@typescript-eslint/no-redeclare': 'off', // dependency interface and dependency token share the same name
-        'no-magic-numbers': ['warn'],
+        'no-magic-numbers': ['warn', { ignore: [0, 1, -1, 2] }],
         'simple-import-sort/imports': 'error',
         'simple-import-sort/exports': 'error',
     },

@@ -1,18 +1,18 @@
-import { Ctor, Injector, Optional, Disposable, Dependency } from '@wendellhu/redi';
+import { Ctor, Dependency, IDisposable, Injector, Optional } from '@wendellhu/redi';
 
 import { ObserverManager } from '../Observer';
+import { Plugin, PluginCtor, PluginStore } from '../Plugin';
+import { CommandService, ICommandService } from '../services/command/command.service';
+import { GenName, Logger } from '../Shared';
 import { Workbook } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Types/Interfaces';
-import { Plugin, PluginCtor, PluginStore } from '../Plugin';
-import { GenName, Logger } from '../Shared';
 import { VersionCode, VersionEnv } from './Version';
 import { WorkBookObserverImpl } from './WorkBookObserverImpl';
-import { CommandService, ICommandService } from '../Service/Command/Command.service';
 
 /**
  * Externally provided UniverSheet root instance
  */
-export class UniverSheet implements Disposable {
+export class UniverSheet implements IDisposable {
     univerSheetConfig: Partial<IWorkbookConfig>;
 
     private readonly _sheetInjector: Injector;

@@ -1,7 +1,6 @@
-import { Inject } from '@wendellhu/redi';
-
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { RangeList, Tools, CommandManager, SheetActionBase, SetZoomRatioAction, UIObserver, ICurrentUniverService, ObserverManager } from '@univerjs/core';
+import { ICurrentUniverService, ObserverManager, RangeList, Tools, UIObserver } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
 import { CountBar } from '../View/CountBar';
 
@@ -13,30 +12,30 @@ export class CountBarUIController {
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager
     ) {
-        CommandManager.getActionObservers().add((event) => {
-            const action = event.action as SheetActionBase<any>;
-            const data = event.data;
+        // CommandManager.getActionObservers().add((event) => {
+        //     const action = event.action as SheetActionBase<any>;
+        //     const data = event.data;
 
-            // TODO Do not use try catch
+        //     // TODO Do not use try catch
 
-            try {
-                action.getWorkBook();
-            } catch (error) {
-                return;
-            }
-            const workbook = action.getWorkBook();
-            const unitId = workbook.getUnitId();
-            const currentWorkbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-            const currentUnitId = currentWorkbook.getUnitId();
-            if (unitId === currentUnitId) {
-                switch (data.actionName) {
-                    case SetZoomRatioAction.NAME: {
-                        this._refreshCountBarUI();
-                        break;
-                    }
-                }
-            }
-        });
+        //     try {
+        //         action.getWorkBook();
+        //     } catch (error) {
+        //         return;
+        //     }
+        //     const workbook = action.getWorkBook();
+        //     const unitId = workbook.getUnitId();
+        //     const currentWorkbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        //     const currentUnitId = currentWorkbook.getUnitId();
+        //     if (unitId === currentUnitId) {
+        //         switch (data.actionName) {
+        //             case SetZoomRatioAction.NAME: {
+        //                 this._refreshCountBarUI();
+        //                 break;
+        //             }
+        //         }
+        //     }
+        // });
 
         this._observerManager.getObserver('onChangeSelectionObserver')?.add(() => {
             const rangeList = this._selectionManager.getActiveRangeList();
@@ -65,16 +64,16 @@ export class CountBarUIController {
     };
 
     protected _totalRangeList(rangeList: RangeList): void {
-        let rectList = rangeList.getRangeList();
-        let recList: string[] = [];
-        let workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-        let worksheet = workbook.getActiveSheet();
-        let cellMatrix = worksheet.getCellMatrix();
+        const rectList = rangeList.getRangeList();
+        const recList: string[] = [];
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const worksheet = workbook.getActiveSheet();
+        const cellMatrix = worksheet.getCellMatrix();
         let avg = 0;
         let total = 0;
         let count = 0;
         for (let i = 0; i < rectList.length; i++) {
-            let rect = rectList[i];
+            const rect = rectList[i];
             for (let r = rect.startRow; r <= rect.endRow; r++) {
                 for (let c = rect.startColumn; c <= rect.endColumn; c++) {
                     if (recList.includes(`${r}${c}`)) {
@@ -82,7 +81,7 @@ export class CountBarUIController {
                     }
                     const cell = cellMatrix.getValue(r, c);
                     if (cell) {
-                        let value = parseFloat(cell.v as string);
+                        const value = parseFloat(cell.v as string);
                         // eslint-disable-next-line no-restricted-globals
                         if (!isNaN(value)) {
                             count += 1;

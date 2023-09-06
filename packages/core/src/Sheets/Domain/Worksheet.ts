@@ -1,19 +1,16 @@
 import { Inject } from '@wendellhu/redi';
 
-import { Command, CommandManager } from '../../Command';
 import { ObserverManager } from '../../Observer';
-import { ICurrentUniverService } from '../../Service/Current.service';
-import { Nullable, ObjectMatrix, Tools, Tuples } from '../../Shared';
+import { ICurrentUniverService } from '../../services/current.service';
+import { Nullable, ObjectMatrix, Tools } from '../../Shared';
 import { DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber, SheetTypes } from '../../Types/Enum';
-import { ICellData, IOptionData, IRangeStringData, IRangeType, ISelectionData, IWorksheetConfig } from '../../Types/Interfaces';
-import { ClearRangeAction, IClearRangeActionData } from '../Action';
+import { ICellData, IRangeStringData, IRangeType, IWorksheetConfig } from '../../Types/Interfaces';
 import { ColumnManager } from './ColumnManager';
 import { Merges } from './Merges';
 import { Range } from './Range';
 import { RangeList } from './RangeList';
 import { RowManager } from './RowManager';
-import { Selection } from './Selection';
 
 /**
  * Access and modify spreadsheet sheets.
@@ -26,8 +23,6 @@ import { Selection } from './Selection';
  * @beta
  */
 export class Worksheet {
-    protected _selection: Selection;
-
     protected _config: IWorksheetConfig;
 
     protected _initialized: boolean;
@@ -44,7 +39,6 @@ export class Worksheet {
 
     constructor(
         customConfig: Partial<IWorksheetConfig>,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
@@ -76,7 +70,7 @@ export class Worksheet {
         this._sheetId = this._config.id ?? Tools.generateRandomId(6);
         this._initialized = false;
         this._cellData = new ObjectMatrix<ICellData>(cellData);
-        this._rowManager = new RowManager(this, rowData, this._currentUniverService, this._commandManager);
+        this._rowManager = new RowManager(this, rowData);
         this._columnManager = new ColumnManager(this, columnData);
         this._initialize();
     }
@@ -125,11 +119,12 @@ export class Worksheet {
     /**
      * Returns WorkSheet Clone Object
      * @returns WorkSheet Clone Object
+     * @deprecated
      */
     clone(): Worksheet {
         const { _config } = this;
         const copy = Tools.deepClone(_config);
-        return new Worksheet(copy, this._commandManager, this._observerManager, this._currentUniverService);
+        return new Worksheet(copy, this._observerManager, this._currentUniverService);
     }
 
     /**
@@ -192,7 +187,7 @@ export class Worksheet {
     getRange(a1Notation: IRangeStringData): Range;
     getRange(...argument: any): Nullable<Range> {
         if (Tools.hasLength(argument, 1)) {
-            return new Range(this, argument[0], this._currentUniverService, this._commandManager);
+            return new Range(this, argument[0], this._currentUniverService);
         }
         if (Tools.hasLength(argument, 2)) {
             return new Range(
@@ -201,8 +196,7 @@ export class Worksheet {
                     row: [argument[0], argument[0]],
                     column: [argument[1], argument[1]],
                 },
-                this._currentUniverService,
-                this._commandManager
+                this._currentUniverService
             );
         }
         if (Tools.hasLength(argument, 3)) {
@@ -212,8 +206,7 @@ export class Worksheet {
                     row: [argument[0], argument[2]],
                     column: [argument[1], argument[1]],
                 },
-                this._currentUniverService,
-                this._commandManager
+                this._currentUniverService
             );
         }
         if (Tools.hasLength(argument, 4)) {
@@ -223,8 +216,7 @@ export class Worksheet {
                     row: [argument[0], argument[2]],
                     column: [argument[1], argument[3]],
                 },
-                this._currentUniverService,
-                this._commandManager
+                this._currentUniverService
             );
         }
     }
@@ -240,7 +232,7 @@ export class Worksheet {
          * const range = universheet.getRange('A1:B2')
          * range.activate() // Activate the current range as the current selection
          */
-        return new RangeList(this, rangeList, this._commandManager, this._currentUniverService);
+        return new RangeList(this, rangeList, this._currentUniverService);
     }
 
     /**
@@ -261,89 +253,11 @@ export class Worksheet {
     }
 
     /**
-     * Returns User Selection
-     * @returns User Selection
-     */
-    getSelection(): Selection {
-        return this._selection;
-    }
-
-    /**
      * Returns WorkSheet Configures
      * @returns WorkSheet Configures
      */
     getConfig(): IWorksheetConfig {
         return this._config;
-    }
-
-    /**
-     * Clears the sheet of content and formatting information.
-     * @returns WorkSheet Instance
-     */
-    clear(): Worksheet;
-    /**
-     * Clears the sheet of content and formatting information.
-     * @param options clear option
-     * @returns WorkSheet Instance
-     */
-    clear(options: IOptionData): Worksheet;
-    clear(...argument: any): Worksheet {
-        // collect all cell as a Range
-        const _range = {
-            startRow: 0,
-            endRow: this.getConfig().rowCount - 1,
-            startColumn: 0,
-            endColumn: this.getConfig().columnCount - 1,
-        };
-
-        // default options
-        let options = {
-            formatOnly: true,
-            contentsOnly: true,
-        };
-
-        if (Tuples.checkup(argument, Tuples.OBJECT_TYPE)) {
-            options = argument[0];
-        }
-
-        const setValue: IClearRangeActionData = {
-            sheetId: this._sheetId,
-            actionName: ClearRangeAction.NAME,
-            options,
-            rangeData: _range,
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
-            },
-            setValue
-        );
-        this._commandManager.invoke(command);
-        return this;
-    }
-
-    /**
-     * restore the active selection region for this sheet.
-     * @returns Range — the newly active range
-     */
-    setActiveSelection(): Range;
-    /**
-     * restore the active selection region for this sheet.
-     * @param range Range Instance of Selection
-     * @returns Range — the newly active range
-     */
-    setActiveSelection(range: Range): Range;
-    /**
-     * restore the active selection region for this sheet.
-     * @param a1Notation One of the range types, the range to set as active, as specified in A1 notation or R1C1 notation
-     * @returns Range — the newly active range
-     */
-    setActiveSelection(a1Notation: IRangeStringData): Range;
-    setActiveSelection(...argument: any): Range {
-        const range = argument[0];
-
-        // just send range, we will handle Range instance or range string in Selection class
-        return range ? this._selection.setSelection({ selection: range }) : this._selection.setSelection();
     }
 
     /**
@@ -402,42 +316,6 @@ export class Worksheet {
     }
 
     /**
-     * Clears the sheet of contents, while preserving formatting information.
-     * @returns WorkSheet Instance
-     */
-    clearContents(): Worksheet {
-        // const { _config } = this;
-        // const { rowCount, columnCount } = _config;
-        // this.getRange({
-        //     startRow: 0,
-        //     endRow: rowCount,
-        //     startColumn: 0,
-        //     endColumn: columnCount,
-        // }).clear({
-        //     contentsOnly: true,
-        // });
-        // return this;
-    }
-
-    /**
-     * Clears the sheet of formatting, while preserving contents.
-     * @returns WorkSheet Instance
-     */
-    // clearFormats(): Worksheet {
-    // const { _config } = this;
-    // const { rowCount, columnCount } = _config;
-    // this.getRange({
-    //     startRow: 0,
-    //     endRow: rowCount,
-    //     startColumn: 0,
-    //     endColumn: columnCount,
-    // }).clear({
-    //     formatOnly: true,
-    // });
-    // return this;
-    // }
-
-    /**
      * Returns Row Count
      * @returns Row Count
      */
@@ -451,39 +329,6 @@ export class Worksheet {
      */
     getColumnCount(): number {
         return this._config.columnCount;
-    }
-
-    /**
-     * Sets the specified cell as the current cell.
-     * @param cell cell range
-     * @returns Range Instance
-     */
-    // setCurrentCell(cell: Range): Range {
-    //     return cell.activateAsCurrentCell();
-    // }
-
-    /**
-     * Returns the active cell in this sheet.
-     * @returns the active cell in this sheet
-     */
-    getActiveCell(): Range {
-        return this.getSelection().getCurrentCell();
-    }
-
-    /**
-     * Returns the selected range in the active sheet
-     * @returns the selected range in the active sheet
-     */
-    getActiveRange(): Range {
-        return this.getSelection().getActiveRange();
-    }
-
-    /**
-     * Returns the list of active ranges in the active sheet
-     * @returns the list of active ranges in the active sheet
-     */
-    getActiveRangeList(): RangeList {
-        return this.getSelection().getActiveRangeList();
     }
 
     /**
@@ -507,26 +352,6 @@ export class Worksheet {
      */
     isSheetHidden(): BooleanNumber {
         return this._config.hidden;
-    }
-
-    /**
-     * Sets the specified range as the active range in the active sheet, with the top left cell in the range as the current cell.
-     * @param range active range types
-     * @return Active Range
-     */
-    setActiveRange(range: ISelectionData): Range {
-        return this.getSelection().setSelection(range);
-    }
-
-    /**
-     * Sets the specified list of ranges as the active ranges in the active sheet. The last range in the list is set as the active range.
-     * @param rangeList active range types array
-     * @return Active Range List
-     */
-    setActiveRangeList(rangeList: ISelectionData): RangeList {
-        const selection = this.getSelection();
-        selection.setSelection(rangeList);
-        return selection.getActiveRangeList();
     }
 
     /**
@@ -616,13 +441,6 @@ export class Worksheet {
     }
 
     /**
-     * @deprecated the method here is just to prevent ts errors
-     */
-    setCommandManager(_commandManager: CommandManager): void {
-        throw new Error('This method is deprecated. The method is here to prevent ts errors!');
-    }
-
-    /**
      * Returns the rectangular grid of values for this range starting at the given coordinates. A -1 value given as the row or column position is equivalent to getting the very last row or column that has data in the sheet.
      * @param startRow row start index
      * @param startColumn column start index
@@ -639,8 +457,7 @@ export class Worksheet {
                 endRow: startRow + numRows - 1,
                 endColumn: startColumn + numColumns - 1,
             },
-            this._currentUniverService,
-            this._commandManager
+            this._currentUniverService
         );
         return range.getValues();
     }
@@ -650,12 +467,12 @@ export class Worksheet {
      * @returns a Range corresponding to the dimensions in which data is present.
      */
     getDataRange(): Range {
-        const range = new Range(this, this._cellData.getRange(), this._currentUniverService, this._commandManager);
+        const range = new Range(this, this._cellData.getRange(), this._currentUniverService);
         return range;
     }
 
     private _initialize(): void {
         // this._selection = new Selection(this);
-        this._merges = new Merges(this, this._config.mergeData, this._commandManager, this._currentUniverService);
+        this._merges = new Merges(this, this._config.mergeData);
     }
 }

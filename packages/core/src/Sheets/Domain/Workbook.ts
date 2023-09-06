@@ -1,8 +1,7 @@
 import { forwardRef, Inject, Injector } from '@wendellhu/redi';
 
-import { CommandManager } from '../../Command';
 import { ObserverManager } from '../../Observer';
-import { ICurrentUniverService } from '../../Service/Current.service';
+import { ICurrentUniverService } from '../../services/current.service';
 import { GenName, Nullable, Tools } from '../../Shared';
 import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
@@ -42,7 +41,6 @@ export class Workbook {
         workbookData: Partial<IWorkbookConfig> = {},
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(Injector) readonly _injector: Injector
     ) {
@@ -428,7 +426,7 @@ export class Workbook {
         for (const sheetId in sheets) {
             const config = sheets[sheetId];
             config.name = this._genName.sheetName(config.name);
-            const worksheet = new Worksheet(config, this._commandManager, this._observerManager, this._currentUniverService);
+            const worksheet = new Worksheet(config, this._observerManager, this._currentUniverService);
             _worksheets.set(sheetId, worksheet);
             if (!sheetOrder.includes(sheetId)) {
                 sheetOrder.push(sheetId);

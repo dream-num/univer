@@ -22,7 +22,6 @@ import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SheetUIPlu
 import { AppUIController } from './Controller/AppUIController';
 import { Fx } from './View/FormulaBar';
 import { SlotComponentProps } from './Controller/SlotController';
-import { IToolbarItemProps } from './Controller/ToolbarUIController';
 import { zh, en } from './Locale';
 import { DesktopSheetShortcutController } from './Controller/shortcut.controller';
 
@@ -154,14 +153,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
     getSlot(name: string) {
         // return this._appUIController.getSheetContainerController().getMainSlotController().getSlot(name);
-    }
-
-    addToolButton(config: IToolbarItemProps) {
-        this._appUIController.getSheetContainerController().getToolbarController().addToolbarConfig(config);
-    }
-
-    deleteToolButton(name: string) {
-        this._appUIController.getSheetContainerController().getToolbarController().deleteToolbarConfig(name);
     }
 
     private initializeDependencies(): void {

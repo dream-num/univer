@@ -12,27 +12,25 @@
  *
  */
 
-import './Sheets/Action';
 import './Docs/Action';
 
 export * from './Basics';
 export * from './Command';
-export * from './Types/Const';
 export * from './Docs/Domain';
-export * from './Types/Enum';
-export * from './Types/Interfaces';
 export * from './Observer';
 export * from './Plugin';
 export * from './Server';
+export { CommandType, ICommand, ICommandInfo, ICommandService, IMutation, IOperation } from './services/command/command.service';
+export { ICurrentUniverService } from './services/current.service';
+export { LocaleService } from './services/locale.service';
+export { DesktopLogService, ILogService } from './services/log/log.service';
+export { DesktopPermissionService, IPermissionService } from './services/permission/permission.service';
+export { IUndoRedoService, LocalUndoRedoService, RedoCommand, UndoCommand } from './services/undoredo/undoredo.service';
 export * from './Shared';
-export { IRowColIter, createRowColIter } from './Shared/RowColIter';
-export { DisposableCollection, Disposable, toDisposable } from './Shared/Lifecycle';
+export { Disposable, DisposableCollection, toDisposable } from './Shared/Lifecycle';
+export { createRowColIter, IRowColIter } from './Shared/RowColIter';
 export * from './Sheets';
 export * from './Slides/Domain';
-
-export { ICurrentUniverService } from './Service/Current.service';
-export { LocaleService } from './Service/Locale.service';
-export { ICommandService, ICommand, CommandType, IMutation, IOperation } from './Service/Command/Command.service';
-export { IUndoRedoService, LocalUndoRedoService, UndoCommand, RedoCommand } from './Service/UndoRedo/undoRedo.service';
-export { ILogService, DesktopLogService } from './Service/log/log.service';
-export { IPermissionService, DesktopPermissionService } from './Service/permission/perimission.service';
+export * from './Types/Const';
+export * from './Types/Enum';
+export * from './Types/Interfaces';

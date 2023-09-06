@@ -339,8 +339,6 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
         const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
         const { title, display, label } = item;
 
-        console.log('debug, value', value, title);
-
         return (
             <li
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}

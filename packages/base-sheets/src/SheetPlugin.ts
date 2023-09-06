@@ -1,31 +1,28 @@
 import { Engine, IRenderingEngine } from '@univerjs/base-render';
-import { Plugin, PLUGIN_NAMES, DEFAULT_SELECTION, PluginType, CommandManager, ICurrentUniverService, LocaleService } from '@univerjs/core';
+import { DEFAULT_SELECTION, ICurrentUniverService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { SheetPluginObserve, uninstall } from './Basics/Observer';
-import { CanvasView } from './View/CanvasView';
-import {
-    SheetBarController,
-    CellEditorController,
-    SheetContainerController,
-    CountBarController,
-    EditTooltipsController,
-    SelectionManager,
-    HideColumnController,
-    BasicWorkbookController,
-} from './Controller';
 import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
-import { FormulaBarController } from './Controller/FormulaBarController';
-import { NamedRangeActionExtensionFactory } from './Basics/Register/NamedRangeActionExtension';
-import { en, zh } from './Locale';
-import { ISelectionManager } from './Services/tokens';
-import { DragLineController } from './Controller/Selection/DragLineController';
-import { ColumnTitleController } from './Controller/Selection/ColumnTitleController';
-import { RowTitleController } from './Controller/Selection/RowTitleController';
-import { ColumnRulerManager } from './Basics/Register/ColumnRegister';
-import { HideColumnRulerFactory } from './Basics/Register/HideColumnRuler';
+import { SheetPluginObserve, uninstall } from './Basics/Observer';
+import {
+    BasicWorkbookController,
+    CellEditorController,
+    CountBarController,
+    // EditTooltipsController,
+    // HideColumnController,
+    SelectionManager,
+    SheetBarController,
+    SheetContainerController,
+} from './Controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
+import { FormulaBarController } from './Controller/FormulaBarController';
+import { ColumnTitleController } from './Controller/Selection/ColumnTitleController';
+import { DragLineController } from './Controller/Selection/DragLineController';
+import { RowTitleController } from './Controller/Selection/RowTitleController';
+import { en, zh } from './Locale';
 import { BorderStyleManagerService } from './Services/border-style-manager.service';
+import { ISelectionManager } from './Services/tokens';
+import { CanvasView } from './View/CanvasView';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -37,32 +34,25 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
     private _canvasEngine: Engine;
 
-    private _editTooltipsController: EditTooltipsController;
+    // private _editTooltipsController: EditTooltipsController;
 
     private _formulaBarController: FormulaBarController;
 
     private _sheetBarController: SheetBarController;
 
-    private _cellEditorController: CellEditorController;
+    // private _cellEditorController: CellEditorController;
 
     private _countBarController: CountBarController;
 
-    private _hideColumnController: HideColumnController;
+    // private _hideColumnController: HideColumnController;
 
     private _sheetContainerController: SheetContainerController;
-
-    private _namedRangeActionExtensionFactory: NamedRangeActionExtensionFactory;
-
-    private _columnRulerManager: ColumnRulerManager;
-
-    private _hideColumnRulerFactory: HideColumnRulerFactory;
 
     constructor(
         config: Partial<ISheetPluginConfig>,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(Injector) override readonly _injector: Injector,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager
+        @Inject(Injector) override readonly _injector: Injector
     ) {
         super(PLUGIN_NAMES.SPREADSHEET);
 
@@ -82,7 +72,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         this.initConfig();
         this.initController();
         this.initCanvasView();
-        this.registerExtension();
         this.listenEventManager();
     }
 
@@ -107,12 +96,11 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     // TODO@huwenzhao: We don't need to init controllers manually
     initController() {
         this._sheetContainerController = this._injector.get(SheetContainerController);
-        this._cellEditorController = this._injector.get(CellEditorController);
         this._formulaBarController = this._injector.get(FormulaBarController);
-        this._editTooltipsController = this._injector.get(EditTooltipsController);
+        // this._editTooltipsController = this._injector.get(EditTooltipsController);
         this._sheetBarController = this._injector.get(SheetBarController);
         this._countBarController = this._injector.get(CountBarController);
-        this._hideColumnController = this._injector.get(HideColumnController);
+        // this._hideColumnController = this._injector.get(HideColumnController);
 
         this._injector.get(BasicWorksheetController);
     }
@@ -129,23 +117,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         super.onDestroy();
 
         uninstall(this);
-
-        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
-        actionRegister.delete(this._namedRangeActionExtensionFactory);
-
-        const rulerRegister = this._columnRulerManager.getRegister();
-        rulerRegister.delete(this._hideColumnRulerFactory);
-    }
-
-    registerExtension() {
-        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
-        this._namedRangeActionExtensionFactory = new NamedRangeActionExtensionFactory(this._injector);
-        actionRegister.add(this._namedRangeActionExtensionFactory); // TODO: this should return a disposable function
-
-        this._columnRulerManager = this._injector.get(ColumnRulerManager);
-        const rulerRegister = this._columnRulerManager.getRegister();
-        this._hideColumnRulerFactory = new HideColumnRulerFactory(this);
-        rulerRegister.add(this._hideColumnRulerFactory);
     }
 
     listenEventManager() {
@@ -166,7 +137,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [CellEditorController],
             [SheetContainerController],
             [FormulaBarController],
-            [EditTooltipsController],
+            // [EditTooltipsController],
             [SheetBarController],
             [CountBarController],
 
@@ -181,9 +152,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [RowTitleController],
             [ColumnTitleController],
             [DragLineController],
-            [HideColumnController],
-
-            [ColumnRulerManager],
+            // [HideColumnController],
 
             [BasicWorksheetController],
             [BasicWorkbookController],

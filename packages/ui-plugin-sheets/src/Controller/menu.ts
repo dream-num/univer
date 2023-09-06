@@ -1,32 +1,36 @@
 import {
-    ISelectionManager,
-    SetBoldCommand,
-    SetItalicCommand,
-    SetSelectionsOperation,
-    SetStrikeThroughCommand,
-    SetUnderlineCommand,
-    SetRangeStyleMutation,
-    SetWorksheetColWidthCommand,
-    SetWorksheetRowHeightCommand,
-    RemoveRowCommand,
-    RemoveColCommand,
-    SetFontFamilyCommand,
-    SetFontSizeCommand,
-    SetTextColorCommand,
-    SetBackgroundColorCommand,
-    SetTextRotationCommand,
-    SetTextWrapCommand,
-    SetHorizontalTextAlignCommand,
-    SetVerticalTextAlignCommand,
-    ResetTextColorCommand,
-    ResetBackgroundColorCommand,
+    ClearSelectionContentCommand,
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
+    InsertColCommand,
+    InsertRowCommand,
+    ISelectionManager,
+    RemoveColCommand,
+    RemoveRowCommand,
     RemoveSheetCommand,
+    ResetBackgroundColorCommand,
+    ResetTextColorCommand,
+    SetBackgroundColorCommand,
+    SetBoldCommand,
+    SetFontFamilyCommand,
+    SetFontSizeCommand,
+    SetHorizontalTextAlignCommand,
+    SetItalicCommand,
+    SetRangeStyleMutation,
+    SetSelectionsOperation,
+    SetStrikeThroughCommand,
+    SetTextColorCommand,
+    SetTextRotationCommand,
+    SetTextWrapCommand,
+    SetUnderlineCommand,
+    SetVerticalTextAlignCommand,
+    SetWorksheetColWidthCommand,
+    SetWorksheetHideCommand,
+    SetWorksheetRowHeightCommand,
     SetWorksheetRowHideCommand,
     SetWorksheetRowShowCommand,
-    SetWorksheetHideCommand,
 } from '@univerjs/base-sheets';
+import { ISetHorizontalTextAlignCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams } from '@univerjs/base-sheets/src/Commands/Commands/set-style.command';
 import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
 import {
     FontItalic,
@@ -40,14 +44,13 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ISetHorizontalTextAlignCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams } from '@univerjs/base-sheets/src/Commands/Commands/set-style.command';
+
+import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
 import { RightMenuInput } from '../View';
 import { FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, HORIZONTAL_ALIGN_CHILDREN, TEXT_ROTATE_CHILDREN, TEXT_WRAP_CHILDREN, VERTICAL_ALIGN_CHILDREN } from '../View/Toolbar/Const';
-import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
 
 export { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './menu/border.menu';
 

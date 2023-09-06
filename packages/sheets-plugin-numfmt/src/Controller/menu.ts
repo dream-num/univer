@@ -1,9 +1,9 @@
-import { ISelectionManager, SetRangeStyleMutation, SetSelectionsOperation } from "@univerjs/base-sheets";
-import { IMenuSelectorItem, SelectTypes, MenuItemType, DisplayTypes, MenuPosition } from "@univerjs/base-ui";
-import { IPermissionService, ICommandService, Observable } from "@univerjs/core";
-import { FONT_FAMILY_CHILDREN } from "@univerjs/ui-plugin-sheets/src/View/Toolbar/Const";
-import { IAccessor } from "@wendellhu/redi";
-import { DEFAULT_DATA, MORE_FORMATS_SELECTIONS } from "../Basics/Const/DEFAULT_DATA";
+import { ISelectionManager } from '@univerjs/base-sheets';
+import { DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
+import { ICommandService, IPermissionService } from '@univerjs/core';
+import { IAccessor } from '@wendellhu/redi';
+
+import { DEFAULT_DATA, MORE_FORMATS_SELECTIONS } from '../Basics/Const/DEFAULT_DATA';
 
 export function NumfmtRangeDataMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const permissionService = accessor.get(IPermissionService);
@@ -12,11 +12,12 @@ export function NumfmtRangeDataMenuItemFactory(accessor: IAccessor): IMenuSelect
 
     return {
         // TODO replace with real command
-        id: "SetNumfmtRangeDataCommand.id",
+        id: 'SetNumfmtRangeDataCommand.id',
         title: 'toolbar.moreFormats',
         tooltip: 'toolbar.moreFormats',
         selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,
+        display: DisplayTypes.CUSTOM,
         // display: DisplayTypes.FONT,
         positions: [MenuPosition.TOOLBAR],
         selections: DEFAULT_DATA,
@@ -58,7 +59,6 @@ export function NumfmtRangeDataMenuItemFactory(accessor: IAccessor): IMenuSelect
     };
 }
 
-
 export function OpenMoreFormatsModalMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
@@ -66,9 +66,9 @@ export function OpenMoreFormatsModalMenuItemFactory(accessor: IAccessor): IMenuS
     return {
         // TODO@Dushusir 1. replace with real command
         // 2. suffix
-        id: "OpenMoreFormatsModalCommand.id",
+        id: 'OpenMoreFormatsModalCommand.id',
         title: 'defaultFmt.CustomFormats.text',
-        positions: "SetNumfmtRangeDataCommand.id",
+        positions: 'SetNumfmtRangeDataCommand.id',
         display: DisplayTypes.LABEL,
         selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,

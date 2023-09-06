@@ -1,17 +1,28 @@
-import { ObjectMatrixPrimitiveType, Command, ObjectMatrix, IRangeData, Range, ACTION_NAMES as CORE_ACTION_NAME, CommandManager, ICurrentUniverService, Disposable } from '@univerjs/core';
-import { BaseComponentRender, ComponentManager, IMenuService } from '@univerjs/base-ui';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { BaseComponentRender, ComponentManager, IMenuService } from '@univerjs/base-ui';
+import {
+    ACTION_NAMES as CORE_ACTION_NAME,
+    Command,
+    CommandManager,
+    Disposable,
+    ICurrentUniverService,
+    IRangeData,
+    ObjectMatrix,
+    ObjectMatrixPrimitiveType,
+    Range,
+} from '@univerjs/core';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
-import styles from '../View/UI/index.module.less';
-import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumfmtConfig } from '../Basics';
-import { NumfmtModalController } from './NumfmtModalController';
-import { INumfmtPluginData } from '../Symbol';
-import { NumfmtModel } from '../Model';
-import { NumfmtRangeDataMenuItemFactory, OpenMoreFormatsModalMenuItemFactory } from './menu';
-import { FormatItem } from '../View/UI/FormatItem';
 
-export class NumfmtController extends Disposable{
+import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumfmtConfig } from '../Basics';
+import { NumfmtModel } from '../Model';
+import { INumfmtPluginData } from '../Symbol';
+import { FormatItem } from '../View/UI/FormatItem';
+import styles from '../View/UI/index.module.less';
+import { NumfmtRangeDataMenuItemFactory, OpenMoreFormatsModalMenuItemFactory } from './menu';
+import { NumfmtModalController } from './NumfmtModalController';
+
+export class NumfmtController extends Disposable {
     protected _numfmtList: IToolbarItemProps;
 
     protected _render: BaseComponentRender;
@@ -223,10 +234,7 @@ export class NumfmtController extends Disposable{
     }
 
     private _initializeContextMenu() {
-        [
-            NumfmtRangeDataMenuItemFactory,
-            OpenMoreFormatsModalMenuItemFactory
-        ].forEach((factory) => {
+        [NumfmtRangeDataMenuItemFactory, OpenMoreFormatsModalMenuItemFactory].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

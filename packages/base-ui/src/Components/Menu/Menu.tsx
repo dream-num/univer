@@ -182,7 +182,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                                     value={option.value}
                                     display={display}
                                     label={option.label}
-                                    title={option.label}
+                                    title={typeof option.label === 'string' ? option.label : ''}
                                     icon={option.icon}
                                 />
                             </li>
@@ -194,7 +194,6 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                     return (
                         <li className={joinClassNames(styles.colsMenuitem, option.disabled ? styles.colsMenuitemDisabled : '')}>
                             <CustomComponent
-                                {...option.props}
                                 onValueChange={(v: string | number) => {
                                     this.props.onOptionSelect!({ value: v, label: option.id });
                                     this.showMenu(false);

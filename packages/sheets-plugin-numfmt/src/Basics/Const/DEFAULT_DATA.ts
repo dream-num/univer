@@ -1,4 +1,4 @@
-import { NUMFMT_PLUGIN_NAME } from "./PLUGIN_NAME";
+import { NUMFMT_PLUGIN_NAME } from './PLUGIN_NAME';
 
 export const DEFAULT_DATA = [
     {
@@ -8,156 +8,168 @@ export const DEFAULT_DATA = [
     },
     {
         label: 'defaultFmt.PlainText.text',
-        value: 'PlainText'
+        value: 'PlainText',
         // border: true,
     },
     {
         // label: 'defaultFmt.Number.text',
         // suffix: 'defaultFmt.Number.example',
-        // value: 'Number'
-        id: NUMFMT_PLUGIN_NAME + "FormatItem",
-        props:{
-            label: 'defaultFmt.Number.text',
-            suffix: 'defaultFmt.Number.example',
-            value: 'Number'
-        }
+        value: 'Number',
+        label: {
+            name: `${NUMFMT_PLUGIN_NAME}FormatItem`,
+            props: {
+                labelText: 'defaultFmt.Number.text',
+                suffix: 'defaultFmt.Number.example',
+            },
+        },
     },
     {
         // label: 'defaultFmt.Percent.text',
         // suffix: 'defaultFmt.Percent.example',
-        // value: 'Percent'
-        id: NUMFMT_PLUGIN_NAME + "FormatItem",
-        props:{
-            label: 'defaultFmt.Percent.text',
-            suffix: 'defaultFmt.Percent.example',
-            value: 'Percent'
-        }
+        value: 'Percent',
+        label: {
+            name: `${NUMFMT_PLUGIN_NAME}FormatItem`,
+            props: {
+                labelText: 'defaultFmt.Percent.text',
+                suffix: 'defaultFmt.Percent.example',
+            },
+        },
     },
     {
         // label: 'defaultFmt.Scientific.text',
         // suffix: 'defaultFmt.Scientific.example',
-        // value: 'Scientific'
+        value: 'Scientific',
         // border: true,
-        id: NUMFMT_PLUGIN_NAME + "FormatItem",
-        props:{
-            label: 'defaultFmt.Scientific.text',
-            suffix: 'defaultFmt.Scientific.example',
-            value: 'Scientific'
-        }
+        label: {
+            name: `${NUMFMT_PLUGIN_NAME}FormatItem`,
+            props: {
+                labelText: 'defaultFmt.Scientific.text',
+                suffix: 'defaultFmt.Scientific.example',
+            },
+        },
     },
     {
         // label: 'defaultFmt.Accounting.text',
         // suffix: 'defaultFmt.Accounting.example',
-        // value: 'Accounting',
-        id: NUMFMT_PLUGIN_NAME + "FormatItem",
-        props:{
-            label: 'defaultFmt.Accounting.text',
-            suffix: 'defaultFmt.Accounting.example',
-            value: 'Accounting',
-        }
+        value: 'Accounting',
+        label: {
+            name: `${NUMFMT_PLUGIN_NAME}FormatItem`,
+            props: {
+                labelText: 'defaultFmt.Accounting.text',
+                suffix: 'defaultFmt.Accounting.example',
+            },
+        },
     },
     {
         // label: 'defaultFmt.Thousand.text',
         // suffix: 'defaultFmt.Thousand.example',
-        // value: 'Thousand',
-        id: NUMFMT_PLUGIN_NAME + "FormatItem",
-        props:{
-            label: 'defaultFmt.Thousand.text',
-            suffix: 'defaultFmt.Thousand.example',
-            value: 'Thousand',
-        }
+        value: 'Thousand',
+        label: {
+            name: `${NUMFMT_PLUGIN_NAME}FormatItem`,
+            props: {
+                labelText: 'defaultFmt.Thousand.text',
+                suffix: 'defaultFmt.Thousand.example',
+            },
+        },
     },
     {
         // label: 'defaultFmt.Currency.text',
         // suffix: 'defaultFmt.Currency.example',
-        // value: 'Currency',
-        id: NUMFMT_PLUGIN_NAME + "FormatItem",
-        props:{
-            label: 'defaultFmt.Currency.text',
-            suffix: 'defaultFmt.Currency.example',
-            value: 'Currency',
-        }
+        value: 'Currency',
+        label: {
+            name: `${NUMFMT_PLUGIN_NAME}FormatItem`,
+            props: {
+                labelText: 'defaultFmt.Currency.text',
+                suffix: 'defaultFmt.Currency.example',
+            },
+        },
     },
     {
         // label: 'defaultFmt.Digit.text',
         // suffix: 'defaultFmt.Digit.example',
-        // value: 'Digit',
+        value: 'Digit',
         // border: true,
-        id: NUMFMT_PLUGIN_NAME + "FormatItem",
-        props:{
-            label: 'defaultFmt.Digit.text',
-            suffix: 'defaultFmt.Digit.example',
-            value: 'Digit',
-        }
+        label: {
+            name: `${NUMFMT_PLUGIN_NAME}FormatItem`,
+            props: {
+                labelText: 'defaultFmt.Digit.text',
+                suffix: 'defaultFmt.Digit.example',
+            },
+        },
     },
     {
         // label: 'defaultFmt.Date.text',
         // suffix: 'defaultFmt.Date.example',
-        // value: 'Date',
-        id: NUMFMT_PLUGIN_NAME + "FormatItem",
-        props:{
-            label: 'defaultFmt.Date.text',
-            suffix: 'defaultFmt.Date.example',
-            value: 'Date',
-        }
+        value: 'Date',
+        label: {
+            name: `${NUMFMT_PLUGIN_NAME}FormatItem`,
+            props: {
+                labelText: 'defaultFmt.Date.text',
+                suffix: 'defaultFmt.Date.example',
+            },
+        },
     },
     {
         // label: 'defaultFmt.Time.text',
         // suffix: 'defaultFmt.Time.example',
-        // value: 'Time',
-        id: NUMFMT_PLUGIN_NAME + "FormatItem",
-        props:{
-            label: 'defaultFmt.Time.text',
-            suffix: 'defaultFmt.Time.example',
-            value: 'Time',
-        }
+        value: 'Time',
+        label: {
+            name: `${NUMFMT_PLUGIN_NAME}FormatItem`,
+            props: {
+                labelText: 'defaultFmt.Time.text',
+                suffix: 'defaultFmt.Time.example',
+            },
+        },
     },
     {
         // label: 'defaultFmt.Time24H.text',
         // suffix: 'defaultFmt.Time24H.example',
-        // value: 'Time24H',
-        id: NUMFMT_PLUGIN_NAME + "FormatItem",
-        props:{
-            label: 'defaultFmt.Time24H.text',
-            suffix: 'defaultFmt.Time24H.example',
-            value: 'Time24H',
-        }
+        value: 'Time24H',
+        label: {
+            name: `${NUMFMT_PLUGIN_NAME}FormatItem`,
+            props: {
+                labelText: 'defaultFmt.Time24H.text',
+                suffix: 'defaultFmt.Time24H.example',
+            },
+        },
     },
     {
         // label: 'defaultFmt.DateTime.text',
         // suffix: 'defaultFmt.DateTime.example',
-        // value: 'DateTime',
-        id: NUMFMT_PLUGIN_NAME + "FormatItem",
-        props:{
-            label: 'defaultFmt.DateTime.text',
-            suffix: 'defaultFmt.DateTime.example',
-            value: 'DateTime',
-        }
+        value: 'DateTime',
+        label: {
+            name: `${NUMFMT_PLUGIN_NAME}FormatItem`,
+            props: {
+                labelText: 'defaultFmt.DateTime.text',
+                suffix: 'defaultFmt.DateTime.example',
+            },
+        },
     },
     {
         // label: 'defaultFmt.DateTime24H.text',
         // suffix: 'defaultFmt.DateTime.example',
-        // value: 'DateTime24H',
-        id: NUMFMT_PLUGIN_NAME + "FormatItem",
-        props:{
-            label: 'defaultFmt.DateTime24H.text',
-            suffix: 'defaultFmt.DateTime.example',
-            value: 'DateTime24H',
-        }
+        value: 'DateTime24H',
+        label: {
+            name: `${NUMFMT_PLUGIN_NAME}FormatItem`,
+            props: {
+                labelText: 'defaultFmt.DateTime24H.text',
+                suffix: 'defaultFmt.DateTime.example',
+            },
+        },
     },
 ];
 
 export const MORE_FORMATS_SELECTIONS = [
     {
         label: 'format.moreCurrency',
-        value: 'MoreCurrency'
+        value: 'MoreCurrency',
     },
     {
         label: 'format.moreDateTime',
-        value: 'MoreDateTime'
+        value: 'MoreDateTime',
     },
     {
         label: 'format.moreNumber',
-        value: 'MoreNumber'
+        value: 'MoreNumber',
     },
-]
+];

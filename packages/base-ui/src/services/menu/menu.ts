@@ -71,7 +71,12 @@ export function isMenuButtonItem(v: IMenuItem): v is IMenuButtonItem {
 
 export interface IValueOption {
     value: string | number;
-    label: string; // custom component, send to NeoCustomLabel label property
+    label:
+        | string
+        | {
+              name: string;
+              props?: Record<string, string | number>;
+          }; // custom component, send to NeoCustomLabel label property
     icon?: string;
     tooltip?: string;
     style?: object;
@@ -84,7 +89,6 @@ export function isValueOptions(v: IValueOption | ICustomComponentOption): v is I
 
 export interface ICustomComponentOption {
     id: string;
-    props?: Record<string, string | number>; // custom property by component
 }
 
 export interface ICustomComponentProps<T> {

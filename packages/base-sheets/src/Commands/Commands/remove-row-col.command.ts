@@ -19,6 +19,7 @@ import { InsertColMutation, InsertRowMutation } from '../Mutations/insert-row-co
 import { IRemoveColMutationFactory, IRemoveRowMutationFactory, RemoveColMutation, RemoveRowMutation } from '../Mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation, RemoveWorksheetMergeMutationFactory } from '../Mutations/remove-worksheet-merge.mutation';
 
+
 export const RemoveRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-row',

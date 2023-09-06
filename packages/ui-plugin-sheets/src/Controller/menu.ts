@@ -4,7 +4,6 @@ import {
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
     InsertColAfterCommand,
-    InsertColCommand,
     InsertRowAfterCommand,
     ISelectionManager,
     RemoveColCommand,

@@ -309,9 +309,8 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
      * user input change value from CustomLabel
      * @param e
      */
-    onChange = (e: Event) => {
-        const targetValue = (e.target as HTMLInputElement).value;
-        const value = isRealNum(targetValue) ? parseInt(targetValue) : targetValue;
+    onChange = (v: string | number) => {
+        const value = isRealNum(v) && typeof v === 'string' ? parseInt(v) : v;
 
         this.setState({
             value,
@@ -344,7 +343,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
                 disabled={disabled}
                 onClick={() => {
-                    commandService.executeCommand(item.id);
+                    commandService.executeCommand(item.id, { value: this.state.value });
                     onClick();
                 }}
             >
@@ -354,8 +353,9 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
                     title={title}
                     label={label}
                     onChange={(v) => {
-                        commandService.executeCommand(item.id, { value: v });
-                        onClick();
+                        this.onChange(v);
+                        // commandService.executeCommand(item.id, { value });
+                        // onClick();
                     }}
                 ></NeoCustomLabel>
             </li>

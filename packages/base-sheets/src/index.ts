@@ -69,8 +69,11 @@ export {
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from './Commands/Commands/add-worksheet-merge.command';
+export { CopySheetCommand } from './Commands/Commands/copy-worksheet.command';
 export { RemoveSheetCommand } from './Commands/Commands/remove-sheet.command';
 export { RemoveWorksheetMergeCommand } from './Commands/Commands/remove-worksheet-merge.command';
+export { SetTabColorCommand } from './Commands/Commands/set-tab-color.command';
 export { SetWorksheetHideCommand } from './Commands/Commands/set-worksheet-hide.command';
 export { SetWorksheetRowHideCommand } from './Commands/Commands/set-worksheet-row-hide.command';
 export { SetWorksheetRowShowCommand } from './Commands/Commands/set-worksheet-row-show.command';
+export { SetWorksheetShowCommand } from './Commands/Commands/set-worksheet-show.command';

@@ -1,5 +1,5 @@
-import { IDisposable, Inject, SkipSelf } from '@wendellhu/redi';
 import { Disposable, ICommandService, IWorksheetConfig, ObserverManager } from '@univerjs/core';
+import { IDisposable, Inject, SkipSelf } from '@wendellhu/redi';
 
 import { InsertSheetCommand } from '../Commands/Commands/insert-sheet.command';
 import { RemoveSheetCommand } from '../Commands/Commands/remove-sheet.command';

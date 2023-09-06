@@ -1,5 +1,6 @@
 import {
     ClearSelectionContentCommand,
+    CopySheetCommand,
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
     InsertColCommand,
@@ -19,6 +20,7 @@ import {
     SetRangeStyleMutation,
     SetSelectionsOperation,
     SetStrikeThroughCommand,
+    SetTabColorCommand,
     SetTextColorCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
@@ -29,6 +31,7 @@ import {
     SetWorksheetRowHeightCommand,
     SetWorksheetRowHideCommand,
     SetWorksheetRowShowCommand,
+    SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
 import { ISetHorizontalTextAlignCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams } from '@univerjs/base-sheets/src/Commands/Commands/set-style.command';
 import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
@@ -750,7 +753,7 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         // TODO@Dushusir use real command id
-        id: 'CopySheetCommand.id',
+        id: CopySheetCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.copy',
@@ -776,7 +779,7 @@ export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 // TODO@Dushusir add command
 export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
-        id: 'ChangeColorSheetCommand.id',
+        id: SetTabColorCommand.id,
         title: 'sheetConfig.changeColor',
         positions: [MenuPosition.SHEET_BAR],
         display: DisplayTypes.COLOR,
@@ -802,7 +805,7 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 // TODO@Dushusir use show worksheet command
 export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'SetWorksheetHideCommand.id',
+        id: SetWorksheetShowCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',

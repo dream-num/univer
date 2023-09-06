@@ -50,7 +50,6 @@ export const SetWorksheetActivateMutation: IMutation<ISetWorksheetActivateMutati
                 worksheet.getConfig().status = BooleanNumber.FALSE;
             }
         }
-
         return true;
     },
 };

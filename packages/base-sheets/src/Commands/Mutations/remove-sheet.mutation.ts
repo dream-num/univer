@@ -1,5 +1,6 @@
-import { IMutation, CommandType, ICurrentUniverService } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
 
 /**
@@ -36,7 +37,18 @@ export const RemoveSheetMutation: IMutation<IRemoveSheetMutationParams, boolean>
             return false;
         }
 
-        workbook.removeSheetBySheetId(worksheetId);
+        const worksheets = workbook.getWorksheets();
+        const config = workbook.getConfig();
+
+        const { sheets } = config;
+        if (sheets[worksheetId] == null) {
+            throw new Error(`Remove sheet fail ${worksheetId} does not exist`);
+        }
+        const findIndex = config.sheetOrder.findIndex((id) => id === worksheetId);
+        delete sheets[worksheetId];
+
+        config.sheetOrder.splice(findIndex, 1);
+        worksheets.delete(worksheetId);
 
         return true;
     },

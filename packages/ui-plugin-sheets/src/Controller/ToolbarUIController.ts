@@ -1,32 +1,33 @@
-import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
-import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
 import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager, IMenuService, MenuPosition } from '@univerjs/base-ui';
-import { UIObserver, ICurrentUniverService, ObserverManager, Disposable } from '@univerjs/core';
-import { ComponentChildren } from 'preact';
 import { IMenuItemFactory } from '@univerjs/base-ui/src/services/menu/menu';
-import { SheetToolbarConfig, SHEET_UI_PLUGIN_NAME } from '../Basics';
+import { Disposable } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
+import { ComponentChildren } from 'preact';
+
+import { SHEET_UI_PLUGIN_NAME, SheetToolbarConfig } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
 import {
-    UndoMenuItemFactory,
-    RedoMenuItemFactory,
+    BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
-    ItalicMenuItemFactory,
-    UnderlineMenuItemFactory,
-    StrikeThroughMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
-    ResetTextColorMenuItemFactory,
-    TextColorSelectorMenuItemFactory,
-    BackgroundColorSelectorMenuItemFactory,
+    HorizontalAlignMenuItemFactory,
+    ItalicMenuItemFactory,
+    RedoMenuItemFactory,
     ResetBackgroundColorMenuItemFactory,
+    ResetTextColorMenuItemFactory,
     SetBorderColorMenuItemFactory,
     SetBorderStyleMenuItemFactory,
-    HorizontalAlignMenuItemFactory,
+    StrikeThroughMenuItemFactory,
+    TextColorSelectorMenuItemFactory,
+    TextRotateMenuItemFactory,
+    UnderlineMenuItemFactory,
+    UndoMenuItemFactory,
     VerticalAlignMenuItemFactory,
     WrapTextMenuItemFactory,
-    TextRotateMenuItemFactory,
 } from './menu';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
+import { CellMergeAllMenuItemFactory, CellMergeCancelMenuItemFactory, CellMergeHorizontalMenuItemFactory, CellMergeMenuItemFactory, CellMergeSelectorMenuItemFactory, CellMergeVerticalMenuItemFactory } from './menu/merge.menu';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
     children?: BaseSelectChildrenProps[];
@@ -101,6 +102,11 @@ export class ToolbarUIController extends Disposable {
                 CellBorderSelectorMenuItemFactory,
                 SetBorderColorMenuItemFactory,
                 SetBorderStyleMenuItemFactory,
+                CellMergeMenuItemFactory,
+                CellMergeAllMenuItemFactory,
+                CellMergeVerticalMenuItemFactory,
+                CellMergeHorizontalMenuItemFactory,
+                CellMergeCancelMenuItemFactory,
                 HorizontalAlignMenuItemFactory,
                 VerticalAlignMenuItemFactory,
                 WrapTextMenuItemFactory,

@@ -7,7 +7,7 @@ import { AddWorksheetMergeMutation, AddWorksheetMergeMutationFactory } from '../
 import { RemoveWorksheetMergeMutation, RemoveWorksheetMergeMutationFactory } from '../Mutations/remove-worksheet-merge.mutation';
 
 interface addMergeCommandParams {
-    direction: Dimension.ROWS | Dimension.COLUMNS;
+    value: Dimension.ROWS | Dimension.COLUMNS;
 }
 
 export const AddWorksheetMergeCommand: ICommand = {
@@ -28,11 +28,11 @@ export const AddWorksheetMergeCommand: ICommand = {
         if (!worksheet) return false;
         let ranges = selections;
 
-        if (params) {
+        if (params && params.value != null) {
             const rectangles = [];
             for (let i = 0; i < ranges.length; i++) {
                 const { startRow, endRow, startColumn, endColumn } = ranges[i];
-                if (params.direction === Dimension.ROWS) {
+                if (params.value === Dimension.ROWS) {
                     for (let r = startRow; r <= endRow; r++) {
                         const data = {
                             startRow: r,
@@ -42,7 +42,7 @@ export const AddWorksheetMergeCommand: ICommand = {
                         };
                         rectangles.push(data);
                     }
-                } else {
+                } else if (params.value === Dimension.COLUMNS) {
                     for (let c = startColumn; c <= endColumn; c++) {
                         const data = {
                             startRow,
@@ -92,5 +92,34 @@ export const AddWorksheetMergeCommand: ICommand = {
             return true;
         }
         return false;
+    },
+};
+
+export const AddWorksheetMergeAllCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.add-worksheet-merge-all',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+
+        return commandService.executeCommand(AddWorksheetMergeCommand.id);
+    },
+};
+export const AddWorksheetMergeVerticalCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.add-worksheet-merge-vertical',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+
+        return commandService.executeCommand(AddWorksheetMergeCommand.id, { value: Dimension.COLUMNS });
+    },
+};
+
+export const AddWorksheetMergeHorizontalCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.add-worksheet-merge-horizontal',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+
+        return commandService.executeCommand(AddWorksheetMergeCommand.id, { value: Dimension.ROWS });
     },
 };

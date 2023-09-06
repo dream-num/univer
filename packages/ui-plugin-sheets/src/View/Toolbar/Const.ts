@@ -148,25 +148,6 @@ export const FONT_FAMILY_CHILDREN = [
     },
 ];
 
-export const MERGE_CHILDREN = [
-    {
-        label: 'merge.all',
-        value: 'all',
-    },
-    {
-        label: 'merge.vertical',
-        value: 'vertical',
-    },
-    {
-        label: 'merge.horizontal',
-        value: 'horizontal',
-    },
-    {
-        label: 'merge.cancel',
-        value: 'cancel',
-    },
-];
-
 export const HORIZONTAL_ALIGN_CHILDREN = [
     {
         label: 'align.left',

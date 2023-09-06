@@ -1,13 +1,13 @@
+import { ICommandService, isRealNum } from '@univerjs/core';
 import { Component, ComponentChild, createRef } from 'preact';
 import { Subscription } from 'rxjs';
-import { ICommandService, isRealNum } from '@univerjs/core';
-import { BaseMenuProps, BaseMenuItem, BaseMenuStyle } from '../../Interfaces';
-import { joinClassNames } from '../../Utils';
-import { AppContext } from '../../Common/AppContext';
-import { ICustomComponentOption, IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption, MenuItemType, isValueOptions } from '../../services/menu/menu';
-import { CustomLabel, NeoCustomLabel } from '../CustomLabel/CustomLabel';
-import { IMenuService } from '../../services/menu/menu.service';
 
+import { AppContext } from '../../Common/AppContext';
+import { BaseMenuItem, BaseMenuProps, BaseMenuStyle } from '../../Interfaces';
+import { ICustomComponentOption, IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, isValueOptions, IValueOption, MenuItemType } from '../../services/menu/menu';
+import { IMenuService } from '../../services/menu/menu.service';
+import { joinClassNames } from '../../Utils';
+import { CustomLabel, NeoCustomLabel } from '../CustomLabel/CustomLabel';
 import styles from './index.module.less';
 
 export interface IBaseMenuState {
@@ -182,7 +182,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                                     value={option.value}
                                     display={display}
                                     label={option.label}
-                                    title={option.label}
+                                    title={typeof option.label === 'string' ? option.label : ''}
                                     icon={option.icon}
                                 />
                             </li>
@@ -192,7 +192,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                     // custom component option
                     const CustomComponent = context.componentManager?.get(option.id);
                     return (
-                        <li>
+                        <li className={joinClassNames(styles.colsMenuitem, option.disabled ? styles.colsMenuitemDisabled : '')}>
                             <CustomComponent
                                 onValueChange={(v: string | number) => {
                                     this.props.onOptionSelect!({ value: v, label: option.id });

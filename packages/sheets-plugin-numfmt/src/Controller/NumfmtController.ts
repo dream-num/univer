@@ -1,15 +1,28 @@
-import { ObjectMatrixPrimitiveType, Command, ObjectMatrix, IRangeData, Range, ACTION_NAMES as CORE_ACTION_NAME, CommandManager, ICurrentUniverService } from '@univerjs/core';
-import { BaseComponentRender } from '@univerjs/base-ui';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { BaseComponentRender, ComponentManager, IMenuService } from '@univerjs/base-ui';
+import {
+    ACTION_NAMES as CORE_ACTION_NAME,
+    Command,
+    CommandManager,
+    Disposable,
+    ICurrentUniverService,
+    IRangeData,
+    ObjectMatrix,
+    ObjectMatrixPrimitiveType,
+    Range,
+} from '@univerjs/core';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
-import styles from '../View/UI/index.module.less';
-import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumfmtConfig } from '../Basics';
-import { NumfmtModalController } from './NumfmtModalController';
-import { INumfmtPluginData } from '../Symbol';
-import { NumfmtModel } from '../Model';
 
-export class NumfmtController {
+import { DEFAULT_DATA, NUMFMT_PLUGIN_NAME, NumfmtConfig } from '../Basics';
+import { NumfmtModel } from '../Model';
+import { INumfmtPluginData } from '../Symbol';
+import { FormatItem } from '../View/UI/FormatItem';
+import styles from '../View/UI/index.module.less';
+import { NumfmtRangeDataMenuItemFactory, OpenMoreFormatsModalMenuItemFactory } from './menu';
+import { NumfmtModalController } from './NumfmtModalController';
+
+export class NumfmtController extends Disposable {
     protected _numfmtList: IToolbarItemProps;
 
     protected _render: BaseComponentRender;
@@ -18,10 +31,12 @@ export class NumfmtController {
         @Inject(ISelectionManager) private readonly _selectionManager: SelectionManager,
         @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
-        @Inject(Injector) private readonly _numfmtInjector: Injector,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(Injector) private readonly _injector: Injector,
         @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
         @Inject(ICurrentUniverService) private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(NumfmtModalController) private readonly _numfmtModalController: NumfmtModalController
+        @Inject(NumfmtModalController) private readonly _numfmtModalController: NumfmtModalController,
+        @IMenuService private readonly _menuService: IMenuService
     ) {
         // const executeFormatter = (type: string): void => {
         //     const manager = this._sheetPlugin.getSelectionManager();
@@ -66,6 +81,7 @@ export class NumfmtController {
         //         cmd.invoke();
         //     });
         // };
+        super();
         const CHILDREN_DATA = DEFAULT_DATA.map((item, index) => ({
             onClick: () => {
                 switch (index) {
@@ -164,7 +180,12 @@ export class NumfmtController {
                 },
             ],
         };
-        this._sheetContainerUIController.getToolbarController().addToolbarConfig(this._numfmtList);
+        // TODO@Dushusir remove this after refactoring to new toolbar
+        // this._sheetContainerUIController.getToolbarController().addToolbarConfig(this._numfmtList);
+
+        this._componentManager.register(NUMFMT_PLUGIN_NAME + FormatItem.name, FormatItem);
+
+        this._initializeContextMenu();
     }
 
     getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {
@@ -210,5 +231,11 @@ export class NumfmtController {
             config
         );
         commandManager.invoke(command);
+    }
+
+    private _initializeContextMenu() {
+        [NumfmtRangeDataMenuItemFactory, OpenMoreFormatsModalMenuItemFactory].forEach((factory) => {
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+        });
     }
 }

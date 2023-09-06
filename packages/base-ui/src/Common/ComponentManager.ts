@@ -1,4 +1,5 @@
 import { IKeyValue } from '@univerjs/core';
+
 import {
     BorderDashDot,
     BorderDashDotDot,
@@ -48,6 +49,7 @@ import {
     UnderLineIcon,
     VerticalBorderIcon,
 } from '../Components/Icon';
+import { Item } from '../Components/Item/Item';
 
 export interface ICustomComponent {
     name: string;
@@ -111,6 +113,9 @@ export class ComponentManager {
         for (const k in iconList) {
             this.register(k, iconList[k]);
         }
+
+        // Register common components
+        this.register('Item', Item);
     }
 
     register(name: string, component: any) {

@@ -1,13 +1,14 @@
-import { Inject } from '@wendellhu/redi';
-import { ICurrentUniverService, IKeyValue, migrate, Tools } from '@univerjs/core';
-import { BaseComponentRender } from '@univerjs/base-ui';
-import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
-
-import * as LuckyExcel from 'luckyexcel';
 import { BasicWorkbookController } from '@univerjs/base-sheets';
-import { IMPORT_XLSX_PLUGIN_NAME } from '../Basics/Const';
+import { BaseComponentRender, IMenuService } from '@univerjs/base-ui';
+import { Disposable, ICurrentUniverService, IKeyValue, migrate, Tools } from '@univerjs/core';
+import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
+import { Inject, Injector } from '@wendellhu/redi';
+import * as LuckyExcel from 'luckyexcel';
 
-export class ImportXlsxController {
+import { IMPORT_XLSX_PLUGIN_NAME } from '../Basics/Const';
+import { ImportMenuItemFactory } from './menu';
+
+export class ImportXlsxController extends Disposable {
     protected _toolButton: IToolbarItemProps;
 
     protected _render: BaseComponentRender;
@@ -15,8 +16,11 @@ export class ImportXlsxController {
     constructor(
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(BasicWorkbookController) private readonly _basicWorkbookController: BasicWorkbookController
+        @Inject(BasicWorkbookController) private readonly _basicWorkbookController: BasicWorkbookController,
+        @Inject(Injector) private readonly _injector: Injector,
+        @IMenuService private readonly _menuService: IMenuService
     ) {
+        super();
         this._toolButton = {
             name: IMPORT_XLSX_PLUGIN_NAME,
             toolbarType: 1,
@@ -27,7 +31,10 @@ export class ImportXlsxController {
                 this.upload();
             },
         };
-        this._sheetContainerUIController.getToolbarController().addToolbarConfig(this._toolButton);
+        // this._sheetContainerUIController.getToolbarController().addToolbarConfig(this._toolButton);
+        const toolbar = this._sheetContainerUIController.getToolbarController();
+        this._initializeContextMenu();
+        toolbar.setToolbar();
     }
 
     upload() {
@@ -95,6 +102,12 @@ export class ImportXlsxController {
                 // workbook.removeSheetBySheetId(sheetId);
                 this._basicWorkbookController.removeSheet(sheetId, workbookId);
             });
+        });
+    }
+
+    private _initializeContextMenu() {
+        [ImportMenuItemFactory].forEach((factory) => {
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }
 }

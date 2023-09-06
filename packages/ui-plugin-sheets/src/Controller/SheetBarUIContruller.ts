@@ -1,28 +1,29 @@
-import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuService, MenuPosition } from '@univerjs/base-ui';
+import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActivateCommand, SetWorksheetOrderCommand } from '@univerjs/base-sheets';
+import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuService } from '@univerjs/base-ui';
 import {
-    Nullable,
     CommandManager,
-    SheetActionBase,
-    UIObserver,
-    SetSheetOrderAction,
-    InsertSheetAction,
-    SetWorkSheetNameAction,
-    SetTabColorAction,
-    SetWorkSheetHideAction,
-    SetWorkSheetActivateAction,
-    SetWorkSheetStatusAction,
-    RemoveSheetAction,
-    ICurrentUniverService,
-    ObserverManager,
     Disposable,
     ICommandService,
+    ICurrentUniverService,
+    InsertSheetAction,
+    Nullable,
+    ObserverManager,
+    RemoveSheetAction,
+    SetSheetOrderAction,
+    SetTabColorAction,
+    SetWorkSheetActivateAction,
+    SetWorkSheetHideAction,
+    SetWorkSheetNameAction,
+    SetWorkSheetStatusAction,
+    SheetActionBase,
+    UIObserver,
 } from '@univerjs/core';
-import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActivateCommand, SetWorksheetOrderCommand } from '@univerjs/base-sheets';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
+
+import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
 import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
-import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
 import {
     ChangeColorSheetMenuItemFactory,
     CopySheetMenuItemFactory,
@@ -279,7 +280,7 @@ export class SheetBarUIController extends Disposable {
     protected _refreshSheetBarUI(): void {
         this._sheetBar.setValue({
             sheetList: this._sheetList,
-            sheetUl: this._sheetUl,
+            // sheetUl: this._sheetUl,
             menuList: this._menuList,
             selectSheet: (event: Event, data: { item: SheetUlProps }) => {
                 this._dataId = data.item.sheetId;

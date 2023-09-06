@@ -1,6 +1,6 @@
+import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
-import { IAccessor } from '@wendellhu/redi';
 import { DisplayTypes, SelectTypes } from '../../Components/Select/Select';
 
 export type OneOrMany<T> = T | T[];
@@ -71,7 +71,12 @@ export function isMenuButtonItem(v: IMenuItem): v is IMenuButtonItem {
 
 export interface IValueOption {
     value: string | number;
-    label: string;
+    label:
+        | string
+        | {
+              name: string;
+              props?: Record<string, string | number>;
+          }; // custom component, send to NeoCustomLabel label property
     icon?: string;
     tooltip?: string;
     style?: object;

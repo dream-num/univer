@@ -1,14 +1,14 @@
 import { CommandManager, IRangeData, LocaleService, ObjectMatrixPrimitiveType, Plugin, PluginType } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
-import { NUMFMT_PLUGIN_NAME, install, NumfmtPluginObserve, NumfmtActionExtensionFactory } from './Basics';
-import { INumfmtPluginData } from './Symbol';
-import { INumfmtPluginConfig } from './Interfaces';
-import { NumfmtModalController, NumfmtController } from './Controller';
-import { NumfmtModel } from './Model';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
+import { install, NUMFMT_PLUGIN_NAME, NumfmtActionExtensionFactory, NumfmtPluginObserve } from './Basics';
+import { NumfmtController, NumfmtModalController } from './Controller';
+import { INumfmtPluginConfig } from './Interfaces';
 import en from './Locale/en';
 import zh from './Locale/zh';
+import { NumfmtModel } from './Model';
+import { INumfmtPluginData } from './Symbol';
 
 export class NumfmtPlugin extends Plugin<NumfmtPluginObserve> {
     static override type = PluginType.Sheet;

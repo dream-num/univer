@@ -1,10 +1,10 @@
-import { IAccessor } from '@wendellhu/redi';
 import { CommandType, Dimension, ICellData, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
+import { IAccessor } from '@wendellhu/redi';
 
-import { DeleteRangeMutation } from '../Mutations/delete-range.mutation';
-import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../Mutations/insert-range.mutation';
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { ISelectionManager } from '../../Services/tokens';
+import { DeleteRangeMutation } from '../Mutations/delete-range.mutation';
+import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../Mutations/insert-range.mutation';
 
 /**
  * The command to insert range.

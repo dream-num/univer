@@ -3,8 +3,9 @@ import {
     CopySheetCommand,
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
+    InsertColAfterCommand,
     InsertColCommand,
-    InsertRowCommand,
+    InsertRowAfterCommand,
     ISelectionManager,
     RemoveColCommand,
     RemoveRowCommand,
@@ -583,7 +584,7 @@ export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuButtonI
 
 export function InsertRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: InsertRowCommand.id,
+        id: InsertRowAfterCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertRow',
@@ -592,7 +593,7 @@ export function InsertRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 export function InsertColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: InsertColCommand.id,
+        id: InsertColAfterCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertColumn',

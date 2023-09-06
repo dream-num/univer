@@ -52,6 +52,7 @@ export const RemoveRowMutation: IMutation<IRemoveRowMutationParams> = {
         const manager = worksheet.getRowManager();
         const rowPrimitive = manager.getRowData().toJSON();
         const rowWrapper = new ObjectArray(rowPrimitive);
+        debugger
 
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];

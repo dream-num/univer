@@ -13,7 +13,14 @@ import { DeleteRangeMoveLeftCommand } from '../Commands/Commands/delete-range-mo
 import { DeleteRangeMoveUpCommand } from '../Commands/Commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../Commands/Commands/insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../Commands/Commands/insert-range-move-right.command';
-import { InsertColCommand } from '../Commands/Commands/insert-row-col.command';
+import {
+    InsertColAfterCommand,
+    InsertColBeforeCommand,
+    InsertColCommand,
+    InsertRowAfterCommand,
+    InsertRowBeforeCommand,
+    InsertRowCommand,
+} from '../Commands/Commands/insert-row-col.command';
 import { RemoveColCommand, RemoveRowCommand } from '../Commands/Commands/remove-row-col.command';
 import { RemoveWorksheetMergeCommand } from '../Commands/Commands/remove-worksheet-merge.command';
 import { SetBorderColorCommand, SetBorderCommand, SetBorderPositionCommand, SetBorderStyleCommand } from '../Commands/Commands/set-border-command';
@@ -91,10 +98,15 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetHideCommand,
             SetWorksheetHideMutation,
 
+            InsertRowCommand,
+            InsertRowBeforeCommand,
+            InsertRowAfterCommand,
             InsertRowMutation,
             RemoveRowCommand,
             RemoveRowMutation,
             InsertColCommand,
+            InsertColBeforeCommand,
+            InsertColAfterCommand,
             InsertColMutation,
             RemoveColCommand,
             RemoveColMutation,

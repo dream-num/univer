@@ -31,7 +31,7 @@ export class InputController {
     }
 
     // eslint-disable-next-line @typescript-eslint/member-ordering
-    moveCursor(docModel: DocumentModel, direction: Direction) {
+    moveCursor(_docModel: DocumentModel, direction: Direction) {
         const documents = (this._canvasView.getDocsView() as DocsView).getDocs();
         const activeSelection = documents.getActiveSelection();
         if (!activeSelection) {

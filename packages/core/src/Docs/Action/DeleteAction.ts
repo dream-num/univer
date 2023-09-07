@@ -1,6 +1,5 @@
-import { DocActionBase } from '../../Command/DocActionBase';
 import { ActionObservers, ActionType, CommandManager, CommandUnit, CommonParameter } from '../../Command';
-
+import { DocActionBase } from '../../Command/DocActionBase';
 import { DOC_ACTION_NAMES } from '../../Types/Const/DOC_ACTION_NAMES';
 import { IDocumentBody } from '../../Types/Interfaces';
 import { DeleteApply } from '../Apply/DeleteApply';

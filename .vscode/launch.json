@@ -5,13 +5,54 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch Doc (Chrome)",
+            "request": "launch",
+            "type": "chrome",
+            "url": "http://localhost:3002",
+            "webRoot": "${workspaceFolder}/examples/univer-doc-ts/local/",
+            "presentation": {
+                "group": "0_example",
+                "order": 1
+            }
+        },
+        {
+            "name": "Launch Doc (Edge)",
+            "request": "launch",
+            "type": "msedge",
+            "url": "http://localhost:3002",
+            "webRoot": "${workspaceFolder}/examples/univer-doc-ts/local/",
+            "presentation": {
+                "group": "0_example",
+                "order": 2
+            }
+        },
+        {
+            "name": "Launch Sheet (Chrome)",
+            "request": "launch",
+            "type": "chrome",
+            "url": "http://localhost:3002",
+            "webRoot": "${workspaceFolder}/examples/univer-sheet-ts/local/",
+            "presentation": {
+                "group": "0_example",
+                "order": 3
+            }
+        },
+        {
+            "name": "Launch Sheet (Edge)",
+            "request": "launch",
+            "type": "msedge",
+            "url": "http://localhost:3002",
+            "webRoot": "${workspaceFolder}/examples/univer-sheet-ts/local/",
+            "presentation": {
+                "group": "0_example",
+                "order": 4
+            }
+        },
+        {
             "type": "node",
             "name": "vscode-jest-tests",
             "request": "launch",
-            "args": [
-                "--runInBand",
-                "--watchAll=false"
-            ],
+            "args": ["--runInBand", "--watchAll=false"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",

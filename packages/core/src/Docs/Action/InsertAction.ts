@@ -1,9 +1,9 @@
-import { DocActionBase } from '../../Command/DocActionBase';
 import { ActionObservers, ActionType, CommandManager, CommandUnit, CommonParameter } from '../../Command';
+import { DocActionBase } from '../../Command/DocActionBase';
 import { DOC_ACTION_NAMES } from '../../Types/Const/DOC_ACTION_NAMES';
-import { InsertApply } from '../Apply/InsertApply';
 import { DeleteApply } from '../Apply/DeleteApply';
-import { IInsertActionData, IDeleteActionData } from './ActionDataInterface';
+import { InsertApply } from '../Apply/InsertApply';
+import { IDeleteActionData, IInsertActionData } from './ActionDataInterface';
 
 export class InsertAction extends DocActionBase<IInsertActionData, IDeleteActionData> {
     static NAME = 'InsertAction';

@@ -1,7 +1,7 @@
 import { IDocActionData } from '../../Command/DocActionBase';
-import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
 import { Nullable } from '../../Shared';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
+import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
 
 export enum UpdateAttributeType {
     TEXT_RUN,

@@ -1,7 +1,7 @@
-import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
-import { DocumentModel } from '../Domain/DocumentModel';
 import { getDocsUpdateBody } from '../../Shared/Common';
 import { insertTextToContent } from '../../Shared/DocTool';
+import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
+import { DocumentModel } from '../Domain/DocumentModel';
 import { insertCustomBlocks, insertCustomRanges, insertParagraphs, insertSectionBreaks, insertTables, insertTextRuns } from './Common';
 
 export function InsertApply(document: DocumentModel, insertBody: IDocumentBody, textLength: number, currentIndex: number, segmentId?: string) {
@@ -23,7 +23,7 @@ export function InsertApply(document: DocumentModel, insertBody: IDocumentBody, 
 
     updateAttributeByInsert(body, insertBody, textLength, currentIndex);
 
-    console.log('插入的model打印', bodyModel, body);
+    console.log('插入的model打印', bodyModel, body, textLength);
 }
 
 function updateAttributeByInsert(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {

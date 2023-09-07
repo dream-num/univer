@@ -1,5 +1,5 @@
-import { DocActionBase } from '../../Command/DocActionBase';
 import { ActionObservers, CommandManager, CommandUnit } from '../../Command';
+import { DocActionBase } from '../../Command/DocActionBase';
 import { IUpdateDocumentActionData } from './ActionDataInterface';
 
 export class UpdateDocumentAction extends DocActionBase<IUpdateDocumentActionData, IUpdateDocumentActionData> {

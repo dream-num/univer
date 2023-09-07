@@ -1,4 +1,4 @@
-export * from './InsertAction';
 export * from './DeleteAction';
-export * from './UpdateDocumentAction';
+export * from './InsertAction';
 export * from './RetainAction';
+export * from './UpdateDocumentAction';

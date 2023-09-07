@@ -5,15 +5,9 @@ import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { IDocUIPluginConfig } from '../Basics';
 import { DocContainer } from '../View';
-import { InfoBarUIController } from './InfoBarUIController';
-import { ToolbarUIController } from './ToolbarUIController';
 
 export class DocContainerUIController {
     private _docContainer: DocContainer;
-
-    private _toolbarController: ToolbarUIController;
-
-    private _infoBarController: InfoBarUIController;
 
     constructor(
         private readonly _config: IDocUIPluginConfig,
@@ -24,9 +18,6 @@ export class DocContainerUIController {
         @IRenderingEngine private readonly _renderingEngine: Engine
     ) {
         this._initialize();
-
-        this._toolbarController = this._injector.createInstance(ToolbarUIController, this._config.layout?.toolbarConfig || {});
-        this._infoBarController = new InfoBarUIController();
     }
 
     getUIConfig() {
@@ -35,16 +26,6 @@ export class DocContainerUIController {
             config: this._config,
             changeLocale: this.changeLocale,
             getComponent: this.getComponent,
-            // 其余组件的props
-            methods: {
-                toolbar: {
-                    getComponent: this._toolbarController.getComponent,
-                },
-                infoBar: {
-                    getComponent: this._infoBarController.getComponent,
-                    // renameSheet: this._infoBarController.renameSheet,
-                },
-            },
         };
         return config;
     }
@@ -60,7 +41,7 @@ export class DocContainerUIController {
 
         window.addEventListener('resize', () => {
             engine.resize();
-        })
+        });
 
         setTimeout(() => {
             engine.resize();
@@ -88,16 +69,10 @@ export class DocContainerUIController {
         return this._docContainer.getContentRef();
     }
 
-    getToolbarController() {
-        return this._toolbarController;
-    }
-
     UIDidMount(cb: Function) {
         if (this._docContainer) {
             return cb(this._docContainer);
         }
-
-        this._plugin.getObserver('onUIDidMount')?.add(() => cb(this._docContainer));
     }
 
     getDocContainer() {

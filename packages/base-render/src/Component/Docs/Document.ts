@@ -1,18 +1,20 @@
-import { BooleanNumber, HorizontalAlign, Nullable, Observable, Observer, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { DocComponent } from './DocComponent';
-import { IDocumentSkeletonCached, IDocumentSkeletonPage, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
-import { IBoundRect, Vector2 } from '../../Basics/Vector2';
-import { DocumentsSpanAndLineExtensionRegistry, IExtensionConfig } from '../Extension';
-import { DocumentSkeleton } from './DocSkeleton';
-import { DOCS_EXTENSION_TYPE } from './DocExtension';
 import './Extensions';
+
+import { BooleanNumber, HorizontalAlign, Nullable, Observable, Observer, VerticalAlign, WrapStrategy } from '@univerjs/core';
+
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../Basics/Draw';
-import { fixLineWidthByScale, getScale, degToRad } from '../../Basics/Tools';
-import { DocsEditor } from './Document.Editor';
-import { Liquid } from './Common/Liquid';
-import { Scene } from '../../Scene';
-import { TextSelection } from './Common/TextSelection';
+import { IDocumentSkeletonCached, IDocumentSkeletonPage, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
 import { INodeInfo } from '../../Basics/Interfaces';
+import { degToRad, fixLineWidthByScale, getScale } from '../../Basics/Tools';
+import { IBoundRect, Vector2 } from '../../Basics/Vector2';
+import { Scene } from '../../Scene';
+import { DocumentsSpanAndLineExtensionRegistry, IExtensionConfig } from '../Extension';
+import { Liquid } from './Common/Liquid';
+import { TextSelection } from './Common/TextSelection';
+import { DocComponent } from './DocComponent';
+import { DOCS_EXTENSION_TYPE } from './DocExtension';
+import { DocumentSkeleton } from './DocSkeleton';
+import { DocsEditor } from './Document.Editor';
 
 export interface IDocumentsConfig {
     pageMarginLeft?: number;
@@ -86,6 +88,14 @@ export class Documents extends DocComponent {
 
     static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         return new Documents(oKey, documentSkeleton, config);
+    }
+
+    getActiveSelection() {
+        return this._editor.getActiveTextSelection();
+    }
+
+    getSelection() {
+        return this._editor.getTextSelectionList();
     }
 
     calculatePagePosition() {

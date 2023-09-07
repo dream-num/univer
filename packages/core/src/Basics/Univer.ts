@@ -200,6 +200,7 @@ export class Univer {
         plugins.forEach((p) => {
             doc.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
         });
+        doc.mount();
     }
 
     private initializePluginsForSlide(slide: UniverSlide): void {

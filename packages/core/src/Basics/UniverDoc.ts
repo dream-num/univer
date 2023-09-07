@@ -1,8 +1,9 @@
 import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
 
 import { DocumentModel } from '../Docs';
-import { IDocumentData } from '../Types/Interfaces';
 import { Plugin, PluginCtor, PluginStore } from '../Plugin';
+import { CommandService, ICommandService } from '../services/command/command.service';
+import { IDocumentData } from '../Types/Interfaces';
 
 /**
  * Externally provided UniverDoc root instance
@@ -36,13 +37,21 @@ export class UniverDoc {
     addPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._injector.createInstance(pluginCtor as unknown as Ctor<any>, options);
 
+        // FIXME: onCreate onMounted should be executed after all plugins have been added
         pluginInstance.onCreate();
         pluginInstance.onMounted();
         this._pluginStore.addPlugin(pluginInstance);
     }
 
+    mount(): void {
+        this._pluginStore.forEachPlugin((plugin) => {
+            plugin.onCreate();
+            plugin.onMounted();
+        });
+    }
+
     private _initializeDependencies(parentInjector?: Injector): Injector {
-        const dependencies: Dependency[] = [];
+        const dependencies: Dependency[] = [[ICommandService, { useClass: CommandService }]];
         return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 }

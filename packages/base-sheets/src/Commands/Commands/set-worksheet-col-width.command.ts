@@ -8,7 +8,7 @@ import { ISetWorksheetColWidthMutationParams, SetWorksheetColWidthMutation, SetW
  * TODO@Dushusir 支持多个选区
  */
 export interface SetWorksheetColWidthCommandParams {
-    colWidth: number;
+    value: number;
 }
 
 export const SetWorksheetColWidthCommand: ICommand = {
@@ -30,7 +30,7 @@ export const SetWorksheetColWidthCommand: ICommand = {
             worksheetId,
             workbookId,
             ranges: selections,
-            colWidth: params.colWidth,
+            colWidth: params.value,
         };
         const undoMutationParams: ISetWorksheetColWidthMutationParams = SetWorksheetColWidthMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);

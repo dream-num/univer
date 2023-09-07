@@ -10,6 +10,7 @@ export interface SlideTabBarConfig {
     slideTabBarItemAutoSort: boolean;
     onSlideEnd: (event: MouseEvent) => void;
     onChangeName: (event: FocusEvent) => void;
+    onItemClick: (slideItemIndex: number) => void;
 }
 
 export class SlideTabBar {
@@ -68,6 +69,36 @@ export class SlideTabBar {
         this._slideScrollbar = new SlideScrollbar(this);
         this._slideTabItems = SlideTabItem.make(slideTabItems, this);
 
+        this.initDownAction();
+        this.initUpAction();
+        this.initMoveAction();
+        this.initWheelAction();
+
+        this._initialize();
+    }
+
+    static checkedSkipSlide(event: MouseEvent): boolean {
+        let parent: HTMLElement | null = event.target as HTMLElement;
+        while (parent != null && parent !== document.body) {
+            if (parent.getAttribute('data-slide-skip')) {
+                return true;
+            }
+            parent = parent.parentElement;
+        }
+        return false;
+    }
+
+    static keepLastIndex(inputHtml: HTMLElement) {
+        setTimeout(() => {
+            const range = window.getSelection();
+            if (range) {
+                range.selectAllChildren(inputHtml);
+                range.collapseToEnd();
+            }
+        });
+    }
+
+    initDownAction() {
         let lastPageX = 0;
         let lastPageY = 0;
         let lastTime = 0;
@@ -118,6 +149,8 @@ export class SlideTabBar {
                                 item.classList().remove(this._config.slideTabBarItemActiveClassName ?? 'slide-tab-active');
                             });
                             this._activeTabItem.classList().add(this._config.slideTabBarItemActiveClassName ?? 'slide-tab-active');
+                            // send current item index to sheet bar
+                            this._config.onItemClick && this._config.onItemClick(slideItemIndex);
                         }
                         this._activeTabItem.enableFixed();
                         this._startAutoScroll();
@@ -136,7 +169,9 @@ export class SlideTabBar {
                 lastTime = current;
             }
         };
+    }
 
+    initUpAction() {
         this._upAction = (upEvent: MouseEvent) => {
             if (this._activeTabItem) {
                 this._closeAutoScroll();
@@ -149,7 +184,7 @@ export class SlideTabBar {
                 }
 
                 // fix bug
-                let event = new MouseEvent('click', {
+                const event = new MouseEvent('click', {
                     view: window,
                     bubbles: true,
                     cancelable: true,
@@ -164,7 +199,9 @@ export class SlideTabBar {
                 this._activeTabItem = null;
             }
         };
+    }
 
+    initMoveAction() {
         this._moveAction = (moveEvent) => {
             if (this._activeTabItem) {
                 this._moveActionX = moveEvent.pageX - this._downActionX;
@@ -173,7 +210,9 @@ export class SlideTabBar {
                 this._scrollRight(moveEvent);
             }
         };
+    }
 
+    initWheelAction() {
         this._wheelAction = (wheelEvent: WheelEvent) => {
             if (wheelEvent.deltaY > 0) {
                 this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + wheelEvent.deltaY);
@@ -181,29 +220,6 @@ export class SlideTabBar {
                 this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + wheelEvent.deltaY);
             }
         };
-
-        this._initialize();
-    }
-
-    static checkedSkipSlide(event: MouseEvent): boolean {
-        let parent: HTMLElement | null = event.target as HTMLElement;
-        while (parent != null && parent !== document.body) {
-            if (parent.getAttribute('data-slide-skip')) {
-                return true;
-            }
-            parent = parent.parentElement;
-        }
-        return false;
-    }
-
-    static keepLastIndex(inputHtml: HTMLElement) {
-        setTimeout(() => {
-            const range = window.getSelection();
-            if (range) {
-                range.selectAllChildren(inputHtml);
-                range.collapseToEnd();
-            }
-        });
     }
 
     primeval(): HTMLElement {
@@ -319,8 +335,8 @@ export class SlideTabBar {
             // dom list sort
             if (this._config.slideTabBarItemAutoSort) {
                 for (let i = 0; i < this._slideTabItems.length; i++) {
-                    let item = this._slideTabItems[i];
-                    let next = this._slideTabItems[i + 1];
+                    const item = this._slideTabItems[i];
+                    const next = this._slideTabItems[i + 1];
                     if (next) {
                         item.after(next);
                     }
@@ -331,9 +347,9 @@ export class SlideTabBar {
 
     protected _compareLeft(): void {
         if (this._activeTabItem && this._activeTabItemIndex) {
-            let splice = this._slideTabItems.findIndex((item) => item.equals(this._activeTabItem));
-            let length = this._slideTabItems.length;
-            let collect = [];
+            const splice = this._slideTabItems.findIndex((item) => item.equals(this._activeTabItem));
+            const length = this._slideTabItems.length;
+            const collect = [];
 
             // collect compare item
             for (let i = 0; i < splice; i++) {
@@ -351,7 +367,7 @@ export class SlideTabBar {
             // diff item midline
             let notFound = true;
             for (let i = collect.length - 1; i >= 0; i--) {
-                let item = collect[i];
+                const item = collect[i];
                 if (SlideTabItem.midline(this._activeTabItem) < item.getMidLine()) {
                     item.animate().translateX(this._activeTabItem.getWidth());
                     this._compareIndex = i;
@@ -368,9 +384,9 @@ export class SlideTabBar {
 
     protected _compareRight(): void {
         if (this._activeTabItem) {
-            let splice = this._slideTabItems.findIndex((item) => item.equals(this._activeTabItem));
-            let length = this._slideTabItems.length;
-            let collect = [];
+            const splice = this._slideTabItems.findIndex((item) => item.equals(this._activeTabItem));
+            const length = this._slideTabItems.length;
+            const collect = [];
 
             // collect compare item
             for (let i = splice + 1; i < length; i++) {
@@ -385,7 +401,7 @@ export class SlideTabBar {
             // diff item midline
             let notFound = true;
             for (let i = 0; i < collect.length; i++) {
-                let item = collect[i];
+                const item = collect[i];
                 if (SlideTabItem.midline(this._activeTabItem) > item.getMidLine()) {
                     item.animate().translateX(-this._activeTabItem.getWidth());
                     this._compareIndex = splice + i + 1;

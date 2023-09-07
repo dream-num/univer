@@ -26,7 +26,7 @@ export const SetWorksheetRowHeightMutationFactory = (accessor: IAccessor, params
     for (let i = 0; i < ranges.length; i++) {
         const range = ranges[i];
         for (let j = range.startRow; j < range.endRow + 1; j++) {
-            const row = manager.getRowOrCreate(i);
+            const row = manager.getRowOrCreate(j);
             rowHeight.set(j, row.h);
         }
     }
@@ -58,7 +58,7 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
             for (let j = range.startRow; j < range.endRow + 1; j++) {
-                const row = manager.getRowOrCreate(i);
+                const row = manager.getRowOrCreate(j);
                 if (typeof params.rowHeight === 'number') {
                     row.h = params.rowHeight;
                 } else {

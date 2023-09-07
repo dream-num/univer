@@ -31,18 +31,20 @@ export const SetWorksheetActivateCommand: ICommand = {
         };
         const undoMutationParams = SetWorksheetUnActivateMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(SetWorksheetActivateMutation.id, redoMutationParams);
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                URI: 'sheet',
-                undo() {
-                    return commandService.executeCommand(SetWorksheetActivateMutation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.executeCommand(SetWorksheetActivateMutation.id, redoMutationParams);
-                },
-            });
-            return true;
-        }
+
+        // no need
+        // if (result) {
+        //     undoRedoService.pushUndoRedo({
+        //         URI: 'sheet',
+        //         undo() {
+        //             return commandService.executeCommand(SetWorksheetActivateMutation.id, undoMutationParams);
+        //         },
+        //         redo() {
+        //             return commandService.executeCommand(SetWorksheetActivateMutation.id, redoMutationParams);
+        //         },
+        //     });
+        //     return true;
+        // }
         return true;
     },
 };

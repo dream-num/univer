@@ -28,6 +28,7 @@ export const SetWorksheetShowCommand: ICommand = {
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
+        debugger;
 
         const hidden = worksheet.getConfig().hidden;
         if (hidden === BooleanNumber.FALSE) return false;
@@ -55,13 +56,13 @@ export const SetWorksheetShowCommand: ICommand = {
                 undo() {
                     return (commandService.executeCommand(SetWorksheetActivateMutation.id, unActiveMutationParams) as Promise<boolean>).then((res) => {
                         if (res) commandService.executeCommand(SetWorksheetHideMutation.id, undoMutationParams);
-                        return false;
+                        return true;
                     });
                 },
                 redo() {
-                    return (commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams);
-                        return false;
+                    return (commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams) as Promise<boolean>).then((res) => {
+                        if (res) commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
+                        return true;
                     });
                 },
             });

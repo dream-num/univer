@@ -760,19 +760,12 @@ export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-// TODO@Dushusir onClick to rename tab
-// No need to trigger command after clicking，maybe no need Command id?
 export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: RenameSheetCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
-        title: 'sheetConfig.rename',
-        onClick: () => {
-            // TODO@Dushusir 这里能监听到点击事件，但是无法触发到 this._sheetBar.reNameSheet(this._dataId);
-            // 或许不应该通过这里的onClick直接更新UI？
-            console.info('rename=========');
-        },
+        title: 'sheetConfig.rename'
     };
 }
 

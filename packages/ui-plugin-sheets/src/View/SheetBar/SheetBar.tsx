@@ -1,9 +1,9 @@
 import { BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, Icon, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
 import { Component, createRef, RefObject } from 'preact';
 
-import { SlideTabBar } from '../../Basics/SlideTabBar/SlideTabBar';
 import styles from './index.module.less';
 import { ISheetBarMenuItem, SheetBarMenu } from './SheetBarMenu';
+import { SlideTabBar } from './SlideTabBar/SlideTabBar';
 
 type SheetState = {
     sheetList: BaseSheetBarProps[];
@@ -153,11 +153,15 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             slideTabBarItemClassName: 'univer-slide-tab-item',
             slideTabBarItemAutoSort: true,
             slideTabRoot: this.slideTabRoot.current,
+            activeClassNameAutoController: true,
             onChangeName: (event: Event) => {
                 this.props.changeSheetName?.(event);
             },
             onSlideEnd: (event: Event) => {
                 this.props.dragEnd?.(this.slideTabBar.getSlideTabItems().map((item) => item.primeval()));
+            },
+            onItemClick: (slideItemIndex: number) => {
+                this.props.selectSheet?.(slideItemIndex);
             },
         });
     }
@@ -169,6 +173,24 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     // Convenient for controller to control sheetBarMenu
     showMenuList(show: boolean) {
         this.ref.current.showMenu(show);
+    }
+
+    setSlideTabActive(sheetId: string) {
+        this.setState((prevState, props) => {
+            const prevSheetList = prevState.sheetList;
+            const currentSheetList = prevSheetList.map((sheet) => {
+                if (sheet.sheetId === sheetId) {
+                    sheet.selected = true;
+                } else {
+                    sheet.selected = false;
+                }
+                return sheet;
+            });
+            return {
+                ...prevState,
+                sheetList: currentSheetList,
+            };
+        });
     }
 
     render(props: BaseSheetBarProps, state: SheetState) {
@@ -194,8 +216,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 <div className={styles.slideTabBar} ref={this.sheetContainerRef}>
                     {sheetList.map((item) => (
                         <div
-                            onMouseDown={item.onDown}
-                            onClick={item.onClick}
+                            onMouseDown={item.onMouseDown}
                             onContextMenu={this.contextMenu}
                             data-id={item.sheetId}
                             key={this._renderKey++}

@@ -113,10 +113,6 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
     };
 
     handleItemClick = (item: IMenuButtonItem) => {
-        // When there is no need to execute the command, execute click
-        if (item.onClick) {
-            item.onClick();
-        }
         this.showMenu(false);
     };
 

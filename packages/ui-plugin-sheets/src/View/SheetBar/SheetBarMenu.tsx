@@ -1,5 +1,6 @@
 import { CustomLabel, Icon, joinClassNames } from '@univerjs/base-ui';
 import { Component } from 'preact';
+
 import styles from './index.module.less';
 
 export interface ISheetBarMenuItem {
@@ -19,6 +20,7 @@ export interface ISheetBarMenuProps {
 
 interface IState {
     show: boolean;
+    menu: ISheetBarMenuItem[];
 }
 
 export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
@@ -28,8 +30,10 @@ export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
     }
 
     initialize() {
+        const { menu } = this.props;
         this.state = {
             show: false,
+            menu,
         };
     }
 
@@ -42,6 +46,7 @@ export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
         onClick?.(e);
         this.showMenu(false);
         window.removeEventListener('click', this.hideMenu, true);
+        this.selectItem(item.sheetId as string);
     }
 
     hideMenu = () => {
@@ -54,9 +59,58 @@ export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
         });
     }
 
+    selectItem(sheetId: string) {
+        this.setState((prevState, props) => {
+            const menu = prevState.menu;
+            const currenMenu = menu.map((sheet) => {
+                if (sheet.sheetId === sheetId) {
+                    sheet.selected = true;
+                    sheet.hide = false;
+                } else {
+                    sheet.selected = false;
+                }
+
+                return sheet;
+            });
+            return {
+                ...prevState,
+                menu: currenMenu,
+            };
+        });
+    }
+
+    hideItem(sheetId: string) {
+        this.setState((prevState, props) => {
+            const menu = prevState.menu;
+            const currenMenu = menu.map((sheet) => {
+                if (sheet.sheetId === sheetId) {
+                    sheet.hide = true;
+                    sheet.selected = false;
+                }
+
+                return sheet;
+            });
+            return {
+                ...prevState,
+                menu: currenMenu,
+            };
+        });
+    }
+
+    deleteItem(sheetId: string) {
+        this.setState((prevState, props) => {
+            const menu = prevState.menu;
+            const currenMenu = menu.filter((item) => item.sheetId !== sheetId);
+            return {
+                ...prevState,
+                menu: currenMenu,
+            };
+        });
+    }
+
     render() {
-        const { menu, style } = this.props;
-        const { show } = this.state;
+        const { style } = this.props;
+        const { show, menu } = this.state;
 
         return (
             <ul className={styles.sheetBarMenu} style={{ ...style, display: show ? 'block' : ' none' }}>
@@ -80,7 +134,7 @@ function EffIcon(props: { item: ISheetBarMenuItem }) {
         return <Icon.HideIcon />;
     }
     if (props.item.selected) {
-        return <Icon.Data.CheckIcon className={styles.sheetBarMenuSvg} />;
+        return <Icon.Format.CorrectIcon className={styles.sheetBarMenuSvg} />;
     }
     return <></>;
 }

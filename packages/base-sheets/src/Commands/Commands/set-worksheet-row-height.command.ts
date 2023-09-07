@@ -8,7 +8,7 @@ import { ISetWorksheetRowHeightMutationParams, SetWorksheetRowHeightMutation, Se
  * TODO@Dushusir 支持多个选区
  */
 export interface SetWorksheetRowHeightCommandParams {
-    rowHeight: number;
+    value: number;
 }
 
 export const SetWorksheetRowHeightCommand: ICommand = {
@@ -22,6 +22,7 @@ export const SetWorksheetRowHeightCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         const selections = selectionManager.getCurrentSelections();
+        console.info('current selections', selections);
         if (!selections.length) return false;
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
@@ -30,7 +31,7 @@ export const SetWorksheetRowHeightCommand: ICommand = {
             worksheetId,
             workbookId,
             ranges: selections,
-            rowHeight: params.rowHeight,
+            rowHeight: params.value,
         };
         const undoMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(SetWorksheetRowHeightMutation.id, redoMutationParams);

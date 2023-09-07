@@ -1,6 +1,6 @@
 import { Inject } from '@wendellhu/redi';
 
-import { SheetBarUIController } from '../Controller/SheetBarUIContruller';
+import { SheetBarUIController } from '../Controller/SheetBarUIController';
 
 export class SheetBarService {
     constructor(@Inject(SheetBarUIController) private _sheetBarUIController: SheetBarUIController) {}

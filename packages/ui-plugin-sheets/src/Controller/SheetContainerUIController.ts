@@ -9,7 +9,7 @@ import { CountBarUIController } from './CountBarUIController';
 import { FormulaBarUIController } from './FormulaBarUIController';
 import { InfoBarUIController } from './InfoBarUIController';
 import { RightMenuUIController } from './RightMenuUIController';
-import { SheetBarUIController } from './SheetBarUIContruller';
+import { SheetBarUIController } from './SheetBarUIController';
 import { SlotController } from './SlotController';
 import { ToolbarUIController } from './ToolbarUIController';
 

@@ -1,4 +1,5 @@
 import { BooleanNumber } from '@univerjs/core';
+
 import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
 
 export interface BaseUlProps extends BaseComponentProps {
@@ -16,7 +17,7 @@ export interface BaseUlProps extends BaseComponentProps {
     children?: BaseUlProps[];
     onClick?: (...arg: any[]) => void;
     onKeyUp?: (...any: any[]) => void;
-    onDown?: (...any: any[]) => void;
+    onMouseDown?: (...any: any[]) => void;
     style?: JSX.CSSProperties;
     showSelect?: (e: MouseEvent) => void;
     getParent?: any;

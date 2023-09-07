@@ -16,9 +16,7 @@ export class DocContainerUIController {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @IRenderingEngine private readonly _renderingEngine: Engine
-    ) {
-        this._initialize();
-    }
+    ) {}
 
     getUIConfig() {
         const config = {
@@ -49,8 +47,6 @@ export class DocContainerUIController {
 
         this._observerManager.requiredObserver<DocContainer>('onUIDidMount')?.notifyObservers(this._docContainer);
         this._globalObserverManager.requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
-
-        this._initDocContainer();
     };
 
     /**
@@ -77,11 +73,5 @@ export class DocContainerUIController {
 
     getDocContainer() {
         return this._docContainer;
-    }
-
-    private _initialize() {}
-
-    private _initDocContainer() {
-        // handle drag event
     }
 }

@@ -7,9 +7,6 @@ import { DocPluginObserve, install } from './Basics/Observer';
 import { BreakLineCommand, DeleteLeftCommand } from './commands/commands/core-editing.command';
 import { MoveCursorOperation } from './commands/operations/cursor.operation';
 import { DocumentController } from './Controller/DocumentController';
-import { InfoBarController } from './Controller/InfoBarController';
-import { ToolbarController } from './Controller/ToolbarController';
-import { IDocPluginConfigBase } from './Interface';
 import { en, zh } from './Locale';
 import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
 import { MoveCursorDownShortcut, MoveCursorLeftShortcut, MoveCursorRightShortcut, MoveCursorUpShortcut } from './shortcuts/cursor.shortcut';
@@ -17,7 +14,7 @@ import { CANVAS_VIEW_KEY } from './View/Render';
 import { CanvasView } from './View/Render/CanvasView';
 import { DocsView } from './View/Render/Views';
 
-export interface IDocPluginConfig extends IDocPluginConfigBase {}
+export interface IDocPluginConfig {}
 
 const DEFAULT_DOCUMENT_PLUGIN_DATA = {};
 
@@ -26,13 +23,9 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
     private _config: IDocPluginConfig;
 
-    private _infoBarControl: InfoBarController;
-
     private _canvasView: CanvasView;
 
     private _canvasEngine: Engine;
-
-    private _toolbarControl: ToolbarController;
 
     private _documentController: DocumentController;
 
@@ -73,8 +66,6 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
     }
 
     initController() {
-        this._toolbarControl = new ToolbarController();
-        this._infoBarControl = new InfoBarController();
         this._documentController = new DocumentController(this._injector);
     }
 
@@ -83,6 +74,8 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
     }
 
     listenEventManager() {
+        // FIXME@wzhudev: this looks strange to be. It should not rely on the event created by a upper layer plugin.
+        // Instead, upper layer plugin should call it.
         this._getCoreObserver<boolean>('onUIDidMountObservable').add(() => {
             this.initializeAfterUI();
         });
@@ -92,40 +85,60 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
         return this._config;
     }
 
+    /**
+     * @deprecated use DI to get underlying dependencies
+     * @returns
+     */
     getCanvasEngine() {
         return this._canvasEngine;
     }
 
+    /**
+     * @deprecated use DI to get underlying dependencies
+     * @returns
+     */
     getCanvasView() {
         return this._canvasView;
     }
 
+    /**
+     * @deprecated use DI to get underlying dependencies
+     * @returns
+     */
     getMainScene() {
         return this._canvasEngine.getScene(CANVAS_VIEW_KEY.MAIN_SCENE);
     }
 
+    /**
+     * @deprecated use DI to get underlying dependencies
+     * @returns
+     */
     getDocsView() {
         return this.getCanvasView().getDocsView();
     }
 
+    /**
+     * @deprecated use DI to get underlying dependencies
+     * @returns
+     */
     getMainComponent() {
         return (this.getDocsView() as DocsView).getDocs();
     }
 
+    /**
+     * @deprecated use DI to get underlying dependencies
+     * @returns
+     */
     getInputEvent() {
         return this.getMainComponent().getEditorInputEvent();
     }
 
+    /**
+     * @deprecated use DI to get underlying dependencies
+     * @returns
+     */
     getDocumentController() {
         return this._documentController;
-    }
-
-    getToolbarControl() {
-        return this._toolbarControl;
-    }
-
-    getInfoBarControl() {
-        return this._infoBarControl;
     }
 
     override onMounted(): void {

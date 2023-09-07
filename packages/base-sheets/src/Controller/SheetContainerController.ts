@@ -2,9 +2,13 @@ import { Disposable, ICommandInfo, ICommandService, ICurrentUniverService } from
 import { Inject } from '@wendellhu/redi';
 
 import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
+import { SetWorksheetColWidthMutation } from '../Commands/Mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetRowHeightMutation } from '../Commands/Mutations/set-worksheet-row-height.mutation';
 import { ISelectionManager } from '../Services/tokens';
 import { CanvasView } from '../View';
 import { SelectionManager } from './Selection';
+
+const updateCommandList = [SetWorksheetRowHeightMutation.id, SetWorksheetColWidthMutation.id, SetWorksheetActivateMutation.id];
 
 export class SheetContainerController extends Disposable {
     constructor(
@@ -21,11 +25,15 @@ export class SheetContainerController extends Disposable {
     private _initialize() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                this.canvasView.getSheetView().getSpreadsheet().makeDirty(true);
-
-                if (command.id === SetWorksheetActivateMutation.id) {
-                    this.canvasView.updateToSheet(this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet());
+                // refresh selection and worksheet canvas view
+                if (updateCommandList.includes(command.id)) {
+                    const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                    this._selectionManager.updateToSheet(worksheet);
+                    this.canvasView.updateToSheet(worksheet);
+                    this._selectionManager.renderCurrentControls(false);
                 }
+
+                this.canvasView.getSheetView().getSpreadsheet().makeDirty(true);
             })
         );
     }

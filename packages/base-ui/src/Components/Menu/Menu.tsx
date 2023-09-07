@@ -397,6 +397,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
                 onMouseEnter={(e) => this.mouseEnter(e, index)}
                 onMouseLeave={(e) => this.mouseLeave(e, index)}
+                onClick={(e) => this.handleClick(e, item, index)}
             >
                 <NeoCustomLabel title={item.title} value={item.title} icon={item.icon} display={item.display} label={item.label}></NeoCustomLabel>
                 {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (

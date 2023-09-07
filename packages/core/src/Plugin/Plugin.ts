@@ -107,6 +107,10 @@ export class PluginStore {
         this.plugins.length = 0;
         return plugins;
     }
+
+    forEachPlugin(callback: (plugin: Plugin) => void): void {
+        this.plugins.forEach(callback);
+    }
 }
 
 /**

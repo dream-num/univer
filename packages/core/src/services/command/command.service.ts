@@ -243,6 +243,8 @@ export class CommandService implements ICommandService {
         } catch (e) {
             result = false;
             this._commandExecutingLevel = 0;
+
+            throw e;
         }
 
         // TODO: remove from old command manager

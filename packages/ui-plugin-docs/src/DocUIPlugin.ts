@@ -1,12 +1,11 @@
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
-import { Plugin, PLUGIN_NAMES, Tools, PluginType, LocaleService, CommandManager } from '@univerjs/core';
-import { RenderEngine } from '@univerjs/base-render';
 import { ComponentManager, RegisterManager } from '@univerjs/base-ui';
+import { LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { zh, en } from './Locale';
-import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { DefaultDocUiConfig, IDocUIPluginConfig, installObserver } from './Basics';
+import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { AppUIController } from './Controller';
+import { en, zh } from './Locale';
 
 export class DocUIPlugin extends Plugin<any> {
     static override type = PluginType.Doc;
@@ -25,6 +24,7 @@ export class DocUIPlugin extends Plugin<any> {
         super(DOC_UI_PLUGIN_NAME);
 
         this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);
+        this._initializeDependencies(_injector);
     }
 
     initialize(): void {
@@ -33,21 +33,7 @@ export class DocUIPlugin extends Plugin<any> {
             zh,
         });
 
-        const dependencies: Dependency[] = [
-            [ComponentManager],
-            [
-                AppUIController,
-                {
-                    useFactory: () => this._injector.createInstance(AppUIController, this._config),
-                },
-            ],
-        ];
-
         installObserver(this);
-
-        dependencies.forEach((d) => {
-            this._injector.add(d);
-        });
 
         this._componentManager = this._injector.get(ComponentManager);
         this._appUIController = this._injector.get(AppUIController);
@@ -76,4 +62,19 @@ export class DocUIPlugin extends Plugin<any> {
 
     override onDestroy(): void {}
 
+    private _initializeDependencies(injector: Injector) {
+        const dependencies: Dependency[] = [
+            [ComponentManager],
+            [
+                AppUIController,
+                {
+                    useFactory: () => this._injector.createInstance(AppUIController, this._config),
+                },
+            ],
+        ];
+
+        dependencies.forEach((d) => {
+            injector.add(d);
+        });
+    }
 }

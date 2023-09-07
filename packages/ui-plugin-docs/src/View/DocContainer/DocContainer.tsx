@@ -1,12 +1,11 @@
-import { BaseComponentProps, Container, Content, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { BaseComponentProps, Container, Content, Footer, Layout, Sider } from '@univerjs/base-ui';
 import defaultSkin from '@univerjs/base-ui/Basics/CSS/Skin/default.module.less';
 import { Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
-import style from './index.module.less';
+import { Component, createRef } from 'preact';
+
 import { IDocUIPluginConfig } from '../../Basics';
-import { Toolbar } from '../Toolbar';
-import { InfoBar } from '../InfoBar';
+import style from './index.module.less';
 
 export interface BaseDocContainerProps extends BaseComponentProps {
     config: IDocUIPluginConfig;
@@ -201,10 +200,6 @@ export class DocContainer extends Component<BaseDocContainerProps> {
                 <Layout>
                     <Sider style={{ display: config.outerLeft ? 'block' : 'none' }}></Sider>
                     <Layout className={style.mainContent} style={{ position: 'relative' }}>
-                        <Header style={{ display: config.header ? 'block' : 'none' }}>
-                            {config.infoBar && <InfoBar {...methods.infoBar}></InfoBar>}
-                            {config.toolbar && <Toolbar {...methods.toolbar}></Toolbar>}
-                        </Header>
                         <Layout>
                             <Sider
                                 style={{

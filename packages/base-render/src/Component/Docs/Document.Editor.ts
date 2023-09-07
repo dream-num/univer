@@ -1,18 +1,17 @@
 import { DataStreamTreeTokenType, Nullable, Observable, Observer } from '@univerjs/core';
-import { IDocumentSkeletonCached } from '../../Basics/IDocumentSkeletonCached';
+
 import { CURSOR_TYPE } from '../../Basics/Const';
+import { IDocumentSkeletonCached } from '../../Basics/IDocumentSkeletonCached';
 import { IMouseEvent, IPointerEvent } from '../../Basics/IEvents';
-import { getOffsetRectForDom, transformBoundingCoord } from '../../Basics/Position';
-import { ScrollTimer } from '../../ScrollTimer';
-
-import { DocComponent } from './DocComponent';
-import { TextSelection } from './Common/TextSelection';
-import { IScrollObserverParam, Viewport } from '../../Viewport';
-import { checkStyle, injectStyle } from '../../Basics/Tools';
-
-import { Vector2 } from '../../Basics/Vector2';
-import { getCurrentScrollXY } from '../../Basics/ScrollXY';
 import { INodeInfo, INodePosition } from '../../Basics/Interfaces';
+import { getOffsetRectForDom, transformBoundingCoord } from '../../Basics/Position';
+import { getCurrentScrollXY } from '../../Basics/ScrollXY';
+import { checkStyle, injectStyle } from '../../Basics/Tools';
+import { Vector2 } from '../../Basics/Vector2';
+import { ScrollTimer } from '../../ScrollTimer';
+import { IScrollObserverParam, Viewport } from '../../Viewport';
+import { TextSelection } from './Common/TextSelection';
+import { DocComponent } from './DocComponent';
 
 export interface IEditorInputConfig {
     event: Event | CompositionEvent | KeyboardEvent;
@@ -214,15 +213,15 @@ export class DocsEditor {
         this._input.contentEditable = 'true';
 
         this._input.style.cssText = `
-            position: absolute; 
-            overflow: hidden; 
-            opacity: 1; 
-            background: #000; 
-            color: transparent; 
-            outline: none; 
-            z-index: -2; 
-            caret-color: transparent; 
-            white-space: pre-wrap; 
+            position: absolute;
+            overflow: hidden;
+            opacity: 1;
+            background: #000;
+            color: transparent;
+            outline: none;
+            z-index: -2;
+            caret-color: transparent;
+            white-space: pre-wrap;
             user-select: text;
         `;
     }
@@ -249,7 +248,7 @@ export class DocsEditor {
                     0% {
                         opacity: 1;
                     }
-                
+
                     13% {
                         opacity: 0;
                     }
@@ -261,7 +260,7 @@ export class DocsEditor {
                     63% {
                         opacity: 1;
                     }
-                
+
                     100% {
                         opacity: 1;
                     }
@@ -272,7 +271,7 @@ export class DocsEditor {
                     0% {
                         opacity: 1;
                     }
-                
+
                     13% {
                         opacity: 0;
                     }
@@ -284,7 +283,7 @@ export class DocsEditor {
                     63% {
                         opacity: 1;
                     }
-                
+
                     100% {
                         opacity: 1;
                     }
@@ -552,6 +551,7 @@ export class DocsEditor {
 
     // eslint-disable-next-line max-lines-per-function
     private _attachInputEvent() {
+        // NOTE@wzhudev: keydown is probably unnecessary
         this._input.addEventListener('keydown', (e) => {
             if (this._isIMEInputApply) {
                 return;

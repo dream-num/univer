@@ -24,6 +24,7 @@ export type DocPluginObserve = {
     onSpreadsheetKeyCompositionEndObservable: Observable<IKeyboardEvent>;
 };
 
+/** @deprecated */
 export function uninstall(plugin: Plugin) {
     plugin.deleteObserve('onAfterChangeFontFamilyObservable');
     plugin.deleteObserve('onAfterChangeFontSizeObservable');
@@ -46,6 +47,7 @@ export function uninstall(plugin: Plugin) {
     plugin.deleteObserve('onSpreadsheetKeyCompositionEndObservable');
 }
 
+/** @deprecated */
 export function install(plugin: Plugin) {
     plugin.pushToObserve('onAfterChangeFontFamilyObservable');
     plugin.pushToObserve('onAfterChangeFontSizeObservable');

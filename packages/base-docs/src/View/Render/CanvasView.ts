@@ -1,9 +1,10 @@
-import { Inject, Injector } from '@wendellhu/redi';
+import './Views';
+
 import { Engine, EVENT_TYPE, IRenderingEngine, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
 import { EventState, sortRules } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 
-import { BaseView, CanvasViewRegistry, CANVAS_VIEW_KEY } from './BaseView';
-import './Views';
+import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
 
 export class CanvasView {
     private _scene: Scene;

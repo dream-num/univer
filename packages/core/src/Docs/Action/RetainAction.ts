@@ -1,10 +1,10 @@
-import { DocActionBase } from '../../Command/DocActionBase';
 import { ActionObservers, CommandManager, CommandUnit, CommonParameter } from '../../Command';
-import { IRetainActionData } from './ActionDataInterface';
-import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
-import { UpdateAttributeApply } from '../Apply/UpdateAttributeApply';
-import { IDocumentBody } from '../../Types/Interfaces';
+import { DocActionBase } from '../../Command/DocActionBase';
 import { Nullable } from '../../Shared';
+import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
+import { IDocumentBody } from '../../Types/Interfaces';
+import { UpdateAttributeApply } from '../Apply/UpdateAttributeApply';
+import { IRetainActionData } from './ActionDataInterface';
 
 export class RetainAction extends DocActionBase<IRetainActionData, IRetainActionData> {
     static NAME = 'RetainAction';

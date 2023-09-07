@@ -1,8 +1,8 @@
-import { ICustomBlock, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITable, ITextRun } from '../../Types/Interfaces/IDocumentData';
-import { Nullable } from '../../Shared/Types';
-import { horizontalLineSegmentsSubtraction } from '../../Shared/DocTool';
 import { isSameStyleTextRun } from '../../Shared/Compare';
+import { horizontalLineSegmentsSubtraction } from '../../Shared/DocTool';
 import { sortRulesFactory } from '../../Shared/SortRules';
+import { Nullable } from '../../Shared/Types';
+import { ICustomBlock, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITable, ITextRun } from '../../Types/Interfaces/IDocumentData';
 import { DataStreamTreeTokenType } from '../Domain/Types';
 
 export function insertTextRuns(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {

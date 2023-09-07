@@ -238,15 +238,15 @@ export const RemoveColCommand: ICommand = {
                 redo() {
                     return (commandService.executeCommand(RemoveColMutation.id, redoMutationParams) as Promise<boolean>)
                         .then((res) => {
-                            if (res) commandService.executeCommand(DeleteRangeMutation.id, deleteRangeValueMutationParams);
+                            if (res) return commandService.executeCommand(DeleteRangeMutation.id, deleteRangeValueMutationParams);
                             return false;
                         })
                         .then((res) => {
-                            if (res) commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+                            if (res) return commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
                             return false;
                         })
                         .then((res) => {
-                            if (res) commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+                            if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
                             return false;
                         });
                 },

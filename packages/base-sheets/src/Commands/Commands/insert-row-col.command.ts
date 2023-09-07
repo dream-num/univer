@@ -121,15 +121,15 @@ export const InsertRowCommand: ICommand = {
                 redo() {
                     return (commandService.executeCommand(InsertRowMutation.id, redoMutationParams) as Promise<boolean>)
                         .then((res) => {
-                            if (res) commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
+                            if (res) return commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
                             return false;
                         })
                         .then((res) => {
-                            if (res) commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+                            if (res) return commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
                             return false;
                         })
                         .then((res) => {
-                            if (res) commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+                            if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
                             return false;
                         });
                 },
@@ -329,15 +329,15 @@ export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
                 redo() {
                     return (commandService.executeCommand(InsertColMutation.id, redoMutationParams) as Promise<boolean>)
                         .then((res) => {
-                            if (res) commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
+                            if (res) return commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
                             return false;
                         })
                         .then((res) => {
-                            if (res) commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+                            if (res) return commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
                             return false;
                         })
                         .then((res) => {
-                            if (res) commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+                            if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
                             return false;
                         });
                 },

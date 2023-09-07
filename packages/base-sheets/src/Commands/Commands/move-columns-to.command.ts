@@ -1,9 +1,10 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
-import { ISelectionManager } from '../../Services/tokens';
+
 import { IInsertColMutationParams, IRemoveColMutationParams } from '../../Basics/Interfaces/MutationInterface';
-import { IRemoveColMutationFactory, RemoveColMutation } from '../Mutations/remove-row-col.mutation';
+import { ISelectionManager } from '../../Services/tokens';
 import { InsertColMutation, InsertColMutationFactory } from '../Mutations/insert-row-col.mutation';
+import { IRemoveColMutationFactory, RemoveColMutation } from '../Mutations/remove-row-col.mutation';
 
 export interface IMoveColumnsToCommandParams {
     destinationIndex: number;
@@ -71,13 +72,13 @@ export const MoveColumnsToCommand: ICommand = {
                 URI: 'sheet', // TODO: this URI is fake
                 undo() {
                     return (commandService.executeCommand(InsertColMutation.id, undoRemoveColumnMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(RemoveColMutation.id, undoMutationParams);
+                        if (res) return commandService.executeCommand(RemoveColMutation.id, undoMutationParams);
                         return false;
                     });
                 },
                 redo() {
                     return (commandService.executeCommand(RemoveColMutation.id, removeColumnMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(InsertColMutation.id, insertColMutationParams);
+                        if (res) return commandService.executeCommand(InsertColMutation.id, insertColMutationParams);
                         return false;
                     });
                 },

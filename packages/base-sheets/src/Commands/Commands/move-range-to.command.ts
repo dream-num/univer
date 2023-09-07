@@ -1,7 +1,8 @@
 import { CommandType, ICellData, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
-import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
+
 import { ISelectionManager } from '../../Services/tokens';
+import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
 
 export interface IMoveRangeToCommandParams {
     destinationRange: IRangeData;
@@ -66,13 +67,13 @@ export const MoveRangeToCommand: ICommand = {
                 URI: 'sheet', // TODO: this URI is fake
                 undo() {
                     return (commandService.executeCommand(SetRangeValuesMutation.id, undoClearMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetRangeValuesMutation.id, undoMutationParams);
+                        if (res) return commandService.executeCommand(SetRangeValuesMutation.id, undoMutationParams);
                         return false;
                     });
                 },
                 redo() {
                     return (commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
+                        if (res) return commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
                         return false;
                     });
                 },

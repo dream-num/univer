@@ -69,13 +69,13 @@ export const InsertSheetCommand: ICommand = {
                 URI: 'sheet',
                 undo() {
                     return (commandService.executeCommand(SetWorksheetActivateMutation.id, undoMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(RemoveSheetMutation.id, removeSheetMutationParams);
+                        if (res) return commandService.executeCommand(RemoveSheetMutation.id, removeSheetMutationParams);
                         return false;
                     });
                 },
                 redo() {
                     return (commandService.executeCommand(InsertSheetMutation.id, insertSheetMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetWorksheetActivateMutation.id, setSheetActiveMutationParams);
+                        if (res) return commandService.executeCommand(SetWorksheetActivateMutation.id, setSheetActiveMutationParams);
                         return false;
                     });
                 },

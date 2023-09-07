@@ -55,14 +55,14 @@ export const SetWorksheetShowCommand: ICommand = {
                 URI: 'sheet',
                 undo() {
                     return (commandService.executeCommand(SetWorksheetActivateMutation.id, unActiveMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetWorksheetHideMutation.id, undoMutationParams);
-                        return true;
+                        if (res) return commandService.executeCommand(SetWorksheetHideMutation.id, undoMutationParams);
+                        return false;
                     });
                 },
                 redo() {
-                    return (commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
-                        return true;
+                    return (commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams) as Promise<boolean>).then((res) => {
+                        if (res) return commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams);
+                        return false;
                     });
                 },
             });

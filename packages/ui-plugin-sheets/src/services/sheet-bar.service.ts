@@ -8,4 +8,8 @@ export class SheetBarService {
     showMenuList(show: boolean) {
         this._sheetBarUIController.showMenuList(show);
     }
+
+    getSheetBarUIController() {
+        return this._sheetBarUIController;
+    }
 }

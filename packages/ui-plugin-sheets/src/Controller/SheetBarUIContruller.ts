@@ -14,6 +14,7 @@ import { Disposable, ICommandService, ICurrentUniverService, Nullable, ObserverM
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
+import { RenameSheetCommand } from '../commands/rename.command';
 import { ShowMenuListCommand } from '../commands/unhide.command';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
@@ -150,7 +151,7 @@ export class SheetBarUIController extends Disposable {
 
         this._componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
 
-        [ShowMenuListCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        [ShowMenuListCommand, RenameSheetCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     getComponent = (ref: SheetBar) => {

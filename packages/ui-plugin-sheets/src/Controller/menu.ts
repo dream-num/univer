@@ -54,6 +54,7 @@ import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
 import { ShowMenuListCommand } from '../commands/unhide.command';
 import { RightMenuInput } from '../View';
 import { FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, HORIZONTAL_ALIGN_CHILDREN, TEXT_ROTATE_CHILDREN, TEXT_WRAP_CHILDREN, VERTICAL_ALIGN_CHILDREN } from '../View/Toolbar/Const';
+import { RenameSheetCommand } from '../commands/rename.command';
 
 export { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './menu/border.menu';
 
@@ -763,7 +764,7 @@ export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 // No need to trigger command after clicking，maybe no need Command id?
 export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'RenameSheetCommand.id',
+        id: RenameSheetCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.rename',

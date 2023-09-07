@@ -1,6 +1,6 @@
-import { CommandType, IMutation, ICurrentUniverService, ICellData, Dimension } from '@univerjs/core';
-
+import { CommandType, Dimension, ICellData, ICurrentUniverService, IMutation } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
 
 /**
@@ -41,14 +41,15 @@ export const InsertRangeMutation: IMutation<IInsertRangeMutationParams, boolean>
                 for (let r = lastEndRow; r >= startRow; r--) {
                     for (let c = startColumn; c <= endColumn; c++) {
                         // get value blow current range
+
                         const value = cellMatrix.getValue(r, c);
-                        cellMatrix.setValue(r + rows, c, value as ICellData);
+                        cellMatrix.setValue(r + rows, c, value || {});
                     }
                 }
                 // insert cell value from user
                 for (let r = endRow; r >= startRow; r--) {
                     for (let c = startColumn; c <= endColumn; c++) {
-                        cellMatrix.setValue(r, c, params.cellValue[r - startRow][c - startColumn]);
+                        cellMatrix.setValue(r, c, params.cellValue[r][c]);
                     }
                 }
             } else if (params.shiftDimension === Dimension.COLUMNS) {
@@ -68,7 +69,7 @@ export const InsertRangeMutation: IMutation<IInsertRangeMutationParams, boolean>
                 // }
                 for (let r = startRow; r <= endRow; r++) {
                     for (let c = endColumn; c >= startColumn; c--) {
-                        cellMatrix.setValue(r, c, params.cellValue[r - startRow][c - startColumn]);
+                        cellMatrix.setValue(r, c, params.cellValue[r][c]);
                     }
                 }
             }

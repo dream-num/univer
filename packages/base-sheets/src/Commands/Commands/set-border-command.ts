@@ -15,9 +15,9 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
 import { BorderStyleManagerService } from '../../Services/border-style-manager.service';
 import { ISelectionManager } from '../../Services/tokens';
+import { ISetBorderStylesMutationParams, SetBorderStylesMutation, SetBorderStylesUndoMutationFactory } from '../Mutations/set-border-styles.mutatio';
 
 function forEach(rangeData: IRangeData, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = rangeData;
@@ -119,8 +119,16 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
     handler: async (accessor: IAccessor, params: ISetBorderCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
         const { top, left, bottom, right, vertical, horizontal, color = 'black', style = BorderStyleTypes.DASH_DOT, workbookId, worksheetId, range } = params;
+
+        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        if (!worksheet) return false;
+        const sheetMatrix = worksheet.getCellMatrix();
         const rangeData = range;
+        const styles = Tools.deepClone(workbook.getStyles());
 
         // Cells in the surrounding range may need to clear the border
         const topRangeOut = {
@@ -180,11 +188,7 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
             endColumn: rangeData.endColumn,
         };
 
-        const mtr = new ObjectMatrix<IStyleData>();
-        const mlr = new ObjectMatrix<IStyleData>();
-        const mbr = new ObjectMatrix<IStyleData>();
-        const mrr = new ObjectMatrix<IStyleData>();
-        const mcr = new ObjectMatrix<IStyleData>();
+        const mr = new ObjectMatrix<IStyleData>();
 
         const border: IBorderStyleData = {
             s: style,
@@ -193,103 +197,103 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
             },
         };
 
-        if (top === true || top === false) {
+        if (top === true || top === false || top === null) {
             // Probably to the border, there are no surrounding cells
             // Clear the bottom border of the top range
             forEach(topRangeOut, (row, column) => {
-                mtr.setValue(row, column, { bd: { b: null } });
+                mr.setValue(row, column, { bd: { b: null } });
             });
 
             // first row
             forEach(topRange, (row, column) => {
                 // update
                 if (top === true) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                    const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                         bd: { t: Tools.deepClone(border) },
                     });
-                    mcr.setValue(row, column, style);
+                    mr.setValue(row, column, style);
                 }
                 // delete
                 else if (top === false) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                    const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                         bd: { t: null },
                     });
-                    mcr.setValue(row, column, style);
+                    mr.setValue(row, column, style);
                 }
             });
         }
-        if (bottom === true || bottom === false) {
+        if (bottom === true || bottom === false || bottom === null) {
             // Probably to the border, there are no surrounding cells
             // Clear the top border of the lower range
             forEach(bottomRangeOut, (row, column) => {
-                mbr.setValue(row, column, { bd: { t: null } });
+                mr.setValue(row, column, { bd: { t: null } });
             });
 
             // the last row
             forEach(bottomRange, (row, column) => {
                 // update
                 if (bottom === true) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                    const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                         bd: { b: Tools.deepClone(border) },
                     });
-                    mcr.setValue(row, column, style);
+                    mr.setValue(row, column, style);
                 }
                 // delete
                 else if (bottom === false) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                    const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                         bd: { b: null },
                     });
-                    mcr.setValue(row, column, style);
+                    mr.setValue(row, column, style);
                 }
             });
         }
-        if (left === true || left === false) {
+        if (left === true || left === false || left === null) {
             // Probably to the border, there are no surrounding cells
             //  Clear the right border of the left range
             forEach(leftRangeOut, (row, column) => {
-                mlr.setValue(row, column, { bd: { r: null } });
+                mr.setValue(row, column, { bd: { r: null } });
             });
 
             // first column
             forEach(leftRange, (row, column) => {
                 // update
                 if (left === true) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                    const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                         bd: { l: Tools.deepClone(border) },
                     });
-                    mcr.setValue(row, column, style);
+                    mr.setValue(row, column, style);
                 }
                 // delete
                 else if (left === false) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                    const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                         bd: { l: null },
                     });
-                    mcr.setValue(row, column, style);
+                    mr.setValue(row, column, style);
                 }
             });
         }
-        if (right === true || right === false) {
+        if (right === true || right === false || right === null) {
             // Probably to the border, there are no surrounding cells
             //  Clear the left border of the right range
             forEach(rightRangeOut, (row, column) => {
-                mrr.setValue(row, column, { bd: { l: null } });
+                mr.setValue(row, column, { bd: { l: null } });
             });
 
             // last column
             forEach(rightRange, (row, column) => {
                 // update
                 if (right === true) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                    const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                         bd: { r: Tools.deepClone(border) },
                     });
-                    mcr.setValue(row, column, style);
+                    mr.setValue(row, column, style);
                 }
                 // delete
                 else if (right === false) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                    const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                         bd: { r: null },
                     });
-                    mcr.setValue(row, column, style);
+                    mr.setValue(row, column, style);
                 }
             });
         }
@@ -302,26 +306,26 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
                 if (column !== rangeData.endColumn) {
                     // update
                     if (vertical === true) {
-                        const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                        const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                             bd: { r: Tools.deepClone(border) },
                         });
-                        mcr.setValue(row, column, style);
+                        mr.setValue(row, column, style);
                     }
                     // delete
                     else if (vertical === false) {
-                        const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                        const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                             bd: { r: null },
                         });
-                        mcr.setValue(row, column, style);
+                        mr.setValue(row, column, style);
                     }
                 }
 
                 // Except for the first column, clear the left border
                 if (column !== rangeData.startColumn) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                    const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                         bd: { l: null },
                     });
-                    mcr.setValue(row, column, style);
+                    mr.setValue(row, column, style);
                 }
             });
         }
@@ -333,49 +337,50 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
                 if (row !== rangeData.endRow) {
                     // update
                     if (horizontal === true) {
-                        const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                        const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                             bd: { b: Tools.deepClone(border) },
                         });
-                        mcr.setValue(row, column, style);
+                        mr.setValue(row, column, style);
                     }
                     // delete
                     else if (horizontal === false) {
-                        const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                        const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                             bd: { b: null },
                         });
-                        mcr.setValue(row, column, style);
+                        mr.setValue(row, column, style);
                     }
                 }
 
                 // Except for the first row, clear the top border
                 if (row !== rangeData.startRow) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
+                    const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                         bd: { t: null },
                     });
-                    mcr.setValue(row, column, style);
+                    mr.setValue(row, column, style);
                 }
             });
         }
 
-        const clearMutationParams: ISetRangeValuesMutationParams = {
-            rangeData: range,
-            worksheetId,
+        const setBorderStylesMutationParams: ISetBorderStylesMutationParams = {
             workbookId,
+            worksheetId,
+            value: mr.getData(),
         };
-        const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, clearMutationParams);
+
+        const undoSetBorderStylesMutationParams: ISetBorderStylesMutationParams = SetBorderStylesUndoMutationFactory(accessor, setBorderStylesMutationParams);
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
+        const result = commandService.executeCommand(SetBorderStylesMutation.id, setBorderStylesMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 // 如果有多个 mutation 构成一个封装项目，那么要封装在同一个 undo redo element 里面
                 // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
                 URI: 'sheet', // TODO: this URI is fake
                 undo() {
-                    return commandService.executeCommand(SetRangeValuesMutation.id, undoClearMutationParams);
+                    return commandService.executeCommand(SetBorderStylesMutation.id, undoSetBorderStylesMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
+                    return commandService.executeCommand(SetBorderStylesMutation.id, setBorderStylesMutationParams);
                 },
             });
 

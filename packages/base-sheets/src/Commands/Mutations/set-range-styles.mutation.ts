@@ -1,26 +1,25 @@
 import {
     CommandType,
-    IMutation,
-    IStyleData,
-    ICurrentUniverService,
-    ObjectMatrix,
-    Tools,
-    Nullable,
     IBorderData,
-    IKeyValue,
+    ICurrentUniverService,
     IDocumentData,
-    ITextStyle,
+    IKeyValue,
+    IMutation,
     IRangeData,
+    IStyleData,
+    ITextStyle,
+    Nullable,
+    ObjectMatrix,
     ObjectMatrixPrimitiveType,
+    Tools,
 } from '@univerjs/core';
-
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetRangeStyleMutationParams {
     workbookId: string;
     worksheetId: string;
     range: IRangeData[];
-    value: ObjectMatrixPrimitiveType<IStyleData>;
+    value?: ObjectMatrixPrimitiveType<IStyleData>;
 }
 
 /**
@@ -34,17 +33,23 @@ export const SetRangeStyleUndoMutationFactory = (accessor: IAccessor, params: IS
     const currentUniverService = accessor.get(ICurrentUniverService);
     const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
     const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(params.worksheetId);
-    const cellMatrix = worksheet?.getCellMatrix();
+    if (worksheet == null) {
+        throw new Error('error');
+    }
+    const cellMatrix = worksheet.getCellMatrix();
     const styles = workbook.getStyles();
+
+    const value = params.value ?? null;
 
     const undoData = new ObjectMatrix<IStyleData>();
     for (let i = 0; i < params.range.length; i++) {
         const { startRow, endRow, startColumn, endColumn } = params.range[i];
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                const cell = cellMatrix?.getValue(r, c) || {};
+                const cell = cellMatrix.getValue(r, c) || {};
                 const old = styles.getStyleByCell(cell);
-                undoData.setValue(r - startRow, c - startColumn, transformStyle(old, params.value[r - startRow][c - startColumn] as Nullable<IStyleData>));
+                const test = transformStyle(old, value ? (value[r - startRow][c - startColumn] as Nullable<IStyleData>) : null);
+                undoData.setValue(r - startRow, c - startColumn, test);
             }
         }
     }
@@ -67,6 +72,7 @@ export const SetRangeStyleMutation: IMutation<ISetRangeStyleMutationParams, bool
 
         const cellMatrix = worksheet.getCellMatrix();
         const styles = workbook.getStyles();
+        const value = params.value ?? null;
 
         for (let i = 0; i < params.range.length; i++) {
             const { startRow, endRow, startColumn, endColumn } = params.range[i];
@@ -82,7 +88,7 @@ export const SetRangeStyleMutation: IMutation<ISetRangeStyleMutationParams, bool
                     }
 
                     // set style
-                    const merge = mergeStyle(old, params.value[r - startRow][c - startColumn] as Nullable<IStyleData>);
+                    const merge = mergeStyle(old, value ? (value[r - startRow][c - startColumn] as Nullable<IStyleData>) : null);
 
                     // then remove null
                     merge && Tools.removeNull(merge);
@@ -96,7 +102,7 @@ export const SetRangeStyleMutation: IMutation<ISetRangeStyleMutationParams, bool
                     // When the rich text sets the cell style, you need to modify the style of all rich text
                     // TODO redo/undo use setRangeData to undo rich text setting
                     if (cell.p) {
-                        mergeRichTextStyle(cell.p, params.value[r - startRow][c - startColumn] as Nullable<IStyleData>);
+                        mergeRichTextStyle(cell.p, value ? (value[r - startRow][c - startColumn] as Nullable<IStyleData>) : null);
                     }
 
                     cellMatrix.setValue(r, c, cell);
@@ -190,7 +196,9 @@ export function mergeStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullable<IS
             // overline/strikethrough/underline add color
             if ('cl' in backupStyle) {
                 if (['ul', 'ol', 'st'].includes(k)) {
-                    backupStyle[k].cl = backupStyle.cl;
+                    if (backupStyle[k]) {
+                        backupStyle[k].cl = backupStyle.cl;
+                    }
                 }
             }
         }

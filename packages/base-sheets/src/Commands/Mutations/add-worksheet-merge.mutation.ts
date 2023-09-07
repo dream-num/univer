@@ -1,5 +1,6 @@
 import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../Basics/Interfaces/MutationInterface';
 
 export const AddWorksheetMergeMutationFactory = (accessor: IAccessor, params: IAddWorksheetMergeMutationParams): IRemoveWorksheetMergeMutationParams => {
@@ -28,12 +29,16 @@ export const AddWorksheetMergeMutation: IMutation<IAddWorksheetMergeMutationPara
             throw new Error('universheet is null error!');
         }
 
-        const config = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)?.getConfig()!;
+        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+        if (!worksheet) return false;
+        const config = worksheet.getConfig()!;
         const mergeConfigData = config.mergeData;
         const mergeAppendData = params.ranges;
         for (let i = 0; i < mergeAppendData.length; i++) {
             mergeConfigData.push(mergeAppendData[i]);
         }
+
+        console.dir(worksheet);
         return true;
     },
 };

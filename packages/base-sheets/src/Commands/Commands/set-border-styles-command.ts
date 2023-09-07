@@ -1,5 +1,6 @@
 import {
     BorderStyleTypes,
+    BorderType,
     CommandType,
     IBorderStyleData,
     ICommand,
@@ -13,8 +14,10 @@ import {
     Tools,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
-import { ISetBorderStylesMutationParams, SetBorderStylesMutation, SetBorderStylesUndoMutationFactory } from '../Mutations/set-border-styles.mutatio';
+
+import { BorderStyleManagerService } from '../../Services/border-style-manager.service';
 import { ISelectionManager } from '../../Services/tokens';
+import { ISetBorderStylesMutationParams, SetBorderStylesMutation, SetBorderStylesUndoMutationFactory } from '../Mutations/set-border-styles.mutatio';
 
 export interface ISetBorderCommandParams {
     workbookId?: string;
@@ -42,8 +45,8 @@ function forEach(rangeData: IRangeData, action: (row: number, column: number) =>
 /**
  * The command to clear content in current selected ranges.
  */
-export const SetBorderStylesCommand: ICommand = {
-    id: 'sheet.command.set-border-styles',
+export const SetBorderCommand: ICommand = {
+    id: 'sheet.command.set-border',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: ISetBorderCommandParams) => {
@@ -327,5 +330,115 @@ export const SetBorderStylesCommand: ICommand = {
         }
 
         return false;
+    },
+};
+
+interface ISetBorderType {
+    type: BorderType;
+}
+
+export const SetBorderTypeCommand: ICommand = {
+    id: 'sheet.command.set-border-types',
+    type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
+    handler: async (accessor: IAccessor, params?: ISetBorderType) => {
+        const commandService = accessor.get(ICommandService);
+        const borderService = accessor.get(BorderStyleManagerService);
+        const type = params ? params.type : BorderType.ALL;
+        borderService.setType(type);
+
+        let top = null;
+        let left = null;
+        let bottom = null;
+        let right = null;
+        let vertical = null;
+        let horizontal = null;
+
+        switch (type) {
+            case BorderType.TOP:
+                top = true;
+                break;
+            case BorderType.BOTTOM:
+                bottom = true;
+                break;
+            case BorderType.LEFT:
+                left = true;
+                break;
+            case BorderType.RIGHT:
+                right = true;
+                break;
+            case BorderType.NONE:
+                top = false;
+                left = false;
+                bottom = false;
+                right = false;
+                vertical = false;
+                horizontal = false;
+                break;
+            case BorderType.ALL:
+                top = true;
+                left = true;
+                bottom = true;
+                right = true;
+                vertical = true;
+                horizontal = true;
+                break;
+            case BorderType.OUTSIDE:
+                top = true;
+                left = true;
+                bottom = true;
+                right = true;
+                break;
+            case BorderType.INSIDE:
+                vertical = true;
+                horizontal = true;
+                break;
+            case BorderType.HORIZONTAL:
+                horizontal = true;
+                break;
+            case BorderType.VERTICAL:
+                vertical = true;
+                break;
+
+            default:
+                break;
+        }
+
+        const { color, style } = borderService.getBorderInfo();
+        const setBorderParams: ISetBorderCommandParams = { top, left, bottom, right, vertical, horizontal, color, style };
+
+        return commandService.executeCommand(SetBorderCommand.id, setBorderParams);
+    },
+};
+
+interface ISetBorderStyle {
+    style: BorderStyleTypes;
+}
+
+export const SetBorderStyleCommand: ICommand = {
+    id: 'sheet.command.set-border-styles',
+    type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
+    handler: async (accessor: IAccessor, params?: ISetBorderStyle) => {
+        const borderService = accessor.get(BorderStyleManagerService);
+        const style = params ? params.style : BorderStyleTypes.THIN;
+        borderService.setStyle(style);
+        return true;
+    },
+};
+
+interface ISetBorderColor {
+    color: string;
+}
+
+export const SetBorderColorCommand: ICommand = {
+    id: 'sheet.command.set-border-color',
+    type: CommandType.COMMAND,
+    // eslint-disable-next-line max-lines-per-function
+    handler: async (accessor: IAccessor, params?: ISetBorderColor) => {
+        const borderService = accessor.get(BorderStyleManagerService);
+        const color = params ? params.color : '#000';
+        borderService.setColor(color);
+        return true;
     },
 };

@@ -1,5 +1,6 @@
 import { CommandType, ICurrentUniverService, IMutation, Rectangle } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../Basics/Interfaces/MutationInterface';
 
 export const RemoveWorksheetMergeMutationFactory = (accessor: IAccessor, params: IRemoveWorksheetMergeMutationParams): IAddWorksheetMergeMutationParams => {

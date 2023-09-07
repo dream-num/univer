@@ -1,11 +1,23 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, Nullable, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
+import {
+    IAddWorksheetMergeMutationParams,
+    IDeleteRangeMutationParams,
+    IInsertColMutationParams,
+    IInsertRangeMutationParams,
+    IInsertRowMutationParams,
+    IRemoveColMutationParams,
+    IRemoveRowMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+} from '../../Basics/Interfaces/MutationInterface';
 import { ISelectionManager } from '../../Services/tokens';
+import { AddWorksheetMergeMutation, AddWorksheetMergeMutationFactory } from '../Mutations/add-worksheet-merge.mutation';
+import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../Mutations/delete-range.mutation';
+import { InsertRangeMutation } from '../Mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../Mutations/insert-row-col.mutation';
 import { IRemoveColMutationFactory, IRemoveRowMutationFactory, RemoveColMutation, RemoveRowMutation } from '../Mutations/remove-row-col.mutation';
-import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
+import { RemoveWorksheetMergeMutation, RemoveWorksheetMergeMutationFactory } from '../Mutations/remove-worksheet-merge.mutation';
 
 export const RemoveRowCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -25,6 +37,11 @@ export const RemoveRowCommand: ICommand = {
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
+        selections.forEach((item) => {
+            item.startColumn = 0;
+            item.endColumn = worksheet.getMaxColumns();
+        });
+
         const redoMutationParams: IRemoveRowMutationParams = {
             workbookId,
             worksheetId,
@@ -34,29 +51,85 @@ export const RemoveRowCommand: ICommand = {
         const undoMutationParams: IInsertRowMutationParams = IRemoveRowMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(RemoveRowMutation.id, redoMutationParams);
 
-        const removeRangeValueMutationParams: ISetRangeValuesMutationParams = {
+        const deleteRangeValueMutationParams: IDeleteRangeMutationParams = {
             workbookId,
             worksheetId,
-            rangeData: selections,
+            range: selections,
+            shiftDimension: Dimension.ROWS,
         };
 
-        const undoRemoveRangeValueMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, removeRangeValueMutationParams);
-        const removeResult = commandService.executeCommand(SetRangeValuesMutation.id, removeRangeValueMutationParams);
+        const insertRangeMutationParams: Nullable<IInsertRangeMutationParams> = DeleteRangeUndoMutationFactory(accessor, deleteRangeValueMutationParams);
+        if (!insertRangeMutationParams) return false;
+        const deleteResult = commandService.executeCommand(DeleteRangeMutation.id, deleteRangeValueMutationParams);
 
-        if (result && removeResult) {
+        const mergeData = Tools.deepClone(worksheet.getConfig().mergeData);
+        for (let i = 0; i < mergeData.length; i++) {
+            const merge = mergeData[i];
+            for (let j = 0; j < selections.length; j++) {
+                const { startRow, endRow, startColumn, endColumn } = selections[j];
+                if (merge.endRow >= startRow) {
+                    if (merge.endColumn < startColumn) {
+                        continue;
+                    } else if (merge.startColumn > endColumn) {
+                        continue;
+                    } else if (merge.startColumn >= startColumn && merge.endColumn <= endColumn) {
+                        const count = endRow - startRow;
+                        merge.startRow -= count;
+                        merge.endRow -= count;
+                    } else {
+                        return;
+                    }
+                }
+            }
+        }
+        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+            workbookId,
+            worksheetId,
+            ranges: Tools.deepClone(worksheet.getConfig().mergeData),
+        };
+        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(accessor, removeMergeMutationParams);
+        const removeResult = commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+
+        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
+            workbookId,
+            worksheetId,
+            ranges: mergeData,
+        };
+        const deleteMergeMutationParams: IRemoveWorksheetMergeMutationParams = AddWorksheetMergeMutationFactory(accessor, addMergeMutationParams);
+        const mergeResult = commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+
+        if (result && deleteResult && removeResult && mergeResult) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return (commandService.executeCommand(InsertRowMutation.id, undoMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetRangeValuesMutation.id, undoRemoveRangeValueMutationParams);
-                        return false;
-                    });
+                    return (commandService.executeCommand(InsertRowMutation.id, undoMutationParams) as Promise<boolean>)
+                        .then((res) => {
+                            if (res) return commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
+                            return false;
+                        })
+                        .then((res) => {
+                            if (res) return commandService.executeCommand(RemoveWorksheetMergeMutation.id, deleteMergeMutationParams);
+                            return false;
+                        })
+                        .then((res) => {
+                            if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, undoRemoveMergeMutationParams);
+                            return fase;
+                        });
                 },
                 redo() {
-                    return (commandService.executeCommand(RemoveRowMutation.id, redoMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetRangeValuesMutation.id, removeRangeValueMutationParams);
-                        return false;
-                    });
+                    return (commandService.executeCommand(RemoveRowMutation.id, redoMutationParams) as Promise<boolean>)
+                        .then((res) => {
+                            if (res) commandService.executeCommand(DeleteRangeMutation.id, deleteRangeValueMutationParams);
+                            return false;
+                        })
+                        .then((res) => {
+                            if (res) commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+                            return false;
+                        })
+                        .then((res) => {
+                            if (res) commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+                            return false;
+                        });
                 },
             });
             return true;
@@ -83,6 +156,11 @@ export const RemoveColCommand: ICommand = {
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
+        selections.forEach((item) => {
+            item.startRow = 0;
+            item.endRow = worksheet.getMaxRows();
+        });
+
         const redoMutationParams: IRemoveColMutationParams = {
             workbookId,
             worksheetId,
@@ -92,29 +170,85 @@ export const RemoveColCommand: ICommand = {
         const undoMutationParams: IInsertColMutationParams = IRemoveColMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(RemoveColMutation.id, redoMutationParams);
 
-        const removeRangeValueMutationParams: ISetRangeValuesMutationParams = {
+        const deleteRangeValueMutationParams: IDeleteRangeMutationParams = {
             workbookId,
             worksheetId,
-            rangeData: selections,
+            range: selections,
+            shiftDimension: Dimension.COLUMNS,
         };
+        const insertRangeMutationParams: Nullable<IInsertRangeMutationParams> = DeleteRangeUndoMutationFactory(accessor, deleteRangeValueMutationParams);
+        if (!insertRangeMutationParams) return false;
+        const deleteResult = commandService.executeCommand(DeleteRangeMutation.id, deleteRangeValueMutationParams);
 
-        const undoRemoveRangeValueMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, removeRangeValueMutationParams);
-        const removeResult = commandService.executeCommand(SetRangeValuesMutation.id, removeRangeValueMutationParams);
+        const mergeData = Tools.deepClone(worksheet.getConfig().mergeData);
+        for (let i = 0; i < mergeData.length; i++) {
+            const merge = mergeData[i];
+            for (let j = 0; j < selections.length; j++) {
+                const { startRow, endRow, startColumn, endColumn } = selections[j];
+                if (merge.startColumn > endColumn) {
+                    if (merge.endRow < startRow) {
+                        continue;
+                    } else if (merge.startRow > endRow) {
+                        continue;
+                    } else if (merge.startRow >= startRow && merge.endRow <= endRow) {
+                        const count = endColumn - startColumn;
 
-        if (result && removeResult) {
+                        merge.startColumn -= count;
+                        merge.endColumn -= count;
+                    } else {
+                        return;
+                    }
+                }
+            }
+        }
+        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+            workbookId,
+            worksheetId,
+            ranges: Tools.deepClone(worksheet.getConfig().mergeData),
+        };
+        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(accessor, removeMergeMutationParams);
+        const removeResult = commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+
+        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
+            workbookId,
+            worksheetId,
+            ranges: mergeData,
+        };
+        const deleteMergeMutationParams: IRemoveWorksheetMergeMutationParams = AddWorksheetMergeMutationFactory(accessor, addMergeMutationParams);
+        const mergeResult = commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+
+        if (result && deleteResult && removeResult && mergeResult) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return (commandService.executeCommand(InsertColMutation.id, undoMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetRangeValuesMutation.id, undoRemoveRangeValueMutationParams);
-                        return false;
-                    });
+                    return (commandService.executeCommand(InsertColMutation.id, undoMutationParams) as Promise<boolean>)
+                        .then((res) => {
+                            if (res) return commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
+                            return false;
+                        })
+                        .then((res) => {
+                            if (res) return commandService.executeCommand(RemoveWorksheetMergeMutation.id, deleteMergeMutationParams);
+                            return false;
+                        })
+                        .then((res) => {
+                            if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, undoRemoveMergeMutationParams);
+                            return fase;
+                        });
                 },
                 redo() {
-                    return (commandService.executeCommand(RemoveColMutation.id, redoMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetRangeValuesMutation.id, removeRangeValueMutationParams);
-                        return false;
-                    });
+                    return (commandService.executeCommand(RemoveColMutation.id, redoMutationParams) as Promise<boolean>)
+                        .then((res) => {
+                            if (res) commandService.executeCommand(DeleteRangeMutation.id, deleteRangeValueMutationParams);
+                            return false;
+                        })
+                        .then((res) => {
+                            if (res) commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+                            return false;
+                        })
+                        .then((res) => {
+                            if (res) commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+                            return false;
+                        });
                 },
             });
 

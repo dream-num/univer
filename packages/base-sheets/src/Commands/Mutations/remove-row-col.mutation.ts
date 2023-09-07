@@ -1,5 +1,6 @@
 import { CommandType, IColumnData, ICurrentUniverService, IMutation, IRowData, ObjectArray } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
 
 export const IRemoveRowMutationFactory = (accessor: IAccessor, params: IRemoveRowMutationParams): IInsertRowMutationParams => {

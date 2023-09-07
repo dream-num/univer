@@ -1,7 +1,8 @@
-import { UIObserver, ObserverManager, LocaleService, ICurrentUniverService, GenName, ICommandService } from '@univerjs/core';
+import { GenName, ICommandService, ICurrentUniverService, LocaleService, ObserverManager, UIObserver } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
-import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name.command';
+
 import { InsertSheetCommand } from '../Commands/Commands/insert-sheet.command';
+import { SetWorksheetNameCommand } from '../Commands/Commands/set-worksheet-name.command';
 
 export class SheetBarController {
     constructor(

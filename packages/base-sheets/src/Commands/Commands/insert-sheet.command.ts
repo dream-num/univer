@@ -4,6 +4,7 @@ import { IAccessor } from '@wendellhu/redi';
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../Mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../Mutations/remove-sheet.mutation';
+import { ISetWorksheetActivateMutationParams, SetWorksheetActivateMutation, SetWorksheetUnActivateMutationFactory } from '../Mutations/set-worksheet-activate.mutation';
 
 export interface InsertSheetCommandParams {
     workbookId?: string;
@@ -32,38 +33,51 @@ export const InsertSheetCommand: ICommand = {
         if (!workbook) return false;
 
         let index = workbook.getSheets().length;
-        let config = Tools.deepClone(DEFAULT_WORKSHEET);
+        let sheetConfig = Tools.deepClone(DEFAULT_WORKSHEET);
         if (params) {
             index = params.index ?? index;
             if (params.sheet) {
-                config = params.sheet;
+                sheetConfig = params.sheet;
             } else {
-                config.id = Tools.generateRandomId();
-                config.name = `工作表${++workbook.getSheets().length}`; // Todo: 表名
+                sheetConfig.id = Tools.generateRandomId();
+                sheetConfig.name = `工作表${++workbook.getSheets().length}`; // Todo: 表名
             }
         } else {
-            config.id = Tools.generateRandomId();
-            config.name = `工作表${++workbook.getSheets().length}`; // Todo: 表名
+            sheetConfig.id = Tools.generateRandomId();
+            sheetConfig.name = `工作表${++workbook.getSheets().length}`; // Todo: 表名
         }
 
         // prepare do mutations
         const insertSheetMutationParams: IInsertSheetMutationParams = {
             index,
-            sheet: config,
+            sheet: sheetConfig,
             workbookId,
         };
         const removeSheetMutationParams: IRemoveSheetMutationParams = InsertSheetUndoMutationFactory(accessor, insertSheetMutationParams);
-
         // execute do mutations and add undo mutations to undo stack if completed
         const result = commandService.executeCommand(InsertSheetMutation.id, insertSheetMutationParams);
-        if (result) {
+
+        const setSheetActiveMutationParams: ISetWorksheetActivateMutationParams = {
+            workbookId,
+            worksheetId: sheetConfig.id,
+        };
+        const undoMutationParams: ISetWorksheetActivateMutationParams = SetWorksheetUnActivateMutationFactory(accessor, setSheetActiveMutationParams);
+        const activateResult = commandService.executeCommand(SetWorksheetActivateMutation.id, setSheetActiveMutationParams);
+
+        if (result && activateResult) {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return commandService.executeCommand(RemoveSheetMutation.id, removeSheetMutationParams);
+                    return (commandService.executeCommand(SetWorksheetActivateMutation.id, undoMutationParams) as Promise<boolean>).then((res) => {
+                        if (res) commandService.executeCommand(RemoveSheetMutation.id, removeSheetMutationParams);
+                        return false;
+                    });
                 },
                 redo() {
-                    return commandService.executeCommand(InsertSheetMutation.id, insertSheetMutationParams);
+                    return (commandService.executeCommand(InsertSheetMutation.id, insertSheetMutationParams) as Promise<boolean>).then((res) => {
+                        if (res) commandService.executeCommand(SetWorksheetActivateMutation.id, setSheetActiveMutationParams);
+                        return false;
+                    });
                 },
             });
 

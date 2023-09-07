@@ -1,6 +1,6 @@
-import { BehaviorSubject } from 'rxjs';
 import { BorderStyleTypes, BorderType } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
+import { BehaviorSubject } from 'rxjs';
 
 export interface IBorderInfo {
     type: BorderType;
@@ -25,6 +25,11 @@ export class BorderStyleManagerService implements IDisposable {
 
     dispose(): void {
         this._borderInfo$.complete();
+    }
+
+    setType(type: BorderType): void {
+        this._borderInfo.type = type;
+        this.refresh();
     }
 
     setColor(color: string): void {

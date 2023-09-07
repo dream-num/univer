@@ -13,9 +13,10 @@ import {
     isSameLine,
     TextSelection,
 } from '@univerjs/base-render';
-import { DataStreamTreeTokenType, Direction, DocumentModel, ICurrentUniverService, IParagraph, Nullable, Observable, UpdateDocsAttributeType } from '@univerjs/core';
+import { DataStreamTreeTokenType, Direction, DocumentModel, ICommandService, ICurrentUniverService, IParagraph, Nullable, Observable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
+import { DeleteCommand, IMEInputCommand, InsertCommand, UpdateCommand } from '../commands/commands/core-editing.command';
 import { CanvasView } from '../View/Render/CanvasView';
 import { DocsView } from '../View/Render/Views';
 
@@ -26,7 +27,11 @@ export class InputController {
 
     private _currentNodePosition: Nullable<INodePosition>;
 
-    constructor(@Inject(CanvasView) private readonly _canvasView: CanvasView, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(
+        @Inject(CanvasView) private readonly _canvasView: CanvasView,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
         this._initialize();
     }
 
@@ -175,18 +180,21 @@ export class InputController {
                 }
             }
 
-            docsModel.update(
-                { dataStream: '', paragraphs: [{ ...updateParagraph }] },
-                {
+            this._commandService.executeCommand(UpdateCommand.id, {
+                unitId: docsModel.getUnitId(),
+                body: {
+                    dataStream: '',
+                    paragraphs: [{ ...updateParagraph }],
+                },
+                range: {
                     cursorStart: paragraphIndex,
                     cursorEnd: paragraphIndex,
                     isEndBack: false,
                     isStartBack: false,
                     isCollapse: true,
                 },
-                UpdateDocsAttributeType.REPLACE,
-                segmentId
-            );
+                segmentId,
+            });
         } else {
             const endNodePosition = activeSelection?.getEnd();
             if (endNodePosition != null) {
@@ -195,10 +203,15 @@ export class InputController {
                     activeRange.cursorEnd -= 1;
                 }
             }
-            docsModel.delete(activeRange, segmentId);
+
+            this._commandService.executeCommand(DeleteCommand.id, {
+                unitId: docsModel.getUnitId(),
+                range: activeRange,
+                segmentId,
+            });
         }
 
-        skeleton.calculate();
+        skeleton?.calculate();
 
         let isBack = false;
 
@@ -242,14 +255,15 @@ export class InputController {
 
         const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
 
-        docsModel.insert(
-            {
+        this._commandService.executeCommand(InsertCommand.id, {
+            unitId: docsModel.getUnitId(),
+            body: {
                 dataStream: DataStreamTreeTokenType.PARAGRAPH,
                 paragraphs: this._generateParagraph(DataStreamTreeTokenType.PARAGRAPH),
             },
-            activeRange,
-            segmentId
-        );
+            range: activeRange,
+            segmentId,
+        });
 
         skeleton?.calculate();
 
@@ -288,7 +302,14 @@ export class InputController {
 
             const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
 
-            docsModel.insert({ dataStream: content }, activeRange, segmentId);
+            this._commandService.executeCommand(InsertCommand.id, {
+                unitId: docsModel.getUnitId(),
+                body: {
+                    dataStream: content,
+                },
+                range: activeRange,
+                segmentId,
+            });
 
             skeleton.calculate();
 
@@ -325,7 +346,7 @@ export class InputController {
             this._previousIMEStart = cursor;
         });
 
-        onCompositionupdateObservable.add((config) => {
+        onCompositionupdateObservable.add(async (config) => {
             const { event, document, activeSelection } = config;
 
             let cursor = this._previousIMEStart;
@@ -348,7 +369,13 @@ export class InputController {
 
             const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
 
-            docsModel.IMEInput(content, this._previousIMEContent.length, cursor, segmentId);
+            await this._commandService.executeCommand(IMEInputCommand.id, {
+                unitId: docsModel.getUnitId(),
+                newText: content,
+                oldTextLen: this._previousIMEContent.length,
+                start: cursor,
+                segmentId,
+            });
 
             skeleton.calculate();
 

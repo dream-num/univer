@@ -1,12 +1,13 @@
 import { Inject } from '@wendellhu/redi';
+
 import { Class } from '../Shared/Types';
 import { ActionBase, IActionData } from './ActionBase';
-import { CommandObservers } from './CommandObservers';
-import { ActionObservers } from './ActionObservers';
-import { CommandInjectorObservers } from './CommandInjectorObservers';
-import { UndoManager } from './UndoManager';
 import { ActionExtensionManager } from './ActionExtensionManager';
+import { ActionObservers } from './ActionObservers';
 import { Command } from './Command';
+import { CommandInjectorObservers } from './CommandInjectorObservers';
+import { CommandObservers } from './CommandObservers';
+import { UndoManager } from './UndoManager';
 
 /**
  * Manage command

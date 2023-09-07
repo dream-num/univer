@@ -1,7 +1,7 @@
+import { DocumentModel } from '../Docs/Domain/DocumentModel';
 import { Class, Nullable } from '../Shared';
 import { Workbook } from '../Sheets';
-import { IActionData, ActionType, ActionBase, CommandInjector, CommandManager, ActionOperation, CommonParameter } from './index';
-import { DocumentModel } from '../Docs/Domain/DocumentModel';
+import { ActionBase, ActionOperation, ActionType, CommandInjector, CommandManager, CommonParameter, IActionData } from './index';
 
 export class CommandUnit {
     WorkBookUnit?: Workbook;

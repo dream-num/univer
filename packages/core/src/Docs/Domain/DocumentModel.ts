@@ -1,13 +1,7 @@
-import { Inject } from '@wendellhu/redi';
-import { Command, CommandManager } from '../../Command';
-import { IDocumentBody, IDocumentData } from '../../Types/Interfaces/IDocumentData';
-import { ITextSelectionRange } from '../../Types/Interfaces/ISelectionData';
-import { DOC_ACTION_NAMES } from '../../Types/Const/DOC_ACTION_NAMES';
-import { Tools, getTextIndexByCursor } from '../../Shared';
-import { DocumentBodyModel } from './DocumentBodyModel';
+import { Tools } from '../../Shared';
 import { DEFAULT_DOC } from '../../Types/Const';
-import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
-import { DocActionType } from '../Action/ActionDataInterface';
+import { IDocumentData } from '../../Types/Interfaces/IDocumentData';
+import { DocumentBodyModel } from './DocumentBodyModel';
 
 interface IDrawingUpdateConfig {
     left: number;
@@ -114,136 +108,20 @@ export class DocumentModelSimple {
     }
 }
 
+const UNIT_ID_LENGTH = 6;
+
 export class DocumentModel extends DocumentModelSimple {
     private _unitId: string;
 
-    constructor(snapshot: Partial<IDocumentData>, @Inject(CommandManager) private readonly _commandManager: CommandManager) {
+    constructor(snapshot: Partial<IDocumentData>) {
         super(snapshot);
-        this._unitId = this.snapshot.id ?? Tools.generateRandomId(6);
+        this._unitId = this.snapshot.id ?? Tools.generateRandomId(UNIT_ID_LENGTH);
 
         this.initializeRowColTree();
     }
 
     getUnitId(): string {
         return this._unitId;
-    }
-
-    insert(body: IDocumentBody, range: ITextSelectionRange, segmentId?: string): DocumentModel {
-        const { cursorStart, cursorEnd, isEndBack, isStartBack, isCollapse } = range;
-
-        const textStart = getTextIndexByCursor(cursorStart, isStartBack);
-
-        const actionList = [];
-
-        if (isCollapse) {
-            actionList.push({
-                actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
-                len: textStart + 1,
-                segmentId,
-            });
-        } else {
-            actionList.push(...this._getDeleteAction(range, segmentId));
-        }
-
-        actionList.push({
-            actionName: DOC_ACTION_NAMES.INSERT_ACTION_NAME,
-            body,
-            len: body.dataStream.length,
-            line: 0,
-            segmentId,
-        });
-
-        const command = new Command(
-            {
-                DocumentUnit: this,
-            },
-            ...actionList
-        );
-        this._commandManager.invoke(command);
-        return this;
-    }
-
-    delete(range: ITextSelectionRange, segmentId?: string): DocumentModel {
-        const deleteActionList = this._getDeleteAction(range, segmentId);
-
-        const command = new Command(
-            {
-                DocumentUnit: this,
-            },
-            ...deleteActionList
-        );
-        this._commandManager.invoke(command);
-        return this;
-    }
-
-    update(updateBody: IDocumentBody, range: ITextSelectionRange, coverType = UpdateDocsAttributeType.COVER, segmentId?: string) {
-        const { cursorStart, cursorEnd, isEndBack, isStartBack } = range;
-        const actionList = [];
-
-        const textStart = getTextIndexByCursor(cursorStart, isStartBack);
-
-        const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
-
-        actionList.push({
-            actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
-            len: textStart,
-            segmentId,
-        });
-
-        actionList.push({
-            actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
-            len: textEnd - textStart + 1,
-            coverType,
-            body: updateBody,
-            segmentId,
-        });
-
-        const command = new Command(
-            {
-                DocumentUnit: this,
-            },
-            ...actionList
-        );
-        this._commandManager.invoke(command);
-        return this;
-    }
-
-    IMEInput(newText: string, oldTextLen: number, start: number, segmentId?: string) {
-        const actionList = [];
-
-        actionList.push({
-            actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
-            len: start + 1,
-            segmentId,
-        });
-
-        if (oldTextLen > 0) {
-            actionList.push({
-                actionName: DOC_ACTION_NAMES.DELETE_ACTION_NAME,
-                len: oldTextLen,
-                line: 0,
-                segmentId,
-            });
-        }
-
-        actionList.push({
-            actionName: DOC_ACTION_NAMES.INSERT_ACTION_NAME,
-            body: {
-                dataStream: newText,
-            },
-            len: newText.length,
-            line: 0,
-            segmentId,
-        });
-
-        const command = new Command(
-            {
-                DocumentUnit: this,
-            },
-            ...actionList
-        );
-        this._commandManager.invoke(command);
-        return this;
     }
 
     private initializeRowColTree() {
@@ -265,31 +143,5 @@ export class DocumentModel extends DocumentModelSimple {
                 this.footerTreeMap.set(footerId, DocumentBodyModel.create(footer.body));
             }
         }
-    }
-
-    private _getDeleteAction(range: ITextSelectionRange, segmentId?: string) {
-        const { cursorStart, cursorEnd, isEndBack, isStartBack, isCollapse } = range;
-        const actionList: DocActionType[] = [];
-
-        const textStart = getTextIndexByCursor(cursorStart, isStartBack) + (isCollapse ? 0 : 1);
-
-        const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
-
-        if (textStart > 0) {
-            actionList.push({
-                actionName: DOC_ACTION_NAMES.RETAIN_ACTION_NAME,
-                len: textStart,
-                segmentId,
-            });
-        }
-
-        actionList.push({
-            actionName: DOC_ACTION_NAMES.DELETE_ACTION_NAME,
-            len: textEnd - textStart + 1,
-            line: 0,
-            segmentId,
-        });
-
-        return actionList;
     }
 }

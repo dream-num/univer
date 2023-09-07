@@ -54,7 +54,6 @@ import { RenameSheetCommand } from '../commands/rename.command';
 import { ShowMenuListCommand } from '../commands/unhide.command';
 import { RightMenuInput } from '../View';
 import { FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, HORIZONTAL_ALIGN_CHILDREN, TEXT_ROTATE_CHILDREN, TEXT_WRAP_CHILDREN, VERTICAL_ALIGN_CHILDREN } from '../View/Toolbar/Const';
-import { RenameSheetCommand } from '../commands/rename.command';
 
 export { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './menu/border.menu';
 

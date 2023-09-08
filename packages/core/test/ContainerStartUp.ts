@@ -1,22 +1,15 @@
-import { SheetContext, Environment } from '../src/Basics';
-import { CommandManager, UndoManager } from '../src/Command';
-import { Workbook, Worksheet } from '../src/Sheets/Domain';
-import { BooleanNumber } from '../src/Types/Enum';
-import { IWorkbookConfig, IWorksheetConfig } from '../src/Types/Interfaces';
+import { Injector } from '../src';
+import { Environment, SheetContext } from '../src/Basics';
 import { HooksManager } from '../src/Observer/HooksManager';
 import { ObserverManager } from '../src/Observer/ObserverManager';
 import { PluginManager } from '../src/Plugin';
-import {
-    IServerSocketWorkbookConfig,
-    ServerHttp,
-    ServerSocket,
-} from '../src/Server';
+import { IServerSocketWorkbookConfig, ServerHttp, ServerSocket } from '../src/Server';
 import { Locale } from '../src/Shared';
-import { Injector } from '../src';
+import { Workbook, Worksheet } from '../src/Sheets/Domain';
+import { BooleanNumber } from '../src/Types/Enum';
+import { IWorkbookConfig, IWorksheetConfig } from '../src/Types/Interfaces';
 
-export function createCoreTestContainer(
-    workbookConfig?: Partial<IWorkbookConfig>
-): Injector {
+export function createCoreTestContainer(workbookConfig?: Partial<IWorkbookConfig>): Injector {
     const configure = {
         value: {
             appVersion: '',
@@ -50,8 +43,6 @@ export function createCoreTestContainer(
         ['WorkBook', { useClass: Workbook }],
         ['Locale', { useClass: Locale }],
         ['Context', { useClass: SheetContext }],
-        ['UndoManager', { useClass: UndoManager }],
-        ['CommandManager', { useClass: CommandManager }],
         ['PluginManager', { useClass: PluginManager }],
         ['ObserverManager', { useClass: ObserverManager }],
         ['ObservableHooksManager', { useClass: HooksManager }],
@@ -147,19 +138,11 @@ export function TestInitTwoSheet() {
         status: 0,
     };
 
-    const worksheetOne = container.createInstance(
-        Worksheet,
-        context,
-        sheetOneConfigure
-    );
+    const worksheetOne = container.createInstance(Worksheet, context, sheetOneConfigure);
     workbook.insertSheet(worksheetOne);
     worksheetOne.setCommandManager(commandManager);
 
-    const worksheetTwo = container.createInstance(
-        Worksheet,
-        context,
-        sheetTwoConfigure
-    );
+    const worksheetTwo = container.createInstance(Worksheet, context, sheetTwoConfigure);
     workbook.insertSheet(worksheetTwo);
     worksheetTwo.setCommandManager(commandManager);
 

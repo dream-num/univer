@@ -1,7 +1,6 @@
 import { SetSelectionsOperation } from '@Commands/Operations/selection.operation';
 import { IMouseEvent, IPointerEvent, Rect, ScrollTimer, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle } from '@univerjs/base-render';
 import {
-    CommandManager,
     DEFAULT_CELL,
     DEFAULT_SELECTION,
     Direction,
@@ -30,7 +29,7 @@ import { SheetView } from '../../View/Views/SheetView';
 import { ColumnTitleController } from './ColumnTitleController';
 import { DragLineController } from './DragLineController';
 import { RowTitleController } from './RowTitleController';
-import { SelectionController, SELECTION_TYPE } from './SelectionController';
+import { SELECTION_TYPE, SelectionController } from './SelectionController';
 
 /**
  * TODO 注册selection拦截，可能在有公式ArrayObject时，fx公式栏显示不同
@@ -72,7 +71,6 @@ export class SelectionManager {
         private readonly _config: ISheetPluginConfig,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         /** @deprecated use ICommandService instead */
-        @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,

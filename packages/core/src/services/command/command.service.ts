@@ -1,7 +1,5 @@
 import { createIdentifier, IAccessor, IDisposable, Inject, Injector, Optional, SkipSelf } from '@wendellhu/redi';
 
-// TODO: we will finally remove these imports after we remove the legacy command manager
-import { ActionType, CommandManager, IActionData } from '../../Command';
 import { toDisposable } from '../../Shared/Lifecycle';
 import { ILogService } from '../log/log.service';
 
@@ -246,16 +244,6 @@ export class CommandService implements ICommandService {
             this._commandExecutingLevel = 0;
 
             throw e;
-        }
-
-        // TODO: remove from old command manager
-        if (command.type === CommandType.MUTATION) {
-            CommandManager.getActionObservers().notifyObservers({
-                type: ActionType.REDO,
-                data: result as unknown as IActionData,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                action: null as any,
-            });
         }
 
         return result;

@@ -1,4 +1,4 @@
-import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, Nullable, Tools } from '@univerjs/core';
+import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, Nullable, Rectangle, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
@@ -119,15 +119,15 @@ export const RemoveRowCommand: ICommand = {
                 redo() {
                     return (commandService.executeCommand(RemoveRowMutation.id, redoMutationParams) as Promise<boolean>)
                         .then((res) => {
-                            if (res) commandService.executeCommand(DeleteRangeMutation.id, deleteRangeValueMutationParams);
+                            if (res) return commandService.executeCommand(DeleteRangeMutation.id, deleteRangeValueMutationParams);
                             return false;
                         })
                         .then((res) => {
-                            if (res) commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+                            if (res) return commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
                             return false;
                         })
                         .then((res) => {
-                            if (res) commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+                            if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
                             return false;
                         });
                 },
@@ -182,22 +182,12 @@ export const RemoveColCommand: ICommand = {
 
         const mergeData = Tools.deepClone(worksheet.getConfig().mergeData);
         for (let i = 0; i < mergeData.length; i++) {
-            const merge = mergeData[i];
+            let merge = mergeData[i];
             for (let j = 0; j < selections.length; j++) {
-                const { startRow, endRow, startColumn, endColumn } = selections[j];
-                if (merge.startColumn > endColumn) {
-                    if (merge.endRow < startRow) {
-                        continue;
-                    } else if (merge.startRow > endRow) {
-                        continue;
-                    } else if (merge.startRow >= startRow && merge.endRow <= endRow) {
-                        const count = endColumn - startColumn;
-
-                        merge.startColumn -= count;
-                        merge.endColumn -= count;
-                    } else {
-                        return;
-                    }
+                merge = Rectangle.getIntersects(selections[j], merge);
+                if (!merge) {
+                    mergeData.splice(i, 1);
+                    i--;
                 }
             }
         }

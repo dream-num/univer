@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, ObjectArray, ObjectMatrix } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, ObjectArray } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
@@ -100,21 +100,17 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
             const colCount = range.endColumn - range.startColumn + 1;
             const defaultColWidth = worksheet.getConfig().defaultColumnWidth;
 
-            if (params.colInfo) {
-                for (let j = colIndex; j < colIndex + colCount; j++) {
-                    const defaultColInfo = {
-                        w: defaultColWidth,
-                        hd: 0,
-                    };
+            for (let j = colIndex; j < colIndex + colCount; j++) {
+                const defaultColInfo = {
+                    w: defaultColWidth,
+                    hd: 0,
+                };
+                if (params.colInfo) {
                     columnWrapper.insert(j, params.colInfo.get(j) ?? defaultColInfo);
+                } else {
+                    columnWrapper.insert(j, defaultColInfo);
                 }
-            } else {
-                columnWrapper.inserts(colIndex, new ObjectArray(colCount));
             }
-
-            const cellPrimitive = worksheet!.getCellMatrix().toJSON();
-            const cellWrapper = new ObjectMatrix(cellPrimitive);
-            cellWrapper.insertColumnCount(colIndex, colCount);
         }
 
         return true;

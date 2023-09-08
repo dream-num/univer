@@ -60,8 +60,8 @@ export const SetWorksheetShowCommand: ICommand = {
                     });
                 },
                 redo() {
-                    return (commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) return commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams);
+                    return (commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams) as Promise<boolean>).then((res) => {
+                        if (res) return commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
                         return false;
                     });
                 },

@@ -38,7 +38,6 @@ export const AddWorksheetMergeMutation: IMutation<IAddWorksheetMergeMutationPara
             mergeConfigData.push(mergeAppendData[i]);
         }
 
-        console.dir(worksheet);
         return true;
     },
 };

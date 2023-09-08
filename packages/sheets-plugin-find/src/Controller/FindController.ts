@@ -3,7 +3,7 @@ import { Disposable, ICommandService } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { IDisposable, Inject, Injector } from '@wendellhu/redi';
 
-import { HideModalCommand, ShowModalCommand } from '../commands/show-modal.command';
+import { HideModalOperation, ShowModalOperation } from '../commands/operations/show-modal.operation';
 import { FindModalController } from './FindModalController';
 import { FindMenuItemFactory } from './menu';
 
@@ -23,7 +23,7 @@ export class FindController extends Disposable implements IDisposable {
         this._initializeContextMenu();
         toolbar.setToolbar();
 
-        [ShowModalCommand, HideModalCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        [ShowModalOperation, HideModalOperation].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _initializeContextMenu() {

@@ -1,11 +1,11 @@
 import { IMenuButtonItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { IAccessor } from '@wendellhu/redi';
 
-import { UploadCommand } from '../commands/upload.command';
+import { UploadOperation } from '../commands/operations/upload.operation';
 
 export function ImportImageMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: UploadCommand.id,
+        id: UploadOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'ImageIcon',
         title: 'Image', // FIXME use translation

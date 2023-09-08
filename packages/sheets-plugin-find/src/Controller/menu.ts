@@ -1,11 +1,11 @@
 import { IMenuButtonItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ShowModalCommand } from '../commands/show-modal.command';
+import { ShowModalOperation } from '../commands/operations/show-modal.operation';
 
 export function FindMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: ShowModalCommand.id,
+        id: ShowModalOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'SearchIcon',
         title: 'find.findLabel',

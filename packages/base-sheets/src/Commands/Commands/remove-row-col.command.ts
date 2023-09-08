@@ -188,7 +188,7 @@ export const RemoveColCommand: ICommand = {
 
         const mergeData = Tools.deepClone(worksheet.getConfig().mergeData);
         for (let i = 0; i < mergeData.length; i++) {
-            let merge = mergeData[i];
+            const merge = mergeData[i];
             for (let j = 0; j < selections.length; j++) {
                 const { startColumn, endColumn } = selections[j];
                 const count = endColumn - startColumn + 1;

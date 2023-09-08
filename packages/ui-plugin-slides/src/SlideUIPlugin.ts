@@ -1,8 +1,9 @@
 import { Plugin, Tools, LocaleService, PluginType } from '@univerjs/core';
-import { RegisterManager, ComponentManager, getRefElement, DragManager } from '@univerjs/base-ui';
+import { ComponentManager, getRefElement, DragManager } from '@univerjs/base-ui';
 import { IRenderingEngine } from '@univerjs/base-render';
 import { Inject, Injector } from '@wendellhu/redi';
 import { CanvasView } from '@univerjs/base-slides';
+
 import { zh, en } from './Locale';
 import { SLIDE_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { AppUIController } from './Controller/AppUIController';
@@ -13,8 +14,6 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
     static override type = PluginType.Slide;
 
     private _appUIController: AppUIController;
-
-    private _registerManager: RegisterManager;
 
     private _config: ISlideUIPluginConfig;
 
@@ -89,14 +88,6 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
     }
 
     /**
-     * usage this._clipboardExtensionManager.handle(data);
-     * @returns
-     */
-    getRegisterManager(): RegisterManager {
-        return this._registerManager;
-    }
-
-    /**
      * This API is used in plugins for initialization that depends on UI rendering
      * @param cb
      * @returns
@@ -115,13 +106,11 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
 
     private initializeDependencies(): void {
         this._injector.add([DragManager]);
-        this._injector.add([RegisterManager]);
         this._injector.add([ComponentManager]);
 
         // TODO: maybe we don't have to instantiate these dependencies manually
         this._dragManager = this._injector.get(DragManager);
         this._componentManager = this._injector.get(ComponentManager);
-        this._registerManager = this._injector.get(RegisterManager);
 
         this._appUIController = this._injector.createInstance(AppUIController, this._config);
     }

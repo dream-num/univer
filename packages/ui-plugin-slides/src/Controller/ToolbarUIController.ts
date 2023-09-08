@@ -1,7 +1,7 @@
 import { BorderInfo } from '@univerjs/base-slides';
 import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager } from '@univerjs/base-ui';
 import { ComponentChildren } from 'preact';
-import { BorderType, CommandManager, HorizontalAlign, ICurrentUniverService, IKeyValue, ObserverManager, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { BorderType, HorizontalAlign, ICurrentUniverService, IKeyValue, ObserverManager, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 import { DefaultToolbarConfig, SlideToolbarConfig, SLIDE_UI_PLUGIN_NAME } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
@@ -262,19 +262,6 @@ export class ToolbarUIController {
         this._componentManager.register(SLIDE_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
         this._componentManager.register(SLIDE_UI_PLUGIN_NAME + LineColor.name, LineColor);
         this._componentManager.register(SLIDE_UI_PLUGIN_NAME + LineBold.name, LineBold);
-
-        CommandManager.getCommandObservers().add(({ actions }) => {
-            // if (!actions || actions.length === 0) return;
-            // const action = actions[0] as SlideActionBase<ISlideActionData, ISlideActionData, void>;
-            // const currentUnitId = this._plugin.getContext().getUniver().getCurrentUniverSlideInstance().UniverSlideConfig.id;
-            // const actionUnitId = action.getWorkBook().getUnitId();
-            // if (currentUnitId !== actionUnitId) return;
-            // const manager = this._slidePlugin.getSelectionManager();
-            // const range = manager?.getCurrentCell();
-            // if (range) {
-            //     this._changeToolbarState(range);
-            // }
-        });
     }
 }
 

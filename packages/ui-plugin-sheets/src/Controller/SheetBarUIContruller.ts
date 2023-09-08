@@ -1,12 +1,12 @@
 import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActivateCommand, SetWorksheetOrderCommand } from '@univerjs/base-sheets';
 import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuService } from '@univerjs/base-ui';
-import { Disposable, ICommandService, ICurrentUniverService, Nullable, ObserverManager, SheetActionBase, UIObserver } from '@univerjs/core';
+import { Disposable, ICommandService, ICurrentUniverService, Nullable, ObserverManager, UIObserver } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
 import { SheetBar } from '../View/SheetBar';
 import styles from '../View/SheetBar/index.module.less';
-import { SheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
+import { ISheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
 import {
     ChangeColorSheetMenuItemFactory,
     CopySheetMenuItemFactory,
@@ -156,7 +156,7 @@ export class SheetBarUIController extends Disposable {
         return this._sheetList;
     }
 
-    getMenuList(): SheetBarMenuItem[] {
+    getMenuList(): ISheetBarMenuItem[] {
         return this._menuList;
     }
 

@@ -13,7 +13,6 @@
  */
 
 export * from './Basics';
-export { DeleteApply, InsertApply, UpdateAttributeApply, UpdateDocumentApply } from './Docs/Apply';
 export * from './Docs/Domain';
 export * from './Observer';
 export * from './Plugin';

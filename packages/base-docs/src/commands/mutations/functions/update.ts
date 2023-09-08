@@ -1,8 +1,17 @@
-import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
-import { getDocsUpdateBody } from '../../Shared/Common';
-import { Nullable } from '../../Shared/Types';
-import { ICustomBlock, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITable, ITextRun } from '../../Types/Interfaces/IDocumentData';
-import { DocumentModel } from '../Domain/DocumentModel';
+import {
+    DocumentModel,
+    getDocsUpdateBody,
+    ICustomBlock,
+    ICustomRange,
+    IDocumentBody,
+    IParagraph,
+    ISectionBreak,
+    ITable,
+    ITextRun,
+    Nullable,
+    UpdateDocsAttributeType,
+} from '@univerjs/core';
+
 import {
     deleteCustomBlocks,
     deleteCustomRanges,
@@ -14,7 +23,7 @@ import {
     insertParagraphs,
     insertTables,
     insertTextRuns,
-} from './Common';
+} from './common';
 
 export function UpdateAttributeApply(
     document: DocumentModel,

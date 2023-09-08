@@ -38,7 +38,7 @@ export class SheetBarUIController extends Disposable {
 
     protected _sheetList: SheetUlProps[];
 
-    protected _menuList: SheetBarMenuItem[];
+    protected _menuList: ISheetBarMenuItem[];
 
     // eslint-disable-next-line max-lines-per-function
     constructor(

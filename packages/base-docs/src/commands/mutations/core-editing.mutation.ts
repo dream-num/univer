@@ -1,4 +1,8 @@
-import { CommandType, DeleteApply, ICurrentUniverService, IDocumentBody, IMutation, InsertApply, UpdateAttributeApply, UpdateDocsAttributeType } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IDocumentBody, IMutation, UpdateDocsAttributeType } from '@univerjs/core';
+
+import { DeleteApply } from './functions/delete-apply';
+import { InsertApply } from './functions/insert';
+import { UpdateAttributeApply } from './functions/update';
 
 /**
  * Retain mutation is used to move the cursor or to update properties of the text in the given range.

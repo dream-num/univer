@@ -1,6 +1,6 @@
 import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActivateCommand, SetWorksheetOrderCommand } from '@univerjs/base-sheets';
 import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuService } from '@univerjs/base-ui';
-import { CommandManager, Disposable, ICommandService, ICurrentUniverService, Nullable, ObserverManager, SheetActionBase, UIObserver } from '@univerjs/core';
+import { Disposable, ICommandService, ICurrentUniverService, Nullable, ObserverManager, SheetActionBase, UIObserver } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
@@ -131,24 +131,6 @@ export class SheetBarUIController extends Disposable {
                 }
             })
         );
-
-        CommandManager.getActionObservers().add((event) => {
-            const action = event.action as SheetActionBase<any>;
-            const data = event.data;
-
-            // TODO Do not use try catch
-
-            try {
-                action.getWorkBook();
-            } catch (error) {
-                return;
-            }
-
-            const workbook = action.getWorkBook();
-            const unitId = workbook.getUnitId();
-            const currentWorkbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-            const currentUnitId = currentWorkbook.getUnitId();
-        });
 
         this._componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
     }

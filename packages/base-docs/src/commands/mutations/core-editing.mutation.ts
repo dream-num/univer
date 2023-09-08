@@ -1,14 +1,4 @@
-import {
-    CommandType,
-    CommonParameter,
-    DeleteApply,
-    ICurrentUniverService,
-    IDocumentBody,
-    IMutation,
-    InsertApply,
-    UpdateAttributeApply,
-    UpdateDocsAttributeType,
-} from '@univerjs/core';
+import { CommandType, DeleteApply, ICurrentUniverService, IDocumentBody, IMutation, InsertApply, UpdateAttributeApply, UpdateDocsAttributeType } from '@univerjs/core';
 
 /**
  * Retain mutation is used to move the cursor or to update properties of the text in the given range.
@@ -106,3 +96,16 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         };
     },
 };
+
+class CommonParameter {
+    cursor: number;
+
+    reset() {
+        this.cursor = 0;
+        return this;
+    }
+
+    moveCursor(pos: number) {
+        this.cursor += pos;
+    }
+}

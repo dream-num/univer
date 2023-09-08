@@ -1,6 +1,5 @@
 import { createIdentifier, IAccessor, IDisposable, Inject, Injector, Optional, SkipSelf } from '@wendellhu/redi';
 
-import { ActionType, CommandManager, IActionData } from '../../Command';
 import { toDisposable } from '../../Shared/Lifecycle';
 import { ILogService } from '../log/log.service';
 
@@ -61,7 +60,7 @@ export type CommandListener = (commandInfo: Readonly<ICommandInfo>) => void;
 export interface ICommandService {
     registerCommand(command: ICommand): IDisposable;
 
-    executeCommand(id: string, params?: object, options?: IExecutionOptions): Promise<boolean> | boolean;
+    executeCommand<P extends object = object, R = boolean>(id: string, params?: P, options?: IExecutionOptions): Promise<R> | R;
 
     /**
      * Register a hook that will be triggered when the
@@ -197,7 +196,7 @@ export class CommandService implements ICommandService {
         throw new Error('Could not add a listener twice.');
     }
 
-    async executeCommand(id: string, params?: object): Promise<boolean> {
+    async executeCommand<P extends object = object, R = boolean>(id: string, params?: P): Promise<R> {
         if (this._parentCommandService) {
             return this._parentCommandService.executeCommand(id, params);
         }
@@ -207,7 +206,7 @@ export class CommandService implements ICommandService {
             const command = item[0];
             const injector = item[1];
 
-            await this._execute(command, injector, params);
+            const result = await this._execute<P, R>(command as ICommand<P, R>, injector, params);
 
             const commandInfo: ICommandInfo = {
                 id: command.id,
@@ -217,7 +216,7 @@ export class CommandService implements ICommandService {
             // emit command execution info
             this._commandExecutedListeners.forEach((l) => l(commandInfo));
 
-            return true;
+            return result;
         }
 
         throw new Error(`Command "${id}" is not registered.`);
@@ -232,11 +231,11 @@ export class CommandService implements ICommandService {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private async _execute(command: ICommand, injector: Injector, params?: object): Promise<boolean> {
+    private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, injector: Injector, params?: P): Promise<R> {
         this._log.log(`${'|-'.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`);
 
         this._commandExecutingLevel++;
-        let result: boolean;
+        let result: R | boolean;
         try {
             result = await injector.invoke(command.handler, params);
             this._commandExecutingLevel--;
@@ -245,16 +244,6 @@ export class CommandService implements ICommandService {
             this._commandExecutingLevel = 0;
 
             throw e;
-        }
-
-        // TODO: remove from old command manager
-        if (command.type === CommandType.MUTATION) {
-            CommandManager.getActionObservers().notifyObservers({
-                type: ActionType.REDO,
-                data: result as unknown as IActionData,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                action: null as any,
-            });
         }
 
         return result;

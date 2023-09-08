@@ -3,7 +3,6 @@ import { Plugin, Tools, PluginType, LocaleService, IUndoRedoService } from '@uni
 import {
     ComponentManager,
     getRefElement,
-    RegisterManager,
     KeyboardManager,
     SlotComponent,
     ZIndexManager,
@@ -31,8 +30,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     private _appUIController: AppUIController;
 
     private _keyboardManager: KeyboardManager;
-
-    private _registerManager: RegisterManager;
 
     private _config: ISheetUIPluginConfig;
 
@@ -110,14 +107,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
      * usage this._clipboardExtensionManager.handle(data);
      * @returns
      */
-    getRegisterManager(): RegisterManager {
-        return this._registerManager;
-    }
-
-    /**
-     * usage this._clipboardExtensionManager.handle(data);
-     * @returns
-     */
     getKeyboardManager(): KeyboardManager {
         return this._keyboardManager;
     }
@@ -159,7 +148,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         const dependencies: Dependency[] = [
             [DragManager],
             [KeyboardManager],
-            [RegisterManager],
             [ComponentManager],
             [ZIndexManager],
             [SlotManager],
@@ -175,7 +163,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         this._componentManager = this._injector.get(ComponentManager);
         this._keyboardManager = this._injector.get(KeyboardManager);
         this._zIndexManager = this._injector.get(ZIndexManager);
-        this._registerManager = this._injector.get(RegisterManager);
 
         this._appUIController = this._injector.createInstance(AppUIController, this._config);
         this._injector.add([AppUIController, { useValue: this._appUIController }]);

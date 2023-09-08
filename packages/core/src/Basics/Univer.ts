@@ -1,6 +1,5 @@
 import { Ctor, Injector } from '@wendellhu/redi';
 
-import { CommandManager, UndoManager } from '../Command';
 import { ObserverManager } from '../Observer';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../Plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
@@ -137,9 +136,7 @@ export class Univer {
         return new Injector([
             [ObserverManager],
             [ICurrentUniverService, { useClass: CurrentUniverService }],
-            [CommandManager],
             [LocaleService],
-            [UndoManager],
             [ILogService, { useClass: DesktopLogService, lazy: true }],
             [ICommandService, { useClass: CommandService, lazy: true }],
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],

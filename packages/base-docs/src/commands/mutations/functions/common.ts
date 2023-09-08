@@ -1,9 +1,17 @@
-import { isSameStyleTextRun } from '../../Shared/Compare';
-import { horizontalLineSegmentsSubtraction } from '../../Shared/DocTool';
-import { sortRulesFactory } from '../../Shared/SortRules';
-import { Nullable } from '../../Shared/Types';
-import { ICustomBlock, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITable, ITextRun } from '../../Types/Interfaces/IDocumentData';
-import { DataStreamTreeTokenType } from '../Domain/Types';
+import {
+    DataStreamTreeTokenType,
+    horizontalLineSegmentsSubtraction,
+    ICustomBlock,
+    ICustomRange,
+    IDocumentBody,
+    IParagraph,
+    ISectionBreak,
+    isSameStyleTextRun,
+    ITable,
+    ITextRun,
+    Nullable,
+    sortRulesFactory,
+} from '@univerjs/core';
 
 export function insertTextRuns(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
     const { textRuns } = body;

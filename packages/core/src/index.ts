@@ -12,10 +12,7 @@
  *
  */
 
-import './Docs/Action';
-
 export * from './Basics';
-export * from './Command';
 export * from './Docs/Domain';
 export * from './Observer';
 export * from './Plugin';

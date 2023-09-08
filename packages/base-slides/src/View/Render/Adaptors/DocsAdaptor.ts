@@ -13,7 +13,7 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/base-render';
-import { CommandManager, DocumentModel, EventState, IPageElement, LocaleService, PageElementType } from '@univerjs/core';
+import { DocumentModel, EventState, IPageElement, LocaleService, PageElementType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 
@@ -31,7 +31,7 @@ export class DocsAdaptor extends ObjectAdaptor {
 
     private _liquid = new Liquid();
 
-    constructor(@Inject(CommandManager) private readonly _commandManager: CommandManager, @Inject(LocaleService) private readonly _localeService: LocaleService) {
+    constructor(@Inject(LocaleService) private readonly _localeService: LocaleService) {
         super();
     }
 
@@ -48,7 +48,7 @@ export class DocsAdaptor extends ObjectAdaptor {
             return;
         }
 
-        const documentSkeleton = DocumentSkeleton.create(new DocumentModel(documentData, this._commandManager), this._localeService);
+        const documentSkeleton = DocumentSkeleton.create(new DocumentModel(documentData), this._localeService);
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton);
 

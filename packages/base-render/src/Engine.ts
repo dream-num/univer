@@ -1,17 +1,13 @@
 import { Observable } from '@univerjs/core';
+
+import { CURSOR_TYPE } from './Basics/Const';
 import { DeviceType, IKeyboardEvent, IPointerEvent, PointerInput } from './Basics/IEvents';
-
-import { getSizeForDom, getPointerPrefix, IsSafari, requestNewFrame } from './Basics/Tools';
-
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
-
 import { PerformanceMonitor } from './Basics/PerformanceMonitor';
-
+import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './Basics/Tools';
 import { Canvas } from './Canvas';
-
 import { Scene } from './Scene';
 import { ThinEngine } from './ThinEngine';
-import { CURSOR_TYPE } from './Basics/Const';
 
 export class Engine extends ThinEngine<Scene> {
     renderEvenInBackground = true;

@@ -4,7 +4,8 @@ import { ICommandService, LocaleService, ObserverManager, Plugin, PLUGIN_NAMES, 
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { DocPluginObserve, install } from './Basics/Observer';
-import { BreakLineCommand, DeleteLeftCommand } from './commands/commands/core-editing.command';
+import { BreakLineCommand, DeleteCommand, DeleteLeftCommand, IMEInputCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
+import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { MoveCursorOperation } from './commands/operations/cursor.operation';
 import { DocumentController } from './Controller/DocumentController';
 import { en, zh } from './Locale';
@@ -39,6 +40,7 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
         this._config = Object.assign(DEFAULT_DOCUMENT_PLUGIN_DATA, config);
         this._initializeDependencies(_injector);
+        this.initializeCommands();
     }
 
     initialize(): void {
@@ -49,15 +51,17 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
         install(this);
 
-        [MoveCursorOperation, DeleteLeftCommand, BreakLineCommand].forEach((command) => {
+        this.listenEventManager();
+    }
+
+    initializeCommands(): void {
+        [MoveCursorOperation, DeleteLeftCommand, BreakLineCommand, InsertCommand, DeleteCommand, UpdateCommand, IMEInputCommand, RichTextEditingMutation].forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
         });
 
         [MoveCursorUpShortcut, MoveCursorDownShortcut, MoveCursorRightShortcut, MoveCursorLeftShortcut, DeleteLeftShortcut, BreakLineShortcut].forEach((shortcut) => {
             this._injector.get(IShortcutService).registerShortcut(shortcut);
         });
-
-        this.listenEventManager();
     }
 
     initializeAfterUI() {

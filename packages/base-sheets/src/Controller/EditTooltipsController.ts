@@ -1,5 +1,5 @@
 import { Engine, IRenderingEngine, Layer } from '@univerjs/base-render';
-import { CommandManager, ICurrentUniverService, SetWorkSheetActivateAction } from '@univerjs/core';
+import { ICurrentUniverService } from '@univerjs/core';
 
 import { CANVAS_VIEW_KEY } from '../View';
 import { EditTooltips, EditTooltipsProps } from '../View/Views';
@@ -11,12 +11,6 @@ export class EditTooltipsController {
 
     constructor(@IRenderingEngine private readonly _engine: Engine, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         this._editTooltipsPage = new Map();
-        CommandManager.getActionObservers().add((event) => {
-            const data = event.data;
-            if (data.actionName === SetWorkSheetActivateAction.NAME) {
-                this.refreshEditTooltips();
-            }
-        });
     }
 
     removeEditTooltipsByKey(key: string): EditTooltips | null {

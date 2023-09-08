@@ -1,8 +1,6 @@
-import { DocumentModel } from '../Domain/DocumentModel';
-import { getDocsUpdateBody } from '../../Shared/Common';
-import { deleteContent } from '../../Shared/DocTool';
-import { IDocumentBody } from '../../Types/Interfaces/IDocumentData';
-import { deleteCustomBlocks, deleteCustomRanges, deleteParagraphs, deleteSectionBreaks, deleteTables, deleteTextRuns } from './Common';
+import { deleteContent, DocumentModel, getDocsUpdateBody, IDocumentBody } from '@univerjs/core';
+
+import { deleteCustomBlocks, deleteCustomRanges, deleteParagraphs, deleteSectionBreaks, deleteTables, deleteTextRuns } from './common';
 
 export function DeleteApply(document: DocumentModel, textLength: number, currentIndex: number, segmentId?: string): IDocumentBody {
     const doc = document.snapshot;

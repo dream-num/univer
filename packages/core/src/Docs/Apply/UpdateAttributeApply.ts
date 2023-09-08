@@ -1,7 +1,8 @@
-import { DocumentModel } from '../Domain/DocumentModel';
-import { getDocsUpdateBody } from '../../Shared/Common';
 import { UpdateDocsAttributeType } from '../../Shared/CommandEnum';
+import { getDocsUpdateBody } from '../../Shared/Common';
 import { Nullable } from '../../Shared/Types';
+import { ICustomBlock, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITable, ITextRun } from '../../Types/Interfaces/IDocumentData';
+import { DocumentModel } from '../Domain/DocumentModel';
 import {
     deleteCustomBlocks,
     deleteCustomRanges,
@@ -14,7 +15,6 @@ import {
     insertTables,
     insertTextRuns,
 } from './Common';
-import { ICustomBlock, ICustomRange, IDocumentBody, IParagraph, ISectionBreak, ITable, ITextRun } from '../../Types/Interfaces/IDocumentData';
 
 export function UpdateAttributeApply(
     document: DocumentModel,
@@ -23,7 +23,7 @@ export function UpdateAttributeApply(
     currentIndex: number,
     coverType = UpdateDocsAttributeType.COVER,
     segmentId?: string
-) {
+): IDocumentBody {
     if (updateBody == null) {
         return;
     }

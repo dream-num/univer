@@ -61,15 +61,6 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 mutations: [],
             },
         };
-
-        const undoMutation: ICommandInfo<IRichTextEditingMutationParams> = {
-            id: RichTextEditingMutation.id,
-            params: {
-                unitId,
-                mutations: [],
-            },
-        };
-
         if (isCollapse) {
             doMutation.params!.mutations.push({
                 t: 'r',
@@ -79,7 +70,6 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         } else {
             doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
         }
-
         doMutation.params!.mutations.push({
             t: 'i',
             body,
@@ -88,27 +78,34 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             segmentId,
         });
 
+        const undoMutation: ICommandInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                mutations: [],
+            },
+        };
+
         // TODO@wzhudev: prepare undo mutation
 
-        const result = await commandService.executeCommand(doMutation.id, doMutation.params);
-        if (!result) {
-            // NOTE: maybe we should throw an error here?
-            return false;
+        const result = await commandService.executeCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(doMutation.id, doMutation.params);
+        if (result) {
+            undoRedoService.pushUndoRedo({
+                URI: 'doc',
+                undo() {
+                    commandService.executeCommand(RichTextEditingMutation.id, result);
+                    return true;
+                },
+                redo() {
+                    commandService.executeCommand(RichTextEditingMutation.id, doMutation.params);
+                    return true;
+                },
+            });
+
+            return true;
         }
 
-        undoRedoService.pushUndoRedo({
-            URI: 'doc',
-            undo() {
-                console.log('TODO: undo doc mutations');
-                return true;
-            },
-            redo() {
-                console.log('TODO: redo doc mutations');
-                return true;
-            },
-        });
-
-        return true;
+        return false;
     },
 };
 
@@ -143,27 +140,23 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
 
         doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
 
-        // TODO@wzhudev: prepare undo mutation
-
-        const result = await commandService.executeCommand(doMutation.id, doMutation.params);
-        if (!result) {
-            // NOTE: maybe we should throw an error here?
+        const result = await commandService.executeCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(doMutation.id, doMutation.params);
+        if (result) {
+            undoRedoService.pushUndoRedo({
+                URI: 'doc',
+                undo() {
+                    commandService.executeCommand(RichTextEditingMutation.id, result);
+                    return true;
+                },
+                redo() {
+                    commandService.executeCommand(doMutation.id, doMutation.params);
+                    return true;
+                },
+            });
             return false;
         }
 
-        undoRedoService.pushUndoRedo({
-            URI: 'doc',
-            undo() {
-                console.log('TODO: undo doc mutations');
-                return true;
-            },
-            redo() {
-                console.log('TODO: redo doc mutations');
-                return true;
-            },
-        });
-
-        return true;
+        return false;
     },
 };
 
@@ -216,27 +209,24 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             coverType,
         });
 
-        // TODO@wzhudev: prepare undo mutation
+        const result = await commandService.executeCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(doMutation.id, doMutation.params);
+        if (result) {
+            undoRedoService.pushUndoRedo({
+                URI: 'doc',
+                undo() {
+                    commandService.executeCommand(RichTextEditingMutation.id, result);
+                    return true;
+                },
+                redo() {
+                    commandService.executeCommand(RichTextEditingMutation.id, doMutation.params);
+                    return true;
+                },
+            });
 
-        const result = await commandService.executeCommand(doMutation.id, doMutation.params);
-        if (!result) {
-            // NOTE: maybe we should throw an error here?
-            return false;
+            return true;
         }
 
-        undoRedoService.pushUndoRedo({
-            URI: 'doc',
-            undo() {
-                console.log('TODO: undo doc mutations');
-                return true;
-            },
-            redo() {
-                console.log('TODO: redo doc mutations');
-                return true;
-            },
-        });
-
-        return true;
+        return false;
     },
 };
 
@@ -289,25 +279,11 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             segmentId,
         });
 
-        // TODO@wzhudev: prepare undo mutation
-
         const result = await commandService.executeCommand(doMutation.id, doMutation.params);
         if (!result) {
             // NOTE: maybe we should throw an error here?
             return false;
         }
-
-        undoRedoService.pushUndoRedo({
-            URI: 'doc',
-            undo() {
-                console.log('TODO: undo doc mutations');
-                return true;
-            },
-            redo() {
-                console.log('TODO: redo doc mutations');
-                return true;
-            },
-        });
 
         return true;
     },

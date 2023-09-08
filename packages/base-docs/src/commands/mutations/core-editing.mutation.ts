@@ -47,7 +47,11 @@ export interface IRichTextEditingMutationParams {
     mutations: Array<IRetainMutationParams | IInsertMutationParams | IDeleteMutationParams>;
 }
 
-export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams> = {
+/**
+ * The core mutator to change rich text mutations. The execution result would be undo mutation params. Could be directly
+ * send to undo redo service (will be used by the triggering command).
+ */
+export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, IRichTextEditingMutationParams> = {
     id: 'doc.mutation.rich-text-editing',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
@@ -59,25 +63,46 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams> 
             throw new Error(`Document not found for unitId: ${unitId}`);
         }
 
+        const undoMutations: Array<IRetainMutationParams | IInsertMutationParams | IDeleteMutationParams> = [];
         const commonParameter = new CommonParameter();
         commonParameter.reset();
         mutations.forEach((mutation) => {
             if (mutation.t === 'r') {
                 const { coverType, body, len, segmentId } = mutation;
-                UpdateAttributeApply(document, body, len, commonParameter.cursor, coverType, segmentId);
+                const documentBody = UpdateAttributeApply(document, body, len, commonParameter.cursor, coverType, segmentId);
                 commonParameter.moveCursor(len);
+                undoMutations.push({
+                    ...mutation,
+                    t: 'r',
+                    coverType: UpdateDocsAttributeType.REPLACE,
+                    body: documentBody,
+                });
             } else if (mutation.t === 'i') {
-                const { body, len, segmentId } = mutation;
+                const { body, len, segmentId, line } = mutation;
                 InsertApply(document, body!, len, commonParameter.cursor, segmentId);
                 commonParameter.moveCursor(len);
+                undoMutations.push({
+                    t: 'd',
+                    len,
+                    line,
+                    segmentId,
+                });
             } else if (mutation.t === 'd') {
                 const { len, segmentId } = mutation;
-                DeleteApply(document, len, commonParameter.cursor, segmentId);
+                const documentBody = DeleteApply(document, len, commonParameter.cursor, segmentId);
+                undoMutations.push({
+                    ...mutation,
+                    t: 'i',
+                    body: documentBody,
+                });
             } else {
                 throw new Error(`Unknown mutation type for mutation: ${mutation}.`);
             }
         });
 
-        return true;
+        return {
+            unitId,
+            mutations: undoMutations,
+        };
     },
 };

@@ -1,5 +1,5 @@
-import { Injector, Optional, createIdentifier } from '@wendellhu/redi';
-import { Plugin, PluginType, PLUGIN_NAMES } from '@univerjs/core';
+import { Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { createIdentifier, Injector, Optional } from '@wendellhu/redi';
 
 import { Engine } from './Engine';
 

@@ -13,7 +13,7 @@ export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectPr
     addSheet?: () => void;
     onMouseDown?: () => void;
     selectSheet?: (slideItemIndex: number) => void;
-    changeSheetName?: (e: Event) => void;
+    changeSheetName?: (sheetId: string, name: string) => void;
     dragEnd?: (elements: HTMLElement[]) => void;
     selected?: boolean;
 }

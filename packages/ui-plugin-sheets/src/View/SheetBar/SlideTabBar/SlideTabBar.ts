@@ -9,7 +9,7 @@ export interface SlideTabBarConfig {
     activeClassNameAutoController: boolean;
     slideTabBarItemAutoSort: boolean;
     onSlideEnd: (event: MouseEvent) => void;
-    onChangeName: (event: FocusEvent) => void;
+    onChangeName: (sheetId: string, name: string) => void;
     onItemClick: (slideItemIndex: number) => void;
 }
 
@@ -248,6 +248,16 @@ export class SlideTabBar {
 
     getSlideTabItems(): SlideTabItem[] {
         return this._slideTabItems;
+    }
+
+    setActiveItem(slideItemIndex: number) {
+        this._compareIndex = slideItemIndex;
+        this._activeTabItem = this._slideTabItems[slideItemIndex];
+        this._activeTabItemIndex = slideItemIndex;
+        this._slideTabItems.forEach((item) => {
+            item.classList().remove('slide-tab-active');
+        });
+        this._activeTabItem.classList().add('slide-tab-active');
     }
 
     destroy(): void {

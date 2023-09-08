@@ -78,8 +78,9 @@ export class SlideTabItem {
 
                 this._slideTabBar.updateItems();
 
-                if (this._slideTabBar.getConfig().onChangeName) {
-                    this._slideTabBar.getConfig().onChangeName(focusEvent);
+                if (this._slideTabBar.getConfig().onChangeName && this._slideTabItem.dataset.id) {
+                    const name = (event.target as HTMLElement).innerText;
+                    this._slideTabBar.getConfig().onChangeName(this._slideTabItem.dataset.id, name);
                 }
 
                 if (callback) {

@@ -108,6 +108,41 @@ export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
         });
     }
 
+    setItemLabel(sheetId: string, label: string) {
+        this.setState((prevState, props) => {
+            const menu = prevState.menu;
+            const currenMenu = menu.map((sheet) => {
+                if (sheet.sheetId === sheetId) {
+                    sheet.label = label;
+                }
+
+                return sheet;
+            });
+            return {
+                ...prevState,
+                menu: currenMenu,
+            };
+        });
+    }
+
+    insertItem(index: number, item: ISheetBarMenuItem) {
+        this.setState((prevState, props) => {
+            const menu = prevState.menu;
+            menu.splice(index, 1, item);
+            return {
+                ...prevState,
+                menu,
+            };
+        });
+    }
+
+    setItemOrder(menu: ISheetBarMenuItem[]) {
+        this.setState((prevState, props) => ({
+            ...prevState,
+            menu,
+        }));
+    }
+
     render() {
         const { style } = this.props;
         const { show, menu } = this.state;

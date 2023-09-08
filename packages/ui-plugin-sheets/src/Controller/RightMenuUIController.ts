@@ -1,7 +1,6 @@
 import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
 import { CanvasView } from '@univerjs/base-sheets';
-import { BaseMenuItem, ComponentManager, ICustomLabelType, IMenuService, MenuPosition } from '@univerjs/base-ui';
-import { IMenuItemFactory } from '@univerjs/base-ui/src/services/menu/menu';
+import { BaseMenuItem, ComponentManager, ICustomLabelType, IMenuItemFactory, IMenuService, MenuPosition } from '@univerjs/base-ui';
 import { Disposable } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ComponentChildren } from 'preact';

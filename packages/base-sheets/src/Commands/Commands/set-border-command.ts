@@ -2,6 +2,7 @@ import {
     BorderStyleTypes,
     BorderType,
     CommandType,
+    IBorderData,
     IBorderStyleData,
     ICommand,
     ICommandService,
@@ -109,6 +110,13 @@ export interface ISetBorderCommandParams {
     style?: BorderStyleTypes;
 }
 
+function setStyleValue(matrix: ObjectMatrix<IStyleData>, row: number, column: number, defaultStyle: IBorderData) {
+    const style = matrix.getValue(row, column);
+    matrix.setValue(row, column, {
+        bd: style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle,
+    });
+}
+
 /**
  * The command to clear content in current selected ranges.
  */
@@ -198,94 +206,112 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
         };
 
         if (top) {
-            // Probably to the border, there are no surrounding cells
             // Clear the bottom border of the top range
             forEach(topRangeOut, (row, column) => {
-                mr.setValue(row, column, { bd: { b: null } });
+                setStyleValue(mr, row, column, { b: null });
             });
 
-            // first row
             forEach(topRange, (row, column) => {
-                const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
-                    bd: { t: Tools.deepClone(border) },
+                setStyleValue(mr, row, column, {
+                    t: Tools.deepClone(border),
                 });
-                mr.setValue(row, column, style);
             });
         }
-
         if (bottom) {
-            // Probably to the border, there are no surrounding cells
             // Clear the top border of the lower range
             forEach(bottomRangeOut, (row, column) => {
-                mr.setValue(row, column, { bd: { t: null } });
+                setStyleValue(mr, row, column, { t: null });
             });
 
-            // the last row
             forEach(bottomRange, (row, column) => {
-                // update
-                const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
-                    bd: { b: Tools.deepClone(border) },
+                setStyleValue(mr, row, column, {
+                    b: Tools.deepClone(border),
                 });
-                mr.setValue(row, column, style);
             });
         }
         if (left) {
-            // Probably to the border, there are no surrounding cells
             //  Clear the right border of the left range
             forEach(leftRangeOut, (row, column) => {
-                mr.setValue(row, column, { bd: { r: null } });
+                setStyleValue(mr, row, column, { r: null });
             });
 
-            // first column
             forEach(leftRange, (row, column) => {
-                // update
-                const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
-                    bd: { l: Tools.deepClone(border) },
+                setStyleValue(mr, row, column, {
+                    l: Tools.deepClone(border),
                 });
-                mr.setValue(row, column, style);
             });
         }
         if (right) {
-            // Probably to the border, there are no surrounding cells
             //  Clear the left border of the right range
             forEach(rightRangeOut, (row, column) => {
-                mr.setValue(row, column, { bd: { l: null } });
+                setStyleValue(mr, row, column, { l: null });
             });
 
-            // last column
             forEach(rightRange, (row, column) => {
-                // update
-                const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
-                    bd: { r: Tools.deepClone(border) },
+                setStyleValue(mr, row, column, {
+                    r: Tools.deepClone(border),
                 });
-                mr.setValue(row, column, style);
             });
         }
-
         // inner vertical border
-        if (vertical === true) {
-            // current range
+        if (vertical) {
             forEach(rangeData, (row, column) => {
-                // Set the right border except the last column
                 if (column !== rangeData.endColumn) {
-                    // update
-                    const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
-                        bd: { r: Tools.deepClone(border) },
+                    setStyleValue(mr, row, column, {
+                        r: Tools.deepClone(border),
                     });
-                    mr.setValue(row, column, style);
                 }
             });
         }
         // inner horizontal border
-        if (horizontal === true) {
-            // current range
+        if (horizontal) {
             forEach(rangeData, (row, column) => {
-                // Except for the last row, set the bottom border
                 if (row !== rangeData.endRow) {
-                    const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
-                        bd: { b: Tools.deepClone(border) },
+                    setStyleValue(mr, row, column, {
+                        b: Tools.deepClone(border),
                     });
-                    mr.setValue(row, column, style);
+                }
+            });
+        }
+
+        if (!top && !bottom && !left && !right && !vertical && !horizontal) {
+            forEach(topRangeOut, (row, column) => {
+                setStyleValue(mr, row, column, { b: null });
+            });
+            forEach(topRange, (row, column) => {
+                setStyleValue(mr, row, column, { t: null });
+            });
+
+            forEach(bottomRangeOut, (row, column) => {
+                setStyleValue(mr, row, column, { t: null });
+            });
+            forEach(bottomRange, (row, column) => {
+                setStyleValue(mr, row, column, { b: null });
+            });
+
+            forEach(leftRangeOut, (row, column) => {
+                setStyleValue(mr, row, column, { r: null });
+            });
+            forEach(leftRange, (row, column) => {
+                setStyleValue(mr, row, column, { l: null });
+            });
+
+            forEach(rightRangeOut, (row, column) => {
+                setStyleValue(mr, row, column, { l: null });
+            });
+            forEach(rightRange, (row, column) => {
+                setStyleValue(mr, row, column, { r: null });
+            });
+
+            forEach(rangeData, (row, column) => {
+                if (column !== rangeData.endColumn) {
+                    setStyleValue(mr, row, column, { r: null });
+                }
+            });
+
+            forEach(rangeData, (row, column) => {
+                if (row !== rangeData.endRow) {
+                    setStyleValue(mr, row, column, { b: null });
                 }
             });
         }

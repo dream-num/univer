@@ -66,18 +66,24 @@ export const RemoveRowCommand: ICommand = {
         for (let i = 0; i < mergeData.length; i++) {
             const merge = mergeData[i];
             for (let j = 0; j < selections.length; j++) {
-                const { startRow, endRow, startColumn, endColumn } = selections[j];
-                if (merge.endRow >= startRow) {
-                    if (merge.endColumn < startColumn) {
-                        continue;
-                    } else if (merge.startColumn > endColumn) {
-                        continue;
-                    } else if (merge.startColumn >= startColumn && merge.endColumn <= endColumn) {
-                        const count = endRow - startRow;
-                        merge.startRow -= count;
-                        merge.endRow -= count;
+                const { startRow, endRow } = selections[j];
+                const count = endRow - startRow + 1;
+                if (endRow < merge.startRow) {
+                    merge.startRow -= count;
+                } else if (startRow > merge.endRow) {
+                    continue;
+                } else if (startRow < merge.startRow && endRow > merge.endRow) {
+                    mergeData.splice(i);
+                    i--;
+                } else {
+                    const intersects = Rectangle.getIntersects(selections[j], merge)!;
+                    const interLength = intersects.endRow - intersects.startRow + 1;
+                    const length = merge.endRow - merge.startRow + 1;
+                    if (interLength === length) {
+                        mergeData.splice(i);
+                        i--;
                     } else {
-                        return;
+                        merge.endRow -= intersects.endRow - intersects.startRow + 1;
                     }
                 }
             }
@@ -182,15 +188,31 @@ export const RemoveColCommand: ICommand = {
 
         const mergeData = Tools.deepClone(worksheet.getConfig().mergeData);
         for (let i = 0; i < mergeData.length; i++) {
-            let merge = mergeData[i];
+            const merge = mergeData[i];
             for (let j = 0; j < selections.length; j++) {
-                merge = Rectangle.getIntersects(selections[j], merge);
-                if (!merge) {
-                    mergeData.splice(i, 1);
+                const { startColumn, endColumn } = selections[j];
+                const count = endColumn - startColumn + 1;
+                if (endColumn < merge.startColumn) {
+                    merge.startColumn -= count;
+                } else if (startColumn > merge.endColumn) {
+                    continue;
+                } else if ((startColumn < merge.startColumn && endColumn > merge.endColumn) || (startColumn === merge.startColumn && endColumn === merge.endColumn)) {
+                    mergeData.splice(i);
                     i--;
+                } else {
+                    const intersects = Rectangle.getIntersects(selections[j], merge)!;
+                    const interLength = intersects.endColumn - intersects.startColumn + 1;
+                    const length = endColumn - startColumn + 1;
+                    if (interLength === length) {
+                        mergeData.splice(i);
+                        i--;
+                    } else {
+                        merge.endColumn -= intersects.endColumn - intersects.startColumn + 1;
+                    }
                 }
             }
         }
+
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             workbookId,
             worksheetId,

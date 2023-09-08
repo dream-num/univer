@@ -1,9 +1,10 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../Basics/Interfaces/MutationInterface';
+import { ISelectionManager } from '../../Services/tokens';
 import { AddWorksheetMergeMutation } from '../Mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation, RemoveWorksheetMergeMutationFactory } from '../Mutations/remove-worksheet-merge.mutation';
-import { ISelectionManager } from '../../Services/tokens';
 
 export const RemoveWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -45,6 +46,6 @@ export const RemoveWorksheetMergeCommand: ICommand = {
             });
             return true;
         }
-        return true;
+        return false;
     },
 };

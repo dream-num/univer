@@ -76,10 +76,10 @@ export const InsertRowCommand: ICommand = {
             const count = endRow - startRow + 1;
             if (startRow > merge.endRow) {
                 continue;
-            } else if (startRow >= merge.startRow && startRow <= merge.endRow) {
+            } else if (endRow < merge.startRow) {
+                merge.startRow += count;
                 merge.endRow += count;
             } else {
-                merge.startRow += count;
                 merge.endRow += count;
             }
         }
@@ -284,10 +284,10 @@ export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
             const count = endColumn - startColumn + 1;
             if (startColumn > merge.endColumn) {
                 continue;
-            } else if (startColumn >= merge.startColumn && startColumn <= merge.endColumn) {
+            } else if (endColumn < merge.startColumn) {
+                merge.startColumn += count;
                 merge.endColumn += count;
             } else {
-                merge.startColumn += count;
                 merge.endColumn += count;
             }
         }

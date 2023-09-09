@@ -1,7 +1,7 @@
 import { SetWorksheetActivateCommand } from '@univerjs/base-sheets';
 import { AppContext, BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, Icon, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
 import { ICommandService } from '@univerjs/core';
-import { Component, createRef, RefObject } from 'preact';
+import { Component, createRef, RefObject } from 'react';
 
 import styles from './index.module.less';
 import { ISheetBarMenuItem, SheetBarMenu } from './SheetBarMenu';
@@ -237,6 +237,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     render(props: BaseSheetBarProps, state: SheetState) {
         const { sheetList, menuList, sheetUl } = state;
+
         const { addSheet, selectSheet } = this.props;
 
         if (!sheetList.length) return;

@@ -1,5 +1,5 @@
-import { Component, isValidElement, JSX } from 'preact';
-import { useContext } from 'preact/hooks';
+import { Component, isValidElement, JSX } from 'react';
+import { useContext } from 'react';
 
 import { AppContext, AppContextValues, ICustomComponent } from '../../Common';
 import { IBaseCustomLabelProps } from '../../Interfaces';

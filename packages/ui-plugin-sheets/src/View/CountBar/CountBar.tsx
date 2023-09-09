@@ -90,8 +90,8 @@ export class CountBar extends Component<CountBarProps, CountState> {
         (this.context.injector as Injector).get(ObserverManager).getObserver<CountBar>('onCountBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET)?.notifyObservers(this);
     }
 
-    render(props: BaseCountBarProps, state: CountState) {
-        const { zoom, content } = state;
+    render() {
+        const { zoom, content } = this.state;
         // const PageIcon = this.getComponentRender().renderFunction('PageIcon');
         // const LayoutIcon = this.getComponentRender().renderFunction('LayoutIcon');
         return (

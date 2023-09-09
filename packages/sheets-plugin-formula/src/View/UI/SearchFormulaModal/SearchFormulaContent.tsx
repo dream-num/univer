@@ -146,7 +146,7 @@ export class SearchFormulaContent extends Component<IProps, IState> {
                     </div>
                     <ul className={styles.functionLists}>
                         {functionList?.map((item, index) => (
-                            <li className={`${styles.functionListsItem}`} onClick={() => this.handleClick(item, index)}>
+                            <li key={index} className={`${styles.functionListsItem}`} onClick={() => this.handleClick(item, index)}>
                                 <div className={styles.functionListsItemName}>{item.n}</div>
                                 <div className={styles.functionListsItemDetail}>{item.d}</div>
                             </li>

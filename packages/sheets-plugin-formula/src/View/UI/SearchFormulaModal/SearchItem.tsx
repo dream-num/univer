@@ -64,7 +64,7 @@ export class SearchItem extends Component<IProps, IState> {
             <div className={styles.functionParamModal}>
                 <div className={styles.functionParamList}>
                     {funParams.funParams?.p?.map((item, index) => (
-                        <div>
+                        <div key={index}>
                             <span>{item.name}:</span>
                             <div onClick={() => this.handleClick(index)}>
                                 <CellRange

@@ -11,9 +11,6 @@ const commonBuildOptions = {
         '.svg': 'file',
     },
     sourcemap: true,
-    alias: {
-        react: 'preact/compat',
-    },
     plugins: [
         stylePlugin({
             cssModulesOptions: {

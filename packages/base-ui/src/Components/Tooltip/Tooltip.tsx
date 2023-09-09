@@ -1,8 +1,6 @@
-import { createRef } from 'preact';
-import { useState, useContext } from 'preact/hooks';
+import { createRef, useState } from 'react';
 import { BaseTooltipProps } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
-import { AppContext } from '../../Common';
 import { CustomLabel } from '../CustomLabel';
 
 import style from './index.module.less';
@@ -32,7 +30,6 @@ const placementClassNames: { [index: string]: string } = {
 };
 
 export function Tooltip(props: BaseTooltipProps) {
-    const context = useContext(AppContext);
     const tooltip = createRef<HTMLDivElement>();
     const [state, setState] = useState<TooltipState>({
         placement: props.placement || 'top',

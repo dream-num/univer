@@ -52,7 +52,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         }
     }
 
-    override componentWillMount() {
+    override UNSAFE_componentWillMount() {
         this.disabledSubscription?.unsubscribe();
         this.activatedSubscription?.unsubscribe();
         this.currentValueSubscription?.unsubscribe();

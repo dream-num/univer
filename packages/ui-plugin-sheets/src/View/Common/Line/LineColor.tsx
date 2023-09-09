@@ -26,7 +26,7 @@ export class LineColor extends Component<IProps, IState> {
         this.props.getComponent?.(this);
     }
 
-    override componentWillReceiveProps(props: IProps): void {
+    override UNSAFE_componentWillReceiveProps(props: IProps): void {
         this.setState({
             color: props.color,
         });

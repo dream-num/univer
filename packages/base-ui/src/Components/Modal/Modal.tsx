@@ -34,7 +34,7 @@ class Modal extends Component<BaseModalProps, IState> {
         }));
     };
 
-    override componentWillReceiveProps(props: BaseModalProps) {
+    override UNSAFE_componentWillReceiveProps(props: BaseModalProps) {
         if (props.visible !== this.state.visible) {
             this.setState({
                 visible: props.visible,
@@ -95,8 +95,8 @@ class Modal extends Component<BaseModalProps, IState> {
                                 <div className={styles.modalBody}>{children}</div>
                                 {footer ? (
                                     <div className={styles.modalFooter}>
-                                        {group.map((item) => (
-                                            <Button type={item.type} onClick={() => this.handleClick(item.onClick)}>
+                                        {group.map((item, index) => (
+                                            <Button key={index} type={item.type} onClick={() => this.handleClick(item.onClick)}>
                                                 <CustomLabel label={item.label} />
                                             </Button>
                                         ))}

@@ -1,7 +1,8 @@
-import { BaseCountBarProps, Button, CountBarComponent, Icon, JSXComponent, Slider, AppContext } from '@univerjs/base-ui';
-import { Component, createRef } from 'react';
+import { AppContext, BaseCountBarProps, Button, CountBarComponent, Icon, JSXComponent, Slider } from '@univerjs/base-ui';
 import { ObserverManager, PLUGIN_NAMES } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
+import { Component, createRef } from 'react';
+
 import styles from './index.module.less';
 
 interface CountState {
@@ -90,7 +91,7 @@ export class CountBar extends Component<CountBarProps, CountState> {
         (this.context.injector as Injector).get(ObserverManager).getObserver<CountBar>('onCountBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET)?.notifyObservers(this);
     }
 
-    render() {
+    override render() {
         const { zoom, content } = this.state;
         // const PageIcon = this.getComponentRender().renderFunction('PageIcon');
         // const LayoutIcon = this.getComponentRender().renderFunction('LayoutIcon');

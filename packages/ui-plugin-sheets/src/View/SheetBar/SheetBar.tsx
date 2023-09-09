@@ -17,13 +17,13 @@ type SheetState = {
 export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     static override contextType = AppContext;
 
-    ref = createRef();
+    ref = createRef<SheetBarMenu>();
 
-    ulRef = createRef();
+    ulRef = createRef<Menu>();
 
-    sheetContainerRef = createRef();
+    sheetContainerRef = createRef<HTMLDivElement>();
 
-    slideTabRoot = createRef();
+    slideTabRoot = createRef<HTMLDivElement>();
 
     sheetContentRef = createRef();
 
@@ -54,6 +54,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             sheetList: [],
             sheetUl: [],
             menuList: [],
+            menuItems: [],
         };
     }
 
@@ -61,13 +62,6 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     setValue = (value: any, fn?: () => void) => {
         this.setState((prevState) => ({ ...value }), fn);
     };
-
-    // TODO@Dushusir remove after refactoring
-    // setSheetUlNeo(menuItems: IMenuItem[]) {
-    //     this.setState({
-    //         menuItems: buildMenuTree(menuItems),
-    //     });
-    // }
 
     // 点击按钮左右滑动
     scrollLeft = (e: MouseEvent) => {
@@ -81,7 +75,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     overGrid = () => {};
 
     // Right click to display menu
-    contextMenu = (e: MouseEvent) => {
+    contextMenu = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.preventDefault();
         const target = e.currentTarget as HTMLDivElement;
         const worksheetId = target.dataset.id as string;
@@ -97,7 +91,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     };
 
     // Click the button to display the menu, if it is not in the current sheet, only switch the sheet after clicking
-    onContextMenuClick = (e: MouseEvent) => {
+    onContextMenuClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.preventDefault();
 
         const target = e.currentTarget as HTMLDivElement;
@@ -116,8 +110,9 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     };
 
     // 显示下拉
-    showSelect = (e: MouseEvent, ref: RefObject<Menu>) => {
-        e.stopImmediatePropagation();
+    showSelect = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, ref: RefObject<Menu>) => {
+        e.stopPropagation();
+        e.preventDefault();
         const current = ref.current;
         if (current) current.showMenu(true);
         // 点击外部隐藏子组件
@@ -132,19 +127,20 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     };
 
     // 点击不同sheet页显示ullist
-    showUlList = (e: MouseEvent, cb?: () => void) => {
+    showUlList = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cb?: () => void) => {
         new Promise<void>((resolve) => {
             const target = e.currentTarget as HTMLDivElement;
             const id = target.dataset.id as string;
             this.showSelect(e, this.ulRef);
             resolve();
         }).then(() => {
-            const currentTarget = (e.currentTarget as HTMLElement).closest(`.${styles.slideTabItem}`);
+            const currentTarget = (e.target as HTMLElement).closest(`.${styles.slideTabItem}`);
             if (currentTarget) {
                 const currentRect = currentTarget.getBoundingClientRect();
                 const left = `${currentRect.left}px`;
                 const bottom = `${currentRect.height}px`;
-                const ul = this.ulRef.current.base;
+                const ul = this.ulRef.current?.getMenuRef().current;
+                if (!ul) return;
                 ul.style.left = left;
                 ul.style.bottom = bottom;
                 ul.style.top = 'auto';
@@ -188,7 +184,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             slideTabBarItemActiveClassName: 'univer-slide-tab-active',
             slideTabBarItemClassName: 'univer-slide-tab-item',
             slideTabBarItemAutoSort: true,
-            slideTabRoot: this.slideTabRoot.current,
+            slideTabRoot: this.slideTabRoot.current as HTMLElement,
             activeClassNameAutoController: true,
             onChangeName: (sheetId: string, name: string) => {
                 this.props.changeSheetName?.(sheetId, name);
@@ -208,7 +204,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     // Convenient for controller to control sheetBarMenu
     showMenuList(show: boolean) {
-        this.ref.current.showMenu(show);
+        this.ref.current?.showMenu(show);
     }
 
     setSlideTabActive(sheetId: string, cb?: () => void) {
@@ -235,7 +231,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         return currentSheet?.sheetId;
     }
 
-    render() {
+    override render() {
         const { sheetList, menuList, sheetUl } = this.state;
 
         const { addSheet, selectSheet } = this.props;
@@ -249,9 +245,9 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                     <Button className={styles.sheetBarOptionsButton} onClick={addSheet} type="text">
                         <Icon.Math.AddIcon style={{ fontSize: '20px' }} />
                     </Button>
-                    <Button className={styles.sheetBarOptionsButton} onClick={(e: MouseEvent) => this.ref.current.showMenu(true)} type="text">
+                    <Button className={styles.sheetBarOptionsButton} onClick={(e: MouseEvent) => this.ref.current?.showMenu(true)} type="text">
                         <Icon.MenuIcon style={{ fontSize: '20px' }} />
-                        <SheetBarMenu onClick={selectSheet} menu={menuList as ISheetBarMenuItem[]} ref={this.ref}></SheetBarMenu>
+                        <SheetBarMenu menu={menuList as ISheetBarMenuItem[]} ref={this.ref}></SheetBarMenu>
                     </Button>
                 </div>
 
@@ -272,7 +268,13 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                                         <CustomLabel label={item.label} />
                                     </span>
                                 </div>
-                                <div className={`${styles.slideTabIcon}`} data-slide-skip="true" style={{ lineHeight: 1 }} data-id={item.sheetId} onClick={this.onContextMenuClick}>
+                                <div
+                                    className={`${styles.slideTabIcon}`}
+                                    data-slide-skip="true"
+                                    style={{ lineHeight: 1 }}
+                                    data-id={item.sheetId}
+                                    onClick={(e) => this.onContextMenuClick(e)}
+                                >
                                     <Icon.NextIcon />
                                 </div>
                             </div>

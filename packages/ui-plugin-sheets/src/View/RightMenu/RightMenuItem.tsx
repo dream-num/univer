@@ -1,5 +1,6 @@
 import { CustomLabel, Icon } from '@univerjs/base-ui';
 import { Component } from 'react';
+
 import styles from './index.module.less';
 
 interface IProps {
@@ -7,7 +8,7 @@ interface IProps {
 }
 
 export class RightMenuItem extends Component<IProps> {
-    render() {
+    override render() {
         const { label } = this.props;
 
         return (

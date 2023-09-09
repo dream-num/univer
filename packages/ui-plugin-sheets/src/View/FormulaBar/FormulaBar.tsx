@@ -1,6 +1,7 @@
 import { AppContext, BaseComponentProps, BaseComponentRender, BaseSelectChildrenProps, debounce, Icon } from '@univerjs/base-ui';
-import { Component } from 'react';
 import { Nullable } from '@univerjs/core';
+import { Component } from 'react';
+
 import styles from './index.module.less';
 
 type FormulaState = {
@@ -71,7 +72,7 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
         });
     }
 
-    componentDidMount() {
+    override componentDidMount() {
         this.props.getComponent?.(this);
         // this._context.getObserverManager().getObserver<FormulaBar>('onFormulaBarDidMountObservable')?.notifyObservers(this);
     }
@@ -82,7 +83,7 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
         return <Icon />;
     }
 
-    render() {
+    override render() {
         // TODO: formula bar top left menu: 1. cell edit formula ,use formula list 2. cell selection ,use named range, 3. cell edit no formula, disable select
         const { namedRanges, fx } = this.state;
 

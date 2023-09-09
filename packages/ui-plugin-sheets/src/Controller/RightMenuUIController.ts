@@ -3,7 +3,6 @@ import { CanvasView } from '@univerjs/base-sheets';
 import { BaseMenuItem, ComponentManager, ICustomLabelType, IMenuItemFactory, IMenuService, MenuPosition } from '@univerjs/base-ui';
 import { Disposable } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ComponentChildren } from 'react';
 
 import { SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
@@ -21,7 +20,7 @@ import {
 } from './menu';
 
 export interface RightMenuProps extends BaseMenuItem {
-    label?: string | ICustomLabelType | ComponentChildren;
+    label?: string | ICustomLabelType | JSX.Element;
     children?: RightMenuProps[];
     suffix?: string;
     border?: boolean;

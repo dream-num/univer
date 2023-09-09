@@ -1,6 +1,7 @@
 import { IMouseEvent } from '@univerjs/base-render';
 import { BaseRightMenuProps, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
 import { Component, createRef } from 'react';
+
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
 
@@ -13,9 +14,9 @@ interface IState {
 }
 
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
-    ulRef = createRef();
+    ulRef = createRef<Menu>();
 
-    root = createRef();
+    root = createRef<HTMLDivElement>();
 
     constructor(props: BaseRightMenuProps) {
         super(props);
@@ -62,7 +63,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
         this.setState({ visible: true, srcElement: event.target, eventType: event.type }, () => {
             new Promise<void>((resolve, reject) => {
-                this.ulRef.current.showMenu(true);
+                this.ulRef.current?.showMenu(true);
                 resolve();
             }).then(() => {
                 // clientX/Y 获取到的是触发点相对于浏览器可视区域左上角距离
@@ -75,9 +76,9 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                 const screenW = window.innerWidth;
                 const screenH = window.innerHeight;
                 // 获取自定义菜单的宽度/高度
-
-                const rootW = this.ulRef.current.base.offsetWidth;
-                const rootH = this.ulRef.current.base.offsetHeight;
+                const currentUl = this.ulRef.current?.getMenuRef().current;
+                const rootW = currentUl?.offsetWidth || 0;
+                const rootH = currentUl?.offsetHeight || 0;
 
                 // right为true，说明鼠标点击的位置到浏览器的右边界的宽度可以放下菜单。否则，菜单放到左边。
                 // bottom为true，说明鼠标点击位置到浏览器的下边界的高度可以放下菜单。否则，菜单放到上边。
@@ -86,19 +87,22 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                 const bottom = screenH - clickY > rootH;
                 const top = !bottom;
 
+                const current = this.root.current;
+                if (!current) return;
+
                 if (right) {
-                    this.root.current.style.left = `${clickX}px`;
+                    current.style.left = `${clickX}px`;
                 }
 
                 if (left) {
-                    this.root.current.style.left = `${clickX - rootW}px`;
+                    current.style.left = `${clickX - rootW}px`;
                 }
 
                 if (bottom) {
-                    this.root.current.style.top = `${clickY}px`;
+                    current.style.top = `${clickY}px`;
                 }
                 if (top) {
-                    this.root.current.style.top = `${clickY - rootH}px`;
+                    current.style.top = `${clickY - rootH}px`;
                 }
             });
         });
@@ -124,7 +128,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
         this.ulRef.current.showMenu(show);
     }
 
-    render() {
+    override render() {
         const wrapStyles = { ...this.props.style };
         const { visible } = this.state;
 

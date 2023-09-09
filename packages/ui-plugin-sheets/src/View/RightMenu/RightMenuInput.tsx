@@ -1,5 +1,5 @@
 import { CustomLabel, ICustomComponentProps, Input } from '@univerjs/base-ui';
-import { Component } from 'react';
+import React, { useState } from 'react';
 
 interface IProps extends ICustomComponentProps<string> {
     prefix: string;
@@ -7,27 +7,20 @@ interface IProps extends ICustomComponentProps<string> {
     onKeyUp?: (e: Event) => void;
 }
 
-export class RightMenuInput extends Component<IProps> {
-    private value = '';
+export const RightMenuInput: React.FC<IProps> = ({ prefix, suffix, onChange }) => {
+    const [inputValue, setInputValue] = useState<string>(''); // Initialized to an empty string
 
-    render() {
-        const { prefix, suffix, value } = this.props;
-        return (
-            <div>
-                <CustomLabel label={prefix} />
-                <Input type="number" placeholder="1" value={value} onClick={(e) => e.stopPropagation()} onChange={this.onChange.bind(this)}></Input>
-                <CustomLabel label={suffix} />
-            </div>
-        );
-    }
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setInputValue(newValue);
+        onChange(newValue);
+    };
 
-    // private handleClick(e: Event) {
-    //     e.stopPropagation();
-    //     this.props.onChange?.(this.value);
-    // }
-
-    private onChange(e: Event) {
-        const value = (e.target as HTMLInputElement).value;
-        this.props.onChange(value);
-    }
-}
+    return (
+        <div>
+            <CustomLabel label={prefix} />
+            <Input type="number" placeholder="1" value={inputValue} onClick={(e) => e.stopPropagation()} onChange={handleChange}></Input>
+            <CustomLabel label={suffix} />
+        </div>
+    );
+};

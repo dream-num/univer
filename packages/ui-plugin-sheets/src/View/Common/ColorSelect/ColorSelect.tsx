@@ -1,9 +1,10 @@
-import { BaseComponentProps, ICustomComponent, CustomLabel } from '@univerjs/base-ui';
-import { Component, ComponentChildren } from 'react';
+import { BaseComponentProps, CustomLabel, ICustomComponent } from '@univerjs/base-ui';
+import { Component } from 'react';
+
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {
-    label?: ComponentChildren | ICustomComponent;
+    label?: JSX.Element | ICustomComponent;
     id: string;
     color: string;
 }
@@ -31,7 +32,7 @@ export class ColorSelect extends Component<IProps, IState> {
         });
     }
 
-    render() {
+    override render() {
         const { label } = this.props;
         return (
             <div className={styles.colorSelect}>

@@ -1,5 +1,5 @@
 import { ICommandService, isRealNum } from '@univerjs/core';
-import { Component, ComponentChild, createRef, Fragment } from 'react';
+import { Component, createRef, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 
 import { AppContext } from '../../Common/AppContext';
@@ -117,11 +117,10 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
     };
 
     // eslint-disable-next-line max-lines-per-function
-    render() {
+    override render() {
         const { context, props, state } = this;
         const { className = '', style = '', menu, deep = 0, options, display, value } = props;
         const { posStyle, show, menuItems } = state;
-
         return (
             <ul className={joinClassNames(styles.colsMenu, className)} style={{ ...style, ...posStyle, display: show ? 'block' : 'none' }} ref={this._MenuRef}>
                 {/* legacy: render selections */}
@@ -199,6 +198,10 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                         </li>
                     );
                 })}
+                {/* render submenus */}
+                {menuItems?.map((item: IDisplayMenuItem<IMenuItem>, index) => (
+                    <MenuItem menuItem={item} key={index} index={index} onClick={this.handleItemClick.bind(this, item as IMenuButtonItem)} />
+                ))}
             </ul>
         );
     }
@@ -238,7 +241,7 @@ export interface IMenuItemState {
 // TODO: this component should have something in common with ToolbarItem
 
 export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
-    static override contextType = AppContext;
+    static contextType = AppContext;
 
     private disabledSubscription: Subscription | undefined;
 
@@ -310,7 +313,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
         });
     };
 
-    override render(): ComponentChild {
+    override render() {
         switch (this.props.menuItem.type) {
             case MenuItemType.SELECTOR:
                 return this.renderSelectorType();
@@ -322,7 +325,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
     }
 
     // button type command should directly execute command
-    private renderButtonType(): ComponentChild {
+    private renderButtonType() {
         const { menuItem, onClick } = this.props;
         const { disabled, value } = this.state;
         const { injector } = this.context;
@@ -355,7 +358,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
         );
     }
 
-    private renderSelectorType(): ComponentChild {
+    private renderSelectorType() {
         const { menuItem, index } = this.props;
         const { disabled, menuItems, value } = this.state;
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
@@ -384,7 +387,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
         );
     }
 
-    private renderSubItemsType(): ComponentChild {
+    private renderSubItemsType() {
         const { menuItem, index } = this.props;
         const { disabled, menuItems } = this.state;
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem<unknown>>;

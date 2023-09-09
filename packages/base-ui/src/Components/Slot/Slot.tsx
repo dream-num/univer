@@ -1,4 +1,4 @@
-import { Component } from 'preact';
+import { Component } from 'react';
 import { BaseComponentProps } from '../../BaseComponent';
 import { SlotComponent } from '../../Common/SlotManager';
 import { AppContext } from '../../Common';

@@ -1,4 +1,4 @@
-import { Component } from 'preact';
+import { Component } from 'react';
 import { Nullable } from '@univerjs/core';
 
 interface SearchProps {

@@ -1,5 +1,5 @@
 import { BaseComponentProps, BaseComponentRender, BaseSelectChildrenProps, debounce, Icon } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { Nullable } from '@univerjs/core';
 import styles from './index.module.less';
 

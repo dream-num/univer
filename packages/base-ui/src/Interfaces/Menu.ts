@@ -1,4 +1,4 @@
-import { ComponentChildren, JSX } from 'preact';
+import { ComponentChildren, JSX } from 'react';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
 import { ICustomComponentOption, IValueOption } from '../services/menu/menu';
 import { DisplayTypes } from '../Components/Select/Select';

@@ -2,7 +2,7 @@ import { BaseComponentProps, Container, Content, Footer, Layout, Sider } from '@
 import defaultSkin from '@univerjs/base-ui/Basics/CSS/Skin/default.module.less';
 import { Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 
 import { IDocUIPluginConfig } from '../../Basics';
 import style from './index.module.less';

@@ -1,5 +1,5 @@
 import { BaseComponentProps, Modal } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { SearchFormulaModalData } from '../../../Basics/Interfaces/IFormula';
 
 interface IProps extends BaseComponentProps {}

@@ -1,5 +1,5 @@
 import { BaseComponentProps, debounce, Input, Select, CustomLabel } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { FormulaType, FunListILabel, Label } from '../../../Basics';
 import styles from './index.module.less';
 

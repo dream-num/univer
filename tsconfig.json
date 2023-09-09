@@ -13,7 +13,7 @@
         "declarationMap": true,
         "experimentalDecorators": true,
         "jsx": "react-jsx",
-        "jsxImportSource": "preact",
+        "jsxImportSource": "react",
         "sourceMap": true,
         "resolveJsonModule": true,
         "strict": true,

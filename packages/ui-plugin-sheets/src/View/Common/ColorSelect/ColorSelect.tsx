@@ -1,5 +1,5 @@
 import { BaseComponentProps, ICustomComponent, CustomLabel } from '@univerjs/base-ui';
-import { Component, ComponentChildren } from 'preact';
+import { Component, ComponentChildren } from 'react';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {

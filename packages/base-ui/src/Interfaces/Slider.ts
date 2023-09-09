@@ -1,4 +1,4 @@
-import { RefObject } from 'preact';
+import { RefObject } from 'react';
 import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
 
 interface SliderBaseProps {

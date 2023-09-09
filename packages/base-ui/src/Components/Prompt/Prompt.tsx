@@ -1,4 +1,4 @@
-import { Component } from 'preact';
+import { Component } from 'react';
 import { Modal } from '../Modal';
 import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';

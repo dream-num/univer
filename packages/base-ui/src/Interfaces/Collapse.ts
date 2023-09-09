@@ -1,4 +1,4 @@
-import { ComponentChildren } from 'preact';
+import { ComponentChildren } from 'react';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
 
 export interface BasePanelProps {

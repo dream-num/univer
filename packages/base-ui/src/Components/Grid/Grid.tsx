@@ -1,4 +1,4 @@
-import { ComponentChildren } from 'preact';
+import { ComponentChildren } from 'react';
 
 type BaseGridProps = {
     children?: ComponentChildren;

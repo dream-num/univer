@@ -1,5 +1,5 @@
 import { BaseComponentRender, Input } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 
 interface IProps {
     prefix?: string;

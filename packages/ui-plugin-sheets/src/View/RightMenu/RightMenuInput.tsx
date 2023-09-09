@@ -1,5 +1,5 @@
 import { CustomLabel, ICustomComponentProps, Input } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 
 interface IProps extends ICustomComponentProps<string> {
     prefix: string;

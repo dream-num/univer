@@ -1,5 +1,5 @@
 import { BaseComponentProps, CellRange, CustomLabel } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { FormulaParamType, FunParams } from '../../../Basics';
 import styles from './index.module.less';
 

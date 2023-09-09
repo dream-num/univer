@@ -1,4 +1,4 @@
-import { ComponentChildren, RefObject } from 'preact';
+import { ComponentChildren, RefObject } from 'react';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
 
 export interface BaseSiderModalProps {

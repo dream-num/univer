@@ -6,9 +6,8 @@
 // import { Bright, FgCyan, FgGreen, Reset } from './color';
 const esbuild = require('esbuild');
 const { promises } = require('fs');
-const { exec } = require('child_process');
 const minimist = require('minimist');
-const { resolve, join } = require('path');
+const { resolve } = require('path');
 const { commonBuildOptions, hasFolder } = require('./common');
 const { Bright, FgCyan, FgGreen, Reset } = require('./color');
 
@@ -29,28 +28,20 @@ const { Bright, FgCyan, FgGreen, Reset } = require('./color');
     await promises.mkdir(paths.outDev);
     await promises.copyFile(paths.index, `${paths.outDev}/index.html`);
 
-    let ctx = await esbuild.context({
+    const ctx = await esbuild.context({
         ...commonBuildOptions,
-        alias: {
-            'preact': 'react',
-            'preact/hooks': 'react',
-            'preact/compat': 'react'
-        },
         entryPoints: [paths.entry],
         outdir: paths.outDev,
     });
 
     await ctx.watch();
 
-    let { host, port } = await ctx.serve({
+    const { host, port } = await ctx.serve({
         servedir: paths.outDev,
         port: 3002,
     });
 
-    let url = `http://localhost:${port}`;
+    const url = `http://localhost:${port}`;
 
     console.log(`${Bright}${FgGreen}Local server: ${FgCyan}${url}${Reset}`);
-
-    // let start = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
-    // exec(`${start} ${url}`);
 })();

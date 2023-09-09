@@ -1,5 +1,5 @@
 import { BaseComponentProps, CustomLabel, Icon } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 
 interface IState {
     color: string;

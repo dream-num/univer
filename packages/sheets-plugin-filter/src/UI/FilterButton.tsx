@@ -1,5 +1,5 @@
 import { BaseSelectProps, Icon, Select } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData';
 import { FilterPlugin } from '../FilterPlugin';

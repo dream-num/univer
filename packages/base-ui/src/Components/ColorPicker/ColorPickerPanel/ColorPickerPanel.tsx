@@ -1,4 +1,4 @@
-import { Component } from 'preact';
+import { Component } from 'react';
 import { HexColorInput, RgbaStringColorPicker } from 'react-colorful';
 import { debounce } from '../../../Utils';
 

@@ -1,4 +1,4 @@
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseSearchTreeProps, SearchTreeComponent } from '../../Interfaces';
 import * as Icon from '../Icon';

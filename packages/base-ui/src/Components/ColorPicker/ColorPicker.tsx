@@ -1,4 +1,4 @@
-import { Component, JSX, createRef } from 'preact';
+import { Component, JSX, createRef } from 'react';
 import { BaseColorPickerProps, ColorPickerComponent, JSXComponent } from '../..';
 import { ICustomComponentProps } from '../../services/menu/menu';
 import { Button, Tooltip } from '../index';

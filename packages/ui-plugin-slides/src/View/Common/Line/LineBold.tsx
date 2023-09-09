@@ -1,5 +1,5 @@
 import { BaseComponentProps, Icon, CustomLabel } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { SlideUIPlugin } from '../../..';
 import { SLIDE_UI_PLUGIN_NAME } from '../../../Basics';
 

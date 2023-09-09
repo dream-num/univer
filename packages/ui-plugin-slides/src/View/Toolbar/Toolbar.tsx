@@ -1,5 +1,5 @@
 import { AppContext, BaseComponentProps, Button, Container, debounce, Select, Tooltip, CustomLabel } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { SlideUIPlugin } from '../..';
 import { SLIDE_UI_PLUGIN_NAME } from '../../Basics';
 import { IToolbarItemProps } from '../../Controller';

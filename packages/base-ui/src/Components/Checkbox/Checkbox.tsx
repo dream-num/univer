@@ -1,4 +1,4 @@
-import { Component } from 'preact';
+import { Component } from 'react';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseCheckboxProps, CheckboxComponent } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';

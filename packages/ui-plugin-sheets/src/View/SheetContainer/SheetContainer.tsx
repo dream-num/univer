@@ -1,5 +1,5 @@
 import { BaseComponentProps, Container, Content, Footer, Header, Layout, Sider, Slot, defaultSkin } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
 import style from './index.module.less';

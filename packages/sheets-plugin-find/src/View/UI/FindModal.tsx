@@ -1,5 +1,5 @@
 import { BaseCheckboxGroupOptions, BaseComponentProps, Button, CellRange, CheckboxGroup, Icon, Input, Modal, Select, CustomLabel } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { BaseItemProps } from '@univerjs/base-ui/src/Components/Item/Item';
 import styles from './index.module.less';
 

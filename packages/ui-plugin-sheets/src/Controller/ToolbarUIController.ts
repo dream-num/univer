@@ -2,7 +2,7 @@ import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager
 import { IMenuItemFactory } from '@univerjs/base-ui/src/services/menu/menu';
 import { Disposable } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ComponentChildren } from 'preact';
+import { ComponentChildren } from 'react';
 
 import { SHEET_UI_PLUGIN_NAME, SheetToolbarConfig } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';

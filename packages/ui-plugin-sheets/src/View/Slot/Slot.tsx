@@ -1,5 +1,5 @@
 import { BaseComponentProps } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { SlotGroupProps } from '../../Controller/SlotController';
 
 interface IState {

@@ -1,4 +1,4 @@
-import { Component, RefObject } from 'preact';
+import { Component, RefObject } from 'react';
 
 /**
  * check element

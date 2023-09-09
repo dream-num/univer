@@ -1,5 +1,5 @@
 import { CustomLabel, Icon, joinClassNames } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 
 import styles from './index.module.less';
 

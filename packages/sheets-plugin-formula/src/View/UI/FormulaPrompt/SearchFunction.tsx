@@ -1,5 +1,5 @@
 import { BaseComponentProps, CustomLabel } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { IKeyValue } from '@univerjs/core';
 import styles from './index.module.less';
 

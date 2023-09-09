@@ -1,4 +1,4 @@
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseSliderRangeProps, BaseSliderSingleProps, SliderComponent } from '../../Interfaces';
 import { randomId } from '../../Utils';

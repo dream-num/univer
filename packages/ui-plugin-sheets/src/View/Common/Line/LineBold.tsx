@@ -1,5 +1,5 @@
 import { BaseComponentProps, AppContext, Icon, CustomLabel } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { BORDER_SIZE_CHILDREN } from '../../../Controller/menu/border.menu';
 
 interface IState {

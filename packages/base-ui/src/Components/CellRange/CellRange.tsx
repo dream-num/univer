@@ -1,4 +1,4 @@
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { Icon, Modal } from '..';
 import { BaseComponentProps } from '../../BaseComponent';
 import { ModalButtonGroup } from '../../Interfaces';

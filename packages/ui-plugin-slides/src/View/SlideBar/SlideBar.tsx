@@ -1,5 +1,5 @@
 import { AppContext, BaseComponentProps, Button } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { ISlidePage } from '@univerjs/core';
 import styles from './index.module.less';
 

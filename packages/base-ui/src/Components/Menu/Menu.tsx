@@ -1,5 +1,5 @@
 import { ICommandService, isRealNum } from '@univerjs/core';
-import { Component, ComponentChild, createRef, Fragment } from 'preact';
+import { Component, ComponentChild, createRef, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 
 import { AppContext } from '../../Common/AppContext';

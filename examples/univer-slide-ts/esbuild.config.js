@@ -3,11 +3,6 @@ require('esbuild').build({
     color: true,
     loader: { '.svg': 'file' },
     sourcemap: false,
-    alias: {
-        'preact': 'react',
-        'preact/hooks': 'react',
-        'preact/compat': 'react'
-    },
     plugins: [
         require('esbuild-plugin-clean').clean({
             patterns: ['./local'],

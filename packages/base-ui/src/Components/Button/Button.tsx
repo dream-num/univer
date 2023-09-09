@@ -1,4 +1,4 @@
-import { Component } from 'preact';
+import { Component } from 'react';
 import { BaseButtonProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils';
 import { LoadingIcon } from '../Icon';

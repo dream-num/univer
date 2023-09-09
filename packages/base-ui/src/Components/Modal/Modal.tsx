@@ -1,4 +1,4 @@
-import { Component } from 'preact';
+import { Component } from 'react';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseModalProps, ModalComponent } from '../../Interfaces';
 import { Button } from '../Button';

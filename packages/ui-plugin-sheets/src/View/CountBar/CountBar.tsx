@@ -1,5 +1,5 @@
 import { BaseCountBarProps, Button, CountBarComponent, Icon, JSXComponent, Slider, AppContext } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { ObserverManager, PLUGIN_NAMES } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import styles from './index.module.less';

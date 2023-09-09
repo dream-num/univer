@@ -1,4 +1,4 @@
-import { Component, VNode, cloneElement } from 'preact';
+import { Component, VNode, cloneElement } from 'react';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseRadioGroupProps, BaseRadioIProps, RadioComponent } from '../../Interfaces';
 import styles from './index.module.less';

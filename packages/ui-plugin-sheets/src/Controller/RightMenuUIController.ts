@@ -3,7 +3,7 @@ import { CanvasView } from '@univerjs/base-sheets';
 import { BaseMenuItem, ComponentManager, ICustomLabelType, IMenuItemFactory, IMenuService, MenuPosition } from '@univerjs/base-ui';
 import { Disposable } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ComponentChildren } from 'preact';
+import { ComponentChildren } from 'react';
 
 import { SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';

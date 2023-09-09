@@ -1,5 +1,5 @@
 import { BaseComponentProps, CustomLabel, Icon } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 
 interface IState {
     color: string;
@@ -26,7 +26,7 @@ export class LineColor extends Component<IProps, IState> {
         this.props.getComponent?.(this);
     }
 
-    override componentWillReceiveProps(props: IProps): void {
+    override UNSAFE_componentWillReceiveProps(props: IProps): void {
         this.setState({
             color: props.color,
         });

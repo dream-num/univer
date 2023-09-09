@@ -1,5 +1,5 @@
 import { BaseComponentProps, debounce, Input, Select, CustomLabel } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { FormulaType, FunListILabel, Label } from '../../../Basics';
 import styles from './index.module.less';
 
@@ -146,7 +146,7 @@ export class SearchFormulaContent extends Component<IProps, IState> {
                     </div>
                     <ul className={styles.functionLists}>
                         {functionList?.map((item, index) => (
-                            <li className={`${styles.functionListsItem}`} onClick={() => this.handleClick(item, index)}>
+                            <li key={index} className={`${styles.functionListsItem}`} onClick={() => this.handleClick(item, index)}>
                                 <div className={styles.functionListsItemName}>{item.n}</div>
                                 <div className={styles.functionListsItemDetail}>{item.d}</div>
                             </li>

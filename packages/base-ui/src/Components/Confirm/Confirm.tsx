@@ -1,4 +1,4 @@
-import { Component } from 'preact';
+import { Component } from 'react';
 import { Modal } from '../Modal';
 import { CustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
@@ -49,7 +49,7 @@ export class Confirm extends Component<BaseConfirmProps, IState> {
         return group;
     }
 
-    override componentWillReceiveProps(props: BaseConfirmProps): void {
+    override UNSAFE_componentWillReceiveProps(props: BaseConfirmProps): void {
         if (props.show !== this.props.show) {
             this.setState({
                 show: props.show,

@@ -1,5 +1,5 @@
 import { AppContext, BaseComponentProps, Button } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { ISlidePage } from '@univerjs/core';
 import styles from './index.module.less';
 
@@ -72,7 +72,7 @@ export class SlideBar extends Component<IProps, SlideBarState> {
             <div className={styles.slideBar} ref={this.slideBarRef}>
                 <div className={styles.slideBarContent}>
                     {slideList.map((item, index) => (
-                        <div className={`${styles.slideBarItem} ${this.isActive(item.id, index)}`} onClick={() => this.activeSlide(item.id, index)}>
+                        <div key={index} className={`${styles.slideBarItem} ${this.isActive(item.id, index)}`} onClick={() => this.activeSlide(item.id, index)}>
                             <span>{index + 1}</span>
                             <div className={styles.slideBarBox}></div>
                         </div>

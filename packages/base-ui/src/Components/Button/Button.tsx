@@ -1,4 +1,4 @@
-import { Component } from 'preact';
+import { Component } from 'react';
 import { BaseButtonProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils';
 import { LoadingIcon } from '../Icon';
@@ -101,7 +101,7 @@ class Button extends Component<BaseButtonProps, IState> {
         );
     };
 
-    override componentWillReceiveProps(props: BaseButtonProps) {
+    override UNSAFE_componentWillReceiveProps(props: BaseButtonProps) {
         this.setState({
             isActive: props.active,
         });

@@ -1,5 +1,5 @@
 import { CustomLabel, Icon, joinClassNames } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 
 import styles from './index.module.less';
 
@@ -150,7 +150,7 @@ export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
         return (
             <ul className={styles.sheetBarMenu} style={{ ...style, display: show ? 'block' : ' none' }}>
                 {menu.map((item) => (
-                    <li onClick={(e) => this.handleClick(e, item)} className={joinClassNames(styles.sheetBarMenuItem)}>
+                    <li key={item.index} onClick={(e) => this.handleClick(e, item)} className={joinClassNames(styles.sheetBarMenuItem)}>
                         <span className={styles.sheetBarMenuIcon}>
                             <EffIcon item={item}></EffIcon>
                         </span>

@@ -1,6 +1,6 @@
 // import Enzyme, { mount } from 'enzyme';
 // import Adapter from 'enzyme-adapter-preact-pure';
-// import { h } from 'preact';
+// import { h } from 'react';
 // import { render, fireEvent, screen, waitFor } from '@testing-library/preact';
 // import { Tooltip } from '..';
 // Enzyme.configure({ adapter: new Adapter() });

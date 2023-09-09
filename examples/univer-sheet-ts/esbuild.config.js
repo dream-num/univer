@@ -1,7 +1,6 @@
 require('esbuild').build({
     bundle: true,
     color: true,
-    alias: { react: 'preact/compat' },
     loader: { '.svg': 'file' },
     sourcemap: false,
     plugins: [

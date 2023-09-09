@@ -1,5 +1,5 @@
 import { BaseComponentProps, CustomLabel } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { IKeyValue } from '@univerjs/core';
 import styles from './index.module.less';
 
@@ -69,8 +69,8 @@ export class SearchFunction extends Component<IProps, IState> {
         return this.state;
     }
 
-    render(props: IProps, state: IState) {
-        const { selectIndex, formula, searchActive, position } = state;
+    render() {
+        const { selectIndex, formula, searchActive, position } = this.state;
         return (
             <ul
                 className={styles.searchFunction}
@@ -79,7 +79,7 @@ export class SearchFunction extends Component<IProps, IState> {
                 ref={this.contentRef}
             >
                 {formula.map((item: any, i: number) => (
-                    <li className={selectIndex === i ? styles.searchFunctionActive : ''}>
+                    <li key={i} className={selectIndex === i ? styles.searchFunctionActive : ''}>
                         <div className={styles.formulaName}>{item.n}</div>
                         <div className={styles.formulaDetail}>
                             <CustomLabel label={item.d} />

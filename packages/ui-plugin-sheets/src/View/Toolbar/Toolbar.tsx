@@ -1,5 +1,5 @@
 import { AppContext, BaseComponentProps, Button, Container, CustomLabel, debounce, IDisplayMenuItem, IMenuItem, Select, Tooltip } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { IToolbarItemProps, SheetContainerUIController } from '../../Controller';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';

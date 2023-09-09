@@ -1,5 +1,5 @@
 import { BaseComponentProps, Icon, CustomLabel } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { SlideUIPlugin } from '../../..';
 import { SLIDE_UI_PLUGIN_NAME } from '../../../Basics';
 
@@ -28,7 +28,7 @@ export class LineBold extends Component<IProps, IState> {
         this.props.getComponent?.(this);
     }
 
-    override componentWillReceiveProps(props: IProps) {
+    override UNSAFE_componentWillReceiveProps(props: IProps) {
         this.setState({
             img: props.img,
         });

@@ -1,4 +1,4 @@
-import { ComponentChildren, Component } from 'preact';
+import { ComponentChildren, Component } from 'react';
 import { BaseMenuItem } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import { CustomLabel } from '../CustomLabel';

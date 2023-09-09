@@ -1,6 +1,6 @@
 // import { CellInputHandler } from '@univerjs/sheets-plugin-formula/src/Controller/CellInputHandler';
 import { BaseComponentProps, xssDeal } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { CellTextStyle } from './CellTextStyle';
 import styles from './index.module.less';
 // interface IProps {
@@ -153,7 +153,7 @@ export class RichText extends Component<BaseRichTextProps, IRichTextState> {
     /**
      * init
      */
-    override componentWillMount() {}
+    override UNSAFE_componentWillMount() {}
 
     override componentDidMount() {
         this.props.getComponent?.(this);
@@ -169,8 +169,8 @@ export class RichText extends Component<BaseRichTextProps, IRichTextState> {
         // this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
-    render(props: BaseRichTextProps, state: IRichTextState) {
-        const { style, className = '', onClick, text } = props;
+    render() {
+        const { style, className = '', onClick, text } = this.props;
         return (
             <div className={`${styles.richTextEditorContainer} ${className}`} style={style} ref={this.container}>
                 <div

@@ -1,5 +1,5 @@
 import { AppContext, BaseComponentProps, Button, Container, debounce, Select, Tooltip, CustomLabel } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { SlideUIPlugin } from '../..';
 import { SLIDE_UI_PLUGIN_NAME } from '../../Basics';
 import { IToolbarItemProps } from '../../Controller';
@@ -188,11 +188,11 @@ export class Toolbar extends Component<IProps, IState> {
 
     // 渲染dom
     getToolbarList(list: IToolbarItemProps[]) {
-        return list.map((item) => {
+        return list.map((item, index) => {
             if (item.toolbarType) {
                 if (item.show) {
                     return (
-                        <Tooltip title={item.tooltip} placement={'bottom'}>
+                        <Tooltip key={index} title={item.tooltip} placement={'bottom'}>
                             <Button unActive={item.unActive} className={styles.textButton} type="text" active={item.active} onClick={item.onClick}>
                                 <CustomLabel label={item.label} />
                             </Button>
@@ -203,6 +203,7 @@ export class Toolbar extends Component<IProps, IState> {
                 if (item.show) {
                     return (
                         <Select
+                            key={index}
                             tooltip={item.tooltip}
                             type={item.type}
                             display={item.display}

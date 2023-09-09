@@ -1,4 +1,4 @@
-import { Component } from 'preact';
+import { Component } from 'react';
 
 export interface ImageUploadButtonUIProps {
     chooseCallback: (url: string, file: File) => void;

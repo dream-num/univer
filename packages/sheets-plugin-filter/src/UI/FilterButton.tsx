@@ -1,5 +1,5 @@
 import { BaseSelectProps, Icon, Select } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { IProps } from '../IData';
 import { FilterPlugin } from '../FilterPlugin';
@@ -51,7 +51,7 @@ export class FilterButton extends Component<IProps, IState> {
     /**
      * init
      */
-    override componentWillMount() {
+    override UNSAFE_componentWillMount() {
         this.setLocale();
 
         // subscribe Locale change event
@@ -96,8 +96,8 @@ export class FilterButton extends Component<IProps, IState> {
      *
      * @returns {void}
      */
-    render(props: IProps, state: IState) {
-        const { filter } = state;
+    render() {
+        const { filter } = this.state;
         return <Select tooltip={filter.tooltip} key={filter.locale} children={filter.children as BaseSelectProps[]} label={filter.label} icon={filter.icon} />;
     }
 }

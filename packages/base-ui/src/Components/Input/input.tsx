@@ -1,4 +1,4 @@
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseInputProps, InputComponent } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
@@ -89,21 +89,21 @@ export class Input extends Component<BaseInputProps, IState> {
     // get input value
     getValue = () => this.ref.current.value;
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         if (this.props.value) {
             this.setValue(this.props.value);
         }
     }
 
-    componentWillReceiveProps(nextProps: Readonly<BaseInputProps>) {
+    UNSAFE_componentWillReceiveProps(nextProps: Readonly<BaseInputProps>) {
         if (nextProps.value && nextProps.value !== this.state.value) {
             this.setValue(nextProps.value);
         }
     }
 
-    render(props: BaseInputProps, state: IState) {
-        const { id, disabled, type, placeholder, bordered = true, className = '', readonly } = props;
-        const { value } = state;
+    render() {
+        const { id, disabled, type, placeholder, bordered = true, className = '', readonly } = this.props;
+        const { value } = this.state;
 
         const classes = joinClassNames(
             styles.input,
@@ -126,7 +126,7 @@ export class Input extends Component<BaseInputProps, IState> {
                 onChange={this.handleChange}
                 value={value}
                 onClick={this.onClick}
-                readonly={readonly}
+                readOnly={readonly}
                 id={id}
                 onKeyUp={this.handlePressEnter}
             ></input>

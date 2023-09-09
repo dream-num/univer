@@ -1,5 +1,5 @@
 import { BaseComponentProps, ICustomComponent, CustomLabel } from '@univerjs/base-ui';
-import { Component, ComponentChildren } from 'preact';
+import { Component, ComponentChildren } from 'react';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {
@@ -17,7 +17,7 @@ export class ColorSelect extends Component<IProps, IState> {
         this.props.getComponent?.(this);
     }
 
-    override componentWillReceiveProps(props: IProps) {
+    override UNSAFE_componentWillReceiveProps(props: IProps) {
         this.setState({
             color: props.color,
         });

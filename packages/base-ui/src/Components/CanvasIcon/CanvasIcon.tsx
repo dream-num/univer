@@ -1,24 +1,29 @@
-import { Component, createRef, RefObject } from 'preact';
+import { useEffect, useRef } from 'react';
 import Style from './index.module.less';
 
 type IProps = {
     width: string;
     height: string;
-    drawLine: (dom: RefObject<CanvasIcon>) => void;
+    type: string;
+    hv: string;
+    mSt: number;
+    mEd: number;
+    lineSt: number;
+    lineEd: number;
 };
 type IState = {};
 
-class CanvasIcon extends Component<IProps, IState> {
-    canvasRef = createRef();
+export function CanvasIcon(props: IProps) {
+    const { type, hv, mSt: m_st, mEd: m_ed, lineSt: line_st, lineEd: line_ed } = props
 
-    override componentDidMount() {
-        this.drawLine();
-    }
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    drawLine() {
-        const canvas = this.canvasRef;
-        this.props.drawLine(canvas);
-    }
+    useEffect(() => {
+        if (!canvasRef.current) return;
+
+        const ctx = canvasRef.current.getContext('2d')!;
+        setLineDash(ctx);
+    }, [])
 
     /**
      *
@@ -30,23 +35,23 @@ class CanvasIcon extends Component<IProps, IState> {
      * @param line_st   End X
      * @param line_ed   End Y
      */
-    setLineDash(ctx: CanvasRenderingContext2D, type: string, hv: string, m_st: number, m_ed: number, line_st: number, line_ed: number) {
-        const borderType: { [index: string]: string } = {
-            '0': 'none',
-            '1': 'Thin',
-            '2': 'Hair',
-            '3': 'Dotted',
-            '4': 'Dashed',
-            '5': 'DashDot',
-            '6': 'DashDotDot',
-            '7': 'Double',
-            '8': 'Medium',
-            '9': 'MediumDashed',
-            '10': 'MediumDashDot',
-            '11': 'MediumDashDotDot',
-            '12': 'SlantedDashDot',
-            '13': 'Thick',
-        };
+    function setLineDash(ctx: CanvasRenderingContext2D) {
+        // const borderType: { [index: string]: string } = {
+        //     '0': 'none',
+        //     '1': 'Thin',
+        //     '2': 'Hair',
+        //     '3': 'Dotted',
+        //     '4': 'Dashed',
+        //     '5': 'DashDot',
+        //     '6': 'DashDotDot',
+        //     '7': 'Double',
+        //     '8': 'Medium',
+        //     '9': 'MediumDashed',
+        //     '10': 'MediumDashDot',
+        //     '11': 'MediumDashDotDot',
+        //     '12': 'SlantedDashDot',
+        //     '13': 'Thick',
+        // };
 
         try {
             if (type === 'Hair') {
@@ -87,11 +92,10 @@ class CanvasIcon extends Component<IProps, IState> {
             ctx.lineTo(line_st, line_ed);
             ctx.lineWidth = 1;
         }
+
+        ctx.stroke();
+        ctx.closePath();
     }
 
-    render() {
-        return <canvas ref={this.canvasRef} className={Style.canvas} width={this.props.width} height={this.props.height} />;
-    }
+    return <canvas ref={canvasRef} className={Style.canvas} width={props.width} height={props.height} />;
 }
-
-export { CanvasIcon };

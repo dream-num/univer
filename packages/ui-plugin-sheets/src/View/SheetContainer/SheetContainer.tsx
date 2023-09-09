@@ -1,5 +1,5 @@
 import { BaseComponentProps, Container, Content, Footer, Header, Layout, Sider, Slot, defaultSkin } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
 import style from './index.module.less';
@@ -35,7 +35,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
     contentRef = createRef<HTMLDivElement>();
 
     constructor(props: BaseSheetContainerProps) {
-        super();
+        super(props);
         this.changeSkin(props.config.container as string, 'default');
     }
 

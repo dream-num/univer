@@ -1,4 +1,4 @@
-import { Component, RefObject } from 'preact';
+import { Component, RefObject } from 'react';
 
 /**
  * check element
@@ -204,10 +204,11 @@ export function getRefElement(ref: RefObject<HTMLElement | Component> | Componen
     }
     const refCurrent = (ref as RefObject<Component>).current as Component<{}, {}>;
 
+    // TODO: need to fix
     if (refCurrent) {
-        return refCurrent?.base as HTMLElement;
+        return refCurrent?.contentRef.current as HTMLElement;
     }
-    return (ref as Component).base as HTMLElement;
+    return (ref as Component).contentRef.current as HTMLElement;
 }
 
 export function printableCharacter(keycode: number) {

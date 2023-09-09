@@ -1,5 +1,5 @@
 import { BaseComponentProps } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { SlotGroupProps } from '../../Controller/SlotController';
 
 interface IState {
@@ -49,6 +49,7 @@ export class Slot extends Component<IProps, IState> {
             if (!Slot) return;
             group.push(
                 <Slot
+                    key={k}
                     ref={(ele: Slot) => {
                         this.refMap.set(k, ele);
                     }}

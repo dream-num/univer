@@ -1,4 +1,4 @@
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { Icon, Modal } from '..';
 import { BaseComponentProps } from '../../BaseComponent';
 import { ModalButtonGroup } from '../../Interfaces';
@@ -62,7 +62,7 @@ export class CellRange extends Component<BaseCellRangeModalProps, IState> {
         onChange?.(e);
     };
 
-    override componentWillReceiveProps(props: BaseCellRangeModalProps) {
+    override UNSAFE_componentWillReceiveProps(props: BaseCellRangeModalProps) {
         if (props.value !== this.state.value) {
             this.setState({
                 value: props.value,
@@ -81,7 +81,7 @@ export class CellRange extends Component<BaseCellRangeModalProps, IState> {
                     <Icon.Sheet.TableIcon />
                 </span>
                 <Modal title={title} visible={show} group={this.group}>
-                    <Input readonly={true} placeholder={contentPlaceholder} value={value} ref={this.ref}></Input>
+                    <Input readOnly={true} placeholder={contentPlaceholder} value={value} ref={this.ref}></Input>
                 </Modal>
             </div>
         );

@@ -1,5 +1,5 @@
 import { BaseComponentProps, AppContext, Icon, CustomLabel } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { BORDER_SIZE_CHILDREN } from '../../../Controller/menu/border.menu';
 
 interface IState {
@@ -32,7 +32,7 @@ export class LineBold extends Component<IProps, IState> {
         this.props.getComponent?.(this);
     }
 
-    override componentWillReceiveProps(props: IProps) {
+    override UNSAFE_componentWillReceiveProps(props: IProps) {
         this.setState({
             img: props.value,
         });

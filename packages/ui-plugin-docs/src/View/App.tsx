@@ -1,5 +1,5 @@
 import { AppContext, BaseComponentProps, ComponentManager } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { LocaleService, LocaleType } from '@univerjs/core';
 import { BaseDocContainerProps, DocContainer } from './DocContainer';
 

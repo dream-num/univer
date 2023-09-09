@@ -1,6 +1,6 @@
 import { AppContext, Button, CustomLabel, IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption, MenuItemType, Select, Tooltip } from '@univerjs/base-ui';
 import { ICommandService } from '@univerjs/core';
-import { Component, ComponentChild } from 'preact';
+import { Component, ComponentChild } from 'react';
 import { Subscription } from 'rxjs';
 
 import styles from './index.module.less';
@@ -52,7 +52,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         }
     }
 
-    override componentWillMount() {
+    override UNSAFE_componentWillMount() {
         this.disabledSubscription?.unsubscribe();
         this.activatedSubscription?.unsubscribe();
         this.currentValueSubscription?.unsubscribe();

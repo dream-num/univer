@@ -2,7 +2,7 @@
  * Use createContext to provide global language and skin settings
  */
 import { LocaleService, ObserverManager } from '@univerjs/core';
-import { createContext } from 'preact';
+import { createContext } from 'react';
 import { Injector } from '@wendellhu/redi';
 
 import { LocaleType } from '../Enum';

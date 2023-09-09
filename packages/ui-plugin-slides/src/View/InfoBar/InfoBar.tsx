@@ -1,5 +1,5 @@
 import { BaseComponentProps, Container, CustomLabel, Input, Tooltip } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { Nullable } from '@univerjs/core';
 import { BaseInfoBarProps } from '../../Controller/InfoBarUIController';
 import styles from './index.module.less';

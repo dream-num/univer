@@ -1,4 +1,4 @@
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseSearchTreeProps, SearchTreeComponent } from '../../Interfaces';
 import * as Icon from '../Icon';
@@ -115,7 +115,7 @@ class SearchTree extends Component<BaseSearchTreeProps, IState> {
         });
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.setState({ dataClone: this.state.data });
     }
 
@@ -133,7 +133,7 @@ class SearchTree extends Component<BaseSearchTreeProps, IState> {
                 </div>
                 <div>
                     {this.state.dataClone.map((item, index: number) => (
-                        <div>
+                        <div key={index}>
                             <input type="checkbox" checked={item.checked} onClick={this.onClick.bind(this, index)} />
                             {item.label}
                         </div>

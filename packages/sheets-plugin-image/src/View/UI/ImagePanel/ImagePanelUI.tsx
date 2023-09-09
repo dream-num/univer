@@ -1,5 +1,5 @@
 import { ColorPickerCircleButton, SiderModal } from '@univerjs/base-ui';
-import { Component, VNode } from 'preact';
+import { Component, VNode } from 'react';
 import { BorderType, NormalType } from '../../../Basics';
 import Style from './ImagePanelUI.module.less';
 

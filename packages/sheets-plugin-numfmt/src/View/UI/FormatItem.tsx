@@ -1,6 +1,5 @@
 import { AppContext, AppContextValues, BaseMenuItem, Icon, joinClassNames } from '@univerjs/base-ui';
-import { ComponentChildren } from 'preact';
-import { useContext } from 'preact/hooks';
+import { ComponentChildren, useContext } from 'react';
 
 import styles from './FormatItem.module.less';
 

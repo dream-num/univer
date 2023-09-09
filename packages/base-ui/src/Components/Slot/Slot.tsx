@@ -1,4 +1,4 @@
-import { Component } from 'preact';
+import { Component } from 'react';
 import { BaseComponentProps } from '../../BaseComponent';
 import { SlotComponent } from '../../Common/SlotManager';
 import { AppContext } from '../../Common';
@@ -76,7 +76,7 @@ export class Slot extends Component<IProps, IState> {
         slotGroup.forEach((item, index) => {
             const Label = this.context.componentManager.get(item.component.name);
             if (Label) {
-                arr.push(<Label ref={(ref: any) => (this._refs[index as any] = ref)} {...item.component.props} />);
+                arr.push(<Label key={index} ref={(ref: any) => (this._refs[index as any] = ref)} {...item.component.props} />);
             }
         });
         return arr;

@@ -1,5 +1,5 @@
 import { BaseComponentRender, BaseComponentSheet } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import styles from './index.module.less';
 
 interface IProps {

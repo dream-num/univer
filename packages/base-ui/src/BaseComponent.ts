@@ -1,5 +1,5 @@
-import { ComponentClass } from 'preact';
-import { ForwardFn } from 'preact/compat';
+import { ComponentClass } from 'react';
+import { ForwardFn } from 'react';
 import { BasePlugin } from '@univerjs/core';
 import { Context } from '@univerjs/core/src/Basics/Context';
 import { Description } from './Interfaces';

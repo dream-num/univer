@@ -1,4 +1,4 @@
-import { VNode } from 'preact';
+import { VNode } from 'react';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
 
 export interface BaseRadioIProps {

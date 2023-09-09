@@ -1,4 +1,4 @@
-import { Component } from 'preact';
+import { Component } from 'react';
 
 type LocationProps = {
     config: any;

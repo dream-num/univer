@@ -1,5 +1,4 @@
-import { Component, createRef, Ref } from 'preact';
-import { forwardRef } from 'preact/compat';
+import { Component, createRef, Ref, forwardRef } from 'react';
 import { BaseLayoutProps } from '../../Interfaces';
 import { getFirstChildren } from '../../Utils';
 import styles from './index.module.less';
@@ -39,9 +38,9 @@ export class Layout extends Component<BaseLayoutProps, IState> {
         }
     }
 
-    render(props: BaseLayoutProps, state: IState) {
-        const { children, style, className = '' } = props;
-        const { isAside } = state;
+    render() {
+        const { children, style, className = '' } = this.props;
+        const { isAside } = this.state;
         return (
             <section
                 style={style}

@@ -1,4 +1,4 @@
-import { useRef } from 'preact/hooks';
+import { useRef } from 'react';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseCheckboxGroupProps, CheckboxGroupComponent } from '../../Interfaces';
 import { Checkbox } from './Checkbox';
@@ -50,7 +50,7 @@ export const CheckboxGroup = (props: BaseCheckboxGroupProps) => {
     return (
         <div className={styles.checkboxGroup} ref={ref}>
             {options.map((item) => (
-                <Checkbox name={item.name} disabled={item.disabled} checked={item.checked} onChange={handelChange} value={item.value}>
+                <Checkbox key={item.name} name={item.name} disabled={item.disabled} checked={item.checked} onChange={handelChange} value={item.value}>
                     {item.label}
                 </Checkbox>
             ))}

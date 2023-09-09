@@ -1,5 +1,5 @@
 import { Button } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 
 interface IProps {
     label: string;
@@ -17,8 +17,8 @@ export class RightMenuButton extends Component<IProps> {
         return (
             <div>
                 {label}
-                {children.map((item: IPropsChildren) => (
-                    <Button type="primary">{item.label}</Button>
+                {children.map((item: IPropsChildren, index) => (
+                    <Button key={index} type="primary">{item.label}</Button>
                 ))}
             </div>
         );

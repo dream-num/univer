@@ -1,5 +1,5 @@
 import { BaseComponentProps, CellRange, CustomLabel } from '@univerjs/base-ui';
-import { Component } from 'preact';
+import { Component } from 'react';
 import { FormulaParamType, FunParams } from '../../../Basics';
 import styles from './index.module.less';
 
@@ -64,7 +64,7 @@ export class SearchItem extends Component<IProps, IState> {
             <div className={styles.functionParamModal}>
                 <div className={styles.functionParamList}>
                     {funParams.funParams?.p?.map((item, index) => (
-                        <div>
+                        <div key={index}>
                             <span>{item.name}:</span>
                             <div onClick={() => this.handleClick(index)}>
                                 <CellRange

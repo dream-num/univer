@@ -3,7 +3,7 @@ import { CANVAS_VIEW_KEY, CanvasView, CellEditorController, ISelectionManager, S
 import { $$, CellEditExtensionManager, getRefElement, handleDomToJson, handleStringToStyle, isCtrlPressed, KeyboardManager, setLastCaretPosition } from '@univerjs/base-ui';
 import { Direction, handleStyleToString, ICellData, isKeyPrintable, ObserverManager, Tools, UIObserver } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
-import { RefObject } from 'preact';
+import { RefObject } from 'react';
 
 import { RichText } from '../View/RichText';
 

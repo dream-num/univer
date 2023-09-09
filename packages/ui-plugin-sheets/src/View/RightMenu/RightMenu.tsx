@@ -1,6 +1,6 @@
 import { IMouseEvent } from '@univerjs/base-render';
 import { BaseRightMenuProps, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
 

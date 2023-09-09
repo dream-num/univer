@@ -1,5 +1,5 @@
-import { ComponentChildren, Ref } from 'preact';
-import { forwardRef } from 'preact/compat';
+import { ComponentChildren, Ref } from 'react';
+import { forwardRef } from 'react';
 
 type IProps = {
     children?: ComponentChildren;

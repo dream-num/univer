@@ -3,7 +3,7 @@ import { Icon } from '../AddIcon';
 
 export const LogoIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="logo" style={props.style}>
-        <svg class="icon" viewBox="0 0 4864 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8477" fill="currentColor">
+        <svg className="icon" viewBox="0 0 4864 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8477" fill="currentColor">
             <path
                 d="M1023.168 131.36c0 234.4-190.016 424.416-424.416 424.416 0-234.4 190.016-424.416 424.416-424.416zM131.36 1023.168c0-234.4 190.016-424.416 424.416-424.416 0 234.4-190.016 424.416-424.416 424.416zM929.696 929.696c-182.784 0-330.944-148.16-330.944-330.944 182.752 0 330.944 148.16 330.944 330.944z"
                 fill="#2D7FF9"

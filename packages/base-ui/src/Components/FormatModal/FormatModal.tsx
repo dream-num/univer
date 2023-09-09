@@ -1,5 +1,5 @@
 // import { Nullable, Observer, Workbook } from '@univerjs/core';
-// import { Component } from 'preact';
+// import { Component } from 'react';
 // import { BaseFormatModalProps } from '../../Interfaces';
 // import { Modal, Ul } from '../index';
 // import styles from './index.module.less';
@@ -126,7 +126,7 @@
 //         }
 //     };
 
-//     componentWillMount() {
+//     UNSAFE_componentWillMount() {
 //         this.setLocale();
 
 //         this._localeObserver = this._context

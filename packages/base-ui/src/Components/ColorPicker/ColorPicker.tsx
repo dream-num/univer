@@ -1,4 +1,4 @@
-import { Component, JSX, createRef } from 'preact';
+import { Component, JSX, createRef } from 'react';
 import { BaseColorPickerProps, ColorPickerComponent, JSXComponent } from '../..';
 import { ICustomComponentProps } from '../../services/menu/menu';
 import { Button, Tooltip } from '../index';
@@ -152,10 +152,10 @@ class ColorPicker extends Component<BaseColorPickerProps & ICustomComponentProps
                 >
                     <div className={styles.picker}>
                         <div className={styles.pickerSwatches}>
-                            {this.state.presetColors.map((presetColor) => (
-                                <div className={styles.pickerSwatchesItem}>
+                            {this.state.presetColors.map((presetColor, index) => (
+                                <div key={index} className={styles.pickerSwatchesItem}>
                                     {presetColor.map((item) => (
-                                        <span className={styles.pickerSwatch} style={{ background: item }}>
+                                        <span key={item} className={styles.pickerSwatch} style={{ background: item }}>
                                             <Tooltip title={item} placement="top">
                                                 <button
                                                     key={item}

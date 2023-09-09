@@ -1,4 +1,4 @@
-import { ComponentChildren } from 'preact';
+import { ComponentChildren } from 'react';
 import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
 
 export interface BaseResizeDialogProps extends BaseComponentProps {

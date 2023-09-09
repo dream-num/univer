@@ -36,14 +36,14 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve> {
         sheetContainerUIController.UIDidMount(() => {
             this.initializeDependencies(_injector);
             this.registerExtension();
+            this._numfmtController = this._injector.get(NumfmtController);
+            this._numfmtModalController = this._injector.get(NumfmtModalController);
         });
     }
 
     override onMounted(): void {
         install(this);
         this._localeService.getLocale().load({ en, zh });
-        this._numfmtController = this._injector.get(NumfmtController);
-        this._numfmtModalController = this._injector.get(NumfmtModalController);
         // const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
         // actionRegister.add(this._numfmtActionExtensionFactory);
     }

@@ -1,5 +1,5 @@
 import { isElement } from '@univerjs/base-ui';
-import { render } from 'preact';
+import { createRoot } from 'react-dom/client';
 import { App, BaseUIProps } from './App';
 
 interface BaseSlideUIConfig extends BaseUIProps {
@@ -34,7 +34,8 @@ export class UI {
             renderContainer.id = 'univer';
         }
 
-        render(<App {...props} />, renderContainer);
+        const root = createRoot(renderContainer);
+        root.render(<App {...props} />);
     }
 }
 

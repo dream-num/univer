@@ -1,4 +1,4 @@
-import { Component, createRef } from 'preact';
+import { Component, createRef } from 'react';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseColorPickerCircleButtonProps, ColorPickerCircleButtonComponent } from '../../Interfaces';
 import { NextIcon } from '../Icon';
@@ -23,8 +23,8 @@ export class ColorPickerCircleButton extends Component<BaseColorPickerCircleButt
         this.colorRef.current.showSelect(this.ref.current);
     };
 
-    render(props: BaseColorPickerCircleButtonProps) {
-        const { color, onClick, onCancel, style, colorPickerStyle } = props;
+    render() {
+        const { color, onClick, onCancel, style, colorPickerStyle } = this.props;
 
         return (
             <div style={style} className={Styles.colorPickerCircleButton} ref={this.ref} onClick={this.handleColorSelectButtonClick}>

@@ -1,5 +1,4 @@
-import { JSX, toChildArray } from 'preact';
-import { PureComponent } from 'preact/compat';
+import { JSX, toChildArray, PureComponent } from 'react';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseTabProps, BaseTabPaneProps, TabComponent, TabPaneComponent } from '../../Interfaces';
 import { randomId, joinClassNames } from '../../Utils';
@@ -51,7 +50,7 @@ export class Tab extends PureComponent<BaseTabProps> {
         );
     };
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.setValue({ active: this.props.activeKey, children: this.props.children });
     }
 
@@ -63,13 +62,13 @@ export class Tab extends PureComponent<BaseTabProps> {
             const id = `${randomId('tab')}-${keys}`;
             if (active === keys) {
                 return (
-                    <div id={id} onClick={this.handleClick} className={joinClassNames(styles.tabsTab, styles.tabsTabActive)}>
+                    <div key={id} id={id} onClick={this.handleClick} className={joinClassNames(styles.tabsTab, styles.tabsTabActive)}>
                         {tab}
                     </div>
                 );
             }
             return (
-                <div id={id} onClick={this.handleClick} className={styles.tabsTab}>
+                <div key={id} id={id} onClick={this.handleClick} className={styles.tabsTab}>
                     {tab}
                 </div>
             );
@@ -86,8 +85,8 @@ export class Tab extends PureComponent<BaseTabProps> {
         this.props.onTabClick?.(value, e);
     };
 
-    render(props: BaseTabProps, state: BaseTabState) {
-        const { children, type = 'line', className = '' } = props;
+    render() {
+        const { children, type = 'line', className = '' } = this.props;
         const classes = joinClassNames(
             styles.tabs,
             {
@@ -106,8 +105,8 @@ export class Tab extends PureComponent<BaseTabProps> {
                     </div>
                 </div>
                 <div className={styles.tabsContent}>
-                    {children.map((item: JSX.Element) => (
-                        <TabPane keys={item.props.keys} active={item.props.keys === this.state.active}>
+                    {children.map((item: JSX.Element, index: number) => (
+                        <TabPane key={index} keys={item.props.keys} active={item.props.keys === this.state.active}>
                             {item.props.children}
                         </TabPane>
                     ))}

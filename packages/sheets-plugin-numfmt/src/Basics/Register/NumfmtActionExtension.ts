@@ -1,89 +1,88 @@
-import {
-    BaseActionExtension,
-    ObjectMatrix,
-    ISheetActionData,
-    ACTION_NAMES,
-    ActionOperation,
-    IActionData,
-    BaseActionExtensionFactory,
-    CommandManager,
-    ISetRangeDataActionData,
-    ICurrentUniverService,
-} from '@univerjs/core';
-import { numfmt } from '@univerjs/base-numfmt-engine';
-import { Inject, Injector } from '@wendellhu/redi';
-import { NumfmtPlugin } from '../../NumfmtPlugin';
-import { INumfmtPluginData } from '../../Symbol';
-import { NumfmtModel } from '../../Model';
-import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
+// import { numfmt } from '@univerjs/base-numfmt-engine';
+// import {
+//     ACTION_NAMES,
+//     ActionOperation,
+//     BaseActionExtension,
+//     BaseActionExtensionFactory,
+//     IActionData,
+//     ICurrentUniverService,
+//     ISetRangeDataActionData,
+//     ISheetActionData,
+//     ObjectMatrix,
+// } from '@univerjs/core';
+// import { Inject, Injector } from '@wendellhu/redi';
 
-export class NumfmtActionExtension extends BaseActionExtension {
-    constructor(
-        actionDataList: IActionData[],
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
-        @Inject(Injector) private readonly _sheetInjector: Injector,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager
-    ) {
-        super(actionDataList);
-    }
+// import { NumfmtModel } from '../../Model';
+// import { NumfmtPlugin } from '../../NumfmtPlugin';
+// import { INumfmtPluginData } from '../../Symbol';
+// import { ACTION_NAMES as PLUGIN_ACTION_NAMES } from '../Enum';
 
-    override execute() {
-        const numfmtMatrix = new ObjectMatrix<string>();
-        const actionDataList = this.actionDataList as ISetRangeDataActionData[];
+// export class NumfmtActionExtension extends BaseActionExtension {
+//     constructor(
+//         actionDataList: IActionData[],
+//         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+//         @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
+//         @Inject(Injector) private readonly _sheetInjector: Injector
+//     ) {
+//         super(actionDataList);
+//     }
 
-        actionDataList.forEach((actionData) => {
-            if (actionData.operation != null && !ActionOperation.hasExtension(actionData)) {
-                return false;
-            }
+//     override execute() {
+//         const numfmtMatrix = new ObjectMatrix<string>();
+//         const actionDataList = this.actionDataList as ISetRangeDataActionData[];
 
-            if (actionData.actionName !== ACTION_NAMES.SET_RANGE_DATA_ACTION) {
-                return false;
-            }
+//         actionDataList.forEach((actionData) => {
+//             if (actionData.operation != null && !ActionOperation.hasExtension(actionData)) {
+//                 return false;
+//             }
 
-            const { cellValue, sheetId } = actionData;
-            const numfmtConfig = this._numfmtPluginData.getNumfmtBySheetIdConfig(sheetId);
-            const currSheetNumfmtMatrix = new ObjectMatrix(numfmtConfig);
-            const rangeMatrix = new ObjectMatrix(cellValue);
+//             if (actionData.actionName !== ACTION_NAMES.SET_RANGE_DATA_ACTION) {
+//                 return false;
+//             }
 
-            rangeMatrix.forValue((r, c, cell) => {
-                const typed = numfmt.parseValue(cell.v) as unknown as { z: string; v: string };
+//             const { cellValue, sheetId } = actionData;
+//             const numfmtConfig = this._numfmtPluginData.getNumfmtBySheetIdConfig(sheetId);
+//             const currSheetNumfmtMatrix = new ObjectMatrix(numfmtConfig);
+//             const rangeMatrix = new ObjectMatrix(cellValue);
 
-                if (typed) {
-                    // format already set，get format, e.g. 100% => =sum(2), we will set 200%
-                    const currNumfmtValue = currSheetNumfmtMatrix.getValue(r, c);
-                    // if (currNumfmtValue) {
-                    //     typed.z = ;
-                    // }
+//             rangeMatrix.forValue((r, c, cell) => {
+//                 const typed = numfmt.parseValue(cell.v) as unknown as { z: string; v: string };
 
-                    const format = numfmt(typed.z);
-                    cell.m = format(typed.v);
-                    cell.v = typed.v || String();
-                    numfmtMatrix.setValue(r, c, typed.z);
-                }
-            });
+//                 if (typed) {
+//                     // format already set，get format, e.g. 100% => =sum(2), we will set 200%
+//                     const currNumfmtValue = currSheetNumfmtMatrix.getValue(r, c);
+//                     // if (currNumfmtValue) {
+//                     //     typed.z = ;
+//                     // }
 
-            const setNumfmtRangeDataAction = {
-                actionName: PLUGIN_ACTION_NAMES.SET_NUMFMT_RANGE_DATA_ACTION,
-                sheetId,
-                cellValue: numfmtMatrix.toJSON(),
-                injector: this._sheetInjector,
-            };
-            this.push(setNumfmtRangeDataAction);
-        });
-    }
-}
+//                     const format = numfmt(typed.z);
+//                     cell.m = format(typed.v);
+//                     cell.v = typed.v || String();
+//                     numfmtMatrix.setValue(r, c, typed.z);
+//                 }
+//             });
 
-export class NumfmtActionExtensionFactory extends BaseActionExtensionFactory {
-    constructor(_plugin: NumfmtPlugin, @Inject(Injector) private readonly _sheetInjector: Injector) {
-        super(_plugin);
-    }
+//             const setNumfmtRangeDataAction = {
+//                 actionName: PLUGIN_ACTION_NAMES.SET_NUMFMT_RANGE_DATA_ACTION,
+//                 sheetId,
+//                 cellValue: numfmtMatrix.toJSON(),
+//                 injector: this._sheetInjector,
+//             };
+//             this.push(setNumfmtRangeDataAction);
+//         });
+//     }
+// }
 
-    override get zIndex(): number {
-        return 2;
-    }
+// export class NumfmtActionExtensionFactory extends BaseActionExtensionFactory {
+//     constructor(_plugin: NumfmtPlugin, @Inject(Injector) private readonly _sheetInjector: Injector) {
+//         super(_plugin);
+//     }
 
-    override create(actionDataList: ISheetActionData[]): BaseActionExtension {
-        return this._sheetInjector.createInstance(NumfmtActionExtension, actionDataList);
-    }
-}
+//     override get zIndex(): number {
+//         return 2;
+//     }
+
+//     override create(actionDataList: ISheetActionData[]): BaseActionExtension {
+//         return this._sheetInjector.createInstance(NumfmtActionExtension, actionDataList);
+//     }
+// }

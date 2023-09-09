@@ -1,16 +1,16 @@
 import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
-import { RegisterManager } from '@univerjs/base-ui';
-import { en, zh } from './Locale';
-import { OPERATION_PLUGIN } from './Const';
-import { Copy, Paste, UniverCopy, UniverPaste } from './Domain';
-import { PasteExtensionFactory } from './Basics/Register/PasteExtension';
-import { PasteOfficeExtensionFactory } from './Basics/Register/PasteOfficeExtension';
+
 import { DEFAULT_OPERATION_PLUGIN_DATA } from './Basics/Const/DEFAULT_OPERATION_PLUGIN_DATA';
 import { IOperationPluginConfig } from './Basics/Interfaces/IOperationPluginConfig';
 import { CopyExtensionFactory } from './Basics/Register/CopyExtension';
 import { CopyImageExtensionFactory } from './Basics/Register/CopyImageExtension';
+import { PasteExtensionFactory } from './Basics/Register/PasteExtension';
 import { PasteImageExtensionFactory } from './Basics/Register/PasteImageExtension';
+import { PasteOfficeExtensionFactory } from './Basics/Register/PasteOfficeExtension';
+import { OPERATION_PLUGIN } from './Const';
+import { Copy, Paste, UniverCopy, UniverPaste } from './Domain';
+import { en, zh } from './Locale';
 
 interface CopyResolver {
     name: string;
@@ -48,8 +48,7 @@ export class OperationPlugin extends Plugin {
     constructor(
         config: Partial<IOperationPluginConfig>,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(Injector) override readonly _injector: Injector,
-        @Inject(RegisterManager) private readonly _registerManager: RegisterManager
+        @Inject(Injector) override readonly _injector: Injector
     ) {
         super(OPERATION_PLUGIN);
         this._config = Object.assign(DEFAULT_OPERATION_PLUGIN_DATA, config);
@@ -72,23 +71,19 @@ export class OperationPlugin extends Plugin {
     }
 
     registerExtension() {
-        const pasteRegister = this._registerManager.getPasteExtensionManager().getRegister();
-
-        this._pasteExtensionFactory = new PasteExtensionFactory(this);
-        pasteRegister.add(this._pasteExtensionFactory);
-
-        this._pasteOfficeExtensionFactory = new PasteOfficeExtensionFactory(this);
-        pasteRegister.add(this._pasteOfficeExtensionFactory);
-        this._pasteImageExtensionFactory = new PasteImageExtensionFactory(this);
-        pasteRegister.add(this._pasteImageExtensionFactory);
-
-        const copyRegister = this._registerManager.getCopyExtensionManager().getRegister();
-
-        this._copyExtensionFactory = new CopyExtensionFactory(this);
-        copyRegister.add(this._copyExtensionFactory);
-
-        this._copyImageExtensionFactory = new CopyImageExtensionFactory(this);
-        copyRegister.add(this._copyImageExtensionFactory);
+        // TODO copy paste service?
+        // const pasteRegister = this._registerManager.getPasteExtensionManager().getRegister();
+        // this._pasteExtensionFactory = new PasteExtensionFactory(this);
+        // pasteRegister.add(this._pasteExtensionFactory);
+        // this._pasteOfficeExtensionFactory = new PasteOfficeExtensionFactory(this);
+        // pasteRegister.add(this._pasteOfficeExtensionFactory);
+        // this._pasteImageExtensionFactory = new PasteImageExtensionFactory(this);
+        // pasteRegister.add(this._pasteImageExtensionFactory);
+        // const copyRegister = this._registerManager.getCopyExtensionManager().getRegister();
+        // this._copyExtensionFactory = new CopyExtensionFactory(this);
+        // copyRegister.add(this._copyExtensionFactory);
+        // this._copyImageExtensionFactory = new CopyImageExtensionFactory(this);
+        // copyRegister.add(this._copyImageExtensionFactory);
     }
 
     // installTo(universheetInstance: UniverSheet) {
@@ -96,15 +91,14 @@ export class OperationPlugin extends Plugin {
     // }
 
     override onDestroy(): void {
-        const pasteRegister = this._registerManager.getPasteExtensionManager().getRegister();
-        pasteRegister.delete(this._pasteExtensionFactory);
-        pasteRegister.delete(this._pasteOfficeExtensionFactory);
-        pasteRegister.delete(this._pasteImageExtensionFactory);
-
-        const copyRegister = this._registerManager.getCopyExtensionManager().getRegister();
-
-        copyRegister.delete(this._copyExtensionFactory);
-        copyRegister.delete(this._copyImageExtensionFactory);
+        // TODO copy paste service?
+        // const pasteRegister = this._registerManager.getPasteExtensionManager().getRegister();
+        // pasteRegister.delete(this._pasteExtensionFactory);
+        // pasteRegister.delete(this._pasteOfficeExtensionFactory);
+        // pasteRegister.delete(this._pasteImageExtensionFactory);
+        // const copyRegister = this._registerManager.getCopyExtensionManager().getRegister();
+        // copyRegister.delete(this._copyExtensionFactory);
+        // copyRegister.delete(this._copyImageExtensionFactory);
     }
 
     override onMounted(): void {

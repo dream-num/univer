@@ -35,11 +35,11 @@ univer.registerPlugin(SheetUIPlugin, {
     },
 });
 
-// univer.registerPlugin(NumfmtPlugin);
-// univer.registerPlugin(FindPlugin);
-// univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
-// univer.registerPlugin(ImportXlsxPlugin);
-// univer.registerPlugin(ImagePlugin);
+univer.registerPlugin(NumfmtPlugin);
+univer.registerPlugin(FindPlugin);
+univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
+univer.registerPlugin(ImportXlsxPlugin);
+univer.registerPlugin(ImagePlugin);
 // univer.registerPlugin(OperationPlugin);
 
 // use for console test

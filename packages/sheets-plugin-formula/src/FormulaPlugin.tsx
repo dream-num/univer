@@ -1,5 +1,5 @@
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
-import { Plugin, CommandManager, PluginType, LocaleService } from '@univerjs/core';
+import { Plugin, PluginType, LocaleService } from '@univerjs/core';
 import { FormulaEngineService } from '@univerjs/base-formula-engine';
 import { CellEditExtensionManager, CellInputExtensionManager, ComponentManager, Icon } from '@univerjs/base-ui';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
@@ -30,7 +30,6 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
     constructor(
         private _config: IFormulaConfig,
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super(FORMULA_PLUGIN_NAME);
@@ -104,8 +103,8 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
     }
 
     override onDestroy(): void {
-        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
-        actionRegister.delete(this._formulaActionExtensionFactory);
+        // const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
+        // actionRegister.delete(this._formulaActionExtensionFactory);
     }
 
     registerExtension() {
@@ -119,9 +118,9 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
         this._injector.add([FormulaCellInputExtensionFactory, { useValue: formulaCellInputExtensionFactory }]);
         cellInputRegister.add(formulaCellInputExtensionFactory);
 
-        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
-        this._formulaActionExtensionFactory = new FormulaActionExtensionFactory(this._injector);
-        actionRegister.add(this._formulaActionExtensionFactory);
+        // const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
+        // this._formulaActionExtensionFactory = new FormulaActionExtensionFactory(this._injector);
+        // actionRegister.add(this._formulaActionExtensionFactory);
     }
 
     getFormulaEngine() {

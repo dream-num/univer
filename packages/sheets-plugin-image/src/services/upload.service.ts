@@ -1,15 +1,13 @@
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { Command, CommandManager, ICurrentUniverService, Tools } from '@univerjs/core';
+import { ICurrentUniverService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { FileSelected, OverGridImageBorderType } from '../Basics';
-import { AddOverGridImageAction, IAddOverGridImageActionData } from '../Model';
+import { FileSelected } from '../Basics';
 
 export class UploadService {
     constructor(
         @Inject(Injector) readonly _injector: Injector,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(CommandManager) private _commandManager: CommandManager,
         @ISelectionManager private readonly _selectionManager: SelectionManager
     ) {}
 
@@ -27,23 +25,23 @@ export class UploadService {
             };
             img.onload = () => {
                 // FIXME use command system
-                const action: IAddOverGridImageActionData = {
-                    actionName: AddOverGridImageAction.NAME,
-                    id: Tools.generateRandomId(),
-                    borderType: OverGridImageBorderType.SOLID,
-                    row: rowIndex || 1,
-                    column: columnIndex || 1,
-                    url: img.src,
-                    radius: 0,
-                    width: img.width,
-                    height: img.height,
-                    borderColor: '#000000',
-                    borderWidth: 1,
-                    sheetId: workbook.getActiveSheet().getSheetId(),
-                    injector: _injector,
-                };
-                const command = new Command({ WorkBookUnit: workbook }, action);
-                this._commandManager.invoke(command);
+                // const action: IAddOverGridImageActionData = {
+                //     actionName: AddOverGridImageAction.NAME,
+                //     id: Tools.generateRandomId(),
+                //     borderType: OverGridImageBorderType.SOLID,
+                //     row: rowIndex || 1,
+                //     column: columnIndex || 1,
+                //     url: img.src,
+                //     radius: 0,
+                //     width: img.width,
+                //     height: img.height,
+                //     borderColor: '#000000',
+                //     borderWidth: 1,
+                //     sheetId: workbook.getActiveSheet().getSheetId(),
+                //     injector: _injector,
+                // };
+                // const command = new Command({ WorkBookUnit: workbook }, action);
+                // this._commandManager.invoke(command);
             };
         });
     }

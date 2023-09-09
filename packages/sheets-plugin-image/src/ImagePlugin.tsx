@@ -1,12 +1,13 @@
-import { Plugin, PluginType, CommandManager, LocaleService } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { uninstall } from '@univerjs/base-sheets';
+import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
-import { OverImageRender } from './View/Render';
-import { IImagePluginData } from './Symbol';
-import { OVER_GRID_IMAGE_PLUGIN_NAME, IOverGridImagePluginConfig, IOverGridImageProperty, install } from './Basics';
-import { OverGridImageController, CellImageController } from './Controller';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
+
+import { install, IOverGridImagePluginConfig, IOverGridImageProperty, OVER_GRID_IMAGE_PLUGIN_NAME } from './Basics';
+import { CellImageController, OverGridImageController } from './Controller';
 import { UploadService } from './services/upload.service';
+import { IImagePluginData } from './Symbol';
+import { OverImageRender } from './View/Render';
 
 /**
  * TODO: 考虑加入单元格图片的情况，
@@ -28,8 +29,7 @@ export class ImagePlugin extends Plugin {
     constructor(
         private _config: IOverGridImagePluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super(OVER_GRID_IMAGE_PLUGIN_NAME);
         this._imagePluginData = new Map<string, IOverGridImageProperty>();
@@ -49,7 +49,7 @@ export class ImagePlugin extends Plugin {
     }
 
     private _initializeDependencies(sheetInjector: Injector) {
-        const dependencies: Dependency[] = [[OverGridImageController], [CellImageController], [OverImageRender],[UploadService]];
+        const dependencies: Dependency[] = [[OverGridImageController], [CellImageController], [OverImageRender], [UploadService]];
         dependencies.forEach((d) => {
             sheetInjector.add(d);
         });

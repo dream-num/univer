@@ -1,7 +1,8 @@
-import { IInterpreterDatasetConfig, SheetDataType, UnitDataType, SheetNameMapType, ArrayFormulaDataType, FormulaEngineService } from '@univerjs/base-formula-engine';
+import { ArrayFormulaDataType, FormulaEngineService, IInterpreterDatasetConfig, SheetDataType, SheetNameMapType, UnitDataType } from '@univerjs/base-formula-engine';
 import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { CommandManager, ICurrentUniverService } from '@univerjs/core';
+import { ICurrentUniverService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
+
 import { IFormulaConfig } from '../Basics/Interfaces/IFormula';
 import { FormulaDataModel } from '../Model/FormulaDataModel';
 import { ArrayFormulaLineControl } from './ArrayFormulaLineController';
@@ -21,7 +22,6 @@ export class FormulaController {
         config: IFormulaConfig,
         @ISelectionManager private readonly _selectionManager: SelectionManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(Injector) private readonly _sheetInjector: Injector
     ) {
         this._formulaDataModel = new FormulaDataModel(config);
@@ -93,10 +93,6 @@ export class FormulaController {
         }
 
         return this._interpreterCalculatePropsCache;
-    }
-
-    getCommandManager() {
-        return this._commandManager;
     }
 
     getWorkbook() {

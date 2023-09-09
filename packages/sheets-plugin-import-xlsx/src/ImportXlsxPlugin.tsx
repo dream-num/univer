@@ -1,4 +1,3 @@
-import { RegisterManager } from '@univerjs/base-ui';
 import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -17,12 +16,7 @@ export class ImportXlsxPlugin extends Plugin<any> {
 
     private _dragAndDropExtensionFactory: DragAndDropExtensionFactory;
 
-    constructor(
-        config: IImportXlsxPluginConfig,
-        @Inject(Injector) override readonly _injector: Injector,
-        @Inject(RegisterManager) private readonly _registerManager: RegisterManager,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
-    ) {
+    constructor(config: IImportXlsxPluginConfig, @Inject(Injector) override readonly _injector: Injector, @Inject(LocaleService) private readonly _localeService: LocaleService) {
         super(IMPORT_XLSX_PLUGIN_NAME);
     }
 
@@ -44,10 +38,9 @@ export class ImportXlsxPlugin extends Plugin<any> {
     }
 
     registerExtension() {
-        const dragAndDropRegister = this._registerManager.getDragAndDropExtensionManager().getRegister();
-
-        this._dragAndDropExtensionFactory = new DragAndDropExtensionFactory(this._injector);
-        dragAndDropRegister.add(this._dragAndDropExtensionFactory);
+        // const dragAndDropRegister = this._registerManager.getDragAndDropExtensionManager().getRegister();
+        // this._dragAndDropExtensionFactory = new DragAndDropExtensionFactory(this._injector);
+        // dragAndDropRegister.add(this._dragAndDropExtensionFactory);
     }
 
     override onMounted(): void {
@@ -55,8 +48,8 @@ export class ImportXlsxPlugin extends Plugin<any> {
     }
 
     override onDestroy(): void {
-        const dragAndDropRegister = this._registerManager.getDragAndDropExtensionManager().getRegister();
-        dragAndDropRegister.delete(this._dragAndDropExtensionFactory);
+        // const dragAndDropRegister = this._registerManager.getDragAndDropExtensionManager().getRegister();
+        // dragAndDropRegister.delete(this._dragAndDropExtensionFactory);
     }
 
     getImportXlsxController() {

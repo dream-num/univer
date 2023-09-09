@@ -1,4 +1,4 @@
-import { CommandManager, IRangeData, LocaleService, ObjectMatrixPrimitiveType, Plugin, PluginType } from '@univerjs/core';
+import { IRangeData, LocaleService, ObjectMatrixPrimitiveType, Plugin, PluginType } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
@@ -25,8 +25,7 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve> {
     constructor(
         config: Partial<INumfmtPluginConfig>,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(Injector) override readonly _injector: Injector,
-        @Inject(CommandManager) private readonly _commandManager: CommandManager
+        @Inject(Injector) override readonly _injector: Injector
     ) {
         super(NUMFMT_PLUGIN_NAME);
 
@@ -45,20 +44,20 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve> {
         this._localeService.getLocale().load({ en, zh });
         this._numfmtController = this._injector.get(NumfmtController);
         this._numfmtModalController = this._injector.get(NumfmtModalController);
-        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
-        actionRegister.add(this._numfmtActionExtensionFactory);
+        // const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
+        // actionRegister.add(this._numfmtActionExtensionFactory);
     }
 
     override onDestroy(): void {
         super.onDestroy();
-        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
-        actionRegister.delete(this._numfmtActionExtensionFactory);
+        // const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
+        // actionRegister.delete(this._numfmtActionExtensionFactory);
     }
 
     registerExtension(): void {
-        const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
-        this._numfmtActionExtensionFactory = new NumfmtActionExtensionFactory(this, this._injector);
-        actionRegister.add(this._numfmtActionExtensionFactory);
+        // const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
+        // this._numfmtActionExtensionFactory = new NumfmtActionExtensionFactory(this, this._injector);
+        // actionRegister.add(this._numfmtActionExtensionFactory);
     }
 
     getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {

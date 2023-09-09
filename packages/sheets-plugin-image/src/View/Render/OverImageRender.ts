@@ -1,9 +1,9 @@
-import { Scene, IRenderingEngine } from '@univerjs/base-render';
-import { CommandManager, ObserverManager } from '@univerjs/core';
+import { IRenderingEngine, Scene } from '@univerjs/base-render';
+import { ObserverManager } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
-import { OverImageShape } from './OverImageShape';
+
 import { IOverGridImageProperty } from '../../Basics';
-import { AddOverGridImageAction, IAddOverGridImageActionData, IRemoveOverGridImageActionData, RemoveOverGridImageAction } from '../../Model';
+import { OverImageShape } from './OverImageShape';
 
 export class OverImageRender {
     static LAYER_Z_INDEX: number = 1000;
@@ -16,20 +16,22 @@ export class OverImageRender {
         if (this._mainScene == null) {
             throw new Error('main scene is null !!');
         }
-        CommandManager.getActionObservers().add((event) => {
-            switch (event.data.actionName) {
-                case AddOverGridImageAction.NAME: {
-                    const data = event.data as IAddOverGridImageActionData;
-                    this.addOverImage(data);
-                    break;
-                }
-                case RemoveOverGridImageAction.NAME: {
-                    const data = event.data as IRemoveOverGridImageActionData;
-                    this.removeOverImage(data.id);
-                    break;
-                }
-            }
-        });
+
+        // TODO new command listener
+        // CommandManager.getActionObservers().add((event) => {
+        //     switch (event.data.actionName) {
+        //         case AddOverGridImageAction.NAME: {
+        //             const data = event.data as IAddOverGridImageActionData;
+        //             this.addOverImage(data);
+        //             break;
+        //         }
+        //         case RemoveOverGridImageAction.NAME: {
+        //             const data = event.data as IRemoveOverGridImageActionData;
+        //             this.removeOverImage(data.id);
+        //             break;
+        //         }
+        //     }
+        // });
     }
 
     addOverImage(property: IOverGridImageProperty): void {

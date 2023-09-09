@@ -1,16 +1,5 @@
 import { BaseComponentRender, ComponentManager, IMenuService } from '@univerjs/base-ui';
-import {
-    ACTION_NAMES as CORE_ACTION_NAME,
-    Command,
-    CommandManager,
-    Disposable,
-    ICommandService,
-    ICurrentUniverService,
-    IRangeData,
-    ObjectMatrix,
-    ObjectMatrixPrimitiveType,
-    Range,
-} from '@univerjs/core';
+import { Disposable, ICommandService, ICurrentUniverService, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, Range } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { NUMFMT_PLUGIN_NAME } from '../Basics/Const';
@@ -93,7 +82,6 @@ export class NumfmtController extends Disposable {
     protected _render: BaseComponentRender;
 
     constructor(
-        @Inject(CommandManager) private readonly _commandManager: CommandManager,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
@@ -120,40 +108,46 @@ export class NumfmtController extends Disposable {
         Range.foreach(numfmtRange, (row, column) => {
             numfmtMatrix.setValue(row, column, numfmtValue);
         });
-        const commandManager = this._commandManager;
-        const config = {
-            actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
-            sheetId,
-            rangeData: numfmtRange,
-            cellValue: numfmtMatrix.toJSON(),
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
-            },
-            config
-        );
-        commandManager.invoke(command);
+
+        // TODO new command
+
+        // const commandManager = this._commandManager;
+        // const config = {
+        //     actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
+        //     sheetId,
+        //     rangeData: numfmtRange,
+        //     cellValue: numfmtMatrix.toJSON(),
+        // };
+        // const command = new Command(
+        //     {
+        //         WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
+        //     },
+        //     config
+        // );
+        // commandManager.invoke(command);
     }
 
     setNumfmtByCoords(sheetId: string, row: number, column: number, numfmt: string): void {
         const numfmtMatrix = new ObjectMatrix<string>();
         numfmtMatrix.setValue(row, column, numfmt);
         const numfmtRange: IRangeData = { startRow: row, startColumn: column, endRow: row, endColumn: column };
-        const commandManager = this._commandManager;
-        const config = {
-            actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
-            sheetId,
-            rangeData: numfmtRange,
-            cellValue: numfmtMatrix.toJSON(),
-        };
-        const command = new Command(
-            {
-                WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
-            },
-            config
-        );
-        commandManager.invoke(command);
+
+        // TODO new command
+
+        // const commandManager = this._commandManager;
+        // const config = {
+        //     actionName: CORE_ACTION_NAME.SET_RANGE_DATA_ACTION,
+        //     sheetId,
+        //     rangeData: numfmtRange,
+        //     cellValue: numfmtMatrix.toJSON(),
+        // };
+        // const command = new Command(
+        //     {
+        //         WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
+        //     },
+        //     config
+        // );
+        // commandManager.invoke(command);
     }
 
     private _initializeContextMenu() {

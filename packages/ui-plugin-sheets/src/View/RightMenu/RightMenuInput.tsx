@@ -13,7 +13,7 @@ export class RightMenuInput extends Component<IProps> {
     render() {
         const { prefix, suffix, value } = this.props;
         return (
-            <div onClick={(e) => this.handleClick(e)}>
+            <div>
                 <CustomLabel label={prefix} />
                 <Input type="number" placeholder="1" value={value} onClick={(e) => e.stopPropagation()} onChange={this.onChange.bind(this)}></Input>
                 <CustomLabel label={suffix} />
@@ -21,12 +21,13 @@ export class RightMenuInput extends Component<IProps> {
         );
     }
 
-    private handleClick(e: Event) {
-        e.stopPropagation();
-        this.props.onChange?.(this.value);
-    }
+    // private handleClick(e: Event) {
+    //     e.stopPropagation();
+    //     this.props.onChange?.(this.value);
+    // }
 
     private onChange(e: Event) {
-        this.value = (e.target as HTMLInputElement).value;
+        const value = (e.target as HTMLInputElement).value;
+        this.props.onChange(value);
     }
 }

@@ -2,6 +2,7 @@ import {
     BorderStyleTypes,
     BorderType,
     CommandType,
+    IBorderData,
     IBorderStyleData,
     ICommand,
     ICommandService,
@@ -15,9 +16,9 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
 import { BorderStyleManagerService } from '../../Services/border-style-manager.service';
 import { ISelectionManager } from '../../Services/tokens';
+import { ISetBorderStylesMutationParams, SetBorderStylesMutation, SetBorderStylesUndoMutationFactory } from '../Mutations/set-border-styles.mutatio';
 
 function forEach(rangeData: IRangeData, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = rangeData;
@@ -53,10 +54,10 @@ export const SetBorderPositionCommand: ICommand<ISetBorderPositionCommandParams>
             workbookId: workbook.getUnitId(),
             worksheetId: workbook.getActiveSheet().getSheetId(),
             range: selections[0],
-            top: value === BorderType.TOP || value === BorderType.ALL || value === BorderType.OUTSIDE || value === BorderType.HORIZONTAL,
-            left: value === BorderType.LEFT || value === BorderType.ALL || value === BorderType.OUTSIDE || value === BorderType.VERTICAL,
-            bottom: value === BorderType.BOTTOM || value === BorderType.ALL || value === BorderType.OUTSIDE || value === BorderType.HORIZONTAL,
-            right: value === BorderType.RIGHT || value === BorderType.ALL || value === BorderType.OUTSIDE || value === BorderType.VERTICAL,
+            top: value === BorderType.TOP || value === BorderType.ALL || value === BorderType.OUTSIDE,
+            left: value === BorderType.LEFT || value === BorderType.ALL || value === BorderType.OUTSIDE,
+            bottom: value === BorderType.BOTTOM || value === BorderType.ALL || value === BorderType.OUTSIDE,
+            right: value === BorderType.RIGHT || value === BorderType.ALL || value === BorderType.OUTSIDE,
             vertical: value === BorderType.VERTICAL || value === BorderType.ALL || value === BorderType.INSIDE,
             horizontal: value === BorderType.HORIZONTAL || value === BorderType.ALL || value === BorderType.INSIDE,
             style: borderInfo.style,
@@ -109,6 +110,13 @@ export interface ISetBorderCommandParams {
     style?: BorderStyleTypes;
 }
 
+function setStyleValue(matrix: ObjectMatrix<IStyleData>, row: number, column: number, defaultStyle: IBorderData) {
+    const style = matrix.getValue(row, column);
+    matrix.setValue(row, column, {
+        bd: style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle,
+    });
+}
+
 /**
  * The command to clear content in current selected ranges.
  */
@@ -119,8 +127,16 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
     handler: async (accessor: IAccessor, params: ISetBorderCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const currentUniverService = accessor.get(ICurrentUniverService);
         const { top, left, bottom, right, vertical, horizontal, color = 'black', style = BorderStyleTypes.DASH_DOT, workbookId, worksheetId, range } = params;
+
+        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        if (!workbook) return false;
+        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        if (!worksheet) return false;
+        const sheetMatrix = worksheet.getCellMatrix();
         const rangeData = range;
+        const styles = Tools.deepClone(workbook.getStyles());
 
         // Cells in the surrounding range may need to clear the border
         const topRangeOut = {
@@ -180,11 +196,7 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
             endColumn: rangeData.endColumn,
         };
 
-        const mtr = new ObjectMatrix<IStyleData>();
-        const mlr = new ObjectMatrix<IStyleData>();
-        const mbr = new ObjectMatrix<IStyleData>();
-        const mrr = new ObjectMatrix<IStyleData>();
-        const mcr = new ObjectMatrix<IStyleData>();
+        const mr = new ObjectMatrix<IStyleData>();
 
         const border: IBorderStyleData = {
             s: style,
@@ -193,189 +205,137 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
             },
         };
 
-        if (top === true || top === false) {
-            // Probably to the border, there are no surrounding cells
+        if (top) {
             // Clear the bottom border of the top range
             forEach(topRangeOut, (row, column) => {
-                mtr.setValue(row, column, { bd: { b: null } });
+                setStyleValue(mr, row, column, { b: null });
             });
 
-            // first row
             forEach(topRange, (row, column) => {
-                // update
-                if (top === true) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                        bd: { t: Tools.deepClone(border) },
-                    });
-                    mcr.setValue(row, column, style);
-                }
-                // delete
-                else if (top === false) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                        bd: { t: null },
-                    });
-                    mcr.setValue(row, column, style);
-                }
+                setStyleValue(mr, row, column, {
+                    t: Tools.deepClone(border),
+                });
             });
         }
-        if (bottom === true || bottom === false) {
-            // Probably to the border, there are no surrounding cells
+        if (bottom) {
             // Clear the top border of the lower range
             forEach(bottomRangeOut, (row, column) => {
-                mbr.setValue(row, column, { bd: { t: null } });
+                setStyleValue(mr, row, column, { t: null });
             });
 
-            // the last row
             forEach(bottomRange, (row, column) => {
-                // update
-                if (bottom === true) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                        bd: { b: Tools.deepClone(border) },
-                    });
-                    mcr.setValue(row, column, style);
-                }
-                // delete
-                else if (bottom === false) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                        bd: { b: null },
-                    });
-                    mcr.setValue(row, column, style);
-                }
+                setStyleValue(mr, row, column, {
+                    b: Tools.deepClone(border),
+                });
             });
         }
-        if (left === true || left === false) {
-            // Probably to the border, there are no surrounding cells
+        if (left) {
             //  Clear the right border of the left range
             forEach(leftRangeOut, (row, column) => {
-                mlr.setValue(row, column, { bd: { r: null } });
+                setStyleValue(mr, row, column, { r: null });
             });
 
-            // first column
             forEach(leftRange, (row, column) => {
-                // update
-                if (left === true) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                        bd: { l: Tools.deepClone(border) },
-                    });
-                    mcr.setValue(row, column, style);
-                }
-                // delete
-                else if (left === false) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                        bd: { l: null },
-                    });
-                    mcr.setValue(row, column, style);
-                }
+                setStyleValue(mr, row, column, {
+                    l: Tools.deepClone(border),
+                });
             });
         }
-        if (right === true || right === false) {
-            // Probably to the border, there are no surrounding cells
+        if (right) {
             //  Clear the left border of the right range
             forEach(rightRangeOut, (row, column) => {
-                mrr.setValue(row, column, { bd: { l: null } });
+                setStyleValue(mr, row, column, { l: null });
             });
 
-            // last column
             forEach(rightRange, (row, column) => {
-                // update
-                if (right === true) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                        bd: { r: Tools.deepClone(border) },
-                    });
-                    mcr.setValue(row, column, style);
-                }
-                // delete
-                else if (right === false) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                        bd: { r: null },
-                    });
-                    mcr.setValue(row, column, style);
-                }
+                setStyleValue(mr, row, column, {
+                    r: Tools.deepClone(border),
+                });
             });
         }
-
         // inner vertical border
-        if (vertical === true || vertical === false) {
-            // current range
+        if (vertical) {
             forEach(rangeData, (row, column) => {
-                // Set the right border except the last column
                 if (column !== rangeData.endColumn) {
-                    // update
-                    if (vertical === true) {
-                        const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                            bd: { r: Tools.deepClone(border) },
-                        });
-                        mcr.setValue(row, column, style);
-                    }
-                    // delete
-                    else if (vertical === false) {
-                        const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                            bd: { r: null },
-                        });
-                        mcr.setValue(row, column, style);
-                    }
-                }
-
-                // Except for the first column, clear the left border
-                if (column !== rangeData.startColumn) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                        bd: { l: null },
+                    setStyleValue(mr, row, column, {
+                        r: Tools.deepClone(border),
                     });
-                    mcr.setValue(row, column, style);
                 }
             });
         }
         // inner horizontal border
-        if (horizontal === true || horizontal === false) {
-            // current range
+        if (horizontal) {
             forEach(rangeData, (row, column) => {
-                // Except for the last row, set the bottom border
                 if (row !== rangeData.endRow) {
-                    // update
-                    if (horizontal === true) {
-                        const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                            bd: { b: Tools.deepClone(border) },
-                        });
-                        mcr.setValue(row, column, style);
-                    }
-                    // delete
-                    else if (horizontal === false) {
-                        const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                            bd: { b: null },
-                        });
-                        mcr.setValue(row, column, style);
-                    }
-                }
-
-                // Except for the first row, clear the top border
-                if (row !== rangeData.startRow) {
-                    const style = Tools.deepMerge(mcr.getValue(row, column) || {}, {
-                        bd: { t: null },
+                    setStyleValue(mr, row, column, {
+                        b: Tools.deepClone(border),
                     });
-                    mcr.setValue(row, column, style);
                 }
             });
         }
 
-        const clearMutationParams: ISetRangeValuesMutationParams = {
-            rangeData: range,
-            worksheetId,
+        if (!top && !bottom && !left && !right && !vertical && !horizontal) {
+            forEach(topRangeOut, (row, column) => {
+                setStyleValue(mr, row, column, { b: null });
+            });
+            forEach(topRange, (row, column) => {
+                setStyleValue(mr, row, column, { t: null });
+            });
+
+            forEach(bottomRangeOut, (row, column) => {
+                setStyleValue(mr, row, column, { t: null });
+            });
+            forEach(bottomRange, (row, column) => {
+                setStyleValue(mr, row, column, { b: null });
+            });
+
+            forEach(leftRangeOut, (row, column) => {
+                setStyleValue(mr, row, column, { r: null });
+            });
+            forEach(leftRange, (row, column) => {
+                setStyleValue(mr, row, column, { l: null });
+            });
+
+            forEach(rightRangeOut, (row, column) => {
+                setStyleValue(mr, row, column, { l: null });
+            });
+            forEach(rightRange, (row, column) => {
+                setStyleValue(mr, row, column, { r: null });
+            });
+
+            forEach(rangeData, (row, column) => {
+                if (column !== rangeData.endColumn) {
+                    setStyleValue(mr, row, column, { r: null });
+                }
+            });
+
+            forEach(rangeData, (row, column) => {
+                if (row !== rangeData.endRow) {
+                    setStyleValue(mr, row, column, { b: null });
+                }
+            });
+        }
+
+        const setBorderStylesMutationParams: ISetBorderStylesMutationParams = {
             workbookId,
+            worksheetId,
+            value: mr.getData(),
         };
-        const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, clearMutationParams);
+
+        const undoSetBorderStylesMutationParams: ISetBorderStylesMutationParams = SetBorderStylesUndoMutationFactory(accessor, setBorderStylesMutationParams);
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
+        const result = commandService.executeCommand(SetBorderStylesMutation.id, setBorderStylesMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 // 如果有多个 mutation 构成一个封装项目，那么要封装在同一个 undo redo element 里面
                 // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
                 URI: 'sheet', // TODO: this URI is fake
                 undo() {
-                    return commandService.executeCommand(SetRangeValuesMutation.id, undoClearMutationParams);
+                    return commandService.executeCommand(SetBorderStylesMutation.id, undoSetBorderStylesMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
+                    return commandService.executeCommand(SetBorderStylesMutation.id, setBorderStylesMutationParams);
                 },
             });
 

@@ -14,8 +14,8 @@ import {
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { NUMFMT_PLUGIN_NAME } from '../Basics/Const';
-import { SetNumfmtRangeDataCommand } from '../commands/set-numfmt-range-data.command';
-import { ShowModalCommand } from '../commands/show-modal.command';
+import { SetNumfmtRangeDataCommand } from '../commands/commands/set-numfmt-range-data.command';
+import { ShowModalOperation } from '../commands/operations/show-modal.operation';
 import { NumfmtModel } from '../Model';
 import { INumfmtPluginData } from '../Symbol';
 import { FormatItem } from '../View/UI/FormatItem';
@@ -108,7 +108,7 @@ export class NumfmtController extends Disposable {
 
         this._initializeContextMenu();
 
-        [ShowModalCommand, SetNumfmtRangeDataCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        [ShowModalOperation, SetNumfmtRangeDataCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {

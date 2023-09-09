@@ -1,15 +1,13 @@
 import { ComponentManager, Icon, IMenuService } from '@univerjs/base-ui';
 import { Disposable, ICommandService } from '@univerjs/core';
-import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
+import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { IDisposable, Inject, Injector } from '@wendellhu/redi';
 
-import { HideModalCommand, ShowModalCommand } from '../commands/show-modal.command';
-import { FIND_PLUGIN_NAME } from '../Const/PLUGIN_NAME';
+import { HideModalOperation, ShowModalOperation } from '../commands/operations/show-modal.operation';
 import { FindModalController } from './FindModalController';
 import { FindMenuItemFactory } from './menu';
 
 export class FindController extends Disposable implements IDisposable {
-
     constructor(
         @Inject(FindModalController) private _findModalController: FindModalController,
         @Inject(SheetContainerUIController) private _uiController: SheetContainerUIController,
@@ -23,11 +21,9 @@ export class FindController extends Disposable implements IDisposable {
         const toolbar = this._uiController.getToolbarController();
 
         this._initializeContextMenu();
-
-        // TODO@Dushusir maybe trigger once in ui-plugin-sheets?
         toolbar.setToolbar();
 
-        [ShowModalCommand, HideModalCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        [ShowModalOperation, HideModalOperation].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _initializeContextMenu() {

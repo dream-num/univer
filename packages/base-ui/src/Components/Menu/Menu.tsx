@@ -113,10 +113,6 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
     };
 
     handleItemClick = (item: IMenuButtonItem) => {
-        // When there is no need to execute the command, execute click
-        if (item.onClick) {
-            item.onClick();
-        }
         this.showMenu(false);
     };
 
@@ -309,9 +305,8 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
      * user input change value from CustomLabel
      * @param e
      */
-    onChange = (e: Event) => {
-        const targetValue = (e.target as HTMLInputElement).value;
-        const value = isRealNum(targetValue) ? parseInt(targetValue) : targetValue;
+    onChange = (v: string | number) => {
+        const value = isRealNum(v) && typeof v === 'string' ? parseInt(v) : v;
 
         this.setState({
             value,
@@ -344,7 +339,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
                 disabled={disabled}
                 onClick={() => {
-                    commandService.executeCommand(item.id);
+                    commandService.executeCommand(item.id, { value: this.state.value });
                     onClick();
                 }}
             >
@@ -354,8 +349,9 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
                     title={title}
                     label={label}
                     onChange={(v) => {
-                        commandService.executeCommand(item.id, { value: v });
-                        onClick();
+                        this.onChange(v);
+                        // commandService.executeCommand(item.id, { value });
+                        // onClick();
                     }}
                 ></NeoCustomLabel>
             </li>
@@ -401,6 +397,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
                 onMouseEnter={(e) => this.mouseEnter(e, index)}
                 onMouseLeave={(e) => this.mouseLeave(e, index)}
+                onClick={(e) => this.handleClick(e, item, index)}
             >
                 <NeoCustomLabel title={item.title} value={item.title} icon={item.icon} display={item.display} label={item.label}></NeoCustomLabel>
                 {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (

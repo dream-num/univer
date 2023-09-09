@@ -3,8 +3,8 @@ import {
     CopySheetCommand,
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
-    InsertColCommand,
-    InsertRowCommand,
+    InsertColAfterCommand,
+    InsertRowAfterCommand,
     ISelectionManager,
     RemoveColCommand,
     RemoveRowCommand,
@@ -31,9 +31,7 @@ import {
     SetWorksheetRowHeightCommand,
     SetWorksheetRowHideCommand,
     SetWorksheetRowShowCommand,
-    SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
-import { ISetHorizontalTextAlignCommandParams, ISetTextWrapCommandParams, ISetVerticalTextAlignCommandParams } from '@univerjs/base-sheets/src/Commands/Commands/set-style.command';
 import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
 import {
     FontItalic,
@@ -52,6 +50,8 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
+import { RenameSheetCommand } from '../commands/rename.command';
+import { ShowMenuListCommand } from '../commands/unhide.command';
 import { RightMenuInput } from '../View';
 import { FONT_FAMILY_CHILDREN, FONT_SIZE_CHILDREN, HORIZONTAL_ALIGN_CHILDREN, TEXT_ROTATE_CHILDREN, TEXT_WRAP_CHILDREN, VERTICAL_ALIGN_CHILDREN } from '../View/Toolbar/Const';
 
@@ -469,6 +469,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 // }
 
 export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<HorizontalAlign> {
+    const selectionManager = accessor.get(ISelectionManager);
     return {
         id: SetHorizontalTextAlignCommand.id,
         title: 'horizontalAlignMode',
@@ -481,10 +482,15 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
         selections: HORIZONTAL_ALIGN_CHILDREN,
         value$: new Observable<HorizontalAlign>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
-                if (c.id === SetHorizontalTextAlignCommand.id) {
-                    const align = (c.params as ISetHorizontalTextAlignCommandParams).value;
-                    subscriber.next(align);
+                const id = c.id;
+                if (id !== SetHorizontalTextAlignCommand.id && id !== SetSelectionsOperation.id) {
+                    return;
                 }
+
+                const range = selectionManager.getCurrentCell();
+                const ha = range?.getHorizontalAlignment();
+
+                subscriber.next(ha ?? HorizontalAlign.LEFT);
             });
 
             subscriber.next(HorizontalAlign.LEFT);
@@ -495,6 +501,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
 }
 
 export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<VerticalAlign> {
+    const selectionManager = accessor.get(ISelectionManager);
     return {
         id: SetVerticalTextAlignCommand.id,
         title: 'verticalAlignMode',
@@ -507,10 +514,15 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
         selections: VERTICAL_ALIGN_CHILDREN,
         value$: new Observable<VerticalAlign>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
-                if (c.id === SetVerticalTextAlignCommand.id) {
-                    const align = (c.params as ISetVerticalTextAlignCommandParams).value;
-                    subscriber.next(align);
+                const id = c.id;
+                if (id !== SetVerticalTextAlignCommand.id && id !== SetSelectionsOperation.id) {
+                    return;
                 }
+
+                const range = selectionManager.getCurrentCell();
+                const va = range?.getVerticalAlignment();
+
+                subscriber.next(va ?? VerticalAlign.TOP);
             });
 
             subscriber.next(VerticalAlign.TOP);
@@ -521,6 +533,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
 }
 
 export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<WrapStrategy> {
+    const selectionManager = accessor.get(ISelectionManager);
     return {
         id: SetTextWrapCommand.id,
         title: 'textWrapMode',
@@ -533,10 +546,15 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
         display: DisplayTypes.ICON,
         value$: new Observable((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
-                if (c.id === SetTextWrapCommand.id) {
-                    const wrap = (c.params as ISetTextWrapCommandParams).value;
-                    subscriber.next(wrap ?? WrapStrategy.OVERFLOW);
+                const id = c.id;
+                if (id !== SetTextWrapCommand.id && id !== SetSelectionsOperation.id) {
+                    return;
                 }
+
+                const range = selectionManager.getCurrentCell();
+                const ws = range?.getWrapStrategy();
+
+                subscriber.next(ws ?? WrapStrategy.OVERFLOW);
             });
 
             subscriber.next(WrapStrategy.OVERFLOW);
@@ -547,6 +565,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
 }
 
 export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number | string> {
+    const selectionManager = accessor.get(ISelectionManager);
     return {
         id: SetTextRotationCommand.id,
         title: 'textRotateMode',
@@ -559,10 +578,15 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         positions: [MenuPosition.TOOLBAR],
         value$: new Observable<number | string>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
-                if (c.id === SetTextRotationCommand.id) {
-                    const rotation = (c.params as { value: number | string }).value;
-                    subscriber.next(rotation ?? 0);
+                const id = c.id;
+                if (id !== SetTextRotationCommand.id && id !== SetSelectionsOperation.id) {
+                    return;
                 }
+
+                const range = selectionManager.getCurrentCell();
+                const tr = range?.getTextRotation();
+
+                subscriber.next((tr && tr.a) ?? 0);
             });
 
             subscriber.next(0);
@@ -583,7 +607,7 @@ export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuButtonI
 
 export function InsertRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: InsertRowCommand.id,
+        id: InsertRowAfterCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertRow',
@@ -592,7 +616,7 @@ export function InsertRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 export function InsertColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: InsertColCommand.id,
+        id: InsertColAfterCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
         title: 'rightClick.insertColumn',
@@ -752,7 +776,6 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
 export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        // TODO@Dushusir use real command id
         id: CopySheetCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
@@ -760,23 +783,15 @@ export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-// TODO@Dushusir onClick to rename tab
-// No need to trigger command after clicking，maybe no need Command id?
 export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'RenameSheetCommand.id',
+        id: RenameSheetCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.rename',
-        onClick: () => {
-            // TODO@Dushusir 这里能监听到点击事件，但是无法触发到 this._sheetBar.reNameSheet(this._dataId);
-            // 或许不应该通过这里的onClick直接更新UI？
-            console.info('rename=========');
-        },
     };
 }
 
-// TODO@Dushusir add command
 export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: SetTabColorCommand.id,
@@ -802,10 +817,9 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-// TODO@Dushusir use show worksheet command
 export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: SetWorksheetShowCommand.id,
+        id: ShowMenuListCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',

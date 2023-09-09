@@ -1,4 +1,3 @@
-import { IAccessor } from '@wendellhu/redi';
 import {
     BooleanNumber,
     CommandType,
@@ -18,9 +17,10 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import { IAccessor } from '@wendellhu/redi';
 
-import { ISetRangeStyleMutationParams, SetRangeStyleMutation, SetRangeStyleUndoMutationFactory } from '../Mutations/set-range-styles.mutation';
 import { ISelectionManager } from '../../Services/tokens';
+import { ISetRangeStyleMutationParams, SetRangeStyleMutation, SetRangeStyleUndoMutationFactory } from '../Mutations/set-range-styles.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;

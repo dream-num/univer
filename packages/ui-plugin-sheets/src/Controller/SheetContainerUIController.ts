@@ -1,7 +1,6 @@
-import { Inject, Injector, Self, SkipSelf } from '@wendellhu/redi';
-
 import { ComponentManager, DragManager, getRefElement, Prompt, SlotManager } from '@univerjs/base-ui';
 import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
+import { Inject, Injector, Self, SkipSelf } from '@wendellhu/redi';
 
 import { ISheetUIPluginConfig } from '../Basics/Interfaces/ComponentConfig/ISheetUIPluginConfig';
 import { SheetContainer } from '../View';
@@ -10,7 +9,7 @@ import { CountBarUIController } from './CountBarUIController';
 import { FormulaBarUIController } from './FormulaBarUIController';
 import { InfoBarUIController } from './InfoBarUIController';
 import { RightMenuUIController } from './RightMenuUIController';
-import { SheetBarUIController } from './SheetBarUIContruller';
+import { SheetBarUIController } from './SheetBarUIController';
 import { SlotController } from './SlotController';
 import { ToolbarUIController } from './ToolbarUIController';
 
@@ -59,6 +58,7 @@ export class SheetContainerUIController {
         this._rightMenuController = this._injector.createInstance(RightMenuUIController, this._config.layout?.rightMenuConfig);
         this._countBarController = this._injector.createInstance(CountBarUIController);
         this._sheetBarController = this._injector.createInstance(SheetBarUIController);
+        this._injector.add([SheetBarUIController, { useFactory: () => this._sheetBarController }]);
         // this._dragManager = this._injector.createInstance(DragManager);
 
         // 插入prompt组件

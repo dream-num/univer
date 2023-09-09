@@ -26,7 +26,7 @@ export const SetWorksheetColWidthMutationFactory = (accessor: IAccessor, params:
     for (let i = 0; i < ranges.length; i++) {
         const range = ranges[i];
         for (let j = range.startColumn; j < range.endColumn + 1; j++) {
-            const column = manager.getColumnOrCreate(i);
+            const column = manager.getColumnOrCreate(j);
             colWidth.set(j, column.w);
         }
     }
@@ -58,7 +58,7 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
             for (let j = range.startColumn; j < range.endColumn + 1; j++) {
-                const column = manager.getColumnOrCreate(i);
+                const column = manager.getColumnOrCreate(j);
                 if (typeof params.colWidth === 'number') {
                     column.w = params.colWidth;
                 } else {

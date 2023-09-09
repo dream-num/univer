@@ -1,5 +1,6 @@
-import { CommandType, ICurrentUniverService, IMutation, ObjectArray, ObjectMatrix } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, ObjectArray } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
 
 export const InsertRowMutationFactory = (accessor: IAccessor, params: IInsertRowMutationParams): IRemoveRowMutationParams => {
@@ -44,21 +45,17 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
             const rowIndex = range.startRow;
             const rowCount = range.endRow - range.startRow + 1;
 
-            if (params.rowInfo) {
-                for (let j = rowIndex; j < rowIndex + rowCount; j++) {
-                    const defaultRowInfo = {
-                        h: defaultRowHeight,
-                        hd: 0,
-                    };
+            for (let j = rowIndex; j < rowIndex + rowCount; j++) {
+                const defaultRowInfo = {
+                    h: defaultRowHeight,
+                    hd: 0,
+                };
+                if (params.rowInfo) {
                     rowWrapper.insert(j, params.rowInfo.get(j) ?? defaultRowInfo);
+                } else {
+                    rowWrapper.insert(j, defaultRowInfo);
                 }
-            } else {
-                rowWrapper.inserts(rowIndex, new ObjectArray(rowCount));
             }
-
-            const cellPrimitive = worksheet!.getCellMatrix().toJSON();
-            const cellWrapper = new ObjectMatrix(cellPrimitive);
-            cellWrapper.insertRowCount(rowIndex, rowCount);
         }
 
         return true;
@@ -103,21 +100,17 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
             const colCount = range.endColumn - range.startColumn + 1;
             const defaultColWidth = worksheet.getConfig().defaultColumnWidth;
 
-            if (params.colInfo) {
-                for (let j = colIndex; j < colIndex + colCount; j++) {
-                    const defaultColInfo = {
-                        w: defaultColWidth,
-                        hd: 0,
-                    };
+            for (let j = colIndex; j < colIndex + colCount; j++) {
+                const defaultColInfo = {
+                    w: defaultColWidth,
+                    hd: 0,
+                };
+                if (params.colInfo) {
                     columnWrapper.insert(j, params.colInfo.get(j) ?? defaultColInfo);
+                } else {
+                    columnWrapper.insert(j, defaultColInfo);
                 }
-            } else {
-                columnWrapper.inserts(colIndex, new ObjectArray(colCount));
             }
-
-            const cellPrimitive = worksheet!.getCellMatrix().toJSON();
-            const cellWrapper = new ObjectMatrix(cellPrimitive);
-            cellWrapper.insertColumnCount(colIndex, colCount);
         }
 
         return true;

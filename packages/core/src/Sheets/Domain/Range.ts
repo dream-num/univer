@@ -2,7 +2,7 @@ import { ICurrentUniverService } from '../../services/current.service';
 import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../../Shared';
 import { DEFAULT_RANGE, DEFAULT_STYLES } from '../../Types/Const';
 import { BooleanNumber, Dimension, Direction, FontItalic, FontWeight, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../Types/Enum';
-import { IBorderData, ICellData, IDocumentData, IRangeData, IRangeType, IStyleData, ITextDecoration } from '../../Types/Interfaces';
+import { IBorderData, ICellData, IDocumentData, IRangeData, IRangeType, IStyleData, ITextDecoration, ITextRotation } from '../../Types/Interfaces';
 import type { Worksheet } from './Worksheet';
 
 /**
@@ -631,7 +631,7 @@ export class Range {
      * Returns the text rotation settings for the top left cell of the range.
      */
     // getTextRotation(): number {
-    getTextRotation() {
+    getTextRotation(): ITextRotation {
         return this.getTextRotations()[0][0];
     }
 
@@ -639,8 +639,8 @@ export class Range {
      * Returns the text rotation settings for the cells in the range.
      */
     // getTextRotations(): number[][] {
-    getTextRotations() {
-        return this._getStyles('tr');
+    getTextRotations(): ITextRotation[][] {
+        return this._getStyles('tr') as ITextRotation[][];
     }
 
     /**

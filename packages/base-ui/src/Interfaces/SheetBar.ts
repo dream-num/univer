@@ -1,4 +1,5 @@
 import { BooleanNumber } from '@univerjs/core';
+
 import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
 import { BaseSelectProps } from '../Components';
 
@@ -10,9 +11,9 @@ export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectPr
     style?: JSX.CSSProperties;
     hidden?: BooleanNumber;
     addSheet?: () => void;
-    onDown?: () => void;
-    selectSheet?: () => void;
-    changeSheetName?: (e: Event) => void;
+    onMouseDown?: () => void;
+    selectSheet?: (slideItemIndex: number) => void;
+    changeSheetName?: (sheetId: string, name: string) => void;
     dragEnd?: (elements: HTMLElement[]) => void;
     selected?: boolean;
 }

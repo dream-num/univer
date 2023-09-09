@@ -1,11 +1,25 @@
-import { InsertSheetMutation, RemoveSheetMutation, SetWorksheetActivateCommand, SetWorksheetOrderCommand } from '@univerjs/base-sheets';
-import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuService } from '@univerjs/base-ui';
-import { Disposable, ICommandService, ICurrentUniverService, Nullable, ObserverManager, UIObserver } from '@univerjs/core';
+import {
+    InsertSheetMutation,
+    RemoveSheetMutation,
+    SetTabColorMutation,
+    SetWorksheetActivateCommand,
+    SetWorksheetActivateMutation,
+    SetWorksheetHideMutation,
+    SetWorksheetNameCommand,
+    SetWorksheetNameMutation,
+    SetWorksheetOrderCommand,
+    SetWorksheetOrderMutation,
+    SetWorksheetShowCommand,
+} from '@univerjs/base-sheets';
+import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuItemFactory, IMenuService } from '@univerjs/base-ui';
+import { Disposable, ICommandService, ICurrentUniverService, IKeyValue, IWorksheetConfig, Nullable, ObserverManager, UIObserver } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
+import { RenameSheetCommand } from '../commands/rename.command';
+import { ShowMenuListCommand } from '../commands/unhide.command';
 import { SheetBar } from '../View/SheetBar';
-import styles from '../View/SheetBar/index.module.less';
+
 import { ISheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
 import {
     ChangeColorSheetMenuItemFactory,
@@ -30,8 +44,6 @@ export interface SheetUlProps extends BaseUlProps {
 export class SheetBarUIController extends Disposable {
     protected _sheetBar: SheetBar;
 
-    protected _sheetUl: SheetUl[];
-
     protected _dataId: string;
 
     protected _sheetIndex: number;
@@ -50,64 +62,6 @@ export class SheetBarUIController extends Disposable {
         @IMenuService private readonly _menuService: IMenuService
     ) {
         super();
-        const that = this;
-        this._sheetUl = [
-            {
-                label: 'sheetConfig.delete',
-                onClick: () => {
-                    that.setUIObserve('onUIChangeObservable', { name: 'deleteSheet', value: this._dataId });
-                },
-            },
-            {
-                label: 'sheetConfig.copy',
-                onClick: () => {
-                    that.setUIObserve('onUIChangeObservable', { name: 'copySheet' });
-                },
-            },
-            {
-                label: 'sheetConfig.rename',
-                onClick: () => {
-                    this._sheetBar.reNameSheet(this._dataId);
-                },
-            },
-            {
-                label: 'sheetConfig.changeColor',
-                border: true,
-                className: styles.selectColorPickerParent,
-                children: [
-                    {
-                        label: {
-                            name: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
-                            props: {
-                                onClick: (color: string) => {
-                                    this.setUIObserve('onUIChangeObservable', {
-                                        name: 'changeSheetColor',
-                                        value: {
-                                            color,
-                                            sheetId: this._dataId,
-                                        },
-                                    });
-                                },
-                            },
-                        },
-                        className: styles.selectColorPicker,
-                    },
-                ],
-            },
-            {
-                label: 'sheetConfig.hide',
-                onClick: () => {
-                    that.setUIObserve('onUIChangeObservable', { name: 'hideSheet', value: this._dataId });
-                },
-            },
-            {
-                label: 'sheetConfig.unhide',
-                onClick: () => {
-                    this._sheetBar.ref.current.showMenu(true);
-                    that.setUIObserve('onUIChangeObservable', { name: 'unHideSheet', value: this._dataId });
-                },
-            },
-        ];
 
         this._initializeContextMenu();
 
@@ -116,13 +70,50 @@ export class SheetBarUIController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((params) => {
                 const { id } = params;
+                let worksheetId;
+                if (params.params) {
+                    const mutationParams: IKeyValue = params.params;
+                    worksheetId = mutationParams.worksheetId;
+                }
                 switch (id) {
-                    case InsertSheetMutation.id:
+                    case SetTabColorMutation.id:
+                        this._refreshComponent();
+
+                        break;
+                    case SetWorksheetHideMutation.id:
+                        this._refreshComponent();
+
+                        this.setMenuListHide(worksheetId);
+
+                        break;
                     case RemoveSheetMutation.id:
-                        // update data;
-                        this._refreshSheetData();
-                        // set ui bar sheetList;
-                        this._refreshSheetBarUI();
+                        this._refreshComponent();
+
+                        this.setMenuListDelete(worksheetId);
+
+                        break;
+                    case SetWorksheetNameMutation.id:
+                        this._refreshComponent();
+
+                        this.setMenuListLabel(worksheetId, (params?.params as IKeyValue).name);
+
+                        break;
+                    case InsertSheetMutation.id:
+                        this._refreshComponent();
+
+                        this.setMenuListInsert((params?.params as IKeyValue).index, (params?.params as IKeyValue).sheet, (params?.params as IKeyValue).workbookId);
+                        // Usually after the insert sheet operation, the activation operation is triggered. If it is placed after activate mutation, it will affect double-click
+                        this._sheetBar.setSlideTabActive((params?.params as IKeyValue).sheet.id);
+
+                        break;
+                    case SetWorksheetOrderMutation.id:
+                        this._refreshComponent();
+
+                        this.setMenuListOrder();
+
+                        break;
+                    case SetWorksheetActivateMutation.id:
+                        this.setMenuListSelect(worksheetId);
 
                         break;
 
@@ -133,6 +124,8 @@ export class SheetBarUIController extends Disposable {
         );
 
         this._componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
+
+        [ShowMenuListCommand, RenameSheetCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     getComponent = (ref: SheetBar) => {
@@ -160,7 +153,11 @@ export class SheetBarUIController extends Disposable {
         return this._menuList;
     }
 
-    selectSheet() {}
+    selectSheet = (sheetIndex: number) => {
+        const worksheetId = this._sheetList.find((sheet) => sheet.index === String(sheetIndex))?.sheetId;
+        if (!worksheetId) return;
+        this._commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId });
+    };
 
     deleteSheet() {}
 
@@ -189,14 +186,8 @@ export class SheetBarUIController extends Disposable {
 
     moveSheet(direct: string) {}
 
-    changeSheetName = (event: Event) => {
-        this.setUIObserve('onUIChangeObservable', {
-            name: 'renameSheet',
-            value: {
-                sheetId: this._dataId,
-                sheetName: (event.target as HTMLElement).innerText,
-            },
-        });
+    changeSheetName = (worksheetId: string, name: string) => {
+        this._commandService.executeCommand(SetWorksheetNameCommand.id, { name, worksheetId });
     };
 
     contextMenu(e: MouseEvent) {
@@ -224,10 +215,57 @@ export class SheetBarUIController extends Disposable {
         });
     };
 
+    showMenuList(show: boolean) {
+        this._sheetBar.showMenuList(show);
+    }
+
+    setMenuListSelect(worksheetId: string) {
+        this._sheetBar.ref.current.selectItem(worksheetId);
+    }
+
+    setMenuListHide(worksheetId: string) {
+        this._sheetBar.ref.current.hideItem(worksheetId);
+    }
+
+    setMenuListDelete(worksheetId: string) {
+        this._sheetBar.ref.current.deleteItem(worksheetId);
+    }
+
+    setMenuListLabel(worksheetId: string, label: string) {
+        this._sheetBar.ref.current.setItemLabel(worksheetId, label);
+    }
+
+    setMenuListInsert(index: number, sheet: IWorksheetConfig, workbookId: string) {
+        const item = {
+            label: sheet.name,
+            index: String(index),
+            sheetId: sheet.id,
+            hide: sheet.hidden === 1,
+            selected: sheet.status === 1,
+            onClick: (e?: MouseEvent) => {
+                if (e) {
+                    const target = e.currentTarget as HTMLDivElement;
+                    this._dataId = target.dataset.id as string;
+                    const worksheetId = sheet.id;
+                    this._commandService.executeCommand(SetWorksheetShowCommand.id, {
+                        workbookId,
+                        worksheetId,
+                    });
+                    // update tab item
+                    this._sheetBar.setSlideTabActive(worksheetId);
+                }
+            },
+        };
+        this._sheetBar.ref.current.insertItem(index, item);
+    }
+
+    setMenuListOrder() {
+        this._sheetBar.ref.current.setItemOrder(this._menuList);
+    }
+
     protected _refreshSheetBarUI(): void {
         this._sheetBar.setValue({
             sheetList: this._sheetList,
-            // sheetUl: this._sheetUl,
             menuList: this._menuList,
             selectSheet: (event: Event, data: { item: SheetUlProps }) => {
                 this._dataId = data.item.sheetId;
@@ -246,10 +284,10 @@ export class SheetBarUIController extends Disposable {
                 this._dataId = target.dataset.id as string;
                 //this._barControl.contextMenu(e);
             },
-            changeSheetName: (event: Event) => {},
-            dragEnd: (elements: HTMLDivElement[]) => {
-                //this._barControl.dragEnd(elements);
-            },
+            // changeSheetName: (event: Event) => {},
+            // dragEnd: (elements: HTMLDivElement[]) => {
+            //     //this._barControl.dragEnd(elements);
+            // },
         });
 
         // this._sheetBar.setSheetUlNeo(this._menuService.getMenuItems(MenuPosition.SHEET_BAR));
@@ -269,12 +307,19 @@ export class SheetBarUIController extends Disposable {
                 if (e) {
                     const target = e.currentTarget as HTMLDivElement;
                     this._dataId = target.dataset.id as string;
-                    sheet.showSheet();
-                    // sheet.activate();
-                    this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                    const worksheetId = sheet.getSheetId();
+                    // command
+                    // this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                    //     workbookId: workbook.getUnitId(),
+                    //     worksheetId,
+                    // });
+                    this._commandService.executeCommand(SetWorksheetShowCommand.id, {
                         workbookId: workbook.getUnitId(),
-                        worksheetId: sheet.getSheetId(),
+                        worksheetId,
                     });
+
+                    // update tab item
+                    this._sheetBar.setSlideTabActive(worksheetId);
                 }
             },
         }));
@@ -287,18 +332,9 @@ export class SheetBarUIController extends Disposable {
                 index: String(index),
                 selected: sheet.getStatus() === 1,
                 color: sheet.getTabColor() as string,
-                onDown: (e: MouseEvent) => {
+                onMouseDown: (e: MouseEvent) => {
                     const target = e.currentTarget as HTMLDivElement;
                     this._dataId = target.dataset.id as string;
-                },
-                onClick: (e: MouseEvent) => {
-                    const target = e.currentTarget as HTMLDivElement;
-                    this._dataId = target.dataset.id as string;
-                    // sheet.activate();
-                    this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
-                        workbookId: workbook.getUnitId(),
-                        worksheetId: sheet.getSheetId(),
-                    });
                 },
             }));
         this._sheetIndex = sheets.findIndex((sheet) => sheet.getStatus() === 1);
@@ -313,14 +349,16 @@ export class SheetBarUIController extends Disposable {
     }
 
     private _initializeContextMenu() {
-        [
-            DeleteSheetMenuItemFactory,
-            CopySheetMenuItemFactory,
-            RenameSheetMenuItemFactory,
-            ChangeColorSheetMenuItemFactory,
-            HideSheetMenuItemFactory,
-            UnHideSheetMenuItemFactory,
-        ].forEach((factory) => {
+        (
+            [
+                DeleteSheetMenuItemFactory,
+                CopySheetMenuItemFactory,
+                RenameSheetMenuItemFactory,
+                ChangeColorSheetMenuItemFactory,
+                HideSheetMenuItemFactory,
+                UnHideSheetMenuItemFactory,
+            ] as IMenuItemFactory[]
+        ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

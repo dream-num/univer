@@ -10,7 +10,7 @@
 //     tooltipRight?: string;
 //     onClick?: (...arg: any[]) => void;
 //     onKeyUp?: (...arg: any[]) => void;
-//     onDown?: (...arg: any[]) => void;
+//     onMouseDown?: (...arg: any[]) => void;
 //     triggerUpdate?: (func: Function) => void;
 //     needChange?: boolean;
 //     selectType?: ISelectButtonType;

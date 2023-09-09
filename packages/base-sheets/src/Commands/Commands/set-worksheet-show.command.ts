@@ -27,7 +27,6 @@ export const SetWorksheetShowCommand: ICommand = {
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
-        if (!worksheet) return false;
 
         const hidden = worksheet.getConfig().hidden;
         if (hidden === BooleanNumber.FALSE) return false;
@@ -54,13 +53,13 @@ export const SetWorksheetShowCommand: ICommand = {
                 URI: 'sheet',
                 undo() {
                     return (commandService.executeCommand(SetWorksheetActivateMutation.id, unActiveMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetWorksheetHideMutation.id, undoMutationParams);
+                        if (res) return commandService.executeCommand(SetWorksheetHideMutation.id, undoMutationParams);
                         return false;
                     });
                 },
                 redo() {
-                    return (commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams);
+                    return (commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams) as Promise<boolean>).then((res) => {
+                        if (res) return commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
                         return false;
                     });
                 },

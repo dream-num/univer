@@ -4,8 +4,8 @@ import { ICommandService, IPermissionService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { DEFAULT_DATA, MORE_FORMATS_SELECTIONS } from '../Basics/Const/DEFAULT_DATA';
-import { SetNumfmtRangeDataCommand } from '../commands/set-numfmt-range-data.command';
-import { ShowModalCommand } from '../commands/show-modal.command';
+import { SetNumfmtRangeDataCommand } from '../commands/commands/set-numfmt-range-data.command';
+import { ShowModalOperation } from '../commands/operations/show-modal.operation';
 
 export function NumfmtRangeDataMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const permissionService = accessor.get(IPermissionService);
@@ -66,7 +66,7 @@ export function OpenMoreFormatsModalMenuItemFactory(accessor: IAccessor): IMenuS
     const selectionManager = accessor.get(ISelectionManager);
     return {
         // 2. suffix
-        id: ShowModalCommand.id,
+        id: ShowModalOperation.id,
         title: 'defaultFmt.CustomFormats.text',
         positions: SetNumfmtRangeDataCommand.id,
         display: DisplayTypes.LABEL,

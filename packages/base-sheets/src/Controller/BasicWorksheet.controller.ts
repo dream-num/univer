@@ -13,8 +13,17 @@ import { DeleteRangeMoveLeftCommand } from '../Commands/Commands/delete-range-mo
 import { DeleteRangeMoveUpCommand } from '../Commands/Commands/delete-range-move-up.command';
 import { InsertRangeMoveDownCommand } from '../Commands/Commands/insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../Commands/Commands/insert-range-move-right.command';
-import { InsertColCommand } from '../Commands/Commands/insert-row-col.command';
+import {
+    InsertColAfterCommand,
+    InsertColBeforeCommand,
+    InsertColCommand,
+    InsertRowAfterCommand,
+    InsertRowBeforeCommand,
+    InsertRowCommand,
+} from '../Commands/Commands/insert-row-col.command';
+import { InsertSheetCommand } from '../Commands/Commands/insert-sheet.command';
 import { RemoveColCommand, RemoveRowCommand } from '../Commands/Commands/remove-row-col.command';
+import { RemoveSheetCommand } from '../Commands/Commands/remove-sheet.command';
 import { RemoveWorksheetMergeCommand } from '../Commands/Commands/remove-worksheet-merge.command';
 import { SetBorderColorCommand, SetBorderCommand, SetBorderPositionCommand, SetBorderStyleCommand } from '../Commands/Commands/set-border-command';
 import { SetRangeFormattedValueCommand } from '../Commands/Commands/set-range-formatted-value.command';
@@ -45,8 +54,11 @@ import { AddWorksheetMergeMutation } from '../Commands/Mutations/add-worksheet-m
 import { DeleteRangeMutation } from '../Commands/Mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../Commands/Mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../Commands/Mutations/insert-row-col.mutation';
+import { InsertSheetMutation } from '../Commands/Mutations/insert-sheet.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../Commands/Mutations/remove-row-col.mutation';
+import { RemoveSheetMutation } from '../Commands/Mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../Commands/Mutations/remove-worksheet-merge.mutation';
+import { SetBorderStylesMutation } from '../Commands/Mutations/set-border-styles.mutatio';
 import { SetRangeFormattedValueMutation } from '../Commands/Mutations/set-range-formatted-value.mutation';
 import { SetRangeStyleMutation } from '../Commands/Mutations/set-range-styles.mutation';
 import { SetRangeValuesMutation } from '../Commands/Mutations/set-range-values.mutation';
@@ -91,10 +103,15 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetHideCommand,
             SetWorksheetHideMutation,
 
+            InsertRowCommand,
+            InsertRowBeforeCommand,
+            InsertRowAfterCommand,
             InsertRowMutation,
             RemoveRowCommand,
             RemoveRowMutation,
             InsertColCommand,
+            InsertColBeforeCommand,
+            InsertColAfterCommand,
             InsertColMutation,
             RemoveColCommand,
             RemoveColMutation,
@@ -129,15 +146,19 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             ResetBackgroundColorCommand,
             SetHorizontalTextAlignCommand,
             SetVerticalTextAlignCommand,
-
             SetBorderCommand,
             SetBorderColorCommand,
             SetBorderStyleCommand,
             SetBorderPositionCommand,
+            SetBorderStylesMutation,
             CopySheetCommand,
             SetTabColorCommand,
             SetTabColorMutation,
             SetWorksheetShowCommand,
+            RemoveSheetCommand,
+            RemoveSheetMutation,
+            InsertSheetCommand,
+            InsertSheetMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

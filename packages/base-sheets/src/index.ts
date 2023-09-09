@@ -26,7 +26,16 @@ export { SetSelectionsOperation } from './Commands/Operations/selection.operatio
 export { ClearSelectionContentCommand } from './Commands/Commands/clear-selection-content.command';
 export { DeleteRangeMoveLeftCommand } from './Commands/Commands/delete-range-move-left.command';
 export { DeleteRangeMoveUpCommand } from './Commands/Commands/delete-range-move-up.command';
-export { InsertColCommand, InsertColCommandParams, InsertRowCommand, InsertRowCommandParams } from './Commands/Commands/insert-row-col.command';
+export {
+    InsertColAfterCommand,
+    InsertColBeforeCommand,
+    InsertColCommand,
+    InsertColCommandParams,
+    InsertRowAfterCommand,
+    InsertRowBeforeCommand,
+    InsertRowCommand,
+    InsertRowCommandParams,
+} from './Commands/Commands/insert-row-col.command';
 export { InsertSheetCommand } from './Commands/Commands/insert-sheet.command';
 export { RemoveColCommand, RemoveRowCommand } from './Commands/Commands/remove-row-col.command';
 export {
@@ -74,6 +83,12 @@ export { RemoveSheetCommand } from './Commands/Commands/remove-sheet.command';
 export { RemoveWorksheetMergeCommand } from './Commands/Commands/remove-worksheet-merge.command';
 export { SetTabColorCommand } from './Commands/Commands/set-tab-color.command';
 export { SetWorksheetHideCommand } from './Commands/Commands/set-worksheet-hide.command';
+export { SetWorksheetNameCommand } from './Commands/Commands/set-worksheet-name.command';
 export { SetWorksheetRowHideCommand } from './Commands/Commands/set-worksheet-row-hide.command';
 export { SetWorksheetRowShowCommand } from './Commands/Commands/set-worksheet-row-show.command';
 export { SetWorksheetShowCommand } from './Commands/Commands/set-worksheet-show.command';
+export { SetTabColorMutation } from './Commands/Mutations/set-tab-color.mutation';
+export { SetWorksheetActivateMutation } from './Commands/Mutations/set-worksheet-activate.mutation';
+export { SetWorksheetHideMutation } from './Commands/Mutations/set-worksheet-hide.mutation';
+export { SetWorksheetNameMutation } from './Commands/Mutations/set-worksheet-name.mutation';
+export { SetWorksheetOrderMutation } from './Commands/Mutations/set-worksheet-order.mutation';

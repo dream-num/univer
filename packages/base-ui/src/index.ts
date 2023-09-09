@@ -1,29 +1,28 @@
+export * from './BaseComponent';
 export * from './Basics';
 export * from './Common';
-export * from './Interfaces';
-export * from './Enum';
-export * from './Utils';
-export * from './Helpers';
 export * from './Components';
-export * from './BaseComponent';
-export * from './UIPlugin';
-
+export { SharedController } from './controllers/shared-shortcut.controller';
+export * from './Enum';
+export * from './Helpers';
+export * from './Interfaces';
 export {
-    ICustomComponentProps,
     ICustomComponentOption,
+    ICustomComponentProps,
+    IDisplayMenuItem,
     IMenuButtonItem,
     IMenuItem,
+    IMenuItemFactory,
     IMenuSelectorItem,
+    isCustomComponentOption,
+    isValueOptions,
     IValueOption,
     MenuItemType,
     MenuPosition,
-    IDisplayMenuItem,
-    isCustomComponentOption,
-    isValueOptions,
 } from './services/menu/menu';
-export { IMenuService, DesktopMenuService } from './services/menu/menu.service';
+export { DesktopMenuService, IMenuService } from './services/menu/menu.service';
+export { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
-export { IShortcutService, IShortcutItem, DesktopShortcutService } from './services/shortcut/shortcut.service';
-export { IPlatformService, DesktopPlatformService } from './services/platform/platform.service';
-
-export { SharedController } from './controllers/shared-shortcut.controller';
+export { DesktopShortcutService, IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
+export * from './UIPlugin';
+export * from './Utils';

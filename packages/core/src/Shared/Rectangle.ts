@@ -1,5 +1,6 @@
 import { IRangeData } from '../Types/Interfaces';
 import { Tools } from './Tools';
+import { Nullable } from './Types';
 
 /**
  * A square area containing four position information: startRow, startColumn, endRow, and endColumn
@@ -65,6 +66,69 @@ export class Rectangle implements IRangeData {
         const y = Math.abs(currentStartRow - currentEndRow) + Math.abs(incomingStartRow - incomingEndRow);
 
         return zx <= x && zy <= y;
+    }
+
+    static getIntersects(src: IRangeData, target: IRangeData): Nullable<IRangeData> {
+        const currentStartRow = src.startRow;
+        const currentEndRow = src.endRow;
+        const currentStartColumn = src.startColumn;
+        const currentEndColumn = src.endColumn;
+
+        const incomingStartRow = target.startRow;
+        const incomingEndRow = target.endRow;
+        const incomingStartColumn = target.startColumn;
+        const incomingEndColumn = target.endColumn;
+
+        let startColumn;
+        let startRow;
+        let endColumn;
+        let endRow;
+        if (incomingStartRow <= currentEndRow) {
+            if (incomingStartRow >= currentStartRow) {
+                startRow = incomingStartRow;
+            } else {
+                startRow = currentStartRow;
+            }
+        } else {
+            return null;
+        }
+
+        if (incomingEndRow >= currentStartRow) {
+            if (incomingEndRow >= currentEndRow) {
+                endRow = currentEndRow;
+            } else {
+                endRow = incomingEndRow;
+            }
+        } else {
+            return null;
+        }
+
+        if (incomingStartColumn <= currentEndColumn) {
+            if (incomingStartColumn > currentStartColumn) {
+                startColumn = incomingStartColumn;
+            } else {
+                startColumn = currentStartColumn;
+            }
+        } else {
+            return null;
+        }
+
+        if (incomingEndColumn >= currentStartColumn) {
+            if (incomingEndColumn >= currentEndColumn) {
+                endColumn = currentEndColumn;
+            } else {
+                endColumn = incomingEndColumn;
+            }
+        } else {
+            return null;
+        }
+
+        return {
+            startRow,
+            endRow,
+            startColumn,
+            endColumn,
+        };
     }
 
     intersects(rectangle: Rectangle): boolean {

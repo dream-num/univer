@@ -5,7 +5,6 @@ import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Ba
 import { InsertSheetMutation } from '../Mutations/insert-sheet.mutation';
 import { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from '../Mutations/remove-sheet.mutation';
 import { ISetWorksheetActivateMutationParams, SetWorksheetActivateMutation, SetWorksheetUnActivateMutationFactory } from '../Mutations/set-worksheet-activate.mutation';
-import { SetWorksheetHideMutation } from '../Mutations/set-worksheet-hide.mutation';
 
 export interface RemoveSheetCommandParams {
     workbookId?: string;
@@ -43,7 +42,7 @@ export const RemoveSheetCommand: ICommand = {
             worksheetId: activateSheetId,
         };
 
-        const unActiveMutationParams = SetWorksheetUnActivateMutationFactory(accessor, activeSheetMutationParams);
+        const activeMutationParams: ISetWorksheetActivateMutationParams = SetWorksheetUnActivateMutationFactory(accessor, activeSheetMutationParams);
         const activeResult = commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams);
 
         // prepare do mutations
@@ -59,14 +58,14 @@ export const RemoveSheetCommand: ICommand = {
             undoRedoService.pushUndoRedo({
                 URI: 'sheet',
                 undo() {
-                    return (commandService.executeCommand(SetWorksheetHideMutation.id, unActiveMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(InsertSheetMutation.id, InsertSheetMutationParams);
+                    return (commandService.executeCommand(InsertSheetMutation.id, InsertSheetMutationParams) as Promise<boolean>).then((res) => {
+                        if (res) return commandService.executeCommand(SetWorksheetActivateMutation.id, activeMutationParams);
                         return false;
                     });
                 },
                 redo() {
                     return (commandService.executeCommand(RemoveSheetMutation.id, RemoveSheetMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams);
+                        if (res) return commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams);
                         return false;
                     });
                 },

@@ -1,6 +1,6 @@
-import { SlideTabBar } from './SlideTabBar';
 import { Animate } from './Animate';
 import { SlideScrollbar } from './SlideScrollbar';
+import { SlideTabBar } from './SlideTabBar';
 
 export interface SlideTabItemAnimate {
     translateX: (x: number) => void;
@@ -40,7 +40,7 @@ export class SlideTabItem {
     }
 
     static make(nodeList: NodeList, slideTabBar: SlideTabBar): SlideTabItem[] {
-        let result: SlideTabItem[] = [];
+        const result: SlideTabItem[] = [];
         nodeList.forEach((item) => result.push(new SlideTabItem(item as HTMLElement, slideTabBar)));
         return result;
     }
@@ -65,9 +65,9 @@ export class SlideTabItem {
 
     editor(callback?: (event: FocusEvent) => void): void {
         if (this._editMode === false) {
-            let input = this.primeval().querySelector('span');
+            const input = this.primeval().querySelector('span');
 
-            let blurAction = (focusEvent: FocusEvent) => {
+            const blurAction = (focusEvent: FocusEvent) => {
                 this._editMode = false;
 
                 if (input) {
@@ -78,8 +78,9 @@ export class SlideTabItem {
 
                 this._slideTabBar.updateItems();
 
-                if (this._slideTabBar.getConfig().onChangeName) {
-                    this._slideTabBar.getConfig().onChangeName(focusEvent);
+                if (this._slideTabBar.getConfig().onChangeName && this._slideTabItem.dataset.id) {
+                    const name = (event.target as HTMLElement).innerText;
+                    this._slideTabBar.getConfig().onChangeName(this._slideTabItem.dataset.id, name);
                 }
 
                 if (callback) {

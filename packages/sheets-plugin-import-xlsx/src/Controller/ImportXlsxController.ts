@@ -3,7 +3,7 @@ import { Disposable, ICommandService } from '@univerjs/core';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { UploadCommand } from '../commands/upload.command';
+import { UploadOperation } from '../commands/operations/upload.operation';
 import { ImportMenuItemFactory } from './menu';
 
 export class ImportXlsxController extends Disposable {
@@ -22,7 +22,7 @@ export class ImportXlsxController extends Disposable {
         this._initializeContextMenu();
         toolbar.setToolbar();
 
-        [UploadCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        [UploadOperation].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _initializeContextMenu() {

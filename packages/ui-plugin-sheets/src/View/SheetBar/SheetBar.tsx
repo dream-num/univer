@@ -1,9 +1,11 @@
-import { BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, Icon, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
+import { SetWorksheetActivateCommand } from '@univerjs/base-sheets';
+import { AppContext, BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, Icon, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
+import { ICommandService } from '@univerjs/core';
 import { Component, createRef, RefObject } from 'preact';
 
-import { SlideTabBar } from '../../Basics/SlideTabBar/SlideTabBar';
 import styles from './index.module.less';
 import { ISheetBarMenuItem, SheetBarMenu } from './SheetBarMenu';
+import { SlideTabBar } from './SlideTabBar/SlideTabBar';
 
 type SheetState = {
     sheetList: BaseSheetBarProps[];
@@ -13,6 +15,8 @@ type SheetState = {
 };
 
 export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
+    static override contextType = AppContext;
+
     ref = createRef();
 
     ulRef = createRef();
@@ -76,10 +80,39 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     overGrid = () => {};
 
-    // 右击显示菜单
+    // Right click to display menu
     contextMenu = (e: MouseEvent) => {
         e.preventDefault();
-        this.showUlList(e);
+        const target = e.currentTarget as HTMLDivElement;
+        const worksheetId = target.dataset.id as string;
+
+        // after show ul,activate DOM
+        this.showUlList(e, () => {
+            this.setSlideTabActive(worksheetId);
+        });
+
+        // activate command
+        const commandService: ICommandService = this.context.injector.get(ICommandService);
+        commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId });
+    };
+
+    // Click the button to display the menu, if it is not in the current sheet, only switch the sheet after clicking
+    onContextMenuClick = (e: MouseEvent) => {
+        e.preventDefault();
+
+        const target = e.currentTarget as HTMLDivElement;
+        const worksheetId = target.dataset.id as string;
+
+        const currentSheetId = this.getCurrentSheetId();
+
+        if (worksheetId === currentSheetId) {
+            this.showUlList(e);
+        } else {
+            this.setSlideTabActive(worksheetId);
+            // activate command
+            const commandService: ICommandService = this.context.injector.get(ICommandService);
+            commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId });
+        }
     };
 
     // 显示下拉
@@ -99,7 +132,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     };
 
     // 点击不同sheet页显示ullist
-    showUlList = (e: MouseEvent) => {
+    showUlList = (e: MouseEvent, cb?: () => void) => {
         new Promise<void>((resolve) => {
             const target = e.currentTarget as HTMLDivElement;
             const id = target.dataset.id as string;
@@ -116,6 +149,8 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 ul.style.bottom = bottom;
                 ul.style.top = 'auto';
                 ul.style.right = 'auto';
+
+                cb && cb();
             }
         });
     };
@@ -128,20 +163,21 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         }
     };
 
-    changeEditable = (e: MouseEvent) => {
-        const target = e.target as HTMLDivElement;
-        let listener: (event: Event) => void;
-        target.contentEditable = 'true';
-        target.focus();
-        target.addEventListener(
-            'blur',
-            (listener = (event) => {
-                this.props.changeSheetName?.(e);
-                target.contentEditable = 'false';
-                target.removeEventListener('blur', listener);
-            })
-        );
-    };
+    // no need
+    // changeEditable = (e: MouseEvent) => {
+    //     const target = e.target as HTMLDivElement;
+    //     let listener: (event: Event) => void;
+    //     target.contentEditable = 'true';
+    //     target.focus();
+    //     target.addEventListener(
+    //         'blur',
+    //         (listener = (event) => {
+    //             this.props.changeSheetName?.(e);
+    //             target.contentEditable = 'false';
+    //             target.removeEventListener('blur', listener);
+    //         })
+    //     );
+    // };
 
     override componentDidUpdate() {
         if (this.slideTabBar) {
@@ -153,17 +189,50 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             slideTabBarItemClassName: 'univer-slide-tab-item',
             slideTabBarItemAutoSort: true,
             slideTabRoot: this.slideTabRoot.current,
-            onChangeName: (event: Event) => {
-                this.props.changeSheetName?.(event);
+            activeClassNameAutoController: true,
+            onChangeName: (sheetId: string, name: string) => {
+                this.props.changeSheetName?.(sheetId, name);
             },
             onSlideEnd: (event: Event) => {
                 this.props.dragEnd?.(this.slideTabBar.getSlideTabItems().map((item) => item.primeval()));
+            },
+            onItemClick: (slideItemIndex: number) => {
+                this.props.selectSheet?.(slideItemIndex);
             },
         });
     }
 
     override componentDidMount() {
         this.props.getComponent?.(this);
+    }
+
+    // Convenient for controller to control sheetBarMenu
+    showMenuList(show: boolean) {
+        this.ref.current.showMenu(show);
+    }
+
+    setSlideTabActive(sheetId: string, cb?: () => void) {
+        this.setState((prevState, props) => {
+            const prevSheetList = prevState.sheetList;
+            const currentSheetList = prevSheetList.map((sheet) => {
+                if (sheet.sheetId === sheetId) {
+                    sheet.selected = true;
+                } else {
+                    sheet.selected = false;
+                }
+                return sheet;
+            });
+            return {
+                ...prevState,
+                sheetList: currentSheetList,
+            };
+        }, cb);
+    }
+
+    getCurrentSheetId() {
+        const sheetList = this.state.sheetList;
+        const currentSheet = sheetList.find((sheet) => sheet.selected);
+        return currentSheet?.sheetId;
     }
 
     render(props: BaseSheetBarProps, state: SheetState) {
@@ -189,8 +258,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 <div className={styles.slideTabBar} ref={this.sheetContainerRef}>
                     {sheetList.map((item) => (
                         <div
-                            onMouseDown={item.onDown}
-                            onClick={item.onClick}
+                            onMouseDown={item.onMouseDown}
                             onContextMenu={this.contextMenu}
                             data-id={item.sheetId}
                             key={this._renderKey++}
@@ -203,7 +271,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                                         <CustomLabel label={item.label} />
                                     </span>
                                 </div>
-                                <div className={`${styles.slideTabIcon}`} data-slide-skip="true" style={{ lineHeight: 1 }} data-id={item.sheetId} onClick={this.contextMenu}>
+                                <div className={`${styles.slideTabIcon}`} data-slide-skip="true" style={{ lineHeight: 1 }} data-id={item.sheetId} onClick={this.onContextMenuClick}>
                                     <Icon.NextIcon />
                                 </div>
                             </div>

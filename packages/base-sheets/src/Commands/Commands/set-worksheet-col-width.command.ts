@@ -1,19 +1,21 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
-import { ISetWorksheetColWidthMutationParams, SetWorksheetColWidthMutation, SetWorksheetColWidthMutationFactory } from '../Mutations/set-worksheet-col-width.mutation';
+
 import { ISelectionManager } from '../../Services/tokens';
+import { ISetWorksheetColWidthMutationParams, SetWorksheetColWidthMutation, SetWorksheetColWidthMutationFactory } from '../Mutations/set-worksheet-col-width.mutation';
 
 /**
  * TODO@Dushusir 支持多个选区
  */
 export interface SetWorksheetColWidthCommandParams {
-    colWidth: number;
+    value: number;
 }
 
 export const SetWorksheetColWidthCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-col-width',
     handler: async (accessor: IAccessor, params: SetWorksheetColWidthCommandParams) => {
+        console.info('sheet.command.set-worksheet-col-width', params);
         const selectionManager = accessor.get(ISelectionManager);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -28,7 +30,7 @@ export const SetWorksheetColWidthCommand: ICommand = {
             worksheetId,
             workbookId,
             ranges: selections,
-            colWidth: params.colWidth,
+            colWidth: params.value,
         };
         const undoMutationParams: ISetWorksheetColWidthMutationParams = SetWorksheetColWidthMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);

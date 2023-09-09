@@ -78,13 +78,13 @@ export const AddWorksheetMergeCommand: ICommand = {
                 URI: 'sheet',
                 undo() {
                     return (commandService.executeCommand(RemoveWorksheetMergeMutation.id, undoMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(AddWorksheetMergeMutation.id, undoRemoveMergeMutationParams);
+                        if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, undoRemoveMergeMutationParams);
                         return false;
                     });
                 },
                 redo() {
                     return (commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+                        if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
                         return false;
                     });
                 },

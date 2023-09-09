@@ -3,11 +3,8 @@ name: CI
 on:
   push:
     branches: [main, dev]
-  pull_request:
+  pull_request_target:
     branches: [main, dev]
-
-permissions:
-  contents: read
 
 jobs:
   build:
@@ -16,6 +13,10 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      ORG_ID: ${{ secrets.ORG_ID }}
+      PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
     steps:
       - name: Checkout
@@ -58,15 +59,15 @@ jobs:
         uses: amondnet/vercel-action@v25
         id: vercel-action
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.ORG_ID}}
-          vercel-project-id: ${{ secrets.PROJECT_ID}}
+          vercel-token: ${{ env.VERCEL_TOKEN }}
+          vercel-org-id: ${{ env.ORG_ID}}
+          vercel-project-id: ${{ env.PROJECT_ID}}
 
       - name: Discord Notification
         uses: sarisia/actions-status-discord@v1
         if: ${{ success() }}
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          webhook: ${{ env.DISCORD_WEBHOOK }}
           status: ${{ job.status }}
           description: |
             CI Pipeline: Success 🏆
@@ -83,7 +84,7 @@ jobs:
         uses: sarisia/actions-status-discord@v1
         if: ${{ failure() }}
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          webhook: ${{ env.DISCORD_WEBHOOK }}
           status: ${{ job.status }}
           description: |
             CI Pipeline: Unsuccessful 📛

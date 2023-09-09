@@ -1,22 +1,23 @@
-import { AppContext, BaseComponentProps, Button, Container, CustomLabel, debounce, IDisplayMenuItem, IMenuItem, Select, Tooltip } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, Container, IDisplayMenuItem, IMenuItem } from '@univerjs/base-ui';
 import { Component, createRef } from 'react';
+
 import { IToolbarItemProps, SheetContainerUIController } from '../../Controller';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
 
 interface IProps extends BaseComponentProps {
-    style?: JSX.CSSProperties;
+    style?: React.CSSProperties;
     toolList: IToolbarItemProps[];
 }
 
 interface IState {
-    menuItems: IDisplayMenuItem<IMenuItem>[];
+    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
 }
 
 export class Toolbar extends Component<IProps, IState> {
     static override contextType = AppContext;
 
-    toolbarRef = createRef();
+    toolbarRef = createRef<HTMLDivElement>();
 
     moreBtnRef = createRef();
 
@@ -38,17 +39,16 @@ export class Toolbar extends Component<IProps, IState> {
     }
 
     setToolbarNeo = (menuItems: Array<IDisplayMenuItem<IMenuItem>>) => {
-        this.setState(
-            {
-                menuItems,
-            },
-        );
+        this.setState({
+            menuItems,
+        });
     };
 
     resetUl = () => {
         const wrapper = this.context.injector.get(SheetContainerUIController).getContentRef().current!;
         const height = `${(wrapper as HTMLDivElement).offsetHeight}px`;
-        const ul = this.toolbarRef.current.querySelectorAll('ul');
+        const ul = this.toolbarRef.current?.querySelectorAll('ul');
+        if (!ul) return;
         for (let i = 0; i < ul.length; i++) {
             ul[i].style.maxHeight = height;
         }
@@ -58,14 +58,13 @@ export class Toolbar extends Component<IProps, IState> {
         this.props.getComponent?.(this); // pass the UI to the controller, which is not good...
     }
 
-    override componentWillUnmount() {
-    }
+    override componentWillUnmount() {}
 
     neoRenderToolbarList() {
         return this.state.menuItems.map((item) => <ToolbarItem key={item.id} {...item} />);
     }
 
-    render() {
+    override render() {
         return (
             <Container style={{ position: 'relative' }}>
                 <div className={`${styles.toolbarWarp} ${styles.toolbar}`} ref={this.toolbarRef}>

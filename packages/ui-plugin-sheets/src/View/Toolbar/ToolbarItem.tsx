@@ -1,6 +1,6 @@
 import { AppContext, Button, CustomLabel, IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption, MenuItemType, Select, Tooltip } from '@univerjs/base-ui';
 import { ICommandService } from '@univerjs/core';
-import { Component, ComponentChild } from 'react';
+import { Component } from 'react';
 import { Subscription } from 'rxjs';
 
 import styles from './index.module.less';
@@ -22,8 +22,8 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
 
     private currentValueSubscription: Subscription | undefined;
 
-    constructor() {
-        super();
+    constructor(props: IDisplayMenuItem<IMenuItem>) {
+        super(props);
 
         this.state = {
             disabled: false,
@@ -58,7 +58,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         this.currentValueSubscription?.unsubscribe();
     }
 
-    render(): ComponentChild {
+    override render() {
         switch (this.props.type) {
             case MenuItemType.SUBITEMS:
             case MenuItemType.SELECTOR:
@@ -68,7 +68,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         }
     }
 
-    private renderSelectorType(): ComponentChild {
+    private renderSelectorType() {
         const { context, state } = this;
         const commandService: ICommandService = context.injector.get(ICommandService);
         const { disabled, value } = state;
@@ -81,7 +81,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                 <Select
                     id={id}
                     title={title}
-                    children={selections!}
+                    children={selections! as IValueOption[]}
                     options={selections as IValueOption[]}
                     display={display}
                     icon={icon}
@@ -95,7 +95,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         );
     }
 
-    private renderButtonType(): ComponentChild {
+    private renderButtonType() {
         const { props, context, state } = this;
         const { disabled, activated } = state;
         const { icon, title } = props;

@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import Style from './index.module.less';
 
 type IProps = {
     width: string;
@@ -11,10 +10,9 @@ type IProps = {
     lineSt: number;
     lineEd: number;
 };
-type IState = {};
 
 export function CanvasIcon(props: IProps) {
-    const { type, hv, mSt: m_st, mEd: m_ed, lineSt: line_st, lineEd: line_ed } = props
+    const { type, hv, mSt: m_st, mEd: m_ed, lineSt: line_st, lineEd: line_ed } = props;
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -23,7 +21,7 @@ export function CanvasIcon(props: IProps) {
 
         const ctx = canvasRef.current.getContext('2d')!;
         setLineDash(ctx);
-    }, [])
+    }, []);
 
     /**
      *
@@ -36,23 +34,6 @@ export function CanvasIcon(props: IProps) {
      * @param line_ed   End Y
      */
     function setLineDash(ctx: CanvasRenderingContext2D) {
-        // const borderType: { [index: string]: string } = {
-        //     '0': 'none',
-        //     '1': 'Thin',
-        //     '2': 'Hair',
-        //     '3': 'Dotted',
-        //     '4': 'Dashed',
-        //     '5': 'DashDot',
-        //     '6': 'DashDotDot',
-        //     '7': 'Double',
-        //     '8': 'Medium',
-        //     '9': 'MediumDashed',
-        //     '10': 'MediumDashDot',
-        //     '11': 'MediumDashDotDot',
-        //     '12': 'SlantedDashDot',
-        //     '13': 'Thick',
-        // };
-
         try {
             if (type === 'Hair') {
                 ctx.setLineDash([1, 2]);
@@ -97,5 +78,5 @@ export function CanvasIcon(props: IProps) {
         ctx.closePath();
     }
 
-    return <canvas ref={canvasRef} className={Style.canvas} width={props.width} height={props.height} />;
+    return <canvas ref={canvasRef} width={props.width} height={props.height} />;
 }

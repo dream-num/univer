@@ -32,6 +32,7 @@ module.exports = {
             'error',
             {
                 devDependencies: true,
+                packageDir: ['./'],
             },
         ],
         // turn on errors for missing imports

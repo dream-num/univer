@@ -1,4 +1,4 @@
-import { Component } from '@univerjs/base-ui';
+import { Component } from 'preact';
 import { Nullable } from '@univerjs/core';
 
 interface SearchProps {
@@ -51,7 +51,7 @@ export class SearchContent extends Component<SearchProps, SearchState> {
     //     });
     // }
 
-    render(props: SearchProps, state: SearchState) {
+    render() {
         // const Tab = this.Render.renderFunction('Tab');
         // const TabPane = this.Render.renderFunction('TabPane');
         // const Button = this.Render.renderFunction('Button');

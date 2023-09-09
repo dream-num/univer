@@ -46,7 +46,7 @@ class IfGenerate extends Component<IProps, IState> {
     /**
      * init
      */
-    override componentWillMount() {
+    override UNSAFE_componentWillMount() {
         this.setLocale();
         this._localeObserver = this.context.observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.add(() => {
             this.setLocale();

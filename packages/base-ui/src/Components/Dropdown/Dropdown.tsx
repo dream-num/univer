@@ -1,5 +1,4 @@
-import { JSX, createRef } from 'preact';
-import { PureComponent } from 'preact/compat';
+import { JSX, createRef, PureComponent } from 'react';
 import { Icon } from '..';
 import { JSXComponent } from '../../BaseComponent';
 import { BaseDropdownProps, DropdownComponent } from '../../Interfaces';

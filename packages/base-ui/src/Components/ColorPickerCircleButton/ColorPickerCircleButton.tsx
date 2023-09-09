@@ -23,8 +23,8 @@ export class ColorPickerCircleButton extends Component<BaseColorPickerCircleButt
         this.colorRef.current.showSelect(this.ref.current);
     };
 
-    render(props: BaseColorPickerCircleButtonProps) {
-        const { color, onClick, onCancel, style, colorPickerStyle } = props;
+    render() {
+        const { color, onClick, onCancel, style, colorPickerStyle } = this.props;
 
         return (
             <div style={style} className={Styles.colorPickerCircleButton} ref={this.ref} onClick={this.handleColorSelectButtonClick}>

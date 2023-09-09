@@ -31,6 +31,11 @@ const { Bright, FgCyan, FgGreen, Reset } = require('./color');
 
     let ctx = await esbuild.context({
         ...commonBuildOptions,
+        alias: {
+            'preact': 'react',
+            'preact/hooks': 'react',
+            'preact/compat': 'react'
+        },
         entryPoints: [paths.entry],
         outdir: paths.outDev,
     });
@@ -46,6 +51,6 @@ const { Bright, FgCyan, FgGreen, Reset } = require('./color');
 
     console.log(`${Bright}${FgGreen}Local server: ${FgCyan}${url}${Reset}`);
 
-    let start = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
-    exec(`${start} ${url}`);
+    // let start = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
+    // exec(`${start} ${url}`);
 })();

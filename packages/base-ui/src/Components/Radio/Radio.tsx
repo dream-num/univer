@@ -28,7 +28,7 @@ class RadioGroup extends Component<BaseRadioGroupProps, IState> {
         const { vertical, className = '' } = this.props;
         return (
             <div className={`${vertical ? styles.radioGroup : ''} ${className || ''}`}>
-                {this.props.children.map((item: VNode<BaseRadioIProps>) => {
+                {this.props.children.map((item: VNode<BaseRadioIProps>, index) => {
                     const isActive = this.props.active === item.props.value;
                     /**
                      *
@@ -39,6 +39,7 @@ class RadioGroup extends Component<BaseRadioGroupProps, IState> {
                                 Argument of type 'Radio & ComponentChildren' is not assignable to parameter of type 'VNode<any>'.
                     */
                     return cloneElement(item, {
+                        key: index,
                         label: item.props.label,
                         children: item.props.children,
                         value: item.props.value,

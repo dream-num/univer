@@ -3,7 +3,7 @@ import { Icon } from '../AddIcon';
 
 export const FillColorIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
-        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5567" width="1em" height="1em" fill="currentColor">
+        <svg className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5567" width="1em" height="1em" fill="currentColor">
             <path
                 d="M730.24 562.176l-253.44 253.44-217.173333-217.258667 253.44-253.44 217.173333 217.258667z m-72.405333-0.042667L512.981333 417.28l-180.992 180.992 144.810667 144.853333 181.034667-181.034666z"
                 p-id="5568"
@@ -18,7 +18,7 @@ export const FillColorIcon = (props: BaseIconProps) => (
 
 export const FullBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
-        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5695" width="1em" height="1em" fill="currentColor">
+        <svg className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5695" width="1em" height="1em" fill="currentColor">
             <path
                 d="M213.333333 810.666667V256h42.666667v554.666667zM725.333333 810.666667V256h42.666667v554.666667zM469.333333 810.666667V256h42.666667v554.666667z"
                 p-id="5696"
@@ -33,7 +33,7 @@ export const FullBorderIcon = (props: BaseIconProps) => (
 
 export const TopBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
-        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5823" width="1em" height="1em" fill="currentColor">
+        <svg className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5823" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 256h554.666667v42.666667H213.333333z" p-id="5824"></path>
             <path
                 d="M213.333333 426.666667h42.666667v42.666666H213.333333zM213.333333 597.333333h42.666667v42.666667H213.333333zM213.333333 341.333333h42.666667v42.666667H213.333333zM213.333333 512h42.666667v42.666667H213.333333zM213.333333 682.666667h42.666667v42.666666H213.333333zM469.333333 426.666667h42.666667v42.666666h-42.666667zM725.333333 426.666667h42.666667v42.666666h-42.666667zM725.333333 597.333333h42.666667v42.666667h-42.666667zM725.333333 341.333333h42.666667v42.666667h-42.666667zM725.333333 512h42.666667v42.666667h-42.666667zM725.333333 682.666667h42.666667v42.666666h-42.666667zM725.333333 768h42.666667v42.666667h-42.666667zM469.333333 597.333333h42.666667v42.666667h-42.666667zM469.333333 341.333333h42.666667v42.666667h-42.666667zM469.333333 512h42.666667v42.666667h-42.666667zM469.333333 682.666667h42.666667v42.666666h-42.666667zM213.333333 768h42.666667v42.666667H213.333333zM384 768h42.666667v42.666667H384zM554.666667 768h42.666666v42.666667h-42.666666zM298.666667 768h42.666666v42.666667H298.666667zM469.333333 768h42.666667v42.666667h-42.666667zM640 768h42.666667v42.666667h-42.666667zM384 512h42.666667v42.666667H384zM554.666667 512h42.666666v42.666667h-42.666666zM298.666667 512h42.666666v42.666667H298.666667z"
@@ -46,7 +46,7 @@ export const TopBorderIcon = (props: BaseIconProps) => (
 
 export const BottomBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
-        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5952" width="1em" height="1em" fill="currentColor">
+        <svg className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5952" width="1em" height="1em" fill="currentColor">
             <path d="M768 810.666667H213.333333v-42.666667h554.666667z" p-id="5953"></path>
             <path
                 d="M768 640h-42.666667v-42.666667h42.666667zM768 469.333333h-42.666667v-42.666666h42.666667zM768 725.333333h-42.666667v-42.666666h42.666667zM768 554.666667h-42.666667v-42.666667h42.666667zM768 384h-42.666667V341.333333h42.666667z"
@@ -75,7 +75,7 @@ export const BottomBorderIcon = (props: BaseIconProps) => (
 
 export const LeftBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
-        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6085" width="1em" height="1em" fill="currentColor">
+        <svg className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6085" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 810.666667V256h42.666667v554.666667z" p-id="6086"></path>
             <path
                 d="M384 810.666667v-42.666667h42.666667v42.666667zM554.666667 810.666667v-42.666667h42.666666v42.666667zM298.666667 810.666667v-42.666667h42.666666v42.666667zM469.333333 810.666667v-42.666667h42.666667v42.666667zM640 810.666667v-42.666667h42.666667v42.666667z"
@@ -100,7 +100,7 @@ export const LeftBorderIcon = (props: BaseIconProps) => (
 
 export const RightBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
-        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6217" width="1em" height="1em" fill="currentColor">
+        <svg className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6217" width="1em" height="1em" fill="currentColor">
             <path d="M768 256v554.666667h-42.666667V256z" p-id="6218"></path>
             <path
                 d="M597.333333 256v42.666667h-42.666666V256zM426.666667 256v42.666667H384V256zM682.666667 256v42.666667h-42.666667V256zM512 256v42.666667h-42.666667V256zM341.333333 256v42.666667H298.666667V256z"
@@ -129,7 +129,7 @@ export const RightBorderIcon = (props: BaseIconProps) => (
 
 export const NoneBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
-        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6350" width="1em" height="1em" fill="currentColor">
+        <svg className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6350" width="1em" height="1em" fill="currentColor">
             <path
                 d="M384 810.666667v-42.666667h42.666667v42.666667zM554.666667 810.666667v-42.666667h42.666666v42.666667zM298.666667 810.666667v-42.666667h42.666666v42.666667zM469.333333 810.666667v-42.666667h42.666667v42.666667zM640 810.666667v-42.666667h42.666667v42.666667zM384 554.666667v-42.666667h42.666667v42.666667zM384 298.666667V256h42.666667v42.666667zM554.666667 298.666667V256h42.666666v42.666667zM298.666667 298.666667V256h42.666666v42.666667zM469.333333 298.666667V256h42.666667v42.666667zM640 298.666667V256h42.666667v42.666667zM725.333333 298.666667V256h42.666667v42.666667zM213.333333 298.666667V256h42.666667v42.666667zM554.666667 554.666667v-42.666667h42.666666v42.666667zM298.666667 554.666667v-42.666667h42.666666v42.666667zM469.333333 554.666667v-42.666667h42.666667v42.666667zM640 554.666667v-42.666667h42.666667v42.666667z"
                 p-id="6351"
@@ -148,7 +148,7 @@ export const NoneBorderIcon = (props: BaseIconProps) => (
 
 export const OuterBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
-        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6479" width="1em" height="1em" fill="currentColor">
+        <svg className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6479" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 810.666667V256h42.666667v554.666667zM725.333333 810.666667V256h42.666667v554.666667z" p-id="6480"></path>
             <path d="M213.333333 256h554.666667v42.666667H213.333333zM213.333333 768h554.666667v42.666667H213.333333z" p-id="6481"></path>
             <path
@@ -162,7 +162,7 @@ export const OuterBorderIcon = (props: BaseIconProps) => (
 
 export const InnerBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
-        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6609" width="1em" height="1em" fill="currentColor">
+        <svg className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6609" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 512h554.666667v42.666667H213.333333z" p-id="6610"></path>
             <path d="M512 256v554.666667h-42.666667V256z" p-id="6611"></path>
             <path
@@ -175,7 +175,7 @@ export const InnerBorderIcon = (props: BaseIconProps) => (
 
 export const StripingBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
-        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6866" width="1em" height="1em" fill="currentColor">
+        <svg className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6866" width="1em" height="1em" fill="currentColor">
             <path d="M213.333333 512h554.666667v42.666667H213.333333z" p-id="6867"></path>
             <path
                 d="M213.333333 426.666667h42.666667v42.666666H213.333333zM213.333333 597.333333h42.666667v42.666667H213.333333zM213.333333 341.333333h42.666667v42.666667H213.333333zM213.333333 682.666667h42.666667v42.666666H213.333333zM725.333333 426.666667h42.666667v42.666666h-42.666667zM469.333333 426.666667h42.666667v42.666666h-42.666667zM725.333333 597.333333h42.666667v42.666667h-42.666667zM469.333333 597.333333h42.666667v42.666667h-42.666667zM725.333333 341.333333h42.666667v42.666667h-42.666667zM469.333333 341.333333h42.666667v42.666667h-42.666667zM725.333333 682.666667h42.666667v42.666666h-42.666667zM469.333333 682.666667h42.666667v42.666666h-42.666667zM725.333333 768h42.666667v42.666667h-42.666667zM725.333333 256h42.666667v42.666667h-42.666667zM213.333333 768h42.666667v42.666667H213.333333zM213.333333 256h42.666667v42.666667H213.333333zM384 768h42.666667v42.666667H384zM384 256h42.666667v42.666667H384zM554.666667 768h42.666666v42.666667h-42.666666zM554.666667 256h42.666666v42.666667h-42.666666zM298.666667 768h42.666666v42.666667H298.666667zM298.666667 256h42.666666v42.666667H298.666667zM469.333333 768h42.666667v42.666667h-42.666667zM469.333333 256h42.666667v42.666667h-42.666667zM640 768h42.666667v42.666667h-42.666667zM640 256h42.666667v42.666667h-42.666667z"
@@ -187,7 +187,7 @@ export const StripingBorderIcon = (props: BaseIconProps) => (
 
 export const VerticalBorderIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
-        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6994" width="1em" height="1em" fill="currentColor">
+        <svg className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6994" width="1em" height="1em" fill="currentColor">
             <path
                 d="M213.333333 426.666667h42.666667v42.666666H213.333333zM213.333333 597.333333h42.666667v42.666667H213.333333zM213.333333 341.333333h42.666667v42.666667H213.333333zM213.333333 682.666667h42.666667v42.666666H213.333333zM725.333333 426.666667h42.666667v42.666666h-42.666667zM725.333333 597.333333h42.666667v42.666667h-42.666667zM725.333333 341.333333h42.666667v42.666667h-42.666667zM725.333333 682.666667h42.666667v42.666666h-42.666667zM725.333333 768h42.666667v42.666667h-42.666667zM725.333333 256h42.666667v42.666667h-42.666667zM725.333333 512h42.666667v42.666667h-42.666667zM213.333333 768h42.666667v42.666667H213.333333zM213.333333 256h42.666667v42.666667H213.333333zM213.333333 512h42.666667v42.666667H213.333333zM384 768h42.666667v42.666667H384zM384 256h42.666667v42.666667H384zM384 512h42.666667v42.666667H384zM554.666667 768h42.666666v42.666667h-42.666666zM554.666667 256h42.666666v42.666667h-42.666666zM554.666667 512h42.666666v42.666667h-42.666666zM298.666667 768h42.666666v42.666667H298.666667zM298.666667 256h42.666666v42.666667H298.666667zM298.666667 512h42.666666v42.666667H298.666667zM469.333333 768h42.666667v42.666667h-42.666667zM469.333333 256h42.666667v42.666667h-42.666667zM469.333333 512h42.666667v42.666667h-42.666667zM640 768h42.666667v42.666667h-42.666667zM640 256h42.666667v42.666667h-42.666667zM640 512h42.666667v42.666667h-42.666667z"
                 p-id="6995"
@@ -199,7 +199,7 @@ export const VerticalBorderIcon = (props: BaseIconProps) => (
 
 export const MergeIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
-        <svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7122" width="1em" height="1em" fill="currentColor">
+        <svg className="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7122" width="1em" height="1em" fill="currentColor">
             <path d="M810.666667 213.333333v597.333334H213.333333V213.333333h597.333334z m-42.666667 42.666667H256v512h512V256z" p-id="7123"></path>
             <path
                 d="M389.162667 426.666667l90.538666 90.496-90.538666 90.538666-30.165334-30.165333 37.802667-37.845333-119.466667 0.042666v-42.666666l121.856-0.042667-40.192-40.192 30.165334-30.165333zM645.162667 426.666667L554.666667 517.162667l90.496 90.538666 30.165333-30.165333-37.76-37.845333 119.466667 0.042666v-42.666666l-121.856-0.042667 40.149333-40.192-30.165333-30.165333z"

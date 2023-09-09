@@ -50,6 +50,8 @@
         "@types/jest": "28.1.8",
         "@types/node": "^18.14.0",
         "@types/numeral": "^2.0.2",
+        "@types/react": "^18.2.21",
+        "@types/react-dom": "^18.2.7",
         "@typescript-eslint/eslint-plugin": "^5.54.0",
         "@typescript-eslint/parser": "^5.54.0",
         "cross-env": "^7.0.3",
@@ -89,6 +91,8 @@
         ]
     },
     "dependencies": {
-        "pnpm": "^8.6.4"
+        "pnpm": "^8.6.4",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
     }
 }

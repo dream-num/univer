@@ -126,7 +126,7 @@
 //         }
 //     };
 
-//     componentWillMount() {
+//     UNSAFE_componentWillMount() {
 //         this.setLocale();
 
 //         this._localeObserver = this._context

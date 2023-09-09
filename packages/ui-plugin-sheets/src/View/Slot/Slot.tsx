@@ -49,6 +49,7 @@ export class Slot extends Component<IProps, IState> {
             if (!Slot) return;
             group.push(
                 <Slot
+                    key={k}
                     ref={(ele: Slot) => {
                         this.refMap.set(k, ele);
                     }}

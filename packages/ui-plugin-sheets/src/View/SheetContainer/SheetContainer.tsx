@@ -35,7 +35,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
     contentRef = createRef<HTMLDivElement>();
 
     constructor(props: BaseSheetContainerProps) {
-        super();
+        super(props);
         this.changeSkin(props.config.container as string, 'default');
     }
 

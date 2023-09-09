@@ -80,19 +80,19 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
         return <Icon />;
     }
 
-    render(props: BaseFormulaBarProps, state: FormulaState) {
+    render() {
         // TODO: formula bar top left menu: 1. cell edit formula ,use formula list 2. cell selection ,use named range, 3. cell edit no formula, disable select
-        const { namedRanges, fx } = state;
+        const { namedRanges, fx } = this.state;
 
         return (
             <div className={styles.formulaBox}>
                 {/* <Select children={namedRanges} type={0}></Select> */}
                 <div className={styles.formulaBar}>
                     <div className={styles.formulaIcon}>
-                        <span className={state.spanClass}>
+                        <span className={this.state.spanClass}>
                             <Icon.Format.CloseIcon />
                         </span>
-                        <span className={state.spanClass}>
+                        <span className={this.state.spanClass}>
                             <Icon.Format.CorrectIcon />
                         </span>
                         {fx ? (
@@ -102,9 +102,13 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
                         ) : null}
                     </div>
                     <div className={styles.formulaInput}>
-                        <div autoFocus contentEditable={true} className={styles.formulaContent} onKeyUp={(e) => this.printChange(e)}>
-                            {state.formulaContent}
-                        </div>
+                        <div
+                            autoFocus
+                            contentEditable={true}
+                            className={styles.formulaContent}
+                            onKeyUp={(e) => this.printChange(e)}
+                            dangerouslySetInnerHTML={{ __html: this.state.formulaContent }}
+                        />
                     </div>
                 </div>
             </div>

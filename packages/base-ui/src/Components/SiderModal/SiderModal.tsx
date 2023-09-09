@@ -34,16 +34,16 @@ class SiderModal extends Component<BaseSiderModalProps, IState> {
         });
     }
 
-    componentWillReceiveProps(props: BaseSiderModalProps): void {
+    UNSAFE_componentWillReceiveProps(props: BaseSiderModalProps): void {
         this.setState({
             show: props.show ?? true,
         });
     }
 
-    render(props: BaseSiderModalProps) {
-        const { className = '', style } = props;
+    render() {
+        const { className = '', style } = this.props;
         const { zIndex, show } = this.state;
-        this.context.zIndexManager.setIndex(props.name, zIndex);
+        this.context.zIndexManager.setIndex(this.props.name, zIndex);
 
         return show ? (
             <div className={`${Style.siderModal} ${className}`} style={{ ...style, zIndex }} onClick={() => this.handleClick()}>

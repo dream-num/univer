@@ -1,5 +1,5 @@
 import { ICommandService, isRealNum } from '@univerjs/core';
-import { Component, ComponentChild, createRef } from 'preact';
+import { Component, ComponentChild, createRef, Fragment } from 'preact';
 import { Subscription } from 'rxjs';
 
 import { AppContext } from '../../Common/AppContext';
@@ -32,7 +32,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
         this.getSubMenus();
     }
 
-    override componentWillReceiveProps(nextProps: Readonly<BaseMenuProps>): void {
+    override UNSAFE_componentWillReceiveProps(nextProps: Readonly<BaseMenuProps>): void {
         if (this.props.menuId !== nextProps.menuId) {
             this.getSubMenus();
         }
@@ -132,10 +132,10 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                 {menu?.map((item: BaseMenuItem, index: number) => {
                     if (item.show === false) return;
                     return (
-                        <>
+                        <Fragment key={index}>
                             <li
                                 className={joinClassNames(styles.colsMenuitem, item.className ?? '', item.disabled ? styles.colsMenuitemDisabled : '')}
-                                style={item.style ?? ''}
+                                style={item.style}
                                 onClick={(e) => this.handleClick(e, item, index)}
                                 onMouseEnter={(e) => {
                                     this.mouseEnter(e, index);
@@ -161,7 +161,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                                 )}
                             </li>
                             {item.border ? <div className={styles.colsMenuitemLine}></div> : ''}
-                        </>
+                        </Fragment>
                     );
                 })}
                 {options?.map((option: IValueOption | ICustomComponentOption, index: number) => {
@@ -170,6 +170,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                     if (isValueOption) {
                         return (
                             <li
+                                key={index}
                                 className={joinClassNames(styles.colsMenuitem, option.disabled ? styles.colsMenuitemDisabled : '')}
                                 onClick={() => {
                                     if (option.value) {
@@ -192,7 +193,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                     // custom component option
                     const CustomComponent = context.componentManager?.get(option.id);
                     return (
-                        <li className={joinClassNames(styles.colsMenuitem, option.disabled ? styles.colsMenuitemDisabled : '')}>
+                        <li key={index} className={joinClassNames(styles.colsMenuitem, option.disabled ? styles.colsMenuitemDisabled : '')}>
                             <CustomComponent
                                 onValueChange={(v: string | number) => {
                                     this.props.onOptionSelect!({ value: v, label: option.id });
@@ -202,10 +203,6 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
                         </li>
                     );
                 })}
-                {/* render submenus */}
-                {menuItems?.map((item: IDisplayMenuItem<IMenuItem>, index) => (
-                    <MenuItem menuItem={item} index={index} onClick={this.handleItemClick.bind(this, item as IMenuButtonItem)} />
-                ))}
             </ul>
         );
     }
@@ -290,7 +287,7 @@ export class MenuItem extends Component<IMenuItemProps, IMenuItemState> {
         this.valueSubscription?.unsubscribe();
     }
 
-    override componentWillReceiveProps(nextProps: Readonly<IMenuItemProps>): void {
+    override UNSAFE_componentWillReceiveProps(nextProps: Readonly<IMenuItemProps>): void {
         if (this.props.menuItem.id !== nextProps.menuItem.id) {
             this.getSubMenus();
         }

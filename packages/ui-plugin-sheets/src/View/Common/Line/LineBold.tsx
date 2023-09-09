@@ -32,7 +32,7 @@ export class LineBold extends Component<IProps, IState> {
         this.props.getComponent?.(this);
     }
 
-    override componentWillReceiveProps(props: IProps) {
+    override UNSAFE_componentWillReceiveProps(props: IProps) {
         this.setState({
             img: props.value,
         });

@@ -34,11 +34,11 @@ export class Checkbox extends Component<BaseCheckboxProps, CheckboxState> {
         this.setState((prevState) => ({ classes: classGroup, check: checked }));
     };
 
-    override componentWillMount() {
+    override UNSAFE_componentWillMount() {
         this.handleStyle(this.props.checked, this.props.disabled);
     }
 
-    override componentWillReceiveProps(nextProps: BaseCheckboxProps) {
+    override UNSAFE_componentWillReceiveProps(nextProps: BaseCheckboxProps) {
         this.handleStyle(nextProps.checked, nextProps.disabled);
     }
 
@@ -50,9 +50,9 @@ export class Checkbox extends Component<BaseCheckboxProps, CheckboxState> {
         this.props.onChange?.(e);
     };
 
-    render(props: BaseCheckboxProps, state: CheckboxState) {
-        const { classes, check } = state;
-        const { value, name, disabled, children } = props;
+    render() {
+        const { classes, check } = this.state;
+        const { value, name, disabled, children } = this.props;
         return (
             <label className={styles.checkboxWrapper}>
                 <span className={classes}>

@@ -1,5 +1,4 @@
-import { ComponentChildren, createRef, RefObject } from 'preact';
-import { PureComponent } from 'preact/compat';
+import { ComponentChildren, createRef, RefObject, PureComponent } from 'react';
 import { AppContext, ICustomComponent } from '../../Common';
 import { BaseMenuItem } from '../../Interfaces';
 import { Dropdown } from '../Dropdown';
@@ -270,7 +269,7 @@ export class Select extends PureComponent<BaseSelectProps, IState> {
         this.initData();
     }
 
-    override componentWillReceiveProps(nextProps: BaseSelectProps) {
+    override UNSAFE_componentWillReceiveProps(nextProps: BaseSelectProps) {
         this.updateData();
     }
 

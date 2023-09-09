@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useState } from 'react';
 import { JSXComponent } from '../../BaseComponent';
 import { BasePanelProps, BaseCollapseProps, CollapseComponent, PanelComponent } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';

@@ -82,7 +82,7 @@ export class Slider extends Component<BaseSliderRangeProps | BaseSliderSinglePro
         );
     };
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         // 生成随机id
         this.idPrev = randomId('slider');
         this.idNext = randomId('slider');
@@ -129,22 +129,22 @@ export class Slider extends Component<BaseSliderRangeProps | BaseSliderSinglePro
         }
     }
 
-    render(props: BaseSliderSingleProps | BaseSliderRangeProps, state: SliderState) {
-        const { valuePrev, valueNext } = state;
-        const { step = 1, min = 0, max = 100, range = false } = props;
+    render() {
+        const { valuePrev, valueNext } = this.state;
+        const { step = 1, min = 0, max = 100, range = false } = this.props;
         if (range) {
             return (
                 <div className={styles.slider} role="group" aria-labelledby="multi-lbl" style={{ '--min': min, '--max': max }} ref={this.ref}>
-                    <label class="sr-only" for={this.idPrev}></label>
+                    <label className="sr-only" htmlFor={this.idPrev}></label>
                     <input id={this.idPrev} type="range" min={min} value={valuePrev} max={max} step={step} onInput={(e) => this.onInput(0, e)} />
-                    <label class="sr-only" for={this.idNext}></label>
+                    <label className="sr-only" htmlFor={this.idNext}></label>
                     <input id={this.idNext} type="range" min={min} value={valueNext} max={max} step={step} onInput={(e) => this.onInput(1, e)} />
                 </div>
             );
         }
         return (
             <div className={styles.slider} role="group" aria-labelledby="multi-lbl" style={{ '--min': min, '--max': max }} ref={this.ref} onClick={(e) => this.onClick(0, e)}>
-                <label class="sr-only" for={this.idPrev}></label>
+                <label className="sr-only" htmlFor={this.idPrev}></label>
                 <input id={this.idPrev} type="range" min={min} value={valuePrev} max={max} step={step} onInput={(e) => this.onInput(0, e)} />
             </div>
         );

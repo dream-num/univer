@@ -17,19 +17,16 @@
         "esbuild:demo": "node ./esbuild.config.js"
     },
     "devDependencies": {
-        "@testing-library/preact": "^2.0.1",
         "@types/jest": "^27.5.2",
         "@types/node": "^18.14.0",
         "enzyme": "^3.11.0",
-        "enzyme-adapter-preact-pure": "^3.3.0",
         "identity-obj-proxy": "^3.0.0",
         "jest-dev-server": "^6.1.1",
         "jest-environment-jsdom": "^29.0.3",
         "less": "^4.1.1",
         "prettier": "^2.3.2",
         "ts-jest": "29.0.1",
-        "ts-node": "^10.9.1",
-        "typescript": "^4.4.1-rc"
+        "ts-node": "^10.9.1"
     },
     "dependencies": {
         "@univerjs/base-docs": "workspace:^0.0.1",
@@ -37,7 +34,6 @@
         "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/common-plugin-data": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
-        "@univerjs/ui-plugin-docs": "workspace:^0.0.1",
-        "preact": "^10.12.1"
+        "@univerjs/ui-plugin-docs": "workspace:^0.0.1"
     }
 }

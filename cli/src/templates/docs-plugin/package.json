@@ -23,31 +23,21 @@
     ],
     "private": true,
     "scripts": {
-        "test": "jest",
-        "dev": "vite",
-        "build": "tsc && vite build",
-        "watch": "vite build",
-        "serve": "vite preview"
+        "test": "jest"
     },
     "devDependencies": {
-        "@preact/preset-vite": "2.0.0",
-        "@testing-library/preact": "^2.0.1",
         "@types/jest": "^27.0.1",
         "@types/node": "^16.4.6",
-        "@vitejs/plugin-legacy": "^1.5.1",
         "less": "^4.1.1",
         "prettier": "^2.3.2",
         "ts-jest": "29.0.1",
-        "ts-node": "^10.2.1",
-        "typescript": "^4.4.1-rc",
-        "vite": "^2.4.4"
+        "ts-node": "^10.2.1"
     },
     "dependencies": {
         "@univerjs/common-plugin-data": "workspace:^0.0.1",
         "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
-        "@univerjs/base-docs": "workspace:^0.0.1",
-        "preact": "^10.5.14"
+        "@univerjs/base-docs": "workspace:^0.0.1"
     }
 }

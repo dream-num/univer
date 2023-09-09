@@ -4,10 +4,9 @@
 
 ## 工具
 
--   vite
 -   pnpm
 -   Typescript
--   preact
+-   react
 
 ## 工程介绍
 

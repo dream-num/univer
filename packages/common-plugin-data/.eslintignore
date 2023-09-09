@@ -1,5 +1,4 @@
 .eslintrc.js
-vite.config.ts
 **/*.test.js
 dist
 lib

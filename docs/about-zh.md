@@ -10,7 +10,7 @@
 
 我们站在巨人的肩膀上构建新的应用，非常感谢这些开源贡献者们的无私奉献。
 
-- [preact](https://preactjs.com)
+- [react](https://react.dev)
 - [dayjs](https://github.com/iamkun/dayjs)
 - [numeral](https://github.com/adamwdraper/Numeral-js)
 - [reflect-metadata](https://github.com/rbuckton/reflect-metadata)

@@ -6,24 +6,17 @@
     "scripts": {
         "test": "node scripts/test",
         "test:e2e": "pnpm run --filter @univerjs/base-sheets test:play",
-        "dev": "node scripts/dev",
-        "dev:sheet": "pnpm run --filter univer-sheet-ts dev",
         "start:sheet": "node scripts/start -t sheet",
         "start:doc": "node scripts/start -t doc",
         "start:slide": "node scripts/start -t slide",
         "dev:all": "pnpm run --filter univer-vanilla-ts dev",
-        "dev:preact": "pnpm run --filter univer-sheet-preact dev",
         "dev:doc": "pnpm run --filter univer-doc-ts dev",
         "dev:slide": "pnpm run --filter univer-slide-ts dev",
-        "d": "pnpm run dev:all",
         "api": "node scripts/api",
         "lighthouse-dev": "start /B node scripts/dev && lighthouse http://127.0.0.1:3103 --output html --output-path ./report.html",
         "build:legacy": "node scripts/build.js",
         "build": "turbo esbuild",
         "build:demo": "turbo esbuild:demo",
-        "build:sheet": "pnpm run --filter univer-sheet-ts build:demo",
-        "build:doc": "pnpm run --filter univer-doc-ts build:demo",
-        "build:slide": "pnpm run --filter univer-slide-ts build:demo",
         "build:customd": "cd cli/src/templates/univer-custom-build && npm run build:d",
         "clean": "npm cache clean --force && node scripts/clean.js && pnpm install",
         "node-server": "node scripts/server.js",
@@ -52,8 +45,8 @@
         "@types/numeral": "^2.0.2",
         "@types/react": "^18.2.21",
         "@types/react-dom": "^18.2.7",
-        "@typescript-eslint/eslint-plugin": "^5.54.0",
-        "@typescript-eslint/parser": "^5.54.0",
+        "@typescript-eslint/eslint-plugin": "^6.6.0",
+        "@typescript-eslint/parser": "^6.6.0",
         "cross-env": "^7.0.3",
         "esbuild": "^0.19.2",
         "esbuild-plugin-clean": "^1.0.1",
@@ -75,15 +68,13 @@
         "lighthouse": "^9.4.0",
         "lint-staged": "^13.0.3",
         "minimist": "^1.2.8",
-        "nodemon": "^2.0.3",
-        "preact": "^10.17.1",
         "prettier": "^2.3.2",
         "rimraf": "^3.0.2",
         "tree-kill": "^1.2.2",
         "ts-jest": "29.0.1",
         "ts-node": "^10.9.1",
         "turbo": "^1.10.13",
-        "typescript": "^4.4.1-rc"
+        "typescript": "^5.2.2"
     },
     "lint-staged": {
         "packages/**/src/**/*.ts?(x)": [
@@ -91,7 +82,6 @@
         ]
     },
     "dependencies": {
-        "pnpm": "^8.6.4",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     }

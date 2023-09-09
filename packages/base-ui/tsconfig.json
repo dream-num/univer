@@ -10,7 +10,7 @@
     },
     "include": [
         "src/**/*",
-        "test/**/*.test.(ts|tsx|js)",
-        "preact"
+        "test/**/*.test.(ts|tsx|js)"
+
     ]
 }

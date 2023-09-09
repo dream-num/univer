@@ -14,7 +14,7 @@ export interface ISheetBarMenuItem {
 
 export interface ISheetBarMenuProps {
     menu: ISheetBarMenuItem[];
-    style?: JSX.CSSProperties;
+    style?: React.CSSProperties;
     onClick?: (e?: MouseEvent) => void;
 }
 
@@ -37,13 +37,13 @@ export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
         };
     }
 
-    handleClick(e: MouseEvent, item: ISheetBarMenuItem) {
+    handleClick(e: React.MouseEvent<HTMLLIElement, MouseEvent>, item: ISheetBarMenuItem) {
         e.stopPropagation();
         const { onClick } = this.props;
         if (item.onClick) {
             item.onClick(e);
         }
-        onClick?.(e);
+        // onClick?.(e);
         this.showMenu(false);
         window.removeEventListener('click', this.hideMenu, true);
         this.selectItem(item.sheetId as string);
@@ -143,7 +143,7 @@ export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
         }));
     }
 
-    render() {
+    override render() {
         const { style } = this.props;
         const { show, menu } = this.state;
 

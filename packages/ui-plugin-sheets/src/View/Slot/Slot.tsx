@@ -1,5 +1,6 @@
-import { BaseComponentProps } from '@univerjs/base-ui';
+import type { BaseComponentProps } from '@univerjs/base-ui';
 import { Component } from 'react';
+
 import { SlotGroupProps } from '../../Controller/SlotController';
 
 interface IState {
@@ -44,13 +45,13 @@ export class Slot extends Component<IProps, IState> {
     getRender(slotGroup: SlotGroupProps) {
         const group: JSX.Element[] = [];
         slotGroup.forEach((v, k) => {
-            const Slot = slotGroup.get(k)?.component;
+            const Slot = slotGroup.get(k)?.component as React.ComponentType<any>;
             const props = slotGroup.get(k)?.props;
             if (!Slot) return;
             group.push(
                 <Slot
                     key={k}
-                    ref={(ele: Slot) => {
+                    ref={(ele: React.ComponentType<any>) => {
                         this.refMap.set(k, ele);
                     }}
                     {...props}
@@ -60,7 +61,7 @@ export class Slot extends Component<IProps, IState> {
         return group;
     }
 
-    render() {
+    override render() {
         const { slotGroup } = this.state;
         return <div>{this.getRender(slotGroup)}</div>;
     }

@@ -79,10 +79,10 @@ export class Animate {
         let successNumber = 0;
         return new Promise<void>((resolve) => {
             for (let i = 0; i < animates.length; i++) {
-                let animate = animates[i];
-                let config = animate._config;
-                let success = config.success;
-                let loop = config.loop;
+                const animate = animates[i];
+                const config = animate._config;
+                const success = config.success;
+                const loop = config.loop;
                 if (loop) {
                     continue;
                 }
@@ -124,8 +124,8 @@ export class Animate {
         let times = Date.now() - this._start;
         times = times >= this._config.duration ? this._config.duration : times;
 
-        let val = Tween[this._config.type](times, this._config.begin, this._config.end - this._config.begin, this._config.duration, 0.7);
-        let fix = val.toFixed(2);
+        const val = Tween[this._config.type](times, this._config.begin, this._config.end - this._config.begin, this._config.duration, 0.7);
+        const fix = val.toFixed(2);
 
         this._config.receive(fix);
 

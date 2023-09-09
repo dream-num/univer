@@ -38,7 +38,7 @@ export class LineColor extends Component<IProps, IState> {
         });
     }
 
-    render() {
+    override render() {
         const { color } = this.state;
         const { label } = this.props;
 

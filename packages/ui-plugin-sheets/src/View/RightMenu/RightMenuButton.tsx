@@ -11,14 +11,16 @@ interface IPropsChildren {
 }
 
 export class RightMenuButton extends Component<IProps> {
-    render() {
+    override render() {
         const { label, children } = this.props;
 
         return (
             <div>
                 {label}
                 {children.map((item: IPropsChildren, index) => (
-                    <Button key={index} type="primary">{item.label}</Button>
+                    <Button key={index} type="primary">
+                        {item.label}
+                    </Button>
                 ))}
             </div>
         );

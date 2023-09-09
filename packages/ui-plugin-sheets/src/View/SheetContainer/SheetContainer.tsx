@@ -1,16 +1,17 @@
-import { BaseComponentProps, Container, Content, Footer, Header, Layout, Sider, Slot, defaultSkin } from '@univerjs/base-ui';
-import { Component, createRef } from 'react';
-import { Tools } from '@univerjs/core';
+import { BaseComponentProps, Container, Content, defaultSkin, Footer, Header, Layout, Sider, Slot } from '@univerjs/base-ui';
+import { IKeyValue, Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
-import style from './index.module.less';
-import { InfoBar } from '../InfoBar';
-import { RightMenu } from '../RightMenu';
-import { CountBar } from '../CountBar';
-import { SheetBar } from '../SheetBar';
-import { FormulaBar } from '../FormulaBar';
-import { RichText } from '../RichText';
+import { Component, createRef } from 'react';
+
 import { ISheetUIPluginConfig } from '../../Basics';
+import { CountBar } from '../CountBar';
+import { FormulaBar } from '../FormulaBar';
+import { InfoBar } from '../InfoBar';
+import { RichText } from '../RichText';
+import { RightMenu } from '../RightMenu';
+import { SheetBar } from '../SheetBar';
 import { Toolbar } from '../Toolbar';
+import style from './index.module.less';
 
 export interface BaseSheetContainerProps extends BaseComponentProps {
     config: ISheetUIPluginConfig;
@@ -47,7 +48,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
      * split mouse down
      * @param e
      */
-    handleSplitBarMouseDown = (e: MouseEvent) => {
+    handleSplitBarMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e = e || window.event; // Compatible with IE browser
         // Store the current mouse position
         this.leftContentLeft = this.splitLeftRef.current?.getBoundingClientRect().left!;
@@ -102,29 +103,22 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
     changeSkin(container: HTMLElement | string, skin: string) {
         // Collect all  skins
         const root = document.documentElement;
-
         const id = typeof container === 'string' ? container : container.id;
-
         // get all skins
-        const skins: Record<string, CSSModuleClasses> = {
+        const skins: Record<string, IKeyValue> = {
             default: defaultSkin,
         };
-
         // current skin set by user
         let currentSkin = skins[skin];
-
         // transform "primaryColor" to "--primary-color"
         currentSkin = Object.fromEntries(Object.keys(currentSkin).map((item) => [`--${item.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`, currentSkin[item]]));
 
         // ie11 does not support css variables, use css-vars-ponyfill to handle
         if (Tools.isIEBrowser()) {
             cssVars({
-                // Options...
-
                 // The container is invalid as rootElement, so the default setting is root.
                 // Disadvantages: In ie11, only one set of skins can be used for multiple workbooks, and it is the skin set by the last workbook
                 rootElement: root, // default
-
                 variables: currentSkin,
             });
         } else {
@@ -133,13 +127,10 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
 
             /**
              *  covert object to style, remove " and replace , to ;
-             *
              *  Example:
-             *
              *  before: {--primary-color:"#0188fb",--primary-color-hover:"#5391ff"}
              *  after:  {--primary-color:#0188fb;--primary-color-hover:#5391ff;}
              */
-
             sheet.insertRule(
                 `#${id} ${JSON.stringify(currentSkin)
                     .replace(/"/g, '')
@@ -195,7 +186,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
      *
      * @returns {void}
      */
-    render() {
+    override render() {
         const { methods } = this.props;
         const { layout } = this.props.config;
         const config = layout?.sheetContainerConfig!;
@@ -227,7 +218,7 @@ export class SheetContainer extends Component<BaseSheetContainerProps> {
                                 {/* <Slot {...methods.slot}></Slot> */}
                                 {!!config.contentSplit && (
                                     <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
-                                        <div className={style.hoverCursor} onMouseDown={this.handleSplitBarMouseDown}></div>
+                                        <div className={style.hoverCursor} onMouseDown={(e) => this.handleSplitBarMouseDown(e)}></div>
                                     </Container>
                                 )}
                                 <Container onContextMenu={(e) => e.preventDefault()} ref={this.contentRef} className={style.contentInnerRightContainer}>

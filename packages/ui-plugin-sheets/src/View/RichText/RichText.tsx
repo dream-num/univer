@@ -1,6 +1,7 @@
 // import { CellInputHandler } from '@univerjs/sheets-plugin-formula/src/Controller/CellInputHandler';
 import { BaseComponentProps, xssDeal } from '@univerjs/base-ui';
-import { Component, createRef } from 'react';
+import { Component, createRef, KeyboardEvent, MouseEventHandler } from 'react';
+
 import { CellTextStyle } from './CellTextStyle';
 import styles from './index.module.less';
 // interface IProps {
@@ -15,7 +16,7 @@ export interface IRichTextState {}
 export interface BaseRichTextProps extends BaseComponentProps {
     style?: {};
     className?: string;
-    onClick?: (e: MouseEvent) => void;
+    onClick?: MouseEventHandler<HTMLDivElement>;
     text?: string;
 }
 
@@ -68,7 +69,7 @@ export class RichText extends Component<BaseRichTextProps, IRichTextState> {
         this.container.current!.style.display = 'none';
     }
 
-    onKeyDown(event: KeyboardEvent) {
+    onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
         // let ctrlKey = event.ctrlKey;
         // let altKey = event.altKey;
         // let shiftKey = event.shiftKey;
@@ -137,7 +138,7 @@ export class RichText extends Component<BaseRichTextProps, IRichTextState> {
         // }
     }
 
-    onKeyUp(event: KeyboardEvent) {
+    onKeyUp(event: KeyboardEvent<HTMLDivElement>) {
         const onKeyUp = this.hooks.get('onKeyUp');
         onKeyUp && onKeyUp(event);
 
@@ -169,7 +170,7 @@ export class RichText extends Component<BaseRichTextProps, IRichTextState> {
         // this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
-    render() {
+    override render() {
         const { style, className = '', onClick, text } = this.props;
         return (
             <div className={`${styles.richTextEditorContainer} ${className}`} style={style} ref={this.container}>
@@ -177,8 +178,8 @@ export class RichText extends Component<BaseRichTextProps, IRichTextState> {
                     ref={this.ref}
                     className={styles.richTextEditor}
                     onClick={onClick}
-                    onKeyDown={this.onKeyDown.bind(this)}
-                    onKeyUp={this.onKeyUp.bind(this)}
+                    onKeyDown={(event) => this.onKeyDown(event)}
+                    onKeyUp={(event) => this.onKeyUp(event)}
                     dangerouslySetInnerHTML={{ __html: text || '' }}
                     contentEditable
                 ></div>

@@ -1,5 +1,7 @@
+/* eslint-disable max-lines-per-function */
 import { $$, selectTextContent, selectTextContentCross, textTrim } from '@univerjs/base-ui';
 import { Color } from '@univerjs/core';
+
 import styles from './index.module.less';
 
 interface IStyleSetting {
@@ -55,7 +57,7 @@ export class CellTextStyle {
     updateFormat(attr: keyof IStyleSetting, foucsStatus: number | string) {
         if (attr in this.inlineStyleAffectAttribute) {
             // TODO: 不要使用 $$
-            let value = this.editor.textContent!;
+            const value = this.editor.textContent!;
             if (value.substr(0, 1) !== '=') {
                 this.updateInlineStringFormat(attr, foucsStatus);
             }
@@ -63,7 +65,7 @@ export class CellTextStyle {
     }
 
     updateInlineStringFormat(attr: keyof IStyleSetting, value: number | string) {
-        let w = window.getSelection();
+        const w = window.getSelection();
         let range;
         if (w?.type === 'None') {
             // range = Store.inlineStringEditRange;
@@ -74,22 +76,22 @@ export class CellTextStyle {
         if (!range) return;
 
         // TODO: 不要使用 $$
-        let $textEditor = this.editor;
+        const $textEditor = this.editor;
 
-        let endContainer = range.endContainer;
-        let startContainer = range.startContainer;
-        let endOffset = range.endOffset;
-        let startOffset = range.startOffset;
+        const endContainer = range.endContainer;
+        const startContainer = range.startContainer;
+        const endOffset = range.endOffset;
+        const startOffset = range.startOffset;
 
         if ($textEditor) {
             if (startContainer === endContainer) {
-                let span = startContainer.parentNode as HTMLElement;
+                const span = startContainer.parentNode as HTMLElement;
                 let spanIndex;
                 let inherit = false;
 
-                let content = span.innerHTML;
+                const content = span.innerHTML;
 
-                let fullContent = $textEditor.innerHTML;
+                const fullContent = $textEditor.innerHTML;
                 if (fullContent.substr(0, 5) !== '<span') {
                     inherit = true;
                 }
@@ -97,10 +99,10 @@ export class CellTextStyle {
                 let left = '';
                 let mid = '';
                 let right = '';
-                let s1 = 0;
-                let s2 = startOffset;
-                let s3 = endOffset;
-                let s4 = content.length;
+                const s1 = 0;
+                const s2 = startOffset;
+                const s3 = endOffset;
+                const s4 = content.length;
                 left = content.substring(s1, s2);
                 mid = content.substring(s2, s3);
                 right = content.substring(s3, s4);
@@ -109,7 +111,7 @@ export class CellTextStyle {
                 if (left !== '') {
                     let cssText = span.style.cssText;
                     if (inherit) {
-                        let box = span.closest(`.${styles.richTextEditorContainer}`) as HTMLElement;
+                        const box = span.closest(`.${styles.richTextEditorContainer}`) as HTMLElement;
                         if (box != null) {
                             cssText = this.extendCssText(box.style.cssText, cssText);
                         }
@@ -121,7 +123,7 @@ export class CellTextStyle {
                     let cssText = this.getCssText(span.style.cssText, attr, value);
 
                     if (inherit) {
-                        let box = span.closest(`.${styles.richTextEditorContainer}`) as HTMLElement;
+                        const box = span.closest(`.${styles.richTextEditorContainer}`) as HTMLElement;
                         if (box != null) {
                             cssText = this.extendCssText(box.style.cssText, cssText);
                         }
@@ -133,7 +135,7 @@ export class CellTextStyle {
                 if (right !== '') {
                     let cssText = span.style.cssText;
                     if (inherit) {
-                        let box = span.closest(`.${styles.richTextEditorContainer}`) as HTMLElement;
+                        const box = span.closest(`.${styles.richTextEditorContainer}`) as HTMLElement;
                         if (box != null) {
                             cssText = this.extendCssText(box.style.cssText, cssText);
                         }
@@ -144,8 +146,8 @@ export class CellTextStyle {
                 if ((startContainer.parentNode as HTMLElement).tagName === 'SPAN') {
                     spanIndex = $$('span', $textEditor).indexOf(span);
                     // spanIndex = $textEditor.find('span').index(span);
-                    let spanP = span.parentElement?.innerHTML;
-                    let spanText = span.outerHTML.replace('\\', '');
+                    const spanP = span.parentElement?.innerHTML;
+                    const spanText = span.outerHTML.replace('\\', '');
                     const newS = spanP?.replace(spanText, cont);
                     span.parentElement!.innerHTML = newS!;
                     // span.replaceWith(cont);
@@ -163,26 +165,24 @@ export class CellTextStyle {
 
                 selectTextContent($textEditor.querySelectorAll('span')[seletedNodeIndex]);
             } else if ((startContainer.parentNode as HTMLElement).tagName === 'SPAN' && (endContainer.parentNode as HTMLElement).tagName === 'SPAN') {
-                let startSpan = startContainer.parentNode as HTMLElement;
-                let startSpanIndex;
-                let endSpan = endContainer.parentNode as HTMLElement;
-                let endSpanIndex;
+                const startSpan = startContainer.parentNode as HTMLElement;
+                const endSpan = endContainer.parentNode as HTMLElement;
 
-                startSpanIndex = $$('span', $textEditor).indexOf(startSpan);
-                endSpanIndex = $$('span', $textEditor).indexOf(endSpan);
+                const startSpanIndex = $$('span', $textEditor).indexOf(startSpan);
+                const endSpanIndex = $$('span', $textEditor).indexOf(endSpan);
                 // startSpanIndex = $textEditor.find('span').index(startSpan);
                 // endSpanIndex = $textEditor.find('span').index(endSpan);
 
-                let startContent = (startSpan as HTMLElement).innerHTML;
-                let endContent = (endSpan as HTMLElement).innerHTML;
+                const startContent = (startSpan as HTMLElement).innerHTML;
+                const endContent = (endSpan as HTMLElement).innerHTML;
                 let sleft = '';
                 let sright = '';
                 let eleft = '';
                 let eright = '';
-                let s1 = 0;
-                let s2 = startOffset;
-                let s3 = endOffset;
-                let s4 = endContent.length;
+                const s1 = 0;
+                const s2 = startOffset;
+                const s3 = endOffset;
+                const s4 = endContent.length;
 
                 sleft = startContent.substring(s1, s2);
                 sright = startContent.substring(s2, startContent.length);
@@ -190,12 +190,12 @@ export class CellTextStyle {
                 eleft = endContent.substring(0, s3);
                 eright = endContent.substring(s3, s4);
                 let spans = Array.prototype.slice.call($textEditor.querySelectorAll('span'));
-                let replaceSpans = spans.slice(startSpanIndex, endSpanIndex + 1);
+                const replaceSpans = spans.slice(startSpanIndex, endSpanIndex + 1);
                 let cont = '';
                 for (let i = 0; i < startSpanIndex; i++) {
                     // let span = spans.get(i),
-                    let span: HTMLElement = spans[`${i}`];
-                    let content = span.innerHTML;
+                    const span: HTMLElement = spans[`${i}`];
+                    const content = span.innerHTML;
                     cont += `<span style='${span.style.cssText}'>${content}</span>`;
                 }
                 if (sleft !== '') {
@@ -203,22 +203,22 @@ export class CellTextStyle {
                 }
 
                 if (sright !== '') {
-                    let cssText = this.getCssText(startSpan.style.cssText, attr, value);
+                    const cssText = this.getCssText(startSpan.style.cssText, attr, value);
                     cont += `<span style='${cssText}'>${sright}</span>`;
                 }
 
                 if (startSpanIndex < endSpanIndex) {
                     for (let i: number = startSpanIndex + 1; i < endSpanIndex; i++) {
                         // let span = spans.get(i),
-                        let span = spans[`${i}`];
-                        let content = span.innerHTML;
-                        let cssText = this.getCssText(span.style.cssText, attr, value);
+                        const span = spans[`${i}`];
+                        const content = span.innerHTML;
+                        const cssText = this.getCssText(span.style.cssText, attr, value);
                         cont += `<span style='${cssText}'>${content}</span>`;
                     }
                 }
 
                 if (eleft !== '') {
-                    let cssText = this.getCssText(endSpan.style.cssText, attr, value);
+                    const cssText = this.getCssText(endSpan.style.cssText, attr, value);
                     cont += `<span style='${cssText}'>${eleft}</span>`;
                 }
 
@@ -228,8 +228,8 @@ export class CellTextStyle {
 
                 for (let i: number = endSpanIndex + 1; i < spans.length; i++) {
                     // let span = spans.get(i),
-                    let span = spans[`${i}`];
-                    let content = span.innerHTML;
+                    const span = spans[`${i}`];
+                    const content = span.innerHTML;
                     cont += `<span style='${span.style.cssText}'>${content}</span>`;
                 }
 
@@ -259,23 +259,23 @@ export class CellTextStyle {
     }
 
     extendCssText(origin: string, cover: string, isLimit = true) {
-        let originArray = origin.split(';');
-        let coverArray = cover.split(';');
+        const originArray = origin.split(';');
+        const coverArray = cover.split(';');
         let newCss = '';
 
-        let addKeyList: Record<string, string | number> = {};
+        const addKeyList: Record<string, string | number> = {};
         for (let i = 0; i < originArray.length; i++) {
             let so = originArray[i];
             let isAdd = true;
             so = so.toLowerCase();
-            let okey = textTrim(so.substr(0, so.indexOf(':')));
+            const okey = textTrim(so.substr(0, so.indexOf(':')));
 
             /* 不设置文字的大小，解决设置删除线等后字体变大的问题 */
             if (okey === 'font-size') {
                 continue;
             }
 
-            let ovalue = textTrim(so.substr(so.indexOf(':') + 1));
+            const ovalue = textTrim(so.substr(so.indexOf(':') + 1));
 
             if (isLimit) {
                 if (!(okey in this.inlineStyleAffectCssName)) {
@@ -286,8 +286,8 @@ export class CellTextStyle {
             for (let a = 0; a < coverArray.length; a++) {
                 let sc = coverArray[a];
                 sc = sc.toLowerCase();
-                let ckey = textTrim(sc.substr(0, sc.indexOf(':')));
-                let cvalue = textTrim(sc.substr(sc.indexOf(':') + 1));
+                const ckey = textTrim(sc.substr(0, sc.indexOf(':')));
+                const cvalue = textTrim(sc.substr(sc.indexOf(':') + 1));
 
                 if (okey === ckey) {
                     newCss += `${ckey}:${cvalue};`;
@@ -306,8 +306,8 @@ export class CellTextStyle {
         for (let a = 0; a < coverArray.length; a++) {
             let sc = coverArray[a];
             sc = sc.toLowerCase();
-            let ckey = textTrim(sc.substr(0, sc.indexOf(':')));
-            let cvalue = textTrim(sc.substr(sc.indexOf(':') + 1));
+            const ckey = textTrim(sc.substr(0, sc.indexOf(':')));
+            const cvalue = textTrim(sc.substr(sc.indexOf(':') + 1));
 
             if (isLimit) {
                 if (!(ckey in this.inlineStyleAffectCssName)) {
@@ -324,14 +324,14 @@ export class CellTextStyle {
     }
 
     getCssText(cssText: string, attr: keyof IStyleSetting, value: string | number) {
-        let styleObj: IStyleSetting = {};
+        const styleObj: IStyleSetting = {};
         (styleObj[attr] as string | number) = value;
         if (attr === 'un') {
             let fontColor = this.getClassWithcss(cssText, 'color');
             if (fontColor === '') {
                 fontColor = '#000000';
             }
-            let fs = this.getClassWithcss(cssText, 'font-size');
+            const fs = this.getClassWithcss(cssText, 'font-size');
             let fsNum = parseInt(fs);
             if (fs === '') {
                 fsNum = 11;
@@ -340,8 +340,8 @@ export class CellTextStyle {
             styleObj._fontSize = fsNum;
             styleObj._color = fontColor;
         }
-        let s: string | undefined = this.getFontStyleByCell(styleObj, undefined, undefined, false);
-        let ukey = textTrim(s && s.substr(0, s.indexOf(':')));
+        const s: string | undefined = this.getFontStyleByCell(styleObj, undefined, undefined, false);
+        const ukey = textTrim(s && s.substr(0, s.indexOf(':')));
         let uvalue = textTrim(s && s.substr(s.indexOf(':') + 1));
         uvalue = uvalue.substr(0, uvalue.length - 1);
         // let cssText = span.style.cssText;
@@ -353,7 +353,7 @@ export class CellTextStyle {
     }
 
     getClassWithcss(cssText: string, ukey: string): string {
-        let cssTextArray = cssText.split(';');
+        const cssTextArray = cssText.split(';');
         if (ukey == null || ukey.length === 0) {
             return cssText;
         }
@@ -361,8 +361,8 @@ export class CellTextStyle {
             for (let i = 0; i < cssTextArray.length; i++) {
                 let s = cssTextArray[i];
                 s = s.toLowerCase();
-                let key = textTrim(s.substr(0, s.indexOf(':')));
-                let value = textTrim(s.substr(s.indexOf(':') + 1));
+                const key = textTrim(s.substr(0, s.indexOf(':')));
+                const value = textTrim(s.substr(s.indexOf(':') + 1));
                 if (key === ukey) {
                     return value;
                 }
@@ -373,9 +373,9 @@ export class CellTextStyle {
     }
 
     removeClassWidthCss(cssText: string, ukey: string) {
-        let cssTextArray = cssText.split(';');
+        const cssTextArray = cssText.split(';');
         let newCss = '';
-        let oUkey = ukey;
+        const oUkey = ukey;
         if (ukey == null || ukey.length === 0) {
             return cssText;
         }
@@ -386,8 +386,8 @@ export class CellTextStyle {
             for (let i = 0; i < cssTextArray.length; i++) {
                 let s = cssTextArray[i];
                 s = s.toLowerCase();
-                let key = textTrim(s.substr(0, s.indexOf(':')));
-                let value = textTrim(s.substr(s.indexOf(':') + 1));
+                const key = textTrim(s.substr(0, s.indexOf(':')));
+                const value = textTrim(s.substr(s.indexOf(':') + 1));
                 if (key === ukey || (oUkey === 'cl' && key === 'lucky-strike') || (oUkey === 'un' && key === 'lucky-underline')) {
                     continue;
                 } else if (key.length > 0) {
@@ -402,7 +402,7 @@ export class CellTextStyle {
     }
 
     upsetClassWithCss(cssText: string, ukey: string, uvalue: string) {
-        let cssTextArray = cssText.split(';');
+        const cssTextArray = cssText.split(';');
         let newCss = '';
         if (ukey == null || ukey.length === 0) {
             return cssText;
@@ -411,8 +411,8 @@ export class CellTextStyle {
             for (let i = 0; i < cssTextArray.length; i++) {
                 let s = cssTextArray[i];
                 s = s.toLowerCase();
-                let key = textTrim(s.substr(0, s.indexOf(':')));
-                let value = textTrim(s.substr(s.indexOf(':') + 1));
+                const key = textTrim(s.substr(0, s.indexOf(':')));
+                const value = textTrim(s.substr(s.indexOf(':') + 1));
                 if (key === ukey) {
                     newCss += `${key}:${uvalue};`;
                 } else if (key.length > 0) {
@@ -432,7 +432,7 @@ export class CellTextStyle {
             return '';
         }
         let style = '';
-        for (let key in cell) {
+        for (const key in cell) {
             let value = cell[key as keyof IStyleSetting];
             if (isCheck) {
                 value = this.checkstatusByCell(cell, key);
@@ -446,7 +446,7 @@ export class CellTextStyle {
             }
 
             if (key === 'ff') {
-                let f = value;
+                const f = value;
                 style += `font-family: ${f};`;
             }
 
@@ -490,7 +490,7 @@ export class CellTextStyle {
     checkstatusByCell(cell: IStyleSetting, a: string) {
         // 获取当前单元格配置 默认值
         let foucsStatus: any;
-        let tf = { bl: 1, it: 1, ff: 1, cl: 1, un: 1 };
+        const tf = { bl: 1, it: 1, ff: 1, cl: 1, un: 1 };
 
         if (a in tf) {
             if (foucsStatus == null) {

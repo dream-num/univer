@@ -8,7 +8,7 @@ export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectPr
     index?: string;
     color?: string;
     sheetId?: string;
-    style?: JSX.CSSProperties;
+    style?: React.CSSProperties;
     hidden?: BooleanNumber;
     addSheet?: () => void;
     onMouseDown?: () => void;

@@ -1,6 +1,7 @@
 import { BaseComponentProps, Container, CustomLabel, Input, Tooltip } from '@univerjs/base-ui';
-import { Component } from 'react';
 import { Nullable } from '@univerjs/core';
+import { Component } from 'react';
+
 import { BaseInfoBarProps } from '../../Controller/InfoBarUIController';
 import styles from './index.module.less';
 
@@ -34,7 +35,7 @@ export class InfoBar extends Component<IProps, IState> {
         });
     }
 
-    render() {
+    override render() {
         const { renameSheet } = this.props;
         if (!this.state.infoList) return;
 

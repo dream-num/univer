@@ -235,8 +235,8 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         return currentSheet?.sheetId;
     }
 
-    render(props: BaseSheetBarProps, state: SheetState) {
-        const { sheetList, menuList, sheetUl } = state;
+    render() {
+        const { sheetList, menuList, sheetUl } = this.state;
 
         const { addSheet, selectSheet } = this.props;
 

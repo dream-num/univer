@@ -48,6 +48,7 @@ import {
     TopVerticalIcon,
     UnderLineIcon,
     VerticalBorderIcon,
+    FxIcon,
 } from '../Components/Icon';
 import { Item } from '../Components/Item/Item';
 
@@ -108,6 +109,7 @@ export class ComponentManager {
             BorderMediumDashDot,
             BorderMediumDashDotDot,
             BorderThick,
+            FxIcon,
         };
 
         for (const k in iconList) {

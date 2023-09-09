@@ -1,4 +1,4 @@
-import { BaseComponentProps, BaseComponentRender, BaseSelectChildrenProps, debounce, Icon } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, BaseComponentRender, BaseSelectChildrenProps, debounce, Icon } from '@univerjs/base-ui';
 import { Component } from 'react';
 import { Nullable } from '@univerjs/core';
 import styles from './index.module.less';
@@ -18,6 +18,8 @@ export type Fx = {
 export interface BaseFormulaBarProps extends BaseComponentProps {}
 
 export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
+    static override contextType = AppContext;
+
     private _render: BaseComponentRender;
 
     // formulaContent = createRef<HTMLDivElement>();

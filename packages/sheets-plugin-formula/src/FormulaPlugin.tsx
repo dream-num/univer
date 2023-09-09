@@ -45,19 +45,17 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
         });
 
         const sheetContainerUIController = this._injector.get(SheetContainerUIController);
-        const formulaBar = sheetContainerUIController.getFormulaBarUIController().getFormulaBar();
 
         sheetContainerUIController.UIDidMount(() => {
             this.initializeDependencies(this._injector);
             this.registerExtension();
+            const formulaBar = sheetContainerUIController.getFormulaBarUIController().getFormulaBar();
 
             const formulaEngineService = this._injector.get(FormulaEngineService);
             this._formulaController.setFormulaEngine(formulaEngineService);
 
             firstLoader(this._formulaController);
 
-            const componentManager = this._injector.get(ComponentManager);
-            componentManager.register('FxIcon', Icon.Math.FxIcon);
 
             formulaBar.setFx({
                 onClick: () => {

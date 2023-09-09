@@ -74,7 +74,7 @@ export class HelpFunction extends Component<IProps, IState> {
                 style={{ display: helpFormulaActive ? 'block' : 'none', position: 'absolute', left: `${position.left}px`, top: `${position.top}px` }}
                 ref={this.contentRef}
             >
-                <div class={styles.helpFunctionTitle}>
+                <div className={styles.helpFunctionTitle}>
                     <Help title={functionInfo.n} value={functionInfo.p} type="name" active={activeIndex} />
                 </div>
                 <div className={styles.helpFunctionContent}>

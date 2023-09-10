@@ -1,5 +1,5 @@
-import { Inject } from '@wendellhu/redi';
 import { Observable, ObserverManager } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
 export type KeyboardObserver = {
     onKeyDownObservable: Observable<KeyboardEvent>;
@@ -12,6 +12,9 @@ export type KeyboardObserver = {
     onKeyCompositionEndObservable: Observable<CompositionEvent>;
 };
 
+/**
+ * @deprecated this module would be removed in the future
+ */
 export class KeyboardManager {
     constructor(@Inject(ObserverManager) private readonly _observerManager: ObserverManager) {
         this._installObserver();

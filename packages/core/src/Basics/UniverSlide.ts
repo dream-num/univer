@@ -1,11 +1,12 @@
 import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
-import { ISlideData } from '../Types/Interfaces';
-import { IOHttp, IOHttpConfig, Logger, GenName } from '../Shared';
-import { VersionCode, VersionEnv } from './Version';
+
+import { ObserverManager } from '../Observer';
+import { Plugin, PluginCtor, PluginStore } from '../Plugin';
+import { GenName, IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
 import { SlideModel } from '../Slides/Domain';
-import { ObserverManager } from '../Observer';
-import { PluginCtor, PluginStore, Plugin } from '../Plugin';
+import { ISlideData } from '../Types/Interfaces';
+import { VersionCode, VersionEnv } from './Version';
 
 /**
  * Externally provided UniverSlide root instance
@@ -68,7 +69,6 @@ export class UniverSlide {
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._slideInjector.createInstance(plugin as unknown as Ctor<any>, options);
 
-        pluginInstance.onCreate();
         pluginInstance.onMounted();
         this._pluginStore.addPlugin(pluginInstance);
     }

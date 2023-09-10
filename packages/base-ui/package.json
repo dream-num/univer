@@ -44,6 +44,8 @@
     "devDependencies": {
         "@types/jest": "^27.5.2",
         "@types/node": "^18.14.0",
+        "@types/react": "^18.2.21",
+        "@types/react-dom": "^18.2.7",
         "debug": "^4.3.3",
         "enzyme": "^3.11.0",
         "identity-obj-proxy": "^3.0.0",
@@ -57,7 +59,9 @@
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
         "@wendellhu/redi": "^0.12.7",
+        "react": "^18.2.0",
         "react-colorful": "^5.3.0",
+        "react-dom": "^18.2.0",
         "rxjs": "^7.8.1"
     }
 }

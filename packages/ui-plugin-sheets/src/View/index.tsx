@@ -1,18 +1,16 @@
 import { isElement } from '@univerjs/base-ui';
 import { createRoot } from 'react-dom/client';
+
 import { App, BaseUIProps } from './App';
 
 interface BaseSheetUIConfig extends BaseUIProps {
     container?: HTMLElement | string;
 }
 
+// TODO@wzhudev: this is not necessary to be a class. A function is enough.
 export class UI {
     constructor(props: BaseSheetUIConfig) {
         this._initialize(props);
-    }
-
-    static create(props: BaseSheetUIConfig) {
-        return new UI(props);
     }
 
     private _initialize(props: BaseSheetUIConfig) {
@@ -39,9 +37,9 @@ export class UI {
     }
 }
 
-export * from './SheetContainer';
-export * from './Toolbar';
-export * from './RightMenu';
-export * from './InfoBar';
 export * from './Common';
+export * from './InfoBar';
+export * from './RightMenu';
+export * from './SheetContainer';
 export * from './Slot/Slot';
+export * from './Toolbar';

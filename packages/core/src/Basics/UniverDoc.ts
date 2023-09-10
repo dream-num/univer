@@ -37,15 +37,12 @@ export class UniverDoc {
     addPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._injector.createInstance(pluginCtor as unknown as Ctor<any>, options);
 
-        // FIXME: onCreate onMounted should be executed after all plugins have been added
-        pluginInstance.onCreate();
         pluginInstance.onMounted();
         this._pluginStore.addPlugin(pluginInstance);
     }
 
     mount(): void {
         this._pluginStore.forEachPlugin((plugin) => {
-            plugin.onCreate();
             plugin.onMounted();
         });
     }

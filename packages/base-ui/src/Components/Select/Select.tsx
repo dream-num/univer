@@ -1,12 +1,13 @@
-import { ComponentChildren, createRef, RefObject, PureComponent } from 'react';
+import { ComponentChildren, createRef, PureComponent, RefObject } from 'react';
+
+import { Icon, IValueOption } from '../..'; // FIXME: strange import
 import { AppContext, ICustomComponent } from '../../Common';
 import { BaseMenuItem } from '../../Interfaces';
+import { CustomLabel, NeoCustomLabel } from '../CustomLabel';
 import { Dropdown } from '../Dropdown';
 import { Input } from '../Input';
 import { BaseItemProps, Item } from '../Item/Item';
-import { CustomLabel, NeoCustomLabel } from '../CustomLabel';
 import styles from './index.module.less';
-import { Icon, IValueOption } from '../..'; // FIXME: strange import
 
 // TODO: these type definitions should be moved out of components to menu service
 

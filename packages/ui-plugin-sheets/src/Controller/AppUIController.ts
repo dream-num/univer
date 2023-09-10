@@ -1,9 +1,10 @@
-import { LocaleType, ObserverManager, LocaleService } from '@univerjs/core';
-import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 import { ComponentManager, ZIndexManager } from '@univerjs/base-ui';
+import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
+import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
+
+import { ISheetUIPluginConfig } from '../Basics';
 import { UI } from '../View';
 import { SheetContainerUIController } from './SheetContainerUIController';
-import { ISheetUIPluginConfig } from '../Basics';
 
 export class AppUIController {
     private _sheetContainerController: SheetContainerUIController;

@@ -148,8 +148,7 @@ export class Univer {
         // For plugins at Univer level. Plugins would be initialized immediately so they can register dependencies.
         const pluginInstance: Plugin = this._univerInjector.createInstance(plugin as unknown as Ctor<any>, options);
 
-        // TODO: remove these two lines later
-        pluginInstance.onCreate();
+        pluginInstance.onMounted();
 
         this._univerPluginStore.addPlugin(pluginInstance);
     }

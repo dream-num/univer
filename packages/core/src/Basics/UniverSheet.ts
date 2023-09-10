@@ -58,7 +58,6 @@ export class UniverSheet implements IDisposable {
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._sheetInjector.createInstance(plugin as unknown as Ctor<any>, options);
 
-        pluginInstance.onCreate();
         pluginInstance.onMounted();
         this._pluginStore.addPlugin(pluginInstance);
     }

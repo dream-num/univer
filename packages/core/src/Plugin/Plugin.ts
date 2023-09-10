@@ -20,11 +20,6 @@ export interface BasePlugin {
     getPluginName(): string;
 
     /**
-     * Could register dependencies at this lifecycle stage.
-     */
-    onCreate(): void;
-
-    /**
      * Could setup initialization works at this lifecycle stage.
      */
     onMounted(): void;
@@ -58,8 +53,6 @@ export abstract class Plugin<Obs = any> implements BasePlugin {
     getPluginByName<T extends BasePlugin>(name: string): Nullable<T> {
         throw new Error('Method not implemented.');
     }
-
-    onCreate(): void {}
 
     onMounted(): void {}
 

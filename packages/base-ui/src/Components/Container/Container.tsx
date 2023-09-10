@@ -1,15 +1,13 @@
-import { ComponentChildren, Ref } from 'react';
-import { forwardRef } from 'react';
+import { forwardRef, PropsWithChildren, Ref } from 'react';
 
-type IProps = {
-    children?: ComponentChildren;
+type IContainerProps = {
     style?: {};
     className?: string;
     onClick?: (e: MouseEvent) => void;
     onContextMenu?: (e: MouseEvent) => void;
 };
 
-export const Container = forwardRef((props: IProps, ref: Ref<HTMLDivElement>) => {
+export const Container = forwardRef((props: PropsWithChildren<IContainerProps>, ref: Ref<HTMLDivElement>) => {
     const { children, style, className, onClick, onContextMenu } = props;
 
     return (

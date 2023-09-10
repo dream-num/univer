@@ -1,5 +1,6 @@
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
+import { UIPlugin } from '@univerjs/base-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { LocaleType, Univer } from '@univerjs/core';
 import { FindPlugin } from '@univerjs/sheets-plugin-find';
@@ -20,6 +21,9 @@ univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 
 // register plugins
 univer.registerPlugin(RenderEngine);
+univer.registerPlugin(UIPlugin, {
+    container: 'univer-container',
+});
 univer.registerPlugin(SheetPlugin);
 univer.registerPlugin(SheetUIPlugin, {
     container: 'universheet',

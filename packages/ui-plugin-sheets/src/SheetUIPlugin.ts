@@ -1,5 +1,5 @@
 import { IRenderingEngine } from '@univerjs/base-render';
-import { ComponentManager, DragManager, getRefElement, KeyboardManager, SharedController, SlotComponent, SlotManager, ZIndexManager } from '@univerjs/base-ui';
+import { DragManager, getRefElement, KeyboardManager, SharedController, SlotComponent, SlotManager, ZIndexManager } from '@univerjs/base-ui';
 import { IUndoRedoService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
@@ -23,8 +23,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     private _zIndexManager: ZIndexManager;
 
     private _dragManager: DragManager;
-
-    private _componentManager: ComponentManager;
 
     constructor(config: ISheetUIPluginConfig, @Inject(Injector) override readonly _injector: Injector, @Inject(LocaleService) private readonly _localeService: LocaleService) {
         super(SHEET_UI_PLUGIN_NAME);
@@ -61,10 +59,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
     getAppUIController() {
         return this._appUIController;
-    }
-
-    getComponentManager() {
-        return this._componentManager;
     }
 
     getZIndexManager() {
@@ -113,19 +107,10 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     }
 
     private initDependencies(): void {
-        const dependencies: Dependency[] = [
-            [DragManager],
-            [KeyboardManager],
-            [ComponentManager],
-            [ZIndexManager],
-            [SlotManager],
-            [DesktopSheetShortcutController],
-            [SheetBarService],
-        ];
+        const dependencies: Dependency[] = [[DragManager], [KeyboardManager], [ZIndexManager], [SlotManager], [DesktopSheetShortcutController], [SheetBarService]];
         dependencies.forEach((d) => this._injector.add(d));
 
         this._dragManager = this._injector.get(DragManager);
-        this._componentManager = this._injector.get(ComponentManager);
         this._keyboardManager = this._injector.get(KeyboardManager);
         this._zIndexManager = this._injector.get(ZIndexManager);
 

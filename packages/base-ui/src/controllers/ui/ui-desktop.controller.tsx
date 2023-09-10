@@ -35,7 +35,7 @@ function bootStrap(injector: Injector, options: IWorkbenchOptions) {
 
     const root = createRoot(mountContainer);
     const ConnectedApp = connectInjector(App, injector);
-    root.render(<ConnectedApp />);
+    root.render(<ConnectedApp {...options} />);
 
     return () => {
         root.unmount();

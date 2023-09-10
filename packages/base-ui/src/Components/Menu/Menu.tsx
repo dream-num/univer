@@ -121,6 +121,7 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
         const { context, props, state } = this;
         const { className = '', style = '', menu, deep = 0, options, display, value } = props;
         const { posStyle, show, menuItems } = state;
+
         return (
             <ul className={joinClassNames(styles.colsMenu, className)} style={{ ...style, ...posStyle, display: show ? 'block' : 'none' }} ref={this._MenuRef}>
                 {/* legacy: render selections */}
@@ -187,6 +188,10 @@ export class Menu extends Component<BaseMenuProps, IBaseMenuState> {
 
                     // custom component option
                     const CustomComponent = context.componentManager?.get(option.id);
+                    if (!CustomComponent) {
+                        throw new Error(`Cannot find custom component ${option.id}.`);
+                    }
+
                     return (
                         <li key={index} className={joinClassNames(styles.colsMenuitem, option.disabled ? styles.colsMenuitemDisabled : '')}>
                             <CustomComponent

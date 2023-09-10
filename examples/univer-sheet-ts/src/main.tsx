@@ -5,7 +5,6 @@ import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { LocaleType, Univer } from '@univerjs/core';
 import { FindPlugin } from '@univerjs/sheets-plugin-find';
 import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
-// import { OperationPlugin } from '@univerjs/sheets-plugin-operation';
 import { ImagePlugin } from '@univerjs/sheets-plugin-image';
 import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
@@ -23,6 +22,8 @@ univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 univer.registerPlugin(RenderEngine);
 univer.registerPlugin(UIPlugin, {
     container: 'univer-container',
+    header: true,
+    toolbar: true,
 });
 univer.registerPlugin(SheetPlugin);
 univer.registerPlugin(SheetUIPlugin, {

@@ -3,11 +3,16 @@ import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 
 import { ComponentManager, ZIndexManager } from '../Common';
 import { AppContext } from '../Common/AppContext';
-import { Layout } from '../Components';
+import { Header, Layout, Sider } from '../Components';
 import { Container } from '../Components/Container/Container';
+import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { LocaleType } from '../Enum';
+import style from './app.module.less';
+import { Toolbar } from './components/toolbar/toolbar';
 
-export function App() {
+export interface IUniverAppProps extends IWorkbenchOptions {}
+
+export function App(props: IUniverAppProps) {
     const injector = useInjector();
     const localeService = useDependency(LocaleService);
     const observerManager = useDependency(ObserverManager);
@@ -45,8 +50,16 @@ export function App() {
                     <option value={LocaleType.ZH}>简体中文</option>
                 </select>
             </div>
-            <Container>
-                <Layout></Layout>
+            <Container className={style.layoutContainer}>
+                <Layout>
+                    <Sider style={{ display: props.outerLeft ? 'block' : 'none' }}></Sider>
+                    <Layout className={style.mainContent} style={{ position: 'relative' }}>
+                        <Header style={{ display: props.header ? 'block' : 'none' }}>
+                            {/* TODO: move Toolbar component to base-ui plugin */}
+                            {props.toolbar && <Toolbar></Toolbar>}
+                        </Header>
+                    </Layout>
+                </Layout>
             </Container>
         </AppContext.Provider>
     );

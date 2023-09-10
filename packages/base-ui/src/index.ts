@@ -5,6 +5,8 @@ export * from './Components';
 export { SharedController } from './controllers/shared-shortcut.controller';
 export * from './Enum';
 export * from './Helpers';
+export { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './services/context/context';
+export { ContextService, IContextService } from './services/context/context.service';
 export {
     ICustomComponentOption,
     ICustomComponentProps,
@@ -23,4 +25,5 @@ export { DesktopMenuService, IMenuService } from './services/menu/menu.service';
 export { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { DesktopShortcutService, IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
+export { UIPlugin } from './UIPlugin';
 export * from './Utils';

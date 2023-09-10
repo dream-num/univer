@@ -13,31 +13,79 @@ import {
     isSameLine,
     TextSelection,
 } from '@univerjs/base-render';
-import { DataStreamTreeTokenType, Direction, DocumentModel, ICommandService, ICurrentUniverService, IParagraph, Nullable, Observable } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import {
+    DataStreamTreeTokenType,
+    Direction,
+    Disposable,
+    DisposableCollection,
+    DocumentModel,
+    fromObservable,
+    ICommandService,
+    ICurrentUniverService,
+    IParagraph,
+    Nullable,
+    Observable,
+    toDisposable,
+} from '@univerjs/core';
+import { IDisposable, Inject } from '@wendellhu/redi';
 
 import { DeleteCommand, IMEInputCommand, InsertCommand, UpdateCommand } from '../commands/commands/core-editing.command';
+import { DocsViewManagerService } from '../services/docs-view-manager/docs-view-manager.service';
 import { CanvasView } from '../View/Render/CanvasView';
 import { DocsView } from '../View/Render/Views';
 
-export class InputController {
+/**
+ * InputController handles inputting events on the currently focused DocsView and apply edits to corresponding UniverDoc.
+ */
+export class InputController extends Disposable {
     private _previousIMEContent: string = '';
 
     private _previousIMEStart: number;
 
     private _currentNodePosition: Nullable<INodePosition>;
 
+    private _editorDisposables: DisposableCollection | null;
+
+    private _currentDocsView: DocsView | null;
+
     constructor(
         @Inject(CanvasView) private readonly _canvasView: CanvasView,
+        @Inject(DocsViewManagerService) private readonly _docsViewManager: DocsViewManagerService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
-        this._initialize();
+        super();
+
+        this.disposeWithMe(
+            fromObservable(
+                this._docsViewManager.current$.subscribe((docsView) => {
+                    this._currentDocsView?.getDocs().disableEditor();
+                    this._editorDisposables?.dispose();
+                    this._editorDisposables = null;
+
+                    if (docsView) {
+                        this._currentDocsView = docsView;
+                        this._editorDisposables = this._initialize(docsView);
+                        // FIXME: should active the EditorElement
+                    }
+                })
+            )
+        );
     }
 
-    // eslint-disable-next-line @typescript-eslint/member-ordering
+    override dispose(): void {
+        super.dispose();
+
+        this._currentDocsView = null;
+        this._editorDisposables?.dispose();
+    }
+
     moveCursor(_docModel: DocumentModel, direction: Direction) {
-        const documents = (this._canvasView.getDocsView() as DocsView).getDocs();
+        if (!this._currentDocsView) {
+            return;
+        }
+
+        const documents = this._currentDocsView.getDocs();
         const activeSelection = documents.getActiveSelection();
         if (!activeSelection) {
             return false;
@@ -115,7 +163,11 @@ export class InputController {
 
     // eslint-disable-next-line max-lines-per-function
     deleteLeft() {
-        const document = (this._canvasView.getDocsView() as DocsView).getDocs();
+        if (!this._currentDocsView) {
+            return;
+        }
+
+        const document = this._currentDocsView.getDocs();
         const activeSelection = document.getActiveSelection();
         if (!activeSelection) {
             return;
@@ -232,7 +284,11 @@ export class InputController {
     }
 
     breakLine() {
-        const document = (this._canvasView.getDocsView() as DocsView).getDocs();
+        if (!this._currentDocsView) {
+            return;
+        }
+
+        const document = this._currentDocsView.getDocs();
         const activeSelection = document.getActiveSelection();
         if (!activeSelection) {
             return;
@@ -272,8 +328,8 @@ export class InputController {
         this._adjustSelection(document as Documents, selectionRemain, span, true);
     }
 
-    private _initialInput(onInputObservable: Observable<IEditorInputConfig>, docsModel: DocumentModel) {
-        onInputObservable.add((config) => {
+    private _initialInput(onInputObservable: Observable<IEditorInputConfig>, docsModel: DocumentModel): IDisposable {
+        const observer = onInputObservable.add((config) => {
             const { event, content = '', document, activeSelection, selectionList } = config;
 
             const e = event as InputEvent;
@@ -319,6 +375,8 @@ export class InputController {
 
             this._adjustSelection(document as Documents, selectionRemain, span);
         });
+
+        return toDisposable(() => onInputObservable.remove(observer));
     }
 
     private _initialComposition(
@@ -326,8 +384,8 @@ export class InputController {
         onCompositionupdateObservable: Observable<IEditorInputConfig>,
         onCompositionendObservable: Observable<IEditorInputConfig>,
         docsModel: DocumentModel
-    ) {
-        onCompositionstartObservable.add((config) => {
+    ): IDisposable {
+        const startObserver = onCompositionstartObservable.add((config) => {
             const { activeSelection, selectionList } = config;
 
             const activeRange = activeSelection?.getRange();
@@ -346,7 +404,7 @@ export class InputController {
             this._previousIMEStart = cursor;
         });
 
-        onCompositionupdateObservable.add(async (config) => {
+        const updateObserver = onCompositionupdateObservable.add(async (config) => {
             const { event, document, activeSelection } = config;
 
             let cursor = this._previousIMEStart;
@@ -388,8 +446,14 @@ export class InputController {
             this._previousIMEContent = content;
         });
 
-        onCompositionendObservable.add((config) => {
+        const endObserver = onCompositionendObservable.add((config) => {
             this._resetIME();
+        });
+
+        return toDisposable(() => {
+            onCompositionstartObservable.remove(startObserver);
+            onCompositionupdateObservable.remove(updateObserver);
+            onCompositionendObservable.remove(endObserver);
         });
     }
 
@@ -661,23 +725,26 @@ export class InputController {
         document.syncSelection();
     }
 
-    private _initialize() {
-        const docsView = this._canvasView.getDocsView() as DocsView;
+    private _initialize(docsView: DocsView): DisposableCollection {
+        docsView.getDocs().enableEditor();
         const events = docsView.getDocs().getEditorInputEvent();
-
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance().getDocument();
+        const disposableCollection = new DisposableCollection();
 
         if (!events) {
-            return;
+            return disposableCollection;
         }
+
         const { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onSelectionStartObservable } = events;
 
-        this._initialInput(onInputObservable, docsModel);
+        disposableCollection.add(this._initialInput(onInputObservable, docsModel));
+        disposableCollection.add(this._initialComposition(onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, docsModel));
 
-        this._initialComposition(onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, docsModel);
-
-        onSelectionStartObservable.add((nodePosition) => {
+        const observer = onSelectionStartObservable.add((nodePosition) => {
             this._currentNodePosition = nodePosition;
         });
+        disposableCollection.add(toDisposable(() => onSelectionStartObservable.remove(observer)));
+
+        return disposableCollection;
     }
 }

@@ -1,9 +1,13 @@
 import { Observable } from '@univerjs/core';
-import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
-import { ITransformChangeState } from './Basics/Interfaces';
-import { IEvent } from './Basics/IEvents';
+import { IDisposable } from '@wendellhu/redi';
 
-export abstract class ThinEngine<T> {
+import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
+import { IEvent } from './Basics/IEvents';
+import { ITransformChangeState } from './Basics/Interfaces';
+import { Canvas } from './Canvas';
+
+// FIXME: T should extends something that is disposable
+export abstract class ThinEngine<T extends IDisposable> {
     onInputChangedObservable = new Observable<IEvent>();
 
     onTransformChangeObservable = new Observable<ITransformChangeState>();
@@ -79,11 +83,11 @@ export abstract class ThinEngine<T> {
         }
     }
 
-    clearCanvas() {}
+    abstract clearCanvas(): void;
 
-    getCanvas() {}
+    abstract getCanvas(): Canvas;
 
-    getCanvasElement() {}
+    abstract getCanvasElement(): HTMLCanvasElement;
 
-    setCanvasCursor(val: CURSOR_TYPE) {}
+    abstract setCanvasCursor(val: CURSOR_TYPE): void;
 }

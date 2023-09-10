@@ -34,7 +34,7 @@ export const SetWorksheetNameCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return commandService.executeCommand(SetWorksheetNameMutation.id, undoMutationParams);
                 },

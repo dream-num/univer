@@ -1,36 +1,75 @@
 import { createIdentifier } from '@wendellhu/redi';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import { UniverDoc } from '../Basics/UniverDoc';
 import { UniverSheet } from '../Basics/UniverSheet';
 import { UniverSlide } from '../Basics/UniverSlide';
 import { Nullable } from '../Shared';
+import { Disposable } from '../Shared/Lifecycle';
+import { IDocumentData } from '../Types/Interfaces';
 
+export interface IUniverHandler {
+    createUniverDoc(data: Partial<IDocumentData>): UniverDoc;
+}
+
+/**
+ * ICurrentUniverService holds all the current univer instances. And it also manages
+ * the focused univer instance.
+ */
 export interface ICurrentUniverService {
+    focused$: Observable<string | null>;
+
+    createDoc(data: Partial<IDocumentData>): UniverDoc;
+
     addSheet(sheet: UniverSheet): void;
     addSlide(slide: UniverSlide): void;
     addDoc(doc: UniverDoc): void;
+
     getUniverSheetInstance(id: string): Nullable<UniverSheet>;
     getUniverDocInstance(id: string): Nullable<UniverDoc>;
-    getUniverSlideInstance(id: string): Nullable<UniverSheet>;
+    getUniverSlideInstance(id: string): Nullable<UniverSlide>;
     getCurrentUniverSheetInstance(): UniverSheet;
     getCurrentUniverDocInstance(): UniverDoc;
     getCurrentUniverSlideInstance(): UniverSlide;
     getAllUniverSheetsInstance(): UniverSheet[];
     getAllUniverDocsInstance(): UniverDoc[];
     getAllUniverSlidesInstance(): UniverSlide[];
+
+    getFocusedUniverInstance(): UniverSheet | UniverDoc | UniverSlide | null;
+    focusUniverInstance(id: string | null): void;
 }
 
 export const ICurrentUniverService = createIdentifier<ICurrentUniverService>('univer.current');
 
-/**
- * Manager instances inside Univer. Also it manages focus on univer instances.
- */
-export class CurrentUniverService implements ICurrentUniverService {
+export class CurrentUniverService extends Disposable implements ICurrentUniverService {
+    readonly focused$: Observable<string | null>;
+
+    private readonly _focused$: BehaviorSubject<string | null>;
+
+    private _focused: UniverDoc | UniverSheet | UniverSlide | null = null;
+
     private readonly _sheets: UniverSheet[] = [];
 
     private readonly _docs: UniverDoc[] = [];
 
     private readonly _slides: UniverSlide[] = [];
+
+    constructor(private readonly _handler: IUniverHandler) {
+        super();
+
+        this._focused$ = new BehaviorSubject<string | null>(null);
+        this.focused$ = this._focused$.asObservable();
+    }
+
+    override dispose(): void {
+        super.dispose();
+
+        this._focused$.complete();
+    }
+
+    createDoc(data: Partial<IDocumentData>): UniverDoc {
+        return this._handler.createUniverDoc(data);
+    }
 
     addSheet(sheet: UniverSheet): void {
         this._sheets.push(sheet);
@@ -52,8 +91,8 @@ export class CurrentUniverService implements ICurrentUniverService {
         return this._docs.find((doc) => doc.getUnitId() === id);
     }
 
-    getUniverSlideInstance(id: string): Nullable<UniverSheet> {
-        return null;
+    getUniverSlideInstance(id: string): Nullable<UniverSlide> {
+        return this._slides.find((slide) => slide.getUnitId() === id);
     }
 
     getAllUniverSheetsInstance() {
@@ -82,5 +121,16 @@ export class CurrentUniverService implements ICurrentUniverService {
 
     getCurrentUniverSlideInstance() {
         return this._slides[0];
+    }
+
+    focusUniverInstance(id: string | null): void {
+        if (id) {
+            this._focused = this.getUniverSheetInstance(id) || this.getUniverDocInstance(id) || this.getUniverSlideInstance(id) || null;
+        }
+        this._focused$.next(id);
+    }
+
+    getFocusedUniverInstance(): UniverSheet | UniverDoc | UniverSlide | null {
+        return this._focused;
     }
 }

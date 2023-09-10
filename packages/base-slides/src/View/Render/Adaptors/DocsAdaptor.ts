@@ -15,7 +15,8 @@ import {
 } from '@univerjs/base-render';
 import { DocumentModel, EventState, IPageElement, LocaleService, PageElementType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
+
+import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../Adaptor';
 
 export enum DOCS_VIEW_KEY {
     MAIN = '__DocsRender__',
@@ -42,6 +43,7 @@ export class DocsAdaptor extends ObjectAdaptor {
         return this;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     override convert(pageElement: IPageElement, mainScene: Scene) {
         const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, document: documentData } = pageElement;
         if (documentData == null) {

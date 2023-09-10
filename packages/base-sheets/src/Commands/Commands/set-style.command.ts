@@ -94,7 +94,7 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         const result = commandService.executeCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet', // TODO: this URI is fake: would be replace with Univer business instance id
+                URI: workbookId,
                 undo() {
                     return commandService.executeCommand(SetRangeStyleMutation.id, undoSetRangeStyleMutationParams);
                 },

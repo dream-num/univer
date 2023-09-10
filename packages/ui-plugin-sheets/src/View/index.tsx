@@ -7,13 +7,10 @@ interface BaseSheetUIConfig extends BaseUIProps {
     container?: HTMLElement | string;
 }
 
+// TODO@wzhudev: this is not necessary to be a class. A function is enough.
 export class UI {
     constructor(props: BaseSheetUIConfig) {
         this._initialize(props);
-    }
-
-    static create(props: BaseSheetUIConfig) {
-        return new UI(props);
     }
 
     private _initialize(props: BaseSheetUIConfig) {

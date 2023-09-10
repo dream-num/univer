@@ -29,6 +29,7 @@
         "ts-node": "^10.9.1"
     },
     "dependencies": {
+        "@univerjs/base-docs": "workspace:^0.0.1",
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/base-sheets": "workspace:^0.0.1",
         "@univerjs/base-ui": "workspace:^0.0.1",
@@ -40,8 +41,9 @@
         "@univerjs/sheets-plugin-import-xlsx": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-numfmt": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-operation": "workspace:^0.0.1",
+        "@univerjs/ui-plugin-docs": "workspace:^0.0.1",
         "@univerjs/ui-plugin-sheets": "workspace:^0.0.1",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "react-dom": "^18.2.0",
+        "react": "^18.2.0"
     }
 }

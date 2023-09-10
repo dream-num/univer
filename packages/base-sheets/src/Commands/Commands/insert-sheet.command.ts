@@ -66,7 +66,7 @@ export const InsertSheetCommand: ICommand = {
 
         if (result && activateResult) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return (commandService.executeCommand(SetWorksheetActivateMutation.id, undoMutationParams) as Promise<boolean>).then((res) => {
                         if (res) return commandService.executeCommand(RemoveSheetMutation.id, removeSheetMutationParams);

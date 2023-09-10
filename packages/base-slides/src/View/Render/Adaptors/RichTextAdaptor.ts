@@ -1,8 +1,8 @@
 import { IRichTextProps, RichText, Scene } from '@univerjs/base-render';
 import { IPageElement, LocaleService, PageElementType } from '@univerjs/core';
-
 import { Inject, Injector } from '@wendellhu/redi';
-import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
+
+import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../Adaptor';
 
 export class RichTextAdaptor extends ObjectAdaptor {
     override zIndex = 2;

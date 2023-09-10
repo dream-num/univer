@@ -1,8 +1,9 @@
-import { IDisposable, createIdentifier } from '@wendellhu/redi';
 import { Disposable, toDisposable } from '@univerjs/core';
-import { IShortcutService } from '../shortcut/shortcut.service';
-import { BaseSelectChildrenProps } from '../../Components/Select/Select';
+import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
+// TODO@wzhudev: this props should be moved to menu.service.ts to break cycle import
+import { BaseSelectChildrenProps } from '../../Components/Select/Select';
+import { IShortcutService } from '../shortcut/shortcut.service';
 import { IDisplayMenuItem, IMenuItem, MenuPosition } from './menu';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

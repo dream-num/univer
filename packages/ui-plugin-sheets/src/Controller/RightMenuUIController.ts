@@ -1,4 +1,3 @@
-import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
 import { CanvasView } from '@univerjs/base-sheets';
 import { BaseMenuItem, BaseSelectChildrenProps, ComponentManager, IMenuItemFactory, IMenuService, MenuPosition } from '@univerjs/base-ui';
 import { Disposable } from '@univerjs/core';
@@ -64,24 +63,29 @@ export class RightMenuUIController extends Disposable {
     };
 
     // 刷新
+    /**
+     * @deprecated right menu component should listen to changes in menu service
+     */
     setMenuList() {
         this._rightMenu?.setMenuListNeo(this._menuService.getMenuItems(MenuPosition.CONTEXT_MENU));
     }
 
     private _initialize() {
+        // TODO: add these menu items to base-ui
         const componentManager = this._componentManager;
         componentManager.register(RightMenuInput.name, RightMenuInput);
         componentManager.register(RightMenuItem.name, RightMenuItem);
 
-        this._sheetCanvasView
-            .getSheetView()
-            .getSpreadsheet()
-            .onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-                if (evt.button === 2) {
-                    evt.preventDefault();
-                    this._rightMenu.handleContextMenu(evt);
-                }
-            });
+        // // add context menu response to base-ui
+        // this._sheetCanvasView
+        //     .getSheetView()
+        //     .getSpreadsheet()
+        //     .onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        //         if (evt.button === 2) {
+        //             evt.preventDefault();
+        //             this._rightMenu.handleContextMenu(evt);
+        //         }
+        //     });
 
         (
             [

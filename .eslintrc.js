@@ -93,19 +93,19 @@ module.exports = {
             },
         ],
         // eslint-plugin-unused-imports
-        '@typescript-eslint/no-unused-vars': 'off',
-        'unused-imports/no-unused-imports': 'error',
-        'prefer-regex-literals': 'off',
+        '@typescript-eslint/consistent-type-assertions': 'off',
         '@typescript-eslint/default-param-last': 'off',
-        'grouped-accessor-pairs': 'off',
         '@typescript-eslint/member-ordering': 'error',
         '@typescript-eslint/no-explicit-any': 'warn',
-        'no-unsafe-optional-chaining': 'off',
-        '@typescript-eslint/consistent-type-assertions': 'off',
         '@typescript-eslint/no-redeclare': 'off', // dependency interface and dependency token share the same name
+        '@typescript-eslint/no-unused-vars': 'off',
+        'grouped-accessor-pairs': 'off',
         'no-magic-numbers': ['warn', { ignore: [0, 1, -1, 2] }],
-        'simple-import-sort/imports': 'error',
+        'no-unsafe-optional-chaining': 'off',
+        'prefer-regex-literals': 'off',
         'simple-import-sort/exports': 'error',
+        'simple-import-sort/imports': 'error',
+        'unused-imports/no-unused-imports': 'error',
     },
     // https://www.npmjs.com/package/eslint-import-resolver-typescript
     settings: {

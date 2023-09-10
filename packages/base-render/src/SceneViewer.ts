@@ -1,10 +1,11 @@
 import { IKeyValue, Nullable } from '@univerjs/core';
-import { IBoundRect, Vector2 } from './Basics/Vector2';
+
 import { BaseObject } from './BaseObject';
-import { ThinScene } from './ThinScene';
-import { IObjectFullState } from './Basics/Interfaces';
 import { RENDER_CLASS_TYPE } from './Basics/Const';
+import { IObjectFullState } from './Basics/Interfaces';
 import { transformBoundingCoord } from './Basics/Position';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
+import { ThinScene } from './ThinScene';
 
 export class SceneViewer extends BaseObject {
     private _subScenes = new Map<string, ThinScene>();
@@ -14,6 +15,7 @@ export class SceneViewer extends BaseObject {
     private _allowSelectedClipElement = false;
 
     constructor(key?: string, props?: IObjectFullState) {
+        // WTF: the name of `props`'s interface ends with State?
         super(key);
         this._initialProps(props);
     }
@@ -56,7 +58,7 @@ export class SceneViewer extends BaseObject {
     }
 
     getSubScene(sceneKey: string) {
-        for (let [key, scene] of this._subScenes) {
+        for (const [key, scene] of this._subScenes) {
             if (key === sceneKey) {
                 return scene;
             }

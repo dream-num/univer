@@ -2,8 +2,8 @@
  * Use createContext to provide global language and skin settings
  */
 import { LocaleService, ObserverManager } from '@univerjs/core';
-import { createContext } from 'react';
 import { Injector } from '@wendellhu/redi';
+import { createContext } from 'react';
 
 import { LocaleType } from '../Enum';
 import { ComponentManager } from './ComponentManager';
@@ -18,6 +18,4 @@ export type AppContextValues = {
     observerManager: ObserverManager;
 };
 
-const AppContext = createContext<Partial<AppContextValues>>({});
-export { AppContext };
-export default AppContext;
+export const AppContext = createContext<Partial<AppContextValues>>({});

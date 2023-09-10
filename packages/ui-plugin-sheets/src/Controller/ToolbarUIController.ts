@@ -66,6 +66,7 @@ export class ToolbarUIController extends Disposable {
         super();
 
         this._initialize();
+        this._initializeToolbar();
     }
 
     // 获取Toolbar组件

@@ -50,7 +50,7 @@ export const SetWorksheetShowCommand: ICommand = {
 
         if (result && activeResult) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return (commandService.executeCommand(SetWorksheetActivateMutation.id, unActiveMutationParams) as Promise<boolean>).then((res) => {
                         if (res) return commandService.executeCommand(SetWorksheetHideMutation.id, undoMutationParams);

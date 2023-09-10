@@ -90,6 +90,10 @@ export class Documents extends DocComponent {
         return new Documents(oKey, documentSkeleton, config);
     }
 
+    getEditor(): DocsEditor {
+        return this._editor;
+    }
+
     getActiveSelection() {
         return this._editor.getActiveTextSelection();
     }
@@ -157,6 +161,7 @@ export class Documents extends DocComponent {
         if (this._hasEditor) {
             return;
         }
+
         this._editor = DocsEditor.create(this);
         this._hasEditor = true;
     }
@@ -210,6 +215,11 @@ export class Documents extends DocComponent {
         const documentSkeleton = this.getSkeleton();
         if (!documentSkeleton) {
             return;
+        }
+
+        const isDrawingCellEditor = documentSkeleton.getModel().snapshot.id === 'sheet.model.cell-editor';
+        if (isDrawingCellEditor) {
+            console.log('drawing', documentSkeleton, documentSkeleton.getModel().snapshot);
         }
 
         // if (this.isCalculateSkeleton) {

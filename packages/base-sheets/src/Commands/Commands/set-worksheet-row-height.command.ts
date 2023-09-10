@@ -37,7 +37,7 @@ export const SetWorksheetRowHeightCommand: ICommand = {
         const result = commandService.executeCommand(SetWorksheetRowHeightMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return commandService.executeCommand(SetWorksheetRowHeightMutation.id, undoMutationParams);
                 },

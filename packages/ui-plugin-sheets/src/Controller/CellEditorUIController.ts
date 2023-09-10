@@ -1,6 +1,16 @@
-import { Engine, IMouseEvent, IPointerEvent, IRenderingEngine, ISelectionRangeWithStyle, ISelectionTransformerShapeManager, mergeCellHandler } from '@univerjs/base-render';
+import { Engine, IRenderingEngine, ISelectionRangeWithStyle, ISelectionTransformerShapeManager, mergeCellHandler } from '@univerjs/base-render';
 import { CANVAS_VIEW_KEY, CanvasView, CellEditorController, SelectionManagerService } from '@univerjs/base-sheets';
-import { $$, CellEditExtensionManager, handleDomToJson, handleStringToStyle, isCtrlPressed, KeyboardManager, setLastCaretPosition } from '@univerjs/base-ui';
+import {
+    $$,
+    CellEditExtensionManager,
+    FOCUSING_SHEET,
+    handleDomToJson,
+    handleStringToStyle,
+    IContextService,
+    isCtrlPressed,
+    KeyboardManager,
+    setLastCaretPosition,
+} from '@univerjs/base-ui';
 import {
     Direction,
     handleStyleToString,
@@ -42,7 +52,8 @@ export class CellEditorUIController {
         // @ISelectionManager private readonly _selectionManager: SelectionManager,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ISelectionTransformerShapeManager private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
-        @Inject(KeyboardManager) private readonly _keyboardManager: KeyboardManager
+        @Inject(KeyboardManager) private readonly _keyboardManager: KeyboardManager,
+        @IContextService private readonly _contextService: IContextService
     ) {
         this._initialize();
     }
@@ -117,10 +128,12 @@ export class CellEditorUIController {
             return false;
         }
 
-        let startX;
-        let endX;
-        let startY;
-        let endY;
+        //#region cell editor position
+
+        let startX: number;
+        let endX: number;
+        let startY: number;
+        let endY: number;
 
         if (currentCell.isMerged) {
             const mergeInfo = currentCell.mergeInfo;
@@ -156,6 +169,10 @@ export class CellEditorUIController {
 
         this._richTextEle.style.transform = '';
 
+        // #endregion
+
+        // #region get editing cell for values
+
         // this._plugin.showMainByName('cellEditor', true).then(() => {
         let cellValue = this._cellEditorController.getSelectionValue();
 
@@ -186,6 +203,8 @@ export class CellEditorUIController {
 
         // });
         this._cellEditorController.setCurrentEditRangeData();
+
+        this._contextService.setContextValue(FOCUSING_SHEET, false);
     }
 
     exitEditMode() {
@@ -220,12 +239,15 @@ export class CellEditorUIController {
         }
         this._cellEditorController.setCurrentEditRangeValue(cell);
         this.hideEditContainer();
+
+        // NOTE: this is a temporary solution. In the future we would make cell editor a focused UniverDoc instance.
+        this._contextService.setContextValue(FOCUSING_SHEET, true);
     }
 
     focusEditEle() {
         // If there is no settimeout, the first letter will be intercepted in Chinese state
         setTimeout(() => {
-            this._richTextEditEle.focus();
+            // this._richTextEditEle.focus();
         }, 100);
     }
 
@@ -241,24 +263,25 @@ export class CellEditorUIController {
         // this._initRegisterComponent();
         // If other plugins are loaded asynchronously, they may be initialized after the rendering layer is loaded, and they will not receive obs listeners.
 
-        const main = this._sheetCanvasView.getSheetView().getSpreadsheet();
+        // const main = this._sheetCanvasView.getSheetView().getSpreadsheet();
 
-        main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            // Prevent left + right double click
-            if (evt.button !== 2) {
-                this.enterEditMode();
-            }
-        });
-        main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this.exitEditMode();
-            evt.preventDefault();
-        });
+        // main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        //     // Prevent left + right double click
+        //     if (evt.button !== 2) {
+        //         this.enterEditMode();
+        //     }
+        // });
+        // main.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        //     this.exitEditMode();
+        //     evt.preventDefault();
+        // });
 
         this._cellEditExtensionManager = new CellEditExtensionManager();
 
         this.listenEventManager();
     }
 
+    // TODO: init rich text editor?
     private setRichText() {
         const richText = this._richText.container.current;
         if (!richText) return;
@@ -285,6 +308,7 @@ export class CellEditorUIController {
         });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _handleKeyboardObserver() {
         const onKeyDownObservable = this._globalObserverManager.getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
         const onKeyCompositionStartObservable = this._globalObserverManager.getObserver<CompositionEvent>('onKeyCompositionStartObservable', 'core');
@@ -294,6 +318,7 @@ export class CellEditorUIController {
             onKeyDownObservable.add((evt: KeyboardEvent) => {
                 if (!isCtrlPressed(evt) && isKeyPrintable(evt.key)) {
                     // character key
+                    // Start keyboard manager when input event stroked
                     this.enterEditMode(true);
                 } else {
                     // control key
@@ -313,38 +338,6 @@ export class CellEditorUIController {
                                 this.enterEditMode(true);
                             }
                             break;
-
-                        case 'ArrowUp':
-                            if (!this.isEditMode) {
-                                this._move(Direction.UP);
-                            }
-                            break;
-
-                        case 'ArrowDown':
-                            if (!this.isEditMode) {
-                                this._move(Direction.DOWN);
-                            }
-                            break;
-
-                        case 'ArrowLeft':
-                            if (!this.isEditMode) {
-                                this._move(Direction.LEFT);
-                            }
-                            break;
-
-                        case 'ArrowRight':
-                            if (!this.isEditMode) {
-                                this._move(Direction.RIGHT);
-                            }
-                            break;
-
-                        case 'Tab':
-                            if (!this.isEditMode) {
-                                this._move(Direction.RIGHT);
-                            }
-                            evt.preventDefault();
-                            break;
-
                         default:
                             break;
                     }
@@ -352,6 +345,7 @@ export class CellEditorUIController {
             });
         }
 
+        // Enter edit mode when CompositionStartEvent triggers
         if (onKeyCompositionStartObservable && !onKeyCompositionStartObservable.hasObservers()) {
             onKeyCompositionStartObservable.add((evt: CompositionEvent) => {
                 if (!this.isEditMode) {

@@ -1,7 +1,7 @@
 import { Ctor, Injector } from '@wendellhu/redi';
 
+import { Nullable } from '../common/type-utils';
 import { Observable, ObserverManager } from '../Observer';
-import { Nullable } from '../Shared';
 
 export type PluginCtor<T extends Plugin> = Ctor<T> & { type: PluginType };
 
@@ -13,16 +13,8 @@ export enum PluginType {
     Slide,
 }
 
-/**
- * Basics function of plugin
- */
-export interface BasePlugin {
+export interface IPlugin {
     getPluginName(): string;
-
-    /**
-     * Could register dependencies at this lifecycle stage.
-     */
-    onCreate(): void;
 
     /**
      * Could setup initialization works at this lifecycle stage.
@@ -34,13 +26,13 @@ export interface BasePlugin {
      */
     onDestroy(): void;
 
-    getPluginByName<T extends BasePlugin>(name: string): Nullable<T>;
+    getPluginByName<T extends IPlugin>(name: string): Nullable<T>;
 }
 
 /**
  * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
  */
-export abstract class Plugin<Obs = any> implements BasePlugin {
+export abstract class Plugin<Obs = any> implements IPlugin {
     static type: PluginType;
 
     _injector: Injector;
@@ -54,12 +46,10 @@ export abstract class Plugin<Obs = any> implements BasePlugin {
         this._observeNames = [];
     }
 
-    /** @deprecated this plugin will be removed */
-    getPluginByName<T extends BasePlugin>(name: string): Nullable<T> {
+    /** @deprecated this method will be removed */
+    getPluginByName<T extends IPlugin>(name: string): Nullable<T> {
         throw new Error('Method not implemented.');
     }
-
-    onCreate(): void {}
 
     onMounted(): void {}
 
@@ -71,8 +61,7 @@ export abstract class Plugin<Obs = any> implements BasePlugin {
         return this._name;
     }
 
-    // TODO@huwenzhao: remove this in the future
-    /** @deprecated */
+    /** @deprecated this method will be removed */
     pushToObserve<K extends keyof Obs & string>(...names: K[]): void {
         const manager = (this._injector as Injector).get(ObserverManager);
         names.forEach((name) => {

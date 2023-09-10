@@ -40,7 +40,7 @@ export const SetFrozenCancelCommand: ICommand = {
 
         if (result && frozenResult) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return (commandService.executeCommand(SetFrozenColumnsMutation.id, frozenColumnMutationParams) as Promise<boolean>).then((res) => {
                         if (res) return commandService.executeCommand(SetFrozenRowsMutation.id, undoMutationParams);

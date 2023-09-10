@@ -37,7 +37,7 @@ export interface BaseRightMenuProps extends BaseComponentProps {
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
     static override contextType = AppContext;
 
-    root = createRef<HTMLDivElement>();
+    private root = createRef<HTMLDivElement>();
 
     constructor(props: BaseRightMenuProps) {
         super(props);

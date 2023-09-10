@@ -1,3 +1,6 @@
+import { IDisposable } from '@wendellhu/redi';
+import { Observable, Subject } from 'rxjs';
+
 import { Nullable } from '../../Shared/Types';
 import { IDocumentBody, ITextRun } from '../../Types/Interfaces/IDocumentData';
 import { DataStreamTreeNode } from './DataStreamTreeNode';
@@ -5,14 +8,29 @@ import { DataStreamTreeNodeType, DataStreamTreeTokenType } from './Types';
 
 export type DocumentBodyModelOrSimple = DocumentBodyModelSimple | DocumentBodyModel;
 
-export class DocumentBodyModelSimple {
+export class DocumentBodyModelSimple implements IDisposable {
     children: DataStreamTreeNode[] = [];
 
-    constructor(public body: IDocumentBody) {
+    readonly modelChange$: Observable<void>;
+
+    protected readonly _modelChange$: Subject<void>;
+
+    constructor(
+        /** @deprecated this does not hold true fact about the text model, do not use this directly */
+        public body: IDocumentBody
+    ) {
         if (this.body == null) {
             return;
         }
+
+        this._modelChange$ = new Subject();
+        this.modelChange$ = this._modelChange$.asObservable();
+
         this.children = this._transformToTree(this.body.dataStream);
+    }
+
+    dispose(): void {
+        this._modelChange$.complete();
     }
 
     resetCache() {}
@@ -46,7 +64,7 @@ export class DocumentBodyModelSimple {
         return 0;
     }
 
-    private _transformToTree(dataStream: string) {
+    protected _transformToTree(dataStream: string) {
         const dataStreamLen = dataStream.length;
 
         let content = '';
@@ -191,8 +209,19 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
 
     private customRangeCurrentIndex = 0;
 
+    /**
+     * @deprecated use constructor directly
+     * @param body
+     * @returns
+     */
     static create(body: IDocumentBody) {
         return new DocumentBodyModel(body);
+    }
+
+    reset(body: IDocumentBody) {
+        this.children = this._transformToTree(body.dataStream);
+        this.body = body;
+        this._modelChange$.next();
     }
 
     insert(insertBody: IDocumentBody, insertIndex = 0) {
@@ -272,82 +301,14 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                 }
             });
         }
+
+        this._modelChange$.next();
     }
 
     delete(currentIndex: number, textLength: number) {
         const nodes = this.children;
         this.deleteTree(nodes, currentIndex, textLength);
-    }
-
-    deleteTree(nodes: DataStreamTreeNode[], currentIndex: number, textLength: number) {
-        const startIndex = currentIndex;
-        const endIndex = currentIndex + textLength - 1;
-        let mergeNode: Nullable<DataStreamTreeNode> = null;
-        let nodeCount = nodes.length;
-        let i = 0;
-        while (i < nodeCount) {
-            const node = nodes[i];
-            const { startIndex: st, endIndex: ed, children } = node;
-
-            this.deleteTree(children, currentIndex, textLength);
-
-            if (startIndex === endIndex && endIndex === ed) {
-                // The cursor is at the dividing point between two paragraphs,
-                // and it is necessary to determine whether to delete elements
-                // such as paragraphs, chapters, and tables
-                if (node.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
-                    const nextNode = this._getNextNode(node);
-                    if (nextNode == null) {
-                        i++;
-                        continue;
-                    }
-
-                    // if (nextNode.isBullet || nextNode.isIndent) {
-                    //     i++;
-                    //     continue;
-                    // } else {
-                    node.minus(startIndex, endIndex);
-                    node.merge(nextNode);
-                    nodeCount--;
-                    // }
-                }
-                // else if (node.nodeType === DataStreamTreeNodeType.SECTION_BREAK) {
-                // } else if (node.nodeType === DataStreamTreeNodeType.TABLE) {
-                // } else if (node.nodeType === DataStreamTreeNodeType.TABLE_ROW) {
-                // } else if (node.nodeType === DataStreamTreeNodeType.TABLE_CELL) {
-                // }
-            } else if (startIndex <= st && endIndex >= ed) {
-                // The first case.  The selection range of the text box
-                // is larger than the current node
-                node.remove();
-                nodeCount--;
-                continue;
-            } else if (st <= startIndex && ed >= endIndex) {
-                // The second case. The selection range of
-                // the text box is smaller than the current node
-                node.minus(startIndex, endIndex);
-            } else if (endIndex > st && endIndex < ed) {
-                // The third case.
-                // The text selection left contains the current node
-                node.minus(st, endIndex);
-                if (mergeNode != null) {
-                    mergeNode.merge(node);
-                    mergeNode = null;
-                    nodeCount--;
-                    continue;
-                }
-            } else if (startIndex > st && startIndex < ed) {
-                // The fourth case.
-                // The text selection right contains the current node
-                node.minus(startIndex, ed);
-                mergeNode = node;
-            } else if (st > endIndex) {
-                // The current node is not on the right side of
-                // the selection area and needs to be moved as a whole
-                node.plus(-textLength);
-            }
-            i++;
-        }
+        this._modelChange$.next();
     }
 
     getParagraphByTree(nodes: DataStreamTreeNode[], insertIndex: number): Nullable<DataStreamTreeNode> {
@@ -501,6 +462,24 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
     }
 
+    /** Get pure text content in the given range. */
+    getText(): string {
+        // Basically this is a DFS traversal of the tree to get the `content` and append it to the result.
+        // TODO: implement
+        const pieces: string[] = [];
+
+        function traverseTreeNode(node: DataStreamTreeNode) {
+            if (node.content) {
+                pieces.push(node.content);
+            }
+
+            node.children.forEach(traverseTreeNode);
+        }
+
+        this.children.forEach((n) => traverseTreeNode(n));
+        return pieces.join('');
+    }
+
     override getCustomBlock(index: number) {
         const customBlocks = this.body.customBlocks;
         if (customBlocks == null) {
@@ -541,6 +520,77 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             if (index >= customRange.startIndex && index <= customRange.endIndex) {
                 return customRange;
             }
+        }
+    }
+
+    private deleteTree(nodes: DataStreamTreeNode[], currentIndex: number, textLength: number) {
+        const startIndex = currentIndex;
+        const endIndex = currentIndex + textLength - 1;
+        let mergeNode: Nullable<DataStreamTreeNode> = null;
+        let nodeCount = nodes.length;
+        let i = 0;
+        while (i < nodeCount) {
+            const node = nodes[i];
+            const { startIndex: st, endIndex: ed, children } = node;
+
+            this.deleteTree(children, currentIndex, textLength);
+
+            if (startIndex === endIndex && endIndex === ed) {
+                // The cursor is at the dividing point between two paragraphs,
+                // and it is necessary to determine whether to delete elements
+                // such as paragraphs, chapters, and tables
+                if (node.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
+                    const nextNode = this._getNextNode(node);
+                    if (nextNode == null) {
+                        i++;
+                        continue;
+                    }
+
+                    // if (nextNode.isBullet || nextNode.isIndent) {
+                    //     i++;
+                    //     continue;
+                    // } else {
+                    node.minus(startIndex, endIndex);
+                    node.merge(nextNode);
+                    nodeCount--;
+                    // }
+                }
+                // else if (node.nodeType === DataStreamTreeNodeType.SECTION_BREAK) {
+                // } else if (node.nodeType === DataStreamTreeNodeType.TABLE) {
+                // } else if (node.nodeType === DataStreamTreeNodeType.TABLE_ROW) {
+                // } else if (node.nodeType === DataStreamTreeNodeType.TABLE_CELL) {
+                // }
+            } else if (startIndex <= st && endIndex >= ed) {
+                // The first case.  The selection range of the text box
+                // is larger than the current node
+                node.remove();
+                nodeCount--;
+                continue;
+            } else if (st <= startIndex && ed >= endIndex) {
+                // The second case. The selection range of
+                // the text box is smaller than the current node
+                node.minus(startIndex, endIndex);
+            } else if (endIndex > st && endIndex < ed) {
+                // The third case.
+                // The text selection left contains the current node
+                node.minus(st, endIndex);
+                if (mergeNode != null) {
+                    mergeNode.merge(node);
+                    mergeNode = null;
+                    nodeCount--;
+                    continue;
+                }
+            } else if (startIndex > st && startIndex < ed) {
+                // The fourth case.
+                // The text selection right contains the current node
+                node.minus(startIndex, ed);
+                mergeNode = node;
+            } else if (st > endIndex) {
+                // The current node is not on the right side of
+                // the selection area and needs to be moved as a whole
+                node.plus(-textLength);
+            }
+            i++;
         }
     }
 

@@ -26,6 +26,7 @@ import {
     FillColorIcon,
     ForwardIcon,
     FullBorderIcon,
+    FxIcon,
     InnerBorderIcon,
     ItalicIcon,
     LeftAlignIcon,
@@ -48,7 +49,6 @@ import {
     TopVerticalIcon,
     UnderLineIcon,
     VerticalBorderIcon,
-    FxIcon,
 } from '../Components/Icon';
 import { Item } from '../Components/Item/Item';
 

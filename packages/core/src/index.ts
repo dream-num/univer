@@ -24,7 +24,7 @@ export { DesktopLogService, ILogService } from './services/log/log.service';
 export { DesktopPermissionService, IPermissionService } from './services/permission/permission.service';
 export { IUndoRedoService, LocalUndoRedoService, RedoCommand, UndoCommand } from './services/undoredo/undoredo.service';
 export * from './Shared';
-export { Disposable, DisposableCollection, toDisposable } from './Shared/Lifecycle';
+export { Disposable, DisposableCollection, fromObservable, toDisposable } from './Shared/Lifecycle';
 export { createRowColIter, IRowColIter } from './Shared/RowColIter';
 export * from './Sheets';
 export * from './Slides/Domain';

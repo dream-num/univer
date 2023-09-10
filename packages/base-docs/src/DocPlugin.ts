@@ -1,14 +1,15 @@
 import { Engine } from '@univerjs/base-render';
-import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
-import { ICommandService, LocaleService, ObserverManager, Plugin, PLUGIN_NAMES, PluginType, UIObserver } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { ContextService, DesktopPlatformService, IContextService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
+import { ICommand, ICommandService, LocaleService, ObserverManager, Plugin, PLUGIN_NAMES, PluginType, UIObserver } from '@univerjs/core';
+import { Dependency, Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { DocPluginObserve, install } from './Basics/Observer';
-import { BreakLineCommand, DeleteCommand, DeleteLeftCommand, IMEInputCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
+import { BreakLineCommand, CoverCommand, DeleteCommand, DeleteLeftCommand, IMEInputCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { MoveCursorOperation } from './commands/operations/cursor.operation';
 import { DocumentController } from './Controller/DocumentController';
 import { en, zh } from './Locale';
+import { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
 import { MoveCursorDownShortcut, MoveCursorLeftShortcut, MoveCursorRightShortcut, MoveCursorUpShortcut } from './shortcuts/cursor.shortcut';
 import { CANVAS_VIEW_KEY } from './View/Render';
@@ -33,13 +34,14 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
     constructor(
         config: Partial<IDocPluginConfig> = {},
         @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
+        @SkipSelf() @Inject(Injector) private readonly _univerInjector: Injector,
         @Inject(Injector) override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super(PLUGIN_NAMES.DOCUMENT);
 
         this._config = Object.assign(DEFAULT_DOCUMENT_PLUGIN_DATA, config);
-        this._initializeDependencies(_injector);
+        this._initializeDependencies(_injector, _univerInjector);
         this.initializeCommands();
     }
 
@@ -52,10 +54,24 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
         install(this);
 
         this.listenEventManager();
+        this.initCanvasView();
+        this.initController();
     }
 
     initializeCommands(): void {
-        [MoveCursorOperation, DeleteLeftCommand, BreakLineCommand, InsertCommand, DeleteCommand, UpdateCommand, IMEInputCommand, RichTextEditingMutation].forEach((command) => {
+        (
+            [
+                MoveCursorOperation,
+                DeleteLeftCommand,
+                BreakLineCommand,
+                InsertCommand,
+                DeleteCommand,
+                UpdateCommand,
+                IMEInputCommand,
+                RichTextEditingMutation,
+                CoverCommand,
+            ] as ICommand[]
+        ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
         });
 
@@ -65,8 +81,8 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
     }
 
     initializeAfterUI() {
-        this.initCanvasView();
-        this.initController();
+        // this.initCanvasView();
+        // this.initController();
     }
 
     initController() {
@@ -74,7 +90,7 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
     }
 
     initCanvasView() {
-        this._canvasView = this._injector.get(CanvasView);
+        // this._canvasView = this._injector.get(CanvasView);
     }
 
     listenEventManager() {
@@ -156,11 +172,16 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
         return this._globalObserverManager.requiredObserver<UIObserver<T>>(type, 'core');
     }
 
-    private _initializeDependencies(docInjector: Injector) {
-        const dependencies: Dependency[] = [[CanvasView], [IShortcutService, { useClass: DesktopShortcutService }], [IPlatformService, { useClass: DesktopPlatformService }]];
+    private _initializeDependencies(docInjector: Injector, univerInjector: Injector) {
+        (
+            [
+                [CanvasView], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
+                [IPlatformService, { useClass: DesktopPlatformService }],
+                [IContextService, { useClass: ContextService }],
+            ] as Dependency[]
+        ).forEach((d) => docInjector.add(d));
 
-        dependencies.forEach((d) => {
-            docInjector.add(d);
-        });
+        // add docs view manager to univer-level injector
+        univerInjector.add([DocsViewManagerService]);
     }
 }

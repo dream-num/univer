@@ -17,6 +17,7 @@ export class UniverSheet implements IDisposable {
 
     private readonly _sheetInjector: Injector;
 
+    // TODO@wzhudev: maybe we should support multiple workbooks in the future?
     private readonly _workbook: Workbook;
 
     private readonly _pluginStore = new PluginStore();
@@ -58,7 +59,6 @@ export class UniverSheet implements IDisposable {
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._sheetInjector.createInstance(plugin as unknown as Ctor<any>, options);
 
-        pluginInstance.onCreate();
         pluginInstance.onMounted();
         this._pluginStore.addPlugin(pluginInstance);
     }

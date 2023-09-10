@@ -1,8 +1,9 @@
 import { nanoid } from 'nanoid';
+
 import { Environment } from '../Basics/Environment';
+import { ObjectArray, ObjectArrayPrimitiveType } from './ObjectArray';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from './ObjectMatrix';
 import { Class, IKeyValue } from './Types';
-import { ObjectArray, ObjectArrayPrimitiveType } from './ObjectArray';
 
 const rmsPrefix = /^-ms-/;
 const rDashAlpha = /-([a-z])/g;

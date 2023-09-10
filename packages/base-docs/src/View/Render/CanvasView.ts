@@ -30,17 +30,16 @@ export class CanvasView {
     private _initialize() {
         const engine = this._engine;
 
-        const scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
-            width: 1200,
-            height: 2000,
-        });
+        const scene = (this._scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
+            width: 12,
+            height: 20,
+        }));
 
-        this._scene = scene;
         const viewMain = new Viewport(CANVAS_VIEW_KEY.DOCS_VIEW, scene, {
             left: 0,
             top: 0,
-            bottom: 0,
-            right: 0,
+            bottom: 500,
+            right: 500,
             isWheelPreventDefaultX: true,
         });
 
@@ -76,13 +75,13 @@ export class CanvasView {
 
         this._viewLoader(scene);
 
-        engine.runRenderLoop(() => {
-            scene.render();
-            const app = document.getElementById('app');
-            if (app) {
-                app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
-            }
-        });
+        // engine.runRenderLoop(() => {
+        // scene.render();
+        // const app = document.getElementById('app');
+        // if (app) {
+        //     app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
+        // }
+        // });
     }
 
     private _viewLoader(scene: Scene) {

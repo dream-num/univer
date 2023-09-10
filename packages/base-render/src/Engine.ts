@@ -111,6 +111,7 @@ export class Engine extends ThinEngine<Scene> {
     setContainer(elem: HTMLElement) {
         this._container = elem;
         this._container.appendChild(this._canvasEle);
+
         this.resize();
     }
 

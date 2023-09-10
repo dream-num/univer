@@ -1,14 +1,11 @@
 import { EventState, IKeyValue, Nullable, Observable, Observer } from '@univerjs/core';
 
-import { EVENT_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
-
-import { ITransformChangeState } from './Basics/Interfaces';
-
-import { Transform } from './Basics/Transform';
-
-import { IBoundRect, Vector2 } from './Basics/Vector2';
 import { BaseObject } from './BaseObject';
+import { EVENT_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
 import { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './Basics/IEvents';
+import { ITransformChangeState } from './Basics/Interfaces';
+import { Transform } from './Basics/Transform';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
 
 export abstract class ThinScene {
     onTransformChangeObservable = new Observable<ITransformChangeState>();

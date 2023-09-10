@@ -48,6 +48,12 @@ export interface ICellData {
      */
     // n?: string; // note comment postil
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isICellData(value: any): value is ICellData {
+    return value && ((value as ICellData).s !== undefined || (value as ICellData).p !== undefined || (value as ICellData).v !== undefined);
+}
+
 /**
  * Format of cell data
  */

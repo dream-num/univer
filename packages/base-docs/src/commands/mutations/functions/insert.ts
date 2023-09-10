@@ -21,7 +21,7 @@ export function InsertApply(document: DocumentModel, insertBody: IDocumentBody, 
 
     updateAttributeByInsert(body, insertBody, textLength, currentIndex);
 
-    console.log('插入的model打印', bodyModel, body, textLength);
+    // console.log('插入的model打印', bodyModel, body, textLength);
 }
 
 function updateAttributeByInsert(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {

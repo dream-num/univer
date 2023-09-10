@@ -1,4 +1,4 @@
-import { AppContext, BaseComponentProps, Container, IDisplayMenuItem, IMenuItem } from '@univerjs/base-ui';
+import { AppContext, AppContextValues, BaseComponentProps, Container, IDisplayMenuItem, IMenuItem } from '@univerjs/base-ui';
 import { Component, createRef } from 'react';
 
 import { IToolbarItemProps, SheetContainerUIController } from '../../Controller';
@@ -14,7 +14,7 @@ interface IState {
     menuItems: Array<IDisplayMenuItem<IMenuItem>>;
 }
 
-export class Toolbar extends Component<IProps, IState> {
+export class Toolbar extends Component<IProps, IState, AppContextValues> {
     static override contextType = AppContext;
 
     toolbarRef = createRef<HTMLDivElement>();
@@ -45,7 +45,7 @@ export class Toolbar extends Component<IProps, IState> {
     };
 
     resetUl = () => {
-        const wrapper = this.context.injector.get(SheetContainerUIController).getContentRef().current!;
+        const wrapper = (this.context as AppContextValues).injector.get(SheetContainerUIController).getContentRef().current!;
         const height = `${(wrapper as HTMLDivElement).offsetHeight}px`;
         const ul = this.toolbarRef.current?.querySelectorAll('ul');
         if (!ul) return;
@@ -57,8 +57,6 @@ export class Toolbar extends Component<IProps, IState> {
     override componentDidMount() {
         this.props.getComponent?.(this); // pass the UI to the controller, which is not good...
     }
-
-    override componentWillUnmount() {}
 
     neoRenderToolbarList() {
         return this.state.menuItems.map((item) => <ToolbarItem key={item.id} {...item} />);

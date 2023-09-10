@@ -36,7 +36,7 @@ export const SetWorksheetColumnHideCommand: ICommand = {
         const result = commandService.executeCommand(SetWorksheetColumnHideMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return commandService.executeCommand(SetWorksheetColumnShowMutation.id, undoMutationParams);
                 },

@@ -34,7 +34,7 @@ export const SetFrozenColumnsCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return commandService.executeCommand(SetFrozenColumnsMutation.id, undoMutationParams);
                 },

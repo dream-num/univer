@@ -4,6 +4,8 @@ import { Inject } from '@wendellhu/redi';
 import { SetSelectionsOperation } from '../Commands/Operations/selection.operation';
 import { SelectionManagerService } from '../Services/selection-manager.service';
 
+// WTF: 为什么除了 CellEditorUIController 之外还有一个 CellEditorController
+// 编辑器本来就应该只是 UI 层的事情
 /**
  * Cell Editor
  */

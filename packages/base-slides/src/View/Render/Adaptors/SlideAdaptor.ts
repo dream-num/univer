@@ -1,8 +1,8 @@
 import { Engine, Rect, Scene, Slide, Viewport } from '@univerjs/base-render';
-import { SlideModel, getColorStyle, IColorStyle, IPageElement, ISlidePage, PageElementType } from '@univerjs/core';
-
+import { getColorStyle, IColorStyle, IPageElement, ISlidePage, PageElementType, SlideModel } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
+
+import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../Adaptor';
 import { ObjectProvider } from '../ObjectProvider';
 // import { DocsAdaptor, ImageAdaptor, RichTextAdaptor, ShapeAdaptor  } from './';
 

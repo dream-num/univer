@@ -1,6 +1,7 @@
 import { AppContext, BaseComponentProps, ComponentManager, ZIndexManager } from '@univerjs/base-ui';
-import { Component } from 'react';
 import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
+import { Component } from 'react';
+
 import { BaseSheetContainerProps, SheetContainer } from './SheetContainer';
 
 export interface BaseUIProps extends BaseComponentProps {
@@ -31,7 +32,7 @@ export class App extends Component<BaseUIProps, IState> {
         });
     }
 
-    render() {
+    override render() {
         const { injector, UIConfig, componentManager, zIndexManager } = this.props;
         const { locale } = this.state;
         const localeService = injector.get(LocaleService);
@@ -58,6 +59,7 @@ export class App extends Component<BaseUIProps, IState> {
                     }}
                     className="univer-dev-operation"
                 >
+                    {/* language selector */}
                     <span
                         style={{
                             display: 'inline-block',

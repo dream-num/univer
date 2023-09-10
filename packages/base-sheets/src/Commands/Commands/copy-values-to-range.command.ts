@@ -59,7 +59,7 @@ export const CopyValuesToRangeCommand: ICommand = {
         const result = commandService.executeCommand(SetRangeFormattedValueMutation.id, setRangeFormattedValueMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return commandService.executeCommand(SetRangeFormattedValueMutation.id, undoMutationParams);
                 },

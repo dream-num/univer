@@ -7,13 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
-      react-dom:
-        specifier: ^18.2.0
-        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@changesets/cli':
         specifier: ^2.22.0
@@ -159,6 +152,12 @@ importers:
       '@univerjs/ui-plugin-docs':
         specifier: workspace:^0.0.1
         version: link:../../packages/ui-plugin-docs
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -166,6 +165,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       enzyme:
         specifier: ^3.11.0
         version: 3.11.0
@@ -229,6 +234,12 @@ importers:
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:^0.0.1
         version: link:../../packages/ui-plugin-sheets
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@playwright/test':
         specifier: ^1.18.1
@@ -239,6 +250,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       enzyme:
         specifier: ^3.11.0
         version: 3.11.0
@@ -290,6 +307,12 @@ importers:
       '@univerjs/ui-plugin-slides':
         specifier: workspace:^0.0.1
         version: link:../../packages/ui-plugin-slides
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -297,6 +320,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       enzyme:
         specifier: ^3.11.0
         version: 3.11.0
@@ -363,6 +392,12 @@ importers:
       '@univerjs/ui-plugin-slides':
         specifier: workspace:^0.0.1
         version: link:../../packages/ui-plugin-slides
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -370,6 +405,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       enzyme:
         specifier: ^3.11.0
         version: 3.11.0
@@ -421,6 +462,12 @@ importers:
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.0.1
@@ -428,6 +475,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       less:
         specifier: ^4.1.1
         version: 4.1.1
@@ -449,6 +502,12 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.7
         version: 0.12.7
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -456,6 +515,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       jest-environment-jsdom:
         specifier: ^29.0.3
         version: 29.0.3
@@ -477,6 +542,12 @@ importers:
       '@univerjs/core':
         specifier: workspace:^0.0.1
         version: link:../core
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -484,6 +555,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       debug:
         specifier: ^4.3.3
         version: 4.3.4
@@ -514,6 +591,12 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.7
         version: 0.12.7
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -521,6 +604,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       enzyme:
         specifier: ^3.11.0
         version: 3.11.0
@@ -554,6 +643,12 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.7
         version: 0.12.7
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -564,6 +659,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       enzyme:
         specifier: ^3.11.0
         version: 3.11.0
@@ -603,6 +704,12 @@ importers:
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.0.1
@@ -610,6 +717,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       less:
         specifier: ^4.1.1
         version: 4.1.1
@@ -634,9 +747,15 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.7
         version: 0.12.7
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
       react-colorful:
         specifier: ^5.3.0
         version: 5.3.0(react-dom@18.2.0)(react@18.2.0)
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -647,6 +766,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       debug:
         specifier: ^4.3.3
         version: 4.3.4
@@ -677,6 +802,12 @@ importers:
       '@univerjs/core':
         specifier: workspace:^0.0.1
         version: link:../core
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -684,6 +815,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       jest:
         specifier: 29.0.0
         version: 29.0.0(@types/node@18.14.0)(ts-node@10.9.1)
@@ -714,6 +851,12 @@ importers:
       numeral:
         specifier: ^2.0.6
         version: 2.0.6
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -724,6 +867,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       debug:
         specifier: ^4.3.4
         version: 4.3.4
@@ -763,10 +912,22 @@ importers:
       '@univerjs/core':
         specifier: workspace:^0.0.1
         version: link:../core
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: 27.0.3
         version: 27.0.3
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       jest:
         specifier: 29.0.0
         version: 29.0.0(@types/node@18.14.0)(ts-node@10.9.1)
@@ -803,6 +964,12 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.7
         version: 0.12.7
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -810,6 +977,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       debug:
         specifier: ^4.3.3
         version: 4.3.4
@@ -855,6 +1028,12 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.7
         version: 0.12.7
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -862,6 +1041,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       debug:
         specifier: ^4.3.3
         version: 4.3.4
@@ -907,6 +1092,12 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.7
         version: 0.12.7
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -914,6 +1105,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       debug:
         specifier: ^4.3.3
         version: 4.3.4
@@ -962,6 +1159,12 @@ importers:
       luckyexcel:
         specifier: ^1.0.1
         version: 1.0.1
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.0.1
@@ -969,6 +1172,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       less:
         specifier: ^4.1.1
         version: 4.1.1
@@ -1008,6 +1217,12 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.7
         version: 0.12.7
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.5.2
@@ -1015,6 +1230,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       debug:
         specifier: ^4.3.3
         version: 4.3.4
@@ -1060,10 +1281,22 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.7
         version: 0.12.7
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: 27.0.3
         version: 27.0.3
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       jest:
         specifier: 29.0.0
         version: 29.0.0(@types/node@18.14.0)(ts-node@10.9.1)
@@ -1097,6 +1330,12 @@ importers:
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.0.1
@@ -1104,6 +1343,12 @@ importers:
       '@types/node':
         specifier: ^16.4.6
         version: 16.4.6
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       less:
         specifier: ^4.1.1
         version: 4.1.1
@@ -1137,6 +1382,12 @@ importers:
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1147,6 +1398,12 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       less:
         specifier: ^4.1.1
         version: 4.1.1
@@ -1180,6 +1437,12 @@ importers:
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@types/jest':
         specifier: ^27.0.1
@@ -1187,6 +1450,12 @@ importers:
       '@types/node':
         specifier: ^16.4.6
         version: 16.4.6
+      '@types/react':
+        specifier: ^18.2.21
+        version: 18.2.21
+      '@types/react-dom':
+        specifier: ^18.2.7
+        version: 18.2.7
       less:
         specifier: ^4.1.1
         version: 4.1.1

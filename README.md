@@ -32,22 +32,28 @@ pnpm i
 
 ### Development
 
+Start concurrently
+
+```bash
+npm run dev
+```
+
 Start sheets
 
-```
-npm run start:sheet
+```bash
+npm run dev:sheet
 ```
 
 Start docs
 
-```
-npm run start:doc
+```bash
+npm run dev:doc
 ```
 
 Start slides
 
-```
-npm run start:slide
+```bash
+npm run dev:slide
 ```
 
 For more development tutorials, please refer to [Contribution Guide](./.github/contributing.md).

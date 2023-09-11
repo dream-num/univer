@@ -5,7 +5,6 @@ import {
     DesktopPlatformService,
     DesktopShortcutService,
     DragManager,
-    getRefElement,
     IMenuService,
     IPlatformService,
     IShortcutService,
@@ -70,7 +69,11 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
     initRender() {
         const engine = this._injector.get(IRenderingEngine);
-        const container = getRefElement(this._appUIController.getSheetContainerController().getContentRef());
+        const container = this._appUIController.getSheetContainerController().getContentRef().current;
+
+        if (!container) {
+            throw new Error('container is not ready');
+        }
 
         // mount canvas to DOM container
         engine.setContainer(container);

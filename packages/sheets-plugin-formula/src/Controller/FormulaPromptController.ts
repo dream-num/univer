@@ -1,7 +1,8 @@
-import { $$, ComponentManager, SlotManager, getRefElement } from '@univerjs/base-ui';
+import { $$, ComponentManager, SlotManager } from '@univerjs/base-ui';
 import { ObserverManager } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
+
 import { FORMULA_PLUGIN_NAME, FunList } from '../Basics';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
 import { CellInputHandler } from './CellInputHandler';
@@ -125,50 +126,7 @@ export class FormulaPromptController {
                 kcode === 46 ||
                 (event.ctrlKey && kcode === 86)
             ) {
-                this.cellInputHandler.searchFunction(this.richTextEditEle);
-                const formula = this.cellInputHandler.getFormula();
-                const helpFormula = this.cellInputHandler.getHelpFormula();
-                const height = parseInt(this.richTextEle.style.minHeight);
-                const width = parseInt(this.richTextEle.style.minWidth);
-                let left = parseInt(this.richTextEle.style.left);
-                let top = parseInt(this.richTextEle.style.top) + height;
-                const sheetContainer = getRefElement(this._sheetContainerUIController.getContentRef());
-                const screenW = sheetContainer.offsetWidth;
-                const screenH = sheetContainer.offsetHeight;
-                const position = { left, top };
-                const getPosition = (component: SearchFunction | HelpFunction) => {
-                    const searchFunctionEle = getRefElement(component.getContentRef());
-                    const rootW = searchFunctionEle.offsetWidth;
-                    const rootH = searchFunctionEle.offsetHeight;
-                    const right = screenW - left > rootW;
-                    const bottom = screenH - top > rootH;
-                    if (!right) {
-                        left -= rootW - width;
-                    }
-                    if (!bottom) {
-                        top -= rootH + height;
-                    }
-                    return { left, top };
-                };
-
-                if (formula[0]) {
-                    this._searchFunction.updateState(true, formula, 0, position, () => {
-                        const position = getPosition(this._searchFunction);
-                        this._searchFunction.updateState(true, formula, 0, position);
-                    });
-                    this._helpFunction.updateState(false);
-                } else if (helpFormula[0]) {
-                    const functionName = (helpFormula[0] as string).toUpperCase();
-                    const functionInfo = FunList.find((item: any) => item.n === functionName) || {};
-                    this._helpFunction.updateState(true, helpFormula[1] as number, functionInfo, position, () => {
-                        const position = getPosition(this._helpFunction);
-                        this._helpFunction.updateState(true, helpFormula[1] as number, functionInfo, position);
-                    });
-                    this._searchFunction.updateState(false);
-                } else {
-                    this._searchFunction.updateState(false, formula);
-                    this._helpFunction.updateState(false);
-                }
+                this._update();
             }
             const value = this.cellInputHandler.getInputValue();
             if (value.length > 0 && value.substr(0, 1) === '=' && (kcode !== 229 || value.length === 1)) {
@@ -183,5 +141,58 @@ export class FormulaPromptController {
                 }
             }
         });
+    }
+
+    private _update() {
+        this.cellInputHandler.searchFunction(this.richTextEditEle);
+        const formula = this.cellInputHandler.getFormula();
+        const helpFormula = this.cellInputHandler.getHelpFormula();
+        const height = parseInt(this.richTextEle.style.minHeight);
+        const width = parseInt(this.richTextEle.style.minWidth);
+        let left = parseInt(this.richTextEle.style.left);
+        let top = parseInt(this.richTextEle.style.top) + height;
+        const sheetContainer = this._sheetContainerUIController.getContentRef().current;
+
+        if (!sheetContainer) return;
+
+        const screenW = sheetContainer.offsetWidth;
+        const screenH = sheetContainer.offsetHeight;
+        const position = { left, top };
+        const getPosition = (component: SearchFunction | HelpFunction) => {
+            const searchFunctionEle = component.getContentRef().current;
+
+            if (!searchFunctionEle) return { left, top };
+
+            const rootW = searchFunctionEle.offsetWidth;
+            const rootH = searchFunctionEle.offsetHeight;
+            const right = screenW - left > rootW;
+            const bottom = screenH - top > rootH;
+            if (!right) {
+                left -= rootW - width;
+            }
+            if (!bottom) {
+                top -= rootH + height;
+            }
+            return { left, top };
+        };
+
+        if (formula[0]) {
+            this._searchFunction.updateState(true, formula, 0, position, () => {
+                const position = getPosition(this._searchFunction);
+                this._searchFunction.updateState(true, formula, 0, position);
+            });
+            this._helpFunction.updateState(false);
+        } else if (helpFormula[0]) {
+            const functionName = (helpFormula[0] as string).toUpperCase();
+            const functionInfo = FunList.find((item: any) => item.n === functionName) || {};
+            this._helpFunction.updateState(true, helpFormula[1] as number, functionInfo, position, () => {
+                const position = getPosition(this._helpFunction);
+                this._helpFunction.updateState(true, helpFormula[1] as number, functionInfo, position);
+            });
+            this._searchFunction.updateState(false);
+        } else {
+            this._searchFunction.updateState(false, formula);
+            this._helpFunction.updateState(false);
+        }
     }
 }

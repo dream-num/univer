@@ -1,14 +1,14 @@
-import { Plugin, Tools, LocaleService, PluginType } from '@univerjs/core';
-import { ComponentManager, getRefElement, DragManager } from '@univerjs/base-ui';
 import { IRenderingEngine } from '@univerjs/base-render';
-import { Inject, Injector } from '@wendellhu/redi';
 import { CanvasView } from '@univerjs/base-slides';
+import { ComponentManager, DragManager } from '@univerjs/base-ui';
+import { LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 
-import { zh, en } from './Locale';
-import { SLIDE_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
-import { AppUIController } from './Controller/AppUIController';
 import { DefaultSlideUIConfig, installObserver, ISlideUIPluginConfig, SlideUIPluginObserve } from './Basics';
+import { SLIDE_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { IToolbarItemProps } from './Controller';
+import { AppUIController } from './Controller/AppUIController';
+import { en, zh } from './Locale';
 
 export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
     static override type = PluginType.Slide;
@@ -55,7 +55,10 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
 
     initRender() {
         const engine = this._injector.get(IRenderingEngine);
-        const container = getRefElement(this._appUIController.getSlideContainerController().getContentRef());
+        const container = this._appUIController.getSlideContainerController().getContentRef().current;
+        if (!container) {
+            throw new Error('container is not ready');
+        }
 
         // mount canvas to DOM container
         engine.setContainer(container);

@@ -1,6 +1,7 @@
-import { ComponentManager, DragManager, getRefElement } from '@univerjs/base-ui';
+import { ComponentManager, DragManager } from '@univerjs/base-ui';
 import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
 import { Inject, Injector, Self, SkipSelf } from '@wendellhu/redi';
+
 import { ISlideUIPluginConfig } from '../Basics';
 import { SlideContainer } from '../View';
 import { InfoBarUIController } from './InfoBarUIController';
@@ -98,6 +99,10 @@ export class SlideContainerUIController {
 
     private setSlideContainer() {
         // handle drag event
-        this._dragManager.handleDragAction(getRefElement(this._slideContainer));
+        const slideContainer = this._slideContainer.getContentRef().current;
+        if (!slideContainer) {
+            throw new Error('slideContainer is not ready');
+        }
+        this._dragManager.handleDragAction(slideContainer);
     }
 }

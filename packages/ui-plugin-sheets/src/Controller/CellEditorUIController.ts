@@ -1,6 +1,6 @@
 import { Engine, IMouseEvent, IPointerEvent, IRenderingEngine } from '@univerjs/base-render';
 import { CANVAS_VIEW_KEY, CanvasView, CellEditorController, ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { $$, CellEditExtensionManager, getRefElement, handleDomToJson, handleStringToStyle, isCtrlPressed, KeyboardManager, setLastCaretPosition } from '@univerjs/base-ui';
+import { $$, CellEditExtensionManager, handleDomToJson, handleStringToStyle, isCtrlPressed, KeyboardManager, setLastCaretPosition } from '@univerjs/base-ui';
 import { Direction, handleStyleToString, ICellData, isKeyPrintable, ObserverManager, Tools, UIObserver } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 import { RefObject } from 'react';
@@ -130,7 +130,9 @@ export class CellEditorUIController {
 
         this._richTextEle.style.borderWidth = '2px';
         const univerContainerContentRef = this._currentRefFetcher();
-        const sheetContentRect = getRefElement(univerContainerContentRef).getBoundingClientRect();
+        const sheetContentRect = univerContainerContentRef.current?.getBoundingClientRect();
+
+        if (!sheetContentRect) return;
 
         this._richTextEle.style.maxWidth = `${sheetContentRect.width - startX + scrollX}px`;
         this._richTextEle.style.maxHeight = `${sheetContentRect.height - startY + scrollY}px`;
@@ -241,7 +243,9 @@ export class CellEditorUIController {
     }
 
     private setRichText() {
-        this._richTextEle = getRefElement(this._richText.container);
+        const richText = this._richText.container.current;
+        if (!richText) return;
+        this._richTextEle = richText;
         this._richTextEditEle = $$('div', this._richTextEle);
 
         // // focus

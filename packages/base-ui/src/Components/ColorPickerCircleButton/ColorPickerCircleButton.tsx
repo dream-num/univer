@@ -38,7 +38,7 @@ interface IState {}
 
 export function ColorPickerCircleButton({ color, onClick, onCancel, style, colorPickerStyle }: BaseColorPickerCircleButtonProps) {
     const ref = useRef<HTMLDivElement>(null);
-    const [currentColorPickerStyle, setCurrentColorPickerStyle] = useState(colorPickerStyle || { display: 'none' });
+    const [currentColorPickerStyle, setCurrentColorPickerStyle] = useState(colorPickerStyle);
     /**
      * handle ColorSelectButton Click,show color picker
      */

@@ -1,18 +1,19 @@
-import { ComponentChildren } from 'react';
+import React from 'react';
+
 import { BaseComponent, JSXComponent } from '../BaseComponent';
 import { BaseMenuProps } from './Menu';
 
 export interface BaseDropdownProps {
-    children: ComponentChildren;
+    children: React.ReactNode;
     /** @deprecated dropdown shouldn't know what is inside */
     menu: BaseMenuProps;
     placement?: 'Left' | 'Right' | 'Top' | 'Bottom';
     showArrow?: boolean;
-    icon?: ComponentChildren;
+    icon?: React.ReactNode;
     onClick?: () => void;
     onMainClick?: () => void; //非功能按钮事件
     tooltip?: string;
-    content?: ComponentChildren;
+    content?: React.ReactNode;
 }
 
 export interface DropdownComponent extends BaseComponent<BaseDropdownProps> {

@@ -1,12 +1,11 @@
-import { ComponentChildren } from 'react';
 import { BaseComponent, JSXComponent } from '../BaseComponent';
 
 export interface BaseModalProps {
     title?: string | JSX.Element;
     width?: number;
     top?: number;
-    style?: JSX.CSSProperties;
-    children?: ComponentChildren;
+    style?: React.CSSProperties;
+    children?: React.ReactNode;
     className?: string;
     group?: ModalButtonGroup[];
     maskClick?: () => void;
@@ -29,7 +28,7 @@ export interface BaseModalProps {
 
 export type ModalButtonGroup = {
     locale?: string;
-    label?: string;
+    label?: string | Element;
     onClick?: (e?: any) => void;
     type?: string;
 };

@@ -85,6 +85,7 @@ export function isValueOptions(v: IValueOption | ICustomComponentOption): v is I
 
 export interface ICustomComponentOption {
     id: string;
+    disabled?: boolean;
 }
 
 export interface ICustomComponentProps<T> {

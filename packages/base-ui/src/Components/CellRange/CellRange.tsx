@@ -132,7 +132,7 @@ export function CellRange(props: BaseCellRangeModalProps) {
 
     return (
         <div className={styles.cellRangeModal}>
-            <Input placeholder={props.placeholder} value={value} onChange={(e) => handleChange(e)}></Input>
+            <Input placeholder={props.placeholder} value={value} onChange={handleChange}></Input>
             <span className={styles.cellModalIcon} onClick={() => setShow(true)}>
                 <Icon.Sheet.TableIcon />
             </span>

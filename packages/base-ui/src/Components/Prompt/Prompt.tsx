@@ -1,6 +1,7 @@
 import { Component } from 'react';
-import { Modal } from '../Modal';
+
 import { CustomLabel } from '../CustomLabel';
+import { Modal } from '../Modal';
 import styles from './index.module.less';
 
 interface BaseConfirmProps {
@@ -37,12 +38,12 @@ export class Prompt extends Component<BaseConfirmProps, IState> {
     getGroup() {
         const group = [
             {
-                label: <CustomLabel label="button.confirm" />,
+                label: 'button.confirm',
                 type: 'primary',
                 onClick: () => this.handleClick(),
             },
             {
-                label: <CustomLabel label="button.cancel" />,
+                label: 'button.cancel',
                 onClick: () => this.showModal(false),
             },
         ];

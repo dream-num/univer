@@ -1,12 +1,13 @@
-import { ComponentChildren, JSX } from 'react';
+import React from 'react';
+
 import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { ICustomComponentOption, IValueOption } from '../services/menu/menu';
 import { DisplayTypes } from '../Components/Select/Select';
+import { ICustomComponentOption, IValueOption } from '../services/menu/menu';
 
 export interface BaseMenuItem {
     className?: string;
-    style?: JSX.CSSProperties;
-    label?: ComponentChildren;
+    style?: React.CSSProperties;
+    label?: React.ReactNode;
     value?: any;
     children?: BaseMenuItem[];
     show?: boolean;
@@ -21,7 +22,7 @@ export interface BaseMenuProps {
     /** @deprecated */
     className?: string;
     /** @deprecated */
-    style?: JSX.CSSProperties;
+    style?: React.CSSProperties;
     /** @deprecated */
     parent?: any;
     /** @deprecated */
@@ -40,6 +41,7 @@ export interface BaseMenuProps {
     value?: string | number;
     options?: Array<IValueOption | ICustomComponentOption>;
     onOptionSelect?: (option: IValueOption) => void;
+    show?: boolean;
 }
 
 export type BaseMenuState = {

@@ -29,7 +29,7 @@ export function Panel(props: BasePanelProps) {
 
     return (
         <div className={Style.panelWrapper}>
-            <div className={Style.panelHeader} onClick={() => handelClick()}>
+            <div className={Style.panelHeader} onClick={handelClick}>
                 {header}
                 <span className={`${Style.panelHeaderIcon} ${panelBodyClassName!.includes('active') ? Style.panelHeaderIconRotate : ''}`}>
                     <Icon.Format.NextIcon />

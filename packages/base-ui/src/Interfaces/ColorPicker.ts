@@ -28,6 +28,8 @@ export interface BaseColorPickerProps extends BaseComponentProps {
      * class name
      */
     className?: string;
+
+    show?: boolean;
 }
 
 export interface ColorPickerComponent extends BaseComponent<BaseColorPickerProps> {

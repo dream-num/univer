@@ -208,6 +208,7 @@ export function ColorPicker(props: BaseColorPickerProps) {
     const [style, setStyles] = useState({});
     const [currentLocale, setCurrentLocale] = useState('');
     const [root, setRoot] = useState(null);
+    const [show, setShow] = useState(props.show || false);
 
     useEffect(() => {
         setPresetColors(allColor);
@@ -218,10 +219,16 @@ export function ColorPicker(props: BaseColorPickerProps) {
         setStyles({});
         setCurrentLocale('');
         setRoot(null);
-
-        // There may be other optimization solutions
-        document.addEventListener('click', hideSelect, true);
     }, [props.color]);
+
+    useEffect(() => {
+        const { show = false } = props;
+        setShow(show);
+
+        if (show) {
+            document.addEventListener('click', hideSelect, true);
+        }
+    }, [props.show]);
 
     const onChange = (presetColor: string) => {
         props.onChange && props.onChange(presetColor);
@@ -238,9 +245,10 @@ export function ColorPicker(props: BaseColorPickerProps) {
     };
 
     const hideSelect = (e?: MouseEvent) => {
+        console.info('hide color picker. If it triggers too frequently, it needs to be corrected');
         if (e && ulRef.current && ulRef.current.contains(e.target as Node)) return;
 
-        setStyles({ display: 'none' });
+        setShow(false);
 
         document.removeEventListener('click', hideSelect, true);
     };
@@ -292,7 +300,7 @@ export function ColorPicker(props: BaseColorPickerProps) {
     const obj = Object.assign(style || {}, props.style);
 
     return (
-        <div className={`${styles.colorPickerOuter} ${props.className}`} ref={ulRef} style={{ ...obj }}>
+        <div className={`${styles.colorPickerOuter} ${props.className}`} ref={ulRef} style={{ ...obj, display: show }}>
             <div className={styles.colorPicker}>
                 <div className={styles.picker}>
                     <div className={styles.pickerSwatches}>
@@ -337,12 +345,7 @@ export function ColorPicker(props: BaseColorPickerProps) {
                             >
                                 <CustomLabel label="colorPicker.confirmColor" />
                             </Button>
-                            <Button
-                                danger
-                                onClick={(e: MouseEvent) => {
-                                    onCancel();
-                                }}
-                            >
+                            <Button danger onClick={onCancel}>
                                 <CustomLabel label="colorPicker.cancelColor" />
                             </Button>
                             <Button

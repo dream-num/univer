@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { JSXComponent } from '../../BaseComponent';
-import { BasePanelProps, BaseCollapseProps, CollapseComponent, PanelComponent } from '../../Interfaces';
+
+import { BaseCollapseProps, BasePanelProps } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import { Icon } from '../index';
 import Style from './index.module.less';
@@ -14,13 +14,13 @@ import Style from './index.module.less';
 //     children: ComponentChildren;
 // }
 
-const Panel = (props: BasePanelProps) => {
+export function Panel(props: BasePanelProps) {
     const { header, children } = props;
     const [panelBodyClassName, setPanelBodyClassName] = useState(joinClassNames(Style.panelBody));
 
     const handelClick = () => {
-        const classname: string | undefined = panelBodyClassName;
-        if ((classname as string).includes('active')) {
+        const className: string | undefined = panelBodyClassName;
+        if ((className as string).includes('active')) {
             setPanelBodyClassName(joinClassNames(Style.panelBody));
         } else {
             setPanelBodyClassName(joinClassNames(Style.panelBody, Style.active));
@@ -38,23 +38,10 @@ const Panel = (props: BasePanelProps) => {
             <div className={panelBodyClassName}>{children}</div>
         </div>
     );
-};
+}
 
-const Collapse = (props: BaseCollapseProps) => {
+export function Collapse(props: BaseCollapseProps) {
     const { children } = props;
 
     return <div className={Style.collapseWrapper}>{children}</div>;
-};
-
-export class UniverCollapse implements CollapseComponent {
-    render(): JSXComponent<BaseCollapseProps> {
-        return Collapse;
-    }
 }
-export class UniverPanel implements PanelComponent {
-    render(): JSXComponent<BasePanelProps> {
-        return Panel;
-    }
-}
-
-export { Panel, Collapse };

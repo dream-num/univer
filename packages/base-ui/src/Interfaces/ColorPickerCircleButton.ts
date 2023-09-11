@@ -9,7 +9,7 @@ export interface BaseColorPickerCircleButtonProps {
     /**
      * Listen to the confirm button
      */
-    onClick: (color: string, e?: MouseEvent) => void;
+    onClick: (color: string, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     /**
      * cancel select
      */
@@ -18,12 +18,12 @@ export interface BaseColorPickerCircleButtonProps {
     /**
      * style
      */
-    style?: JSX.CSSProperties;
+    style?: React.CSSProperties;
 
     /**
      * color picker style
      */
-    colorPickerStyle?: JSX.CSSProperties;
+    colorPickerStyle?: React.CSSProperties;
 }
 
 export interface ColorPickerCircleButtonComponent extends BaseComponent<BaseColorPickerCircleButtonProps> {

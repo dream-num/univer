@@ -19,9 +19,10 @@ export interface BaseColorPickerProps extends BaseComponentProps {
     /**
      * style
      */
-    style?: JSX.CSSProperties;
+    style?: React.CSSProperties;
 
-    onClick?: (color: string, e: MouseEvent) => void; // 返回所选颜色
+    onClick?: (color: string, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void; // 返回所选颜色
+    onValueChange?: (value: string) => void; // 返回所选颜色
 
     /**
      * class name

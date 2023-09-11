@@ -2,11 +2,11 @@ import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponen
 
 // Components interface
 const ButtonTypes: string[] = ['default', 'primary'];
-export type ButtonType = typeof ButtonTypes[number];
+export type ButtonType = 'default' | 'primary';
 const ButtonShapes: string[] = ['circle', 'round'];
-export type ButtonShape = typeof ButtonShapes[number];
+export type ButtonShape = 'circle' | 'round';
 const SizeTypes: string[] = ['small', 'middle', 'large'];
-export type SizeType = typeof SizeTypes[number];
+export type SizeType = 'small' | 'middle' | 'large';
 const ButtonHTMLTypes: string[] = ['submit', 'reset', 'button'];
 export type ButtonHTMLType = 'submit' | 'reset' | 'button';
 

@@ -137,7 +137,7 @@ export function CellRange(props: BaseCellRangeModalProps) {
                 <Icon.Sheet.TableIcon />
             </span>
             <Modal title={props.title} visible={show} group={group}>
-                <Input readOnly={true} placeholder={props.contentPlaceholder} value={value}></Input>
+                <Input readonly={true} placeholder={props.contentPlaceholder} value={value}></Input>
             </Modal>
         </div>
     );

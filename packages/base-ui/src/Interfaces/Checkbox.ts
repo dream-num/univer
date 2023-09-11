@@ -1,4 +1,5 @@
 import { ComponentChildren } from 'react';
+
 import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
 
 export interface BaseCheckboxProps extends BaseComponentProps {
@@ -7,8 +8,8 @@ export interface BaseCheckboxProps extends BaseComponentProps {
     className?: string;
     disabled?: boolean;
     name?: string;
-    onChange?: (e: Event) => void;
-    children?: ComponentChildren;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    children?: React.ReactNode;
 }
 
 export interface CheckboxComponent extends BaseComponent<BaseCheckboxProps> {

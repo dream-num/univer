@@ -1,5 +1,4 @@
-import { JSXComponent } from '../../BaseComponent';
-import { AvatarComponent, BaseAvatarProps } from '../../Interfaces';
+import { BaseAvatarProps } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import styles from './Style/index.module.less';
 
@@ -64,10 +63,4 @@ export function Avatar(props: BaseAvatarProps) {
             {children}
         </span>
     );
-}
-
-export class UniverAvatar implements AvatarComponent {
-    render(): JSXComponent<BaseAvatarProps> {
-        return Avatar;
-    }
 }

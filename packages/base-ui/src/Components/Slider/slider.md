@@ -21,7 +21,7 @@ Property Introduction:
 | min | The maximum value the slider can slide to | number | 0 |
 | max | The minimum value the slider can slide to | number | 100 |
 | step | The granularity the slider can step through values. Must greater than 0, and be divided by (max - min) | number | 1 |
-| className | classname | string | - |
+| className | className | string | - |
 | style | css style | cssStyle | - |
 | value | The value of slider | number | - |
 | onChange | Callback function that is fired when the user changes the slider's value | (e: Event) => void | - |

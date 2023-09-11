@@ -20,7 +20,7 @@ Property Introduction:
 | spin | always spin | boolean | false |
 | rotate | rotate deg | number | - |
 | style | css style | cssStyle | - |
-| className | classname | string | - |
+| className | className | string | - |
 
 ## 案例
 

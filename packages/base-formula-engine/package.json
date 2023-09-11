@@ -39,6 +39,8 @@
     "devDependencies": {
         "@types/jest": "^27.5.2",
         "@types/node": "^18.14.0",
+        "@types/react": "^18.2.21",
+        "@types/react-dom": "^18.2.7",
         "jest-environment-jsdom": "^29.0.3",
         "less": "^4.1.1",
         "prettier": "^2.3.2",
@@ -47,6 +49,8 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:^0.0.1",
-        "@wendellhu/redi": "^0.12.7"
+        "@wendellhu/redi": "^0.12.7",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
     }
 }

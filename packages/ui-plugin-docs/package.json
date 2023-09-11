@@ -38,17 +38,21 @@
     "devDependencies": {
         "@types/jest": "^27.0.1",
         "@types/node": "^16.4.6",
+        "@types/react": "^18.2.21",
+        "@types/react-dom": "^18.2.7",
         "less": "^4.1.1",
         "prettier": "^2.3.2",
         "ts-jest": "29.0.1",
         "ts-node": "^10.2.1"
     },
     "dependencies": {
+        "@univerjs/base-docs": "workspace:^0.0.1",
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
-        "@univerjs/base-docs": "workspace:^0.0.1",
         "@wendellhu/redi": "^0.12.7",
-        "css-vars-ponyfill": "^2.4.6"
+        "css-vars-ponyfill": "^2.4.6",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
     }
 }

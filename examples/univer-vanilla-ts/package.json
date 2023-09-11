@@ -15,6 +15,8 @@
     "devDependencies": {
         "@types/jest": "^27.5.2",
         "@types/node": "^18.14.0",
+        "@types/react": "^18.2.21",
+        "@types/react-dom": "^18.2.7",
         "enzyme": "^3.11.0",
         "esbuild": "^0.16.4",
         "identity-obj-proxy": "^3.0.0",
@@ -33,11 +35,13 @@
         "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/common-plugin-data": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
-        "@univerjs/sheets-plugin-operation": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-formula": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-import-xlsx": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-numfmt": "workspace:^0.0.1",
+        "@univerjs/sheets-plugin-operation": "workspace:^0.0.1",
         "@univerjs/ui-plugin-sheets": "workspace:^0.0.1",
-        "@univerjs/ui-plugin-slides": "workspace:^0.0.1"
+        "@univerjs/ui-plugin-slides": "workspace:^0.0.1",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
     }
 }

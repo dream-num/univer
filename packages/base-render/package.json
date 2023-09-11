@@ -43,6 +43,8 @@
     "devDependencies": {
         "@types/jest": "^27.5.2",
         "@types/node": "^18.14.0",
+        "@types/react": "^18.2.21",
+        "@types/react-dom": "^18.2.7",
         "enzyme": "^3.11.0",
         "identity-obj-proxy": "^3.0.0",
         "jest-dev-server": "^6.1.1",
@@ -53,6 +55,8 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:^0.0.1",
-        "@wendellhu/redi": "^0.12.7"
+        "@wendellhu/redi": "^0.12.7",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
     }
 }

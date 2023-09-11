@@ -6,7 +6,7 @@
         "esbuild:demo": {
             "cache": false
         },
-        "dev": {
+        "dev:demo": {
             "cache": false,
             "persistent": true
         }

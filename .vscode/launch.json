@@ -8,7 +8,7 @@
             "name": "Launch Doc (Chrome)",
             "request": "launch",
             "type": "chrome",
-            "url": "http://localhost:3002",
+            "url": "http://localhost:3003",
             "webRoot": "${workspaceFolder}/examples/univer-doc-ts/local/",
             "presentation": {
                 "group": "0_example",
@@ -19,7 +19,7 @@
             "name": "Launch Doc (Edge)",
             "request": "launch",
             "type": "msedge",
-            "url": "http://localhost:3002",
+            "url": "http://localhost:3003",
             "webRoot": "${workspaceFolder}/examples/univer-doc-ts/local/",
             "presentation": {
                 "group": "0_example",
@@ -46,6 +46,28 @@
             "presentation": {
                 "group": "0_example",
                 "order": 4
+            }
+        },
+        {
+            "name": "Launch Slide (Chrome)",
+            "request": "launch",
+            "type": "chrome",
+            "url": "http://localhost:3004",
+            "webRoot": "${workspaceFolder}/examples/univer-slide-ts/local/",
+            "presentation": {
+                "group": "0_example",
+                "order": 5
+            }
+        },
+        {
+            "name": "Launch Slide (Edge)",
+            "request": "launch",
+            "type": "msedge",
+            "url": "http://localhost:3004",
+            "webRoot": "${workspaceFolder}/examples/univer-slide-ts/local/",
+            "presentation": {
+                "group": "0_example",
+                "order": 6
             }
         },
         {

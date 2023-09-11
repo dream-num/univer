@@ -15,11 +15,6 @@ function deleteNodeModules(directory) {
             } else {
                 deleteNodeModules(filePath);
             }
-        } else {
-            if (['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml'].includes(file)) {
-                console.log('Deleting:', filePath);
-                fs.unlinkSync(filePath);
-            }
         }
     });
 }

@@ -1,4 +1,4 @@
-/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+/** @type {import('ts-jest/dist/types').JestConfigWithTsJest} */
 module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
@@ -9,10 +9,11 @@ module.exports = {
     testMatch: ['<rootDir>/**/test/**/*.test.ts'],
     // collectCoverageFrom: ['**/*.{js,jsx}', '!**/node_modules/**', '!**/vendor/**'],
     transform: {
-        '^.+\\.ts?$': [
+        '^.+\\.(ts|tsx)$': [
             'ts-jest',
             {
-                experimentalDecorators: true,
+                babel: true,
+                tsconfig: 'tsconfig.json',
             },
         ],
     },

@@ -1,9 +1,6 @@
-import Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-preact-pure';
-import { render, fireEvent, screen } from '@testing-library/preact';
-import { Button } from '..';
+import { fireEvent, render, screen } from '@testing-library/react';
 
-Enzyme.configure({ adapter: new Adapter() });
+import { Button } from '..';
 
 describe('Button', () => {
     test('should display initial Button', () => {

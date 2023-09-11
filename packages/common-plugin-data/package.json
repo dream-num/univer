@@ -31,7 +31,7 @@
     ],
     "private": false,
     "scripts": {
-        "test": "cross-env NODE_ENV=--experimental-vm-modules jest",
+        "jest": "jest -c jest.config.js",
         "esbuild": "node ./esbuild.config.js"
     },
     "license": "MIT",
@@ -41,13 +41,13 @@
         "react-dom": "^18.2.0"
     },
     "devDependencies": {
-        "@types/jest": "^27.5.2",
+        "@types/jest": "^29.5.4",
         "@types/node": "^18.14.0",
         "@types/react": "^18.2.21",
         "@types/react-dom": "^18.2.7",
-        "jest": "29.0.0",
-        "jest-dev-server": "^6.1.1",
-        "ts-jest": "29.0.1",
+        "jest": "29.6.4",
+        "jest-environment-jsdom": "^29.6.4",
+        "ts-jest": "29.1.1",
         "ts-node": "^10.9.1"
     }
 }

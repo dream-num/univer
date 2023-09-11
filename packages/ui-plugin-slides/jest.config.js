@@ -1,18 +1,22 @@
-/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+/** @type {import('ts-jest/dist/types').JestConfigWithTsJest} */
 module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'jsdom',
     moduleFileExtensions: ['js', 'ts', 'tsx'],
 
-    roots: ['<rootDir>/src'],
+    roots: ['<rootDir>'],
     testMatch: ['**/__tests__/**/*.+(ts|tsx|js)', '**/?(*.)+(spec|test).+(ts|tsx|js)'],
     transform: {
-        '^.+\\.(ts|tsx)$': 'ts-jest',
-        '^.+\\.tsx?$': 'babel-jest', // https://github.com/kulshekhar/ts-jest/issues/937#issuecomment-455431207
+        '^.+\\.(ts|tsx)$': [
+            'ts-jest',
+            {
+                babel: true,
+                tsconfig: '<rootDir>/tsconfig.json',
+            },
+        ],
+        '.+\\.(css|less)$': 'jest-css-modules-transform',
     },
-    globals: {
-        'ts-jest': {
-            tsConfig: 'tsconfig.json',
-        },
-    },
+
+    collectCoverage: true,
+    coverageReporters: ['json', 'html'],
 };

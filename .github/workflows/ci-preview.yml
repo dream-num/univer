@@ -1,4 +1,4 @@
-name: CI
+name: 📦 CI Preview
 
 on:
   push:
@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   build:
+    if: github.repository == 'dream-num/univer'
     runs-on: ubuntu-latest
 
     env:

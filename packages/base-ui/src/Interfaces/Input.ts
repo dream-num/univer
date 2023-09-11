@@ -1,8 +1,9 @@
 import { RefObject } from 'react';
+
 import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
 
 export interface BaseInputProps extends BaseComponentProps {
-    type?: 'text' | 'button' | 'checkbox' | 'file' | 'hidden' | 'image' | 'password' | 'radio' | 'rest' | 'submit' | 'number';
+    type?: 'text' | 'button' | 'checkbox' | 'file' | 'hidden' | 'image' | 'password' | 'radio' | 'reset' | 'submit' | 'number';
     value?: string;
     placeholder?: string;
     onChange?: (e: Event) => void;

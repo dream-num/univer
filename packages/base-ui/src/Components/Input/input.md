@@ -23,7 +23,7 @@ Property Introduction:
 | className | input classname | string | - |
 | id | input id | string | - |
 | value | input value | string | - |
-| type | type of input | 'text' | 'button' | 'checkbox' | 'file' | 'hidden' | 'image' | 'password' | 'radio' | 'rest' | 'submit' | - |
+| type | type of input | 'text' | 'button' | 'checkbox' | 'file' | 'hidden' | 'image' | 'password' | 'radio' | 'reset' | 'submit' | - |
 | placeholder | placeholder | string | - |
 | border | set border of input | boolean | true |
 | readonly | input is readonly | boolean | false |

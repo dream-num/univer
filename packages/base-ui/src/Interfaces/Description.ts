@@ -1,24 +1,24 @@
-import { FormatModalComponent } from './FormatModal';
 import { AvatarComponent } from './Avatar';
+import { ButtonComponent } from './Button';
 import { CheckboxComponent, CheckboxGroupComponent } from './Checkbox';
+import { CollapseComponent, PanelComponent } from './Collapse';
+import { ColorPickerComponent } from './ColorPicker';
 import { ColorPickerCircleButtonComponent } from './ColorPickerCircleButton';
-import { SiderModalComponent } from './SiderModal';
-import { ButtonComponent } from '../BaseComponent';
+import { ContainerComponent, ContentComponent, FooterComponent, HeaderComponent, LayoutComponent, SiderComponent } from './Container';
+import { DropdownComponent } from './Dropdown';
+import { FormatModalComponent } from './FormatModal';
 import { IconComponent } from './Icon';
 import { InputComponent } from './Input';
-import { TabComponent, TabPaneComponent } from './Tab';
-import { RadioComponent, RadioGroupComponent } from './Radio';
-import { ContainerComponent, ContentComponent, FooterComponent, HeaderComponent, LayoutComponent, SiderComponent } from './Container';
-import { SingleButtonComponent } from './SingleButton';
+import { MenuComponent } from './Menu';
 // import { SelectComponent } from './Select';
 import { ModalComponent } from './Modal';
-import { ColorPickerComponent } from './ColorPicker';
-import { TooltipComponent } from './Tooltip';
-import { CollapseComponent, PanelComponent } from './Collapse';
-import { UlComponent } from './Ul';
+import { RadioComponent, RadioGroupComponent } from './Radio';
+import { SiderModalComponent } from './SiderModal';
+import { SingleButtonComponent } from './SingleButton';
 import { SliderComponent } from './Slider';
-import { MenuComponent } from './Menu';
-import { DropdownComponent } from './Dropdown';
+import { TabComponent, TabPaneComponent } from './Tab';
+import { TooltipComponent } from './Tooltip';
+import { UlComponent } from './Ul';
 
 export interface Description {
     Button: ButtonComponent;

@@ -1,5 +1,5 @@
 import { JSXComponent } from '../../BaseComponent';
-import { BaseAvatarProps, AvatarComponent } from '../../Interfaces';
+import { AvatarComponent, BaseAvatarProps } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
 import styles from './Style/index.module.less';
 
@@ -23,7 +23,7 @@ import styles from './Style/index.module.less';
 //     title?: string;
 // }
 
-export const Avatar = (props: BaseAvatarProps) => {
+export function Avatar(props: BaseAvatarProps) {
     const { alt, shape = 'circle', size, src, onError, style, fit = 'fill', children, onLoad, title } = props;
 
     // const responseSize = () => {
@@ -64,7 +64,7 @@ export const Avatar = (props: BaseAvatarProps) => {
             {children}
         </span>
     );
-};
+}
 
 export class UniverAvatar implements AvatarComponent {
     render(): JSXComponent<BaseAvatarProps> {

@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
 
 type Shape = 'circle' | 'square';
@@ -12,7 +14,7 @@ export interface BaseAvatarProps extends BaseComponentProps {
     shape?: Shape;
     size?: AvatarSize;
     src?: string;
-    style?: JSX.CSSProperties;
+    style?: React.CSSProperties;
     fit?: ImageFit;
     children?: any;
     onError?: () => void;

@@ -1,4 +1,4 @@
-import { ComponentManager, DragManager, getRefElement, Prompt, SlotManager } from '@univerjs/base-ui';
+import { ComponentManager, DragManager, Prompt, SlotManager } from '@univerjs/base-ui';
 import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
 import { Inject, Injector, Self, SkipSelf } from '@wendellhu/redi';
 
@@ -171,6 +171,10 @@ export class SheetContainerUIController {
 
     private setSheetContainer() {
         // handle drag event
-        this._dragManager.handleDragAction(getRefElement(this._sheetContainer));
+        const sheetContainerEle = this._sheetContainer.getContentRef().current;
+        if (!sheetContainerEle) {
+            throw new Error('sheetContainerEle is not ready');
+        }
+        this._dragManager.handleDragAction(sheetContainerEle);
     }
 }

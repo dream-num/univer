@@ -1,4 +1,4 @@
-import { Component, RefObject } from 'react';
+import { RefObject } from 'react';
 
 /**
  * check element
@@ -8,11 +8,6 @@ import { Component, RefObject } from 'react';
 export function isElement(element: any) {
     return element instanceof Element || element instanceof HTMLDocument;
 }
-
-export const isDOM =
-    typeof HTMLElement === 'object'
-        ? (obj: any) => obj instanceof HTMLElement
-        : (obj: any) => obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string';
 
 /**
  * DOM selector
@@ -196,19 +191,6 @@ export function textTrim(x: string): string {
         return x;
     }
     return x.replace(/^\s+|\s+$/gm, '');
-}
-
-export function getRefElement(ref: RefObject<HTMLElement | Component> | Component) {
-    if (isDOM((ref as RefObject<HTMLElement>).current)) {
-        return (ref as RefObject<HTMLElement>).current as HTMLElement;
-    }
-    const refCurrent = (ref as RefObject<Component>).current as Component<{}, {}>;
-
-    // TODO: need to fix
-    if (refCurrent) {
-        return refCurrent?.contentRef.current as HTMLElement;
-    }
-    return (ref as Component).contentRef.current as HTMLElement;
 }
 
 export function printableCharacter(keycode: number) {

@@ -1,5 +1,4 @@
 import { Engine, IRenderingEngine } from '@univerjs/base-render';
-import { getRefElement } from '@univerjs/base-ui';
 import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
@@ -32,7 +31,11 @@ export class DocContainerUIController {
     getComponent = (ref: DocContainer) => {
         this._docContainer = ref;
 
-        const container = getRefElement(ref.getContentRef());
+        const container = ref.getContentRef().current;
+
+        if (!container) {
+            throw new Error('container is not ready');
+        }
 
         const engine = this._renderingEngine;
         engine.setContainer(container);

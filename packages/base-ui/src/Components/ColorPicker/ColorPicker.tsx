@@ -300,7 +300,7 @@ export function ColorPicker(props: BaseColorPickerProps) {
     const obj = Object.assign(style || {}, props.style);
 
     return (
-        <div className={`${styles.colorPickerOuter} ${props.className}`} ref={ulRef} style={{ ...obj, display: show }}>
+        <div className={`${styles.colorPickerOuter} ${props.className}`} ref={ulRef} style={{ ...obj, display: show ? 'block' : 'none' }}>
             <div className={styles.colorPicker}>
                 <div className={styles.picker}>
                     <div className={styles.pickerSwatches}>

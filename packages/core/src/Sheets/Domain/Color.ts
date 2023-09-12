@@ -290,19 +290,19 @@ export class RgbColor extends Color {
         return this._alpha;
     }
 
-    getColorType(): ColorType {
+    override getColorType(): ColorType {
         return ColorType.RGB;
     }
 
-    clone(): RgbColor {
+    override clone(): RgbColor {
         return new RgbColor(this._cssString, this._builder);
     }
 
-    asThemeColor(): ThemeColor {
+    override asThemeColor(): ThemeColor {
         throw new Error('rgb color not support to themeColor');
     }
 
-    equals(color: Color): boolean {
+    override equals(color: Color): boolean {
         if (color instanceof RgbColor) {
             return color._red === this._red && color._blue === this._blue && color._green === this._green && color._alpha === this._alpha;
         }
@@ -346,7 +346,7 @@ export class ThemeColor extends Color {
         return value;
     }
 
-    asRgbColor(): RgbColor {
+    override asRgbColor(): RgbColor {
         const themeColors = THEME_COLORS[this._themeColors];
         if (themeColors == null) {
             throw new Error('not find themeColors type');
@@ -376,18 +376,18 @@ export class ThemeColor extends Color {
         return rgbColor;
     }
 
-    clone(): ThemeColor {
+    override clone(): ThemeColor {
         return new ThemeColor(this._themeColorType, this._themeTint, this._themeColors, this._builder);
     }
 
-    equals(color: Color): boolean {
+    override equals(color: Color): boolean {
         if (color instanceof ThemeColor) {
             return color._themeColorType === this._themeColorType;
         }
         return false;
     }
 
-    getColorType(): ColorType {
+    override getColorType(): ColorType {
         return ColorType.THEME;
     }
 

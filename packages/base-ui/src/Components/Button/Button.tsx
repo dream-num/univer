@@ -1,9 +1,45 @@
 import { useEffect, useState } from 'react';
 
-import { BaseButtonProps } from '../../Interfaces/Button';
+
 import { joinClassNames } from '../../Utils/util';
 import { LoadingIcon } from '../Icon';
 import styles from './Style/index.module.less';
+
+
+import { BaseComponent, BaseComponentProps, JSXComponent } from '../../BaseComponent';
+
+// Components interface
+const ButtonTypes: string[] = ['default', 'primary'];
+export type ButtonType = 'default' | 'primary';
+const ButtonShapes: string[] = ['circle', 'round'];
+export type ButtonShape = 'circle' | 'round';
+const SizeTypes: string[] = ['small', 'middle', 'large'];
+export type SizeType = 'small' | 'middle' | 'large';
+const ButtonHTMLTypes: string[] = ['submit', 'reset', 'button'];
+export type ButtonHTMLType = 'submit' | 'reset' | 'button';
+
+export interface BaseButtonProps extends BaseComponentProps {
+    type?: ButtonType;
+    shape?: ButtonShape;
+    size?: SizeType;
+    danger?: boolean;
+    disabled?: boolean;
+    block?: boolean;
+    loading?: boolean;
+    active?: boolean;
+    htmlType?: ButtonHTMLType;
+    onClick?: Function;
+    children?: any;
+    className?: string;
+    style?: React.CSSProperties;
+    unActive?: boolean;
+}
+
+// component class
+export interface ButtonComponent extends BaseComponent<BaseButtonProps> {
+    render(): JSXComponent<BaseButtonProps>;
+}
+
 
 // interface IState {
 //     isActive: boolean;

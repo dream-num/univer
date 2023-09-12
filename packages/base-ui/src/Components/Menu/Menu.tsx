@@ -347,12 +347,53 @@ import React, { forwardRef, Ref, useContext, useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { AppContext } from '../../Common/AppContext';
-import { BaseMenuItem, BaseMenuProps, BaseMenuStyle } from '../../Interfaces';
 import { ICustomComponentOption, IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, isValueOptions, IValueOption, MenuItemType } from '../../services/menu/menu';
 import { IMenuService } from '../../services/menu/menu.service';
 import { joinClassNames } from '../../Utils';
 import { CustomLabel, NeoCustomLabel } from '../CustomLabel/CustomLabel';
+import { BaseMenuItem } from '../Item/Item';
+import { DisplayTypes } from '../Select/Select';
 import styles from './index.module.less';
+
+export interface BaseMenuProps {
+    /** @deprecated */
+    onClick?: (...arg: any) => void;
+    /** @deprecated */
+    className?: string;
+    /** @deprecated */
+    style?: React.CSSProperties;
+    /** @deprecated */
+    parent?: any;
+    /** @deprecated */
+    dom?: HTMLElement;
+    /** @deprecated */
+    ref?: any;
+    /** @deprecated */
+    deep?: number;
+    /** @deprecated this is legacy menu mechanism. Do not use it. Use `menuItems` instead. */
+    menu?: BaseMenuItem[]; // TODO: should be renamed to `items`
+
+    // NOTE: options above are legacy. They are going to be removed after we complete refactoring.
+
+    display?: DisplayTypes;
+    menuId?: string;
+    value?: string | number;
+    options?: Array<IValueOption | ICustomComponentOption>;
+    onOptionSelect?: (option: IValueOption) => void;
+    show?: boolean;
+}
+
+export type BaseMenuState = {
+    show: boolean;
+    posStyle: BaseMenuStyle;
+};
+
+export type BaseMenuStyle = {
+    left?: string;
+    right?: string;
+    top?: string;
+    bottom?: string;
+};
 
 // export interface IBaseMenuState {
 //     show: boolean;

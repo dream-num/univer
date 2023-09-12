@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 import { BaseInputProps } from '../../Interfaces';
 import { joinClassNames } from '../../Utils/util';
@@ -119,20 +119,28 @@ export function Input(props: BaseInputProps) {
     const [value, setValue] = useState(props.value);
     const [focused, setFocused] = useState(false);
 
+    // useEffect(() => {
+    //     if (props.value && props.value !== value) {
+    //         setValue(props.value);
+    //     }
+    // }, [props.value]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { onChange } = props;
-        if (!onChange) return;
         const target = e.target;
+
         setValue(target.value);
+        if (!onChange) return;
         onChange(e);
     };
 
     const handlePressEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
         const { onPressEnter, onValueChange } = props;
+        const v = getValue();
+        setValue(v);
         if (e.key === 'Enter') {
             onPressEnter?.(e);
             ref.current?.blur();
-            const v = getValue();
             v && onValueChange?.(v);
         }
     };
@@ -144,9 +152,9 @@ export function Input(props: BaseInputProps) {
     };
 
     const onClick = (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
+        e.stopPropagation();
         const { onClick } = props;
         onClick?.(e);
-        e.stopPropagation();
     };
 
     const onBlur = (e: React.FocusEvent<HTMLInputElement, Element>) => {
@@ -158,10 +166,6 @@ export function Input(props: BaseInputProps) {
     };
 
     const getValue = () => ref.current?.value;
-
-    if (props.value && props.value !== value) {
-        setValue(props.value);
-    }
 
     const { id, disabled, type, placeholder, bordered = true, className = '', readonly } = props;
 
@@ -177,18 +181,18 @@ export function Input(props: BaseInputProps) {
     return (
         <input
             type={type}
-            onBlur={(e) => onBlur(e)}
-            onFocus={(e) => onFocus(e)}
+            onBlur={onBlur}
+            onFocus={onFocus}
             className={classes}
             placeholder={placeholder}
             disabled={disabled}
             ref={ref}
-            onChange={(e) => handleChange(e)}
+            onChange={handleChange}
             value={value}
-            onClick={(e) => onClick(e)}
+            onClick={onClick}
             readOnly={readonly}
             id={id}
-            onKeyUp={(e) => handlePressEnter(e)}
+            onKeyUp={handlePressEnter}
         ></input>
     );
 }

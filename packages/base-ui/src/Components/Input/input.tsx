@@ -1,8 +1,28 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import React, { RefObject, useEffect, useMemo, useRef, useState } from 'react';
 
-import { BaseInputProps } from '../../Interfaces';
+import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils/util';
 import styles from './Style/index.module.less';
+
+export interface BaseInputProps extends BaseComponentProps {
+    type?: 'text' | 'button' | 'checkbox' | 'file' | 'hidden' | 'image' | 'password' | 'radio' | 'reset' | 'submit' | 'number';
+    value?: string;
+    placeholder?: string;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    bordered?: boolean;
+    disabled?: boolean;
+    // maxLength?: number;
+    // onPressEnter?: KeyboardEvent;
+    onFocus?: (e: React.FocusEvent<HTMLInputElement, Element>) => void;
+    onBlur?: (e: React.FocusEvent<HTMLInputElement, Element>) => void;
+    onClick?: (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => void;
+    onValueChange?: (value: string) => void;
+    className?: string;
+    readonly?: boolean;
+    id?: string;
+    ref?: RefObject<HTMLInputElement>;
+}
 
 export function Input(props: BaseInputProps) {
     const ref = useRef<HTMLInputElement>(null);

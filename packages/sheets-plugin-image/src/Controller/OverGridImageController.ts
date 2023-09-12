@@ -1,4 +1,4 @@
-import { BaseComponentRender, ComponentManager, Icon, IMenuService } from '@univerjs/base-ui';
+import { ComponentManager, Icon, IMenuService } from '@univerjs/base-ui';
 import { Disposable, ICommandService } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -9,7 +9,6 @@ import { IImagePluginData } from '../Symbol';
 import { ImportImageMenuItemFactory } from './menu';
 
 export class OverGridImageController extends Disposable {
-    protected _render: BaseComponentRender;
 
     constructor(
         @Inject(Injector) readonly _injector: Injector,

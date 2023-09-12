@@ -1,6 +1,7 @@
 import { forwardRef, Ref } from 'react';
+import { BaseComponentProps } from '../../BaseComponent';
 
-type IProps = {
+interface BaseContainerProps extends BaseComponentProps {
     children?: React.ReactNode;
     style?: {};
     className?: string;
@@ -8,7 +9,7 @@ type IProps = {
     onContextMenu?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 };
 
-export const Container = forwardRef((props: IProps, ref: Ref<HTMLDivElement>) => {
+export const Container = forwardRef((props: BaseContainerProps, ref: Ref<HTMLDivElement>) => {
     const { children, style = {}, className = '', onClick, onContextMenu } = props;
 
     return (

@@ -1,7 +1,15 @@
 import { useEffect, useRef } from 'react';
-import { JSXComponent } from '../../BaseComponent';
-import { BaseResizeDialogProps, ResizeDialogComponent } from '../../Interfaces';
+
 import styles from './index.module.less';
+
+export interface BaseResizeDialogProps extends BaseComponentProps {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    children: React.ReactNode;
+    ratio: number;
+}
 
 export const ResizeDialog = (props: BaseResizeDialogProps) => {
     let { left = 0, top = 0, width = 100, height = 50, children, ratio = 1 } = props;
@@ -180,9 +188,3 @@ export const ResizeDialog = (props: BaseResizeDialogProps) => {
         </div>
     );
 };
-
-export class UniverResizeDialog implements ResizeDialogComponent {
-    render(): JSXComponent<BaseResizeDialogProps> {
-        return ResizeDialog;
-    }
-}

@@ -1,12 +1,23 @@
 import { isValidElement, JSX, useContext } from 'react';
 
 import { AppContext, AppContextValues, ICustomComponent } from '../../Common';
-import { IBaseCustomLabelProps } from '../../Interfaces';
 import { IMenuSelectorItem } from '../../services/menu/menu';
 import { Input } from '../Input/input';
 import { Item } from '../Item/Item';
 import { DisplayTypes } from '../Select';
 import styles from './CustomLabel.module.less';
+
+export interface IBaseCustomLabelProps {
+    icon?: string;
+    value?: string;
+    label: string | ICustomComponent | React.ReactNode;
+    display?: DisplayTypes;
+    onChange?: (e: Event) => void;
+    selected?: boolean;
+    title?: string;
+}
+
+
 
 function getLocale(context: Partial<AppContextValues>, name: string) {
     return context.localeService?.t(name);

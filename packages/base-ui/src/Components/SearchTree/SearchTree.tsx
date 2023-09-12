@@ -1,6 +1,5 @@
 import { Component, createRef } from 'react';
-import { JSXComponent } from '../../BaseComponent';
-import { BaseSearchTreeProps, SearchTreeComponent } from '../../Interfaces';
+
 import * as Icon from '../Icon';
 import styles from './index.module.less';
 
@@ -14,6 +13,8 @@ interface IState {
     data: Data[];
     dataClone: Data[];
 }
+
+export interface BaseSearchTreeProps {}
 
 class SearchTree extends Component<BaseSearchTreeProps, IState> {
     input = createRef();
@@ -148,12 +149,6 @@ class SearchTree extends Component<BaseSearchTreeProps, IState> {
                 </button>
             </div>
         );
-    }
-}
-
-export class UniverSearchTree implements SearchTreeComponent {
-    render(): JSXComponent<BaseSearchTreeProps> {
-        return SearchTree;
     }
 }
 

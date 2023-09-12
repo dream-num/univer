@@ -1,11 +1,36 @@
 import { useRef, useState } from 'react';
 
-import { BaseColorPickerCircleButtonProps } from '../../Interfaces';
 import { NextIcon } from '../Icon';
 import { ColorPicker } from '../index';
 import Styles from './index.module.less';
 
-interface IState {}
+export interface BaseColorPickerCircleButtonProps {
+    /**
+     * init color
+     */
+    color: string;
+
+    /**
+     * Listen to the confirm button
+     */
+    onClick: (color: string, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    /**
+     * cancel select
+     */
+    onCancel?: () => void;
+
+    /**
+     * style
+     */
+    style?: React.CSSProperties;
+
+    /**
+     * color picker style
+     */
+    colorPickerStyle?: React.CSSProperties;
+}
+
+
 
 // /**
 //  * e2e test,check Components.playwright.test.ts

@@ -1,5 +1,4 @@
-import { BaseIconProps } from '../../../Interfaces';
-import { Icon } from '../AddIcon';
+import { BaseIconProps, Icon } from '../AddIcon';
 
 export const LogoIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="logo" style={props.style}>

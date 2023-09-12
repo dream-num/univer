@@ -1,6 +1,4 @@
-import { BaseComponent, JSXComponent } from '../BaseComponent';
-import { ICustomComponent } from '../Common';
-import { BaseSelectChildrenProps, DisplayTypes } from '../Components/Select/Select';
+import { BaseSelectChildrenProps } from '../Components/Select/Select';
 
 export interface ICustomLabelProps {
     prefix?: string[] | string;
@@ -11,21 +9,8 @@ export interface ICustomLabelProps {
     onKeyUp?: (e: Event) => void;
 }
 
+// TODO move to right menu
 export interface ICustomLabelType {
     name: string;
     props?: ICustomLabelProps;
-}
-
-export interface IBaseCustomLabelProps {
-    icon?: string;
-    value?: string;
-    label: string | ICustomComponent | React.ReactNode;
-    display?: DisplayTypes;
-    onChange?: (e: Event) => void;
-    selected?: boolean;
-    title?: string;
-}
-
-export interface CustomLabelComponent extends BaseComponent<IBaseCustomLabelProps> {
-    render(): JSXComponent<IBaseCustomLabelProps>;
 }

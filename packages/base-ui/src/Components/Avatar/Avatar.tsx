@@ -1,26 +1,28 @@
-import { BaseAvatarProps } from '../../Interfaces';
+import React from 'react';
+
+import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils';
 import styles from './Style/index.module.less';
 
-// type Shape = 'circle' | 'square';
+type Shape = 'circle' | 'square';
 // type BreakPoint = 'xxl' | 'xl' | 'lg' | 'md' | 'sm' | 'xs';
 // type AvatatScreen = Partial<Record<BreakPoint, number>>;
 // type AvatarSize = number | 'large' | 'small' | 'default' | AvatatScreen;
-// type AvatarSize = number | 'large' | 'small' | 'default';
-// type ImageFit = 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
+type AvatarSize = number | 'large' | 'small' | 'default';
+type ImageFit = 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
 
-// export interface AvatarProps {
-//     alt?: string;
-//     shape?: Shape;
-//     size?: AvatarSize;
-//     src?: string;
-//     style?: JSX.CSSProperties;
-//     fit?: ImageFit;
-//     children?: any;
-//     onError?: () => void;
-//     onLoad?: () => void;
-//     title?: string;
-// }
+export interface BaseAvatarProps extends BaseComponentProps {
+    alt?: string;
+    shape?: Shape;
+    size?: AvatarSize;
+    src?: string;
+    style?: React.CSSProperties;
+    fit?: ImageFit;
+    children?: any;
+    onError?: () => void;
+    onLoad?: () => void;
+    title?: string;
+}
 
 export function Avatar(props: BaseAvatarProps) {
     const { alt, shape = 'circle', size, src, onError, style, fit = 'fill', children, onLoad, title } = props;

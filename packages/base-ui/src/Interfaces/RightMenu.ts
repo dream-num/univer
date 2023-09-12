@@ -1,19 +1,15 @@
-import { ComponentChildren } from 'react';
-import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
+import { BaseComponentProps } from '../BaseComponent';
 
 export interface List {
-    content: ComponentChildren;
+    content: React.ReactNode;
     onClick?: () => void;
     vertical?: boolean;
     type?: string;
     children?: List[];
 }
 
+// TODO remove to component file
 export interface BaseRightMenuProps extends BaseComponentProps {
     onClick?: () => void;
     style?: {};
-}
-
-export interface RightMenuComponent extends BaseComponent<BaseRightMenuProps> {
-    render(): JSXComponent<BaseRightMenuProps>;
 }

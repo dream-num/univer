@@ -7,9 +7,15 @@
 // Types for state
 import React, { forwardRef, Ref, useEffect, useRef, useState } from 'react';
 
-import { BaseLayoutProps } from '../../Interfaces';
 import { getFirstChildren } from '../../Utils';
 import styles from './index.module.less';
+import { BaseComponentProps } from '../../BaseComponent';
+
+export interface BaseLayoutProps extends BaseComponentProps {
+    children?: React.ReactNode;
+    className?: string;
+    style?: {};
+}
 
 export function Layout({ children, style, className = '' }: BaseLayoutProps) {
     const [isAside, setIsAside] = useState(false);

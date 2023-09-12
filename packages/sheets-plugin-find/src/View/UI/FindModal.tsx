@@ -1,6 +1,7 @@
-import { BaseCheckboxGroupOptions, BaseComponentProps, Button, CellRange, CheckboxGroup, Icon, Input, Modal, Select, CustomLabel } from '@univerjs/base-ui';
-import { Component, createRef } from 'react';
+import { BaseCheckboxGroupOptions, BaseComponentProps, Button, CellRange, CheckboxGroup, CustomLabel, Icon, Input, Modal, Select } from '@univerjs/base-ui';
 import { BaseItemProps } from '@univerjs/base-ui/src/Components/Item/Item';
+import { Component, createRef } from 'react';
+
 import styles from './index.module.less';
 
 type searchResult = {
@@ -27,6 +28,7 @@ interface IState {
     current: number;
     count: number;
     replaceCount: number;
+    value: string;
 }
 
 export enum SelectSearch {
@@ -36,9 +38,6 @@ export enum SelectSearch {
 }
 
 export class FindModal extends Component<IProps, IState> {
-    private _searchRef = createRef();
-
-    private _replaceRef = createRef();
 
     private _matchGroup: BaseCheckboxGroupOptions[] = [];
 
@@ -53,6 +52,7 @@ export class FindModal extends Component<IProps, IState> {
             current: 0,
             count: 0,
             replaceCount: 0,
+            value: '',
         };
 
         this._matchGroup = [
@@ -141,7 +141,7 @@ export class FindModal extends Component<IProps, IState> {
     }
 
     findNext() {
-        const value = this._searchRef.current.getValue();
+        const value = this.state.value;
         if (!value) return;
         const { count, current } = this.props.findNext(value);
         this.setState({
@@ -151,7 +151,7 @@ export class FindModal extends Component<IProps, IState> {
     }
 
     findPrevious() {
-        const value = this._searchRef.current.getValue();
+        const value = this.state.value;
         if (!value) return;
         const { count, current } = this.props.findPrevious(value);
         this.setState({
@@ -161,7 +161,7 @@ export class FindModal extends Component<IProps, IState> {
     }
 
     replaceText() {
-        const value = this._replaceRef.current.getValue();
+        const value = this.state.value;
         if (!value) return;
         const replaceCount = this.props.replaceText(value);
         this.setState({
@@ -170,11 +170,18 @@ export class FindModal extends Component<IProps, IState> {
     }
 
     replaceAll() {
-        const value = this._replaceRef.current.getValue();
+        const value = this.state.value;
         if (!value) return;
         const replaceCount = this.props.replaceAll(value);
         this.setState({
             ...replaceCount,
+        });
+    }
+
+    onChange(e) {
+        const value = e.target.value;
+        this.setState({
+            value,
         });
     }
 
@@ -202,7 +209,7 @@ export class FindModal extends Component<IProps, IState> {
                             <CustomLabel label="find.find" />
                         </span>
                     )}
-                    <Input ref={this._searchRef} onPressEnter={this.findNext.bind(this)}></Input>
+                    <Input onPressEnter={this.findNext.bind(this)} onChange={(e) => this.onChange(e)}></Input>
                     {count ? (
                         <div className={styles.count}>
                             <span onClick={this.findPrevious.bind(this)}>
@@ -226,7 +233,7 @@ export class FindModal extends Component<IProps, IState> {
                             <span>
                                 <CustomLabel label="find.replaceWith" />
                             </span>
-                            <Input ref={this._replaceRef}></Input>
+                            <Input></Input>
                         </div>
                         <div className={styles.box}>
                             <span>

@@ -95,11 +95,24 @@
 // }
 import React, { useEffect, useRef, useState } from 'react';
 
-import { BaseDropdownProps } from '../../Interfaces';
 import { Icon } from '..';
 import { Menu } from '../Menu';
+import { BaseMenuProps } from '../Menu/Menu';
 import { Tooltip } from '../Tooltip';
 import styles from './index.module.less';
+
+export interface BaseDropdownProps {
+    children: React.ReactNode;
+    /** @deprecated dropdown shouldn't know what is inside */
+    menu: BaseMenuProps;
+    placement?: 'Left' | 'Right' | 'Top' | 'Bottom';
+    showArrow?: boolean;
+    icon?: React.ReactNode;
+    onClick?: () => void;
+    onMainClick?: () => void; //非功能按钮事件
+    tooltip?: string;
+    content?: React.ReactNode;
+}
 
 export function Dropdown(props: BaseDropdownProps) {
     // const MenuRef = useRef<Menu>(null);

@@ -19,11 +19,7 @@ type LabelProps = {
 export class LocationContent extends Component<LocationProps, LocationState> {
     // private _localeObserver: Nullable<Observer<Workbook>>;
 
-    // Render: BaseComponentRender;
-
     // initialize() {
-    //     const component = new SheetPlugin().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-    //     this.Render = component.getComponentRender();
     //     this.state = {
     //         radioGroup: [],
     //         active: '1',

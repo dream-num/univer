@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { BaseCheckboxProps } from '../../Interfaces';
+import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils';
 import styles from './index.module.less';
 // export type CheckboxBaseProps = {
@@ -64,6 +64,15 @@ import styles from './index.module.less';
 //         );
 //     }
 // }
+export interface BaseCheckboxProps extends BaseComponentProps {
+    value?: string;
+    checked?: boolean;
+    className?: string;
+    disabled?: boolean;
+    name?: string;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    children?: React.ReactNode;
+}
 
 export function Checkbox(props: BaseCheckboxProps) {
     const { className, checked: initialChecked, disabled, name, onChange, children, value } = props;

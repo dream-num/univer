@@ -26,6 +26,7 @@ import { Tooltip } from './Tooltip';
 // import { Ul } from './Ul';
 
 export * from './CellRange';
+export * from './Item/Item';
 export * from './Prompt';
 export * from './Select';
 export * from './Slot/Slot';

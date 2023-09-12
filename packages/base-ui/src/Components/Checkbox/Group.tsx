@@ -1,23 +1,23 @@
 import { useRef } from 'react';
 
-import { BaseCheckboxGroupProps } from '../../Interfaces';
+import { BaseComponentProps } from '../../BaseComponent';
 import { Checkbox } from './Checkbox';
 import styles from './index.module.less';
 
-// type CheckboxGroupProps = {
-//     disabled?: boolean;
-//     name?: string;
-//     options: Array<options>;
-//     onChange?: (value: string[]) => void;
-// };
+export type BaseCheckboxGroupOptions = {
+    checked?: boolean;
+    disabled?: boolean;
+    name?: string;
+    label?: React.ReactNode;
+    value?: string;
+};
 
-// type options = {
-//     checked?: boolean;
-//     disabled?: boolean;
-//     name?: string;
-//     label?: string | JSX.Element;
-//     value?: string;
-// };
+export interface BaseCheckboxGroupProps extends BaseComponentProps {
+    disabled?: boolean;
+    name?: string;
+    options: BaseCheckboxGroupOptions[];
+    onChange?: (value: string[]) => void;
+}
 
 export function CheckboxGroup(props: BaseCheckboxGroupProps) {
     const { options, onChange, disabled, name } = props;

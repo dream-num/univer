@@ -1,19 +1,17 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
-import { BaseCollapseProps, BasePanelProps } from '../../Interfaces';
 import { joinClassNames } from '../../Utils';
-import { Icon } from '../index';
+import { NextIcon } from '../Icon/Format';
 import Style from './index.module.less';
 
-// interface PanelProps {
-//     children: ComponentChildren;
-//     header?: ComponentChildren;
-// }
+export interface BasePanelProps {
+    children: React.ReactNode;
+    header?: React.ReactNode;
+}
 
-// interface CollapseProps {
-//     children: ComponentChildren;
-// }
-
+export interface BaseCollapseProps {
+    children: React.ReactNode;
+}
 export function Panel(props: BasePanelProps) {
     const { header, children } = props;
     const [panelBodyClassName, setPanelBodyClassName] = useState(joinClassNames(Style.panelBody));
@@ -32,7 +30,7 @@ export function Panel(props: BasePanelProps) {
             <div className={Style.panelHeader} onClick={handelClick}>
                 {header}
                 <span className={`${Style.panelHeaderIcon} ${panelBodyClassName!.includes('active') ? Style.panelHeaderIconRotate : ''}`}>
-                    <Icon.Format.NextIcon />
+                    <NextIcon />
                 </span>
             </div>
             <div className={panelBodyClassName}>{children}</div>

@@ -1,4 +1,4 @@
-import { AppContext, BaseComponentProps, BaseComponentRender, BaseSelectChildrenProps, debounce, Icon } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, BaseSelectChildrenProps, debounce, Icon } from '@univerjs/base-ui';
 import { Nullable } from '@univerjs/core';
 import { Component } from 'react';
 
@@ -20,8 +20,6 @@ export interface BaseFormulaBarProps extends BaseComponentProps {}
 
 export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
     static override contextType = AppContext;
-
-    private _render: BaseComponentRender;
 
     // formulaContent = createRef<HTMLDivElement>();
 

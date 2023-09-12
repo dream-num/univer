@@ -180,11 +180,45 @@
 // }
 import React, { useEffect, useRef, useState } from 'react';
 
-import { BaseColorPickerProps } from '../..';
 import { CustomLabel } from '../CustomLabel';
 import { Button, Tooltip } from '../index';
 import { ColorPickerPanel } from './ColorPickerPanel';
 import styles from './index.module.less';
+import { BaseComponentProps } from '../../BaseComponent';
+
+
+
+export interface BaseColorPickerProps extends BaseComponentProps {
+    /**
+     * init color
+     */
+    color?: string;
+
+    /**
+     * cancel select
+     */
+    onCancel?: () => void;
+
+    /**
+     * Change colors in real time
+     */
+    onChange?: (color: string, val?: boolean) => void;
+
+    /**
+     * style
+     */
+    style?: React.CSSProperties;
+
+    onClick?: (color: string, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void; // 返回所选颜色
+    onValueChange?: (value: string) => void; // 返回所选颜色
+
+    /**
+     * class name
+     */
+    className?: string;
+
+    show?: boolean;
+}
 
 const allColor = [
     ['#000', '#444', '#666', '#999', '#ccc', '#eee', '#f3f3f3', '#fff'],

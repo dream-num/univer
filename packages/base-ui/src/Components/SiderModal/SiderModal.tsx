@@ -1,5 +1,4 @@
 import { Component } from 'react';
-import { BaseSiderModalProps } from '../../Interfaces';
 import { Icon } from '../index';
 import Style from './index.module.less';
 
@@ -7,6 +6,19 @@ type IState = {
     zIndex: number;
     show: boolean;
 };
+
+export interface BaseSiderModalProps {
+    name: string;
+    title: string | any;
+    show?: boolean;
+    children?: ComponentChildren;
+    footer?: ComponentChildren;
+    ref?: RefObject<HTMLElement>;
+    className?: string;
+    zIndex?: number;
+    style?: React.CSSProperties;
+}
+
 
 class SiderModal extends Component<BaseSiderModalProps, IState> {
     constructor(props: BaseSiderModalProps) {

@@ -1,19 +1,22 @@
-name: 📌 PR Title Lint
+name: 🧪 CI Test
 
 on:
+  push:
+    branches: [main, dev]
   pull_request:
-    types:
-      - opened
-      - edited
-      - synchronize
+    branches: [main, dev]
 
 permissions:
   contents: read
 
 jobs:
-  check-pull-request-title:
-    name: Check pull request title
+  build:
     runs-on: ubuntu-latest
+
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -45,4 +48,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - run: echo "${{ github.event.pull_request.title }}" | pnpx commitlint -g ./commitlint.config.js
+      - name: Testing
+        run: pnpm run test

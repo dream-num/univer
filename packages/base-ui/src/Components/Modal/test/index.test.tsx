@@ -1,9 +1,6 @@
-import Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-preact-pure';
-import { render, screen } from '@testing-library/preact';
-import { Modal } from '..';
+import { render, screen } from '@testing-library/react';
 
-Enzyme.configure({ adapter: new Adapter() });
+import { Modal } from '..';
 
 describe('Modal', () => {
     const title = 'title';

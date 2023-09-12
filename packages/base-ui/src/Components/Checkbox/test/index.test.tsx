@@ -1,9 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/preact';
-import Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-preact-pure';
-import { Checkbox, CheckboxGroup } from '..';
+import { fireEvent, render, screen } from '@testing-library/react';
 
-Enzyme.configure({ adapter: new Adapter() });
+import { Checkbox, CheckboxGroup } from '..';
 
 describe('checkbox', () => {
     test('checkbox', () => {
@@ -16,7 +13,7 @@ describe('checkbox', () => {
     });
     test('checkbox group', () => {
         let a = 1;
-        let checkGroups = [
+        const checkGroups = [
             {
                 checked: true,
                 disabled: false,

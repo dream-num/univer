@@ -1,9 +1,6 @@
-import Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-preact-pure';
-import { render } from '@testing-library/preact';
-import { Slider } from '..';
+import { render } from '@testing-library/react';
 
-Enzyme.configure({ adapter: new Adapter() });
+import { Slider } from '..';
 
 describe('input', () => {
     test('input', () => {

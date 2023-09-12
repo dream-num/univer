@@ -14,7 +14,6 @@ const config = {
     addons: [
         getAbsolutePath('@storybook/addon-links'),
         getAbsolutePath('@storybook/addon-essentials'),
-        getAbsolutePath('@storybook/addon-onboarding'),
         getAbsolutePath('@storybook/addon-interactions'),
     ],
     framework: {
@@ -23,6 +22,16 @@ const config = {
     },
     docs: {
         autodocs: 'tag',
+    },
+    async viteFinal(config, options) {
+        config.css = {
+            modules: {
+                localsConvention: 'camelCaseOnly',
+                generateScopedName: 'univer-[local]',
+            }
+        };
+
+        return config;
     },
 };
 

@@ -53,8 +53,7 @@
 // }
 import React, { useEffect, useState } from 'react';
 
-import { ModalButtonGroup } from '../../Interfaces/Modal';
-import { Modal } from '../Modal';
+import { Modal, ModalButtonGroup } from '../Modal';
 import styles from './index.module.less';
 
 interface BaseConfirmProps {
@@ -83,6 +82,7 @@ export function Confirm({ title, content, onClick, show = false }: BaseConfirmPr
             onClick: handleClick,
         },
         {
+            type: 'default',
             label: 'button.cancel',
             onClick: () => setVisible(false),
         },

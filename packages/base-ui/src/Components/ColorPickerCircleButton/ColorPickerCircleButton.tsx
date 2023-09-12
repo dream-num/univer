@@ -30,8 +30,6 @@ export interface BaseColorPickerCircleButtonProps {
     colorPickerStyle?: React.CSSProperties;
 }
 
-
-
 // /**
 //  * e2e test,check Components.playwright.test.ts
 //  */

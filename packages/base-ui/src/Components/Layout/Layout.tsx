@@ -7,9 +7,9 @@
 // Types for state
 import React, { forwardRef, Ref, useEffect, useRef, useState } from 'react';
 
+import { BaseComponentProps } from '../../BaseComponent';
 import { getFirstChildren } from '../../Utils';
 import styles from './index.module.less';
-import { BaseComponentProps } from '../../BaseComponent';
 
 export interface BaseLayoutProps extends BaseComponentProps {
     children?: React.ReactNode;

@@ -180,13 +180,11 @@
 // }
 import React, { useEffect, useRef, useState } from 'react';
 
+import { BaseComponentProps } from '../../BaseComponent';
 import { CustomLabel } from '../CustomLabel';
 import { Button, Tooltip } from '../index';
 import { ColorPickerPanel } from './ColorPickerPanel';
 import styles from './index.module.less';
-import { BaseComponentProps } from '../../BaseComponent';
-
-
 
 export interface BaseColorPickerProps extends BaseComponentProps {
     /**

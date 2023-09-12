@@ -1,4 +1,5 @@
 import { forwardRef, Ref } from 'react';
+
 import { BaseComponentProps } from '../../BaseComponent';
 
 interface BaseContainerProps extends BaseComponentProps {
@@ -7,7 +8,7 @@ interface BaseContainerProps extends BaseComponentProps {
     className?: string;
     onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
     onContextMenu?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-};
+}
 
 export const Container = forwardRef((props: BaseContainerProps, ref: Ref<HTMLDivElement>) => {
     const { children, style = {}, className = '', onClick, onContextMenu } = props;

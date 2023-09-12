@@ -342,7 +342,7 @@
 //         }
 //     }
 // }
-import { ICommandService, isRealNum } from '@univerjs/core';
+import { ICommandService, IKeyValue, isRealNum } from '@univerjs/core';
 import React, { forwardRef, Ref, useContext, useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 
@@ -436,6 +436,7 @@ export type BaseMenuStyle = {
 //     onOptionSelect?: (option: IValueOption) => void;
 // }
 
+// TODODushusir remove forwardRef
 export const Menu = forwardRef((props: BaseMenuProps, MenuRef: Ref<HTMLUListElement>) => {
     const { display, menuId, value, options, onOptionSelect, dom, parent, onClick, deep = 0, menu = [], className = '', style = {}, show = false } = props;
     const context = useContext(AppContext);
@@ -443,7 +444,8 @@ export const Menu = forwardRef((props: BaseMenuProps, MenuRef: Ref<HTMLUListElem
     const [posStyle, setPosStyle] = useState<BaseMenuStyle>({});
     const [menuItems, setMenuItems] = useState<Array<IDisplayMenuItem<IMenuItem>>>([]);
     // const MenuRef = useRef<HTMLUListElement | null>(null);
-    const refs: Array<React.RefObject<Menu>> = [];
+    // const refs: Array<React.RefObject<Menu>> = []; // FIXME type error
+    const refs: Array<React.RefObject<IKeyValue>> = [];
 
     useEffect(() => {
         getSubMenus();
@@ -478,7 +480,7 @@ export const Menu = forwardRef((props: BaseMenuProps, MenuRef: Ref<HTMLUListElem
     };
 
     const getStyle = () => {
-        const current = MenuRef.current;
+        const current = (MenuRef as IKeyValue).current;
         if (!current) return;
         const style: BaseMenuStyle = {};
         const curPosition = current.getBoundingClientRect();
@@ -595,7 +597,8 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     const [menuItems, setMenuItems] = useState<Array<IDisplayMenuItem<IMenuItem>>>([]);
     const [disabledSubscription, setDisabledSubscription] = useState<Subscription | undefined>();
     const [valueSubscription, setValueSubscription] = useState<Subscription | undefined>();
-    const _refs: Menu[] = [];
+    // const _refs: Menu[] = [];
+    const _refs: IKeyValue[] = [];
 
     const mouseEnter = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
         _refs[index]?.showMenu(true);
@@ -705,12 +708,12 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                 {item.shortcut && ` (${item.shortcut})`}
                 {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
                     <Menu
-                        ref={(ele: Menu) => (_refs[index] = ele)}
+                        ref={(ele: HTMLUListElement) => (_refs[index] = ele)}
                         onOptionSelect={(v) => commandService.executeCommand(item.id, { value: v.value })}
                         menuId={item.id}
                         options={item.selections}
                         display={item.display}
-                        parent={this}
+                        // parent={this}
                     ></Menu>
                 )}
             </li>
@@ -729,7 +732,8 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
             >
                 <NeoCustomLabel title={item.title} value={item.title} icon={item.icon} display={item.display} label={item.label}></NeoCustomLabel>
                 {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
-                    <Menu ref={(ele: Menu) => (_refs[index] = ele)} menuId={item.id} parent={this} display={item.display}></Menu>
+                    // <Menu ref={(ele: Menu) => (_refs[index] = ele)} menuId={item.id} parent={this} display={item.display}></Menu>
+                    <Menu ref={(ele: HTMLUListElement) => (_refs[index] = ele)} menuId={item.id} display={item.display}></Menu>
                 )}
             </li>
         );

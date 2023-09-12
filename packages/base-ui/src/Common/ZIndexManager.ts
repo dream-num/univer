@@ -1,8 +1,8 @@
 export class ZIndexManager {
-    private _list: Map<string, string> = new Map();
+    private _list: Map<string, number> = new Map();
 
-    setIndex(name: string, value: string) {
-        this._list.set(name, value);
+    setIndex(name: string, index: number) {
+        this._list.set(name, index);
     }
 
     getIndex(name: string) {

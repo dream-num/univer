@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react';
 
-
+import { BaseComponent, BaseComponentProps, JSXComponent } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils/util';
 import { LoadingIcon } from '../Icon';
 import styles from './Style/index.module.less';
-
-
-import { BaseComponent, BaseComponentProps, JSXComponent } from '../../BaseComponent';
 
 // Components interface
 const ButtonTypes: string[] = ['default', 'primary'];
@@ -39,7 +36,6 @@ export interface BaseButtonProps extends BaseComponentProps {
 export interface ButtonComponent extends BaseComponent<BaseButtonProps> {
     render(): JSXComponent<BaseButtonProps>;
 }
-
 
 // interface IState {
 //     isActive: boolean;

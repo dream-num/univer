@@ -118,7 +118,7 @@ export interface BaseModalProps {
     ref?: any;
 }
 
-interface ModalButtonGroup {
+export interface ModalButtonGroup {
     type: ButtonType;
     onClick: () => void;
     label: string;

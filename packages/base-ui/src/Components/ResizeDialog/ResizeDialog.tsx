@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 
+import { BaseComponentProps } from '../../BaseComponent';
 import styles from './index.module.less';
 
 export interface BaseResizeDialogProps extends BaseComponentProps {
@@ -12,7 +13,8 @@ export interface BaseResizeDialogProps extends BaseComponentProps {
 }
 
 export const ResizeDialog = (props: BaseResizeDialogProps) => {
-    let { left = 0, top = 0, width = 100, height = 50, children, ratio = 1 } = props;
+    let { left = 0, top = 0 } = props;
+    const { width = 100, height = 50, children, ratio = 1 } = props;
     const ref = useRef<HTMLDivElement>(null);
     const resizeRef = useRef<HTMLDivElement>(null);
 
@@ -50,7 +52,7 @@ export const ResizeDialog = (props: BaseResizeDialogProps) => {
             item.classList.remove(styles.dialogResizeActive);
         });
     };
-    const highLight = (e: Event) => {
+    const highLight = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         if (!ref.current || !resizeRef.current) return;
         const classList = resizeRef.current.classList;
         if (!ref.current.contains(e.target as HTMLElement)) {
@@ -66,7 +68,7 @@ export const ResizeDialog = (props: BaseResizeDialogProps) => {
         cancelHighlight();
         highLight(e);
     };
-    const mouseDown = (e: MouseEvent) => {
+    const mouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         window.addEventListener('mousemove', mouseMove);
         window.addEventListener('mouseup', mouseUp);
         window.addEventListener('click', handleClick);
@@ -76,7 +78,7 @@ export const ResizeDialog = (props: BaseResizeDialogProps) => {
         pastMove = [e.pageX, e.pageY];
         move = true;
     };
-    const resizeMouseDown = (e: MouseEvent) => {
+    const resizeMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation();
         const target = e.target as HTMLElement;
         if (!target.className.includes(`${styles.resizeItem}`)) return;

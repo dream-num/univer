@@ -92,9 +92,9 @@
 import React, { useState } from 'react';
 
 import { BaseComponentProps } from '../../BaseComponent';
-import { ModalButtonGroup } from '../../Interfaces';
 import { Icon, Modal } from '..';
 import { Input } from '../Input';
+import { ModalButtonGroup } from '../Modal/Modal';
 import styles from './index.module.less';
 
 export interface BaseCellRangeModalProps extends BaseComponentProps {
@@ -102,7 +102,7 @@ export interface BaseCellRangeModalProps extends BaseComponentProps {
     placeholder?: string;
     title?: string;
     contentPlaceholder?: string;
-    onClick?: (e: Event) => void;
+    onClick: () => void;
     onChange?: (e: Event) => void;
 }
 

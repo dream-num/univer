@@ -11,11 +11,14 @@ interface IState {
     eventType: string | null;
     children: RightMenuProps[];
     menuItems: Array<IDisplayMenuItem<IMenuItem>>;
+    menuShow: boolean;
+    clientPosition: {
+        clientX: number;
+        clientY: number;
+    };
 }
 
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
-    ulRef = createRef<Menu>();
-
     root = createRef<HTMLDivElement>();
 
     constructor(props: BaseRightMenuProps) {
@@ -30,6 +33,11 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
             eventType: null,
             children: [],
             menuItems: [],
+            menuShow: false,
+            clientPosition: {
+                clientX: 0,
+                clientY: 0,
+            },
         };
     }
 
@@ -58,52 +66,22 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
     }
 
     // 右键菜单事件
-    handleContextMenu = async (event: IMouseEvent, rect?: any, down?: boolean) => {
+    handleContextMenu = async (event: IMouseEvent) => {
         event.preventDefault();
 
         this.setState({ visible: true, srcElement: event.target, eventType: event.type }, () => {
             new Promise<void>((resolve, reject) => {
-                this.ulRef.current?.showMenu(true);
                 resolve();
             }).then(() => {
-                // clientX/Y 获取到的是触发点相对于浏览器可视区域左上角距离
-                const clickX = !down ? event.clientX : rect.x;
-                const clickY = !down ? event.clientY : rect.y;
+                // clientX/Y obtains the distance between the trigger point and the upper left corner of the browser's visible area.
+                this.setState({
+                    clientPosition: {
+                        clientX: event.clientX,
+                        clientY: event.clientY,
+                    },
+                });
 
-                // console.log(event);
-
-                // window.innerWidth/innerHeight 获取的是当前浏览器窗口的视口宽度/高度
-                const screenW = window.innerWidth;
-                const screenH = window.innerHeight;
-                // 获取自定义菜单的宽度/高度
-                const currentUl = this.ulRef.current?.getMenuRef().current;
-                const rootW = currentUl?.offsetWidth || 0;
-                const rootH = currentUl?.offsetHeight || 0;
-
-                // right为true，说明鼠标点击的位置到浏览器的右边界的宽度可以放下菜单。否则，菜单放到左边。
-                // bottom为true，说明鼠标点击位置到浏览器的下边界的高度可以放下菜单。否则，菜单放到上边。
-                const right = screenW - clickX > rootW;
-                const left = !right;
-                const bottom = screenH - clickY > rootH;
-                const top = !bottom;
-
-                const current = this.root.current;
-                if (!current) return;
-
-                if (right) {
-                    current.style.left = `${clickX}px`;
-                }
-
-                if (left) {
-                    current.style.left = `${clickX - rootW}px`;
-                }
-
-                if (bottom) {
-                    current.style.top = `${clickY}px`;
-                }
-                if (top) {
-                    current.style.top = `${clickY - rootH}px`;
-                }
+                this.showRightMenu(true);
             });
         });
     };
@@ -115,7 +93,7 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
         if (eventType === 'click' && srcElement && srcElement.contains(e.target)) {
             return;
         }
-        if (this.root.current.contains(e.target)) {
+        if (this.root.current.contains(e.target as Node)) {
             return;
         }
         if (visible) {
@@ -125,12 +103,14 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
 
     // 显示隐藏菜单栏
     showRightMenu(show: boolean) {
-        this.ulRef.current.showMenu(show);
+        this.setState({
+            menuShow: show,
+        });
     }
 
     override render() {
         const wrapStyles = { ...this.props.style };
-        const { visible } = this.state;
+        const { visible, menuShow, clientPosition } = this.state;
 
         return (
             visible && (
@@ -142,7 +122,15 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                         e.preventDefault();
                     }}
                 >
-                    <Menu ref={this.ulRef} menuId={MenuPosition.CONTEXT_MENU} onClick={this.handleClick}></Menu>
+                    <Menu
+                        show={menuShow}
+                        menuId={MenuPosition.CONTEXT_MENU}
+                        onClick={this.handleClick}
+                        clientPosition={clientPosition}
+                        onOptionSelect={() => {
+                            this.showRightMenu(false);
+                        }}
+                    ></Menu>
                 </div>
             )
         );

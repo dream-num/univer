@@ -93,6 +93,7 @@
 //         };
 //     }
 // }
+import { IKeyValue } from '@univerjs/core';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Icon } from '..';
@@ -114,8 +115,7 @@ export interface BaseDropdownProps {
     content?: React.ReactNode;
 }
 
-export function Dropdown(props: BaseDropdownProps) {
-    // const MenuRef = useRef<Menu>(null);
+export const Dropdown = (props: BaseDropdownProps) => {
     const DropRef = useRef<HTMLDivElement>(null);
     const IconRef = useRef<HTMLDivElement>(null);
     const [menuStyle, setMenuStyle] = useState<Record<string, string | number>>({});
@@ -126,24 +126,22 @@ export function Dropdown(props: BaseDropdownProps) {
         props.onMainClick?.();
         const { icon } = props;
         if (!icon) {
-            // MenuRef.current?.showMenu(true);
-            setMenuShow(true);
+            showMenu();
         }
     };
 
-    const handleSubClick = () => {
-        console.info('show');
-        // MenuRef.current?.showMenu(true);
+    const showMenu = () => {
         setMenuShow(true);
+        window.addEventListener('click', hideMenuClick, true);
     };
 
     const hideMenu = () => {
-        // MenuRef.current?.showMenu(false);
         setMenuShow(false);
+        window.removeEventListener('click', hideMenuClick, true);
     };
 
     const hideMenuClick = (e: MouseEvent) => {
-        if (!DropRef.current || !DropRef.current?.contains(e.target as Node)) {
+        if (!(DropRef as IKeyValue).current || !(DropRef as IKeyValue).current?.contains(e.target as Node)) {
             hideMenu();
         }
     };
@@ -165,11 +163,6 @@ export function Dropdown(props: BaseDropdownProps) {
             style.top = 0;
         }
         setMenuStyle(style);
-        window.addEventListener('click', hideMenuClick, true);
-
-        return () => {
-            window.removeEventListener('click', hideMenuClick, true);
-        };
     }, [props.placement]);
     return (
         <div className={styles.dropdown} ref={DropRef}>
@@ -180,7 +173,7 @@ export function Dropdown(props: BaseDropdownProps) {
                 </div>
             </Tooltip>
             {props.icon && (
-                <div ref={IconRef} className={styles.dropIcon} onClick={handleSubClick}>
+                <div ref={IconRef} className={styles.dropIcon} onClick={showMenu}>
                     {props.icon}
                 </div>
             )}
@@ -190,7 +183,6 @@ export function Dropdown(props: BaseDropdownProps) {
                 options={props.menu.options}
                 display={props.menu.display}
                 onClick={props.menu.onClick}
-                // ref={MenuRef}
                 value={props.menu.value}
                 menu={props.menu.menu}
                 className={props.menu.className}
@@ -203,4 +195,4 @@ export function Dropdown(props: BaseDropdownProps) {
             ></Menu>
         </div>
     );
-}
+};

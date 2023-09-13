@@ -1,8 +1,9 @@
+import type { Meta } from '@storybook/react';
+
 import { CellRange } from './CellRange';
 
-// More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-export default {
-    title: 'Components/CellRange',
+const meta: Meta<typeof CellRange> = {
+    title: 'Components / CellRange',
     component: CellRange,
     parameters: {
         layout: 'centered',
@@ -11,7 +12,8 @@ export default {
     args: {},
 };
 
-// More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
+export default meta;
+
 export const Playground = {
     args: {},
 };

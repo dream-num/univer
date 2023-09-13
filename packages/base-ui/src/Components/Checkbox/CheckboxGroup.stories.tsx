@@ -1,8 +1,9 @@
+import type { Meta } from '@storybook/react';
+
 import { CheckboxGroup } from './CheckboxGroup';
 
-// More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-export default {
-    title: 'Components/CheckboxGroup',
+const meta: Meta<typeof CheckboxGroup> = {
+    title: 'Components / CheckboxGroup',
     component: CheckboxGroup,
     parameters: {
         layout: 'centered',
@@ -25,7 +26,8 @@ export default {
     },
 };
 
-// More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
+export default meta;
+
 export const Playground = {
     args: {},
 };

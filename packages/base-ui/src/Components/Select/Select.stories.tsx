@@ -1,8 +1,9 @@
+import type { Meta } from '@storybook/react';
+
 import { Select } from './Select';
 
-// More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-export default {
-    title: 'Components/Select',
+const meta: Meta<typeof Select> = {
+    title: 'Components / Select',
     component: Select,
     parameters: {
         layout: 'centered',
@@ -13,7 +14,8 @@ export default {
     },
 };
 
-// More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
+export default meta;
+
 export const Playground = {
     args: {},
 };

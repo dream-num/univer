@@ -1,0 +1,75 @@
+@import '../../../Basics/CSS/Skin/base.module.less';
+
+.active() {
+    border-right-width: @border-width-base !important;
+    outline: 0;
+    box-shadow: var(--box-shadow-base);
+}
+
+.hover(@color: var(--primary-color-hover)) {
+    border-color: @color;
+    border-right-width: @border-width-base !important;
+}
+
+.disabled() {
+    color: var(--disabled-color);
+    background-color: var(--disabled-bg);
+    border-color: var(--border-color-base);
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 1;
+
+    &:hover {
+        .hover(var(--border-color-base));
+    }
+}
+
+.input() {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 2px 7px;
+    color: var(--text-color);
+    font-size: @font-size-base;
+    line-height: @line-height-base;
+    background-color: var(--bg);
+    background-image: none;
+    border: @border-width-base @border-style-base var(--border-color-base);
+    border-radius: @border-radius-base;
+    transition: all 0.3s;
+
+    &:hover {
+        .hover();
+    }
+
+    &:focus,
+    &-focused {
+        .active();
+    }
+
+    &[disabled] {
+        .disabled();
+    }
+
+    &-disabled {
+        .disabled();
+    }
+
+    &-borderless {
+        border: none;
+        box-shadow: none;
+
+        &:hover {
+            border: @border-width-base @border-style-base var(--border-color-base);
+            .hover();
+        }
+
+        &:focus,
+        &-focused {
+            border: @border-width-base @border-style-base var(--primary-color-hover);
+            .active();
+        }
+    }
+}

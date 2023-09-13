@@ -93,7 +93,8 @@
 //         };
 //     }
 // }
-import React, { useEffect, useRef, useState } from 'react';
+import { IKeyValue } from '@univerjs/core';
+import React, { forwardRef, Ref, useEffect, useRef, useState } from 'react';
 
 import { Icon } from '..';
 import { Menu } from '../Menu';
@@ -113,10 +114,11 @@ export interface BaseDropdownProps {
     tooltip?: string;
     content?: React.ReactNode;
 }
-
-export function Dropdown(props: BaseDropdownProps) {
-    // const MenuRef = useRef<Menu>(null);
-    const DropRef = useRef<HTMLDivElement>(null);
+// FIXME remove forwardRef
+export const Dropdown = forwardRef((props: BaseDropdownProps, DropRef: Ref<HTMLDivElement>) => {
+    // const MenuRef = useRef<Menu>(null);// FIXME remove ref
+    const MenuRef = useRef<IKeyValue>(null);
+    // const DropRef = useRef<HTMLDivElement>(null);
     const IconRef = useRef<HTMLDivElement>(null);
     const [menuStyle, setMenuStyle] = useState<Record<string, string | number>>({});
     const [menuShow, setMenuShow] = useState(false);
@@ -126,14 +128,14 @@ export function Dropdown(props: BaseDropdownProps) {
         props.onMainClick?.();
         const { icon } = props;
         if (!icon) {
-            // MenuRef.current?.showMenu(true);
+            MenuRef.current?.showMenu(true);
             setMenuShow(true);
         }
     };
 
     const handleSubClick = () => {
         console.info('show');
-        // MenuRef.current?.showMenu(true);
+        MenuRef.current?.showMenu(true);
         setMenuShow(true);
     };
 
@@ -143,7 +145,7 @@ export function Dropdown(props: BaseDropdownProps) {
     };
 
     const hideMenuClick = (e: MouseEvent) => {
-        if (!DropRef.current || !DropRef.current?.contains(e.target as Node)) {
+        if (!(DropRef as IKeyValue).current || !(DropRef as IKeyValue).current?.contains(e.target as Node)) {
             hideMenu();
         }
     };
@@ -190,7 +192,7 @@ export function Dropdown(props: BaseDropdownProps) {
                 options={props.menu.options}
                 display={props.menu.display}
                 onClick={props.menu.onClick}
-                // ref={MenuRef}
+                ref={MenuRef as Ref<HTMLUListElement> | undefined}
                 value={props.menu.value}
                 menu={props.menu.menu}
                 className={props.menu.className}
@@ -203,4 +205,4 @@ export function Dropdown(props: BaseDropdownProps) {
             ></Menu>
         </div>
     );
-}
+});

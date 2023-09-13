@@ -18,11 +18,6 @@ import {
     // SetRowHeightAction,
 } from '@univerjs/core';
 
-export interface PasteType {
-    type: string;
-    result: string | ArrayBuffer | null;
-}
-
 export interface PasteInfo {
     data: Nullable<Array<[]>>;
     colInfo: Nullable<number[]>;

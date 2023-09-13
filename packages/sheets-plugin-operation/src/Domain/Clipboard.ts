@@ -1,5 +1,5 @@
+import { PasteType } from '@univerjs/base-ui';
 import { Nullable } from '@univerjs/core';
-import { PasteType } from './Paste';
 
 export type ClipboardType = {
     type?: 'text/html' | 'text/plain' | 'image/png';

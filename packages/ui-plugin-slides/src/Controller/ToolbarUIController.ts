@@ -1,12 +1,12 @@
 import { BorderInfo } from '@univerjs/base-slides';
 import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager } from '@univerjs/base-ui';
-import { ComponentChildren } from 'react';
 import { BorderType, HorizontalAlign, ICurrentUniverService, IKeyValue, ObserverManager, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
-import { DefaultToolbarConfig, SlideToolbarConfig, SLIDE_UI_PLUGIN_NAME } from '../Basics';
-import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
-import { TEXT_ROTATE_CHILDREN } from '../View/Toolbar/Const';
+import { ComponentChildren } from 'react';
 
+import { DefaultToolbarConfig, SLIDE_UI_PLUGIN_NAME, SlideToolbarConfig } from '../Basics';
+import { Toolbar } from '../View';
+import { TEXT_ROTATE_CHILDREN } from '../View/Toolbar/Const';
 import styles from '../View/Toolbar/index.module.less';
 
 export interface BaseToolbarSelectProps extends BaseSelectProps {
@@ -35,15 +35,7 @@ export class ToolbarUIController {
 
     private _config: SlideToolbarConfig;
 
-    private _lineColor: LineColor;
-
-    private _lineBold: LineBold;
-
-    private _colorSelect1: ColorSelect;
-
     private _textColor: string = '#000';
-
-    private _colorSelect2: ColorSelect;
 
     private _background: string = '#fff';
 
@@ -258,10 +250,7 @@ export class ToolbarUIController {
     }
 
     private _initialize() {
-        this._componentManager.register(SLIDE_UI_PLUGIN_NAME + ColorSelect.name, ColorSelect);
         this._componentManager.register(SLIDE_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
-        this._componentManager.register(SLIDE_UI_PLUGIN_NAME + LineColor.name, LineColor);
-        this._componentManager.register(SLIDE_UI_PLUGIN_NAME + LineBold.name, LineBold);
     }
 }
 

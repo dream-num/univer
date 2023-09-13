@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { BaseComponent, BaseComponentProps, JSXComponent } from '../../BaseComponent';
+import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils/util';
 import { LoadingIcon } from '../Icon';
 import styles from './Style/index.module.less';
@@ -33,9 +33,6 @@ export interface BaseButtonProps extends BaseComponentProps {
 }
 
 // component class
-export interface ButtonComponent extends BaseComponent<BaseButtonProps> {
-    render(): JSXComponent<BaseButtonProps>;
-}
 
 // interface IState {
 //     isActive: boolean;

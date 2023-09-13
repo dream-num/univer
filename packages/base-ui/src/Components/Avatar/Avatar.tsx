@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils';
 import styles from './Style/index.module.less';
@@ -9,7 +7,7 @@ type AvatarSize = number | 'large' | 'small' | 'default';
 type ImageFit = 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
 
 export interface BaseAvatarProps extends BaseComponentProps {
-    children?: JSX.Element | string;
+    children?: React.ReactNode;
 
     /** Semantic DOM style */
     style?: React.CSSProperties;

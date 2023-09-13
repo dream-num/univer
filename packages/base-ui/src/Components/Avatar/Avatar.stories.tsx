@@ -21,7 +21,9 @@ export default meta;
 export const Playground = {
     args: {},
 };
-export const ImgAvatar = {
+
+export const UsingSrc = {
+    title: 'Using Src',
     args: {
         src: 'https://avatars.githubusercontent.com/u/20630676?s=60&v=4',
     },

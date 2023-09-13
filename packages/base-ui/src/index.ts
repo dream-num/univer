@@ -5,7 +5,6 @@ export * from './Components';
 export { SharedController } from './controllers/shared-shortcut.controller';
 export * from './Enum';
 export * from './Helpers';
-export * from './Interfaces';
 export {
     ICustomComponentOption,
     ICustomComponentProps,

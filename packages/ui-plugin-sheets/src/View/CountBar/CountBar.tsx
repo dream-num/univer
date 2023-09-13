@@ -1,9 +1,11 @@
-import { AppContext, BaseCountBarProps, Button, CountBarComponent, Icon, JSXComponent, Slider } from '@univerjs/base-ui';
-import { ObserverManager, PLUGIN_NAMES } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import { AppContext, BaseComponentProps, Button, Icon, Slider } from '@univerjs/base-ui';
 import { Component, createRef } from 'react';
 
 import styles from './index.module.less';
+
+export interface BaseCountBarProps extends BaseComponentProps {
+    changeRatio: (ratio: string) => void;
+}
 
 interface CountState {
     zoom: number;
@@ -49,7 +51,6 @@ export class CountBar extends Component<CountBarProps, CountState> {
             this.setValue({
                 zoom,
             });
-            this.ref.current.changeInputValue(0, zoom);
         }
     }
 
@@ -59,7 +60,6 @@ export class CountBar extends Component<CountBarProps, CountState> {
             this.props.onChange(target.value);
         }
         this.setValue({ zoom: target.value });
-        this.ref.current.changeInputValue(0, target.value);
     };
 
     handleClick = (e: Event, value: number | string) => {
@@ -84,12 +84,7 @@ export class CountBar extends Component<CountBarProps, CountState> {
         if (this.props.onChange) {
             this.props.onChange(String(value));
         }
-        this.ref.current.changeInputValue(0, value);
     };
-
-    override componentDidMount() {
-        (this.context.injector as Injector).get(ObserverManager).getObserver<CountBar>('onCountBarDidMountObservable', PLUGIN_NAMES.SPREADSHEET)?.notifyObservers(this);
-    }
 
     override render() {
         const { zoom, content } = this.state;
@@ -97,16 +92,14 @@ export class CountBar extends Component<CountBarProps, CountState> {
         // const LayoutIcon = this.getComponentRender().renderFunction('LayoutIcon');
         return (
             <div className={styles.countBar}>
-                <Button type="text" className={styles.countZoom}>
-                    {zoom}
-                </Button>
-                <Button type="text" onClick={this.addZoom}>
+                <Button className={styles.countZoom}>{zoom}</Button>
+                <Button onClick={this.addZoom}>
                     <Icon.Math.AddIcon />
                 </Button>
                 <div className={styles.countSlider}>
-                    <Slider ref={this.ref} onChange={this.onChange} value={zoom} min={this.min} max={this.max} onClick={this.handleClick} />
+                    <Slider onChange={this.onChange} value={zoom} min={this.min} max={this.max} onClick={this.handleClick} />
                 </div>
-                <Button type="text" onClick={this.reduceZoom}>
+                <Button onClick={this.reduceZoom}>
                     <Icon.Math.ReduceIcon />
                 </Button>
                 {/* <Button type="text">
@@ -115,17 +108,11 @@ export class CountBar extends Component<CountBarProps, CountState> {
                 {/* <Button type="text">
                     <LayoutIcon />
                 </Button> */}
-                <Button type="text">
+                <Button>
                     <Icon.Sheet.RegularIcon />
                 </Button>
                 <span className={styles.countStatistic}>{content}</span>
             </div>
         );
-    }
-}
-
-export class UniverCountBar implements CountBarComponent {
-    render(): JSXComponent<BaseCountBarProps> {
-        return CountBar;
     }
 }

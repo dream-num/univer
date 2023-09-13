@@ -1,11 +1,26 @@
 import { SetWorksheetActivateCommand } from '@univerjs/base-sheets';
-import { AppContext, BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, Icon, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
-import { ICommandService, IKeyValue } from '@univerjs/core';
+import { AppContext, BaseComponentProps, BaseMenuItem, BaseSelectProps, Button, CustomLabel, Icon, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
+import { BooleanNumber, ICommandService, IKeyValue } from '@univerjs/core';
 import { Component, createRef } from 'react';
 
 import styles from './index.module.less';
 import { ISheetBarMenuItem, SheetBarMenu } from './SheetBarMenu';
 import { SlideTabBar } from './SlideTabBar/SlideTabBar';
+
+export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectProps, 'children'> {
+    children?: any[];
+    index?: string;
+    color?: string;
+    sheetId?: string;
+    style?: React.CSSProperties;
+    hidden?: BooleanNumber;
+    addSheet?: () => void;
+    onMouseDown?: () => void;
+    selectSheet?: (slideItemIndex: number) => void;
+    changeSheetName?: (sheetId: string, name: string) => void;
+    dragEnd?: (elements: HTMLElement[]) => void;
+    selected?: boolean;
+}
 
 type SheetState = {
     sheetList: BaseSheetBarProps[];
@@ -252,10 +267,10 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             <div className={styles.sheetBar} ref={this.slideTabRoot}>
                 {/* user options button */}
                 <div className={styles.sheetBarOptions}>
-                    <Button className={styles.sheetBarOptionsButton} onClick={addSheet} type="text">
+                    <Button className={styles.sheetBarOptionsButton} onClick={addSheet}>
                         <Icon.Math.AddIcon style={{ fontSize: '20px' }} />
                     </Button>
-                    <Button className={styles.sheetBarOptionsButton} onClick={(e: MouseEvent) => this.ref.current?.showMenu(true)} type="text">
+                    <Button className={styles.sheetBarOptionsButton} onClick={(e: MouseEvent) => this.ref.current?.showMenu(true)}>
                         <Icon.MenuIcon style={{ fontSize: '20px' }} />
                         <SheetBarMenu menu={menuList as ISheetBarMenuItem[]} ref={this.ref}></SheetBarMenu>
                     </Button>
@@ -300,10 +315,10 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
                 {/* prev next scroll button */}
                 <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>
-                    <Button type="text" className={styles.sheetBarOptionsButton} onClick={this.scrollLeft}>
+                    <Button className={styles.sheetBarOptionsButton} onClick={this.scrollLeft}>
                         <Icon.NextIcon rotate={90} style={{ padding: '5px' }} />
                     </Button>
-                    <Button type="text" className={styles.sheetBarOptionsButton} onClick={this.scrollRight}>
+                    <Button className={styles.sheetBarOptionsButton} onClick={this.scrollRight}>
                         <Icon.NextIcon rotate={-90} style={{ padding: '5px' }} />
                     </Button>
                 </div>

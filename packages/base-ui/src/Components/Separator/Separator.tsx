@@ -1,6 +1,6 @@
 import styles from './index.module.less';
 
-interface IProps {
+export interface IProps {
     mode: boolean;
 }
 

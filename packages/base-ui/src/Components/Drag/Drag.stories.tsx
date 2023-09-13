@@ -1,4 +1,4 @@
-import Drag from './Drag';
+import { Drag } from './Drag';
 
 // More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {

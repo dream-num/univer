@@ -1,3 +1,1 @@
-import { Separator } from './Separator';
-
-export { Separator };
+export * from './Separator';

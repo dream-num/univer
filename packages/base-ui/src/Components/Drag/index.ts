@@ -1,1 +1,1 @@
-export { Drag } from './Drag';
+export * from './Drag';

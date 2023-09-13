@@ -2,6 +2,7 @@ import { BooleanNumber } from '@univerjs/core';
 
 import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
 
+// TODO move to component file
 export interface BaseUlProps extends BaseComponentProps {
     label?: string | JSX.Element | string[];
     /**
@@ -18,7 +19,7 @@ export interface BaseUlProps extends BaseComponentProps {
     onClick?: (...arg: any[]) => void;
     onKeyUp?: (...any: any[]) => void;
     onMouseDown?: (...any: any[]) => void;
-    style?: JSX.CSSProperties;
+    style?: React.CSSProperties;
     showSelect?: (e: MouseEvent) => void;
     getParent?: any;
     show?: boolean;
@@ -31,8 +32,4 @@ export interface BaseUlProps extends BaseComponentProps {
      * 是否隐藏当前item
      */
     hideLi?: boolean;
-}
-
-export interface UlComponent extends BaseComponent<BaseUlProps> {
-    render(): JSXComponent<BaseUlProps>;
 }

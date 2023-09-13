@@ -1,3 +1,1 @@
-import { UniverRadio, UniverRadioGroup, Radio, RadioGroup } from './Radio';
-
-export { RadioGroup, Radio, UniverRadio, UniverRadioGroup };
+export { Radio, RadioGroup } from './Radio';

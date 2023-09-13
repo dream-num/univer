@@ -1,4 +1,4 @@
-import { BaseComponentProps, BaseComponentRender, BaseComponentSheet } from '@univerjs/base-ui';
+import { BaseComponentProps} from '@univerjs/base-ui';
 import { Component } from 'react';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { PLUGIN_NAMES } from '@univerjs/core';
@@ -13,7 +13,6 @@ interface IState {
 }
 
 export class NumfmtModal extends Component<IProps, IState> {
-    private _render: BaseComponentRender;
 
     constructor(props: IProps) {
         super(props);
@@ -21,8 +20,6 @@ export class NumfmtModal extends Component<IProps, IState> {
     }
 
     initialize(props: IProps): void {
-        const component = this.getContext().getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-        this._render = component.getComponentRender();
 
         this.state = {
             modalData: [],

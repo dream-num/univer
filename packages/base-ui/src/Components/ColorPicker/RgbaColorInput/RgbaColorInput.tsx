@@ -1,5 +1,6 @@
 import { Color, Nullable } from '@univerjs/core';
 import { useRef } from 'react';
+
 import { Input } from '../../Input';
 
 interface IProps {
@@ -7,7 +8,7 @@ interface IProps {
     onChange: (...arg: any) => void;
 }
 
-export const RgbaColorInput = (props: IProps) => {
+export function RgbaColorInput(props: IProps) {
     let { color } = props;
     if (!color) return null;
     let rgba;
@@ -28,4 +29,4 @@ export const RgbaColorInput = (props: IProps) => {
     };
 
     return <Input ref={inputRef} type="text" value={`rgba(${rgba})`} onChange={onChange} />;
-};
+}

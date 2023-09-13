@@ -1,4 +1,4 @@
-import { BaseComponentRender, ComponentManager, IMenuService } from '@univerjs/base-ui';
+import { ComponentManager, IMenuService } from '@univerjs/base-ui';
 import { Disposable, ICommandService, ICurrentUniverService, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, Range } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -79,7 +79,6 @@ import { NumfmtModalController } from './NumfmtModalController';
         }));
  */
 export class NumfmtController extends Disposable {
-    protected _render: BaseComponentRender;
 
     constructor(
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,

@@ -25,11 +25,8 @@ type LabelProps = {
 };
 
 export class SearchContent extends Component<SearchProps, SearchState> {
-    // Render: BaseComponentRender;
 
     // initialize() {
-    //     const component = this._context.getPluginManager().getPluginByName<BaseComponentSheet>('ComponentSheet')!;
-    //     this.Render = component.getComponentRender();
     //     this.state = {
     //         tab: [],
     //         content: [],

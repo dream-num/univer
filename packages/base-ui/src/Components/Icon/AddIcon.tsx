@@ -1,21 +1,17 @@
-import { BaseIconProps } from '../../Interfaces';
+import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils';
 import styles from './Style/index.module.less';
 
-// export interface BaseIconProps {
-//     spin?: boolean;
-//     rotate?: number;
-//     style?: JSX.CSSProperties;
-//     className?: string;
-//     children?: ComponentChildren;
-//     name?: string;
-// }
-
-// export interface AddIconProps extends BaseIconProps {
-//     children?: ComponentChildren;
-//     name?: string;
-// }
-
+export interface BaseIconProps extends BaseComponentProps {
+    spin?: boolean;
+    rotate?: number;
+    style?: React.CSSProperties;
+    className?: string;
+    children?: React.ReactNode;
+    name?: string;
+    width?: string;
+    height?: string;
+}
 export const Icon = (props: BaseIconProps) => {
     const { spin, rotate, children, name, style, className } = props;
 

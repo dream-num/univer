@@ -20,10 +20,10 @@ Property Introduction:
 | onFocus | Set the handler to handle `focue` event | (event) => void | - |
 | onBlur | Set the handler to handle `blur` event | (event) => void | - |
 | onClick | Set the handler to handle `click` event | (event) => void | - |
-| className | input classname | string | - |
+| className | input className | string | - |
 | id | input id | string | - |
 | value | input value | string | - |
-| type | type of input | 'text' | 'button' | 'checkbox' | 'file' | 'hidden' | 'image' | 'password' | 'radio' | 'rest' | 'submit' | - |
+| type | type of input | 'text' | 'button' | 'checkbox' | 'file' | 'hidden' | 'image' | 'password' | 'radio' | 'reset' | 'submit' | - |
 | placeholder | placeholder | string | - |
 | border | set border of input | boolean | true |
 | readonly | input is readonly | boolean | false |

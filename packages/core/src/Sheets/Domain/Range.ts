@@ -857,41 +857,6 @@ export class Range {
     }
 
     /**
-     * Sets the specified range as the active range, with the top left cell in the range as the current cell.
-     *
-     * @returns This range, for chaining.
-     * @internal
-     */
-    activate(): Range {
-        // The user entered an invalid range
-        if (this._rangeData?.startRow === -1) {
-            console.error('Invalid range,default set startRow -1');
-            return this;
-        }
-
-        this._worksheet.getSelection().setSelection({ selection: this });
-
-        // This range, for chaining
-        return this;
-    }
-
-    /**
-     * Sets the specified cell as the current cell.
-     *
-     * If the specified cell is present in an existing range, then that range becomes the active range with the cell as the current cell.
-     *
-     * If the specified cell is not present in any existing range, then the existing selection is removed and the cell becomes the current cell and the active range.
-     *
-     * Note: The specified Range must consist of one cell, otherwise it throws an exception.
-     *
-     * @returns This range, for chaining.
-     */
-    activateAsCurrentCell(): Range {
-        this._worksheet.getSelection().setCurrentCell(this);
-        return this;
-    }
-
-    /**
      * Whether the current range and the incoming range have an intersection
      *
      * @param range the incoming range

@@ -1,8 +1,8 @@
 import { createRef, useState } from 'react';
-import { BaseTooltipProps } from '../../Interfaces';
+
+import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils';
 import { CustomLabel } from '../CustomLabel';
-
 import style from './index.module.less';
 
 // interface TooltipProps {
@@ -28,6 +28,17 @@ const placementClassNames: { [index: string]: string } = {
     left: style.left,
     right: style.right,
 };
+
+export interface BaseTooltipProps extends BaseComponentProps {
+    [index: number]: string;
+
+    title?: string;
+    shortcut?: string;
+    children: React.ReactNode;
+    placement?: string;
+    color?: string;
+    styles?: {};
+}
 
 export function Tooltip(props: BaseTooltipProps) {
     const tooltip = createRef<HTMLDivElement>();

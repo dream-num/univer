@@ -1,84 +1,62 @@
-import { Component, VNode, cloneElement } from 'react';
-import { JSXComponent } from '../../BaseComponent';
-import { BaseRadioGroupProps, BaseRadioIProps, RadioComponent } from '../../Interfaces';
+import React from 'react';
+
 import styles from './index.module.less';
-// interface IProps {
-//     value: string;
-//     active?: boolean;
-//     onClick?: () => void;
-//     label?: string;
-// }
 
-interface IState {}
+export interface BaseRadioIProps {
+    value: string;
+    active?: boolean;
+    onClick?: (value: string) => void;
+    label?: string;
+    children?: React.ReactNode[];
+}
 
-// interface RadioGroupProps {
-//     className?: string;
-//     active: string | number;
-//     vertical?: boolean;
-//     onChange: (value: string) => void;
-//     children: Array<VNode<IProps>>;
-// }
+export interface BaseRadioGroupProps {
+    className?: string;
+    active?: string | number;
+    vertical?: boolean;
+    onChange: (value: string) => void;
+    children: React.ReactNode[];
+}
 
-class RadioGroup extends Component<BaseRadioGroupProps, IState> {
-    handleActiveChange(value: string) {
-        this.props.onChange(value);
-    }
+export function RadioGroup(props: BaseRadioGroupProps) {
+    const { vertical, className = '', active, onChange } = props;
 
-    render() {
-        const { vertical, className = '' } = this.props;
-        return (
-            <div className={`${vertical ? styles.radioGroup : ''} ${className || ''}`}>
-                {this.props.children.map((item: VNode<BaseRadioIProps>, index) => {
-                    const isActive = this.props.active === item.props.value;
-                    /**
-                     *
-                     * Use item as VNode
-                     *
-                     * fix : No overload matches this call.
-                                Overload 1 of 2, '(vnode: VNode<any>, props?: any, ...children: ComponentChildren[]): VNode<any>', gave the following error.
-                                Argument of type 'Radio & ComponentChildren' is not assignable to parameter of type 'VNode<any>'.
-                    */
-                    return cloneElement(item, {
+    const handleActiveChange = (value: string) => {
+        onChange(value);
+    };
+
+    return (
+        <div className={`${vertical ? styles.radioGroup : ''} ${className || ''}`}>
+            {React.Children.map(props.children, (child, index) => {
+                if (React.isValidElement<BaseRadioIProps>(child)) {
+                    const isActive = active === child.props.value;
+                    return React.cloneElement(child, {
                         key: index,
-                        label: item.props.label,
-                        children: item.props.children,
-                        value: item.props.value,
+                        label: child.props.label,
+                        children: child.props.children,
+                        value: child.props.value,
                         active: isActive,
-                        onClick: this.handleActiveChange.bind(this),
+                        onClick: handleActiveChange,
                     });
-                })}
-            </div>
-        );
-    }
+                }
+                return child;
+            })}
+        </div>
+    );
 }
 
-class Radio extends Component<BaseRadioIProps, IState> {
-    render() {
-        return (
-            <div className={styles.radioWrap}>
-                <div className={styles.radioLeft}>
-                    <div onClick={this.props.onClick!.bind(this, this.props.value)}>
-                        <div className={`${styles.circle} ${this.props.active && styles.active}`}>
-                            <div className={styles.fork}></div>
-                        </div>
-                        <div className={styles.label}>{this.props.label}</div>
+export function Radio({ value, active, onClick, label, children }: BaseRadioIProps) {
+    return (
+        <div className={styles.radioWrap}>
+            <div className={styles.radioLeft}>
+                <div onClick={onClick && (() => onClick(value))}>
+                    <div className={`${styles.circle} ${active && styles.active}`}>
+                        <div className={styles.fork}></div>
                     </div>
-                    {this.props.children}
+                    <div className={styles.label}>{label}</div>
                 </div>
+                {children}
             </div>
-        );
-    }
+        </div>
+    );
 }
-
-export class UniverRadio implements RadioComponent {
-    render(): JSXComponent<BaseRadioIProps> {
-        return Radio;
-    }
-}
-export class UniverRadioGroup implements RadioComponent {
-    render(): JSXComponent<BaseRadioIProps> {
-        return Radio;
-    }
-}
-
-export { RadioGroup, Radio };

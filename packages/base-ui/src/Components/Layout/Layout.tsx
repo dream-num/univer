@@ -1,56 +1,46 @@
-import { Component, createRef, Ref, forwardRef } from 'react';
-import { BaseLayoutProps } from '../../Interfaces';
-import { getFirstChildren } from '../../Utils';
-import styles from './index.module.less';
-
 // Types for props
 // type BaseLayoutProps = {
 //     children?: ComponentChildren;
 //     className?: string;
 //     style?: {};
 // };
-
 // Types for state
-type IState = {
-    isAside: boolean;
-};
+import React, { forwardRef, Ref, useEffect, useRef, useState } from 'react';
 
-export class Layout extends Component<BaseLayoutProps, IState> {
-    ref = createRef<HTMLTableSectionElement>();
+import { BaseComponentProps } from '../../BaseComponent';
+import { getFirstChildren } from '../../Utils';
+import styles from './index.module.less';
 
-    state = {
-        isAside: false,
-    };
+export interface BaseLayoutProps extends BaseComponentProps {
+    children?: React.ReactNode;
+    className?: string;
+    style?: {};
+}
+
+export function Layout({ children, style, className = '' }: BaseLayoutProps) {
+    const [isAside, setIsAside] = useState(false);
+    const ref = useRef<HTMLTableSectionElement>(null);
 
     // If the first child element contains the `aside` component, the layout needs to be changed to horizontal arrangement
-    componentDidMount() {
-        if (this.ref.current) {
-            const children = getFirstChildren(this.ref.current);
+    useEffect(() => {
+        if (ref.current) {
+            const children = getFirstChildren(ref.current);
             const childrens = children instanceof Array ? children : [children];
 
             for (const ele of childrens) {
                 if (ele.tagName === 'ASIDE') {
-                    this.setState({
-                        isAside: true,
-                    });
+                    setIsAside(true);
+                    break;
                 }
             }
         }
-    }
+    }, []);
 
-    render() {
-        const { children, style, className = '' } = this.props;
-        const { isAside } = this.state;
-        return (
-            <section
-                style={style}
-                ref={this.ref}
-                className={isAside ? `${styles.layoutWrapper} ${styles.layoutWrapperHasSider} ${className}` : `${styles.layoutWrapper} ${className}`}
-            >
-                {children}
-            </section>
-        );
-    }
+    return (
+        <section style={style} ref={ref} className={isAside ? `${styles.layoutWrapper} ${styles.layoutWrapperHasSider} ${className}` : `${styles.layoutWrapper} ${className}`}>
+            {children}
+        </section>
+    );
 }
 
 const Header = (props: BaseLayoutProps) => {
@@ -94,4 +84,4 @@ const Sider = (props: BaseLayoutProps) => {
     );
 };
 
-export { Header, Footer, Content, Sider };
+export { Content, Footer, Header, Sider };

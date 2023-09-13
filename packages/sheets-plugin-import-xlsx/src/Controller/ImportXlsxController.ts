@@ -1,4 +1,4 @@
-import { BaseComponentRender, IMenuService } from '@univerjs/base-ui';
+import { IMenuService } from '@univerjs/base-ui';
 import { Disposable, ICommandService } from '@univerjs/core';
 import { IToolbarItemProps, SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -8,8 +8,6 @@ import { ImportMenuItemFactory } from './menu';
 
 export class ImportXlsxController extends Disposable {
     protected _toolButton: IToolbarItemProps;
-
-    protected _render: BaseComponentRender;
 
     constructor(
         @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,

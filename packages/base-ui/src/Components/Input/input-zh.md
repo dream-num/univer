@@ -24,7 +24,7 @@ cover: ''
 | className | 输入框类名 | string | - |
 | id | 输入框 id | string | - |
 | value | 输入框 value | string | - |
-| type | 输入框类型 | 'text' | 'button' | 'checkbox' | 'file' | 'hidden' | 'image' | 'password' | 'radio' | 'rest' | 'submit' | - |
+| type | 输入框类型 | 'text' | 'button' | 'checkbox' | 'file' | 'hidden' | 'image' | 'password' | 'radio' | 'reset' | 'submit' | - |
 | placeholder | 占位符 | string | - |
 | border | 输入框边框 | boolean | true |
 | readonly | 输入框是否只读 | boolean | false |

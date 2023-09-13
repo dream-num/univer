@@ -5,7 +5,7 @@ import { Button } from '..';
 describe('Button', () => {
     test('should display initial Button', () => {
         const { container } = render(
-            <Button type="text" onClick={() => {}}>
+            <Button type="primary" onClick={() => {}}>
                 哈哈
             </Button>
         );
@@ -16,7 +16,7 @@ describe('Button', () => {
 
         render(
             <Button
-                type="text"
+                type="default"
                 onClick={() => {
                     a++;
                 }}

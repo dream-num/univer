@@ -1,8 +1,9 @@
 import { BooleanNumber } from '@univerjs/core';
 
-import { BaseComponent, BaseComponentProps, JSXComponent } from '../BaseComponent';
+import { BaseComponentProps } from '../BaseComponent';
 import { BaseSelectProps } from '../Components';
 
+// TODO move to component file
 export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectProps, 'children'> {
     children?: any[];
     index?: string;
@@ -16,8 +17,4 @@ export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectPr
     changeSheetName?: (sheetId: string, name: string) => void;
     dragEnd?: (elements: HTMLElement[]) => void;
     selected?: boolean;
-}
-
-export interface SheetBarComponent extends BaseComponent<BaseSheetBarProps> {
-    render(): JSXComponent<BaseSheetBarProps>;
 }

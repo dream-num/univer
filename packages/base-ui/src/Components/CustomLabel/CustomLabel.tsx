@@ -1,14 +1,21 @@
-import { Component, isValidElement, JSX } from 'react';
-import { useContext } from 'react';
+import { isValidElement, JSX, useContext } from 'react';
 
 import { AppContext, AppContextValues, ICustomComponent } from '../../Common';
-import { IBaseCustomLabelProps } from '../../Interfaces';
-import { DisplayTypes } from '../Select';
-
-import styles from './CustomLabel.module.less';
 import { IMenuSelectorItem } from '../../services/menu/menu';
-import { Item } from '../Item/Item';
 import { Input } from '../Input/input';
+import { Item } from '../Item/Item';
+import { DisplayTypes } from '../Select';
+import styles from './CustomLabel.module.less';
+
+export interface IBaseCustomLabelProps {
+    icon?: string;
+    value?: string;
+    label: string | ICustomComponent | React.ReactNode;
+    display?: DisplayTypes;
+    onChange?: (e: Event) => void;
+    selected?: boolean;
+    title?: string;
+}
 
 function getLocale(context: Partial<AppContextValues>, name: string) {
     return context.localeService?.t(name);
@@ -80,7 +87,7 @@ export function CustomLabel(props: IBaseCustomLabelProps): JSX.Element | null {
 
     // the new way to render toolbar item type to replace Label prop
     if (display === DisplayTypes.COLOR) {
-        return <ColorSelect value={props.label} title={props.label} />;
+        return <ColorSelect value={props.label as string} title={props.label as string} />;
     }
 
     if (typeof label === 'string') {
@@ -110,14 +117,22 @@ export interface IColorSelectProps {
     value: string;
 }
 
-export class ColorSelect extends Component<IColorSelectProps> {
-    render() {
-        const { value, icon, title } = this.props;
-        return (
-            <div className={styles.colorSelect}>
-                <div>{icon ? <CustomLabel label={{ name: icon }} /> : title}</div>
-                <div className={styles.colorSelectLine} style={{ background: value }}></div>
-            </div>
-        );
-    }
+// export class ColorSelect extends Component<IColorSelectProps> {
+//     render() {
+//         const { value, icon, title } = this.props;
+//         return (
+//             <div className={styles.colorSelect}>
+//                 <div>{icon ? <CustomLabel label={{ name: icon }} /> : title}</div>
+//                 <div className={styles.colorSelectLine} style={{ background: value }}></div>
+//             </div>
+//         );
+//     }
+// }
+export function ColorSelect({ value, icon, title }: IColorSelectProps) {
+    return (
+        <div className={styles.colorSelect}>
+            <div>{icon ? <CustomLabel label={{ name: icon }} /> : title}</div>
+            <div className={styles.colorSelectLine} style={{ background: value }}></div>
+        </div>
+    );
 }

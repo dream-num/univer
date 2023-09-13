@@ -22,7 +22,7 @@ export function $$(selector: string, context?: HTMLElement | Document) {
 }
 
 /**
- * add classname
+ * add className
  * @param className
  * @param selector
  * @param context
@@ -41,7 +41,7 @@ export function addClass(className: string, selector: HTMLElement | string, cont
     });
 }
 /**
- * remove classname
+ * remove className
  * @param className
  * @param selector
  * @param context

@@ -1,141 +1,110 @@
-import { Component, createRef } from 'react';
-import { JSXComponent } from '../../BaseComponent';
-import { BaseInputProps, InputComponent } from '../../Interfaces';
-import { joinClassNames } from '../../Utils';
+import React, { RefObject, useEffect, useMemo, useRef, useState } from 'react';
+
+import { BaseComponentProps } from '../../BaseComponent';
+import { joinClassNames } from '../../Utils/util';
 import styles from './Style/index.module.less';
 
-// interface InputProps {
-//     type?: 'text' | 'button' | 'checkbox' | 'file' | 'hidden' | 'image' | 'password' | 'radio' | 'rest' | 'submit' | 'number';
-//     value?: string;
-//     placeholder?: string;
-//     onChange?: (e: Event) => void;
-//     bordered?: boolean;
-//     disabled?: boolean;
-//     // maxLength?: number;
-//     // onPressEnter?: KeyboardEvent;
-//     onFocus?: (e: Event) => void;
-//     onBlur?: (e: Event) => void;
-//     onClick?: (e: MouseEvent) => void;
-//     className?: string;
-//     readonly?: boolean;
-//     id?: string;
-// }
-
-type IState = {
+export interface BaseInputProps extends BaseComponentProps {
+    type?: 'text' | 'button' | 'checkbox' | 'file' | 'hidden' | 'image' | 'password' | 'radio' | 'reset' | 'submit' | 'number';
     value?: string;
-    focused: boolean;
-    prevValue?: string;
-};
+    placeholder?: string;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    bordered?: boolean;
+    disabled?: boolean;
+    // maxLength?: number;
+    // onPressEnter?: KeyboardEvent;
+    onFocus?: (e: React.FocusEvent<HTMLInputElement, Element>) => void;
+    onBlur?: (e: React.FocusEvent<HTMLInputElement, Element>) => void;
+    onClick?: (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => void;
+    onValueChange?: (value: string) => void;
+    className?: string;
+    readonly?: boolean;
+    id?: string;
+    ref?: RefObject<HTMLInputElement>;
+}
 
-export class Input extends Component<BaseInputProps, IState> {
-    ref = createRef();
+export function Input(props: BaseInputProps) {
+    const ref = useRef<HTMLInputElement>(null);
+    const [value, setValue] = useState(props.value);
+    const [focused, setFocused] = useState(false);
 
-    constructor(props: BaseInputProps) {
-        super();
-        this.initialize(props);
-    }
+    const realValue = useMemo(() => value ?? props.value ?? '', [value, props.value]);
 
-    initialize(props: BaseInputProps) {
-        // super(props);
-        this.state = {
-            value: props.value,
-            focused: false,
-        };
-    }
+    useEffect(() => {
+        if (props.value && props.value !== value) {
+            setValue(props.value);
+        }
+    }, [props.value]);
 
-    setValue = (value: string, callback?: () => void) => {
-        this.setState(
-            (prevState) => ({
-                value,
-            }),
-            callback
-        );
-    };
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { onChange } = props;
+        const target = e.target;
 
-    handleChange = (e: Event) => {
-        const { onChange } = this.props;
+        setValue(target.value);
         if (!onChange) return;
-        const target = e.target as HTMLInputElement;
-        this.setValue(target.value);
         onChange(e);
     };
 
-    handlePressEnter = (e: KeyboardEvent) => {
-        const { onPressEnter, onValueChange } = this.props;
+    const handlePressEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        const { onPressEnter, onValueChange } = props;
+        const v = getValue();
+        setValue(v);
         if (e.key === 'Enter') {
             onPressEnter?.(e);
-            this.ref.current.blur();
-            onValueChange?.(this.getValue());
+            ref.current?.blur();
+            v && onValueChange?.(v);
         }
     };
 
-    onFocus = (e: Event) => {
-        const { onFocus } = this.props;
+    const onFocus = (e: React.FocusEvent<HTMLInputElement, Element>) => {
+        const { onFocus } = props;
         onFocus?.(e);
+        setFocused(true);
     };
 
-    onClick = (e: MouseEvent) => {
-        const { onClick } = this.props;
-        onClick?.(e);
+    const onClick = (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
         e.stopPropagation();
+        const { onClick } = props;
+        onClick?.(e);
     };
 
-    onBlur = (e: FocusEvent) => {
-        const { onBlur, onValueChange } = this.props;
+    const onBlur = (e: React.FocusEvent<HTMLInputElement, Element>) => {
+        const { onBlur, onValueChange } = props;
         onBlur?.(e);
-        onValueChange?.(this.getValue());
+        const v = getValue();
+        v && onValueChange?.(v);
+        setFocused(false);
     };
 
-    // get input value
-    getValue = () => this.ref.current.value;
+    const getValue = () => ref.current?.value;
 
-    UNSAFE_componentWillMount() {
-        if (this.props.value) {
-            this.setValue(this.props.value);
-        }
-    }
+    const { id, disabled, type, placeholder, bordered = true, className = '', readonly } = props;
 
-    UNSAFE_componentWillReceiveProps(nextProps: Readonly<BaseInputProps>) {
-        if (nextProps.value && nextProps.value !== this.state.value) {
-            this.setValue(nextProps.value);
-        }
-    }
+    const classes = joinClassNames(
+        styles.input,
+        {
+            [`${styles.input}-disable`]: disabled,
+            [`${styles.input}-borderless`]: !bordered,
+        },
+        className
+    );
 
-    render() {
-        const { id, disabled, type, placeholder, bordered = true, className = '', readonly } = this.props;
-        const { value } = this.state;
-
-        const classes = joinClassNames(
-            styles.input,
-            {
-                [`${styles.input}-disable`]: disabled,
-                [`${styles.input}-borderless`]: !bordered,
-            },
-            className
-        );
-
-        return (
-            <input
-                type={type}
-                onBlur={this.onBlur}
-                onFocus={this.onFocus}
-                className={classes}
-                placeholder={placeholder}
-                disabled={disabled}
-                ref={this.ref}
-                onChange={this.handleChange}
-                value={value}
-                onClick={this.onClick}
-                readOnly={readonly}
-                id={id}
-                onKeyUp={this.handlePressEnter}
-            ></input>
-        );
-    }
-}
-
-export class UniverInput implements InputComponent {
-    render(): JSXComponent<BaseInputProps> {
-        return Input;
-    }
+    return (
+        <input
+            type={type}
+            onBlur={onBlur}
+            onFocus={onFocus}
+            className={classes}
+            placeholder={placeholder}
+            disabled={disabled}
+            ref={ref}
+            onChange={handleChange}
+            value={realValue}
+            onClick={onClick}
+            readOnly={readonly}
+            id={id}
+            onKeyUp={handlePressEnter}
+        />
+    );
 }

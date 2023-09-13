@@ -11,15 +11,14 @@ import {
     SetWorksheetOrderMutation,
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
-import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuItemFactory, IMenuService } from '@univerjs/base-ui';
-import { Disposable, ICommandService, ICurrentUniverService, IKeyValue, IWorksheetConfig, Nullable, ObserverManager, UIObserver } from '@univerjs/core';
+import { BaseComponentProps, BaseMenuItem, ColorPicker, ComponentManager, ICustomComponent, IMenuItemFactory, IMenuService } from '@univerjs/base-ui';
+import { BooleanNumber, Disposable, ICommandService, ICurrentUniverService, IKeyValue, IWorksheetConfig, Nullable, ObserverManager, UIObserver } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
 import { RenameSheetCommand } from '../commands/rename.command';
 import { ShowMenuListCommand } from '../commands/unhide.command';
 import { SheetBar } from '../View/SheetBar';
-
 import { ISheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
 import {
     ChangeColorSheetMenuItemFactory,
@@ -29,6 +28,37 @@ import {
     RenameSheetMenuItemFactory,
     UnHideSheetMenuItemFactory,
 } from './menu';
+
+export interface BaseUlProps extends BaseComponentProps {
+    label?: string | JSX.Element | string[];
+    /**
+     * 是否显示 选中图标
+     */
+    selected?: boolean;
+    /**
+     * 是否显示 隐藏图标
+     */
+    hidden?: BooleanNumber;
+    icon?: JSX.Element | string | null | undefined;
+    border?: boolean;
+    children?: BaseUlProps[];
+    onClick?: (...arg: any[]) => void;
+    onKeyUp?: (...any: any[]) => void;
+    onMouseDown?: (...any: any[]) => void;
+    style?: React.CSSProperties;
+    showSelect?: (e: MouseEvent) => void;
+    getParent?: any;
+    show?: boolean;
+    className?: string;
+    selectType?: string;
+    name?: string;
+    ref?: any;
+    locale?: Array<string | object> | string;
+    /**
+     * 是否隐藏当前item
+     */
+    hideLi?: boolean;
+}
 
 interface SheetUl extends BaseMenuItem {
     label?: ICustomComponent | string;

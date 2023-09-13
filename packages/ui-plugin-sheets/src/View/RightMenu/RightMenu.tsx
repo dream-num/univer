@@ -1,5 +1,5 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { BaseRightMenuProps, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
+import { BaseComponentProps, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
 import { Component, createRef } from 'react';
 
 import { RightMenuProps } from '../../Controller';
@@ -11,6 +11,11 @@ interface IState {
     eventType: string | null;
     children: RightMenuProps[];
     menuItems: Array<IDisplayMenuItem<IMenuItem>>;
+}
+
+export interface BaseRightMenuProps extends BaseComponentProps {
+    onClick?: () => void;
+    style?: {};
 }
 
 export class RightMenu extends Component<BaseRightMenuProps, IState> {

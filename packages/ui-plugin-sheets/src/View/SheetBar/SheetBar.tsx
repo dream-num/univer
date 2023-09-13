@@ -1,11 +1,26 @@
 import { SetWorksheetActivateCommand } from '@univerjs/base-sheets';
-import { AppContext, BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, Icon, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
-import { ICommandService } from '@univerjs/core';
+import { AppContext, BaseComponentProps, BaseMenuItem, BaseSelectProps, Button, CustomLabel, Icon, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
+import { BooleanNumber, ICommandService } from '@univerjs/core';
 import { Component, createRef, RefObject } from 'react';
 
 import styles from './index.module.less';
 import { ISheetBarMenuItem, SheetBarMenu } from './SheetBarMenu';
 import { SlideTabBar } from './SlideTabBar/SlideTabBar';
+
+export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectProps, 'children'> {
+    children?: any[];
+    index?: string;
+    color?: string;
+    sheetId?: string;
+    style?: React.CSSProperties;
+    hidden?: BooleanNumber;
+    addSheet?: () => void;
+    onMouseDown?: () => void;
+    selectSheet?: (slideItemIndex: number) => void;
+    changeSheetName?: (sheetId: string, name: string) => void;
+    dragEnd?: (elements: HTMLElement[]) => void;
+    selected?: boolean;
+}
 
 type SheetState = {
     sheetList: BaseSheetBarProps[];

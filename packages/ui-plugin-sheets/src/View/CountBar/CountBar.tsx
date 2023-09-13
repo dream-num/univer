@@ -1,4 +1,4 @@
-import { AppContext, BaseCountBarProps, Button, CountBarComponent, Icon, JSXComponent, Slider } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, Button, Icon, Slider } from '@univerjs/base-ui';
 import { ObserverManager, PLUGIN_NAMES } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { Component, createRef } from 'react';
@@ -10,7 +10,8 @@ interface CountState {
     content: string;
 }
 
-interface CountBarProps extends BaseCountBarProps {
+interface CountBarProps extends BaseComponentProps {
+    changeRatio: (ratio: string) => void;
     onChange?: (value: string) => void;
 }
 
@@ -121,11 +122,5 @@ export class CountBar extends Component<CountBarProps, CountState> {
                 <span className={styles.countStatistic}>{content}</span>
             </div>
         );
-    }
-}
-
-export class UniverCountBar implements CountBarComponent {
-    render(): JSXComponent<BaseCountBarProps> {
-        return CountBar;
     }
 }

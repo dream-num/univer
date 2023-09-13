@@ -6,11 +6,12 @@ describe('checkbox', () => {
     test('checkbox', () => {
         const { container } = render(
             <Checkbox value={`Header`} checked={true}>
-                Header
+                foo
             </Checkbox>
         );
         expect(container);
     });
+
     test('checkbox group', () => {
         let a = 1;
         const checkGroups = [
@@ -18,13 +19,13 @@ describe('checkbox', () => {
                 checked: true,
                 disabled: false,
                 name: '123',
-                label: '哈哈',
+                label: 'agree',
                 value: '1',
             },
         ];
         const { container } = render(<CheckboxGroup options={checkGroups} onChange={() => a++}></CheckboxGroup>);
         expect(container);
-        fireEvent.click(screen.getByText('哈哈'));
+        fireEvent.click(screen.getByText('agree'));
         expect(a).toEqual(2);
     });
 });

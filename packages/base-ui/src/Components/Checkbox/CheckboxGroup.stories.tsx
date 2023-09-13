@@ -10,6 +10,15 @@ const meta: Meta<typeof CheckboxGroup> = {
     },
     tags: ['autodocs'],
     args: {
+        disabled: false,
+        options: [],
+    },
+};
+
+export default meta;
+
+export const Playground = {
+    args: {
         options: [
             {
                 checked: true,
@@ -24,10 +33,4 @@ const meta: Meta<typeof CheckboxGroup> = {
             },
         ],
     },
-};
-
-export default meta;
-
-export const Playground = {
-    args: {},
 };

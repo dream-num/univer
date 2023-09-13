@@ -9,11 +9,21 @@ const meta: Meta<typeof Checkbox> = {
         layout: 'centered',
     },
     tags: ['autodocs'],
-    args: {},
+    args: {
+        checked: false,
+        disabled: false,
+    },
 };
 
 export default meta;
 
 export const Playground = {
     args: {},
+};
+
+export const UsingSlot = {
+    title: 'Using Slot',
+    args: {
+        children: <strong>Apple</strong>,
+    },
 };

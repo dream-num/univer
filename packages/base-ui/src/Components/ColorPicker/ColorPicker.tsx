@@ -240,7 +240,7 @@ export function ColorPicker(props: BaseColorPickerProps) {
     const [style, setStyles] = useState({});
     const [currentLocale, setCurrentLocale] = useState('');
     const [root, setRoot] = useState(null);
-    const [show, setShow] = useState(props.show || false);
+    // const [show, setShow] = useState(props.show || false);
 
     useEffect(() => {
         setPresetColors(allColor);
@@ -253,14 +253,14 @@ export function ColorPicker(props: BaseColorPickerProps) {
         setRoot(null);
     }, [props.color]);
 
-    useEffect(() => {
-        const { show = false } = props;
-        setShow(show);
+    // useEffect(() => {
+    //     const { show = false } = props;
+    //     setShow(show);
 
-        if (show) {
-            document.addEventListener('click', hideSelect, true);
-        }
-    }, [props.show]);
+    //     // if (show) {
+    //     //     document.addEventListener('click', hideSelect, true);
+    //     // }
+    // }, [props.show]);
 
     const onChange = (presetColor: string) => {
         props.onChange && props.onChange(presetColor);
@@ -276,14 +276,14 @@ export function ColorPicker(props: BaseColorPickerProps) {
         props.onCancel && props.onCancel();
     };
 
-    const hideSelect = (e?: MouseEvent) => {
-        console.info('hide color picker. If it triggers too frequently, it needs to be corrected');
-        if (e && ulRef.current && ulRef.current.contains(e.target as Node)) return;
+    // const hideSelect = (e?: MouseEvent) => {
+    //     console.info('hide color picker. If it triggers too frequently, it needs to be corrected');
+    //     if (e && ulRef.current && ulRef.current.contains(e.target as Node)) return;
 
-        setShow(false);
+    //     setShow(false);
 
-        document.removeEventListener('click', hideSelect, true);
-    };
+    //     document.removeEventListener('click', hideSelect, true);
+    // };
 
     /**
      * TODO handle ele?
@@ -332,7 +332,7 @@ export function ColorPicker(props: BaseColorPickerProps) {
     const obj = Object.assign(style || {}, props.style);
 
     return (
-        <div className={`${styles.colorPickerOuter} ${props.className}`} ref={ulRef} style={{ ...obj, display: show ? 'block' : 'none' }}>
+        <div className={`${styles.colorPickerOuter} ${props.className}`} ref={ulRef} style={{ ...obj }}>
             <div className={styles.colorPicker}>
                 <div className={styles.picker}>
                     <div className={styles.pickerSwatches}>

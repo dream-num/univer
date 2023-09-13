@@ -316,8 +316,7 @@
 //         return <div className={styles.selectComponent}>{this.getType(type)}</div>;
 //     }
 // }
-import { IKeyValue } from '@univerjs/core';
-import React, { createRef, Ref, RefObject, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { ICustomComponent } from '../../Common';
 import { IValueOption } from '../../services/menu/menu';
@@ -572,7 +571,7 @@ export function Select(props: BaseSelectProps) {
         switch (type) {
             case SelectTypes.SINGLE:
                 return getSingle();
-            case SelectTypes.INPUT:
+            case SelectTypes.INPUT: // unused now
                 return getInput();
             case SelectTypes.DOUBLE:
                 return getDouble();
@@ -601,20 +600,18 @@ export function Select(props: BaseSelectProps) {
         );
     };
 
-    // FIXME ref type, don't use ref to hide menu
-    const handlePressEnter = (e: React.KeyboardEvent<HTMLInputElement>, ref: RefObject<IKeyValue>) => {
+    const handlePressEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        console.info('press enter');
         onPressEnter(e);
-        ref.current?.hideMenu();
     };
 
     const getInput = () => {
         const { className = '', tooltip, onMainClick } = props;
-        const ref = createRef<IKeyValue>();
 
         return (
             <div className={`${styles.selectInput} ${className}`}>
-                <Dropdown onMainClick={onMainClick} ref={ref as Ref<HTMLDivElement> | undefined} tooltip={tooltip} menu={{ menu, onClick }}>
-                    <Input onPressEnter={(e) => handlePressEnter(e, ref)} onBlur={onPressEnter} type="number" value={`${props.label as number}` ?? (content as string)} />
+                <Dropdown onMainClick={onMainClick} tooltip={tooltip} menu={{ menu, onClick }}>
+                    <Input onPressEnter={(e) => handlePressEnter(e)} onBlur={onPressEnter} type="number" value={`${props.label as number}` ?? (content as string)} />
                 </Dropdown>
             </div>
         );

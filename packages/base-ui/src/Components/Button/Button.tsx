@@ -7,7 +7,7 @@ import styles from './Style/index.module.less';
 
 // Components interface
 const ButtonTypes: string[] = ['default', 'primary'];
-export type ButtonType = 'default' | 'primary';
+export type ButtonType = 'default' | 'primary' | 'text';
 const ButtonShapes: string[] = ['circle', 'round'];
 export type ButtonShape = 'circle' | 'round';
 const SizeTypes: string[] = ['small', 'middle', 'large'];

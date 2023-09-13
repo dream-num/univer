@@ -94,7 +94,7 @@
 //     }
 // }
 import { IKeyValue } from '@univerjs/core';
-import React, { forwardRef, Ref, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { Icon } from '..';
 import { Menu } from '../Menu';
@@ -114,11 +114,9 @@ export interface BaseDropdownProps {
     tooltip?: string;
     content?: React.ReactNode;
 }
-// FIXME remove forwardRef
-export const Dropdown = forwardRef((props: BaseDropdownProps, DropRef: Ref<HTMLDivElement>) => {
-    // const MenuRef = useRef<Menu>(null);// FIXME remove ref
-    const MenuRef = useRef<IKeyValue>(null);
-    // const DropRef = useRef<HTMLDivElement>(null);
+
+export const Dropdown = (props: BaseDropdownProps) => {
+    const DropRef = useRef<HTMLDivElement>(null);
     const IconRef = useRef<HTMLDivElement>(null);
     const [menuStyle, setMenuStyle] = useState<Record<string, string | number>>({});
     const [menuShow, setMenuShow] = useState(false);
@@ -128,20 +126,18 @@ export const Dropdown = forwardRef((props: BaseDropdownProps, DropRef: Ref<HTMLD
         props.onMainClick?.();
         const { icon } = props;
         if (!icon) {
-            MenuRef.current?.showMenu(true);
-            setMenuShow(true);
+            showMenu();
         }
     };
 
-    const handleSubClick = () => {
-        console.info('show');
-        MenuRef.current?.showMenu(true);
+    const showMenu = () => {
         setMenuShow(true);
+        window.addEventListener('click', hideMenuClick, true);
     };
 
     const hideMenu = () => {
-        // MenuRef.current?.showMenu(false);
         setMenuShow(false);
+        window.removeEventListener('click', hideMenuClick, true);
     };
 
     const hideMenuClick = (e: MouseEvent) => {
@@ -167,11 +163,6 @@ export const Dropdown = forwardRef((props: BaseDropdownProps, DropRef: Ref<HTMLD
             style.top = 0;
         }
         setMenuStyle(style);
-        window.addEventListener('click', hideMenuClick, true);
-
-        return () => {
-            window.removeEventListener('click', hideMenuClick, true);
-        };
     }, [props.placement]);
     return (
         <div className={styles.dropdown} ref={DropRef}>
@@ -182,7 +173,7 @@ export const Dropdown = forwardRef((props: BaseDropdownProps, DropRef: Ref<HTMLD
                 </div>
             </Tooltip>
             {props.icon && (
-                <div ref={IconRef} className={styles.dropIcon} onClick={handleSubClick}>
+                <div ref={IconRef} className={styles.dropIcon} onClick={showMenu}>
                     {props.icon}
                 </div>
             )}
@@ -192,7 +183,6 @@ export const Dropdown = forwardRef((props: BaseDropdownProps, DropRef: Ref<HTMLD
                 options={props.menu.options}
                 display={props.menu.display}
                 onClick={props.menu.onClick}
-                ref={MenuRef as Ref<HTMLUListElement> | undefined}
                 value={props.menu.value}
                 menu={props.menu.menu}
                 className={props.menu.className}
@@ -205,4 +195,4 @@ export const Dropdown = forwardRef((props: BaseDropdownProps, DropRef: Ref<HTMLD
             ></Menu>
         </div>
     );
-});
+};

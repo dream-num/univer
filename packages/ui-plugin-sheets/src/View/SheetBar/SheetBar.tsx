@@ -1,7 +1,7 @@
 import { SetWorksheetActivateCommand } from '@univerjs/base-sheets';
 import { AppContext, BaseMenuItem, BaseSheetBarProps, Button, CustomLabel, Icon, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
-import { ICommandService } from '@univerjs/core';
-import { Component, createRef, RefObject } from 'react';
+import { ICommandService, IKeyValue } from '@univerjs/core';
+import { Component, createRef } from 'react';
 
 import styles from './index.module.less';
 import { ISheetBarMenuItem, SheetBarMenu } from './SheetBarMenu';
@@ -12,14 +12,14 @@ type SheetState = {
     menuList: BaseSheetBarProps[];
     sheetUl: BaseMenuItem[];
     menuItems: Array<IDisplayMenuItem<IMenuItem>>;
+    showMenu: boolean;
+    menuStyle: React.CSSProperties;
 };
 
 export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     static override contextType = AppContext;
 
     ref = createRef<SheetBarMenu>();
-
-    ulRef = createRef<Menu>();
 
     sheetContainerRef = createRef<HTMLDivElement>();
 
@@ -55,6 +55,8 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             sheetUl: [],
             menuList: [],
             menuItems: [],
+            showMenu: false,
+            menuStyle: {},
         };
     }
 
@@ -86,7 +88,8 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         });
 
         // activate command
-        const commandService: ICommandService = this.context.injector.get(ICommandService);
+        // FIXME this.context type error
+        const commandService: ICommandService = (this.context as IKeyValue).injector.get(ICommandService);
         commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId });
     };
 
@@ -104,25 +107,28 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         } else {
             this.setSlideTabActive(worksheetId);
             // activate command
-            const commandService: ICommandService = this.context.injector.get(ICommandService);
+            // FIXME this.context type error
+            const commandService: ICommandService = (this.context as IKeyValue).injector.get(ICommandService);
             commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId });
         }
     };
 
     // 显示下拉
-    showSelect = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, ref: RefObject<Menu>) => {
+    showSelect = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation();
         e.preventDefault();
-        const current = ref.current;
-        if (current) current.showMenu(true);
+        this.setState({
+            showMenu: true,
+        });
         // 点击外部隐藏子组件
         window.addEventListener('click', this.hideSelect);
     };
 
     // 隐藏下拉
     hideSelect = (e: MouseEvent) => {
-        const ulCurrent = this.ulRef.current;
-        if (ulCurrent) ulCurrent.showMenu(false);
+        this.setState({
+            showMenu: false,
+        });
         window.removeEventListener('click', this.hideSelect);
     };
 
@@ -130,8 +136,6 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     showUlList = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cb?: () => void) => {
         new Promise<void>((resolve) => {
             const target = e.currentTarget as HTMLDivElement;
-            const id = target.dataset.id as string;
-            this.showSelect(e, this.ulRef);
             resolve();
         }).then(() => {
             const currentTarget = (e.target as HTMLElement).closest(`.${styles.slideTabItem}`);
@@ -139,12 +143,18 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 const currentRect = currentTarget.getBoundingClientRect();
                 const left = `${currentRect.left}px`;
                 const bottom = `${currentRect.height}px`;
-                const ul = this.ulRef.current?.getMenuRef().current;
-                if (!ul) return;
-                ul.style.left = left;
-                ul.style.bottom = bottom;
-                ul.style.top = 'auto';
-                ul.style.right = 'auto';
+                const top = 'auto';
+                const right = 'auto';
+                this.setState({
+                    menuStyle: {
+                        left,
+                        bottom,
+                        top,
+                        right,
+                    },
+                });
+
+                this.showSelect(e);
 
                 cb && cb();
             }
@@ -232,7 +242,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     }
 
     override render() {
-        const { sheetList, menuList, sheetUl } = this.state;
+        const { sheetList, menuList, sheetUl, showMenu, menuStyle } = this.state;
 
         const { addSheet, selectSheet } = this.props;
 
@@ -286,7 +296,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 </div>
 
                 {/* mouse right button context menu */}
-                <Menu className={styles.sheetUl} menu={sheetUl} menuId={MenuPosition.SHEET_BAR} ref={this.ulRef} />
+                <Menu className={styles.sheetUl} menu={sheetUl} menuId={MenuPosition.SHEET_BAR} show={showMenu} style={menuStyle} />
 
                 {/* prev next scroll button */}
                 <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>

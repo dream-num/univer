@@ -1,5 +1,5 @@
 import { AppContext, Button, CustomLabel, IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption, MenuItemType, Select, Tooltip } from '@univerjs/base-ui';
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, IKeyValue } from '@univerjs/core';
 import { Component } from 'react';
 import { Subscription } from 'rxjs';
 
@@ -70,7 +70,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
 
     private renderSelectorType() {
         const { context, state } = this;
-        const commandService: ICommandService = context.injector.get(ICommandService);
+        const commandService: ICommandService = (context as IKeyValue).injector.get(ICommandService);
         const { disabled, value } = state;
 
         const props = this.props as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
@@ -99,7 +99,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         const { props, context, state } = this;
         const { disabled, activated } = state;
         const { icon, title } = props;
-        const commandService: ICommandService = context.injector.get(ICommandService);
+        const commandService: ICommandService = (context as IKeyValue).injector.get(ICommandService);
 
         return (
             <Tooltip title={this.getTooltip()} placement="bottom">
@@ -111,6 +111,6 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
     }
 
     private getTooltip(): string {
-        return this.context.localeService?.t(this.props.tooltip) + (this.props.shortcut ? ` (${this.props.shortcut})` : '');
+        return (this.context as IKeyValue).localeService?.t(this.props.tooltip) + (this.props.shortcut ? ` (${this.props.shortcut})` : '');
     }
 }

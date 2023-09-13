@@ -342,8 +342,8 @@
 //         }
 //     }
 // }
-import { ICommandService, IKeyValue, isRealNum } from '@univerjs/core';
-import React, { forwardRef, Ref, useContext, useEffect, useState } from 'react';
+import { ICommandService, isRealNum } from '@univerjs/core';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { AppContext } from '../../Common/AppContext';
@@ -363,11 +363,7 @@ export interface BaseMenuProps {
     /** @deprecated */
     style?: React.CSSProperties;
     /** @deprecated */
-    parent?: any;
-    /** @deprecated */
-    dom?: HTMLElement;
-    /** @deprecated */
-    ref?: any;
+    parent?: boolean;
     /** @deprecated */
     deep?: number;
     /** @deprecated this is legacy menu mechanism. Do not use it. Use `menuItems` instead. */
@@ -381,12 +377,11 @@ export interface BaseMenuProps {
     options?: Array<IValueOption | ICustomComponentOption>;
     onOptionSelect?: (option: IValueOption) => void;
     show?: boolean;
+    clientPosition?: {
+        clientX: number;
+        clientY: number;
+    }; //Right-click menu adaptive position, send the location of the mouse click
 }
-
-export type BaseMenuState = {
-    show: boolean;
-    posStyle: BaseMenuStyle;
-};
 
 export type BaseMenuStyle = {
     left?: string;
@@ -436,16 +431,13 @@ export type BaseMenuStyle = {
 //     onOptionSelect?: (option: IValueOption) => void;
 // }
 
-// TODODushusir remove forwardRef
-export const Menu = forwardRef((props: BaseMenuProps, MenuRef: Ref<HTMLUListElement>) => {
-    const { display, menuId, value, options, onOptionSelect, dom, parent, onClick, deep = 0, menu = [], className = '', style = {}, show = false } = props;
+export const Menu = (props: BaseMenuProps) => {
+    const { display, menuId, value, options, onOptionSelect, parent, onClick, deep = 0, menu = [], className = '', style = {}, show = false, clientPosition } = props;
     const context = useContext(AppContext);
     const [isShow, setIsShow] = useState(show);
     const [posStyle, setPosStyle] = useState<BaseMenuStyle>({});
     const [menuItems, setMenuItems] = useState<Array<IDisplayMenuItem<IMenuItem>>>([]);
-    // const MenuRef = useRef<HTMLUListElement | null>(null);
-    // const refs: Array<React.RefObject<Menu>> = []; // FIXME type error
-    const refs: Array<React.RefObject<IKeyValue>> = [];
+    const MenuRef = useRef<HTMLUListElement | null>(null);
 
     useEffect(() => {
         getSubMenus();
@@ -453,50 +445,40 @@ export const Menu = forwardRef((props: BaseMenuProps, MenuRef: Ref<HTMLUListElem
 
     useEffect(() => {
         const { show = false } = props;
-        setIsShow(show);
-    }, [show]);
+        showMenu(show);
+    }, [props.show]);
 
-    const handleClick = (e: MouseEvent, item: BaseMenuItem, index: number) => {
-        item.onClick?.call(null, e, item.label, index, deep);
-        onClick?.call(null, e, item.value, index, deep);
-        setIsShow(false);
-    };
+    useEffect(() => {
+        const { clientPosition } = props;
+        if (!clientPosition) return;
+        const { clientX = 0, clientY = 0 } = clientPosition;
+        setAutoPosition(clientX, clientY);
+    }, [props.clientPosition]);
+
+    // const handleClick = (e: MouseEvent, item: BaseMenuItem, index: number) => {
+    //     item.onClick?.call(null, e, item.label, index, deep);
+    //     onClick?.call(null, e, item.value, index, deep);
+    //     setIsShow(false);
+    // };
 
     const showMenu = (show: boolean) => {
         setIsShow(show);
         getStyle();
     };
 
-    const mouseEnter = (e: MouseEvent, index: number) => {
-        if (menu[index] && menu[index].hasOwnProperty('children')) {
-            refs[index].current?.showMenu(true);
-        }
-    };
-
-    const mouseLeave = (e: MouseEvent, index: number) => {
-        if (menu[index] && menu[index].hasOwnProperty('children')) {
-            refs[index].current?.showMenu(false);
-        }
-    };
-
     const getStyle = () => {
-        const current = (MenuRef as IKeyValue).current;
+        const current = MenuRef.current;
         if (!current) return;
         const style: BaseMenuStyle = {};
         const curPosition = current.getBoundingClientRect();
-        let docPosition;
+        const docPosition = {
+            left: 0,
+            right: document.documentElement.clientWidth,
+            top: 0,
+            bottom: document.documentElement.clientHeight,
+        };
 
-        if (dom) {
-            docPosition = dom.getBoundingClientRect();
-        } else {
-            docPosition = {
-                left: 0,
-                right: document.documentElement.clientWidth,
-                top: 0,
-                bottom: document.documentElement.clientHeight,
-            };
-        }
-
+        // Nested submenus
         if (parent) {
             current.style.position = 'fixed';
             const parPosition = current.parentElement?.getBoundingClientRect();
@@ -516,8 +498,48 @@ export const Menu = forwardRef((props: BaseMenuProps, MenuRef: Ref<HTMLUListElem
         }
     };
 
-    const handleItemClick = (item: IMenuButtonItem) => {
-        showMenu(false);
+    const setAutoPosition = (clientX: number, clientY: number) => {
+        const current = MenuRef.current;
+        if (!current) return;
+        const style: BaseMenuStyle = {};
+        const curPosition = current.getBoundingClientRect();
+        const docPosition = {
+            left: 0,
+            right: document.documentElement.clientWidth,
+            top: 0,
+            bottom: document.documentElement.clientHeight,
+        };
+
+        const screenW = docPosition.right;
+        const screenH = docPosition.bottom;
+        const clickX = clientX;
+        const clickY = clientY;
+        const rootW = curPosition.width;
+        const rootH = curPosition.height;
+
+        // right is true, which means that the width from the mouse click position to the right border of the browser can be used to place the menu. Otherwise, the menu is moved to the left.
+        // bottom is true, which means that the menu can be dropped from the height of the mouse click position to the lower border of the browser. Otherwise, the menu is placed above.
+        const right = screenW - clickX > rootW;
+        const left = !right;
+        const bottom = screenH - clickY > rootH;
+        const top = !bottom;
+
+        if (right) {
+            style.left = `${clickX}px`;
+        }
+
+        if (left) {
+            style.left = `${clickX - rootW}px`;
+        }
+
+        if (bottom) {
+            style.top = `${clickY}px`;
+        }
+        if (top) {
+            style.top = `${clickY - rootH}px`;
+        }
+
+        setPosStyle(style);
     };
 
     const getSubMenus = () => {
@@ -564,7 +586,6 @@ export const Menu = forwardRef((props: BaseMenuProps, MenuRef: Ref<HTMLUListElem
                         <CustomComponent
                             onValueChange={(v: string | number) => {
                                 onOptionSelect?.({ value: v, label: option.id });
-                                showMenu(false);
                             }}
                         />
                     </li>
@@ -572,11 +593,18 @@ export const Menu = forwardRef((props: BaseMenuProps, MenuRef: Ref<HTMLUListElem
             })}
             {/* render submenus */}
             {menuItems?.map((item: IDisplayMenuItem<IMenuItem>, index) => (
-                <MenuItem menuItem={item} key={index} index={index} onClick={() => handleItemClick(item as IMenuButtonItem)} />
+                <MenuItem
+                    menuItem={item}
+                    key={index}
+                    index={index}
+                    onClick={() => {
+                        onOptionSelect?.({ value: item.id, label: item.title });
+                    }}
+                />
             ))}
         </ul>
     );
-});
+};
 
 export interface IMenuItemProps {
     menuItem: IDisplayMenuItem<IMenuItem>;
@@ -597,15 +625,14 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     const [menuItems, setMenuItems] = useState<Array<IDisplayMenuItem<IMenuItem>>>([]);
     const [disabledSubscription, setDisabledSubscription] = useState<Subscription | undefined>();
     const [valueSubscription, setValueSubscription] = useState<Subscription | undefined>();
-    // const _refs: Menu[] = [];
-    const _refs: IKeyValue[] = [];
+    const [itemShow, setItemShow] = useState<boolean>(false);
 
     const mouseEnter = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
-        _refs[index]?.showMenu(true);
+        setItemShow(true);
     };
 
     const mouseLeave = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
-        _refs[index]?.showMenu(false);
+        setItemShow(false);
     };
 
     const getSubMenus = () => {
@@ -617,13 +644,13 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
         }
     };
 
-    const handleClick = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, item: IDisplayMenuItem<IMenuItem>, index: number) => {
-        // const commandService: ICommandService = context.injector.get(ICommandService);
-        onClick();
+    // const handleClick = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, item: IDisplayMenuItem<IMenuItem>, index: number) => {
+    //     // const commandService: ICommandService = context.injector.get(ICommandService);
+    //     onClick();
 
-        const itemValue = value;
-        // !(item.subMenuItems && item.subMenuItems.length > 0) && commandService.executeCommand(item.id, { value });
-    };
+    //     const itemValue = value;
+    //     // !(item.subMenuItems && item.subMenuItems.length > 0) && commandService.executeCommand(item.id, { value });
+    // };
 
     /**
      * user input change value from CustomLabel
@@ -702,18 +729,21 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
                 onMouseEnter={(e) => mouseEnter(e, index)}
                 onMouseLeave={(e) => mouseLeave(e, index)}
-                onClick={(e) => handleClick(e, item, index)}
+                // onClick={(e) => handleClick(e, item, index)} // Nested select without click events, like border style
             >
                 <NeoCustomLabel title={item.title} value={value} onChange={onChange} icon={item.icon} display={item.display} label={item.label}></NeoCustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
                 {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
                     <Menu
-                        ref={(ele: HTMLUListElement) => (_refs[index] = ele)}
-                        onOptionSelect={(v) => commandService.executeCommand(item.id, { value: v.value })}
+                        show={itemShow}
+                        onOptionSelect={(v) => {
+                            commandService.executeCommand(item.id, { value: v.value });
+                            // onClick(); // border style don't trigger hide menu
+                        }}
                         menuId={item.id}
                         options={item.selections}
                         display={item.display}
-                        // parent={this}
+                        parent={true}
                     ></Menu>
                 )}
             </li>
@@ -728,12 +758,11 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
                 onMouseEnter={(e) => mouseEnter(e, index)}
                 onMouseLeave={(e) => mouseLeave(e, index)}
-                onClick={(e) => handleClick(e, item, index)}
+                // onClick={(e) => handleClick(e, item, index)} // Nested menus without click events, like right menu delete cell
             >
                 <NeoCustomLabel title={item.title} value={item.title} icon={item.icon} display={item.display} label={item.label}></NeoCustomLabel>
                 {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
-                    // <Menu ref={(ele: Menu) => (_refs[index] = ele)} menuId={item.id} parent={this} display={item.display}></Menu>
-                    <Menu ref={(ele: HTMLUListElement) => (_refs[index] = ele)} menuId={item.id} display={item.display}></Menu>
+                    <Menu show={itemShow} menuId={item.id} display={item.display} parent={true} onOptionSelect={onClick}></Menu>
                 )}
             </li>
         );

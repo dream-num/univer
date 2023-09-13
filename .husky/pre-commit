@@ -2,4 +2,4 @@
 # . "$(dirname -- "$0")/_/husky.sh"
 
 # lint all changed files
-npx --no -- eslint $(git diff --name-only HEAD **/*.{tsx,ts,js} | xargs)
+npx --no lint-staged --concurrent false

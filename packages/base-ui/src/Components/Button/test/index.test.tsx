@@ -3,30 +3,49 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { Button } from '..';
 
 describe('Button', () => {
-    test('should display initial Button', () => {
+    test('renders correctly', () => {
         const { container } = render(
             <Button type="primary" onClick={() => {}}>
-                哈哈
+                lol
             </Button>
         );
         expect(container);
     });
-    test('click onSwitch function', async () => {
+
+    test('click onClick function', () => {
         let a = 1;
 
         render(
             <Button
-                type="default"
                 onClick={() => {
                     a++;
                 }}
             >
-                哈哈
+                lol
             </Button>
         );
 
-        fireEvent.click(screen.getByText('哈哈'));
+        fireEvent.click(screen.getByText('lol'));
 
         expect(a).toEqual(2);
+    });
+
+    test('should prevent event when button is disabled', () => {
+        let a = 1;
+
+        render(
+            <Button
+                disabled
+                onClick={() => {
+                    a++;
+                }}
+            >
+                lol
+            </Button>
+        );
+
+        fireEvent.click(screen.getByText('lol'));
+
+        expect(a).toEqual(1);
     });
 });

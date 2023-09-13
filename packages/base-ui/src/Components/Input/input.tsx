@@ -12,8 +12,7 @@ export interface BaseInputProps extends BaseComponentProps {
     onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
     bordered?: boolean;
     disabled?: boolean;
-    // maxLength?: number;
-    // onPressEnter?: KeyboardEvent;
+    maxLength?: number;
     onFocus?: (e: React.FocusEvent<HTMLInputElement, Element>) => void;
     onBlur?: (e: React.FocusEvent<HTMLInputElement, Element>) => void;
     onClick?: (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => void;
@@ -79,7 +78,7 @@ export function Input(props: BaseInputProps) {
 
     const getValue = () => ref.current?.value;
 
-    const { id, disabled, type, placeholder, bordered = true, className = '', readonly } = props;
+    const { id, disabled, type, placeholder, bordered = true, className = '', readonly, maxLength } = props;
 
     const classes = joinClassNames(
         styles.input,
@@ -96,6 +95,7 @@ export function Input(props: BaseInputProps) {
             onBlur={onBlur}
             onFocus={onFocus}
             className={classes}
+            maxLength={maxLength}
             placeholder={placeholder}
             disabled={disabled}
             ref={ref}

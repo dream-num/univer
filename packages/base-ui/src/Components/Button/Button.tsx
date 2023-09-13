@@ -1,190 +1,110 @@
-import { useEffect, useState } from 'react';
-
 import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils/util';
 import { LoadingIcon } from '../Icon';
 import styles from './Style/index.module.less';
 
 // Components interface
-const ButtonTypes: string[] = ['default', 'primary'];
 export type ButtonType = 'default' | 'primary';
-const ButtonShapes: string[] = ['circle', 'round'];
 export type ButtonShape = 'circle' | 'round';
-const SizeTypes: string[] = ['small', 'middle', 'large'];
 export type SizeType = 'small' | 'middle' | 'large';
-const ButtonHTMLTypes: string[] = ['submit', 'reset', 'button'];
 export type ButtonHTMLType = 'submit' | 'reset' | 'button';
 
-export interface BaseButtonProps extends BaseComponentProps {
-    type?: ButtonType;
-    shape?: ButtonShape;
-    size?: SizeType;
-    danger?: boolean;
-    disabled?: boolean;
-    block?: boolean;
-    loading?: boolean;
-    active?: boolean;
-    htmlType?: ButtonHTMLType;
-    onClick?: Function;
-    children?: any;
+export interface IBaseButtonProps extends BaseComponentProps {
+    children?: React.ReactNode;
+
+    /** Semantic DOM class */
     className?: string;
+
+    /** Semantic DOM style */
     style?: React.CSSProperties;
-    unActive?: boolean;
+
+    /**
+     * Set button type
+     * @default 'default'
+     */
+    type?: ButtonType;
+
+    /** Can be set button shape */
+    shape?: ButtonShape;
+
+    /**
+     * Set the size of button
+     * @default 'middle'
+     */
+    size?: SizeType;
+
+    /** Set the original html `type` of button, see: [MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#attr-type) */
+    htmlType?: ButtonHTMLType;
+
+    /**
+     * Set the danger status of button
+     * @default false
+     */
+    danger?: boolean;
+
+    /**
+     * Disabled state of button
+     * @default false
+     */
+    disabled?: boolean;
+
+    /**
+     * Option to fit button width to its parent width
+     * @default false
+     */
+    block?: boolean;
+
+    /**
+     * Set the loading status of button
+     * @default false
+     */
+    loading?: boolean;
+
+    /** Set the handler to handle `click` event */
+    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-// component class
+const getSizeClass = (size?: SizeType) => {
+    switch (size) {
+        case 'large':
+            return 'lg';
+        case 'small':
+            return 'sm';
+        default:
+            return '';
+    }
+};
 
-// interface IState {
-//     isActive: boolean;
-// }
-
-// class Button extends Component<BaseButtonProps, IState> {
-//     constructor(props: BaseButtonProps) {
-//         super();
-//         this.state = {
-//             isActive: props.active ?? false,
-//         };
-//     }
-
-//     getSizeCls() {
-//         const { size } = this.props;
-//         let sizeCls = '';
-//         switch (size) {
-//             case 'large':
-//                 sizeCls = 'lg';
-//                 break;
-//             case 'small':
-//                 sizeCls = 'sm';
-//                 break;
-//             default:
-//                 break;
-//         }
-//         return sizeCls;
-//     }
-
-//     getClass() {
-//         const { isActive } = this.state;
-//         const { type, shape, danger, block, loading, size, className } = this.props;
-//         return joinClassNames(
-//             styles.btn,
-//             {
-//                 [`${styles.btn}-${type}`]: type,
-//                 [`${styles.btn}-${shape}`]: shape,
-//                 [`${styles.btn}-${this.getSizeCls()}`]: size,
-//                 [`${styles.btn}-danger`]: !!danger,
-//                 [`${styles.btn}-block`]: block,
-//                 [`${styles.btn}-loading`]: loading,
-//                 [`${styles.btn}-active`]: isActive,
-//             },
-//             className
-//         );
-//     }
-
-//     handleClick = (e: MouseEvent) => {
-//         const { disabled, onClick, unActive = true } = this.props;
-
-//         if (disabled) {
-//             e.preventDefault();
-//             return;
-//         }
-
-//         if (unActive) {
-//             onClick?.(e);
-//             return;
-//         }
-
-//         this.setState(
-//             {
-//                 isActive: !this.state.isActive,
-//             },
-//             () => {
-//                 if (onClick) {
-//                     onClick.call(null, e, this.state.isActive);
-//                 }
-//             }
-//         );
-//     };
-
-//     override UNSAFE_componentWillReceiveProps(props: BaseButtonProps) {
-//         this.setState({
-//             isActive: props.active,
-//         });
-//     }
-
-//     render() {
-//         const { htmlType, disabled, style, loading, children } = this.props;
-//         return (
-//             <button type={htmlType} onClick={this.handleClick} className={this.getClass()} disabled={disabled} style={style}>
-//                 {loading ? <LoadingIcon /> : ''}
-//                 {children}
-//             </button>
-//         );
-//     }
-// }
-
-export function Button(props: BaseButtonProps) {
-    const [isActive, setIsActive] = useState(props.active ?? false);
-
-    useEffect(() => {
-        setIsActive(props.active ?? false);
-    }, [props.active]);
-
-    const getSizeCls = () => {
-        const { size } = props;
-        let sizeCls = '';
-        switch (size) {
-            case 'large':
-                sizeCls = 'lg';
-                break;
-            case 'small':
-                sizeCls = 'sm';
-                break;
-            default:
-                break;
-        }
-        return sizeCls;
-    };
-
-    const getClass = () => {
-        const { type, shape, danger, block, loading, size, className } = props;
-        return joinClassNames(
-            styles.btn,
-            {
-                [`${styles.btn}-${type}`]: type,
-                [`${styles.btn}-${shape}`]: shape,
-                [`${styles.btn}-${getSizeCls()}`]: size,
-                [`${styles.btn}-danger`]: !!danger,
-                [`${styles.btn}-block`]: block,
-                [`${styles.btn}-loading`]: loading,
-                [`${styles.btn}-active`]: isActive,
-            },
-            className
-        );
-    };
+/**
+ * Button Component
+ */
+export function Button(props: IBaseButtonProps) {
+    const { children, className, style, type = 'default', shape, size, htmlType, danger = false, disabled = false, block = false, loading = false, onClick } = props;
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        const { disabled, onClick, unActive = true } = props;
-
         if (disabled) {
             e.preventDefault();
             return;
         }
 
-        if (unActive) {
-            onClick?.(e);
-            return;
-        }
-
-        setIsActive(!isActive);
-
-        if (onClick) {
-            onClick.call(e, isActive);
-        }
+        onClick && onClick(e);
     };
 
-    const { htmlType, disabled, style, loading, children } = props;
+    const _className = joinClassNames(
+        styles.btn,
+        {
+            [`${styles.btn}-${type}`]: type,
+            [`${styles.btn}-${shape}`]: shape,
+            [`${styles.btn}-${getSizeClass(size)}`]: size,
+            [`${styles.btn}-danger`]: !!danger,
+            [`${styles.btn}-block`]: block,
+            [`${styles.btn}-loading`]: loading,
+        },
+        className
+    );
+
     return (
-        <button type={htmlType} onClick={handleClick} className={getClass()} disabled={disabled} style={style}>
+        <button className={_className} style={style} disabled={disabled} type={htmlType} onClick={handleClick}>
             {loading ? <LoadingIcon /> : ''}
             {children}
         </button>

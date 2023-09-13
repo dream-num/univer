@@ -1,17 +1,28 @@
+import type { Meta } from '@storybook/react';
+
 import { Avatar } from './Avatar';
 
-// More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-export default {
-    title: 'Components/Avatar',
+const meta: Meta<typeof Avatar> = {
+    title: 'Components / Avatar',
     component: Avatar,
     parameters: {
         layout: 'centered',
     },
     tags: ['autodocs'],
-    args: {},
+    args: {
+        shape: 'circle',
+        size: 'default',
+        fit: 'fill',
+    },
 };
 
-// More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
+export default meta;
+
 export const Playground = {
     args: {},
+};
+export const ImgAvatar = {
+    args: {
+        src: 'https://avatars.githubusercontent.com/u/20630676?s=60&v=4',
+    },
 };

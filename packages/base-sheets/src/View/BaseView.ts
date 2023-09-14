@@ -15,7 +15,7 @@ export class BaseView {
         return this._scene;
     }
 
-    updateToSheet(worksheet: Worksheet) {}
+    onSheetChange(worksheet: Worksheet) {}
 
     initialize(scene: Scene) {
         this._scene = scene;

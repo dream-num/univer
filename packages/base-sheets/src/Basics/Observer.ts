@@ -1,5 +1,4 @@
-import { Observable, Plugin } from '@univerjs/core';
-import { SelectionController } from '../Controller/Selection/SelectionController';
+import { ISelectionRange, Observable, Plugin } from '@univerjs/core';
 
 interface ISelectionControlFillConfig {
     //TODO ...
@@ -31,7 +30,7 @@ export type SheetPluginObserve = {
 
     onFillEndObserver: Observable<ISelectionControlFillConfig>;
 
-    onChangeSelectionObserver: Observable<SelectionController>;
+    onChangeSelectionObserver: Observable<ISelectionRange>;
 
     onChangeCurrentSheetObserver: Observable<string>;
 

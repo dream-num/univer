@@ -1,6 +1,7 @@
-import { Direction, handleJsonToDom, ICellData, ICurrentUniverService, IDocumentData, IRangeData, IStyleData, Nullable } from '@univerjs/core';
+import { Direction, handleJsonToDom, ICellData, ICommandService, ICurrentUniverService, IDocumentData, IRangeData, IStyleData, Nullable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
+import { SetSelectionsOperation } from '../Commands/Operations/selection.operation';
 import { SelectionManagerService } from '../Services/selection-manager.service';
 
 /**
@@ -14,8 +15,11 @@ export class CellEditorController {
 
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
-    ) {}
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
+        this._commandService.registerCommand(SetSelectionsOperation);
+    }
 
     setEditMode(value: boolean) {
         this.isEditMode = value;
@@ -95,8 +99,14 @@ export class CellEditorController {
     getActiveRange() {
         const cellRange = this._selectionManagerService.getLast()?.cellRange;
         if (!cellRange) return;
+        let { row, column } = cellRange;
 
-        return this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getRange(cellRange.row, cellRange.column);
+        if (cellRange.isMerged) {
+            row = cellRange.startRow;
+            column = cellRange.startColumn;
+        }
+
+        return this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getRange(row, column);
     }
 
     handleBackSpace() {}

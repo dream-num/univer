@@ -153,8 +153,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [
                 ISelectionTransformerShapeManager,
                 {
-                    useFactory: (injector: Injector) => injector.createInstance(SelectionTransformerShapeManager),
-                    deps: [Injector],
+                    useClass: SelectionTransformerShapeManager,
                 },
             ],
         ];

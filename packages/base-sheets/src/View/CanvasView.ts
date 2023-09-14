@@ -37,7 +37,7 @@ export class CanvasView {
 
     updateToSheet(worksheet: Worksheet) {
         for (const view of this._views) {
-            view.updateToSheet(worksheet);
+            view.onSheetChange(worksheet);
         }
     }
 

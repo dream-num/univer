@@ -38,7 +38,7 @@ export class CountBarUIController {
         // });
 
         this._observerManager.getObserver('onChangeSelectionObserver')?.add(() => {
-            const rangeList = this._selectionManagerService.getRangeDataList();
+            const rangeList = this._selectionManagerService.getRangeDatas();
             const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
             if (rangeList && this._countBar) {
                 this._totalRangeList(worksheet.getRangeList(rangeList));

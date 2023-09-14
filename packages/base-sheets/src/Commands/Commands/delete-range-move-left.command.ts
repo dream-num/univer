@@ -21,7 +21,7 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        const range = selectionManagerService.getRangeDataList();
+        const range = selectionManagerService.getRangeDatas();
         if (!range?.length) return false;
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();

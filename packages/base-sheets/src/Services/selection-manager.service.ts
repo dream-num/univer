@@ -1,5 +1,5 @@
 import { ISelectionRangeWithStyle, ISelectionStyle, mergeCellHandler, NORMAL_SELECTION_PLUGIN_STYLE } from '@univerjs/base-render';
-import { Direction, IRangeData, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
+import { IRangeData, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -12,7 +12,7 @@ export interface ISelectionManagerSearchParam {
 }
 
 export interface ISelectionManagerInsertParam extends ISelectionManagerSearchParam {
-    selectionDataList: ISelectionRangeWithStyle[];
+    selectionDatas: ISelectionRangeWithStyle[];
 }
 
 //{ [pluginName: string]: { [unitId: string]: { [sheetId: string]: ISelectionData[] } } }
@@ -50,16 +50,16 @@ export class SelectionManagerService implements IDisposable {
         return this._selectionInfo;
     }
 
-    getSelectionDataListByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionRangeWithStyle[]>> {
-        return this._getSelectionDataList(param);
+    getSelectionDatasByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionRangeWithStyle[]>> {
+        return this._getSelectionDatas(param);
     }
 
-    getSelectionDataList(): Readonly<Nullable<ISelectionRangeWithStyle[]>> {
-        return this._getSelectionDataList(this._currentSelection);
+    getSelectionDatas(): Readonly<Nullable<ISelectionRangeWithStyle[]>> {
+        return this._getSelectionDatas(this._currentSelection);
     }
 
-    getRangeDataList(): Nullable<IRangeData[]> {
-        const selectionDataList = this.getSelectionDataList();
+    getRangeDatas(): Nullable<IRangeData[]> {
+        const selectionDataList = this.getSelectionDatas();
         if (selectionDataList == null) {
             return;
         }
@@ -83,34 +83,34 @@ export class SelectionManagerService implements IDisposable {
         return this._getLastByParam(this._currentSelection);
     }
 
-    add(selectionDataList: ISelectionRangeWithStyle[]) {
+    add(selectionDatas: ISelectionRangeWithStyle[]) {
         if (this._currentSelection == null) {
             return;
         }
         this._addByParam({
             ...this._currentSelection,
-            selectionDataList,
+            selectionDatas,
         });
     }
 
-    replace(selectionDataList: ISelectionRangeWithStyle[]) {
+    replace(selectionDatas: ISelectionRangeWithStyle[]) {
         if (this._currentSelection == null) {
             return;
         }
         this._replaceByParam({
             ...this._currentSelection,
-            selectionDataList,
+            selectionDatas,
         });
         this.refresh(this._currentSelection);
     }
 
-    replaceWithNoRefresh(selectionDataList: ISelectionRangeWithStyle[]) {
+    replaceWithNoRefresh(selectionDatas: ISelectionRangeWithStyle[]) {
         if (this._currentSelection == null) {
             return;
         }
         this._replaceByParam({
             ...this._currentSelection,
-            selectionDataList,
+            selectionDatas,
         });
     }
 
@@ -155,94 +155,6 @@ export class SelectionManagerService implements IDisposable {
         return NORMAL_SELECTION_PLUGIN_STYLE;
     }
 
-    /**
-     * Move the selection according to different directions, usually used for the shortcut key operation of ↑ ↓ ← →
-     * @param direction
-     * @returns
-     */
-    // eslint-disable-next-line max-lines-per-function
-    getMoveCellInfo(
-        direction: Direction,
-        rowCount: number,
-        columnCount: number,
-        mergeData: IRangeData[],
-        selectionData: Nullable<ISelectionRangeWithStyle>
-    ): Nullable<ISelectionRangeWithStyle> {
-        const cellRange = selectionData?.cellRange;
-
-        const style = selectionData?.style;
-
-        if (!cellRange) return;
-
-        let { startRow: mergeStartRow, startColumn: mergeStartColumn, endRow: mergeEndRow, endColumn: mergeEndColumn } = cellRange;
-
-        let { row, column } = cellRange;
-        // const rowCount = this._skeleton?.getRowCount() || DEFAULT_WORKSHEET_ROW_COUNT;
-        // const columnCount = this._skeleton?.getColumnCount() || DEFAULT_WORKSHEET_COLUMN_COUNT;
-        switch (direction) {
-            case Direction.UP:
-                if (cellRange.isMerged || cellRange.isMergedMainCell) {
-                    row = --mergeStartRow;
-                } else {
-                    row--;
-                }
-                if (row < 0) {
-                    row = 0;
-                }
-                break;
-            case Direction.DOWN:
-                if (cellRange.isMerged || cellRange.isMergedMainCell) {
-                    row = ++mergeEndRow;
-                } else {
-                    row++;
-                }
-
-                if (row > rowCount) {
-                    row = rowCount;
-                }
-                break;
-            case Direction.LEFT:
-                if (cellRange.isMerged || cellRange.isMergedMainCell) {
-                    column = --mergeStartColumn;
-                } else {
-                    column--;
-                }
-
-                if (column < 0) {
-                    column = 0;
-                }
-                break;
-            case Direction.RIGHT:
-                if (cellRange.isMerged || cellRange.isMergedMainCell) {
-                    column = ++mergeEndColumn;
-                } else {
-                    column++;
-                }
-
-                if (column > columnCount) {
-                    column = columnCount;
-                }
-                break;
-
-            default:
-                break;
-        }
-
-        const newCellRange = mergeCellHandler(row, column, mergeData);
-
-        const newSelectionData = makeCellRangeToRangeData(newCellRange);
-
-        if (!newSelectionData) {
-            return;
-        }
-
-        return {
-            rangeData: newSelectionData,
-            cellRange: newCellRange,
-            style,
-        };
-    }
-
     transformCellDataToSelectionData(row: number, column: number, mergeData: IRangeData[]): Nullable<ISelectionRangeWithStyle> {
         const newCellRange = mergeCellHandler(row, column, mergeData);
 
@@ -259,7 +171,7 @@ export class SelectionManagerService implements IDisposable {
         };
     }
 
-    private _getSelectionDataList(param: Nullable<ISelectionManagerSearchParam>) {
+    private _getSelectionDatas(param: Nullable<ISelectionManagerSearchParam>) {
         if (param == null) {
             return;
         }
@@ -268,23 +180,23 @@ export class SelectionManagerService implements IDisposable {
     }
 
     private refresh(param: ISelectionManagerSearchParam): void {
-        this._selectionInfo$.next(this._getSelectionDataList(param));
+        this._selectionInfo$.next(this._getSelectionDatas(param));
     }
 
     private _getFirstByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionRangeWithStyle>> {
-        const selectionData = this._getSelectionDataList(param);
+        const selectionData = this._getSelectionDatas(param);
 
         return selectionData?.[0];
     }
 
     private _getLastByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionRangeWithStyle>> {
-        const selectionData = this._getSelectionDataList(param);
+        const selectionData = this._getSelectionDatas(param);
 
         return selectionData?.[selectionData.length - 1];
     }
 
     private _addByParam(insertParam: ISelectionManagerInsertParam): void {
-        const { pluginName, unitId, sheetId, selectionDataList } = insertParam;
+        const { pluginName, unitId, sheetId, selectionDatas } = insertParam;
 
         if (!this._selectionInfo.has(pluginName)) {
             this._selectionInfo.set(pluginName, new Map());
@@ -299,17 +211,17 @@ export class SelectionManagerService implements IDisposable {
         const sheetSelectionData = unitSelectionData.get(unitId)!;
 
         if (!sheetSelectionData.has(sheetId)) {
-            sheetSelectionData.set(sheetId, [...selectionDataList]);
+            sheetSelectionData.set(sheetId, [...selectionDatas]);
         } else {
-            const OldSelectionDataList = sheetSelectionData.get(sheetId)!;
-            OldSelectionDataList.push(...selectionDataList);
+            const OldSelectionDatas = sheetSelectionData.get(sheetId)!;
+            OldSelectionDatas.push(...selectionDatas);
         }
 
         this.refresh({ pluginName, unitId, sheetId });
     }
 
     private _replaceByParam(insertParam: ISelectionManagerInsertParam) {
-        const { pluginName, unitId, sheetId, selectionDataList } = insertParam;
+        const { pluginName, unitId, sheetId, selectionDatas } = insertParam;
 
         if (!this._selectionInfo.has(pluginName)) {
             this._selectionInfo.set(pluginName, new Map());
@@ -324,17 +236,17 @@ export class SelectionManagerService implements IDisposable {
         const sheetSelectionData = unitSelectionData.get(unitId)!;
 
         if (!sheetSelectionData.has(sheetId)) {
-            sheetSelectionData.set(sheetId, selectionDataList);
+            sheetSelectionData.set(sheetId, selectionDatas);
         } else {
-            const OldSelectionDataList = sheetSelectionData.get(sheetId)!;
-            OldSelectionDataList.splice(0, OldSelectionDataList.length, ...selectionDataList);
+            const OldSelectionDatas = sheetSelectionData.get(sheetId)!;
+            OldSelectionDatas.splice(0, OldSelectionDatas.length, ...selectionDatas);
         }
 
         // this.refresh({ pluginName, unitId, sheetId });
     }
 
     private _clearByParam(param: ISelectionManagerSearchParam): void {
-        const selectionData = this._getSelectionDataList(param);
+        const selectionData = this._getSelectionDatas(param);
 
         selectionData?.splice(0);
 
@@ -342,7 +254,7 @@ export class SelectionManagerService implements IDisposable {
     }
 
     private _removeByParam(index: number, param: ISelectionManagerSearchParam): void {
-        const selectionData = this._getSelectionDataList(param);
+        const selectionData = this._getSelectionDatas(param);
 
         selectionData?.splice(index, 1);
 

@@ -9,7 +9,7 @@ import {
     SpreadsheetColumnTitle,
     SpreadsheetRowTitle,
 } from '@univerjs/base-render';
-import { ICurrentUniverService, LocaleService, Worksheet } from '@univerjs/core';
+import { ICurrentUniverService, ISelectionRange, LocaleService, ObserverManager, Worksheet } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../Services/selection-manager.service';
@@ -22,30 +22,14 @@ export class SelectionView extends BaseView {
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ISelectionTransformerShapeManager private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
     }
 
-    override updateToSheet(worksheet: Worksheet) {
-        const { spreadsheet, spreadsheetRowTitle, spreadsheetColumnTitle, spreadsheetLeftTopPlaceholder, spreadsheetSkeleton } = this._getSheetObject();
-        if (spreadsheetSkeleton == null) {
-            return;
-        }
-        const scene = this.getScene();
-        this._selectionTransformerShapeManager.changeRuntime(spreadsheetSkeleton, scene);
-
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-
-        const unitId = workbook.getUnitId();
-
-        const sheetId = worksheet.getSheetId();
-
-        this._selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId,
-            sheetId,
-        });
+    override onSheetChange(worksheet: Worksheet) {
+        this._update(worksheet);
     }
 
     protected override _initialize() {
@@ -75,7 +59,6 @@ export class SelectionView extends BaseView {
 
         spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             this._selectionTransformerShapeManager.eventTrigger(evt, spreadsheet.zIndex + 1);
-
             state.stopPropagation();
         });
 
@@ -87,9 +70,39 @@ export class SelectionView extends BaseView {
 
         this._selectionTransformerShapeManager.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
             this._selectionManagerService.replaceWithNoRefresh(selectionDataWithStyleList.map((selectionDataWithStyle) => convertSelectionDataToRange(selectionDataWithStyle)));
+            const current = selectionDataWithStyleList[selectionDataWithStyleList.length - 1];
+            if (current == null) {
+                return;
+            }
+            const selectionRange = convertSelectionDataToRange(current);
+            this._observerManager.getObserver<ISelectionRange>('onChangeSelectionObserver')?.notifyObservers({
+                rangeData: selectionRange.rangeData,
+                cellRange: selectionRange.cellRange,
+            });
         });
 
-        this.updateToSheet(worksheet);
+        this._update(worksheet);
+    }
+
+    private _update(worksheet: Worksheet) {
+        const { spreadsheet, spreadsheetRowTitle, spreadsheetColumnTitle, spreadsheetLeftTopPlaceholder, spreadsheetSkeleton } = this._getSheetObject();
+        if (spreadsheetSkeleton == null) {
+            return;
+        }
+        const scene = this.getScene();
+        this._selectionTransformerShapeManager.changeRuntime(spreadsheetSkeleton, scene);
+
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+
+        const unitId = workbook.getUnitId();
+
+        const sheetId = worksheet.getSheetId();
+
+        this._selectionManagerService.setCurrentSelection({
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId,
+            sheetId,
+        });
     }
 
     private _getSheetObject() {

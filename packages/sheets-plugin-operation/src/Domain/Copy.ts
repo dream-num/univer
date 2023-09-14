@@ -385,7 +385,7 @@ export class UniverCopy extends Copy {
 
     private _getSheetInfo() {
         const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
-        const selections = this._selectionManagerService.getRangeDataList();
+        const selections = this._selectionManagerService.getRangeDatas();
         return { sheet, selections };
     }
 

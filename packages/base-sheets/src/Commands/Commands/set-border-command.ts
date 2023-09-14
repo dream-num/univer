@@ -42,7 +42,7 @@ export const SetBorderPositionCommand: ICommand<ISetBorderPositionCommandParams>
         const selectionManagerService = accessor.get(SelectionManagerService);
         const borderStyleManagerService = accessor.get(BorderStyleManagerService);
 
-        const selections = selectionManagerService.getRangeDataList();
+        const selections = selectionManagerService.getRangeDatas();
         const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         if (!selections?.length) {
             return false;

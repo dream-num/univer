@@ -29,7 +29,7 @@ export const RemoveRowCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManagerService.getRangeDataList();
+        const selections = selectionManagerService.getRangeDatas();
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         if (!selections?.length) return false;
@@ -155,7 +155,7 @@ export const RemoveColCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManagerService.getRangeDataList();
+        const selections = selectionManagerService.getRangeDatas();
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         if (!selections?.length) return false;

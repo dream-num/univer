@@ -15,7 +15,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManagerService.getRangeDataList();
+        const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length) return false;
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();

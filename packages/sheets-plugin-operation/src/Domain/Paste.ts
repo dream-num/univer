@@ -51,7 +51,7 @@ export class UniverPaste extends Paste {
     //     if (!sheet) return [];
     //     const sheetId = sheet.getSheetId();
 
-    //     const selections = this._selectionManagerService.getRangeDataList();
+    //     const selections = this._selectionManagerService.getRangeDatas();
 
     //     if (!selections?.length) {
     //         return [];

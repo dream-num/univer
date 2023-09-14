@@ -1,5 +1,16 @@
 import { ISelectionData, ISelectionRange, Nullable } from '@univerjs/core';
 
+/**
+ * Whether to display the controller that modifies the selection, distributed in 8 locations
+ * tl top_left_corner
+ * tc top_center_corner
+ * tr top_right_corner
+ * ml middle_left_corner
+ * mr middle_right_corner
+ * bl bottom_left_corner
+ * bc bottom_center_corner
+ * br bottom_right_corner
+ */
 export interface ISelectionControlConfig {
     tl?: boolean;
     tc?: boolean;

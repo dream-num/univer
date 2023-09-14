@@ -19,7 +19,7 @@ export const ClearSelectionContentCommand: ICommand = {
 
         const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const worksheet = workbook.getActiveSheet();
-        const selections = selectionManagerService.getRangeDataList();
+        const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length) {
             return false;
         }

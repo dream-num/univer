@@ -1,7 +1,19 @@
-import { Engine, IMouseEvent, IPointerEvent, IRenderingEngine, ISelectionTransformerShapeManager } from '@univerjs/base-render';
+import { Engine, IMouseEvent, IPointerEvent, IRenderingEngine, ISelectionRangeWithStyle, ISelectionTransformerShapeManager, mergeCellHandler } from '@univerjs/base-render';
 import { CANVAS_VIEW_KEY, CanvasView, CellEditorController, SelectionManagerService } from '@univerjs/base-sheets';
 import { $$, CellEditExtensionManager, handleDomToJson, handleStringToStyle, isCtrlPressed, KeyboardManager, setLastCaretPosition } from '@univerjs/base-ui';
-import { Direction, handleStyleToString, ICellData, ICurrentUniverService, isKeyPrintable, ObserverManager, Tools, UIObserver } from '@univerjs/core';
+import {
+    Direction,
+    handleStyleToString,
+    ICellData,
+    ICurrentUniverService,
+    IRangeData,
+    isKeyPrintable,
+    makeCellRangeToRangeData,
+    Nullable,
+    ObserverManager,
+    Tools,
+    UIObserver,
+} from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 import { RefObject } from 'react';
 
@@ -356,11 +368,99 @@ export class CellEditorUIController {
         const mergeData = worksheet.getMergeData();
         const selectionData = this._selectionManagerService.getLast();
 
-        const moveSelectionData = this._selectionManagerService.getMoveCellInfo(direction, rowCount, columnCount, mergeData, selectionData);
+        const moveSelectionData = this._getMoveCellInfo(direction, rowCount, columnCount, mergeData, selectionData);
 
         if (moveSelectionData != null) {
             // move to cell below
             this._selectionManagerService.replace([moveSelectionData]);
         }
+    }
+
+    /**
+     * Move the selection according to different directions, usually used for the shortcut key operation of ↑ ↓ ← →
+     * @param direction
+     * @returns
+     */
+    // eslint-disable-next-line max-lines-per-function
+    private _getMoveCellInfo(
+        direction: Direction,
+        rowCount: number,
+        columnCount: number,
+        mergeData: IRangeData[],
+        selectionData: Nullable<ISelectionRangeWithStyle>
+    ): Nullable<ISelectionRangeWithStyle> {
+        const cellRange = selectionData?.cellRange;
+
+        const style = selectionData?.style;
+
+        if (!cellRange) return;
+
+        let { startRow: mergeStartRow, startColumn: mergeStartColumn, endRow: mergeEndRow, endColumn: mergeEndColumn } = cellRange;
+
+        let { row, column } = cellRange;
+        // const rowCount = this._skeleton?.getRowCount() || DEFAULT_WORKSHEET_ROW_COUNT;
+        // const columnCount = this._skeleton?.getColumnCount() || DEFAULT_WORKSHEET_COLUMN_COUNT;
+        switch (direction) {
+            case Direction.UP:
+                if (cellRange.isMerged || cellRange.isMergedMainCell) {
+                    row = --mergeStartRow;
+                } else {
+                    row--;
+                }
+                if (row < 0) {
+                    row = 0;
+                }
+                break;
+            case Direction.DOWN:
+                if (cellRange.isMerged || cellRange.isMergedMainCell) {
+                    row = ++mergeEndRow;
+                } else {
+                    row++;
+                }
+
+                if (row > rowCount) {
+                    row = rowCount;
+                }
+                break;
+            case Direction.LEFT:
+                if (cellRange.isMerged || cellRange.isMergedMainCell) {
+                    column = --mergeStartColumn;
+                } else {
+                    column--;
+                }
+
+                if (column < 0) {
+                    column = 0;
+                }
+                break;
+            case Direction.RIGHT:
+                if (cellRange.isMerged || cellRange.isMergedMainCell) {
+                    column = ++mergeEndColumn;
+                } else {
+                    column++;
+                }
+
+                if (column > columnCount) {
+                    column = columnCount;
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        const newCellRange = mergeCellHandler(row, column, mergeData);
+
+        const newSelectionData = makeCellRangeToRangeData(newCellRange);
+
+        if (!newSelectionData) {
+            return;
+        }
+
+        return {
+            rangeData: newSelectionData,
+            cellRange: newCellRange,
+            style,
+        };
     }
 }

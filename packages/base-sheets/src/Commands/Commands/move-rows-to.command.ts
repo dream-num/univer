@@ -19,7 +19,7 @@ export const MoveRowsToCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
         const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const originRange = selectionManagerService.getRangeDataList()?.[0];
+        const originRange = selectionManagerService.getRangeDatas()?.[0];
         if (!originRange) {
             return false;
         }

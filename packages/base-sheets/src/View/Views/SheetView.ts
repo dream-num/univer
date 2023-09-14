@@ -41,7 +41,7 @@ export class SheetView extends BaseView {
         return this._spreadsheetLeftTopPlaceholder;
     }
 
-    override updateToSheet(worksheet: Worksheet) {
+    override onSheetChange(worksheet: Worksheet) {
         const scene = this.getScene();
         const spreadsheetSkeleton = this._buildSkeleton(worksheet);
         const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;

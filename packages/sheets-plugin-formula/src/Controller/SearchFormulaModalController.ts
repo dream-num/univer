@@ -1,6 +1,5 @@
-import { SelectionTransformerShape } from '@univerjs/base-render';
 import { ComponentManager } from '@univerjs/base-ui';
-import { ObserverManager } from '@univerjs/core';
+import { ISelectionRange, ObserverManager } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 
@@ -130,8 +129,8 @@ export class SearchFormulaController {
     private _initialize() {
         this._initRegisterComponent();
 
-        this._observerManager.getObserver<SelectionTransformerShape>('onChangeSelectionObserver')?.add((selection) => {
-            const info = selection.getCurrentCellInfo();
+        this._observerManager.getObserver<ISelectionRange>('onChangeSelectionObserver')?.add((selection) => {
+            const info = selection.cellRange;
             // this._searchItem.changeRange(info?.startColumn.toString() ?? '');
         });
     }

@@ -22,7 +22,7 @@ export const SetRangeValuesCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
         const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const range = selectionManagerService.getRangeDataList();
+        const range = selectionManagerService.getRangeDatas();
         if (!range?.length) {
             return false;
         }

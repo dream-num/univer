@@ -21,7 +21,7 @@ export const SetWorksheetRowHeightCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManagerService.getRangeDataList();
+        const selections = selectionManagerService.getRangeDatas();
         console.info('current selections', selections);
         if (!selections?.length) return false;
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();

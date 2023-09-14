@@ -18,7 +18,7 @@ export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
 
-        const selections = selectionManagerService.getRangeDataList();
+        const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length || params == null) {
             return false;
         }

@@ -1,6 +1,5 @@
-import { SelectionTransformerShape } from '@univerjs/base-render';
 import { CellInputExtensionManager } from '@univerjs/base-ui';
-import { ICurrentUniverService, INamedRange, ObserverManager } from '@univerjs/core';
+import { ICurrentUniverService, INamedRange, ISelectionRange, ObserverManager } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { FormulaBar } from '../View/FormulaBar';
@@ -28,20 +27,18 @@ export class FormulaBarUIController {
     }
 
     private _initialize() {
-        this._observerManager.getObserver<SelectionTransformerShape>('onChangeSelectionObserver')?.add((selectionControl: SelectionTransformerShape) => {
-            const currentCell = selectionControl.model.currentCell;
+        this._observerManager.getObserver<ISelectionRange>('onChangeSelectionObserver')?.add((selectionRange: ISelectionRange) => {
+            const currentCell = selectionRange.cellRange;
 
             if (currentCell) {
                 let currentRangeData;
 
                 if (currentCell.isMerged) {
-                    const mergeInfo = currentCell.mergeInfo;
-
                     currentRangeData = {
-                        startRow: mergeInfo.startRow,
-                        endRow: mergeInfo.endRow,
-                        startColumn: mergeInfo.startColumn,
-                        endColumn: mergeInfo.endColumn,
+                        startRow: currentCell.startRow,
+                        endRow: currentCell.endRow,
+                        startColumn: currentCell.startColumn,
+                        endColumn: currentCell.endColumn,
                     };
                 } else {
                     const { row, column } = currentCell;

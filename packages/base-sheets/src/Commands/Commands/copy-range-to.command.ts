@@ -30,7 +30,7 @@ export const CopyRangeToCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManagerService.getRangeDataList();
+        const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length) return false;
         const originRange = selections[0];
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();

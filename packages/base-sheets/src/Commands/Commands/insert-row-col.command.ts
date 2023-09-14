@@ -153,7 +153,7 @@ export const InsertRowBeforeCommand: ICommand<InsertRowCommandParams> = {
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         let range: IRangeData;
-        const selections = selectionManagerService.getRangeDataList();
+        const selections = selectionManagerService.getRangeDatas();
         if (selections && selections.length === 1) {
             range = selections[0];
         } else {
@@ -196,7 +196,7 @@ export const InsertRowAfterCommand: ICommand<InsertRowCommandParams> = {
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         let range: IRangeData;
-        const selections = selectionManagerService.getRangeDataList();
+        const selections = selectionManagerService.getRangeDatas();
         if (selections && selections.length === 1) {
             range = selections[0];
         } else {
@@ -362,7 +362,7 @@ export const InsertColBeforeCommand: ICommand<InsertColCommandParams> = {
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         let range: IRangeData;
-        const selections = selectionManagerService.getRangeDataList();
+        const selections = selectionManagerService.getRangeDatas();
         if (selections && selections.length === 1) {
             range = selections[0];
         } else {
@@ -405,7 +405,7 @@ export const InsertColAfterCommand: ICommand<InsertColCommandParams> = {
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         let range: IRangeData;
-        const selections = selectionManagerService.getRangeDataList();
+        const selections = selectionManagerService.getRangeDatas();
         if (selections && selections.length === 1) {
             range = selections[0];
         } else {

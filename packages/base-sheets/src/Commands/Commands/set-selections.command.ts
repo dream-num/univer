@@ -1,7 +1,7 @@
 import { SetSelectionsOperation } from '@Commands/Operations/selection.operation';
 import { CommandType, Direction, ICommand, ICommandService, ICurrentUniverService, IRangeData } from '@univerjs/core';
 
-import { ISelectionManager } from '../../Services/tokens';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../Services/selection-manager.service';
 
 export interface IChangeSelectionCommandParams {
     direction: Direction;
@@ -13,12 +13,13 @@ export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const currentWorksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
-        const selectionManager = accessor.get(ISelectionManager);
+        const currentWorkbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const currentWorksheet = currentWorkbook.getActiveSheet();
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
 
-        const selections = selectionManager.getCurrentSelections();
-        if (!selections.length) {
+        const selections = selectionManagerService.getRangeDatas();
+        if (!selections?.length || params == null) {
             return false;
         }
 
@@ -51,10 +52,22 @@ export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
         // TODO: deal with `toEnd` parameter here
 
         commandService.executeCommand(SetSelectionsOperation.id, {
+            unitId: currentWorkbook.getUnitId(),
             sheetId: currentWorksheet.getSheetId(),
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {
-                    selection: destRange,
+                    rangeData: destRange,
+                    cellRange: {
+                        row: destRange.startRow,
+                        column: destRange.startColumn,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                        startRow: destRange.startRow,
+                        startColumn: destRange.startColumn,
+                        endRow: destRange.endRow,
+                        endColumn: destRange.endColumn,
+                    },
                 },
             ],
         });

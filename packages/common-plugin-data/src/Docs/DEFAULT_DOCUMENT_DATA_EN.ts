@@ -1,4 +1,5 @@
 import { BooleanNumber, ColumnSeparatorType, IDocumentData, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SectionType, WrapTextType } from '@univerjs/core';
+
 import { DEFAULT_LIST_TEST } from './DEFAULT_LIST';
 
 export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {

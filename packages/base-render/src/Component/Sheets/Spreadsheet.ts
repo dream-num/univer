@@ -1,27 +1,27 @@
-import { CellValueType, HorizontalAlign, ICellInfo, IRangeData, Nullable, ObjectMatrix, searchArray, WrapStrategy, sortRules } from '@univerjs/core';
-import { Background } from './Extensions/Background';
-import { Border } from './Extensions/Border';
-import { Font } from './Extensions/Font';
-import { BorderAuxiliary } from './Extensions/BorderAuxiliary';
+import { CellValueType, HorizontalAlign, ICellInfo, IRangeData, Nullable, ObjectMatrix, searchArray, sortRules, WrapStrategy } from '@univerjs/core';
+
+import { BaseObject } from '../../BaseObject';
+import { ORIENTATION_TYPE, RENDER_CLASS_TYPE } from '../../Basics/Const';
+import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
+import { IDocumentSkeletonColumn } from '../../Basics/IDocumentSkeletonCached';
+import { ITransformChangeState } from '../../Basics/Interfaces';
+import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale, mergeInfoOffset } from '../../Basics/Tools';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
-import { SpreadsheetSkeleton } from './SheetSkeleton';
-import { SheetComponent } from './SheetComponent';
-import { SpreadsheetExtensionRegistry } from '../Extension';
 import { Canvas } from '../../Canvas';
 import { Engine } from '../../Engine';
 import { Scene } from '../../Scene';
 import { SceneViewer } from '../../SceneViewer';
 import { Viewport } from '../../Viewport';
-import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale, mergeInfoOffset } from '../../Basics/Tools';
-import { ITransformChangeState } from '../../Basics/Interfaces';
-import { BaseObject } from '../../BaseObject';
-import { Documents } from '../Docs/Document';
-import { ORIENTATION_TYPE, RENDER_CLASS_TYPE } from '../../Basics/Const';
 import { columnIterator } from '../Docs/Common/Tools';
 import { DocumentSkeleton } from '../Docs/DocSkeleton';
-import { IDocumentSkeletonColumn } from '../../Basics/IDocumentSkeletonCached';
-import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
-import { SelectionManager } from './Selection/SelectionManager';
+import { Documents } from '../Docs/Document';
+import { SpreadsheetExtensionRegistry } from '../Extension';
+import { Background } from './Extensions/Background';
+import { Border } from './Extensions/Border';
+import { BorderAuxiliary } from './Extensions/BorderAuxiliary';
+import { Font } from './Extensions/Font';
+import { SheetComponent } from './SheetComponent';
+import { SpreadsheetSkeleton } from './SheetSkeleton';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -43,8 +43,6 @@ export class Spreadsheet extends SheetComponent {
     private _cacheOffsetY = 0;
 
     private _hasSelection = false;
-
-    private _selection: SelectionManager;
 
     private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
         pageMarginLeft: 0,
@@ -163,7 +161,7 @@ export class Spreadsheet extends SheetComponent {
         const { x: scrollX, y: scrollY } = scrollXY;
 
         // these values are not affected by zooming (ideal positions)
-        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight, dataMergeCacheAll } = spreadsheetSkeleton;
+        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight, mergeData } = spreadsheetSkeleton;
 
         // so we should map physical positions to ideal positions
         offsetX = offsetX / scaleX + scrollX - rowTitleWidth;
@@ -192,7 +190,7 @@ export class Spreadsheet extends SheetComponent {
             }
         }
 
-        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
+        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, mergeData);
         const { isMerged, isMergedMainCell } = cellInfo;
         let { startY, endY, startX, endX, mergeInfo } = cellInfo;
 
@@ -229,9 +227,9 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
         const { scaleX = 1, scaleY = 1 } = this.getParentScale();
-        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight, dataMergeCacheAll } = spreadsheetSkeleton;
+        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight, mergeData } = spreadsheetSkeleton;
 
-        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCacheAll);
+        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, mergeData);
         const { isMerged, isMergedMainCell } = cellInfo;
         let { startY, endY, startX, endX, mergeInfo } = cellInfo;
 
@@ -364,18 +362,18 @@ export class Spreadsheet extends SheetComponent {
         this.makeDirty(true);
     }
 
-    enableSelection() {
-        if (this._hasSelection) {
-            return;
-        }
-        this._selection = SelectionManager.create(this);
-        this._hasSelection = true;
-    }
+    // enableSelection() {
+    //     if (this._hasSelection) {
+    //         return;
+    //     }
+    //     this._selection = SelectionManager.create(this);
+    //     this._hasSelection = true;
+    // }
 
-    disableSelection() {
-        this._selection?.dispose();
-        this._hasSelection = false;
-    }
+    // disableSelection() {
+    //     this._selection?.dispose();
+    //     this._hasSelection = false;
+    // }
 
     getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angle: number = 0) {
         const skeletonData = documentSkeleton?.getSkeletonData();
@@ -580,7 +578,7 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
         const columnCount = spreadsheetSkeleton.getColumnCount();
-        const { stylesCache, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache } = spreadsheetSkeleton;
+        const { stylesCache, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache, mergeData } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         fontList &&
             Object.keys(fontList).forEach((fontFormat: string) => {
@@ -611,7 +609,7 @@ export class Spreadsheet extends SheetComponent {
                             }
 
                             if (angle !== 0) {
-                                const { startY, endY, startX, endX } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                                const { startY, endY, startX, endX } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, mergeData);
                                 const cellWidth = endX - startX;
                                 const cellHeight = endY - startY;
 
@@ -639,7 +637,7 @@ export class Spreadsheet extends SheetComponent {
                                 endColumn,
                             });
                         } else if (wrapStrategy === WrapStrategy.WRAP && angle !== 0) {
-                            const { startY, endY } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                            const { startY, endY } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, mergeData);
 
                             const cellHeight = endY - startY;
                             documentSkeleton.getModel().updateDocumentDataPageSize(cellHeight);

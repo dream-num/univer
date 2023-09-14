@@ -1,13 +1,13 @@
 export * from './Basics';
 export * from './Controller';
-export * from './Model';
 export * from './SheetPlugin';
 export * from './View';
 
 // #region services
 
 export { BorderStyleManagerService } from './Services/border-style-manager.service';
-export { ICanvasView, ISelectionManager } from './Services/tokens';
+export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './Services/selection-manager.service';
+export { ICanvasView } from './Services/tokens';
 
 // #endregion
 

@@ -1,6 +1,7 @@
 import { sortRules } from '@univerjs/core';
-import { IBoundRect } from '../Basics/Vector2';
+
 import { BaseObject } from '../BaseObject';
+import { IBoundRect } from '../Basics/Vector2';
 import { ComponentExtension } from './Extension';
 
 export class RenderComponent<T, U> extends BaseObject {
@@ -11,14 +12,14 @@ export class RenderComponent<T, U> extends BaseObject {
     }
 
     register(...extensions: Array<ComponentExtension<T, U>>) {
-        for (let extension of extensions) {
+        for (const extension of extensions) {
             extension.parent = this;
             this._extensions.set(extension.uKey, extension);
         }
     }
 
     unRegister(...uKeys: string[]) {
-        for (let uKey of uKeys) {
+        for (const uKey of uKeys) {
             this._extensions.delete(uKey);
         }
     }

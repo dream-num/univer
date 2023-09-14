@@ -1,7 +1,10 @@
-import { Range, FormatType, IGridRange, ObjectMatrix, ICellData, Nullable, Worksheet, ICurrentUniverService } from '@univerjs/core';
-import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { getRegExpStr } from '../Util/util';
+import { ISelectionTransformerShapeManager } from '@univerjs/base-render';
+import { SelectionManagerService } from '@univerjs/base-sheets';
+import { FormatType, ICellData, ICurrentUniverService, IGridRange, Nullable, ObjectMatrix, Range, Worksheet } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+
 import { FindType } from '../IData';
+import { getRegExpStr } from '../Util/util';
 import { SelectSearch } from '../View/UI/FindModal';
 
 export class TextFinder {
@@ -27,7 +30,11 @@ export class TextFinder {
 
     private _startRange: Nullable<Range>; // 从这个位置后开始找
 
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {}
+    constructor(
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @ISelectionTransformerShapeManager private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager
+    ) {}
 
     /**
      * Returns all cells matching the search criteria.
@@ -297,7 +304,22 @@ export class TextFinder {
     // 高亮匹配单元格
     private _highlightCell(range: IGridRange) {
         if (!range) return;
-        this._selectionManager.setCurrentCell(range);
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const unitId = workbook.getUnitId();
+        const sheetId = range.sheetId;
+        const mergeData = workbook.getActiveSheet().getMergeData();
+
+        const selectionRange = this._selectionManagerService.transformCellDataToSelectionData(range.rangeData.startColumn, range.rangeData.endColumn, mergeData);
+        if (selectionRange == null) {
+            return;
+        }
+
+        this._selectionManagerService.replace([
+            {
+                ...selectionRange,
+                ...this._selectionManagerService.createDefaultSelection(),
+            },
+        ]);
     }
 
     private _replaceText(sheet: Worksheet, range: IGridRange, text: string) {
@@ -310,9 +332,9 @@ export class TextFinder {
                 match = 'g';
             }
             const reg = new RegExp(getRegExpStr(this._text as string), match);
-            sheet.getRange(range.rangeData).setValue(value.m.replace(reg, text));
+            // sheet.getRange(range.rangeData).setValue(value.m.replace(reg, text));
         } else {
-            sheet.getRange(range.rangeData).setValue(text);
+            // sheet.getRange(range.rangeData).setValue(text);
         }
     }
 }

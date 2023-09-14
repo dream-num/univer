@@ -1,2 +1,3 @@
-export * from './SheetView';
 export * from './EditTooltipsView';
+export * from './SelectionView';
+export * from './SheetView';

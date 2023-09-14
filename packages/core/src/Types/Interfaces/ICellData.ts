@@ -1,7 +1,7 @@
-import { IDocumentData } from './index';
+import { Nullable } from '../../Shared/Types';
 import { FormatType } from '../Enum/FormatType';
 import { CellValueType } from '../Enum/TextStyle';
-import { Nullable } from '../../Shared/Types';
+import { IDocumentData } from './IDocumentData';
 import { IStyleData } from './IStyleData';
 
 /**

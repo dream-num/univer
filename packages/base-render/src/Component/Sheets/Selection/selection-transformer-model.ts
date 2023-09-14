@@ -1,7 +1,8 @@
-import { ICellInfo, ISelection, Nullable, makeCellToSelection } from '@univerjs/core';
+import { ICellInfo, ISelection, makeCellToSelection, Nullable } from '@univerjs/core';
+
 import { SELECTION_TYPE } from '../../../Basics/Const';
 
-export class SelectionModel implements ISelection {
+export class SelectionTransformerModel implements ISelection {
     private _startColumn: number;
 
     private _startRow: number;
@@ -96,6 +97,24 @@ export class SelectionModel implements ISelection {
         return makeCellToSelection(this._currentCell);
     }
 
+    getSelection() {
+        return {
+            startColumn: this._startColumn,
+            startRow: this._startRow,
+            endColumn: this._endColumn,
+            endRow: this._endRow,
+
+            startX: this._startX,
+            startY: this._startY,
+            endX: this._endX,
+            endY: this._endY,
+        };
+    }
+
+    getCell() {
+        return this._currentCell;
+    }
+
     getValue() {
         return {
             selection: {
@@ -109,7 +128,7 @@ export class SelectionModel implements ISelection {
                 endX: this._endX,
                 endY: this._endY,
             },
-            cell: this._currentCell,
+            cellInfo: this._currentCell,
         };
     }
 

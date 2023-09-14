@@ -12,18 +12,15 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import { getLastPage, updateBlockIndex } from './Common/Tools';
-
-import { createSkeletonPage } from './Common/Page';
-
-import { createSkeletonSection } from './Common/Section';
-
-import { dealWithSections } from './Block/Section';
 
 import { IDocumentSkeletonCached, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../Basics/IDocumentSkeletonCached';
 import { IDocsConfig, ISectionBreakConfig } from '../../Basics/Interfaces';
-import { Skeleton } from '../Skeleton';
 import { IBoundRect } from '../../Basics/Vector2';
+import { Skeleton } from '../Skeleton';
+import { dealWithSections } from './Block/Section';
+import { createSkeletonPage } from './Common/Page';
+import { createSkeletonSection } from './Common/Section';
+import { getLastPage, updateBlockIndex } from './Common/Tools';
 
 const DEFAULT_SECTION_BREAK: ISectionBreak = {
     columnProperties: [],

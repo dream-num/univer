@@ -17,7 +17,7 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { BorderStyleManagerService } from '../../Services/border-style-manager.service';
-import { ISelectionManager } from '../../Services/tokens';
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetBorderStylesMutationParams, SetBorderStylesMutation, SetBorderStylesUndoMutationFactory } from '../Mutations/set-border-styles.mutatio';
 
 function forEach(rangeData: IRangeData, action: (row: number, column: number) => void): void {
@@ -39,12 +39,12 @@ export const SetBorderPositionCommand: ICommand<ISetBorderPositionCommandParams>
     handler: async (accessor: IAccessor, params: ISetBorderPositionCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const borderStyleManagerService = accessor.get(BorderStyleManagerService);
 
-        const selections = selectionManager.getCurrentSelections();
+        const selections = selectionManagerService.getRangeDatas();
         const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-        if (!selections.length) {
+        if (!selections?.length) {
             return false;
         }
 

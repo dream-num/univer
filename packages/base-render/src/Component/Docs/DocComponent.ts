@@ -1,13 +1,14 @@
 import { Nullable } from '@univerjs/core';
-import { IBoundRect } from '../../Basics/Vector2';
-import { INodeInfo, INodePosition, INodeSearch, ITransformChangeState } from '../../Basics/Interfaces';
-import { Canvas } from '../../Canvas';
-import { RenderComponent } from '../Component';
-import { DocumentSkeleton } from './DocSkeleton';
-import { Scene } from '../../Scene';
-import { DOCS_EXTENSION_TYPE } from './DocExtension';
-import { IDocumentSkeletonLine, IDocumentSkeletonSpan, PageLayoutType, SpanType } from '../../Basics/IDocumentSkeletonCached';
+
 import { RENDER_CLASS_TYPE } from '../../Basics/Const';
+import { IDocumentSkeletonLine, IDocumentSkeletonSpan, PageLayoutType, SpanType } from '../../Basics/IDocumentSkeletonCached';
+import { INodeInfo, INodePosition, INodeSearch, ITransformChangeState } from '../../Basics/Interfaces';
+import { IBoundRect } from '../../Basics/Vector2';
+import { Canvas } from '../../Canvas';
+import { Scene } from '../../Scene';
+import { RenderComponent } from '../Component';
+import { DOCS_EXTENSION_TYPE } from './DocExtension';
+import { DocumentSkeleton } from './DocSkeleton';
 
 export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE> {
     pageWidth: number;

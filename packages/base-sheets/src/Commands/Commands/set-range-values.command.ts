@@ -1,7 +1,8 @@
 import { CommandType, ICellData, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
-import { ISelectionManager } from '../../Services/tokens';
 
 export interface ISetRangeValuesCommandParams {
     worksheetId?: string;
@@ -19,10 +20,10 @@ export const SetRangeValuesCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const range = selectionManager.getCurrentSelections();
-        if (!range.length) {
+        const range = selectionManagerService.getRangeDatas();
+        if (!range?.length) {
             return false;
         }
 

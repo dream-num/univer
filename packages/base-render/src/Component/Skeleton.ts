@@ -1,7 +1,8 @@
 import { LocaleService } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { en, zh } from '../Locale';
+
 import { IFontLocale } from '../Basics/Interfaces';
+import { en, zh } from '../Locale';
 
 export class Skeleton {
     private _fontLocale: IFontLocale;

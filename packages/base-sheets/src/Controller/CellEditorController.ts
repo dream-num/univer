@@ -1,7 +1,8 @@
-import { Direction, handleJsonToDom, ICellData, ICurrentUniverService, IDocumentData, IRangeData, IStyleData, Nullable } from '@univerjs/core';
+import { Direction, handleJsonToDom, ICellData, ICommandService, ICurrentUniverService, IDocumentData, IRangeData, IStyleData, Nullable } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
-import { ISelectionManager } from '../Services/tokens';
-import { SelectionManager } from './Selection';
+import { SetSelectionsOperation } from '../Commands/Operations/selection.operation';
+import { SelectionManagerService } from '../Services/selection-manager.service';
 
 /**
  * Cell Editor
@@ -12,7 +13,13 @@ export class CellEditorController {
     // current edit cell
     currentEditRangeData: IRangeData;
 
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {}
+    constructor(
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
+        this._commandService.registerCommand(SetSelectionsOperation);
+    }
 
     setEditMode(value: boolean) {
         this.isEditMode = value;
@@ -23,16 +30,15 @@ export class CellEditorController {
     }
 
     setCurrentEditRangeData() {
-        const currentCell = this._selectionManager.getCurrentCellModel();
+        const currentCell = this._selectionManagerService.getLast()?.cellRange;
         if (!currentCell) return;
 
         let row;
         let column;
 
         if (currentCell.isMerged) {
-            const mergeInfo = currentCell.mergeInfo;
-            row = mergeInfo.startRow;
-            column = mergeInfo.startColumn;
+            row = currentCell.startRow;
+            column = currentCell.startColumn;
         } else {
             row = currentCell.row;
             column = currentCell.column;
@@ -52,6 +58,9 @@ export class CellEditorController {
 
     setCurrentEditRangeValue(cell: ICellData) {
         // only one selection
+        if (this.currentEditRangeData == null) {
+            return;
+        }
         const { startRow, startColumn, endRow, endColumn } = this.currentEditRangeData;
         const range = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getRange(startRow, startColumn, endRow, endColumn);
 
@@ -59,8 +68,7 @@ export class CellEditorController {
     }
 
     getSelectionValue(): string {
-        const range = this._selectionManager.getActiveRange();
-        if (!range) return '';
+        const range = this.getActiveRange();
 
         const value = range && range.getDisplayValue();
         if (typeof value === 'string') {
@@ -73,11 +81,11 @@ export class CellEditorController {
     }
 
     getSelectionStyle(): Nullable<IStyleData> {
-        return this._selectionManager.getActiveRange()?.getTextStyle();
+        return this.getActiveRange()?.getTextStyle();
     }
 
     setSelectionValue(value: IDocumentData | string) {
-        const range = this._selectionManager.getActiveRange();
+        const range = this.getActiveRange();
         if (!range) return;
 
         if (typeof value === 'string') {
@@ -86,6 +94,19 @@ export class CellEditorController {
         if (typeof value === 'object') {
             // range.setRangeData({ p: value });
         }
+    }
+
+    getActiveRange() {
+        const cellRange = this._selectionManagerService.getLast()?.cellRange;
+        if (!cellRange) return;
+        let { row, column } = cellRange;
+
+        if (cellRange.isMerged) {
+            row = cellRange.startRow;
+            column = cellRange.startColumn;
+        }
+
+        return this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getRange(row, column);
     }
 
     handleBackSpace() {}

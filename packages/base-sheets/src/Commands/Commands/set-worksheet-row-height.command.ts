@@ -1,7 +1,7 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISelectionManager } from '../../Services/tokens';
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetWorksheetRowHeightMutationParams, SetWorksheetRowHeightMutation, SetWorksheetRowHeightMutationFactory } from '../Mutations/set-worksheet-row-height.mutation';
 
 /**
@@ -16,14 +16,14 @@ export const SetWorksheetRowHeightCommand: ICommand = {
     id: 'sheet.command.set-worksheet-row-height',
     handler: async (accessor: IAccessor, params: SetWorksheetRowHeightCommandParams) => {
         console.info('sheet.command.set-worksheet-row-height==========', params);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManager.getCurrentSelections();
+        const selections = selectionManagerService.getRangeDatas();
         console.info('current selections', selections);
-        if (!selections.length) return false;
+        if (!selections?.length) return false;
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
 

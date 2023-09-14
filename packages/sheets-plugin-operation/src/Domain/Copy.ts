@@ -1,7 +1,8 @@
-import { Tools, handleJsonToDom, handleStyleToString, IKeyValue, ICurrentUniverService } from '@univerjs/core';
-import { SelectionModel, SelectionController, ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
-import { RightMenuItem } from '@univerjs/ui-plugin-sheets';
+import { SelectionManagerService } from '@univerjs/base-sheets';
 import { Clipboard } from '@univerjs/base-ui';
+import { handleJsonToDom, handleStyleToString, ICurrentUniverService, IKeyValue, Tools } from '@univerjs/core';
+import { RightMenuItem } from '@univerjs/ui-plugin-sheets';
+import { Inject } from '@wendellhu/redi';
 // import { ClipboardInput } from '../UI/ClipboardInput';
 
 export abstract class Copy {
@@ -19,7 +20,10 @@ export abstract class Copy {
 }
 
 export class UniverCopy extends Copy {
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {
+    constructor(
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+    ) {
         const copyList = [
             {
                 label: 'rightClick.copy',
@@ -240,10 +244,11 @@ export class UniverCopy extends Copy {
      * TODO 加入univerId,sheetId,rangeData等 @tony
      * @returns
      */
+    // eslint-disable-next-line max-lines-per-function
     getCopyContent() {
-        const { sheet, spreadsheet, selections } = this._getSheetInfo();
-        if (selections.length > 1) return;
-
+        const { sheet, selections } = this._getSheetInfo();
+        if (!selections?.length) return;
+        const mergeData = sheet.getMergeData();
         const rowManager = sheet.getRowManager().getRowData();
         const colManager = sheet.getColumnManager().getColumnData();
         const rowIndexArr: number[] = [];
@@ -327,12 +332,10 @@ export class UniverCopy extends Copy {
                     }
                 }
 
-                const cellInfo = spreadsheet?.getCellByIndex(r, c);
-                if (cellInfo?.isMerged || (!cellInfo?.isMerged && cellInfo?.isMergedMainCell)) {
-                    if (cellInfo.isMergedMainCell) {
-                        span = `rowSpan="${cellInfo.mergeInfo.endRow - cellInfo.mergeInfo.startRow + 1}" colSpan="${
-                            cellInfo.mergeInfo.endColumn - cellInfo.mergeInfo.startColumn + 1
-                        }"`;
+                const cellRange = this._selectionManagerService.transformCellDataToSelectionData(r, c, mergeData)?.cellRange;
+                if (cellRange?.isMerged || (!cellRange?.isMerged && cellRange?.isMergedMainCell)) {
+                    if (cellRange.isMergedMainCell) {
+                        span = `rowSpan="${cellRange.endRow - cellRange.startRow + 1}" colSpan="${cellRange.endColumn - cellRange.startColumn + 1}"`;
                     } else {
                         continue;
                     }
@@ -382,22 +385,13 @@ export class UniverCopy extends Copy {
 
     private _getSheetInfo() {
         const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
-        const controls = this._selectionManager.getCurrentControls();
-        const selections: any = controls?.map((control: SelectionController) => {
-            const model: SelectionModel = control.model;
-            return {
-                startRow: model.startRow,
-                startColumn: model.startColumn,
-                endRow: model.endRow,
-                endColumn: model.endColumn,
-            };
-        });
+        const selections = this._selectionManagerService.getRangeDatas();
         return { sheet, selections };
     }
 
     private _getRangeInfo() {
         const { sheet, selections } = this._getSheetInfo();
-        if (!selections.length) return;
+        if (!selections?.length) return;
         const range = sheet.getRange(selections[0]);
         const rangeData = range.getValues();
         if (!rangeData.length) return;

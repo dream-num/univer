@@ -5,12 +5,12 @@ import {
     DeleteRangeMoveUpCommand,
     InsertColAfterCommand,
     InsertRowAfterCommand,
-    ISelectionManager,
     RemoveColCommand,
     RemoveRowCommand,
     RemoveSheetCommand,
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
+    SelectionManagerService,
     SetBackgroundColorCommand,
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -38,6 +38,7 @@ import {
     FontWeight,
     HorizontalAlign,
     ICommandService,
+    ICurrentUniverService,
     IPermissionService,
     IUndoRedoService,
     RedoCommand,
@@ -88,7 +89,8 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
     const permissionService = accessor.get(IPermissionService);
-    const selectionManager = accessor.get(ISelectionManager);
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
         id: SetBoldCommand.id,
@@ -121,8 +123,13 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     return;
                 }
 
-                const range = selectionManager.getCurrentCell();
-                const isBold = range?.getFontWeight();
+                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                let isBold = FontWeight.NORMAL;
+                if (cellRange != null) {
+                    const range = worksheet.getRange(cellRange.row, cellRange.column);
+                    isBold = range?.getFontWeight();
+                }
 
                 subscriber.next(isBold === FontWeight.BOLD);
             });
@@ -136,7 +143,8 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
         id: SetItalicCommand.id,
@@ -168,8 +176,13 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     return;
                 }
 
-                const range = selectionManager.getCurrentCell();
-                const isItalic = range?.getFontStyle();
+                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                let isItalic = FontItalic.NORMAL;
+                if (cellRange != null) {
+                    const range = worksheet.getRange(cellRange.row, cellRange.column);
+                    isItalic = range?.getFontStyle();
+                }
 
                 subscriber.next(isItalic === FontItalic.ITALIC);
             });
@@ -183,7 +196,8 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
         id: SetUnderlineCommand.id,
@@ -215,8 +229,13 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     return;
                 }
 
-                const range = selectionManager.getCurrentCell();
-                const isUnderline = range?.getUnderline();
+                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                let isUnderline;
+                if (cellRange != null) {
+                    const range = worksheet.getRange(cellRange.row, cellRange.column);
+                    isUnderline = range?.getUnderline();
+                }
 
                 subscriber.next(!!(isUnderline && isUnderline.s));
             });
@@ -230,7 +249,8 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
         id: SetStrikeThroughCommand.id,
@@ -262,8 +282,13 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                     return;
                 }
 
-                const range = selectionManager.getCurrentCell();
-                const st = range?.getStrikeThrough();
+                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                let st;
+                if (cellRange != null) {
+                    const range = worksheet.getRange(cellRange.row, cellRange.column);
+                    st = range?.getStrikeThrough();
+                }
 
                 subscriber.next(!!(st && st.s));
             });
@@ -277,7 +302,8 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
         id: SetFontFamilyCommand.id,
@@ -314,8 +340,13 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                     return;
                 }
 
-                const range = selectionManager.getCurrentCell();
-                const ff = range?.getFontFamily();
+                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                let ff;
+                if (cellRange != null) {
+                    const range = worksheet.getRange(cellRange.row, cellRange.column);
+                    ff = range?.getFontFamily();
+                }
 
                 subscriber.next(ff ?? defaultValue);
             });
@@ -329,7 +360,8 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
         id: SetFontSizeCommand.id,
@@ -365,10 +397,15 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                     return;
                 }
 
-                const range = selectionManager.getCurrentCell();
-                const fs = range?.getFontSize() ?? DEFAULT_SIZE;
+                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                let fs;
+                if (cellRange != null) {
+                    const range = worksheet.getRange(cellRange.row, cellRange.column);
+                    fs = range?.getFontSize();
+                }
 
-                subscriber.next(fs);
+                subscriber.next(fs ?? DEFAULT_SIZE);
             });
 
             subscriber.next(DEFAULT_SIZE);
@@ -389,7 +426,6 @@ export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonI
 
 export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
 
     return {
         id: SetTextColorCommand.id,
@@ -431,7 +467,6 @@ export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuB
 
 export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
 
     return {
         id: SetBackgroundColorCommand.id,
@@ -469,7 +504,8 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 // }
 
 export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<HorizontalAlign> {
-    const selectionManager = accessor.get(ISelectionManager);
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetHorizontalTextAlignCommand.id,
         title: 'horizontalAlignMode',
@@ -487,8 +523,13 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
                     return;
                 }
 
-                const range = selectionManager.getCurrentCell();
-                const ha = range?.getHorizontalAlignment();
+                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                let ha;
+                if (cellRange != null) {
+                    const range = worksheet.getRange(cellRange.row, cellRange.column);
+                    ha = range?.getHorizontalAlignment();
+                }
 
                 subscriber.next(ha ?? HorizontalAlign.LEFT);
             });
@@ -501,7 +542,8 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
 }
 
 export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<VerticalAlign> {
-    const selectionManager = accessor.get(ISelectionManager);
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetVerticalTextAlignCommand.id,
         title: 'verticalAlignMode',
@@ -519,8 +561,13 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                     return;
                 }
 
-                const range = selectionManager.getCurrentCell();
-                const va = range?.getVerticalAlignment();
+                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                let va;
+                if (cellRange != null) {
+                    const range = worksheet.getRange(cellRange.row, cellRange.column);
+                    va = range?.getVerticalAlignment();
+                }
 
                 subscriber.next(va ?? VerticalAlign.TOP);
             });
@@ -533,7 +580,8 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
 }
 
 export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<WrapStrategy> {
-    const selectionManager = accessor.get(ISelectionManager);
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetTextWrapCommand.id,
         title: 'textWrapMode',
@@ -551,8 +599,13 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
                     return;
                 }
 
-                const range = selectionManager.getCurrentCell();
-                const ws = range?.getWrapStrategy();
+                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                let ws;
+                if (cellRange != null) {
+                    const range = worksheet.getRange(cellRange.row, cellRange.column);
+                    ws = range?.getWrapStrategy();
+                }
 
                 subscriber.next(ws ?? WrapStrategy.OVERFLOW);
             });
@@ -565,7 +618,8 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
 }
 
 export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number | string> {
-    const selectionManager = accessor.get(ISelectionManager);
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetTextRotationCommand.id,
         title: 'textRotateMode',
@@ -583,8 +637,13 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
                     return;
                 }
 
-                const range = selectionManager.getCurrentCell();
-                const tr = range?.getTextRotation();
+                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                let tr;
+                if (cellRange != null) {
+                    const range = worksheet.getRange(cellRange.row, cellRange.column);
+                    tr = range?.getTextRotation();
+                }
 
                 subscriber.next((tr && tr.a) ?? 0);
             });
@@ -661,7 +720,8 @@ export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
         id: SetWorksheetRowHeightCommand.id,
@@ -678,8 +738,13 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         },
         value$: new Observable((subscriber) => {
             function update() {
-                const range = selectionManager.getCurrentCell();
-                const rowHeight = range?.getHeight();
+                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                let rowHeight;
+                if (cellRange != null) {
+                    const range = worksheet.getRange(cellRange.row, cellRange.column);
+                    rowHeight = range?.getHeight();
+                }
 
                 subscriber.next(rowHeight ?? 0);
             }
@@ -699,7 +764,8 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
 export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
         id: SetWorksheetColWidthCommand.id,
@@ -716,8 +782,13 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         },
         value$: new Observable((subscriber) => {
             function update() {
-                const range = selectionManager.getCurrentCell();
-                const rowHeight = range?.getWidth();
+                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                let rowHeight;
+                if (cellRange != null) {
+                    const range = worksheet.getRange(cellRange.row, cellRange.column);
+                    rowHeight = range?.getWidth();
+                }
 
                 subscriber.next(rowHeight ?? 0);
             }

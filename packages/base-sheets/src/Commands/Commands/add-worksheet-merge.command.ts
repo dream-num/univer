@@ -1,8 +1,8 @@
-import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../Basics/Interfaces/MutationInterface';
-import { ISelectionManager } from '../../Services/tokens';
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { AddWorksheetMergeMutation, AddWorksheetMergeMutationFactory } from '../Mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation, RemoveWorksheetMergeMutationFactory } from '../Mutations/remove-worksheet-merge.mutation';
 
@@ -13,13 +13,14 @@ interface addMergeCommandParams {
 export const AddWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-worksheet-merge',
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params?: addMergeCommandParams) => {
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const selections = selectionManager.getCurrentSelections();
-        if (!selections.length) return false;
+        const selections = selectionManagerService.getRangeDatas();
+        if (!selections?.length) return false;
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
@@ -29,7 +30,7 @@ export const AddWorksheetMergeCommand: ICommand = {
         let ranges = selections;
 
         if (params && params.value != null) {
-            const rectangles = [];
+            const rectangles: IRangeData[] = [];
             for (let i = 0; i < ranges.length; i++) {
                 const { startRow, endRow, startColumn, endColumn } = ranges[i];
                 if (params.value === Dimension.ROWS) {

@@ -1,10 +1,11 @@
-import { Rect, Group } from '@univerjs/base-render';
-import { Inject, Injector } from '@wendellhu/redi';
-import { Nullable, ISelection, ICellInfo } from '@univerjs/core';
-import { SelectionModel } from '../../Model/SelectionModel';
-import { SelectionControlDragAndDrop } from './SelectionControlDragDrop';
-import { SelectionControlFill } from './SelectionControlFill';
-import { CanvasView } from '../../View';
+import { ICellInfo, ISelection, Nullable } from '@univerjs/core';
+
+import { SELECTION_TYPE } from '../../../Basics/Const';
+import { ISelectionDataWithStyle, ISelectionStyle, NORMAL_SELECTION_PLUGIN_STYLE } from '../../../Basics/Selection';
+import { Group } from '../../../Group';
+import { Scene } from '../../../Scene';
+import { Rect } from '../../../Shape/Rect';
+import { SelectionTransformerModel } from './selection-transformer-model';
 
 // export enum DEFAULT_SELECTION_CONFIG {
 //     strokeColor = 'rgb(1,136,251)',
@@ -22,12 +23,6 @@ export const DEFAULT_SELECTION_CONFIG = {
     fillStrokeLength: 1,
     fillStrokeColor: 'rgb(255,255,255)',
 };
-
-export enum SELECTION_TYPE {
-    NORMAL,
-    ROW,
-    COLUMN,
-}
 
 enum SELECTION_MANAGER_KEY {
     Selection = '__SpreadsheetSelectionShape__',
@@ -48,7 +43,7 @@ enum SELECTION_MANAGER_KEY {
 /**
  * The main selection canvas component
  */
-export class SelectionController {
+export class SelectionTransformerShape {
     private _leftControl: Rect;
 
     private _rightControl: Rect;
@@ -69,13 +64,11 @@ export class SelectionController {
 
     private _selectionShape: Group;
 
-    private _selectionModel: SelectionModel;
+    private _selectionModel: SelectionTransformerModel;
 
-    private _selectionDragAndDrop: SelectionControlDragAndDrop;
+    private _selectionStyle: Nullable<ISelectionStyle>;
 
-    private _selectionControlFill: SelectionControlFill;
-
-    constructor(private _zIndex: number, @Inject(Injector) private readonly _injector: Injector, @Inject(CanvasView) private readonly _canvasView: CanvasView) {
+    constructor(private _scene: Scene, private _zIndex: number) {
         this._initialize();
     }
 
@@ -127,22 +120,23 @@ export class SelectionController {
         return this._selectionModel;
     }
 
-    static create(injector: Injector, zIndex: number) {
-        return injector.createInstance(this, zIndex);
+    static create(scene: Scene, zIndex: number) {
+        return new this(scene, zIndex);
     }
 
-    // static fromJson(zIndex: number, newSelectionRange: ISelection) {
-    //     const control = SelectionController.create(zIndex);
-    //     control.update(newSelectionRange);
-    //     return control;
-    // }
+    static fromJson(scene: Scene, zIndex: number, newSelectionData: ISelectionDataWithStyle) {
+        const { selection, cellInfo, style } = newSelectionData;
+        const control = SelectionTransformerShape.create(scene, zIndex);
+        control.update(selection, cellInfo, style);
+        return control;
+    }
 
     /**
      * just handle the view
      *
      * inner update
      */
-    _updateControl() {
+    _updateControl(style: Nullable<ISelectionStyle>) {
         const { startX, startY, endX, endY } = this._selectionModel;
 
         this.leftControl.resize(undefined, endY - startY);
@@ -159,63 +153,27 @@ export class SelectionController {
         this.fillControl.translate(endX - startX - DEFAULT_SELECTION_CONFIG.fillSideLength / 2, endY - startY - DEFAULT_SELECTION_CONFIG.fillSideLength / 2);
 
         this._updateBackgroundControl();
-        this._updateDragAndFill();
 
         this.selectionShape.show();
         this.selectionShape.translate(startX, startY);
 
+        this._selectionStyle = style;
+
         this.selectionShape.makeDirty(true);
     }
 
-    update(newSelectionRange: ISelection, highlight: Nullable<ICellInfo>) {
+    update(newSelectionRange: ISelection, highlight: Nullable<ICellInfo>, style: Nullable<ISelectionStyle> = NORMAL_SELECTION_PLUGIN_STYLE) {
         this._selectionModel.setValue(newSelectionRange, highlight);
-        this._updateControl();
+        this._updateControl(style);
     }
-
-    // /**
-    //  *When switching to the current sheet
-    //  *
-    //  * 1. Reinitialize the rendering component
-    //  * 2. Calculate the position based on the current skeleton
-    //  * 3. Update data
-    //  * 4. Trigger rendering
-    //  */
-    // render() {
-    //     this._initialize();
-
-    //     let cellInfo = null;
-    //     const main = this._manager.getMainComponent();
-    //     const curCellRange = this._selectionModel.currentCell;
-
-    //     if (curCellRange) {
-    //         cellInfo = main.getCellByIndex(curCellRange.row, curCellRange.column);
-    //     }
-
-    //     const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = this._selectionModel;
-    //     const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn);
-    //     const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn);
-
-    //     this._manager.updateSelectionValue(
-    //         this,
-    //         {
-    //             startColumn: finalStartColumn,
-    //             startRow: finalStartRow,
-    //             endColumn: finalEndColumn,
-    //             endRow: finalEndRow,
-    //             startY: startCell?.startY || 0,
-    //             endY: endCell?.endY || 0,
-    //             startX: startCell?.startX || 0,
-    //             endX: endCell?.endX || 0,
-    //         },
-    //         cellInfo
-    //     );
-
-    //     this._updateControl();
-    // }
 
     clearHighlight() {
         this._selectionModel.clearCurrentCell();
         this._updateControl();
+    }
+
+    getScene() {
+        return this._scene;
     }
 
     dispose() {
@@ -229,8 +187,6 @@ export class SelectionController {
         this._backgroundControlBottom?.dispose();
         this._fillControl?.dispose();
         this._selectionShape?.dispose();
-
-        this._selectionDragAndDrop.dispose();
     }
 
     /**
@@ -240,7 +196,7 @@ export class SelectionController {
         const currentCell = this.model.currentCell;
 
         if (currentCell) {
-            let currentRangeData;
+            let currentRangeData: ISelection;
 
             if (currentCell.isMerged) {
                 const mergeInfo = currentCell.mergeInfo;
@@ -273,8 +229,15 @@ export class SelectionController {
         }
     }
 
+    getValue(): ISelectionDataWithStyle {
+        return {
+            ...this._selectionModel.getValue(),
+            style: this._selectionStyle,
+        };
+    }
+
     private _initialize() {
-        this._selectionModel = this._injector.createInstance(SelectionModel, SELECTION_TYPE.NORMAL);
+        this._selectionModel = new SelectionTransformerModel(SELECTION_TYPE.NORMAL);
         const zIndex = this._zIndex;
         this._leftControl = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
             top: 0,
@@ -349,20 +312,8 @@ export class SelectionController {
 
         this._selectionShape.zIndex = zIndex;
 
-        this._selectionDragAndDrop = SelectionControlDragAndDrop.create(this._injector, this._zIndex, this._selectionModel, {
-            leftControl: this.leftControl,
-            rightControl: this.rightControl,
-            topControl: this.topControl,
-            bottomControl: this.bottomControl,
-            fillControl: this.fillControl,
-            update: this.update.bind(this),
-        });
-
-        this._selectionControlFill = SelectionControlFill.create(this._injector, {
-            fillControl: this.fillControl,
-        });
-
-        this._canvasView.getSheetView().getScene().addObject(this._selectionShape);
+        const scene = this.getScene();
+        scene.addObject(this._selectionShape);
     }
 
     private _updateBackgroundControl() {
@@ -439,19 +390,5 @@ export class SelectionController {
             middleBottomConfig.height = 0;
         }
         this._backgroundControlBottom.transformByState(middleBottomConfig);
-    }
-
-    /**
-     *  Updated DragAndDrop and fill controls, inactive selections need to hide them
-     */
-    private _updateDragAndFill() {
-        const highlightSelection = this._selectionModel.highlightToSelection();
-
-        if (!highlightSelection) {
-            this._selectionDragAndDrop.remove();
-
-            this._fillControl.resize(0, 0);
-            this._selectionControlFill.remove();
-        }
     }
 }

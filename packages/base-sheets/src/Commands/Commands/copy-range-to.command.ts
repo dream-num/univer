@@ -12,8 +12,9 @@ import {
     ObjectMatrix,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
-import { ISelectionManager } from '../../Services/tokens';
 
 export interface ICopyRangeToCommandParams {
     destinationRange: IRangeData;
@@ -24,13 +25,13 @@ export const CopyRangeToCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.copy-range-to',
     handler: async (accessor: IAccessor, params: ICopyRangeToCommandParams) => {
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManager.getCurrentSelections();
-        if (!selections.length) return false;
+        const selections = selectionManagerService.getRangeDatas();
+        if (!selections?.length) return false;
         const originRange = selections[0];
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();

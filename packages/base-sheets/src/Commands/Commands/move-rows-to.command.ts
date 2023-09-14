@@ -2,7 +2,7 @@ import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRed
 import { IAccessor } from '@wendellhu/redi';
 
 import { IInsertRowMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
-import { ISelectionManager } from '../../Services/tokens';
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { InsertRowMutation, InsertRowMutationFactory } from '../Mutations/insert-row-col.mutation';
 import { IRemoveRowMutationFactory, RemoveRowMutation } from '../Mutations/remove-row-col.mutation';
 
@@ -17,9 +17,9 @@ export const MoveRowsToCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const originRange = selectionManager.getCurrentSelections()[0];
+        const originRange = selectionManagerService.getRangeDatas()?.[0];
         if (!originRange) {
             return false;
         }

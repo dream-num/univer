@@ -1,19 +1,19 @@
 // import { fixLineWidthByScale, getColor, IScale } from '@Basics';
 import { IScale } from '@univerjs/core';
+
+import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
+import { SpreadsheetExtensionRegistry } from '../../Extension';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-
-import { SpreadsheetExtensionRegistry } from '../../Extension';
-import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
 export class Background extends SheetExtension {
-    uKey = UNIQUE_KEY;
+    override uKey = UNIQUE_KEY;
 
-    zIndex = 20;
+    override zIndex = 20;
 
-    draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
         const { rowTitleWidth, columnTitleHeight, dataMergeCache, stylesCache } = spreadsheetSkeleton;
         const { background } = stylesCache;
         if (!spreadsheetSkeleton) {
@@ -35,8 +35,9 @@ export class Background extends SheetExtension {
                 ctx.beginPath();
                 backgroundCache.forEach((rowIndex, backgroundRow) => {
                     backgroundRow.forEach((columnIndex) => {
-                        let { isMerged, startY, endY, startX, endX } = this.getCellIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
-
+                        const cellInfo = this.getCellIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                        let { startY, endY, startX, endX } = cellInfo;
+                        const { isMerged } = cellInfo;
                         if (isMerged) {
                             return true;
                         }

@@ -1,7 +1,7 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISelectionManager } from '../../Services/tokens';
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetRangeStyleMutationParams, SetRangeStyleMutation, SetRangeStyleUndoMutationFactory } from '../Mutations/set-range-styles.mutation';
 import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
 
@@ -14,13 +14,13 @@ export const ClearSelectionContentCommand: ICommand = {
     handler: async (accessor: IAccessor) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
         const commandService = accessor.get(ICommandService);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const worksheet = workbook.getActiveSheet();
-        const selections = selectionManager.getCurrentSelections();
-        if (!selections.length) {
+        const selections = selectionManagerService.getRangeDatas();
+        if (!selections?.length) {
             return false;
         }
 

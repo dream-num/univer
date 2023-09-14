@@ -1,14 +1,8 @@
 import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univerjs/base-render';
 import { ICurrentUniverService, LocaleService, Worksheet } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
-import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 
-export enum SHEET_VIEW_KEY {
-    MAIN = '__SpreadsheetRender__',
-    ROW = '__SpreadsheetRowTitle__',
-    COLUMN = '__SpreadsheetColumnTitle__',
-    LEFT_TOP = '__SpreadsheetLeftTopPlaceholder__',
-}
+import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry, SHEET_VIEW_KEY } from '../BaseView';
 
 export class SheetView extends BaseView {
     override viewKey = CANVAS_VIEW_KEY.SHEET_VIEW;
@@ -47,7 +41,7 @@ export class SheetView extends BaseView {
         return this._spreadsheetLeftTopPlaceholder;
     }
 
-    override updateToSheet(worksheet: Worksheet) {
+    override onSheetChange(worksheet: Worksheet) {
         const scene = this.getScene();
         const spreadsheetSkeleton = this._buildSkeleton(worksheet);
         const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
@@ -166,6 +160,8 @@ export class SheetView extends BaseView {
 }
 
 export class SheetViewFactory {
+    zIndex = 0;
+
     /**
      * Generate SheetView Instance
      * @param scene

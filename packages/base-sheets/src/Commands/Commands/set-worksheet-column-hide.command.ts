@@ -1,20 +1,21 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetWorksheetColumnHideMutationParams, SetWorksheetColumnHideMutation, SetWorksheetColumnHideMutationFactory } from '../Mutations/set-worksheet-column-hide.mutation';
 import { SetWorksheetColumnShowMutation } from '../Mutations/set-worksheet-column-show.mutation';
-import { ISelectionManager } from '../../Services/tokens';
 
 export const SetWorksheetColumnHideCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-column-hide',
     handler: async (accessor: IAccessor) => {
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManager.getCurrentSelections();
-        if (!selections.length) {
+        const selections = selectionManagerService.getRangeDatas();
+        if (!selections?.length) {
             return false;
         }
 

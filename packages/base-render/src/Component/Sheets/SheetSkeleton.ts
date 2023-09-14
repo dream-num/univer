@@ -1,42 +1,43 @@
 import {
     BooleanNumber,
+    DocumentModelSimple,
+    getColorStyle,
     HorizontalAlign,
     IBorderStyleData,
     ICellData,
+    ICellInfo,
+    IColumnData,
     IDocumentData,
+    IDocumentRenderConfig,
     IPaddingData,
     IRangeData,
+    IRowData,
+    isEmptyCell,
     IStyleBase,
     IStyleData,
     ITextRotation,
     ITextStyle,
-    ObjectArray,
+    IWorksheetConfig,
+    LocaleService,
+    Nullable,
+    ObjectArrayType,
     ObjectMatrix,
+    searchArray,
     Styles,
     TextDirection,
     TextDirectionType,
+    Tools,
     VerticalAlign,
     WrapStrategy,
-    IRowData,
-    IColumnData,
-    ObjectArrayType,
-    IWorksheetConfig,
-    searchArray,
-    isEmptyCell,
-    Nullable,
-    getColorStyle,
-    IDocumentRenderConfig,
-    DocumentModelSimple,
-    Tools,
-    LocaleService,
 } from '@univerjs/core';
+
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
-import { IStylesCache, BorderCache } from './Interfaces';
-import { getFontStyleString, getCellPositionByIndex, isRectIntersect } from '../../Basics/Tools';
 import { IFontLocale } from '../../Basics/Interfaces';
+import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getFontStyleString, isRectIntersect, mergeInfoOffset } from '../../Basics/Tools';
 import { IBoundRect } from '../../Basics/Vector2';
-import { Skeleton } from '../Skeleton';
 import { DocumentSkeleton } from '../Docs/DocSkeleton';
+import { Skeleton } from '../Skeleton';
+import { BorderCache, IStylesCache } from './Interfaces';
 
 interface ISetCellCache {
     cache: IStylesCache;
@@ -94,9 +95,9 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _rowColumnSegment: IRowColumnSegment;
 
-    private _dataMergeCache: ObjectMatrix<IRangeData>;
+    private _dataMergeCache: IRangeData[];
 
-    private _dataMergeCacheAll: ObjectMatrix<IRangeData>;
+    // private _dataMergeCacheAll: ObjectMatrix<IRangeData>;
 
     private _overflowCache: ObjectMatrix<IRangeData>;
 
@@ -108,7 +109,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         super(_localeService);
 
         this.updateLayout();
-        this.updateDataMerge();
+        // this.updateDataMerge();
     }
 
     get rowHeightAccumulation() {
@@ -155,9 +156,13 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._showGridlines;
     }
 
-    get dataMergeCacheAll() {
-        return this._dataMergeCacheAll;
+    get mergeData() {
+        return this._config.mergeData;
     }
+
+    // get dataMergeCacheAll() {
+    //     return this._dataMergeCacheAll;
+    // }
 
     static create(config: IWorksheetConfig, cellData: ObjectMatrix<ICellData>, styles: Styles, LocaleService: LocaleService) {
         return new SpreadsheetSkeleton(config, cellData, styles, LocaleService);
@@ -221,18 +226,19 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this;
     }
 
-    updateDataMerge() {
-        const { mergeData } = this._config;
-        this._dataMergeCacheAll = mergeData && this._getMergeCells(mergeData);
-    }
+    // updateDataMerge() {
+    //     const { mergeData } = this._config;
+    //     this._dataMergeCacheAll = mergeData && this._getMergeCells(mergeData);
+    // }
 
     getRowColumnSegment(bounds?: IBoundRect) {
         return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds);
     }
 
+    // eslint-disable-next-line max-lines-per-function
     getMergeBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
-        const dataMergeCache = this._dataMergeCacheAll;
-        if (!dataMergeCache) {
+        const mergeData = this._config.mergeData;
+        if (!mergeData) {
             return {
                 startRow,
                 startColumn,
@@ -242,39 +248,72 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
         let isSearching = true;
         const searchedMarge = new ObjectMatrix<boolean>();
+        // const dataMergeCache = this._getMergeCells(mergeData);
         while (isSearching) {
             isSearching = false;
-            dataMergeCache.forEach((row: number, rowArray: ObjectArray<IRangeData>) => {
-                rowArray.forEach((column: number, mainCell: IRangeData) => {
-                    if (!mainCell || searchedMarge.getValue(row, column)) {
-                        return true;
-                    }
-                    const { startRow: mainStartRow, startColumn: mainStartColumn, endRow: mainEndRow, endColumn: mainEndColumn } = mainCell;
 
-                    const rect1 = {
-                        left: startColumn,
-                        top: startRow,
-                        right: endColumn,
-                        bottom: endRow,
-                    };
+            for (let i = 0; i < mergeData.length; i++) {
+                const { startRow: mainStartRow, startColumn: mainStartColumn, endRow: mainEndRow, endColumn: mainEndColumn } = mergeData[i];
 
-                    const rect2 = {
-                        left: mainStartColumn,
-                        top: mainStartRow,
-                        right: mainEndColumn,
-                        bottom: mainEndRow,
-                    };
+                if (searchedMarge.getValue(mainStartRow, mainStartColumn)) {
+                    continue;
+                }
 
-                    if (isRectIntersect(rect1, rect2)) {
-                        startRow = Math.min(startRow, mainStartRow);
-                        startColumn = Math.min(startColumn, mainStartColumn);
-                        endRow = Math.max(endRow, mainEndRow);
-                        endColumn = Math.max(endColumn, mainEndColumn);
-                        searchedMarge.setValue(row, column, true);
-                        isSearching = true;
-                    }
-                });
-            });
+                const rect1 = {
+                    left: startColumn,
+                    top: startRow,
+                    right: endColumn,
+                    bottom: endRow,
+                };
+
+                const rect2 = {
+                    left: mainStartColumn,
+                    top: mainStartRow,
+                    right: mainEndColumn,
+                    bottom: mainEndRow,
+                };
+
+                if (isRectIntersect(rect1, rect2)) {
+                    startRow = Math.min(startRow, mainStartRow);
+                    startColumn = Math.min(startColumn, mainStartColumn);
+                    endRow = Math.max(endRow, mainEndRow);
+                    endColumn = Math.max(endColumn, mainEndColumn);
+                    searchedMarge.setValue(mainStartRow, mainStartColumn, true);
+                    isSearching = true;
+                }
+            }
+
+            // dataMergeCache.forEach((row: number, rowArray: ObjectArray<IRangeData>) => {
+            //     rowArray.forEach((column: number, mainCell: IRangeData) => {
+            //         if (!mainCell || searchedMarge.getValue(row, column)) {
+            //             return true;
+            //         }
+            //         const { startRow: mainStartRow, startColumn: mainStartColumn, endRow: mainEndRow, endColumn: mainEndColumn } = mainCell;
+
+            //         const rect1 = {
+            //             left: startColumn,
+            //             top: startRow,
+            //             right: endColumn,
+            //             bottom: endRow,
+            //         };
+
+            //         const rect2 = {
+            //             left: mainStartColumn,
+            //             top: mainStartRow,
+            //             right: mainEndColumn,
+            //             bottom: mainEndRow,
+            //         };
+
+            //         if (isRectIntersect(rect1, rect2)) {
+            //             startRow = Math.min(startRow, mainStartRow);
+            //             startColumn = Math.min(startColumn, mainStartColumn);
+            //             endRow = Math.max(endRow, mainEndRow);
+            //             endColumn = Math.max(endColumn, mainEndColumn);
+            //             searchedMarge.setValue(row, column, true);
+            //             isSearching = true;
+            //         }
+            //     });
+            // });
         }
 
         return {
@@ -323,6 +362,161 @@ export class SpreadsheetSkeleton extends Skeleton {
             startColumn,
             endColumn,
         };
+    }
+
+    getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number, scaleX: number, scaleY: number) {
+        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } = this;
+        // const { scaleX = 1, scaleY = 1 } = this.getParentScale();
+        let { startY, endY, startX, endX } = getCellPositionByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation);
+
+        startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
+        endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
+        startX = fixLineWidthByScale(startX + rowTitleWidth, scaleX);
+        endX = fixLineWidthByScale(endX + rowTitleWidth, scaleX);
+
+        return {
+            startY,
+            endY,
+            startX,
+            endX,
+        };
+    }
+
+    calculateCellIndexByPosition(offsetX: number, offsetY: number, scaleX: number, scaleY: number, scrollXY: { x: number; y: number }): Nullable<ICellInfo> {
+        const { x: scrollX, y: scrollY } = scrollXY;
+
+        // these values are not affected by zooming (ideal positions)
+        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } = this;
+
+        // so we should map physical positions to ideal positions
+        offsetX = offsetX / scaleX + scrollX - rowTitleWidth;
+        offsetY = offsetY / scaleY + scrollY - columnTitleHeight;
+
+        let row = searchArray(rowHeightAccumulation, offsetY);
+        let column = searchArray(columnWidthAccumulation, offsetX);
+
+        if (row === -1) {
+            const rowLength = rowHeightAccumulation.length - 1;
+            const lastRowValue = rowHeightAccumulation[rowLength];
+            if (lastRowValue <= offsetY) {
+                row = rowHeightAccumulation.length - 1;
+            } else {
+                row = 0;
+            }
+        }
+
+        if (column === -1) {
+            const columnLength = columnWidthAccumulation.length - 1;
+            const lastColumnValue = columnWidthAccumulation[columnLength];
+            if (lastColumnValue <= offsetX) {
+                column = columnWidthAccumulation.length - 1;
+            } else {
+                column = 0;
+            }
+        }
+
+        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, this._config.mergeData);
+        const { isMerged, isMergedMainCell } = cellInfo;
+        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
+
+        startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
+        endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
+        startX = fixLineWidthByScale(startX + rowTitleWidth, scaleX);
+        endX = fixLineWidthByScale(endX + rowTitleWidth, scaleX);
+
+        mergeInfo = mergeInfoOffset(mergeInfo, rowTitleWidth, columnTitleHeight, scaleX, scaleY);
+
+        // let endRow = row;
+        // let endColumn = column;
+        // if (isMerged && mergeInfo) {
+        //     endRow = mergeInfo.endRow;
+        //     endColumn = mergeInfo.endColumn;
+        // }
+
+        return {
+            row,
+            column,
+            startY,
+            endY,
+            startX,
+            endX,
+            isMerged,
+            isMergedMainCell,
+            mergeInfo,
+        };
+    }
+
+    getCellByIndex(row: number, column: number, scaleX: number, scaleY: number) {
+        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } = this;
+
+        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, this._config.mergeData);
+        const { isMerged, isMergedMainCell } = cellInfo;
+        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
+
+        startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
+        endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
+        startX = fixLineWidthByScale(startX + rowTitleWidth, scaleX);
+        endX = fixLineWidthByScale(endX + rowTitleWidth, scaleX);
+
+        mergeInfo = mergeInfoOffset(mergeInfo, rowTitleWidth, columnTitleHeight, scaleX, scaleY);
+
+        return {
+            row,
+            column,
+            startY,
+            endY,
+            startX,
+            endX,
+            isMerged,
+            isMergedMainCell,
+            mergeInfo,
+        };
+    }
+
+    // getScrollXYByRelativeCoords(coord: Vector2) {
+    //     const scene = this.getParent() as Scene;
+    //     let x = 0;
+    //     let y = 0;
+    //     const viewPort = scene.getActiveViewportByRelativeCoord(coord);
+    //     if (viewPort) {
+    //         const actualX = viewPort.actualScrollX || 0;
+    //         const actualY = viewPort.actualScrollY || 0;
+    //         x += actualX;
+    //         y += actualY;
+    //     }
+    //     return {
+    //         x,
+    //         y,
+    //     };
+    // }
+
+    // getAncestorScrollXY(offsetX: number, offsetY: number) {
+    //     let parent: any = this.getParent();
+
+    //     let x = 0;
+    //     let y = 0;
+    //     const coord = Vector2.FromArray([offsetX, offsetY]);
+    //     while (parent) {
+    //         if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
+    //             const scene = parent as Scene;
+    //             const viewPort = scene.getActiveViewportByCoord(coord);
+    //             if (viewPort) {
+    //                 const actualX = viewPort.actualScrollX || 0;
+    //                 const actualY = viewPort.actualScrollY || 0;
+    //                 x += actualX;
+    //                 y += actualY;
+    //             }
+    //         }
+    //         parent = parent?.getParent && parent?.getParent();
+    //     }
+    //     return {
+    //         x,
+    //         y,
+    //     };
+    // }
+
+    getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
+        return this.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
     /**
@@ -555,15 +749,18 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _intersectMergeRange(row: number, column: number) {
         const dataMergeCache = this.dataMergeCache;
         let isIntersected = false;
-        dataMergeCache?.forEach((r, dataMergeRow) => {
-            dataMergeRow?.forEach((c, dataCache) => {
-                const { startRow: startRowMargeIndex, endRow: endRowMargeIndex, startColumn: startColumnMargeIndex, endColumn: endColumnMargeIndex } = dataCache;
-                if (row >= startRowMargeIndex && row <= endRowMargeIndex && column >= startColumnMargeIndex && column <= endColumnMargeIndex) {
-                    isIntersected = true;
-                    return false;
-                }
-            });
-        });
+        for (const dataCache of dataMergeCache) {
+            const { startRow: startRowMargeIndex, endRow: endRowMargeIndex, startColumn: startColumnMargeIndex, endColumn: endColumnMargeIndex } = dataCache;
+            if (row >= startRowMargeIndex && row <= endRowMargeIndex && column >= startColumnMargeIndex && column <= endColumnMargeIndex) {
+                isIntersected = true;
+                return false;
+            }
+        }
+        // dataMergeCache?.forEach((r, dataMergeRow) => {
+        //     dataMergeRow?.forEach((c, dataCache) => {
+
+        //     });
+        // });
         return isIntersected;
     }
 
@@ -645,26 +842,40 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        dataMergeCache &&
-            dataMergeCache.forEach((rowIndex: number, row: ObjectArray<IRangeData>) => {
-                row.forEach((columnIndex: number, mainCell: IRangeData) => {
-                    if (!mainCell) {
-                        return true;
-                    }
+        for (const data of dataMergeCache) {
+            this.__setCellCache(
+                data.startRow,
+                data.startColumn,
+                {
+                    cache,
+                    styles,
+                    cellData,
+                    skipBackgroundAndBorder: false,
+                },
+                fontLocale
+            );
+        }
 
-                    this.__setCellCache(
-                        rowIndex,
-                        columnIndex,
-                        {
-                            cache,
-                            styles,
-                            cellData,
-                            skipBackgroundAndBorder: false,
-                        },
-                        fontLocale
-                    );
-                });
-            });
+        // dataMergeCache &&
+        //     dataMergeCache.forEach((rowIndex: number, row: ObjectArray<IRangeData>) => {
+        //         row.forEach((columnIndex: number, mainCell: IRangeData) => {
+        //             if (!mainCell) {
+        //                 return true;
+        //             }
+
+        //             this.__setCellCache(
+        //                 rowIndex,
+        //                 columnIndex,
+        //                 {
+        //                     cache,
+        //                     styles,
+        //                     cellData,
+        //                     skipBackgroundAndBorder: false,
+        //                 },
+        //                 fontLocale
+        //             );
+        //         });
+        //     });
         return cache;
     }
 
@@ -939,14 +1150,14 @@ export class SpreadsheetSkeleton extends Skeleton {
             rowColumnSegment = { startRow: rowColumnSegment.startRow, endRow: rowColumnSegment.endRow, endColumn: endColumnLast, startColumn: 0 };
         }
         const { startRow, startColumn, endRow, endColumn } = rowColumnSegment;
-        const cacheDataMerge = new ObjectMatrix<IRangeData>();
+        const cacheDataMerge: IRangeData[] = [];
         for (let i = 0; i < mergeData.length; i++) {
             const { startRow: mergeStartRow, endRow: mergeEndRow, startColumn: mergeStartColumn, endColumn: mergeEndColumn } = mergeData[i];
             for (let r = startRow; r <= endRow; r++) {
                 let isBreak = false;
                 for (let c = startColumn; c <= endColumn; c++) {
                     if (r >= mergeStartRow && r <= mergeEndRow && c >= mergeStartColumn && c <= mergeEndColumn) {
-                        cacheDataMerge.setValue(mergeStartRow, mergeStartColumn, {
+                        cacheDataMerge.push({
                             startRow: mergeStartRow,
                             endRow: mergeEndRow,
                             startColumn: mergeStartColumn,

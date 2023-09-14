@@ -1,7 +1,7 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISelectionManager } from '../../Services/tokens';
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetWorksheetColWidthMutationParams, SetWorksheetColWidthMutation, SetWorksheetColWidthMutationFactory } from '../Mutations/set-worksheet-col-width.mutation';
 
 /**
@@ -16,13 +16,13 @@ export const SetWorksheetColWidthCommand: ICommand = {
     id: 'sheet.command.set-worksheet-col-width',
     handler: async (accessor: IAccessor, params: SetWorksheetColWidthCommandParams) => {
         console.info('sheet.command.set-worksheet-col-width', params);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManager.getCurrentSelections();
-        if (!selections.length) return false;
+        const selections = selectionManagerService.getRangeDatas();
+        if (!selections?.length) return false;
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
 

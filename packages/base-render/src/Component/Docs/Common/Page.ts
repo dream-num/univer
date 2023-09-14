@@ -1,9 +1,10 @@
 import { DocumentBodyModel, Nullable, PageOrientType } from '@univerjs/core';
-import { createSkeletonSection } from './Section';
+
 import { BreakType, IDocumentSkeletonFooter, IDocumentSkeletonHeader, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../../../Basics/Interfaces';
 // eslint-disable-next-line import/no-cycle
 import { dealWithSections } from '../Block/Section';
+import { createSkeletonSection } from './Section';
 import { updateBlockIndex } from './Tools';
 
 // 新增数据结构框架

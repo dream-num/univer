@@ -1,4 +1,4 @@
-import { BorderStyleManagerService, ISelectionManager, SetBorderColorCommand, SetBorderPositionCommand, SetBorderStyleCommand } from '@univerjs/base-sheets';
+import { BorderStyleManagerService, SetBorderColorCommand, SetBorderPositionCommand, SetBorderStyleCommand } from '@univerjs/base-sheets';
 import { ColorPicker, DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
 import { BorderStyleTypes, ICommandService, IPermissionService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
@@ -114,7 +114,7 @@ export const BORDER_SIZE_CHILDREN = [
 export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
+
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
     return {
         id: SetBorderPositionCommand.id,
@@ -132,7 +132,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
+
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
     return {
         id: SetBorderColorCommand.id,
@@ -153,7 +153,7 @@ export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelecto
 export function SetBorderStyleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<BorderStyleTypes> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const selectionManager = accessor.get(ISelectionManager);
+
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
     return {
         id: SetBorderStyleCommand.id,

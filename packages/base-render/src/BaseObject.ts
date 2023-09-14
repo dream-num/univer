@@ -1,15 +1,11 @@
-import { EventState, IKeyValue, Observable, Observer, Nullable } from '@univerjs/core';
-import { IBoundRect, Vector2 } from './Basics/Vector2';
+import { EventState, IKeyValue, Nullable, Observable, Observer } from '@univerjs/core';
 
-import { Transform } from './Basics/Transform';
-
+import { CURSOR_TYPE, EVENT_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
 import { IMouseEvent, IPointerEvent, IWheelEvent } from './Basics/IEvents';
-
-import { generateRandomKey, toPx } from './Basics/Tools';
-
-import { EVENT_TYPE, CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
-
 import { IObjectFullState, ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
+import { generateRandomKey, toPx } from './Basics/Tools';
+import { Transform } from './Basics/Transform';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
 
 export const BASE_OBJECT_ARRAY = ['top', 'left', 'width', 'height', 'angle', 'scaleX', 'scaleY', 'skewX', 'skewY', 'flipX', 'flipY', 'strokeWidth'];
 

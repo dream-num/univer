@@ -9,7 +9,12 @@ const meta: Meta<typeof Slider> = {
         layout: 'centered',
     },
     tags: ['autodocs'],
-    args: {},
+    args: {
+        min: 0,
+        max: 100,
+        step: 1,
+        range: false,
+    },
 };
 
 export default meta;

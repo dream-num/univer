@@ -20,7 +20,7 @@ interface CountBarProps extends BaseComponentProps {
 export class CountBar extends Component<CountBarProps, CountState> {
     static override contextType = AppContext;
 
-    max = 400;
+    max = 100;
 
     min = 0;
 
@@ -98,7 +98,7 @@ export class CountBar extends Component<CountBarProps, CountState> {
                     <Icon.Math.AddIcon />
                 </Button>
                 <div className={styles.countSlider}>
-                    <Slider onChange={this.onChange} value={zoom} min={this.min} max={this.max} onClick={this.handleClick} />
+                    <Slider onChange={this.onChange} value={[20, 50]} min={this.min} max={this.max} range onClick={this.handleClick} />
                 </div>
                 <Button onClick={this.reduceZoom}>
                     <Icon.Math.ReduceIcon />

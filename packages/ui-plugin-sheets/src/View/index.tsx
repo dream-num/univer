@@ -1,5 +1,6 @@
 import { isElement } from '@univerjs/base-ui';
 import { createRoot } from 'react-dom/client';
+
 import { App, BaseUIProps } from './App';
 
 interface BaseSheetUIConfig extends BaseUIProps {
@@ -39,9 +40,8 @@ export class UI {
     }
 }
 
+export * from './Common';
+export * from './InfoBar';
+export * from './RightMenu';
 export * from './SheetContainer';
 export * from './Toolbar';
-export * from './RightMenu';
-export * from './InfoBar';
-export * from './Common';
-export * from './Slot/Slot';

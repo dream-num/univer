@@ -1,13 +1,14 @@
 import { BaseComponentProps, Container, Content, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
-import { Component, createRef } from 'react';
 import defaultSkin from '@univerjs/base-ui/Basics/CSS/Skin/default.module.less';
 import { Tools } from '@univerjs/core';
 import cssVars from 'css-vars-ponyfill';
-import style from './index.module.less';
-import { InfoBar } from '../InfoBar';
+import { Component, createRef } from 'react';
+
 import { ISlideUIPluginConfig } from '../../Basics';
-import { Toolbar } from '../Toolbar';
+import { InfoBar } from '../InfoBar';
 import { SlideBar } from '../SlideBar/SlideBar';
+import { Toolbar } from '../Toolbar';
+import style from './index.module.less';
 
 export interface BaseSlideContainerProps extends BaseComponentProps {
     config: ISlideUIPluginConfig;
@@ -216,7 +217,6 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
                                 <SlideBar {...methods.slideBar}></SlideBar>
                             </Sider>
                             <Content className={config.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
-                                {/* <Slot {...methods.slot}></Slot> */}
                                 {!!config.contentSplit && (
                                     <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
                                         <div className={style.hoverCursor} onMouseDown={this.handleSplitBarMouseDown}></div>
@@ -225,7 +225,6 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
                                 <Container onContextMenu={(e) => e.preventDefault()} ref={this.contentRef} className={style.contentInnerRightContainer}>
                                     {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>} */}
                                 </Container>
-                                {/* <Prompt show={true} title="123" content="235" /> */}
                                 {/* extend main content */}
                             </Content>
 

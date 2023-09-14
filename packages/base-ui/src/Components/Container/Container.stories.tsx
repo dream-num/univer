@@ -10,7 +10,7 @@ const meta: Meta<typeof Container> = {
     },
     tags: ['autodocs'],
     args: {
-        children: 'test container',
+        children: 'main container',
     },
 };
 

@@ -1,9 +1,10 @@
 import { BaselineOffset, getColorStyle, IScale } from '@univerjs/core';
+
+import { COLOR_BLACK_RGB } from '../../../Basics/Const';
+import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
+import { Vector2 } from '../../../Basics/Vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
 import { docExtension } from '../DocExtension';
-import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
-import { COLOR_BLACK_RGB } from '../../../Basics/Const';
-import { Vector2 } from '../../../Basics/Vector2';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 

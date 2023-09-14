@@ -1,10 +1,11 @@
-import { HorizontalAlign, IColorStyle, ObjectMatrix, WrapStrategy, IScale } from '@univerjs/core';
+import { HorizontalAlign, IColorStyle, IScale, ObjectMatrix, WrapStrategy } from '@univerjs/core';
+
+import { fixLineWidthByScale } from '../../../Basics/Tools';
+import { SpreadsheetExtensionRegistry } from '../../Extension';
+import { fontCacheItem } from '../Interfaces';
+import { SheetComponent } from '../SheetComponent';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-import { SpreadsheetExtensionRegistry } from '../../Extension';
-import { SheetComponent } from '../SheetComponent';
-import { fixLineWidthByScale } from '../../../Basics/Tools';
-import { fontCacheItem } from '../Interfaces';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
 export class Font extends SheetExtension {
@@ -44,13 +45,9 @@ export class Font extends SheetExtension {
                 const fontObjectArray = fontList[fontFormat];
                 fontObjectArray.forEach((rowIndex, fontArray) => {
                     fontArray.forEach((columnIndex, docsConfig) => {
-                        let { isMerged, isMergedMainCell, startY, endY, startX, endX, mergeInfo } = this.getCellIndex(
-                            rowIndex,
-                            columnIndex,
-                            rowHeightAccumulation,
-                            columnWidthAccumulation,
-                            dataMergeCache
-                        );
+                        const cellInfo = this.getCellIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                        let { startY, endY, startX, endX } = cellInfo;
+                        const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
                         if (isMerged) {
                             return true;

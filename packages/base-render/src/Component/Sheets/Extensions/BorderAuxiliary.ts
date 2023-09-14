@@ -1,17 +1,18 @@
-import { BooleanNumber, IRangeData, IScale, ObjectMatrix } from '@univerjs/core';
+import { BooleanNumber, IRangeData, IScale } from '@univerjs/core';
+
 import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
+import { SpreadsheetExtensionRegistry } from '../../Extension';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-import { SpreadsheetExtensionRegistry } from '../../Extension';
 
 const UNIQUE_KEY = 'DefaultBorderAuxiliaryExtension';
 
 export class BorderAuxiliary extends SheetExtension {
-    uKey = UNIQUE_KEY;
+    override uKey = UNIQUE_KEY;
 
-    zIndex = 10;
+    override zIndex = 10;
 
-    draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
         const { rowColumnSegment, rowTitleWidth = 0, columnTitleHeight = 0, dataMergeCache, overflowCache, stylesCache, showGridlines } = spreadsheetSkeleton;
 
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
@@ -30,8 +31,8 @@ export class BorderAuxiliary extends SheetExtension {
         ctx.beginPath();
         ctx.lineWidth = 1 / scale;
         ctx.strokeStyle = getColor([217, 217, 217])!;
-        let width = fixLineWidthByScale(columnTotalWidth, scale);
-        let height = fixLineWidthByScale(rowTotalHeight, scale);
+        const width = fixLineWidthByScale(columnTotalWidth, scale);
+        const height = fixLineWidthByScale(rowTotalHeight, scale);
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;
         for (let r = startRow - 1; r <= endRow; r++) {
@@ -57,40 +58,41 @@ export class BorderAuxiliary extends SheetExtension {
 
         this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 
-        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, overflowCache);
+        this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
         ctx.restore();
     }
 
-    private _clearRectangle(
-        ctx: CanvasRenderingContext2D,
-        scale: number,
-        rowHeightAccumulation: number[],
-        columnWidthAccumulation: number[],
-        dataMergeCache?: ObjectMatrix<IRangeData>
-    ) {
-        dataMergeCache?.forEach((r, dataMergeRow) => {
-            dataMergeRow?.forEach((c, dataCache) => {
-                const { startRow, endRow, startColumn, endColumn } = dataCache;
+    private _clearRectangle(ctx: CanvasRenderingContext2D, scale: number, rowHeightAccumulation: number[], columnWidthAccumulation: number[], dataMergeCache?: IRangeData[]) {
+        if (dataMergeCache == null) {
+            return;
+        }
+        for (const dataCache of dataMergeCache) {
+            const { startRow, endRow, startColumn, endColumn } = dataCache;
 
-                const startY = fixLineWidthByScale(rowHeightAccumulation[startRow - 1] || 0, scale);
-                const endY = fixLineWidthByScale(rowHeightAccumulation[endRow], scale);
+            const startY = fixLineWidthByScale(rowHeightAccumulation[startRow - 1] || 0, scale);
+            const endY = fixLineWidthByScale(rowHeightAccumulation[endRow], scale);
 
-                const startX = fixLineWidthByScale(columnWidthAccumulation[startColumn - 1] || 0, scale);
-                const endX = fixLineWidthByScale(columnWidthAccumulation[endColumn], scale);
+            const startX = fixLineWidthByScale(columnWidthAccumulation[startColumn - 1] || 0, scale);
+            const endX = fixLineWidthByScale(columnWidthAccumulation[endColumn], scale);
 
-                ctx.clearRect(startX, startY, endX - startX, endY - startY);
+            ctx.clearRect(startX, startY, endX - startX, endY - startY);
 
-                // After ClearRect, the lines will become thinner, and the lines will be repaired below.
-                ctx.beginPath();
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(endX, startY);
-                ctx.lineTo(endX, endY);
-                ctx.lineTo(startX, endY);
-                ctx.lineTo(startX, startY);
-                ctx.stroke();
-                ctx.closePath();
-            });
-        });
+            // After ClearRect, the lines will become thinner, and the lines will be repaired below.
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.lineTo(startX, endY);
+            ctx.lineTo(startX, startY);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        // dataMergeCache?.forEach((r, dataMergeRow) => {
+        //     dataMergeRow?.forEach((c, dataCache) => {
+
+        //     });
+        // });
     }
 }
 

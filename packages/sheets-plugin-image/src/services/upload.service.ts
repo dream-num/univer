@@ -1,4 +1,4 @@
-import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { SelectionManagerService } from '@univerjs/base-sheets';
 import { ICurrentUniverService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -8,13 +8,19 @@ export class UploadService {
     constructor(
         @Inject(Injector) readonly _injector: Injector,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @ISelectionManager private readonly _selectionManager: SelectionManager
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {}
 
     upload() {
-        const { _selectionManager, _currentUniverService, _injector } = this;
-        const rowIndex = _selectionManager.getActiveRange()?.getRowIndex();
-        const columnIndex = _selectionManager.getActiveRange()?.getColumn();
+        const { _selectionManagerService, _currentUniverService, _injector } = this;
+        const selection = _selectionManagerService.getLast()?.selection;
+        const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        if (selection == null) {
+            return;
+        }
+        const activeRange = worksheet.getRange(selection);
+        const rowIndex = activeRange.getRowIndex();
+        const columnIndex = activeRange.getColumn();
         const workbook = _currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         FileSelected.chooseImage().then((file) => {
             const reader = new FileReader();

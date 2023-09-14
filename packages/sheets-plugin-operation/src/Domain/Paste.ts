@@ -1,22 +1,11 @@
-import { ISelectionManager, SelectionController, SelectionManager, SelectionModel } from '@univerjs/base-sheets';
-import { handleTableMergeData } from '@univerjs/base-ui';
+import { SelectionManagerService } from '@univerjs/base-sheets';
 import {
-    ACTION_NAMES,
-    // AddMergeAction,
-    IActionData,
-    // IAddMergeActionData,
-    ICellData,
     ICurrentUniverService,
-    IRangeData,
-    // IRemoveMergeActionData,
-    // ISetColumnWidthActionData,
-    // ISetRangeDataActionData,
-    // ISetRowHeightActionData,
     Nullable,
-    ObjectMatrix,
     // RemoveMergeAction,
     // SetRowHeightAction,
 } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
 export interface PasteType {
     type: string;
@@ -36,7 +25,10 @@ export abstract class Paste {
 }
 
 export class UniverPaste extends Paste {
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @ISelectionManager private readonly _selectionManager: SelectionManager) {
+    constructor(
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+    ) {
         const pasteList = [
             {
                 label: 'rightClick.paste',
@@ -49,152 +41,144 @@ export class UniverPaste extends Paste {
         super();
     }
 
-    pasteTo(info: PasteInfo): IActionData[] {
-        let actionDataList: IActionData[] = [];
-        const { data, colInfo, rowInfo } = info;
-        // const data = await this.pasteResolver(e);
-        // if (data.length === 0) return;
-        if (!data || !data.length) return [];
-        const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
-        if (!sheet) return [];
-        const sheetId = sheet.getSheetId();
-        const controls = this._selectionManager.getCurrentControls();
-        const selections: any = controls?.map((control: SelectionController) => {
-            const model: SelectionModel = control.model;
-            return {
-                startRow: model.startRow,
-                startColumn: model.startColumn,
-                endRow: model.endRow,
-                endColumn: model.endColumn,
-            };
-        });
+    // pasteTo(info: PasteInfo): IActionData[] {
+    //     let actionDataList: IActionData[] = [];
+    //     const { data, colInfo, rowInfo } = info;
+    //     // const data = await this.pasteResolver(e);
+    //     // if (data.length === 0) return;
+    //     if (!data || !data.length) return [];
+    //     const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+    //     if (!sheet) return [];
+    //     const sheetId = sheet.getSheetId();
 
-        if (!selections.length) {
-            return [];
-        }
+    //     const selections = this._selectionManagerService.getRangeDataList();
 
-        if (selections.length > 1) {
-            return [];
-        }
+    //     if (!selections?.length) {
+    //         return [];
+    //     }
 
-        const selection = selections[0];
+    //     if (selections.length > 1) {
+    //         return [];
+    //     }
 
-        const copyH = data.length;
-        const copyC = data[0].length;
+    //     const selection = selections[0];
 
-        const minH = selection.startRow; //应用范围首尾行
-        const maxH = minH + copyH - 1;
-        const minC = selection.startColumn; //应用范围首尾列
-        const maxC = minC + copyC - 1;
-        const isMerge = sheet.getMerges().getByRowColumn(minH, maxH, minC, maxC);
-        if (isMerge) {
-            // const prompt = this.getContext()
-            //     .getUniver()
-            //     .getGlobalContext()
-            //     .getPluginManager()
-            //     .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
-            //     .getSlot(SHEET_UI_PLUGIN_NAME + Prompt.name);
-            // prompt.props.title = 'info.tooltip';
-            // prompt.props.content = 'info.notChangeMerge';
-            // prompt.showModal(true);
+    //     const copyH = data.length;
+    //     const copyC = data[0].length;
 
-            return [];
-        }
-        // 最终渲染数据
-        const tableData = handleTableMergeData(data, selection);
-        const mergeData = tableData.mergeData;
-        for (let i = 0; i < mergeData.length; i++) {
-            // sheet.getMerges().add(mergeData[i]);
+    //     const minH = selection.startRow; //应用范围首尾行
+    //     const maxH = minH + copyH - 1;
+    //     const minC = selection.startColumn; //应用范围首尾列
+    //     const maxC = minC + copyC - 1;
+    //     const isMerge = sheet.getMerges().getByRowColumn(minH, maxH, minC, maxC);
+    //     if (isMerge) {
+    //         // const prompt = this.getContext()
+    //         //     .getUniver()
+    //         //     .getGlobalContext()
+    //         //     .getPluginManager()
+    //         //     .getRequirePluginByName<SheetUIPlugin>(SHEET_UI_PLUGIN_NAME)
+    //         //     .getSlot(SHEET_UI_PLUGIN_NAME + Prompt.name);
+    //         // prompt.props.title = 'info.tooltip';
+    //         // prompt.props.content = 'info.notChangeMerge';
+    //         // prompt.showModal(true);
 
-            // Don't trigger the API, return to the ExtensionManager after collection and trigger it in one Command, which is convenient for undo
-            const mergeActionDataList = this._getMergeActionData(sheetId, mergeData[i]);
-            actionDataList = actionDataList.concat(mergeActionDataList);
-        }
-        // sheet.getRange(minH, minC, maxH, maxC).setRangeDatas(tableData.data);
-        const rangeActionData = this._getRangeActionData(sheetId, minH, minC, maxH, maxC, tableData.data);
-        actionDataList.push(rangeActionData);
+    //         return [];
+    //     }
+    //     // 最终渲染数据
+    //     const tableData = handleTableMergeData(data, selection);
+    //     const mergeData = tableData.mergeData;
+    //     for (let i = 0; i < mergeData.length; i++) {
+    //         // sheet.getMerges().add(mergeData[i]);
 
-        const columnWidthActionDataList = this._getColumnWidthActionData(sheetId, colInfo, minC);
-        actionDataList = actionDataList.concat(columnWidthActionDataList);
+    //         // Don't trigger the API, return to the ExtensionManager after collection and trigger it in one Command, which is convenient for undo
+    //         const mergeActionDataList = this._getMergeActionData(sheetId, mergeData[i]);
+    //         actionDataList = actionDataList.concat(mergeActionDataList);
+    //     }
+    //     // sheet.getRange(minH, minC, maxH, maxC).setRangeDatas(tableData.data);
+    //     const rangeActionData = this._getRangeActionData(sheetId, minH, minC, maxH, maxC, tableData.data);
+    //     actionDataList.push(rangeActionData);
 
-        const rowHeightActionDataList = this._getRowHeightActionData(sheetId, rowInfo, minH);
-        actionDataList = actionDataList.concat(rowHeightActionDataList);
+    //     const columnWidthActionDataList = this._getColumnWidthActionData(sheetId, colInfo, minC);
+    //     actionDataList = actionDataList.concat(columnWidthActionDataList);
 
-        // TODO
-        // const selectionActionData = this._getSelectionActionData(sheetId);
-        // selectionActionData && actionDataList.push(selectionActionData)
+    //     const rowHeightActionDataList = this._getRowHeightActionData(sheetId, rowInfo, minH);
+    //     actionDataList = actionDataList.concat(rowHeightActionDataList);
 
-        return actionDataList;
-    }
+    //     // TODO
+    //     // const selectionActionData = this._getSelectionActionData(sheetId);
+    //     // selectionActionData && actionDataList.push(selectionActionData)
 
-    private _getMergeActionData(sheetId: string, mergeData: IRangeData) {
-        const removeAction: IRemoveMergeActionData = {
-            actionName: RemoveMergeAction.NAME,
-            sheetId,
-            rectangles: [mergeData],
-        };
-        const appendAction: IAddMergeActionData = {
-            actionName: AddMergeAction.NAME,
-            sheetId,
-            rectangles: [mergeData],
-        };
-        return [removeAction, appendAction];
-    }
+    //     return actionDataList;
+    // }
 
-    private _getRangeActionData(sheetId: string, startRow: number, startColumn: number, endRow: number, endColumn: number, values: ICellData[][]) {
-        const cellValue = new ObjectMatrix<ICellData>();
-        for (let r = 0; r <= endRow - startRow; r++) {
-            for (let c = 0; c <= endColumn - startColumn; c++) {
-                cellValue.setValue(r + startRow, c + startColumn, values[r][c]);
-            }
-        }
+    // private _getMergeActionData(sheetId: string, mergeData: IRangeData) {
+    //     const removeAction: IRemoveMergeActionData = {
+    //         actionName: RemoveMergeAction.NAME,
+    //         sheetId,
+    //         rectangles: [mergeData],
+    //     };
+    //     const appendAction: IAddMergeActionData = {
+    //         actionName: AddMergeAction.NAME,
+    //         sheetId,
+    //         rectangles: [mergeData],
+    //     };
+    //     return [removeAction, appendAction];
+    // }
 
-        const setValue: ISetRangeDataActionData = {
-            sheetId,
-            actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
-            cellValue: cellValue.getData(),
-        };
+    // private _getRangeActionData(sheetId: string, startRow: number, startColumn: number, endRow: number, endColumn: number, values: ICellData[][]) {
+    //     const cellValue = new ObjectMatrix<ICellData>();
+    //     for (let r = 0; r <= endRow - startRow; r++) {
+    //         for (let c = 0; c <= endColumn - startColumn; c++) {
+    //             cellValue.setValue(r + startRow, c + startColumn, values[r][c]);
+    //         }
+    //     }
 
-        return setValue;
-    }
+    //     const setValue: ISetRangeDataActionData = {
+    //         sheetId,
+    //         actionName: ACTION_NAMES.SET_RANGE_DATA_ACTION,
+    //         cellValue: cellValue.getData(),
+    //     };
 
-    private _getColumnWidthActionData(sheetId: string, colInfo: Nullable<number[]>, minC: number) {
-        const actionDataList: ISetColumnWidthActionData[] = [];
-        if (colInfo && colInfo.length) {
-            for (let i = 0; i < colInfo.length; i++) {
-                const columnIndex = minC + i;
-                const columnWidth = [colInfo[i]];
-                const setColumnWidth: ISetColumnWidthActionData = {
-                    sheetId,
-                    actionName: ACTION_NAMES.SET_COLUMN_WIDTH_ACTION,
-                    columnIndex,
-                    columnWidth,
-                };
+    //     return setValue;
+    // }
 
-                actionDataList.push(setColumnWidth);
-            }
-        }
+    // private _getColumnWidthActionData(sheetId: string, colInfo: Nullable<number[]>, minC: number) {
+    //     const actionDataList: ISetColumnWidthActionData[] = [];
+    //     if (colInfo && colInfo.length) {
+    //         for (let i = 0; i < colInfo.length; i++) {
+    //             const columnIndex = minC + i;
+    //             const columnWidth = [colInfo[i]];
+    //             const setColumnWidth: ISetColumnWidthActionData = {
+    //                 sheetId,
+    //                 actionName: ACTION_NAMES.SET_COLUMN_WIDTH_ACTION,
+    //                 columnIndex,
+    //                 columnWidth,
+    //             };
 
-        return actionDataList;
-    }
+    //             actionDataList.push(setColumnWidth);
+    //         }
+    //     }
 
-    private _getRowHeightActionData(sheetId: string, rowInfo: Nullable<number[]>, minH: number) {
-        const actionDataList: ISetRowHeightActionData[] = [];
+    //     return actionDataList;
+    // }
 
-        if (rowInfo && rowInfo.length) {
-            for (let i = 0; i < rowInfo.length; i++) {
-                const rowIndex = minH + i;
-                const rowHeight = [rowInfo[i]];
-                const setRowHeight: ISetRowHeightActionData = {
-                    sheetId,
-                    actionName: SetRowHeightAction.NAME,
-                    rowIndex,
-                    rowHeight,
-                };
-                actionDataList.push(setRowHeight);
-            }
-        }
+    // private _getRowHeightActionData(sheetId: string, rowInfo: Nullable<number[]>, minH: number) {
+    //     const actionDataList: ISetRowHeightActionData[] = [];
 
-        return actionDataList;
-    }
+    //     if (rowInfo && rowInfo.length) {
+    //         for (let i = 0; i < rowInfo.length; i++) {
+    //             const rowIndex = minH + i;
+    //             const rowHeight = [rowInfo[i]];
+    //             const setRowHeight: ISetRowHeightActionData = {
+    //                 sheetId,
+    //                 actionName: SetRowHeightAction.NAME,
+    //                 rowIndex,
+    //                 rowHeight,
+    //             };
+    //             actionDataList.push(setRowHeight);
+    //         }
+    //     }
+
+    //     return actionDataList;
+    // }
 }

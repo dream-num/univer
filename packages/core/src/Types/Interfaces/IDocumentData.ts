@@ -1,7 +1,7 @@
-import { IColorStyle, IStyleBase } from './IStyleData';
 import { BooleanNumber, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../Enum';
 import { IImageProperties } from './IImageProperties';
 import { IShapeProperties } from './IShapeProperties';
+import { IColorStyle, IStyleBase } from './IStyleData';
 
 // 注意：所有的尺寸单位，若无特殊说明，都是指pt，1 pt = 1 / 72 in
 /**

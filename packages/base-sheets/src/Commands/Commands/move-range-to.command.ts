@@ -1,7 +1,7 @@
 import { CommandType, ICellData, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISelectionManager } from '../../Services/tokens';
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
 
 export interface IMoveRangeToCommandParams {
@@ -15,9 +15,9 @@ export const MoveRangeToCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const originRange = selectionManager.getCurrentSelections()[0];
+        const originRange = selectionManagerService.getRangeDataList()?.[0];
         if (!originRange) {
             return false;
         }

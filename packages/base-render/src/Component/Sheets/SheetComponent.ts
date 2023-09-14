@@ -1,9 +1,10 @@
 import { ICellInfo, Nullable, searchArray } from '@univerjs/core';
+
+import { RENDER_CLASS_TYPE } from '../../Basics/Const';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { RenderComponent } from '../Component';
-import { SpreadsheetSkeleton } from './SheetSkeleton';
 import { SHEET_EXTENSION_TYPE } from './Extensions/SheetExtension';
-import { RENDER_CLASS_TYPE } from '../../Basics/Const';
+import { SpreadsheetSkeleton } from './SheetSkeleton';
 
 export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE> {
     // protected _cacheCanvas = new Canvas();

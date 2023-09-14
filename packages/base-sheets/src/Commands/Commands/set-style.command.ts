@@ -19,7 +19,7 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISelectionManager } from '../../Services/tokens';
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetRangeStyleMutationParams, SetRangeStyleMutation, SetRangeStyleUndoMutationFactory } from '../Mutations/set-range-styles.mutation';
 
 export interface IStyleTypeValue<T> {
@@ -44,11 +44,11 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
     handler: async <T>(accessor: IAccessor, params: ISetStyleParams<T>) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const ranges = selectionManager.getCurrentSelections();
-        if (!ranges.length) {
+        const ranges = selectionManagerService.getRangeDataList();
+        if (!ranges?.length) {
             return false;
         }
 
@@ -119,8 +119,14 @@ export const SetBoldCommand: ICommand = {
     id: 'sheet.command.set-bold',
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManager = accessor.get(ISelectionManager);
-        const currentlyBold = selectionManager.getCurrentCell()?.getFontWeight() === FontWeight.BOLD;
+        const selectionManagerService = accessor.get(SelectionManagerService);
+        const cellRange = selectionManagerService.getLast()?.cellRange;
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        let currentlyBold = true;
+        if (cellRange) {
+            currentlyBold = worksheet.getRange(cellRange.row, cellRange.column).getFontWeight() === FontWeight.BOLD;
+        }
 
         const setStyleParams: ISetStyleParams<BooleanNumber> = {
             style: {
@@ -141,8 +147,15 @@ export const SetItalicCommand: ICommand = {
     id: 'sheet.command.set-italic',
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManager = accessor.get(ISelectionManager);
-        const currentlyItalic = selectionManager.getCurrentCell()?.getFontStyle() === FontItalic.ITALIC;
+        const selectionManagerService = accessor.get(SelectionManagerService);
+        const cellRange = selectionManagerService.getLast()?.cellRange;
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+
+        let currentlyItalic = true;
+        if (cellRange) {
+            currentlyItalic = worksheet.getRange(cellRange.row, cellRange.column).getFontStyle() === FontItalic.ITALIC;
+        }
 
         const setStyleParams: ISetStyleParams<BooleanNumber> = {
             style: {
@@ -163,8 +176,15 @@ export const SetUnderlineCommand: ICommand = {
     id: 'sheet.command.set-underline',
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManager = accessor.get(ISelectionManager);
-        const currentlyUnderline = !!selectionManager.getCurrentCell()?.getUnderline().s;
+        const selectionManagerService = accessor.get(SelectionManagerService);
+        const cellRange = selectionManagerService.getLast()?.cellRange;
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+
+        let currentlyUnderline = true;
+        if (cellRange) {
+            currentlyUnderline = !!worksheet.getRange(cellRange.row, cellRange.column).getUnderline().s;
+        }
 
         const setStyleParams: ISetStyleParams<{ s: number }> = {
             style: {
@@ -187,8 +207,16 @@ export const SetStrikeThroughCommand: ICommand = {
     id: 'sheet.command.set-stroke',
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const selectionManager = accessor.get(ISelectionManager);
-        const currentlyStrokeThrough = !!selectionManager.getCurrentCell()?.getStrikeThrough().s;
+
+        const selectionManagerService = accessor.get(SelectionManagerService);
+        const cellRange = selectionManagerService.getLast()?.cellRange;
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+
+        let currentlyStrokeThrough = true;
+        if (cellRange) {
+            currentlyStrokeThrough = !!worksheet.getRange(cellRange.row, cellRange.column).getStrikeThrough().s;
+        }
 
         const setStyleParams: ISetStyleParams<{ s: number }> = {
             style: {

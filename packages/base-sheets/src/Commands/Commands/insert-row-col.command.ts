@@ -11,7 +11,7 @@ import {
     IRemoveRowMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
-import { ISelectionManager } from '../../Services/tokens';
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { AddWorksheetMergeMutation, AddWorksheetMergeMutationFactory } from '../Mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation } from '../Mutations/delete-range.mutation';
 import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../Mutations/insert-range.mutation';
@@ -32,6 +32,7 @@ export interface InsertRowCommandBaseParams {
 export const InsertRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row',
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: InsertRowCommandBaseParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -70,7 +71,7 @@ export const InsertRowCommand: ICommand = {
         if (!deleteRangeMutationParams) return false;
         const deleteResult = commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
 
-        const mergeData = Tools.deepClone(worksheet.getConfig().mergeData);
+        const mergeData = Tools.deepClone(worksheet.getMergeData());
         for (let i = 0; i < mergeData.length; i++) {
             const merge = mergeData[i];
             const count = endRow - startRow + 1;
@@ -87,7 +88,7 @@ export const InsertRowCommand: ICommand = {
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
-            ranges: Tools.deepClone(worksheet.getConfig().mergeData),
+            ranges: Tools.deepClone(worksheet.getMergeData()),
         };
         const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(accessor, removeMergeMutationParams);
         const removeResult = commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
@@ -115,7 +116,7 @@ export const InsertRowCommand: ICommand = {
                         })
                         .then((res) => {
                             if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, undoRemoveMergeMutationParams);
-                            return fase;
+                            return false;
                         });
                 },
                 redo() {
@@ -147,12 +148,12 @@ export const InsertRowBeforeCommand: ICommand<InsertRowCommandParams> = {
     handler: async (accessor: IAccessor, params?: InsertRowCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         let range: IRangeData;
-        const selections = selectionManager.getCurrentSelections();
+        const selections = selectionManagerService.getRangeDataList();
         if (selections && selections.length === 1) {
             range = selections[0];
         } else {
@@ -190,12 +191,12 @@ export const InsertRowAfterCommand: ICommand<InsertRowCommandParams> = {
     handler: async (accessor: IAccessor, params: InsertRowCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         let range: IRangeData;
-        const selections = selectionManager.getCurrentSelections();
+        const selections = selectionManagerService.getRangeDataList();
         if (selections && selections.length === 1) {
             range = selections[0];
         } else {
@@ -240,6 +241,7 @@ export interface InsertColCommandBaseParams {
 export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col',
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: InsertColCommandBaseParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -278,7 +280,7 @@ export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
         if (!deleteRangeMutationParams) return false;
         const deleteResult = commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
 
-        const mergeData = Tools.deepClone(worksheet.getConfig().mergeData);
+        const mergeData = Tools.deepClone(worksheet.getMergeData());
         for (let i = 0; i < mergeData.length; i++) {
             const merge = mergeData[i];
             const count = endColumn - startColumn + 1;
@@ -295,7 +297,7 @@ export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
-            ranges: Tools.deepClone(worksheet.getConfig().mergeData),
+            ranges: Tools.deepClone(worksheet.getMergeData()),
         };
         const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(accessor, removeMergeMutationParams);
         const removeResult = commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
@@ -323,7 +325,7 @@ export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
                         })
                         .then((res) => {
                             if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, undoRemoveMergeMutationParams);
-                            return fase;
+                            return false;
                         });
                 },
                 redo() {
@@ -355,12 +357,12 @@ export const InsertColBeforeCommand: ICommand<InsertColCommandParams> = {
     handler: async (accessor: IAccessor, params?: InsertColCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         let range: IRangeData;
-        const selections = selectionManager.getCurrentSelections();
+        const selections = selectionManagerService.getRangeDataList();
         if (selections && selections.length === 1) {
             range = selections[0];
         } else {
@@ -398,12 +400,12 @@ export const InsertColAfterCommand: ICommand<InsertColCommandParams> = {
     handler: async (accessor: IAccessor, params?: InsertColCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         let range: IRangeData;
-        const selections = selectionManager.getCurrentSelections();
+        const selections = selectionManagerService.getRangeDataList();
         if (selections && selections.length === 1) {
             range = selections[0];
         } else {

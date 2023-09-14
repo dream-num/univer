@@ -11,7 +11,7 @@ import {
     IRemoveRowMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
-import { ISelectionManager } from '../../Services/tokens';
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { AddWorksheetMergeMutation, AddWorksheetMergeMutationFactory } from '../Mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../Mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../Mutations/insert-range.mutation';
@@ -22,16 +22,17 @@ import { RemoveWorksheetMergeMutation, RemoveWorksheetMergeMutationFactory } fro
 export const RemoveRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-row',
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor) => {
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManager.getCurrentSelections();
+        const selections = selectionManagerService.getRangeDataList();
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        if (!selections.length) return false;
+        if (!selections?.length) return false;
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
@@ -62,7 +63,7 @@ export const RemoveRowCommand: ICommand = {
         if (!insertRangeMutationParams) return false;
         const deleteResult = commandService.executeCommand(DeleteRangeMutation.id, deleteRangeValueMutationParams);
 
-        const mergeData = Tools.deepClone(worksheet.getConfig().mergeData);
+        const mergeData = Tools.deepClone(worksheet.getMergeData());
         for (let i = 0; i < mergeData.length; i++) {
             const merge = mergeData[i];
             for (let j = 0; j < selections.length; j++) {
@@ -91,7 +92,7 @@ export const RemoveRowCommand: ICommand = {
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             workbookId,
             worksheetId,
-            ranges: Tools.deepClone(worksheet.getConfig().mergeData),
+            ranges: Tools.deepClone(worksheet.getMergeData()),
         };
         const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(accessor, removeMergeMutationParams);
         const removeResult = commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
@@ -119,7 +120,7 @@ export const RemoveRowCommand: ICommand = {
                         })
                         .then((res) => {
                             if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, undoRemoveMergeMutationParams);
-                            return fase;
+                            return false;
                         });
                 },
                 redo() {
@@ -147,16 +148,17 @@ export const RemoveRowCommand: ICommand = {
 export const RemoveColCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-col',
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor) => {
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManager.getCurrentSelections();
+        const selections = selectionManagerService.getRangeDataList();
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        if (!selections.length) return false;
+        if (!selections?.length) return false;
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
@@ -186,7 +188,7 @@ export const RemoveColCommand: ICommand = {
         if (!insertRangeMutationParams) return false;
         const deleteResult = commandService.executeCommand(DeleteRangeMutation.id, deleteRangeValueMutationParams);
 
-        const mergeData = Tools.deepClone(worksheet.getConfig().mergeData);
+        const mergeData = Tools.deepClone(worksheet.getMergeData());
         for (let i = 0; i < mergeData.length; i++) {
             const merge = mergeData[i];
             for (let j = 0; j < selections.length; j++) {
@@ -216,7 +218,7 @@ export const RemoveColCommand: ICommand = {
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             workbookId,
             worksheetId,
-            ranges: Tools.deepClone(worksheet.getConfig().mergeData),
+            ranges: Tools.deepClone(worksheet.getMergeData()),
         };
         const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(accessor, removeMergeMutationParams);
         const removeResult = commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
@@ -244,7 +246,7 @@ export const RemoveColCommand: ICommand = {
                         })
                         .then((res) => {
                             if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, undoRemoveMergeMutationParams);
-                            return fase;
+                            return false;
                         });
                 },
                 redo() {

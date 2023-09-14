@@ -241,6 +241,14 @@ export class ObjectMatrix<T> {
         };
     }
 
+    toNativeArray(): T[] {
+        const native = new Array<T>();
+        this.forValue((row: number, col: number, value: T) => {
+            native.push(value);
+        });
+        return native;
+    }
+
     toArray(): T[][] {
         return this._option.toArray().map((item) => new ObjectArray(item).toArray()) as T[][];
     }

@@ -1,30 +1,19 @@
-import { sortRules, sortRulesByDesc, Nullable, IKeyValue } from '@univerjs/core';
-import { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './Basics/IEvents';
-
-import { requestNewFrame, precisionTo } from './Basics/Tools';
-
-import { IBoundRect, Vector2 } from './Basics/Vector2';
-
-import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
-
-import { IObjectFullState, ISceneTransformState, ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
-
-import { Transform } from './Basics/Transform';
-
-import { ThinEngine } from './ThinEngine';
+import { IKeyValue, Nullable, sortRules, sortRulesByDesc } from '@univerjs/core';
 
 import { BaseObject } from './BaseObject';
-
-import { Viewport } from './Viewport';
-
+import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
+import { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './Basics/IEvents';
+import { IObjectFullState, ISceneTransformState, ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
+import { precisionTo, requestNewFrame } from './Basics/Tools';
+import { Transform } from './Basics/Transform';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
 import { Layer } from './Layer';
-
-import { SceneViewer } from './SceneViewer';
-
-import { Transformer, ITransformerConfig } from './Scene.Transformer';
-
-import { ThinScene } from './ThinScene';
 import { InputManager } from './Scene.inputManager';
+import { ITransformerConfig, Transformer } from './Scene.Transformer';
+import { SceneViewer } from './SceneViewer';
+import { ThinEngine } from './ThinEngine';
+import { ThinScene } from './ThinScene';
+import { Viewport } from './Viewport';
 
 export class Scene extends ThinScene {
     private _layers: Layer[] = [];
@@ -272,7 +261,7 @@ export class Scene extends ThinScene {
     }
 
     getLayer(zIndex: number = 1) {
-        for (let layer of this._layers) {
+        for (const layer of this._layers) {
             if (layer.zIndex === zIndex) {
                 return layer;
             }
@@ -340,7 +329,7 @@ export class Scene extends ThinScene {
             return;
         }
         const layers = this.getLayers();
-        for (let layer of layers) {
+        for (const layer of layers) {
             layer.removeObject(object);
         }
         return this;
@@ -351,7 +340,7 @@ export class Scene extends ThinScene {
             return;
         }
         const layers = this.getLayers();
-        for (let layer of layers) {
+        for (const layer of layers) {
             layer.removeObjects(objects);
         }
         return this;
@@ -374,7 +363,7 @@ export class Scene extends ThinScene {
     getAllObjects() {
         const objects: BaseObject[] = [];
         this._layers.sort(sortRules);
-        for (let layer of this._layers) {
+        for (const layer of this._layers) {
             objects.push(...layer.getObjectsByOrder());
         }
         return objects;
@@ -384,7 +373,7 @@ export class Scene extends ThinScene {
         const objects: BaseObject[] = [];
         const useSortRules = isDesc ? sortRulesByDesc : sortRules;
         this._layers.sort(useSortRules);
-        for (let layer of this._layers) {
+        for (const layer of this._layers) {
             objects.push(...layer.getObjectsByOrder().sort(useSortRules));
         }
         return objects;
@@ -394,16 +383,16 @@ export class Scene extends ThinScene {
         const objects: BaseObject[] = [];
         const useSortRules = isDesc ? sortRulesByDesc : sortRules;
         this._layers.sort(useSortRules);
-        for (let layer of this._layers) {
+        for (const layer of this._layers) {
             objects.push(...layer.getObjectsByOrderForPick().sort(useSortRules));
         }
         return objects;
     }
 
     override getObject(oKey: string) {
-        for (let layer of this._layers) {
+        for (const layer of this._layers) {
             const objects = layer.getObjectsByOrder();
-            for (let object of objects) {
+            for (const object of objects) {
                 if (object.oKey === oKey) {
                     return object;
                 }
@@ -413,9 +402,9 @@ export class Scene extends ThinScene {
 
     fuzzyMathObjects(oKey: string) {
         const objects: BaseObject[] = [];
-        for (let layer of this._layers) {
+        for (const layer of this._layers) {
             const objects = layer.getObjectsByOrder();
-            for (let object of objects) {
+            for (const object of objects) {
                 if (object.oKey.indexOf(oKey) > -1) {
                     objects.push(object);
                 }
@@ -437,7 +426,7 @@ export class Scene extends ThinScene {
     }
 
     getViewport(key: string) {
-        for (let viewport of this._viewports) {
+        for (const viewport of this._viewports) {
             if (viewport.viewPortKey === key) {
                 return viewport;
             }
@@ -515,6 +504,22 @@ export class Scene extends ThinScene {
         return this.getActiveViewportByRelativeCoord(coord);
     }
 
+    getScrollXYByRelativeCoords(coord: Vector2) {
+        let x = 0;
+        let y = 0;
+        const viewPort = this.getActiveViewportByRelativeCoord(coord);
+        if (viewPort) {
+            const actualX = viewPort.actualScrollX || 0;
+            const actualY = viewPort.actualScrollY || 0;
+            x += actualX;
+            y += actualY;
+        }
+        return {
+            x,
+            y,
+        };
+    }
+
     getRelativeCoord(coord: Vector2) {
         let parent: any = this.getParent();
 
@@ -529,7 +534,7 @@ export class Scene extends ThinScene {
 
         parentList.reverse();
 
-        for (let parent of parentList) {
+        for (const parent of parentList) {
             if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
                 const scene = parent as Scene;
                 const viewPort = scene.getActiveViewportByCoord(coord);
@@ -559,6 +564,20 @@ export class Scene extends ThinScene {
 
     clearViewports() {
         this._viewports = [];
+    }
+
+    getAncestorScale() {
+        let { scaleX = 1, scaleY = 1 } = this;
+
+        if (this.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            scaleX = this.ancestorScaleX || 1;
+            scaleY = this.ancestorScaleY || 1;
+        }
+
+        return {
+            scaleX,
+            scaleY,
+        };
     }
 
     override dispose() {

@@ -1,8 +1,9 @@
-import { FontStyleType, ICellInfo, ISelection, IStyleBase, Nullable, ObjectMatrix, Tools, IRangeData, BaselineOffset, IScale } from '@univerjs/core';
+import { BaselineOffset, FontStyleType, ICellInfo, IRangeData, IScale, ISelection, IStyleBase, Nullable, Tools } from '@univerjs/core';
+
 import { DEFAULT_FONTFACE_PLANE } from './Const';
-import { IBoundRectNoAngle } from './Vector2';
-import { IFontLocale } from './Interfaces';
 import { FontCache } from './FontCache';
+import { IFontLocale } from './Interfaces';
+import { IBoundRectNoAngle } from './Vector2';
 
 const OBJECT_ARRAY = '[object Array]';
 const OBJECT_NUMBER = '[object Number]';
@@ -469,34 +470,28 @@ export function getCellPositionByIndex(row: number, column: number, rowHeightAcc
     };
 }
 
-export function getCellByIndex(
-    row: number,
-    column: number,
-    rowHeightAccumulation: number[],
-    columnWidthAccumulation: number[],
-    dataMergeCache: ObjectMatrix<IRangeData>
-): ICellInfo {
+export function getCellByIndex(row: number, column: number, rowHeightAccumulation: number[], columnWidthAccumulation: number[], mergeData: IRangeData[]): ICellInfo {
     // eslint-disable-next-line prefer-const
     let { startY, endY, startX, endX } = getCellPositionByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation);
 
-    const { isMerged, isMergedMainCell, newEndRow, newEndColumn, mergeRow, mergeColumn } = mergeCellHandler(row, column, dataMergeCache);
+    const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = mergeCellHandler(row, column, mergeData);
     let mergeInfo = {
-        startRow: mergeRow,
-        startColumn: mergeColumn,
-        endRow: newEndRow,
-        endColumn: newEndColumn,
+        startRow,
+        startColumn,
+        endRow,
+        endColumn,
 
         startY: 0,
         endY: 0,
         startX: 0,
         endX: 0,
     };
-    if (isMerged && mergeRow !== -1 && mergeColumn !== -1) {
-        const mergeStartY = rowHeightAccumulation[mergeRow - 1] || 0;
-        const mergeEndY = rowHeightAccumulation[newEndRow];
+    if (isMerged && startRow !== -1 && startColumn !== -1) {
+        const mergeStartY = rowHeightAccumulation[startRow - 1] || 0;
+        const mergeEndY = rowHeightAccumulation[endRow];
 
-        const mergeStartX = columnWidthAccumulation[mergeColumn - 1] || 0;
-        const mergeEndX = columnWidthAccumulation[newEndColumn];
+        const mergeStartX = columnWidthAccumulation[startColumn - 1] || 0;
+        const mergeEndX = columnWidthAccumulation[endColumn];
         mergeInfo = {
             ...mergeInfo,
             startY: mergeStartY,
@@ -504,9 +499,9 @@ export function getCellByIndex(
             startX: mergeStartX,
             endX: mergeEndX,
         };
-    } else if (!isMerged && newEndRow !== -1 && newEndColumn !== -1) {
-        endY = rowHeightAccumulation[newEndRow] || 0;
-        endX = columnWidthAccumulation[newEndColumn] || 0;
+    } else if (!isMerged && endRow !== -1 && endColumn !== -1) {
+        endY = rowHeightAccumulation[endRow] || 0;
+        endX = columnWidthAccumulation[endColumn] || 0;
     }
 
     return {
@@ -522,49 +517,84 @@ export function getCellByIndex(
     };
 }
 
-export function mergeCellHandler(row: number, column: number, dataMergeCache?: ObjectMatrix<IRangeData>) {
+export function mergeCellHandler(row: number, column: number, mergeData?: IRangeData[]) {
     let isMerged = false; // The upper left cell only renders the content
     let isMergedMainCell = false;
     let newEndRow = -1;
     let newEndColumn = -1;
     let mergeRow = -1;
     let mergeColumn = -1;
-    dataMergeCache?.forEach((r, dataMergeRow) => {
-        let isSuspended = false;
-        dataMergeRow?.forEach((c, dataCache) => {
-            const { startRow: startRowMarge, endRow: endRowMarge, startColumn: startColumnMarge, endColumn: endColumnMarge } = dataCache;
-            if (row === startRowMarge && column === startColumnMarge) {
-                newEndRow = endRowMarge;
-                newEndColumn = endColumnMarge;
-                mergeRow = startRowMarge;
-                mergeColumn = startColumnMarge;
-                isSuspended = true;
-                isMergedMainCell = true;
-                return false;
-            }
-            if (row >= startRowMarge && row <= endRowMarge && column >= startColumnMarge && column <= endColumnMarge) {
-                newEndRow = endRowMarge;
-                newEndColumn = endColumnMarge;
-                mergeRow = startRowMarge;
-                mergeColumn = startColumnMarge;
-                isSuspended = true;
-                isMerged = true;
-                return false;
-            }
-        });
 
-        if (isSuspended) {
-            return false;
+    if (mergeData == null) {
+        return {
+            row,
+            column,
+            isMergedMainCell,
+            isMerged,
+            endRow: newEndRow,
+            endColumn: newEndColumn,
+            startRow: mergeRow,
+            startColumn: mergeColumn,
+        };
+    }
+    for (let i = 0; i < mergeData.length; i++) {
+        const { startRow: startRowMarge, endRow: endRowMarge, startColumn: startColumnMarge, endColumn: endColumnMarge } = mergeData[i];
+        if (row === startRowMarge && column === startColumnMarge) {
+            newEndRow = endRowMarge;
+            newEndColumn = endColumnMarge;
+            mergeRow = startRowMarge;
+            mergeColumn = startColumnMarge;
+
+            isMergedMainCell = true;
+            break;
         }
-    });
+        if (row >= startRowMarge && row <= endRowMarge && column >= startColumnMarge && column <= endColumnMarge) {
+            newEndRow = endRowMarge;
+            newEndColumn = endColumnMarge;
+            mergeRow = startRowMarge;
+            mergeColumn = startColumnMarge;
 
+            isMerged = true;
+            break;
+        }
+    }
+    // dataMergeCache?.forEach((r, dataMergeRow) => {
+    //     let isSuspended = false;
+    //     dataMergeRow?.forEach((c, dataCache) => {
+    //         const { startRow: startRowMarge, endRow: endRowMarge, startColumn: startColumnMarge, endColumn: endColumnMarge } = dataCache;
+    //         if (row === startRowMarge && column === startColumnMarge) {
+    //             newEndRow = endRowMarge;
+    //             newEndColumn = endColumnMarge;
+    //             mergeRow = startRowMarge;
+    //             mergeColumn = startColumnMarge;
+    //             isSuspended = true;
+    //             isMergedMainCell = true;
+    //             return false;
+    //         }
+    //         if (row >= startRowMarge && row <= endRowMarge && column >= startColumnMarge && column <= endColumnMarge) {
+    //             newEndRow = endRowMarge;
+    //             newEndColumn = endColumnMarge;
+    //             mergeRow = startRowMarge;
+    //             mergeColumn = startColumnMarge;
+    //             isSuspended = true;
+    //             isMerged = true;
+    //             return false;
+    //         }
+    //     });
+
+    //     if (isSuspended) {
+    //         return false;
+    //     }
+    // });
     return {
+        row,
+        column,
         isMergedMainCell,
         isMerged,
-        newEndRow,
-        newEndColumn,
-        mergeRow,
-        mergeColumn,
+        endRow: newEndRow,
+        endColumn: newEndColumn,
+        startRow: mergeRow,
+        startColumn: mergeColumn,
     };
 }
 

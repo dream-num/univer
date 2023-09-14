@@ -1,7 +1,7 @@
-import { Engine, IMouseEvent, IPointerEvent, IRenderingEngine } from '@univerjs/base-render';
-import { CANVAS_VIEW_KEY, CanvasView, CellEditorController, ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { Engine, IMouseEvent, IPointerEvent, IRenderingEngine, ISelectionTransformerShapeManager } from '@univerjs/base-render';
+import { CANVAS_VIEW_KEY, CanvasView, CellEditorController, SelectionManagerService } from '@univerjs/base-sheets';
 import { $$, CellEditExtensionManager, handleDomToJson, handleStringToStyle, isCtrlPressed, KeyboardManager, setLastCaretPosition } from '@univerjs/base-ui';
-import { Direction, handleStyleToString, ICellData, isKeyPrintable, ObserverManager, Tools, UIObserver } from '@univerjs/core';
+import { Direction, handleStyleToString, ICellData, ICurrentUniverService, isKeyPrintable, ObserverManager, Tools, UIObserver } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 import { RefObject } from 'react';
 
@@ -21,12 +21,15 @@ export class CellEditorUIController {
 
     constructor(
         private readonly _currentRefFetcher: () => RefObject<HTMLDivElement>,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @IRenderingEngine private readonly _renderingEngine: Engine,
         @Inject(CanvasView) private readonly _sheetCanvasView: CanvasView,
         @Inject(ObserverManager) private readonly _selfObserverManager: ObserverManager,
-        @Inject(CellEditorController) private readonly _cellEditorContorller: CellEditorController,
-        @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @Inject(CellEditorController) private readonly _cellEditorController: CellEditorController,
+        // @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @ISelectionTransformerShapeManager private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
         @Inject(KeyboardManager) private readonly _keyboardManager: KeyboardManager
     ) {
         this._initialize();
@@ -92,9 +95,11 @@ export class CellEditorUIController {
         }, 1);
 
         this.isEditMode = true;
-        this._cellEditorContorller.setEditMode(this.isEditMode);
+        this._cellEditorController.setEditMode(this.isEditMode);
 
-        const currentCell = this._selectionManager.getCurrentCellModel();
+        const cellRange = this._selectionManagerService.getLast()?.cellRange;
+
+        const currentCell = this._selectionTransformerShapeManager.convertCellRangeToInfo(cellRange);
 
         if (!currentCell) {
             return false;
@@ -140,7 +145,7 @@ export class CellEditorUIController {
         this._richTextEle.style.transform = '';
 
         // this._plugin.showMainByName('cellEditor', true).then(() => {
-        let cellValue = this._cellEditorContorller.getSelectionValue();
+        let cellValue = this._cellEditorController.getSelectionValue();
 
         // Intercept, the formula needs to modify the value of the edit state
         const cell = this._cellEditExtensionManager.handle({
@@ -158,7 +163,7 @@ export class CellEditorUIController {
         }
         this._richText.setValue(cellValue);
 
-        const style = this._cellEditorContorller.getSelectionStyle();
+        const style = this._cellEditorController.getSelectionStyle();
 
         this._richTextEditEle.style.cssText = '';
 
@@ -168,7 +173,7 @@ export class CellEditorUIController {
         }
 
         // });
-        this._cellEditorContorller.setCurrentEditRangeData();
+        this._cellEditorController.setCurrentEditRangeData();
     }
 
     exitEditMode() {
@@ -177,7 +182,7 @@ export class CellEditorUIController {
         if (!this.isEditMode) return;
 
         this.isEditMode = false;
-        this._cellEditorContorller.setEditMode(this.isEditMode);
+        this._cellEditorController.setEditMode(this.isEditMode);
         // this._plugin.showMainByName('cellEditor', false).then(() => {
         const value = handleDomToJson(this._richTextEditEle);
         const text = this._richTextEditEle.innerText;
@@ -201,7 +206,7 @@ export class CellEditorUIController {
         if (Tools.isPlainObject(style)) {
             cell.s = style;
         }
-        this._cellEditorContorller.setCurrentEditRangeValue(cell);
+        this._cellEditorController.setCurrentEditRangeValue(cell);
         this.hideEditContainer();
     }
 
@@ -272,7 +277,7 @@ export class CellEditorUIController {
         const onKeyDownObservable = this._globalObserverManager.getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
         const onKeyCompositionStartObservable = this._globalObserverManager.getObserver<CompositionEvent>('onKeyCompositionStartObservable', 'core');
 
-        const selectionManager = this._selectionManager;
+        const selectionManager = this._selectionManagerService;
         if (onKeyDownObservable && !onKeyDownObservable.hasObservers()) {
             onKeyDownObservable.add((evt: KeyboardEvent) => {
                 if (!isCtrlPressed(evt) && isKeyPrintable(evt.key)) {
@@ -285,11 +290,7 @@ export class CellEditorUIController {
                             if (this.isEditMode) {
                                 this.exitEditMode();
 
-                                const currentCell = selectionManager.getCurrentCellModel();
-                                if (!currentCell?.isMerged) {
-                                    // move to cell below
-                                    selectionManager.move(Direction.DOWN);
-                                }
+                                this._move(Direction.DOWN);
                             } else {
                                 this.enterEditMode();
                             }
@@ -303,31 +304,31 @@ export class CellEditorUIController {
 
                         case 'ArrowUp':
                             if (!this.isEditMode) {
-                                selectionManager.move(Direction.UP);
+                                this._move(Direction.UP);
                             }
                             break;
 
                         case 'ArrowDown':
                             if (!this.isEditMode) {
-                                selectionManager.move(Direction.DOWN);
+                                this._move(Direction.DOWN);
                             }
                             break;
 
                         case 'ArrowLeft':
                             if (!this.isEditMode) {
-                                selectionManager.move(Direction.LEFT);
+                                this._move(Direction.LEFT);
                             }
                             break;
 
                         case 'ArrowRight':
                             if (!this.isEditMode) {
-                                selectionManager.move(Direction.RIGHT);
+                                this._move(Direction.RIGHT);
                             }
                             break;
 
                         case 'Tab':
                             if (!this.isEditMode) {
-                                selectionManager.move(Direction.RIGHT);
+                                this._move(Direction.RIGHT);
                             }
                             evt.preventDefault();
                             break;
@@ -345,6 +346,21 @@ export class CellEditorUIController {
                     this.enterEditMode(true);
                 }
             });
+        }
+    }
+
+    private _move(direction: Direction) {
+        const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        const rowCount = worksheet.getRowCount();
+        const columnCount = worksheet.getColumnCount();
+        const mergeData = worksheet.getMergeData();
+        const selectionData = this._selectionManagerService.getLast();
+
+        const moveSelectionData = this._selectionManagerService.getMoveCellInfo(direction, rowCount, columnCount, mergeData, selectionData);
+
+        if (moveSelectionData != null) {
+            // move to cell below
+            this._selectionManagerService.replace([moveSelectionData]);
         }
     }
 }

@@ -4,15 +4,14 @@ import { Inject } from '@wendellhu/redi';
 import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
 import { SetWorksheetColWidthMutation } from '../Commands/Mutations/set-worksheet-col-width.mutation';
 import { SetWorksheetRowHeightMutation } from '../Commands/Mutations/set-worksheet-row-height.mutation';
-import { ISelectionManager } from '../Services/tokens';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../Services/selection-manager.service';
 import { CanvasView } from '../View';
-import { SelectionManager } from './Selection';
 
 const updateCommandList = [SetWorksheetRowHeightMutation.id, SetWorksheetColWidthMutation.id, SetWorksheetActivateMutation.id];
 
 export class SheetContainerController extends Disposable {
     constructor(
-        @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(CanvasView) private readonly canvasView: CanvasView,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ICommandService private readonly _commandService: ICommandService
@@ -27,10 +26,19 @@ export class SheetContainerController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 // refresh selection and worksheet canvas view
                 if (updateCommandList.includes(command.id)) {
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+                    const unitId = workbook.getUnitId();
                     const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
-                    this._selectionManager.updateToSheet(worksheet);
+                    const sheetId = worksheet.getSheetId();
+                    // this._selectionManager.updateToSheet(worksheet);
+
+                    this._selectionManagerService.setCurrentSelection({
+                        pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                        unitId,
+                        sheetId,
+                    });
+
                     this.canvasView.updateToSheet(worksheet);
-                    this._selectionManager.renderCurrentControls(false);
                 }
 
                 this.canvasView.getSheetView().getSpreadsheet().makeDirty(true);

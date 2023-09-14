@@ -1,27 +1,15 @@
-import { Engine, IRenderingEngine } from '@univerjs/base-render';
+import { Engine, IRenderingEngine, ISelectionTransformerShapeManager, SelectionTransformerShapeManager } from '@univerjs/base-render';
 import { DEFAULT_SELECTION, ICurrentUniverService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
-import {
-    BasicWorkbookController,
-    CellEditorController,
-    CountBarController,
-    // EditTooltipsController,
-    // HideColumnController,
-    SelectionManager,
-    SheetBarController,
-    SheetContainerController,
-} from './Controller';
+import { BasicWorkbookController, CellEditorController, CountBarController, SheetBarController, SheetContainerController } from './Controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
-import { ColumnTitleController } from './Controller/Selection/ColumnTitleController';
-import { DragLineController } from './Controller/Selection/DragLineController';
-import { RowTitleController } from './Controller/Selection/RowTitleController';
 import { en, zh } from './Locale';
 import { BorderStyleManagerService } from './Services/border-style-manager.service';
-import { ISelectionManager } from './Services/tokens';
+import { SelectionManagerService } from './Services/selection-manager.service';
 import { CanvasView } from './View/CanvasView';
 
 /**
@@ -127,9 +115,9 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     }
 
     /** @deprecated move to DI system */
-    getSelectionManager() {
-        return this._injector.get(ISelectionManager);
-    }
+    // getSelectionManager() {
+    //     return this._injector.get(ISelectionManager);
+    // }
 
     private _initializeDependencies(sheetInjector: Injector) {
         const dependencies: Dependency[] = [
@@ -143,22 +131,32 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [CountBarController],
 
             // TODO@huwenzhao: this is a temporary solution
-            [
-                ISelectionManager,
-                {
-                    useFactory: (injector: Injector, canvasView: CanvasView) => injector.createInstance(SelectionManager, canvasView.getSheetView(), this._config),
-                    deps: [Injector, CanvasView],
-                },
-            ],
-            [RowTitleController],
-            [ColumnTitleController],
-            [DragLineController],
+            // [
+            //     ISelectionManager,
+            //     {
+            //         useFactory: (injector: Injector, canvasView: CanvasView) => injector.createInstance(SelectionManager, canvasView.getSheetView(), this._config),
+            //         deps: [Injector, CanvasView],
+            //     },
+            // ],
+            // [RowTitleController],
+            // [ColumnTitleController],
+            // [DragLineController],
             // [HideColumnController],
 
             [BasicWorksheetController],
             [BasicWorkbookController],
 
             [BorderStyleManagerService],
+
+            [SelectionManagerService],
+
+            [
+                ISelectionTransformerShapeManager,
+                {
+                    useFactory: (injector: Injector) => injector.createInstance(SelectionTransformerShapeManager),
+                    deps: [Injector],
+                },
+            ],
         ];
 
         dependencies.forEach((d) => {

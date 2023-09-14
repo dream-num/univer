@@ -1,20 +1,21 @@
-import { BorderStyleTypes, IRangeData, ObjectMatrix, IScale } from '@univerjs/core';
-import { BorderCacheItem } from '../Interfaces';
+import { BorderStyleTypes, IRangeData, IScale, ObjectMatrix } from '@univerjs/core';
+
+import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../Basics/Const';
+import { drawLineByBorderType, getLineWidth, setLineType } from '../../../Basics/Draw';
 import { fixLineWidthByScale } from '../../../Basics/Tools';
+import { SpreadsheetExtensionRegistry } from '../../Extension';
+import { BorderCacheItem } from '../Interfaces';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../Basics/Const';
-import { SpreadsheetExtensionRegistry } from '../../Extension';
-import { drawLineByBorderType, getLineWidth, setLineType } from '../../../Basics/Draw';
 
 const UNIQUE_KEY = 'DefaultBorderExtension';
 
 export class Border extends SheetExtension {
-    uKey = UNIQUE_KEY;
+    override uKey = UNIQUE_KEY;
 
-    zIndex = 30;
+    override zIndex = 30;
 
-    draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
         const { rowColumnSegment, rowTitleWidth, columnTitleHeight, dataMergeCache, stylesCache, overflowCache } = spreadsheetSkeleton;
         const { border } = stylesCache;
         if (!spreadsheetSkeleton) {
@@ -40,9 +41,11 @@ export class Border extends SheetExtension {
                     return true;
                 }
 
-                let { isMerged, startY, endY, startX, endX } = this.getCellIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                const cellInfo = this.getCellIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 
-                if (isMerged) {
+                let { startY, endY, startX, endX } = cellInfo;
+
+                if (cellInfo.isMerged) {
                     return true;
                 }
 
@@ -51,7 +54,7 @@ export class Border extends SheetExtension {
                 startX = fixLineWidthByScale(startX, scaleX);
                 endX = fixLineWidthByScale(endX, scaleX);
 
-                for (let key in borderCaches) {
+                for (const key in borderCaches) {
                     const { type, style, color } = borderCaches[key] as BorderCacheItem;
 
                     if (this._getOverflowExclusion(overflowCache, type, rowIndex, columnIndex)) {

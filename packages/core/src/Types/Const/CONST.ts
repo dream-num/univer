@@ -1,12 +1,4 @@
-import {
-    BooleanNumber,
-    HorizontalAlign,
-    LocaleType,
-    SheetTypes,
-    TextDirection,
-    VerticalAlign,
-    WrapStrategy,
-} from '../Enum';
+import { BooleanNumber, HorizontalAlign, LocaleType, SheetTypes, TextDirection, VerticalAlign, WrapStrategy } from '../Enum';
 import { IStyleData, IWorkbookConfig, IWorksheetConfig } from '../Interfaces';
 
 /**
@@ -74,6 +66,18 @@ export const DEFAULT_WORKBOOK: IWorkbookConfig = {
     namedRanges: [],
 };
 
+export const DEFAULT_WORKSHEET_ROW_COUNT = 1000;
+
+export const DEFAULT_WORKSHEET_COLUMN_COUNT = 20;
+
+export const DEFAULT_WORKSHEET_ROW_HEIGHT = 19;
+
+export const DEFAULT_WORKSHEET_COLUMN_WIDTH = 73;
+
+export const DEFAULT_WORKSHEET_ROW_TITLE_WIDTH = 46;
+
+export const DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT = 20;
+
 /**
  * Used as an init worksheet return value
  */
@@ -84,14 +88,14 @@ export const DEFAULT_WORKSHEET: IWorksheetConfig = {
     tabColor: '',
     hidden: BooleanNumber.FALSE,
     freezeColumn: -1,
-    rowCount: 1000,
-    columnCount: 100,
+    rowCount: DEFAULT_WORKSHEET_ROW_COUNT,
+    columnCount: DEFAULT_WORKSHEET_COLUMN_COUNT,
     freezeRow: -1,
     zoomRatio: 1,
     scrollTop: 0,
     scrollLeft: 0,
-    defaultColumnWidth: 73,
-    defaultRowHeight: 19,
+    defaultColumnWidth: DEFAULT_WORKSHEET_COLUMN_WIDTH,
+    defaultRowHeight: DEFAULT_WORKSHEET_ROW_HEIGHT,
     mergeData: [],
     hideRow: [],
     hideColumn: [],
@@ -101,11 +105,11 @@ export const DEFAULT_WORKSHEET: IWorksheetConfig = {
     status: BooleanNumber.FALSE,
     showGridlines: BooleanNumber.TRUE,
     rowTitle: {
-        width: 46,
+        width: DEFAULT_WORKSHEET_ROW_TITLE_WIDTH,
         hidden: BooleanNumber.FALSE,
     },
     columnTitle: {
-        height: 20,
+        height: DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT,
         hidden: BooleanNumber.FALSE,
     },
     selections: ['A1'],

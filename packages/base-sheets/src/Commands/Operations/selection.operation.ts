@@ -1,27 +1,26 @@
-// This file provide operations to change selecction of sheets.
+// This file provide operations to change selection of sheets.
 
-import { ISelectionManager } from '@Services/tokens';
-import { CommandType, ICellInfo, IOperation, ISelection, Nullable } from '@univerjs/core';
+import { ISelectionRangeWithStyle } from '@univerjs/base-render';
+import { CommandType, IOperation } from '@univerjs/core';
 
-export interface ISelectionModelValue {
-    selection: ISelection;
-    cell: Nullable<ICellInfo>;
-}
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 
 export interface ISetSelectionsOperationParams {
+    unitId: string;
     sheetId: string;
-    selections: ISelectionModelValue[];
+    pluginName: string;
+    selections: ISelectionRangeWithStyle[];
 }
 
 export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> = {
     id: 'sheet.operation.set-selections',
     type: CommandType.OPERATION,
     handler: async (accessor, params) => {
-        const selectionManager = accessor.get(ISelectionManager);
-        selectionManager.setModels(params!.selections);
-        const models = selectionManager.getCurrentModels();
-        models?.forEach((m) => m.setCurrentCell());
-        selectionManager.renderCurrentControls(false);
+        const selectionManagerService = accessor.get(SelectionManagerService);
+        selectionManagerService.replace(params!.selections);
+        // const models = selectionManager.getCurrentModels();
+        // models?.forEach((m) => m.setCurrentCell());
+        // selectionManager.renderCurrentControls(false);
         return true;
     },
 };

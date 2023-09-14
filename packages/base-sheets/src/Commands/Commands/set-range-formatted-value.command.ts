@@ -1,8 +1,8 @@
-import { IAccessor } from '@wendellhu/redi';
 import { CommandType, ICellV, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix, Tools } from '@univerjs/core';
+import { IAccessor } from '@wendellhu/redi';
 
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetRangeFormattedValueMutationParams, SetRangeFormattedValueMutation, SetRangeFormattedValueUndoMutationFactory } from '../Mutations/set-range-formatted-value.mutation';
-import { ISelectionManager } from '../../Services/tokens';
 
 export interface ISetRangeFormattedValueParams {
     value: ICellV | ICellV[][] | ObjectMatrix<ICellV>;
@@ -19,10 +19,10 @@ export const SetRangeFormattedValueCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const ranges = selectionManager.getCurrentSelections();
-        if (!ranges.length) {
+        const ranges = selectionManagerService.getRangeDataList();
+        if (!ranges?.length) {
             return false;
         }
 

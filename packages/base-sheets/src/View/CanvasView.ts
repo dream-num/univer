@@ -1,10 +1,11 @@
-import { Inject, Injector } from '@wendellhu/redi';
-import { EventState, ICurrentUniverService, ObserverManager, Worksheet } from '@univerjs/core';
+import './Views';
 
 import { Engine, EVENT_TYPE, IRenderingEngine, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
+import { EventState, ICurrentUniverService, ObserverManager, sortRules, Worksheet } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
+
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
 import { SheetView } from './Views/SheetView';
-import './Views';
 
 // workbook
 export class CanvasView {
@@ -128,7 +129,7 @@ export class CanvasView {
                 const currentRatio = sheet.getZoomRatio();
                 let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
                 nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
-                sheet.setZoomRatio(nextRatio);
+                // sheet.setZoomRatio(nextRatio);
 
                 e.preventDefault();
             } else {
@@ -153,8 +154,10 @@ export class CanvasView {
     }
 
     private _viewLoader(scene: Scene) {
-        CanvasViewRegistry.getData().forEach((viewFactory) => {
-            this._views.push(viewFactory.create(scene, this._injector));
-        });
+        CanvasViewRegistry.getData()
+            .sort(sortRules)
+            .forEach((viewFactory) => {
+                this._views.push(viewFactory.create(scene, this._injector));
+            });
     }
 }

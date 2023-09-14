@@ -1,9 +1,10 @@
+import { SelectionTransformerShape } from '@univerjs/base-render';
 import { ComponentManager } from '@univerjs/base-ui';
 import { ObserverManager } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
-import { SelectionControl } from '@univerjs/base-render/src/Component/Sheets/Selection/SelectionControl';
-import { FormulaType, FORMULA_PLUGIN_NAME, FunList, SelectCategoryType, FunParams, SearchFormulaModalData } from '../Basics';
+
+import { FORMULA_PLUGIN_NAME, FormulaType, FunList, FunParams, SearchFormulaModalData, SelectCategoryType } from '../Basics';
 import { SearchFormulaContent } from '../View/UI/SearchFormulaModal/SearchFormulaContent';
 import { SearchFormulaModal } from '../View/UI/SearchFormulaModal/SearchFormulaModal';
 import { SearchItem } from '../View/UI/SearchFormulaModal/SearchItem';
@@ -129,7 +130,7 @@ export class SearchFormulaController {
     private _initialize() {
         this._initRegisterComponent();
 
-        this._observerManager.getObserver<SelectionControl>('onChangeSelectionObserver')?.add((selection) => {
+        this._observerManager.getObserver<SelectionTransformerShape>('onChangeSelectionObserver')?.add((selection) => {
             const info = selection.getCurrentCellInfo();
             // this._searchItem.changeRange(info?.startColumn.toString() ?? '');
         });

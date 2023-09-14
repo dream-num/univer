@@ -1,5 +1,5 @@
 import { ArrayFormulaDataType, FormulaEngineService, IInterpreterDatasetConfig, SheetDataType, SheetNameMapType, UnitDataType } from '@univerjs/base-formula-engine';
-import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { SelectionManagerService } from '@univerjs/base-sheets';
 import { ICurrentUniverService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -20,7 +20,7 @@ export class FormulaController {
 
     constructor(
         config: IFormulaConfig,
-        @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(Injector) private readonly _sheetInjector: Injector
     ) {
@@ -126,12 +126,12 @@ export class FormulaController {
         const arrayFormula = arrayFormulaData[this._activeSheetId];
         if (!arrayFormula) return;
 
-        const currentCellData = this._selectionManager.getCurrentCellData();
+        const currentCellData = this._selectionManagerService.getLast()?.cellInfo;
 
         arrayFormula.forValue((r, c, v) => {
             const { startRow, startColumn, endRow, endColumn } = v;
             if (currentCellData) {
-                const { startRow: row, startColumn: column } = currentCellData;
+                const { row, column } = currentCellData;
                 if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
                     const arrayFormulaLineControl = this._sheetInjector.createInstance(ArrayFormulaLineControl, this._activeSheetId, v);
                     this._arrayFormulaLineControls.push(arrayFormulaLineControl);

@@ -1,4 +1,4 @@
-import { ISelectionManager, SelectionManager } from '@univerjs/base-sheets';
+import { SelectionManagerService } from '@univerjs/base-sheets';
 import { ICurrentUniverService, ObserverManager, RangeList, Tools, UIObserver } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -9,7 +9,7 @@ export class CountBarUIController {
 
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @ISelectionManager private readonly _selectionManager: SelectionManager,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager
     ) {
         // CommandManager.getActionObservers().add((event) => {
@@ -38,9 +38,10 @@ export class CountBarUIController {
         // });
 
         this._observerManager.getObserver('onChangeSelectionObserver')?.add(() => {
-            const rangeList = this._selectionManager.getActiveRangeList();
+            const rangeList = this._selectionManagerService.getRangeDataList();
+            const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
             if (rangeList && this._countBar) {
-                this._totalRangeList(rangeList);
+                this._totalRangeList(worksheet.getRangeList(rangeList));
             }
         });
     }

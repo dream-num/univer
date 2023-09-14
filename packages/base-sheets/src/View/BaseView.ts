@@ -5,6 +5,8 @@ import { Injector } from '@wendellhu/redi';
 export class BaseView {
     viewKey = '';
 
+    zIndex = 0;
+
     protected _injector: Injector;
 
     private _scene: Scene;
@@ -34,6 +36,14 @@ export enum CANVAS_VIEW_KEY {
     VIEW_LEFT_TOP = 'viewLeftTop',
     SHEET_VIEW = 'sheetView',
     DRAG_LINE_VIEW = 'dragLineView',
+    SELECTION_VIEW = 'selectionView',
+}
+
+export enum SHEET_VIEW_KEY {
+    MAIN = '__SpreadsheetRender__',
+    ROW = '__SpreadsheetRowTitle__',
+    COLUMN = '__SpreadsheetColumnTitle__',
+    LEFT_TOP = '__SpreadsheetLeftTopPlaceholder__',
 }
 
 export const CanvasViewRegistry = Registry.create();

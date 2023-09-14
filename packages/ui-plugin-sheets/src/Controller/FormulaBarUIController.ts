@@ -1,8 +1,8 @@
-import { Inject } from '@wendellhu/redi';
-
-import { SelectionControl } from '@univerjs/base-render/src/Component/Sheets/Selection/SelectionControl';
+import { SelectionTransformerShape } from '@univerjs/base-render';
 import { CellInputExtensionManager } from '@univerjs/base-ui';
 import { ICurrentUniverService, INamedRange, ObserverManager } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+
 import { FormulaBar } from '../View/FormulaBar';
 
 export class FormulaBarUIController {
@@ -28,7 +28,7 @@ export class FormulaBarUIController {
     }
 
     private _initialize() {
-        this._observerManager.getObserver<SelectionControl>('onChangeSelectionObserver')?.add((selectionControl: SelectionControl) => {
+        this._observerManager.getObserver<SelectionTransformerShape>('onChangeSelectionObserver')?.add((selectionControl: SelectionTransformerShape) => {
             const currentCell = selectionControl.model.currentCell;
 
             if (currentCell) {

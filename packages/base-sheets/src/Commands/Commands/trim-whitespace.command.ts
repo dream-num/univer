@@ -1,8 +1,8 @@
-import { IAccessor } from '@wendellhu/redi';
 import { CommandType, ICellV, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
+import { IAccessor } from '@wendellhu/redi';
 
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetRangeFormattedValueMutationParams, SetRangeFormattedValueMutation, SetRangeFormattedValueUndoMutationFactory } from '../Mutations/set-range-formatted-value.mutation';
-import { ISelectionManager } from '../../Services/tokens';
 
 /**
  * The command to trim whitespace.
@@ -12,13 +12,13 @@ export const TrimWhitespaceCommand: ICommand = {
     id: 'sheet.command.trim-whitespace',
 
     handler: async (accessor: IAccessor) => {
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManager.getCurrentSelections();
-        if (!selections.length) return false;
+        const selections = selectionManagerService.getRangeDataList();
+        if (!selections?.length) return false;
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();

@@ -16,7 +16,7 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { BorderStyleManagerService } from '../../Services/border-style-manager.service';
-import { ISelectionManager } from '../../Services/tokens';
+import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetBorderStylesMutationParams, SetBorderStylesMutation, SetBorderStylesUndoMutationFactory } from '../Mutations/set-border-styles.mutatio';
 
 export interface ISetBorderCommandParams {
@@ -53,9 +53,9 @@ export const SetBorderCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const selectionManager = accessor.get(ISelectionManager);
+        const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const range = params.range || selectionManager.getCurrentSelections()[0];
+        const range = params.range || selectionManagerService.getRangeDataList()?.[0];
         if (!range) {
             return false;
         }

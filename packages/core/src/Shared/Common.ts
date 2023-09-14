@@ -1,11 +1,12 @@
+import { ColorBuilder } from '../Sheets/Domain';
+import { BaselineOffset, BorderStyleTypes, HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../Types/Enum';
+import { IRangeData } from '../Types/Interfaces';
+import { ICellData } from '../Types/Interfaces/ICellData';
+import { IDocumentData } from '../Types/Interfaces/IDocumentData';
+import { ICellInfo, ICellRange, ISelection } from '../Types/Interfaces/ISelectionData';
+import { IColorStyle, IStyleData } from '../Types/Interfaces/IStyleData';
 import { Tools } from './Tools';
 import { Nullable } from './Types';
-import { IDocumentData } from '../Types/Interfaces/IDocumentData';
-import { ICellData } from '../Types/Interfaces/ICellData';
-import { IColorStyle, IStyleData } from '../Types/Interfaces/IStyleData';
-import { ICellInfo, ISelection } from '../Types/Interfaces/ISelectionData';
-import { ColorBuilder } from '../Sheets/Domain';
-import { BaselineOffset, TextDirection, HorizontalAlign, VerticalAlign, WrapStrategy, BorderStyleTypes } from '../Types/Enum';
 
 export function makeCellToSelection(cellInfo: Nullable<ICellInfo>): Nullable<ISelection> {
     if (!cellInfo) {
@@ -47,6 +48,30 @@ export function makeCellToSelection(cellInfo: Nullable<ICellInfo>): Nullable<ISe
         endY,
         startX,
         endX,
+    };
+}
+
+export function makeCellRangeToRangeData(cellInfo: Nullable<ICellRange>): Nullable<IRangeData> {
+    if (!cellInfo) {
+        return;
+    }
+    const { row, column, isMerged, startRow: mergeStartRow, startColumn: mergeStartColumn, endRow: mergeEndRow, endColumn: mergeEndColumn } = cellInfo;
+    let startRow = row;
+    let startColumn = column;
+    let endRow = row;
+    let endColumn = column;
+    if (isMerged) {
+        startRow = mergeStartRow;
+        startColumn = mergeStartColumn;
+        endRow = mergeEndRow;
+        endColumn = mergeEndColumn;
+    }
+
+    return {
+        startRow,
+        startColumn,
+        endRow,
+        endColumn,
     };
 }
 

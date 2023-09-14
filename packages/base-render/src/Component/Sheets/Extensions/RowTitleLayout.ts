@@ -1,18 +1,19 @@
 import { IScale } from '@univerjs/core';
-import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
+
 import { MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../Basics/Const';
+import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
+import { SheetRowTitleExtensionRegistry } from '../../Extension';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
-import { SheetRowTitleExtensionRegistry } from '../../Extension';
 
 const UNIQUE_KEY = 'DefaultRowTitleLayoutExtension';
 
 export class RowTitleLayout extends SheetExtension {
-    uKey = UNIQUE_KEY;
+    override uKey = UNIQUE_KEY;
 
-    zIndex = 10;
+    override zIndex = 10;
 
-    draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
         const { rowColumnSegment, rowTitleWidth = 0, columnTitleHeight = 0 } = spreadsheetSkeleton;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton) {

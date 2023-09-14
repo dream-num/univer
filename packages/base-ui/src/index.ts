@@ -23,5 +23,4 @@ export { DesktopMenuService, IMenuService } from './services/menu/menu.service';
 export { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { DesktopShortcutService, IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
-export * from './UIPlugin';
 export * from './Utils';

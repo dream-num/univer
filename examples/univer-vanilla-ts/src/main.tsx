@@ -1,10 +1,8 @@
-import { UniverSheet, Univer } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
-import { UIPlugin } from '@univerjs/base-ui';
-
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
+import { Univer, UniverSheet } from '@univerjs/core';
+import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 
 // univer
 const univer = new Univer();

@@ -1,5 +1,6 @@
 import { isElement } from '@univerjs/base-ui';
 import { createRoot } from 'react-dom/client';
+
 import { App, BaseUIProps } from './App';
 
 interface BaseSlideUIConfig extends BaseUIProps {
@@ -41,4 +42,3 @@ export class UI {
 
 export * from './SlideContainer';
 export * from './Toolbar';
-export * from './Common';

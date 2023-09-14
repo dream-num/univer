@@ -24,6 +24,16 @@ interface IState {
     };
 }
 
+export interface BaseRightMenuProps extends BaseComponentProps {
+    onClick?: () => void;
+    style?: {};
+}
+
+export interface BaseRightMenuProps extends BaseComponentProps {
+    onClick?: () => void;
+    style?: {};
+}
+
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
     static override contextType = AppContext;
 

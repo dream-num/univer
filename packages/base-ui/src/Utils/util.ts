@@ -1,5 +1,3 @@
-import { RefObject } from 'react';
-
 /**
  * check element
  * @param element

@@ -667,7 +667,7 @@ export function Select(props: BaseSelectProps) {
         };
 
         const onOptionSelect = (option: IValueOption) => {
-            onClick?.(option.value);
+            onClick?.(option);
         };
 
         const iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
@@ -677,7 +677,7 @@ export function Select(props: BaseSelectProps) {
             <div className={`${styles.selectDouble}`}>
                 <Dropdown
                     tooltip={tooltip}
-                    onClick={type === SelectTypes.NEO ? () => onClick?.(value) : onClick}
+                    onClick={type === SelectTypes.NEO ? () => onClick?.({ value }) : onClick}
                     menu={{
                         menuId: id,
                         options,

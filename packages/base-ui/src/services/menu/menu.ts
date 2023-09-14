@@ -77,6 +77,8 @@ export interface IValueOption {
     tooltip?: string;
     style?: object;
     disabled?: boolean;
+    id?: string; // command id
+    show?: boolean; // show parent menu or not
 }
 
 export function isValueOptions(v: IValueOption | ICustomComponentOption): v is IValueOption {

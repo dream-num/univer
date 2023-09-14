@@ -1,5 +1,6 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { BaseComponentProps, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
+import { ICommandService, IKeyValue } from '@univerjs/core';
 import { Component, createRef } from 'react';
 
 import { RightMenuProps } from '../../Controller';
@@ -24,6 +25,8 @@ interface IState {
 }
 
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
+    static override contextType = AppContext;
+
     root = createRef<HTMLDivElement>();
 
     constructor(props: BaseRightMenuProps) {
@@ -132,7 +135,10 @@ export class RightMenu extends Component<BaseRightMenuProps, IState> {
                         menuId={MenuPosition.CONTEXT_MENU}
                         onClick={this.handleClick}
                         clientPosition={clientPosition}
-                        onOptionSelect={() => {
+                        onOptionSelect={(params) => {
+                            const { label: commandId, value } = params;
+                            const commandService: ICommandService = (this.context as IKeyValue).injector.get(ICommandService);
+                            commandService.executeCommand(commandId as string, { value });
                             this.showRightMenu(false);
                         }}
                     ></Menu>

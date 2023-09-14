@@ -311,7 +311,18 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 </div>
 
                 {/* mouse right button context menu */}
-                <Menu className={styles.sheetUl} menu={sheetUl} menuId={MenuPosition.SHEET_BAR} show={showMenu} style={menuStyle} />
+                <Menu
+                    className={styles.sheetUl}
+                    menu={sheetUl}
+                    menuId={MenuPosition.SHEET_BAR}
+                    show={showMenu}
+                    style={menuStyle}
+                    onOptionSelect={(params) => {
+                        const { label: commandId } = params;
+                        const commandService: ICommandService = (this.context as IKeyValue).injector.get(ICommandService);
+                        commandService.executeCommand(commandId as string);
+                    }}
+                />
 
                 {/* prev next scroll button */}
                 <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>

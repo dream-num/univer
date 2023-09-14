@@ -1,4 +1,17 @@
-import { AppContext, Button, CustomLabel, IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption, MenuItemType, Select, Tooltip } from '@univerjs/base-ui';
+import {
+    AppContext,
+    Button,
+    ButtonType,
+    CustomLabel,
+    IDisplayMenuItem,
+    IMenuButtonItem,
+    IMenuItem,
+    IMenuSelectorItem,
+    IValueOption,
+    MenuItemType,
+    Select,
+    Tooltip,
+} from '@univerjs/base-ui';
 import { ICommandService, IKeyValue } from '@univerjs/core';
 import { Component } from 'react';
 import { Subscription } from 'rxjs';
@@ -87,7 +100,9 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                     icon={icon}
                     value={value}
                     label={value ?? label} // TODO: this line is strange
-                    onClick={(value) => commandService.executeCommand(id, { value })} // TODO@wzhudev: should be merged to a single API on value change
+                    onClick={({ value, id: selectorId }) => {
+                        commandService.executeCommand(selectorId ?? id, { value });
+                    }} // TODO@wzhudev: should be merged to a single API on value change
                     onPressEnter={(value) => commandService.executeCommand(id, { value })}
                     type={selectType!}
                 ></Select>
@@ -103,7 +118,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
 
         return (
             <Tooltip title={this.getTooltip()} placement="bottom">
-                <Button active={activated} className={styles.textButton} type="text" disabled={disabled} onClick={() => commandService.executeCommand(props.id)}>
+                <Button active={activated} className={styles.textButton} type={'text' as ButtonType} disabled={disabled} onClick={() => commandService.executeCommand(props.id)}>
                     <CustomLabel label={icon ? { name: icon } : title} />
                 </Button>
             </Tooltip>

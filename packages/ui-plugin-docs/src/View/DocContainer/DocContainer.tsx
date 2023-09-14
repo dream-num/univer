@@ -215,7 +215,6 @@ export class DocContainer extends Component<BaseDocContainerProps> {
                                     </Container>
                                 )}
                                 <Container onContextMenu={(e) => e.preventDefault()} ref={this.contentRef} className={style.contentInnerRightContainer}></Container>
-                                {/* <Prompt show={true} title="123" content="235" /> */}
                                 {/* extend main content */}
                             </Content>
 

@@ -1,4 +1,4 @@
-import { ComponentManager, DragManager, Prompt, SlotManager } from '@univerjs/base-ui';
+import { ComponentManager, DragManager, SlotManager } from '@univerjs/base-ui';
 import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
 import { Inject, Injector, Self, SkipSelf } from '@wendellhu/redi';
 
@@ -59,16 +59,6 @@ export class SheetContainerUIController {
         this._countBarController = this._injector.createInstance(CountBarUIController);
         this._sheetBarController = this._injector.createInstance(SheetBarUIController);
         this._injector.add([SheetBarUIController, { useFactory: () => this._sheetBarController }]);
-        // this._dragManager = this._injector.createInstance(DragManager);
-
-        // 插入prompt组件
-        this._componentManager.register(Prompt.name, Prompt);
-        this._slotManager.setSlotComponent('main', {
-            name: Prompt.name,
-            component: {
-                name: Prompt.name,
-            },
-        });
     }
 
     getUIConfig() {

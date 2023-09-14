@@ -16,7 +16,6 @@ export * from './Item/Item';
 export * from './Layout';
 export * from './Menu';
 export * from './Modal';
-export * from './Prompt';
 export * from './Radio';
 export * from './ResizeDialog';
 export * from './Select';

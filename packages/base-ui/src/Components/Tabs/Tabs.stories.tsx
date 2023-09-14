@@ -10,16 +10,15 @@ const meta: Meta<typeof Tab> = {
     },
     tags: ['autodocs'],
     args: {
-        children: (
-            <>
-                <TabPane tab="test">
-                    <div>test</div>
-                </TabPane>
-                <TabPane tab="test1">
-                    <div>test1</div>
-                </TabPane>
-            </>
-        ),
+        children: [
+            <TabPane label="test" keys="test" active>
+                <div>test content</div>
+            </TabPane>,
+            <TabPane label="test1" keys="test1">
+                <div>test1 content</div>
+            </TabPane>,
+        ],
+        activeKey: 'test1',
     },
 };
 

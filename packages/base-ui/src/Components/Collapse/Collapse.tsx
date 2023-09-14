@@ -4,15 +4,19 @@ import { joinClassNames } from '../../Utils';
 import { NextIcon } from '../Icon/Format';
 import Style from './index.module.less';
 
-export interface BasePanelProps {
-    children: React.ReactNode;
-    header?: React.ReactNode;
-}
-
 export interface BaseCollapseProps {
     children: React.ReactNode;
+
+    /**
+     * Set the header of collapse
+     */
+    header: string;
 }
-export function Panel(props: BasePanelProps) {
+
+/**
+ * Collapse Component
+ */
+export function Collapse(props: BaseCollapseProps) {
     const { header, children } = props;
     const [panelBodyClassName, setPanelBodyClassName] = useState(joinClassNames(Style.panelBody));
 
@@ -36,10 +40,4 @@ export function Panel(props: BasePanelProps) {
             <div className={panelBodyClassName}>{children}</div>
         </div>
     );
-}
-
-export function Collapse(props: BaseCollapseProps) {
-    const { children } = props;
-
-    return <div className={Style.collapseWrapper}>{children}</div>;
 }

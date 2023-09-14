@@ -1,6 +1,6 @@
 import type { Meta } from '@storybook/react';
 
-import { Collapse, Panel } from './Collapse';
+import { Collapse } from './Collapse';
 
 const meta: Meta<typeof Collapse> = {
     title: 'Components / Collapse',
@@ -10,16 +10,8 @@ const meta: Meta<typeof Collapse> = {
     },
     tags: ['autodocs'],
     args: {
-        children: (
-            <>
-                <Panel header="test">
-                    <div>test Collapse</div>
-                </Panel>
-                <Panel header="test1">
-                    <div>test Collapse1</div>
-                </Panel>
-            </>
-        ),
+        children: 'Collapse Content',
+        header: 'Collapse Header',
     },
 };
 

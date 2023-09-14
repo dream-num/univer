@@ -28,6 +28,11 @@ export interface BaseRightMenuProps extends BaseComponentProps {
     style?: {};
 }
 
+export interface BaseRightMenuProps extends BaseComponentProps {
+    onClick?: () => void;
+    style?: {};
+}
+
 export class RightMenu extends Component<BaseRightMenuProps, IState> {
     root = createRef<HTMLDivElement>();
 

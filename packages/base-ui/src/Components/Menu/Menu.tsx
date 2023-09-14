@@ -342,7 +342,7 @@
 //         }
 //     }
 // }
-import { ICommandService, isRealNum } from '@univerjs/core';
+import { isRealNum } from '@univerjs/core';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
@@ -597,8 +597,8 @@ export const Menu = (props: BaseMenuProps) => {
                     menuItem={item}
                     key={index}
                     index={index}
-                    onClick={() => {
-                        onOptionSelect?.({ value: item.id, label: item.title });
+                    onClick={(object: Partial<IValueOption>) => {
+                        onOptionSelect?.({ value: '', label: item.id, ...object });
                     }}
                 />
             ))}
@@ -609,7 +609,7 @@ export const Menu = (props: BaseMenuProps) => {
 export interface IMenuItemProps {
     menuItem: IDisplayMenuItem<IMenuItem>;
     index: number;
-    onClick: () => void;
+    onClick: (params: Partial<IValueOption>) => void;
 }
 
 export interface IMenuItemState {
@@ -684,11 +684,6 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     }, [menuItem]);
 
     const renderButtonType = () => {
-        const { injector } = context;
-        const commandService = injector?.get(ICommandService);
-        if (!commandService) {
-            throw new Error('commandService is not defined');
-        }
         const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
         const { title, display, label } = item;
 
@@ -697,8 +692,8 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                 className={joinClassNames(styles.colsMenuitem, disabled ? styles.colsMenuitemDisabled : '')}
                 // disabled={disabled} // FIXME disabled is not working
                 onClick={() => {
-                    commandService.executeCommand(item.id, { value });
-                    onClick();
+                    // commandService.executeCommand(item.id, { value });// move to business components
+                    onClick({ value, id: item.id }); // merge cell
                 }}
             >
                 <NeoCustomLabel
@@ -708,8 +703,6 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                     label={label}
                     onChange={(v) => {
                         onChange(v);
-                        // commandService.executeCommand(item.id, { value });
-                        // onClick();
                     }}
                 ></NeoCustomLabel>
             </li>
@@ -718,11 +711,6 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
 
     const renderSelectorType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
-        const commandService = context.injector?.get(ICommandService);
-
-        if (!commandService) {
-            throw new Error('commandService is not defined');
-        }
 
         return (
             <li
@@ -737,8 +725,9 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                     <Menu
                         show={itemShow}
                         onOptionSelect={(v) => {
-                            commandService.executeCommand(item.id, { value: v.value });
-                            // onClick(); // border style don't trigger hide menu
+                            // commandService.executeCommand(item.id, { value: v.value });
+                            onClick({ value: v.value, id: item.id, show: true }); // border style don't trigger hide menu, set show true
+                            setItemShow(false); // hide current menu
                         }}
                         menuId={item.id}
                         options={item.selections}

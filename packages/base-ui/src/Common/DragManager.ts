@@ -5,6 +5,9 @@ import { Inject } from '@wendellhu/redi';
 //     onKeyDownObservable: Observable<DragEvent>;
 // };
 
+/**
+ * @deprecated
+ */
 export class DragManager {
     constructor(@Inject(ObserverManager) private readonly _observerManager: ObserverManager) {
         this._installObserver();

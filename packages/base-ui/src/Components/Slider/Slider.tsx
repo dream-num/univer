@@ -122,7 +122,7 @@
 //         );
 //     }
 // }
-import React, { CSSProperties, ForwardedRef, forwardRef, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 
 import { randomId } from '../../Utils';
 import styles from './index.module.less';
@@ -149,14 +149,14 @@ export interface BaseSliderRangeProps extends SliderBaseProps {
     onClick?: (e: Event, value: number | string) => void;
 }
 
-function SliderFactory(props: BaseSliderRangeProps | BaseSliderSingleProps, ref: ForwardedRef<HTMLDivElement>) {
+export function Slider(props: BaseSliderRangeProps | BaseSliderSingleProps) {
     const [valuePrev, setValuePrev] = useState<number>(0);
     const [valueNext, setValueNext] = useState<number>(0);
     const idPrevRef = useRef<string>(randomId('slider'));
     const idNextRef = useRef<string>(randomId('slider'));
     const sliderRef = useRef<HTMLDivElement | null>(null);
 
-    const { min = 0, max = 100, step = 1, range = false } = props;
+    const { min = 0, max = 100, step = 1, range = false, value } = props;
 
     useEffect(() => {
         // 初始化input值和样式
@@ -200,7 +200,7 @@ function SliderFactory(props: BaseSliderRangeProps | BaseSliderSingleProps, ref:
                 );
             }
         }
-    }, [min, max, range, valuePrev, valueNext]);
+    }, [value]);
 
     const onInput = (index: number, e: React.FormEvent<HTMLInputElement>) => {
         const value = Number((e.target as HTMLInputElement).value);
@@ -237,7 +237,14 @@ function SliderFactory(props: BaseSliderRangeProps | BaseSliderSingleProps, ref:
     };
 
     return (
-        <div className={styles.slider} role="group" aria-labelledby="multi-lbl" style={{ '--min': min, '--max': max } as CSSProperties} ref={sliderRef}>
+        <div
+            className={styles.slider}
+            role="group"
+            aria-labelledby="multi-lbl"
+            style={{ '--min': min, '--max': max } as CSSProperties}
+            ref={sliderRef}
+            onClick={(e) => onClick(0, e)}
+        >
             <label className="sr-only" htmlFor={idPrevRef.current}></label>
             <input id={idPrevRef.current} type="range" min={min} value={valuePrev} max={max} step={step} onInput={(e) => onInput(0, e)} />
             {range && (
@@ -249,6 +256,3 @@ function SliderFactory(props: BaseSliderRangeProps | BaseSliderSingleProps, ref:
         </div>
     );
 }
-
-// Use React.forwardRef to wrap the component
-export const Slider = forwardRef(SliderFactory);

@@ -1,9 +1,14 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { BaseRightMenuProps, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
+import { BaseComponentProps, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
 import { Component, createRef } from 'react';
 
 import { RightMenuProps } from '../../Controller';
 import Style from './index.module.less';
+
+export interface BaseRightMenuProps extends BaseComponentProps {
+    onClick?: () => void;
+    style?: {};
+}
 
 interface IState {
     visible: boolean;

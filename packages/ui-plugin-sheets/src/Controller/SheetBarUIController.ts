@@ -11,15 +11,14 @@ import {
     SetWorksheetOrderMutation,
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
-import { BaseMenuItem, BaseUlProps, ColorPicker, ComponentManager, ICustomComponent, IMenuItemFactory, IMenuService } from '@univerjs/base-ui';
-import { Disposable, ICommandService, ICurrentUniverService, IKeyValue, IWorksheetConfig, Nullable, ObserverManager, UIObserver } from '@univerjs/core';
+import { BaseComponentProps, ColorPicker, ComponentManager, IMenuItemFactory, IMenuService } from '@univerjs/base-ui';
+import { BooleanNumber, Disposable, ICommandService, ICurrentUniverService, IKeyValue, IWorksheetConfig, Nullable, ObserverManager, UIObserver } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
 import { RenameSheetCommand } from '../commands/rename.command';
 import { ShowMenuListCommand } from '../commands/unhide.command';
 import { SheetBar } from '../View/SheetBar';
-
 import { ISheetBarMenuItem } from '../View/SheetBar/SheetBarMenu';
 import {
     ChangeColorSheetMenuItemFactory,
@@ -30,11 +29,36 @@ import {
     UnHideSheetMenuItemFactory,
 } from './menu';
 
-interface SheetUl extends BaseMenuItem {
-    label?: ICustomComponent | string;
-    children?: SheetUl[];
+export interface BaseUlProps extends BaseComponentProps {
+    label?: string | JSX.Element | string[];
+    /**
+     * 是否显示 选中图标
+     */
+    selected?: boolean;
+    /**
+     * 是否显示 隐藏图标
+     */
+    hidden?: BooleanNumber;
+    icon?: JSX.Element | string | null | undefined;
+    border?: boolean;
+    children?: BaseUlProps[];
+    onClick?: (...arg: any[]) => void;
+    onKeyUp?: (...any: any[]) => void;
+    onMouseDown?: (...any: any[]) => void;
+    style?: React.CSSProperties;
+    showSelect?: (e: MouseEvent) => void;
+    getParent?: any;
+    show?: boolean;
+    className?: string;
+    selectType?: string;
+    name?: string;
+    ref?: any;
+    locale?: Array<string | object> | string;
+    /**
+     * 是否隐藏当前item
+     */
+    hideLi?: boolean;
 }
-
 export interface SheetUlProps extends BaseUlProps {
     index: string;
     color?: Nullable<string>;
@@ -181,7 +205,7 @@ export class SheetBarUIController extends Disposable {
     hideSheet() {}
 
     unHideSheet() {
-        this._sheetBar.ref.current.showSelect();
+        (this._sheetBar?.ref?.current as IKeyValue).showSelect();
     }
 
     moveSheet(direct: string) {}
@@ -190,7 +214,7 @@ export class SheetBarUIController extends Disposable {
         this._commandService.executeCommand(SetWorksheetNameCommand.id, { name, worksheetId });
     };
 
-    contextMenu(e: MouseEvent) {
+    contextMenu(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         this._sheetBar.contextMenu(e);
     }
 
@@ -220,19 +244,19 @@ export class SheetBarUIController extends Disposable {
     }
 
     setMenuListSelect(worksheetId: string) {
-        this._sheetBar.ref.current.selectItem(worksheetId);
+        (this._sheetBar?.ref?.current as IKeyValue).selectItem(worksheetId);
     }
 
     setMenuListHide(worksheetId: string) {
-        this._sheetBar.ref.current.hideItem(worksheetId);
+        (this._sheetBar?.ref?.current as IKeyValue).hideItem(worksheetId);
     }
 
     setMenuListDelete(worksheetId: string) {
-        this._sheetBar.ref.current.deleteItem(worksheetId);
+        (this._sheetBar?.ref?.current as IKeyValue).deleteItem(worksheetId);
     }
 
     setMenuListLabel(worksheetId: string, label: string) {
-        this._sheetBar.ref.current.setItemLabel(worksheetId, label);
+        (this._sheetBar?.ref?.current as IKeyValue).setItemLabel(worksheetId, label);
     }
 
     setMenuListInsert(index: number, sheet: IWorksheetConfig, workbookId: string) {
@@ -256,11 +280,11 @@ export class SheetBarUIController extends Disposable {
                 }
             },
         };
-        this._sheetBar.ref.current.insertItem(index, item);
+        (this._sheetBar?.ref?.current as IKeyValue).insertItem(index, item);
     }
 
     setMenuListOrder() {
-        this._sheetBar.ref.current.setItemOrder(this._menuList);
+        (this._sheetBar?.ref?.current as IKeyValue).setItemOrder(this._menuList);
     }
 
     protected _refreshSheetBarUI(): void {
@@ -279,7 +303,7 @@ export class SheetBarUIController extends Disposable {
                     });
                 }
             },
-            contextMenu: (e: MouseEvent) => {
+            contextMenu: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
                 const target = e.currentTarget as HTMLDivElement;
                 this._dataId = target.dataset.id as string;
                 //this._barControl.contextMenu(e);

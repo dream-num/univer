@@ -1,6 +1,6 @@
 import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
 import { CanvasView } from '@univerjs/base-sheets';
-import { BaseMenuItem, ComponentManager, ICustomLabelType, IMenuItemFactory, IMenuService, MenuPosition } from '@univerjs/base-ui';
+import { BaseMenuItem, BaseSelectChildrenProps, ComponentManager, IMenuItemFactory, IMenuService, MenuPosition } from '@univerjs/base-ui';
 import { Disposable } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -19,7 +19,22 @@ import {
     SetRowHeightMenuItemFactory,
 } from './menu';
 
-export interface RightMenuProps extends BaseMenuItem {
+export interface ICustomLabelProps {
+    prefix?: string[] | string;
+    suffix?: string[] | string;
+    options?: BaseSelectChildrenProps[];
+    label?: string;
+    children?: ICustomLabelProps[];
+    onKeyUp?: (e: Event) => void;
+}
+
+// TODO move to right menu
+export interface ICustomLabelType {
+    name: string;
+    props?: ICustomLabelProps;
+}
+
+export interface RightMenuProps extends Omit<BaseMenuItem, 'label' | 'children'> {
     label?: string | ICustomLabelType | JSX.Element;
     children?: RightMenuProps[];
     suffix?: string;

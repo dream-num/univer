@@ -15,6 +15,7 @@ export interface BaseAvatarProps extends BaseComponentProps {
     /** The title of the image avatar */
     title?: string;
 
+    /** Image description */
     alt?: string;
 
     /**

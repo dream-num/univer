@@ -11,7 +11,6 @@ const meta: Meta<typeof Radio> = {
     tags: ['autodocs'],
     args: {
         value: 'value',
-        label: 'label',
     },
 };
 

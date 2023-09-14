@@ -1,6 +1,6 @@
 import type { Meta } from '@storybook/react';
 
-import { Input } from '../Input/input';
+import { Input } from '../Input';
 import { Dropdown } from './Dropdown';
 
 const meta: Meta<typeof Dropdown> = {

@@ -58,7 +58,7 @@ npm run dev:slide
 
 ## 社区
 
-欢迎加入我们的 [Discord 社区](https://discord.gg/w2f6VUKw)。
+欢迎加入我们的 [Discord 社区](https://discord.gg/z3NKNT6D2f)。
 
 ## 问题反馈
 

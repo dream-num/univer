@@ -10,7 +10,7 @@ const meta: Meta<typeof Confirm> = {
     },
     tags: ['autodocs'],
     args: {
-        color: '#abcdef',
+        content: '#abcdef',
     },
 };
 

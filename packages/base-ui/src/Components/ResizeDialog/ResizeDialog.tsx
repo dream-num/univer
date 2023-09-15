@@ -3,15 +3,47 @@ import { useEffect, useRef } from 'react';
 import { BaseComponentProps } from '../../BaseComponent';
 import styles from './index.module.less';
 
+// Component Interface
 export interface BaseResizeDialogProps extends BaseComponentProps {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
+    /**
+     * Distance from the top left corner of the parent element.
+     * @default 0
+     */
+    left?: number;
+
+    /**
+     * Distance from the top left corner of the parent element.
+     * @default 0
+     */
+    top?: number;
+
+    /**
+     * Resize dialog's width
+     * @default 100
+     */
+    width?: number;
+
+    /**
+     * Resize dialog's height
+     * @default 50
+     */
+    height?: number;
+
+    /**
+     * Resize dialog's children
+     */
     children: React.ReactNode;
-    ratio: number;
+
+    /**
+     * Resize dialog's ratio
+     * @default 1
+     */
+    ratio?: number;
 }
 
+/**
+ * Resize Dialog Component
+ */
 export const ResizeDialog = (props: BaseResizeDialogProps) => {
     let { left = 0, top = 0 } = props;
     const { width = 100, height = 50, children, ratio = 1 } = props;
@@ -66,7 +98,7 @@ export const ResizeDialog = (props: BaseResizeDialogProps) => {
     const handleClick = (e: MouseEvent) => {
         e.stopPropagation();
         cancelHighlight();
-        highLight(e);
+        highLight(e as unknown as React.MouseEvent<HTMLDivElement, MouseEvent>);
     };
     const mouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         window.addEventListener('mousemove', mouseMove);
@@ -100,6 +132,7 @@ export const ResizeDialog = (props: BaseResizeDialogProps) => {
 
         left = parseFloat(dialog.style.left) + currentMove[0] - pastMove[0];
         left = left < 0 ? 0 : left;
+
         if (left + ref.current.offsetWidth > parent.offsetWidth) {
             left = parent.offsetWidth - ref.current.offsetWidth;
         }

@@ -12,6 +12,7 @@ const meta: Meta<typeof Input> = {
     args: {
         placeholder: 'Your Content',
         bordered: true,
+        type: 'text',
     },
 };
 

@@ -534,8 +534,16 @@ export function getCellByIndex(
             endX: mergeEndX,
         };
     } else if (!isMerged && endRow !== -1 && endColumn !== -1) {
-        endY = rowHeightAccumulation[endRow] || 0;
-        endX = columnWidthAccumulation[endColumn] || 0;
+        const mergeEndY = rowHeightAccumulation[endRow] || 0;
+        const mergeEndX = columnWidthAccumulation[endColumn] || 0;
+
+        mergeInfo = {
+            ...mergeInfo,
+            startY,
+            endY: mergeEndY,
+            startX,
+            endX: mergeEndX,
+        };
     }
 
     return {

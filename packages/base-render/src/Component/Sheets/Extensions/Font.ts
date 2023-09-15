@@ -53,6 +53,13 @@ export class Font extends SheetExtension {
                             return true;
                         }
 
+                        if (isMergedMainCell) {
+                            startY = mergeInfo.startY;
+                            endY = mergeInfo.endY;
+                            startX = mergeInfo.startX;
+                            endX = mergeInfo.endX;
+                        }
+
                         startY = fixLineWidthByScale(startY, scaleY);
                         endY = fixLineWidthByScale(endY, scaleY);
                         startX = fixLineWidthByScale(startX, scaleX);

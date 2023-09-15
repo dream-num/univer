@@ -1,6 +1,7 @@
-import { SetWorksheetActivateCommand } from '@univerjs/base-sheets';
+import { SetWorksheetActivateCommand, SetWorksheetShowCommand } from '@univerjs/base-sheets';
 import { AppContext, BaseComponentProps, BaseMenuItem, BaseSelectProps, Button, CustomLabel, Icon, IDisplayMenuItem, IMenuItem, Menu, MenuPosition } from '@univerjs/base-ui';
-import { BooleanNumber, ICommandService, IKeyValue } from '@univerjs/core';
+import { BooleanNumber, ICommandService, ICurrentUniverService, IKeyValue } from '@univerjs/core';
+import { IDisposable } from '@wendellhu/redi';
 import { Component, createRef } from 'react';
 
 import styles from './index.module.less';
@@ -15,7 +16,7 @@ export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectPr
     style?: React.CSSProperties;
     hidden?: BooleanNumber;
     addSheet?: () => void;
-    onMouseDown?: () => void;
+    onMouseDown?: (e: MouseEvent) => void;
     selectSheet?: (slideItemIndex: number) => void;
     changeSheetName?: (sheetId: string, name: string) => void;
     dragEnd?: (elements: HTMLElement[]) => void;
@@ -33,6 +34,8 @@ type SheetState = {
 
 export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     static override contextType = AppContext;
+
+    declare context: React.ContextType<typeof AppContext>;
 
     ref = createRef<SheetBarMenu>();
 
@@ -225,6 +228,9 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     override componentDidMount() {
         this.props.getComponent?.(this);
+
+        this._updateSheetBarStatus();
+        this._setupStatusUpdate();
     }
 
     // Convenient for controller to control sheetBarMenu
@@ -232,6 +238,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         this.ref.current?.showMenu(show);
     }
 
+    /** @deprecated */
     setSlideTabActive(sheetId: string, cb?: () => void) {
         this.setState((prevState, props) => {
             const prevSheetList = prevState.sheetList;
@@ -254,6 +261,63 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         const sheetList = this.state.sheetList;
         const currentSheet = sheetList.find((sheet) => sheet.selected);
         return currentSheet?.sheetId;
+    }
+
+    /**
+     * Update worksheet info.
+     *
+     * This method could be triggered when
+     */
+    private _updateSheetBarStatus(): void {
+        const injector = this.context.injector!;
+        const currentUniverService = injector.get(ICurrentUniverService);
+        const commandService = injector.get(ICommandService);
+        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const sheets = workbook.getSheets();
+
+        const worksheetMenuItems = sheets.map((sheet, index) => ({
+            label: sheet.getName(),
+            index: `${index}`,
+            sheetId: sheet.getSheetId(),
+            hide: sheet.isSheetHidden() === BooleanNumber.TRUE,
+            selected: sheet.getStatus() === BooleanNumber.TRUE,
+            onClick: (e?: MouseEvent) => {
+                const worksheetId = sheet.getSheetId();
+                commandService.executeCommand(SetWorksheetShowCommand.id, {
+                    workbookId: workbook.getUnitId(),
+                    worksheetId,
+                });
+            },
+        }));
+
+        const sheetListItems = sheets
+            .filter((sheet) => !sheet.isSheetHidden())
+            .map((sheet, index) => ({
+                sheetId: sheet.getSheetId(),
+                label: sheet.getName(),
+                index: `${index}`,
+                selected: sheet.getStatus() === BooleanNumber.TRUE,
+                color: (sheet.getTabColor() as string) ?? undefined,
+                onMouseDown: (e: MouseEvent) => {
+                    const worksheetId = sheet.getSheetId();
+                    commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                        workbookId: workbook.getUnitId(),
+                        worksheetId,
+                    });
+                },
+            }));
+
+        // TODO: update state to the component, including active sheet index
+
+        this.setState({
+            menuList: worksheetMenuItems,
+            sheetList: sheetListItems,
+        });
+    }
+
+    private _setupStatusUpdate(): IDisposable {
+        const commandService = this.context.injector.get(ICommandService);
+        return commandService.onCommandExecuted((commandInfo) => {});
     }
 
     override render() {

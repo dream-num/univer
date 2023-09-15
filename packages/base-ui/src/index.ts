@@ -3,6 +3,8 @@ export * from './Basics';
 export * from './Common';
 export * from './Components';
 export { SharedController } from './controllers/shared-shortcut.controller';
+export { IUIController } from './controllers/ui/ui.controller';
+export { IDesktopUIController } from './controllers/ui/ui-desktop.controller';
 export * from './Enum';
 export * from './Helpers';
 export { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './services/context/context';

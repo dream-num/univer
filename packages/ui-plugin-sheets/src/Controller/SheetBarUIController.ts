@@ -133,6 +133,7 @@ export class SheetBarUIController extends Disposable {
                     case SetWorksheetOrderMutation.id:
                         this._refreshComponent();
 
+                        // 重新计算状态不就行了...  搞这么复杂...
                         this.setMenuListOrder();
 
                         break;
@@ -154,19 +155,13 @@ export class SheetBarUIController extends Disposable {
 
     getComponent = (ref: SheetBar) => {
         this._sheetBar = ref;
+
+        // render sheet bar content when the component is rendered
         this._refreshComponent();
     };
 
     setUIObserve<T>(type: string, msg: UIObserver<T>) {
         this._observerManager.requiredObserver<UIObserver<T>>(type, 'core').notifyObservers(msg);
-    }
-
-    getSheetBar(): SheetBar {
-        return this._sheetBar;
-    }
-
-    getDataId(): string {
-        return this._dataId;
     }
 
     getSheetList(): SheetUlProps[] {
@@ -182,33 +177,6 @@ export class SheetBarUIController extends Disposable {
         if (!worksheetId) return;
         this._commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId });
     };
-
-    deleteSheet() {}
-
-    sortMenu(index: number, hidden?: boolean, hideIndex?: number) {}
-
-    copySheet() {}
-
-    /**
-     * Arrow functions must be used to bind `this`, otherwise `this` will be lost when the DOM component triggers the callback
-     */
-    addSheet = (position?: string, config?: SheetUlProps): void => {
-        this.setUIObserve('onUIChangeObservable', {
-            name: 'addSheet',
-            value: {
-                position,
-                config,
-            },
-        });
-    };
-
-    hideSheet() {}
-
-    unHideSheet() {
-        (this._sheetBar?.ref?.current as IKeyValue).showSelect();
-    }
-
-    moveSheet(direct: string) {}
 
     changeSheetName = (worksheetId: string, name: string) => {
         this._commandService.executeCommand(SetWorksheetNameCommand.id, { name, worksheetId });
@@ -291,84 +259,10 @@ export class SheetBarUIController extends Disposable {
         this._sheetBar.setValue({
             sheetList: this._sheetList,
             menuList: this._menuList,
-            selectSheet: (event: Event, data: { item: SheetUlProps }) => {
-                this._dataId = data.item.sheetId;
-                const currentWorkbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-                const sheet = currentWorkbook.getSheetBySheetId(this._dataId);
-                if (sheet) {
-                    // sheet.activate();
-                    this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
-                        workbookId: currentWorkbook.getUnitId(),
-                        worksheetId: sheet.getSheetId(),
-                    });
-                }
-            },
-            contextMenu: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-                const target = e.currentTarget as HTMLDivElement;
-                this._dataId = target.dataset.id as string;
-                //this._barControl.contextMenu(e);
-            },
-            // changeSheetName: (event: Event) => {},
-            // dragEnd: (elements: HTMLDivElement[]) => {
-            //     //this._barControl.dragEnd(elements);
-            // },
         });
-
-        // this._sheetBar.setSheetUlNeo(this._menuService.getMenuItems(MenuPosition.SHEET_BAR));
-    }
-
-    protected _refreshSheetData(): void {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-        const sheets = workbook.getSheets();
-
-        this._menuList = sheets.map((sheet, index) => ({
-            label: sheet.getName(),
-            index: String(index),
-            sheetId: sheet.getSheetId(),
-            hide: sheet.isSheetHidden() === 1,
-            selected: sheet.getStatus() === 1,
-            onClick: (e?: MouseEvent) => {
-                if (e) {
-                    const target = e.currentTarget as HTMLDivElement;
-                    this._dataId = target.dataset.id as string;
-                    const worksheetId = sheet.getSheetId();
-                    // command
-                    // this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
-                    //     workbookId: workbook.getUnitId(),
-                    //     worksheetId,
-                    // });
-                    this._commandService.executeCommand(SetWorksheetShowCommand.id, {
-                        workbookId: workbook.getUnitId(),
-                        worksheetId,
-                    });
-
-                    // update tab item
-                    this._sheetBar.setSlideTabActive(worksheetId);
-                }
-            },
-        }));
-
-        this._sheetList = sheets
-            .filter((sheet) => !sheet.isSheetHidden())
-            .map((sheet, index) => ({
-                sheetId: sheet.getSheetId(),
-                label: sheet.getName(),
-                index: String(index),
-                selected: sheet.getStatus() === 1,
-                color: sheet.getTabColor() as string,
-                onMouseDown: (e: MouseEvent) => {
-                    const target = e.currentTarget as HTMLDivElement;
-                    this._dataId = target.dataset.id as string;
-                },
-            }));
-        this._sheetIndex = sheets.findIndex((sheet) => sheet.getStatus() === 1);
-        if (this._sheetIndex > -1) {
-            this._dataId = sheets[this._sheetIndex].getSheetId();
-        }
     }
 
     protected _refreshComponent(): void {
-        this._refreshSheetData();
         this._refreshSheetBarUI();
     }
 

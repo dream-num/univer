@@ -2,7 +2,7 @@ import '../Basics/CSS/Skin/default.module.less';
 
 import { LocaleService, ObserverManager } from '@univerjs/core';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
-import { useEffect, useRef } from 'react';
+import React, { ComponentType, useEffect, useRef } from 'react';
 
 import { defaultSkin } from '../Basics/CSS';
 import { ComponentManager, ZIndexManager } from '../Common';
@@ -11,13 +11,13 @@ import { Content, Footer, Header, Layout, Sider } from '../Components';
 import { Container } from '../Components/Container/Container';
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { LocaleType } from '../Enum';
-import { IContextMenuService } from '../services/contextmenu/contextmenu.service';
 import style from './app.module.less';
 import { ContextMenu } from './components/contextmenu/contextmenu';
 import { Toolbar } from './components/toolbar/toolbar';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     onRendered?: (container: HTMLElement) => void;
+    footerComponents?: Set<() => ComponentType>;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -27,9 +27,10 @@ export function App(props: IUniverAppProps) {
     const observerManager = useDependency(ObserverManager);
     const zIndexManager = useDependency(ZIndexManager);
     const componentManager = useDependency(ComponentManager);
-    const contextMenuService = useDependency(IContextMenuService);
 
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const { footerComponents } = props;
 
     useEffect(() => {
         /**
@@ -141,7 +142,9 @@ export function App(props: IUniverAppProps) {
                             </Content>
                         </Layout>
                         {/* footer */}
-                        <Footer style={{ display: props.footer ? 'block' : 'none' }} className={style.outerRightContainer}></Footer>
+                        <Footer style={{ display: props.footer ? 'block' : 'none' }}>
+                            {footerComponents && Array.from(footerComponents.values()).map((component, index) => React.createElement(component(), { key: `${index}` }))}
+                        </Footer>
                     </Layout>
                 </Layout>
             </Container>

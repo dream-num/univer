@@ -17,6 +17,8 @@ export type Class<T> = {
 
 /**
  * Key value object
+ *
+ * @deprecated
  */
 export interface IKeyValue {
     [key: string]: any;

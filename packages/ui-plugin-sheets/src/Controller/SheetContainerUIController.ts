@@ -30,7 +30,7 @@ export class SheetContainerUIController {
 
     private _countBarController: CountBarUIController;
 
-    private _sheetBarController: SheetBarUIController;
+    private _sheetBarUIController: SheetBarUIController;
 
     private _config: ISheetUIPluginConfig;
 
@@ -53,8 +53,8 @@ export class SheetContainerUIController {
         this._infoBarController = this._injector.createInstance(InfoBarUIController);
         this._rightMenuController = this._injector.createInstance(RightMenuUIController, this._config.layout?.rightMenuConfig);
         this._countBarController = this._injector.createInstance(CountBarUIController);
-        this._sheetBarController = this._injector.createInstance(SheetBarUIController);
-        this._injector.add([SheetBarUIController, { useFactory: () => this._sheetBarController }]);
+        this._sheetBarUIController = this._injector.createInstance(SheetBarUIController);
+        this._injector.add([SheetBarUIController, { useFactory: () => this._sheetBarUIController }]);
     }
 
     getUIConfig() {
@@ -81,13 +81,6 @@ export class SheetContainerUIController {
                 countBar: {
                     getComponent: this._countBarController.getComponent,
                     onChange: this._countBarController.onChange,
-                },
-                sheetBar: {
-                    getComponent: this._sheetBarController.getComponent,
-                    addSheet: this._sheetBarController.addSheet,
-                    selectSheet: this._sheetBarController.selectSheet,
-                    dragEnd: this._sheetBarController.dragEnd,
-                    changeSheetName: this._sheetBarController.changeSheetName,
                 },
                 slot: {
                     // getComponent: this._slotController.getComponent,

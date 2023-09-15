@@ -19,6 +19,16 @@ export interface BaseSheetContainerProps extends BaseComponentProps {
     methods?: any;
 }
 
+export function RenderSheetFooter() {
+    console.log('should render sheet bar');
+    return (
+        <>
+            <SheetBar></SheetBar>
+            <CountBar></CountBar>
+        </>
+    );
+}
+
 /**
  * One universheet instance DOM container
  */

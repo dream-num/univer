@@ -60,7 +60,7 @@ For more development tutorials, please refer to [Contribution Guide](./.github/c
 
 ## Community
 
-Welcome to join our [Discord community](https://discord.gg/w2f6VUKw).
+Welcome to join our [Discord community](https://discord.gg/z3NKNT6D2f).
 
 
 ## Issues

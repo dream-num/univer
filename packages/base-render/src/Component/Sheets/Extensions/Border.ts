@@ -44,9 +44,17 @@ export class Border extends SheetExtension {
                 const cellInfo = this.getCellIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 
                 let { startY, endY, startX, endX } = cellInfo;
+                const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-                if (cellInfo.isMerged) {
+                if (isMerged) {
                     return true;
+                }
+
+                if (isMergedMainCell) {
+                    startY = mergeInfo.startY;
+                    endY = mergeInfo.endY;
+                    startX = mergeInfo.startX;
+                    endX = mergeInfo.endX;
                 }
 
                 startY = fixLineWidthByScale(startY, scaleY);

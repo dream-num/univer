@@ -1,11 +1,11 @@
-import { CellValueType, HorizontalAlign, ICellInfo, IRangeData, Nullable, ObjectMatrix, searchArray, sortRules, WrapStrategy } from '@univerjs/core';
+import { CellValueType, HorizontalAlign, IRangeData, Nullable, ObjectMatrix, sortRules, WrapStrategy } from '@univerjs/core';
 
 import { BaseObject } from '../../BaseObject';
 import { ORIENTATION_TYPE, RENDER_CLASS_TYPE } from '../../Basics/Const';
 import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
 import { IDocumentSkeletonColumn } from '../../Basics/IDocumentSkeletonCached';
 import { ITransformChangeState } from '../../Basics/Interfaces';
-import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale, mergeInfoOffset } from '../../Basics/Tools';
+import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale } from '../../Basics/Tools';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { Canvas } from '../../Canvas';
 import { Engine } from '../../Engine';
@@ -148,108 +148,6 @@ export class Spreadsheet extends SheetComponent {
             endY,
             startX,
             endX,
-        };
-    }
-
-    override calculateCellIndexByPosition(offsetX: number, offsetY: number, scrollXY: { x: number; y: number }): Nullable<ICellInfo> {
-        const spreadsheetSkeleton = this.getSkeleton();
-        if (!spreadsheetSkeleton) {
-            return;
-        }
-
-        const { scaleX = 1, scaleY = 1 } = this.getParentScale();
-        const { x: scrollX, y: scrollY } = scrollXY;
-
-        // these values are not affected by zooming (ideal positions)
-        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight, mergeData } = spreadsheetSkeleton;
-
-        // so we should map physical positions to ideal positions
-        offsetX = offsetX / scaleX + scrollX - rowTitleWidth;
-        offsetY = offsetY / scaleY + scrollY - columnTitleHeight;
-
-        let row = searchArray(rowHeightAccumulation, offsetY);
-        let column = searchArray(columnWidthAccumulation, offsetX);
-
-        if (row === -1) {
-            const rowLength = rowHeightAccumulation.length - 1;
-            const lastRowValue = rowHeightAccumulation[rowLength];
-            if (lastRowValue <= offsetY) {
-                row = rowHeightAccumulation.length - 1;
-            } else {
-                row = 0;
-            }
-        }
-
-        if (column === -1) {
-            const columnLength = columnWidthAccumulation.length - 1;
-            const lastColumnValue = columnWidthAccumulation[columnLength];
-            if (lastColumnValue <= offsetX) {
-                column = columnWidthAccumulation.length - 1;
-            } else {
-                column = 0;
-            }
-        }
-
-        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, mergeData);
-        const { isMerged, isMergedMainCell } = cellInfo;
-        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
-
-        startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowTitleWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowTitleWidth, scaleX);
-
-        mergeInfo = mergeInfoOffset(mergeInfo, rowTitleWidth, columnTitleHeight, scaleX, scaleY);
-
-        // let endRow = row;
-        // let endColumn = column;
-        // if (isMerged && mergeInfo) {
-        //     endRow = mergeInfo.endRow;
-        //     endColumn = mergeInfo.endColumn;
-        // }
-
-        return {
-            row,
-            column,
-            startY,
-            endY,
-            startX,
-            endX,
-            isMerged,
-            isMergedMainCell,
-            mergeInfo,
-        };
-    }
-
-    override getCellByIndex(row: number, column: number) {
-        const spreadsheetSkeleton = this.getSkeleton();
-        if (!spreadsheetSkeleton) {
-            return;
-        }
-        const { scaleX = 1, scaleY = 1 } = this.getParentScale();
-        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight, mergeData } = spreadsheetSkeleton;
-
-        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, mergeData);
-        const { isMerged, isMergedMainCell } = cellInfo;
-        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
-
-        startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowTitleWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowTitleWidth, scaleX);
-
-        mergeInfo = mergeInfoOffset(mergeInfo, rowTitleWidth, columnTitleHeight, scaleX, scaleY);
-
-        return {
-            row,
-            column,
-            startY,
-            endY,
-            startX,
-            endX,
-            isMerged,
-            isMergedMainCell,
-            mergeInfo,
         };
     }
 

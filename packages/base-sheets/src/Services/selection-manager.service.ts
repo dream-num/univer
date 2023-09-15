@@ -152,7 +152,14 @@ export class SelectionManagerService implements IDisposable {
     }
 
     createDefaultSelection(): ISelectionStyle {
-        return NORMAL_SELECTION_PLUGIN_STYLE;
+        return {
+            strokeDashArray: [],
+            strokeWidth: 2,
+            stroke: '#FFF000',
+            fill: 'rgba(0, 0, 0, 0.2)',
+            controls: { tr: true, tl: true, br: true, bl: true },
+            hasAutoFill: false,
+        };
     }
 
     transformCellDataToSelectionData(row: number, column: number, mergeData: IRangeData[]): Nullable<ISelectionRangeWithStyle> {

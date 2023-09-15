@@ -1,4 +1,5 @@
 import { PageElementType } from '@univerjs/core';
+
 import { DEFAULT_LIST_TEST } from '../../Docs/DEFAULT_LIST';
 
 export const PAGE3_RICHTEXT_1 = {

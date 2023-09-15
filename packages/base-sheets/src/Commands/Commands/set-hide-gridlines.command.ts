@@ -1,5 +1,6 @@
 import { BooleanNumber, CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { ISetHideGridlinesMutationParams, SetHideGridlinesMutation, SetHideGridlinesUndoMutationFactory } from '../Mutations/set-hide-gridlines.mutatiom';
 
 export interface ISetHideGridlinesCommandParams {

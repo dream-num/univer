@@ -15,6 +15,7 @@ import {
     Viewport,
 } from '@univerjs/base-render';
 import { EventState, Worksheet } from '@univerjs/core';
+
 import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView } from '../../BaseView';
 
@@ -41,7 +42,7 @@ export class SceneViewerTestView extends BaseView {
 
         const context = this.getContext();
         const workbook = context.getWorkBook();
-        let worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet();
 
         const sv = new SceneViewer('sceneViewer1', {
             left: 200,

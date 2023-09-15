@@ -1,4 +1,5 @@
 import { Nullable } from '@univerjs/core';
+
 import { Vector2 } from './Vector2';
 
 export const INITIAL_Path2: Vector2[] = [new Vector2(0, 0), new Vector2(1, 1)];
@@ -52,10 +53,10 @@ export class Path2 {
         const d = line2.to;
 
         // 2 times the area of triangle abc
-        let area_abc = (a.x - c.x) * (b.y - c.y) - (a.y - c.y) * (b.x - c.x);
+        const area_abc = (a.x - c.x) * (b.y - c.y) - (a.y - c.y) * (b.x - c.x);
 
         // 2 times the area of the triangle abd
-        let area_abd = (a.x - d.x) * (b.y - d.y) - (a.y - d.y) * (b.x - d.x);
+        const area_abd = (a.x - d.x) * (b.y - d.y) - (a.y - d.y) * (b.x - d.x);
 
         // If the area symbols are the same, the two points are on the same side of the line segment and do not intersect (for the case where the points are on the line segment, this example is treated as disjoint);
         if (area_abc * area_abd >= 0) {
@@ -63,18 +64,18 @@ export class Path2 {
         }
 
         // 2 times the area of the triangle cda
-        let area_cda = (c.x - a.x) * (d.y - a.y) - (c.y - a.y) * (d.x - a.x);
+        const area_cda = (c.x - a.x) * (d.y - a.y) - (c.y - a.y) * (d.x - a.x);
         // 2 times the area of the triangle cdb
         // Note: There is a small optimization here. There is no need to calculate the area with the formula, but by adding and subtracting the three known areas.
-        let area_cdb = area_cda + area_abc - area_abd;
+        const area_cdb = area_cda + area_abc - area_abd;
         if (area_cda * area_cdb >= 0) {
             return false;
         }
 
         // Calculate intersection coordinates
-        let t = area_cda / (area_abd - area_abc);
-        let dx = t * (b.x - a.x);
-        let dy = t * (b.y - a.y);
+        const t = area_cda / (area_abd - area_abc);
+        const dx = t * (b.x - a.x);
+        const dy = t * (b.y - a.y);
         return new Vector2(a.x + dx, a.y + dy);
     }
 }

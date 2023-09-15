@@ -1,5 +1,6 @@
-import { Tools, Workbook } from '@univerjs/core';
 import { FormulaDataType } from '@univerjs/base-formula-engine';
+import { Tools, Workbook } from '@univerjs/core';
+
 import { FormulaController } from '../../Controller/FormulaController';
 
 export function SetFormulaRangeData(workbook: Workbook, formulaData: FormulaDataType, _formulaController: FormulaController): FormulaDataType {

@@ -1,18 +1,18 @@
-import { suffixToken } from '../Basics/Token';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { BaseAstNode, ErrorNode } from './BaseAstNode';
-import { NodeType, NODE_ORDER_MAP } from './NodeType';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { ErrorType } from '../Basics/ErrorType';
-import { BaseFunction } from '../Functions/BaseFunction';
-import { NumberValueObject } from '../ValueObject/PrimitiveObject';
-import { IInterpreterDatasetConfig } from '../Basics/Common';
-import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
+import { LexerTreeMaker } from '../Analysis/Lexer';
 import { LexerNode } from '../Analysis/LexerNode';
+import { IInterpreterDatasetConfig } from '../Basics/Common';
+import { ErrorType } from '../Basics/ErrorType';
+import { ParserDataLoader } from '../Basics/ParserDataLoader';
+import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
+import { suffixToken } from '../Basics/Token';
+import { BaseFunction } from '../Functions/BaseFunction';
+import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
-import { LexerTreeMaker } from '../Analysis/Lexer';
+import { NumberValueObject } from '../ValueObject/PrimitiveObject';
+import { BaseAstNode, ErrorNode } from './BaseAstNode';
 import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class SuffixNode extends BaseAstNode {
     constructor(private _operatorString: string, private _functionExecutor?: BaseFunction) {

@@ -6,9 +6,7 @@ type SerializerNewInstanceType = { newInstance: (sequence: Sequence) => Serializ
 export abstract class Serializer {
     static fromSequence<T extends Serializer>(sequence: Sequence[]): T[];
     static fromSequence<T extends Serializer>(sequence: Sequence): T;
-    static fromSequence<T extends Serializer>(
-        sequence: Sequence | Sequence[]
-    ): T | T[] {
+    static fromSequence<T extends Serializer>(sequence: Sequence | Sequence[]): T | T[] {
         if (Tools.isObject<Sequence>(sequence)) {
             if (Serializer.requiredNewInstance(this)) {
                 const SerializerClass = this;
@@ -18,9 +16,7 @@ export abstract class Serializer {
         if (Tools.isArray<Sequence>(sequence)) {
             if (Serializer.requiredNewInstance(this)) {
                 const SerializerClass = this;
-                return sequence.map((element: Sequence) =>
-                    SerializerClass.newInstance(element)
-                ) as T[];
+                return sequence.map((element: Sequence) => SerializerClass.newInstance(element)) as T[];
             }
         }
         return [];
@@ -32,9 +28,7 @@ export abstract class Serializer {
 }
 
 export namespace Serializer {
-    export function requiredNewInstance(
-        target: any
-    ): target is SerializerNewInstanceType {
+    export function requiredNewInstance(target: any): target is SerializerNewInstanceType {
         if (Tools.isDefine(target.newInstance)) {
             return true;
         }

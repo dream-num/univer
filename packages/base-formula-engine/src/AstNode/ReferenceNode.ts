@@ -1,18 +1,18 @@
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { BaseAstNode, ErrorNode } from './BaseAstNode';
-import { NodeType, NODE_ORDER_MAP } from './NodeType';
-import { REFERENCE_SINGLE_RANGE_REGEX, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_REGEX_SINGLE_COLUMN, $SUPER_TABLE_COLUMN_REGEX } from '../Basics/Regex';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { LexerNode } from '../Analysis/LexerNode';
-import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
-import { IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
-import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
-import { RowReferenceObject } from '../ReferenceObject/RowReferenceObject';
-import { ColumnReferenceObject } from '../ReferenceObject/ColumnReferenceObject';
-import { TableReferenceObject } from '../ReferenceObject/TableReferenceObject';
 import { LexerTreeMaker } from '../Analysis/Lexer';
+import { LexerNode } from '../Analysis/LexerNode';
+import { IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
+import { ParserDataLoader } from '../Basics/ParserDataLoader';
+import { $SUPER_TABLE_COLUMN_REGEX, REFERENCE_REGEX_SINGLE_COLUMN, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../Basics/Regex';
+import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
+import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
+import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
+import { ColumnReferenceObject } from '../ReferenceObject/ColumnReferenceObject';
+import { RowReferenceObject } from '../ReferenceObject/RowReferenceObject';
+import { TableReferenceObject } from '../ReferenceObject/TableReferenceObject';
+import { BaseAstNode, ErrorNode } from './BaseAstNode';
 import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class ReferenceNode extends BaseAstNode {
     constructor(private _operatorString: string, private _referenceObject: BaseReferenceObject) {

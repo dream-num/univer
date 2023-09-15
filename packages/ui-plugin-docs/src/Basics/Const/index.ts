@@ -1,2 +1,2 @@
-export * from './PLUGIN_NAME';
 export * from './DefaultUniverDocConfig';
+export * from './PLUGIN_NAME';

@@ -1,4 +1,5 @@
 import { Observable } from '@univerjs/core';
+
 import { ImagePlugin } from '../ImagePlugin';
 import { IOverGridImageProperty } from './Interfaces';
 

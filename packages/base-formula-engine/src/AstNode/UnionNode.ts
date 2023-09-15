@@ -1,14 +1,14 @@
-import { matchToken } from '../Basics/Token';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { BaseAstNode, ErrorNode } from './BaseAstNode';
-import { NodeType, NODE_ORDER_MAP } from './NodeType';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
+import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
+import { ParserDataLoader } from '../Basics/ParserDataLoader';
+import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
+import { matchToken } from '../Basics/Token';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
-import { LexerNode } from '../Analysis/LexerNode';
 import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
+import { BaseAstNode, ErrorNode } from './BaseAstNode';
 import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 const UNION_EXECUTOR_NAME = 'UNION';
 

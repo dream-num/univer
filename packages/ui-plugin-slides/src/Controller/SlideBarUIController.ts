@@ -1,6 +1,7 @@
+import { CanvasView } from '@univerjs/base-slides';
 import { ICurrentUniverService, ISlidePage } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { CanvasView } from '@univerjs/base-slides';
+
 import { SlideBar } from '../View/SlideBar/SlideBar';
 
 export class SlideBarUIController {

@@ -1,7 +1,7 @@
 import { defaultLocale, getLocale } from './locale';
-import { runPart } from './runPart';
-import { parsePart, PartType } from './parsePart';
 import { OptionsData } from './options';
+import { parsePart, PartType } from './parsePart';
+import { runPart } from './runPart';
 
 const default_text = parsePart('@');
 const default_color = 'black';

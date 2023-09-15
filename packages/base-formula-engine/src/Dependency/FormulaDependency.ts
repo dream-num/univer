@@ -1,14 +1,15 @@
 import { IRangeData, IUnitRange, ObjectMatrix } from '@univerjs/core';
+
 import { generateAstNode } from '../Analysis/Tools';
 import { FunctionNode, PrefixNode, SuffixNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
 import { FormulaDataType, IInterpreterDatasetConfig } from '../Basics/Common';
+import { PreCalculateNodeType } from '../Basics/NodeType';
 import { prefixToken, suffixToken } from '../Basics/Token';
 import { Interpreter } from '../Interpreter/Interpreter';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { FormulaDependencyTree } from './DependencyTree';
-import { PreCalculateNodeType } from '../Basics/NodeType';
 
 export class FormulaDependencyGenerator {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRangeData>>();
@@ -43,12 +44,12 @@ export class FormulaDependencyGenerator {
 
         const treeList: FormulaDependencyTree[] = [];
 
-        for (let unitId of formulaDataKeys) {
+        for (const unitId of formulaDataKeys) {
             const sheetData = this._formulaData[unitId];
 
             const sheetDataKeys = Object.keys(sheetData);
 
-            for (let sheetId of sheetDataKeys) {
+            for (const sheetId of sheetDataKeys) {
                 const matrixData = new ObjectMatrix(sheetData[sheetId]);
 
                 matrixData.forValue((row, column, formulaData) => {
@@ -186,7 +187,7 @@ export class FormulaDependencyGenerator {
         for (let i = 0, len = preCalculateNodeList.length; i < len; i++) {
             const node = preCalculateNodeList[i];
 
-            let value: BaseReferenceObject = await this._executeNode(node, formulaInterpreter);
+            const value: BaseReferenceObject = await this._executeNode(node, formulaInterpreter);
 
             const gridRange = value.toUnitRange();
 
@@ -195,7 +196,7 @@ export class FormulaDependencyGenerator {
 
         for (let i = 0, len = referenceFunctionList.length; i < len; i++) {
             const node = referenceFunctionList[i];
-            let value: BaseReferenceObject = await this._executeNode(node, formulaInterpreter);
+            const value: BaseReferenceObject = await this._executeNode(node, formulaInterpreter);
 
             const gridRange = value.toUnitRange();
 
@@ -262,7 +263,7 @@ export class FormulaDependencyGenerator {
         let stack = treeList;
         const formulaRunList = [];
         while (stack.length > 0) {
-            let tree = stack.pop();
+            const tree = stack.pop();
 
             if (tree === undefined || tree.isSkip()) {
                 continue;

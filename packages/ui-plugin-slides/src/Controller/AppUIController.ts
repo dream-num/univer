@@ -1,9 +1,10 @@
+import { ComponentManager } from '@univerjs/base-ui';
 import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
-import { ComponentManager } from '@univerjs/base-ui';
+
+import { ISlideUIPluginConfig } from '../Basics';
 import { UI } from '../View';
 import { SlideContainerUIController } from './SlideContainerUIController';
-import { ISlideUIPluginConfig } from '../Basics';
 
 export class AppUIController {
     private _slideContainerUIController: SlideContainerUIController;

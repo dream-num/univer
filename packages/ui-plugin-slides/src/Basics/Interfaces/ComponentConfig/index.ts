@@ -1,2 +1,2 @@
-export * from './ToolbarConfig';
 export * from './ISlideUIPluginConfig';
+export * from './ToolbarConfig';

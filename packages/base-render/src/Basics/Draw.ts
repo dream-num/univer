@@ -1,4 +1,5 @@
 import { BorderStyleTypes, IPosition } from '@univerjs/core';
+
 import { BORDER_TYPE, ORIENTATION_TYPE } from './Const';
 import { IDocumentSkeletonLine } from './IDocumentSkeletonCached';
 import { Vector2 } from './Vector2';

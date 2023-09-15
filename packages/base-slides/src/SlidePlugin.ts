@@ -1,10 +1,11 @@
-import { ICurrentUniverService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Engine, IRenderingEngine } from '@univerjs/base-render';
+import { ICurrentUniverService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
-import { zh, en } from './Locale';
+
 import { install, SlidePluginObserve, uninstall } from './Basics/Observer';
-import { CanvasView } from './View/Render';
 import { ToolbarController } from './Controller';
+import { en, zh } from './Locale';
+import { CanvasView } from './View/Render';
 
 export interface ISlidePluginConfig {}
 

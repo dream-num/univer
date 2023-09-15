@@ -1,6 +1,7 @@
 import { ActionObservers, CommandUnit, CommonParameter, ISheetActionData, SheetActionBase } from '@univerjs/core';
-import { IAddOverGridImageActionData } from './AddOverGridImageAction';
+
 import { OverGridImageBorderType } from '../../Basics';
+import { IAddOverGridImageActionData } from './AddOverGridImageAction';
 
 export interface IRemoveOverGridImageActionData extends ISheetActionData {
     id: string;

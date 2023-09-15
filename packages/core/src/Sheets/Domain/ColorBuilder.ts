@@ -1,5 +1,5 @@
-import { ColorType, ThemeColors, ThemeColorType } from '../../Types/Enum';
 import { Nullable } from '../../Shared';
+import { ColorType, ThemeColors, ThemeColorType } from '../../Types/Enum';
 import { Color, RgbColor, ThemeColor } from './Color';
 
 export class ColorBuilder {

@@ -50,7 +50,7 @@ export class PerformanceMonitor {
      * Returns the average framerate in frames per second using the most recent frame time
      */
     get instantaneousFPS(): number {
-        let history = this._rollingFrameTime.history(0);
+        const history = this._rollingFrameTime.history(0);
 
         if (history === 0) {
             return 0;
@@ -83,7 +83,7 @@ export class PerformanceMonitor {
         }
 
         if (this._lastFrameTimeMs != null) {
-            let dt = timeMs - this._lastFrameTimeMs;
+            const dt = timeMs - this._lastFrameTimeMs;
             this._rollingFrameTime.add(dt);
         }
 
@@ -170,7 +170,7 @@ export class RollingAverage {
         // we need to check if we've already wrapped round
         if (this.isSaturated()) {
             // remove bottom of stack from mean
-            let bottomValue = this._samples[this._pos];
+            const bottomValue = this._samples[this._pos];
             delta = bottomValue - this.average;
             this.average -= delta / (this._sampleCount - 1);
             this._m2 -= delta * (bottomValue - this.average);
@@ -202,7 +202,7 @@ export class RollingAverage {
             return 0;
         }
 
-        let i0 = this._wrapPosition(this._pos - 1.0);
+        const i0 = this._wrapPosition(this._pos - 1.0);
         return this._samples[this._wrapPosition(i0 - i)];
     }
 
@@ -231,7 +231,7 @@ export class RollingAverage {
      * @return Wrapped position in sample range
      */
     protected _wrapPosition(i: number): number {
-        let max = this._samples.length;
+        const max = this._samples.length;
         return ((i % max) + max) % max;
     }
 }

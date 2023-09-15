@@ -1,9 +1,9 @@
 import { IMouseEvent } from '@univerjs/base-render';
+import { DisposableCollection } from '@univerjs/core';
 import { RediContext, WithDependency } from '@wendellhu/redi/react-bindings';
-import { Component, createRef } from 'react';
+import React, { Component, createRef } from 'react';
 
-import { Menu } from '../../../Components';
-import { BaseMenuItem } from '../../../Interfaces/Menu';
+import { BaseMenuItem, Menu } from '../../../Components';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 import { IDisplayMenuItem, IMenuItem, MenuPosition } from '../../../services/menu/menu';
 import styles from './contextmenu.module.less';
@@ -22,14 +22,16 @@ export interface IContextMenuState {
 export class ContextMenu extends Component<IContextMenuProps, IContextMenuState> {
     static override contextType = RediContext;
 
+    declare context: React.ContextType<typeof RediContext>;
+
     @WithDependency(IContextMenuService)
     private declare contextMenuService: IContextMenuService;
-
-    declare context: typeof RediContext;
 
     private menuRef = createRef<Menu>();
 
     private rootRef = createRef<HTMLDivElement>();
+
+    private _disposables = new DisposableCollection();
 
     constructor(props: IContextMenuProps) {
         super(props);
@@ -47,17 +49,16 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
         document.addEventListener('click', this.handleClick);
 
         // TODO: dispose
-        this.contextMenuService.registerContextMenuHandler({
-            handleContextMenu: this.handleContextMenu,
-        });
+        this._disposables.add(
+            this.contextMenuService.registerContextMenuHandler({
+                handleContextMenu: this.handleContextMenu,
+            })
+        );
     }
 
     override componentWillUnmount(): void {
         document.removeEventListener('click', this.handleClick);
-    }
-
-    showContextMenu(show: boolean) {
-        this.menuRef.current?.showMenu(show);
+        this._disposables.dispose();
     }
 
     override render() {
@@ -66,7 +67,7 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
         return (
             visible && (
                 <div ref={this.rootRef} className={styles.contextMenu} onContextMenu={(e) => e.preventDefault()}>
-                    <Menu ref={this.menuRef} menuId={MenuPosition.CONTEXT_MENU} onClick={this.handleClick} />
+                    <Menu menuId={MenuPosition.CONTEXT_MENU} onClick={this.handleClick} show={visible} />
                 </div>
             )
         );
@@ -79,7 +80,6 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
         // FIXME: contextmenu position algorithm is not correct
         this.setState({ visible: true, srcElement: event.srcElement, eventType: event.type }, () => {
             new Promise<void>((resolve, reject) => {
-                this.menuRef.current?.showMenu(true);
                 resolve();
             }).then(() => {
                 // clientX/Y 获取到的是触发点相对于浏览器可视区域左上角距离

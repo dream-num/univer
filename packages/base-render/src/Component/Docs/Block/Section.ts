@@ -1,9 +1,10 @@
-import { DataStreamTreeNodeType, DataStreamTreeNode, DocumentBodyModel } from '@univerjs/core';
-// eslint-disable-next-line import/no-cycle
-import { dealWidthParagraph } from './Paragraph';
-import { dealWithBlockError } from './BlockError';
+import { DataStreamTreeNode, DataStreamTreeNodeType, DocumentBodyModel } from '@univerjs/core';
+
 import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../../../Basics/Interfaces';
+import { dealWithBlockError } from './BlockError';
+// eslint-disable-next-line import/no-cycle
+import { dealWidthParagraph } from './Paragraph';
 
 export function dealWithSections(
     bodyModel: DocumentBodyModel,
@@ -11,11 +12,11 @@ export function dealWithSections(
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
-    preRenderedBlockIdMap?: Map<string, boolean>,
+    preRenderedBlockIdMap?: Map<string, boolean>
 ) {
     const allCurrentSkeletonPages: IDocumentSkeletonPage[] = [];
     const renderedBlockIdMap = new Map<string, boolean>();
-    for (let node of sectionNode.children) {
+    for (const node of sectionNode.children) {
         // const { paragraph, table, tableOfContents, blockType, customBlock, blockId } = block;
         // if (preRenderedBlockIdMap?.get(blockId)) {
         //     continue;

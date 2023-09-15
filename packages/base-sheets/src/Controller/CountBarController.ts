@@ -1,5 +1,5 @@
+import { ICurrentUniverService, ObserverManager, UIObserver } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
-import { UIObserver, ObserverManager, ICurrentUniverService } from '@univerjs/core';
 
 export class CountBarController {
     constructor(

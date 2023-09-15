@@ -1,6 +1,6 @@
 import { BaseObject } from '../BaseObject';
-import { IBoundRect, Vector2 } from '../Basics/Vector2';
 import { transformBoundingCoord } from '../Basics/Position';
+import { IBoundRect, Vector2 } from '../Basics/Vector2';
 
 export class CustomObject extends BaseObject {
     constructor(key?: string, private _render = (mainCtx: CanvasRenderingContext2D) => {}, private _isHitCustom?: (coord: Vector2) => boolean) {

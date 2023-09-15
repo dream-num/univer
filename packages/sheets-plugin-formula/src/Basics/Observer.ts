@@ -1,4 +1,5 @@
 import { Observable, Plugin } from '@univerjs/core';
+
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
 import { SearchFormulaModal } from '../View/UI/SearchFormulaModal/SearchFormulaModal';
 import { SearchItem } from '../View/UI/SearchFormulaModal/SearchItem';

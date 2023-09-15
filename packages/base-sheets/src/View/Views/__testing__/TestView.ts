@@ -1,4 +1,5 @@
 import { EVENT_TYPE, getColor, IRectProps, Rect, Scene } from '@univerjs/base-render';
+
 import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView } from '../../BaseView';
 

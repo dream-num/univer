@@ -1,5 +1,6 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { ISetZoomRatioMutationParams, SetZoomRatioMutation, SetZoomRatioUndoMutationFactory } from '../Mutations/set-zoom-ratio.mutation';
 
 export interface ISetZoomRatioCommandParams {

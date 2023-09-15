@@ -1,7 +1,8 @@
 import { IPaddingData, Nullable } from '@univerjs/core';
+
 import { RENDER_CLASS_TYPE } from './Basics/Const';
+import { cancelRequestFrame, requestNewFrame } from './Basics/Tools';
 import { Vector2 } from './Basics/Vector2';
-import { requestNewFrame, cancelRequestFrame } from './Basics/Tools';
 
 export class ScrollTimer {
     private _requestNewFrameNumber: number;

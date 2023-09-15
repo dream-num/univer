@@ -1,16 +1,16 @@
-import { prefixToken } from '../Basics/Token';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { ErrorNode, BaseAstNode } from './BaseAstNode';
-import { NodeType, NODE_ORDER_MAP } from './NodeType';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { ErrorType } from '../Basics/ErrorType';
-import { BaseFunction } from '../Functions/BaseFunction';
-import { NumberValueObject } from '../ValueObject/PrimitiveObject';
-import { IInterpreterDatasetConfig } from '../Basics/Common';
-import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { LexerNode } from '../Analysis/LexerNode';
+import { IInterpreterDatasetConfig } from '../Basics/Common';
+import { ErrorType } from '../Basics/ErrorType';
+import { ParserDataLoader } from '../Basics/ParserDataLoader';
+import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
+import { prefixToken } from '../Basics/Token';
+import { BaseFunction } from '../Functions/BaseFunction';
+import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
+import { NumberValueObject } from '../ValueObject/PrimitiveObject';
+import { BaseAstNode, ErrorNode } from './BaseAstNode';
 import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class PrefixNode extends BaseAstNode {
     constructor(private _operatorString: string, private _functionExecutor?: BaseFunction) {

@@ -61,7 +61,9 @@ export class SelectionView extends BaseView {
 
         spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             this._selectionTransformerShapeManager.eventTrigger(evt, spreadsheet.zIndex + 1);
-            state.stopPropagation();
+            if (evt.button !== 2) {
+                state.stopPropagation();
+            }
         });
 
         spreadsheetRowTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});

@@ -1,6 +1,7 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
 import { IKeyValue } from '@univerjs/core';
+
 import { IObjectFullState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics/Interfaces';
 import { IPoint } from '../Basics/Vector2';
 import { IShapeProps, Shape } from './Shape';
@@ -39,7 +40,7 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
             ctx.setLineDash(props.strokeDashArray);
         }
         ctx.beginPath();
-        for (let points of pointsGroup) {
+        for (const points of pointsGroup) {
             ctx.moveTo(points[0].x, points[0].y);
             for (let n = 1; n < points.length; n++) {
                 const point = points[n];
@@ -141,8 +142,8 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         this.height = height;
 
         const pointsGroup = this.pointsGroup;
-        for (let points of pointsGroup) {
-            for (let point of points) {
+        for (const points of pointsGroup) {
+            for (const point of points) {
                 point.x -= left;
                 point.y -= top;
             }
@@ -159,8 +160,8 @@ export class RegularPolygon extends Shape<IRegularPolygonProps> {
         let minY = pointsGroup[0][0].y;
         let maxY = pointsGroup[0][0].y;
 
-        for (let points of pointsGroup) {
-            for (let point of points) {
+        for (const points of pointsGroup) {
+            for (const point of points) {
                 minX = Math.min(minX, point.x);
                 maxX = Math.max(maxX, point.x);
                 minY = Math.min(minY, point.y);

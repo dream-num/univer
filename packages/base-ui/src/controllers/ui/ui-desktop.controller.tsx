@@ -1,30 +1,51 @@
 import { Engine, IRenderingEngine } from '@univerjs/base-render';
 import { Disposable, toDisposable } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { IDisposable, Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
+import React, { ComponentType } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Observable, Subject } from 'rxjs';
 
 import { App } from '../../views/app';
 import { IUIController, IWorkbenchOptions } from './ui.controller';
 
-export class DesktopUIController extends Disposable implements IUIController {
+/**
+ * IDesktopUIController
+ */
+export interface IDesktopUIController extends IUIController {
+    componentRegistered$: Observable<void>;
+
+    registerFooterComponent(component: () => ComponentType): IDisposable;
+    getFooterComponents(): Set<() => ComponentType>;
+}
+
+export class DesktopUIController extends Disposable implements IDesktopUIController {
+    private _footerComponents: Set<() => ComponentType> = new Set();
+
+    private _componentRegistered$ = new Subject<void>();
+
+    componentRegistered$ = this._componentRegistered$.asObservable();
+
     constructor(@Inject(Injector) private readonly _injector: Injector, @IRenderingEngine private readonly _renderingEngine: Engine) {
         super();
     }
 
     bootstrapWorkbench(options: IWorkbenchOptions): void {
-        this.disposeWithMe(
-            toDisposable(
-                bootStrap(this._injector, options, (element) => {
-                    // set render container after UI is rendered
-                    this._renderingEngine.setContainer(element);
-                })
-            )
-        );
+        this.disposeWithMe(bootStrap(this._injector, options, (element) => this._renderingEngine.setContainer(element)));
+    }
+
+    registerFooterComponent(component: () => ComponentType): IDisposable {
+        this._footerComponents.add(component);
+        this._componentRegistered$.next();
+        return toDisposable(() => this._footerComponents.delete(component));
+    }
+
+    getFooterComponents(): Set<() => ComponentType> {
+        return new Set([...this._footerComponents]);
     }
 }
 
-function bootStrap(injector: Injector, options: IWorkbenchOptions, callback: (containerEl: HTMLElement) => void) {
+function bootStrap(injector: Injector, options: IWorkbenchOptions, callback: (containerEl: HTMLElement) => void): IDisposable {
     let mountContainer: HTMLElement;
 
     const container = options.container;
@@ -45,9 +66,16 @@ function bootStrap(injector: Injector, options: IWorkbenchOptions, callback: (co
     const ConnectedApp = connectInjector(App, injector);
     root.render(<ConnectedApp {...options} onRendered={callback} />);
 
-    return () => {
+    const desktopUIController = injector.get(IUIController) as IDesktopUIController;
+    const updateSubscription = desktopUIController.componentRegistered$.subscribe(() => {
+        const footerComponents = desktopUIController.getFooterComponents();
+        root.render(<ConnectedApp {...options} footerComponents={footerComponents} onRendered={callback} />);
+    });
+
+    return toDisposable(() => {
         root.unmount();
-    };
+        updateSubscription.unsubscribe();
+    });
 }
 
 function createContainer(id: string): HTMLElement {

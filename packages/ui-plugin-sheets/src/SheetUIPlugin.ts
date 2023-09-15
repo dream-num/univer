@@ -8,7 +8,6 @@ import { DesktopSheetShortcutController } from './Controller/shortcut.controller
 import { en, zh } from './Locale';
 import { ICellEditorService } from './services/cell-editor/cell-editor.service';
 import { DesktopCellEditorService } from './services/cell-editor/cell-editor-desktop.service';
-import { SheetBarService } from './services/sheet-bar.service';
 import { Fx } from './View/FormulaBar';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
@@ -80,21 +79,18 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
                 [ZIndexManager],
                 [SlotManager],
                 [DesktopSheetShortcutController],
-                [SheetBarService],
                 [ICellEditorService, { useClass: DesktopCellEditorService }],
+                [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
             ] as Dependency[]
         ).forEach((d) => this._injector.add(d));
 
         this._dragManager = this._injector.get(DragManager);
         this._zIndexManager = this._injector.get(ZIndexManager);
 
-        this._appUIController = this._injector.createInstance(AppUIController, this._config);
-        this._injector.add([AppUIController, { useValue: this._appUIController }]);
-
         this._injector.get(IUndoRedoService);
         this._injector.get(SharedController);
         this._injector.get(DesktopSheetShortcutController);
-
         this._injector.get(ICellEditorService).initialize();
+        this._injector.get(AppUIController);
     }
 }

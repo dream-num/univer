@@ -1,13 +1,13 @@
 import {
     BulletAlignment,
     ColumnSeparatorType,
+    DataStreamTreeTokenType,
+    IDocumentRenderConfig,
     IDrawing,
+    IIndentStart,
     INestingLevel,
     ITextStyle,
-    IDocumentRenderConfig,
-    IIndentStart,
     PageOrientType,
-    DataStreamTreeTokenType,
 } from '@univerjs/core';
 
 export interface IDocumentSkeletonCached extends ISkeletonResourceReference {

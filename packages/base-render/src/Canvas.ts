@@ -11,11 +11,11 @@ export interface IContext2D extends CanvasRenderingContext2D {
 // calculate pixel ratio
 export function getDevicePixelRatio(): number {
     let _pixelRatio: number = 1;
-    let canvas = createCanvasElement();
-    let context = canvas.getContext('2d') as IContext2D;
+    const canvas = createCanvasElement();
+    const context = canvas.getContext('2d') as IContext2D;
     _pixelRatio = (() => {
-        let devicePixelRatio = window.devicePixelRatio || 1;
-        let backingStoreRatio =
+        const devicePixelRatio = window.devicePixelRatio || 1;
+        const backingStoreRatio =
             context.webkitBackingStorePixelRatio ||
             context.mozBackingStorePixelRatio ||
             context.msBackingStorePixelRatio ||

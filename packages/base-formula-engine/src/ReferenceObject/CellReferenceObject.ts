@@ -1,4 +1,5 @@
 import { IRangeData, referenceToGrid } from '@univerjs/core';
+
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject } from './BaseReferenceObject';
@@ -37,7 +38,7 @@ export class CellReferenceObject extends BaseReferenceObject {
 
         const startRow2 = rangeData2.startRow;
         const startColumn2 = rangeData2.startColumn;
-        let rangeData: IRangeData = {
+        const rangeData: IRangeData = {
             startRow: -1,
             startColumn: -1,
             endRow: -1,

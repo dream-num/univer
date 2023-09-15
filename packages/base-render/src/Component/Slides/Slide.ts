@@ -1,11 +1,12 @@
 import { Nullable, Observable } from '@univerjs/core';
-import { getColor } from '../../Basics/Tools';
+
 import { COLORS, CURSOR_TYPE } from '../../Basics/Const';
-import { Scene } from '../../Scene';
-import { Path } from '../../Shape/Path';
-import { SceneViewer } from '../../SceneViewer';
-import { attachObjectHover } from '../../Basics/quickEvent';
 import { IMouseEvent, IPointerEvent } from '../../Basics/IEvents';
+import { attachObjectHover } from '../../Basics/quickEvent';
+import { getColor } from '../../Basics/Tools';
+import { Scene } from '../../Scene';
+import { SceneViewer } from '../../SceneViewer';
+import { Path } from '../../Shape/Path';
 
 export enum SLIDE_NAVIGATION_KEY {
     LEFT = '__slideNavigationLeft__',

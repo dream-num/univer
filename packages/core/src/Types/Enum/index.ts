@@ -13,8 +13,8 @@ export * from './InterpolationPointType';
 export * from './LocaleType';
 export * from './ProtectionType';
 export * from './RelativeDate';
+export * from './ShapeType';
 export * from './SheetTypes';
 export * from './TextStyle';
 export * from './ThemeColorType';
-export * from './ShapeType';
 // @endindex

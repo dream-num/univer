@@ -1,4 +1,5 @@
-import { SheetActionBase, ActionObservers, Nullable, Workbook } from '@univerjs/core';
+import { ActionObservers, Nullable, SheetActionBase, Workbook } from '@univerjs/core';
+
 import { AddFilter, RemoveFilter } from '../Apply';
 import { ACTION_NAMES } from '../Const';
 import { IAddFilterActionData, IFilter, IRemoveFilterActionData } from '../IData/FilterType';

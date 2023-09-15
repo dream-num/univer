@@ -1,9 +1,10 @@
 import { Nullable } from '@univerjs/core';
-import { $ARRAY_VALUE_REGEX } from '../Basics/Regex';
+
 import { BooleanValue } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
-import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
+import { $ARRAY_VALUE_REGEX } from '../Basics/Regex';
 import { compareToken } from '../Basics/Token';
+import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseValueObject, CalculateValueType, IArrayValueObject } from './BaseValueObject';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from './PrimitiveObject';
 
@@ -68,10 +69,10 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     getRangePosition() {
-        let startRow = 0;
-        let rowCount = this.getRowCount();
-        let startColumn = 0;
-        let columnCount = this.getColumnCount();
+        const startRow = 0;
+        const rowCount = this.getRowCount();
+        const startColumn = 0;
+        const columnCount = this.getColumnCount();
 
         return {
             startRow,
@@ -198,8 +199,8 @@ export class ArrayValueObject extends BaseValueObject {
             return this;
         }
 
-        let rowCount = this._rowCount;
-        let columnCount = this._columnCount;
+        const rowCount = this._rowCount;
+        const columnCount = this._columnCount;
 
         const result: CalculateValueType[][] = [];
 

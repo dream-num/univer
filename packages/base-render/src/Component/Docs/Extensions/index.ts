@@ -1,4 +1,4 @@
-export * from './FontAndBaseLine';
 export * from './Background';
-export * from './Line';
 export * from './Border';
+export * from './FontAndBaseLine';
+export * from './Line';

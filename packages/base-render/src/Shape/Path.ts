@@ -1,6 +1,7 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
 import { IKeyValue, Nullable } from '@univerjs/core';
+
 import { IObjectFullState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics/Interfaces';
 import { IShapeProps, Shape } from './Shape';
 
@@ -118,8 +119,8 @@ export class Path extends Shape<IPathProps> {
         ctx.beginPath();
         let isClosed = false;
         for (let n = 0; n < ca.length; n++) {
-            let c = ca[n].command;
-            let p = ca[n].points;
+            const c = ca[n].command;
+            const p = ca[n].points;
             switch (c) {
                 case 'L':
                     ctx.lineTo(p[0], p[1]);
@@ -179,7 +180,7 @@ export class Path extends Shape<IPathProps> {
             fromY = P1y;
         }
 
-        let m = (P2y - P1y) / (P2x - P1x + 0.00000001);
+        const m = (P2y - P1y) / (P2x - P1x + 0.00000001);
         let run = Math.sqrt((dist * dist) / (1 + m * m));
         if (P2x < P1x) {
             run *= -1;
@@ -199,10 +200,7 @@ export class Path extends Shape<IPathProps> {
                 y: fromY + rise,
             };
         } else {
-            let ix;
-            let iy;
-
-            let len = this.getLineLength(P1x, P1y, P2x, P2y);
+            const len = this.getLineLength(P1x, P1y, P2x, P2y);
             // if (len < 0.00000001) {
             //   return {
             //     x: P1x,
@@ -211,11 +209,11 @@ export class Path extends Shape<IPathProps> {
             // }
             let u = (fromX - P1x) * (P2x - P1x) + (fromY - P1y) * (P2y - P1y);
             u /= len * len;
-            ix = P1x + u * (P2x - P1x);
-            iy = P1y + u * (P2y - P1y);
+            const ix = P1x + u * (P2x - P1x);
+            const iy = P1y + u * (P2y - P1y);
 
-            let pRise = this.getLineLength(fromX, fromY, ix, iy);
-            let pRun = Math.sqrt(dist * dist - pRise * pRise);
+            const pRise = this.getLineLength(fromX, fromY, ix, iy);
+            const pRun = Math.sqrt(dist * dist - pRise * pRise);
             run = Math.sqrt((pRun * pRun) / (1 + m * m));
             if (P2x < P1x) {
                 run *= -1;
@@ -243,8 +241,8 @@ export class Path extends Shape<IPathProps> {
         function CB4(t: number) {
             return (1 - t) * (1 - t) * (1 - t);
         }
-        let x = P4x * CB1(pct) + P3x * CB2(pct) + P2x * CB3(pct) + P1x * CB4(pct);
-        let y = P4y * CB1(pct) + P3y * CB2(pct) + P2y * CB3(pct) + P1y * CB4(pct);
+        const x = P4x * CB1(pct) + P3x * CB2(pct) + P2x * CB3(pct) + P1x * CB4(pct);
+        const y = P4y * CB1(pct) + P3y * CB2(pct) + P2y * CB3(pct) + P1y * CB4(pct);
 
         return {
             x,
@@ -262,8 +260,8 @@ export class Path extends Shape<IPathProps> {
         function QB3(t: number) {
             return (1 - t) * (1 - t);
         }
-        let x = P3x * QB1(pct) + P2x * QB2(pct) + P1x * QB3(pct);
-        let y = P3y * QB1(pct) + P2y * QB2(pct) + P1y * QB3(pct);
+        const x = P3x * QB1(pct) + P2x * QB2(pct) + P1x * QB3(pct);
+        const y = P3y * QB1(pct) + P2y * QB2(pct) + P1y * QB3(pct);
 
         return {
             x,
@@ -272,9 +270,9 @@ export class Path extends Shape<IPathProps> {
     }
 
     static getPointOnEllipticalArc(cx: number, cy: number, rx: number, ry: number, theta: number, psi: number) {
-        let cosPsi = Math.cos(psi);
-        let sinPsi = Math.sin(psi);
-        let pt = {
+        const cosPsi = Math.cos(psi);
+        const sinPsi = Math.sin(psi);
+        const pt = {
             x: rx * Math.cos(theta),
             y: ry * Math.sin(theta),
         };
@@ -323,7 +321,7 @@ export class Path extends Shape<IPathProps> {
         let cs = data;
 
         // command chars
-        let cc = ['m', 'M', 'l', 'L', 'v', 'V', 'h', 'H', 'z', 'Z', 'c', 'C', 'q', 'Q', 't', 'T', 's', 'S', 'a', 'A'];
+        const cc = ['m', 'M', 'l', 'L', 'v', 'V', 'h', 'H', 'z', 'Z', 'c', 'C', 'q', 'Q', 't', 'T', 's', 'S', 'a', 'A'];
         // convert white spaces to commas
         cs = cs.replace(new RegExp(' ', 'g'), ',');
         // create pipes so that we can split the data
@@ -331,14 +329,14 @@ export class Path extends Shape<IPathProps> {
             cs = cs.replace(new RegExp(cc[n], 'g'), `|${cc[n]}`);
         }
         // create array
-        let arr = cs.split('|');
-        let ca: IPathDataArray[] = [];
-        let coords = [];
+        const arr = cs.split('|');
+        const ca: IPathDataArray[] = [];
+        const coords = [];
         // init context point
         let cpx = 0;
         let cpy = 0;
 
-        let re = /([-+]?((\d+\.\d+)|((\d+)|(\.\d+)))(?:e[-+]?\d+)?)/gi;
+        const re = /([-+]?((\d+\.\d+)|((\d+)|(\.\d+)))(?:e[-+]?\d+)?)/gi;
         let match;
         for (let n = 1, len = arr.length; n < len; n++) {
             let str = arr[n];
@@ -353,7 +351,7 @@ export class Path extends Shape<IPathProps> {
             // while ((match = re.exec(str))) {
             //   coords.push(match[0]);
             // }
-            let p = [];
+            const p = [];
 
             for (let j = 0, jLen = coords.length; j < jLen; j++) {
                 // extra case for merged flags
@@ -361,7 +359,7 @@ export class Path extends Shape<IPathProps> {
                     p.push(0, 0);
                     continue;
                 }
-                let parsed = parseFloat(coords[j]);
+                const parsed = parseFloat(coords[j]);
                 if (!isNaN(parsed)) {
                     p.push(parsed);
                 } else {
@@ -377,8 +375,8 @@ export class Path extends Shape<IPathProps> {
 
                 let cmd: Nullable<string>;
                 let points: number[] = [];
-                let startX = cpx;
-                let startY = cpy;
+                const startX = cpx;
+                const startY = cpy;
                 // Move var from within the switch to up here (jshint)
                 let prevCmd: IPathDataArray;
                 let ctlPtx: number;
@@ -407,8 +405,8 @@ export class Path extends Shape<IPathProps> {
                         break;
                     // Note: lineTo handlers need to be above this point
                     case 'm': {
-                        let dx = p.shift() || 0;
-                        let dy = p.shift() || 0;
+                        const dx = p.shift() || 0;
+                        const dy = p.shift() || 0;
                         cpx += dx;
                         cpy += dy;
                         cmd = 'M';
@@ -597,7 +595,7 @@ export class Path extends Shape<IPathProps> {
         let p1;
         let p2;
         let t;
-        let path = Path;
+        const path = Path;
 
         switch (cmd) {
             case 'L':
@@ -625,11 +623,11 @@ export class Path extends Shape<IPathProps> {
             case 'A': {
                 // Approximates by breaking curve into line segments
                 len = 0.0;
-                let start = points[4];
+                const start = points[4];
                 // 4 = theta
-                let dTheta = points[5];
+                const dTheta = points[5];
                 // 5 = dTheta
-                let end = points[4] + dTheta;
+                const end = points[4] + dTheta;
                 let inc = Math.PI / 180.0;
                 // 1 degree resolution
                 if (Math.abs(start - end) < inc) {
@@ -664,11 +662,11 @@ export class Path extends Shape<IPathProps> {
 
     static convertEndpointToCenterParameterization(x1: number, y1: number, x2: number, y2: number, fa: number, fs: number, rx: number, ry: number, psiDeg: number) {
         // Derived from: http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
-        let psi = psiDeg * (Math.PI / 180.0);
-        let xp = (Math.cos(psi) * (x1 - x2)) / 2.0 + (Math.sin(psi) * (y1 - y2)) / 2.0;
-        let yp = (-1 * Math.sin(psi) * (x1 - x2)) / 2.0 + (Math.cos(psi) * (y1 - y2)) / 2.0;
+        const psi = psiDeg * (Math.PI / 180.0);
+        const xp = (Math.cos(psi) * (x1 - x2)) / 2.0 + (Math.sin(psi) * (y1 - y2)) / 2.0;
+        const yp = (-1 * Math.sin(psi) * (x1 - x2)) / 2.0 + (Math.cos(psi) * (y1 - y2)) / 2.0;
 
-        let lambda = (xp * xp) / (rx * rx) + (yp * yp) / (ry * ry);
+        const lambda = (xp * xp) / (rx * rx) + (yp * yp) / (ry * ry);
 
         if (lambda > 1) {
             rx *= Math.sqrt(lambda);
@@ -684,18 +682,18 @@ export class Path extends Shape<IPathProps> {
             f = 0;
         }
 
-        let cxp = (f * rx * yp) / ry;
-        let cyp = (f * -ry * xp) / rx;
+        const cxp = (f * rx * yp) / ry;
+        const cyp = (f * -ry * xp) / rx;
 
-        let cx = (x1 + x2) / 2.0 + Math.cos(psi) * cxp - Math.sin(psi) * cyp;
-        let cy = (y1 + y2) / 2.0 + Math.sin(psi) * cxp + Math.cos(psi) * cyp;
+        const cx = (x1 + x2) / 2.0 + Math.cos(psi) * cxp - Math.sin(psi) * cyp;
+        const cy = (y1 + y2) / 2.0 + Math.sin(psi) * cxp + Math.cos(psi) * cyp;
 
-        let vMag = (v: number[]) => Math.sqrt(v[0] * v[0] + v[1] * v[1]);
-        let vRatio = (u: number[], v: number[]) => (u[0] * v[0] + u[1] * v[1]) / (vMag(u) * vMag(v));
-        let vAngle = (u: number[], v: number[]) => (u[0] * v[1] < u[1] * v[0] ? -1 : 1) * Math.acos(vRatio(u, v));
-        let theta = vAngle([1, 0], [(xp - cxp) / rx, (yp - cyp) / ry]);
-        let u = [(xp - cxp) / rx, (yp - cyp) / ry];
-        let v = [(-1 * xp - cxp) / rx, (-1 * yp - cyp) / ry];
+        const vMag = (v: number[]) => Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+        const vRatio = (u: number[], v: number[]) => (u[0] * v[0] + u[1] * v[1]) / (vMag(u) * vMag(v));
+        const vAngle = (u: number[], v: number[]) => (u[0] * v[1] < u[1] * v[0] ? -1 : 1) * Math.acos(vRatio(u, v));
+        const theta = vAngle([1, 0], [(xp - cxp) / rx, (yp - cyp) / ry]);
+        const u = [(xp - cxp) / rx, (yp - cyp) / ry];
+        const v = [(-1 * xp - cxp) / rx, (-1 * yp - cyp) / ry];
         let dTheta = vAngle(u, v);
 
         if (vRatio(u, v) <= -1) {
@@ -775,7 +773,7 @@ export class Path extends Shape<IPathProps> {
     getPointAtLength(length: number) {
         let point;
         let i = 0;
-        let ii = this.dataArray.length;
+        const ii = this.dataArray.length;
 
         if (!ii) {
             return null;
@@ -802,8 +800,8 @@ export class Path extends Shape<IPathProps> {
             };
         }
 
-        let cp = this.dataArray[i];
-        let p = cp.points;
+        const cp = this.dataArray[i];
+        const p = cp.points;
         switch (cp.command) {
             case 'L':
                 return Path.getPointOnLine(length, cp.start.x, cp.start.y, p[0], p[1]);
@@ -812,13 +810,13 @@ export class Path extends Shape<IPathProps> {
             case 'Q':
                 return Path.getPointOnQuadraticBezier(length / cp.pathLength, cp.start.x, cp.start.y, p[0], p[1], p[2], p[3]);
             case 'A': {
-                let cx = p[0];
-                let cy = p[1];
-                let rx = p[2];
-                let ry = p[3];
+                const cx = p[0];
+                const cy = p[1];
+                const rx = p[2];
+                const ry = p[3];
                 let theta = p[4];
-                let dTheta = p[5];
-                let psi = p[6];
+                const dTheta = p[5];
+                const psi = p[6];
                 theta += (dTheta * length) / cp.pathLength;
                 return Path.getPointOnEllipticalArc(cx, cy, rx, ry, theta, psi);
             }
@@ -858,11 +856,11 @@ export class Path extends Shape<IPathProps> {
         this.dataArray.forEach((data) => {
             if (data.command === 'A') {
                 // Approximates by breaking curve into line segments
-                let start = data.points[4];
+                const start = data.points[4];
                 // 4 = theta
-                let dTheta = data.points[5];
+                const dTheta = data.points[5];
                 // 5 = dTheta
-                let end = data.points[4] + dTheta;
+                const end = data.points[4] + dTheta;
                 let inc = Math.PI / 180.0;
                 // 1 degree resolution
                 if (Math.abs(start - end) < inc) {

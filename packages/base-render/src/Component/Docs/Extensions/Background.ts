@@ -1,8 +1,9 @@
 import { getColorStyle, IScale } from '@univerjs/core';
-import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
-import { docExtension } from '../DocExtension';
+
 import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
 import { Vector2 } from '../../../Basics/Vector2';
+import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
+import { docExtension } from '../DocExtension';
 
 const UNIQUE_KEY = 'DefaultDocsBackgroundExtension';
 

@@ -1,7 +1,8 @@
-import { IDocumentRenderConfig, Registry, IScale } from '@univerjs/core';
+import { IDocumentRenderConfig, IScale, Registry } from '@univerjs/core';
+
+import { BaseObject } from '../BaseObject';
 import { getScale } from '../Basics/Tools';
 import { Vector2 } from '../Basics/Vector2';
-import { BaseObject } from '../BaseObject';
 
 export interface IExtensionConfig {
     originTranslate?: Vector2; // docs

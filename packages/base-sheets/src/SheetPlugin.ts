@@ -5,7 +5,7 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { SetSelectionsOperation } from './Commands/Operations/selection.operation';
-import { BasicWorkbookController, CountBarController, SheetBarController, SheetContainerController } from './Controller';
+import { BasicWorkbookController, CountBarController, SheetContainerController } from './Controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { en, zh } from './Locale';
@@ -22,8 +22,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     private _config: ISheetPluginConfig;
 
     private _formulaBarController: FormulaBarController;
-
-    private _sheetBarController: SheetBarController;
 
     private _countBarController: CountBarController;
 
@@ -78,7 +76,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     initController() {
         this._sheetContainerController = this._injector.get(SheetContainerController);
         this._formulaBarController = this._injector.get(FormulaBarController);
-        this._sheetBarController = this._injector.get(SheetBarController);
         this._countBarController = this._injector.get(CountBarController);
 
         this._injector.get(BasicWorksheetController);
@@ -98,7 +95,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     listenEventManager() {
         // TODO: move these init to controllers not here
         this._countBarController.listenEventManager();
-        this._sheetBarController.listenEventManager();
     }
 
     private _initializeDependencies(sheetInjector: Injector) {
@@ -118,7 +114,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             // controllers
             [SheetContainerController],
             [FormulaBarController],
-            [SheetBarController],
             [CountBarController],
             [BasicWorksheetController],
             [BasicWorkbookController],

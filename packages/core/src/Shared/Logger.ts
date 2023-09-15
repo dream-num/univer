@@ -30,20 +30,9 @@ export class Logger {
         Logger.info('\n');
     }
 
-    static capsule(
-        env: string,
-        version: string,
-        prefix: string = '',
-        suffix = ''
-    ): void {
+    static capsule(env: string, version: string, prefix: string = '', suffix = ''): void {
         if (console) {
-            console.log(
-                `%c${prefix}%c${env}%c${version}%c${suffix}`,
-                '',
-                'padding:3px;color:white;background:#023047',
-                'padding:3px;color:white;background:#219EBC',
-                ''
-            );
+            console.log(`%c${prefix}%c${env}%c${version}%c${suffix}`, '', 'padding:3px;color:white;background:#023047', 'padding:3px;color:white;background:#219EBC', '');
         }
     }
 }

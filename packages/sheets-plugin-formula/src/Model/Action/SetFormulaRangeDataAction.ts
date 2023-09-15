@@ -1,7 +1,8 @@
 import { FormulaDataType } from '@univerjs/base-formula-engine';
-import { SheetActionBase, ActionObservers, ISheetActionData, CommandUnit } from '@univerjs/core';
-import { SetFormulaRangeData } from '../Apply/SetFormulaRangeData';
+import { ActionObservers, CommandUnit, ISheetActionData, SheetActionBase } from '@univerjs/core';
+
 import { FormulaController } from '../../Controller/FormulaController';
+import { SetFormulaRangeData } from '../Apply/SetFormulaRangeData';
 
 export interface ISetFormulaRangeActionData extends ISheetActionData {
     formulaData: FormulaDataType;

@@ -1,4 +1,5 @@
 import { Nullable } from '@univerjs/core';
+
 import { IFilterCriteriaColumn } from '../IData/FilterType';
 
 export function AddFilterCriteria(sheetId: string, criteriaColumn: Nullable<IFilterCriteriaColumn>) {

@@ -1,13 +1,13 @@
 import { Nullable, Tools } from '@univerjs/core';
+
 import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../Basics/TokenType';
-import { ErrorNode, BaseAstNode, LambdaPrivacyVarType } from './BaseAstNode';
-
-import { NodeType, NODE_ORDER_MAP } from './NodeType';
+import { BaseAstNode, ErrorNode, LambdaPrivacyVarType } from './BaseAstNode';
 import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export const LAMBDA_TOKEN: string = 'LAMBDA';
 

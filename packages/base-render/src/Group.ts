@@ -1,9 +1,10 @@
 import { Nullable, sortRules } from '@univerjs/core';
-import { ThinScene } from './ThinScene';
-import { isString } from './Basics/Tools';
-import { IBoundRect, Vector2 } from './Basics/Vector2';
+
 import { BaseObject } from './BaseObject';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
+import { isString } from './Basics/Tools';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
+import { ThinScene } from './ThinScene';
 
 export class Group extends BaseObject {
     private _objects: BaseObject[] = [];
@@ -83,7 +84,7 @@ export class Group extends BaseObject {
     getObjectsByOrder() {
         const objects: BaseObject[] = [];
         this._objects.sort(sortRules);
-        for (let o of this._objects) {
+        for (const o of this._objects) {
             if (!o.isInGroup && o.visible) {
                 objects.push(o);
             }
@@ -100,7 +101,7 @@ export class Group extends BaseObject {
         const m = this.transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         this._objects.sort(sortRules);
-        for (let object of this._objects) {
+        for (const object of this._objects) {
             object.render(ctx, this._transformBounds(bounds));
         }
         ctx.restore();

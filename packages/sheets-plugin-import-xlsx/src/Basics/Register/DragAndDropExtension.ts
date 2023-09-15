@@ -1,5 +1,6 @@
 import { BaseDragAndDropExtension, BaseDragAndDropExtensionFactory, IDragAndDropData } from '@univerjs/base-ui';
 import { Inject, Injector } from '@wendellhu/redi';
+
 import { ImportXlsxController } from '../../Controller/ImportXlsxController';
 
 export class DragAndDropExtension extends BaseDragAndDropExtension {

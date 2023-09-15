@@ -1,10 +1,11 @@
-import { BorderStyleTypes, getColorStyle, IBorderData, IBorderStyleData, Nullable, IScale } from '@univerjs/core';
-import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
-import { docExtension } from '../DocExtension';
-import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
+import { BorderStyleTypes, getColorStyle, IBorderData, IBorderStyleData, IScale, Nullable } from '@univerjs/core';
+
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../Basics/Const';
 import { drawLineByBorderType, getLineWidth, setLineType } from '../../../Basics/Draw';
+import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
 import { Vector2 } from '../../../Basics/Vector2';
+import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
+import { docExtension } from '../DocExtension';
 
 const UNIQUE_KEY = 'DefaultDocsBorderExtension';
 
@@ -39,7 +40,7 @@ export class Border extends docExtension {
 
         const { spanStartPoint = Vector2.create(0, 0) } = this.extensionOffset;
 
-        for (let type of borderCache.keys()) {
+        for (const type of borderCache.keys()) {
             const borderCacheValue = borderCache.get(type);
             if (!borderCacheValue) {
                 continue;

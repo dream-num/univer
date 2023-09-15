@@ -1,6 +1,7 @@
 import { Color, RelativeDate, Serializer, Tools } from '@univerjs/core';
-import { ConditionValue, IFilterCriteriaData } from '../IData/FilterType';
+
 import { BooleanCriteria } from '../Enum/BooleanCriteria';
+import { ConditionValue, IFilterCriteriaData } from '../IData/FilterType';
 
 export class FilterCriteria extends Serializer {
     private _whenNumberGreaterThanOrEqualTo: number;

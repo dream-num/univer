@@ -8,12 +8,13 @@ import {
     handleTableRowGroup,
     IPasteData,
 } from '@univerjs/base-ui';
+
 import { OperationPlugin } from '../../OperationPlugin';
 
 // copy paste delete cut insert // SheetsPluginOperation
 export class PasteExtension extends BasePasteExtension<OperationPlugin> {
     execute() {
-        let content = this._data.html || this._data.plain;
+        const content = this._data.html || this._data.plain;
 
         let data;
         let colInfo;

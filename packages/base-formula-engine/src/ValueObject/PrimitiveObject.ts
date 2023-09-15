@@ -1,9 +1,9 @@
-import { compareToken } from '../Basics/Token';
-import { BaseValueObject, CalculateValueType } from './BaseValueObject';
 import { reverseCompareOperator } from '../Basics/Calculate';
 import { BooleanValue, ConcatenateType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
+import { compareToken } from '../Basics/Token';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
+import { BaseValueObject, CalculateValueType } from './BaseValueObject';
 
 export class BooleanValueObject extends BaseValueObject {
     private _value: boolean;
@@ -194,7 +194,7 @@ export class NumberValueObject extends BaseValueObject {
     }
 
     override plusBy(value: string | number | boolean): CalculateValueType {
-        let currentValue = this.getValue();
+        const currentValue = this.getValue();
         if (typeof value === 'string') {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
@@ -207,7 +207,7 @@ export class NumberValueObject extends BaseValueObject {
     }
 
     override minusBy(value: string | number | boolean): CalculateValueType {
-        let currentValue = this.getValue();
+        const currentValue = this.getValue();
         if (typeof value === 'string') {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
@@ -220,7 +220,7 @@ export class NumberValueObject extends BaseValueObject {
     }
 
     override multiplyBy(value: string | number | boolean): CalculateValueType {
-        let currentValue = this.getValue();
+        const currentValue = this.getValue();
         if (typeof value === 'string') {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
@@ -233,7 +233,7 @@ export class NumberValueObject extends BaseValueObject {
     }
 
     override dividedBy(value: string | number | boolean): CalculateValueType {
-        let currentValue = this.getValue();
+        const currentValue = this.getValue();
         if (typeof value === 'string') {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
@@ -252,7 +252,7 @@ export class NumberValueObject extends BaseValueObject {
     }
 
     override compareBy(value: string | number | boolean, operator: compareToken): CalculateValueType {
-        let currentValue = this.getValue();
+        const currentValue = this.getValue();
         let result = false;
         if (typeof value === 'string') {
             switch (operator) {
@@ -359,7 +359,7 @@ export class StringValueObject extends BaseValueObject {
     }
 
     override compareBy(value: string | number | boolean, operator: compareToken): CalculateValueType {
-        let currentValue = this.getValue();
+        const currentValue = this.getValue();
         let result = false;
         if (typeof value === 'string') {
             switch (operator) {

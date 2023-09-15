@@ -1,4 +1,4 @@
-import { IDocumentSkeletonSpan, IDocumentSkeletonLine } from '../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonLine, IDocumentSkeletonSpan } from '../../Basics/IDocumentSkeletonCached';
 import { ComponentExtension } from '../Extension';
 
 export enum DOCS_EXTENSION_TYPE {

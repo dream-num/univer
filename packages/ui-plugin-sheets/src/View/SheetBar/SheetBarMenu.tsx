@@ -20,8 +20,9 @@ export interface ISheetBarMenuProps {
 
 interface IState {
     show: boolean;
-    menu: ISheetBarMenuItem[];
 }
+
+// TODO@wzhudev: this component could be directly placed in SheetBar component.
 
 export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
     constructor(props: ISheetBarMenuProps) {
@@ -30,10 +31,8 @@ export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
     }
 
     initialize() {
-        const { menu } = this.props;
         this.state = {
             show: false,
-            menu,
         };
     }
 
@@ -46,7 +45,6 @@ export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
         // onClick?.(e);
         this.showMenu(false);
         window.removeEventListener('click', this.hideMenu, true);
-        this.selectItem(item.sheetId as string);
     }
 
     hideMenu = () => {
@@ -55,97 +53,15 @@ export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
 
     showMenu(show: boolean) {
         this.setState({ show }, () => {
-            if (this.state.show) window.addEventListener('click', this.hideMenu, true);
+            if (this.state.show) {
+                window.addEventListener('click', this.hideMenu, true);
+            }
         });
-    }
-
-    selectItem(sheetId: string) {
-        this.setState((prevState, props) => {
-            const menu = prevState.menu;
-            const currenMenu = menu.map((sheet) => {
-                if (sheet.sheetId === sheetId) {
-                    sheet.selected = true;
-                    sheet.hide = false;
-                } else {
-                    sheet.selected = false;
-                }
-
-                return sheet;
-            });
-            return {
-                ...prevState,
-                menu: currenMenu,
-            };
-        });
-    }
-
-    hideItem(sheetId: string) {
-        this.setState((prevState, props) => {
-            const menu = prevState.menu;
-            const currenMenu = menu.map((sheet) => {
-                if (sheet.sheetId === sheetId) {
-                    sheet.hide = true;
-                    sheet.selected = false;
-                }
-
-                return sheet;
-            });
-            return {
-                ...prevState,
-                menu: currenMenu,
-            };
-        });
-    }
-
-    deleteItem(sheetId: string) {
-        this.setState((prevState, props) => {
-            const menu = prevState.menu;
-            const currenMenu = menu.filter((item) => item.sheetId !== sheetId);
-            return {
-                ...prevState,
-                menu: currenMenu,
-            };
-        });
-    }
-
-    setItemLabel(sheetId: string, label: string) {
-        this.setState((prevState, props) => {
-            const menu = prevState.menu;
-            const currenMenu = menu.map((sheet) => {
-                if (sheet.sheetId === sheetId) {
-                    sheet.label = label;
-                }
-
-                return sheet;
-            });
-            return {
-                ...prevState,
-                menu: currenMenu,
-            };
-        });
-    }
-
-    insertItem(index: number, item: ISheetBarMenuItem) {
-        this.setState((prevState, props) => {
-            const menu = prevState.menu;
-            menu.splice(index, 1, item);
-            return {
-                ...prevState,
-                menu,
-            };
-        });
-    }
-
-    setItemOrder(menu: ISheetBarMenuItem[]) {
-        this.setState((prevState, props) => ({
-            ...prevState,
-            menu,
-        }));
     }
 
     override render() {
-        const { style } = this.props;
-        const { show, menu } = this.state;
+        const { style, menu } = this.props;
+        const { show } = this.state;
 
         return (
             <ul className={styles.sheetBarMenu} style={{ ...style, display: show ? 'block' : ' none' }}>

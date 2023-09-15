@@ -1,7 +1,8 @@
 import { sortRules } from '@univerjs/core';
+
 import { BaseObject } from './BaseObject';
-import { ThinScene } from './ThinScene';
 import { RENDER_CLASS_TYPE } from './Basics/Const';
+import { ThinScene } from './ThinScene';
 
 export class Layer {
     private _objects: BaseObject[] = [];
@@ -25,7 +26,7 @@ export class Layer {
     getObjectsByOrder() {
         const objects: BaseObject[] = [];
         this._objects.sort(sortRules);
-        for (let o of this._objects) {
+        for (const o of this._objects) {
             if (!o.isInGroup && o.visible) {
                 objects.push(o);
             }
@@ -36,7 +37,7 @@ export class Layer {
     getObjectsByOrderForPick() {
         const objects: BaseObject[] = [];
         this._objects.sort(sortRules);
-        for (let o of this._objects) {
+        for (const o of this._objects) {
             if (!(o.classType === RENDER_CLASS_TYPE.GROUP) && o.visible) {
                 objects.push(o);
             }
@@ -51,7 +52,7 @@ export class Layer {
     addObject(o: BaseObject) {
         if (o.classType === RENDER_CLASS_TYPE.GROUP) {
             const objects = (o as BaseObject).getObjects();
-            for (let object of objects) {
+            for (const object of objects) {
                 if (this.scene.getObject(object.oKey)) {
                     continue;
                 }

@@ -1,4 +1,5 @@
 import { BasePasteExtension, BasePasteExtensionFactory, IPasteData } from '@univerjs/base-ui';
+
 import { OperationPlugin } from '../../OperationPlugin';
 
 /**

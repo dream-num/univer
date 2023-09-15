@@ -27,6 +27,7 @@ univer.registerPlugin(UIPlugin, {
     container: 'univer-container',
     header: true,
     toolbar: true,
+    footer: true,
 });
 univer.registerPlugin(SheetPlugin);
 univer.registerPlugin(SheetUIPlugin);

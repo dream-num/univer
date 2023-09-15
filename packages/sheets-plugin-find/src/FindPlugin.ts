@@ -28,7 +28,7 @@ export class FindPlugin extends Plugin<FindPluginObserve> {
         config: Partial<IFindPluginConfig>,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(Injector) private readonly _sheetInjector: Injector,
+        @Inject(Injector) private readonly _sheetInjector: Injector
     ) {
         super(FIND_PLUGIN_NAME);
 

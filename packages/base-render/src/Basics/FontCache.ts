@@ -1,6 +1,7 @@
 import { Nullable } from '@univerjs/core';
-import { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from './IDocumentSkeletonCached';
+
 import { DEFAULT_MEASURE_TEXT } from './Const';
+import { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from './IDocumentSkeletonCached';
 import { IMeasureTextCache } from './Interfaces';
 
 const getDefaultBaselineOffset = (fontSize: number) => ({

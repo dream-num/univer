@@ -1,11 +1,12 @@
-import { BooleanNumber, getColorStyle, TextDecoration, IScale } from '@univerjs/core';
+import { BooleanNumber, getColorStyle, IScale, TextDecoration } from '@univerjs/core';
+
+import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../Basics/Const';
+import { calculateRectRotate } from '../../../Basics/Draw';
+import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
+import { fixLineWidthByScale, getScale } from '../../../Basics/Tools';
+import { Vector2 } from '../../../Basics/Vector2';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../Extension';
 import { docExtension } from '../DocExtension';
-import { IDocumentSkeletonSpan } from '../../../Basics/IDocumentSkeletonCached';
-import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../Basics/Const';
-import { Vector2 } from '../../../Basics/Vector2';
-import { calculateRectRotate } from '../../../Basics/Draw';
-import { fixLineWidthByScale, getScale } from '../../../Basics/Tools';
 
 const UNIQUE_KEY = 'DefaultDocsLineExtension';
 

@@ -1,7 +1,8 @@
 import { Rect } from '@univerjs/base-render';
 import { getColorStyle, IPageElement, PageElementType, ShapeType } from '@univerjs/core';
-import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
 import { Injector } from '@wendellhu/redi';
+
+import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../Adaptor';
 
 export class ShapeAdaptor extends ObjectAdaptor {
     zIndex = 2;

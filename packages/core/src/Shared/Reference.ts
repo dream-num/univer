@@ -13,8 +13,8 @@ export interface IGridRangeName {
 }
 
 function singleReferenceToGrid(refBody: string) {
-    let row = parseInt(refBody.replace($ROW_REGEX, '')) - 1;
-    let column = Tools.ABCatNum(refBody.replace($COLUMN_REGEX, ''));
+    const row = parseInt(refBody.replace($ROW_REGEX, '')) - 1;
+    const column = Tools.ABCatNum(refBody.replace($COLUMN_REGEX, ''));
 
     return {
         row,
@@ -33,7 +33,7 @@ export function referenceToGrid(refString: string): IGridRangeName {
         refBody = refString;
     }
 
-    let colonIndex = refBody.indexOf(COLON_SYMBOL);
+    const colonIndex = refBody.indexOf(COLON_SYMBOL);
 
     if (colonIndex === -1) {
         const grid = singleReferenceToGrid(refBody);

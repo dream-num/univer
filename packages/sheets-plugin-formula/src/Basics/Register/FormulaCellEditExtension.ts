@@ -2,6 +2,7 @@ import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell } from '@uni
 import { ICurrentUniverService, IRangeData, Nullable } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
+
 import { FormulaController } from '../../Controller/FormulaController';
 import { FormulaPromptController } from '../../Controller/FormulaPromptController';
 

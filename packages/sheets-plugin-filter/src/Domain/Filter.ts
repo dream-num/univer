@@ -1,7 +1,8 @@
-import { IRangeData, GroupModel, Nullable, Serializer } from '@univerjs/core';
+import { GroupModel, IRangeData, Nullable, Serializer } from '@univerjs/core';
+
+import { IFilter, IFilterCriteriaColumn } from '../IData/FilterType';
 import { FilterCriteria } from './FilterCriteria';
 import { FilterCriteriaColumn } from './FilterCriteriaColumn';
-import { IFilter, IFilterCriteriaColumn } from '../IData/FilterType';
 
 export class Filter extends Serializer implements GroupModel<{ [column: number]: FilterCriteriaColumn }> {
     private _range: IRangeData;

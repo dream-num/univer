@@ -7,9 +7,9 @@ export function ABCToNumber(a: string) {
     if (a == null || a.length === 0) {
         return NaN;
     }
-    let str = a.toLowerCase().split('');
-    let al = str.length;
-    let getCharNumber = (charX: string) => charX.charCodeAt(0) - 96;
+    const str = a.toLowerCase().split('');
+    const al = str.length;
+    const getCharNumber = (charX: string) => charX.charCodeAt(0) - 96;
     let numOut = 0;
     let charnum = 0;
     for (let i = 0; i < al; i++) {
@@ -77,7 +77,7 @@ export function numberToListABC(n: number, uppercase = false) {
 
     const abc = String.fromCharCode((n % len) + order);
 
-    let times = Math.floor(n / len) + 1;
+    const times = Math.floor(n / len) + 1;
 
     return repeatStringNumTimes(abc, times);
 }

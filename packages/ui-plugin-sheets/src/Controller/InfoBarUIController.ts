@@ -23,8 +23,7 @@ export class InfoBarUIController {
 
     private _infoList: BaseInfoBarProps;
 
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
-    }
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {}
 
     getComponent = (ref: InfoBar) => {
         this._infoBar = ref;

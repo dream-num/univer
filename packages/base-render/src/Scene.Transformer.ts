@@ -1,12 +1,13 @@
 import { IKeyValue, Nullable, Observable, Observer } from '@univerjs/core';
+
 import { BaseObject } from './BaseObject';
 import { CURSOR_TYPE } from './Basics/Const';
 import { IMouseEvent, IPointerEvent } from './Basics/IEvents';
 import { getCurrentScrollXY } from './Basics/ScrollXY';
 import { Group } from './Group';
-import { ThinScene } from './ThinScene';
 import { ScrollTimer } from './ScrollTimer';
 import { Rect } from './Shape/Rect';
+import { ThinScene } from './ThinScene';
 
 enum TransformerManagerType {
     RESIZE_LT = '__SpreadsheetTransformerResizeLT__',
@@ -576,7 +577,7 @@ export class Transformer implements ITransformerConfig {
     }
 
     private _createResizeAnchor(type: TransformerManagerType, applyObject: BaseObject, zIndex: number) {
-        let { height, width, scaleX, scaleY } = applyObject.getState();
+        const { height, width, scaleX, scaleY } = applyObject.getState();
 
         const { left, top } = this._getRotateAnchorPosition(type, height, width, scaleX, scaleY);
 
@@ -689,7 +690,7 @@ export class Transformer implements ITransformerConfig {
 
     // eslint-disable-next-line max-lines-per-function
     private _createControl(applyObject: BaseObject) {
-        let { left, top, height, width, angle, scaleX, scaleY, skewX, skewY, flipX, flipY } = applyObject.getState();
+        const { left, top, height, width, angle, scaleX, scaleY, skewX, skewY, flipX, flipY } = applyObject.getState();
         const oKey = applyObject.oKey;
         const zIndex = this._selectedObjectMap.size;
 

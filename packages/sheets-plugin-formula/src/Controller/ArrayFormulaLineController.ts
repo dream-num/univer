@@ -1,7 +1,6 @@
-import { ICurrentUniverService, IRangeData, Workbook } from '@univerjs/core';
 import { Rect, Scene } from '@univerjs/base-render';
 import { CanvasView, SheetView } from '@univerjs/base-sheets';
-
+import { ICurrentUniverService, IRangeData, Workbook } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 enum ARRAY_FORMULA_LINE_MANAGER_KEY {

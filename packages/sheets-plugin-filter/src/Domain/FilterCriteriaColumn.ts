@@ -1,6 +1,7 @@
 import { Sequence, Serializer } from '@univerjs/core';
-import { FilterCriteria } from './FilterCriteria';
+
 import { IFilterCriteriaColumn } from '../IData/FilterType';
+import { FilterCriteria } from './FilterCriteria';
 
 export class FilterCriteriaColumn extends Serializer {
     private _criteria: FilterCriteria;

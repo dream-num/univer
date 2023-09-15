@@ -1,4 +1,5 @@
 import { BorderType } from '@univerjs/core';
+
 import { SlidePlugin } from '../SlidePlugin';
 
 export interface BorderInfo {

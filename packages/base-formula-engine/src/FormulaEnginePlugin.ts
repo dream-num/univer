@@ -1,5 +1,5 @@
-import { Injector, Inject } from '@wendellhu/redi';
-import { SheetContext, Plugin } from '@univerjs/core';
+import { Plugin, SheetContext } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { FormulaEnginePluginObserver } from './Analysis/LexerNode';
 

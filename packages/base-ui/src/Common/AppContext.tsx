@@ -18,4 +18,4 @@ export type AppContextValues = {
     observerManager: ObserverManager;
 };
 
-export const AppContext = createContext<Partial<AppContextValues>>({});
+export const AppContext = createContext<AppContextValues>({} as unknown as AppContextValues);

@@ -3,7 +3,6 @@ import { FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
-
 import { BaseFunction } from './BaseFunction';
 import { Count } from './Count';
 import { Sum } from './Sum';

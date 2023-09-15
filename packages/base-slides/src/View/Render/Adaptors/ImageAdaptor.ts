@@ -1,7 +1,8 @@
 import { Picture } from '@univerjs/base-render';
 import { IPageElement, PageElementType } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
-import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
+
+import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../Adaptor';
 
 export class ImageAdaptor extends ObjectAdaptor {
     override zIndex = 1;

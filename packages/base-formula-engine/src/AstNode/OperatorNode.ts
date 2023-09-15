@@ -1,14 +1,14 @@
-import { OPERATOR_TOKEN_SET, OPERATOR_TOKEN_COMPARE_SET, operatorToken, compareToken } from '../Basics/Token';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { ErrorNode, BaseAstNode } from './BaseAstNode';
-import { NodeType, NODE_ORDER_MAP } from './NodeType';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { ErrorType } from '../Basics/ErrorType';
-import { BaseFunction } from '../Functions/BaseFunction';
 import { LexerNode } from '../Analysis/LexerNode';
+import { ErrorType } from '../Basics/ErrorType';
+import { ParserDataLoader } from '../Basics/ParserDataLoader';
+import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
+import { compareToken, OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../Basics/Token';
+import { BaseFunction } from '../Functions/BaseFunction';
 import { Compare } from '../Functions/meta/Compare';
-import { BaseAstNodeFactory } from './BaseAstNodeFactory';
 import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
+import { BaseAstNode, ErrorNode } from './BaseAstNode';
+import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 const PLUS_EXECUTOR_NAME = 'PLUS';
 

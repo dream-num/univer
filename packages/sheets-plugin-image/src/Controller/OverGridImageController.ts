@@ -9,7 +9,6 @@ import { IImagePluginData } from '../Symbol';
 import { ImportImageMenuItemFactory } from './menu';
 
 export class OverGridImageController extends Disposable {
-
     constructor(
         @Inject(Injector) readonly _injector: Injector,
         @Inject(IImagePluginData) _imagePluginData: Map<string, IOverGridImageProperty>,

@@ -1,7 +1,7 @@
-import { BooleanNumber, SheetTypes } from '../Enum';
 import { IKeyValue } from '../../Shared';
 import { ObjectArrayType } from '../../Shared/ObjectArray';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
+import { BooleanNumber, SheetTypes } from '../Enum';
 import { ICellData } from './ICellData';
 import { IColumnData } from './IColumnData';
 import { IRangeData, IRangeType } from './IRangeData';

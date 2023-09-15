@@ -1,8 +1,9 @@
-import { FORMULA_FUNCTION_REGISTRY } from './Registry';
+import '../Functions';
+
+import { LambdaRuntime } from '../AstNode/LambdaRuntime';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { ISuperTable, TableOptionType } from './Common';
-import { LambdaRuntime } from '../AstNode/LambdaRuntime';
-import '../Functions';
+import { FORMULA_FUNCTION_REGISTRY } from './Registry';
 
 export class ParserDataLoader {
     private _functionMap: Map<string, BaseFunction> = new Map();

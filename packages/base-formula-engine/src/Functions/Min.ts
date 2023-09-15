@@ -4,7 +4,6 @@ import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/Bas
 import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
 import { BooleanValueObject, NumberValueObject } from '../ValueObject/PrimitiveObject';
-
 import { BaseFunction } from './BaseFunction';
 
 const FUNCTION_NAME = 'MIN';
@@ -17,7 +16,7 @@ export class Min extends BaseFunction {
     override calculate(...variants: FunctionVariantType[]) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(Infinity);
         for (let i = 0; i < variants.length; i++) {
-            let variant = variants[i];
+            const variant = variants[i];
 
             if (variant.isReferenceObject() || (variant.isValueObject() && (variant as BaseValueObject).isArray())) {
                 (variant as BaseReferenceObject | ArrayValueObject).iterator((valueObject, row, column) => {

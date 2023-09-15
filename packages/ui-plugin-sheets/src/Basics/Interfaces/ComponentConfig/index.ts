@@ -1,3 +1,3 @@
-export * from './ToolbarConfig';
-export * from './RightMenuConfig';
 export * from './ISheetUIPluginConfig';
+export * from './RightMenuConfig';
+export * from './ToolbarConfig';

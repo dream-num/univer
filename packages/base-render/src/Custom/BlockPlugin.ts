@@ -1,4 +1,5 @@
-import { SheetContext, Observable, Plugin } from '@univerjs/core';
+import { Observable, Plugin, SheetContext } from '@univerjs/core';
+
 import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../Basics/Interfaces';
 

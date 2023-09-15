@@ -1,4 +1,5 @@
 import { Color, ConditionType, IColor, IRangeData, ISheetActionData, Nullable, RelativeDate, Sequence } from '@univerjs/core';
+
 import { BooleanCriteria } from '../Enum/BooleanCriteria';
 
 /**

@@ -44,6 +44,10 @@ export function makeCellToSelection(cellInfo: Nullable<ICellInfo>): Nullable<ISe
         endY = mergeInfo.endY;
         startX = mergeInfo.startX;
         endX = mergeInfo.endX;
+
+        endRow = mergeInfo.endRow;
+
+        endColumn = mergeInfo.endColumn;
     }
 
     return {

@@ -1,10 +1,11 @@
 import { BasePasteExtension, BasePasteExtensionFactory, IPasteData } from '@univerjs/base-ui';
+
 import { OperationPlugin } from '../../OperationPlugin';
 
 // copy paste delete cut insert // TODO 这个模块应该放到图片插件 @jerry
 export class PasteImageExtension extends BasePasteExtension<OperationPlugin> {
     execute() {
-        let content = this._data.html || this._data.plain;
+        const content = this._data.html || this._data.plain;
         console.info('cc--', content);
         return [];
     }

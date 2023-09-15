@@ -1,10 +1,10 @@
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { BaseAstNode } from './BaseAstNode';
-import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { LexerNode } from '../Analysis/LexerNode';
 import { BooleanValue } from '../Basics/Common';
-import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { ValueObjectFactory } from '../ValueObject/ArrayValueObject';
+import { BaseAstNode } from './BaseAstNode';
+import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class ValueNode extends BaseAstNode {
     constructor(private _operatorString: string) {

@@ -1,6 +1,7 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, CommandUnit } from '@univerjs/core';
-import { SetOverGridImageTypeApply } from '../Apply';
+import { ActionObservers, CommandUnit, ISheetActionData, SheetActionBase } from '@univerjs/core';
+
 import { ACTION_NAMES, OVER_GRID_IMAGE_PLUGIN_NAME } from '../../Basics';
+import { SetOverGridImageTypeApply } from '../Apply';
 
 export interface ISetImageTypeData extends ISheetActionData {
     id: string;

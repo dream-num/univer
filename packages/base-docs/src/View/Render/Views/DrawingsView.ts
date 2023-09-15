@@ -1,5 +1,6 @@
-import { Documents, BaseObject, Picture, Liquid, Scene } from '@univerjs/base-render';
+import { BaseObject, Documents, Liquid, Picture, Scene } from '@univerjs/base-render';
 import { Injector } from '@wendellhu/redi';
+
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 import { DOCS_VIEW_KEY } from './DocsView';
 

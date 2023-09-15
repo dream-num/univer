@@ -1,4 +1,5 @@
 import { Nullable, Observable } from '@univerjs/core';
+
 import { LambdaPrivacyVarType } from '../AstNode/BaseAstNode';
 
 interface LexerNodeJson {

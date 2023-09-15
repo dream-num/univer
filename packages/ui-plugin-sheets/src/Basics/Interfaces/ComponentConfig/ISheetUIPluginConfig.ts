@@ -1,4 +1,5 @@
 import { LocaleType } from '@univerjs/core';
+
 import { SheetRightMenuConfig } from './RightMenuConfig';
 import { SheetContainerConfig } from './SheetContainerConfig';
 import { SheetToolbarConfig } from './ToolbarConfig';

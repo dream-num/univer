@@ -1,4 +1,5 @@
-import { ObjectMatrix, BorderStyleTypes, VerticalAlign, HorizontalAlign, WrapStrategy } from '@univerjs/core';
+import { BorderStyleTypes, HorizontalAlign, ObjectMatrix, VerticalAlign, WrapStrategy } from '@univerjs/core';
+
 import { BORDER_TYPE } from '../../Basics/Const';
 import { DocumentSkeleton } from '../Docs/DocSkeleton';
 

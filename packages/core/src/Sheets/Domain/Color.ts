@@ -1,7 +1,7 @@
-import { ThemeColorType, ColorType, ThemeColors } from '../../Types/Enum';
 import { Nullable } from '../../Shared';
-import { ColorBuilder } from './ColorBuilder';
 import { THEME_COLORS } from '../../Types/Const/THEME_COLOR_MAP';
+import { ColorType, ThemeColors, ThemeColorType } from '../../Types/Enum';
+import { ColorBuilder } from './ColorBuilder';
 
 export class Color {
     protected _builder: ColorBuilder;
@@ -22,9 +22,9 @@ export class Color {
         } else {
             hexValue = '#000000';
         }
-        let r = +`0x${hexValue[0]}${hexValue[1]}`;
-        let g = +`0x${hexValue[2]}${hexValue[3]}`;
-        let b = +`0x${hexValue[4]}${hexValue[5]}`;
+        const r = +`0x${hexValue[0]}${hexValue[1]}`;
+        const g = +`0x${hexValue[2]}${hexValue[3]}`;
+        const b = +`0x${hexValue[4]}${hexValue[5]}`;
         return new ColorBuilder().setRgbColor(`rgb(${r},${g},${b})`).asRgbColor();
     }
 

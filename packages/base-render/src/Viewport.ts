@@ -1,18 +1,12 @@
-import { EventState, Observable, Nullable, IKeyValue } from '@univerjs/core';
-import { toPx } from './Basics/Tools';
-
-import { PointerInput, IWheelEvent } from './Basics/IEvents';
-
-import { Canvas } from './Canvas';
-
-import { IBoundRect, Vector2 } from './Basics/Vector2';
-
-import { Transform } from './Basics/Transform';
-
-import { BaseScrollBar } from './Shape/BaseScrollBar';
+import { EventState, IKeyValue, Nullable, Observable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from './Basics/Const';
-
+import { IWheelEvent, PointerInput } from './Basics/IEvents';
+import { toPx } from './Basics/Tools';
+import { Transform } from './Basics/Transform';
+import { IBoundRect, Vector2 } from './Basics/Vector2';
+import { Canvas } from './Canvas';
+import { BaseScrollBar } from './Shape/BaseScrollBar';
 import { ThinScene } from './ThinScene';
 
 interface IViewPosition {

@@ -15,7 +15,7 @@ export class KeyIterator<K, V> implements IterableIterator<K> {
     }
 
     next(): IteratorResult<K, K | undefined> {
-        let ent = this.entry;
+        const ent = this.entry;
         if (ent) {
             this.entry = ent[NEWER];
             return { done: false, value: ent.key };
@@ -36,7 +36,7 @@ export class ValueIterator<K, V> implements IterableIterator<V> {
     }
 
     next(): IteratorResult<V, V | undefined> {
-        let ent = this.entry;
+        const ent = this.entry;
         if (ent) {
             this.entry = ent[NEWER];
             return { done: false, value: ent.value };
@@ -57,7 +57,7 @@ export class EntryIterator<K, V> implements IterableIterator<[K, V]> {
     }
 
     next(): IteratorResult<[K, V], [K, V] | undefined> {
-        let ent = this.entry;
+        const ent = this.entry;
         if (ent) {
             this.entry = ent[NEWER];
             return { done: false, value: [ent.key, ent.value] };
@@ -171,9 +171,9 @@ export class LRUMap<K, V> {
         let entry;
         let limit = this.limit || Number.MAX_VALUE;
         this._keymap.clear();
-        let it = entries[Symbol.iterator]();
+        const it = entries[Symbol.iterator]();
         for (let itv = it.next(); !itv.done; itv = it.next()) {
-            let e = new Entry(itv.value[0], itv.value[1]);
+            const e = new Entry(itv.value[0], itv.value[1]);
             this._keymap.set(e.key, e);
             if (!entry) {
                 this.oldest = e;
@@ -225,7 +225,7 @@ export class LRUMap<K, V> {
 
     shift(): [K, V] | undefined {
         // todo: handle special case when limit == 1
-        let entry = this.oldest;
+        const entry = this.oldest;
         if (entry) {
             if (this.oldest && this.oldest[NEWER]) {
                 // advance the list
@@ -259,12 +259,12 @@ export class LRUMap<K, V> {
     }
 
     find(key: K): V | undefined {
-        let e = this._keymap.get(key);
+        const e = this._keymap.get(key);
         return e ? e.value : undefined;
     }
 
     delete(key: K): V | undefined {
-        let entry = this._keymap.get(key);
+        const entry = this._keymap.get(key);
         if (!entry) return;
         this._keymap.delete(entry.key);
         if (entry[NEWER] && entry[OLDER]) {
@@ -326,7 +326,7 @@ export class LRUMap<K, V> {
     }
 
     toJSON(): Array<{ key: K; value: V }> {
-        let s = new Array(this.size);
+        const s = new Array(this.size);
         let i = 0;
         let entry = this.oldest;
         while (entry) {

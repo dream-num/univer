@@ -1,28 +1,17 @@
 import {
+    BooleanNumber,
+    DataStreamTreeNode,
+    DataStreamTreeTokenType,
+    DocumentBodyModel,
+    GridType,
+    HorizontalAlign,
     IBullet,
+    ICustomBlock,
     IDrawing,
     IDrawings,
     Nullable,
     PositionedObjectLayoutType,
-    DataStreamTreeNode,
-    GridType,
-    HorizontalAlign,
-    BooleanNumber,
-    DataStreamTreeTokenType,
-    ICustomBlock,
-    DocumentBodyModel,
 } from '@univerjs/core';
-import { dealWidthBullet } from './Bullet';
-import { dealWidthInlineDrawing } from './InlineDrawing';
-
-import { clearFontCreateConfigCache, getCharSpaceApply, getFontCreateConfig, getLastNotFullColumnInfo, getSpanGroupWidth, lineIterator } from '../../Common/Tools';
-// eslint-disable-next-line import/no-cycle
-import { createSkeletonPage } from '../../Common/Page';
-import { setColumnFullState } from '../../Common/Section';
-
-import { calculateParagraphLayout } from './Layout.Ruler';
-
-import { composeCharForLanguage } from './Language.Ruler';
 
 import {
     BreakType,
@@ -33,7 +22,15 @@ import {
     ISkeletonResourceReference,
 } from '../../../../Basics/IDocumentSkeletonCached';
 import { IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interfaces';
+// eslint-disable-next-line import/no-cycle
+import { createSkeletonPage } from '../../Common/Page';
+import { setColumnFullState } from '../../Common/Section';
 import { createSkeletonTabSpan, createSkeletonWordSpan } from '../../Common/Span';
+import { clearFontCreateConfigCache, getCharSpaceApply, getFontCreateConfig, getLastNotFullColumnInfo, getSpanGroupWidth, lineIterator } from '../../Common/Tools';
+import { dealWidthBullet } from './Bullet';
+import { dealWidthInlineDrawing } from './InlineDrawing';
+import { composeCharForLanguage } from './Language.Ruler';
+import { calculateParagraphLayout } from './Layout.Ruler';
 
 // eslint-disable-next-line max-lines-per-function
 export function dealWidthParagraph(

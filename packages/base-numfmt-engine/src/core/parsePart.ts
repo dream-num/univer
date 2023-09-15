@@ -1,6 +1,5 @@
+import { _numchars, _sp_chars, EPOCH_1317, EPOCH_1900, indexColors, u_CSEC, u_DAY, u_DSEC, u_HOUR, u_MIN, u_MONTH, u_MSEC, u_SEC, u_YEAR } from './constants';
 import { resolveLocale } from './locale';
-
-import { u_YEAR, u_MONTH, u_DAY, u_HOUR, u_MIN, u_SEC, u_DSEC, u_CSEC, u_MSEC, EPOCH_1900, EPOCH_1317, _numchars, _sp_chars, indexColors } from './constants';
 
 export interface TokensType {
     type?: string;
@@ -145,7 +144,7 @@ export function parsePart(pattern: string): PartType {
     let current_pattern = 'int';
     let part_over = false;
     let last_number_chunk = null;
-    let date_chunks = [];
+    const date_chunks = [];
     let last;
     let have_locale = false;
     let m: RegExpExecArray | string[];

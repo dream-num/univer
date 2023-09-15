@@ -1,2 +1,2 @@
-export * from './PLUGIN_NAME';
 export * from './DefaultUniverSheetConfig';
+export * from './PLUGIN_NAME';

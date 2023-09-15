@@ -79,7 +79,6 @@ import { NumfmtModalController } from './NumfmtModalController';
         }));
  */
 export class NumfmtController extends Disposable {
-
     constructor(
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(Injector) private readonly _injector: Injector,

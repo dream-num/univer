@@ -1,7 +1,7 @@
-import { BlockPlugin } from './BlockPlugin';
-import { BulletPlugin } from './BulletPlugin';
 import { IDocumentSkeletonPage, ISkeletonResourceReference } from '../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../Basics/Interfaces';
+import { BlockPlugin } from './BlockPlugin';
+import { BulletPlugin } from './BulletPlugin';
 
 const DOCUMENT_CUSTOM_BLOCK = 'documentCustomBlock';
 const DOCUMENT_CUSTOM_BULLET = 'documentCustomBullet';
@@ -11,7 +11,7 @@ export function dealWidthCustomBlock(
     custom: unknown,
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
-    skeletonResourceReference: ISkeletonResourceReference,
+    skeletonResourceReference: ISkeletonResourceReference
 ) {
     if (!context) {
         return [];

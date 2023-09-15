@@ -1,4 +1,5 @@
 import { Picture } from '@univerjs/base-render';
+
 import { IOverGridImageProperty, OverGridImageBorderType } from '../../Basics';
 
 export class OverImageShape extends Picture {

@@ -1,5 +1,5 @@
-import { Sequence } from './Sequence';
 import { Tools } from '../Tools';
+import { Sequence } from './Sequence';
 import { Serialize } from './Serialize';
 
 type SerializeClassType<T extends typeof Serialize = typeof Serialize> = T;
@@ -24,20 +24,16 @@ export class SerializeManager {
         }
     }
 
-    fromSequence<I extends Serialize>(
-        sequence: object[]
-    ): Array<SerializeInstance<I>>;
+    fromSequence<I extends Serialize>(sequence: object[]): Array<SerializeInstance<I>>;
     fromSequence<I extends Serialize>(sequence: object): SerializeInstance<I>;
-    fromSequence<I extends Serialize>(
-        sequence: object | object[]
-    ): Array<SerializeInstance<I>> | SerializeInstance<I> {
+    fromSequence<I extends Serialize>(sequence: object | object[]): Array<SerializeInstance<I>> | SerializeInstance<I> {
         if (Tools.isObject<Sequence>(sequence)) {
             const Clazz = this._storage.get(sequence.className!) as typeof Serialize;
             return Clazz.fromSequence(sequence) as SerializeInstance<I>;
         }
         if (Tools.isArray<Sequence>(sequence)) {
-            let result = new Array<SerializeInstance<I>>();
-            for (let element of sequence) {
+            const result = new Array<SerializeInstance<I>>();
+            for (const element of sequence) {
                 result.push(this.fromSequence(element) as SerializeInstance<I>);
             }
             return result;
@@ -47,15 +43,13 @@ export class SerializeManager {
 
     toSequence(instance: SerializeInstance[]): SequenceInstance[];
     toSequence(instance: SerializeInstance): SequenceInstance;
-    toSequence(
-        instance: SerializeInstance | SerializeInstance[]
-    ): SequenceInstance[] | SequenceInstance {
+    toSequence(instance: SerializeInstance | SerializeInstance[]): SequenceInstance[] | SequenceInstance {
         if (Tools.isObject<SerializeInstance>(instance)) {
             return instance.toSequence();
         }
         if (Tools.isArray<SerializeInstance>(instance)) {
-            let result = new Array<SequenceInstance>();
-            for (let element of instance) {
+            const result = new Array<SequenceInstance>();
+            for (const element of instance) {
                 result.push(this.toSequence(element));
             }
             return result;

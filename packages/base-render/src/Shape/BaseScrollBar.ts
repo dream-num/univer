@@ -1,7 +1,7 @@
 import { IKeyValue } from '@univerjs/core';
+
 import { Vector2 } from '../Basics/Vector2';
 import { ThinScene } from '../ThinScene';
-
 import { Rect } from './Rect';
 
 export interface IScrollBarProps {

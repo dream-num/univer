@@ -16,7 +16,6 @@ export * from './Basics';
 export * from './Docs/Domain';
 export * from './Observer';
 export * from './Plugin';
-export * from './Server';
 export { CommandType, ICommand, ICommandInfo, ICommandService, IMutation, IOperation } from './services/command/command.service';
 export { ICurrentUniverService } from './services/current.service';
 export { LocaleService } from './services/locale.service';

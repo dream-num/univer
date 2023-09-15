@@ -1,11 +1,11 @@
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { ErrorNode, BaseAstNode, LambdaPrivacyVarType } from './BaseAstNode';
-import { NodeType, NODE_ORDER_MAP } from './NodeType';
 import { LexerNode } from '../Analysis/LexerNode';
+import { ErrorType } from '../Basics/ErrorType';
+import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../Basics/TokenType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
-import { ErrorType } from '../Basics/ErrorType';
+import { BaseAstNode, ErrorNode, LambdaPrivacyVarType } from './BaseAstNode';
 import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class LambdaParameterNode extends BaseAstNode {
     constructor(token: string, private _lambdaParameter: string, private _currentLambdaPrivacyVar: LambdaPrivacyVarType) {

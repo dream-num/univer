@@ -1,4 +1,5 @@
 import { Observable } from '@univerjs/core';
+
 import { DocUIPlugin } from '../DocUIPlugin';
 import { DocContainer } from '../View';
 

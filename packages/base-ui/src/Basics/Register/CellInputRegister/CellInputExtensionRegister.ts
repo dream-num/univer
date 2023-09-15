@@ -1,4 +1,5 @@
 import { sortRules } from '@univerjs/core';
+
 import { BaseCellInputExtensionFactory } from './CellInputExtensionFactory';
 import { REGISTRY_CELL_INPUT_FACTORY } from './RegistryFactory';
 

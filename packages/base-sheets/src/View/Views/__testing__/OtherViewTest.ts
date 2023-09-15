@@ -1,4 +1,4 @@
-import { getColor, Path, Picture, Rect, Circle, RichText, Scene } from '@univerjs/base-render';
+import { Circle, getColor, Path, Picture, Rect, RichText, Scene } from '@univerjs/base-render';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -12,6 +12,7 @@ import {
     SectionType,
     WrapTextType,
 } from '@univerjs/core';
+
 import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView } from '../../BaseView';
 

@@ -1,4 +1,5 @@
 import { Observable } from '@univerjs/core';
+
 import { SlideUIPlugin } from '../SlideUIPlugin';
 import { SlideContainer } from '../View';
 

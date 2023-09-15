@@ -1,8 +1,8 @@
 import { IKeyType, IKeyValue, Nullable } from '../../Shared/Types';
 import { BooleanNumber, LocaleType } from '../Enum';
+import { INamedRange } from './INamedRange';
 import { IStyleData } from './IStyleData';
 import { IWorksheetConfig } from './IWorksheetData';
-import { INamedRange } from './INamedRange';
 
 /**
  * Properties of a workbook's configuration

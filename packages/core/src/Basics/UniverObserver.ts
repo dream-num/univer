@@ -1,5 +1,5 @@
-import { UIObserver } from '../Types/Interfaces';
 import { Observable } from '../Observer/Observable';
+import { UIObserver } from '../Types/Interfaces';
 
 export type UniverObserver<T> = {
     onUIChangeObservable: Observable<UIObserver<T>>;

@@ -2,6 +2,7 @@ import { IFormulaData } from '@univerjs/base-formula-engine';
 import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univerjs/base-ui';
 import { ICurrentUniverService, IRangeData, Nullable, ObjectArray } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
+
 import { FormulaController } from '../../Controller/FormulaController';
 
 export class FormulaCellInputExtension extends BaseCellInputExtension {

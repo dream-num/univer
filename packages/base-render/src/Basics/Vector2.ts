@@ -67,17 +67,17 @@ export class Vector2 implements IPoint {
      * @returns a new Vector2
      */
     static CatmullRom(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>, value3: DeepImmutable<Vector2>, value4: DeepImmutable<Vector2>, amount: number): Vector2 {
-        let squared = amount * amount;
-        let cubed = amount * squared;
+        const squared = amount * amount;
+        const cubed = amount * squared;
 
-        let x =
+        const x =
             0.5 *
             (2.0 * value2.x +
                 (-value1.x + value3.x) * amount +
                 (2.0 * value1.x - 5.0 * value2.x + 4.0 * value3.x - value4.x) * squared +
                 (-value1.x + 3.0 * value2.x - 3.0 * value3.x + value4.x) * cubed);
 
-        let y =
+        const y =
             0.5 *
             (2.0 * value2.y +
                 (-value1.y + value3.y) * amount +
@@ -118,15 +118,15 @@ export class Vector2 implements IPoint {
      * @returns a new Vector2
      */
     static Hermite(value1: DeepImmutable<Vector2>, tangent1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>, tangent2: DeepImmutable<Vector2>, amount: number): Vector2 {
-        let squared = amount * amount;
-        let cubed = amount * squared;
-        let part1 = 2.0 * cubed - 3.0 * squared + 1.0;
-        let part2 = -2.0 * cubed + 3.0 * squared;
-        let part3 = cubed - 2.0 * squared + amount;
-        let part4 = cubed - squared;
+        const squared = amount * amount;
+        const cubed = amount * squared;
+        const part1 = 2.0 * cubed - 3.0 * squared + 1.0;
+        const part2 = -2.0 * cubed + 3.0 * squared;
+        const part3 = cubed - 2.0 * squared + amount;
+        const part4 = cubed - squared;
 
-        let x = value1.x * part1 + value2.x * part2 + tangent1.x * part3 + tangent2.x * part4;
-        let y = value1.y * part1 + value2.y * part2 + tangent1.y * part3 + tangent2.y * part4;
+        const x = value1.x * part1 + value2.x * part2 + tangent1.x * part3 + tangent2.x * part4;
+        const y = value1.y * part1 + value2.y * part2 + tangent1.y * part3 + tangent2.y * part4;
 
         return new Vector2(x, y);
     }
@@ -147,7 +147,7 @@ export class Vector2 implements IPoint {
         tangent2: DeepImmutable<Vector2>,
         time: number
     ): Vector2 {
-        let result = Vector2.Zero();
+        const result = Vector2.Zero();
 
         this.Hermite1stDerivativeToRef(value1, tangent1, value2, tangent2, time, result);
 
@@ -185,8 +185,8 @@ export class Vector2 implements IPoint {
      * @returns a new Vector2
      */
     static Lerp(start: DeepImmutable<Vector2>, end: DeepImmutable<Vector2>, amount: number): Vector2 {
-        let x = start.x + (end.x - start.x) * amount;
-        let y = start.y + (end.y - start.y) * amount;
+        const x = start.x + (end.x - start.x) * amount;
+        const y = start.y + (end.y - start.y) * amount;
         return new Vector2(x, y);
     }
 
@@ -206,7 +206,7 @@ export class Vector2 implements IPoint {
      * @returns a new Vector2
      */
     static Normalize(vector: DeepImmutable<Vector2>): Vector2 {
-        let newVector = Vector2.Zero();
+        const newVector = Vector2.Zero();
         this.NormalizeToRef(vector, newVector);
         return newVector;
     }
@@ -217,7 +217,7 @@ export class Vector2 implements IPoint {
      * @param result defines the vector where to store the result
      */
     static NormalizeToRef(vector: DeepImmutable<Vector2>, result: Vector2) {
-        let len = vector.length();
+        const len = vector.length();
 
         if (len === 0) {
             return;
@@ -234,8 +234,8 @@ export class Vector2 implements IPoint {
      * @returns a new Vector2
      */
     static Minimize(left: DeepImmutable<Vector2>, right: DeepImmutable<Vector2>): Vector2 {
-        let x = left.x < right.x ? left.x : right.x;
-        let y = left.y < right.y ? left.y : right.y;
+        const x = left.x < right.x ? left.x : right.x;
+        const y = left.y < right.y ? left.y : right.y;
         return new Vector2(x, y);
     }
 
@@ -246,8 +246,8 @@ export class Vector2 implements IPoint {
      * @returns a new Vector2
      */
     static Maximize(left: DeepImmutable<Vector2>, right: DeepImmutable<Vector2>): Vector2 {
-        let x = left.x > right.x ? left.x : right.x;
-        let y = left.y > right.y ? left.y : right.y;
+        const x = left.x > right.x ? left.x : right.x;
+        const y = left.y > right.y ? left.y : right.y;
         return new Vector2(x, y);
     }
 
@@ -276,10 +276,10 @@ export class Vector2 implements IPoint {
      * @returns true if the point "p" is in the triangle defined by the vectors "p0", "p1", "p2"
      */
     static PointInTriangle(p: DeepImmutable<Vector2>, p0: DeepImmutable<Vector2>, p1: DeepImmutable<Vector2>, p2: DeepImmutable<Vector2>) {
-        let a = (1 / 2) * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);
-        let sign = a < 0 ? -1 : 1;
-        let s = (p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * p.x + (p0.x - p2.x) * p.y) * sign;
-        let t = (p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * p.x + (p1.x - p0.x) * p.y) * sign;
+        const a = (1 / 2) * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);
+        const sign = a < 0 ? -1 : 1;
+        const s = (p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * p.x + (p0.x - p2.x) * p.y) * sign;
+        const t = (p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * p.x + (p1.x - p0.x) * p.y) * sign;
 
         return s > 0 && t > 0 && s + t < 2 * a * sign;
     }
@@ -301,8 +301,8 @@ export class Vector2 implements IPoint {
      * @returns the squared distance between vectors
      */
     static DistanceSquared(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>): number {
-        let x = value1.x - value2.x;
-        let y = value1.y - value2.y;
+        const x = value1.x - value2.x;
+        const y = value1.y - value2.y;
         return x * x + y * y;
     }
 
@@ -335,13 +335,13 @@ export class Vector2 implements IPoint {
      * @returns the shortest distance
      */
     static DistanceOfPointFromSegment(p: DeepImmutable<Vector2>, segA: DeepImmutable<Vector2>, segB: DeepImmutable<Vector2>): number {
-        let l2 = Vector2.DistanceSquared(segA, segB);
+        const l2 = Vector2.DistanceSquared(segA, segB);
         if (l2 === 0.0) {
             return Vector2.Distance(p, segA);
         }
-        let v = segB.subtract(segA);
-        let t = Math.max(0, Math.min(1, Vector2.Dot(p.subtract(segA), v) / l2));
-        let proj = segA.add(v.multiplyByFloats(t, t));
+        const v = segB.subtract(segA);
+        const t = Math.max(0, Math.min(1, Vector2.Dot(p.subtract(segA), v) / l2));
+        const proj = segA.add(v.multiplyByFloats(t, t));
         return Vector2.Distance(p, proj);
     }
 
@@ -405,7 +405,7 @@ export class Vector2 implements IPoint {
      * @returns a new array with 2 elements: the Vector2 coordinates.
      */
     asArray(): number[] {
-        let result = new Array<number>();
+        const result = new Array<number>();
         this.toArray(result, 0);
         return result;
     }
@@ -631,7 +631,7 @@ export class Vector2 implements IPoint {
      * @returns a new Vector2
      */
     scale(scale: number): Vector2 {
-        let result = new Vector2(0, 0);
+        const result = new Vector2(0, 0);
         this.scaleToRef(scale, result);
         return result;
     }

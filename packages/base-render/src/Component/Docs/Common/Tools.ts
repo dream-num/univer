@@ -2,21 +2,23 @@ import {
     AlignTypeH,
     AlignTypeV,
     BooleanNumber,
+    DataStreamTreeNode,
+    DocumentBodyModel,
     GridType,
     INumberUnit,
+    IParagraphStyle,
+    ITextStyle,
     Nullable,
     NumberUnitType,
+    ObjectMatrix,
     ObjectPositionH,
     ObjectPositionV,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
     SpacingRule,
-    DataStreamTreeNode,
-    IParagraphStyle,
-    ITextStyle,
-    ObjectMatrix,
-    DocumentBodyModel,
 } from '@univerjs/core';
+
+import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../Basics/Const';
 import {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
@@ -25,9 +27,8 @@ import {
     IDocumentSkeletonSpan,
     SpanType,
 } from '../../../Basics/IDocumentSkeletonCached';
-import { getFontStyleString, isFunction } from '../../../Basics/Tools';
-import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../Basics/Const';
 import { IParagraphConfig, ISectionBreakConfig } from '../../../Basics/Interfaces';
+import { getFontStyleString, isFunction } from '../../../Basics/Tools';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages?.[pages.length - 1];

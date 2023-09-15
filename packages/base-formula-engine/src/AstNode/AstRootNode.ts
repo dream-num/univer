@@ -3,7 +3,7 @@ import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
 import { BaseAstNode } from './BaseAstNode';
 import { BaseAstNodeFactory } from './BaseAstNodeFactory';
-import { NodeType, NODE_ORDER_MAP } from './NodeType';
+import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class AstRootNode extends BaseAstNode {
     override get nodeType() {

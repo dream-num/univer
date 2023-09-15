@@ -1,4 +1,5 @@
 import { IPosition, ITextSelectionRange, Nullable, Tools } from '@univerjs/core';
+
 import { COLORS } from '../../../Basics/Const';
 import {
     IDocumentSkeletonColumn,
@@ -8,16 +9,14 @@ import {
     IDocumentSkeletonSection,
     SpanType,
 } from '../../../Basics/IDocumentSkeletonCached';
+import { INodePosition } from '../../../Basics/Interfaces';
 import { getColor } from '../../../Basics/Tools';
 import { IPoint } from '../../../Basics/Vector2';
-
 import { Rect } from '../../../Shape/Rect';
 import { RegularPolygon } from '../../../Shape/RegularPolygon';
-
-import { Liquid } from './Liquid';
-import { DocComponent } from '../DocComponent';
-import { INodePosition } from '../../../Basics/Interfaces';
 import { ThinScene } from '../../../ThinScene';
+import { DocComponent } from '../DocComponent';
+import { Liquid } from './Liquid';
 
 enum NodePositionStateType {
     NORMAL,

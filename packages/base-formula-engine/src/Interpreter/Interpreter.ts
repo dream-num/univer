@@ -1,14 +1,15 @@
 import { CellValueType, ICellData, IRangeData, ObjectMatrix } from '@univerjs/core';
+
 import { FunctionNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
 import { AstNodePromiseType, IInterpreterDatasetConfig, UnitArrayFormulaDataType, UnitDataType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
+import { PreCalculateNodeType } from '../Basics/NodeType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
 import { BaseValueObject, CalculateValueType } from '../ValueObject/BaseValueObject';
-import { PreCalculateNodeType } from '../Basics/NodeType';
 
 export class Interpreter {
     private _runtimeData: UnitDataType = {};

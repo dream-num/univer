@@ -1,5 +1,6 @@
-import { getBorderStyleType, IBorderData, ICellData, IDocumentData, IKeyValue, IRangeData, IStyleData, ITextDecoration, ITextRun, Tools } from '@univerjs/core';
 import { ptToPx, pxToPt } from '@univerjs/base-render';
+import { getBorderStyleType, IBorderData, ICellData, IDocumentData, IKeyValue, IRangeData, IStyleData, ITextDecoration, ITextRun, Tools } from '@univerjs/core';
+
 import { textTrim } from '../Utils';
 
 // TODO: move to Utils
@@ -40,16 +41,16 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
         } else {
             str = span.innerText;
         }
-        let textStyle = handleStringToStyle(span);
+        const textStyle = handleStringToStyle(span);
 
         // let str = span.innerText;
-        let spanTexts = splitSpanText(str);
+        const spanTexts = splitSpanText(str);
 
         spanTexts.forEach((item) => {
             const length = item.length;
             ed += length;
             st = ed - length;
-            let sId = Tools.generateRandomId(6);
+            const sId = Tools.generateRandomId(6);
 
             textRuns.push({
                 sId,
@@ -88,7 +89,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
     }
 
     const blockId = Tools.generateRandomId(6);
-    let p: IDocumentData = {
+    const p: IDocumentData = {
         id: Tools.generateRandomId(6),
         body: {
             dataStream,
@@ -112,10 +113,10 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
         return {};
     }
     cssText += cssStyle;
-    let cssTextArray = cssText.split(';');
-    let styleList: IStyleData = {};
+    const cssTextArray = cssText.split(';');
+    const styleList: IStyleData = {};
 
-    let borderInfo = {
+    const borderInfo = {
         t: '',
         r: '',
         b: '',
@@ -124,8 +125,8 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
 
     cssTextArray.forEach((s) => {
         s = s.toLowerCase();
-        let key = textTrim(s.substr(0, s.indexOf(':')));
-        let value = textTrim(s.substr(s.indexOf(':') + 1));
+        const key = textTrim(s.substr(0, s.indexOf(':')));
+        const value = textTrim(s.substr(s.indexOf(':') + 1));
 
         // bold
         if (key === 'font-weight') {
@@ -351,11 +352,11 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
                         s: 0,
                     },
                 };
-                for (let k in colors) {
+                for (const k in colors) {
                     (styleList.bd as IKeyValue)[k].cl.rgb = colors[k as keyof IBorderData];
                 }
             } else {
-                for (let k in colors) {
+                for (const k in colors) {
                     (styleList.bd as IKeyValue)[k].cl.rgb = colors[k as keyof IBorderData];
                 }
             }
@@ -363,7 +364,7 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
 
         if (key === 'border-width' || key === 'border-style') {
             const width = handleBorder(value, ' ');
-            for (let k in width) {
+            for (const k in width) {
                 (borderInfo as IKeyValue)[k] += ` ${width[k as keyof IBorderData]}`;
             }
             if (!styleList.bd) {
@@ -496,16 +497,16 @@ function handleBorder(border: string, param: string): IBorderData {
 export function splitSpanText(text: string) {
     if (text === '') return [text];
     const regex = /(?:(\n+.+)|(.+))/g;
-    let arr = text.match(regex)!;
-    let arr1 = arr.map((item) => item.replace(/\n/g, '\r\n'));
+    const arr = text.match(regex)!;
+    const arr1 = arr.map((item) => item.replace(/\n/g, '\r\n'));
     return arr1;
 }
 
 export function handleTableColgroup(table: string) {
     const content = document.createElement('DIV');
-    let data: any[] = [];
+    const data: any[] = [];
     content.innerHTML = table;
-    let colgroup = content.querySelectorAll('table col');
+    const colgroup = content.querySelectorAll('table col');
     if (!colgroup.length) return [];
     for (let i = 0; i < colgroup.length; i++) {
         const col = colgroup[i];
@@ -538,9 +539,9 @@ function getTdHeight(height: string | null, defaultHeight: number) {
 
 export function handleTableRowGroup(table: string) {
     const content = document.createElement('DIV');
-    let data: any[] = [];
+    const data: any[] = [];
     content.innerHTML = table;
-    let rowGroup = content.querySelectorAll('table tr');
+    const rowGroup = content.querySelectorAll('table tr');
     if (!rowGroup.length) return [];
     for (let i = 0; i < rowGroup.length; i++) {
         const row = rowGroup[i];
@@ -592,14 +593,14 @@ export function handelTableToJson(table: string) {
     trs.forEach((item: any) => {
         let c = 0;
         item.querySelectorAll('td').forEach((td: HTMLTableCellElement) => {
-            let cell: ICellData = {};
+            const cell: ICellData = {};
             if (td.querySelectorAll('span').length || td.querySelectorAll('font').length) {
                 const spanStyle = handleDomToJson(td);
                 if (typeof spanStyle !== 'string') {
                     cell.p = spanStyle;
                 }
             }
-            let txt = td.innerText;
+            const txt = td.innerText;
             if (txt.trim().length === 0) {
                 cell.v = '';
                 cell.m = '';
@@ -620,10 +621,10 @@ export function handelTableToJson(table: string) {
             }
             if (data[r][c] == null) {
                 data[r][c] = cell;
-                let rowSpan = Number(td.getAttribute('rowSpan')) ?? 1;
-                let colSpan = Number(td.getAttribute('colSpan')) ?? 1;
+                const rowSpan = Number(td.getAttribute('rowSpan')) ?? 1;
+                const colSpan = Number(td.getAttribute('colSpan')) ?? 1;
                 if (rowSpan > 1 || colSpan > 1) {
-                    let first = { rs: +rowSpan - 1, cs: +colSpan - 1, r, c };
+                    const first = { rs: +rowSpan - 1, cs: +colSpan - 1, r, c };
                     data[r][c].mc = first;
                     for (let rp = 0; rp < rowSpan; rp++) {
                         for (let cp = 0; cp < colSpan; cp++) {
@@ -645,12 +646,12 @@ export function handelTableToJson(table: string) {
 
 // 将文本格式数据转为sheet数据
 export function handlePlainToJson(plain: string) {
-    let data: any[] = [];
+    const data: any[] = [];
     const content = document.createElement('DIV');
     content.innerHTML = plain;
-    let dataChe = plain.replace(/\r/g, '');
-    let che = dataChe.split('\n');
-    let colCheLen = che[0].split('\t').length;
+    const dataChe = plain.replace(/\r/g, '');
+    const che = dataChe.split('\n');
+    const colCheLen = che[0].split('\t').length;
     for (let i = 0; i < che.length; i++) {
         if (che[i].split('\t').length < colCheLen) {
             continue;
@@ -675,8 +676,8 @@ export function handlePlainToJson(plain: string) {
 
 // 获取最终sheet数据
 export function handleTableMergeData(data: any[], selection?: IRangeData) {
-    let copyH = data.length;
-    let copyC = data[0].length;
+    const copyH = data.length;
+    const copyC = data[0].length;
     let minH = 0; //应用范围首尾行
     let maxH = minH + copyH - 1;
     let minC = 0; //应用范围首尾列
@@ -745,14 +746,14 @@ export function handelExcelToJson(html: string) {
     trs.forEach((item: any) => {
         let c = 0;
         item.querySelectorAll('td').forEach((td: HTMLTableCellElement) => {
-            let cell: ICellData = {};
+            const cell: ICellData = {};
             if (td.querySelectorAll('span').length || td.querySelectorAll('font').length) {
                 const spanStyle = handleDomToJson(td);
                 if (typeof spanStyle !== 'string') {
                     cell.p = spanStyle;
                 }
             }
-            let txt = td.innerText;
+            const txt = td.innerText;
             if (txt.trim().length === 0) {
                 cell.v = '';
                 cell.m = '';
@@ -763,7 +764,7 @@ export function handelExcelToJson(html: string) {
             }
 
             let cssText = '';
-            for (let attr in excelStyle) {
+            for (const attr in excelStyle) {
                 if (td.classList.contains(attr)) {
                     cssText += excelStyle[attr];
                 }
@@ -781,11 +782,11 @@ export function handelExcelToJson(html: string) {
             }
             if (data[r][c] == null) {
                 data[r][c] = cell;
-                let rowSpan = Number(td.getAttribute('rowSpan')) ?? 1;
-                let colSpan = Number(td.getAttribute('colSpan')) ?? 1;
+                const rowSpan = Number(td.getAttribute('rowSpan')) ?? 1;
+                const colSpan = Number(td.getAttribute('colSpan')) ?? 1;
 
                 if (rowSpan > 1 || colSpan > 1) {
-                    let first = { rs: +rowSpan - 1, cs: +colSpan - 1, r, c };
+                    const first = { rs: +rowSpan - 1, cs: +colSpan - 1, r, c };
                     data[r][c].mc = first;
                     for (let rp = 0; rp < rowSpan; rp++) {
                         for (let cp = 0; cp < colSpan; cp++) {
@@ -806,7 +807,7 @@ export function handelExcelToJson(html: string) {
 }
 
 function getStyles(styleText: string): IKeyValue {
-    let output: IKeyValue = {};
+    const output: IKeyValue = {};
     const string = styleText.replaceAll('<!--', '').replaceAll('-->', '').trim();
     const style = string?.replaceAll('\t', '').replaceAll('\n', '').split('}');
     for (let i = 0; i < style.length; i++) {

@@ -1,4 +1,21 @@
 import { BooleanNumber, DataStreamTreeTokenType, GridType, HorizontalAlign, INumberUnit, IParagraphStyle, NamedStyleType, SpacingRule } from '@univerjs/core';
+
+import {
+    IDocumentSkeletonBullet,
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonSpan,
+    LineType,
+    SpanType,
+} from '../../../../Basics/IDocumentSkeletonCached';
+import { IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interfaces';
+import { calculateLineTopByDrawings, createAndUpdateBlockAnchor, createSkeletonLine, setDivideFullState } from '../../Common/Line';
+// eslint-disable-next-line import/no-cycle
+import { createSkeletonPage } from '../../Common/Page';
+import { setColumnFullState } from '../../Common/Section';
+import { addSpanToDivide, createSkeletonBulletSpan } from '../../Common/Span';
 import {
     getCharSpaceApply,
     getCharSpaceConfig,
@@ -17,22 +34,6 @@ import {
     isBlankPage,
     isColumnFull,
 } from '../../Common/Tools';
-// eslint-disable-next-line import/no-cycle
-import { createSkeletonPage } from '../../Common/Page';
-import { calculateLineTopByDrawings, createAndUpdateBlockAnchor, createSkeletonLine, setDivideFullState } from '../../Common/Line';
-import { createSkeletonBulletSpan, addSpanToDivide } from '../../Common/Span';
-import { setColumnFullState } from '../../Common/Section';
-import {
-    IDocumentSkeletonBullet,
-    IDocumentSkeletonColumn,
-    IDocumentSkeletonDrawing,
-    IDocumentSkeletonLine,
-    IDocumentSkeletonPage,
-    IDocumentSkeletonSpan,
-    LineType,
-    SpanType,
-} from '../../../../Basics/IDocumentSkeletonCached';
-import { IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interfaces';
 
 export function calculateParagraphLayout(
     spanGroup: IDocumentSkeletonSpan[],

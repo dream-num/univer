@@ -1,4 +1,5 @@
 import { BaseCopyExtension, BaseCopyExtensionFactory } from '@univerjs/base-ui';
+
 import { OperationPlugin } from '../../OperationPlugin';
 
 export class CopyExtension extends BaseCopyExtension<OperationPlugin> {

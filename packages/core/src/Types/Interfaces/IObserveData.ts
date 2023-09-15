@@ -1,5 +1,5 @@
-import { Worksheet } from '../../Sheets/Domain';
 import { Observable } from '../../Observer';
+import { Worksheet } from '../../Sheets/Domain';
 
 /**
  * Worksheet Observable Data

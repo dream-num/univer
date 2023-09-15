@@ -1,18 +1,17 @@
 import {
     CommandType,
+    IBorderData,
+    ICurrentUniverService,
+    IDocumentData,
+    IKeyValue,
     IMutation,
     IStyleData,
-    ICurrentUniverService,
-    ObjectMatrix,
-    Tools,
-    Nullable,
-    IBorderData,
-    IKeyValue,
-    IDocumentData,
     ITextStyle,
+    Nullable,
+    ObjectMatrix,
     ObjectMatrixPrimitiveType,
+    Tools,
 } from '@univerjs/core';
-
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetBorderStylesMutationParams {

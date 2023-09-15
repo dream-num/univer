@@ -1,4 +1,5 @@
 import { Nullable } from '@univerjs/core';
+
 import { LexerNode } from '../Analysis/LexerNode';
 import { AstNodePromiseType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
@@ -6,11 +7,11 @@ import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { prefixToken } from '../Basics/Token';
 import { BaseFunction } from '../Functions/BaseFunction';
-import { BaseAstNode, ErrorNode } from './BaseAstNode';
-import { NodeType, NODE_ORDER_MAP } from './NodeType';
-import { PrefixNode } from './PrefixNode';
 import { AsyncObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
+import { BaseAstNode, ErrorNode } from './BaseAstNode';
 import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { NODE_ORDER_MAP, NodeType } from './NodeType';
+import { PrefixNode } from './PrefixNode';
 
 export class FunctionNode extends BaseAstNode {
     constructor(token: string, private _functionExecutor: BaseFunction) {

@@ -1,4 +1,5 @@
 import { BooleanNumber, ColumnSeparatorType, IDocumentData, SectionType } from '@univerjs/core';
+
 import { DEFAULT_LIST_TEST } from '../../Docs/DEFAULT_LIST';
 
 export const PAGE5_RICHTEXT_1: IDocumentData = {

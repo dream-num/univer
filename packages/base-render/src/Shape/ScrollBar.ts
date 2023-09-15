@@ -1,13 +1,14 @@
 import { EventState } from '@univerjs/core';
-import { Vector2 } from '../Basics/Vector2';
-import { IMouseEvent, IPointerEvent } from '../Basics/IEvents';
+
 import { COLORS, EVENT_TYPE } from '../Basics/Const';
+import { IMouseEvent, IPointerEvent } from '../Basics/IEvents';
 import { getColor } from '../Basics/Tools';
 import { Transform } from '../Basics/Transform';
+import { Vector2 } from '../Basics/Vector2';
 import { ThinScene } from '../ThinScene';
 import { Viewport } from '../Viewport';
-import { Rect } from './Rect';
 import { BaseScrollBar, IScrollBarProps } from './BaseScrollBar';
+import { Rect } from './Rect';
 
 const MINI_THUMB_SIZE = 17;
 
@@ -61,7 +62,7 @@ export class ScrollBar extends BaseScrollBar {
     }
 
     override render(ctx: CanvasRenderingContext2D, left: number = 0, top: number = 0) {
-        let { scrollX, scrollY } = this._view;
+        const { scrollX, scrollY } = this._view;
         ctx.save();
         const transform = new Transform([1, 0, 0, 1, left, top]);
         const m = transform.getMatrix();

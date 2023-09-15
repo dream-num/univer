@@ -1,23 +1,24 @@
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
 import {
+    BooleanNumber,
+    DocumentModelSimple,
+    IBorderData,
+    IColorStyle,
     IDocumentData,
     IKeyValue,
-    ITransformState,
     IStyleBase,
-    BooleanNumber,
     ITextDecoration,
-    IColorStyle,
-    IBorderData,
-    Nullable,
-    DocumentModelSimple,
+    ITransformState,
     LocaleService,
+    Nullable,
 } from '@univerjs/core';
-import { Canvas } from '../Canvas';
+
 import { BaseObject } from '../BaseObject';
-import { IBoundRect } from '../Basics/Vector2';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../Basics/Interfaces';
 import { transformBoundingCoord } from '../Basics/Position';
+import { IBoundRect } from '../Basics/Vector2';
+import { Canvas } from '../Canvas';
 import { DocumentSkeleton } from '../Component/Docs/DocSkeleton';
 import { Documents } from '../Component/Docs/Document';
 

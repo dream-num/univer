@@ -1,8 +1,9 @@
 import { IBullet, ILists, INestingLevel, ITextStyle, Nullable } from '@univerjs/core';
+
 import { FontCache } from '../../../../Basics/FontCache';
-import { getFontStyleString } from '../../../../Basics/Tools';
 import { IDocumentSkeletonBullet } from '../../../../Basics/IDocumentSkeletonCached';
 import { IFontLocale } from '../../../../Basics/Interfaces';
+import { getFontStyleString } from '../../../../Basics/Tools';
 import { getBulletOrderedSymbol } from './Bullet.Ruler';
 
 export function dealWidthBullet(

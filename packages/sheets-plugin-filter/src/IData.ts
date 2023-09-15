@@ -1,5 +1,6 @@
-import { SheetContext } from '@univerjs/core';
 import { BaseComponentProps } from '@univerjs/base-ui/src/BaseComponent';
+import { SheetContext } from '@univerjs/core';
+
 import { FilterPlugin } from './FilterPlugin';
 
 export type IConfig = {

@@ -1,8 +1,9 @@
 import { DataStreamTreeNode, DataStreamTreeTokenType, DocumentBodyModel, IParagraphStyle, Nullable } from '@univerjs/core';
-import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../Common/Span';
-import { hasArabic, hasCJK, hasSpaceAndTab, hasTibetan } from '../../../../Basics/Tools';
+
 import { IDocumentSkeletonSpan } from '../../../../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../../../../Basics/Interfaces';
+import { hasArabic, hasCJK, hasSpaceAndTab, hasTibetan } from '../../../../Basics/Tools';
+import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../Common/Span';
 import { getFontCreateConfig } from '../../Common/Tools';
 
 interface LanguageResult {

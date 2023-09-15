@@ -1,6 +1,7 @@
-import { SheetActionBase, ActionObservers, Workbook } from '@univerjs/core';
-import { ACTION_NAMES } from '../Const';
+import { ActionObservers, SheetActionBase, Workbook } from '@univerjs/core';
+
 import { AddFilter, RemoveFilter } from '../Apply';
+import { ACTION_NAMES } from '../Const';
 import { IAddFilterActionData, IRemoveFilterActionData } from '../IData/FilterType';
 
 export class AddFilterAction extends SheetActionBase<IAddFilterActionData, IRemoveFilterActionData> {

@@ -1,9 +1,10 @@
 import { Nullable } from '@univerjs/core';
+
 import { AstNodePromiseType, IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
-import { NodeType } from './NodeType';
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
+import { NodeType } from './NodeType';
 
 interface AstNodeNodeJson {
     token: string;

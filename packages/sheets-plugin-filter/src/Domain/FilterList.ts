@@ -1,6 +1,7 @@
 import { GroupModel, Sequence, Serializer, Tools } from '@univerjs/core';
-import { Filter } from './Filter';
+
 import { IFilter } from '../IData/FilterType';
+import { Filter } from './Filter';
 
 export interface IFilterPluginConfig extends Sequence {
     filters?: {

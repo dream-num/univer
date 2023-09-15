@@ -1,11 +1,9 @@
 import { IDrawing, Nullable, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
-import { IDocumentSkeletonDrawingAnchor, IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonLine, LineType } from '../../../Basics/IDocumentSkeletonCached';
 
-import { Vector2 } from '../../../Basics/Vector2';
-
+import { IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonDrawingAnchor, IDocumentSkeletonLine, LineType } from '../../../Basics/IDocumentSkeletonCached';
 import { Path2 } from '../../../Basics/Path2';
-
 import { Transform } from '../../../Basics/Transform';
+import { Vector2 } from '../../../Basics/Vector2';
 
 interface IDrawingsSplit {
     left: number;

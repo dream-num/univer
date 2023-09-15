@@ -3,7 +3,7 @@ export function binarySearchArray(arr: number[], pos: number) {
     let high = arr.length - 1;
 
     while (low <= high) {
-        let mid = Math.floor((high + low) / 2);
+        const mid = Math.floor((high + low) / 2);
 
         if (pos < arr[mid] && (mid === 0 || pos >= arr[mid - 1])) {
             return mid;

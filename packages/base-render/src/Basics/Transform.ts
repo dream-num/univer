@@ -1,6 +1,7 @@
 import { ITransformState } from '@univerjs/core';
-import { degToRad, precisionTo, radToDeg } from './Tools';
+
 import { IRect } from './Interfaces';
+import { degToRad, precisionTo, radToDeg } from './Tools';
 import { Vector2 } from './Vector2';
 
 export const INITIAL_MATRIX: number[] = [1, 0, 0, 1, 0, 0];

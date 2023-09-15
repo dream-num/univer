@@ -1,4 +1,5 @@
 import { PageElementType, PageType, ShapeType } from '@univerjs/core';
+
 import { PAGE3_RICHTEXT_1 } from '../RichText/PAGE3_RICHTEXT_1';
 import { PAGE3_RICHTEXT_2 } from '../RichText/PAGE3_RICHTEXT_2';
 import { PAGE3_RICHTEXT_3 } from '../RichText/PAGE3_RICHTEXT_3';

@@ -1,4 +1,5 @@
-import { SheetActionBase, ActionObservers, ISheetActionData, CommandUnit, ActionType } from '@univerjs/core';
+import { ActionObservers, ActionType, CommandUnit, ISheetActionData, SheetActionBase } from '@univerjs/core';
+
 import { ACTION_NAMES, OverGridImageBorderType } from '../../Basics';
 import { AddOverGridImageApply, RemoveOverGridImageApply } from '../Apply';
 import { IRemoveOverGridImageActionData } from './RemoveOverGridImageAction';

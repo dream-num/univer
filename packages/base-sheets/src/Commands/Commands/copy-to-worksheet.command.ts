@@ -1,5 +1,6 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import { ISetWorksheetConfigMutationParams, SetWorksheetConfigMutation, SetWorksheetConfigUndoMutationFactory } from '../Mutations/set-worksheet-config.mutation';
 
 export interface ICopySheetToCommandParams {

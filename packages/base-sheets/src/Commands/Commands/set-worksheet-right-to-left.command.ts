@@ -1,5 +1,6 @@
 import { BooleanNumber, CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
 import {
     ISetWorksheetRightToLeftMutationParams,
     SetWorksheetRightToLeftMutation,

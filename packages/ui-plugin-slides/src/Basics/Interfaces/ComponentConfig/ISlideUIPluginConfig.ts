@@ -1,4 +1,5 @@
 import { LocaleType } from '@univerjs/core';
+
 import { SlideContainerConfig } from './SlideContainerConfig';
 import { SlideToolbarConfig } from './ToolbarConfig';
 

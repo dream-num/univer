@@ -1,15 +1,16 @@
+import '../AstNode';
+
 import { AstRootNode } from '../AstNode/AstRootNode';
 import { BaseAstNode, ErrorNode } from '../AstNode/BaseAstNode';
+import { BaseAstNodeFactory } from '../AstNode/BaseAstNodeFactory';
+import { LambdaNode } from '../AstNode/LambdaNode';
+import { LambdaRuntime } from '../AstNode/LambdaRuntime';
 import { NodeType } from '../AstNode/NodeType';
 import { ErrorType } from '../Basics/ErrorType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { LexerNode } from './LexerNode';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
-import { LambdaRuntime } from '../AstNode/LambdaRuntime';
-import { BaseAstNodeFactory } from '../AstNode/BaseAstNodeFactory';
-import { LambdaNode } from '../AstNode/LambdaNode';
-import '../AstNode';
+import { LexerNode } from './LexerNode';
 
 export class AstTreeMaker {
     static maker: AstTreeMaker;

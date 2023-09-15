@@ -1,4 +1,5 @@
 import { sortRules } from '@univerjs/core';
+
 import { BaseCopyExtensionFactory } from './CopyExtensionFactory';
 
 export class CopyExtensionRegister {

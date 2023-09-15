@@ -1,9 +1,9 @@
-import { ColumnTitleLayout } from './Extensions/ColumnTitleLayout';
-import { IBoundRect, Vector2 } from '../../Basics/Vector2';
-import { SpreadsheetSkeleton } from './SheetSkeleton';
-import { SpreadsheetTitle } from './SheetComponent';
-import { SheetColumnTitleExtensionRegistry } from '../Extension';
 import { fixLineWidthByScale, getScale } from '../../Basics/Tools';
+import { IBoundRect, Vector2 } from '../../Basics/Vector2';
+import { SheetColumnTitleExtensionRegistry } from '../Extension';
+import { ColumnTitleLayout } from './Extensions/ColumnTitleLayout';
+import { SpreadsheetTitle } from './SheetComponent';
+import { SpreadsheetSkeleton } from './SheetSkeleton';
 
 export class SpreadsheetColumnTitle extends SpreadsheetTitle {
     private _columnTitleLayoutExtension: ColumnTitleLayout;
@@ -37,7 +37,7 @@ export class SpreadsheetColumnTitle extends SpreadsheetTitle {
         ctx.translate(fixLineWidthByScale(rowTitleWidth, scale) - 0.5 / scale, -0.5 / scale);
 
         const extensions = this.getExtensionsByOrder();
-        for (let extension of extensions) {
+        for (const extension of extensions) {
             extension.draw(ctx, parentScale, spreadsheetSkeleton);
         }
     }

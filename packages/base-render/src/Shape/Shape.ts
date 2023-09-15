@@ -1,10 +1,11 @@
 import { IKeyValue, IScale, Nullable } from '@univerjs/core';
-import { Canvas, getDevicePixelRatio } from '../Canvas';
-import { BaseObject, BASE_OBJECT_ARRAY } from '../BaseObject';
-import { IBoundRect, Vector2 } from '../Basics/Vector2';
+
+import { BASE_OBJECT_ARRAY, BaseObject } from '../BaseObject';
 import { SHAPE_TYPE } from '../Basics/Const';
-import { transformBoundingCoord } from '../Basics/Position';
 import { IObjectFullState } from '../Basics/Interfaces';
+import { transformBoundingCoord } from '../Basics/Position';
+import { IBoundRect, Vector2 } from '../Basics/Vector2';
+import { Canvas, getDevicePixelRatio } from '../Canvas';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';
@@ -269,7 +270,9 @@ export abstract class Shape<T> extends BaseObject {
      * @param {CanvasRenderingContext2D} ctx SheetContext to render on
      */
     private static _renderStroke(ctx: CanvasRenderingContext2D, props: IShapeProps) {
-        let { stroke, strokeWidth, shadowEnabled, shadowForStrokeEnabled, strokeScaleEnabled, scaleX, scaleY, parent } = props;
+        const { stroke, strokeWidth, shadowEnabled, shadowForStrokeEnabled, strokeScaleEnabled, parent } = props;
+
+        let { scaleX, scaleY } = props;
         if (!stroke || strokeWidth === 0) {
             return;
         }
@@ -280,7 +283,7 @@ export abstract class Shape<T> extends BaseObject {
 
         ctx.save();
         if (strokeScaleEnabled && parent) {
-            let scaling = this.__getObjectScaling();
+            const scaling = this.__getObjectScaling();
             ctx.scale(1 / scaling.scaleX, 1 / scaling.scaleY);
         } else if (strokeScaleEnabled) {
             scaleX = scaleX ?? 1;
@@ -380,8 +383,8 @@ export abstract class Shape<T> extends BaseObject {
     }
 
     override scaleCacheCanvas() {
-        let scaleX = this.getParent()?.ancestorScaleX || 1;
-        let scaleY = this.getParent()?.ancestorScaleX || 1;
+        const scaleX = this.getParent()?.ancestorScaleX || 1;
+        const scaleY = this.getParent()?.ancestorScaleX || 1;
 
         this._cacheCanvas?.setPixelRatio(Math.max(scaleX, scaleY) * getDevicePixelRatio());
         this.makeDirty(true);

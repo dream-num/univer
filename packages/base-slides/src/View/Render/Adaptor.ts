@@ -14,8 +14,9 @@ export class ObjectAdaptor {
         return this;
     }
 
-    convert(pageElement: IPageElement, mainScene: Scene) { }
-    create(injector: Injector){}
+    convert(pageElement: IPageElement, mainScene: Scene) {}
+
+    create(injector: Injector) {}
 }
 
 export const CanvasObjectProviderRegistry = Registry.create();

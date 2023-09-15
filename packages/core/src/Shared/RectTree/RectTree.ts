@@ -1,10 +1,8 @@
 import { Nullable } from '../Types';
 import { Compare, QuickSelect } from './QuickSelect';
 
-const defaultCompareNodeMinX = (a: RectTree.Node, b: RectTree.Node) =>
-    a.minX - b.minX;
-const defaultCompareNodeMinY = (a: RectTree.Node, b: RectTree.Node) =>
-    a.minY - b.minY;
+const defaultCompareNodeMinX = (a: RectTree.Node, b: RectTree.Node) => a.minX - b.minX;
+const defaultCompareNodeMinY = (a: RectTree.Node, b: RectTree.Node) => a.minY - b.minY;
 
 export class RectTree {
     private _maxEntries: number;
@@ -37,13 +35,7 @@ export class RectTree {
         return -1;
     }
 
-    static multiSelect(
-        array: RectTree.Node[],
-        left: number,
-        right: number,
-        n: number,
-        compare: Compare<RectTree.Node>
-    ) {
+    static multiSelect(array: RectTree.Node[], left: number, right: number, n: number, compare: Compare<RectTree.Node>) {
         // 对数组进行排序，以便项目以 n 个未排序项目为一组，各组在彼此之间排序；
         // 将选择算法与二元分治法相结合
         const stack: number[] = [left, right];
@@ -103,10 +95,7 @@ export class RectTree {
         return this;
     }
 
-    remove(
-        item: RectTree.Node,
-        equals: Nullable<EqualsFunction<RectTree.Node>>
-    ): RectTree {
+    remove(item: RectTree.Node, equals: Nullable<EqualsFunction<RectTree.Node>>): RectTree {
         if (!item) {
             return this;
         }
@@ -242,12 +231,7 @@ export class RectTree {
         }
     }
 
-    private _allDistMargin(
-        node: RectTree.Node,
-        m: number,
-        M: number,
-        compare: Compare<RectTree.Node>
-    ) {
+    private _allDistMargin(node: RectTree.Node, m: number, M: number, compare: Compare<RectTree.Node>) {
         node.childrenNodes.sort(compare);
         const leftBBox = node.distBBox(0, m);
         const rightBBox = node.distBBox(M - m, M);
@@ -277,12 +261,7 @@ export class RectTree {
 
         const splitIndex = this._chooseSplitIndex(node, m, M);
 
-        const newNode = RectTree.Node.makeParentNode(
-            node.childrenNodes.splice(
-                splitIndex,
-                node.childrenNodes.length - splitIndex
-            )
-        );
+        const newNode = RectTree.Node.makeParentNode(node.childrenNodes.splice(splitIndex, node.childrenNodes.length - splitIndex));
         newNode.height = node.height;
         newNode.leaf = node.leaf;
 
@@ -345,12 +324,7 @@ export class RectTree {
         this._adjustParentBBoxes(bbox, insertPath, level);
     }
 
-    private _build(
-        items: RectTree.Node[],
-        left: number,
-        right: number,
-        height: number
-    ) {
+    private _build(items: RectTree.Node[], left: number, right: number, height: number) {
         const N = right - left + 1;
         let M = this._maxEntries;
         let node;
@@ -420,23 +394,14 @@ export class RectTree {
         return index || M - m;
     }
 
-    private _adjustParentBBoxes(
-        bbox: RectTree.Node,
-        path: RectTree.Node[],
-        level: number
-    ) {
+    private _adjustParentBBoxes(bbox: RectTree.Node, path: RectTree.Node[], level: number) {
         // 沿给定的树路径调整 bbox
         for (let i = level; i >= 0; i--) {
             path[i].extend(bbox);
         }
     }
 
-    private _chooseSubtree(
-        bbox: RectTree.Node,
-        node: RectTree.Node,
-        level: number,
-        path: RectTree.Node[]
-    ) {
+    private _chooseSubtree(bbox: RectTree.Node, node: RectTree.Node, level: number, path: RectTree.Node[]) {
         // eslint-disable-next-line no-constant-condition
         while (true) {
             path.push(node);
@@ -515,10 +480,7 @@ export namespace RectTree {
             return new RectTree.Node({ childrenNodes });
         }
 
-        static expandNode(
-            node: RectTree.Node,
-            result: RectTree.Node[]
-        ): RectTree.Node[] {
+        static expandNode(node: RectTree.Node, result: RectTree.Node[]): RectTree.Node[] {
             const nodesToSearch: RectTree.Node[] = [];
             while (node) {
                 if (node.leaf) {
@@ -533,12 +495,7 @@ export namespace RectTree {
 
         difference(other: RectTree.Node, collect: Nullable<RectTree.Node[]>) {
             const ret: RectTree.Node[] = collect || [];
-            const addNode = (
-                minY: number,
-                minX: number,
-                maxY: number,
-                maxX: number
-            ) => {
+            const addNode = (minY: number, minX: number, maxY: number, maxX: number) => {
                 ret.push(
                     new RectTree.Node({
                         minY,
@@ -626,9 +583,7 @@ export namespace RectTree {
         distBBox(k: number, p: number, destNode: Nullable<RectTree.Node>) {
             // 从 k 到 p-1 的节点子节点的最小边界矩形
             if (!destNode) {
-                destNode = RectTree.Node.makeParentNode(
-                    null as unknown as RectTree.Node[]
-                );
+                destNode = RectTree.Node.makeParentNode(null as unknown as RectTree.Node[]);
             }
             destNode.minX = Infinity;
             destNode.minY = Infinity;
@@ -642,21 +597,11 @@ export namespace RectTree {
         }
 
         contains(other: RectTree.Node) {
-            return (
-                this.minX <= other.minX &&
-                this.minY <= other.minY &&
-                other.maxX <= this.maxX &&
-                other.maxY <= this.maxY
-            );
+            return this.minX <= other.minX && this.minY <= other.minY && other.maxX <= this.maxX && other.maxY <= this.maxY;
         }
 
         intersects(other: RectTree.Node) {
-            return (
-                other.minX <= this.maxX &&
-                other.minY <= this.maxY &&
-                other.maxX >= this.minX &&
-                other.maxY >= this.minY
-            );
+            return other.minX <= this.maxX && other.minY <= this.maxY && other.maxX >= this.minX && other.maxY >= this.minY;
         }
 
         extend(other: RectTree.Node): RectTree.Node {
@@ -668,10 +613,7 @@ export namespace RectTree {
         }
 
         enlargedArea(other: RectTree.Node) {
-            return (
-                (Math.max(other.maxX, this.maxX) - Math.min(other.minX, this.minX)) *
-                (Math.max(other.maxY, this.maxY) - Math.min(other.minY, this.minY))
-            );
+            return (Math.max(other.maxX, this.maxX) - Math.min(other.minX, this.minX)) * (Math.max(other.maxY, this.maxY) - Math.min(other.minY, this.minY));
         }
 
         intersectionArea(other: RectTree.Node) {

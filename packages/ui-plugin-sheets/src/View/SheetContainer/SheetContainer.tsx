@@ -20,7 +20,6 @@ export interface BaseSheetContainerProps extends BaseComponentProps {
 }
 
 export function RenderSheetFooter() {
-    console.log('should render sheet bar');
     return (
         <>
             <SheetBar></SheetBar>

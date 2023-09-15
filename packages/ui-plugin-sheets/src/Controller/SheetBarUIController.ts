@@ -1,6 +1,6 @@
 import { BaseComponentProps, ColorPicker, ComponentManager, IMenuItemFactory, IMenuService } from '@univerjs/base-ui';
-import { BooleanNumber, Disposable, ICommandService, ICurrentUniverService, Nullable, ObserverManager, UIObserver } from '@univerjs/core';
-import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
+import { BooleanNumber, Disposable, ICommandService, Nullable } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
 import { RenameSheetCommand } from '../commands/rename.command';
@@ -56,9 +56,7 @@ export class SheetBarUIController extends Disposable {
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @SkipSelf() @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuService private readonly _menuService: IMenuService
     ) {
@@ -69,18 +67,6 @@ export class SheetBarUIController extends Disposable {
         this._componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
 
         [ShowMenuListCommand, RenameSheetCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
-    }
-
-    setUIObserve<T>(type: string, msg: UIObserver<T>) {
-        this._observerManager.requiredObserver<UIObserver<T>>(type, 'core').notifyObservers(msg);
-    }
-
-    contextMenu(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        this._sheetBar.contextMenu(e);
-    }
-
-    showMenuList(show: boolean) {
-        this._sheetBar.showMenuList(show);
     }
 
     private _initializeContextMenu() {

@@ -42,7 +42,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         });
 
         this.initDependencies();
-        this.markSheetAsFocused();
+        this._markSheetAsFocused();
     }
 
     override onDestroy(): void {}
@@ -67,16 +67,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         this._appUIController.getSheetContainerController().getFormulaBarUIController().getFormulaBar().setFx(fx);
     }
 
-    /**
-     * This API is used in plugins for initialization that depends on UI rendering
-     * @param cb
-     * @returns
-     */
-    private UIDidMount(cb: Function) {
-        this._appUIController.getSheetContainerController().UIDidMount(cb);
-    }
-
-    private markSheetAsFocused() {
+    private _markSheetAsFocused() {
         const currentService = this._injector.get(ICurrentUniverService);
         const c = currentService.getCurrentUniverSheetInstance();
         currentService.focusUniverInstance(c.getUnitId());

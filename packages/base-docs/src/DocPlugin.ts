@@ -1,6 +1,6 @@
 import { Engine } from '@univerjs/base-render';
 import { ContextService, DesktopPlatformService, IContextService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
-import { ICommand, ICommandService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { ICommand, ICommandService, ICurrentUniverService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { DocPluginObserve, install } from './Basics/Observer';
@@ -37,7 +37,8 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
         config: Partial<IDocPluginConfig> = {},
         @SkipSelf() @Inject(Injector) _univerInjector: Injector,
         @Inject(Injector) override _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         super(PLUGIN_NAMES.DOCUMENT);
 
@@ -54,11 +55,12 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
         install(this);
 
-        if (!this._config.standalone) {
+        if (this._config.standalone) {
             this.initCanvasView();
         }
 
-        this.initController();
+        this._initController();
+        this._markDocAsFocused();
     }
 
     initializeCommands(): void {
@@ -83,7 +85,7 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
         });
     }
 
-    initController() {
+    _initController() {
         this._documentController = new DocumentController(this._injector);
     }
 
@@ -168,5 +170,12 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
         // add docs view manager to univer-level injector
         univerInjector.add([DocsViewManagerService]);
+    }
+
+    private _markDocAsFocused() {
+        if (this._config.standalone) {
+            const c = this._currentUniverService.getCurrentUniverDocInstance();
+            this._currentUniverService.focusUniverInstance(c.getUnitId());
+        }
     }
 }

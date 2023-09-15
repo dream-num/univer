@@ -64,7 +64,6 @@ export class InputController extends Disposable {
                     if (docsView) {
                         this._currentDocsView = docsView;
                         this._editorDisposables = this._initialize(docsView);
-                        // FIXME: should active the EditorElement
                     }
                 })
             )

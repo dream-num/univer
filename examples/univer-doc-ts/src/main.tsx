@@ -17,7 +17,9 @@ univer.registerPlugin(UIPlugin, {
     header: true,
     toolbar: true,
 });
-univer.registerPlugin(DocPlugin);
+univer.registerPlugin(DocPlugin, {
+    standalone: true,
+});
 univer.registerPlugin(DocUIPlugin, {
     container: 'univerdoc',
     layout: {

@@ -4,7 +4,6 @@
         "rootDir": "./",
         "outDir": "lib",
         "module": "commonjs",
-        "moduleResolution": "Node", //This value is needed for Node.js.
         "downlevelIteration": true,
         "baseUrl": "./",
         "esModuleInterop": true, // auto allowSyntheticDefaultImports true

@@ -16,9 +16,8 @@ export function getPositionOfCurrentCell(currentCell: ICellInfo, renderingEngine
     let endX: number;
     let startY: number;
     let endY: number;
-
+    const mergeInfo = currentCell.mergeInfo;
     if (currentCell.isMerged) {
-        const mergeInfo = currentCell.mergeInfo;
         startX = mergeInfo.startX;
         endX = mergeInfo.endX;
         startY = mergeInfo.startY;
@@ -28,6 +27,11 @@ export function getPositionOfCurrentCell(currentCell: ICellInfo, renderingEngine
         endX = currentCell.endX;
         startY = currentCell.startY;
         endY = currentCell.endY;
+    }
+
+    if (currentCell.isMergedMainCell) {
+        endX = mergeInfo.endX;
+        endY = mergeInfo.endY;
     }
 
     const mainScene = renderingEngine.getScene(CANVAS_VIEW_KEY.MAIN_SCENE);

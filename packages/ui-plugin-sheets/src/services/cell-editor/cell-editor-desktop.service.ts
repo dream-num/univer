@@ -304,21 +304,28 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
 }
 
 function getRangeFromCellInfo(cellInfo: ICellRange): IRangeData {
-    let row: number;
-    let column: number;
+    let startRow: number;
+    let startColumn: number;
+
+    let endRow: number;
+
+    let endColumn: number;
 
     if (cellInfo.isMerged) {
-        row = cellInfo.startRow;
-        column = cellInfo.startColumn;
+        startRow = cellInfo.startRow;
+        startColumn = cellInfo.startColumn;
+
+        endRow = cellInfo.endRow;
+        endColumn = cellInfo.endColumn;
     } else {
-        row = cellInfo.row;
-        column = cellInfo.column;
+        startRow = endRow = cellInfo.row;
+        startColumn = endColumn = cellInfo.column;
     }
 
     return {
-        startRow: row,
-        startColumn: column,
-        endRow: row,
-        endColumn: column,
+        startRow,
+        startColumn,
+        endRow,
+        endColumn,
     };
 }

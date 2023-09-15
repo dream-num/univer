@@ -1,5 +1,6 @@
-import { Rect, Documents, IPageRenderConfig, Scene } from '@univerjs/base-render';
+import { Documents, IPageRenderConfig, Rect, Scene } from '@univerjs/base-render';
 import { Injector } from '@wendellhu/redi';
+
 import { BaseView, CanvasViewRegistry } from '../BaseView';
 import { DOCS_VIEW_KEY } from './DocsView';
 

@@ -38,7 +38,9 @@ export class DocContainerUIController {
         }
 
         const engine = this._renderingEngine;
-        engine.setContainer(container);
+        // engine.setContainer(container);
+
+        // TODO: rendering engine should handle this problem internally
 
         window.addEventListener('resize', () => {
             engine.resize();

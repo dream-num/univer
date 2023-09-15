@@ -1,15 +1,17 @@
-import { LocaleService } from '@univerjs/core';
+import { Disposable, LocaleService } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { IFontLocale } from '../Basics/Interfaces';
 import { en, zh } from '../Locale';
 
-export class Skeleton {
+export class Skeleton extends Disposable {
     private _fontLocale: IFontLocale;
 
     private _dirty = true;
 
     constructor(@Inject(LocaleService) protected readonly _localService: LocaleService) {
+        super();
+
         this._localeInitial();
     }
 

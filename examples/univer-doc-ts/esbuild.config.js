@@ -5,7 +5,7 @@ const args = require('minimist')(process.argv.slice(2));
         bundle: true,
         color: true,
         loader: { '.svg': 'file' },
-        sourcemap: false,
+        sourcemap: true,
         plugins: [
             require('esbuild-plugin-clean').clean({
                 patterns: ['./local'],

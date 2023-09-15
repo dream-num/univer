@@ -36,7 +36,7 @@ export const SetWorksheetColWidthCommand: ICommand = {
         const result = commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return commandService.executeCommand(SetWorksheetColWidthMutation.id, undoMutationParams);
                 },

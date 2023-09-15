@@ -1,6 +1,6 @@
+import { Tools } from '../../Shared';
 import { DEFAULT_SLIDE } from '../../Types/Const';
 import { ISlideData, ISlidePage, PageType } from '../../Types/Interfaces';
-import { Tools } from '../../Shared';
 
 export class SlideModel {
     private _snapshot: ISlideData;

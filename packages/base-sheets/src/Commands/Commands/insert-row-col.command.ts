@@ -103,7 +103,7 @@ export const InsertRowCommand: ICommand = {
 
         if (result && deleteResult && removeResult && mergeResult) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return (commandService.executeCommand(DeleteRangeMutation.id, deleteRangeMutationParams) as Promise<boolean>)
                         .then((res) => {
@@ -312,7 +312,7 @@ export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
 
         if (result && deleteResult && removeResult && mergeResult) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return (commandService.executeCommand(DeleteRangeMutation.id, deleteRangeMutationParams) as Promise<boolean>)
                         .then((res) => {

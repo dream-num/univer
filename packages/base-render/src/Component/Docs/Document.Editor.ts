@@ -126,9 +126,51 @@ export class DocsEditor {
         this._scrollToSelection();
     }
 
+    activate(toLastPosition = false): void {
+        // const documents = this._documents;
+        // if (!documents) {
+        //     return;
+        // }
+        // setTimeout(() => {
+        //     documents.makeDirty();
+        // });
+        // FIXME: I don't know if this is correct. Just trying it.
+        // const lastCharIndex = documents.getSkeleton()!.getModel().bodyModel.body.dataStream.length;
+        // const span = documents.findNodeByCharIndex(lastCharIndex - 1);
+        // const position = documents.findPositionBySpan(span!);
+        // const remain = this.remain();
+        // if (position && remain) {
+        //     remain.startNodePosition = { ...position, isBack: true };
+        //     remain.endNodePosition = undefined;
+        // }
+        // if (!this._documents) {
+        //    return;
+        // }
+        // TODO
+        // this.activeViewport = this._documents.getActiveViewportByCoord(evtOffsetX, evtOffsetY);
+        // const startNode = this._documents.findNodeByCoord(evtOffsetX, evtOffsetY);
+        // console.log('startNode', startNode, position, evtOffsetX, evtOffsetY);
+        // if (position == null) {
+        //     this._deleteAllTextSelection();
+        //     return;
+        // }
+        // if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
+        //     position.isBack = true;
+        // }
+        // if (evt.ctrlKey || this._isEmptyTextSelection()) {
+        //     const newTextSelection = new TextSelection(this._documents.getScene(), position);
+        //     this._addTextSelection(newTextSelection);
+        // } else {
+        //     this._updateTextSelection(position);
+        // }
+        // this._activeSelectionRefresh();
+        // this._syncDomToSelection();
+    }
+
     active(x: number, y: number) {
         this._container.style.left = `${x}px`;
         this._container.style.top = `${y}px`;
+        this._container.style.zIndex = `1000`;
 
         this._cursor.style.animation = 'univer_cursor_blinkStyle 1s steps(1) infinite';
         this._cursor.style.display = 'revert';
@@ -138,14 +180,21 @@ export class DocsEditor {
         }, 0);
     }
 
-    deactivate() {
+    focus(): void {
+        this._input.focus();
+    }
+
+    // FIXME: for editor cell editor we don't need to blur the input element
+    deactivate(withoutBlur = true) {
         this._container.style.left = `0px`;
         this._container.style.top = `0px`;
 
         this._cursor.style.animation = '';
         this._cursor.style.display = 'none';
 
-        this._input.blur();
+        if (!withoutBlur) {
+            this._input.blur();
+        }
     }
 
     changeDocuments(documents: DocComponent) {
@@ -169,23 +218,16 @@ export class DocsEditor {
 
     private _initialDom() {
         const container = document.createElement('div');
-
         container.style.position = 'absolute';
-
-        container.style.position = 'absolute';
-
         container.style.left = `0px`;
         container.style.top = `0px`;
 
         const inputParent = document.createElement('div');
         const inputDom = document.createElement('div');
-
         const cursorDom = document.createElement('div');
 
         inputParent.appendChild(inputDom);
-
         container.appendChild(inputParent);
-
         container.appendChild(cursorDom);
 
         this._container = container;
@@ -675,12 +717,11 @@ export class DocsEditor {
         const scene = documents.getScene();
 
         this._downObserver = documents.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-
             if (!this._documents) {
                 return;
             }
 
+            const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
             this.activeViewport = this._documents.getActiveViewportByCoord(evtOffsetX, evtOffsetY);
 
             const startNode = this._documents.findNodeByCoord(evtOffsetX, evtOffsetY);

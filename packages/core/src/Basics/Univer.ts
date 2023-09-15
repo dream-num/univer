@@ -64,8 +64,8 @@ export class Univer {
         // TODO@wzhudev: clean this
         sheet.getWorkBook().onUniver();
 
-        this.initializePluginsForSheet(sheet);
         this._currentUniverService.addSheet(sheet);
+        this.initializePluginsForSheet(sheet);
 
         return sheet;
     }
@@ -73,8 +73,8 @@ export class Univer {
     createUniverDoc(config: Partial<IDocumentData>): UniverDoc {
         const doc = this._univerInjector.createInstance(UniverDoc, config);
 
-        this.initializePluginsForDoc(doc);
         this._currentUniverService.addDoc(doc);
+        this.initializePluginsForDoc(doc);
 
         return doc;
     }
@@ -82,8 +82,8 @@ export class Univer {
     createUniverSlide(config: Partial<ISlideData>): UniverSlide {
         const slide = this._univerInjector.createInstance(UniverSlide, config);
 
-        this.initializePluginsForSlide(slide);
         this._currentUniverService.addSlide(slide);
+        this.initializePluginsForSlide(slide);
 
         return slide;
     }
@@ -135,7 +135,15 @@ export class Univer {
     private initializeDependencies(): Injector {
         return new Injector([
             [ObserverManager],
-            [ICurrentUniverService, { useClass: CurrentUniverService }],
+            [
+                ICurrentUniverService,
+                {
+                    useFactory: () =>
+                        new CurrentUniverService({
+                            createUniverDoc: (data) => this.createUniverDoc(data),
+                        }),
+                },
+            ],
             [LocaleService],
             [ILogService, { useClass: DesktopLogService, lazy: true }],
             [ICommandService, { useClass: CommandService, lazy: true }],
@@ -148,8 +156,7 @@ export class Univer {
         // For plugins at Univer level. Plugins would be initialized immediately so they can register dependencies.
         const pluginInstance: Plugin = this._univerInjector.createInstance(plugin as unknown as Ctor<any>, options);
 
-        // TODO: remove these two lines later
-        pluginInstance.onCreate();
+        pluginInstance.onMounted();
 
         this._univerPluginStore.addPlugin(pluginInstance);
     }
@@ -197,7 +204,6 @@ export class Univer {
         plugins.forEach((p) => {
             doc.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
         });
-        doc.mount();
     }
 
     private initializePluginsForSlide(slide: UniverSlide): void {

@@ -43,7 +43,7 @@ export const SetHideGridlinesCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return commandService.executeCommand(SetHideGridlinesMutation.id, undoMutationParams);
                 },

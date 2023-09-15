@@ -2,6 +2,7 @@ import { Disposable, ICommandService, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
 import { fromDocumentEvent } from '../../Common/lifecycle';
+import { IContextService } from '../context/context.service';
 import { IPlatformService } from '../platform/platform.service';
 import { MetaKeys } from './keycode';
 
@@ -10,7 +11,9 @@ export interface IShortcutItem<P extends object = object> {
     id: string;
     description?: string;
 
-    // TODO@wzhudev: add a precondition to check if the command should trigger
+    priority?: number;
+    /** A callback that will be triggered to examine if the shortcut should be invoked. */
+    preconditions?: (contextService: Pick<IContextService, 'getContextValue'>) => boolean;
 
     /** A command can be bound to several bindings, with different static parameters perhaps. */
     binding: number;
@@ -32,12 +35,15 @@ export const IShortcutService = createIdentifier<IShortcutService>('univer.short
 
 export class DesktopShortcutService extends Disposable implements IShortcutService {
     // TODO: @wzhudev: this should be a linked list to resolve different shortcut mapping to the same keybinding
-
-    private readonly _shortCutMapping = new Map<number, IShortcutItem>();
+    private readonly _shortCutMapping = new Map<number, Set<IShortcutItem>>();
 
     private readonly _idToShortcut = new Map<string, number>();
 
-    constructor(@ICommandService private readonly _commandService: ICommandService, @IPlatformService private readonly _platformService: IPlatformService) {
+    constructor(
+        @ICommandService private readonly _commandService: ICommandService,
+        @IPlatformService private readonly _platformService: IPlatformService,
+        @IContextService private readonly _contextService: IContextService
+    ) {
         super();
 
         this.disposeWithMe(
@@ -50,7 +56,13 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
     registerShortcut(shortcut: IShortcutItem): IDisposable {
         // first map shortcut to a number, so it could be converted and fetched quickly
         const binding = this.getBindingFromItem(shortcut);
-        this._shortCutMapping.set(binding, shortcut);
+        const existing = this._shortCutMapping.get(binding);
+        if (existing) {
+            existing.add(shortcut);
+        } else {
+            this._shortCutMapping.set(binding, new Set([shortcut]));
+        }
+
         this._idToShortcut.set(shortcut.id, binding);
 
         return toDisposable(() => {
@@ -89,14 +101,20 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
             return false;
         }
 
-        const shortcut = this._shortCutMapping.get(binding);
-        if (shortcut === undefined) {
+        const shortcuts = this._shortCutMapping.get(binding);
+        if (shortcuts === undefined) {
             return false;
         }
 
-        // shortcut could support static parameters
-        this._commandService.executeCommand(shortcut.id, shortcut.staticParameters);
-        return true;
+        const shouldTrigger = Array.from(shortcuts)
+            .sort((s1, s2) => (s1.priority ?? 0) - (s2.priority ?? 0))
+            .find((s) => s.preconditions?.({ getContextValue: this._contextService.getContextValue.bind(this._contextService) }) ?? true);
+        if (shouldTrigger) {
+            this._commandService.executeCommand(shouldTrigger.id, shouldTrigger.staticParameters);
+            return true;
+        }
+
+        return false;
     }
 
     private getBindingFromItem(item: IShortcutItem): number {

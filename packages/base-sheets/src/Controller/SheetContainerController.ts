@@ -24,13 +24,11 @@ export class SheetContainerController extends Disposable {
     private _initialize() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                // refresh selection and worksheet canvas view
                 if (updateCommandList.includes(command.id)) {
                     const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
                     const unitId = workbook.getUnitId();
-                    const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                    const worksheet = workbook.getActiveSheet();
                     const sheetId = worksheet.getSheetId();
-                    // this._selectionManager.updateToSheet(worksheet);
 
                     this._selectionManagerService.setCurrentSelection({
                         pluginName: NORMAL_SELECTION_PLUGIN_NAME,

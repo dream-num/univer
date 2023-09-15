@@ -54,6 +54,7 @@
     "dependencies": {
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/base-sheets": "workspace:^0.0.1",
+        "@univerjs/base-docs": "workspace:^0.0.1",
         "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
         "@wendellhu/redi": "^0.12.7",

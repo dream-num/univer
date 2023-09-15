@@ -107,7 +107,7 @@ export const RemoveRowCommand: ICommand = {
 
         if (result && deleteResult && removeResult && mergeResult) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return (commandService.executeCommand(InsertRowMutation.id, undoMutationParams) as Promise<boolean>)
                         .then((res) => {
@@ -233,7 +233,7 @@ export const RemoveColCommand: ICommand = {
 
         if (result && deleteResult && removeResult && mergeResult) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return (commandService.executeCommand(InsertColMutation.id, undoMutationParams) as Promise<boolean>)
                         .then((res) => {

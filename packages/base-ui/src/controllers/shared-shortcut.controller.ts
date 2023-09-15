@@ -1,7 +1,7 @@
 import { Disposable, ICommandService, RedoCommand, UndoCommand } from '@univerjs/core';
 
-import { IShortcutItem, IShortcutService } from '../services/shortcut/shortcut.service';
 import { KeyCode, MetaKeys } from '../services/shortcut/keycode';
+import { IShortcutItem, IShortcutService } from '../services/shortcut/shortcut.service';
 
 export const UndoShortcutItem: IShortcutItem = {
     id: UndoCommand.id,
@@ -22,12 +22,6 @@ export class SharedController extends Disposable {
 
         this.registerShortcuts();
     }
-
-    // private registerToolbarItem(): void {}
-
-    // private registerContextMenuItem(): void {}
-
-    // private registerFooterItem(): void {}
 
     private registerShortcuts(): void {
         [UndoShortcutItem, RedoShortcutItem].forEach((shortcut) => {

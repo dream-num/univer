@@ -1,4 +1,3 @@
-import { ComponentManager, RegisterManager } from '@univerjs/base-ui';
 import { LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
@@ -12,10 +11,6 @@ export class DocUIPlugin extends Plugin<any> {
 
     private _appUIController: AppUIController;
 
-    private _registerManager: RegisterManager;
-
-    private _componentManager: ComponentManager;
-
     constructor(
         private readonly _config: IDocUIPluginConfig,
         @Inject(Injector) override _injector: Injector,
@@ -27,7 +22,7 @@ export class DocUIPlugin extends Plugin<any> {
         this._initializeDependencies(_injector);
     }
 
-    initialize(): void {
+    override onMounted(): void {
         this._localService.getLocale().load({
             en,
             zh,
@@ -35,36 +30,13 @@ export class DocUIPlugin extends Plugin<any> {
 
         installObserver(this);
 
-        this._componentManager = this._injector.get(ComponentManager);
         this._appUIController = this._injector.get(AppUIController);
-    }
-
-    /**
-     * usage this._clipboardExtensionManager.handle(data);
-     * @returns
-     */
-    getRegisterManager(): RegisterManager {
-        return this._registerManager;
-    }
-
-    /**
-     * This API is used in plugins for initialization that depends on UI rendering
-     * @param cb
-     * @returns
-     */
-    UIDidMount(cb: Function) {
-        this._appUIController.getDocContainerController().UIDidMount(cb);
-    }
-
-    override onMounted(): void {
-        this.initialize();
     }
 
     override onDestroy(): void {}
 
     private _initializeDependencies(injector: Injector) {
         const dependencies: Dependency[] = [
-            [ComponentManager],
             [
                 AppUIController,
                 {

@@ -1,4 +1,4 @@
-import { horizontalLineSegmentsSubtraction, deleteContent, insertTextToContent } from '../../Shared/DocTool';
+import { deleteContent, horizontalLineSegmentsSubtraction, insertTextToContent } from '../../Shared/DocTool';
 import { Nullable } from '../../Shared/Types';
 import { DataStreamTreeNodeType, DataStreamTreeTokenType } from './Types';
 

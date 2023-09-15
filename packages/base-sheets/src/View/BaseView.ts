@@ -36,6 +36,7 @@ export enum CANVAS_VIEW_KEY {
     VIEW_LEFT_TOP = 'viewLeftTop',
     SHEET_VIEW = 'sheetView',
     DRAG_LINE_VIEW = 'dragLineView',
+    CELL_EDITOR = 'cellEditor',
     SELECTION_VIEW = 'selectionView',
 }
 

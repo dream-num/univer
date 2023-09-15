@@ -1,9 +1,28 @@
 import { IDisposable } from '@wendellhu/redi';
+import { Subscription, SubscriptionLike } from 'rxjs';
+import { isSubscription } from 'rxjs/internal/Subscription';
 
-export function toDisposable(callback: () => void): IDisposable {
+export function toDisposable(subscription: SubscriptionLike): IDisposable;
+export function toDisposable(callback: () => void): IDisposable;
+export function toDisposable(v: SubscriptionLike | (() => void)): IDisposable {
+    if (isSubscription(v)) {
+        return {
+            dispose: () => v.unsubscribe(),
+        };
+    }
+
     return {
-        dispose: callback,
+        dispose: v as () => void,
     };
+}
+
+/**
+ * @deprecated use toDisposable instead
+ */
+export function fromObservable(subscription: Subscription) {
+    return toDisposable(() => {
+        subscription.unsubscribe();
+    });
 }
 
 export class DisposableCollection implements IDisposable {

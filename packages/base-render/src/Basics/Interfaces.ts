@@ -1,5 +1,6 @@
 import {
     BooleanNumber,
+    DocumentBodyModel,
     GridType,
     IDocStyleBase,
     IDocumentLayout,
@@ -11,12 +12,12 @@ import {
     ISize,
     ITextStyle,
     ITransformState,
-    DocumentBodyModel,
 } from '@univerjs/core';
+
 import {
-    IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonBullet,
     IDocumentSkeletonDrawing,
+    IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonFontStyle,
     IDocumentSkeletonFooter,
     IDocumentSkeletonHeader,

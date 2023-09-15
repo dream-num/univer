@@ -1,33 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <title>UniverDoc</title>
 
-<head>
-  <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1" name="viewport" />
-  <title>UniverDoc</title>
+        <link rel="stylesheet" href="./main.css" />
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+            }
+        </style>
 
-  <link rel="stylesheet" href="./main.css" />
-  <style>
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-    }
-  </style>
+        <script>
+            new EventSource('/esbuild').addEventListener('change', () => {
+                location.reload();
+            });
+        </script>
+    </head>
 
+    <body>
+        <div id="app" style="z-index: 1; position: fixed; font-size: 20px; color: green"></div>
+        <div id="univer-container" style="height: 100%"></div>
 
-  <script>
-    new EventSource('/esbuild').addEventListener('change', () => {
-      location.reload()
-    })
-  </script>
-</head>
-
-<body>
-  <div id="app" style="z-index: 1; position: fixed; font-size: 20px; color: green;"></div>
-  <div id="univerdoc" style="height: 100%;"></div>
-
-  <script src="./main.js"></script>
-</body>
-
+        <script src="./main.js"></script>
+    </body>
 </html>

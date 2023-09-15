@@ -53,11 +53,14 @@ export class CanvasView {
         const rowTitle = config.rowTitle;
         const columnTitle = config.columnTitle;
 
+        // How do we know if a business should claim itself as main scene?
         const scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
             width: 1500,
             height: 1000,
         });
+
         scene.openTransformer();
+
         this._scene = scene;
         const viewMain = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN, scene, {
             left: rowTitle.width,
@@ -89,6 +92,7 @@ export class CanvasView {
         });
         // viewMain.linkToViewport(viewLeft, LINK_VIEW_PORT_TYPE.Y);
         // viewMain.linkToViewport(viewTop, LINK_VIEW_PORT_TYPE.X);
+        // syncing scroll on the main area to headerbars
         viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
             const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
 
@@ -129,6 +133,7 @@ export class CanvasView {
                 const currentRatio = sheet.getZoomRatio();
                 let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
                 nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
+
                 // sheet.setZoomRatio(nextRatio);
 
                 e.preventDefault();
@@ -145,11 +150,6 @@ export class CanvasView {
 
         engine.runRenderLoop(() => {
             scene.render();
-
-            const app = document.getElementById('app');
-            if (app) {
-                app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
-            }
         });
     }
 

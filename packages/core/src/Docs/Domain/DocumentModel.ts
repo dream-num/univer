@@ -115,9 +115,19 @@ export class DocumentModel extends DocumentModelSimple {
 
     constructor(snapshot: Partial<IDocumentData>) {
         super(snapshot);
-        this._unitId = this.snapshot.id ?? Tools.generateRandomId(UNIT_ID_LENGTH);
 
+        this._unitId = this.snapshot.id ?? Tools.generateRandomId(UNIT_ID_LENGTH);
         this.initializeRowColTree();
+    }
+
+    reset(snapshot: Partial<IDocumentData>) {
+        if (snapshot.id && snapshot.id !== this._unitId) {
+            throw new Error('Cannot reset a document model with a different unit id!');
+        }
+
+        this.snapshot = { ...DEFAULT_DOC, ...snapshot };
+        this.initializeRowColTree();
+        this.bodyModel.reset(snapshot.body ?? { dataStream: '\r\n\0' });
     }
 
     getUnitId(): string {
@@ -144,4 +154,12 @@ export class DocumentModel extends DocumentModelSimple {
             }
         }
     }
+}
+
+export function createEmptyDocSnapshot(): Partial<IDocumentData> {
+    return {
+        body: {
+            dataStream: '\r\n\0',
+        },
+    };
 }

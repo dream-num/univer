@@ -6,6 +6,7 @@ import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
 import { PerformanceMonitor } from './Basics/PerformanceMonitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './Basics/Tools';
 import { Canvas } from './Canvas';
+import { fromWindowEvent } from './common/lifecycle';
 import { Scene } from './Scene';
 import { ThinEngine } from './ThinEngine';
 
@@ -111,7 +112,9 @@ export class Engine extends ThinEngine<Scene> {
     setContainer(elem: HTMLElement) {
         this._container = elem;
         this._container.appendChild(this._canvasEle);
+
         this.resize();
+        this.disposeWithMe(fromWindowEvent('resize', () => this.resize()));
     }
 
     resize() {
@@ -119,7 +122,6 @@ export class Engine extends ThinEngine<Scene> {
             return;
         }
 
-        // const { offsetWidth, offsetHeight } = this._container;
         const { width, height } = getSizeForDom(this._container);
         this.resizeBySize(width, height);
     }

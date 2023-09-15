@@ -289,12 +289,11 @@ export class CanvasView {
 
         const { pageElements, pageBackgroundFill } = page;
 
+        // SceneViewers
         const objects = this._ObjectProvider.convertToRenderObjects(pageElements, this._scene);
-
         scene.openTransformer();
-
         this._addBackgroundRect(scene, pageBackgroundFill);
-
+        // So finally SceneViewers are added to the scene as objects. How can we do optimizations on this?
         scene.addObjects(objects);
 
         const transformer = scene.getTransformer();

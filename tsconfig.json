@@ -1,11 +1,6 @@
 {
     "compilerOptions": {
-        "lib": [
-            "ESNext",
-            "DOM",
-            "WebWorker",
-            "dom.iterable"
-        ],
+        "lib": ["ESNext", "DOM", "WebWorker", "dom.iterable"],
         "target": "ESNext",
         "module": "ESNext",
         "declaration": true,
@@ -17,18 +12,11 @@
         "sourceMap": true,
         "resolveJsonModule": true,
         "strict": true,
+        "strictPropertyInitialization": true,
         "noImplicitOverride": true,
         "allowJs": true,
         "skipLibCheck": true,
-        "types": [
-            "jest",
-            "node",
-            "@types/jest",
-            "esbuild-style-plugin"
-        ]
+        "types": ["jest", "node", "@types/jest", "esbuild-style-plugin"]
     },
-    "include": [
-        "packages/*/src",
-        "examples/*/src",
-    ]
+    "include": ["packages/*/src", "examples/*/src"]
 }

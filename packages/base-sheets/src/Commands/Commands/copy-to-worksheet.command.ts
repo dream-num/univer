@@ -43,7 +43,7 @@ export const CopySheetToCommand: ICommand = {
         const result = commandService.executeCommand(SetWorksheetConfigMutation.id, setWorksheetConfigMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return commandService.executeCommand(SetWorksheetConfigMutation.id, undoMutationParams);
                 },

@@ -28,7 +28,7 @@ export class BaseView {
 }
 
 export enum CANVAS_VIEW_KEY {
-    MAIN_SCENE = 'mainScene',
+    MAIN_SCENE = 'docMainScene',
     DOCS_VIEW = 'docsView',
 }
 

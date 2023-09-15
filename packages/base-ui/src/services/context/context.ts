@@ -1,0 +1,3 @@
+export const FOCUSING_SHEET = 'FOCUSING_SHEET';
+export const FOCUSING_DOC = 'FOCUSING_DOC';
+export const FOCUSING_SLIDE = 'FOCUSING_SLIDE';

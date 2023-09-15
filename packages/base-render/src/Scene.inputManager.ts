@@ -1,9 +1,10 @@
-import { Observer, Nullable } from '@univerjs/core';
-import { IKeyboardEvent, IMouseEvent, IPointerEvent, IEvent, DeviceType, PointerInput, IWheelEvent } from './Basics/IEvents';
-import { Vector2 } from './Basics/Vector2';
+import { Nullable, Observer } from '@univerjs/core';
+
 import { BaseObject } from './BaseObject';
-import { ThinScene } from './ThinScene';
 import { RENDER_CLASS_TYPE } from './Basics/Const';
+import { DeviceType, IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent, PointerInput } from './Basics/IEvents';
+import { Vector2 } from './Basics/Vector2';
+import { ThinScene } from './ThinScene';
 import { Viewport } from './Viewport';
 
 export class InputManager {

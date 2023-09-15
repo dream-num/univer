@@ -1,10 +1,13 @@
 import {
     CommandType,
+    createEmptyDocSnapshot,
     getTextIndexByCursor,
     ICommand,
     ICommandInfo,
     ICommandService,
+    ICurrentUniverService,
     IDocumentBody,
+    IDocumentData,
     ITextSelectionRange,
     IUndoRedoService,
     UpdateDocsAttributeType,
@@ -91,7 +94,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         const result = await commandService.executeCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(doMutation.id, doMutation.params);
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'doc',
+                URI: unitId,
                 undo() {
                     commandService.executeCommand(RichTextEditingMutation.id, result);
                     return true;
@@ -143,7 +146,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         const result = await commandService.executeCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(doMutation.id, doMutation.params);
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'doc',
+                URI: unitId,
                 undo() {
                     commandService.executeCommand(RichTextEditingMutation.id, result);
                     return true;
@@ -212,7 +215,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
         const result = await commandService.executeCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(doMutation.id, doMutation.params);
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'doc',
+                URI: unitId,
                 undo() {
                     commandService.executeCommand(RichTextEditingMutation.id, result);
                     return true;
@@ -243,7 +246,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
     type: CommandType.COMMAND,
     handler: async (accessor, params: IIMEInputCommandParams) => {
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
 
         const { unitId, newText, oldTextLen, start, segmentId } = params;
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
@@ -281,8 +283,36 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         const result = await commandService.executeCommand(doMutation.id, doMutation.params);
         if (!result) {
-            // NOTE: maybe we should throw an error here?
             return false;
+        }
+
+        return true;
+    },
+};
+
+export interface ICoverCommandParams {
+    unitId: string;
+
+    snapshot?: IDocumentData;
+    clearUndoRedoStack?: boolean;
+}
+
+export const CoverCommand: ICommand<ICoverCommandParams> = {
+    id: 'doc.command-cover-content',
+    type: CommandType.COMMAND,
+    handler: async (accessor, params: ICoverCommandParams) => {
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const { unitId, snapshot, clearUndoRedoStack } = params;
+        const doc = currentUniverService.getUniverDocInstance(unitId);
+        if (!doc) {
+            return false;
+        }
+
+        doc.getDocument().reset(snapshot || createEmptyDocSnapshot());
+
+        if (clearUndoRedoStack) {
+            const undoRedoService = accessor.get(IUndoRedoService);
+            undoRedoService.clearUndoRedo(unitId);
         }
 
         return true;

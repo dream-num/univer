@@ -1,6 +1,6 @@
+import { IKeyType, Nullable } from '../../Shared/Types';
 import { LocaleType, ThemeColorType } from '../Enum';
 import { ShapeType } from '../Enum/ShapeType';
-import { IKeyType, Nullable } from '../../Shared/Types';
 import { ICustomBlock, IDocumentData, ILists, ISizeData } from './IDocumentData';
 import { IImageProperties } from './IImageProperties';
 import { IPlaceholder } from './IPlaceholder';

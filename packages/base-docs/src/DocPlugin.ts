@@ -1,21 +1,24 @@
 import { Engine } from '@univerjs/base-render';
-import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
-import { ICommandService, LocaleService, ObserverManager, Plugin, PLUGIN_NAMES, PluginType, UIObserver } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { ContextService, DesktopPlatformService, IContextService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
+import { ICommand, ICommandService, ICurrentUniverService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { Dependency, Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { DocPluginObserve, install } from './Basics/Observer';
-import { BreakLineCommand, DeleteCommand, DeleteLeftCommand, IMEInputCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
+import { BreakLineCommand, CoverCommand, DeleteCommand, DeleteLeftCommand, IMEInputCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { MoveCursorOperation } from './commands/operations/cursor.operation';
 import { DocumentController } from './Controller/DocumentController';
 import { en, zh } from './Locale';
+import { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
 import { MoveCursorDownShortcut, MoveCursorLeftShortcut, MoveCursorRightShortcut, MoveCursorUpShortcut } from './shortcuts/cursor.shortcut';
 import { CANVAS_VIEW_KEY } from './View/Render';
 import { CanvasView } from './View/Render/CanvasView';
 import { DocsView } from './View/Render/Views';
 
-export interface IDocPluginConfig {}
+export interface IDocPluginConfig {
+    standalone?: boolean;
+}
 
 const DEFAULT_DOCUMENT_PLUGIN_DATA = {};
 
@@ -32,14 +35,15 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
     constructor(
         config: Partial<IDocPluginConfig> = {},
-        @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
+        @SkipSelf() @Inject(Injector) _univerInjector: Injector,
         @Inject(Injector) override _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         super(PLUGIN_NAMES.DOCUMENT);
 
         this._config = Object.assign(DEFAULT_DOCUMENT_PLUGIN_DATA, config);
-        this._initializeDependencies(_injector);
+        this._initializeDependencies(_injector, _univerInjector);
         this.initializeCommands();
     }
 
@@ -51,11 +55,28 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
         install(this);
 
-        this.listenEventManager();
+        if (this._config.standalone) {
+            this.initCanvasView();
+        }
+
+        this._initController();
+        this._markDocAsFocused();
     }
 
     initializeCommands(): void {
-        [MoveCursorOperation, DeleteLeftCommand, BreakLineCommand, InsertCommand, DeleteCommand, UpdateCommand, IMEInputCommand, RichTextEditingMutation].forEach((command) => {
+        (
+            [
+                MoveCursorOperation,
+                DeleteLeftCommand,
+                BreakLineCommand,
+                InsertCommand,
+                DeleteCommand,
+                UpdateCommand,
+                IMEInputCommand,
+                RichTextEditingMutation,
+                CoverCommand,
+            ] as ICommand[]
+        ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
         });
 
@@ -64,25 +85,12 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
         });
     }
 
-    initializeAfterUI() {
-        this.initCanvasView();
-        this.initController();
-    }
-
-    initController() {
+    _initController() {
         this._documentController = new DocumentController(this._injector);
     }
 
     initCanvasView() {
         this._canvasView = this._injector.get(CanvasView);
-    }
-
-    listenEventManager() {
-        // FIXME@wzhudev: this looks strange to be. It should not rely on the event created by a upper layer plugin.
-        // Instead, upper layer plugin should call it.
-        this._getCoreObserver<boolean>('onUIDidMountObservable').add(() => {
-            this.initializeAfterUI();
-        });
     }
 
     getConfig() {
@@ -151,16 +159,23 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
     override onDestroy(): void {}
 
-    /** @deprecated This will be removed. Modules should inject `ObserverManager` instead of getting it from plugin. */
-    protected _getCoreObserver<T>(type: string) {
-        return this._globalObserverManager.requiredObserver<UIObserver<T>>(type, 'core');
+    private _initializeDependencies(docInjector: Injector, univerInjector: Injector) {
+        (
+            [
+                [CanvasView, { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) }], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
+                [IPlatformService, { useClass: DesktopPlatformService }],
+                [IContextService, { useClass: ContextService }],
+            ] as Dependency[]
+        ).forEach((d) => docInjector.add(d));
+
+        // add docs view manager to univer-level injector
+        univerInjector.add([DocsViewManagerService]);
     }
 
-    private _initializeDependencies(docInjector: Injector) {
-        const dependencies: Dependency[] = [[CanvasView], [IShortcutService, { useClass: DesktopShortcutService }], [IPlatformService, { useClass: DesktopPlatformService }]];
-
-        dependencies.forEach((d) => {
-            docInjector.add(d);
-        });
+    private _markDocAsFocused() {
+        if (this._config.standalone) {
+            const c = this._currentUniverService.getCurrentUniverDocInstance();
+            this._currentUniverService.focusUniverInstance(c.getUnitId());
+        }
     }
 }

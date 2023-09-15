@@ -43,7 +43,7 @@ export const SetZoomRatioCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: 'sheet',
+                URI: workbookId,
                 undo() {
                     return commandService.executeCommand(SetZoomRatioMutation.id, undoMutationParams);
                 },

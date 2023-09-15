@@ -230,7 +230,6 @@ export class CommandService implements ICommandService {
         return this._commandRegistry.registerCommand(command, injector);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, injector: Injector, params?: P): Promise<R> {
         this._log.log(`${'|-'.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`);
 

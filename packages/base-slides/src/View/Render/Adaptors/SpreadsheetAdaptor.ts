@@ -13,9 +13,10 @@ import {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/base-render';
-import { EventState, ICellData, IPageElement, ObjectMatrix, PageElementType, Styles, LocaleService } from '@univerjs/core';
+import { EventState, ICellData, IPageElement, LocaleService, ObjectMatrix, PageElementType, Styles } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ObjectAdaptor, CanvasObjectProviderRegistry } from '../Adaptor';
+
+import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../Adaptor';
 
 enum SHEET_VIEW_KEY {
     MAIN = 'spreadInSlide',

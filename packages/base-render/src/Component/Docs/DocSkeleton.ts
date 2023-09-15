@@ -1,6 +1,7 @@
 import {
     ColumnSeparatorType,
     DocumentModelOrSimple,
+    fromObservable,
     GridType,
     HorizontalAlign,
     ISectionBreak,
@@ -47,7 +48,15 @@ export class DocumentSkeleton extends Skeleton {
 
     constructor(docModel: DocumentModelOrSimple, localeService: LocaleService) {
         super(localeService);
+
         this._docModel = docModel;
+        this.disposeWithMe(
+            fromObservable(
+                this._docModel.bodyModel.modelChange$.subscribe(() => {
+                    this.calculate();
+                })
+            )
+        );
     }
 
     static create(docModel: DocumentModelOrSimple, localeService: LocaleService) {

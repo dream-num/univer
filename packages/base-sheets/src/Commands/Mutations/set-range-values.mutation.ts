@@ -1,15 +1,4 @@
-import {
-    CommandType,
-    createRowColIter,
-    ICellData,
-    ICopyToOptionsData,
-    ICurrentUniverService,
-    IMutation,
-    IRangeData,
-    ObjectMatrix,
-    ObjectMatrixPrimitiveType,
-    Tools,
-} from '@univerjs/core';
+import { CommandType, ICellData, ICopyToOptionsData, ICurrentUniverService, IMutation, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 /** Params of `SetRangeValuesMutation` */
@@ -57,6 +46,7 @@ export const SetRangeValuesUndoMutationFactory = (accessor: IAccessor, params: I
     } as ISetRangeValuesMutationParams;
 };
 
+// TODO@Dushusir: this would cover style as well. Which is not expected.
 export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, boolean> = {
     id: 'sheet.mutation.set-range-values',
     type: CommandType.MUTATION,
@@ -76,11 +66,11 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
             const { startRow, startColumn, endColumn, endRow } = rangeData[i];
 
             // clear selection content
-            createRowColIter(startRow, endRow, startColumn, endColumn).forEach((r, c) => {
-                if (cellMatrix.getValue(r, c)) {
-                    cellMatrix.setValue(r, c, { v: null });
-                }
-            });
+            // createRowColIter(startRow, endRow, startColumn, endColumn).forEach((r, c) => {
+            //     if (cellMatrix.getValue(r, c)) {
+            //         cellMatrix.setValue(r, c, { v: null });
+            //     }
+            // });
 
             newValues.forValue((row, col, newVal) => {
                 const oldVal = cellMatrix.getValue(row, col) || {};
@@ -91,23 +81,29 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                         v: null,
                     });
                 } else {
-                    // TODO: @wzhudev: add config to change value or format only
+                    let dirty = false;
+
                     if (newVal.p != null) {
                         oldVal.p = newVal.p;
+                        dirty = true;
                     }
 
                     if (newVal.v != null) {
                         oldVal.v = newVal.v;
+                        dirty = true;
                     }
 
                     if (newVal.m != null) {
                         oldVal.m = newVal.m;
+                        dirty = true;
                     } else {
                         oldVal.m = String(oldVal.v);
+                        dirty = true;
                     }
 
                     if (newVal.t != null) {
                         oldVal.t = newVal.t;
+                        dirty = true;
                     }
 
                     cellMatrix.setValue(row, col, oldVal);

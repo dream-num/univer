@@ -11,6 +11,8 @@ import {
 import { IShortcutService } from '@univerjs/base-ui';
 import { Disposable, ICommandService } from '@univerjs/core';
 
+import { QuitCellEditorCommand } from '../services/cell-editor/cell-editor.command';
+import { QuitCellEditorShortcutItem } from '../services/shortcuts/shortcuts';
 import {
     ExpandSelectionDownShortcutItem,
     ExpandSelectionEndDownShortcutItem,
@@ -27,6 +29,7 @@ import {
     MoveSelectionEndUpShortcutItem,
     MoveSelectionLeftShortcutItem,
     MoveSelectionRightShortcutItem,
+    MoveSelectionTabShortcutItem,
     MoveSelectionUpShortcutItem,
 } from './shortcuts/selection.shortcut';
 import { SetBoldShortcutItem, SetItalicShortcutItem, SetStrikeThroughShortcutItem, SetUnderlineShortcutItem } from './shortcuts/style.shortcut';
@@ -45,6 +48,8 @@ export class DesktopSheetShortcutController extends Disposable {
             SetUnderlineCommand,
             SetFontFamilyCommand,
             SetFontSizeCommand,
+
+            QuitCellEditorCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
@@ -54,6 +59,7 @@ export class DesktopSheetShortcutController extends Disposable {
             MoveSelectionUpShortcutItem,
             MoveSelectionLeftShortcutItem,
             MoveSelectionRightShortcutItem,
+            MoveSelectionTabShortcutItem,
             MoveSelectionEndDownShortcutItem,
             MoveSelectionEndUpShortcutItem,
             MoveSelectionEndLeftShortcutItem,
@@ -73,6 +79,8 @@ export class DesktopSheetShortcutController extends Disposable {
             SetStrikeThroughShortcutItem,
 
             ClearSelectionValueShortcutItem,
+
+            QuitCellEditorShortcutItem,
         ].forEach((item) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(item));
         });

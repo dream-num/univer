@@ -5,9 +5,9 @@ export const enum KeyCode {
     UNKNOWN = 0,
 
     BACKSPACE = 8,
+    TAB = 9,
     DELETE = 12,
     ENTER = 13,
-    TAB = 17,
     ESC = 27,
     SPACE = 32,
 

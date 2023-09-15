@@ -1,10 +1,11 @@
 import { ChangeSelectionCommand, ExpandSelectionCommand, IChangeSelectionCommandParams, IExpandSelectionCommandParams } from '@univerjs/base-sheets';
-import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
+import { FOCUSING_SHEET, IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
 import { Direction } from '@univerjs/core';
 
 export const MoveSelectionDownShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
     id: ChangeSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.DOWN,
     },
@@ -13,6 +14,7 @@ export const MoveSelectionDownShortcutItem: IShortcutItem<IChangeSelectionComman
 export const MoveSelectionUpShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
     id: ChangeSelectionCommand.id,
     binding: KeyCode.ARROW_UP,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.UP,
     },
@@ -21,6 +23,7 @@ export const MoveSelectionUpShortcutItem: IShortcutItem<IChangeSelectionCommandP
 export const MoveSelectionLeftShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
     id: ChangeSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.LEFT,
     },
@@ -29,6 +32,16 @@ export const MoveSelectionLeftShortcutItem: IShortcutItem<IChangeSelectionComman
 export const MoveSelectionRightShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
     id: ChangeSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    staticParameters: {
+        direction: Direction.RIGHT,
+    },
+};
+
+export const MoveSelectionTabShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
+    id: ChangeSelectionCommand.id,
+    binding: KeyCode.TAB,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.RIGHT,
     },
@@ -39,6 +52,7 @@ export const MoveSelectionRightShortcutItem: IShortcutItem<IChangeSelectionComma
 export const MoveSelectionEndDownShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
     id: ChangeSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.LEFT,
         toEnd: true,
@@ -48,6 +62,7 @@ export const MoveSelectionEndDownShortcutItem: IShortcutItem<IChangeSelectionCom
 export const MoveSelectionEndUpShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
     id: ChangeSelectionCommand.id,
     binding: KeyCode.ARROW_UP | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.UP,
         toEnd: true,
@@ -57,6 +72,7 @@ export const MoveSelectionEndUpShortcutItem: IShortcutItem<IChangeSelectionComma
 export const MoveSelectionEndLeftShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
     id: ChangeSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.LEFT,
         toEnd: true,
@@ -66,6 +82,7 @@ export const MoveSelectionEndLeftShortcutItem: IShortcutItem<IChangeSelectionCom
 export const MoveSelectionEndRightShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
     id: ChangeSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.RIGHT,
         toEnd: true,
@@ -77,6 +94,7 @@ export const MoveSelectionEndRightShortcutItem: IShortcutItem<IChangeSelectionCo
 export const ExpandSelectionDownShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN | MetaKeys.SHIFT,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.DOWN,
     },
@@ -85,6 +103,7 @@ export const ExpandSelectionDownShortcutItem: IShortcutItem<IExpandSelectionComm
 export const ExpandSelectionUpShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_UP | MetaKeys.SHIFT,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.UP,
     },
@@ -93,6 +112,7 @@ export const ExpandSelectionUpShortcutItem: IShortcutItem<IExpandSelectionComman
 export const ExpandSelectionLeftShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT | MetaKeys.SHIFT,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.LEFT,
     },
@@ -101,6 +121,7 @@ export const ExpandSelectionLeftShortcutItem: IShortcutItem<IExpandSelectionComm
 export const ExpandSelectionRightShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT | MetaKeys.SHIFT,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.RIGHT,
     },
@@ -111,6 +132,7 @@ export const ExpandSelectionRightShortcutItem: IShortcutItem<IExpandSelectionCom
 export const ExpandSelectionEndDownShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.DOWN,
         toEnd: true,
@@ -120,6 +142,7 @@ export const ExpandSelectionEndDownShortcutItem: IShortcutItem<IExpandSelectionC
 export const ExpandSelectionEndUpShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_UP | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.UP,
         toEnd: true,
@@ -129,6 +152,7 @@ export const ExpandSelectionEndUpShortcutItem: IShortcutItem<IExpandSelectionCom
 export const ExpandSelectionEndLeftShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.LEFT,
         toEnd: true,
@@ -138,6 +162,7 @@ export const ExpandSelectionEndLeftShortcutItem: IShortcutItem<IExpandSelectionC
 export const ExpandSelectionEndRightShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.RIGHT,
         toEnd: true,

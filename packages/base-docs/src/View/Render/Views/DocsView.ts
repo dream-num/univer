@@ -2,6 +2,7 @@ import { Documents, DocumentSkeleton, IDocumentSkeletonDrawing, Picture, Scene }
 import { DocumentModel, ICurrentUniverService, LocaleService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { DocsViewManagerService } from '../../../services/docs-view-manager/docs-view-manager.service';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from '../BaseView';
 
 export enum DOCS_VIEW_KEY {
@@ -17,8 +18,30 @@ export class DocsView extends BaseView {
 
     private _documents: Documents;
 
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @Inject(LocaleService) private readonly _localeService: LocaleService) {
+    private readonly _useExternalModel: boolean;
+
+    private _model: DocumentModel | null = null;
+
+    // TODO: wzhudev this is strange that DocsView depends on current univer service
+    constructor(
+        externalModel: DocumentModel | undefined,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(DocsViewManagerService) private _docsViewManagerService: DocsViewManagerService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
         super();
+
+        if (externalModel) {
+            this._useExternalModel = true;
+            this._model = externalModel;
+        } else {
+            this._useExternalModel = false;
+        }
+
+        const docsModel = this._useExternalModel ? externalModel : this._currentUniverService.getCurrentUniverDocInstance()?.getDocument();
+        if (docsModel) {
+            this._docsViewManagerService.registerCanvasViewForUniverInstance(docsModel!.getUnitId(), this);
+        }
     }
 
     getDocumentSkeleton() {
@@ -51,12 +74,16 @@ export class DocsView extends BaseView {
 
     protected override _initialize() {
         const scene = this.getScene();
-
-        const docsModel = this._currentUniverService.getCurrentUniverDocInstance().getDocument();
+        const docsModel = this._useExternalModel ? this._model! : this._currentUniverService.getCurrentUniverDocInstance()?.getDocument();
+        if (!docsModel) {
+            return;
+        }
 
         const documentSkeleton = this._buildSkeleton(docsModel);
-
-        const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton);
+        const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton, {
+            pageMarginLeft: docsModel.documentStyle.marginLeft,
+            pageMarginTop: docsModel.documentStyle.marginTop,
+        });
         documents.zIndex = 1000;
         this._documentSkeleton = documentSkeleton;
         this._documents = documents;
@@ -110,8 +137,6 @@ export class DocsView extends BaseView {
                 obj?.translate(obj.left + docsLeft - pageMarginLeft, obj.top + docsTop - pageMarginTop);
             }
         }
-
-        documents.enableEditor();
     }
 
     private _buildSkeleton(model: DocumentModel) {

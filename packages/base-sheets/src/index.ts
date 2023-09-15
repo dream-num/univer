@@ -81,6 +81,7 @@ export {
 export { CopySheetCommand } from './Commands/Commands/copy-worksheet.command';
 export { RemoveSheetCommand } from './Commands/Commands/remove-sheet.command';
 export { RemoveWorksheetMergeCommand } from './Commands/Commands/remove-worksheet-merge.command';
+export { ISetRangeValuesCommandParams, SetRangeValuesCommand } from './Commands/Commands/set-range-values.command';
 export { SetTabColorCommand } from './Commands/Commands/set-tab-color.command';
 export { SetWorksheetHideCommand } from './Commands/Commands/set-worksheet-hide.command';
 export { SetWorksheetNameCommand } from './Commands/Commands/set-worksheet-name.command';

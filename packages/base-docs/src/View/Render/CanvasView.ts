@@ -11,7 +11,13 @@ export class CanvasView {
 
     private _views: BaseView[] = [];
 
-    constructor(@IRenderingEngine private readonly _engine: Engine, @Inject(Injector) private readonly _injector: Injector) {
+    constructor(
+        // TODO@wzhudev: CanvasView should not be a singleton
+        /** @deprecated This a temporary solution. CanvasView should not be a singleton. */
+        private standalone = true,
+        @IRenderingEngine private readonly _engine: Engine,
+        @Inject(Injector) private readonly _injector: Injector
+    ) {
         this._initialize();
     }
 
@@ -31,15 +37,15 @@ export class CanvasView {
         const engine = this._engine;
 
         const scene = (this._scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
-            width: 12,
-            height: 20,
+            width: 1024,
+            height: 2000,
         }));
 
         const viewMain = new Viewport(CANVAS_VIEW_KEY.DOCS_VIEW, scene, {
             left: 0,
             top: 0,
-            bottom: 500,
-            right: 500,
+            bottom: 0,
+            right: 0,
             isWheelPreventDefaultX: true,
         });
 
@@ -75,13 +81,15 @@ export class CanvasView {
 
         this._viewLoader(scene);
 
-        // engine.runRenderLoop(() => {
-        // scene.render();
-        // const app = document.getElementById('app');
-        // if (app) {
-        //     app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
-        // }
-        // });
+        if (this.standalone) {
+            engine.runRenderLoop(() => {
+                scene.render();
+                const app = document.getElementById('app');
+                if (app) {
+                    app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
+                }
+            });
+        }
     }
 
     private _viewLoader(scene: Scene) {

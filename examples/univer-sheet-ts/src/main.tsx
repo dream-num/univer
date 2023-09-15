@@ -17,11 +17,11 @@ const univer = new Univer({
     locale: LocaleType.EN,
 });
 
-// univer.createUniverDoc({});
-univer.registerPlugin(DocPlugin);
+// core plugins
+univer.registerPlugin(DocPlugin, {
+    standalone: false,
+});
 univer.registerPlugin(DocUIPlugin);
-
-// register plugins
 univer.registerPlugin(RenderEngine);
 univer.registerPlugin(UIPlugin, {
     container: 'univer-container',
@@ -29,20 +29,9 @@ univer.registerPlugin(UIPlugin, {
     toolbar: true,
 });
 univer.registerPlugin(SheetPlugin);
-univer.registerPlugin(SheetUIPlugin, {
-    container: 'universheet',
-    layout: {
-        sheetContainerConfig: {
-            infoBar: true,
-            formulaBar: true,
-            toolbar: true,
-            sheetBar: true,
-            countBar: true,
-            rightMenu: true,
-        },
-    },
-});
+univer.registerPlugin(SheetUIPlugin);
 
+// feature plugins
 univer.registerPlugin(NumfmtPlugin);
 univer.registerPlugin(FindPlugin);
 univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);

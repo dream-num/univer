@@ -1,6 +1,6 @@
 import { Engine } from '@univerjs/base-render';
 import { ContextService, DesktopPlatformService, IContextService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
-import { ICommand, ICommandService, LocaleService, ObserverManager, Plugin, PLUGIN_NAMES, PluginType, UIObserver } from '@univerjs/core';
+import { ICommand, ICommandService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { DocPluginObserve, install } from './Basics/Observer';
@@ -16,7 +16,9 @@ import { CANVAS_VIEW_KEY } from './View/Render';
 import { CanvasView } from './View/Render/CanvasView';
 import { DocsView } from './View/Render/Views';
 
-export interface IDocPluginConfig {}
+export interface IDocPluginConfig {
+    standalone?: boolean;
+}
 
 const DEFAULT_DOCUMENT_PLUGIN_DATA = {};
 
@@ -33,8 +35,7 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
     constructor(
         config: Partial<IDocPluginConfig> = {},
-        @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
-        @SkipSelf() @Inject(Injector) private readonly _univerInjector: Injector,
+        @SkipSelf() @Inject(Injector) _univerInjector: Injector,
         @Inject(Injector) override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
@@ -53,8 +54,10 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
         install(this);
 
-        this.listenEventManager();
-        this.initCanvasView();
+        if (!this._config.standalone) {
+            this.initCanvasView();
+        }
+
         this.initController();
     }
 
@@ -80,25 +83,12 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
         });
     }
 
-    initializeAfterUI() {
-        // this.initCanvasView();
-        // this.initController();
-    }
-
     initController() {
         this._documentController = new DocumentController(this._injector);
     }
 
     initCanvasView() {
-        // this._canvasView = this._injector.get(CanvasView);
-    }
-
-    listenEventManager() {
-        // FIXME@wzhudev: this looks strange to be. It should not rely on the event created by a upper layer plugin.
-        // Instead, upper layer plugin should call it.
-        this._getCoreObserver<boolean>('onUIDidMountObservable').add(() => {
-            this.initializeAfterUI();
-        });
+        this._canvasView = this._injector.get(CanvasView);
     }
 
     getConfig() {
@@ -167,15 +157,10 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
     override onDestroy(): void {}
 
-    /** @deprecated This will be removed. Modules should inject `ObserverManager` instead of getting it from plugin. */
-    protected _getCoreObserver<T>(type: string) {
-        return this._globalObserverManager.requiredObserver<UIObserver<T>>(type, 'core');
-    }
-
     private _initializeDependencies(docInjector: Injector, univerInjector: Injector) {
         (
             [
-                [CanvasView], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
+                [CanvasView, { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) }], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
                 [IPlatformService, { useClass: DesktopPlatformService }],
                 [IContextService, { useClass: ContextService }],
             ] as Dependency[]

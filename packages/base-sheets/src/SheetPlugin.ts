@@ -75,7 +75,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         }
     }
 
-    // TODO@huwenzhao: We don't need to init controllers manually
     initController() {
         this._sheetContainerController = this._injector.get(SheetContainerController);
         this._formulaBarController = this._injector.get(FormulaBarController);
@@ -106,24 +105,23 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         const dependencies: Dependency[] = [
             [CanvasView],
 
-            [SheetContainerController],
-            [FormulaBarController],
-            [SheetBarController],
-            [CountBarController],
-
-            [BasicWorksheetController],
-            [BasicWorkbookController],
-
+            // services
             [BorderStyleManagerService],
-
             [SelectionManagerService],
-
             [
                 ISelectionTransformerShapeManager,
                 {
                     useClass: SelectionTransformerShapeManager,
                 },
             ],
+
+            // controllers
+            [SheetContainerController],
+            [FormulaBarController],
+            [SheetBarController],
+            [CountBarController],
+            [BasicWorksheetController],
+            [BasicWorkbookController],
         ];
 
         dependencies.forEach((d) => {

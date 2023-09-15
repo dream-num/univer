@@ -1,5 +1,4 @@
-import { IRenderingEngine } from '@univerjs/base-render';
-import { DragManager, KeyboardManager, SharedController, SlotManager, ZIndexManager } from '@univerjs/base-ui';
+import { DragManager, SharedController, SlotManager, ZIndexManager } from '@univerjs/base-ui';
 import { ICurrentUniverService, IUndoRedoService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
@@ -17,8 +16,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
     private _appUIController: AppUIController;
 
-    private _keyboardManager: KeyboardManager;
-
     private _config: ISheetUIPluginConfig;
 
     private _zIndexManager: ZIndexManager;
@@ -31,7 +28,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         this._config = Tools.deepMerge({}, DefaultSheetUIConfig, config);
     }
 
-    initialize(): void {
+    override onMounted(): void {
         installObserver(this);
 
         /**
@@ -45,39 +42,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         });
 
         this.initDependencies();
-
-        // AppUIController initializes the DOM as an asynchronous rendering process, and must wait for the UI rendering to complete before starting to render the canvas
-        this.UIDidMount(() => {
-            this.initRender();
-            this.markSheetAsFocused();
-        });
-    }
-
-    initRender() {
-        const engine = this._injector.get(IRenderingEngine);
-        const container = this._appUIController.getSheetContainerController().getContentRef().current;
-
-        if (!container) {
-            throw new Error('container is not ready');
-        }
-
-        // mount canvas to DOM container
-        engine.setContainer(container);
-
-        window.addEventListener('resize', () => {
-            engine.resize();
-        });
-
-        // should be clear
-        setTimeout(() => {
-            engine.resize();
-        }, 0);
-    }
-
-    initUI() {}
-
-    override onMounted(): void {
-        this.initialize();
+        this.markSheetAsFocused();
     }
 
     override onDestroy(): void {}
@@ -88,14 +53,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
     getZIndexManager() {
         return this._zIndexManager;
-    }
-
-    /**
-     * usage this._clipboardExtensionManager.handle(data);
-     * @returns
-     */
-    getKeyboardManager(): KeyboardManager {
-        return this._keyboardManager;
     }
 
     /**
@@ -129,7 +86,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         (
             [
                 [DragManager],
-                [KeyboardManager],
                 [ZIndexManager],
                 [SlotManager],
                 [DesktopSheetShortcutController],
@@ -139,7 +95,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         ).forEach((d) => this._injector.add(d));
 
         this._dragManager = this._injector.get(DragManager);
-        this._keyboardManager = this._injector.get(KeyboardManager);
         this._zIndexManager = this._injector.get(ZIndexManager);
 
         this._appUIController = this._injector.createInstance(AppUIController, this._config);

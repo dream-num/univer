@@ -1,4 +1,4 @@
-import { Observable } from '@univerjs/core';
+import { Disposable, Observable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
@@ -7,7 +7,7 @@ import { ITransformChangeState } from './Basics/Interfaces';
 import { Canvas } from './Canvas';
 
 // FIXME: T should extends something that is disposable
-export abstract class ThinEngine<T extends IDisposable> {
+export abstract class ThinEngine<T extends IDisposable> extends Disposable {
     onInputChangedObservable = new Observable<IEvent>();
 
     onTransformChangeObservable = new Observable<ITransformChangeState>();
@@ -66,7 +66,9 @@ export abstract class ThinEngine<T extends IDisposable> {
         return this._activeScene != null;
     }
 
-    dispose() {
+    override dispose() {
+        super.dispose();
+
         const scenes = this.getScenes();
         const sceneKeys = Object.keys(scenes);
         sceneKeys.forEach((key) => {

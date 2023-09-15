@@ -1,10 +1,11 @@
-import { Engine, IRenderingEngine, ISelectionTransformerShapeManager, SelectionTransformerShapeManager } from '@univerjs/base-render';
-import { DEFAULT_SELECTION, ICurrentUniverService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { ISelectionTransformerShapeManager, SelectionTransformerShapeManager } from '@univerjs/base-render';
+import { DEFAULT_SELECTION, ICommandService, ICurrentUniverService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
-import { BasicWorkbookController, CellEditorController, CountBarController, SheetBarController, SheetContainerController } from './Controller';
+import { SetSelectionsOperation } from './Commands/Operations/selection.operation';
+import { BasicWorkbookController, CountBarController, SheetBarController, SheetContainerController } from './Controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { en, zh } from './Locale';
@@ -20,25 +21,18 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
     private _config: ISheetPluginConfig;
 
-    private _canvasEngine: Engine;
-
-    // private _editTooltipsController: EditTooltipsController;
-
     private _formulaBarController: FormulaBarController;
 
     private _sheetBarController: SheetBarController;
 
-    // private _cellEditorController: CellEditorController;
-
     private _countBarController: CountBarController;
-
-    // private _hideColumnController: HideColumnController;
 
     private _sheetContainerController: SheetContainerController;
 
     constructor(
         config: Partial<ISheetPluginConfig>,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector
     ) {
@@ -47,6 +41,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         this._config = Object.assign(DEFAULT_SPREADSHEET_PLUGIN_DATA, config);
 
         this._initializeDependencies(_injector);
+        this._initializeCommands();
     }
 
     initialize(): void {
@@ -59,7 +54,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
         this.initConfig();
         this.initController();
-        this.initCanvasView();
         this.listenEventManager();
     }
 
@@ -85,17 +79,11 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     initController() {
         this._sheetContainerController = this._injector.get(SheetContainerController);
         this._formulaBarController = this._injector.get(FormulaBarController);
-        // this._editTooltipsController = this._injector.get(EditTooltipsController);
         this._sheetBarController = this._injector.get(SheetBarController);
         this._countBarController = this._injector.get(CountBarController);
-        // this._hideColumnController = this._injector.get(HideColumnController);
 
         this._injector.get(BasicWorksheetController);
         this._injector.get(BasicWorkbookController);
-    }
-
-    initCanvasView() {
-        this._canvasEngine = this._injector.get(IRenderingEngine);
     }
 
     override onMounted(): void {
@@ -114,34 +102,14 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         this._sheetBarController.listenEventManager();
     }
 
-    /** @deprecated move to DI system */
-    // getSelectionManager() {
-    //     return this._injector.get(ISelectionManager);
-    // }
-
     private _initializeDependencies(sheetInjector: Injector) {
         const dependencies: Dependency[] = [
             [CanvasView],
 
-            [CellEditorController],
             [SheetContainerController],
             [FormulaBarController],
-            // [EditTooltipsController],
             [SheetBarController],
             [CountBarController],
-
-            // TODO@huwenzhao: this is a temporary solution
-            // [
-            //     ISelectionManager,
-            //     {
-            //         useFactory: (injector: Injector, canvasView: CanvasView) => injector.createInstance(SelectionManager, canvasView.getSheetView(), this._config),
-            //         deps: [Injector, CanvasView],
-            //     },
-            // ],
-            // [RowTitleController],
-            // [ColumnTitleController],
-            // [DragLineController],
-            // [HideColumnController],
 
             [BasicWorksheetController],
             [BasicWorkbookController],
@@ -161,5 +129,9 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         dependencies.forEach((d) => {
             sheetInjector.add(d);
         });
+    }
+
+    private _initializeCommands(): void {
+        this._commandService.registerCommand(SetSelectionsOperation);
     }
 }

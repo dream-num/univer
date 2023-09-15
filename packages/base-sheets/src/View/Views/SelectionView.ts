@@ -9,9 +9,10 @@ import {
     SpreadsheetColumnTitle,
     SpreadsheetRowTitle,
 } from '@univerjs/base-render';
-import { ICurrentUniverService, ISelectionRange, LocaleService, ObserverManager, Worksheet } from '@univerjs/core';
+import { ICommandService, ICurrentUniverService, ISelectionRange, LocaleService, ObserverManager, Worksheet } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { SetSelectionsOperation } from '../../Commands/Operations/selection.operation';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../Services/selection-manager.service';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry, SHEET_VIEW_KEY } from '../BaseView';
 
@@ -21,6 +22,7 @@ export class SelectionView extends BaseView {
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ISelectionTransformerShapeManager private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
+        @ICommandService private readonly _commandService: ICommandService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(LocaleService) private readonly _localeService: LocaleService
@@ -69,7 +71,16 @@ export class SelectionView extends BaseView {
         spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
 
         this._selectionTransformerShapeManager.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
-            this._selectionManagerService.replaceWithNoRefresh(selectionDataWithStyleList.map((selectionDataWithStyle) => convertSelectionDataToRange(selectionDataWithStyle)));
+            const unitId = workbook.getUnitId();
+            const sheetId = worksheet.getSheetId();
+
+            this._commandService.executeCommand(SetSelectionsOperation.id, {
+                unitId,
+                sheetId,
+                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                selections: selectionDataWithStyleList.map((selectionDataWithStyle) => convertSelectionDataToRange(selectionDataWithStyle)),
+            });
+
             const current = selectionDataWithStyleList[selectionDataWithStyleList.length - 1];
             if (current == null) {
                 return;

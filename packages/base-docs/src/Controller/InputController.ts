@@ -31,7 +31,6 @@ import { IDisposable, Inject } from '@wendellhu/redi';
 
 import { DeleteCommand, IMEInputCommand, InsertCommand, UpdateCommand } from '../commands/commands/core-editing.command';
 import { DocsViewManagerService } from '../services/docs-view-manager/docs-view-manager.service';
-import { CanvasView } from '../View/Render/CanvasView';
 import { DocsView } from '../View/Render/Views';
 
 /**
@@ -49,7 +48,6 @@ export class InputController extends Disposable {
     private _currentDocsView: DocsView | null;
 
     constructor(
-        @Inject(CanvasView) private readonly _canvasView: CanvasView,
         @Inject(DocsViewManagerService) private readonly _docsViewManager: DocsViewManagerService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ICommandService private readonly _commandService: ICommandService

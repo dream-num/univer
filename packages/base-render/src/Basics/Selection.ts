@@ -42,10 +42,10 @@ export interface ISelectionRangeWithStyle extends ISelectionRange {
 export const NORMAL_SELECTION_PLUGIN_STYLE = {
     strokeDashArray: [],
     strokeWidth: 2,
-    stroke: '#FFF000',
+    stroke: 'rgb(1,136,251)',
     fill: 'rgba(0, 0, 0, 0.2)',
-    controls: { tr: true, tl: true, br: true, bl: true },
-    hasAutoFill: false,
+    controls: {},
+    hasAutoFill: true,
 };
 
 export function convertSelectionDataToRange(selectionDataWithStyle: ISelectionDataWithStyle): ISelectionRangeWithStyle {

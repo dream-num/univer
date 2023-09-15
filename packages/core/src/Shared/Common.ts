@@ -12,7 +12,7 @@ export function makeCellToSelection(cellInfo: Nullable<ICellInfo>): Nullable<ISe
     if (!cellInfo) {
         return;
     }
-    const { row, column, isMerged, mergeInfo } = cellInfo;
+    const { row, column, isMerged, isMergedMainCell, mergeInfo } = cellInfo;
     let { startY, endY, startX, endX } = cellInfo;
     let startRow = row;
     let startColumn = column;
@@ -37,6 +37,13 @@ export function makeCellToSelection(cellInfo: Nullable<ICellInfo>): Nullable<ISe
         endY = mergeEndY;
         startX = mergeStartX;
         endX = mergeEndX;
+    }
+
+    if (isMergedMainCell) {
+        startY = mergeInfo.startY;
+        endY = mergeInfo.endY;
+        startX = mergeInfo.startX;
+        endX = mergeInfo.endX;
     }
 
     return {

@@ -1,5 +1,12 @@
 import { ColorBuilder } from '../Sheets/Domain';
-import { BaselineOffset, BorderStyleTypes, HorizontalAlign, TextDirection, VerticalAlign, WrapStrategy } from '../Types/Enum';
+import {
+    BaselineOffset,
+    BorderStyleTypes,
+    HorizontalAlign,
+    TextDirection,
+    VerticalAlign,
+    WrapStrategy,
+} from '../Types/Enum';
 import { IRangeData } from '../Types/Interfaces';
 import { ICellData } from '../Types/Interfaces/ICellData';
 import { IDocumentData } from '../Types/Interfaces/IDocumentData';
@@ -66,7 +73,15 @@ export function makeCellRangeToRangeData(cellInfo: Nullable<ICellRange>): Nullab
     if (!cellInfo) {
         return;
     }
-    const { row, column, isMerged, startRow: mergeStartRow, startColumn: mergeStartColumn, endRow: mergeEndRow, endColumn: mergeEndColumn } = cellInfo;
+    const {
+        row,
+        column,
+        isMerged,
+        startRow: mergeStartRow,
+        startColumn: mergeStartColumn,
+        endRow: mergeEndRow,
+        endColumn: mergeEndColumn,
+    } = cellInfo;
     let startRow = row;
     let startColumn = column;
     let endRow = row;

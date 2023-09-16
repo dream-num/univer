@@ -11,5 +11,6 @@
         },
         "esModuleInterop": true, // auto allowSyntheticDefaultImports true
         "strictPropertyInitialization": false
-    }
+    },
+    "include": ["src/**/*", "test/**/*"]
 }

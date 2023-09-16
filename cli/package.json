@@ -16,7 +16,7 @@
         "cli": "ts-node --project tsconfig.cli.json src/cli.ts",
         "build": "shx rm -rf lib/* && npx tsc --project tsconfig.cli.json && shx cp -r src/templates lib/templates"
     },
-    "author": "DreamNum <msoffice2@126.com>",
+    "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "files": [
         "package.json",

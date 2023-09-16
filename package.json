@@ -30,7 +30,7 @@
         "node": "^16.20.0",
         "pnpm": "^8.6.2"
     },
-    "author": "DreamNum <msoffice2@126.com>",
+    "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "devDependencies": {
         "@changesets/cli": "^2.22.0",

@@ -12,7 +12,7 @@
         "word",
         "ppt"
     ],
-    "author": "DreamNum <msoffice2@126.com>",
+    "author": "DreamNum <developer@univer.ai>",
     "main": "./src/index.ts",
     "module": "./src/index.ts",
     "publishConfig": {

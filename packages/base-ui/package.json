@@ -6,7 +6,7 @@
         "univer",
         "ui"
     ],
-    "author": "DreamNum <msoffice2@126.com>",
+    "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
     "module": "./src/index.ts",

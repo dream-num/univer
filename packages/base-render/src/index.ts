@@ -6,7 +6,6 @@ export * from './Custom';
 export * from './Engine';
 export * from './Group';
 export * from './Layer';
-export * from './Locale';
 export { IRenderingEngine, RenderEngine } from './RenderEngine';
 export * from './Scene';
 export * from './SceneViewer';

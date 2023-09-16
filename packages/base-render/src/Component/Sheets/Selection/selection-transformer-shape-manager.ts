@@ -13,7 +13,7 @@ import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { IMouseEvent, IPointerEvent } from '../../../Basics/IEvents';
-import { ISelectionDataWithStyle, ISelectionRangeWithStyle, NORMAL_SELECTION_PLUGIN_STYLE } from '../../../Basics/Selection';
+import { ISelectionDataWithStyle, ISelectionRangeWithStyle, ISelectionStyle, NORMAL_SELECTION_PLUGIN_STYLE } from '../../../Basics/Selection';
 import { Vector2 } from '../../../Basics/Vector2';
 import { Scene } from '../../../Scene';
 import { ScrollTimer } from '../../../ScrollTimer';
@@ -39,7 +39,7 @@ export interface ISelectionTransformerShapeManager {
     convertSelectionRangeToData(selectionRange: ISelectionRangeWithStyle): ISelectionDataWithStyle;
     convertRangeDataToSelection(rangeData: IRangeData): ISelection;
     convertCellRangeToInfo(cellRange: Nullable<ICellRange>): Nullable<ICellInfo>;
-    eventTrigger(evt: IPointerEvent | IMouseEvent, zIndex: number): void;
+    eventTrigger(evt: IPointerEvent | IMouseEvent, style: ISelectionStyle, zIndex: number): void;
     // getMoveCellInfo(direction: Direction, selectionData: Nullable<ISelectionData>): Nullable<ISelectionData>;
     // transformCellDataToSelectionData(row: number, column: number): Nullable<ISelectionData>;
     reset(): void;
@@ -105,12 +105,12 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
             style = NORMAL_SELECTION_PLUGIN_STYLE;
         }
 
-        const { strokeDashArray, strokeWidth, stroke, fill, controls, hasAutoFill } = style;
-
         const control = SelectionTransformerShape.create(this.getScene(), currentControls.length);
 
+        const { rowTitleWidth, columnTitleHeight } = this._skeleton;
+
         // update control
-        control.update(selection, cellInfo);
+        control.update(selection, rowTitleWidth, columnTitleHeight, style, cellInfo);
 
         currentControls.push(control);
     }
@@ -243,7 +243,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
     }
 
     // eslint-disable-next-line max-lines-per-function
-    eventTrigger(evt: IPointerEvent | IMouseEvent, zIndex = 0) {
+    eventTrigger(evt: IPointerEvent | IMouseEvent, style: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE, zIndex = 0) {
         const skeleton = this._skeleton;
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
@@ -268,6 +268,8 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         }
 
         const { startRow, startColumn, endColumn, endRow, startY, endY, startX, endX } = actualSelection;
+
+        const { rowTitleWidth, columnTitleHeight } = skeleton;
 
         const startSelectionRange = {
             startColumn,
@@ -336,10 +338,11 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
                 startX: startCell?.startX || 0,
                 endX: endCell?.endX || 0,
             };
-            selectionControl.update(newSelectionRange, currentCell);
+            selectionControl.update(newSelectionRange, rowTitleWidth, columnTitleHeight, style, currentCell);
         } else {
             selectionControl = SelectionTransformerShape.create(scene, curControls.length + zIndex);
-            selectionControl.update(startSelectionRange, cellInfo);
+            selectionControl.update(startSelectionRange, rowTitleWidth, columnTitleHeight, style, cellInfo);
+
             curControls.push(selectionControl);
         }
 
@@ -462,6 +465,8 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
+        const { rowTitleWidth, columnTitleHeight } = main;
+
         const moveCellInfo = main.calculateCellIndexByPosition(moveOffsetX, moveOffsetY, scaleX, scaleY, scrollXY);
         const moveActualSelection = makeCellToSelection(moveCellInfo);
 
@@ -503,7 +508,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         } = selectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
 
         if (oldStartColumn !== finalStartColumn || oldStartRow !== finalStartRow || oldEndColumn !== finalEndColumn || oldEndRow !== finalEndRow) {
-            selectionControl && selectionControl.update(newSelectionRange);
+            selectionControl && selectionControl.update(newSelectionRange, rowTitleWidth, columnTitleHeight);
         }
     }
 

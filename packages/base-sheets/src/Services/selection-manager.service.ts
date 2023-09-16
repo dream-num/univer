@@ -31,10 +31,51 @@ export class SelectionManagerService implements IDisposable {
 
     private _currentSelection: Nullable<ISelectionManagerSearchParam> = null;
 
+    private _currentStyle: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE;
+
+    private _isSelectionEnabled: boolean = true;
+
     private readonly _selectionInfo$ = new BehaviorSubject<Nullable<ISelectionRangeWithStyle[]>>(null);
 
     // eslint-disable-next-line @typescript-eslint/member-ordering
     readonly selectionInfo$ = this._selectionInfo$.asObservable();
+
+    get isSelectionEnabled() {
+        return this._isSelectionEnabled;
+    }
+
+    get currentStyle() {
+        return this._currentStyle;
+    }
+
+    enableSelection() {
+        this._isSelectionEnabled = true;
+    }
+
+    disableSelection() {
+        this._isSelectionEnabled = false;
+
+        if (this._currentSelection == null) {
+            return;
+        }
+
+        this._selectionInfo.set(this._currentSelection.pluginName, new Map());
+
+        this.refresh(this._currentSelection);
+    }
+
+    resetPlugin() {
+        if (this._currentSelection == null) {
+            return;
+        }
+        this._currentSelection.pluginName = NORMAL_SELECTION_PLUGIN_NAME;
+
+        this.refresh(this._currentSelection);
+    }
+
+    setCurrentStyle(style: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE) {
+        this._currentStyle = style;
+    }
 
     dispose(): void {
         this._selectionInfo$.complete();
@@ -138,33 +179,30 @@ export class SelectionManagerService implements IDisposable {
 
     createDefaultAutoFillSelection(): ISelectionStyle {
         return {
-            strokeDashArray: [],
             strokeWidth: 2,
             stroke: '#FFF000',
             fill: 'rgba(0, 0, 0, 0.2)',
-            controls: {},
+            widgets: {},
             hasAutoFill: true,
         };
     }
 
     createCopyPasteSelection(): ISelectionStyle {
         return {
-            strokeDashArray: [1, 0, 1, 1],
             strokeWidth: 2,
             stroke: '#FFF000',
             fill: 'rgba(0, 0, 0, 0.2)',
-            controls: {},
+            widgets: {},
             hasAutoFill: false,
         };
     }
 
     createDefaultSelection(): ISelectionStyle {
         return {
-            strokeDashArray: [],
             strokeWidth: 2,
             stroke: '#FFF000',
             fill: 'rgba(0, 0, 0, 0.2)',
-            controls: { tr: true, tl: true, br: true, bl: true },
+            widgets: { tr: true, tl: true, br: true, bl: true },
             hasAutoFill: false,
         };
     }

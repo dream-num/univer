@@ -2,7 +2,7 @@ import '../Basics/CSS/Skin/default.module.less';
 
 import { LocaleService, ObserverManager } from '@univerjs/core';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
-import React, { ComponentType, useEffect, useRef } from 'react';
+import React, { ComponentType, useEffect, useRef, useState } from 'react';
 
 import { defaultSkin } from '../Basics/CSS';
 import { ComponentManager, ZIndexManager } from '../Common';
@@ -94,8 +94,10 @@ export function App(props: IUniverAppProps) {
         }
     }, [props.onRendered]);
 
+    const [locale, setLocale] = useState<LocaleType>(localeService.getLocale().getCurrentLocale());
+
     return (
-        <AppContext.Provider value={{ injector, localeService, locale: LocaleType.EN, componentManager, zIndexManager, observerManager }}>
+        <AppContext.Provider value={{ injector, localeService, locale, componentManager, zIndexManager, observerManager }}>
             {/* TODO: UI here is not fine tuned */}
             <div
                 style={{
@@ -117,7 +119,15 @@ export function App(props: IUniverAppProps) {
                 >
                     Language
                 </span>
-                <select value={LocaleType.EN} style={{ width: 70 }} onChange={(e) => localeService.setLocale(e.target.value as LocaleType)}>
+                <select
+                    value={locale}
+                    style={{ width: 70 }}
+                    onChange={(e) => {
+                        const value = e.target.value as LocaleType;
+                        localeService.setLocale(value);
+                        setLocale(value);
+                    }}
+                >
                     <option value={LocaleType.EN}>English</option>
                     <option value={LocaleType.ZH}>简体中文</option>
                 </select>

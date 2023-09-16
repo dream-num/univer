@@ -2,7 +2,6 @@ import { createRef, useState } from 'react';
 
 import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils';
-import { CustomLabel } from '../CustomLabel';
 import style from './index.module.less';
 
 // interface TooltipProps {
@@ -110,7 +109,7 @@ export function Tooltip(props: BaseTooltipProps) {
                         display: `${state.show ? 'block' : 'none'}`,
                     }}
                 >
-                    <CustomLabel label={props.title} />
+                    {props.title}
                     <span className={style.tooltipTriangle}></span>
                 </span>
             ) : null}

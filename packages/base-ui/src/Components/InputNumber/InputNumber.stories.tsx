@@ -10,7 +10,9 @@ const meta: Meta<typeof InputNumber> = {
     },
     tags: ['autodocs'],
     args: {
-        bordered: true,
+        value: 1,
+        min: 0,
+        max: 10,
     },
 };
 

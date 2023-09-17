@@ -1,104 +1,163 @@
-import React, { RefObject, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils/util';
 import styles from './Style/index.module.less';
 
+// TODO@Dushusir disabled/bordered handle buttons
+
 export interface BaseInputNumberProps extends BaseComponentProps {
-    value?: string;
-    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-    bordered?: boolean;
-    disabled?: boolean;
-    onFocus?: (e: React.FocusEvent<HTMLInputElement, Element>) => void;
-    onBlur?: (e: React.FocusEvent<HTMLInputElement, Element>) => void;
-    onClick?: (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => void;
-    onValueChange?: (value: string) => void;
-    className?: string;
+    /**
+     * The input content value
+     */
+    value?: number;
+
+    /**
+     * The input content placeholder
+     */
+    placeholder?: string;
+
+    /**
+     * minimum value
+     */
+    min?: number;
+
+    /**
+     * maximum number
+     */
+    max?: number;
+
+    /**
+     * Whether the input is read only
+     * @default false
+     */
     readonly?: boolean;
-    id?: string;
-    ref?: RefObject<HTMLInputElement>;
+
+    /**
+     * Whether the input is disabled
+     * @default false
+     */
+    disabled?: boolean;
+
+    /**
+     * Whether has border style
+     * @default true
+     */
+    bordered?: boolean;
+
+    /**
+     * Callback when user input
+     */
+    onChange?: (value: number) => void;
+
+    /**
+     * The callback function that is triggered when Enter key is pressed
+     */
+    onPressEnter?: (value: number) => void;
+
+    /**
+     * Whether the input is blur
+     */
+    onBlur?: (value: number) => void;
 }
 
-export function InputNumber(props: BaseInputNumberProps) {
+/**
+ * Input Number Component
+ */
+export const InputNumber: React.FC<BaseInputNumberProps> = ({
+    value = 0,
+    placeholder = '',
+    onChange,
+    min = -Infinity,
+    max = Infinity,
+    onPressEnter,
+    onBlur,
+    readonly = false,
+    disabled = false,
+    bordered = true,
+}) => {
+    const [inputValue, setInputValue] = useState(value);
     const ref = useRef<HTMLInputElement>(null);
-    const [value, setValue] = useState(props.value);
-    const [focused, setFocused] = useState(false);
 
-    const realValue = useMemo(() => value ?? props.value ?? '', [value, props.value]);
-
-    useEffect(() => {
-        if (props.value && props.value !== value) {
-            setValue(props.value);
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let newValue = parseFloat(e.target.value);
+        if (isNaN(newValue)) {
+            newValue = 0;
         }
-    }, [props.value]);
+        if (newValue < min) {
+            newValue = min;
+        } else if (newValue > max) {
+            newValue = max;
+        }
+        setInputValue(newValue);
+        if (onChange) {
+            onChange(newValue);
+        }
+    };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { onChange } = props;
-        const target = e.target;
+    const handleIncrement = () => {
+        const newValue = inputValue + 1;
+        if (newValue <= max) {
+            setInputValue(newValue);
+            if (onChange) {
+                onChange(newValue);
+            }
+        }
+    };
 
-        setValue(target.value);
-        if (!onChange) return;
-        onChange(e);
+    const handleDecrement = () => {
+        const newValue = inputValue - 1;
+        if (newValue >= min) {
+            setInputValue(newValue);
+            if (onChange) {
+                onChange(newValue);
+            }
+        }
     };
 
     const handlePressEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        const { onPressEnter, onValueChange } = props;
-        const v = getValue();
-        setValue(v);
-        if (e.key === 'Enter') {
-            onPressEnter?.(e);
+        if (e.key === 'Enter' && onPressEnter) {
+            onPressEnter(inputValue);
             ref.current?.blur();
-            v && onValueChange?.(v);
         }
     };
 
-    const onFocus = (e: React.FocusEvent<HTMLInputElement, Element>) => {
-        const { onFocus } = props;
-        onFocus?.(e);
-        setFocused(true);
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement, Element>) => {
+        if (onBlur) {
+            onBlur(inputValue);
+        }
     };
 
-    const onClick = (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
-        e.stopPropagation();
-        const { onClick } = props;
-        onClick?.(e);
-    };
-
-    const onBlur = (e: React.FocusEvent<HTMLInputElement, Element>) => {
-        const { onBlur, onValueChange } = props;
-        onBlur?.(e);
-        const v = getValue();
-        v && onValueChange?.(v);
-        setFocused(false);
-    };
-
-    const getValue = () => ref.current?.value;
-
-    const { id, disabled, bordered = true, className = '', readonly } = props;
-
-    const classes = joinClassNames(
-        styles.input,
-        {
-            [`${styles.input}-disable`]: disabled,
-            [`${styles.input}-borderless`]: !bordered,
-        },
-        className
-    );
+    const classes = joinClassNames(styles.input, {
+        [`${styles.input}-disable`]: disabled,
+        [`${styles.input}-borderless`]: !bordered,
+    });
 
     return (
-        <input
-            onBlur={onBlur}
-            onFocus={onFocus}
-            className={classes}
-            disabled={disabled}
-            ref={ref}
-            onChange={handleChange}
-            value={realValue}
-            onClick={onClick}
-            readOnly={readonly}
-            id={id}
-            onKeyUp={handlePressEnter}
-        />
+        <div className={styles.inputNumber}>
+            <div className={styles.inputWrap}>
+                <input
+                    ref={ref}
+                    type="text"
+                    placeholder={placeholder}
+                    value={inputValue}
+                    disabled={disabled}
+                    onChange={handleInputChange}
+                    className={classes}
+                    onKeyUp={handlePressEnter}
+                    onBlur={handleBlur}
+                    readOnly={readonly}
+                />
+            </div>
+
+            <div className={styles.inputButtons}>
+                <button onClick={handleIncrement} className={styles.inputButton}>
+                    <span>+</span>
+                </button>
+                <button onClick={handleDecrement} className={styles.inputButton}>
+                    <span>-</span>
+                </button>
+            </div>
+        </div>
     );
-}
+};

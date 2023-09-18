@@ -1,6 +1,6 @@
 import { ChangeSelectionCommand, ExpandSelectionCommand, IChangeSelectionCommandParams, IExpandSelectionCommandParams } from '@univerjs/base-sheets';
-import { FOCUSING_SHEET, IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
-import { Direction } from '@univerjs/core';
+import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
+import { Direction, FOCUSING_SHEET } from '@univerjs/core';
 
 export const MoveSelectionDownShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
     id: ChangeSelectionCommand.id,

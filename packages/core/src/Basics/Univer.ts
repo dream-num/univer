@@ -3,6 +3,7 @@ import { Ctor, Injector } from '@wendellhu/redi';
 import { ObserverManager } from '../Observer';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../Plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
+import { ContextService, IContextService } from '../services/context/context.service';
 import { CurrentUniverService, ICurrentUniverService } from '../services/current.service';
 import { LocaleService } from '../services/locale.service';
 import { DesktopLogService, ILogService } from '../services/log/log.service';
@@ -26,7 +27,7 @@ export class Univer {
     private readonly _univerPluginRegistry = new PluginRegistry();
 
     constructor(univerData: Partial<IUniverData> = {}) {
-        this._univerInjector = this.initializeDependencies();
+        this._univerInjector = this._initializeDependencies();
         this._setObserver();
 
         // initialize localization info
@@ -132,7 +133,7 @@ export class Univer {
         new UniverObserverImpl().install(this._univerInjector.get(ObserverManager));
     }
 
-    private initializeDependencies(): Injector {
+    private _initializeDependencies(): Injector {
         return new Injector([
             [ObserverManager],
             [
@@ -149,6 +150,7 @@ export class Univer {
             [ICommandService, { useClass: CommandService, lazy: true }],
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
             [IPermissionService, { useClass: DesktopPermissionService }],
+            [IContextService, { useClass: ContextService }],
         ]);
     }
 

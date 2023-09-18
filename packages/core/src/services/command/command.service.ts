@@ -1,6 +1,6 @@
 import { createIdentifier, IAccessor, IDisposable, Inject, Injector, Optional, SkipSelf } from '@wendellhu/redi';
 
-import { toDisposable } from '../../Shared/Lifecycle';
+import { toDisposable } from '../../Shared/lifecycle';
 import { IKeyValue } from '../../Shared/Types';
 import { ILogService } from '../log/log.service';
 

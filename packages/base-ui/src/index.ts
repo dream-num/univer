@@ -12,8 +12,6 @@ export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clip
 export { DesktopClipboardService, IClipboardService } from './services/clipboard/clipboard.service';
 export { CopyShortcutItem, CutShortcutItem, PasteShortcutItem } from './services/clipboard/clipboard.shortcut';
 export { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
-export { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './services/context/context';
-export { ContextService, IContextService } from './services/context/context.service';
 export {
     ICustomComponentOption,
     ICustomComponentProps,

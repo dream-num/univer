@@ -8,7 +8,6 @@ import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { DesktopClipboardService, IClipboardService } from './services/clipboard/clipboard.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
-import { ContextService, IContextService } from './services/context/context.service';
 import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopMenuService, IMenuService } from './services/menu/menu.service';
 import { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
@@ -49,7 +48,6 @@ export class UIPlugin extends Plugin {
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
             [IMenuService, { useClass: DesktopMenuService }],
-            [IContextService, { useClass: ContextService }],
             [IContextMenuService, { useClass: DesktopContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService }],
             [IClipboardService, { useClass: DesktopClipboardService }],

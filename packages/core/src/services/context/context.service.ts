@@ -1,9 +1,11 @@
-import { Disposable, fromObservable, ICurrentUniverService, UniverDoc, UniverSheet, UniverSlide } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
+import { UniverDoc } from '../../Basics/UniverDoc';
+import { UniverSheet } from '../../Basics/UniverSheet';
+import { UniverSlide } from '../../Basics/UniverSlide';
+import { Disposable, fromObservable } from '../../Shared/lifecycle';
+import { ICurrentUniverService } from '../current.service';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './context';
-
-// TODO: maybe context service should be moved to core
 
 export interface IContextService {
     getContextValue(key: string): boolean;

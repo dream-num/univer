@@ -5,7 +5,7 @@ import { UniverDoc } from '../Basics/UniverDoc';
 import { UniverSheet } from '../Basics/UniverSheet';
 import { UniverSlide } from '../Basics/UniverSlide';
 import { Nullable } from '../Shared';
-import { Disposable } from '../Shared/Lifecycle';
+import { Disposable } from '../Shared/lifecycle';
 import { IDocumentData } from '../Types/Interfaces';
 
 export interface IUniverHandler {

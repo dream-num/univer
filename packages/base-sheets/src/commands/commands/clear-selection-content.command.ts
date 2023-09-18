@@ -1,4 +1,14 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import {
+    CommandType,
+    ICellData,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    ISelectionRange,
+    IUndoRedoService,
+    ObjectMatrix,
+    ObjectMatrixPrimitiveType,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
@@ -23,6 +33,7 @@ export const ClearSelectionContentCommand: ICommand = {
         const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const workbookId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
+        const worksheetId = worksheet.getSheetId();
         const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length) {
             return false;
@@ -30,8 +41,9 @@ export const ClearSelectionContentCommand: ICommand = {
 
         const clearMutationParams: ISetRangeValuesMutationParams = {
             rangeData: selections,
-            workbookId: workbook.getUnitId(),
-            worksheetId: worksheet.getSheetId(),
+            worksheetId,
+            workbookId,
+            cellValue: generateNullCellValue(selections),
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,
@@ -41,8 +53,8 @@ export const ClearSelectionContentCommand: ICommand = {
         const result = commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                // 如果有多个 mutation 构成一个封装项目，那么要封装在同一个 undo redo element 里面
-                // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
+                // If there are multiple mutations that form an encapsulated project, they must be encapsulated in the same undo redo element.
+                // Hooks can be used to hook the code of external controllers to add new actions.
                 URI: workbookId,
                 undo() {
                     return commandService.executeCommand(SetRangeValuesMutation.id, undoClearMutationParams);
@@ -58,3 +70,21 @@ export const ClearSelectionContentCommand: ICommand = {
         return false;
     },
 };
+
+// Generate cellValue from rangeData and set v to null
+function generateNullCellValue(rangeData: ISelectionRange[]): ObjectMatrixPrimitiveType<ICellData> {
+    const cellValue = new ObjectMatrix<ICellData>();
+    rangeData.forEach((range: ISelectionRange) => {
+        const { startRow, startColumn, endRow, endColumn } = range;
+        for (let i = startRow; i <= endRow; i++) {
+            for (let j = startColumn; j <= endColumn; j++) {
+                cellValue.setValue(i, j, {
+                    v: null,
+                    m: null,
+                });
+            }
+        }
+    });
+
+    return cellValue.getData();
+}

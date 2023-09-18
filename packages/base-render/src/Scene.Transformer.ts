@@ -247,7 +247,7 @@ export class Transformer implements ITransformerConfig {
                 scene.onPointerUpObserver.remove(this._upObserver);
                 scene.enableEvent();
                 this._updateControl();
-                scrollTimer.stopScroll();
+                scrollTimer.dispose();
 
                 this.onChangeEndObservable.notifyObservers({
                     objects: this._selectedObjectMap,
@@ -426,7 +426,7 @@ export class Transformer implements ITransformerConfig {
                 scene.onPointerUpObserver.remove(this._upObserver);
                 scene.enableEvent();
                 scene.resetCursor();
-                scrollTimer.stopScroll();
+                scrollTimer.dispose();
             });
 
             state.stopPropagation();

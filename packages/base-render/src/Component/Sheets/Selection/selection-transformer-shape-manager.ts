@@ -20,6 +20,7 @@ import { ScrollTimer } from '../../../ScrollTimer';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SelectionTransformerModel } from './selection-transformer-model';
 import { SelectionTransformerShape } from './selection-transformer-shape';
+import { SelectionTransformerShapeEvent } from './selection-transformer-shape-event';
 
 export interface ISelectionTransformerShapeManager {
     readonly selectionRangeWithStyle$: Observable<ISelectionDataWithStyle[]>;
@@ -99,15 +100,21 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         }
         const { selection, cellInfo } = data;
 
+        const skeleton = this._skeleton;
+
         let style = data.style;
 
         if (style == null) {
             style = NORMAL_SELECTION_PLUGIN_STYLE;
         }
 
+        const scene = this.getScene();
+
         const control = SelectionTransformerShape.create(this.getScene(), currentControls.length);
 
-        const { rowTitleWidth, columnTitleHeight } = this._skeleton;
+        new SelectionTransformerShapeEvent(control, skeleton, scene);
+
+        const { rowTitleWidth, columnTitleHeight } = skeleton;
 
         // update control
         control.update(selection, rowTitleWidth, columnTitleHeight, style, cellInfo);
@@ -341,6 +348,9 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
             selectionControl.update(newSelectionRange, rowTitleWidth, columnTitleHeight, style, currentCell);
         } else {
             selectionControl = SelectionTransformerShape.create(scene, curControls.length + zIndex);
+
+            new SelectionTransformerShapeEvent(selectionControl, skeleton, scene);
+
             selectionControl.update(startSelectionRange, rowTitleWidth, columnTitleHeight, style, cellInfo);
 
             curControls.push(selectionControl);
@@ -521,7 +531,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         scene.onPointerUpObserver.remove(this._upObserver);
         scene.enableEvent();
 
-        this._scrollTimer?.stopScroll();
+        this._scrollTimer?.dispose();
 
         const mainScene = scene.getEngine()?.activeScene;
         mainScene?.onPointerDownObserver.remove(this._cancelDownObserver);

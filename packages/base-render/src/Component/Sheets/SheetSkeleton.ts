@@ -383,6 +383,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     calculateCellIndexByPosition(offsetX: number, offsetY: number, scaleX: number, scaleY: number, scrollXY: { x: number; y: number }): Nullable<ICellInfo> {
+        const { row, column } = this.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+
+        return this.getCellByIndex(row, column, scaleX, scaleY);
+    }
+
+    getCellPositionByOffset(offsetX: number, offsetY: number, scaleX: number, scaleY: number, scrollXY: { x: number; y: number }) {
         const { x: scrollX, y: scrollY } = scrollXY;
 
         // these values are not affected by zooming (ideal positions)
@@ -415,34 +421,9 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, this._config.mergeData);
-        const { isMerged, isMergedMainCell } = cellInfo;
-        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
-
-        startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowTitleWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowTitleWidth, scaleX);
-
-        mergeInfo = mergeInfoOffset(mergeInfo, rowTitleWidth, columnTitleHeight, scaleX, scaleY);
-
-        // let endRow = row;
-        // let endColumn = column;
-        // if (isMerged && mergeInfo) {
-        //     endRow = mergeInfo.endRow;
-        //     endColumn = mergeInfo.endColumn;
-        // }
-
         return {
             row,
             column,
-            startY,
-            endY,
-            startX,
-            endX,
-            isMerged,
-            isMergedMainCell,
-            mergeInfo,
         };
     }
 

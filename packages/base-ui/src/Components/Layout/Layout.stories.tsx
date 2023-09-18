@@ -1,19 +1,38 @@
-import { Layout } from './Layout';
+import type { Meta } from '@storybook/react';
 
-// More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-export default {
-    title: 'Components/Layout',
+import { Content, Footer, Header, Layout, Sider } from './Layout';
+
+const meta: Meta<typeof Layout> = {
+    title: 'Components / Layout',
     component: Layout,
     parameters: {
         layout: 'centered',
     },
     tags: ['autodocs'],
     args: {
-        children: <div>test layout</div>,
+        children: <div>basic layout</div>,
     },
 };
 
-// More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
+export default meta;
+
 export const Playground = {
     args: {},
+};
+
+export const SiderLayout = {
+    title: 'Sider',
+    args: {
+        style: { width: '640px', height: '320px' },
+        children: (
+            <>
+                <Sider style={{ color: '#fff', background: '#001529' }}>aside</Sider>
+                <Content style={{ padding: '24px', background: '#f5f5f5', display: 'flex', flexDirection: 'column' }}>
+                    <Header style={{ color: '#fff', background: '#001529' }}>header</Header>
+                    <Content style={{ background: '#fff' }}>content</Content>
+                    <Footer style={{ color: '#fff', background: '#001529' }}>footer</Footer>
+                </Content>
+            </>
+        ),
+    },
 };

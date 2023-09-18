@@ -309,8 +309,8 @@ export function ColorPicker(props: BaseColorPickerProps) {
         return { left, top };
     };
 
-    const onSwitch = (e: Event) => {
-        e.stopImmediatePropagation();
+    const onSwitch = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        (e as unknown as MouseEvent).stopImmediatePropagation();
 
         new Promise((resolve, reject) => {
             setSetting(!setting);
@@ -381,7 +381,7 @@ export function ColorPicker(props: BaseColorPickerProps) {
                                 <CustomLabel label="colorPicker.cancelColor" />
                             </Button>
                             <Button
-                                onClick={(e: MouseEvent) => {
+                                onClick={(e) => {
                                     e.stopPropagation();
                                     setRgb(!rgb);
                                 }}

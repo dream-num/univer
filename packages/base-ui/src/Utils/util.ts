@@ -91,30 +91,6 @@ export function randomId(prefix: string) {
 }
 
 /**
- * 获取第一级子元素
- * @param obj
- * @returns
- */
-export function getFirstChildren(obj: HTMLElement) {
-    const objChild = [];
-    const objs = obj.getElementsByTagName('*');
-    for (let i = 0, j = objs.length; i < j; ++i) {
-        if (objs[i].nodeType !== 1) {
-            // alert(objs[i].nodeType);
-            continue;
-        }
-        const temp: HTMLElement | any = objs[i].parentNode;
-        if (temp && temp.nodeType === 1) {
-            if (temp === obj) {
-                objChild[objChild.length] = objs[i];
-            }
-        } else if (temp && temp.parentNode === obj) {
-            objChild[objChild.length] = objs[i];
-        }
-    }
-    return objChild;
-}
-/**
  * join className
  */
 export function joinClassNames(...args: any) {

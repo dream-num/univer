@@ -1,8 +1,9 @@
-import { Input } from './input';
+import type { Meta } from '@storybook/react';
 
-// More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-export default {
-    title: 'Components/Input',
+import { Input } from './Input';
+
+const meta: Meta<typeof Input> = {
+    title: 'Components / Input',
     component: Input,
     parameters: {
         layout: 'centered',
@@ -11,10 +12,12 @@ export default {
     args: {
         placeholder: 'Your Content',
         bordered: true,
+        type: 'text',
     },
 };
 
-// More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
+export default meta;
+
 export const Playground = {
     args: {},
 };

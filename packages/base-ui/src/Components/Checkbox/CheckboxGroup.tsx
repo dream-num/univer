@@ -5,22 +5,43 @@ import { Checkbox } from './Checkbox';
 import styles from './index.module.less';
 
 export type BaseCheckboxGroupOptions = {
-    checked?: boolean;
-    disabled?: boolean;
-    name?: string;
     label?: React.ReactNode;
+
+    checked?: boolean;
+
+    disabled?: boolean;
+
+    name?: string;
+
     value?: string;
 };
 
+// TODO: where is the `value`?
+
 export interface BaseCheckboxGroupProps extends BaseComponentProps {
-    disabled?: boolean;
+    /** The `name` property of all `input[type="checkbox"]` children */
     name?: string;
+
+    /**
+     * Specifies options
+     * @default []
+     */
     options: BaseCheckboxGroupOptions[];
+
+    /**
+     * If disable all checkboxes
+     * @default false
+     */
+    disabled?: boolean;
+
     onChange?: (value: string[]) => void;
 }
 
+/**
+ * CheckboxGroup Component
+ */
 export function CheckboxGroup(props: BaseCheckboxGroupProps) {
-    const { options, onChange, disabled, name } = props;
+    const { name, options = [], disabled = false, onChange } = props;
     const ref = useRef<HTMLDivElement>(null);
 
     if (disabled) {

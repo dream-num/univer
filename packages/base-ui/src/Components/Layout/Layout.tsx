@@ -1,30 +1,51 @@
-// Types for props
-// type BaseLayoutProps = {
-//     children?: ComponentChildren;
-//     className?: string;
-//     style?: {};
-// };
-// Types for state
-import React, { forwardRef, Ref, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { BaseComponentProps } from '../../BaseComponent';
-import { getFirstChildren } from '../../Utils';
+import { joinClassNames } from '../../Utils';
 import styles from './index.module.less';
+
+function getFirstChild(obj: HTMLElement) {
+    const objChild = [];
+    const objs = obj.getElementsByTagName('*');
+
+    for (let i = 0, j = objs.length; i < j; ++i) {
+        if (objs[i].nodeType !== Node.ELEMENT_NODE) {
+            continue;
+        }
+        const node = objs[i].parentNode;
+        if (node && node.nodeType === 1) {
+            if (node === obj) {
+                objChild[objChild.length] = objs[i];
+            }
+        } else if (node && node.parentNode === obj) {
+            objChild[objChild.length] = objs[i];
+        }
+    }
+
+    return objChild;
+}
 
 export interface BaseLayoutProps extends BaseComponentProps {
     children?: React.ReactNode;
+
+    /** Semantic DOM class */
     className?: string;
-    style?: {};
+
+    /** Semantic DOM style */
+    style?: React.CSSProperties;
 }
 
-export function Layout({ children, style, className = '' }: BaseLayoutProps) {
+/**
+ * Layout Component
+ */
+export function Layout({ children, style, className }: BaseLayoutProps) {
     const [isAside, setIsAside] = useState(false);
     const ref = useRef<HTMLTableSectionElement>(null);
 
     // If the first child element contains the `aside` component, the layout needs to be changed to horizontal arrangement
     useEffect(() => {
         if (ref.current) {
-            const children = getFirstChildren(ref.current);
+            const children = getFirstChild(ref.current);
             const childrens = children instanceof Array ? children : [children];
 
             for (const ele of childrens) {
@@ -36,15 +57,26 @@ export function Layout({ children, style, className = '' }: BaseLayoutProps) {
         }
     }, []);
 
+    const classes = joinClassNames(
+        styles.layoutWrapper,
+        {
+            [styles.layoutWrapperHasSider]: isAside,
+        },
+        className
+    );
+
     return (
-        <section style={style} ref={ref} className={isAside ? `${styles.layoutWrapper} ${styles.layoutWrapperHasSider} ${className}` : `${styles.layoutWrapper} ${className}`}>
+        <section style={style} ref={ref} className={classes}>
             {children}
         </section>
     );
 }
 
+/**
+ * Header Component
+ */
 const Header = (props: BaseLayoutProps) => {
-    const { children, style, className = '' } = props;
+    const { children, className, style } = props;
 
     return (
         <header style={style} className={`${styles.headerWrapper} ${className}`}>
@@ -52,33 +84,47 @@ const Header = (props: BaseLayoutProps) => {
         </header>
     );
 };
+
+/**
+ * Footer Component
+ */
 const Footer = (props: BaseLayoutProps) => {
-    const { children, style, className = '' } = props;
+    const { children, className, style } = props;
+
+    const classes = joinClassNames(styles.footerWrapper, className);
 
     return (
-        <footer style={style} className={`${styles.footerWrapper} ${className}`}>
+        <footer className={classes} style={style}>
             {children}
         </footer>
     );
 };
 
 /**
- * use forwardRef, get hold of a specific reference further down the tree
+ * Content Component
  */
-const Content = forwardRef((props: BaseLayoutProps, ref: Ref<HTMLElement>) => {
-    const { children, style, className = '' } = props;
+const Content = (props: BaseLayoutProps) => {
+    const { children, className, style } = props;
+
+    const classes = joinClassNames(styles.contentWrapper, className);
 
     return (
-        <main ref={ref} style={style} className={`${styles.contentWrapper} ${className}`}>
+        <main className={classes} style={style}>
             {children}
         </main>
     );
-});
+};
+
+/**
+ * Sider Component
+ */
 const Sider = (props: BaseLayoutProps) => {
-    const { children, style, className = '' } = props;
+    const { children, className, style } = props;
+
+    const classes = joinClassNames(styles.siderWrapper, className);
 
     return (
-        <aside style={style} className={`${styles.siderWrapper} ${className}`}>
+        <aside className={classes} style={style}>
             {children}
         </aside>
     );

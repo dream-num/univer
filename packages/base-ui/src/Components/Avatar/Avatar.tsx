@@ -1,36 +1,56 @@
-import React from 'react';
-
 import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils';
 import styles from './Style/index.module.less';
 
 type Shape = 'circle' | 'square';
-// type BreakPoint = 'xxl' | 'xl' | 'lg' | 'md' | 'sm' | 'xs';
-// type AvatatScreen = Partial<Record<BreakPoint, number>>;
-// type AvatarSize = number | 'large' | 'small' | 'default' | AvatatScreen;
 type AvatarSize = number | 'large' | 'small' | 'default';
 type ImageFit = 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
 
 export interface BaseAvatarProps extends BaseComponentProps {
-    alt?: string;
-    shape?: Shape;
-    size?: AvatarSize;
-    src?: string;
+    children?: React.ReactNode;
+
+    /** Semantic DOM style */
     style?: React.CSSProperties;
-    fit?: ImageFit;
-    children?: any;
-    onError?: () => void;
-    onLoad?: () => void;
+
+    /** The title of the image avatar */
     title?: string;
+
+    /** Image description */
+    alt?: string;
+
+    /**
+     * The shape of the avatar
+     * @default 'circle'
+     */
+    shape?: Shape;
+
+    /**
+     * The size of the avatar
+     * @default 'default'
+     */
+    size?: AvatarSize;
+
+    /** The address of the image for an image avatar or image element */
+    src?: string;
+
+    /**
+     * The fit of the image avatar
+     * @default fill
+     */
+    fit?: ImageFit;
+
+    /** Handler when img load error */
+    onError?: () => void;
+
+    /** Handler when img load success */
+    onLoad?: () => void;
 }
 
+/**
+ * Avatar Component
+ */
 export function Avatar(props: BaseAvatarProps) {
-    const { alt, shape = 'circle', size, src, onError, style, fit = 'fill', children, onLoad, title } = props;
-
-    // const responseSize = () => {
-    //     if (size instanceof Object) {
-    //     }
-    // };
+    const { children, style, title, alt, shape = 'circle', size = 'default', src, fit = 'fill', onError, onLoad } = props;
 
     const sizeStyle =
         typeof size === 'number'
@@ -51,6 +71,7 @@ export function Avatar(props: BaseAvatarProps) {
     });
 
     const fitStyle = fit ? { objectFit: fit } : {};
+
     if (src) {
         return (
             <span className={classes} style={{ ...sizeStyle, ...style, ...fitStyle }}>

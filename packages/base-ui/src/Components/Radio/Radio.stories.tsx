@@ -1,16 +1,16 @@
 import type { Meta } from '@storybook/react';
 
-import { Slot } from './Slot';
+import { Radio } from './Radio';
 
-const meta: Meta<typeof Slot> = {
-    title: 'Components / Slot',
-    component: Slot,
+const meta: Meta<typeof Radio> = {
+    title: 'Components / Radio',
+    component: Radio,
     parameters: {
         layout: 'centered',
     },
     tags: ['autodocs'],
     args: {
-        name: 'main',
+        value: 'value',
     },
 };
 

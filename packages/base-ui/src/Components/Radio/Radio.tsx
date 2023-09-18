@@ -3,30 +3,72 @@ import React from 'react';
 import styles from './index.module.less';
 
 export interface BaseRadioIProps {
-    value: string;
-    active?: boolean;
-    onClick?: (value: string) => void;
-    label?: string;
     children?: React.ReactNode[];
+
+    /** Semantic DOM style */
+    style?: React.CSSProperties;
+
+    /**
+     * Used for setting the currently selected value
+     */
+    value: string;
+
+    /**
+     * Specifies whether the radio is selected
+     * @default false
+     */
+    active?: boolean;
+
+    /**
+     * Set the handler to handle `click` event
+     */
+    onClick?: (value: string) => void;
+
+    /**
+     * The label content displayed
+     * @default ''
+     */
+    label?: string;
 }
 
 export interface BaseRadioGroupProps {
-    className?: string;
-    active?: string | number;
-    vertical?: boolean;
-    onChange: (value: string) => void;
     children: React.ReactNode[];
+
+    /**
+     * Semantic DOM class
+     * @default ''
+     */
+    className?: string;
+
+    /**
+     * Define which radio is selected
+     */
+    active: string;
+
+    /**
+     * Whether to arrange vertically
+     * @default false
+     */
+    vertical?: boolean;
+
+    /**
+     * The callback function triggered when switching options
+     */
+    onChange: (value: string) => void;
 }
 
+/**
+ * RadioGroup Component
+ */
 export function RadioGroup(props: BaseRadioGroupProps) {
-    const { vertical, className = '', active, onChange } = props;
+    const { vertical = false, className = '', active, onChange } = props;
 
     const handleActiveChange = (value: string) => {
         onChange(value);
     };
 
     return (
-        <div className={`${vertical ? styles.radioGroup : ''} ${className || ''}`}>
+        <div className={`${vertical ? styles.radioGroup : ''} ${className}`}>
             {React.Children.map(props.children, (child, index) => {
                 if (React.isValidElement<BaseRadioIProps>(child)) {
                     const isActive = active === child.props.value;
@@ -37,6 +79,7 @@ export function RadioGroup(props: BaseRadioGroupProps) {
                         value: child.props.value,
                         active: isActive,
                         onClick: handleActiveChange,
+                        style: child.props.style,
                     });
                 }
                 return child;
@@ -45,11 +88,14 @@ export function RadioGroup(props: BaseRadioGroupProps) {
     );
 }
 
-export function Radio({ value, active, onClick, label, children }: BaseRadioIProps) {
+/**
+ * Radio Component
+ */
+export function Radio({ value, active, onClick, label = 'Radio', children, style }: BaseRadioIProps) {
     return (
-        <div className={styles.radioWrap}>
-            <div className={styles.radioLeft}>
-                <div onClick={onClick && (() => onClick(value))}>
+        <div className={styles.radioWrap} style={style}>
+            <div>
+                <div className={styles.radioLeft} onClick={onClick && (() => onClick(value))}>
                     <div className={`${styles.circle} ${active && styles.active}`}>
                         <div className={styles.fork}></div>
                     </div>

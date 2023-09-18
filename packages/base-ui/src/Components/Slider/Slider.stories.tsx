@@ -1,17 +1,24 @@
+import type { Meta } from '@storybook/react';
+
 import { Slider } from './Slider';
 
-// More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-export default {
-    title: 'Components/Slider',
+const meta: Meta<typeof Slider> = {
+    title: 'Components / Slider',
     component: Slider,
     parameters: {
         layout: 'centered',
     },
     tags: ['autodocs'],
-    args: {},
+    args: {
+        min: 0,
+        max: 100,
+        step: 1,
+        range: false,
+    },
 };
 
-// More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
+export default meta;
+
 export const Playground = {
     args: {},
 };

@@ -2,7 +2,7 @@ import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager
 import { IMenuItemFactory } from '@univerjs/base-ui/src/services/menu/menu';
 import { Disposable } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
-import { ComponentChildren } from 'react';
+import React from 'react';
 
 import { SHEET_UI_PLUGIN_NAME, SheetToolbarConfig } from '../Basics';
 import { ColorSelect, LineBold, LineColor, Toolbar } from '../View';
@@ -51,7 +51,7 @@ export interface IToolbarItemProps extends BaseToolbarSelectProps {
     toolbarType?: ToolbarType;
     tooltip?: string; //tooltip文字
     border?: boolean;
-    suffix?: ComponentChildren;
+    suffix?: React.ReactNode;
 }
 
 export class ToolbarUIController extends Disposable {

@@ -1,17 +1,29 @@
+import type { Meta } from '@storybook/react';
+
 import { Checkbox } from './Checkbox';
 
-// More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-export default {
-    title: 'Components/Checkbox',
+const meta: Meta<typeof Checkbox> = {
+    title: 'Components / Checkbox',
     component: Checkbox,
     parameters: {
         layout: 'centered',
     },
     tags: ['autodocs'],
+    args: {
+        checked: false,
+        disabled: false,
+    },
+};
+
+export default meta;
+
+export const Playground = {
     args: {},
 };
 
-// More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
-export const Playground = {
-    args: {},
+export const UsingSlot = {
+    title: 'Using Slot',
+    args: {
+        children: <strong>Apple</strong>,
+    },
 };

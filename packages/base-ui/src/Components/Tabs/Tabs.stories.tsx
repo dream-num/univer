@@ -1,28 +1,29 @@
+import type { Meta } from '@storybook/react';
+
 import { Tab, TabPane } from './Tabs';
 
-// More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
-export default {
-    title: 'Components/Tab',
+const meta: Meta<typeof Tab> = {
+    title: 'Components / Tabs',
     component: Tab,
     parameters: {
         layout: 'centered',
     },
     tags: ['autodocs'],
     args: {
-        children: (
-            <>
-                <TabPane tab="test">
-                    <div>test</div>
-                </TabPane>
-                <TabPane tab="test1">
-                    <div>test1</div>
-                </TabPane>
-            </>
-        ),
+        children: [
+            <TabPane label="test" keys="test" active>
+                <div>test content</div>
+            </TabPane>,
+            <TabPane label="test1" keys="test1">
+                <div>test1 content</div>
+            </TabPane>,
+        ],
+        activeKey: 'test1',
     },
 };
 
-// More on writing stories with args: https://storybook.js.org/docs/react/writing-stories/args
+export default meta;
+
 export const Playground = {
     args: {},
 };

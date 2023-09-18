@@ -2,7 +2,7 @@ import { isValidElement, JSX, useContext } from 'react';
 
 import { AppContext, AppContextValues, ICustomComponent } from '../../Common';
 import { IMenuSelectorItem } from '../../services/menu/menu';
-import { Input } from '../Input/input';
+import { Input } from '../Input';
 import { Item } from '../Item/Item';
 import { DisplayTypes } from '../Select';
 import styles from './CustomLabel.module.less';

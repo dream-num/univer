@@ -1,16 +1,18 @@
 import type { Meta } from '@storybook/react';
 
-import { Slot } from './Slot';
+import { InputNumber } from './InputNumber';
 
-const meta: Meta<typeof Slot> = {
-    title: 'Components / Slot',
-    component: Slot,
+const meta: Meta<typeof InputNumber> = {
+    title: 'Components / InputNumber',
+    component: InputNumber,
     parameters: {
         layout: 'centered',
     },
     tags: ['autodocs'],
     args: {
-        name: 'main',
+        value: 1,
+        min: 0,
+        max: 10,
     },
 };
 

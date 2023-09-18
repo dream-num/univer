@@ -3,6 +3,9 @@ import { createIdentifier } from '@wendellhu/redi';
 
 import { IClipboardInterfaceService } from './clipboard-interface.service';
 
+// TODO@wzhudev: currently I have no idea if this should be moved to sheet-ui or other places. And it do not have any
+// implementation yet.
+
 /**
  * This interface provides an interface for features to hook in copy paste feature.
  */

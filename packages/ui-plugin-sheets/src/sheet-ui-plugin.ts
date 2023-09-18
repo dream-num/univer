@@ -9,6 +9,7 @@ import { DesktopSheetShortcutController } from './Controller/shortcut.controller
 import { en, zh } from './Locale';
 import { ICellEditorService } from './services/cell-editor/cell-editor.service';
 import { DesktopCellEditorService } from './services/cell-editor/cell-editor-desktop.service';
+import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/sheet-clipboard.service';
 import { Fx } from './View/FormulaBar';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
@@ -77,11 +78,17 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     private _initDependencies(): void {
         (
             [
+                // legacy managers
                 [DragManager],
                 [ZIndexManager],
                 [SlotManager],
-                [DesktopSheetShortcutController],
+
+                // services
                 [ICellEditorService, { useClass: DesktopCellEditorService }],
+                [ISheetClipboardService, { useClass: SheetClipboardService }],
+
+                // controllers
+                [DesktopSheetShortcutController],
                 [SheetClipboardController],
                 [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
             ] as Dependency[]

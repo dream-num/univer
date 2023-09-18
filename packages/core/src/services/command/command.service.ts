@@ -314,7 +314,7 @@ class MultiCommand implements IMultiCommand {
     registerImplementation(implementation: IMultiCommand, injector: Injector): IDisposable {
         const registry = { command: implementation, injector };
         this._implementations.push(registry);
-        this._implementations.sort((a, b) => a.command.priority - b.command.priority);
+        this._implementations.sort((a, b) => b.command.priority - a.command.priority);
 
         return toDisposable(() => {
             const index = this._implementations.indexOf(registry);
@@ -345,6 +345,6 @@ class MultiCommand implements IMultiCommand {
             }
         }
 
-        return true;
+        return false;
     };
 }

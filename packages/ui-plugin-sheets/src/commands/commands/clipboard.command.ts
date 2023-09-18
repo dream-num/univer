@@ -1,5 +1,8 @@
-import { CopyCommand, CutCommand, IClipboardInterfaceService } from '@univerjs/base-ui';
-import { CommandType, IMultiCommand } from '@univerjs/core';
+import { CopyCommand, CutCommand, PasteCommand } from '@univerjs/base-ui';
+import { CommandType, FOCUSING_SHEET, IContextService, IMultiCommand } from '@univerjs/core';
+
+import { ISheetClipboardService } from '../../services/clipboard/sheet-clipboard.service';
+import { FOCUSING_SHEET_EDITOR } from '../../services/context/context';
 
 export const SheetCopyCommand: IMultiCommand = {
     id: CopyCommand.id,
@@ -7,11 +10,13 @@ export const SheetCopyCommand: IMultiCommand = {
     multi: true,
     name: 'sheet.command.copy',
     priority: 1000,
-    preconditions: () => true,
+    preconditions: (contextService: IContextService) => contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
     handler: async (accessor, params) => {
-        const clipboardInterface = accessor.get(IClipboardInterfaceService);
-        clipboardInterface.writeText('123');
-        return true;
+        const sheetClipboardService = accessor.get(ISheetClipboardService);
+
+        // TODO: permission control here?
+
+        return sheetClipboardService.copy();
     },
 };
 
@@ -21,16 +26,18 @@ export const SheetCutCommand: IMultiCommand = {
     multi: true,
     name: 'sheet.command.cut',
     priority: 1000,
-    preconditions: () => true,
-    handler: async (accessor, params) => true,
+    preconditions: (contextService: IContextService) => contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
+    handler: async (accessor, params) =>
+        // TODO@wzhudev: the same as SheetCopyCommand but we should dispatch a delete command as well
+        true,
 };
 
 export const SheetPasteCommand: IMultiCommand = {
-    id: CopyCommand.id,
+    id: PasteCommand.id,
     type: CommandType.COMMAND,
     multi: true,
     name: 'sheet.command.paste',
     priority: 1000,
-    preconditions: () => true,
+    preconditions: (contextService: IContextService) => contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
     handler: async (accessor, params) => true,
 };

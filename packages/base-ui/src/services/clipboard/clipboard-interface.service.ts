@@ -35,7 +35,14 @@ export interface IClipboardInterfaceService {
 export const IClipboardInterfaceService = createIdentifier<IClipboardInterfaceService>('univer.clipboard-interface-service');
 
 export class BrowserClipboardService extends Disposable implements IClipboardInterfaceService {
-    write(text: string, html: string): Promise<void> {}
+    async write(text: string, html: string): Promise<void> {
+        // try {
+        //     // write both pure text content and html content to the clipboard
+        //     return await navigator.clipboard.write();
+        // } catch (error) {
+        //     console.error(error);
+        // }
+    }
 
     async writeText(text: string): Promise<void> {
         // use new Clipboard API first

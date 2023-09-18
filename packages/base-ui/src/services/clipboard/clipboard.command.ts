@@ -6,6 +6,7 @@ export const CopyCommand: IMultiCommand = {
     multi: true,
     priority: 0,
     type: CommandType.COMMAND,
+    preconditions: () => false,
     handler: async () => true,
 };
 
@@ -15,6 +16,7 @@ export const CutCommand: IMultiCommand = {
     multi: true,
     priority: 0,
     type: CommandType.COMMAND,
+    preconditions: () => false,
     handler: async () => true,
 };
 
@@ -24,5 +26,6 @@ export const PasteCommand: IMultiCommand = {
     multi: true,
     priority: 0,
     type: CommandType.COMMAND,
+    preconditions: () => false,
     handler: async () => true,
 };

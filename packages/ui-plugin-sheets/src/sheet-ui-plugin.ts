@@ -82,6 +82,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
                 [SlotManager],
                 [DesktopSheetShortcutController],
                 [ICellEditorService, { useClass: DesktopCellEditorService }],
+                [SheetClipboardController],
                 [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
             ] as Dependency[]
         ).forEach((d) => this._injector.add(d));

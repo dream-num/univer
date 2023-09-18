@@ -2,6 +2,7 @@ import { createIdentifier, IAccessor, IDisposable, Inject, Injector, Optional, S
 
 import { toDisposable } from '../../Shared/lifecycle';
 import { IKeyValue } from '../../Shared/Types';
+import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
 
 export const enum CommandType {
@@ -28,7 +29,7 @@ export interface IMultiCommand<P extends object = object, R = boolean> extends I
     multi: true;
     priority: number;
 
-    preconditions?: () => boolean;
+    preconditions?: (contextService: IContextService) => boolean;
 }
 
 /**
@@ -258,7 +259,7 @@ export class CommandService implements ICommandService {
         let multiCommand: MultiCommand;
         if (!registry) {
             multiCommand = new MultiCommand(command.id);
-            this._multiCommandDisposables.set(command.id, this._commandRegistry.registerCommand(command, this._injector));
+            this._multiCommandDisposables.set(command.id, this._commandRegistry.registerCommand(multiCommand, this._injector));
         } else {
             if ((registry[0] as IKeyValue).multi !== true) {
                 throw new Error('Command has registered as a single command.');
@@ -325,16 +326,17 @@ class MultiCommand implements IMultiCommand {
         return this._implementations.length > 0;
     }
 
-    async handler(accessor: IAccessor, params?: object | undefined): Promise<boolean> {
+    handler = async (accessor: IAccessor, params?: object | undefined): Promise<boolean> => {
         if (!this._implementations.length) {
             return false;
         }
 
         const logService = accessor.get(ILogService);
+        const contextService = accessor.get(IContextService);
 
         for (const item of this._implementations) {
             const preconditions = item.command.preconditions;
-            if (preconditions?.()) {
+            if (preconditions?.(contextService)) {
                 logService.log(`[MultiCommand]: executing implementation "${item.command.name}".`);
                 const result = await item.injector.invoke(item.command.handler, params);
                 if (result) {
@@ -344,5 +346,5 @@ class MultiCommand implements IMultiCommand {
         }
 
         return true;
-    }
+    };
 }

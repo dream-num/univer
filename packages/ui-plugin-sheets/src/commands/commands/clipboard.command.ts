@@ -1,4 +1,4 @@
-import { CopyCommand, CutCommand } from '@univerjs/base-ui';
+import { CopyCommand, CutCommand, IClipboardInterfaceService } from '@univerjs/base-ui';
 import { CommandType, IMultiCommand } from '@univerjs/core';
 
 export const SheetCopyCommand: IMultiCommand = {
@@ -8,7 +8,11 @@ export const SheetCopyCommand: IMultiCommand = {
     name: 'sheet.command.copy',
     priority: 1000,
     preconditions: () => true,
-    handler: async (accessor, params) => true,
+    handler: async (accessor, params) => {
+        const clipboardInterface = accessor.get(IClipboardInterfaceService);
+        clipboardInterface.writeText('123');
+        return true;
+    },
 };
 
 export const SheetCutCommand: IMultiCommand = {

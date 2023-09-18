@@ -1,9 +1,10 @@
-import { DragManager, SharedController, SlotManager, ZIndexManager } from '@univerjs/base-ui';
+import { DragManager, SlotManager, ZIndexManager } from '@univerjs/base-ui';
 import { ICurrentUniverService, IUndoRedoService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SHEET_UI_PLUGIN_NAME, SheetUIPluginObserve } from './Basics';
 import { AppUIController } from './Controller/AppUIController';
+import { SheetClipboardController } from './Controller/clipboard/clipboard.controller';
 import { DesktopSheetShortcutController } from './Controller/shortcut.controller';
 import { en, zh } from './Locale';
 import { ICellEditorService } from './services/cell-editor/cell-editor.service';
@@ -40,7 +41,8 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
             en,
         });
 
-        this.initDependencies();
+        this._initDependencies();
+        this._initModules();
         this._markSheetAsFocused();
     }
 
@@ -72,7 +74,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         currentService.focusUniverInstance(c.getUnitId());
     }
 
-    private initDependencies(): void {
+    private _initDependencies(): void {
         (
             [
                 [DragManager],
@@ -88,9 +90,12 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         this._zIndexManager = this._injector.get(ZIndexManager);
 
         this._injector.get(IUndoRedoService);
-        this._injector.get(SharedController);
         this._injector.get(DesktopSheetShortcutController);
         this._injector.get(ICellEditorService).initialize();
         this._injector.get(AppUIController);
+    }
+
+    private _initModules(): void {
+        this._injector.get(SheetClipboardController).initialize();
     }
 }

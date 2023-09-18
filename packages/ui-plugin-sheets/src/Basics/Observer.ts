@@ -1,6 +1,6 @@
 import { Observable } from '@univerjs/core';
 
-import { SheetUIPlugin } from '../SheetUIPlugin';
+import { SheetUIPlugin } from '../sheet-ui-plugin';
 import { SheetContainer } from '../View';
 
 export type SheetUIPluginObserve = {

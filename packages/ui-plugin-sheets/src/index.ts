@@ -1,4 +1,4 @@
 export * from './Basics';
 export * from './Controller';
-export * from './SheetUIPlugin';
+export { SheetUIPlugin } from './sheet-ui-plugin';
 export * from './View';

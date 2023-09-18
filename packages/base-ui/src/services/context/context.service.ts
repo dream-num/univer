@@ -3,6 +3,8 @@ import { createIdentifier } from '@wendellhu/redi';
 
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './context';
 
+// TODO: maybe context service should be moved to core
+
 export interface IContextService {
     getContextValue(key: string): boolean;
     setContextValue(key: string, value: boolean): void;

@@ -1,4 +1,5 @@
 import { ICellInfo, ISelection, Nullable } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 
 import { SELECTION_TYPE } from '../../../Basics/Const';
 import { ISelectionDataWithStyle, ISelectionStyle, ISelectionWidgetConfig, NORMAL_SELECTION_PLUGIN_STYLE } from '../../../Basics/Selection';
@@ -38,6 +39,10 @@ enum SELECTION_MANAGER_KEY {
     bottomCenterWidget = '__SpreadSheetSelectionBottomCenterWidget__',
     bottomRightWidget = '__SpreadSheetSelectionBottomRightWidget__',
 }
+
+const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 4;
+
+const SELECTION_CONTROL_BORDER_BUFFER_COLOR = 'rgba(255,255,255, 0.01)';
 
 /**
  * The main selection canvas component
@@ -101,6 +106,22 @@ export class SelectionTransformerShape {
 
     private _widgetRects: Rect[] = [];
 
+    private _dispose$ = new BehaviorSubject<SelectionTransformerShape>(this);
+
+    readonly dispose$ = this._dispose$.asObservable();
+
+    readonly selectionMoving$ = new BehaviorSubject<Nullable<ISelection>>(null);
+
+    readonly selectionMoved$ = new BehaviorSubject<Nullable<ISelection>>(null);
+
+    readonly selectionScaling$ = new BehaviorSubject<Nullable<ISelection>>(null);
+
+    readonly selectionScaled$ = new BehaviorSubject<Nullable<ISelection>>(null);
+
+    readonly selectionFilling$ = new BehaviorSubject<Nullable<ISelection>>(null);
+
+    readonly selectionFilled$ = new BehaviorSubject<Nullable<ISelection>>(null);
+
     constructor(private _scene: Scene, private _zIndex: number) {
         this._initialize();
     }
@@ -153,6 +174,42 @@ export class SelectionTransformerShape {
         return this._selectionModel;
     }
 
+    get topLeftWidget() {
+        return this._topLeftWidget;
+    }
+
+    get topCenterWidget() {
+        return this._topCenterWidget;
+    }
+
+    get topRightWidget() {
+        return this._topRightWidget;
+    }
+
+    get middleLeftWidget() {
+        return this._middleLeftWidget;
+    }
+
+    get middleRightWidget() {
+        return this._middleRightWidget;
+    }
+
+    get bottomLeftWidget() {
+        return this._bottomLeftWidget;
+    }
+
+    get bottomCenterWidget() {
+        return this._bottomCenterWidget;
+    }
+
+    get bottomRightWidget() {
+        return this._bottomRightWidget;
+    }
+
+    get selectionStyle() {
+        return this._selectionStyle;
+    }
+
     static create(scene: Scene, zIndex: number) {
         return new this(scene, zIndex);
     }
@@ -186,47 +243,58 @@ export class SelectionTransformerShape {
             AutofillStroke = NORMAL_SELECTION_PLUGIN_STYLE.AutofillStroke!,
         } = style;
 
+        const leftAdjustWidth = strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH;
+
         this.leftControl.transformByState({
             height: endY - startY,
-            left: -strokeWidth / 2,
+            left: -leftAdjustWidth / 2,
             width: strokeWidth,
-            top: 0,
+            strokeWidth: SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
+            top: -SELECTION_CONTROL_BORDER_BUFFER_WIDTH / 2,
         });
 
         this.leftControl.setProps({
             fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
         });
 
         this.rightControl.transformByState({
             height: endY - startY,
-            left: endX - startX - strokeWidth / 2,
+            left: endX - startX - leftAdjustWidth / 2,
             width: strokeWidth,
+            strokeWidth: SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
+            top: -SELECTION_CONTROL_BORDER_BUFFER_WIDTH / 2,
         });
 
         this.rightControl.setProps({
             fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
         });
 
         this.topControl.transformByState({
             width: endX - startX + strokeWidth,
-            top: -strokeWidth / 2,
-            left: -strokeWidth / 2,
+            top: -leftAdjustWidth / 2,
+            left: -leftAdjustWidth / 2,
             height: strokeWidth,
+            strokeWidth: SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
         });
 
         this.topControl.setProps({
             fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
         });
 
         this.bottomControl.transformByState({
             width: endX - startX + strokeWidth,
-            top: endY - startY - strokeWidth / 2,
+            top: endY - startY - leftAdjustWidth / 2,
             height: strokeWidth,
-            left: -strokeWidth / 2,
+            left: -leftAdjustWidth / 2,
+            strokeWidth: SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
         });
 
         this.bottomControl.setProps({
             fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
         });
 
         if (hasAutoFill === true && !this._hasWidgets(widgets)) {
@@ -326,6 +394,10 @@ export class SelectionTransformerShape {
         this._bottomCenterWidget?.dispose();
 
         this._bottomRightWidget?.dispose();
+
+        this._dispose$.next(this);
+
+        this._dispose$.complete();
     }
 
     /**

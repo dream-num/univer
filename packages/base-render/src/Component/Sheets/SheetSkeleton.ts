@@ -470,13 +470,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         return {
             row,
             column,
-            startY,
-            endY,
-            startX,
-            endX,
-            isMerged,
-            isMergedMainCell,
-            mergeInfo,
         };
     }
 

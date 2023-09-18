@@ -76,8 +76,9 @@ export class SelectionView extends BaseView {
         spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
 
         this._selectionTransformerShapeManager.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
             const unitId = workbook.getUnitId();
-            const sheetId = worksheet.getSheetId();
+            const sheetId = workbook.getActiveSheet().getSheetId();
 
             this._commandService.executeCommand(SetSelectionsOperation.id, {
                 unitId,

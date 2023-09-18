@@ -785,7 +785,7 @@ export class DocsEditor {
                 scene.onPointerUpObserver.remove(this._upObserver);
                 scene.enableEvent();
 
-                scrollTimer.stopScroll();
+                scrollTimer.dispose();
             });
 
             // state.stopPropagation();

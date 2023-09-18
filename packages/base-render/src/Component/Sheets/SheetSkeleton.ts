@@ -33,7 +33,14 @@ import {
 
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
 import { IFontLocale } from '../../Basics/Interfaces';
-import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getFontStyleString, isRectIntersect, mergeInfoOffset } from '../../Basics/Tools';
+import {
+    fixLineWidthByScale,
+    getCellByIndex,
+    getCellPositionByIndex,
+    getFontStyleString,
+    isRectIntersect,
+    mergeInfoOffset,
+} from '../../Basics/Tools';
 import { IBoundRect } from '../../Basics/Vector2';
 import { DocumentSkeleton } from '../Docs/DocSkeleton';
 import { Skeleton } from '../Skeleton';
@@ -105,7 +112,12 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _showGridlines: BooleanNumber;
 
-    constructor(private _config: IWorksheetConfig, private _cellData: ObjectMatrix<ICellData>, private _styles: Styles, _localeService: LocaleService) {
+    constructor(
+        private _config: IWorksheetConfig,
+        private _cellData: ObjectMatrix<ICellData>,
+        private _styles: Styles,
+        _localeService: LocaleService
+    ) {
         super(_localeService);
 
         this.updateLayout();
@@ -164,7 +176,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     //     return this._dataMergeCacheAll;
     // }
 
-    static create(config: IWorksheetConfig, cellData: ObjectMatrix<ICellData>, styles: Styles, LocaleService: LocaleService) {
+    static create(
+        config: IWorksheetConfig,
+        cellData: ObjectMatrix<ICellData>,
+        styles: Styles,
+        LocaleService: LocaleService
+    ) {
         return new SpreadsheetSkeleton(config, cellData, styles, LocaleService);
     }
 
@@ -208,9 +225,27 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (!this.dirty) {
             return;
         }
-        const { rowData, columnData, defaultRowHeight, defaultColumnWidth, rowCount, columnCount, rowTitle, columnTitle, showGridlines } = this._config;
-        const { rowTotalHeight, rowHeightAccumulation } = this._generateRowMatrixCache(rowCount, rowData, defaultRowHeight);
-        const { columnTotalWidth, columnWidthAccumulation } = this._generateColumnMatrixCache(columnCount, columnData, defaultColumnWidth);
+        const {
+            rowData,
+            columnData,
+            defaultRowHeight,
+            defaultColumnWidth,
+            rowCount,
+            columnCount,
+            rowTitle,
+            columnTitle,
+            showGridlines,
+        } = this._config;
+        const { rowTotalHeight, rowHeightAccumulation } = this._generateRowMatrixCache(
+            rowCount,
+            rowData,
+            defaultRowHeight
+        );
+        const { columnTotalWidth, columnWidthAccumulation } = this._generateColumnMatrixCache(
+            columnCount,
+            columnData,
+            defaultColumnWidth
+        );
 
         this._rowTitleWidth = rowTitle.hidden !== BooleanNumber.TRUE ? rowTitle.width : 0;
         this._columnTitleHeight = columnTitle.hidden !== BooleanNumber.TRUE ? columnTitle.height : 0;
@@ -246,6 +281,9 @@ export class SpreadsheetSkeleton extends Skeleton {
                 endColumn,
             };
         }
+
+        // TODO: what is this used for?
+
         let isSearching = true;
         const searchedMarge = new ObjectMatrix<boolean>();
         // const dataMergeCache = this._getMergeCells(mergeData);
@@ -253,7 +291,12 @@ export class SpreadsheetSkeleton extends Skeleton {
             isSearching = false;
 
             for (let i = 0; i < mergeData.length; i++) {
-                const { startRow: mainStartRow, startColumn: mainStartColumn, endRow: mainEndRow, endColumn: mainEndColumn } = mergeData[i];
+                const {
+                    startRow: mainStartRow,
+                    startColumn: mainStartColumn,
+                    endRow: mainEndRow,
+                    endColumn: mainEndColumn,
+                } = mergeData[i];
 
                 if (searchedMarge.getValue(mainStartRow, mainStartColumn)) {
                     continue;
@@ -341,7 +384,13 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._rowHeightAccumulation.length;
     }
 
-    getOverflowPosition(contentSize: { width: number; height: number }, horizontalAlign: HorizontalAlign, row: number, column: number, columnCount: number) {
+    getOverflowPosition(
+        contentSize: { width: number; height: number },
+        horizontalAlign: HorizontalAlign,
+        row: number,
+        column: number,
+        columnCount: number
+    ) {
         const { width: contentWidth, height: contentHeight } = contentSize;
 
         let startColumn = column;
@@ -367,7 +416,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number, scaleX: number, scaleY: number) {
         const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } = this;
         // const { scaleX = 1, scaleY = 1 } = this.getParentScale();
-        let { startY, endY, startX, endX } = getCellPositionByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation);
+        let { startY, endY, startX, endX } = getCellPositionByIndex(
+            rowIndex,
+            columnIndex,
+            rowHeightAccumulation,
+            columnWidthAccumulation
+        );
 
         startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
         endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
@@ -382,7 +436,13 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    calculateCellIndexByPosition(offsetX: number, offsetY: number, scaleX: number, scaleY: number, scrollXY: { x: number; y: number }): Nullable<ICellInfo> {
+    calculateCellIndexByPosition(
+        offsetX: number,
+        offsetY: number,
+        scaleX: number,
+        scaleY: number,
+        scrollXY: { x: number; y: number }
+    ): Nullable<ICellInfo> {
         const { x: scrollX, y: scrollY } = scrollXY;
 
         // these values are not affected by zooming (ideal positions)
@@ -415,7 +475,13 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, this._config.mergeData);
+        const cellInfo = getCellByIndex(
+            row,
+            column,
+            rowHeightAccumulation,
+            columnWidthAccumulation,
+            this._config.mergeData
+        );
         const { isMerged, isMergedMainCell } = cellInfo;
         let { startY, endY, startX, endX, mergeInfo } = cellInfo;
 
@@ -449,7 +515,13 @@ export class SpreadsheetSkeleton extends Skeleton {
     getCellByIndex(row: number, column: number, scaleX: number, scaleY: number) {
         const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } = this;
 
-        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, this._config.mergeData);
+        const cellInfo = getCellByIndex(
+            row,
+            column,
+            rowHeightAccumulation,
+            columnWidthAccumulation,
+            this._config.mergeData
+        );
         const { isMerged, isMergedMainCell } = cellInfo;
         let { startY, endY, startX, endX, mergeInfo } = cellInfo;
 
@@ -582,7 +654,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    private _generateRowMatrixCache(rowCount: number, rowData: ObjectArrayType<Partial<IRowData>>, defaultRowHeight: number) {
+    private _generateRowMatrixCache(
+        rowCount: number,
+        rowData: ObjectArrayType<Partial<IRowData>>,
+        defaultRowHeight: number
+    ) {
         let rowTotalHeight = 0;
         const rowHeightAccumulation: number[] = [];
         const data = Tools.createObjectArray(rowData);
@@ -618,7 +694,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    private _generateColumnMatrixCache(colCount: number, columnData: ObjectArrayType<Partial<IColumnData>>, defaultColumnWidth: number) {
+    private _generateColumnMatrixCache(
+        colCount: number,
+        columnData: ObjectArrayType<Partial<IColumnData>>,
+        defaultColumnWidth: number
+    ) {
         let columnTotalWidth = 0;
         const columnWidthAccumulation: number[] = [];
 
@@ -719,7 +799,12 @@ export class SpreadsheetSkeleton extends Skeleton {
                     }
                     return column + 1 > columnCount ? columnCount : column + 1;
                 }
-                const { startX, endX } = getCellPositionByIndex(row, column, this.rowHeightAccumulation, this.columnWidthAccumulation);
+                const { startX, endX } = getCellPositionByIndex(
+                    row,
+                    column,
+                    this.rowHeightAccumulation,
+                    this.columnWidthAccumulation
+                );
                 cumWidth += endX - startX;
                 if (contentWidth < cumWidth) {
                     return column;
@@ -737,7 +822,12 @@ export class SpreadsheetSkeleton extends Skeleton {
 
                 return column - 1 < 0 ? 0 : column - 1;
             }
-            const { startX, endX } = getCellPositionByIndex(row, column, this.rowHeightAccumulation, this.columnWidthAccumulation);
+            const { startX, endX } = getCellPositionByIndex(
+                row,
+                column,
+                this.rowHeightAccumulation,
+                this.columnWidthAccumulation
+            );
             cumWidth += endX - startX;
             if (contentWidth < cumWidth) {
                 return column;
@@ -750,8 +840,18 @@ export class SpreadsheetSkeleton extends Skeleton {
         const dataMergeCache = this.dataMergeCache;
         let isIntersected = false;
         for (const dataCache of dataMergeCache) {
-            const { startRow: startRowMargeIndex, endRow: endRowMargeIndex, startColumn: startColumnMargeIndex, endColumn: endColumnMargeIndex } = dataCache;
-            if (row >= startRowMargeIndex && row <= endRowMargeIndex && column >= startColumnMargeIndex && column <= endColumnMargeIndex) {
+            const {
+                startRow: startRowMargeIndex,
+                endRow: endRowMargeIndex,
+                startColumn: startColumnMargeIndex,
+                endColumn: endColumnMargeIndex,
+            } = dataCache;
+            if (
+                row >= startRowMargeIndex &&
+                row <= endRowMargeIndex &&
+                column >= startColumnMargeIndex &&
+                column <= endColumnMargeIndex
+            ) {
                 isIntersected = true;
                 return false;
             }
@@ -979,7 +1079,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
     }
 
-    private _updateRenderConfigAndHorizon(document: IDocumentData, horizontalAlign: HorizontalAlign, renderConfig?: IDocumentRenderConfig) {
+    private _updateRenderConfigAndHorizon(
+        document: IDocumentData,
+        horizontalAlign: HorizontalAlign,
+        renderConfig?: IDocumentRenderConfig
+    ) {
         if (!renderConfig) {
             return;
         }
@@ -1147,12 +1251,22 @@ export class SpreadsheetSkeleton extends Skeleton {
             const endRow = this.rowHeightAccumulation.length - 1;
             rowColumnSegment = { startRow: 0, startColumn: 0, endRow, endColumn: endColumnLast };
         } else {
-            rowColumnSegment = { startRow: rowColumnSegment.startRow, endRow: rowColumnSegment.endRow, endColumn: endColumnLast, startColumn: 0 };
+            rowColumnSegment = {
+                startRow: rowColumnSegment.startRow,
+                endRow: rowColumnSegment.endRow,
+                endColumn: endColumnLast,
+                startColumn: 0,
+            };
         }
         const { startRow, startColumn, endRow, endColumn } = rowColumnSegment;
         const cacheDataMerge: IRangeData[] = [];
         for (let i = 0; i < mergeData.length; i++) {
-            const { startRow: mergeStartRow, endRow: mergeEndRow, startColumn: mergeStartColumn, endColumn: mergeEndColumn } = mergeData[i];
+            const {
+                startRow: mergeStartRow,
+                endRow: mergeEndRow,
+                startColumn: mergeStartColumn,
+                endColumn: mergeEndColumn,
+            } = mergeData[i];
             for (let r = startRow; r <= endRow; r++) {
                 let isBreak = false;
                 for (let c = startColumn; c <= endColumn; c++) {

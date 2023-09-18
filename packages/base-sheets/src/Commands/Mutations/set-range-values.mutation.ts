@@ -1,4 +1,14 @@
-import { CommandType, ICellData, ICopyToOptionsData, ICurrentUniverService, IMutation, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '@univerjs/core';
+import {
+    CommandType,
+    ICellData,
+    ICopyToOptionsData,
+    ICurrentUniverService,
+    IMutation,
+    IRangeData,
+    ObjectMatrix,
+    ObjectMatrixPrimitiveType,
+    Tools,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 /** Params of `SetRangeValuesMutation` */
@@ -18,9 +28,15 @@ export interface ISetRangeValuesMutationParams {
  * @param {ISetRangeValuesMutationParams} params - do mutation params
  * @returns {ISetRangeValuesMutationParams} undo mutation params
  */
-export const SetRangeValuesUndoMutationFactory = (accessor: IAccessor, params: ISetRangeValuesMutationParams): ISetRangeValuesMutationParams => {
+export const SetRangeValuesUndoMutationFactory = (
+    accessor: IAccessor,
+    params: ISetRangeValuesMutationParams
+): ISetRangeValuesMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
-    const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(params.worksheetId);
+    const worksheet = currentUniverService
+        .getCurrentUniverSheetInstance()
+        .getWorkBook()
+        .getSheetBySheetId(params.worksheetId);
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
     }

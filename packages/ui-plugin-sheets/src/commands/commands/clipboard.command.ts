@@ -10,7 +10,8 @@ export const SheetCopyCommand: IMultiCommand = {
     multi: true,
     name: 'sheet.command.copy',
     priority: 1000,
-    preconditions: (contextService: IContextService) => contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
+    preconditions: (contextService: IContextService) =>
+        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
     handler: async (accessor, params) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
 
@@ -26,7 +27,8 @@ export const SheetCutCommand: IMultiCommand = {
     multi: true,
     name: 'sheet.command.cut',
     priority: 1000,
-    preconditions: (contextService: IContextService) => contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
+    preconditions: (contextService: IContextService) =>
+        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
     handler: async (accessor, params) =>
         // TODO@wzhudev: the same as SheetCopyCommand but we should dispatch a delete command as well
         true,
@@ -38,6 +40,7 @@ export const SheetPasteCommand: IMultiCommand = {
     multi: true,
     name: 'sheet.command.paste',
     priority: 1000,
-    preconditions: (contextService: IContextService) => contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
+    preconditions: (contextService: IContextService) =>
+        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
     handler: async (accessor, params) => true,
 };

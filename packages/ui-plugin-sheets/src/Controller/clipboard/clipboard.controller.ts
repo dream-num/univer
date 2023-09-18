@@ -1,17 +1,24 @@
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, ICurrentUniverService } from '@univerjs/core';
 
 import { SheetCopyCommand, SheetCutCommand, SheetPasteCommand } from '../../commands/commands/clipboard.command';
 import { ISheetClipboardHook, ISheetClipboardService } from '../../services/clipboard/sheet-clipboard.service';
 
 export class SheetClipboardController extends Disposable {
-    constructor(@ICommandService private readonly _commandService: ICommandService, @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService) {
+    constructor(
+        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @ICommandService private readonly _commandService: ICommandService,
+        @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService
+    ) {
         super();
     }
 
     initialize() {
-        [SheetCopyCommand, SheetCutCommand, SheetPasteCommand].forEach((command) => this.disposeWithMe(this._commandService.registerAsMultipleCommand(command)));
+        [SheetCopyCommand, SheetCutCommand, SheetPasteCommand].forEach((command) =>
+            this.disposeWithMe(this._commandService.registerAsMultipleCommand(command))
+        );
 
         const hook: ISheetClipboardHook = {
+            onGetContent(row: number, col: number) {},
             onBeforeCopy() {},
             // copy
             onCopy: (row: number, col: number) => ({

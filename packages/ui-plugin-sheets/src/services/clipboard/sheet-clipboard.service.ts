@@ -56,7 +56,7 @@ export const ISheetClipboardService = createIdentifier<ISheetClipboardService>('
  * This service provide hooks for sheet features to supplement content to clipboard.
  */
 export class SheetClipboardService extends Disposable implements ISheetClipboardService {
-    private _cellContentHooks: ISheetClipboardHook[] = [];
+    private _clipboardHooks: ISheetClipboardHook[] = [];
 
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
@@ -67,11 +67,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     async copy(): Promise<boolean> {
-        const hooks = this._cellContentHooks;
+        const hooks = this._clipboardHooks;
         // steps to copy cells from the sheet:
         // 1. get the selected range, the range should be the last one of selected ranges
         const selections = this._selectionManagerService.getLast();
+
+        // TODO: get cell matrix with spans count-in
         console.log('debug, copy range', selections);
+
         // 2. filtered out rows those are filtered out by plugins (e.g. filter feature)
 
         const filteredRows = hooks.reduce((acc, cur) => {
@@ -80,7 +83,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return acc;
         }, new Set<number>());
 
-        // 3. calculate selection matrix
+        console.log('debug, filtered rows', filteredRows);
+
+        // 3. calculate selection matrix, span cells would only
+
         // 4. get html and pure text contents
         return true;
     }
@@ -94,17 +100,17 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     addClipboardHook(hook: ISheetClipboardHook): IDisposable {
-        this._cellContentHooks.push(hook);
+        this._clipboardHooks.push(hook);
 
         return toDisposable(() => {
-            const index = this._cellContentHooks.indexOf(hook);
+            const index = this._clipboardHooks.indexOf(hook);
             if (index > -1) {
-                this._cellContentHooks.splice(index, 1);
+                this._clipboardHooks.splice(index, 1);
             }
         });
     }
 
     getCellContentClipboardHooks(): Readonly<ISheetClipboardHook[]> {
-        return this._cellContentHooks.slice();
+        return this._clipboardHooks.slice();
     }
 }

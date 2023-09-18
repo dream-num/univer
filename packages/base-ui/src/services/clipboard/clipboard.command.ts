@@ -1,8 +1,9 @@
 import { CommandType, IMultiCommand } from '@univerjs/core';
 
+const CopyCommandName = 'univer.command.copy';
 export const CopyCommand: IMultiCommand = {
-    id: 'univer.copy-command',
-    name: 'univer.copy-command',
+    id: CopyCommandName,
+    name: CopyCommandName,
     multi: true,
     priority: 0,
     type: CommandType.COMMAND,
@@ -10,9 +11,10 @@ export const CopyCommand: IMultiCommand = {
     handler: async () => true,
 };
 
+const CutCommandName = 'univer.command.cut';
 export const CutCommand: IMultiCommand = {
-    id: 'univer.cut-command',
-    name: 'univer.cut-command',
+    id: CutCommandName,
+    name: CutCommandName,
     multi: true,
     priority: 0,
     type: CommandType.COMMAND,
@@ -20,9 +22,10 @@ export const CutCommand: IMultiCommand = {
     handler: async () => true,
 };
 
+const PasteCommandName = 'univer.command.paste';
 export const PasteCommand: IMultiCommand = {
-    id: 'univer.paste-command',
-    name: 'univer.paste-command',
+    id: PasteCommandName,
+    name: PasteCommandName,
     multi: true,
     priority: 0,
     type: CommandType.COMMAND,

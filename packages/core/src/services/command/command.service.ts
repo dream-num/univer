@@ -72,7 +72,11 @@ export interface ICommandService {
 
     registerAsMultipleCommand(command: ICommand): IDisposable;
 
-    executeCommand<P extends object = object, R = boolean>(id: string, params?: P, options?: IExecutionOptions): Promise<R> | R;
+    executeCommand<P extends object = object, R = boolean>(
+        id: string,
+        params?: P,
+        options?: IExecutionOptions
+    ): Promise<R> | R;
 
     /**
      * Register a hook that will be triggered when the
@@ -80,7 +84,10 @@ export interface ICommandService {
      * @param id the command that will be fired.
      * @param callback the callback function that would be called
      */
-    onCommandWillExecute<P extends object = object>(id: string, callback: (params?: P) => ICommandInfo[][]): IDisposable;
+    onCommandWillExecute<P extends object = object>(
+        id: string,
+        callback: (params?: P) => ICommandInfo[][]
+    ): IDisposable;
 
     /**
      * The method that would be trigger when a command is executing. Gather all interceptors and middlewares.
@@ -161,7 +168,10 @@ export class CommandService implements ICommandService {
         return this._registerMultiCommand(command, this._injector);
     }
 
-    onCommandWillExecute<P extends object = object>(id: string, callback: (params?: P) => ICommandInfo[][]): IDisposable {
+    onCommandWillExecute<P extends object = object>(
+        id: string,
+        callback: (params?: P) => ICommandInfo[][]
+    ): IDisposable {
         if (this._parentCommandService) {
             return this._parentCommandService.onCommandWillExecute(id, callback);
         }
@@ -259,7 +269,10 @@ export class CommandService implements ICommandService {
         let multiCommand: MultiCommand;
         if (!registry) {
             multiCommand = new MultiCommand(command.id);
-            this._multiCommandDisposables.set(command.id, this._commandRegistry.registerCommand(multiCommand, this._injector));
+            this._multiCommandDisposables.set(
+                command.id,
+                this._commandRegistry.registerCommand(multiCommand, this._injector)
+            );
         } else {
             if ((registry[0] as IKeyValue).multi !== true) {
                 throw new Error('Command has registered as a single command.');
@@ -277,8 +290,14 @@ export class CommandService implements ICommandService {
         });
     }
 
-    private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, injector: Injector, params?: P): Promise<R> {
-        this._log.log(`${'|-'.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`);
+    private async _execute<P extends object, R = boolean>(
+        command: ICommand<P, R>,
+        injector: Injector,
+        params?: P
+    ): Promise<R> {
+        this._log.log(
+            `${'|-'.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`
+        );
 
         this._commandExecutingLevel++;
         let result: R | boolean;

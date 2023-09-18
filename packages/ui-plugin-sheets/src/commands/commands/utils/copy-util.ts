@@ -1,12 +1,22 @@
 import { IClipboardPropertyItem, ISheetClipboardHook } from '../../../services/clipboard/sheet-clipboard.service';
 
 /**
+ *
+ * @param matrix
+ * @param cols
+ * @param hooks
+ */
+export function getTableContent(matrix: number[][], cols: number[], hooks: ISheetClipboardHook[]) {}
+
+export function getSingleCellContent() {}
+
+/**
  * Get content of a single td element.
  * @param row index of the copied cell
  * @param col index of the copied cell
  * @returns
  */
-export function getTDContent(row: number, col: number, content: string, hooks: ISheetClipboardHook[]) {
+function getTDContent(row: number, col: number, content: string, hooks: ISheetClipboardHook[]) {
     const properties = hooks.map((hook) => hook.onCopy?.(row, col)).filter((v) => !v) as IClipboardPropertyItem[];
     const mergedProperties = mergeProperties(properties);
     const str = zipClipboardPropertyItemToString(mergedProperties);
@@ -20,7 +30,7 @@ export function getTDContent(row: number, col: number, content: string, hooks: I
  * @param hooks
  * @returns
  */
-export function getRowContent(row: number, cols: number[], hooks: ISheetClipboardHook[]) {
+function getRowContent(row: number, cols: number[], hooks: ISheetClipboardHook[]) {
     const properties = hooks.map((hook) => hook.onCopyRow?.(row)).filter((v) => !v) as IClipboardPropertyItem[];
     const mergedProperties = mergeProperties(properties);
     const str = zipClipboardPropertyItemToString(mergedProperties);
@@ -30,10 +40,12 @@ export function getRowContent(row: number, cols: number[], hooks: ISheetClipboar
     return `<tr ${str}>${tds}</tr>`;
 }
 
-export function getColStyle(cols: number[], hooks: ISheetClipboardHook[]) {
+function getColStyle(cols: number[], hooks: ISheetClipboardHook[]) {
     const str = cols
         .map((col) => {
-            const properties = hooks.map((hook) => hook.onCopyColumn?.(col)).filter((v) => !v) as IClipboardPropertyItem[];
+            const properties = hooks
+                .map((hook) => hook.onCopyColumn?.(col))
+                .filter((v) => !v) as IClipboardPropertyItem[];
             const mergedProperties = mergeProperties(properties);
             const str = zipClipboardPropertyItemToString(mergedProperties);
             return `<col ${str}>`;
@@ -43,9 +55,7 @@ export function getColStyle(cols: number[], hooks: ISheetClipboardHook[]) {
     return `<colgroup>${str}</colgroup>`;
 }
 
-export function getTableContent(matrix: number[][], cols: number[], hooks: ISheetClipboardHook[]) {}
-
-export function mergeProperties(properties: IClipboardPropertyItem[]) {
+function mergeProperties(properties: IClipboardPropertyItem[]): IClipboardPropertyItem {
     return properties.reduce((acc, cur) => {
         const keys = Object.keys(cur);
         keys.forEach((key) => {
@@ -59,7 +69,7 @@ export function mergeProperties(properties: IClipboardPropertyItem[]) {
     }, {});
 }
 
-export function zipClipboardPropertyItemToString(item: IClipboardPropertyItem) {
+function zipClipboardPropertyItemToString(item: IClipboardPropertyItem) {
     return Object.keys(item).reduce((acc, cur) => {
         acc += `${cur}="${item[cur]}"`;
         return acc;

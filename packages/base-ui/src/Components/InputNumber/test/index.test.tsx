@@ -4,13 +4,11 @@ import { InputNumber } from '../InputNumber';
 
 describe('input number', () => {
     test('render', () => {
-        const { container } = render(<InputNumber value={0} placeholder="haha" />);
+        const { container } = render(<InputNumber value={0} />);
         expect(container);
-        // test the value of the placeholder
-        expect(container.querySelector('input')?.placeholder).toBe('haha');
     });
     test('min max', () => {
-        const { container } = render(<InputNumber value={0} placeholder="haha" min={0} max={5} />);
+        const { container } = render(<InputNumber value={0} min={0} max={5} />);
         const input = container.querySelector('input');
         const buttonAddition = container?.querySelectorAll('button')[0];
         const buttonSubtraction = container?.querySelectorAll('button')[1];
@@ -33,7 +31,7 @@ describe('input number', () => {
     });
 
     test('input/change event', () => {
-        const { container } = render(<InputNumber value={0} placeholder="haha" />);
+        const { container } = render(<InputNumber value={0} />);
         const input = container.querySelector('input');
         fireEvent.input(input!, { target: { value: 1 } });
         expect(input!.value).toBe('1');
@@ -43,7 +41,7 @@ describe('input number', () => {
 
     test('blur event', () => {
         let a = 1;
-        const { container } = render(<InputNumber value={0} onBlur={() => a++} disabled placeholder="haha" />);
+        const { container } = render(<InputNumber value={0} onBlur={() => a++} disabled />);
         fireEvent.click(document.querySelector('input')!);
         fireEvent.blur(document.querySelector('input')!);
         expect(a).toEqual(2);
@@ -53,7 +51,6 @@ describe('input number', () => {
         const { container } = render(
             <InputNumber
                 value={1}
-                placeholder="haha"
                 onPressEnter={(v) => {
                     a = v;
                 }}

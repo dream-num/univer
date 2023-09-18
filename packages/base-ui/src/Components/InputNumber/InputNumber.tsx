@@ -4,18 +4,11 @@ import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils/util';
 import styles from './Style/index.module.less';
 
-// TODO@Dushusir disabled/bordered handle buttons
-
 export interface BaseInputNumberProps extends BaseComponentProps {
     /**
      * The input content value
      */
     value?: number;
-
-    /**
-     * The input content placeholder
-     */
-    placeholder?: string;
 
     /**
      * minimum value
@@ -66,7 +59,6 @@ export interface BaseInputNumberProps extends BaseComponentProps {
  */
 export const InputNumber: React.FC<BaseInputNumberProps> = ({
     value = 0,
-    placeholder = '',
     onChange,
     min = -Infinity,
     max = Infinity,
@@ -96,6 +88,8 @@ export const InputNumber: React.FC<BaseInputNumberProps> = ({
     };
 
     const handleIncrement = () => {
+        if (readonly) return;
+
         const newValue = inputValue + 1;
         if (newValue <= max) {
             setInputValue(newValue);
@@ -106,6 +100,8 @@ export const InputNumber: React.FC<BaseInputNumberProps> = ({
     };
 
     const handleDecrement = () => {
+        if (readonly) return;
+
         const newValue = inputValue - 1;
         if (newValue >= min) {
             setInputValue(newValue);
@@ -139,7 +135,6 @@ export const InputNumber: React.FC<BaseInputNumberProps> = ({
                 <input
                     ref={ref}
                     type="text"
-                    placeholder={placeholder}
                     value={inputValue}
                     disabled={disabled}
                     onChange={handleInputChange}
@@ -150,7 +145,7 @@ export const InputNumber: React.FC<BaseInputNumberProps> = ({
                 />
             </div>
 
-            <div className={styles.inputButtons}>
+            <div className={styles.inputButtons} style={{ display: disabled ? 'none' : 'flex' }}>
                 <button onClick={handleIncrement} className={styles.inputButton}>
                     <span>+</span>
                 </button>

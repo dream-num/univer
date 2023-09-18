@@ -61,15 +61,11 @@
         border: none;
         box-shadow: none;
 
-        &:hover {
-            border: @border-width-base @border-style-base var(--border-color-base);
-            .hover();
-        }
-
         &:focus,
         &-focused {
-            border: @border-width-base @border-style-base var(--primary-color-hover);
-            .active();
+            border-width: 0;
+            outline: 0;
+            box-shadow: none;
         }
     }
 }

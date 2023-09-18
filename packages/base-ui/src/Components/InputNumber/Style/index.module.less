@@ -12,6 +12,12 @@
     align-items: center;
     width: 150px;
     height: 30px;
+
+    &:hover {
+        .input-buttons {
+            opacity: 1;
+        }
+    }
 }
 
 
@@ -24,13 +30,15 @@
     position: absolute;
     right: 1px;
     display: flex;
+    opacity: 0;
     flex-direction: column;
+    transition: opacity 0.1s linear;
 
     .input-button {
-        background-color: #fff;
+        background-color: var(--bg);
         border-style: solid;
-        border-color: #d9d9d9;
-        color: #333;
+        border-color: var(--border-color-base);
+        color: var(--text-color);
         cursor: pointer;
         height: 13px;
 

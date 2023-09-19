@@ -1,10 +1,10 @@
 import type { Meta } from '@storybook/react';
 
-import { Tab, TabPane } from './Tabs';
+import { TabPane, Tabs } from './Tabs';
 
-const meta: Meta<typeof Tab> = {
+const meta: Meta<typeof Tabs> = {
     title: 'Components / Tabs',
-    component: Tab,
+    component: Tabs,
     parameters: {
         layout: 'centered',
     },

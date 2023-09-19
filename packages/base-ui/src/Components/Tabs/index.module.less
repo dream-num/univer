@@ -1,16 +1,17 @@
 @import '../../Basics/CSS/Skin/base.module.less';
 
 .tabs {
-    // display: flex;
     overflow: hidden;
 
+    ::-webkit-scrollbar {
+        display: none;
+    }
+
     .tabs-nav {
-        position: relative;
-        display: flex;
-        flex: none;
-        align-items: center;
+        width: 100%;
 
         .tabs-nav-wrap {
+            width: 100%;
             position: relative;
             display: flex;
             flex: auto;
@@ -19,25 +20,11 @@
             white-space: nowrap;
 
             .tabs-nav-list {
+                display: inline-block;
+                overflow-y: hidden;
+                overflow-x: auto;
                 position: relative;
-                display: flex;
-
-                .tabs-tab {
-                    position: relative;
-                    display: inline-flex;
-                    align-items: center;
-                    padding: 0.5rem 1em;
-                    font-size: var(--font-size);
-                    background: transparent;
-                    border: 0;
-                    outline: none;
-                    cursor: pointer;
-
-                    &:hover,
-                    &-active {
-                        color: var(--primary-color);
-                    }
-                }
+                white-space: nowrap;
             }
         }
     }
@@ -58,9 +45,28 @@
     }
 }
 
+.tabs-tab {
+    display: inline-block;
+    position: relative;
+    user-select: none;
+    padding: 0.5rem 1em;
+    font-size: var(--font-size);
+    background: transparent;
+    border: 0;
+    outline: none;
+    cursor: pointer;
+
+    &:hover,
+    &-active {
+        color: var(--primary-color);
+    }
+}
+
 .tabs.tabs-card {
     .tabs-nav {
+        width: 100%;
         .tabs-nav-wrap {
+            width: 100%;
             .tabs-nav-list {
                 .tabs-tab {
                     margin: 0;
@@ -77,3 +83,4 @@
         }
     }
 }
+

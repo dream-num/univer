@@ -57,7 +57,7 @@ export function Slider(props: BaseSliderProps) {
     const idNextRef = useRef<string>(randomId('slider'));
     const sliderRef = useRef<HTMLDivElement | null>(null);
 
-    const { min = 0, max = 100, step = 1, range = false, value } = props;
+    const { min = 0, max = 100, step = 1, range = false, value, className = '' } = props;
 
     useEffect(() => {
         const diff = max - min;
@@ -129,10 +129,9 @@ export function Slider(props: BaseSliderProps) {
                 index = 1;
             }
         }
+        props.onChange?.(e.nativeEvent);
 
         changeInputValue(index, value);
-
-        props.onChange?.(e.nativeEvent);
     };
 
     const onClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -152,9 +151,8 @@ export function Slider(props: BaseSliderProps) {
                 index = 1;
             }
         }
-
-        changeInputValue(index, value);
         props.onClick?.(e.nativeEvent, value);
+        changeInputValue(index, value);
     };
 
     const changeInputValue = (index: number, value: number) => {
@@ -174,7 +172,7 @@ export function Slider(props: BaseSliderProps) {
 
     return (
         <div
-            className={styles.slider}
+            className={`${styles.slider} ${className}`}
             role="slider-group"
             aria-labelledby="multi-lbl"
             style={{ '--min': min, '--max': max } as CSSProperties}

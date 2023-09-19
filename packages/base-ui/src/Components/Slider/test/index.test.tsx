@@ -24,4 +24,13 @@ describe('Slider', () => {
 
         expect(a).toEqual(2);
     });
+
+    test('test change event', () => {
+        let a = 1;
+        const { container } = render(<Slider onChange={() => a++} />);
+        const slider = screen.getByRole('slider-group');
+        const input = slider.querySelector('input');
+        fireEvent.input(input!);
+        expect(a).toEqual(2);
+    });
 });

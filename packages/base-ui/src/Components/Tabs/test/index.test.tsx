@@ -1,18 +1,18 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { Tab, TabPane } from '..';
+import { TabPane, Tabs } from '..';
 
 describe('tab', () => {
     test('tab render', () => {
         const { container } = render(
-            <Tab activeKey="tab" type="card">
+            <Tabs activeKey="tab" type="card">
                 <TabPane label="tab1" keys="tab">
                     test tab
                 </TabPane>
                 <TabPane label="tab2" keys="tabs">
                     test tabs
                 </TabPane>
-            </Tab>
+            </Tabs>
         );
 
         expect(container);
@@ -22,14 +22,14 @@ describe('tab', () => {
         let a = 1;
 
         render(
-            <Tab activeKey="tab" type="card" onTabClick={() => a++}>
+            <Tabs activeKey="tab" type="card" onTabClick={() => a++}>
                 <TabPane label="tab1" keys="tab">
                     test tab
                 </TabPane>
                 <TabPane label="tab2" keys="tabs">
                     test tabs
                 </TabPane>
-            </Tab>
+            </Tabs>
         );
 
         fireEvent.click(screen.getByText('tab1'));

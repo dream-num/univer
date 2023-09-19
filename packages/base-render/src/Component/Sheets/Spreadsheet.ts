@@ -1,4 +1,12 @@
-import { CellValueType, HorizontalAlign, ISelectionRange, Nullable, ObjectMatrix, sortRules, WrapStrategy } from '@univerjs/core';
+import {
+    CellValueType,
+    HorizontalAlign,
+    ISelectionRange,
+    Nullable,
+    ObjectMatrix,
+    sortRules,
+    WrapStrategy,
+} from '@univerjs/core';
 
 import { BaseObject } from '../../BaseObject';
 import { ORIENTATION_TYPE, RENDER_CLASS_TYPE } from '../../Basics/Const';
@@ -105,7 +113,10 @@ export class Spreadsheet extends SheetComponent {
 
         const { rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
 
-        ctx.translate(fixLineWidthByScale(rowTitleWidth, scale) - 0.5 / scale, fixLineWidthByScale(columnTitleHeight, scale) - 0.5 / scale);
+        ctx.translate(
+            fixLineWidthByScale(rowTitleWidth, scale) - 0.5 / scale,
+            fixLineWidthByScale(columnTitleHeight, scale) - 0.5 / scale
+        );
 
         // insert overflow cache
         this._calculateOverflow();
@@ -134,9 +145,15 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
-        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
+        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } =
+            spreadsheetSkeleton;
         const { scaleX = 1, scaleY = 1 } = this.getParentScale();
-        let { startY, endY, startX, endX } = getCellPositionByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation);
+        let { startY, endY, startX, endX } = getCellPositionByIndex(
+            rowIndex,
+            columnIndex,
+            rowHeightAccumulation,
+            columnWidthAccumulation
+        );
 
         startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
         endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
@@ -312,7 +329,10 @@ export class Spreadsheet extends SheetComponent {
                 allRotatedWidth += rotatedWidth;
             }
 
-            if ((orientation === ORIENTATION_TYPE.UP && i === 0) || (orientation === ORIENTATION_TYPE.DOWN && i === widthCount - 1)) {
+            if (
+                (orientation === ORIENTATION_TYPE.UP && i === 0) ||
+                (orientation === ORIENTATION_TYPE.DOWN && i === widthCount - 1)
+            ) {
                 allRotatedWidth += (rotatedWidth + spaceWidth / sinTheta) / tanTheta;
             }
         }
@@ -476,7 +496,8 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
         const columnCount = spreadsheetSkeleton.getColumnCount();
-        const { stylesCache, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache, mergeData } = spreadsheetSkeleton;
+        const { stylesCache, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache, mergeData } =
+            spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         fontList &&
             Object.keys(fontList).forEach((fontFormat: string) => {
@@ -484,7 +505,13 @@ export class Spreadsheet extends SheetComponent {
                 fontObjectArray.forEach((row, fontArray) => {
                     fontArray.forEach((column, docsConfig) => {
                         // wrap and angle handler
-                        const { documentSkeleton, angle = 0, verticalAlign, horizontalAlign, wrapStrategy } = docsConfig;
+                        const {
+                            documentSkeleton,
+                            angle = 0,
+                            verticalAlign,
+                            horizontalAlign,
+                            wrapStrategy,
+                        } = docsConfig;
                         const cell = spreadsheetSkeleton.getCellData().getValue(row, column);
 
                         const sheetSkeleton = this.getSkeleton();
@@ -507,7 +534,13 @@ export class Spreadsheet extends SheetComponent {
                             }
 
                             if (angle !== 0) {
-                                const { startY, endY, startX, endX } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, mergeData);
+                                const { startY, endY, startX, endX } = getCellByIndex(
+                                    row,
+                                    column,
+                                    rowHeightAccumulation,
+                                    columnWidthAccumulation,
+                                    mergeData
+                                );
                                 const cellWidth = endX - startX;
                                 const cellHeight = endY - startY;
 
@@ -524,7 +557,13 @@ export class Spreadsheet extends SheetComponent {
                                 }
                             }
 
-                            const position = spreadsheetSkeleton.getOverflowPosition(contentSize, horizontalAlign, row, column, columnCount);
+                            const position = spreadsheetSkeleton.getOverflowPosition(
+                                contentSize,
+                                horizontalAlign,
+                                row,
+                                column,
+                                columnCount
+                            );
 
                             const { startColumn, endColumn } = position;
 
@@ -535,7 +574,13 @@ export class Spreadsheet extends SheetComponent {
                                 endColumn,
                             });
                         } else if (wrapStrategy === WrapStrategy.WRAP && angle !== 0) {
-                            const { startY, endY } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, mergeData);
+                            const { startY, endY } = getCellByIndex(
+                                row,
+                                column,
+                                rowHeightAccumulation,
+                                columnWidthAccumulation,
+                                mergeData
+                            );
 
                             const cellHeight = endY - startY;
                             documentSkeleton.getModel().updateDocumentDataPageSize(cellHeight);
@@ -546,7 +591,13 @@ export class Spreadsheet extends SheetComponent {
                                 return true;
                             }
 
-                            const { startColumn, endColumn } = sheetSkeleton.getOverflowPosition(contentSize, horizontalAlign, row, column, sheetSkeleton.getColumnCount());
+                            const { startColumn, endColumn } = sheetSkeleton.getOverflowPosition(
+                                contentSize,
+                                horizontalAlign,
+                                row,
+                                column,
+                                sheetSkeleton.getColumnCount()
+                            );
                             overflowCache.setValue(row, column, { startRow: row, endRow: row, startColumn, endColumn });
                         }
 

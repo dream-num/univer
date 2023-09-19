@@ -14,7 +14,11 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../Services/selection-manager.service';
-import { ISetRangeFormattedValueMutationParams, SetRangeFormattedValueMutation, SetRangeFormattedValueUndoMutationFactory } from '../Mutations/set-range-formatted-value.mutation';
+import {
+    ISetRangeFormattedValueMutationParams,
+    SetRangeFormattedValueMutation,
+    SetRangeFormattedValueUndoMutationFactory,
+} from '../Mutations/set-range-formatted-value.mutation';
 
 export interface ICopyValuesToRangeCommandParams {
     destinationRange: ISelectionRange;
@@ -33,7 +37,11 @@ export const CopyValuesToRangeCommand: ICommand = {
         if (!selections?.length) return false;
         const originRange = selections[0];
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const handleResult = handleCopyRange(accessor, workbookId, worksheetId, originRange, params.destinationRange);
@@ -55,8 +63,14 @@ export const CopyValuesToRangeCommand: ICommand = {
             value: cellValue.getData(),
         };
 
-        const undoMutationParams: ISetRangeFormattedValueMutationParams = SetRangeFormattedValueUndoMutationFactory(accessor, setRangeFormattedValueMutationParams);
-        const result = commandService.executeCommand(SetRangeFormattedValueMutation.id, setRangeFormattedValueMutationParams);
+        const undoMutationParams: ISetRangeFormattedValueMutationParams = SetRangeFormattedValueUndoMutationFactory(
+            accessor,
+            setRangeFormattedValueMutationParams
+        );
+        const result = commandService.executeCommand(
+            SetRangeFormattedValueMutation.id,
+            setRangeFormattedValueMutationParams
+        );
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
@@ -64,7 +78,10 @@ export const CopyValuesToRangeCommand: ICommand = {
                     return commandService.executeCommand(SetRangeFormattedValueMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetRangeFormattedValueMutation.id, setRangeFormattedValueMutationParams);
+                    return commandService.executeCommand(
+                        SetRangeFormattedValueMutation.id,
+                        setRangeFormattedValueMutationParams
+                    );
                 },
             });
             return true;
@@ -80,7 +97,11 @@ function handleCopyRange(
     originRange: ISelectionRange,
     destinationRange: ISelectionRange
 ): Nullable<[ICellDataMatrix, ISelectionRange]> {
-    const worksheet = accessor.get(ICurrentUniverService).getUniverSheetInstance(workbookId)?.getWorkBook().getSheetBySheetId(worksheetId);
+    const worksheet = accessor
+        .get(ICurrentUniverService)
+        .getUniverSheetInstance(workbookId)
+        ?.getWorkBook()
+        .getSheetBySheetId(worksheetId);
     if (!worksheet) return;
 
     const sheetMatrix = worksheet.getCellMatrix();

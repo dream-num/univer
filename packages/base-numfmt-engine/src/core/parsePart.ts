@@ -1,4 +1,19 @@
-import { _numchars, _sp_chars, EPOCH_1317, EPOCH_1900, indexColors, u_CSEC, u_DAY, u_DSEC, u_HOUR, u_MIN, u_MONTH, u_MSEC, u_SEC, u_YEAR } from './constants';
+import {
+    _numchars,
+    _sp_chars,
+    EPOCH_1317,
+    EPOCH_1900,
+    indexColors,
+    u_CSEC,
+    u_DAY,
+    u_DSEC,
+    u_HOUR,
+    u_MIN,
+    u_MONTH,
+    u_MSEC,
+    u_SEC,
+    u_YEAR,
+} from './constants';
 import { resolveLocale } from './locale';
 
 export interface TokensType {
@@ -64,7 +79,7 @@ const _pattcache: {
     [key: string]: string;
 } = {};
 
-function minMaxPad(str: string, part: object, prefix: string): object {
+function minMaxPad(str: string, part: object | any, prefix: string): object {
     part[`${prefix}_max`] = str.length;
     part[`${prefix}_min`] = str.replace(/#/g, '').length;
     return part;
@@ -88,7 +103,7 @@ function patternToPadding(ss: string): string {
  * @param s
  * @param tokens
  */
-function add(s: TokensType | string, tokens: TokensType[]) {
+function add(s: TokensType | string, tokens: TokensType[] | any) {
     // allow adding string tokens without wrapping
     if (typeof s === 'string') {
         s = s.replace(/ /g, _numchars['?']);
@@ -103,8 +118,8 @@ function add(s: TokensType | string, tokens: TokensType[]) {
 }
 
 export function parsePart(pattern: string): PartType {
-    const tokens = [];
-    const part: PartType = {
+    const tokens: any = [];
+    const part: any = {
         scale: 1,
         percent: false,
         text: false,
@@ -138,7 +153,7 @@ export function parsePart(pattern: string): PartType {
         den_pattern: [],
         num_pattern: [],
         tokens,
-    };
+    }; // PartType
 
     let s = `${pattern}`;
     let current_pattern = 'int';
@@ -147,7 +162,7 @@ export function parsePart(pattern: string): PartType {
     const date_chunks = [];
     let last;
     let have_locale = false;
-    let m: RegExpExecArray | string[];
+    let m: RegExpExecArray | string[] | any;
 
     while (s && !part_over) {
         if ((m = /^General/i.exec(s))) {
@@ -156,10 +171,14 @@ export function parsePart(pattern: string): PartType {
         }
 
         // new partition
-        else if ((current_pattern === 'int' && (m = /^[#?0]+(?:,[#?0]+)*/.exec(s))) || (current_pattern === 'den' && (m = /^[#?\d]+/.exec(s))) || (m = /^[#?0]+/.exec(s))) {
+        else if (
+            (current_pattern === 'int' && (m = /^[#?0]+(?:,[#?0]+)*/.exec(s))) ||
+            (current_pattern === 'den' && (m = /^[#?\d]+/.exec(s))) ||
+            (m = /^[#?0]+/.exec(s))
+        ) {
             part[`${current_pattern}_pattern`].push(m[0]);
             last_number_chunk = { type: current_pattern, num: m[0] };
-            add(last_number_chunk, tokens);
+            add(last_number_chunk as any, tokens);
         }
 
         // vulgar fractions
@@ -299,7 +318,7 @@ export function parsePart(pattern: string): PartType {
                     bit.type = 'monthname';
                 }
                 // m or mm can be either minute or month based on context
-                const last_date_chunk = date_chunks[date_chunks.length - 1];
+                const last_date_chunk: any = date_chunks[date_chunks.length - 1];
                 if (!bit.type && last_date_chunk && !last_date_chunk.used && last_date_chunk.size & (u_HOUR | u_SEC)) {
                     // if this token follows hour or second, it is a minute
                     last_date_chunk.used = true;
@@ -320,7 +339,7 @@ export function parsePart(pattern: string): PartType {
                 bit.type = 'sec';
                 bit.pad = /ss/.test(token) ? 1 : 0;
                 // if last date chunk was m, flag this used
-                const last_date_chunk = date_chunks[date_chunks.length - 1];
+                const last_date_chunk: any = date_chunks[date_chunks.length - 1];
                 if (last_date_chunk && last_date_chunk.size & u_MIN) {
                     bit.used = true;
                 }
@@ -335,7 +354,7 @@ export function parsePart(pattern: string): PartType {
                 // FIXME: Don't know what this does? (yet!)
             }
             // signal date calc and track smallest needed unit
-            part.date |= bit.size;
+            part.date |= bit.size!;
             part.date_eval = true;
             date_chunks.push(bit);
             add(bit, tokens);
@@ -547,7 +566,7 @@ export function parsePart(pattern: string): PartType {
         // fragment bits affect surrounding whitespace
         // if either bit is "#", the whitespace around it, and
         // the div symbol, is removed if the bit is not shown
-        tokens.forEach((tok, i) => {
+        tokens.forEach((tok: any, i: number) => {
             // is next token a "num", "den", or "div"?
             const next = tokens[i + 1];
             if (tok.type === 'string' && next) {
@@ -566,7 +585,10 @@ export function parsePart(pattern: string): PartType {
     // general cannot blend with non-date tokens
     // -- this is doess not match excel 100% (it seems to allow , as a text token with general)
     // -- excel also does something strange when mixing general with dates (but that can hardly be expected to work)
-    if ((part.date || part.general) && (part.int_pattern.length || part.frac_pattern.length || part.scale !== 1 || part.text)) {
+    if (
+        (part.date || part.general) &&
+        (part.int_pattern.length || part.frac_pattern.length || part.scale !== 1 || part.text)
+    ) {
         throw new Error('Illegal format');
     }
 

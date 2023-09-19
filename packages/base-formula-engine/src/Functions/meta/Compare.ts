@@ -27,11 +27,18 @@ export class Compare extends BaseFunction {
         let result;
 
         if (this.checkArrayType(variant1) && this.checkArrayType(variant2)) {
-            result = (variant1 as BaseReferenceObject).toArrayValueObject().compare((variant2 as BaseReferenceObject).toArrayValueObject(), this._compareType);
+            result = (variant1 as BaseReferenceObject)
+                .toArrayValueObject()
+                .compare((variant2 as BaseReferenceObject).toArrayValueObject(), this._compareType);
         } else if (this.checkArrayType(variant1)) {
-            result = (variant1 as BaseReferenceObject).toArrayValueObject().compare(variant2 as BaseValueObject, this._compareType);
+            result = (variant1 as BaseReferenceObject)
+                .toArrayValueObject()
+                .compare(variant2 as BaseValueObject, this._compareType);
         } else if (this.checkArrayType(variant2)) {
-            result = (variant1 as BaseValueObject).compare((variant2 as BaseReferenceObject).toArrayValueObject(), this._compareType);
+            result = (variant1 as BaseValueObject).compare(
+                (variant2 as BaseReferenceObject).toArrayValueObject(),
+                this._compareType
+            );
         } else {
             result = (variant1 as BaseValueObject).compare(variant2 as BaseValueObject, this._compareType);
         }

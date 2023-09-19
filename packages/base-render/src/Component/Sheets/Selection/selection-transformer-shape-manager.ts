@@ -13,7 +13,12 @@ import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { IMouseEvent, IPointerEvent } from '../../../Basics/IEvents';
-import { ISelectionDataWithStyle, ISelectionRangeWithStyle, ISelectionStyle, NORMAL_SELECTION_PLUGIN_STYLE } from '../../../Basics/Selection';
+import {
+    ISelectionDataWithStyle,
+    ISelectionRangeWithStyle,
+    ISelectionStyle,
+    NORMAL_SELECTION_PLUGIN_STYLE,
+} from '../../../Basics/Selection';
 import { Vector2 } from '../../../Basics/Vector2';
 import { Scene } from '../../../Scene';
 import { ScrollTimer } from '../../../ScrollTimer';
@@ -372,7 +377,9 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
+                Vector2.FromArray([moveOffsetX, moveOffsetY])
+            );
 
             this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl);
 
@@ -483,7 +490,12 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         if (!moveActualSelection) {
             return false;
         }
-        const { startRow: moveStartRow, startColumn: moveStartColumn, endColumn: moveEndColumn, endRow: moveEndRow } = moveActualSelection;
+        const {
+            startRow: moveStartRow,
+            startColumn: moveStartColumn,
+            endColumn: moveEndColumn,
+            endRow: moveEndRow,
+        } = moveActualSelection;
 
         const newStartRow = Math.min(moveStartRow, startRow);
         const newStartColumn = Math.min(moveStartColumn, startColumn);
@@ -494,7 +506,12 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         if (!newBounding) {
             return false;
         }
-        const { startRow: finalStartRow, startColumn: finalStartColumn, endRow: finalEndRow, endColumn: finalEndColumn } = newBounding;
+        const {
+            startRow: finalStartRow,
+            startColumn: finalStartColumn,
+            endRow: finalEndRow,
+            endColumn: finalEndColumn,
+        } = newBounding;
 
         const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn, scaleX, scaleY);
         const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn, scaleX, scaleY);
@@ -517,7 +534,12 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
             endColumn: oldEndColumn,
         } = selectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
 
-        if (oldStartColumn !== finalStartColumn || oldStartRow !== finalStartRow || oldEndColumn !== finalEndColumn || oldEndRow !== finalEndRow) {
+        if (
+            oldStartColumn !== finalStartColumn ||
+            oldStartRow !== finalStartRow ||
+            oldEndColumn !== finalEndColumn ||
+            oldEndRow !== finalEndRow
+        ) {
             selectionControl && selectionControl.update(newSelectionRange, rowTitleWidth, columnTitleHeight);
         }
     }
@@ -559,4 +581,6 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
     }
 }
 
-export const ISelectionTransformerShapeManager = createIdentifier<SelectionTransformerShapeManager>('deprecated.univer.sheet.selection-transformer-manager');
+export const ISelectionTransformerShapeManager = createIdentifier<SelectionTransformerShapeManager>(
+    'deprecated.univer.sheet.selection-transformer-manager'
+);

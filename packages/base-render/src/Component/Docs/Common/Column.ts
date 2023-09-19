@@ -25,7 +25,11 @@ export function createSkeletonColumn(
     };
 }
 
-function _calculateColumnSize(columnIndex: number = 0, columnProperties: ISectionColumnProperties[], pageWidth: number) {
+function _calculateColumnSize(
+    columnIndex: number = 0,
+    columnProperties: ISectionColumnProperties[],
+    pageWidth: number
+) {
     let colWidth = 0;
     let spaceWidth = 0;
     let left = 0;

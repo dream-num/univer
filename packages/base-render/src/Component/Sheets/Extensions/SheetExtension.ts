@@ -11,7 +11,13 @@ export enum SHEET_EXTENSION_TYPE {
 export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE> {
     override type = SHEET_EXTENSION_TYPE.GRID;
 
-    getCellIndex(rowIndex: number, columnIndex: number, rowHeightAccumulation: number[], columnWidthAccumulation: number[], dataMergeCache: ISelectionRange[]) {
+    getCellIndex(
+        rowIndex: number,
+        columnIndex: number,
+        rowHeightAccumulation: number[],
+        columnWidthAccumulation: number[],
+        dataMergeCache: ISelectionRange[]
+    ) {
         return getCellByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
     }
 }

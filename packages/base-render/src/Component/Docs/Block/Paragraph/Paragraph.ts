@@ -26,7 +26,14 @@ import { IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interf
 import { createSkeletonPage } from '../../Common/Page';
 import { setColumnFullState } from '../../Common/Section';
 import { createSkeletonTabSpan, createSkeletonWordSpan } from '../../Common/Span';
-import { clearFontCreateConfigCache, getCharSpaceApply, getFontCreateConfig, getLastNotFullColumnInfo, getSpanGroupWidth, lineIterator } from '../../Common/Tools';
+import {
+    clearFontCreateConfigCache,
+    getCharSpaceApply,
+    getFontCreateConfig,
+    getLastNotFullColumnInfo,
+    getSpanGroupWidth,
+    lineIterator,
+} from '../../Common/Tools';
 import { dealWidthBullet } from './Bullet';
 import { dealWidthInlineDrawing } from './InlineDrawing';
 import { composeCharForLanguage } from './Language.Ruler';
@@ -152,11 +159,24 @@ export function dealWidthParagraph(
                 const blockId = customBlock.blockId;
                 const drawingOrigin = drawings[blockId];
                 if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
-                    allPages = dealWidthInlineDrawing(drawingOrigin, sectionBreakConfig, allPages, paragraphConfig, fontLocale);
+                    allPages = dealWidthInlineDrawing(
+                        drawingOrigin,
+                        sectionBreakConfig,
+                        allPages,
+                        paragraphConfig,
+                        fontLocale
+                    );
                 }
             }
         } else if (char === DataStreamTreeTokenType.PAGE_BREAK) {
-            allPages.push(createSkeletonPage(sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(allPages[allPages.length - 1]), BreakType.PAGE));
+            allPages.push(
+                createSkeletonPage(
+                    sectionBreakConfig,
+                    skeletonResourceReference,
+                    _getNextPageNumber(allPages[allPages.length - 1]),
+                    BreakType.PAGE
+                )
+            );
             paragraphAffectSkeDrawings.clear();
         } else if (char === DataStreamTreeTokenType.COLUMN_BREAK) {
             // 换列标识，还在同一个节内
@@ -166,12 +186,27 @@ export function dealWidthParagraph(
             if (columnInfo && !columnInfo.isLast) {
                 setColumnFullState(columnInfo.column, true);
             } else {
-                allPages.push(createSkeletonPage(sectionBreakConfig, skeletonResourceReference, _getNextPageNumber(lastPage), BreakType.COLUMN));
+                allPages.push(
+                    createSkeletonPage(
+                        sectionBreakConfig,
+                        skeletonResourceReference,
+                        _getNextPageNumber(lastPage),
+                        BreakType.COLUMN
+                    )
+                );
             }
         }
 
         const paragraphStart = i === 0;
-        const languageHandlerResult = composeCharForLanguage(char, i, content, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle); // Handling special languages such as Tibetan, Arabic
+        const languageHandlerResult = composeCharForLanguage(
+            char,
+            i,
+            content,
+            bodyModel,
+            paragraphNode,
+            sectionBreakConfig,
+            paragraphStyle
+        ); // Handling special languages such as Tibetan, Arabic
         let newSpanGroup = [];
         if (languageHandlerResult) {
             const { charIndex: newCharIndex, spanGroup } = languageHandlerResult;
@@ -182,7 +217,13 @@ export function dealWidthParagraph(
             newSpanGroup.push(span);
         }
 
-        allPages = calculateParagraphLayout(newSpanGroup, allPages, sectionBreakConfig, paragraphConfig, paragraphStart);
+        allPages = calculateParagraphLayout(
+            newSpanGroup,
+            allPages,
+            sectionBreakConfig,
+            paragraphConfig,
+            paragraphStart
+        );
     }
 
     lineIterator(allPages, (line: IDocumentSkeletonLine) => {
@@ -192,7 +233,10 @@ export function dealWidthParagraph(
     return allPages;
 }
 
-function _getListLevelAncestors(bullet?: IBullet, listLevel?: Map<string, IDocumentSkeletonBullet[]>): Array<Nullable<IDocumentSkeletonBullet>> | undefined {
+function _getListLevelAncestors(
+    bullet?: IBullet,
+    listLevel?: Map<string, IDocumentSkeletonBullet[]>
+): Array<Nullable<IDocumentSkeletonBullet>> | undefined {
     if (!bullet || !listLevel) {
         return;
     }
@@ -219,7 +263,11 @@ function _getListLevelAncestors(bullet?: IBullet, listLevel?: Map<string, IDocum
     return listLevelAncestors;
 }
 
-function _updateListLevelAncestors(bullet?: IBullet, bulletSkeleton?: IDocumentSkeletonBullet, listLevel?: Map<string, IDocumentSkeletonBullet[]>) {
+function _updateListLevelAncestors(
+    bullet?: IBullet,
+    bulletSkeleton?: IDocumentSkeletonBullet,
+    listLevel?: Map<string, IDocumentSkeletonBullet[]>
+) {
     if (!bullet || !bulletSkeleton) {
         return;
     }
@@ -237,7 +285,10 @@ function _updateListLevelAncestors(bullet?: IBullet, bulletSkeleton?: IDocumentS
     listLevel?.set(listId, cacheItem);
 }
 
-function _changeDrawingToSkeletonFormat(drawingIds: string[], drawings: IDrawings): Map<string, IDocumentSkeletonDrawing> {
+function _changeDrawingToSkeletonFormat(
+    drawingIds: string[],
+    drawings: IDrawings
+): Map<string, IDocumentSkeletonDrawing> {
     const skeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     drawingIds.forEach((objectId) => {
         const drawingOrigin = drawings[objectId];

@@ -18,7 +18,11 @@ import { IAccessor } from '@wendellhu/redi';
 
 import { BorderStyleManagerService } from '../../Services/border-style-manager.service';
 import { SelectionManagerService } from '../../Services/selection-manager.service';
-import { ISetBorderStylesMutationParams, SetBorderStylesMutation, SetBorderStylesUndoMutationFactory } from '../Mutations/set-border-styles.mutatio';
+import {
+    ISetBorderStylesMutationParams,
+    SetBorderStylesMutation,
+    SetBorderStylesUndoMutationFactory,
+} from '../Mutations/set-border-styles.mutatio';
 
 function forEach(rangeData: ISelectionRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = rangeData;
@@ -128,7 +132,19 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const { top, left, bottom, right, vertical, horizontal, color = 'black', style = BorderStyleTypes.DASH_DOT, workbookId, worksheetId, range } = params;
+        const {
+            top,
+            left,
+            bottom,
+            right,
+            vertical,
+            horizontal,
+            color = 'black',
+            style = BorderStyleTypes.DASH_DOT,
+            workbookId,
+            worksheetId,
+            range,
+        } = params;
 
         const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)?.getWorkBook();
         if (!workbook) return false;
@@ -322,7 +338,10 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
             value: mr.getData(),
         };
 
-        const undoSetBorderStylesMutationParams: ISetBorderStylesMutationParams = SetBorderStylesUndoMutationFactory(accessor, setBorderStylesMutationParams);
+        const undoSetBorderStylesMutationParams: ISetBorderStylesMutationParams = SetBorderStylesUndoMutationFactory(
+            accessor,
+            setBorderStylesMutationParams
+        );
 
         // execute do mutations and add undo mutations to undo stack if completed
         const result = commandService.executeCommand(SetBorderStylesMutation.id, setBorderStylesMutationParams);

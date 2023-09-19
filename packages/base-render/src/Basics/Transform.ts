@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import { ITransformState } from '@univerjs/core';
 
 import { IRect } from './Interfaces';
@@ -316,7 +317,14 @@ export class Transform {
         if (options.angle) {
             matrix.rotate(options.angle);
         }
-        if (options.scaleX !== 1 || options.scaleY !== 1 || options.skewX || options.skewY || options.flipX || options.flipY) {
+        if (
+            options.scaleX !== 1 ||
+            options.scaleY !== 1 ||
+            options.skewX ||
+            options.skewY ||
+            options.flipX ||
+            options.flipY
+        ) {
             matrix.multiply(this._calcDimensionsMatrix(options));
         }
         this._m = matrix.getMatrix();
@@ -345,7 +353,14 @@ export class Transform {
     private _calcDimensionsMatrix(options: ITransformState) {
         const scaleX = options.scaleX ?? 1;
         const scaleY = options.scaleY ?? 1;
-        const scaleMatrix = new Transform([options.flipX ? -scaleX : scaleX, 0, 0, options.flipY ? -scaleY : scaleY, 0, 0]);
+        const scaleMatrix = new Transform([
+            options.flipX ? -scaleX : scaleX,
+            0,
+            0,
+            options.flipY ? -scaleY : scaleY,
+            0,
+            0,
+        ]);
         if (options.skewX) {
             scaleMatrix.multiply(new Transform([1, 0, Math.tan(degToRad(options.skewX)), 1, 0, 0]));
         }

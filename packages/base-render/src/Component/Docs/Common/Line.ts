@@ -1,6 +1,12 @@
 import { IDrawing, Nullable, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 
-import { IDocumentSkeletonDivide, IDocumentSkeletonDrawing, IDocumentSkeletonDrawingAnchor, IDocumentSkeletonLine, LineType } from '../../../Basics/IDocumentSkeletonCached';
+import {
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonDrawingAnchor,
+    IDocumentSkeletonLine,
+    LineType,
+} from '../../../Basics/IDocumentSkeletonCached';
 import { Path2 } from '../../../Basics/Path2';
 import { Transform } from '../../../Basics/Transform';
 import { Vector2 } from '../../../Basics/Vector2';
@@ -68,7 +74,16 @@ export function createSkeletonLine(
     lineSke.marginTop = marginTop; // marginTop is initialized when it is created, and marginBottom is not calculated when it is created, it will be determined according to the situation of the next paragraph
     lineSke.spaceBelowApply = spaceBelowApply;
 
-    lineSke.divides = _calculateDividesByDrawings(lineHeight, lineTop, columnWidth, paddingLeft, paddingRight, affectSkeDrawings, headersDrawings, footersDrawings);
+    lineSke.divides = _calculateDividesByDrawings(
+        lineHeight,
+        lineTop,
+        columnWidth,
+        paddingLeft,
+        paddingRight,
+        affectSkeDrawings,
+        headersDrawings,
+        footersDrawings
+    );
 
     for (const divide of lineSke.divides) {
         divide.parent = lineSke;
@@ -200,11 +215,19 @@ export function setLineMarginBottom(line: IDocumentSkeletonLine, marginBottom: n
 // 获得文字内容后的行信息计算
 export function updateDivideInLine(line: IDocumentSkeletonLine) {}
 
-function _calculateSplit(drawing: IDocumentSkeletonDrawing, lineHeight: number, lineTop: number, columnWidth: number): Nullable<IDrawingsSplit> {
+function _calculateSplit(
+    drawing: IDocumentSkeletonDrawing,
+    lineHeight: number,
+    lineTop: number,
+    columnWidth: number
+): Nullable<IDrawingsSplit> {
     const { aTop, height, aLeft, width, angle = 0, drawingOrigin } = drawing;
     const { layoutType } = drawingOrigin;
 
-    if (layoutType === PositionedObjectLayoutType.WRAP_NONE || layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM) {
+    if (
+        layoutType === PositionedObjectLayoutType.WRAP_NONE ||
+        layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM
+    ) {
         return;
     }
 
@@ -243,7 +266,16 @@ function _calculateSplit(drawing: IDocumentSkeletonDrawing, lineHeight: number, 
     if (layoutType === PositionedObjectLayoutType.WRAP_SQUARE) {
         // WRAP_SQUARE的情况下，旋转后的图形会重新有一个rect，用这个新rect来决定split
         const { left: sLeft, width: sWidth, top: sTop, height: sHeight } = boundingBox;
-        return __getSplitWidthNoAngle(sTop!, sHeight!, sLeft!, sWidth!, lineTop, lineHeight, columnWidth, drawingOrigin);
+        return __getSplitWidthNoAngle(
+            sTop!,
+            sHeight!,
+            sLeft!,
+            sWidth!,
+            lineTop,
+            lineHeight,
+            columnWidth,
+            drawingOrigin
+        );
     }
 
     // wrapThrough | wrapTight
@@ -265,7 +297,10 @@ function __getBoundingBox(angle: number, left: number, width: number, top: numbe
 function __getCrossPoint(points: Vector2[], lineTop: number, lineHeight: number, columnWidth: number) {
     const path = new Path2(points);
     const crossPointTop = path.intersection([new Vector2(0, lineTop), new Vector2(columnWidth, lineTop)]);
-    const crossPointBottom = path.intersection([new Vector2(0, lineTop + lineHeight), new Vector2(columnWidth, lineTop + lineHeight)]);
+    const crossPointBottom = path.intersection([
+        new Vector2(0, lineTop + lineHeight),
+        new Vector2(columnWidth, lineTop + lineHeight),
+    ]);
 
     if (!crossPointTop && !crossPointBottom) {
         return;
@@ -294,8 +329,24 @@ function ___getMaxAndMinAxis(points: Vector2[], axis = AxisType.X) {
     };
 }
 
-function __getSplitWidthNoAngle(top: number, height: number, left: number, width: number, lineTop: number, lineHeight: number, columnWidth: number, drawingOrigin: IDrawing) {
-    const { layoutType, wrapText = WrapTextType.BOTH_SIDES, distL = 0, distR = 0, distT = 0, distB = 0 } = drawingOrigin;
+function __getSplitWidthNoAngle(
+    top: number,
+    height: number,
+    left: number,
+    width: number,
+    lineTop: number,
+    lineHeight: number,
+    columnWidth: number,
+    drawingOrigin: IDrawing
+) {
+    const {
+        layoutType,
+        wrapText = WrapTextType.BOTH_SIDES,
+        distL = 0,
+        distR = 0,
+        distT = 0,
+        distB = 0,
+    } = drawingOrigin;
 
     const newAtop = top - (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distT : 0);
     const newHeight = height + (layoutType === PositionedObjectLayoutType.WRAP_SQUARE ? distB : 0);
@@ -410,7 +461,12 @@ function _getLineSke(lineType: LineType, paragraphIndex: number): IDocumentSkele
     };
 }
 
-export function createAndUpdateBlockAnchor(paragraphIndex: number, line: IDocumentSkeletonLine, top: number, drawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>) {
+export function createAndUpdateBlockAnchor(
+    paragraphIndex: number,
+    line: IDocumentSkeletonLine,
+    top: number,
+    drawingAnchor?: Map<number, IDocumentSkeletonDrawingAnchor>
+) {
     if (!drawingAnchor) {
         return;
     }

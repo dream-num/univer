@@ -1,8 +1,19 @@
 import { Nullable } from '@univerjs/core';
 
 import { ErrorType } from '../Basics/ErrorType';
-import { matchToken, OPERATOR_TOKEN_PRIORITY, OPERATOR_TOKEN_SET, operatorToken, prefixToken, SUFFIX_TOKEN_SET } from '../Basics/Token';
-import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
+import {
+    matchToken,
+    OPERATOR_TOKEN_PRIORITY,
+    OPERATOR_TOKEN_SET,
+    operatorToken,
+    prefixToken,
+    SUFFIX_TOKEN_SET,
+} from '../Basics/Token';
+import {
+    DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
+    DEFAULT_TOKEN_TYPE_PARAMETER,
+    DEFAULT_TOKEN_TYPE_ROOT,
+} from '../Basics/TokenType';
 import { LexerNode } from './LexerNode';
 
 enum bracketType {
@@ -342,7 +353,11 @@ export class LexerTreeMaker {
     }
 
     private _negativeCondition(prevString: string) {
-        if (OPERATOR_TOKEN_SET.has(prevString) || prevString === matchToken.OPEN_BRACKET || prevString === matchToken.COMMA) {
+        if (
+            OPERATOR_TOKEN_SET.has(prevString) ||
+            prevString === matchToken.OPEN_BRACKET ||
+            prevString === matchToken.COMMA
+        ) {
             return true;
         }
         return false;
@@ -359,7 +374,11 @@ export class LexerTreeMaker {
         this._resetSegment();
         while (cur < formulaStringArrayCount) {
             const currentString = formulaStringArray[cur];
-            if (currentString === matchToken.OPEN_BRACKET && this.isSingleQuotationClose() && this.isDoubleQuotationClose()) {
+            if (
+                currentString === matchToken.OPEN_BRACKET &&
+                this.isSingleQuotationClose() &&
+                this.isDoubleQuotationClose()
+            ) {
                 if (this._segmentCount() > 0 || this.isLambdaOpen()) {
                     if (this.isLambdaClose()) {
                         // const subLexerNode = new LexerNode();
@@ -389,7 +408,11 @@ export class LexerTreeMaker {
                     this._pushNodeToChildren(currentString);
                     this._openBracket(bracketType.NORMAL);
                 }
-            } else if (currentString === matchToken.CLOSE_BRACKET && this.isSingleQuotationClose() && this.isDoubleQuotationClose()) {
+            } else if (
+                currentString === matchToken.CLOSE_BRACKET &&
+                this.isSingleQuotationClose() &&
+                this.isDoubleQuotationClose()
+            ) {
                 this._pushNodeToChildren(this._segment);
                 this._resetSegment();
                 const currentBracket = this._getCurrentBracket();
@@ -417,15 +440,27 @@ export class LexerTreeMaker {
                     return ErrorType.VALUE;
                 }
                 this._closeBracket();
-            } else if (currentString === matchToken.OPEN_BRACES && this.isSingleQuotationClose() && this.isDoubleQuotationClose()) {
+            } else if (
+                currentString === matchToken.OPEN_BRACES &&
+                this.isSingleQuotationClose() &&
+                this.isDoubleQuotationClose()
+            ) {
                 this._pushSegment(currentString);
                 this._openBraces();
-            } else if (currentString === matchToken.CLOSE_BRACES && this.isSingleQuotationClose() && this.isDoubleQuotationClose()) {
+            } else if (
+                currentString === matchToken.CLOSE_BRACES &&
+                this.isSingleQuotationClose() &&
+                this.isDoubleQuotationClose()
+            ) {
                 this._pushSegment(currentString);
                 this._pushNodeToChildren(this._segment);
                 this._resetSegment();
                 this._closeBraces();
-            } else if (currentString === matchToken.DOUBLE_QUOTATION && this.isSingleQuotationClose() && this.isBracesClose()) {
+            } else if (
+                currentString === matchToken.DOUBLE_QUOTATION &&
+                this.isSingleQuotationClose() &&
+                this.isBracesClose()
+            ) {
                 if (this.isDoubleQuotationClose()) {
                     this._openDoubleQuotation();
                 } else {
@@ -451,7 +486,12 @@ export class LexerTreeMaker {
                 }
                 // this._pushNodeToChildren(currentString);
                 this._pushSegment(currentString);
-            } else if (currentString === matchToken.COMMA && this.isSingleQuotationClose() && this.isDoubleQuotationClose() && this.isBracesClose()) {
+            } else if (
+                currentString === matchToken.COMMA &&
+                this.isSingleQuotationClose() &&
+                this.isDoubleQuotationClose() &&
+                this.isBracesClose()
+            ) {
                 const currentBracket = this._getCurrentBracket();
                 if (currentBracket === bracketType.FUNCTION) {
                     this._pushNodeToChildren(this._segment);
@@ -466,7 +506,12 @@ export class LexerTreeMaker {
                 } else {
                     return ErrorType.VALUE;
                 }
-            } else if (currentString === matchToken.COLON && this.isSingleQuotationClose() && this.isDoubleQuotationClose() && this.isBracesClose()) {
+            } else if (
+                currentString === matchToken.COLON &&
+                this.isSingleQuotationClose() &&
+                this.isDoubleQuotationClose() &&
+                this.isBracesClose()
+            ) {
                 // const subLexerNode = new LexerNode();
                 // subLexerNode.token = currentString;
                 // this.setCurrentLexerNode(subLexerNode);
@@ -549,7 +594,11 @@ export class LexerTreeMaker {
                 this._setCurrentLexerNode(subLexerNode_main);
                 this._currentLexerNode = subLexerNode_right;
                 this._openColon(upLevel);
-            } else if (SUFFIX_TOKEN_SET.has(currentString) && this.isSingleQuotationClose() && this.isDoubleQuotationClose()) {
+            } else if (
+                SUFFIX_TOKEN_SET.has(currentString) &&
+                this.isSingleQuotationClose() &&
+                this.isDoubleQuotationClose()
+            ) {
                 this._pushNodeToChildren(this._segment);
 
                 // this._pushNodeToChildren(currentString);
@@ -569,7 +618,11 @@ export class LexerTreeMaker {
                 subLexerNode.setParent(this._currentLexerNode);
 
                 this._resetSegment();
-            } else if (OPERATOR_TOKEN_SET.has(currentString) && this.isSingleQuotationClose() && this.isDoubleQuotationClose()) {
+            } else if (
+                OPERATOR_TOKEN_SET.has(currentString) &&
+                this.isSingleQuotationClose() &&
+                this.isDoubleQuotationClose()
+            ) {
                 let trimSegment = this._segment.trim();
 
                 if (currentString === operatorToken.MINUS && trimSegment === '') {

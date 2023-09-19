@@ -66,7 +66,13 @@ export class Vector2 implements IPoint {
      * @param amount defines the interpolation factor
      * @returns a new Vector2
      */
-    static CatmullRom(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>, value3: DeepImmutable<Vector2>, value4: DeepImmutable<Vector2>, amount: number): Vector2 {
+    static CatmullRom(
+        value1: DeepImmutable<Vector2>,
+        value2: DeepImmutable<Vector2>,
+        value3: DeepImmutable<Vector2>,
+        value4: DeepImmutable<Vector2>,
+        amount: number
+    ): Vector2 {
         const squared = amount * amount;
         const cubed = amount * squared;
 
@@ -117,7 +123,13 @@ export class Vector2 implements IPoint {
      * @param amount defines the interpolation factor
      * @returns a new Vector2
      */
-    static Hermite(value1: DeepImmutable<Vector2>, tangent1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>, tangent2: DeepImmutable<Vector2>, amount: number): Vector2 {
+    static Hermite(
+        value1: DeepImmutable<Vector2>,
+        tangent1: DeepImmutable<Vector2>,
+        value2: DeepImmutable<Vector2>,
+        tangent2: DeepImmutable<Vector2>,
+        amount: number
+    ): Vector2 {
         const squared = amount * amount;
         const cubed = amount * squared;
         const part1 = 2.0 * cubed - 3.0 * squared + 1.0;
@@ -173,8 +185,16 @@ export class Vector2 implements IPoint {
     ) {
         const t2 = time * time;
 
-        result.x = (t2 - time) * 6 * value1.x + (3 * t2 - 4 * time + 1) * tangent1.x + (-t2 + time) * 6 * value2.x + (3 * t2 - 2 * time) * tangent2.x;
-        result.y = (t2 - time) * 6 * value1.y + (3 * t2 - 4 * time + 1) * tangent1.y + (-t2 + time) * 6 * value2.y + (3 * t2 - 2 * time) * tangent2.y;
+        result.x =
+            (t2 - time) * 6 * value1.x +
+            (3 * t2 - 4 * time + 1) * tangent1.x +
+            (-t2 + time) * 6 * value2.x +
+            (3 * t2 - 2 * time) * tangent2.x;
+        result.y =
+            (t2 - time) * 6 * value1.y +
+            (3 * t2 - 4 * time + 1) * tangent1.y +
+            (-t2 + time) * 6 * value2.y +
+            (3 * t2 - 2 * time) * tangent2.y;
     }
 
     /**
@@ -275,7 +295,12 @@ export class Vector2 implements IPoint {
      * @param p2 defines 3rd triangle point
      * @returns true if the point "p" is in the triangle defined by the vectors "p0", "p1", "p2"
      */
-    static PointInTriangle(p: DeepImmutable<Vector2>, p0: DeepImmutable<Vector2>, p1: DeepImmutable<Vector2>, p2: DeepImmutable<Vector2>) {
+    static PointInTriangle(
+        p: DeepImmutable<Vector2>,
+        p0: DeepImmutable<Vector2>,
+        p1: DeepImmutable<Vector2>,
+        p2: DeepImmutable<Vector2>
+    ) {
         const a = (1 / 2) * (-p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y);
         const sign = a < 0 ? -1 : 1;
         const s = (p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * p.x + (p0.x - p2.x) * p.y) * sign;
@@ -323,7 +348,11 @@ export class Vector2 implements IPoint {
      * @param ref defines third vector
      * @returns ref
      */
-    static CenterToRef(value1: DeepImmutable<Vector2>, value2: DeepImmutable<Vector2>, ref: DeepImmutable<Vector2>): Vector2 {
+    static CenterToRef(
+        value1: DeepImmutable<Vector2>,
+        value2: DeepImmutable<Vector2>,
+        ref: DeepImmutable<Vector2>
+    ): Vector2 {
         return ref.copyFromFloats((value1.x + value2.x) / 2, (value1.y + value2.y) / 2);
     }
 
@@ -334,7 +363,11 @@ export class Vector2 implements IPoint {
      * @param segB defines the other point of the segment
      * @returns the shortest distance
      */
-    static DistanceOfPointFromSegment(p: DeepImmutable<Vector2>, segA: DeepImmutable<Vector2>, segB: DeepImmutable<Vector2>): number {
+    static DistanceOfPointFromSegment(
+        p: DeepImmutable<Vector2>,
+        segA: DeepImmutable<Vector2>,
+        segB: DeepImmutable<Vector2>
+    ): number {
         const l2 = Vector2.DistanceSquared(segA, segB);
         if (l2 === 0.0) {
             return Vector2.Distance(p, segA);

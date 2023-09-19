@@ -217,7 +217,13 @@ export class SelectionTransformerShape {
         return new this(scene, zIndex);
     }
 
-    static fromJson(scene: Scene, zIndex: number, newSelectionData: ISelectionDataWithStyle, rowTitleWidth: number, columnTitleHeight: number) {
+    static fromJson(
+        scene: Scene,
+        zIndex: number,
+        newSelectionData: ISelectionDataWithStyle,
+        rowTitleWidth: number,
+        columnTitleHeight: number
+    ) {
         const { selection, cellInfo, style } = newSelectionData;
         const control = SelectionTransformerShape.create(scene, zIndex);
         control.update(selection, rowTitleWidth, columnTitleHeight, style, cellInfo);
@@ -532,7 +538,11 @@ export class SelectionTransformerShape {
             evented: false,
         });
 
-        this._rowTitleGroup = new Group(SELECTION_MANAGER_KEY.rowTitleGroup + zIndex, this._rowTitleBackground, this._rowTitleBorder);
+        this._rowTitleGroup = new Group(
+            SELECTION_MANAGER_KEY.rowTitleGroup + zIndex,
+            this._rowTitleBackground,
+            this._rowTitleBorder
+        );
 
         this._rowTitleGroup.hide();
 
@@ -550,7 +560,11 @@ export class SelectionTransformerShape {
             evented: false,
         });
 
-        this._columnTitleGroup = new Group(SELECTION_MANAGER_KEY.columnTitleGroup + zIndex, this._columnTitleBackground, this._columnTitleBorder);
+        this._columnTitleGroup = new Group(
+            SELECTION_MANAGER_KEY.columnTitleGroup + zIndex,
+            this._columnTitleBackground,
+            this._columnTitleBorder
+        );
 
         this._columnTitleGroup.hide();
 
@@ -682,7 +696,8 @@ export class SelectionTransformerShape {
             style = NORMAL_SELECTION_PLUGIN_STYLE;
         }
 
-        const { strokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.strokeWidth!, fill = NORMAL_SELECTION_PLUGIN_STYLE.fill! } = style;
+        const { strokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.strokeWidth!, fill = NORMAL_SELECTION_PLUGIN_STYLE.fill! } =
+            style;
 
         const highlightSelection = this._selectionModel.highlightToSelection();
 

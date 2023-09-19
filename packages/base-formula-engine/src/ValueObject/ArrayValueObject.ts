@@ -125,7 +125,11 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _batchOperator(valueObject: BaseValueObject, batchOperatorType: BatchOperatorType, operator?: compareToken): CalculateValueType {
+    private _batchOperator(
+        valueObject: BaseValueObject,
+        batchOperatorType: BatchOperatorType,
+        operator?: compareToken
+    ): CalculateValueType {
         if (valueObject.isArray()) {
             let rowCount = (valueObject as ArrayValueObject).getRowCount();
             let columnCount = (valueObject as ArrayValueObject).getColumnCount();
@@ -170,14 +174,21 @@ export class ArrayValueObject extends BaseValueObject {
                                     if (!operator) {
                                         rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
                                     } else {
-                                        rowList[c] = (currentValue as BaseValueObject).compare(opValue as BaseValueObject, operator);
+                                        rowList[c] = (currentValue as BaseValueObject).compare(
+                                            opValue as BaseValueObject,
+                                            operator
+                                        );
                                     }
                                     break;
                                 case BatchOperatorType.CONCATENATE_FRONT:
-                                    rowList[c] = (currentValue as BaseValueObject).concatenateFront(opValue as BaseValueObject);
+                                    rowList[c] = (currentValue as BaseValueObject).concatenateFront(
+                                        opValue as BaseValueObject
+                                    );
                                     break;
                                 case BatchOperatorType.CONCATENATE_BACK:
-                                    rowList[c] = (currentValue as BaseValueObject).concatenateBack(opValue as BaseValueObject);
+                                    rowList[c] = (currentValue as BaseValueObject).concatenateBack(
+                                        opValue as BaseValueObject
+                                    );
                                     break;
                             }
                         }

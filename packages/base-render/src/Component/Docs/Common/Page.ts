@@ -1,6 +1,12 @@
 import { DocumentBodyModel, Nullable, PageOrientType } from '@univerjs/core';
 
-import { BreakType, IDocumentSkeletonFooter, IDocumentSkeletonHeader, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../Basics/IDocumentSkeletonCached';
+import {
+    BreakType,
+    IDocumentSkeletonFooter,
+    IDocumentSkeletonHeader,
+    IDocumentSkeletonPage,
+    ISkeletonResourceReference,
+} from '../../../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../../../Basics/Interfaces';
 // eslint-disable-next-line import/no-cycle
 import { dealWithSections } from '../Block/Section';
@@ -73,7 +79,11 @@ export function createSkeletonPage(
         if (skeHeaders.get(headerId)?.has(pageWidth)) {
             header = skeHeaders.get(headerId)?.get(pageWidth);
         } else if (headerTreeMap && headerTreeMap.has(headerId)) {
-            header = _createSkeletonHeader(headerTreeMap.get(headerId)!, sectionBreakConfig, skeletonResourceReference) as IDocumentSkeletonHeader;
+            header = _createSkeletonHeader(
+                headerTreeMap.get(headerId)!,
+                sectionBreakConfig,
+                skeletonResourceReference
+            ) as IDocumentSkeletonHeader;
             skeHeaders.set(headerId, new Map([[pageWidth, header]]));
         }
         page.headerId = headerId;
@@ -83,7 +93,11 @@ export function createSkeletonPage(
         if (skeFooters.get(footerId)?.has(pageWidth)) {
             footer = skeFooters.get(footerId)?.get(pageWidth);
         } else if (footerTreeMap && footerTreeMap.has(footerId)) {
-            footer = _createSkeletonHeader(footerTreeMap.get(footerId)!, sectionBreakConfig, skeletonResourceReference) as IDocumentSkeletonFooter;
+            footer = _createSkeletonHeader(
+                footerTreeMap.get(footerId)!,
+                sectionBreakConfig,
+                skeletonResourceReference
+            ) as IDocumentSkeletonFooter;
             skeFooters.set(headerId, new Map([[pageWidth, footer]]));
         }
         page.footerId = footerId;
@@ -102,7 +116,14 @@ export function createSkeletonPage(
         lastSectionBottom = lastSection.top + lastSection.height;
     }
 
-    const newSection = createSkeletonSection(columnProperties, columnSeparatorType, lastSectionBottom, 0, pageContentWidth, pageContentHeight - lastSectionBottom);
+    const newSection = createSkeletonSection(
+        columnProperties,
+        columnSeparatorType,
+        lastSectionBottom,
+        0,
+        pageContentWidth,
+        pageContentHeight - lastSectionBottom
+    );
     newSection.parent = page;
     sections.push(newSection);
 
@@ -172,7 +193,13 @@ function _createSkeletonHeader(
     };
 
     const areaPage = createSkeletonPage(headerConfig, skeletonResourceReference);
-    const page = dealWithSections(headerOrFooter, headerOrFooter.children[0], areaPage, headerConfig, skeletonResourceReference).pages[0];
+    const page = dealWithSections(
+        headerOrFooter,
+        headerOrFooter.children[0],
+        areaPage,
+        headerConfig,
+        skeletonResourceReference
+    ).pages[0];
     updateBlockIndex([page]);
     const column = page.sections[0].columns[0];
     const height = column.height || 0;
@@ -200,7 +227,11 @@ function _createSkeletonHeader(
     };
 }
 
-function _getVerticalMargin(marginTB: number, marginHF: number, headerOrFooter: Nullable<IDocumentSkeletonHeader> | Nullable<IDocumentSkeletonFooter>) {
+function _getVerticalMargin(
+    marginTB: number,
+    marginHF: number,
+    headerOrFooter: Nullable<IDocumentSkeletonHeader> | Nullable<IDocumentSkeletonFooter>
+) {
     if (!headerOrFooter || headerOrFooter.lines.length === 0) {
         return marginTB;
     }

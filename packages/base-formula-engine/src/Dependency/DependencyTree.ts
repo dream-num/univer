@@ -84,7 +84,12 @@ export class FormulaDependencyTree implements IFormulaData {
 
             const { startRow, startColumn, endRow, endColumn } = dependencyRange;
 
-            if (rangeData.startRow > endRow || rangeData.endRow < startRow || rangeData.startColumn > endColumn || rangeData.endColumn < startColumn) {
+            if (
+                rangeData.startRow > endRow ||
+                rangeData.endRow < startRow ||
+                rangeData.startColumn > endColumn ||
+                rangeData.endColumn < startColumn
+            ) {
                 continue;
             } else {
                 return true;
@@ -114,7 +119,11 @@ export class FormulaDependencyTree implements IFormulaData {
             const sheetId = unitRange.sheetId;
             const rangeData = unitRange.rangeData;
 
-            if (dependenceTree.unitId === unitId && dependenceTree.sheetId === sheetId && dependenceTree.compareRangeData(rangeData)) {
+            if (
+                dependenceTree.unitId === unitId &&
+                dependenceTree.sheetId === sheetId &&
+                dependenceTree.compareRangeData(rangeData)
+            ) {
                 return true;
             }
         }

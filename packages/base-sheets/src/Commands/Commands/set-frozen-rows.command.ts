@@ -1,7 +1,11 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISetFrozenRowsMutationParams, SetFrozenRowsMutation, SetFrozenRowsMutationFactory } from '../Mutations/set-frozen-rows.mutation';
+import {
+    ISetFrozenRowsMutationParams,
+    SetFrozenRowsMutation,
+    SetFrozenRowsMutationFactory,
+} from '../Mutations/set-frozen-rows.mutation';
 
 interface ISetFrozenRowsCommandParams {
     value: number;
@@ -16,7 +20,11 @@ export const SetFrozenRowsCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
@@ -29,7 +37,10 @@ export const SetFrozenRowsCommand: ICommand = {
             numRows: params.value,
         };
 
-        const undoMutationParams: ISetFrozenRowsMutationParams = SetFrozenRowsMutationFactory(accessor, redoMutationParams);
+        const undoMutationParams: ISetFrozenRowsMutationParams = SetFrozenRowsMutationFactory(
+            accessor,
+            redoMutationParams
+        );
         const result = commandService.executeCommand(SetFrozenRowsMutation.id, redoMutationParams);
 
         if (result) {

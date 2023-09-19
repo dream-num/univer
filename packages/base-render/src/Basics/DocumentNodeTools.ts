@@ -98,7 +98,9 @@ export function isPlaceholderOrSpace(span: Nullable<IDocumentSkeletonSpan>) {
     }
 
     if (
-        [DataStreamTreeTokenType.PARAGRAPH, DataStreamTreeTokenType.TAB, DataStreamTreeTokenType.SECTION_BREAK].indexOf(span.streamType) !== -1 ||
+        [DataStreamTreeTokenType.PARAGRAPH, DataStreamTreeTokenType.TAB, DataStreamTreeTokenType.SECTION_BREAK].indexOf(
+            span.streamType
+        ) !== -1 ||
         span.content === DataStreamTreeTokenType.SPACE
     ) {
         return true;

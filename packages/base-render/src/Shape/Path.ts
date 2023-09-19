@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 // import { IShapeProps, Shape, IObjectFullState, Group, Scene } from '.';
 
 import { IKeyValue, Nullable } from '@univerjs/core';
@@ -172,7 +173,15 @@ export class Path extends Shape<IPathProps> {
         return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
-    static getPointOnLine(dist: number, P1x: number, P1y: number, P2x: number, P2y: number, fromX?: number, fromY?: number) {
+    static getPointOnLine(
+        dist: number,
+        P1x: number,
+        P1y: number,
+        P2x: number,
+        P2y: number,
+        fromX?: number,
+        fromY?: number
+    ) {
         if (fromX === undefined) {
             fromX = P1x;
         }
@@ -228,7 +237,17 @@ export class Path extends Shape<IPathProps> {
         return pt;
     }
 
-    static getPointOnCubicBezier(pct: number, P1x: number, P1y: number, P2x: number, P2y: number, P3x: number, P3y: number, P4x: number, P4y: number) {
+    static getPointOnCubicBezier(
+        pct: number,
+        P1x: number,
+        P1y: number,
+        P2x: number,
+        P2y: number,
+        P3x: number,
+        P3y: number,
+        P4x: number,
+        P4y: number
+    ) {
         function CB1(t: number) {
             return t * t * t;
         }
@@ -250,7 +269,15 @@ export class Path extends Shape<IPathProps> {
         };
     }
 
-    static getPointOnQuadraticBezier(pct: number, P1x: number, P1y: number, P2x: number, P2y: number, P3x: number, P3y: number) {
+    static getPointOnQuadraticBezier(
+        pct: number,
+        P1x: number,
+        P1y: number,
+        P2x: number,
+        P2y: number,
+        P3x: number,
+        P3y: number
+    ) {
         function QB1(t: number) {
             return t * t;
         }
@@ -462,7 +489,12 @@ export class Path extends Shape<IPathProps> {
                         points.push(cpx, cpy);
                         break;
                     case 'c':
-                        points.push(cpx + (p.shift() || 0), cpy + (p.shift() || 0), cpx + (p.shift() || 0), cpy + (p.shift() || 0));
+                        points.push(
+                            cpx + (p.shift() || 0),
+                            cpy + (p.shift() || 0),
+                            cpx + (p.shift() || 0),
+                            cpy + (p.shift() || 0)
+                        );
                         cpx += p.shift() || 0;
                         cpy += p.shift() || 0;
                         cmd = 'C';
@@ -603,9 +635,29 @@ export class Path extends Shape<IPathProps> {
             case 'C':
                 // Approximates by breaking curve into 100 line segments
                 len = 0.0;
-                p1 = path.getPointOnCubicBezier(0, x, y, points[0], points[1], points[2], points[3], points[4], points[5]);
+                p1 = path.getPointOnCubicBezier(
+                    0,
+                    x,
+                    y,
+                    points[0],
+                    points[1],
+                    points[2],
+                    points[3],
+                    points[4],
+                    points[5]
+                );
                 for (t = 0.01; t <= 1; t += 0.01) {
-                    p2 = path.getPointOnCubicBezier(t, x, y, points[0], points[1], points[2], points[3], points[4], points[5]);
+                    p2 = path.getPointOnCubicBezier(
+                        t,
+                        x,
+                        y,
+                        points[0],
+                        points[1],
+                        points[2],
+                        points[3],
+                        points[4],
+                        points[5]
+                    );
                     len += path.getLineLength(p1.x, p1.y, p2.x, p2.y);
                     p1 = p2;
                 }
@@ -660,7 +712,17 @@ export class Path extends Shape<IPathProps> {
         return 0;
     }
 
-    static convertEndpointToCenterParameterization(x1: number, y1: number, x2: number, y2: number, fa: number, fs: number, rx: number, ry: number, psiDeg: number) {
+    static convertEndpointToCenterParameterization(
+        x1: number,
+        y1: number,
+        x2: number,
+        y2: number,
+        fa: number,
+        fs: number,
+        rx: number,
+        ry: number,
+        psiDeg: number
+    ) {
         // Derived from: http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
         const psi = psiDeg * (Math.PI / 180.0);
         const xp = (Math.cos(psi) * (x1 - x2)) / 2.0 + (Math.sin(psi) * (y1 - y2)) / 2.0;
@@ -673,7 +735,10 @@ export class Path extends Shape<IPathProps> {
             ry *= Math.sqrt(lambda);
         }
 
-        let f = Math.sqrt((rx * rx * (ry * ry) - rx * rx * (yp * yp) - ry * ry * (xp * xp)) / (rx * rx * (yp * yp) + ry * ry * (xp * xp)));
+        let f = Math.sqrt(
+            (rx * rx * (ry * ry) - rx * rx * (yp * yp) - ry * ry * (xp * xp)) /
+                (rx * rx * (yp * yp) + ry * ry * (xp * xp))
+        );
 
         if (fa === fs) {
             f *= -1;
@@ -806,9 +871,27 @@ export class Path extends Shape<IPathProps> {
             case 'L':
                 return Path.getPointOnLine(length, cp.start.x, cp.start.y, p[0], p[1]);
             case 'C':
-                return Path.getPointOnCubicBezier(length / cp.pathLength, cp.start.x, cp.start.y, p[0], p[1], p[2], p[3], p[4], p[5]);
+                return Path.getPointOnCubicBezier(
+                    length / cp.pathLength,
+                    cp.start.x,
+                    cp.start.y,
+                    p[0],
+                    p[1],
+                    p[2],
+                    p[3],
+                    p[4],
+                    p[5]
+                );
             case 'Q':
-                return Path.getPointOnQuadraticBezier(length / cp.pathLength, cp.start.x, cp.start.y, p[0], p[1], p[2], p[3]);
+                return Path.getPointOnQuadraticBezier(
+                    length / cp.pathLength,
+                    cp.start.x,
+                    cp.start.y,
+                    p[0],
+                    p[1],
+                    p[2],
+                    p[3]
+                );
             case 'A': {
                 const cx = p[0];
                 const cy = p[1];
@@ -869,13 +952,27 @@ export class Path extends Shape<IPathProps> {
                 if (dTheta < 0) {
                     // clockwise
                     for (let t = start - inc; t > end; t -= inc) {
-                        const point = Path.getPointOnEllipticalArc(data.points[0], data.points[1], data.points[2], data.points[3], t, 0);
+                        const point = Path.getPointOnEllipticalArc(
+                            data.points[0],
+                            data.points[1],
+                            data.points[2],
+                            data.points[3],
+                            t,
+                            0
+                        );
                         points.push(point.x, point.y);
                     }
                 } else {
                     // counter-clockwise
                     for (let t = start + inc; t < end; t += inc) {
-                        const point = Path.getPointOnEllipticalArc(data.points[0], data.points[1], data.points[2], data.points[3], t, 0);
+                        const point = Path.getPointOnEllipticalArc(
+                            data.points[0],
+                            data.points[1],
+                            data.points[2],
+                            data.points[3],
+                            t,
+                            0
+                        );
                         points.push(point.x, point.y);
                     }
                 }

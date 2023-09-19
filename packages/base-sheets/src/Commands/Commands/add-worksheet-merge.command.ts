@@ -1,10 +1,24 @@
-import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, ISelectionRange, IUndoRedoService } from '@univerjs/core';
+import {
+    CommandType,
+    Dimension,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    ISelectionRange,
+    IUndoRedoService,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../Basics/Interfaces/MutationInterface';
+import {
+    IAddWorksheetMergeMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+} from '../../Basics/Interfaces/MutationInterface';
 import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { AddWorksheetMergeMutation, AddWorksheetMergeMutationFactory } from '../Mutations/add-worksheet-merge.mutation';
-import { RemoveWorksheetMergeMutation, RemoveWorksheetMergeMutationFactory } from '../Mutations/remove-worksheet-merge.mutation';
+import {
+    RemoveWorksheetMergeMutation,
+    RemoveWorksheetMergeMutationFactory,
+} from '../Mutations/remove-worksheet-merge.mutation';
 
 interface addMergeCommandParams {
     value: Dimension.ROWS | Dimension.COLUMNS;
@@ -22,7 +36,11 @@ export const AddWorksheetMergeCommand: ICommand = {
         const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length) return false;
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
@@ -63,7 +81,10 @@ export const AddWorksheetMergeCommand: ICommand = {
             worksheetId,
             ranges,
         };
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(accessor, removeMergeMutationParams);
+        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(
+            accessor,
+            removeMergeMutationParams
+        );
         const removeResult = commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
 
         const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
@@ -71,21 +92,39 @@ export const AddWorksheetMergeCommand: ICommand = {
             worksheetId,
             ranges,
         };
-        const undoMutationParams: IRemoveWorksheetMergeMutationParams = AddWorksheetMergeMutationFactory(accessor, addMergeMutationParams);
+        const undoMutationParams: IRemoveWorksheetMergeMutationParams = AddWorksheetMergeMutationFactory(
+            accessor,
+            addMergeMutationParams
+        );
         const result = commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
 
         if (result && removeResult) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return (commandService.executeCommand(RemoveWorksheetMergeMutation.id, undoMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, undoRemoveMergeMutationParams);
+                    return (
+                        commandService.executeCommand(
+                            RemoveWorksheetMergeMutation.id,
+                            undoMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
+                        if (res)
+                            return commandService.executeCommand(
+                                AddWorksheetMergeMutation.id,
+                                undoRemoveMergeMutationParams
+                            );
                         return false;
                     });
                 },
                 redo() {
-                    return (commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) return commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+                    return (
+                        commandService.executeCommand(
+                            RemoveWorksheetMergeMutation.id,
+                            removeMergeMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
+                        if (res)
+                            return commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
                         return false;
                     });
                 },

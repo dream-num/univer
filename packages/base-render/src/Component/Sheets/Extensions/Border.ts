@@ -16,15 +16,22 @@ export class Border extends SheetExtension {
     override zIndex = 30;
 
     override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowColumnSegment, rowTitleWidth, columnTitleHeight, dataMergeCache, stylesCache, overflowCache } = spreadsheetSkeleton;
+        const { rowColumnSegment, rowTitleWidth, columnTitleHeight, dataMergeCache, stylesCache, overflowCache } =
+            spreadsheetSkeleton;
         const { border } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;
         }
 
-        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
+        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } =
+            spreadsheetSkeleton;
 
-        if (!rowHeightAccumulation || !columnWidthAccumulation || columnTotalWidth === undefined || rowTotalHeight === undefined) {
+        if (
+            !rowHeightAccumulation ||
+            !columnWidthAccumulation ||
+            columnTotalWidth === undefined ||
+            rowTotalHeight === undefined
+        ) {
             return;
         }
         ctx.save();
@@ -41,7 +48,13 @@ export class Border extends SheetExtension {
                     return true;
                 }
 
-                const cellInfo = this.getCellIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                const cellInfo = this.getCellIndex(
+                    rowIndex,
+                    columnIndex,
+                    rowHeightAccumulation,
+                    columnWidthAccumulation,
+                    dataMergeCache
+                );
 
                 let { startY, endY, startX, endX } = cellInfo;
                 const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
@@ -89,7 +102,12 @@ export class Border extends SheetExtension {
         ctx.restore();
     }
 
-    private _getOverflowExclusion(overflowCache: ObjectMatrix<ISelectionRange>, type: BORDER_TYPE, borderRow: number, borderColumn: number) {
+    private _getOverflowExclusion(
+        overflowCache: ObjectMatrix<ISelectionRange>,
+        type: BORDER_TYPE,
+        borderRow: number,
+        borderColumn: number
+    ) {
         let isDraw = false;
         if (type === BORDER_TYPE.TOP || type === BORDER_TYPE.BOTTOM) {
             return isDraw;

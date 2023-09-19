@@ -25,7 +25,11 @@ export const MoveColumnsToCommand: ICommand = {
         }
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
@@ -45,7 +49,10 @@ export const MoveColumnsToCommand: ICommand = {
                 },
             ],
         };
-        const undoRemoveColumnMutationParams: IInsertColMutationParams = IRemoveColMutationFactory(accessor, removeColumnMutationParams);
+        const undoRemoveColumnMutationParams: IInsertColMutationParams = IRemoveColMutationFactory(
+            accessor,
+            removeColumnMutationParams
+        );
 
         const removeResult = commandService.executeCommand(RemoveColMutation.id, removeColumnMutationParams);
 
@@ -61,7 +68,10 @@ export const MoveColumnsToCommand: ICommand = {
             ],
         };
 
-        const undoMutationParams: IRemoveColMutationParams = InsertColMutationFactory(accessor, insertColMutationParams);
+        const undoMutationParams: IRemoveColMutationParams = InsertColMutationFactory(
+            accessor,
+            insertColMutationParams
+        );
 
         const result = commandService.executeCommand(InsertColMutation.id, insertColMutationParams);
 
@@ -71,13 +81,23 @@ export const MoveColumnsToCommand: ICommand = {
                 // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
                 URI: workbookId,
                 undo() {
-                    return (commandService.executeCommand(InsertColMutation.id, undoRemoveColumnMutationParams) as Promise<boolean>).then((res) => {
+                    return (
+                        commandService.executeCommand(
+                            InsertColMutation.id,
+                            undoRemoveColumnMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
                         if (res) return commandService.executeCommand(RemoveColMutation.id, undoMutationParams);
                         return false;
                     });
                 },
                 redo() {
-                    return (commandService.executeCommand(RemoveColMutation.id, removeColumnMutationParams) as Promise<boolean>).then((res) => {
+                    return (
+                        commandService.executeCommand(
+                            RemoveColMutation.id,
+                            removeColumnMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
                         if (res) return commandService.executeCommand(InsertColMutation.id, insertColMutationParams);
                         return false;
                     });

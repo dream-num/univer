@@ -385,7 +385,9 @@ export class Viewport {
         const applyCanvasState = this._getApplyCanvasState();
 
         if (applyCanvasState) {
-            sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.left / this._scene.scaleX, -this.top / this._scene.scaleY]));
+            sceneTrans.multiply(
+                Transform.create([1, 0, 0, 1, -this.left / this._scene.scaleX, -this.top / this._scene.scaleY])
+            );
             ctx = this._cacheCanvas.getContext();
             this._cacheCanvas.clear();
         }
@@ -536,7 +538,12 @@ export class Viewport {
         // coord = Transform.create([pixelRatio, 0, 0, pixelRatio, 0, 0]).applyPoint(
         //     coord
         // );
-        if (coord.x >= this.left && coord.x <= this.left + width && coord.y >= this.top && coord.y <= this.top + height) {
+        if (
+            coord.x >= this.left &&
+            coord.x <= this.left + width &&
+            coord.y >= this.top &&
+            coord.y <= this.top + height
+        ) {
             return true;
         }
         return false;
@@ -590,7 +597,8 @@ export class Viewport {
             width = this._widthOrigin!;
         } else {
             const referenceWidth = parent.width;
-            const containerWidth = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceWidth * parent.scaleX : referenceWidth;
+            const containerWidth =
+                parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceWidth * parent.scaleX : referenceWidth;
             width = containerWidth - (this._left + this._right);
         }
 
@@ -598,7 +606,8 @@ export class Viewport {
             height = this._heightOrigin!;
         } else {
             const referenceHeight = parent.height;
-            const containerHeight = parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceHeight * parent.scaleY : referenceHeight;
+            const containerHeight =
+                parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceHeight * parent.scaleY : referenceHeight;
             height = containerHeight - (this._top + this._bottom);
         }
 
@@ -792,6 +801,16 @@ export class Viewport {
         const width = this._cacheCanvas.getWidth() * pixelRatio;
         const height = this._cacheCanvas.getHeight() * pixelRatio;
         // console.log(this.viewPortKey, this._cacheCanvas, width, height, this.left, this.top, this.width, this.height, pixelRatio);
-        ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0, width, height, this.left, this.top, this.width || 0, this.height || 0);
+        ctx.drawImage(
+            this._cacheCanvas.getCanvasEle(),
+            0,
+            0,
+            width,
+            height,
+            this.left,
+            this.top,
+            this.width || 0,
+            this.height || 0
+        );
     }
 }

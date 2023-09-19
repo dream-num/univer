@@ -189,7 +189,13 @@ export class FontCache {
 
         const textMetrics = ctx.measureText(content);
 
-        const { width, fontBoundingBoxAscent, fontBoundingBoxDescent, actualBoundingBoxAscent, actualBoundingBoxDescent } = textMetrics;
+        const {
+            width,
+            fontBoundingBoxAscent,
+            fontBoundingBoxDescent,
+            actualBoundingBoxAscent,
+            actualBoundingBoxDescent,
+        } = textMetrics;
 
         const cache: IMeasureTextCache = {
             width,
@@ -200,7 +206,12 @@ export class FontCache {
         };
 
         // 兼容不支持textMetrics的情况
-        if (fontBoundingBoxAscent == null || fontBoundingBoxDescent == null || Number.isNaN(fontBoundingBoxAscent) || Number.isNaN(fontBoundingBoxDescent)) {
+        if (
+            fontBoundingBoxAscent == null ||
+            fontBoundingBoxDescent == null ||
+            Number.isNaN(fontBoundingBoxAscent) ||
+            Number.isNaN(fontBoundingBoxDescent)
+        ) {
             const oneLineTextHeight = this.getTextSizeByDom(DEFAULT_MEASURE_TEXT, fontString).height;
 
             if (ctx.textBaseline === 'top') {
@@ -287,7 +298,13 @@ export class FontCache {
     }
 
     private static _calculateBoundingBoxByMeasureText(textCache: IMeasureTextCache, fontSize: number) {
-        const { width, fontBoundingBoxAscent, fontBoundingBoxDescent, actualBoundingBoxAscent, actualBoundingBoxDescent } = textCache;
+        const {
+            width,
+            fontBoundingBoxAscent,
+            fontBoundingBoxDescent,
+            actualBoundingBoxAscent,
+            actualBoundingBoxDescent,
+        } = textCache;
         return {
             width,
             ba: fontBoundingBoxAscent,

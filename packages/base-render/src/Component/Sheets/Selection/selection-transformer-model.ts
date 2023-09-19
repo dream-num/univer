@@ -69,11 +69,21 @@ export class SelectionTransformerModel implements ISelectionRangeWithCoord {
 
     isEqual(selectionRange: ISelectionRangeWithCoord) {
         const { startColumn, startRow, endColumn, endRow, type } = this;
-        const { startColumn: newStartColumn, startRow: newStartRow, endColumn: newEndColumn, endRow: newEndRow } = selectionRange;
+        const {
+            startColumn: newStartColumn,
+            startRow: newStartRow,
+            endColumn: newEndColumn,
+            endRow: newEndRow,
+        } = selectionRange;
         // if (type !== newType) {
         //     return false;
         // }
-        if (startColumn === newStartColumn && startRow === newStartRow && endColumn === newEndColumn && endRow === newEndRow) {
+        if (
+            startColumn === newStartColumn &&
+            startRow === newStartRow &&
+            endColumn === newEndColumn &&
+            endRow === newEndRow
+        ) {
             return true;
         }
         return false;
@@ -81,13 +91,20 @@ export class SelectionTransformerModel implements ISelectionRangeWithCoord {
 
     isInclude(selectionRange: ISelectionRangeWithCoord) {
         const { startColumn, startRow, endColumn, endRow, type } = this;
-        const { startColumn: newStartColumn, startRow: newStartRow, endColumn: newEndColumn, endRow: newEndRow } = selectionRange;
+        const {
+            startColumn: newStartColumn,
+            startRow: newStartRow,
+            endColumn: newEndColumn,
+            endRow: newEndRow,
+        } = selectionRange;
 
         // if (type !== newType) {
         //     return false;
         // }
 
-        if (!(newEndColumn < startColumn || newStartColumn > endColumn || newStartRow > endRow || newEndRow < startRow)) {
+        if (
+            !(newEndColumn < startColumn || newStartColumn > endColumn || newStartRow > endRow || newEndRow < startRow)
+        ) {
             return true;
         }
         return false;

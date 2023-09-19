@@ -49,8 +49,20 @@ export enum TRANSFORM_CHANGE_OBSERVABLE_TYPE {
 
 export interface ITransformChangeState {
     type: TRANSFORM_CHANGE_OBSERVABLE_TYPE;
-    value: number | string | boolean | { x: number | string | boolean; y: number | string | boolean } | IObjectFullState | ISceneTransformState;
-    preValue: number | string | boolean | { x: number | string | boolean; y: number | string | boolean } | IObjectFullState | ISceneTransformState;
+    value:
+        | number
+        | string
+        | boolean
+        | { x: number | string | boolean; y: number | string | boolean }
+        | IObjectFullState
+        | ISceneTransformState;
+    preValue:
+        | number
+        | string
+        | boolean
+        | { x: number | string | boolean; y: number | string | boolean }
+        | IObjectFullState
+        | ISceneTransformState;
 }
 
 export interface IFontLocale {

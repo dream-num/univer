@@ -91,11 +91,19 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
         return this.create(param, parserDataLoader);
     }
 
-    private _updateLambdaStatement(functionStatementNode: LexerNode, lambdaId: string, currentLambdaPrivacyVar: LambdaPrivacyVarType) {
+    private _updateLambdaStatement(
+        functionStatementNode: LexerNode,
+        lambdaId: string,
+        currentLambdaPrivacyVar: LambdaPrivacyVarType
+    ) {
         this._updateTree(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
     }
 
-    private _updateTree(functionStatementNode: LexerNode, lambdaId: string, currentLambdaPrivacyVar: LambdaPrivacyVarType) {
+    private _updateTree(
+        functionStatementNode: LexerNode,
+        lambdaId: string,
+        currentLambdaPrivacyVar: LambdaPrivacyVarType
+    ) {
         const children = functionStatementNode.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {

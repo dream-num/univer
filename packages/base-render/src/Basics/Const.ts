@@ -191,7 +191,8 @@ export enum LINK_VIEW_PORT_TYPE {
 
 export const MIDDLE_CELL_POS_MAGIC_NUMBER = 1;
 
-export const DEFAULT_FONTFACE_PLANE = '"Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif';
+export const DEFAULT_FONTFACE_PLANE =
+    '"Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif';
 
 const DEFAULT_SKELETON_HEADER_FOOTER = {
     lines: [],

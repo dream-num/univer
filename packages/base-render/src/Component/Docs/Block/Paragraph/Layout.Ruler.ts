@@ -1,4 +1,13 @@
-import { BooleanNumber, DataStreamTreeTokenType, GridType, HorizontalAlign, INumberUnit, IParagraphStyle, NamedStyleType, SpacingRule } from '@univerjs/core';
+import {
+    BooleanNumber,
+    DataStreamTreeTokenType,
+    GridType,
+    HorizontalAlign,
+    INumberUnit,
+    IParagraphStyle,
+    NamedStyleType,
+    SpacingRule,
+} from '@univerjs/core';
 
 import {
     IDocumentSkeletonBullet,
@@ -11,7 +20,12 @@ import {
     SpanType,
 } from '../../../../Basics/IDocumentSkeletonCached';
 import { IParagraphConfig, ISectionBreakConfig } from '../../../../Basics/Interfaces';
-import { calculateLineTopByDrawings, createAndUpdateBlockAnchor, createSkeletonLine, setDivideFullState } from '../../Common/Line';
+import {
+    calculateLineTopByDrawings,
+    createAndUpdateBlockAnchor,
+    createSkeletonLine,
+    setDivideFullState,
+} from '../../Common/Line';
 // eslint-disable-next-line import/no-cycle
 import { createSkeletonPage } from '../../Common/Page';
 import { setColumnFullState } from '../../Common/Section';
@@ -102,7 +116,14 @@ function _divideOperator(
                     // divide.spanGroup.push(...spanGroup);
                     __makeColumnsFull(column?.parent?.columns);
                 } else {
-                    _pageOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+                    _pageOperator(
+                        spanGroup,
+                        pages,
+                        sectionBreakConfig,
+                        paragraphConfig,
+                        paragraphStart,
+                        defaultSpanLineHeight
+                    );
                 }
             } else if (column && width > column.width) {
                 // 一个字符超列宽
@@ -111,28 +132,58 @@ function _divideOperator(
                     addSpanToDivide(divide, spanGroup, preOffsetLeft);
                     // divide.spanGroup.push(...spanGroup);
                 } else {
-                    _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+                    _columnOperator(
+                        spanGroup,
+                        pages,
+                        sectionBreakConfig,
+                        paragraphConfig,
+                        paragraphStart,
+                        defaultSpanLineHeight
+                    );
                 }
             } else if (divideInfo.isLast) {
                 // 最后一个divide
                 if (spanGroup.length === 1 && spanGroup[0].content === DataStreamTreeTokenType.SPACE) {
                     addSpanToDivide(divide, spanGroup, preOffsetLeft);
                 } else {
-                    _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+                    _lineOperator(
+                        spanGroup,
+                        pages,
+                        sectionBreakConfig,
+                        paragraphConfig,
+                        paragraphStart,
+                        defaultSpanLineHeight
+                    );
                 }
             } else {
                 // 不是最后一个divide
-                _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+                _divideOperator(
+                    spanGroup,
+                    pages,
+                    sectionBreakConfig,
+                    paragraphConfig,
+                    paragraphStart,
+                    defaultSpanLineHeight
+                );
             }
         } else {
             // w不超过div宽度，加入到divide中去
             const currentLine = divide.parent;
             const maxBox = __maxFontBoundingBoxBySpanGroup(spanGroup);
             if (currentLine && maxBox && !__isNullLine(currentLine)) {
-                const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } = getLineHeightConfig(sectionBreakConfig, paragraphConfig);
+                const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } =
+                    getLineHeightConfig(sectionBreakConfig, paragraphConfig);
                 const { boundingBoxAscent, boundingBoxDescent } = maxBox;
                 const spanLineHeight = boundingBoxAscent + boundingBoxDescent;
-                const { contentHeight } = __getLineHeight(spanLineHeight, paragraphLineGapDefault, linePitch, gridType, lineSpacing, spacingRule, snapToGrid);
+                const { contentHeight } = __getLineHeight(
+                    spanLineHeight,
+                    paragraphLineGapDefault,
+                    linePitch,
+                    gridType,
+                    lineSpacing,
+                    spacingRule,
+                    snapToGrid
+                );
                 if (currentLine.contentHeight < contentHeight) {
                     // 如果新内容的高度超过其加入行的高度，为了处理图文混排，整行都需要按照新高度重新计算
                     // If the height of the new content exceeds the height of the added row, the entire row needs to be recalculated according to the new height in order to handle the mixing of graphics and text
@@ -148,9 +199,22 @@ function _divideOperator(
                     }
                     const column = currentLine.parent;
                     column?.lines.pop(); // Delete the previous line and recalculate according to the maximum content height
-                    _lineOperator(newSpanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, boundingBoxAscent + boundingBoxDescent);
+                    _lineOperator(
+                        newSpanGroup,
+                        pages,
+                        sectionBreakConfig,
+                        paragraphConfig,
+                        paragraphStart,
+                        boundingBoxAscent + boundingBoxDescent
+                    );
                     for (let i = startIndex; i < spanGroupCached.length; i++) {
-                        _divideOperator([spanGroupCached[i]], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+                        _divideOperator(
+                            [spanGroupCached[i]],
+                            pages,
+                            sectionBreakConfig,
+                            paragraphConfig,
+                            paragraphStart
+                        );
                     }
                     _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
                     return;
@@ -192,7 +256,14 @@ function _lineOperator(
     const { ba: ascent, bd: descent } = spanGroup[0].bBox;
     const spanLineHeight = defaultSpanLineHeight || ascent + descent;
 
-    const { paragraphStyle = {}, paragraphAffectSkeDrawings, skeHeaders, skeFooters, drawingAnchor, paragraphIndex } = paragraphConfig;
+    const {
+        paragraphStyle = {},
+        paragraphAffectSkeDrawings,
+        skeHeaders,
+        skeFooters,
+        drawingAnchor,
+        paragraphIndex,
+    } = paragraphConfig;
 
     const {
         namedStyleType = NamedStyleType.NAMED_STYLE_TYPE_UNSPECIFIED,
@@ -221,7 +292,10 @@ function _lineOperator(
         shading,
     } = paragraphStyle;
 
-    const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } = getLineHeightConfig(sectionBreakConfig, paragraphConfig);
+    const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } = getLineHeightConfig(
+        sectionBreakConfig,
+        paragraphConfig
+    );
 
     const { paddingTop, paddingBottom, contentHeight, lineSpacingApply } = __getLineHeight(
         spanLineHeight,
@@ -233,7 +307,13 @@ function _lineOperator(
         snapToGrid
     );
 
-    const { marginTop, spaceBelowApply } = __getParagraphSpace(lineSpacingApply, spaceAbove, spaceBelow, paragraphStart, line);
+    const { marginTop, spaceBelowApply } = __getParagraphSpace(
+        lineSpacingApply,
+        spaceAbove,
+        spaceBelow,
+        paragraphStart,
+        line
+    );
 
     const lineHeight = marginTop + paddingTop + contentHeight + paddingBottom;
     let section = column.parent;
@@ -249,9 +329,21 @@ function _lineOperator(
     const headersDrawings = skeHeaders?.get(headerId)?.get(width)?.skeDrawings;
     const footersDrawings = skeFooters?.get(footerId)?.get(width)?.skeDrawings;
 
-    __updateDrawingPosition(lineTop, lineHeight, column, drawingAnchor?.get(paragraphIndex)?.top, paragraphAffectSkeDrawings); // 初始化paragraphAffectSkeDrawings的位置，drawing的布局参照Paragraph开始位置，如果段落中有换页的情况，换页之后的drawing参照位置是0， 0
+    __updateDrawingPosition(
+        lineTop,
+        lineHeight,
+        column,
+        drawingAnchor?.get(paragraphIndex)?.top,
+        paragraphAffectSkeDrawings
+    ); // 初始化paragraphAffectSkeDrawings的位置，drawing的布局参照Paragraph开始位置，如果段落中有换页的情况，换页之后的drawing参照位置是0， 0
 
-    const newLineTop = calculateLineTopByDrawings(lineHeight, lineTop, lastPage.skeDrawings, headersDrawings, footersDrawings); // WRAP_TOP_AND_BOTTOM的drawing会改变行的起始top
+    const newLineTop = calculateLineTopByDrawings(
+        lineHeight,
+        lineTop,
+        lastPage.skeDrawings,
+        headersDrawings,
+        footersDrawings
+    ); // WRAP_TOP_AND_BOTTOM的drawing会改变行的起始top
 
     if (lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) {
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
@@ -265,7 +357,14 @@ function _lineOperator(
     const lineIndex = line ? line.lineIndex + 1 : 0;
     const { charSpace, defaultTabStop } = getCharSpaceConfig(sectionBreakConfig, paragraphConfig);
     const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-    const { paddingLeft, paddingRight, changeBulletWidth } = __getIndentPadding(spanGroup[0], indentFirstLine, hanging, indentStart, indentEnd, charSpaceApply);
+    const { paddingLeft, paddingRight, changeBulletWidth } = __getIndentPadding(
+        spanGroup[0],
+        indentFirstLine,
+        hanging,
+        indentStart,
+        indentEnd,
+        charSpaceApply
+    );
     if (changeBulletWidth.state) {
         // 为了保持__getIndentPadding的纯函数特性，把修改首行列表宽度的逻辑外置到这里
         spanGroup[0].width = changeBulletWidth.hangingNumber;
@@ -512,7 +611,8 @@ function __updateDrawingPosition(
         const { width = 0, height = 0 } = size;
 
         drawing.aLeft = getPositionHorizon(positionH, column, page, width, isPageBreak) || 0;
-        drawing.aTop = getPositionVertical(positionV, page, lineTop, lineHeight, height, blockAnchorTop, isPageBreak) || 0;
+        drawing.aTop =
+            getPositionVertical(positionV, page, lineTop, lineHeight, height, blockAnchorTop, isPageBreak) || 0;
         drawing.width = width;
         drawing.height = height;
         drawing.angle = angle;
@@ -594,7 +694,11 @@ function __getSpanGroupByLine(line: IDocumentSkeletonLine) {
     return spanGroup;
 }
 
-function __bulletIndentHandler(paragraphStyle: IParagraphStyle, bulletSkeleton: IDocumentSkeletonBullet, charSpaceApply: number) {
+function __bulletIndentHandler(
+    paragraphStyle: IParagraphStyle,
+    bulletSkeleton: IDocumentSkeletonBullet,
+    charSpaceApply: number
+) {
     const { hanging, indentStart } = paragraphStyle;
 
     const { hanging: hangingBullet, indentStart: indentStartBullet } = bulletSkeleton;
@@ -604,7 +708,9 @@ function __bulletIndentHandler(paragraphStyle: IParagraphStyle, bulletSkeleton: 
     }
 
     if (indentStart === undefined) {
-        paragraphStyle.indentStart = getNumberUnitValue(indentStartBullet || 0, charSpaceApply) - getNumberUnitValue(hangingBullet || 0, charSpaceApply);
+        paragraphStyle.indentStart =
+            getNumberUnitValue(indentStartBullet || 0, charSpaceApply) -
+            getNumberUnitValue(hangingBullet || 0, charSpaceApply);
     }
 }
 

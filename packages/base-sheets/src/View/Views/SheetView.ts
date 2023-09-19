@@ -1,5 +1,12 @@
-import { Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univerjs/base-render';
-import { ICurrentUniverService, LocaleService, Worksheet } from '@univerjs/core';
+import {
+    Rect,
+    Scene,
+    Spreadsheet,
+    SpreadsheetColumnTitle,
+    SpreadsheetRowTitle,
+    SpreadsheetSkeleton,
+} from '@univerjs/base-render';
+import { ICurrentUniverService, LocaleService, Nullable, Worksheet } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry, SHEET_VIEW_KEY } from '../BaseView';
@@ -7,17 +14,20 @@ import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry, SHEET_VIEW_KEY } from '.
 export class SheetView extends BaseView {
     override viewKey = CANVAS_VIEW_KEY.SHEET_VIEW;
 
-    private _spreadsheetSkeleton: SpreadsheetSkeleton;
+    private _spreadsheetSkeleton: Nullable<SpreadsheetSkeleton>;
 
-    private _spreadsheet: Spreadsheet;
+    private _spreadsheet: Nullable<Spreadsheet>;
 
-    private _spreadsheetRowTitle: SpreadsheetRowTitle;
+    private _spreadsheetRowTitle: Nullable<SpreadsheetRowTitle>;
 
-    private _spreadsheetColumnTitle: SpreadsheetColumnTitle;
+    private _spreadsheetColumnTitle: Nullable<SpreadsheetColumnTitle>;
 
-    private _spreadsheetLeftTopPlaceholder: Rect;
+    private _spreadsheetLeftTopPlaceholder: Nullable<Rect>;
 
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService, @Inject(LocaleService) private readonly _localeService: LocaleService) {
+    constructor(
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
         super();
     }
 
@@ -47,10 +57,10 @@ export class SheetView extends BaseView {
         const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
 
         this._spreadsheetSkeleton = spreadsheetSkeleton;
-        this._spreadsheet.updateSkeleton(spreadsheetSkeleton);
-        this._spreadsheetRowTitle.updateSkeleton(spreadsheetSkeleton);
-        this._spreadsheetColumnTitle.updateSkeleton(spreadsheetSkeleton);
-        this._spreadsheetLeftTopPlaceholder.transformByState({
+        this._spreadsheet?.updateSkeleton(spreadsheetSkeleton);
+        this._spreadsheetRowTitle?.updateSkeleton(spreadsheetSkeleton);
+        this._spreadsheetColumnTitle?.updateSkeleton(spreadsheetSkeleton);
+        this._spreadsheetLeftTopPlaceholder?.transformByState({
             width: rowTitleWidth,
             height: columnTitleHeight,
         });
@@ -142,7 +152,12 @@ export class SheetView extends BaseView {
     private _buildSkeleton(worksheet: Worksheet) {
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const config = worksheet.getConfig();
-        const spreadsheetSkeleton = SpreadsheetSkeleton.create(config, worksheet.getCellMatrix(), workbook.getStyles(), this._localeService);
+        const spreadsheetSkeleton = SpreadsheetSkeleton.create(
+            config,
+            worksheet.getCellMatrix(),
+            workbook.getStyles(),
+            this._localeService
+        );
         return spreadsheetSkeleton;
     }
 

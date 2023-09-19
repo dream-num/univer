@@ -164,7 +164,9 @@ export class Canvas {
                 return this._canvasEle.toDataURL();
             } catch (err: unknown) {
                 const { message } = err as Error;
-                console.error(`Unable to get data URL. ${message} For more info read https://universheet.net/docs/Canvas.html.`);
+                console.error(
+                    `Unable to get data URL. ${message} For more info read https://universheet.net/docs/Canvas.html.`
+                );
                 return '';
             }
         }

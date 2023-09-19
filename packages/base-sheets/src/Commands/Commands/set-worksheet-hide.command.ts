@@ -1,8 +1,23 @@
-import { BooleanNumber, CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CommandType,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    IUndoRedoService,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISetWorksheetActivateMutationParams, SetWorksheetActivateMutation, SetWorksheetUnActivateMutationFactory } from '../Mutations/set-worksheet-activate.mutation';
-import { ISetWorksheetHideMutationParams, SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../Mutations/set-worksheet-hide.mutation';
+import {
+    ISetWorksheetActivateMutationParams,
+    SetWorksheetActivateMutation,
+    SetWorksheetUnActivateMutationFactory,
+} from '../Mutations/set-worksheet-activate.mutation';
+import {
+    ISetWorksheetHideMutationParams,
+    SetWorksheetHideMutation,
+    SetWorksheetHideMutationFactory,
+} from '../Mutations/set-worksheet-hide.mutation';
 
 export interface ISetWorksheetHiddenCommandParams {
     worksheetId?: string;
@@ -18,7 +33,11 @@ export const SetWorksheetHideCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        let worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
 
         if (params) {
             worksheetId = params.worksheetId ?? worksheetId;
@@ -56,13 +75,23 @@ export const SetWorksheetHideCommand: ICommand = {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return (commandService.executeCommand(SetWorksheetActivateMutation.id, unActiveMutationParams) as Promise<boolean>).then((res) => {
+                    return (
+                        commandService.executeCommand(
+                            SetWorksheetActivateMutation.id,
+                            unActiveMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
                         if (res) return commandService.executeCommand(SetWorksheetHideMutation.id, undoMutationParams);
                         return false;
                     });
                 },
                 redo() {
-                    return (commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams) as Promise<boolean>).then((res) => {
+                    return (
+                        commandService.executeCommand(
+                            SetWorksheetActivateMutation.id,
+                            activeSheetMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
                         if (res) return commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
                         return false;
                     });

@@ -203,9 +203,11 @@ export class DocsEditor {
         }
 
         this._documents = documents;
-        this._skeletonObserver = documents.getSkeleton()?.onRecalculateChangeObservable.add((data: IDocumentSkeletonCached) => {
-            this._deleteAllTextSelection();
-        });
+        this._skeletonObserver = documents
+            .getSkeleton()
+            ?.onRecalculateChangeObservable.add((data: IDocumentSkeletonCached) => {
+                this._deleteAllTextSelection();
+            });
         this._attachSelectionEvent(this._documents);
     }
 

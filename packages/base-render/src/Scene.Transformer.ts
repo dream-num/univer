@@ -323,7 +323,12 @@ export class Transformer implements ITransformerConfig {
         });
     }
 
-    private _anchorMoving(type: TransformerManagerType, moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {
+    private _anchorMoving(
+        type: TransformerManagerType,
+        moveOffsetX: number,
+        moveOffsetY: number,
+        scrollTimer: ScrollTimer
+    ) {
         const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
         const x = moveOffsetX - this._viewportScrollX + scrollX;
         const y = moveOffsetY - this._viewportScrollY + scrollY;
@@ -510,7 +515,13 @@ export class Transformer implements ITransformerConfig {
         return cursor;
     }
 
-    private _getRotateAnchorPosition(type: TransformerManagerType, height: number, width: number, scaleX: number, scaleY: number) {
+    private _getRotateAnchorPosition(
+        type: TransformerManagerType,
+        height: number,
+        width: number,
+        scaleX: number,
+        scaleY: number
+    ) {
         // width /= scaleX;
 
         // height /= scaleY;
@@ -712,7 +723,13 @@ export class Transformer implements ITransformerConfig {
         }
 
         if (this.resizeEnabled) {
-            const { left: lineLeft, top: lineTop } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE_LINE, height, width, scaleX, scaleY);
+            const { left: lineLeft, top: lineTop } = this._getRotateAnchorPosition(
+                TransformerManagerType.ROTATE_LINE,
+                height,
+                width,
+                scaleX,
+                scaleY
+            );
             const rotateLine = new Rect(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
                 zIndex: zIndex - 1,
                 evented: false,
@@ -724,7 +741,13 @@ export class Transformer implements ITransformerConfig {
                 stroke: this.borderStroke,
             });
 
-            const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, scaleX, scaleY);
+            const { left, top } = this._getRotateAnchorPosition(
+                TransformerManagerType.ROTATE,
+                height,
+                width,
+                scaleX,
+                scaleY
+            );
             const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
             const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
                 zIndex: zIndex - 1,

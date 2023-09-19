@@ -1,7 +1,15 @@
 import { TinyColor } from '@ctrl/tinycolor';
 import { ISelectionRangeWithCoord, Nullable, Observer } from '@univerjs/core';
 
-import { CURSOR_TYPE, IMouseEvent, IPointerEvent, isRectIntersect, NORMAL_SELECTION_PLUGIN_STYLE, SELECTION_CONTROL_BORDER_BUFFER_WIDTH, Vector2 } from '../../../Basics';
+import {
+    CURSOR_TYPE,
+    IMouseEvent,
+    IPointerEvent,
+    isRectIntersect,
+    NORMAL_SELECTION_PLUGIN_STYLE,
+    SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
+    Vector2,
+} from '../../../Basics';
 import { Scene } from '../../../Scene';
 import { ScrollTimer } from '../../../ScrollTimer';
 import { Rect } from '../../../Shape';
@@ -44,7 +52,11 @@ export class SelectionTransformerShapeEvent {
 
     private _fillControlColors: string[] = [];
 
-    constructor(private _control: SelectionTransformerShape, private _skeleton: SpreadsheetSkeleton, private _scene: Scene) {
+    constructor(
+        private _control: SelectionTransformerShape,
+        private _skeleton: SpreadsheetSkeleton,
+        private _scene: Scene
+    ) {
         this._initialControl();
 
         this._initialWidget();
@@ -87,7 +99,13 @@ export class SelectionTransformerShapeEvent {
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const moveActualSelection = this._skeleton.getCellPositionByOffset(moveOffsetX, moveOffsetY, scaleX, scaleY, scrollXY);
+        const moveActualSelection = this._skeleton.getCellPositionByOffset(
+            moveOffsetX,
+            moveOffsetY,
+            scaleX,
+            scaleY,
+            scrollXY
+        );
 
         const { row, column } = moveActualSelection;
 
@@ -169,7 +187,13 @@ export class SelectionTransformerShapeEvent {
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const actualSelection = this._skeleton.getCellPositionByOffset(newEvtOffsetX, newEvtOffsetY, scaleX, scaleY, scrollXY);
+        const actualSelection = this._skeleton.getCellPositionByOffset(
+            newEvtOffsetX,
+            newEvtOffsetY,
+            scaleX,
+            scaleY,
+            scrollXY
+        );
 
         this._startOffsetX = newEvtOffsetX;
 
@@ -177,7 +201,12 @@ export class SelectionTransformerShapeEvent {
 
         const { row, column } = actualSelection;
 
-        const { startRow: originStartRow, startColumn: originStartColumn, endRow: originEndRow, endColumn: originEndColumn } = this._control.model;
+        const {
+            startRow: originStartRow,
+            startColumn: originStartColumn,
+            endRow: originEndRow,
+            endColumn: originEndColumn,
+        } = this._control.model;
 
         let fixRow = 0;
 
@@ -225,7 +254,9 @@ export class SelectionTransformerShapeEvent {
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
+                Vector2.FromArray([moveOffsetX, moveOffsetY])
+            );
 
             this._controlMoving(newMoveOffsetX, newMoveOffsetY);
 
@@ -249,7 +280,16 @@ export class SelectionTransformerShapeEvent {
     }
 
     private _initialWidget() {
-        const { topLeftWidget, topCenterWidget, topRightWidget, middleLeftWidget, middleRightWidget, bottomLeftWidget, bottomCenterWidget, bottomRightWidget } = this._control;
+        const {
+            topLeftWidget,
+            topCenterWidget,
+            topRightWidget,
+            middleLeftWidget,
+            middleRightWidget,
+            bottomLeftWidget,
+            bottomCenterWidget,
+            bottomRightWidget,
+        } = this._control;
 
         const cursors: CURSOR_TYPE[] = [
             CURSOR_TYPE.NORTH_WEST_RESIZE,
@@ -262,7 +302,16 @@ export class SelectionTransformerShapeEvent {
             CURSOR_TYPE.SOUTH_EAST_RESIZE,
         ];
 
-        [topLeftWidget, topCenterWidget, topRightWidget, middleLeftWidget, middleRightWidget, bottomLeftWidget, bottomCenterWidget, bottomRightWidget].forEach((control, index) => {
+        [
+            topLeftWidget,
+            topCenterWidget,
+            topRightWidget,
+            middleLeftWidget,
+            middleRightWidget,
+            bottomLeftWidget,
+            bottomCenterWidget,
+            bottomRightWidget,
+        ].forEach((control, index) => {
             control.onPointerEnterObserver.add((evt: IMouseEvent | IPointerEvent) => {
                 control.setCursor(cursors[index]);
             });
@@ -284,7 +333,13 @@ export class SelectionTransformerShapeEvent {
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const moveActualSelection = this._skeleton.getCellPositionByOffset(moveOffsetX, moveOffsetY, scaleX, scaleY, scrollXY);
+        const moveActualSelection = this._skeleton.getCellPositionByOffset(
+            moveOffsetX,
+            moveOffsetY,
+            scaleX,
+            scaleY,
+            scrollXY
+        );
 
         const { row, column } = moveActualSelection;
 
@@ -380,7 +435,12 @@ export class SelectionTransformerShapeEvent {
 
         this._startOffsetY = evtOffsetY;
 
-        const { startRow: originStartRow, startColumn: originStartColumn, endRow: originEndRow, endColumn: originEndColumn } = this._control.model;
+        const {
+            startRow: originStartRow,
+            startColumn: originStartColumn,
+            endRow: originEndRow,
+            endColumn: originEndColumn,
+        } = this._control.model;
 
         this._relativeSelectionPositionRow = originStartRow;
 
@@ -414,7 +474,9 @@ export class SelectionTransformerShapeEvent {
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
+                Vector2.FromArray([moveOffsetX, moveOffsetY])
+            );
 
             this._widgetMoving(newMoveOffsetX, newMoveOffsetY, cursor);
 
@@ -457,7 +519,13 @@ export class SelectionTransformerShapeEvent {
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const moveActualSelection = this._skeleton.getCellPositionByOffset(moveOffsetX, moveOffsetY, scaleX, scaleY, scrollXY);
+        const moveActualSelection = this._skeleton.getCellPositionByOffset(
+            moveOffsetX,
+            moveOffsetY,
+            scaleX,
+            scaleY,
+            scrollXY
+        );
 
         const { row, column } = moveActualSelection;
 
@@ -480,7 +548,13 @@ export class SelectionTransformerShapeEvent {
         let isRowDropping = true;
 
         if ((column < startColumn || column > endColumn) && row >= startRow && row <= endRow) {
-            const rulerValue = this._FillRuler(column, startColumn, endColumn, this._relativeSelectionColumnLength, maxColumn);
+            const rulerValue = this._FillRuler(
+                column,
+                startColumn,
+                endColumn,
+                this._relativeSelectionColumnLength,
+                maxColumn
+            );
 
             startColumn = rulerValue.startRowOrColumn;
 
@@ -497,8 +571,17 @@ export class SelectionTransformerShapeEvent {
             endRow = rulerValue.endRowOrColumn;
 
             isLighten = rulerValue.isLighten;
-        } else if (Math.abs(this._startOffsetX - moveRelativeCoords.x - scrollXY.x) / 2 > Math.abs(this._startOffsetY - moveRelativeCoords.y - scrollXY.y)) {
-            const rulerValue = this._FillRuler(column, startColumn, endColumn, this._relativeSelectionColumnLength, maxColumn);
+        } else if (
+            Math.abs(this._startOffsetX - moveRelativeCoords.x - scrollXY.x) / 2 >
+            Math.abs(this._startOffsetY - moveRelativeCoords.y - scrollXY.y)
+        ) {
+            const rulerValue = this._FillRuler(
+                column,
+                startColumn,
+                endColumn,
+                this._relativeSelectionColumnLength,
+                maxColumn
+            );
 
             startColumn = rulerValue.startRowOrColumn;
 
@@ -527,7 +610,9 @@ export class SelectionTransformerShapeEvent {
 
         if (isLighten) {
             this._controlHandler((o, index) => {
-                const newColor = new TinyColor(this._fillControlColors[index]).lighten(SELECTION_CONTROL_DELETING_LIGHTEN).toString();
+                const newColor = new TinyColor(this._fillControlColors[index])
+                    .lighten(SELECTION_CONTROL_DELETING_LIGHTEN)
+                    .toString();
                 o.setProps({
                     fill: newColor,
                 });
@@ -580,7 +665,12 @@ export class SelectionTransformerShapeEvent {
 
         this._startOffsetY = newEvtOffsetY;
 
-        const { startRow: originStartRow, startColumn: originStartColumn, endRow: originEndRow, endColumn: originEndColumn } = this._control.model;
+        const {
+            startRow: originStartRow,
+            startColumn: originStartColumn,
+            endRow: originEndRow,
+            endColumn: originEndColumn,
+        } = this._control.model;
 
         this._isInMergeState = this._hasMergeInRange(originStartRow, originStartColumn, originEndRow, originEndColumn);
 
@@ -626,7 +716,9 @@ export class SelectionTransformerShapeEvent {
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(Vector2.FromArray([moveOffsetX, moveOffsetY]));
+            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
+                Vector2.FromArray([moveOffsetX, moveOffsetY])
+            );
 
             this._fillMoving(newMoveOffsetX, newMoveOffsetY);
 
@@ -663,7 +755,12 @@ export class SelectionTransformerShapeEvent {
         }
 
         for (const data of mergeData) {
-            const { startRow: mainStartRow, startColumn: mainStartColumn, endRow: mainEndRow, endColumn: mainEndColumn } = data;
+            const {
+                startRow: mainStartRow,
+                startColumn: mainStartColumn,
+                endRow: mainEndRow,
+                endColumn: mainEndColumn,
+            } = data;
             const rect1 = {
                 left: startColumn,
                 top: startRow,
@@ -729,7 +826,13 @@ export class SelectionTransformerShapeEvent {
         }
     }
 
-    private _FillRuler(rowOrColumn: number, startRowOrColumn: number, endRowOrColumn: number, rowOrColumnLength: number, maxRowOrColumn: number) {
+    private _FillRuler(
+        rowOrColumn: number,
+        startRowOrColumn: number,
+        endRowOrColumn: number,
+        rowOrColumnLength: number,
+        maxRowOrColumn: number
+    ) {
         let isLighten = false;
         if (rowOrColumn < startRowOrColumn) {
             if (this._isInMergeState && rowOrColumn < startRowOrColumn) {

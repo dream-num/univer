@@ -250,7 +250,12 @@ export class FormulaDependencyGenerator {
              * tree.dependencyRange: Formula dependent modification range
              * includeTree: modification range contains formula
              */
-            if ((this._forceCalculate || tree.dependencyRange(this._updateRangeFlattenCache) || this._includeTree(tree)) && !existTree.has(tree)) {
+            if (
+                (this._forceCalculate ||
+                    tree.dependencyRange(this._updateRangeFlattenCache) ||
+                    this._includeTree(tree)) &&
+                !existTree.has(tree)
+            ) {
                 newTreeList.push(tree);
                 existTree.add(tree);
             }

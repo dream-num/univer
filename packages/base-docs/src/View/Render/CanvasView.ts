@@ -1,6 +1,15 @@
 import './Views';
 
-import { Engine, EVENT_TYPE, IRenderingEngine, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
+import {
+    Engine,
+    EVENT_TYPE,
+    IRenderingEngine,
+    IWheelEvent,
+    Layer,
+    Scene,
+    ScrollBar,
+    Viewport,
+} from '@univerjs/base-render';
 import { EventState, sortRules } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 

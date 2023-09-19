@@ -9,7 +9,11 @@ import { NodeType } from '../AstNode/NodeType';
 import { ErrorType } from '../Basics/ErrorType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
-import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_PARAMETER, DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
+import {
+    DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
+    DEFAULT_TOKEN_TYPE_PARAMETER,
+    DEFAULT_TOKEN_TYPE_ROOT,
+} from '../Basics/TokenType';
 import { LexerNode } from './LexerNode';
 
 export class AstTreeMaker {
@@ -121,7 +125,12 @@ export class AstTreeMaker {
         }
         // console.log('currentAstNode', currentAstNode.nodeType, currentAstNode, lexerNode);
         for (let i = 0; i < childrenCount; i++) {
-            if (currentAstNode.nodeType === NodeType.LAMBDA && parent.nodeType !== NodeType.LAMBDA && i !== 0 && i !== childrenCount - 1) {
+            if (
+                currentAstNode.nodeType === NodeType.LAMBDA &&
+                parent.nodeType !== NodeType.LAMBDA &&
+                i !== 0 &&
+                i !== childrenCount - 1
+            ) {
                 continue;
             }
 

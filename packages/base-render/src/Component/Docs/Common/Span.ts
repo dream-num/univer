@@ -1,16 +1,29 @@
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
 
 import { FontCache } from '../../../Basics/FontCache';
-import { IDocumentSkeletonBullet, IDocumentSkeletonDivide, IDocumentSkeletonSpan, SpanType } from '../../../Basics/IDocumentSkeletonCached';
+import {
+    IDocumentSkeletonBullet,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonSpan,
+    SpanType,
+} from '../../../Basics/IDocumentSkeletonCached';
 import { IFontCreateConfig } from '../../../Basics/Interfaces';
 import { hasCJK } from '../../../Basics/Tools';
 import { validationGrid } from './Tools';
 
-export function createSkeletonWordSpan(content: string, config: IFontCreateConfig, spanWidth?: number): IDocumentSkeletonSpan {
+export function createSkeletonWordSpan(
+    content: string,
+    config: IFontCreateConfig,
+    spanWidth?: number
+): IDocumentSkeletonSpan {
     return _createSkeletonWordOrLetter(SpanType.WORD, content, config, spanWidth);
 }
 
-export function createSkeletonLetterSpan(content: string, config: IFontCreateConfig, spanWidth?: number): IDocumentSkeletonSpan {
+export function createSkeletonLetterSpan(
+    content: string,
+    config: IFontCreateConfig,
+    spanWidth?: number
+): IDocumentSkeletonSpan {
     return _createSkeletonWordOrLetter(SpanType.LETTER, content, config, spanWidth);
 }
 
@@ -18,7 +31,12 @@ export function createSkeletonTabSpan(config: IFontCreateConfig, spanWidth?: num
     return _createSkeletonWordOrLetter(SpanType.TAB, DT.TAB, config, spanWidth);
 }
 
-export function _createSkeletonWordOrLetter(spanType: SpanType, content: string, config: IFontCreateConfig, spanWidth?: number): IDocumentSkeletonSpan {
+export function _createSkeletonWordOrLetter(
+    spanType: SpanType,
+    content: string,
+    config: IFontCreateConfig,
+    spanWidth?: number
+): IDocumentSkeletonSpan {
     const { fontStyle, textStyle, charSpace = 1, gridType = GridType.LINES, snapToGrid = BooleanNumber.FALSE } = config;
     const skipWidthList: string[] = [
         DT.SECTION_BREAK,
@@ -89,8 +107,19 @@ export function _createSkeletonWordOrLetter(spanType: SpanType, content: string,
     };
 }
 
-export function createSkeletonBulletSpan(span: IDocumentSkeletonSpan, bulletSkeleton: IDocumentSkeletonBullet, charSpaceApply: number): IDocumentSkeletonSpan {
-    const { bBox: boundingBox, symbol: content, ts: textStyle, fontStyle, bulletAlign = BulletAlignment.START, bulletType = false } = bulletSkeleton;
+export function createSkeletonBulletSpan(
+    span: IDocumentSkeletonSpan,
+    bulletSkeleton: IDocumentSkeletonBullet,
+    charSpaceApply: number
+): IDocumentSkeletonSpan {
+    const {
+        bBox: boundingBox,
+        symbol: content,
+        ts: textStyle,
+        fontStyle,
+        bulletAlign = BulletAlignment.START,
+        bulletType = false,
+    } = bulletSkeleton;
     const contentWidth = boundingBox.width;
     // 当文字也需要对齐到网格式，进行处理, LINES默认参照是doc全局字体大小
 
@@ -139,7 +168,11 @@ export function setSpanLeft(span: IDocumentSkeletonSpan, left: number = 0) {
     span.left = left;
 }
 
-export function addSpanToDivide(divide: IDocumentSkeletonDivide, spanGroup: IDocumentSkeletonSpan[], offsetLeft: number = 0) {
+export function addSpanToDivide(
+    divide: IDocumentSkeletonDivide,
+    spanGroup: IDocumentSkeletonSpan[],
+    offsetLeft: number = 0
+) {
     // const line = divide.parent;
     // if (line != null) {
     //     const isFirstLine = line.divides[0].spanGroup[0] == null;

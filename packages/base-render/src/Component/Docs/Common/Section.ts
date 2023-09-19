@@ -54,7 +54,12 @@ export function setColumnFullState(column: IDocumentSkeletonColumn, state: boole
     column.isFull = state;
 }
 
-function _getSkeletonColumn(left: number, width: number, spaceWidth: number, columnSeparatorType: ColumnSeparatorType): IDocumentSkeletonColumn {
+function _getSkeletonColumn(
+    left: number,
+    width: number,
+    spaceWidth: number,
+    columnSeparatorType: ColumnSeparatorType
+): IDocumentSkeletonColumn {
     return {
         lines: [],
         // column坐标系相对于section

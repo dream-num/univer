@@ -3,7 +3,11 @@ import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { SetWorksheetColumnHideMutation } from '../Mutations/set-worksheet-column-hide.mutation';
-import { ISetWorksheetColumnShowMutationParams, SetWorksheetColumnShowMutation, SetWorksheetColumnShowMutationFactory } from '../Mutations/set-worksheet-column-show.mutation';
+import {
+    ISetWorksheetColumnShowMutationParams,
+    SetWorksheetColumnShowMutation,
+    SetWorksheetColumnShowMutationFactory,
+} from '../Mutations/set-worksheet-column-show.mutation';
 
 export const SetWorksheetColumnShowCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -20,7 +24,11 @@ export const SetWorksheetColumnShowCommand: ICommand = {
         }
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);

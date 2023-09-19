@@ -20,7 +20,11 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../Services/selection-manager.service';
-import { ISetRangeStyleMutationParams, SetRangeStyleMutation, SetRangeStyleUndoMutationFactory } from '../Mutations/set-range-styles.mutation';
+import {
+    ISetRangeStyleMutationParams,
+    SetRangeStyleMutation,
+    SetRangeStyleUndoMutationFactory,
+} from '../Mutations/set-range-styles.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -53,7 +57,11 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         }
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         const style = params.style;
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
@@ -89,7 +97,10 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
             value: value!,
         };
 
-        const undoSetRangeStyleMutationParams: ISetRangeStyleMutationParams = SetRangeStyleUndoMutationFactory(accessor, setRangeStyleMutationParams);
+        const undoSetRangeStyleMutationParams: ISetRangeStyleMutationParams = SetRangeStyleUndoMutationFactory(
+            accessor,
+            setRangeStyleMutationParams
+        );
 
         const result = commandService.executeCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
         if (result) {

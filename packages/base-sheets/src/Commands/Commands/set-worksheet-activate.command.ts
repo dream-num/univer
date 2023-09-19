@@ -1,7 +1,11 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISetWorksheetActivateMutationParams, SetWorksheetActivateMutation, SetWorksheetUnActivateMutationFactory } from '../Mutations/set-worksheet-activate.mutation';
+import {
+    ISetWorksheetActivateMutationParams,
+    SetWorksheetActivateMutation,
+    SetWorksheetUnActivateMutationFactory,
+} from '../Mutations/set-worksheet-activate.mutation';
 
 export interface ISetWorksheetActivateCommandParams {
     workbookId?: string;
@@ -18,7 +22,11 @@ export const SetWorksheetActivateCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        let worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
 
         if (params) {
             workbookId = params.workbookId ?? workbookId;

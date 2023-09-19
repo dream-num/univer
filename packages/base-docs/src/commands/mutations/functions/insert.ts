@@ -1,8 +1,21 @@
 import { DocumentModel, getDocsUpdateBody, IDocumentBody, insertTextToContent } from '@univerjs/core';
 
-import { insertCustomBlocks, insertCustomRanges, insertParagraphs, insertSectionBreaks, insertTables, insertTextRuns } from './common';
+import {
+    insertCustomBlocks,
+    insertCustomRanges,
+    insertParagraphs,
+    insertSectionBreaks,
+    insertTables,
+    insertTextRuns,
+} from './common';
 
-export function InsertApply(document: DocumentModel, insertBody: IDocumentBody, textLength: number, currentIndex: number, segmentId?: string) {
+export function InsertApply(
+    document: DocumentModel,
+    insertBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    segmentId?: string
+) {
     const doc = document.snapshot;
 
     const bodyModel = document.getBodyModel(segmentId);
@@ -24,7 +37,12 @@ export function InsertApply(document: DocumentModel, insertBody: IDocumentBody, 
     // console.log('插入的model打印', bodyModel, body, textLength);
 }
 
-function updateAttributeByInsert(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
+function updateAttributeByInsert(
+    body: IDocumentBody,
+    insertBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
     body.dataStream = insertTextToContent(body.dataStream, currentIndex, insertBody.dataStream);
 
     insertTextRuns(body, insertBody, textLength, currentIndex);

@@ -14,7 +14,11 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../Services/selection-manager.service';
-import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
+import {
+    ISetRangeValuesMutationParams,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+} from '../Mutations/set-range-values.mutation';
 
 export interface ICopyRangeToCommandParams {
     destinationRange: ISelectionRange;
@@ -34,7 +38,11 @@ export const CopyRangeToCommand: ICommand = {
         if (!selections?.length) return false;
         const originRange = selections[0];
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const handleResult = handleCopyRange(accessor, workbookId, worksheetId, originRange, params.destinationRange);
@@ -58,7 +66,10 @@ export const CopyRangeToCommand: ICommand = {
             options,
         };
 
-        const undoMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
+        const undoMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+            accessor,
+            setRangeValuesMutationParams
+        );
         const result = commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
@@ -125,7 +136,11 @@ function handleCopyRange(
     originRange: ISelectionRange,
     destinationRange: ISelectionRange
 ): Nullable<[ICellDataMatrix, ISelectionRange]> {
-    const worksheet = accessor.get(ICurrentUniverService).getUniverSheetInstance(workbookId)?.getWorkBook().getSheetBySheetId(worksheetId);
+    const worksheet = accessor
+        .get(ICurrentUniverService)
+        .getUniverSheetInstance(workbookId)
+        ?.getWorkBook()
+        .getSheetBySheetId(worksheetId);
     if (!worksheet) return;
 
     const sheetMatrix = worksheet.getCellMatrix();

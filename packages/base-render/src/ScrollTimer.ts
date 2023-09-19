@@ -23,7 +23,12 @@ export class ScrollTimer {
 
     private _scrollFunction?: (x?: number, y?: number) => void;
 
-    constructor(private _scene: any, private _padding?: IPaddingData, private _smoothRatioX = 0.05, private _smoothRatioY = 0.05) {
+    constructor(
+        private _scene: any,
+        private _padding?: IPaddingData,
+        private _smoothRatioX = 0.05,
+        private _smoothRatioY = 0.05
+    ) {
         if (!this._padding) {
             this._padding = { t: 20, b: 20, l: 46, r: 60 };
         }

@@ -1,7 +1,11 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISetWorksheetOrderMutationParams, SetWorksheetOrderMutation, SetWorksheetOrderUndoMutationFactory } from '../Mutations/set-worksheet-order.mutation';
+import {
+    ISetWorksheetOrderMutationParams,
+    SetWorksheetOrderMutation,
+    SetWorksheetOrderUndoMutationFactory,
+} from '../Mutations/set-worksheet-order.mutation';
 
 export interface ISetWorksheetOrderCommandParams {
     order: number;
@@ -19,7 +23,9 @@ export const SetWorksheetOrderCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId =
+            params.worksheetId ||
+            currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;

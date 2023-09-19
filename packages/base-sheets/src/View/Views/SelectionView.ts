@@ -9,7 +9,14 @@ import {
     SpreadsheetColumnTitle,
     SpreadsheetRowTitle,
 } from '@univerjs/base-render';
-import { ICommandService, ICurrentUniverService, ISelection, LocaleService, ObserverManager, Worksheet } from '@univerjs/core';
+import {
+    ICommandService,
+    ICurrentUniverService,
+    ISelection,
+    LocaleService,
+    ObserverManager,
+    Worksheet,
+} from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SetSelectionsOperation } from '../../Commands/Operations/selection.operation';
@@ -21,7 +28,8 @@ export class SelectionView extends BaseView {
 
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @ISelectionTransformerShapeManager private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
+        @ISelectionTransformerShapeManager
+        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
@@ -54,7 +62,8 @@ export class SelectionView extends BaseView {
             }
 
             for (const selectionRange of param) {
-                const selectionData = this._selectionTransformerShapeManager.convertSelectionRangeToData(selectionRange);
+                const selectionData =
+                    this._selectionTransformerShapeManager.convertSelectionRangeToData(selectionRange);
                 this._selectionTransformerShapeManager.addControlToCurrentByRangeData(selectionData);
             }
         });
@@ -63,7 +72,11 @@ export class SelectionView extends BaseView {
             if (!this._selectionManagerService.isSelectionEnabled) {
                 return;
             }
-            this._selectionTransformerShapeManager.eventTrigger(evt, this._selectionManagerService.currentStyle, spreadsheet.zIndex + 1);
+            this._selectionTransformerShapeManager.eventTrigger(
+                evt,
+                this._selectionManagerService.currentStyle,
+                spreadsheet.zIndex + 1
+            );
             if (evt.button !== 2) {
                 state.stopPropagation();
             }
@@ -84,7 +97,9 @@ export class SelectionView extends BaseView {
                 unitId,
                 sheetId,
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                selections: selectionDataWithStyleList.map((selectionDataWithStyle) => convertSelectionDataToRange(selectionDataWithStyle)),
+                selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
+                    convertSelectionDataToRange(selectionDataWithStyle)
+                ),
             });
 
             const current = selectionDataWithStyleList[selectionDataWithStyleList.length - 1];
@@ -107,7 +122,11 @@ export class SelectionView extends BaseView {
             if (!this._selectionManagerService.isSelectionEnabled) {
                 return;
             }
-            this._selectionTransformerShapeManager.eventTrigger(evt, this._selectionManagerService.currentStyle, spreadsheet.zIndex + 1);
+            this._selectionTransformerShapeManager.eventTrigger(
+                evt,
+                this._selectionManagerService.currentStyle,
+                spreadsheet.zIndex + 1
+            );
             if (evt.button !== 2) {
                 state.stopPropagation();
             }
@@ -124,7 +143,11 @@ export class SelectionView extends BaseView {
             if (!this._selectionManagerService.isSelectionEnabled) {
                 return;
             }
-            this._selectionTransformerShapeManager.eventTrigger(evt, this._selectionManagerService.currentStyle, spreadsheet.zIndex + 1);
+            this._selectionTransformerShapeManager.eventTrigger(
+                evt,
+                this._selectionManagerService.currentStyle,
+                spreadsheet.zIndex + 1
+            );
             if (evt.button !== 2) {
                 state.stopPropagation();
             }

@@ -1,7 +1,14 @@
-import { SetSelectionsOperation } from '@Commands/Operations/selection.operation';
-import { CommandType, Direction, ICommand, ICommandService, ICurrentUniverService, ISelectionRange } from '@univerjs/core';
+import {
+    CommandType,
+    Direction,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    ISelectionRange,
+} from '@univerjs/core';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../Services/selection-manager.service';
+import { SetSelectionsOperation } from '../Operations/selection.operation';
 
 export interface IChangeSelectionCommandParams {
     direction: Direction;

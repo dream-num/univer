@@ -1,7 +1,18 @@
-import { BooleanNumber, CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CommandType,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    IUndoRedoService,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISetHideGridlinesMutationParams, SetHideGridlinesMutation, SetHideGridlinesUndoMutationFactory } from '../Mutations/set-hide-gridlines.mutatiom';
+import {
+    ISetHideGridlinesMutationParams,
+    SetHideGridlinesMutation,
+    SetHideGridlinesUndoMutationFactory,
+} from '../Mutations/set-hide-gridlines.mutatiom';
 
 export interface ISetHideGridlinesCommandParams {
     hideGridlines?: BooleanNumber;
@@ -19,7 +30,11 @@ export const SetHideGridlinesCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        let worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         let hideGridlines = BooleanNumber.FALSE;
 
         if (params) {

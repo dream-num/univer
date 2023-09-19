@@ -55,7 +55,10 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
 
     getDocuments(): any {}
 
-    getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number): Nullable<{ startY: number; startX: number; endX: number; endY: number }> {}
+    getNoMergeCellPositionByIndex(
+        rowIndex: number,
+        columnIndex: number
+    ): Nullable<{ startY: number; startX: number; endX: number; endY: number }> {}
 
     getScrollXYByRelativeCoords(coord: Vector2) {
         return { x: 0, y: 0 };

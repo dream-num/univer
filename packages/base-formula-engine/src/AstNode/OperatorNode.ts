@@ -38,7 +38,9 @@ export class OperatorNode extends BaseAstNode {
         if (this._functionExecutor.name === COMPARE_EXECUTOR_NAME) {
             (this._functionExecutor as Compare).setCompareType(this.getToken() as compareToken);
         }
-        this.setValue(this._functionExecutor.calculate(children[0].getValue(), children[1].getValue()) as FunctionVariantType);
+        this.setValue(
+            this._functionExecutor.calculate(children[0].getValue(), children[1].getValue()) as FunctionVariantType
+        );
     }
 }
 

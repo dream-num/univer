@@ -1,4 +1,12 @@
-import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, Nullable } from '@univerjs/core';
+import {
+    CommandType,
+    Dimension,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    IUndoRedoService,
+    Nullable,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
@@ -20,7 +28,11 @@ export const DeleteRangeMoveUpCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         const range = selectionManagerService.getRangeDatas();
         if (!range?.length) return false;
 
@@ -36,7 +48,10 @@ export const DeleteRangeMoveUpCommand: ICommand = {
             shiftDimension: Dimension.ROWS,
         };
 
-        const insertRangeMutationParams: Nullable<IInsertRangeMutationParams> = DeleteRangeUndoMutationFactory(accessor, deleteRangeMutationParams);
+        const insertRangeMutationParams: Nullable<IInsertRangeMutationParams> = DeleteRangeUndoMutationFactory(
+            accessor,
+            deleteRangeMutationParams
+        );
         if (!insertRangeMutationParams) return false;
 
         // execute do mutations and add undo mutations to undo stack if completed

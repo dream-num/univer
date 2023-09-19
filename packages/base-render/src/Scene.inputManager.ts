@@ -2,7 +2,15 @@ import { Nullable, Observer } from '@univerjs/core';
 
 import { BaseObject } from './BaseObject';
 import { RENDER_CLASS_TYPE } from './Basics/Const';
-import { DeviceType, IEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent, PointerInput } from './Basics/IEvents';
+import {
+    DeviceType,
+    IEvent,
+    IKeyboardEvent,
+    IMouseEvent,
+    IPointerEvent,
+    IWheelEvent,
+    PointerInput,
+} from './Basics/IEvents';
 import { Vector2 } from './Basics/Vector2';
 import { ThinScene } from './ThinScene';
 import { Viewport } from './Viewport';
@@ -178,11 +186,21 @@ export class InputManager {
 
             // Pointer Events
             if (eventData.deviceType === DeviceType.Mouse || eventData.deviceType === DeviceType.Touch) {
-                if (hasDown && eventData.inputIndex >= PointerInput.LeftClick && eventData.inputIndex <= PointerInput.RightClick && eventData.currentState === 1) {
+                if (
+                    hasDown &&
+                    eventData.inputIndex >= PointerInput.LeftClick &&
+                    eventData.inputIndex <= PointerInput.RightClick &&
+                    eventData.currentState === 1
+                ) {
                     this._onPointerDown(evt as IPointerEvent);
                 }
 
-                if (hasUp && eventData.inputIndex >= PointerInput.LeftClick && eventData.inputIndex <= PointerInput.RightClick && eventData.currentState === 0) {
+                if (
+                    hasUp &&
+                    eventData.inputIndex >= PointerInput.LeftClick &&
+                    eventData.inputIndex <= PointerInput.RightClick &&
+                    eventData.currentState === 0
+                ) {
                     this._onPointerUp(evt as IPointerEvent);
                 }
 
@@ -196,7 +214,9 @@ export class InputManager {
                     this._onPointerMove(evt as IPointerEvent);
                 } else if (
                     hasWheel &&
-                    (eventData.inputIndex === PointerInput.MouseWheelX || eventData.inputIndex === PointerInput.MouseWheelY || eventData.inputIndex === PointerInput.MouseWheelZ)
+                    (eventData.inputIndex === PointerInput.MouseWheelX ||
+                        eventData.inputIndex === PointerInput.MouseWheelY ||
+                        eventData.inputIndex === PointerInput.MouseWheelZ)
                 ) {
                     this._onMouseWheel(evt as IWheelEvent);
                 }
@@ -251,7 +271,8 @@ export class InputManager {
      */
     private _isPointerSwiping(pointerX: number, pointerY: number): boolean {
         return (
-            Math.abs(this._startingPosition.x - pointerX) > InputManager.DragMovementThreshold || Math.abs(this._startingPosition.y - pointerY) > InputManager.DragMovementThreshold
+            Math.abs(this._startingPosition.x - pointerX) > InputManager.DragMovementThreshold ||
+            Math.abs(this._startingPosition.y - pointerY) > InputManager.DragMovementThreshold
         );
     }
 

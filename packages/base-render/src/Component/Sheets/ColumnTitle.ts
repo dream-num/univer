@@ -59,6 +59,8 @@ export class SpreadsheetColumnTitle extends SpreadsheetTitle {
         SheetColumnTitleExtensionRegistry.getData().forEach((extension) => {
             this.register(extension);
         });
-        this._columnTitleLayoutExtension = this.getExtensionByKey('DefaultColumnTitleLayoutExtension') as ColumnTitleLayout;
+        this._columnTitleLayoutExtension = this.getExtensionByKey(
+            'DefaultColumnTitleLayoutExtension'
+        ) as ColumnTitleLayout;
     }
 }

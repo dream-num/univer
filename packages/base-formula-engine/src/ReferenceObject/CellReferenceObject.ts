@@ -64,7 +64,11 @@ export class CellReferenceObject extends BaseReferenceObject {
     }
 
     private _createRange(newRangeData: ISelectionRange) {
-        const rangeReferenceObject = new RangeReferenceObject(newRangeData, this.getForcedSheetId(), this.getForcedUnitId());
+        const rangeReferenceObject = new RangeReferenceObject(
+            newRangeData,
+            this.getForcedSheetId(),
+            this.getForcedUnitId()
+        );
 
         rangeReferenceObject.setUnitData(this.getUnitData());
 

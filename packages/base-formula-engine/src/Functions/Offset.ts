@@ -10,7 +10,13 @@ export class Offset extends BaseFunction {
         return FUNCTION_NAME;
     }
 
-    override calculate(reference: FunctionVariantType, rows: FunctionVariantType, columns: FunctionVariantType, height?: FunctionVariantType, width?: FunctionVariantType) {
+    override calculate(
+        reference: FunctionVariantType,
+        rows: FunctionVariantType,
+        columns: FunctionVariantType,
+        height?: FunctionVariantType,
+        width?: FunctionVariantType
+    ) {
         return new CellReferenceObject('A5');
     }
 }

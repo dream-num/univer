@@ -1,5 +1,4 @@
 import { GlyphType, numberToListABC } from '@univerjs/core';
-// import { dealWidthCustomBulletOrderedSymbol } from '../../../../Custom/UseCustom';
 
 export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType | string) {
     // if (!(glyphType in GlyphType)) {

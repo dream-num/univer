@@ -87,6 +87,8 @@ interface IRowColumnSegment {
     endColumn: number;
 }
 
+const DEFAULT_ROTATE_ANGLE = 90;
+
 export class SpreadsheetSkeleton extends Skeleton {
     private _rowHeightAccumulation: number[];
 
@@ -996,8 +998,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             let centerAngle = 0;
             let vertexAngle = angle;
             if (isVertical === BooleanNumber.TRUE) {
-                centerAngle = 90;
-                vertexAngle = 90;
+                centerAngle = DEFAULT_ROTATE_ANGLE;
+                vertexAngle = DEFAULT_ROTATE_ANGLE;
             }
             documentModel = this._updateRenderConfigAndHorizon(cell.p, horizontalAlign, {
                 horizontalAlign,
@@ -1021,7 +1023,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         let { a: angle } = textRotation as ITextRotation;
         const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
         if (isVertical === BooleanNumber.TRUE) {
-            angle = 90;
+            angle = DEFAULT_ROTATE_ANGLE;
         }
         if (documentModel) {
             const documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
@@ -1093,8 +1095,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         let centerAngle = 0;
         let vertexAngle = angle;
         if (isVertical === BooleanNumber.TRUE) {
-            centerAngle = 90;
-            vertexAngle = 90;
+            centerAngle = DEFAULT_ROTATE_ANGLE;
+            vertexAngle = DEFAULT_ROTATE_ANGLE;
             textDirectionDocument = TextDirectionType.TBRL;
         }
         const documentData: IDocumentData = {

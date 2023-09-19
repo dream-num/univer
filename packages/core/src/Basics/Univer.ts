@@ -10,6 +10,7 @@ import { DesktopLogService, ILogService } from '../services/log/log.service';
 import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
 import { Nullable } from '../Shared';
+import { LocaleType } from '../Types/Enum/LocaleType';
 import { IDocumentData, ISlideData, IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverDoc } from './UniverDoc';
 import { UniverObserverImpl } from './UniverObserverImpl';
@@ -31,10 +32,9 @@ export class Univer {
         this._setObserver();
 
         // initialize localization info
-        const { locale } = univerData;
-        if (locale) {
-            this._univerInjector.get(LocaleService).setLocale(locale);
-        }
+        const { locale, locales } = univerData;
+        locales && this._univerInjector.get(LocaleService).load(locales);
+        locale && this._univerInjector.get(LocaleService).setLocale(locale);
     }
 
     private get _currentUniverService(): ICurrentUniverService {
@@ -56,6 +56,10 @@ export class Univer {
         } else {
             throw new Error(`Unimplemented plugin system for business: "${plugin.type}".`);
         }
+    }
+
+    setLocale(locale: LocaleType) {
+        this._univerInjector.get(LocaleService).setLocale(locale);
     }
 
     /** Create a univer sheet instance with internal dependency injection. */

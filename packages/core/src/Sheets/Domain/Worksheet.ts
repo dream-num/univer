@@ -181,7 +181,7 @@ export class Worksheet {
                 }
 
                 if (row !== startRow || col !== startColumn) {
-                    ret.deleteValue(row, col);
+                    ret.realDeleteValue(row, col);
                 }
             });
         });

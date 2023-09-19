@@ -140,6 +140,13 @@ export class ObjectMatrix<T> {
         }
     }
 
+    realDeleteValue(row: number, column: number): void {
+        const objectArray = this.getRow(row);
+        if (objectArray) {
+            objectArray.realDelete(column);
+        }
+    }
+
     spliceRows(start: number, count: number): ObjectMatrix<T> {
         const splice = this._option.splice(start, count);
         return new ObjectMatrix(splice.toJSON() as ObjectMatrixPrimitiveType<T>);

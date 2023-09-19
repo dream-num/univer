@@ -32,7 +32,16 @@ import {
     SetWorksheetRowHideCommand,
     SetWorksheetRowShowCommand,
 } from '@univerjs/base-sheets';
-import { ColorPicker, DisplayTypes, IMenuButtonItem, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
+import {
+    ColorPicker,
+    CopyCommand,
+    DisplayTypes,
+    IMenuButtonItem,
+    IMenuSelectorItem,
+    MenuItemType,
+    MenuPosition,
+    SelectTypes,
+} from '@univerjs/base-ui';
 import {
     FontItalic,
     FontWeight,
@@ -880,6 +889,15 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
 
             return disposable.dispose;
         }),
+    };
+}
+
+export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: CopyCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'rightClick.copy',
+        positions: [MenuPosition.CONTEXT_MENU],
     };
 }
 

@@ -273,8 +273,30 @@ export class ObjectArray<T> {
         return keys.length === 0;
     }
 
+    /**
+     * @deprecated use `realDelete` or `splice`
+     * @param index
+     */
     delete(index: number): void {
         this.splice(index, 1);
+    }
+
+    realDelete(index: number): void {
+        const length = this._length;
+        if (length > 0) {
+            const end = index + 1;
+            const array = this._array;
+            let effective = 0;
+            const splice: ObjectArrayPrimitiveType<T> = {};
+            for (let i = index; i < end; i++) {
+                const item = array[i];
+                if (define(item)) {
+                    delete array[i];
+                    splice[effective] = item;
+                    effective++;
+                }
+            }
+        }
     }
 
     includes(target: T): boolean {

@@ -27,7 +27,7 @@
         "lint:fix": "eslint packages/**/src/**/*.{tsx,ts} --fix"
     },
     "engines": {
-        "node": "^16.20.0",
+        "node": "^18.17.0",
         "pnpm": "^8.6.2"
     },
     "author": "DreamNum <developer@univer.ai>",

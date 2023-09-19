@@ -101,10 +101,13 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // row styles and table contents
         const rowContents: string[] = [];
         matrix.forRow((row, cols) => {
+            // TODO: cols here should filtered out those in span cells
             rowContents.push(getRowContent(row, cols, hooks, matrix));
         });
         // final result
-        const html = `<table>${colStyles}<tbody>${rowContents.join('')}</tbody></table>`;
+        const html = `<google-sheets-html-origin><style type="text/css"><!--td {border: 1px solid #cccccc;}br {mso-data-placement:same-cell;}--></style><table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}<tbody>${rowContents.join(
+            ''
+        )}</tbody></table>`;
 
         // 6. write html and maybe plain text info the clipboard interface
         await this._clipboardInterfaceService.write('table', html);
@@ -187,7 +190,10 @@ function getRowContent(
     const properties = hooks.map((hook) => hook.onCopyRow?.(row)).filter((v) => !!v) as IClipboardPropertyItem[];
     const mergedProperties = mergeProperties(properties);
     const str = zipClipboardPropertyItemToString(mergedProperties);
-    const tds = cols.map((col) => getTDContent(row, col, hooks, matrix)).join('');
+    const tds = cols
+        .map((col) => getTDContent(row, col, hooks, matrix))
+        .filter((v) => !!v)
+        .join('');
 
     return `<tr${str}>${tds}</tr>`;
 }

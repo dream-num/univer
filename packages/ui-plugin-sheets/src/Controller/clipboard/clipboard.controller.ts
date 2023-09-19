@@ -1,4 +1,4 @@
-import { Disposable, ICommandService, ICurrentUniverService, Worksheet } from '@univerjs/core';
+import { Disposable, ICommandService, ICurrentUniverService, Worksheet, WrapStrategy } from '@univerjs/core';
 
 import { SheetCopyCommand, SheetCutCommand, SheetPasteCommand } from '../../commands/commands/clipboard.command';
 import {
@@ -40,16 +40,51 @@ export class SheetClipboardController extends Disposable {
             },
             onCopy: (row: number, col: number, rowSpan?: number, colSpan?: number) => {
                 // TODO: get cell style and write it into clipboard property item
-                if (!rowSpan && !colSpan) {
-                    return null;
-                }
-
                 const properties: IClipboardPropertyItem = {};
+
                 if (rowSpan) {
                     properties.rowspan = `${rowSpan}`;
                 }
                 if (colSpan) {
                     properties.colspan = `${colSpan}`;
+                }
+
+                const range = currentSheet!.getRange(row, col);
+                const textStyle = range.getTextStyle();
+                const color = range.getFontColor();
+                const backgroundColor = range.getBackground();
+
+                let style = '';
+                if (color) {
+                    style += `color: ${color};`;
+                }
+                if (backgroundColor) {
+                    style += `background-color: ${backgroundColor};`;
+                }
+                if (textStyle?.bl) {
+                    style += 'font-weight: bold;';
+                }
+                if (textStyle?.fs) {
+                    style += `font-size: ${textStyle.fs}px;`;
+                }
+                if (textStyle?.tb === WrapStrategy.WRAP) {
+                    style += 'word-wrap: break-word;';
+                }
+                if (textStyle?.it) {
+                    style += 'font-style: italic;';
+                }
+                if (textStyle?.ff) {
+                    style += `font-family: ${textStyle.ff};`;
+                }
+                if (textStyle?.st) {
+                    style += 'text-decoration: line-through;';
+                }
+                if (textStyle?.ul) {
+                    style += 'text-decoration: underline';
+                }
+
+                if (style) {
+                    properties.style = style;
                 }
 
                 return properties;
@@ -58,7 +93,7 @@ export class SheetClipboardController extends Disposable {
                 const sheet = currentSheet!;
                 const width = sheet.getColumnWidth(col);
                 return {
-                    style: `width: ${width}px;`,
+                    width: `${width}`,
                 };
             },
             onCopyRow(row: number) {

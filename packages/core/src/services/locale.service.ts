@@ -1,6 +1,6 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { Disposable, toDisposable } from '../Shared/Lifecycle';
+import { Disposable, toDisposable } from '../Shared/lifecycle';
 import { ILocales } from '../Shared/Locale';
 import { Tools } from '../Shared/Tools';
 import { Nullable } from '../Shared/Types';

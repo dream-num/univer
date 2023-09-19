@@ -1,4 +1,4 @@
-import { IClipboardPropertyItem, ISheetClipboardHook } from '../../../services/clipboard/sheet-clipboard.service';
+import { IClipboardPropertyItem, ISheetClipboardHook } from '../../../services/clipboard/clipboard.service';
 
 /**
  *

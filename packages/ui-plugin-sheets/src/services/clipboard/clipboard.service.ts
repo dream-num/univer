@@ -29,13 +29,13 @@ export interface ISheetClipboardHook {
     onCut?(row: number, col: number): IClipboardPropertyItem | null;
     onPaste?(row: number, col: number): void; // TODO: should add raw content here
 
-    onCopyRow(row: number): IClipboardPropertyItem | null;
-    onCutRow(row: number): IClipboardPropertyItem | null;
-    onPasteRow(row: number): void;
+    onCopyRow?(row: number): IClipboardPropertyItem | null;
+    onCutRow?(row: number): IClipboardPropertyItem | null;
+    onPasteRow?(row: number): void;
 
-    onCopyColumn(col: number): IClipboardPropertyItem | null;
-    onCutColumn(row: number): IClipboardPropertyItem | null;
-    onPasteColumn(row: number): void;
+    onCopyColumn?(col: number): IClipboardPropertyItem | null;
+    onCutColumn?(row: number): IClipboardPropertyItem | null;
+    onPasteColumn?(row: number): void;
 
     onAfterCopy?(): void;
     onAfterCut?(): void;
@@ -44,17 +44,19 @@ export interface ISheetClipboardHook {
     getFilteredOutRows?(): number[];
 }
 
+/**
+ * This service provide hooks for sheet features to supplement content or modify behavior of clipboard.
+ */
 export interface ISheetClipboardService {
     copy(): Promise<boolean>;
+    cut(): Promise<boolean>;
+    paste(): Promise<boolean>;
 
     addClipboardHook(hook: ISheetClipboardHook): IDisposable;
 }
 
 export const ISheetClipboardService = createIdentifier<ISheetClipboardService>('sheet.clipboard-service');
 
-/**
- * This service provide hooks for sheet features to supplement content to clipboard.
- */
 export class SheetClipboardService extends Disposable implements ISheetClipboardService {
     private _clipboardHooks: ISheetClipboardHook[] = [];
 
@@ -68,34 +70,39 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     async copy(): Promise<boolean> {
         const hooks = this._clipboardHooks;
-        // steps to copy cells from the sheet:
+        // steps to copy cells from the sheet
+
         // 1. get the selected range, the range should be the last one of selected ranges
         const selections = this._selectionManagerService.getLast();
-
-        // TODO: get cell matrix with spans count-in
-        console.log('debug, copy range', selections);
+        if (!selections) {
+            return false; // maybe we should notify user that there is no selection
+        }
 
         // 2. filtered out rows those are filtered out by plugins (e.g. filter feature)
-
         const filteredRows = hooks.reduce((acc, cur) => {
             const rows = cur.getFilteredOutRows?.();
             rows?.forEach((r) => acc.add(r));
             return acc;
         }, new Set<number>());
 
-        console.log('debug, filtered rows', filteredRows);
+        // 3. calculate selection matrix, span cells would only - maybe warn uses that cells are too may in the future
+        // TODO: calculate the selection matrix considering about merged cells and filtered out rows
 
-        // 3. calculate selection matrix, span cells would only
+        // 4. generate html and pure text contents by calling all clipboard hooks
 
-        // 4. get html and pure text contents
-        return true;
-    }
+        // 5. write contents to the clipboard interface and done!
+        // await this._clipboardInterfaceService.write();
 
-    async paste(): Promise<boolean> {
+        // FIXME:
+
         return true;
     }
 
     async cut(): Promise<boolean> {
+        return true;
+    }
+
+    async paste(): Promise<boolean> {
         return true;
     }
 

@@ -1,14 +1,14 @@
 import { CopyCommand, CutCommand, PasteCommand } from '@univerjs/base-ui';
 import { CommandType, FOCUSING_SHEET, IContextService, IMultiCommand } from '@univerjs/core';
 
-import { ISheetClipboardService } from '../../services/clipboard/sheet-clipboard.service';
+import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
 import { FOCUSING_SHEET_EDITOR } from '../../services/context/context';
 
 export const SheetCopyCommand: IMultiCommand = {
     id: CopyCommand.id,
+    name: 'sheet.command.copy',
     type: CommandType.COMMAND,
     multi: true,
-    name: 'sheet.command.copy',
     priority: 1000,
     preconditions: (contextService: IContextService) =>
         contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
@@ -23,9 +23,9 @@ export const SheetCopyCommand: IMultiCommand = {
 
 export const SheetCutCommand: IMultiCommand = {
     id: CutCommand.id,
+    name: 'sheet.command.cut',
     type: CommandType.COMMAND,
     multi: true,
-    name: 'sheet.command.cut',
     priority: 1000,
     preconditions: (contextService: IContextService) =>
         contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),

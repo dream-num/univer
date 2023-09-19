@@ -14,7 +14,11 @@ import type { Worksheet } from './Worksheet';
 export class RangeList {
     private _rangeList: IRangeData[];
 
-    constructor(private readonly _worksheet: Worksheet, rangeList: IRangeType[], @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(
+        private readonly _worksheet: Worksheet,
+        rangeList: IRangeType[],
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+    ) {
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         this._rangeList = [];
 

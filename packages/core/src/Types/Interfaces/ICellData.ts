@@ -51,7 +51,12 @@ export interface ICellData {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isICellData(value: any): value is ICellData {
-    return value && ((value as ICellData).s !== undefined || (value as ICellData).p !== undefined || (value as ICellData).v !== undefined);
+    return (
+        value &&
+        ((value as ICellData).s !== undefined ||
+            (value as ICellData).p !== undefined ||
+            (value as ICellData).v !== undefined)
+    );
 }
 
 /**
@@ -75,6 +80,8 @@ export interface IFormatData {
  * Cell data type
  */
 export type ICellDataType = Nullable<ICellData> | Nullable<IStyleData> | string | number | boolean;
+
+// WTF: other matrix are number indexed objects, but this is an array?
 
 /**
  * Cell data matrix type

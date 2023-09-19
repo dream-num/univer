@@ -282,11 +282,11 @@ export class SpreadsheetSkeleton extends Skeleton {
             };
         }
 
-        // TODO: what is this used for?
-
         let isSearching = true;
         const searchedMarge = new ObjectMatrix<boolean>();
-        // const dataMergeCache = this._getMergeCells(mergeData);
+
+        // the loop breaks when there are not merged cells intersect with the current range
+        // NOTE: what about the performance issue?
         while (isSearching) {
             isSearching = false;
 
@@ -325,38 +325,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                     isSearching = true;
                 }
             }
-
-            // dataMergeCache.forEach((row: number, rowArray: ObjectArray<IRangeData>) => {
-            //     rowArray.forEach((column: number, mainCell: IRangeData) => {
-            //         if (!mainCell || searchedMarge.getValue(row, column)) {
-            //             return true;
-            //         }
-            //         const { startRow: mainStartRow, startColumn: mainStartColumn, endRow: mainEndRow, endColumn: mainEndColumn } = mainCell;
-
-            //         const rect1 = {
-            //             left: startColumn,
-            //             top: startRow,
-            //             right: endColumn,
-            //             bottom: endRow,
-            //         };
-
-            //         const rect2 = {
-            //             left: mainStartColumn,
-            //             top: mainStartRow,
-            //             right: mainEndColumn,
-            //             bottom: mainEndRow,
-            //         };
-
-            //         if (isRectIntersect(rect1, rect2)) {
-            //             startRow = Math.min(startRow, mainStartRow);
-            //             startColumn = Math.min(startColumn, mainStartColumn);
-            //             endRow = Math.max(endRow, mainEndRow);
-            //             endColumn = Math.max(endColumn, mainEndColumn);
-            //             searchedMarge.setValue(row, column, true);
-            //             isSearching = true;
-            //         }
-            //     });
-            // });
         }
 
         return {

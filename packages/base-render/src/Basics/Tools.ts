@@ -1,4 +1,14 @@
-import { BaselineOffset, FontStyleType, ICellInfo, IRangeData, IScale, ISelection, IStyleBase, Nullable, Tools } from '@univerjs/core';
+import {
+    BaselineOffset,
+    FontStyleType,
+    ICellInfo,
+    IRangeData,
+    IScale,
+    ISelection,
+    IStyleBase,
+    Nullable,
+    Tools,
+} from '@univerjs/core';
 
 import { DEFAULT_FONTFACE_PLANE } from './Const';
 import { FontCache } from './FontCache';
@@ -226,7 +236,11 @@ export function getFontStyleString(textStyle?: IStyleBase, fontLocale?: IFontLoc
     const { fontList, defaultFontSize } = fontLocale;
 
     if (!textStyle) {
-        return { fontString: `${defaultFontSize}px  ${fontList[0]}`, fontSize: defaultFontSize, fontFamily: fontList[0] };
+        return {
+            fontString: `${defaultFontSize}px  ${fontList[0]}`,
+            fontSize: defaultFontSize,
+            fontFamily: fontList[0],
+        };
     }
 
     // font-style
@@ -452,7 +466,12 @@ export function getScale(parentScale: IScale) {
     return Math.max(scaleX, scaleY);
 }
 
-export function getCellPositionByIndex(row: number, column: number, rowHeightAccumulation: number[], columnWidthAccumulation: number[]) {
+export function getCellPositionByIndex(
+    row: number,
+    column: number,
+    rowHeightAccumulation: number[],
+    columnWidthAccumulation: number[]
+) {
     const startRow = row - 1;
     const startColumn = column - 1;
 
@@ -470,11 +489,26 @@ export function getCellPositionByIndex(row: number, column: number, rowHeightAcc
     };
 }
 
-export function getCellByIndex(row: number, column: number, rowHeightAccumulation: number[], columnWidthAccumulation: number[], mergeData: IRangeData[]): ICellInfo {
+export function getCellByIndex(
+    row: number,
+    column: number,
+    rowHeightAccumulation: number[],
+    columnWidthAccumulation: number[],
+    mergeData: IRangeData[]
+): ICellInfo {
     // eslint-disable-next-line prefer-const
-    let { startY, endY, startX, endX } = getCellPositionByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation);
+    let { startY, endY, startX, endX } = getCellPositionByIndex(
+        row,
+        column,
+        rowHeightAccumulation,
+        columnWidthAccumulation
+    );
 
-    const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = mergeCellHandler(row, column, mergeData);
+    const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = mergeCellHandler(
+        row,
+        column,
+        mergeData
+    );
     let mergeInfo = {
         startRow,
         startColumn,
@@ -517,6 +551,7 @@ export function getCellByIndex(row: number, column: number, rowHeightAccumulatio
     };
 }
 
+// WTF: this name doesn't express any useful information about what is this used for
 export function mergeCellHandler(row: number, column: number, mergeData?: IRangeData[]) {
     let isMerged = false; // The upper left cell only renders the content
     let isMergedMainCell = false;
@@ -538,7 +573,12 @@ export function mergeCellHandler(row: number, column: number, mergeData?: IRange
         };
     }
     for (let i = 0; i < mergeData.length; i++) {
-        const { startRow: startRowMarge, endRow: endRowMarge, startColumn: startColumnMarge, endColumn: endColumnMarge } = mergeData[i];
+        const {
+            startRow: startRowMarge,
+            endRow: endRowMarge,
+            startColumn: startColumnMarge,
+            endColumn: endColumnMarge,
+        } = mergeData[i];
         if (row === startRowMarge && column === startColumnMarge) {
             newEndRow = endRowMarge;
             newEndColumn = endColumnMarge;
@@ -558,34 +598,7 @@ export function mergeCellHandler(row: number, column: number, mergeData?: IRange
             break;
         }
     }
-    // dataMergeCache?.forEach((r, dataMergeRow) => {
-    //     let isSuspended = false;
-    //     dataMergeRow?.forEach((c, dataCache) => {
-    //         const { startRow: startRowMarge, endRow: endRowMarge, startColumn: startColumnMarge, endColumn: endColumnMarge } = dataCache;
-    //         if (row === startRowMarge && column === startColumnMarge) {
-    //             newEndRow = endRowMarge;
-    //             newEndColumn = endColumnMarge;
-    //             mergeRow = startRowMarge;
-    //             mergeColumn = startColumnMarge;
-    //             isSuspended = true;
-    //             isMergedMainCell = true;
-    //             return false;
-    //         }
-    //         if (row >= startRowMarge && row <= endRowMarge && column >= startColumnMarge && column <= endColumnMarge) {
-    //             newEndRow = endRowMarge;
-    //             newEndColumn = endColumnMarge;
-    //             mergeRow = startRowMarge;
-    //             mergeColumn = startColumnMarge;
-    //             isSuspended = true;
-    //             isMerged = true;
-    //             return false;
-    //         }
-    //     });
 
-    //     if (isSuspended) {
-    //         return false;
-    //     }
-    // });
     return {
         row,
         column,
@@ -598,7 +611,13 @@ export function mergeCellHandler(row: number, column: number, mergeData?: IRange
     };
 }
 
-export function mergeInfoOffset(mergeInfo: ISelection, offsetX: number, offsetY: number, scaleX: number, scaleY: number) {
+export function mergeInfoOffset(
+    mergeInfo: ISelection,
+    offsetX: number,
+    offsetY: number,
+    scaleX: number,
+    scaleY: number
+) {
     const { startY, endY, startX, endX } = mergeInfo;
     mergeInfo.startY = fixLineWidthByScale(startY + offsetY, scaleY);
     mergeInfo.endY = fixLineWidthByScale(endY + offsetY, scaleY);
@@ -611,7 +630,12 @@ export function mergeInfoOffset(mergeInfo: ISelection, offsetX: number, offsetY:
 }
 
 export function isRectIntersect(rect1: IBoundRectNoAngle, rect2: IBoundRectNoAngle) {
-    return !(rect1.left > rect2.right || rect1.top > rect2.bottom || rect2.left > rect1.right || rect2.top > rect1.bottom);
+    return !(
+        rect1.left > rect2.right ||
+        rect1.top > rect2.bottom ||
+        rect2.left > rect1.right ||
+        rect2.top > rect1.bottom
+    );
 }
 
 export function injectStyle(styles: string[]) {

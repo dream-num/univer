@@ -1,8 +1,26 @@
 import { ICurrentUniverService } from '../../services/current.service';
 import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../../Shared';
 import { DEFAULT_RANGE, DEFAULT_STYLES } from '../../Types/Const';
-import { BooleanNumber, Dimension, Direction, FontItalic, FontWeight, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../Types/Enum';
-import { IBorderData, ICellData, IDocumentData, IRangeData, IRangeType, IStyleData, ITextDecoration, ITextRotation } from '../../Types/Interfaces';
+import {
+    BooleanNumber,
+    Dimension,
+    Direction,
+    FontItalic,
+    FontWeight,
+    HorizontalAlign,
+    VerticalAlign,
+    WrapStrategy,
+} from '../../Types/Enum';
+import {
+    IBorderData,
+    ICellData,
+    IDocumentData,
+    IRangeData,
+    IRangeType,
+    IStyleData,
+    ITextDecoration,
+    ITextRotation,
+} from '../../Types/Interfaces';
 import type { Worksheet } from './Worksheet';
 
 /**
@@ -30,9 +48,16 @@ export class Range {
 
     private _worksheet: Worksheet;
 
-    constructor(workSheet: Worksheet, range: IRangeType, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(
+        workSheet: Worksheet,
+        range: IRangeType,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+    ) {
         // Convert the range passed in by the user into a standard format
-        this._rangeData = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().transformRangeType(range).rangeData;
+        this._rangeData = this._currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .transformRangeType(range).rangeData;
         this._worksheet = workSheet;
 
         // The user entered an invalid range
@@ -485,18 +510,6 @@ export class Range {
     }
 
     /**
-     * Returns an array of Range objects representing merged cells that either are fully within the current range, or contain at least one cell in the current range.
-     */
-    getMergedRanges(): Range[] {
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
-
-        return this._worksheet
-            .getMerges()
-            .getMergedRanges({ startRow, endRow, startColumn, endColumn })
-            .map((rangeData) => new Range(this._worksheet, rangeData, this._currentUniverService));
-    }
-
-    /**
      * Starting at the cell in the first column and row of the range, returns the next cell in the given direction that is the edge of a contiguous range of cells with data in them or the cell at the edge of the spreadsheet in that direction.
      * @param direction
      * @returns The data region edge cell or the cell at the edge of the spreadsheet.
@@ -721,26 +734,9 @@ export class Range {
         return data.some((items) => items.some((item) => item?.m === ''));
     }
 
-    // isChecked() {}
-    // isEndColumnBounded() {}
-    // isEndRowBounded() {}
-
     /**
-     * Returns true if the cells in the current range overlap any merged cells.
-     */
-    isPartOfMerge(): boolean {
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
-
-        const data = this._worksheet.getMerges().getByRowColumn(startRow, endRow, startColumn, endColumn);
-        if (data) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns a copy of the range expanded in the four cardinal Directions to cover all adjacent cells with data in them.
+     * Returns a copy of the range expanded in the four cardinal Directions to cover all adjacent cells
+     * with data in them.
      *
      * @returns This range, for chaining.
      */

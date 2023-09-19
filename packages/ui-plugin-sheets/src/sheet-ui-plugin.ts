@@ -2,14 +2,20 @@ import { DragManager, SlotManager, ZIndexManager } from '@univerjs/base-ui';
 import { ICurrentUniverService, IUndoRedoService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { DefaultSheetUIConfig, installObserver, ISheetUIPluginConfig, SHEET_UI_PLUGIN_NAME, SheetUIPluginObserve } from './Basics';
+import {
+    DefaultSheetUIConfig,
+    installObserver,
+    ISheetUIPluginConfig,
+    SHEET_UI_PLUGIN_NAME,
+    SheetUIPluginObserve,
+} from './Basics';
 import { AppUIController } from './Controller/AppUIController';
 import { SheetClipboardController } from './Controller/clipboard/clipboard.controller';
 import { DesktopSheetShortcutController } from './Controller/shortcut.controller';
 import { en, zh } from './Locale';
 import { ICellEditorService } from './services/cell-editor/cell-editor.service';
 import { DesktopCellEditorService } from './services/cell-editor/cell-editor-desktop.service';
-import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/sheet-clipboard.service';
+import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { Fx } from './View/FormulaBar';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
@@ -23,7 +29,11 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
     private _dragManager: DragManager;
 
-    constructor(config: ISheetUIPluginConfig, @Inject(Injector) override readonly _injector: Injector, @Inject(LocaleService) private readonly _localeService: LocaleService) {
+    constructor(
+        config: ISheetUIPluginConfig,
+        @Inject(Injector) override readonly _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
         super(SHEET_UI_PLUGIN_NAME);
 
         this._config = Tools.deepMerge({}, DefaultSheetUIConfig, config);
@@ -62,7 +72,11 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
      * @param str
      */
     setFormulaContent(str: string) {
-        this._appUIController.getSheetContainerController().getFormulaBarUIController().getFormulaBar().setFormulaContent(str);
+        this._appUIController
+            .getSheetContainerController()
+            .getFormulaBarUIController()
+            .getFormulaBar()
+            .setFormulaContent(str);
     }
 
     setFx(fx: Fx) {

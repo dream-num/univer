@@ -1,6 +1,6 @@
 import { Observable } from '@univerjs/core';
 
-import { DocUIPlugin } from '../DocUIPlugin';
+import { DocUIPlugin } from '../doc-ui-plugin';
 import { DocContainer } from '../View';
 
 export type DocUIPluginObserve = {

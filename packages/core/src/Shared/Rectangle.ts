@@ -2,6 +2,8 @@ import { IRangeData } from '../Types/Interfaces';
 import { Tools } from './Tools';
 import { Nullable } from './Types';
 
+// TODO: it seems that this wrapper is not necessary. Only static methods are good.
+
 /**
  * A square area containing four position information: startRow, startColumn, endRow, and endColumn
  */
@@ -46,7 +48,12 @@ export class Rectangle implements IRangeData {
     }
 
     static equals(src: IRangeData, target: IRangeData): boolean {
-        return src.endRow === target.endRow && src.endColumn === target.endColumn && src.startRow === target.startRow && src.startColumn === target.startColumn;
+        return (
+            src.endRow === target.endRow &&
+            src.endColumn === target.endColumn &&
+            src.startRow === target.startRow &&
+            src.startColumn === target.startColumn
+        );
     }
 
     static intersects(src: IRangeData, target: IRangeData): boolean {

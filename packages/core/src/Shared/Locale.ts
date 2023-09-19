@@ -3,8 +3,8 @@ import { Tools } from './Tools';
 import { IKeyValue, Nullable } from './Types';
 
 export type ILocales = {
-    en: IKeyValue;
-    zh: IKeyValue;
+    en?: IKeyValue;
+    zh?: IKeyValue;
 };
 /**
  * The data structure stored by the Locale class

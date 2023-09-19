@@ -1,25 +1,24 @@
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
-import { Plugin, PluginType, LocaleService } from '@univerjs/core';
 import { FormulaEngineService } from '@univerjs/base-formula-engine';
-import { CellEditExtensionManager, CellInputExtensionManager, ComponentManager, Icon } from '@univerjs/base-ui';
+import { CellEditExtensionManager, CellInputExtensionManager } from '@univerjs/base-ui';
+import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
-import { zh, en } from './Locale';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { IFormulaConfig } from './Basics/Interfaces/IFormula';
 import { FORMULA_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
-import { FormulaController } from './Controller/FormulaController';
-import { firstLoader } from './Controller/FirstLoader';
+import { IFormulaConfig } from './Basics/Interfaces/IFormula';
+import { FormulaPluginObserve, install } from './Basics/Observer';
 import { FormulaCellEditExtensionFactory } from './Basics/Register/FormulaCellEditExtension';
 import { FormulaCellInputExtensionFactory } from './Basics/Register/FormulaCellInputExtension';
-import { FormulaActionExtensionFactory } from './Basics/Register';
-import { FormulaPluginObserve, install } from './Basics/Observer';
-import { SearchFormulaController } from './Controller/SearchFormulaModalController';
+import { firstLoader } from './Controller/FirstLoader';
+import { FormulaController } from './Controller/FormulaController';
 import { FormulaPromptController } from './Controller/FormulaPromptController';
+import { SearchFormulaController } from './Controller/SearchFormulaModalController';
+import { en } from './Locale';
 
 export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
     static override type = PluginType.Sheet;
 
-    protected _formulaActionExtensionFactory: FormulaActionExtensionFactory;
+    // protected _formulaActionExtensionFactory: FormulaActionExtensionFactory;
 
     private _formulaController: FormulaController;
 
@@ -27,11 +26,7 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
 
     private _formulaPromptController: FormulaPromptController;
 
-    constructor(
-        private _config: IFormulaConfig,
-        @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
-    ) {
+    constructor(private _config: IFormulaConfig, @Inject(Injector) override readonly _injector: Injector, @Inject(LocaleService) private readonly _localeService: LocaleService) {
         super(FORMULA_PLUGIN_NAME);
     }
 
@@ -41,7 +36,6 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
          */
         this._localeService.getLocale().load({
             en,
-            zh,
         });
 
         const sheetContainerUIController = this._injector.get(SheetContainerUIController);
@@ -55,7 +49,6 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
             this._formulaController.setFormulaEngine(formulaEngineService);
 
             firstLoader(this._formulaController);
-
 
             formulaBar.setFx({
                 onClick: () => {

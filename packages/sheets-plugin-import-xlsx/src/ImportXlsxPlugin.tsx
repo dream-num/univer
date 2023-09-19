@@ -4,7 +4,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { IMPORT_XLSX_PLUGIN_NAME } from './Basics';
 import { DragAndDropExtensionFactory } from './Basics/Register/DragAndDropExtension';
 import { ImportXlsxController } from './Controller/ImportXlsxController';
-import { en, zh } from './Locale';
+import { en } from './Locale';
 import { UploadService } from './services/upload.service';
 
 export interface IImportXlsxPluginConfig {}
@@ -26,7 +26,6 @@ export class ImportXlsxPlugin extends Plugin<any> {
          */
         this._localeService.getLocale().load({
             en,
-            zh,
         });
 
         // this._importXlsxController = new ImportXlsxController(this);

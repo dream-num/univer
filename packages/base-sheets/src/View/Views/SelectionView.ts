@@ -102,19 +102,33 @@ export class SelectionView extends BaseView {
     }
 
     private _initialRowTitle() {
-        const { spreadsheetRowTitle, spreadsheetSkeleton } = this._getSheetObject();
-        spreadsheetRowTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            console.log('rowTitleDown');
+        const { spreadsheetRowTitle, spreadsheet, spreadsheetSkeleton } = this._getSheetObject();
+        spreadsheetRowTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            if (!this._selectionManagerService.isSelectionEnabled) {
+                return;
+            }
+            this._selectionTransformerShapeManager.eventTrigger(evt, this._selectionManagerService.currentStyle, spreadsheet.zIndex + 1);
+            if (evt.button !== 2) {
+                state.stopPropagation();
+            }
         });
 
-        spreadsheetRowTitle?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        spreadsheetRowTitle?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             console.log('titleMove');
         });
     }
 
     private _initialColumnTitle() {
-        const { spreadsheetColumnTitle, spreadsheetSkeleton } = this._getSheetObject();
-        spreadsheetColumnTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
+        const { spreadsheetColumnTitle, spreadsheet, spreadsheetSkeleton } = this._getSheetObject();
+        spreadsheetColumnTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            if (!this._selectionManagerService.isSelectionEnabled) {
+                return;
+            }
+            this._selectionTransformerShapeManager.eventTrigger(evt, this._selectionManagerService.currentStyle, spreadsheet.zIndex + 1);
+            if (evt.button !== 2) {
+                state.stopPropagation();
+            }
+        });
     }
 
     private _update(worksheet: Worksheet) {

@@ -1,7 +1,11 @@
-import { Disposable, ICommandService, ICurrentUniverService, Worksheet } from '@univerjs/core';
+import { Disposable, ICommandService, ICurrentUniverService, Worksheet, WrapStrategy } from '@univerjs/core';
 
 import { SheetCopyCommand, SheetCutCommand, SheetPasteCommand } from '../../commands/commands/clipboard.command';
-import { ISheetClipboardHook, ISheetClipboardService } from '../../services/clipboard/clipboard.service';
+import {
+    IClipboardPropertyItem,
+    ISheetClipboardHook,
+    ISheetClipboardService,
+} from '../../services/clipboard/clipboard.service';
 
 /**
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
@@ -30,17 +34,74 @@ export class SheetClipboardController extends Disposable {
                 // and create necessary cache if needed
                 currentSheet = self._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
             },
-            onGetContent(row: number, col: number) {},
-            // copy
-            onCopy: (row: number, col: number) => ({
-                'data-row': row.toString(),
-                'data-col': col.toString(),
-            }),
+            onGetContent(row: number, col: number): string {
+                const v = currentSheet!.getCellMatrix().getValue(row, col);
+                return v?.m || '';
+            },
+            onCopy: (row: number, col: number, rowSpan?: number, colSpan?: number) => {
+                // TODO: get cell style and write it into clipboard property item
+                const properties: IClipboardPropertyItem = {};
+
+                if (rowSpan) {
+                    properties.rowspan = `${rowSpan}`;
+                }
+                if (colSpan) {
+                    properties.colspan = `${colSpan}`;
+                }
+
+                const range = currentSheet!.getRange(row, col);
+                const textStyle = range.getTextStyle();
+                const color = range.getFontColor();
+                const backgroundColor = range.getBackground();
+
+                let style = '';
+                if (color) {
+                    style += `color: ${color};`;
+                }
+                if (backgroundColor) {
+                    style += `background-color: ${backgroundColor};`;
+                }
+                if (textStyle?.bl) {
+                    style += 'font-weight: bold;';
+                }
+                if (textStyle?.fs) {
+                    style += `font-size: ${textStyle.fs}px;`;
+                }
+                if (textStyle?.tb === WrapStrategy.WRAP) {
+                    style += 'word-wrap: break-word;';
+                }
+                if (textStyle?.it) {
+                    style += 'font-style: italic;';
+                }
+                if (textStyle?.ff) {
+                    style += `font-family: ${textStyle.ff};`;
+                }
+                if (textStyle?.st) {
+                    style += 'text-decoration: line-through;';
+                }
+                if (textStyle?.ul) {
+                    style += 'text-decoration: underline';
+                }
+
+                if (style) {
+                    properties.style = style;
+                }
+
+                return properties;
+            },
             onCopyColumn(col: number) {
-                return null;
+                const sheet = currentSheet!;
+                const width = sheet.getColumnWidth(col);
+                return {
+                    width: `${width}`,
+                };
             },
             onCopyRow(row: number) {
-                return null;
+                const sheet = currentSheet!;
+                const height = sheet.getRowHeight(row);
+                return {
+                    style: `height: ${height}px;`,
+                };
             },
             onAfterCopy() {
                 currentSheet = null;

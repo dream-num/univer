@@ -3,6 +3,7 @@ import { Inject } from '@wendellhu/redi';
 import { ObserverManager } from '../../Observer';
 import { ICurrentUniverService } from '../../services/current.service';
 import { Nullable, ObjectMatrix, Rectangle, Tools } from '../../Shared';
+import { createRowColIter } from '../../Shared/RowColIter';
 import { DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber, SheetTypes } from '../../Types/Enum';
 import { ICellData, IRangeData, IRangeStringData, IRangeType, IWorksheetConfig } from '../../Types/Interfaces';
@@ -144,9 +145,48 @@ export class Worksheet {
     /**
      * Get cell matrix from a given range and pick out non-first cells of merged cells.
      */
-    getMatrixWithMergedCells(row: number, col: number, endRow: number, endCol: number): ObjectMatrix<ICellData> {
-        // TODO@wzhudev: implement this method
-        // const mergedCellsInRange = this.
+    // PERF: we could not skip indexes with merged cells, because we have already known the merged cells' range
+    getMatrixWithMergedCells(
+        row: number,
+        col: number,
+        endRow: number,
+        endCol: number
+    ): ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }> {
+        const matrix = this.getCellMatrix();
+        const mergedCellsInRange = this._snapshot.mergeData.filter((rect) => {
+            const rectRange = new Rectangle(rect);
+            const targetRange = new Rectangle(row, col, endRow, endCol);
+            return rectRange.intersects(targetRange);
+        });
+
+        const ret = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>();
+
+        createRowColIter(row, endRow, col, endCol).forEach((row, col) => {
+            const v = matrix.getValue(row, col);
+            if (v) {
+                // ICellData should combine merge info
+                ret.setValue(row, col, v);
+            }
+        });
+
+        mergedCellsInRange.forEach((mergedCell) => {
+            const { startColumn, startRow, endColumn, endRow } = mergedCell;
+            createRowColIter(startRow, endRow, startColumn, endColumn).forEach((row, col) => {
+                if (row === startRow && col === startColumn) {
+                    ret.setValue(row, col, {
+                        ...ret.getValue(row, col),
+                        rowSpan: endRow - startRow + 1,
+                        colSpan: endColumn - startColumn + 1,
+                    });
+                }
+
+                if (row !== startRow || col !== startColumn) {
+                    ret.realDeleteValue(row, col);
+                }
+            });
+        });
+
+        return ret;
     }
 
     // WTF: this function signature is so ridiculous...

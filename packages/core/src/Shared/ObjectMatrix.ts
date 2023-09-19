@@ -48,6 +48,21 @@ export class ObjectMatrix<T> {
         return this;
     }
 
+    forRow(callback: (row: number, cols: number[]) => Nullable<boolean>): void {
+        const keys = this._option.getKeys();
+        for (let i = 0; i < keys.length; i++) {
+            const key = +keys[i];
+            const value = this.getRow(key) as ObjectArray<T>;
+            const result = callback(
+                key,
+                value.getKeys().map((item) => +item)
+            );
+            if (result === false) {
+                return;
+            }
+        }
+    }
+
     forValue(callback: (row: number, col: number, value: T) => Nullable<boolean>): ObjectMatrix<T> {
         const keys = this._option.getKeys();
         for (let i = 0; i < keys.length; i++) {
@@ -122,6 +137,13 @@ export class ObjectMatrix<T> {
         const objectArray = this.getRow(row);
         if (objectArray) {
             objectArray.delete(column);
+        }
+    }
+
+    realDeleteValue(row: number, column: number): void {
+        const objectArray = this.getRow(row);
+        if (objectArray) {
+            objectArray.realDelete(column);
         }
     }
 

@@ -1,5 +1,12 @@
 import { CanvasView } from '@univerjs/base-sheets';
-import { BaseMenuItem, BaseSelectChildrenProps, ComponentManager, IMenuItemFactory, IMenuService, MenuPosition } from '@univerjs/base-ui';
+import {
+    BaseMenuItem,
+    BaseSelectChildrenProps,
+    ComponentManager,
+    IMenuItemFactory,
+    IMenuService,
+    MenuPosition,
+} from '@univerjs/base-ui';
 import { Disposable } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -7,6 +14,7 @@ import { SheetRightMenuConfig } from '../Basics';
 import { RightMenu, RightMenuInput, RightMenuItem } from '../View';
 import {
     ClearSelectionMenuItemFactory,
+    CopyMenuItemFactory,
     DeleteRangeMenuItemFactory,
     DeleteRangeMoveLeftMenuItemFactory,
     DeleteRangeMoveUpMenuItemFactory,
@@ -89,6 +97,7 @@ export class RightMenuUIController extends Disposable {
 
         (
             [
+                CopyMenuItemFactory,
                 ClearSelectionMenuItemFactory,
                 InsertRowMenuItemFactory,
                 InsertColMenuItemFactory,

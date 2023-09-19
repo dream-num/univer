@@ -14,7 +14,11 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../Services/selection-manager.service';
-import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
+import {
+    ISetRangeValuesMutationParams,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+} from '../Mutations/set-range-values.mutation';
 
 export interface ISetRangeValuesCommandParams {
     worksheetId?: string;
@@ -39,7 +43,11 @@ export const SetRangeValuesCommand: ICommand = {
             value,
             range,
             workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId(),
-            worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId(),
+            worksheetId = currentUniverService
+                .getCurrentUniverSheetInstance()
+                .getWorkBook()
+                .getActiveSheet()
+                .getSheetId(),
         } = params;
 
         const currentSelections = range ? [range] : selectionManagerService.getRangeDatas();
@@ -72,7 +80,10 @@ export const SetRangeValuesCommand: ICommand = {
             workbookId,
             cellValue: realCellValue ?? cellValue.getMatrix(),
         };
-        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
+        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+            accessor,
+            setRangeValuesMutationParams
+        );
 
         const result = commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
         if (result) {

@@ -53,6 +53,7 @@
         "ts-node": "^10.9.1"
     },
     "dependencies": {
+        "@ctrl/tinycolor": "^4.0.2",
         "@univerjs/core": "workspace:^0.0.1",
         "@wendellhu/redi": "^0.12.7",
         "react": "^18.2.0",

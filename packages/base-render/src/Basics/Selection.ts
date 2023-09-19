@@ -109,3 +109,7 @@ export function convertSelectionDataToRange(selectionDataWithStyle: ISelectionDa
     }
     return result;
 }
+
+export const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 4;
+
+export const SELECTION_CONTROL_BORDER_BUFFER_COLOR = 'rgba(255,255,255, 0.01)';

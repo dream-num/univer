@@ -2,7 +2,14 @@ import { ICellInfo, ISelection, Nullable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 import { SELECTION_TYPE } from '../../../Basics/Const';
-import { ISelectionDataWithStyle, ISelectionStyle, ISelectionWidgetConfig, NORMAL_SELECTION_PLUGIN_STYLE } from '../../../Basics/Selection';
+import {
+    ISelectionDataWithStyle,
+    ISelectionStyle,
+    ISelectionWidgetConfig,
+    NORMAL_SELECTION_PLUGIN_STYLE,
+    SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+    SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
+} from '../../../Basics/Selection';
 import { Group } from '../../../Group';
 import { Scene } from '../../../Scene';
 import { Rect } from '../../../Shape/Rect';
@@ -39,10 +46,6 @@ enum SELECTION_MANAGER_KEY {
     bottomCenterWidget = '__SpreadSheetSelectionBottomCenterWidget__',
     bottomRightWidget = '__SpreadSheetSelectionBottomRightWidget__',
 }
-
-const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 4;
-
-const SELECTION_CONTROL_BORDER_BUFFER_COLOR = 'rgba(255,255,255, 0.01)';
 
 /**
  * The main selection canvas component

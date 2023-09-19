@@ -1,7 +1,7 @@
-import { IRangeCellData, IRangeData } from '@univerjs/core';
+import { IRangeCellData, ISelectionRange } from '@univerjs/core';
 
 export interface ISelectionConfig {
-    selection: IRangeData;
+    selection: ISelectionRange;
     cell?: IRangeCellData;
 }
 

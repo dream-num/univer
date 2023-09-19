@@ -1,4 +1,4 @@
-import { Color, ConditionType, IColor, IRangeData, ISheetActionData, Nullable, RelativeDate, Sequence } from '@univerjs/core';
+import { Color, ConditionType, IColor, ISelectionRange, ISheetActionData, Nullable, RelativeDate, Sequence } from '@univerjs/core';
 
 import { BooleanCriteria } from '../Enum/BooleanCriteria';
 
@@ -19,7 +19,7 @@ export type BooleanCondition = {
 };
 
 export type IFilterType = {
-    range: IRangeData;
+    range: ISelectionRange;
     sortSpecs: {};
     filterSpecs: IFilterSpecsType[];
 };
@@ -42,7 +42,7 @@ export type IFilterCriteria = {
 };
 
 export interface IFilter extends Sequence {
-    range: IRangeData;
+    range: ISelectionRange;
     sheetId: string;
     criteriaColumns: {
         [column: number]: IFilterCriteriaColumn;

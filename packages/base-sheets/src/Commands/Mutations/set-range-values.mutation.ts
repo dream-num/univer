@@ -1,9 +1,9 @@
-import { CommandType, ICellData, ICopyToOptionsData, ICurrentUniverService, IMutation, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '@univerjs/core';
+import { CommandType, ICellData, ICopyToOptionsData, ICurrentUniverService, IMutation, ISelectionRange, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams {
-    rangeData: IRangeData[];
+    rangeData: ISelectionRange[];
     worksheetId: string;
 
     cellValue?: ObjectMatrixPrimitiveType<ICellData>;

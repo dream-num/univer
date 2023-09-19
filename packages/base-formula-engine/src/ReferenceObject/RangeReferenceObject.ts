@@ -1,9 +1,9 @@
-import { IRangeData } from '@univerjs/core';
+import { ISelectionRange } from '@univerjs/core';
 
 import { BaseReferenceObject } from './BaseReferenceObject';
 
 export class RangeReferenceObject extends BaseReferenceObject {
-    constructor(rangeData: IRangeData, forcedSheetId?: string, forcedUnitId?: string) {
+    constructor(rangeData: ISelectionRange, forcedSheetId?: string, forcedUnitId?: string) {
         super('');
         this.setRangeData(rangeData);
         if (forcedSheetId) {

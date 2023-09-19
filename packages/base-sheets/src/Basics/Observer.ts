@@ -1,4 +1,4 @@
-import { ISelectionRange, Observable, Plugin } from '@univerjs/core';
+import { ISelection, Observable, Plugin } from '@univerjs/core';
 
 interface ISelectionControlFillConfig {
     //TODO ...
@@ -30,7 +30,7 @@ export type SheetPluginObserve = {
 
     onFillEndObserver: Observable<ISelectionControlFillConfig>;
 
-    onChangeSelectionObserver: Observable<ISelectionRange>;
+    onChangeSelectionObserver: Observable<ISelection>;
 
     onChangeCurrentSheetObserver: Observable<string>;
 

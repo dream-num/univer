@@ -1,4 +1,4 @@
-import { ICellInfo, ISelection, Nullable } from '@univerjs/core';
+import { ISelectionCellWithCoord, ISelectionRangeWithCoord, Nullable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 import { SELECTION_TYPE } from '../../../Basics/Const';
@@ -113,17 +113,17 @@ export class SelectionTransformerShape {
 
     readonly dispose$ = this._dispose$.asObservable();
 
-    readonly selectionMoving$ = new BehaviorSubject<Nullable<ISelection>>(null);
+    readonly selectionMoving$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
 
-    readonly selectionMoved$ = new BehaviorSubject<Nullable<ISelection>>(null);
+    readonly selectionMoved$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
 
-    readonly selectionScaling$ = new BehaviorSubject<Nullable<ISelection>>(null);
+    readonly selectionScaling$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
 
-    readonly selectionScaled$ = new BehaviorSubject<Nullable<ISelection>>(null);
+    readonly selectionScaled$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
 
-    readonly selectionFilling$ = new BehaviorSubject<Nullable<ISelection>>(null);
+    readonly selectionFilling$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
 
-    readonly selectionFilled$ = new BehaviorSubject<Nullable<ISelection>>(null);
+    readonly selectionFilled$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
 
     constructor(private _scene: Scene, private _zIndex: number) {
         this._initialize();
@@ -336,11 +336,11 @@ export class SelectionTransformerShape {
     }
 
     update(
-        newSelectionRange: ISelection,
+        newSelectionRange: ISelectionRangeWithCoord,
         rowTitleWidth: number,
         columnTitleHeight: number,
         style: Nullable<ISelectionStyle> = NORMAL_SELECTION_PLUGIN_STYLE,
-        highlight: Nullable<ICellInfo>
+        highlight: Nullable<ISelectionCellWithCoord>
     ) {
         this._selectionModel.setValue(newSelectionRange, highlight);
         if (style == null) {
@@ -406,11 +406,11 @@ export class SelectionTransformerShape {
     /**
      * Get the cell information of the current selection, considering the case of merging cells
      */
-    getCurrentCellInfo(): Nullable<ISelection> {
+    getCurrentCellInfo(): Nullable<ISelectionRangeWithCoord> {
         const currentCell = this.model.currentCell;
 
         if (currentCell) {
-            let currentRangeData: ISelection;
+            let currentRangeData: ISelectionRangeWithCoord;
 
             if (currentCell.isMerged) {
                 const mergeInfo = currentCell.mergeInfo;

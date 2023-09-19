@@ -1,4 +1,16 @@
-import { CommandType, Dimension, ICellData, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService, Nullable, ObjectMatrix, Tools } from '@univerjs/core';
+import {
+    CommandType,
+    Dimension,
+    ICellData,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    ISelectionRange,
+    IUndoRedoService,
+    Nullable,
+    ObjectMatrix,
+    Tools,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
@@ -26,7 +38,7 @@ export interface InsertRowCommandParams {
 export interface InsertRowCommandBaseParams {
     workbookId: string;
     worksheetId: string;
-    range: IRangeData;
+    range: ISelectionRange;
 }
 
 export const InsertRowCommand: ICommand = {
@@ -152,7 +164,7 @@ export const InsertRowBeforeCommand: ICommand<InsertRowCommandParams> = {
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        let range: IRangeData;
+        let range: ISelectionRange;
         const selections = selectionManagerService.getRangeDatas();
         if (selections && selections.length === 1) {
             range = selections[0];
@@ -195,7 +207,7 @@ export const InsertRowAfterCommand: ICommand<InsertRowCommandParams> = {
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        let range: IRangeData;
+        let range: ISelectionRange;
         const selections = selectionManagerService.getRangeDatas();
         if (selections && selections.length === 1) {
             range = selections[0];
@@ -235,7 +247,7 @@ export interface InsertColCommandParams {
 export interface InsertColCommandBaseParams {
     workbookId: string;
     worksheetId: string;
-    range: IRangeData;
+    range: ISelectionRange;
 }
 
 export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
@@ -361,7 +373,7 @@ export const InsertColBeforeCommand: ICommand<InsertColCommandParams> = {
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        let range: IRangeData;
+        let range: ISelectionRange;
         const selections = selectionManagerService.getRangeDatas();
         if (selections && selections.length === 1) {
             range = selections[0];
@@ -404,7 +416,7 @@ export const InsertColAfterCommand: ICommand<InsertColCommandParams> = {
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        let range: IRangeData;
+        let range: ISelectionRange;
         const selections = selectionManagerService.getRangeDatas();
         if (selections && selections.length === 1) {
             range = selections[0];

@@ -1,5 +1,5 @@
 import { ComponentManager } from '@univerjs/base-ui';
-import { ISelectionRange, ObserverManager } from '@univerjs/core';
+import { ISelection, ObserverManager } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 
@@ -129,7 +129,7 @@ export class SearchFormulaController {
     private _initialize() {
         this._initRegisterComponent();
 
-        this._observerManager.getObserver<ISelectionRange>('onChangeSelectionObserver')?.add((selection) => {
+        this._observerManager.getObserver<ISelection>('onChangeSelectionObserver')?.add((selection) => {
             const info = selection.cellRange;
             // this._searchItem.changeRange(info?.startColumn.toString() ?? '');
         });

@@ -5,7 +5,7 @@ import { ICurrentUniverService } from '../../services/current.service';
 import { Nullable, ObjectMatrix, Tools } from '../../Shared';
 import { DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber, SheetTypes } from '../../Types/Enum';
-import { ICellData, IRangeData, IRangeStringData, IRangeType, IWorksheetConfig } from '../../Types/Interfaces';
+import { ICellData, IRangeStringData, IRangeType, ISelectionRange, IWorksheetConfig } from '../../Types/Interfaces';
 import { ColumnManager } from './ColumnManager';
 import { Merges } from './Merges';
 import { Range } from './Range';
@@ -252,7 +252,7 @@ export class Worksheet {
         return this._config.zoomRatio || 1;
     }
 
-    getMergeData(): IRangeData[] {
+    getMergeData(): ISelectionRange[] {
         return this._config.mergeData;
     }
 

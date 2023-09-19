@@ -1,6 +1,6 @@
 import { IFormulaData } from '@univerjs/base-formula-engine';
 import { BaseCellInputExtension, BaseCellInputExtensionFactory, ICell } from '@univerjs/base-ui';
-import { ICurrentUniverService, IRangeData, Nullable, ObjectArray } from '@univerjs/core';
+import { ICurrentUniverService, ISelectionRange, Nullable, ObjectArray } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FormulaController } from '../../Controller/FormulaController';
@@ -83,7 +83,7 @@ export class FormulaCellInputExtensionFactory extends BaseCellInputExtensionFact
         Object.keys(arrayFormulaData).forEach((sheetId) => {
             const sheetData = arrayFormulaData[sheetId];
 
-            sheetData.forValue((rowIndex: number, columnIndex: number, value: IRangeData) => {
+            sheetData.forValue((rowIndex: number, columnIndex: number, value: ISelectionRange) => {
                 const { startRow, startColumn, endRow, endColumn } = value;
                 if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
                     const cellData = formulaData[unitId][sheetId];

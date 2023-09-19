@@ -5,9 +5,7 @@ import { ICurrentUniverService } from '../../services/current.service';
 import { GenName, Nullable, Tools } from '../../Shared';
 import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
-import { IColumnStartEndData, IGridRange, IRangeArrayData, IRangeData, IRangeStringData, IRangeType, IRowStartEndData, IWorkbookConfig } from '../../Types/Interfaces';
-import { RangeList } from './RangeList';
-import { Selection } from './Selection';
+import { IColumnStartEndData, IGridRange, IRangeArrayData, IRangeStringData, IRangeType, IRowStartEndData, ISelectionRange, IWorkbookConfig } from '../../Types/Interfaces';
 import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
 
@@ -61,7 +59,7 @@ export class Workbook {
      * @param rangeData
      * @returns
      */
-    static rangeDataToRangeStringData(rangeData: IRangeData) {
+    static rangeDataToRangeStringData(rangeData: ISelectionRange) {
         const { startRow, endRow, startColumn, endColumn } = rangeData;
 
         return `${Tools.chatAtABC(startColumn) + (startRow + 1)}:${Tools.chatAtABC(endColumn)}${endRow + 1}`;
@@ -135,24 +133,24 @@ export class Workbook {
         });
     }
 
-    getActiveRange(): Nullable<Range> {
-        const workSheet = this.getActiveSheet();
-        if (workSheet) {
-            const selection = workSheet.getSelection();
-            return selection.getActiveRange();
-        }
-        return null;
-    }
+    // getActiveRange(): Nullable<Range> {
+    //     const workSheet = this.getActiveSheet();
+    //     if (workSheet) {
+    //         const selection = workSheet.getSelection();
+    //         return selection.getActiveRange();
+    //     }
+    //     return null;
+    // }
 
-    setActiveRange(range: Range): Nullable<Range> {
-        const workSheet = this.getActiveSheet();
-        if (workSheet) {
-            return workSheet.setActiveSelection(range);
-        }
-        return null;
-    }
+    // setActiveRange(range: Range): Nullable<Range> {
+    //     const workSheet = this.getActiveSheet();
+    //     if (workSheet) {
+    //         return workSheet.setActiveSelection(range);
+    //     }
+    //     return null;
+    // }
 
-    setActiveRangeList(rangeList: IRangeType[]): Nullable<IRangeData[]> {
+    setActiveRangeList(rangeList: IRangeType[]): Nullable<ISelectionRange[]> {
         const workSheet = this.getActiveSheet();
         if (workSheet) {
             const activeRangeList = workSheet.getRangeList(rangeList);
@@ -162,28 +160,28 @@ export class Workbook {
         return null;
     }
 
-    getActiveRangeList(): Nullable<RangeList> {
-        const workSheet = this.getActiveSheet();
-        if (workSheet) {
-            const selection = workSheet.getSelection();
-            return selection.getActiveRangeList();
-        }
-        return null;
-    }
+    // getActiveRangeList(): Nullable<RangeList> {
+    //     const workSheet = this.getActiveSheet();
+    //     if (workSheet) {
+    //         const selection = workSheet.getSelection();
+    //         return selection.getActiveRangeList();
+    //     }
+    //     return null;
+    // }
 
-    getSelection(): Nullable<Selection> {
-        const workSheet = this.getActiveSheet();
-        if (workSheet) {
-            return workSheet.getSelection();
-        }
-    }
+    // getSelection(): Nullable<Selection> {
+    //     const workSheet = this.getActiveSheet();
+    //     if (workSheet) {
+    //         return workSheet.getSelection();
+    //     }
+    // }
 
-    getCurrentCell(): Nullable<Range> {
-        const selection = this.getSelection();
-        if (selection) {
-            return selection.getCurrentCell();
-        }
-    }
+    // getCurrentCell(): Nullable<Range> {
+    //     const selection = this.getSelection();
+    //     if (selection) {
+    //         return selection.getCurrentCell();
+    //     }
+    // }
 
     getSheetSize(): number {
         return this._config.sheetOrder.length;

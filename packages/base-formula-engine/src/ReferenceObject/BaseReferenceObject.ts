@@ -1,4 +1,4 @@
-import { CellValueType, ICellData, IRangeData, Nullable } from '@univerjs/core';
+import { CellValueType, ICellData, ISelectionRange, Nullable } from '@univerjs/core';
 
 import { SheetNameMapType, UnitDataType } from '../Basics/Common';
 import { ERROR_TYPE_SET, ErrorType } from '../Basics/ErrorType';
@@ -19,7 +19,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _defaultSheetId: string;
 
-    private _rangeData: IRangeData;
+    private _rangeData: ISelectionRange;
 
     private _unitData: UnitDataType;
 
@@ -98,7 +98,7 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._rangeData;
     }
 
-    setRangeData(rangeData: IRangeData) {
+    setRangeData(rangeData: ISelectionRange) {
         this._rangeData = rangeData;
     }
 
@@ -217,7 +217,7 @@ export class BaseReferenceObject extends ObjectClassType {
         return ErrorValueObject.create(ErrorType.REF);
     }
 
-    unionRange(rangeData1: IRangeData, rangeData2: IRangeData): IRangeData {
+    unionRange(rangeData1: ISelectionRange, rangeData2: ISelectionRange): ISelectionRange {
         /** abstract */
         return {
             startRow: -1,

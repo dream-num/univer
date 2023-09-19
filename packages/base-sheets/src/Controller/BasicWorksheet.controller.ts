@@ -169,7 +169,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
         return this._commandService.executeCommand(ClearSelectionContentCommand.id);
     }
 
-    // async setStyle<T>(workbookId: string, worksheetId: string, style: IStyleTypeValue<T>, range: IRangeData[]): Promise<boolean> {
+    // async setStyle<T>(workbookId: string, worksheetId: string, style: IStyleTypeValue<T>, range: ISelectionRange[]): Promise<boolean> {
     //     const options: ISetStyleParams<T> = {
     //         workbookId,
     //         worksheetId,
@@ -182,7 +182,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     // /**
     //  * Trims the whitespace (such as spaces, tabs, or new lines) in every cell in this range. Removes all whitespace from the start and end of each cell's text, and reduces any subsequence of remaining whitespace characters to a single space.
     //  */
-    // async trimWhitespace(workbookId: string, worksheetId: string, range: IRangeData[]): Promise<boolean> {
+    // async trimWhitespace(workbookId: string, worksheetId: string, range: ISelectionRange[]): Promise<boolean> {
     //     const options = {
     //         workbookId,
     //         worksheetId,
@@ -194,7 +194,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     // /**
     //  * Sets a rectangular grid of values (must match dimensions of this range).
     //  */
-    // async setValue(workbookId: string, worksheetId: string, value: ICellV | ICellV[][] | ObjectMatrix<ICellV>, range: IRangeData[]): Promise<boolean> {
+    // async setValue(workbookId: string, worksheetId: string, value: ICellV | ICellV[][] | ObjectMatrix<ICellV>, range: ISelectionRange[]): Promise<boolean> {
     //     const options: ISetRangeFormattedValueParams = {
     //         workbookId,
     //         worksheetId,
@@ -208,7 +208,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     //  * Sets a rectangular grid of cell obejct data (must match dimensions of this range).
     //  * @param value A two-dimensional array of cell object data.
     //  */
-    // async setRangeValues(workbookId: string, worksheetId: string, value: ICellData | ICellData[][] | ObjectMatrixPrimitiveType<ICellData>, range: IRangeData): Promise<boolean> {
+    // async setRangeValues(workbookId: string, worksheetId: string, value: ICellData | ICellData[][] | ObjectMatrixPrimitiveType<ICellData>, range: ISelectionRange): Promise<boolean> {
     //     const options: ISetRangeValuesCommandParams = {
     //         workbookId,
     //         worksheetId,
@@ -223,7 +223,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     //  *
     //  * solution: Clear the range to be deleted, and then set the new value of the cell content at the bottom using setValue
     //  */
-    // async deleteRangeMoveLeft(workbookId: string, worksheetId: string, range: IRangeData): Promise<boolean> {
+    // async deleteRangeMoveLeft(workbookId: string, worksheetId: string, range: ISelectionRange): Promise<boolean> {
     //     const options: IDeleteRangeMoveLeftParams = {
     //         workbookId,
     //         worksheetId,
@@ -232,7 +232,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     //     return this._commandService.executeCommand(DeleteRangeMoveLeftCommand.id, options);
     // }
 
-    // async deleteRangeMoveUp(workbookId: string, worksheetId: string, range: IRangeData): Promise<boolean> {
+    // async deleteRangeMoveUp(workbookId: string, worksheetId: string, range: ISelectionRange): Promise<boolean> {
     //     const options: IDeleteRangeMoveUpParams = {
     //         workbookId,
     //         worksheetId,
@@ -244,7 +244,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     // /**
     //  * Inserts empty cells into this range. The new cells retain any formatting present in the cells previously occupying this range. Existing data in the sheet along the provided dimension is shifted away from the inserted range.
     //  */
-    // async insertRangeMoveRight(workbookId: string, worksheetId: string, range: IRangeData, destination?: IRangeData): Promise<boolean> {
+    // async insertRangeMoveRight(workbookId: string, worksheetId: string, range: ISelectionRange, destination?: ISelectionRange): Promise<boolean> {
     //     const options: IInsertRangeMoveRightParams = {
     //         workbookId,
     //         worksheetId,
@@ -254,7 +254,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     //     return this._commandService.executeCommand(InsertRangeMoveRightCommand.id, options);
     // }
 
-    // async insertRangeMoveBottom(workbookId: string, worksheetId: string, range: IRangeData, destination?: IRangeData): Promise<boolean> {
+    // async insertRangeMoveBottom(workbookId: string, worksheetId: string, range: ISelectionRange, destination?: ISelectionRange): Promise<boolean> {
     //     const options: IInsertRangeMoveBottomParams = {
     //         workbookId,
     //         worksheetId,
@@ -268,7 +268,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
     //  * Cut and paste (both format and values) from this range to the target range.
     //  * @param target A target range to copy this range to; only the top-left cell position is relevant.
     //  */
-    // // async moveTo(workbookId: string, worksheetId: string, range: IRangeData): Promise<boolean> {
+    // // async moveTo(workbookId: string, worksheetId: string, range: ISelectionRange): Promise<boolean> {
     // //     const options: IInsertRangeParams = {
     // //         workbookId,
     // //         worksheetId,

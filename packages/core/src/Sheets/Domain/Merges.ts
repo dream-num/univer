@@ -1,5 +1,7 @@
-import { Nullable, Rectangle, Tuples } from '../../Shared';
-import { IRangeData } from '../../Types/Interfaces';
+import { Rectangle } from '../../Shared/Rectangle';
+import { Tuples } from '../../Shared/Tuples';
+import { Nullable } from '../../Shared/Types';
+import { ISelectionRange } from '../../Types/Interfaces/ISelectionRange';
 import type { Worksheet } from './Worksheet';
 
 // NOTE: some methods are leaving here for future refactoring
@@ -8,7 +10,7 @@ import type { Worksheet } from './Worksheet';
  * Manage merged cells
  */
 export class Merges {
-    private _rectangleList: IRangeData[];
+    private _rectangleList: ISelectionRange[];
 
     private _worksheet: Worksheet;
 
@@ -176,13 +178,13 @@ export class Merges {
         // });
     }
 
-    getMergeData(): IRangeData[] {
+    getMergeData(): ISelectionRange[] {
         return this._rectangleList;
     }
 
-    getByRowColumn(startRow: number, endRow: number, startColumn: number, endColumn: number): Nullable<IRangeData[]>;
-    getByRowColumn(row: number, column: number): Nullable<IRangeData[]>;
-    getByRowColumn(...argument: any): Nullable<IRangeData[]> {
+    getByRowColumn(startRow: number, endRow: number, startColumn: number, endColumn: number): Nullable<ISelectionRange[]>;
+    getByRowColumn(row: number, column: number): Nullable<ISelectionRange[]>;
+    getByRowColumn(...argument: any): Nullable<ISelectionRange[]> {
         const { _rectangleList } = this;
         let target: Rectangle;
         if (Tuples.checkup(argument, Tuples.NUMBER_TYPE, Tuples.NUMBER_TYPE, Tuples.NUMBER_TYPE, Tuples.NUMBER_TYPE)) {
@@ -202,7 +204,7 @@ export class Merges {
         return rectList.length ? rectList : null;
     }
 
-    // remove(rectangle: IRangeData): void {
+    // remove(rectangle: ISelectionRange): void {
     //     const removeAction: IRemoveMergeActionData = {
     //         actionName: RemoveMergeAction.NAME,
     //         sheetId: this._worksheet.getSheetId(),
@@ -222,7 +224,7 @@ export class Merges {
         return this._rectangleList.length;
     }
 
-    // add(rectangle: IRangeData): void {
+    // add(rectangle: ISelectionRange): void {
     //     const removeAction: IRemoveMergeActionData = {
     //         actionName: RemoveMergeAction.NAME,
     //         sheetId: this._worksheet.getSheetId(),
@@ -243,7 +245,7 @@ export class Merges {
     //     this._commandManager.invoke(command);
     // }
 
-    // union(rectangle: IRangeData): IRangeData {
+    // union(rectangle: ISelectionRange): ISelectionRange {
     //     const { _rectangleList } = this;
     //     const { length } = _rectangleList;
     //     let target = new Rectangle(rectangle);
@@ -254,7 +256,7 @@ export class Merges {
     //     return target.getData();
     // }
 
-    getMergedRanges(rectangle: IRangeData): IRangeData[] {
+    getMergedRanges(rectangle: ISelectionRange): ISelectionRange[] {
         const { _rectangleList } = this;
         const { length } = _rectangleList;
         const result = [];
@@ -268,7 +270,7 @@ export class Merges {
         return result;
     }
 
-    // modifyMerge(originMerge: IRangeData[], currentMerge: IRangeData[]) {
+    // modifyMerge(originMerge: ISelectionRange[], currentMerge: ISelectionRange[]) {
     //     const removeAction: IRemoveMergeActionData = {
     //         actionName: RemoveMergeAction.NAME,
     //         sheetId: this._worksheet.getSheetId(),

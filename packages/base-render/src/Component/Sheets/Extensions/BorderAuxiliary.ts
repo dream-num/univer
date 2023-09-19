@@ -1,4 +1,4 @@
-import { BooleanNumber, IRangeData, IScale } from '@univerjs/core';
+import { BooleanNumber, IScale, ISelectionRange } from '@univerjs/core';
 
 import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
@@ -62,7 +62,7 @@ export class BorderAuxiliary extends SheetExtension {
         ctx.restore();
     }
 
-    private _clearRectangle(ctx: CanvasRenderingContext2D, scale: number, rowHeightAccumulation: number[], columnWidthAccumulation: number[], dataMergeCache?: IRangeData[]) {
+    private _clearRectangle(ctx: CanvasRenderingContext2D, scale: number, rowHeightAccumulation: number[], columnWidthAccumulation: number[], dataMergeCache?: ISelectionRange[]) {
         if (dataMergeCache == null) {
             return;
         }

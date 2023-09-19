@@ -1,4 +1,4 @@
-import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService } from '@univerjs/core';
+import { CommandType, Dimension, ICommand, ICommandService, ICurrentUniverService, ISelectionRange, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '../../Basics/Interfaces/MutationInterface';
@@ -30,7 +30,7 @@ export const AddWorksheetMergeCommand: ICommand = {
         let ranges = selections;
 
         if (params && params.value != null) {
-            const rectangles: IRangeData[] = [];
+            const rectangles: ISelectionRange[] = [];
             for (let i = 0; i < ranges.length; i++) {
                 const { startRow, endRow, startColumn, endColumn } = ranges[i];
                 if (params.value === Dimension.ROWS) {

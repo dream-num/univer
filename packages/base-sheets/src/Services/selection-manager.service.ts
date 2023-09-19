@@ -1,5 +1,5 @@
 import { ISelectionRangeWithStyle, ISelectionStyle, mergeCellHandler, NORMAL_SELECTION_PLUGIN_STYLE } from '@univerjs/base-render';
-import { IRangeData, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
+import { ISelectionRange, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -15,7 +15,7 @@ export interface ISelectionManagerInsertParam extends ISelectionManagerSearchPar
     selectionDatas: ISelectionRangeWithStyle[];
 }
 
-//{ [pluginName: string]: { [unitId: string]: { [sheetId: string]: ISelectionData[] } } }
+//{ [pluginName: string]: { [unitId: string]: { [sheetId: string]: ISelectionWithCoord[] } } }
 export type ISelectionInfo = Map<string, Map<string, Map<string, ISelectionRangeWithStyle[]>>>;
 
 /**
@@ -99,7 +99,7 @@ export class SelectionManagerService implements IDisposable {
         return this._getSelectionDatas(this._currentSelection);
     }
 
-    getRangeDatas(): Nullable<IRangeData[]> {
+    getRangeDatas(): Nullable<ISelectionRange[]> {
         const selectionDataList = this.getSelectionDatas();
         if (selectionDataList == null) {
             return;
@@ -200,7 +200,7 @@ export class SelectionManagerService implements IDisposable {
         };
     }
 
-    transformCellDataToSelectionData(row: number, column: number, mergeData: IRangeData[]): Nullable<ISelectionRangeWithStyle> {
+    transformCellDataToSelectionData(row: number, column: number, mergeData: ISelectionRange[]): Nullable<ISelectionRangeWithStyle> {
         const newCellRange = mergeCellHandler(row, column, mergeData);
 
         const newSelectionData = makeCellRangeToRangeData(newCellRange);

@@ -1,11 +1,11 @@
-import { CommandType, ICellData, ICommand, ICommandService, ICurrentUniverService, IRangeData, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
+import { CommandType, ICellData, ICommand, ICommandService, ICurrentUniverService, ISelectionRange, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
 
 export interface IMoveRangeToCommandParams {
-    destinationRange: IRangeData;
+    destinationRange: ISelectionRange;
 }
 
 export const MoveRangeToCommand: ICommand = {

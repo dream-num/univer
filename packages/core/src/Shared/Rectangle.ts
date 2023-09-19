@@ -1,11 +1,11 @@
-import { IRangeData } from '../Types/Interfaces';
+import { ISelectionRange } from '../Types/Interfaces/ISelectionRange';
 import { Tools } from './Tools';
 import { Nullable } from './Types';
 
 /**
  * A square area containing four position information: startRow, startColumn, endRow, and endColumn
  */
-export class Rectangle implements IRangeData {
+export class Rectangle implements ISelectionRange {
     startRow: number;
 
     startColumn: number;
@@ -15,7 +15,7 @@ export class Rectangle implements IRangeData {
     endColumn: number;
 
     constructor();
-    constructor(rectangle: IRangeData);
+    constructor(rectangle: ISelectionRange);
     constructor(startRow: number, startColumn: number, endRow: number, endColumn: number);
     constructor(...argument: any[]) {
         if (Tools.hasLength(argument, 0)) {
@@ -45,11 +45,11 @@ export class Rectangle implements IRangeData {
         }
     }
 
-    static equals(src: IRangeData, target: IRangeData): boolean {
+    static equals(src: ISelectionRange, target: ISelectionRange): boolean {
         return src.endRow === target.endRow && src.endColumn === target.endColumn && src.startRow === target.startRow && src.startColumn === target.startColumn;
     }
 
-    static intersects(src: IRangeData, target: IRangeData): boolean {
+    static intersects(src: ISelectionRange, target: ISelectionRange): boolean {
         const currentStartRow = src.startRow;
         const currentEndRow = src.endRow;
         const currentStartColumn = src.startColumn;
@@ -68,7 +68,7 @@ export class Rectangle implements IRangeData {
         return zx <= x && zy <= y;
     }
 
-    static getIntersects(src: IRangeData, target: IRangeData): Nullable<IRangeData> {
+    static getIntersects(src: ISelectionRange, target: ISelectionRange): Nullable<ISelectionRange> {
         const currentStartRow = src.startRow;
         const currentEndRow = src.endRow;
         const currentStartColumn = src.startColumn;

@@ -4,7 +4,7 @@
 //     BaseActionExtension,
 //     BaseActionExtensionFactory,
 //     Command,
-//     IRangeData,
+//     ISelectionRange,
 //     ISetRangeDataActionData,
 //     isFormulaString,
 //     ISheetActionData,
@@ -162,8 +162,8 @@
 //         });
 //     }
 
-//     checkArrayFormValue(row: number, column: number): Nullable<IRangeData> {
-//         let formula: Nullable<IRangeData>;
+//     checkArrayFormValue(row: number, column: number): Nullable<ISelectionRange> {
+//         let formula: Nullable<ISelectionRange>;
 //         const arrayFormulaData = this._formulaController.getDataModel().getArrayFormulaData();
 
 //         if (!arrayFormulaData) return null;
@@ -171,7 +171,7 @@
 //         Object.keys(arrayFormulaData).forEach((sheetId) => {
 //             const sheetData = arrayFormulaData[sheetId];
 
-//             sheetData.forValue((rowIndex: number, columnIndex: number, value: IRangeData) => {
+//             sheetData.forValue((rowIndex: number, columnIndex: number, value: ISelectionRange) => {
 //                 const { startRow, startColumn, endRow, endColumn } = value;
 //                 if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
 //                     formula = {

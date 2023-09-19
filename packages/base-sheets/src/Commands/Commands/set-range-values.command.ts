@@ -4,7 +4,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    IRangeData,
+    ISelectionRange,
     isICellData,
     IUndoRedoService,
     ObjectMatrix,
@@ -19,7 +19,7 @@ import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUn
 export interface ISetRangeValuesCommandParams {
     worksheetId?: string;
     workbookId?: string;
-    range?: IRangeData;
+    range?: ISelectionRange;
     value: ICellData | ICellData[][] | ObjectMatrixPrimitiveType<ICellData>;
 }
 

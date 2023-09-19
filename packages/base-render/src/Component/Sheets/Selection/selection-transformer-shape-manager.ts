@@ -1,10 +1,10 @@
 import {
     DEFAULT_WORKSHEET_COLUMN_COUNT,
     DEFAULT_WORKSHEET_ROW_COUNT,
-    ICellInfo,
-    ICellRange,
-    IRangeData,
-    ISelection,
+    ISelectionCell,
+    ISelectionCellWithCoord,
+    ISelectionRange,
+    ISelectionRangeWithCoord,
     makeCellToSelection,
     Nullable,
     Observer,
@@ -34,15 +34,15 @@ export interface ISelectionTransformerShapeManager {
     getCurrentControls(): void;
     getCurrentControl(): void;
     clearSelectionControls(): void;
-    getActiveRangeList(): Nullable<IRangeData[]>;
-    getActiveRange(): Nullable<IRangeData>;
+    getActiveRangeList(): Nullable<ISelectionRange[]>;
+    getActiveRange(): Nullable<ISelectionRange>;
     getActiveSelection(): Nullable<SelectionTransformerShape>;
     convertSelectionRangeToData(selectionRange: ISelectionRangeWithStyle): ISelectionDataWithStyle;
-    convertRangeDataToSelection(rangeData: IRangeData): ISelection;
-    convertCellRangeToInfo(cellRange: Nullable<ICellRange>): Nullable<ICellInfo>;
+    convertRangeDataToSelection(rangeData: ISelectionRange): ISelectionRangeWithCoord;
+    convertCellRangeToInfo(cellRange: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
     eventTrigger(evt: IPointerEvent | IMouseEvent, style: ISelectionStyle, zIndex: number): void;
-    // getMoveCellInfo(direction: Direction, selectionData: Nullable<ISelectionData>): Nullable<ISelectionData>;
-    // transformCellDataToSelectionData(row: number, column: number): Nullable<ISelectionData>;
+    // getMoveCellInfo(direction: Direction, selectionData: Nullable<ISelectionWithCoord>): Nullable<ISelectionWithCoord>;
+    // transformCellDataToSelectionData(row: number, column: number): Nullable<ISelectionWithCoord>;
     reset(): void;
 }
 
@@ -62,7 +62,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
     private _selectionControls: SelectionTransformerShape[] = []; // sheetID:Controls
 
-    private _startSelectionRange: ISelection;
+    private _startSelectionRange: ISelectionRangeWithCoord;
 
     private _startOffsetX: number = 0;
 
@@ -190,7 +190,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
      *
      * @returns
      */
-    getActiveRangeList(): Nullable<IRangeData[]> {
+    getActiveRangeList(): Nullable<ISelectionRange[]> {
         const controls = this.getCurrentControls();
         if (controls && controls.length > 0) {
             const selections = controls?.map((control: SelectionTransformerShape) => {
@@ -211,7 +211,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
      * TODO: 默认最后一个选区为当前激活选区，或者当前激活单元格所在选区为激活选区
      * @returns
      */
-    getActiveRange(): Nullable<IRangeData> {
+    getActiveRange(): Nullable<ISelectionRange> {
         const controls = this.getCurrentControls();
         const model = controls && controls[controls.length - 1].model;
         return (
@@ -399,7 +399,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         };
     }
 
-    convertRangeDataToSelection(rangeData: IRangeData): ISelection {
+    convertRangeDataToSelection(rangeData: ISelectionRange): ISelectionRangeWithCoord {
         const { startRow, startColumn, endRow, endColumn } = rangeData;
         const { scaleX, scaleY } = this._scene.getAncestorScale();
         const startCell = this._skeleton.getNoMergeCellPositionByIndex(startRow, startColumn, scaleX, scaleY);
@@ -417,7 +417,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         };
     }
 
-    convertCellRangeToInfo(cellRange: Nullable<ICellRange>): Nullable<ICellInfo> {
+    convertCellRangeToInfo(cellRange: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord> {
         if (cellRange == null) {
             return;
         }
@@ -499,7 +499,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         const startCell = main.getNoMergeCellPositionByIndex(finalStartRow, finalStartColumn, scaleX, scaleY);
         const endCell = main.getNoMergeCellPositionByIndex(finalEndRow, finalEndColumn, scaleX, scaleY);
 
-        const newSelectionRange: ISelection = {
+        const newSelectionRange: ISelectionRangeWithCoord = {
             startColumn: finalStartColumn,
             startRow: finalStartRow,
             endColumn: finalEndColumn,

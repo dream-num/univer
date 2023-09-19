@@ -1,6 +1,6 @@
 import { Rect, Scene } from '@univerjs/base-render';
 import { CanvasView, SheetView } from '@univerjs/base-sheets';
-import { ICurrentUniverService, IRangeData, Workbook } from '@univerjs/core';
+import { ICurrentUniverService, ISelectionRange, Workbook } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 enum ARRAY_FORMULA_LINE_MANAGER_KEY {
@@ -32,7 +32,7 @@ export class ArrayFormulaLineControl {
      */
     constructor(
         private _sheetId: string,
-        private _range: IRangeData,
+        private _range: ISelectionRange,
         @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
         @Inject(CanvasView) private readonly _canvasView: CanvasView
     ) {

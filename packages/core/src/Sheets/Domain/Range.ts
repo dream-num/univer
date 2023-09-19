@@ -2,7 +2,7 @@ import { ICurrentUniverService } from '../../services/current.service';
 import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../../Shared';
 import { DEFAULT_RANGE, DEFAULT_STYLES } from '../../Types/Const';
 import { BooleanNumber, Dimension, Direction, FontItalic, FontWeight, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../Types/Enum';
-import { IBorderData, ICellData, IDocumentData, IRangeData, IRangeType, IStyleData, ITextDecoration, ITextRotation } from '../../Types/Interfaces';
+import { IBorderData, ICellData, IDocumentData, IRangeType, ISelectionRange, IStyleData, ITextDecoration, ITextRotation } from '../../Types/Interfaces';
 import type { Worksheet } from './Worksheet';
 
 /**
@@ -26,7 +26,7 @@ type IValueOptionsType = {
  * @beta
  */
 export class Range {
-    private _rangeData: IRangeData;
+    private _rangeData: ISelectionRange;
 
     private _worksheet: Worksheet;
 
@@ -41,7 +41,7 @@ export class Range {
         }
     }
 
-    static foreach(rangeData: IRangeData, action: (row: number, column: number) => void): void {
+    static foreach(rangeData: ISelectionRange, action: (row: number, column: number) => void): void {
         const { startRow, startColumn, endRow, endColumn } = rangeData;
         for (let i = startRow; i <= endRow; i++) {
             for (let j = startColumn; j <= endColumn; j++) {
@@ -55,7 +55,7 @@ export class Range {
      *
      * @returns current range
      */
-    getRangeData(): IRangeData {
+    getRangeData(): ISelectionRange {
         return this._rangeData;
     }
 

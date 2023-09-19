@@ -1,4 +1,4 @@
-import { CellValueType, ICellData, IRangeData, ObjectMatrix } from '@univerjs/core';
+import { CellValueType, ICellData, ISelectionRange, ObjectMatrix } from '@univerjs/core';
 
 import { FunctionNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
@@ -98,7 +98,7 @@ export class Interpreter {
         const arrayFormulaData = this._unitArrayFormulaData[unitId];
 
         if (arrayFormulaData[sheetId] === undefined) {
-            arrayFormulaData[sheetId] = new ObjectMatrix<IRangeData>();
+            arrayFormulaData[sheetId] = new ObjectMatrix<ISelectionRange>();
         }
 
         const sheetData = unitData[sheetId];

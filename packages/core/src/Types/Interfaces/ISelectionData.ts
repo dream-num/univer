@@ -1,5 +1,5 @@
 import { Nullable } from '../../Shared/Types';
-import { IRangeData } from './IRangeData';
+import { ISelectionRange } from './ISelectionRange';
 
 /**
  * Properties of selection data
@@ -11,7 +11,7 @@ export interface IPosition {
     endY: number;
 }
 
-export interface ICellRange extends IRangeData {
+export interface ISingleCell {
     row: number; // current cell, if cell is in merge,  isMerged is true, If the cell is in the upper left corner, isMergedMainCell is true.
     column: number;
 
@@ -20,28 +20,31 @@ export interface ICellRange extends IRangeData {
     isMergedMainCell: boolean;
 }
 
-export interface ICellInfo extends IPosition {
-    row: number; // current cell, if cell is in merge,  isMerged is true, If the cell is in the upper left corner, isMergedMainCell is true.
-    column: number;
+export interface ISelectionRangeWithCoord extends IPosition, ISelectionRange {}
 
-    isMerged: boolean;
+export interface ISelectionCell extends ISelectionRange, ISingleCell {}
 
-    isMergedMainCell: boolean;
-
-    mergeInfo: ISelection; // merge cell, start and end is upper left cell
+export interface ISelectionCellWithCoord extends IPosition, ISingleCell {
+    mergeInfo: ISelectionRangeWithCoord; // merge cell, start and end is upper left cell
 }
 
-export interface ISelectionRange {
-    rangeData: IRangeData;
-    cellRange: Nullable<ICellRange>;
+export enum SelectionType {
+    NORMAL,
+    ROW,
+    COLUMN,
 }
 
-export interface ISelectionData {
-    selection: ISelection;
-    cellInfo: Nullable<ICellInfo>;
+export interface ISelection {
+    rangeData: ISelectionRange;
+    cellRange: Nullable<ISelectionCell>;
+    type?: SelectionType;
 }
 
-export interface ISelection extends IPosition, IRangeData {}
+export interface ISelectionWithCoord {
+    selection: ISelectionRangeWithCoord;
+    cellInfo: Nullable<ISelectionCellWithCoord>;
+    type?: SelectionType;
+}
 
 export interface ITextSelectionRangeStart {
     cursorStart: number;

@@ -1,11 +1,11 @@
-import { GroupModel, IRangeData, Nullable, Serializer } from '@univerjs/core';
+import { GroupModel, ISelectionRange, Nullable, Serializer } from '@univerjs/core';
 
 import { IFilter, IFilterCriteriaColumn } from '../IData/FilterType';
 import { FilterCriteria } from './FilterCriteria';
 import { FilterCriteriaColumn } from './FilterCriteriaColumn';
 
 export class Filter extends Serializer implements GroupModel<{ [column: number]: FilterCriteriaColumn }> {
-    private _range: IRangeData;
+    private _range: ISelectionRange;
 
     private _sheetId: string;
 
@@ -13,7 +13,7 @@ export class Filter extends Serializer implements GroupModel<{ [column: number]:
         [column: number]: FilterCriteriaColumn;
     };
 
-    constructor(sheetId: string, range: IRangeData) {
+    constructor(sheetId: string, range: ISelectionRange) {
         super();
         this._sheetId = sheetId;
         this._range = range;

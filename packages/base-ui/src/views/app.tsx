@@ -96,6 +96,12 @@ export function App(props: IUniverAppProps) {
 
     const [locale, setLocale] = useState<LocaleType>(localeService.getLocale().getCurrentLocale());
 
+    useEffect(() => {
+        localeService.getLocale().locale$.subscribe((locale) => {
+            locale && setLocale(locale);
+        });
+    });
+
     return (
         <AppContext.Provider value={{ injector, localeService, locale, componentManager, zIndexManager, observerManager }}>
             {/* TODO: UI here is not fine tuned */}
@@ -125,7 +131,6 @@ export function App(props: IUniverAppProps) {
                     onChange={(e) => {
                         const value = e.target.value as LocaleType;
                         localeService.setLocale(value);
-                        setLocale(value);
                     }}
                 >
                     <option value={LocaleType.EN}>English</option>

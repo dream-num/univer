@@ -1,8 +1,7 @@
-import { Disposable, ICommandService, toDisposable } from '@univerjs/core';
+import { Disposable, ICommandService, IContextService, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
 import { fromDocumentEvent } from '../../Common/lifecycle';
-import { IContextService } from '../context/context.service';
 import { IPlatformService } from '../platform/platform.service';
 import { MetaKeys } from './keycode';
 

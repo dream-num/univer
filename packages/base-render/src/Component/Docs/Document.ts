@@ -1,9 +1,22 @@
 import './Extensions';
 
-import { BooleanNumber, HorizontalAlign, Nullable, Observable, Observer, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import {
+    BooleanNumber,
+    HorizontalAlign,
+    Nullable,
+    Observable,
+    Observer,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../Basics/Draw';
-import { IDocumentSkeletonCached, IDocumentSkeletonPage, LineType, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
+import {
+    IDocumentSkeletonCached,
+    IDocumentSkeletonPage,
+    LineType,
+    PageLayoutType,
+} from '../../Basics/IDocumentSkeletonCached';
 import { INodeInfo } from '../../Basics/Interfaces';
 import { degToRad, fixLineWidthByScale, getScale } from '../../Basics/Tools';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
@@ -175,9 +188,22 @@ export class Documents extends DocComponent {
         if (!this._hasEditor) {
             return;
         }
-        const { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onKeydownObservable, onSelectionStartObservable } =
-            this._editor;
-        return { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onKeydownObservable, onSelectionStartObservable };
+        const {
+            onInputObservable,
+            onCompositionstartObservable,
+            onCompositionupdateObservable,
+            onCompositionendObservable,
+            onKeydownObservable,
+            onSelectionStartObservable,
+        } = this._editor;
+        return {
+            onInputObservable,
+            onCompositionstartObservable,
+            onCompositionupdateObservable,
+            onCompositionendObservable,
+            onKeydownObservable,
+            onSelectionStartObservable,
+        };
     }
 
     override remainActiveSelection() {
@@ -215,11 +241,6 @@ export class Documents extends DocComponent {
         const documentSkeleton = this.getSkeleton();
         if (!documentSkeleton) {
             return;
-        }
-
-        const isDrawingCellEditor = documentSkeleton.getModel().snapshot.id === 'sheet.model.cell-editor';
-        if (isDrawingCellEditor) {
-            console.log('drawing', documentSkeleton, documentSkeleton.getModel().snapshot);
         }
 
         // if (this.isCalculateSkeleton) {
@@ -263,8 +284,18 @@ export class Documents extends DocComponent {
                 isRotateNonEastAsian = BooleanNumber.FALSE,
             } = renderConfig;
 
-            const horizontalOffsetNoAngle = this._horizontalHandler(pageWidth, pagePaddingLeft, pagePaddingRight, horizontalAlign);
-            const verticalOffsetNoAngle = this._verticalHandler(pageHeight, pagePaddingTop, pagePaddingBottom, verticalAlign);
+            const horizontalOffsetNoAngle = this._horizontalHandler(
+                pageWidth,
+                pagePaddingLeft,
+                pagePaddingRight,
+                horizontalAlign
+            );
+            const verticalOffsetNoAngle = this._verticalHandler(
+                pageHeight,
+                pagePaddingTop,
+                pagePaddingBottom,
+                verticalAlign
+            );
             const alignOffsetNoAngle = Vector2.create(horizontalOffsetNoAngle, verticalOffsetNoAngle);
 
             const centerAngle = degToRad(centerAngleDeg);
@@ -297,11 +328,14 @@ export class Documents extends DocComponent {
                     let alignOffset;
                     let rotateTranslateXListApply = null;
                     if (vertexAngle !== 0) {
-                        const { rotateTranslateXList, rotatedHeight, rotatedWidth, fixOffsetX, fixOffsetY, rotateTranslateY } = getRotateOffsetAndFarthestHypotenuse(
-                            lines,
-                            columnWidth,
-                            vertexAngle
-                        );
+                        const {
+                            rotateTranslateXList,
+                            rotatedHeight,
+                            rotatedWidth,
+                            fixOffsetX,
+                            fixOffsetY,
+                            rotateTranslateY,
+                        } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, vertexAngle);
 
                         let exceedWidthFix = rotatedWidth;
                         if (rotatedHeight > this.height && wrapStrategy !== WrapStrategy.WRAP) {
@@ -310,9 +344,19 @@ export class Documents extends DocComponent {
                             }
                         }
 
-                        const horizontalOffset = this._horizontalHandler(exceedWidthFix, pagePaddingLeft, pagePaddingRight, horizontalAlign);
+                        const horizontalOffset = this._horizontalHandler(
+                            exceedWidthFix,
+                            pagePaddingLeft,
+                            pagePaddingRight,
+                            horizontalAlign
+                        );
 
-                        const verticalOffset = this._verticalHandler(rotatedHeight, pagePaddingTop, pagePaddingBottom, verticalAlign);
+                        const verticalOffset = this._verticalHandler(
+                            rotatedHeight,
+                            pagePaddingTop,
+                            pagePaddingBottom,
+                            verticalAlign
+                        );
 
                         let exceedHeightFix = verticalOffset - fixOffsetY;
                         if (rotatedHeight > this.height) {
@@ -376,10 +420,19 @@ export class Documents extends DocComponent {
 
                                     const { width: spanWidth, left: spanLeft, paddingLeft } = span;
                                     const { x: translateX, y: translateY } = this._drawLiquid;
-                                    const originTranslate = Vector2.create(fixLineWidthByScale(translateX, scale), fixLineWidthByScale(translateY, scale));
-                                    const centerPoint = Vector2.create(fixLineWidthByScale(spanWidth / 2, scale), fixLineWidthByScale(lineHeight / 2, scale));
+                                    const originTranslate = Vector2.create(
+                                        fixLineWidthByScale(translateX, scale),
+                                        fixLineWidthByScale(translateY, scale)
+                                    );
+                                    const centerPoint = Vector2.create(
+                                        fixLineWidthByScale(spanWidth / 2, scale),
+                                        fixLineWidthByScale(lineHeight / 2, scale)
+                                    );
                                     const spanStartPoint = calculateRectRotate(
-                                        originTranslate.addByPoint(fixLineWidthByScale(spanLeft + paddingLeft, scale), 0),
+                                        originTranslate.addByPoint(
+                                            fixLineWidthByScale(spanLeft + paddingLeft, scale),
+                                            0
+                                        ),
                                         centerPoint,
                                         centerAngle,
                                         vertexAngle,
@@ -387,7 +440,10 @@ export class Documents extends DocComponent {
                                     );
 
                                     const spanPointWithFont = calculateRectRotate(
-                                        originTranslate.addByPoint(fixLineWidthByScale(spanLeft + maxLineAscSin + paddingLeft, scale), fixLineWidthByScale(maxLineAscCos, scale)),
+                                        originTranslate.addByPoint(
+                                            fixLineWidthByScale(spanLeft + maxLineAscSin + paddingLeft, scale),
+                                            fixLineWidthByScale(maxLineAscCos, scale)
+                                        ),
                                         centerPoint,
                                         centerAngle,
                                         vertexAngle,
@@ -420,7 +476,12 @@ export class Documents extends DocComponent {
 
             this._resetRotation(ctx, finalAngle);
 
-            const { x, y } = this._drawLiquid.translatePage(page, this.pageLayoutType, this.pageMarginLeft, this.pageMarginTop);
+            const { x, y } = this._drawLiquid.translatePage(
+                page,
+                this.pageLayoutType,
+                this.pageMarginLeft,
+                this.pageMarginTop
+            );
             pageLeft += x;
             pageTop += y;
         }
@@ -651,7 +712,12 @@ export class Documents extends DocComponent {
         return nearestNodeList[miniValueIndex];
     }
 
-    private _horizontalHandler(pageWidth: number, pagePaddingLeft: number, pagePaddingRight: number, horizontalAlign: HorizontalAlign) {
+    private _horizontalHandler(
+        pageWidth: number,
+        pagePaddingLeft: number,
+        pagePaddingRight: number,
+        horizontalAlign: HorizontalAlign
+    ) {
         let offsetLeft = 0;
         if (horizontalAlign === HorizontalAlign.CENTER) {
             offsetLeft = (this.width - pageWidth) / 2;
@@ -664,7 +730,12 @@ export class Documents extends DocComponent {
         return offsetLeft;
     }
 
-    private _verticalHandler(pageHeight: number, pagePaddingTop: number, pagePaddingBottom: number, verticalAlign: VerticalAlign) {
+    private _verticalHandler(
+        pageHeight: number,
+        pagePaddingTop: number,
+        pagePaddingBottom: number,
+        verticalAlign: VerticalAlign
+    ) {
         let offsetTop = 0;
         if (verticalAlign === VerticalAlign.MIDDLE) {
             offsetTop = (this.height - pageHeight) / 2;

@@ -2,12 +2,11 @@ import { Inject } from '@wendellhu/redi';
 
 import { ObserverManager } from '../../Observer';
 import { ICurrentUniverService } from '../../services/current.service';
-import { Nullable, ObjectMatrix, Tools } from '../../Shared';
+import { Nullable, ObjectMatrix, Rectangle, Tools } from '../../Shared';
 import { DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber, SheetTypes } from '../../Types/Enum';
 import { ICellData, IRangeData, IRangeStringData, IRangeType, IWorksheetConfig } from '../../Types/Interfaces';
 import { ColumnManager } from './ColumnManager';
-import { Merges } from './Merges';
 import { Range } from './Range';
 import { RangeList } from './RangeList';
 import { RowManager } from './RowManager';
@@ -23,11 +22,9 @@ import { RowManager } from './RowManager';
  * @beta
  */
 export class Worksheet {
-    protected _config: IWorksheetConfig;
+    protected _snapshot: IWorksheetConfig;
 
     protected _initialized: boolean;
-
-    protected _merges: Merges;
 
     protected _sheetId: string;
 
@@ -38,11 +35,11 @@ export class Worksheet {
     protected _columnManager: ColumnManager;
 
     constructor(
-        customConfig: Partial<IWorksheetConfig>,
+        snapshot: Partial<IWorksheetConfig>,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
-        const config: IWorksheetConfig = {
+        const mergedSnapshot: IWorksheetConfig = {
             ...DEFAULT_WORKSHEET,
             mergeData: [],
             hideRow: [],
@@ -61,25 +58,23 @@ export class Worksheet {
             selections: ['A1'],
             rightToLeft: BooleanNumber.FALSE,
             pluginMeta: {},
-            ...customConfig,
+            ...snapshot,
         };
 
-        this._config = config;
+        this._snapshot = mergedSnapshot;
 
-        const { columnData, rowData, cellData } = this._config;
-        this._sheetId = this._config.id ?? Tools.generateRandomId(6);
+        const { columnData, rowData, cellData } = this._snapshot;
+        this._sheetId = this._snapshot.id ?? Tools.generateRandomId(6);
         this._initialized = false;
         this._cellData = new ObjectMatrix<ICellData>(cellData);
         this._rowManager = new RowManager(this, rowData);
         this._columnManager = new ColumnManager(this, columnData);
-        this._initialize();
     }
 
     /**
      * Returns WorkSheet Cell Data Matrix
      * @returns
      */
-    // TODO: change its name to getWorksheetMatrix?
     getCellMatrix(): ObjectMatrix<ICellData> {
         return this._cellData;
     }
@@ -113,7 +108,7 @@ export class Worksheet {
      * @returns name of the sheet
      */
     getName(): string {
-        return this._config.name;
+        return this._snapshot.name;
     }
 
     /**
@@ -122,31 +117,39 @@ export class Worksheet {
      * @deprecated
      */
     clone(): Worksheet {
-        const { _config } = this;
+        const { _snapshot: _config } = this;
         const copy = Tools.deepClone(_config);
         return new Worksheet(copy, this._observerManager, this._currentUniverService);
     }
 
-    /**
-     * Returns WorkSheet Merges Manage
-     *
-     * @returns merge instance
-     */
-    getMerges(): Merges {
-        return this._merges;
+    getMergeData(): IRangeData[] {
+        return this._snapshot.mergeData;
+    }
+
+    getMergedCells(row: number, col: number): Nullable<IRangeData[]> {
+        const _rectangleList = this._snapshot.mergeData;
+        const rectList = [];
+        const target = new Rectangle(row, col, row, col);
+        for (let i = 0; i < _rectangleList.length; i++) {
+            const rectangle = _rectangleList[i];
+            if (target!.intersects(new Rectangle(rectangle))) {
+                // return rectangle;
+                rectList.push(rectangle);
+            }
+        }
+
+        return rectList.length ? rectList : null;
     }
 
     /**
-     * Returns Sheet Data To Array
-     * @remarks {@link ICellData}  data type of cell.
-     * @returns Sheet Data To Array
+     * Get cell matrix from a given range and pick out non-first cells of merged cells.
      */
-    getSheetData(): ICellData[][] {
-        // TODO: Whether to support multiple types, the length attribute will be used in other methods
-        // TODO:
-        // return this._cellData.toArray();
-        return [];
+    getMatrixWithMergedCells(row: number, col: number, endRow: number, endCol: number): ObjectMatrix<ICellData> {
+        // TODO@wzhudev: implement this method
+        // const mergedCellsInRange = this.
     }
+
+    // WTF: this function signature is so ridiculous...
 
     /**
      * Returns User Selection Range
@@ -240,7 +243,7 @@ export class Worksheet {
      * @returns WorkSheet Status
      */
     getStatus() {
-        const { _config } = this;
+        const { _snapshot: _config } = this;
         return _config.status;
     }
 
@@ -249,11 +252,7 @@ export class Worksheet {
      * @return zoomRatio
      */
     getZoomRatio(): number {
-        return this._config.zoomRatio || 1;
-    }
-
-    getMergeData(): IRangeData[] {
-        return this._config.mergeData;
+        return this._snapshot.zoomRatio || 1;
     }
 
     /**
@@ -261,7 +260,7 @@ export class Worksheet {
      * @returns WorkSheet Configures
      */
     getConfig(): IWorksheetConfig {
-        return this._config;
+        return this._snapshot;
     }
 
     /**
@@ -269,7 +268,7 @@ export class Worksheet {
      * @returns the number of frozen rows
      */
     getFrozenRows(): number {
-        return this._config.freezeRow;
+        return this._snapshot.freezeRow;
     }
 
     /**
@@ -286,7 +285,7 @@ export class Worksheet {
      * @returns the number of frozen columns
      */
     getFrozenColumns(): number {
-        return this._config.freezeColumn;
+        return this._snapshot.freezeColumn;
     }
 
     /**
@@ -294,7 +293,7 @@ export class Worksheet {
      * @returns the current number of columns in the sheet, regardless of content
      */
     getMaxColumns(): number {
-        const { _config } = this;
+        const { _snapshot: _config } = this;
         const { columnCount } = _config;
         return columnCount;
     }
@@ -304,7 +303,7 @@ export class Worksheet {
      * @returns the current number of rows in the sheet, regardless of content
      */
     getMaxRows(): number {
-        const { _config } = this;
+        const { _snapshot: _config } = this;
         const { rowCount } = _config;
         return rowCount;
     }
@@ -314,7 +313,7 @@ export class Worksheet {
      * @returns the type of the sheet
      */
     getType(): SheetTypes {
-        const { _config } = this;
+        const { _snapshot: _config } = this;
         const { type } = _config;
         return type;
     }
@@ -324,7 +323,7 @@ export class Worksheet {
      * @returns Row Count
      */
     getRowCount(): number {
-        return this._config.rowCount;
+        return this._snapshot.rowCount;
     }
 
     /**
@@ -332,7 +331,7 @@ export class Worksheet {
      * @returns Column Count
      */
     getColumnCount(): number {
-        return this._config.columnCount;
+        return this._snapshot.columnCount;
     }
 
     /**
@@ -355,7 +354,7 @@ export class Worksheet {
      * @returns hidden status of sheet
      */
     isSheetHidden(): BooleanNumber {
-        return this._config.hidden;
+        return this._snapshot.hidden;
     }
 
     /**
@@ -363,7 +362,7 @@ export class Worksheet {
      * @returns Gridlines Hidden Status
      */
     hasHiddenGridlines(): Boolean {
-        const { _config } = this;
+        const { _snapshot: _config } = this;
         const { showGridlines } = _config;
         if (showGridlines === 0) {
             return true;
@@ -376,7 +375,7 @@ export class Worksheet {
      * @returns the sheet tab color or null
      */
     getTabColor(): Nullable<string> {
-        const { _config } = this;
+        const { _snapshot: _config } = this;
         const { tabColor } = _config;
         return tabColor;
     }
@@ -404,7 +403,7 @@ export class Worksheet {
      * @returns true if this sheet layout is right-to-left. Returns false if the sheet uses the default left-to-right layout.
      */
     isRightToLeft(): BooleanNumber {
-        const { _config } = this;
+        const { _snapshot: _config } = this;
         const { rightToLeft } = _config;
         return rightToLeft;
     }
@@ -415,7 +414,7 @@ export class Worksheet {
      * @returns information stored by the plugin
      */
     getPluginMeta<T>(name: string): T {
-        return this._config.pluginMeta[name];
+        return this._snapshot.pluginMeta[name];
     }
 
     /**
@@ -425,7 +424,7 @@ export class Worksheet {
      * @returns
      */
     setPluginMeta<T>(name: string, value: T) {
-        this._config.pluginMeta[name] = value;
+        this._snapshot.pluginMeta[name] = value;
     }
 
     /**
@@ -452,7 +451,12 @@ export class Worksheet {
      * @param numColumns column count
      * @returns the rectangular grid of values for this range starting at the given coordinates. A -1 value given as the row or column position is equivalent to getting the very last row or column that has data in the sheet.
      */
-    getSheetValues(startRow: number, startColumn: number, numRows: number, numColumns: number): Array<Array<Nullable<ICellData>>> {
+    getSheetValues(
+        startRow: number,
+        startColumn: number,
+        numRows: number,
+        numColumns: number
+    ): Array<Array<Nullable<ICellData>>> {
         const range = new Range(
             this,
             {
@@ -473,10 +477,5 @@ export class Worksheet {
     getDataRange(): Range {
         const range = new Range(this, this._cellData.getRange(), this._currentUniverService);
         return range;
-    }
-
-    private _initialize(): void {
-        // this._selection = new Selection(this);
-        this._merges = new Merges(this, this._config.mergeData);
     }
 }

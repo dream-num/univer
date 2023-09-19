@@ -1,5 +1,5 @@
-import { FOCUSING_DOC, IShortcutItem, KeyCode } from '@univerjs/base-ui';
-import { Direction } from '@univerjs/core';
+import { IShortcutItem, KeyCode } from '@univerjs/base-ui';
+import { Direction, FOCUSING_DOC } from '@univerjs/core';
 
 import { MoveCursorOperation } from '../commands/operations/cursor.operation';
 

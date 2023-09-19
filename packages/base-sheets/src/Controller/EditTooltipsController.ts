@@ -9,7 +9,10 @@ export class EditTooltipsController {
 
     _layer: Layer;
 
-    constructor(@IRenderingEngine private readonly _engine: Engine, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(
+        @IRenderingEngine private readonly _engine: Engine,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+    ) {
         this._editTooltipsPage = new Map();
     }
 
@@ -54,18 +57,21 @@ export class EditTooltipsController {
     }
 
     setRowColumn(key: string, sheetId: string, row: number, column: number): void {
-        const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
+        const sheet = this._currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getSheetBySheetId(sheetId);
         const editTooltips = this.createIfEditTooltips(key, sheetId);
         if (sheet) {
-            const merges = sheet.getMerges().getByRowColumn(row, column);
+            const mergedCells = sheet.getMergedCells(row, column);
             const rowTitle = sheet.getConfig().rowTitle;
             const columnTitle = sheet.getConfig().columnTitle;
             let left = rowTitle.width ?? 0;
             let top = columnTitle.height ?? 0;
             let height = 0;
             let width = 0;
-            if (merges) {
-                const merge = merges[0];
+            if (mergedCells) {
+                const merge = mergedCells[0];
                 for (let i = merge.startColumn; i <= merge.endColumn; i++) {
                     width += sheet.getColumnWidth(i);
                 }

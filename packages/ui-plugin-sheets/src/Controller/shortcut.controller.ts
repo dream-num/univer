@@ -32,11 +32,19 @@ import {
     MoveSelectionTabShortcutItem,
     MoveSelectionUpShortcutItem,
 } from './shortcuts/selection.shortcut';
-import { SetBoldShortcutItem, SetItalicShortcutItem, SetStrikeThroughShortcutItem, SetUnderlineShortcutItem } from './shortcuts/style.shortcut';
+import {
+    SetBoldShortcutItem,
+    SetItalicShortcutItem,
+    SetStrikeThroughShortcutItem,
+    SetUnderlineShortcutItem,
+} from './shortcuts/style.shortcut';
 import { ClearSelectionValueShortcutItem } from './shortcuts/value.shortcut';
 
 export class DesktopSheetShortcutController extends Disposable {
-    constructor(@IShortcutService private readonly _shortcutService: IShortcutService, @ICommandService private readonly _commandService: ICommandService) {
+    constructor(
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
         super();
 
         [

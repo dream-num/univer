@@ -1,4 +1,9 @@
-import { ISelectionRangeWithStyle, ISelectionStyle, mergeCellHandler, NORMAL_SELECTION_PLUGIN_STYLE } from '@univerjs/base-render';
+import {
+    ISelectionRangeWithStyle,
+    ISelectionStyle,
+    mergeCellHandler,
+    NORMAL_SELECTION_PLUGIN_STYLE,
+} from '@univerjs/base-render';
 import { IRangeData, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
@@ -50,7 +55,9 @@ export class SelectionManagerService implements IDisposable {
         return this._selectionInfo;
     }
 
-    getSelectionDatasByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionRangeWithStyle[]>> {
+    getSelectionDatasByParam(
+        param: Nullable<ISelectionManagerSearchParam>
+    ): Readonly<Nullable<ISelectionRangeWithStyle[]>> {
         return this._getSelectionDatas(param);
     }
 
@@ -155,7 +162,11 @@ export class SelectionManagerService implements IDisposable {
         return NORMAL_SELECTION_PLUGIN_STYLE;
     }
 
-    transformCellDataToSelectionData(row: number, column: number, mergeData: IRangeData[]): Nullable<ISelectionRangeWithStyle> {
+    transformCellDataToSelectionData(
+        row: number,
+        column: number,
+        mergeData: IRangeData[]
+    ): Nullable<ISelectionRangeWithStyle> {
         const newCellRange = mergeCellHandler(row, column, mergeData);
 
         const newSelectionData = makeCellRangeToRangeData(newCellRange);
@@ -183,13 +194,17 @@ export class SelectionManagerService implements IDisposable {
         this._selectionInfo$.next(this._getSelectionDatas(param));
     }
 
-    private _getFirstByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionRangeWithStyle>> {
+    private _getFirstByParam(
+        param: Nullable<ISelectionManagerSearchParam>
+    ): Readonly<Nullable<ISelectionRangeWithStyle>> {
         const selectionData = this._getSelectionDatas(param);
 
         return selectionData?.[0];
     }
 
-    private _getLastByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionRangeWithStyle>> {
+    private _getLastByParam(
+        param: Nullable<ISelectionManagerSearchParam>
+    ): Readonly<Nullable<ISelectionRangeWithStyle>> {
         const selectionData = this._getSelectionDatas(param);
 
         return selectionData?.[selectionData.length - 1];

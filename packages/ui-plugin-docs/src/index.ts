@@ -1,2 +1,2 @@
 export * from './Basics';
-export * from './DocUIPlugin';
+export * from './doc-ui-plugin';

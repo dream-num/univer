@@ -9,10 +9,12 @@ export type ObjectMatrixPrimitiveType<T> = {
     [key: number]: { [key: number]: T };
 };
 
+// TODO: this is not a good name
+
 /**
  * A two-dimensional array represented by a two-level deep object and provides an array-like API
-
- @beta
+ *
+ * @beta
  */
 export class ObjectMatrix<T> {
     private _option: ObjectArray<ObjectArrayPrimitiveType<T>>;

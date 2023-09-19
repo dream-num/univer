@@ -1,11 +1,11 @@
 import { createIdentifier, IAccessor, IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { Disposable, toDisposable } from '../../Shared/Lifecycle';
+import { Disposable, toDisposable } from '../../Shared/lifecycle';
 import { CommandService, CommandType, ICommand, ICommandService } from '../command/command.service';
 import { ICurrentUniverService } from '../current.service';
 
-// TODO:: an undo redo element may be mergable to another undo redo element
+// TODO:: an undo redo element may be mergeable to another undo redo element
 
 interface IUndoRedoItem {
     /** URI maps to unitId for UniverSheet / UniverDoc / UniverSlide */
@@ -51,7 +51,10 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
 
     private readonly _redoStacks = new Map<string, IUndoRedoItem[]>();
 
-    constructor(@ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService, @ICommandService private readonly _commandService: CommandService) {
+    constructor(
+        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @ICommandService private readonly _commandService: CommandService
+    ) {
         super();
 
         this.undoRedoStatus$ = this._undoRedoStatus$.asObservable();

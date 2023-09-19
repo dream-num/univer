@@ -4,12 +4,12 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { DefaultDocUiConfig, IDocUIPluginConfig, installObserver } from './Basics';
 import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { AppUIController } from './Controller';
+import { DocClipboardController } from './Controller/clipboard.controller';
 import { en, zh } from './Locale';
+import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 
 export class DocUIPlugin extends Plugin<any> {
     static override type = PluginType.Doc;
-
-    private _appUIController: AppUIController;
 
     constructor(
         private readonly _config: IDocUIPluginConfig,
@@ -19,7 +19,7 @@ export class DocUIPlugin extends Plugin<any> {
         super(DOC_UI_PLUGIN_NAME);
 
         this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);
-        this._initializeDependencies(_injector);
+        this._initDependencies(_injector);
     }
 
     override onMounted(): void {
@@ -30,14 +30,17 @@ export class DocUIPlugin extends Plugin<any> {
 
         installObserver(this);
 
-        this._appUIController = this._injector.get(AppUIController);
+        this._initModules();
     }
 
     override onDestroy(): void {}
 
-    private _initializeDependencies(injector: Injector) {
+    private _initDependencies(injector: Injector) {
         const dependencies: Dependency[] = [
+            [IDocClipboardService, { useClass: DocClipboardService }],
+            [DocClipboardController],
             [
+                // controllers
                 AppUIController,
                 {
                     useFactory: () => this._injector.createInstance(AppUIController, this._config),
@@ -48,5 +51,10 @@ export class DocUIPlugin extends Plugin<any> {
         dependencies.forEach((d) => {
             injector.add(d);
         });
+    }
+
+    private _initModules(): void {
+        this._injector.get(AppUIController);
+        this._injector.get(DocClipboardController).initialize();
     }
 }

@@ -1,6 +1,8 @@
 import { createIdentifier, IAccessor, IDisposable, Inject, Injector, Optional, SkipSelf } from '@wendellhu/redi';
 
-import { toDisposable } from '../../Shared/Lifecycle';
+import { toDisposable } from '../../Shared/lifecycle';
+import { IKeyValue } from '../../Shared/Types';
+import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
 
 export const enum CommandType {
@@ -8,7 +10,7 @@ export const enum CommandType {
     COMMAND = 0,
     /** An operation that do not require conflict resolve.  */
     OPERATION = 1,
-    /** An operation that need to be resolved before applicated on peer client. */
+    /** An operation that need to be resolved before applied on peer client. */
     MUTATION = 2,
 }
 
@@ -22,6 +24,14 @@ export interface ICommand<P extends object = object, R = boolean> {
     handler(accessor: IAccessor, params?: P): Promise<R>;
 }
 
+export interface IMultiCommand<P extends object = object, R = boolean> extends ICommand<P, R> {
+    name: string;
+    multi: true;
+    priority: number;
+
+    preconditions?: (contextService: IContextService) => boolean;
+}
+
 /**
  * Mutation would change the model of Univer applications.
  */
@@ -32,7 +42,7 @@ export interface IMutation<P extends object = object, R = boolean> extends IComm
 
 /**
  * Operation would change the state of Univer applications. State should only be in memory and does not
- * require confliction resolution.
+ * require conflicting resolution.
  */
 export interface IOperation<P extends object = object, R = boolean> extends ICommand<P, R> {
     type: CommandType.OPERATION;
@@ -41,8 +51,8 @@ export interface IOperation<P extends object = object, R = boolean> extends ICom
 /**
  * The command info, only a command id and responsible params
  */
+// TODO: change object to serializable interface type
 export interface ICommandInfo<T extends object = object> {
-    // TODO: change object to serializable interface type
     id: string;
 
     /**
@@ -60,7 +70,13 @@ export type CommandListener = (commandInfo: Readonly<ICommandInfo>) => void;
 export interface ICommandService {
     registerCommand(command: ICommand): IDisposable;
 
-    executeCommand<P extends object = object, R = boolean>(id: string, params?: P, options?: IExecutionOptions): Promise<R> | R;
+    registerAsMultipleCommand(command: ICommand): IDisposable;
+
+    executeCommand<P extends object = object, R = boolean>(
+        id: string,
+        params?: P,
+        options?: IExecutionOptions
+    ): Promise<R> | R;
 
     /**
      * Register a hook that will be triggered when the
@@ -68,7 +84,10 @@ export interface ICommandService {
      * @param id the command that will be fired.
      * @param callback the callback function that would be called
      */
-    onCommandWillExecute<P extends object = object>(id: string, callback: (params?: P) => ICommandInfo[][]): IDisposable;
+    onCommandWillExecute<P extends object = object>(
+        id: string,
+        callback: (params?: P) => ICommandInfo[][]
+    ): IDisposable;
 
     /**
      * The method that would be trigger when a command is executing. Gather all interceptors and middlewares.
@@ -128,6 +147,8 @@ export class CommandService implements ICommandService {
 
     private readonly _commandExecutedListeners: CommandListener[] = [];
 
+    private _multiCommandDisposables = new Map<string, IDisposable>();
+
     private _commandExecutingLevel = 0;
 
     constructor(
@@ -138,11 +159,19 @@ export class CommandService implements ICommandService {
         this._commandRegistry = new CommandRegistry();
     }
 
+    // TODO: support registering to multi command
     registerCommand(command: ICommand): IDisposable {
         return this._registerCommand(command, this._injector);
     }
 
-    onCommandWillExecute<P extends object = object>(id: string, callback: (params?: P) => ICommandInfo[][]): IDisposable {
+    registerAsMultipleCommand(command: ICommand): IDisposable {
+        return this._registerMultiCommand(command, this._injector);
+    }
+
+    onCommandWillExecute<P extends object = object>(
+        id: string,
+        callback: (params?: P) => ICommandInfo[][]
+    ): IDisposable {
         if (this._parentCommandService) {
             return this._parentCommandService.onCommandWillExecute(id, callback);
         }
@@ -230,8 +259,45 @@ export class CommandService implements ICommandService {
         return this._commandRegistry.registerCommand(command, injector);
     }
 
-    private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, injector: Injector, params?: P): Promise<R> {
-        this._log.log(`${'|-'.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`);
+    private _registerMultiCommand(command: ICommand, injector: Injector): IDisposable {
+        if (this._parentCommandService) {
+            return this._parentCommandService._registerMultiCommand(command, injector);
+        }
+
+        // compose a multi command and register it
+        const registry = this._commandRegistry.getCommand(command.id);
+        let multiCommand: MultiCommand;
+        if (!registry) {
+            multiCommand = new MultiCommand(command.id);
+            this._multiCommandDisposables.set(
+                command.id,
+                this._commandRegistry.registerCommand(multiCommand, this._injector)
+            );
+        } else {
+            if ((registry[0] as IKeyValue).multi !== true) {
+                throw new Error('Command has registered as a single command.');
+            } else {
+                multiCommand = registry[0] as MultiCommand;
+            }
+        }
+
+        const commandDisposable = multiCommand.registerImplementation(command as IMultiCommand, injector);
+        return toDisposable(() => {
+            commandDisposable.dispose();
+            if (!multiCommand.hasImplementations()) {
+                this._multiCommandDisposables.get(command.id)?.dispose();
+            }
+        });
+    }
+
+    private async _execute<P extends object, R = boolean>(
+        command: ICommand<P, R>,
+        injector: Injector,
+        params?: P
+    ): Promise<R> {
+        this._log.log(
+            `${'|-'.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`
+        );
 
         this._commandExecutingLevel++;
         let result: R | boolean;
@@ -247,4 +313,57 @@ export class CommandService implements ICommandService {
 
         return result;
     }
+}
+
+class MultiCommand implements IMultiCommand {
+    readonly name: string;
+
+    readonly multi = true;
+
+    readonly type = CommandType.COMMAND;
+
+    readonly priority: number = 0;
+
+    private readonly _implementations: Array<{ command: IMultiCommand; injector: Injector }> = [];
+
+    constructor(readonly id: string) {
+        this.name = id;
+    }
+
+    registerImplementation(implementation: IMultiCommand, injector: Injector): IDisposable {
+        const registry = { command: implementation, injector };
+        this._implementations.push(registry);
+        this._implementations.sort((a, b) => b.command.priority - a.command.priority);
+
+        return toDisposable(() => {
+            const index = this._implementations.indexOf(registry);
+            this._implementations.splice(index, 1);
+        });
+    }
+
+    hasImplementations(): boolean {
+        return this._implementations.length > 0;
+    }
+
+    handler = async (accessor: IAccessor, params?: object | undefined): Promise<boolean> => {
+        if (!this._implementations.length) {
+            return false;
+        }
+
+        const logService = accessor.get(ILogService);
+        const contextService = accessor.get(IContextService);
+
+        for (const item of this._implementations) {
+            const preconditions = item.command.preconditions;
+            if (preconditions?.(contextService)) {
+                logService.log(`[MultiCommand]: executing implementation "${item.command.name}".`);
+                const result = await item.injector.invoke(item.command.handler, params);
+                if (result) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    };
 }

@@ -14,6 +14,8 @@ import { IRowData } from './IRowData';
 //     visibility?: DeveloperMetadataVisibility;
 // };
 
+// TODO: name of the interface is not accurate, should be IWorksheetSnapshot
+
 /**
  * Properties of a worksheet's configuration
  *

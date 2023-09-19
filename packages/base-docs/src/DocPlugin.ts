@@ -1,5 +1,5 @@
 import { Engine } from '@univerjs/base-render';
-import { ContextService, DesktopPlatformService, IContextService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
+import { DesktopPlatformService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
 import { ICommand, ICommandService, ICurrentUniverService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
@@ -164,7 +164,6 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
             [
                 [CanvasView, { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) }], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
                 [IPlatformService, { useClass: DesktopPlatformService }],
-                [IContextService, { useClass: ContextService }],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
 

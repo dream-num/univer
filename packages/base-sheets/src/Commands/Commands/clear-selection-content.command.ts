@@ -2,8 +2,11 @@ import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRed
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../Services/selection-manager.service';
-import { ISetRangeStyleMutationParams, SetRangeStyleMutation, SetRangeStyleUndoMutationFactory } from '../Mutations/set-range-styles.mutation';
-import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
+import {
+    ISetRangeValuesMutationParams,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+} from '../Mutations/set-range-values.mutation';
 
 /**
  * The command to clear content in current selected ranges.
@@ -18,39 +21,31 @@ export const ClearSelectionContentCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbookId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length) {
             return false;
         }
 
-        const cleanStyleMutationParams: ISetRangeStyleMutationParams = {
-            range: selections,
-            worksheetId: worksheet.getSheetId(),
-            workbookId: workbook.getUnitId(),
-        };
-        const setStyleMutationParams: ISetRangeStyleMutationParams = SetRangeStyleUndoMutationFactory(accessor, cleanStyleMutationParams);
-
-        const cleanResult = commandService.executeCommand(SetRangeStyleMutation.id, cleanStyleMutationParams);
-
         const clearMutationParams: ISetRangeValuesMutationParams = {
             rangeData: selections,
+            workbookId: workbook.getUnitId(),
             worksheetId: worksheet.getSheetId(),
         };
-        const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, clearMutationParams);
+        const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+            accessor,
+            clearMutationParams
+        );
 
         const result = commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
-
-        if (result && cleanResult) {
+        if (result) {
             undoRedoService.pushUndoRedo({
                 // 如果有多个 mutation 构成一个封装项目，那么要封装在同一个 undo redo element 里面
                 // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
                 URI: workbookId,
                 undo() {
-                    return (commandService.executeCommand(SetRangeValuesMutation.id, undoClearMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) return commandService.executeCommand(SetRangeStyleMutation.id, setStyleMutationParams);
-                        return false;
-                    });
+                    return commandService.executeCommand(SetRangeValuesMutation.id, undoClearMutationParams);
                 },
                 redo() {
                     return commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);

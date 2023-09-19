@@ -3,13 +3,13 @@ import './desktop.module.less';
 import { CoverCommand, DocsView, DocsViewManagerService, ICoverCommandParams } from '@univerjs/base-docs';
 import { DocsEditor, Engine, IMouseEvent, IPointerEvent, IRenderingEngine, ISelectionTransformerShapeManager, Layer, Scene, Viewport } from '@univerjs/base-render';
 import { CANVAS_VIEW_KEY, CanvasView, ISetRangeValuesCommandParams, SelectionManagerService, SetRangeValuesCommand } from '@univerjs/base-sheets';
-import { ContextService, IContextService } from '@univerjs/base-ui';
 import {
     createEmptyDocSnapshot,
     Disposable,
     handleJsonToDom,
     ICellRange,
     ICommandService,
+    IContextService,
     ICurrentUniverService,
     IDocumentData,
     IRangeData,
@@ -51,7 +51,7 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderingEngine private readonly _renderingEngine: Engine,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @IContextService private readonly _contextService: ContextService
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
     }

@@ -6,7 +6,8 @@ import { ZIndexManager } from './Common/ZIndexManager';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
-import { ContextService, IContextService } from './services/context/context.service';
+import { DesktopClipboardService, IClipboardService } from './services/clipboard/clipboard.service';
+import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopMenuService, IMenuService } from './services/menu/menu.service';
 import { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
@@ -32,11 +33,12 @@ export class UIPlugin extends Plugin {
     }
 
     override onMounted(): void {
-        this.initDependencies();
-        this.initUI();
+        this._initDependencies();
+        this._initModules();
+        this._initUI();
     }
 
-    private initDependencies(): void {
+    private _initDependencies(): void {
         const dependencies: Dependency[] = [
             // legacy managers - deprecated
             [ComponentManager],
@@ -46,8 +48,9 @@ export class UIPlugin extends Plugin {
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
             [IMenuService, { useClass: DesktopMenuService }],
-            [IContextService, { useClass: ContextService }],
             [IContextMenuService, { useClass: DesktopContextMenuService }],
+            [IClipboardInterfaceService, { useClass: BrowserClipboardService }],
+            [IClipboardService, { useClass: DesktopClipboardService }],
 
             // controllers
             [SharedController],
@@ -57,7 +60,11 @@ export class UIPlugin extends Plugin {
         dependencies.forEach((dependency) => this._injector.add(dependency));
     }
 
-    private initUI(): void {
+    private _initModules(): void {
+        this._injector.get(SharedController).initialize();
+    }
+
+    private _initUI(): void {
         this._injector.get(IUIController).bootstrapWorkbench(this._config);
     }
 }

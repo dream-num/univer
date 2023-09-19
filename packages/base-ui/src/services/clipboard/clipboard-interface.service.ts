@@ -32,16 +32,22 @@ export interface IClipboardInterfaceService {
     // NOTE: maybe we should add an interface to support image copy
 }
 
-export const IClipboardInterfaceService = createIdentifier<IClipboardInterfaceService>('univer.clipboard-interface-service');
+export const IClipboardInterfaceService = createIdentifier<IClipboardInterfaceService>(
+    'univer.clipboard-interface-service'
+);
 
 export class BrowserClipboardService extends Disposable implements IClipboardInterfaceService {
     async write(text: string, html: string): Promise<void> {
-        // try {
-        //     // write both pure text content and html content to the clipboard
-        //     return await navigator.clipboard.write();
-        // } catch (error) {
-        //     console.error(error);
-        // }
+        try {
+            // write both pure text content and html content to the clipboard
+            return await navigator.clipboard.write([
+                new ClipboardItem({
+                    'text/html': new Blob([html], { type: 'text/html' }),
+                }),
+            ]);
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     async writeText(text: string): Promise<void> {

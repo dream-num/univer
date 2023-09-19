@@ -1,7 +1,11 @@
 import { Disposable, ICommandService, ICurrentUniverService, Worksheet } from '@univerjs/core';
 
 import { SheetCopyCommand, SheetCutCommand, SheetPasteCommand } from '../../commands/commands/clipboard.command';
-import { ISheetClipboardHook, ISheetClipboardService } from '../../services/clipboard/clipboard.service';
+import {
+    IClipboardPropertyItem,
+    ISheetClipboardHook,
+    ISheetClipboardService,
+} from '../../services/clipboard/clipboard.service';
 
 /**
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
@@ -30,17 +34,39 @@ export class SheetClipboardController extends Disposable {
                 // and create necessary cache if needed
                 currentSheet = self._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
             },
-            onGetContent(row: number, col: number) {},
-            // copy
-            onCopy: (row: number, col: number) => ({
-                'data-row': row.toString(),
-                'data-col': col.toString(),
-            }),
+            onGetContent(row: number, col: number): string {
+                const v = currentSheet!.getCellMatrix().getValue(row, col);
+                return v?.m || '';
+            },
+            onCopy: (row: number, col: number, rowSpan?: number, colSpan?: number) => {
+                // TODO: get cell style and write it into clipboard property item
+                if (!rowSpan && !colSpan) {
+                    return null;
+                }
+
+                const properties: IClipboardPropertyItem = {};
+                if (rowSpan) {
+                    properties.rowspan = `${rowSpan}`;
+                }
+                if (colSpan) {
+                    properties.colspan = `${colSpan}`;
+                }
+
+                return properties;
+            },
             onCopyColumn(col: number) {
-                return null;
+                const sheet = currentSheet!;
+                const width = sheet.getColumnWidth(col);
+                return {
+                    style: `width: ${width}px;`,
+                };
             },
             onCopyRow(row: number) {
-                return null;
+                const sheet = currentSheet!;
+                const height = sheet.getRowHeight(row);
+                return {
+                    style: `height: ${height}px;`,
+                };
             },
             onAfterCopy() {
                 currentSheet = null;

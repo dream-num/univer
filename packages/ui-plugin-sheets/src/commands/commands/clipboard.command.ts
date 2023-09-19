@@ -12,11 +12,8 @@ export const SheetCopyCommand: IMultiCommand = {
     priority: 1000,
     preconditions: (contextService: IContextService) =>
         contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
-    handler: async (accessor, params) => {
+    handler: async (accessor) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
-
-        // TODO: permission control here?
-
         return sheetClipboardService.copy();
     },
 };

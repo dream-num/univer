@@ -13,7 +13,7 @@
  *
  * means "A1:B2"
  */
-export interface IRangeData {
+export interface ISelectionRange {
     /**
      * The start row (inclusive) of the range
      * startRow
@@ -41,7 +41,7 @@ export interface IRangeData {
  */
 export interface IGridRange {
     sheetId: string;
-    rangeData: IRangeData;
+    rangeData: ISelectionRange;
 }
 
 /**
@@ -109,9 +109,9 @@ export type IRangeCellData = {
 /**
  * range types
  *
- * Allow users to provide one of three formats, we need to convert to IRangeData to store
+ * Allow users to provide one of three formats, we need to convert to ISelectionRange to store
  */
-export type IRangeType = IRangeData | IRangeStringData | IRangeArrayData | IRangeCellData;
+export type IRangeType = ISelectionRange | IRangeStringData | IRangeArrayData | IRangeCellData;
 
 // export interface IInfoObjData extends IRangeArrayData {
 //     sheetId?: Nullable<string>;

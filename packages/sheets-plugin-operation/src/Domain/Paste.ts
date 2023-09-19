@@ -106,7 +106,7 @@ export class UniverPaste extends Paste {
     //     return actionDataList;
     // }
 
-    // private _getMergeActionData(sheetId: string, mergeData: IRangeData) {
+    // private _getMergeActionData(sheetId: string, mergeData: ISelectionRange) {
     //     const removeAction: IRemoveMergeActionData = {
     //         actionName: RemoveMergeAction.NAME,
     //         sheetId,

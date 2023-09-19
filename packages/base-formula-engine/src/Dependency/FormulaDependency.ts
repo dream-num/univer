@@ -1,4 +1,4 @@
-import { IRangeData, IUnitRange, ObjectMatrix } from '@univerjs/core';
+import { ISelectionRange, IUnitRange, ObjectMatrix } from '@univerjs/core';
 
 import { generateAstNode } from '../Analysis/Tools';
 import { FunctionNode, PrefixNode, SuffixNode } from '../AstNode';
@@ -12,7 +12,7 @@ import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { FormulaDependencyTree } from './DependencyTree';
 
 export class FormulaDependencyGenerator {
-    private _updateRangeFlattenCache = new Map<string, Map<string, IRangeData>>();
+    private _updateRangeFlattenCache = new Map<string, Map<string, ISelectionRange>>();
 
     constructor(private _formulaData: FormulaDataType, private _forceCalculate = false) {}
 
@@ -24,7 +24,7 @@ export class FormulaDependencyGenerator {
         if (this._forceCalculate) {
             return;
         }
-        this._updateRangeFlattenCache = new Map<string, Map<string, IRangeData>>();
+        this._updateRangeFlattenCache = new Map<string, Map<string, ISelectionRange>>();
         for (let i = 0; i < updateRangeList.length; i++) {
             const gridRange = updateRangeList[i];
             const range = gridRange.rangeData;
@@ -87,10 +87,10 @@ export class FormulaDependencyGenerator {
         return Promise.resolve(this._calculateRunList(updateTreeList));
     }
 
-    private _addFlattenCache(unitId: string, sheetId: string, rangeData: IRangeData) {
+    private _addFlattenCache(unitId: string, sheetId: string, rangeData: ISelectionRange) {
         let unitMatrix = this._updateRangeFlattenCache.get(unitId);
         if (!unitMatrix) {
-            unitMatrix = new Map<string, IRangeData>();
+            unitMatrix = new Map<string, ISelectionRange>();
             this._updateRangeFlattenCache.set(unitId, unitMatrix);
         }
 
@@ -98,7 +98,7 @@ export class FormulaDependencyGenerator {
 
         // let sheetMatrix = unitMatrix.get(sheetId);
         // if (!sheetMatrix) {
-        //     sheetMatrix = new ObjectMatrix<IRangeData>();
+        //     sheetMatrix = new ObjectMatrix<ISelectionRange>();
         //     unitMatrix.set(sheetId, sheetMatrix);
         // }
 

@@ -9,7 +9,7 @@ import {
     SpreadsheetColumnTitle,
     SpreadsheetRowTitle,
 } from '@univerjs/base-render';
-import { ICommandService, ICurrentUniverService, ISelectionRange, LocaleService, ObserverManager, Worksheet } from '@univerjs/core';
+import { ICommandService, ICurrentUniverService, ISelection, LocaleService, ObserverManager, Worksheet } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SetSelectionsOperation } from '../../Commands/Operations/selection.operation';
@@ -41,7 +41,7 @@ export class SelectionView extends BaseView {
             worksheet = workbook.getSheets()[0];
         }
 
-        const { spreadsheet, spreadsheetRowTitle, spreadsheetColumnTitle, spreadsheetLeftTopPlaceholder, spreadsheetSkeleton } = this._getSheetObject();
+        const { spreadsheet, spreadsheetLeftTopPlaceholder, spreadsheetSkeleton } = this._getSheetObject();
 
         if (spreadsheet == null) {
             return;
@@ -69,9 +69,9 @@ export class SelectionView extends BaseView {
             }
         });
 
-        spreadsheetRowTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
+        this._initialRowTitle();
 
-        spreadsheetColumnTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
+        this._initialColumnTitle();
 
         spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
 
@@ -92,7 +92,7 @@ export class SelectionView extends BaseView {
                 return;
             }
             const selectionRange = convertSelectionDataToRange(current);
-            this._observerManager.getObserver<ISelectionRange>('onChangeSelectionObserver')?.notifyObservers({
+            this._observerManager.getObserver<ISelection>('onChangeSelectionObserver')?.notifyObservers({
                 rangeData: selectionRange.rangeData,
                 cellRange: selectionRange.cellRange,
             });
@@ -101,8 +101,24 @@ export class SelectionView extends BaseView {
         this._update(worksheet);
     }
 
+    private _initialRowTitle() {
+        const { spreadsheetRowTitle, spreadsheetSkeleton } = this._getSheetObject();
+        spreadsheetRowTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            console.log('rowTitleDown');
+        });
+
+        spreadsheetRowTitle?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
+            console.log('titleMove');
+        });
+    }
+
+    private _initialColumnTitle() {
+        const { spreadsheetColumnTitle, spreadsheetSkeleton } = this._getSheetObject();
+        spreadsheetColumnTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
+    }
+
     private _update(worksheet: Worksheet) {
-        const { spreadsheet, spreadsheetRowTitle, spreadsheetColumnTitle, spreadsheetLeftTopPlaceholder, spreadsheetSkeleton } = this._getSheetObject();
+        const { spreadsheetSkeleton } = this._getSheetObject();
         if (spreadsheetSkeleton == null) {
             return;
         }

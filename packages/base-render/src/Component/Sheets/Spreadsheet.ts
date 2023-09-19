@@ -1,4 +1,4 @@
-import { CellValueType, HorizontalAlign, IRangeData, Nullable, ObjectMatrix, sortRules, WrapStrategy } from '@univerjs/core';
+import { CellValueType, HorizontalAlign, ISelectionRange, Nullable, ObjectMatrix, sortRules, WrapStrategy } from '@univerjs/core';
 
 import { BaseObject } from '../../BaseObject';
 import { ORIENTATION_TYPE, RENDER_CLASS_TYPE } from '../../Basics/Const';
@@ -470,7 +470,7 @@ export class Spreadsheet extends SheetComponent {
 
     // eslint-disable-next-line max-lines-per-function
     private _calculateOverflow() {
-        const overflowCache = new ObjectMatrix<IRangeData>();
+        const overflowCache = new ObjectMatrix<ISelectionRange>();
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;

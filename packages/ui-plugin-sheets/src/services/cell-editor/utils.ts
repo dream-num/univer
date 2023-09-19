@@ -1,6 +1,6 @@
 import { Engine } from '@univerjs/base-render';
 import { CANVAS_VIEW_KEY } from '@univerjs/base-sheets';
-import { ICellInfo } from '@univerjs/core';
+import { ISelectionCellWithCoord } from '@univerjs/core';
 
 export interface ICellPosition {
     left: number;
@@ -11,7 +11,7 @@ export interface ICellPosition {
     maxHeight: number;
 }
 
-export function getPositionOfCurrentCell(currentCell: ICellInfo, renderingEngine: Engine): ICellPosition {
+export function getPositionOfCurrentCell(currentCell: ISelectionCellWithCoord, renderingEngine: Engine): ICellPosition {
     let startX: number;
     let endX: number;
     let startY: number;

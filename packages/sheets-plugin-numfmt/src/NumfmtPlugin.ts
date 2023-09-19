@@ -1,4 +1,4 @@
-import { IRangeData, LocaleService, ObjectMatrixPrimitiveType, Plugin, PluginType } from '@univerjs/core';
+import { ISelectionRange, LocaleService, ObjectMatrixPrimitiveType, Plugin, PluginType } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
@@ -63,7 +63,7 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve> {
         return this._numfmtController.getNumfmtBySheetIdConfig(sheetId);
     }
 
-    setNumfmtByRange(sheetId: string, range: IRangeData, format: string): void {
+    setNumfmtByRange(sheetId: string, range: ISelectionRange, format: string): void {
         this._numfmtController.setNumfmtByRange(sheetId, range, format);
     }
 

@@ -1,10 +1,10 @@
-import { CommandType, ICellData, ICellV, ICurrentUniverService, IMutation, IRangeData, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '@univerjs/core';
+import { CommandType, ICellData, ICellV, ICurrentUniverService, IMutation, ISelectionRange, Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetRangeFormattedValueMutationParams {
     workbookId: string;
     worksheetId: string;
-    range: IRangeData[];
+    range: ISelectionRange[];
     value: ObjectMatrixPrimitiveType<ICellV>;
 }
 

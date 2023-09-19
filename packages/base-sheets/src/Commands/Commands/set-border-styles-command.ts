@@ -6,7 +6,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    IRangeData,
+    ISelectionRange,
     IStyleData,
     IUndoRedoService,
     Nullable,
@@ -22,7 +22,7 @@ import { ISetBorderStylesMutationParams, SetBorderStylesMutation, SetBorderStyle
 export interface ISetBorderCommandParams {
     workbookId?: string;
     worksheetId?: string;
-    range?: IRangeData;
+    range?: ISelectionRange;
     top?: Nullable<boolean>;
     left?: Nullable<boolean>;
     bottom?: Nullable<boolean>;
@@ -33,7 +33,7 @@ export interface ISetBorderCommandParams {
     style?: BorderStyleTypes;
 }
 
-function forEach(rangeData: IRangeData, action: (row: number, column: number) => void): void {
+function forEach(rangeData: ISelectionRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = rangeData;
     for (let i = startRow; i <= endRow; i++) {
         for (let j = startColumn; j <= endColumn; j++) {

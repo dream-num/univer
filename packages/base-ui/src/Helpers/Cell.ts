@@ -1,5 +1,5 @@
 import { ptToPx, pxToPt } from '@univerjs/base-render';
-import { getBorderStyleType, IBorderData, ICellData, IDocumentData, IKeyValue, IRangeData, IStyleData, ITextDecoration, ITextRun, Tools } from '@univerjs/core';
+import { getBorderStyleType, IBorderData, ICellData, IDocumentData, IKeyValue, ISelectionRange, IStyleData, ITextDecoration, ITextRun, Tools } from '@univerjs/core';
 
 import { textTrim } from '../Utils';
 
@@ -675,7 +675,7 @@ export function handlePlainToJson(plain: string) {
 }
 
 // 获取最终sheet数据
-export function handleTableMergeData(data: any[], selection?: IRangeData) {
+export function handleTableMergeData(data: any[], selection?: ISelectionRange) {
     const copyH = data.length;
     const copyC = data[0].length;
     let minH = 0; //应用范围首尾行

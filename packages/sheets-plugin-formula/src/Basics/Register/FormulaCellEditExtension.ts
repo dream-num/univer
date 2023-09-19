@@ -1,5 +1,5 @@
 import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell } from '@univerjs/base-ui';
-import { ICurrentUniverService, IRangeData, Nullable } from '@univerjs/core';
+import { ICurrentUniverService, ISelectionRange, Nullable } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -86,7 +86,7 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
         Object.keys(arrayFormulaData).forEach((sheetId) => {
             const sheetData = arrayFormulaData[sheetId];
 
-            sheetData.forValue((rowIndex: number, columnIndex: number, value: IRangeData) => {
+            sheetData.forValue((rowIndex: number, columnIndex: number, value: ISelectionRange) => {
                 const { startRow, startColumn, endRow, endColumn } = value;
                 if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
                     formula = '';

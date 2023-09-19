@@ -5,7 +5,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    IRangeData,
+    ISelectionRange,
     IStyleData,
     IUndoRedoService,
     Nullable,
@@ -17,7 +17,7 @@ import { SelectionManagerService } from '../../Services/selection-manager.servic
 import { ISetRangeStyleMutationParams, SetRangeStyleMutation, SetRangeStyleUndoMutationFactory } from '../Mutations/set-range-styles.mutation';
 
 export interface ICopyFormatToRangeCommandParams {
-    destinationRange: IRangeData;
+    destinationRange: ISelectionRange;
 }
 
 export const CopyFormatToRangeCommand: ICommand = {
@@ -80,9 +80,9 @@ function handleCopyRange(
     accessor: IAccessor,
     workbookId: string,
     worksheetId: string,
-    originRange: IRangeData,
-    destinationRange: IRangeData
-): Nullable<[ICellDataMatrix, IRangeData]> {
+    originRange: ISelectionRange,
+    destinationRange: ISelectionRange
+): Nullable<[ICellDataMatrix, ISelectionRange]> {
     const worksheet = accessor.get(ICurrentUniverService).getUniverSheetInstance(workbookId)?.getWorkBook().getSheetBySheetId(worksheetId);
     if (!worksheet) return;
 
@@ -106,7 +106,7 @@ function handleCopyRange(
     const destinationColumns = dEndColumn - dStartColumn + 1;
 
     let value: ICellDataMatrix = [];
-    let range: IRangeData;
+    let range: ISelectionRange;
 
     // judge whether N2 is a multiple of N1
     if (destinationRows % originRows === 0 && destinationColumns % originColumns === 0) {

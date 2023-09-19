@@ -1,5 +1,5 @@
 import { ComponentManager, IMenuService } from '@univerjs/base-ui';
-import { Disposable, ICommandService, ICurrentUniverService, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType, Range } from '@univerjs/core';
+import { Disposable, ICommandService, ICurrentUniverService, ISelectionRange, ObjectMatrix, ObjectMatrixPrimitiveType, Range } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { NUMFMT_PLUGIN_NAME } from '../Basics/Const';
@@ -101,7 +101,7 @@ export class NumfmtController extends Disposable {
         return this._numfmtPluginData.getNumfmtBySheetIdConfig(sheetId);
     }
 
-    setNumfmtByRange(sheetId: string, numfmtRange: IRangeData, numfmtValue: string): void {
+    setNumfmtByRange(sheetId: string, numfmtRange: ISelectionRange, numfmtValue: string): void {
         const numfmtMatrix = new ObjectMatrix<string>();
         Range.foreach(numfmtRange, (row, column) => {
             numfmtMatrix.setValue(row, column, numfmtValue);
@@ -128,7 +128,7 @@ export class NumfmtController extends Disposable {
     setNumfmtByCoords(sheetId: string, row: number, column: number, numfmt: string): void {
         const numfmtMatrix = new ObjectMatrix<string>();
         numfmtMatrix.setValue(row, column, numfmt);
-        const numfmtRange: IRangeData = { startRow: row, startColumn: column, endRow: row, endColumn: column };
+        const numfmtRange: ISelectionRange = { startRow: row, startColumn: column, endRow: row, endColumn: column };
 
         // TODO new command
 

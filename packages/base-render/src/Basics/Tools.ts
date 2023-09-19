@@ -1,10 +1,10 @@
 import {
     BaselineOffset,
     FontStyleType,
-    ICellInfo,
-    IRangeData,
     IScale,
-    ISelection,
+    ISelectionCellWithCoord,
+    ISelectionRange,
+    ISelectionRangeWithCoord,
     IStyleBase,
     Nullable,
     Tools,
@@ -15,12 +15,14 @@ import { FontCache } from './FontCache';
 import { IFontLocale } from './Interfaces';
 import { IBoundRectNoAngle } from './Vector2';
 
+const DEG180 = 180;
+
 const OBJECT_ARRAY = '[object Array]';
 const OBJECT_NUMBER = '[object Number]';
 const OBJECT_STRING = '[object String]';
 const OBJECT_BOOLEAN = '[object Boolean]';
-const PI_OVER_DEG180 = Math.PI / 180;
-const DEG180_OVER_PI = 180 / Math.PI;
+const PI_OVER_DEG180 = Math.PI / DEG180;
+const DEG180_OVER_PI = DEG180 / Math.PI;
 const HASH = '#';
 const EMPTY_STRING = '';
 const ZERO = '0';
@@ -40,16 +42,20 @@ export const getColor = (RgbArray: number[], opacity?: number): string => {
     return `${RGB_PAREN + RgbArray.join(',')})`;
 };
 
+const PERCENT_TO_NUMBER_DIVIDE = 100;
+
 export const toPx = (num: number | string, ReferenceValue: Nullable<number>): number => {
     if (Tools.isNumber(num)) {
         return num;
     }
     if (ReferenceValue && num && Tools.isString(num) && num.substr(num.length - 1, 1) === '%') {
-        const numFloat = parseFloat(num) / 100;
+        const numFloat = parseFloat(num) / PERCENT_TO_NUMBER_DIVIDE;
         return ReferenceValue * numFloat;
     }
     return 0;
 };
+
+const ONE_FRAME_NUMBER = 16;
 
 /**
  * Queue a new function into the requested animation frame pool (ie. this function will be executed byt the browser for the next frame)
@@ -80,7 +86,7 @@ export const requestNewFrame = (func: Function, requester?: any): number => {
     if (requester.oRequestAnimationFrame) {
         return requester.oRequestAnimationFrame(func);
     }
-    return window.setTimeout(func, 16);
+    return window.setTimeout(func, ONE_FRAME_NUMBER);
 };
 
 export const cancelRequestFrame = (requestID: number, requester?: any) => {
@@ -164,7 +170,12 @@ export const IsSafari = (): boolean => {
     return false;
 };
 
-export const generateRandomKey = (prefix: string = 'obj', keyLength: number = 4): string => {
+const GENERATE_RANDOM_KEY_DEFAULT_LENGTH = 4;
+
+export const generateRandomKey = (
+    prefix: string = 'obj',
+    keyLength: number = GENERATE_RANDOM_KEY_DEFAULT_LENGTH
+): string => {
     const userAgent = window.navigator.userAgent.replace(/[^a-zA-Z0-9]/g, '').split('');
 
     let mid = '';
@@ -178,11 +189,11 @@ export const generateRandomKey = (prefix: string = 'obj', keyLength: number = 4)
     return `${prefix}_${mid}_${time}`;
 };
 
-export function getValueType(value: any): string {
+export function getValueType(value: unknown): string {
     return Object.prototype.toString.apply(value);
 }
 
-export function isFunction(value?: any): value is boolean {
+export function isFunction(value?: unknown): value is boolean {
     return getValueType(value) === '[object Function]';
 }
 
@@ -190,23 +201,23 @@ export function isDate(value?: Date): value is Date {
     return getValueType(value) === '[object Date]';
 }
 
-export function isRegExp(value?: any): value is RegExp {
+export function isRegExp(value?: unknown): value is RegExp {
     return getValueType(value) === '[object RegExp]';
 }
 
-export function isArray<T>(value?: any): value is T[] {
+export function isArray<T>(value?: unknown): value is T[] {
     return getValueType(value) === '[object Array]';
 }
 
-export function isString(value?: any): value is string {
+export function isString(value?: unknown): value is string {
     return getValueType(value) === '[object String]';
 }
 
-export function isNumber(value?: any): value is number {
+export function isNumber(value?: unknown): value is number {
     return getValueType(value) === '[object Number]';
 }
 
-export function isObject(value?: any): value is object {
+export function isObject(value?: unknown): value is object {
     return getValueType(value) === '[object Object]';
 }
 
@@ -419,6 +430,8 @@ export function hasSpaceAndTab(text: string) {
     return true;
 }
 
+const one_thousand = 1000;
+
 // 返回屏幕DPI
 let dpi_cache: Nullable<number>;
 export function getDPI() {
@@ -426,7 +439,7 @@ export function getDPI() {
         return dpi_cache;
     }
     let i = 56;
-    for (; i < 2000; i++) {
+    for (; i < one_thousand * 2; i++) {
         if (matchMedia(`(max-resolution: ${i}dpi)`).matches === true) {
             return i;
         }
@@ -434,7 +447,7 @@ export function getDPI() {
     dpi_cache = i;
     setTimeout(() => {
         dpi_cache = null;
-    }, 1000);
+    }, one_thousand);
     return i;
 }
 
@@ -494,8 +507,8 @@ export function getCellByIndex(
     column: number,
     rowHeightAccumulation: number[],
     columnWidthAccumulation: number[],
-    mergeData: IRangeData[]
-): ICellInfo {
+    mergeData: ISelectionRange[]
+): ISelectionCellWithCoord {
     // eslint-disable-next-line prefer-const
     let { startY, endY, startX, endX } = getCellPositionByIndex(
         row,
@@ -560,7 +573,7 @@ export function getCellByIndex(
 }
 
 // WTF: this name doesn't express any useful information about what is this used for
-export function mergeCellHandler(row: number, column: number, mergeData?: IRangeData[]) {
+export function mergeCellHandler(row: number, column: number, mergeData?: ISelectionRange[]) {
     let isMerged = false; // The upper left cell only renders the content
     let isMergedMainCell = false;
     let newEndRow = -1;
@@ -620,7 +633,7 @@ export function mergeCellHandler(row: number, column: number, mergeData?: IRange
 }
 
 export function mergeInfoOffset(
-    mergeInfo: ISelection,
+    mergeInfo: ISelectionRangeWithCoord,
     offsetX: number,
     offsetY: number,
     scaleX: number,

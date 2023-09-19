@@ -7,12 +7,12 @@ import {
     createEmptyDocSnapshot,
     Disposable,
     handleJsonToDom,
-    ICellRange,
     ICommandService,
     IContextService,
     ICurrentUniverService,
     IDocumentData,
-    IRangeData,
+    ISelectionCell,
+    ISelectionRange,
     IStyleData,
     Nullable,
     toDisposable,
@@ -41,7 +41,7 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
     /** This flag indicated whether the cell editor is visible (as it always handles keyboard events when a UniverSheet is focused). */
     private _activated = false;
 
-    private _currentEditingCell: Nullable<IRangeData> = null;
+    private _currentEditingCell: Nullable<ISelectionRange> = null;
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -185,7 +185,7 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
         engine.setContainer(this._containerElement);
     }
 
-    private _positionCellEditor(currentCell: ICellRange) {
+    private _positionCellEditor(currentCell: ISelectionCell) {
         const cellInfo = this._selectionTransformerShapeManager.convertCellRangeToInfo(currentCell)!;
         const position = getPositionOfCurrentCell(cellInfo, this._renderingEngine);
 
@@ -303,7 +303,7 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
     }
 }
 
-function getRangeFromCellInfo(cellInfo: ICellRange): IRangeData {
+function getRangeFromCellInfo(cellInfo: ISelectionCell): ISelectionRange {
     let startRow: number;
     let startColumn: number;
 

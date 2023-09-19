@@ -1,4 +1,4 @@
-import { Dimension, ICellData, IColumnData, IRangeData, IRowData, IWorksheetConfig, ObjectArray, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { Dimension, ICellData, IColumnData, IRowData, ISelectionRange, IWorksheetConfig, ObjectArray, ObjectMatrixPrimitiveType } from '@univerjs/core';
 
 /** Params of `RemoveSheetMutation` */
 export interface IRemoveSheetMutationParams {
@@ -17,7 +17,7 @@ export interface IInsertSheetMutationParams {
 export interface IInsertRowMutationParams {
     workbookId: string;
     worksheetId: string;
-    ranges: IRangeData[];
+    ranges: ISelectionRange[];
     rowInfo?: ObjectArray<IRowData>;
 }
 
@@ -25,7 +25,7 @@ export interface IInsertRowMutationParams {
 export interface IInsertColMutationParams {
     workbookId: string;
     worksheetId: string;
-    ranges: IRangeData[];
+    ranges: ISelectionRange[];
     colInfo?: ObjectArray<IColumnData>;
 }
 
@@ -33,21 +33,21 @@ export interface IInsertColMutationParams {
 export interface IRemoveRowMutationParams {
     workbookId: string;
     worksheetId: string;
-    ranges: IRangeData[];
+    ranges: ISelectionRange[];
 }
 
 /** Params of InsertColMutation */
 export interface IRemoveColMutationParams {
     workbookId: string;
     worksheetId: string;
-    ranges: IRangeData[];
+    ranges: ISelectionRange[];
 }
 
 /** Params of DeleteRange */
 export interface IDeleteRangeMutationParams {
     workbookId: string;
     worksheetId: string;
-    range: IRangeData[];
+    range: ISelectionRange[];
     shiftDimension: Dimension;
 }
 
@@ -55,7 +55,7 @@ export interface IDeleteRangeMutationParams {
 export interface IInsertRangeMutationParams {
     workbookId: string;
     worksheetId: string;
-    range: IRangeData[];
+    range: ISelectionRange[];
     shiftDimension: Dimension;
     cellValue: ObjectMatrixPrimitiveType<ICellData>;
 }
@@ -64,12 +64,12 @@ export interface IInsertRangeMutationParams {
 export interface IRemoveWorksheetMergeMutationParams {
     workbookId: string;
     worksheetId: string;
-    ranges: IRangeData[];
+    ranges: ISelectionRange[];
 }
 
 /** Params of AddWorksheetMergeMutation */
 export interface IAddWorksheetMergeMutationParams {
     workbookId: string;
     worksheetId: string;
-    ranges: IRangeData[];
+    ranges: ISelectionRange[];
 }

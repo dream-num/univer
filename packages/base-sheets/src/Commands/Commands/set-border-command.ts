@@ -7,7 +7,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    IRangeData,
+    ISelectionRange,
     IStyleData,
     IUndoRedoService,
     Nullable,
@@ -20,7 +20,7 @@ import { BorderStyleManagerService } from '../../Services/border-style-manager.s
 import { SelectionManagerService } from '../../Services/selection-manager.service';
 import { ISetBorderStylesMutationParams, SetBorderStylesMutation, SetBorderStylesUndoMutationFactory } from '../Mutations/set-border-styles.mutatio';
 
-function forEach(rangeData: IRangeData, action: (row: number, column: number) => void): void {
+function forEach(rangeData: ISelectionRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = rangeData;
     for (let i = startRow; i <= endRow; i++) {
         for (let j = startColumn; j <= endColumn; j++) {
@@ -99,7 +99,7 @@ export const SetBorderColorCommand: ICommand<ISetBorderColorCommandParams> = {
 export interface ISetBorderCommandParams {
     workbookId: string;
     worksheetId: string;
-    range: IRangeData;
+    range: ISelectionRange;
     top: Nullable<boolean>;
     left: Nullable<boolean>;
     bottom: Nullable<boolean>;

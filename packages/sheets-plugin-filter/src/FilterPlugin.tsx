@@ -1,4 +1,5 @@
-import { IRangeData, Plugin } from '@univerjs/core';
+import { ISelectionRange, Plugin } from '@univerjs/core';
+
 import { FILTER_PLUGIN_NAME } from './Const';
 import { Filter, FilterList, IFilterPluginConfig } from './Domain';
 
@@ -47,7 +48,7 @@ export class FilterPlugin extends Plugin {
         // }
     }
 
-    newFilter(sheetId: string, range: IRangeData): Filter | null {
+    newFilter(sheetId: string, range: ISelectionRange): Filter | null {
         //return new Filter(sheetId, range).withContext(this.getContext());
         return null;
     }

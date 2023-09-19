@@ -1,10 +1,10 @@
-import { CommandType, ICurrentUniverService, IMutation, IRangeData } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, ISelectionRange } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetColumnShowMutationParams {
     workbookId: string;
     worksheetId: string;
-    ranges: IRangeData[];
+    ranges: ISelectionRange[];
 }
 
 export const SetWorksheetColumnShowMutationFactory = (accessor: IAccessor, params: ISetWorksheetColumnShowMutationParams) => {

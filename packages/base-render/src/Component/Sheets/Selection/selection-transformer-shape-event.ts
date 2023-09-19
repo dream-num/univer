@@ -1,5 +1,5 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import { ISelection, Nullable, Observer } from '@univerjs/core';
+import { ISelectionRangeWithCoord, Nullable, Observer } from '@univerjs/core';
 
 import { CURSOR_TYPE, IMouseEvent, IPointerEvent, isRectIntersect, NORMAL_SELECTION_PLUGIN_STYLE, SELECTION_CONTROL_BORDER_BUFFER_WIDTH, Vector2 } from '../../../Basics';
 import { Scene } from '../../../Scene';
@@ -14,7 +14,7 @@ const SELECTION_CONTROL_DELETING_LIGHTEN = 35;
 
 export interface ISelectionTransformerShapeTargetSelection {
     originControl: SelectionTransformerShape;
-    targetSelection: ISelection;
+    targetSelection: ISelectionRangeWithCoord;
 }
 
 export class SelectionTransformerShapeEvent {
@@ -30,8 +30,6 @@ export class SelectionTransformerShapeEvent {
 
     private _relativeSelectionColumnLength = 0;
 
-    private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
     private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
@@ -40,7 +38,7 @@ export class SelectionTransformerShapeEvent {
 
     private _scrollTimer: ScrollTimer;
 
-    private _targetSelection: ISelection;
+    private _targetSelection: ISelectionRangeWithCoord;
 
     private _isInMergeState: boolean = false;
 
@@ -58,23 +56,13 @@ export class SelectionTransformerShapeEvent {
         });
     }
 
-    dispose() {}
-
-    // private _getCurrentSelection(evtOffsetX: number, evtOffsetY: number, scrollOffsetX: number, scrollOffsetY: number) {
-    //     const scene = this._scene;
-
-    //     const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
-
-    //     const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
-
-    //     const scrollRelativeCoords = scene.getRelativeCoord(Vector2.FromArray([scrollOffsetX, scrollOffsetY]));
-
-    //     const scrollXY = scene.getScrollXYByRelativeCoords(scrollRelativeCoords);
-
-    //     const { scaleX, scaleY } = scene.getAncestorScale();
-
-    //     return this._skeleton.getCellPositionByOffset(newEvtOffsetX, newEvtOffsetY, scaleX, scaleY, scrollXY);
-    // }
+    dispose() {
+        this._scrollTimer?.dispose();
+        this._fillControlColors = [];
+        this._scene.onPointerMoveObserver.remove(this._moveObserver);
+        this._scene.onPointerUpObserver.remove(this._upObserver);
+        this._helperSelection?.dispose();
+    }
 
     private _initialControl() {
         const { leftControl, rightControl, topControl, bottomControl } = this._control;

@@ -1,4 +1,4 @@
-import { getColor, Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univerjs/base-render';
+import { Rect, Scene, Spreadsheet, SpreadsheetColumnTitle, SpreadsheetRowTitle, SpreadsheetSkeleton } from '@univerjs/base-render';
 import { ICurrentUniverService, LocaleService, Worksheet } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -85,8 +85,8 @@ export class SheetView extends BaseView {
             top: -1,
             width: rowTitleWidth,
             height: columnTitleHeight,
-            fill: getColor([248, 249, 250]),
-            stroke: getColor([217, 217, 217]),
+            fill: 'rgb(248, 249, 250)',
+            stroke: 'rgb(217, 217, 217)',
             strokeWidth: 1,
         });
 

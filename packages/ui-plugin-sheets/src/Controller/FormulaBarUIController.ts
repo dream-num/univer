@@ -1,5 +1,5 @@
 import { CellInputExtensionManager } from '@univerjs/base-ui';
-import { ICurrentUniverService, INamedRange, ISelectionRange, ObserverManager } from '@univerjs/core';
+import { ICurrentUniverService, INamedRange, ISelection, ObserverManager } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { FormulaBar } from '../View/FormulaBar';
@@ -27,7 +27,7 @@ export class FormulaBarUIController {
     }
 
     private _initialize() {
-        this._observerManager.getObserver<ISelectionRange>('onChangeSelectionObserver')?.add((selectionRange: ISelectionRange) => {
+        this._observerManager.getObserver<ISelection>('onChangeSelectionObserver')?.add((selectionRange: ISelection) => {
             const currentCell = selectionRange.cellRange;
 
             if (currentCell) {

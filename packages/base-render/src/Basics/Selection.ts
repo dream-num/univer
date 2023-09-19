@@ -1,4 +1,4 @@
-import { ISelectionData, ISelectionRange, Nullable } from '@univerjs/core';
+import { ISelection, ISelectionWithCoord, Nullable } from '@univerjs/core';
 
 /**
  * Whether to display the controller that modifies the selection, distributed in 8 locations
@@ -47,11 +47,11 @@ export interface ISelectionStyle {
     columnTitleStrokeWidth?: number;
 }
 
-export interface ISelectionDataWithStyle extends ISelectionData {
+export interface ISelectionDataWithStyle extends ISelectionWithCoord {
     style: Nullable<ISelectionStyle>;
 }
 
-export interface ISelectionRangeWithStyle extends ISelectionRange {
+export interface ISelectionRangeWithStyle extends ISelection {
     style: Nullable<ISelectionStyle>;
 }
 

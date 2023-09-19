@@ -1,8 +1,24 @@
 import './desktop.module.less';
 
 import { CoverCommand, DocsView, DocsViewManagerService, ICoverCommandParams } from '@univerjs/base-docs';
-import { DocsEditor, Engine, IMouseEvent, IPointerEvent, IRenderingEngine, ISelectionTransformerShapeManager, Layer, Scene, Viewport } from '@univerjs/base-render';
-import { CANVAS_VIEW_KEY, CanvasView, ISetRangeValuesCommandParams, SelectionManagerService, SetRangeValuesCommand } from '@univerjs/base-sheets';
+import {
+    DocsEditor,
+    Engine,
+    IMouseEvent,
+    IPointerEvent,
+    IRenderingEngine,
+    ISelectionTransformerShapeManager,
+    Layer,
+    Scene,
+    Viewport,
+} from '@univerjs/base-render';
+import {
+    CANVAS_VIEW_KEY,
+    CanvasView,
+    ISetRangeValuesCommandParams,
+    SelectionManagerService,
+    SetRangeValuesCommand,
+} from '@univerjs/base-sheets';
 import {
     createEmptyDocSnapshot,
     Disposable,
@@ -47,7 +63,8 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(CanvasView) private readonly _sheetCanvasView: CanvasView,
         @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
-        @ISelectionTransformerShapeManager private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
+        @ISelectionTransformerShapeManager
+        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderingEngine private readonly _renderingEngine: Engine,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
@@ -124,7 +141,9 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
     }
 
     private _focusCurrentSheet(): void {
-        this._currentUniverService.focusUniverInstance(this._currentUniverService.getCurrentUniverSheetInstance().getUnitId());
+        this._currentUniverService.focusUniverInstance(
+            this._currentUniverService.getCurrentUniverSheetInstance().getUnitId()
+        );
     }
 
     private _mountCellEditor(): void {
@@ -209,7 +228,10 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
 
     private _initListeners(): void {
         const main = this._sheetCanvasView.getSheetView().getSpreadsheet();
-        const onDbclickObserver = main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        if (main == null) {
+            return;
+        }
+        const onDbClickObserver = main.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
             if (evt.button !== 2) {
                 this.enterEditing();
                 evt.preventDefault();
@@ -221,14 +243,16 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
 
         this.disposeWithMe(
             toDisposable(() => {
-                main.onDblclickObserver.remove(onDbclickObserver);
+                main.onDblclickObserver.remove(onDbClickObserver);
                 main.onPointerDownObserver.remove(pointerDownObserver);
             })
         );
     }
 
     private async _updateDocumentModelFromCellModel(position: ICellPosition): Promise<void> {
-        const cellEditorModel = this._currentUniverService.getUniverDocInstance(SHEET_CELL_EDITOR_MODEL_ID)?.getDocument();
+        const cellEditorModel = this._currentUniverService
+            .getUniverDocInstance(SHEET_CELL_EDITOR_MODEL_ID)
+            ?.getDocument();
         if (!cellEditorModel) {
             throw new Error('Cell editor model not found!');
         }
@@ -286,7 +310,11 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
     }
 
     private _getCellEditor(): Nullable<DocsEditor> {
-        return this._injector.get(DocsViewManagerService).getDocsView(SHEET_CELL_EDITOR_MODEL_ID)?.getDocs().getEditor();
+        return this._injector
+            .get(DocsViewManagerService)
+            .getDocsView(SHEET_CELL_EDITOR_MODEL_ID)
+            ?.getDocs()
+            .getEditor();
     }
 
     private _getActiveRange() {
@@ -299,7 +327,11 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
             column = cellRange.startColumn;
         }
 
-        return this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getRange(row, column);
+        return this._currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getRange(row, column);
     }
 }
 

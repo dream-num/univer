@@ -21,7 +21,24 @@ export class RichTextAdaptor extends ObjectAdaptor {
     }
 
     override convert(pageElement: IPageElement, mainScene: Scene) {
-        const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, richText = {} } = pageElement;
+        const {
+            id,
+            zIndex,
+            left = 0,
+            top = 0,
+            width,
+            height,
+            angle,
+            scaleX,
+            scaleY,
+            skewX,
+            skewY,
+            flipX,
+            flipY,
+            title,
+            description,
+            richText = {},
+        } = pageElement;
         const { text, ff, fs, it, bl, ul, st, ol, bg, bd, cl, rich } = richText;
         let config: IRichTextProps = {
             top,

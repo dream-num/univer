@@ -32,7 +32,24 @@ export class SlideAdaptor extends ObjectAdaptor {
     }
 
     override convert(pageElement: IPageElement, mainScene: Scene) {
-        const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, slide: slideData } = pageElement;
+        const {
+            id,
+            zIndex,
+            left = 0,
+            top = 0,
+            width,
+            height,
+            angle,
+            scaleX,
+            scaleY,
+            skewX,
+            skewY,
+            flipX,
+            flipY,
+            title,
+            description,
+            slide: slideData,
+        } = pageElement;
         if (slideData == null) {
             return;
         }
@@ -81,7 +98,13 @@ export class SlideAdaptor extends ObjectAdaptor {
         return slideComponent;
     }
 
-    private _createScene(pageId: string, parent: Engine | Slide, page: ISlidePage, mainScene: Scene, model: SlideModel) {
+    private _createScene(
+        pageId: string,
+        parent: Engine | Slide,
+        page: ISlidePage,
+        mainScene: Scene,
+        model: SlideModel
+    ) {
         const { width, height } = parent;
 
         const scene = new Scene(pageId, parent, {

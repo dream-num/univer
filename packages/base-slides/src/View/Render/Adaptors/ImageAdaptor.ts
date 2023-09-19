@@ -17,7 +17,24 @@ export class ImageAdaptor extends ObjectAdaptor {
     }
 
     override convert(pageElement: IPageElement) {
-        const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, image = {} } = pageElement;
+        const {
+            id,
+            zIndex,
+            left = 0,
+            top = 0,
+            width,
+            height,
+            angle,
+            scaleX,
+            scaleY,
+            skewX,
+            skewY,
+            flipX,
+            flipY,
+            title,
+            description,
+            image = {},
+        } = pageElement;
         const { imageProperties, placeholder, link } = image;
 
         const contentUrl = imageProperties?.contentUrl || '';

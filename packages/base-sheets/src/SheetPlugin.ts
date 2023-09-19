@@ -1,5 +1,14 @@
 import { ISelectionTransformerShapeManager, SelectionTransformerShapeManager } from '@univerjs/base-render';
-import { DEFAULT_SELECTION, ICommandService, ICurrentUniverService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import {
+    DEFAULT_SELECTION,
+    ICommandService,
+    ICurrentUniverService,
+    LocaleService,
+    Nullable,
+    Plugin,
+    PLUGIN_NAMES,
+    PluginType,
+} from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
@@ -21,11 +30,11 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
     private _config: ISheetPluginConfig;
 
-    private _formulaBarController: FormulaBarController;
+    private _formulaBarController: Nullable<FormulaBarController>;
 
-    private _countBarController: CountBarController;
+    private _countBarController: Nullable<CountBarController>;
 
-    private _sheetContainerController: SheetContainerController;
+    private _sheetContainerController: Nullable<SheetContainerController>;
 
     constructor(
         config: Partial<ISheetPluginConfig>,
@@ -61,7 +70,11 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     initConfig() {
         const config = this._config;
         if (!config.selections) {
-            const worksheetId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+            const worksheetId = this._currentUniverService
+                .getCurrentUniverSheetInstance()
+                .getWorkBook()
+                .getActiveSheet()
+                .getSheetId();
             config.selections = {
                 [worksheetId]: [
                     {
@@ -93,7 +106,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
     listenEventManager() {
         // TODO: move these init to controllers not here
-        this._countBarController.listenEventManager();
+        this._countBarController?.listenEventManager();
     }
 
     private _initializeDependencies(sheetInjector: Injector) {

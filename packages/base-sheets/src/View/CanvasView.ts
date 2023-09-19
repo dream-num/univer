@@ -1,7 +1,17 @@
 import './Views';
 
-import { Engine, EVENT_TYPE, IRenderingEngine, IScrollObserverParam, IWheelEvent, Layer, Scene, ScrollBar, Viewport } from '@univerjs/base-render';
-import { EventState, ICurrentUniverService, ObserverManager, sortRules, Worksheet } from '@univerjs/core';
+import {
+    Engine,
+    EVENT_TYPE,
+    IRenderingEngine,
+    IScrollObserverParam,
+    IWheelEvent,
+    Layer,
+    Scene,
+    ScrollBar,
+    Viewport,
+} from '@univerjs/base-render';
+import { EventState, ICurrentUniverService, Nullable, ObserverManager, sortRules, Worksheet } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
@@ -10,7 +20,7 @@ import { SheetView } from './Views/SheetView';
 // workbook
 export class CanvasView {
     // TODO: rename to SheetCanvasView
-    private _scene: Scene;
+    private _scene: Nullable<Scene>;
 
     private _views: BaseView[] = []; // worksheet
 
@@ -113,7 +123,7 @@ export class CanvasView {
 
         // sheet zoom [0 ~ 1]
         this._observerManager.requiredObserver<{ zoomRatio: number }>('onZoomRatioSheetObservable').add((value) => {
-            this._scene.scale(value.zoomRatio, value.zoomRatio);
+            this._scene?.scale(value.zoomRatio, value.zoomRatio);
         });
 
         scene.addViewport(viewMain, viewLeft, viewTop, viewLeftTop).attachControl();

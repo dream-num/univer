@@ -45,7 +45,24 @@ export class DocsAdaptor extends ObjectAdaptor {
 
     // eslint-disable-next-line max-lines-per-function
     override convert(pageElement: IPageElement, mainScene: Scene) {
-        const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, document: documentData } = pageElement;
+        const {
+            id,
+            zIndex,
+            left = 0,
+            top = 0,
+            width,
+            height,
+            angle,
+            scaleX,
+            scaleY,
+            skewX,
+            skewY,
+            flipX,
+            flipY,
+            title,
+            description,
+            document: documentData,
+        } = pageElement;
         if (documentData == null) {
             return;
         }
@@ -175,7 +192,12 @@ export class DocsAdaptor extends ObjectAdaptor {
                 objectList.push(rect);
             });
 
-            this._liquid.translatePage(page, documents.pageLayoutType, documents.pageMarginLeft, documents.pageMarginTop);
+            this._liquid.translatePage(
+                page,
+                documents.pageLayoutType,
+                documents.pageMarginLeft,
+                documents.pageMarginTop
+            );
         }
         scene.openTransformer();
         scene.addObjects(objectList);

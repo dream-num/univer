@@ -1,5 +1,18 @@
 import { clamp } from './clamp';
-import { _numchars, EPOCH_1317, MAX_L_DATE, MAX_S_DATE, MIN_L_DATE, MIN_S_DATE, u_CSEC, u_DSEC, u_HOUR, u_MIN, u_MSEC, u_SEC } from './constants';
+import {
+    _numchars,
+    EPOCH_1317,
+    MAX_L_DATE,
+    MAX_S_DATE,
+    MIN_L_DATE,
+    MIN_S_DATE,
+    u_CSEC,
+    u_DSEC,
+    u_HOUR,
+    u_MIN,
+    u_MSEC,
+    u_SEC,
+} from './constants';
 import { dec2frac } from './dec2frac';
 import { general } from './general';
 import { defaultLocale, LocaleData } from './locale';
@@ -22,7 +35,7 @@ const DAYSIZE = 86400;
  * @param bigRange
  * @returns
  */
-const dateOverflows = (value, bigRange) => {
+const dateOverflows = (value: number, bigRange: any) => {
     if (bigRange) {
         return value < MIN_L_DATE || value >= MAX_L_DATE;
     }
@@ -36,7 +49,7 @@ const dateOverflows = (value, bigRange) => {
  * @param opts
  * @param l10n_
  */
-export function runPart(value, part: PartType, opts: OptionsData, l10n_: LocaleData): string {
+export function runPart(value: number, part: PartType | any, opts: OptionsData, l10n_: LocaleData): any {
     let mantissa = '';
     let numerator = '';
     let denominator = '';
@@ -55,7 +68,7 @@ export function runPart(value, part: PartType, opts: OptionsData, l10n_: LocaleD
     let second = 0;
     let subsec = 0;
 
-    const l10n = l10n_ || defaultLocale;
+    const l10n: any = l10n_ || defaultLocale;
 
     // scale number
     if (!part.text && isFinite(part.scale) && part.scale !== 1) {
@@ -178,7 +191,13 @@ export function runPart(value, part: PartType, opts: OptionsData, l10n_: LocaleD
         }
         if (time || subsec) {
             // round time based on smallest used unit
-            const minU = part.date & u_MSEC || part.date & u_CSEC || part.date & u_DSEC || part.date & u_SEC || part.date & u_MIN || part.date & u_HOUR;
+            const minU =
+                part.date & u_MSEC ||
+                part.date & u_CSEC ||
+                part.date & u_DSEC ||
+                part.date & u_SEC ||
+                part.date & u_MIN ||
+                part.date & u_HOUR;
             if (
                 (minU === u_MSEC && subsec > 0.9995) ||
                 (minU === u_CSEC && subsec > 0.995) ||
@@ -200,15 +219,24 @@ export function runPart(value, part: PartType, opts: OptionsData, l10n_: LocaleD
 
     // integer padding
     if (part.int_padding) {
-        integer = part.int_padding.length === 1 ? integer || part.int_padding : part.int_padding.substring(0, part.int_padding.length - integer.length) + integer;
+        integer =
+            part.int_padding.length === 1
+                ? integer || part.int_padding
+                : part.int_padding.substring(0, part.int_padding.length - integer.length) + integer;
     }
     // numerator padding
     if (part.num_padding) {
-        numerator = part.num_padding.length === 1 ? numerator || part.num_padding : part.num_padding.substring(0, part.num_padding.length - numerator.length) + numerator;
+        numerator =
+            part.num_padding.length === 1
+                ? numerator || part.num_padding
+                : part.num_padding.substring(0, part.num_padding.length - numerator.length) + numerator;
     }
     // denominator padding
     if (part.den_padding) {
-        denominator = part.den_padding.length === 1 ? denominator || part.den_padding : denominator + part.den_padding.slice(denominator.length);
+        denominator =
+            part.den_padding.length === 1
+                ? denominator || part.den_padding
+                : denominator + part.den_padding.slice(denominator.length);
     }
     // mantissa padding
     if (part.man_padding) {
@@ -216,12 +244,14 @@ export function runPart(value, part: PartType, opts: OptionsData, l10n_: LocaleD
         mantissa =
             part.man_padding.length === 1
                 ? (exp < 0 ? '-' : m_sign) + (mantissa || part.man_padding)
-                : (exp < 0 ? '-' : m_sign) + part.man_padding.slice(0, part.man_padding.length - mantissa.length) + mantissa;
+                : (exp < 0 ? '-' : m_sign) +
+                  part.man_padding.slice(0, part.man_padding.length - mantissa.length) +
+                  mantissa;
     }
 
     const ret = [];
     let integer_bits_counter = 0;
-    const counter = {
+    const counter: any = {
         int: 0,
         frac: 0,
         man: 0,
@@ -296,7 +326,10 @@ export function runPart(value, part: PartType, opts: OptionsData, l10n_: LocaleD
                 ret.push(integer);
             } else {
                 const c_s = !integer_bits_counter ? Infinity : part.int_pattern.join('').length - counter.int;
-                const c_e = integer_bits_counter === part.int_pattern.length - 1 ? 0 : part.int_pattern.join('').length - (counter.int + tok.num.length);
+                const c_e =
+                    integer_bits_counter === part.int_pattern.length - 1
+                        ? 0
+                        : part.int_pattern.join('').length - (counter.int + tok.num.length);
                 ret.push(integer.substring(integer.length - c_s, integer.length - c_e));
                 integer_bits_counter++;
                 counter.int += tok.num.length;
@@ -326,7 +359,7 @@ export function runPart(value, part: PartType, opts: OptionsData, l10n_: LocaleD
                     ret.push(denominator);
                 }
             } else {
-                ret.push(short_to_long[tok.type].slice(counter[tok.type], counter[tok.type] + len));
+                ret.push((short_to_long as any)[tok.type].slice(counter[tok.type], counter[tok.type] + len));
                 counter[tok.type] += len;
             }
         } else if (tok.type === 'year') {

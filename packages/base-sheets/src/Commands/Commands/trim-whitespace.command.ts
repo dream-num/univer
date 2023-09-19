@@ -1,8 +1,20 @@
-import { CommandType, ICellV, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
+import {
+    CommandType,
+    ICellV,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    IUndoRedoService,
+    ObjectMatrix,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../Services/selection-manager.service';
-import { ISetRangeFormattedValueMutationParams, SetRangeFormattedValueMutation, SetRangeFormattedValueUndoMutationFactory } from '../Mutations/set-range-formatted-value.mutation';
+import {
+    ISetRangeFormattedValueMutationParams,
+    SetRangeFormattedValueMutation,
+    SetRangeFormattedValueUndoMutationFactory,
+} from '../Mutations/set-range-formatted-value.mutation';
 
 /**
  * The command to trim whitespace.
@@ -21,9 +33,16 @@ export const TrimWhitespaceCommand: ICommand = {
         if (!selections?.length) return false;
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
 
-        const worksheet = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook().getSheetBySheetId(worksheetId);
+        const worksheet = currentUniverService
+            .getUniverSheetInstance(workbookId)
+            ?.getWorkBook()
+            .getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
         const sheetMatrix = worksheet.getCellMatrix();
         const cellValue = new ObjectMatrix<ICellV>();
@@ -46,23 +65,30 @@ export const TrimWhitespaceCommand: ICommand = {
             value: cellValue.getData(),
         };
 
-        const undoSetRangeFormattedValueMutationParams: ISetRangeFormattedValueMutationParams = SetRangeFormattedValueUndoMutationFactory(
-            accessor,
-            setRangeFormattedValueMutationParams
-        );
+        const undoSetRangeFormattedValueMutationParams: ISetRangeFormattedValueMutationParams =
+            SetRangeFormattedValueUndoMutationFactory(accessor, setRangeFormattedValueMutationParams);
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.executeCommand(SetRangeFormattedValueMutation.id, setRangeFormattedValueMutationParams);
+        const result = commandService.executeCommand(
+            SetRangeFormattedValueMutation.id,
+            setRangeFormattedValueMutationParams
+        );
         if (result) {
             undoRedoService.pushUndoRedo({
                 // 如果有多个 mutation 构成一个封装项目，那么要封装在同一个 undo redo element 里面
                 // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetRangeFormattedValueMutation.id, undoSetRangeFormattedValueMutationParams);
+                    return commandService.executeCommand(
+                        SetRangeFormattedValueMutation.id,
+                        undoSetRangeFormattedValueMutationParams
+                    );
                 },
                 redo() {
-                    return commandService.executeCommand(SetRangeFormattedValueMutation.id, setRangeFormattedValueMutationParams);
+                    return commandService.executeCommand(
+                        SetRangeFormattedValueMutation.id,
+                        setRangeFormattedValueMutationParams
+                    );
                 },
             });
 

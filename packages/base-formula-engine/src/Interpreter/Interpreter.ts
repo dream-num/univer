@@ -3,7 +3,12 @@ import { CellValueType, ICellData, ISelectionRange, ObjectMatrix } from '@univer
 import { FunctionNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { NodeType } from '../AstNode/NodeType';
-import { AstNodePromiseType, IInterpreterDatasetConfig, UnitArrayFormulaDataType, UnitDataType } from '../Basics/Common';
+import {
+    AstNodePromiseType,
+    IInterpreterDatasetConfig,
+    UnitArrayFormulaDataType,
+    UnitDataType,
+} from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { PreCalculateNodeType } from '../Basics/NodeType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -103,11 +108,18 @@ export class Interpreter {
 
         const sheetData = unitData[sheetId];
         const arrayData = arrayFormulaData[sheetId];
-        if (functionVariant.isReferenceObject() || (functionVariant.isValueObject() && (functionVariant as BaseValueObject).isArray())) {
+        if (
+            functionVariant.isReferenceObject() ||
+            (functionVariant.isValueObject() && (functionVariant as BaseValueObject).isArray())
+        ) {
             const objectValueRefOrArray = functionVariant as BaseReferenceObject | ArrayValueObject;
             const { startRow, startColumn, endRow, endColumn } = objectValueRefOrArray.getRangePosition();
             objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
-                sheetData.setValue(rowIndex - startRow + row, columnIndex - startColumn + column, this._objectValueToCellValue(valueObject));
+                sheetData.setValue(
+                    rowIndex - startRow + row,
+                    columnIndex - startColumn + column,
+                    this._objectValueToCellValue(valueObject)
+                );
             });
 
             arrayData.setValue(row, column, {

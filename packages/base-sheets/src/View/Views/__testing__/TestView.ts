@@ -4,7 +4,7 @@ import { SheetPlugin } from '../../../SheetPlugin';
 import { BaseView } from '../../BaseView';
 
 export class TestView extends BaseView {
-    protected _initialize() {
+    protected override _initialize() {
         const scene = this.getScene();
         const rect1 = new Rect<IRectProps>('green', {
             top: 100,
@@ -90,7 +90,7 @@ export class TestViewFactory {
      * @returns
      */
     create(scene: Scene, plugin: SheetPlugin): TestView {
-        return new TestView().initialize(scene, plugin);
+        return new TestView().initialize(scene);
     }
 }
 // CanvasViewRegistry.add(new TestViewFactory());

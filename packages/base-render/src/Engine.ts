@@ -424,7 +424,11 @@ export class Engine extends ThinEngine<Scene> {
             deviceEvent.previousState = previousButton;
             deviceEvent.currentState = this.pointer[evt.button + 2];
 
-            if (deviceType === DeviceType.Mouse && this.__mouseId >= 0 && this._canvasEle.hasPointerCapture(this.__mouseId)) {
+            if (
+                deviceType === DeviceType.Mouse &&
+                this.__mouseId >= 0 &&
+                this._canvasEle.hasPointerCapture(this.__mouseId)
+            ) {
                 this._canvasEle.releasePointerCapture(this.__mouseId);
             } else if (deviceEvent.pointerId && this._canvasEle.hasPointerCapture(deviceEvent.pointerId)) {
                 this._canvasEle.releasePointerCapture(deviceEvent.pointerId);
@@ -485,7 +489,11 @@ export class Engine extends ThinEngine<Scene> {
         this._canvasEle.addEventListener(`${eventPrefix}down`, this._pointerDownEvent);
         this._canvasEle.addEventListener(`${eventPrefix}up`, this._pointerUpEvent);
         this._canvasEle.addEventListener('blur', this._pointerBlurEvent);
-        this._canvasEle.addEventListener(this._getWheelEventName(), this._pointerWheelEvent, this._getPassive() ? { passive: false } : false);
+        this._canvasEle.addEventListener(
+            this._getWheelEventName(),
+            this._pointerWheelEvent,
+            this._getPassive() ? { passive: false } : false
+        );
     }
 
     private _getWheelEventName(): string {

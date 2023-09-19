@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 export const RGB_PAREN = 'rgb(';
 export const RGBA_PAREN = 'rgba(';
 export const COLORS = {

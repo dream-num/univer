@@ -13,7 +13,15 @@ import {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/base-render';
-import { EventState, ICellData, IPageElement, LocaleService, ObjectMatrix, PageElementType, Styles } from '@univerjs/core';
+import {
+    EventState,
+    ICellData,
+    IPageElement,
+    LocaleService,
+    ObjectMatrix,
+    PageElementType,
+    Styles,
+} from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../Adaptor';
@@ -48,7 +56,24 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
     }
 
     override convert(pageElement: IPageElement, mainScene: Scene) {
-        const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description, spreadsheet: spreadsheetModel } = pageElement;
+        const {
+            id,
+            zIndex,
+            left = 0,
+            top = 0,
+            width,
+            height,
+            angle,
+            scaleX,
+            scaleY,
+            skewX,
+            skewY,
+            flipX,
+            flipY,
+            title,
+            description,
+            spreadsheet: spreadsheetModel,
+        } = pageElement;
 
         if (spreadsheetModel == null) {
             return;
@@ -60,7 +85,12 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
 
         const cellDataMatrix = new ObjectMatrix<ICellData>(cellData);
 
-        const spreadsheetSkeleton = SpreadsheetSkeleton.create(worksheet, cellDataMatrix, new Styles(styles), this._localeService);
+        const spreadsheetSkeleton = SpreadsheetSkeleton.create(
+            worksheet,
+            cellDataMatrix,
+            new Styles(styles),
+            this._localeService
+        );
 
         const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
 
@@ -108,12 +138,18 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         spreadsheet.zIndex = 10;
         scene.addObjects([spreadsheet], 1);
         scene.addObjects([spreadsheetRowTitle, spreadsheetColumnTitle, SpreadsheetLeftTopPlaceholder], 2);
-        spreadsheet.enableSelection();
+        // spreadsheet.enableSelection();
         return sv;
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _updateViewport(id: string, rowTitleWidth: number, columnTitleHeight: number, scene: Scene, mainScene: Scene) {
+    private _updateViewport(
+        id: string,
+        rowTitleWidth: number,
+        columnTitleHeight: number,
+        scene: Scene,
+        mainScene: Scene
+    ) {
         if (mainScene == null) {
             return;
         }

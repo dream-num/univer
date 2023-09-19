@@ -676,7 +676,12 @@ export class Viewport {
 
     private _scroll(scrollType: SCROLL_TYPE, pos: IScrollBarPosition) {
         const { x, y } = pos;
-        if (x !== undefined) {
+
+        if (this._scrollBar == null) {
+            return;
+        }
+
+        if (x !== undefined && this._scrollBar.hasHorizonThumb()) {
             if (scrollType === SCROLL_TYPE.scrollBy) {
                 this.scrollX += x;
             } else {
@@ -684,7 +689,7 @@ export class Viewport {
             }
         }
 
-        if (y !== undefined) {
+        if (y !== undefined && this._scrollBar.hasVerticalThumb()) {
             if (scrollType === SCROLL_TYPE.scrollBy) {
                 this.scrollY += y;
             } else {

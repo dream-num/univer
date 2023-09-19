@@ -12,7 +12,7 @@ import {
 import { AppUIController } from './Controller/AppUIController';
 import { SheetClipboardController } from './Controller/clipboard/clipboard.controller';
 import { DesktopSheetShortcutController } from './Controller/shortcut.controller';
-import { en, zh } from './Locale';
+import { en } from './Locale';
 import { ICellEditorService } from './services/cell-editor/cell-editor.service';
 import { DesktopCellEditorService } from './services/cell-editor/cell-editor-desktop.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
@@ -48,7 +48,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
          * TODO 异步加载
          */
         this._localeService.getLocale().load({
-            zh,
             en,
         });
 

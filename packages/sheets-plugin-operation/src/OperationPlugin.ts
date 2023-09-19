@@ -10,7 +10,7 @@ import { PasteImageExtensionFactory } from './Basics/Register/PasteImageExtensio
 import { PasteOfficeExtensionFactory } from './Basics/Register/PasteOfficeExtension';
 import { OPERATION_PLUGIN } from './Const';
 import { Copy, Paste, UniverCopy, UniverPaste } from './Domain';
-import { en, zh } from './Locale';
+import { en } from './Locale';
 
 interface CopyResolver {
     name: string;
@@ -62,7 +62,6 @@ export class OperationPlugin extends Plugin {
     initialize() {
         this._localeService.getLocale().load({
             en,
-            zh,
         });
 
         this.registerExtension();

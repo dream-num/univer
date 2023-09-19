@@ -8,7 +8,7 @@ import { BreakLineCommand, CoverCommand, DeleteCommand, DeleteLeftCommand, IMEIn
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { MoveCursorOperation } from './commands/operations/cursor.operation';
 import { DocumentController } from './Controller/DocumentController';
-import { en, zh } from './Locale';
+import { en } from './Locale';
 import { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
 import { MoveCursorDownShortcut, MoveCursorLeftShortcut, MoveCursorRightShortcut, MoveCursorUpShortcut } from './shortcuts/cursor.shortcut';
@@ -50,7 +50,6 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
     initialize(): void {
         this._localeService.getLocale().load({
             en,
-            zh,
         });
 
         install(this);

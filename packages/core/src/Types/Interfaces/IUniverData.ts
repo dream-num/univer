@@ -1,7 +1,9 @@
+import { ILocales } from '../../Shared/Locale';
 import { LocaleType } from '../Enum';
 
 export interface IUniverData {
     locale: LocaleType;
+    locales: ILocales;
     id: string;
 }
 

@@ -8,7 +8,7 @@ import { SetSelectionsOperation } from './Commands/Operations/selection.operatio
 import { BasicWorkbookController, CountBarController, SheetContainerController } from './Controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
-import { en, zh } from './Locale';
+import { en } from './Locale';
 import { BorderStyleManagerService } from './Services/border-style-manager.service';
 import { SelectionManagerService } from './Services/selection-manager.service';
 import { CanvasView } from './View/CanvasView';
@@ -45,7 +45,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     initialize(): void {
         this._localeService.getLocale().load({
             en,
-            zh,
         });
 
         install(this);

@@ -12,9 +12,12 @@ import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import { DocUIPlugin } from '@univerjs/ui-plugin-docs';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 
+import { locales } from './locales';
+
 // univer
 const univer = new Univer({
     locale: LocaleType.EN,
+    locales,
 });
 
 // core plugins
@@ -45,7 +48,7 @@ univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 // use for console test
 declare global {
     interface Window {
-        univer?: any;
+        univer?: Univer;
     }
 }
 

@@ -93,3 +93,4 @@ export { SetWorksheetActivateMutation } from './Commands/Mutations/set-worksheet
 export { SetWorksheetHideMutation } from './Commands/Mutations/set-worksheet-hide.mutation';
 export { SetWorksheetNameMutation } from './Commands/Mutations/set-worksheet-name.mutation';
 export { SetWorksheetOrderMutation } from './Commands/Mutations/set-worksheet-order.mutation';
+export * from './Locale';

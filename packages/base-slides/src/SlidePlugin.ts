@@ -4,7 +4,7 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { install, SlidePluginObserve, uninstall } from './Basics/Observer';
 import { ToolbarController } from './Controller';
-import { en, zh } from './Locale';
+import { en } from './Locale';
 import { CanvasView } from './View/Render';
 
 export interface ISlidePluginConfig {}
@@ -37,7 +37,6 @@ export class SlidePlugin extends Plugin<SlidePluginObserve> {
     initialize(): void {
         this._localeService.getLocale().load({
             en,
-            zh,
         });
         install(this);
         // this.initConfig();

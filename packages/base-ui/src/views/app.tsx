@@ -80,7 +80,12 @@ export function App(props: IUniverAppProps) {
          *  after:  {--primary-color:#0188fb;--primary-color-hover:#5391ff;}
          */
         let currentSkin = defaultSkin;
-        currentSkin = Object.fromEntries(Object.keys(defaultSkin).map((item) => [`--${item.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`, currentSkin[item]]));
+        currentSkin = Object.fromEntries(
+            Object.keys(defaultSkin).map((item) => [
+                `--${item.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`,
+                currentSkin[item],
+            ])
+        );
         sheet.insertRule(
             `#${'univer-container'} ${JSON.stringify(currentSkin)
                 .replace(/"/g, '')
@@ -96,8 +101,20 @@ export function App(props: IUniverAppProps) {
 
     const [locale, setLocale] = useState<LocaleType>(localeService.getLocale().getCurrentLocale());
 
+    useEffect(() => {
+        const listener = localeService.getLocale().locale$.subscribe((locale) => {
+            locale && setLocale(locale);
+        });
+
+        return () => {
+            listener.unsubscribe();
+        };
+    }, []);
+
     return (
-        <AppContext.Provider value={{ injector, localeService, locale, componentManager, zIndexManager, observerManager }}>
+        <AppContext.Provider
+            value={{ injector, localeService, locale, componentManager, zIndexManager, observerManager }}
+        >
             {/* TODO: UI here is not fine tuned */}
             <div
                 style={{
@@ -125,7 +142,6 @@ export function App(props: IUniverAppProps) {
                     onChange={(e) => {
                         const value = e.target.value as LocaleType;
                         localeService.setLocale(value);
-                        setLocale(value);
                     }}
                 >
                     <option value={LocaleType.EN}>English</option>
@@ -138,13 +154,19 @@ export function App(props: IUniverAppProps) {
                     <Sider style={{ display: props.outerLeft ? 'block' : 'none' }}></Sider>
                     <Layout className={style.mainContent} style={{ position: 'relative' }}>
                         {/* header */}
-                        <Header style={{ display: props.header ? 'block' : 'none' }}>{props.toolbar && <Toolbar></Toolbar>}</Header>
+                        <Header style={{ display: props.header ? 'block' : 'none' }}>
+                            {props.toolbar && <Toolbar></Toolbar>}
+                        </Header>
                         {/* content */}
                         <Layout>
                             <Sider style={{ display: props.innerLeft ? 'block' : 'none' }}>{/* inner left */}</Sider>
                             <Content className={style.contentContainerHorizontal}>
                                 {/* FIXME: context menu component shouldn't have to mount on this position */}
-                                <Container onContextMenu={(e) => e.preventDefault()} className={style.contentInnerRightContainer} ref={containerRef}>
+                                <Container
+                                    onContextMenu={(e) => e.preventDefault()}
+                                    className={style.contentInnerRightContainer}
+                                    ref={containerRef}
+                                >
                                     <ContextMenu />
                                     {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>} */}
                                     {/* {<RichText {...methods.cellEditor}></RichText>} */}
@@ -153,7 +175,10 @@ export function App(props: IUniverAppProps) {
                         </Layout>
                         {/* footer */}
                         <Footer style={{ display: props.footer ? 'block' : 'none' }}>
-                            {footerComponents && Array.from(footerComponents.values()).map((component, index) => React.createElement(component(), { key: `${index}` }))}
+                            {footerComponents &&
+                                Array.from(footerComponents.values()).map((component, index) =>
+                                    React.createElement(component(), { key: `${index}` })
+                                )}
                         </Footer>
                     </Layout>
                 </Layout>

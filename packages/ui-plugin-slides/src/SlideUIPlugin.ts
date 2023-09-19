@@ -8,7 +8,7 @@ import { DefaultSlideUIConfig, installObserver, ISlideUIPluginConfig, SlideUIPlu
 import { SLIDE_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { IToolbarItemProps } from './Controller';
 import { AppUIController } from './Controller/AppUIController';
-import { en, zh } from './Locale';
+import { en } from './Locale';
 
 export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
     static override type = PluginType.Slide;
@@ -39,7 +39,6 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
          * load more Locale object
          */
         this._localeService.getLocale().load({
-            zh,
             en,
         });
 

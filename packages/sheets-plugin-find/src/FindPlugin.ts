@@ -7,7 +7,7 @@ import { FIND_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { FindController } from './Controller/FindController';
 import { FindModalController } from './Controller/FindModalController';
 import { TextFinder } from './Domain/TextFind';
-import { en, zh } from './Locale';
+import { en } from './Locale';
 import { FindService } from './services/find.service';
 // import { FindPluginObserve, install } from './Basics/Observer';
 // import { FindModalController } from './Controller/FindModalController';
@@ -57,7 +57,6 @@ export class FindPlugin extends Plugin<FindPluginObserve> {
     initialize(): void {
         this._localeService.getLocale().load({
             en,
-            zh,
         });
 
         this.initController();

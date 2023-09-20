@@ -82,7 +82,7 @@ export const NORMAL_SELECTION_PLUGIN_STYLE: ISelectionStyle = {
 };
 
 export function convertSelectionDataToRange(selectionDataWithStyle: ISelectionDataWithStyle): ISelectionRangeWithStyle {
-    const { selection, cellInfo, style } = selectionDataWithStyle;
+    const { selection, cellInfo, style, selectionType } = selectionDataWithStyle;
     const result: ISelectionRangeWithStyle = {
         rangeData: {
             startRow: selection.startRow,
@@ -92,6 +92,7 @@ export function convertSelectionDataToRange(selectionDataWithStyle: ISelectionDa
         },
         cellRange: null,
         style,
+        selectionType,
     };
     if (cellInfo != null) {
         const { row, column, isMerged, isMergedMainCell } = cellInfo;

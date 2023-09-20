@@ -4,7 +4,7 @@ import {
     mergeCellHandler,
     NORMAL_SELECTION_PLUGIN_STYLE,
 } from '@univerjs/base-render';
-import { ISelectionRange, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
+import { ISelectionRange, makeCellRangeToRangeData, Nullable, SELECTION_TYPE } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -33,6 +33,10 @@ export class SelectionManagerService implements IDisposable {
 
     private _currentStyle: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE;
 
+    private _currentDetectMergedCell: boolean = false;
+
+    private _currentSelectionType: SELECTION_TYPE = SELECTION_TYPE.AUTO;
+
     private _isSelectionEnabled: boolean = true;
 
     private readonly _selectionInfo$ = new BehaviorSubject<Nullable<ISelectionRangeWithStyle[]>>(null);
@@ -46,6 +50,14 @@ export class SelectionManagerService implements IDisposable {
 
     get currentStyle() {
         return this._currentStyle;
+    }
+
+    get isDetectMergedCell() {
+        return this._currentDetectMergedCell;
+    }
+
+    get selectionType() {
+        return this._currentSelectionType;
     }
 
     enableSelection() {
@@ -75,6 +87,22 @@ export class SelectionManagerService implements IDisposable {
 
     setCurrentStyle(style: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE) {
         this._currentStyle = style;
+    }
+
+    enableDetectMergedCell() {
+        this._currentDetectMergedCell = true;
+    }
+
+    disableDetectMergedCell() {
+        this._currentDetectMergedCell = false;
+    }
+
+    setCurrentSelectionType(selectionType: SELECTION_TYPE = SELECTION_TYPE.AUTO) {
+        this._currentSelectionType = selectionType;
+    }
+
+    resetCurrentSelectionType() {
+        this.setCurrentSelectionType();
     }
 
     dispose(): void {

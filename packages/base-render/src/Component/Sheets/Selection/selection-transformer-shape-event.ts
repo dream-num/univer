@@ -71,9 +71,15 @@ export class SelectionTransformerShapeEvent {
     dispose() {
         this._scrollTimer?.dispose();
         this._fillControlColors = [];
+        this._clearObserverEvent();
+        this._helperSelection?.dispose();
+    }
+
+    private _clearObserverEvent() {
         this._scene.onPointerMoveObserver.remove(this._moveObserver);
         this._scene.onPointerUpObserver.remove(this._upObserver);
-        this._helperSelection?.dispose();
+        this._moveObserver = null;
+        this._upObserver = null;
     }
 
     private _initialControl() {
@@ -271,8 +277,7 @@ export class SelectionTransformerShapeEvent {
             this._helperSelection.dispose();
             const scene = this._scene;
             scene.resetCursor();
-            scene.onPointerMoveObserver.remove(this._moveObserver);
-            scene.onPointerUpObserver.remove(this._upObserver);
+            this._clearObserverEvent();
             scene.enableEvent();
             this._scrollTimer?.dispose();
             this._control.selectionMoved$.next(this._targetSelection);
@@ -490,8 +495,7 @@ export class SelectionTransformerShapeEvent {
         this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
             const scene = this._scene;
             scene.resetCursor();
-            scene.onPointerMoveObserver.remove(this._moveObserver);
-            scene.onPointerUpObserver.remove(this._upObserver);
+            this._clearObserverEvent();
             scene.enableEvent();
             this._scrollTimer?.dispose();
             this._control.selectionScaled$.next(this._targetSelection);
@@ -733,8 +737,7 @@ export class SelectionTransformerShapeEvent {
             this._helperSelection.dispose();
             const scene = this._scene;
             scene.resetCursor();
-            scene.onPointerMoveObserver.remove(this._moveObserver);
-            scene.onPointerUpObserver.remove(this._upObserver);
+            this._clearObserverEvent();
             scene.enableEvent();
             this._scrollTimer?.dispose();
             this._control.selectionFilled$.next(this._targetSelection);

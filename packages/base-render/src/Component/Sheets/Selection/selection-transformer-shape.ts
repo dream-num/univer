@@ -1,7 +1,7 @@
-import { ISelectionCellWithCoord, ISelectionRangeWithCoord, Nullable } from '@univerjs/core';
+import { TinyColor } from '@ctrl/tinycolor';
+import { ISelectionCellWithCoord, ISelectionRangeWithCoord, Nullable, SELECTION_TYPE } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
-import { SELECTION_TYPE } from '../../../Basics/Const';
 import {
     ISelectionDataWithStyle,
     ISelectionStyle,
@@ -47,6 +47,8 @@ enum SELECTION_MANAGER_KEY {
     bottomRightWidget = '__SpreadSheetSelectionBottomRightWidget__',
 }
 
+const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
+
 /**
  * The main selection canvas component
  */
@@ -77,11 +79,15 @@ export class SelectionTransformerShape {
 
     private _rowTitleGroup: Group;
 
+    private _rowTitleHighlight: Rect;
+
     private _columnTitleBackground: Rect;
 
     private _columnTitleBorder: Rect;
 
     private _columnTitleGroup: Group;
+
+    private _columnTitleHighlight: Rect;
 
     private _topLeftWidget: Rect;
 
@@ -346,9 +352,10 @@ export class SelectionTransformerShape {
         rowTitleWidth: number,
         columnTitleHeight: number,
         style: Nullable<ISelectionStyle> = NORMAL_SELECTION_PLUGIN_STYLE,
-        highlight: Nullable<ISelectionCellWithCoord>
+        highlight: Nullable<ISelectionCellWithCoord>,
+        selectionType: Nullable<SELECTION_TYPE>
     ) {
-        this._selectionModel.setValue(newSelectionRange, highlight);
+        this._selectionModel.setValue(newSelectionRange, highlight, selectionType);
         if (style == null) {
             style = this._selectionStyle;
         }
@@ -381,6 +388,8 @@ export class SelectionTransformerShape {
         this._rowTitleBorder?.dispose();
 
         this._rowTitleGroup?.dispose();
+
+        this._rowTitleBackground?.dispose();
 
         this._columnTitleBackground?.dispose();
 
@@ -457,7 +466,7 @@ export class SelectionTransformerShape {
     }
 
     private _initialize() {
-        this._selectionModel = new SelectionTransformerModel(SELECTION_TYPE.NORMAL);
+        this._selectionModel = new SelectionTransformerModel();
         const zIndex = this._zIndex;
         this._leftControl = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
             zIndex,
@@ -624,13 +633,14 @@ export class SelectionTransformerShape {
     }
 
     private _updateBackgroundTitle(style: Nullable<ISelectionStyle>, rowTitleWidth: number, columnTitleHeight: number) {
-        const { startX, startY, endX, endY } = this._selectionModel;
+        const { startX, startY, endX, endY, selectionType } = this._selectionModel;
 
         if (style == null) {
             style = NORMAL_SELECTION_PLUGIN_STYLE;
         }
 
         const {
+            stroke,
             hasRowTitle,
             rowTitleFill = NORMAL_SELECTION_PLUGIN_STYLE.rowTitleFill!,
             rowTitleStroke = NORMAL_SELECTION_PLUGIN_STYLE.rowTitleStroke!,
@@ -643,8 +653,12 @@ export class SelectionTransformerShape {
         } = style;
 
         if (hasColumnTitle === true) {
+            let highlightTitleColor = columnTitleFill;
+            if (selectionType === SELECTION_TYPE.COLUMN) {
+                highlightTitleColor = new TinyColor(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
+            }
             this._columnTitleBackground.setProps({
-                fill: columnTitleFill,
+                fill: highlightTitleColor,
             });
             this._columnTitleBackground.resize(endX - startX, columnTitleHeight);
 
@@ -666,8 +680,12 @@ export class SelectionTransformerShape {
         this._columnTitleGroup.makeDirty(true);
 
         if (hasRowTitle === true) {
+            let highlightTitleColor = rowTitleFill;
+            if (selectionType === SELECTION_TYPE.ROW) {
+                highlightTitleColor = new TinyColor(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
+            }
             this._rowTitleBackground.setProps({
-                fill: rowTitleFill,
+                fill: highlightTitleColor,
             });
             this._rowTitleBackground.resize(rowTitleWidth, endY - startY);
 

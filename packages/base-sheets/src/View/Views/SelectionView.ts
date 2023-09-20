@@ -15,6 +15,7 @@ import {
     ISelection,
     LocaleService,
     ObserverManager,
+    SELECTION_TYPE,
     Worksheet,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -72,10 +73,17 @@ export class SelectionView extends BaseView {
             if (!this._selectionManagerService.isSelectionEnabled) {
                 return;
             }
+            let selectionType = this._selectionManagerService.selectionType;
+            if (selectionType === SELECTION_TYPE.AUTO) {
+                selectionType = SELECTION_TYPE.NORMAL;
+            }
             this._selectionTransformerShapeManager.eventTrigger(
                 evt,
                 this._selectionManagerService.currentStyle,
-                spreadsheet.zIndex + 1
+                spreadsheet.zIndex + 1,
+                selectionType,
+                SELECTION_TYPE.NORMAL,
+                this._selectionManagerService.isDetectMergedCell
             );
             if (evt.button !== 2) {
                 state.stopPropagation();
@@ -110,6 +118,7 @@ export class SelectionView extends BaseView {
             this._observerManager.getObserver<ISelection>('onChangeSelectionObserver')?.notifyObservers({
                 rangeData: selectionRange.rangeData,
                 cellRange: selectionRange.cellRange,
+                selectionType: selectionRange.selectionType,
             });
         });
 
@@ -122,10 +131,17 @@ export class SelectionView extends BaseView {
             if (!this._selectionManagerService.isSelectionEnabled) {
                 return;
             }
+            let selectionType = this._selectionManagerService.selectionType;
+            if (selectionType === SELECTION_TYPE.AUTO) {
+                selectionType = SELECTION_TYPE.ROW;
+            }
             this._selectionTransformerShapeManager.eventTrigger(
                 evt,
                 this._selectionManagerService.currentStyle,
-                spreadsheet.zIndex + 1
+                spreadsheet.zIndex + 1,
+                selectionType,
+                SELECTION_TYPE.ROW,
+                this._selectionManagerService.isDetectMergedCell
             );
             if (evt.button !== 2) {
                 state.stopPropagation();
@@ -143,10 +159,17 @@ export class SelectionView extends BaseView {
             if (!this._selectionManagerService.isSelectionEnabled) {
                 return;
             }
+            let selectionType = this._selectionManagerService.selectionType;
+            if (selectionType === SELECTION_TYPE.AUTO) {
+                selectionType = SELECTION_TYPE.COLUMN;
+            }
             this._selectionTransformerShapeManager.eventTrigger(
                 evt,
                 this._selectionManagerService.currentStyle,
-                spreadsheet.zIndex + 1
+                spreadsheet.zIndex + 1,
+                selectionType,
+                SELECTION_TYPE.COLUMN,
+                this._selectionManagerService.isDetectMergedCell
             );
             if (evt.button !== 2) {
                 state.stopPropagation();

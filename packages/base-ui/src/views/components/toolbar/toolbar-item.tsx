@@ -99,8 +99,8 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                     icon={icon}
                     value={value}
                     label={value ?? label} // TODO: this line is strange
-                    onClick={(value) => commandService.executeCommand(id, { value })} // TODO@wzhudev: should be merged to a single API on value change
-                    onPressEnter={(value) => commandService.executeCommand(id, { value })}
+                    onClick={(value) => commandService.executeCommand(id, value)} // TODO@wzhudev: should be merged to a single API on value change
+                    onPressEnter={(value) => commandService.executeCommand(id, value)}
                     type={selectType!}
                 ></Select>
             </Tooltip>

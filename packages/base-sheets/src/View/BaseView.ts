@@ -42,8 +42,8 @@ export enum CANVAS_VIEW_KEY {
 
 export enum SHEET_VIEW_KEY {
     MAIN = '__SpreadsheetRender__',
-    ROW = '__SpreadsheetRowTitle__',
-    COLUMN = '__SpreadsheetColumnTitle__',
+    ROW = '__SpreadsheetRowHeader__',
+    COLUMN = '__SpreadsheetColumnHeader__',
     LEFT_TOP = '__SpreadsheetLeftTopPlaceholder__',
 }
 

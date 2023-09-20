@@ -111,11 +111,11 @@ export class Spreadsheet extends SheetComponent {
 
         const scale = getScale(parentScale);
 
-        const { rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
+        const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
         ctx.translate(
-            fixLineWidthByScale(rowTitleWidth, scale) - 0.5 / scale,
-            fixLineWidthByScale(columnTitleHeight, scale) - 0.5 / scale
+            fixLineWidthByScale(rowHeaderWidth, scale) - 0.5 / scale,
+            fixLineWidthByScale(columnHeaderHeight, scale) - 0.5 / scale
         );
 
         // insert overflow cache
@@ -133,8 +133,8 @@ export class Spreadsheet extends SheetComponent {
         if (!skeleton) {
             return false;
         }
-        const { rowTitleWidth, columnTitleHeight } = skeleton;
-        if (oCoord.x > rowTitleWidth && oCoord.y > columnTitleHeight) {
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+        if (oCoord.x > rowHeaderWidth && oCoord.y > columnHeaderHeight) {
             return true;
         }
         return false;
@@ -145,7 +145,7 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
-        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } =
+        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } =
             spreadsheetSkeleton;
         const { scaleX = 1, scaleY = 1 } = this.getParentScale();
         let { startY, endY, startX, endX } = getCellPositionByIndex(
@@ -155,10 +155,10 @@ export class Spreadsheet extends SheetComponent {
             columnWidthAccumulation
         );
 
-        startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowTitleWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowTitleWidth, scaleX);
+        startY = fixLineWidthByScale(startY + columnHeaderHeight, scaleY);
+        endY = fixLineWidthByScale(endY + columnHeaderHeight, scaleY);
+        startX = fixLineWidthByScale(startX + rowHeaderWidth, scaleX);
+        endX = fixLineWidthByScale(endX + rowHeaderWidth, scaleX);
 
         return {
             startY,
@@ -266,11 +266,11 @@ export class Spreadsheet extends SheetComponent {
         }
         const { width, height } = parentSize;
         const skeleton = this.getSkeleton();
-        let rowTitleWidth = 0;
-        let columnTitleHeight = 0;
+        let rowHeaderWidth = 0;
+        let columnHeaderHeight = 0;
         if (skeleton) {
-            rowTitleWidth = skeleton.rowTitleWidth;
-            columnTitleHeight = skeleton.columnTitleHeight;
+            rowHeaderWidth = skeleton.rowHeaderWidth;
+            columnHeaderHeight = skeleton.columnHeaderHeight;
         }
 
         this._cacheCanvas.setSize(width, height);
@@ -358,10 +358,10 @@ export class Spreadsheet extends SheetComponent {
         // let offsetX = 0;
         // let offsetY = 0;
         // if (skeleton) {
-        //     const { rowTitleWidth, columnTitleHeight } = skeleton;
+        //     const { rowHeaderWidth, columnHeaderHeight } = skeleton;
         //     const { scaleX, scaleY } = this.getParentScale();
-        //     offsetX = fixLineWidthByScale(rowTitleWidth, scaleX);
-        //     offsetY = fixLineWidthByScale(columnTitleHeight, scaleY);
+        //     offsetX = fixLineWidthByScale(rowHeaderWidth, scaleX);
+        //     offsetY = fixLineWidthByScale(columnHeaderHeight, scaleY);
         // }
         // const pixelRatio = this._cacheCanvas.getPixelRatio();
         // const width = this._cacheCanvas.getWidth() * pixelRatio;

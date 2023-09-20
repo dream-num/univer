@@ -15,8 +15,8 @@ export class BorderAuxiliary extends SheetExtension {
     override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
         const {
             rowColumnSegment,
-            rowTitleWidth = 0,
-            columnTitleHeight = 0,
+            rowHeaderWidth = 0,
+            columnHeaderHeight = 0,
             dataMergeCache,
             overflowCache,
             stylesCache,

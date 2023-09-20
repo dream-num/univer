@@ -55,11 +55,11 @@ export interface IWorksheetConfig {
     rowData: ObjectArrayType<Partial<IRowData>>; // TODO:配置文件不能为ObjectArray实例，应该是纯json配置 @jerry
     columnData: ObjectArrayType<Partial<IColumnData>>;
     showGridlines: BooleanNumber;
-    rowTitle: {
+    rowHeader: {
         width: number;
         hidden?: BooleanNumber;
     };
-    columnTitle: {
+    columnHeader: {
         height: number;
         hidden?: BooleanNumber;
     };

@@ -2,8 +2,8 @@ import {
     Rect,
     Scene,
     Spreadsheet,
-    SpreadsheetColumnTitle,
-    SpreadsheetRowTitle,
+    SpreadsheetColumnHeader,
+    SpreadsheetRowHeader,
     SpreadsheetSkeleton,
 } from '@univerjs/base-render';
 import { ICurrentUniverService, LocaleService, Nullable, Worksheet } from '@univerjs/core';
@@ -18,9 +18,9 @@ export class SheetView extends BaseView {
 
     private _spreadsheet: Nullable<Spreadsheet>;
 
-    private _spreadsheetRowTitle: Nullable<SpreadsheetRowTitle>;
+    private _spreadsheetRowHeader: Nullable<SpreadsheetRowHeader>;
 
-    private _spreadsheetColumnTitle: Nullable<SpreadsheetColumnTitle>;
+    private _spreadsheetColumnHeader: Nullable<SpreadsheetColumnHeader>;
 
     private _spreadsheetLeftTopPlaceholder: Nullable<Rect>;
 
@@ -39,12 +39,12 @@ export class SheetView extends BaseView {
         return this._spreadsheet;
     }
 
-    getSpreadsheetRowTitle() {
-        return this._spreadsheetRowTitle;
+    getSpreadsheetRowHeader() {
+        return this._spreadsheetRowHeader;
     }
 
-    getSpreadsheetColumnTitle() {
-        return this._spreadsheetColumnTitle;
+    getSpreadsheetColumnHeader() {
+        return this._spreadsheetColumnHeader;
     }
 
     getSpreadsheetLeftTopPlaceholder() {
@@ -54,15 +54,15 @@ export class SheetView extends BaseView {
     override onSheetChange(worksheet: Worksheet) {
         const scene = this.getScene();
         const spreadsheetSkeleton = this._buildSkeleton(worksheet);
-        const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
+        const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
         this._spreadsheetSkeleton = spreadsheetSkeleton;
         this._spreadsheet?.updateSkeleton(spreadsheetSkeleton);
-        this._spreadsheetRowTitle?.updateSkeleton(spreadsheetSkeleton);
-        this._spreadsheetColumnTitle?.updateSkeleton(spreadsheetSkeleton);
+        this._spreadsheetRowHeader?.updateSkeleton(spreadsheetSkeleton);
+        this._spreadsheetColumnHeader?.updateSkeleton(spreadsheetSkeleton);
         this._spreadsheetLeftTopPlaceholder?.transformByState({
-            width: rowTitleWidth,
-            height: columnTitleHeight,
+            width: rowHeaderWidth,
+            height: columnHeaderHeight,
         });
 
         scene.transformByState({
@@ -71,7 +71,7 @@ export class SheetView extends BaseView {
             // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
             // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
         });
-        this._updateViewport(rowTitleWidth, columnTitleHeight);
+        this._updateViewport(rowHeaderWidth, columnHeaderHeight);
     }
 
     protected override _initialize() {
@@ -83,18 +83,18 @@ export class SheetView extends BaseView {
         }
         const spreadsheetSkeleton = this._buildSkeleton(worksheet);
 
-        const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
-        // const rowTitleWidth = rowTitle.hidden !== true ? rowTitle.width : 0;
-        // const columnTitleHeight = columnTitle.hidden !== true ? columnTitle.height : 0;
+        const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+        // const rowHeaderWidth = rowHeader.hidden !== true ? rowHeader.width : 0;
+        // const columnHeaderHeight = columnHeader.hidden !== true ? columnHeader.height : 0;
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN, spreadsheetSkeleton);
-        const spreadsheetRowTitle = new SpreadsheetRowTitle(SHEET_VIEW_KEY.ROW, spreadsheetSkeleton);
-        const spreadsheetColumnTitle = new SpreadsheetColumnTitle(SHEET_VIEW_KEY.COLUMN, spreadsheetSkeleton);
+        const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW, spreadsheetSkeleton);
+        const spreadsheetColumnHeader = new SpreadsheetColumnHeader(SHEET_VIEW_KEY.COLUMN, spreadsheetSkeleton);
         const SpreadsheetLeftTopPlaceholder = new Rect(SHEET_VIEW_KEY.LEFT_TOP, {
             zIndex: 2,
             left: -1,
             top: -1,
-            width: rowTitleWidth,
-            height: columnTitleHeight,
+            width: rowHeaderWidth,
+            height: columnHeaderHeight,
             fill: 'rgb(248, 249, 250)',
             stroke: 'rgb(217, 217, 217)',
             strokeWidth: 1,
@@ -102,12 +102,12 @@ export class SheetView extends BaseView {
 
         this._spreadsheetSkeleton = spreadsheetSkeleton;
         this._spreadsheet = spreadsheet;
-        this._spreadsheetRowTitle = spreadsheetRowTitle;
-        this._spreadsheetColumnTitle = spreadsheetColumnTitle;
+        this._spreadsheetRowHeader = spreadsheetRowHeader;
+        this._spreadsheetColumnHeader = spreadsheetColumnHeader;
         this._spreadsheetLeftTopPlaceholder = SpreadsheetLeftTopPlaceholder;
 
         scene.addObjects([spreadsheet], 0);
-        scene.addObjects([spreadsheetRowTitle, spreadsheetColumnTitle, SpreadsheetLeftTopPlaceholder], 2);
+        scene.addObjects([spreadsheetRowHeader, spreadsheetColumnHeader, SpreadsheetLeftTopPlaceholder], 2);
         scene.transformByState({
             width: this._columnWidthByTitle(worksheet) + columnTotalWidth,
             height: this._rowHeightByTitle(worksheet) + rowTotalHeight,
@@ -115,13 +115,13 @@ export class SheetView extends BaseView {
             // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
         });
 
-        this._updateViewport(rowTitleWidth, columnTitleHeight);
+        this._updateViewport(rowHeaderWidth, columnHeaderHeight);
     }
 
-    private _updateViewport(rowTitleWidth: number, columnTitleHeight: number) {
+    private _updateViewport(rowHeaderWidth: number, columnHeaderHeight: number) {
         const scene = this.getScene();
-        const rowTitleWidthScale = rowTitleWidth * scene.scaleX;
-        const columnTitleHeightScale = columnTitleHeight * scene.scaleY;
+        const rowHeaderWidthScale = rowHeaderWidth * scene.scaleX;
+        const columnHeaderHeightScale = columnHeaderHeight * scene.scaleY;
 
         const viewMain = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
         const viewTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_TOP);
@@ -129,23 +129,23 @@ export class SheetView extends BaseView {
         const viewLeftTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP);
 
         viewMain?.resize({
-            left: rowTitleWidthScale,
-            top: columnTitleHeightScale,
+            left: rowHeaderWidthScale,
+            top: columnHeaderHeightScale,
         });
 
         viewTop?.resize({
-            left: rowTitleWidthScale,
-            height: columnTitleHeightScale,
+            left: rowHeaderWidthScale,
+            height: columnHeaderHeightScale,
         });
 
         viewLeft?.resize({
-            top: columnTitleHeightScale,
-            width: rowTitleWidthScale,
+            top: columnHeaderHeightScale,
+            width: rowHeaderWidthScale,
         });
 
         viewLeftTop?.resize({
-            width: rowTitleWidthScale,
-            height: columnTitleHeightScale,
+            width: rowHeaderWidthScale,
+            height: columnHeaderHeightScale,
         });
     }
 
@@ -163,14 +163,14 @@ export class SheetView extends BaseView {
 
     private _rowHeightByTitle(worksheet: Worksheet) {
         const config = worksheet?.getConfig();
-        const columnTitle = config?.columnTitle.height || 0;
-        return columnTitle;
+        const columnHeader = config?.columnHeader.height || 0;
+        return columnHeader;
     }
 
     private _columnWidthByTitle(worksheet: Worksheet) {
         const config = worksheet?.getConfig();
-        const rowTitle = config?.rowTitle.width || 0;
-        return rowTitle;
+        const rowHeader = config?.rowHeader.width || 0;
+        return rowHeader;
     }
 }
 

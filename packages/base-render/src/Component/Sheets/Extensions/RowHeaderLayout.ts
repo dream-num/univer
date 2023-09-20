@@ -1,20 +1,20 @@
-import { IScale, numberToABC } from '@univerjs/core';
+import { IScale } from '@univerjs/core';
 
 import { MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../Basics/Const';
 import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
-import { SheetColumnTitleExtensionRegistry } from '../../Extension';
+import { SheetRowHeaderExtensionRegistry } from '../../Extension';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
 
-const UNIQUE_KEY = 'DefaultColumnTitleLayoutExtension';
+const UNIQUE_KEY = 'DefaultRowHeaderLayoutExtension';
 
-export class ColumnTitleLayout extends SheetExtension {
+export class RowHeaderLayout extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
     override zIndex = 10;
 
     override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowColumnSegment, rowTitleWidth = 0, columnTitleHeight = 0 } = spreadsheetSkeleton;
+        const { rowColumnSegment, rowHeaderWidth = 0, columnHeaderHeight = 0 } = spreadsheetSkeleton;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton) {
             return;
@@ -34,37 +34,37 @@ export class ColumnTitleLayout extends SheetExtension {
 
         const scale = this._getScale(parentScale);
         ctx.fillStyle = getColor([248, 249, 250])!;
-        ctx.fillRect(0, 0, columnTotalWidth, columnTitleHeight);
+        ctx.fillRect(0, 0, rowHeaderWidth, rowTotalHeight);
         ctx.textAlign = 'center'; // 文字水平居中
         ctx.textBaseline = 'middle'; // 文字垂直居中
         ctx.fillStyle = getColor([0, 0, 0])!; // 文字颜色
         ctx.beginPath();
         ctx.lineWidth = 1 / scale;
         ctx.strokeStyle = getColor([217, 217, 217])!;
-        let preColumnPosition = 0;
-        const columnWidthAccumulationLength = columnWidthAccumulation.length;
-        for (let c = startColumn - 1; c <= endColumn; c++) {
-            if (c < 0 || c > columnWidthAccumulationLength - 1) {
+        let preRowPosition = 0;
+        const rowHeightAccumulationLength = rowHeightAccumulation.length;
+        for (let r = startRow - 1; r <= endRow; r++) {
+            if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
-            const columnEndPosition = fixLineWidthByScale(columnWidthAccumulation[c], scale);
-            if (preColumnPosition === columnEndPosition) {
+            const rowEndPosition = fixLineWidthByScale(rowHeightAccumulation[r], scale);
+            if (preRowPosition === rowEndPosition) {
                 // 跳过隐藏行
                 continue;
             }
-            ctx.moveTo(columnEndPosition, 0);
-            ctx.lineTo(columnEndPosition, columnTitleHeight);
+            ctx.moveTo(0, rowEndPosition);
+            ctx.lineTo(rowHeaderWidth, rowEndPosition);
 
-            const middleCellPos = preColumnPosition + (columnEndPosition - preColumnPosition) / 2;
-            ctx.fillText(numberToABC(c), middleCellPos, columnTitleHeight / 2 + MIDDLE_CELL_POS_MAGIC_NUMBER); // 魔法数字1，因为垂直对齐看起来差1像素
-            preColumnPosition = columnEndPosition;
+            const middleCellPos = preRowPosition + (rowEndPosition - preRowPosition) / 2;
+            ctx.fillText(`${r + 1}`, rowHeaderWidth / 2, middleCellPos + MIDDLE_CELL_POS_MAGIC_NUMBER); // 魔法数字1，因为垂直对齐看起来差1像素
+            preRowPosition = rowEndPosition;
         }
+        // console.log('xx2', rowColumnIndexRange, bounds, this._rowTotalHeight, this._rowHeightAccumulation);
 
-        const columnTitleHeightFix = fixLineWidthByScale(columnTitleHeight, scale);
-        ctx.moveTo(0, columnTitleHeightFix);
-        ctx.lineTo(columnTotalWidth, columnTitleHeightFix);
+        ctx.moveTo(fixLineWidthByScale(rowHeaderWidth, scale), 0);
+        ctx.lineTo(fixLineWidthByScale(rowHeaderWidth, scale), rowTotalHeight);
         ctx.stroke();
     }
 }
 
-SheetColumnTitleExtensionRegistry.add(new ColumnTitleLayout());
+SheetRowHeaderExtensionRegistry.add(new RowHeaderLayout());

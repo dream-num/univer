@@ -60,8 +60,8 @@ export class CanvasView {
             worksheet = workbook.getSheets()[0];
         }
         const config = worksheet.getConfig();
-        const rowTitle = config.rowTitle;
-        const columnTitle = config.columnTitle;
+        const rowHeader = config.rowHeader;
+        const columnHeader = config.columnHeader;
 
         // How do we know if a business should claim itself as main scene?
         const scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
@@ -73,31 +73,31 @@ export class CanvasView {
 
         this._scene = scene;
         const viewMain = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN, scene, {
-            left: rowTitle.width,
-            top: columnTitle.height,
+            left: rowHeader.width,
+            top: columnHeader.height,
             bottom: 0,
             right: 0,
             isWheelPreventDefaultX: true,
         });
         const viewTop = new Viewport(CANVAS_VIEW_KEY.VIEW_TOP, scene, {
-            left: rowTitle.width,
+            left: rowHeader.width,
             top: 0,
-            height: columnTitle.height,
+            height: columnHeader.height,
             right: 0,
             isWheelPreventDefaultX: true,
         });
         const viewLeft = new Viewport(CANVAS_VIEW_KEY.VIEW_LEFT, scene, {
             left: 0,
-            top: columnTitle.height,
+            top: columnHeader.height,
             bottom: 0,
-            width: rowTitle.width,
+            width: rowHeader.width,
             isWheelPreventDefaultX: true,
         });
         const viewLeftTop = new Viewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP, scene, {
             left: 0,
             top: 0,
-            width: rowTitle.width,
-            height: columnTitle.height,
+            width: rowHeader.width,
+            height: columnHeader.height,
             isWheelPreventDefaultX: true,
         });
         // viewMain.linkToViewport(viewLeft, LINK_VIEW_PORT_TYPE.Y);

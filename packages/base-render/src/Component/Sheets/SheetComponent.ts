@@ -144,7 +144,7 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
     }
 }
 
-export class SpreadsheetTitle extends SheetComponent {
+export class SpreadsheetHeader extends SheetComponent {
     protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect): void {
         this.draw(ctx, bounds);
     }

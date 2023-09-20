@@ -16,7 +16,7 @@ export class Border extends SheetExtension {
     override zIndex = 30;
 
     override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowColumnSegment, rowTitleWidth, columnTitleHeight, dataMergeCache, stylesCache, overflowCache } =
+        const { rowColumnSegment, rowHeaderWidth, columnHeaderHeight, dataMergeCache, stylesCache, overflowCache } =
             spreadsheetSkeleton;
         const { border } = stylesCache;
         if (!spreadsheetSkeleton) {

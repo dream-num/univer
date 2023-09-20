@@ -14,7 +14,7 @@ export class Background extends SheetExtension {
     override zIndex = 20;
 
     override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowTitleWidth, columnTitleHeight, dataMergeCache, stylesCache } = spreadsheetSkeleton;
+        const { rowHeaderWidth, columnHeaderHeight, dataMergeCache, stylesCache } = spreadsheetSkeleton;
         const { background } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;

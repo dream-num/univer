@@ -6,6 +6,6 @@
     "packages/**/*",
     "examples/**/*",
     "scripts/**/*",
-    ".eslintrc.js"
+    ".eslintrc.cjs"
   ],
 }

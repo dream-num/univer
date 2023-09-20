@@ -50,7 +50,7 @@ jobs:
         with:
           path: .eslintcache
           key: |
-            ${{ runner.os }}-eslint-${{ hashFiles('.eslintrc.js') }}
+            ${{ runner.os }}-eslint-${{ hashFiles('.eslintrc.cjs') }}
           restore-keys: |
             ${{ runner.os }}-eslint-
 

@@ -45,4 +45,4 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - run: echo "${{ github.event.pull_request.title }}" | pnpx commitlint -g ./commitlint.config.js
+      - run: echo "${{ github.event.pull_request.title }}" | pnpx commitlint -g ./commitlint.config.cjs

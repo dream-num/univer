@@ -1,4 +1,13 @@
-import { CommandType, Dimension, ICellData, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
+import {
+    CommandType,
+    Dimension,
+    ICellData,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    IUndoRedoService,
+    ObjectMatrix,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
@@ -20,7 +29,11 @@ export const InsertRangeMoveDownCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         const range = selectionManagerService.getRangeDatas();
         if (!range?.length) return false;
 
@@ -48,7 +61,10 @@ export const InsertRangeMoveDownCommand: ICommand = {
             cellValue: cellValue.getData(),
         };
 
-        const deleteRangeMutationParams: IDeleteRangeMutationParams = InsertRangeUndoMutationFactory(accessor, insertRangeMutationParams);
+        const deleteRangeMutationParams: IDeleteRangeMutationParams = InsertRangeUndoMutationFactory(
+            accessor,
+            insertRangeMutationParams
+        );
 
         // execute do mutations and add undo mutations to undo stack if completed
         const result = commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);

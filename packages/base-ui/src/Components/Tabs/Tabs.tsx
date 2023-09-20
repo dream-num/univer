@@ -1,27 +1,16 @@
 import React, { createRef, ReactNode, useEffect, useState } from 'react';
 
-import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames, randomId } from '../../Utils';
 import styles from './index.module.less';
 
 // Components interface
 
 // Props of tab pane
-export interface BaseTabPaneProps {
+export interface IBaseTabPaneProps {
     /**
      * TabPane's head display content
      */
-    label: ReactNode;
-
-    /**
-     * Active status of tab pane
-     */
-    active?: boolean;
-
-    /**
-     * TabPane's key
-     */
-    keys?: string;
+    children?: ReactNode;
 
     /**
      * TabPane's id
@@ -41,11 +30,21 @@ export interface BaseTabPaneProps {
     /**
      * TabPane's head display content
      */
-    children?: ReactNode;
+    label: ReactNode;
+
+    /**
+     * Active status of tab pane
+     */
+    active?: boolean;
+
+    /**
+     * TabPane's key
+     */
+    keys?: string;
 }
 
 // Props of tabs
-export interface BaseTabProps extends BaseComponentProps {
+export interface IBaseTabsProps {
     /**
      * Basic style of tabs
      */
@@ -74,7 +73,7 @@ export interface BaseTabProps extends BaseComponentProps {
     /**
      * Content of tab
      */
-    children: Array<React.ReactElement<BaseTabPaneProps, string>>;
+    children: Array<React.ReactElement<IBaseTabPaneProps, string>>;
 
     /**
      * Tab pane is draggable
@@ -92,9 +91,9 @@ interface ITabInfo {
  * Tabs Component
  */
 export const Tabs = React.memo(
-    (props: BaseTabProps) => {
+    (props: IBaseTabsProps) => {
         const { type = 'line', className = '', draggable = false } = props;
-        const [active, setActive] = useState<string>(props.activeKey || ''); // Initialize active with the provided activeKey
+        const [active, setActive] = useState<string>(props.activeKey ?? ''); // Initialize active with the provided activeKey
 
         useEffect(() => {
             props.activeKey && setActive(props.activeKey); // Update active state when props.activeKey changes
@@ -104,6 +103,10 @@ export const Tabs = React.memo(
             if (!parent.current) return;
             parent.current.removeEventListener('wheel', wheel);
             parent.current.addEventListener('wheel', wheel);
+
+            return () => {
+                parent.current?.removeEventListener('wheel', wheel);
+            };
         }, [props.children]);
 
         const parseNavList = () =>
@@ -355,7 +358,7 @@ export const Tabs = React.memo(
 
             document.body.appendChild(target);
             target.style.position = 'absolute';
-            // Todo: CSS变量挂在container上，container外层取不到
+            // TODO: CSS变量挂在container上，container外层取不到
             target.style.fontSize = '14px';
 
             list = getList(current);
@@ -393,14 +396,14 @@ export const Tabs = React.memo(
 );
 
 // tab content
-export function TabPane(props: BaseTabPaneProps) {
+export function TabPane(props: IBaseTabPaneProps) {
     const { id, keys, style, children, active } = props;
     return (
         <div
             id={id && `${id}-panel-${keys}`}
             role="tabpanel"
-            style={{ ...style }}
             className={joinClassNames(styles.tabsPanel, active && styles.tabsPanelActive)}
+            style={{ ...style }}
         >
             {active && children}
         </div>

@@ -1,4 +1,10 @@
-import { DataStreamTreeNode, DataStreamTreeTokenType, DocumentBodyModel, IParagraphStyle, Nullable } from '@univerjs/core';
+import {
+    DataStreamTreeNode,
+    DataStreamTreeTokenType,
+    DocumentBodyModel,
+    IParagraphStyle,
+    Nullable,
+} from '@univerjs/core';
 
 import { IDocumentSkeletonSpan } from '../../../../Basics/IDocumentSkeletonCached';
 import { ISectionBreakConfig } from '../../../../Basics/Interfaces';

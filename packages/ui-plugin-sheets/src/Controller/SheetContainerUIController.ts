@@ -48,10 +48,16 @@ export class SheetContainerUIController {
 
         this._slotController = new SlotController();
         // this._slotManager = new SlotManager();
-        this._toolbarController = this._injector.createInstance(ToolbarUIController, this._config.layout?.toolbarConfig);
+        this._toolbarController = this._injector.createInstance(
+            ToolbarUIController,
+            this._config.layout?.toolbarConfig
+        );
         this._formulaBarUIController = this._injector.createInstance(FormulaBarUIController);
         this._infoBarController = this._injector.createInstance(InfoBarUIController);
-        this._rightMenuController = this._injector.createInstance(RightMenuUIController, this._config.layout?.rightMenuConfig);
+        this._rightMenuController = this._injector.createInstance(
+            RightMenuUIController,
+            this._config.layout?.rightMenuConfig
+        );
         this._countBarController = this._injector.createInstance(CountBarUIController);
         this._sheetBarUIController = this._injector.createInstance(SheetBarUIController);
         this._injector.add([SheetBarUIController, { useFactory: () => this._sheetBarUIController }]);

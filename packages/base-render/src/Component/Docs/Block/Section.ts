@@ -28,7 +28,13 @@ export function dealWithSections(
         }
         if (node.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
             // Paragraph 段落
-            skeletonPages = dealWidthParagraph(bodyModel, node, currentPageCache, sectionBreakConfig, skeletonResourceReference);
+            skeletonPages = dealWidthParagraph(
+                bodyModel,
+                node,
+                currentPageCache,
+                sectionBreakConfig,
+                skeletonResourceReference
+            );
         } else if (node.nodeType === DataStreamTreeNodeType.TABLE) {
             // Table 表格
         }

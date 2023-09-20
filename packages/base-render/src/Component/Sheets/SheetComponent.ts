@@ -1,4 +1,4 @@
-import { ICellInfo, Nullable, searchArray } from '@univerjs/core';
+import { Nullable, searchArray } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from '../../Basics/Const';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
@@ -55,15 +55,14 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
 
     getDocuments(): any {}
 
-    getCellByIndex(row: number, column: number) {}
-
-    getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number): Nullable<{ startY: number; startX: number; endX: number; endY: number }> {}
+    getNoMergeCellPositionByIndex(
+        rowIndex: number,
+        columnIndex: number
+    ): Nullable<{ startY: number; startX: number; endX: number; endY: number }> {}
 
     getScrollXYByRelativeCoords(coord: Vector2) {
         return { x: 0, y: 0 };
     }
-
-    calculateCellIndexByPosition(offsetX: number, offsetY: number, scrollXY: { x: number; y: number }): Nullable<ICellInfo> {}
 
     getSelectionBounding(
         startRow: number,

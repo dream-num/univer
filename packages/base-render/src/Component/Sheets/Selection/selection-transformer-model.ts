@@ -1,8 +1,8 @@
-import { ICellInfo, ISelection, makeCellToSelection, Nullable } from '@univerjs/core';
+import { ISelectionCellWithCoord, ISelectionRangeWithCoord, makeCellToSelection, Nullable } from '@univerjs/core';
 
 import { SELECTION_TYPE } from '../../../Basics/Const';
 
-export class SelectionTransformerModel implements ISelection {
+export class SelectionTransformerModel implements ISelectionRangeWithCoord {
     private _startColumn: number;
 
     private _startRow: number;
@@ -21,7 +21,7 @@ export class SelectionTransformerModel implements ISelection {
 
     private _type: SELECTION_TYPE;
 
-    private _currentCell: Nullable<ICellInfo>;
+    private _currentCell: Nullable<ISelectionCellWithCoord>;
 
     constructor(type: SELECTION_TYPE = SELECTION_TYPE.NORMAL) {
         this._type = type;
@@ -67,27 +67,44 @@ export class SelectionTransformerModel implements ISelection {
         return this._currentCell;
     }
 
-    isEqual(selectionRange: ISelection) {
+    isEqual(selectionRange: ISelectionRangeWithCoord) {
         const { startColumn, startRow, endColumn, endRow, type } = this;
-        const { startColumn: newStartColumn, startRow: newStartRow, endColumn: newEndColumn, endRow: newEndRow } = selectionRange;
+        const {
+            startColumn: newStartColumn,
+            startRow: newStartRow,
+            endColumn: newEndColumn,
+            endRow: newEndRow,
+        } = selectionRange;
         // if (type !== newType) {
         //     return false;
         // }
-        if (startColumn === newStartColumn && startRow === newStartRow && endColumn === newEndColumn && endRow === newEndRow) {
+        if (
+            startColumn === newStartColumn &&
+            startRow === newStartRow &&
+            endColumn === newEndColumn &&
+            endRow === newEndRow
+        ) {
             return true;
         }
         return false;
     }
 
-    isInclude(selectionRange: ISelection) {
+    isInclude(selectionRange: ISelectionRangeWithCoord) {
         const { startColumn, startRow, endColumn, endRow, type } = this;
-        const { startColumn: newStartColumn, startRow: newStartRow, endColumn: newEndColumn, endRow: newEndRow } = selectionRange;
+        const {
+            startColumn: newStartColumn,
+            startRow: newStartRow,
+            endColumn: newEndColumn,
+            endRow: newEndRow,
+        } = selectionRange;
 
         // if (type !== newType) {
         //     return false;
         // }
 
-        if (!(newEndColumn < startColumn || newStartColumn > endColumn || newStartRow > endRow || newEndRow < startRow)) {
+        if (
+            !(newEndColumn < startColumn || newStartColumn > endColumn || newStartRow > endRow || newEndRow < startRow)
+        ) {
             return true;
         }
         return false;
@@ -132,7 +149,7 @@ export class SelectionTransformerModel implements ISelection {
         };
     }
 
-    setValue(newSelectionRange: ISelection, currentCell: Nullable<ICellInfo>) {
+    setValue(newSelectionRange: ISelectionRangeWithCoord, currentCell: Nullable<ISelectionCellWithCoord>) {
         const {
             startColumn,
             startRow,
@@ -164,7 +181,7 @@ export class SelectionTransformerModel implements ISelection {
         this.setCurrentCell(currentCell);
     }
 
-    setCurrentCell(currentCell: Nullable<ICellInfo>) {
+    setCurrentCell(currentCell: Nullable<ISelectionCellWithCoord>) {
         if (currentCell) {
             this._currentCell = currentCell;
         }

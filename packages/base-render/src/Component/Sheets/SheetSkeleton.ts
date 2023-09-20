@@ -5,13 +5,13 @@ import {
     HorizontalAlign,
     IBorderStyleData,
     ICellData,
-    ICellInfo,
     IColumnData,
     IDocumentData,
     IDocumentRenderConfig,
     IPaddingData,
-    IRangeData,
     IRowData,
+    ISelectionCellWithCoord,
+    ISelectionRange,
     isEmptyCell,
     IStyleBase,
     IStyleData,
@@ -87,6 +87,8 @@ interface IRowColumnSegment {
     endColumn: number;
 }
 
+const DEFAULT_ROTATE_ANGLE = 90;
+
 export class SpreadsheetSkeleton extends Skeleton {
     private _rowHeightAccumulation: number[];
 
@@ -102,11 +104,11 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _rowColumnSegment: IRowColumnSegment;
 
-    private _dataMergeCache: IRangeData[];
+    private _dataMergeCache: ISelectionRange[];
 
-    // private _dataMergeCacheAll: ObjectMatrix<IRangeData>;
+    // private _dataMergeCacheAll: ObjectMatrix<ISelectionRange>;
 
-    private _overflowCache: ObjectMatrix<IRangeData>;
+    private _overflowCache: ObjectMatrix<ISelectionRange>;
 
     private _stylesCache: IStylesCache;
 
@@ -197,7 +199,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._styles;
     }
 
-    setOverflowCache(value: ObjectMatrix<IRangeData>) {
+    setOverflowCache(value: ObjectMatrix<ISelectionRange>) {
         this._overflowCache = value;
     }
 
@@ -410,28 +412,39 @@ export class SpreadsheetSkeleton extends Skeleton {
         scaleX: number,
         scaleY: number,
         scrollXY: { x: number; y: number }
-    ): Nullable<ICellInfo> {
-        const { x: scrollX, y: scrollY } = scrollXY;
+    ): Nullable<ISelectionCellWithCoord> {
+        const { row, column } = this.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+
+        return this.getCellByIndex(row, column, scaleX, scaleY);
+    }
+
+    getCellPositionByOffset(
+        offsetX: number,
+        offsetY: number,
+        scaleX: number,
+        scaleY: number,
+        scrollXY: { x: number; y: number }
+    ) {
+        const row = this.getCellRowPositionByOffsetY(offsetY, scaleY, scrollXY);
+
+        const column = this.getCellColumnPositionByOffsetX(offsetX, scaleX, scrollXY);
+
+        return {
+            row,
+            column,
+        };
+    }
+
+    getCellColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
+        const { x: scrollX } = scrollXY;
 
         // these values are not affected by zooming (ideal positions)
-        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } = this;
+        const { columnWidthAccumulation, rowTitleWidth } = this;
 
         // so we should map physical positions to ideal positions
         offsetX = offsetX / scaleX + scrollX - rowTitleWidth;
-        offsetY = offsetY / scaleY + scrollY - columnTitleHeight;
 
-        let row = searchArray(rowHeightAccumulation, offsetY);
         let column = searchArray(columnWidthAccumulation, offsetX);
-
-        if (row === -1) {
-            const rowLength = rowHeightAccumulation.length - 1;
-            const lastRowValue = rowHeightAccumulation[rowLength];
-            if (lastRowValue <= offsetY) {
-                row = rowHeightAccumulation.length - 1;
-            } else {
-                row = 0;
-            }
-        }
 
         if (column === -1) {
             const columnLength = columnWidthAccumulation.length - 1;
@@ -443,41 +456,30 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        const cellInfo = getCellByIndex(
-            row,
-            column,
-            rowHeightAccumulation,
-            columnWidthAccumulation,
-            this._config.mergeData
-        );
-        const { isMerged, isMergedMainCell } = cellInfo;
-        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
+        return column;
+    }
 
-        startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowTitleWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowTitleWidth, scaleX);
+    getCellRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
+        const { y: scrollY } = scrollXY;
 
-        mergeInfo = mergeInfoOffset(mergeInfo, rowTitleWidth, columnTitleHeight, scaleX, scaleY);
+        // these values are not affected by zooming (ideal positions)
+        const { rowHeightAccumulation, columnTitleHeight } = this;
 
-        // let endRow = row;
-        // let endColumn = column;
-        // if (isMerged && mergeInfo) {
-        //     endRow = mergeInfo.endRow;
-        //     endColumn = mergeInfo.endColumn;
-        // }
+        offsetY = offsetY / scaleY + scrollY - columnTitleHeight;
 
-        return {
-            row,
-            column,
-            startY,
-            endY,
-            startX,
-            endX,
-            isMerged,
-            isMergedMainCell,
-            mergeInfo,
-        };
+        let row = searchArray(rowHeightAccumulation, offsetY);
+
+        if (row === -1) {
+            const rowLength = rowHeightAccumulation.length - 1;
+            const lastRowValue = rowHeightAccumulation[rowLength];
+            if (lastRowValue <= offsetY) {
+                row = rowHeightAccumulation.length - 1;
+            } else {
+                row = 0;
+            }
+        }
+
+        return row;
     }
 
     getCellByIndex(row: number, column: number, scaleX: number, scaleY: number) {
@@ -705,7 +707,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     // private _calculateOverflowCache() {
     //     const { font: fontList } = this.stylesCache;
     //     // const mergeRangeCache = this._getMergeRangeCache();
-    //     const overflowCache = new ObjectMatrix<IRangeData>();
+    //     const overflowCache = new ObjectMatrix<ISelectionRange>();
     //     const columnCount = this.getColumnCount();
     //     fontList &&
     //         Object.keys(fontList).forEach((fontFormat: string) => {
@@ -925,8 +927,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         // dataMergeCache &&
-        //     dataMergeCache.forEach((rowIndex: number, row: ObjectArray<IRangeData>) => {
-        //         row.forEach((columnIndex: number, mainCell: IRangeData) => {
+        //     dataMergeCache.forEach((rowIndex: number, row: ObjectArray<ISelectionRange>) => {
+        //         row.forEach((columnIndex: number, mainCell: ISelectionRange) => {
         //             if (!mainCell) {
         //                 return true;
         //             }
@@ -1003,8 +1005,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             let centerAngle = 0;
             let vertexAngle = angle;
             if (isVertical === BooleanNumber.TRUE) {
-                centerAngle = 90;
-                vertexAngle = 90;
+                centerAngle = DEFAULT_ROTATE_ANGLE;
+                vertexAngle = DEFAULT_ROTATE_ANGLE;
             }
             documentModel = this._updateRenderConfigAndHorizon(cell.p, horizontalAlign, {
                 horizontalAlign,
@@ -1028,7 +1030,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         let { a: angle } = textRotation as ITextRotation;
         const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
         if (isVertical === BooleanNumber.TRUE) {
-            angle = 90;
+            angle = DEFAULT_ROTATE_ANGLE;
         }
         if (documentModel) {
             const documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
@@ -1100,8 +1102,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         let centerAngle = 0;
         let vertexAngle = angle;
         if (isVertical === BooleanNumber.TRUE) {
-            centerAngle = 90;
-            vertexAngle = 90;
+            centerAngle = DEFAULT_ROTATE_ANGLE;
+            vertexAngle = DEFAULT_ROTATE_ANGLE;
             textDirectionDocument = TextDirectionType.TBRL;
         }
         const documentData: IDocumentData = {
@@ -1212,7 +1214,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    private _getMergeCells(mergeData: IRangeData[], rowColumnSegment?: IRowColumnSegment) {
+    private _getMergeCells(mergeData: ISelectionRange[], rowColumnSegment?: IRowColumnSegment) {
         // const rowColumnSegment = this._rowColumnSegment;
         const endColumnLast = this.columnWidthAccumulation.length - 1;
         if (!rowColumnSegment) {
@@ -1227,7 +1229,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             };
         }
         const { startRow, startColumn, endRow, endColumn } = rowColumnSegment;
-        const cacheDataMerge: IRangeData[] = [];
+        const cacheDataMerge: ISelectionRange[] = [];
         for (let i = 0; i < mergeData.length; i++) {
             const {
                 startRow: mergeStartRow,

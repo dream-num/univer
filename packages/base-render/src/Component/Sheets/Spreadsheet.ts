@@ -1,11 +1,19 @@
-import { CellValueType, HorizontalAlign, ICellInfo, IRangeData, Nullable, ObjectMatrix, searchArray, sortRules, WrapStrategy } from '@univerjs/core';
+import {
+    CellValueType,
+    HorizontalAlign,
+    ISelectionRange,
+    Nullable,
+    ObjectMatrix,
+    sortRules,
+    WrapStrategy,
+} from '@univerjs/core';
 
 import { BaseObject } from '../../BaseObject';
 import { ORIENTATION_TYPE, RENDER_CLASS_TYPE } from '../../Basics/Const';
 import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
 import { IDocumentSkeletonColumn } from '../../Basics/IDocumentSkeletonCached';
 import { ITransformChangeState } from '../../Basics/Interfaces';
-import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale, mergeInfoOffset } from '../../Basics/Tools';
+import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale } from '../../Basics/Tools';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { Canvas } from '../../Canvas';
 import { Engine } from '../../Engine';
@@ -105,7 +113,10 @@ export class Spreadsheet extends SheetComponent {
 
         const { rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
 
-        ctx.translate(fixLineWidthByScale(rowTitleWidth, scale) - 0.5 / scale, fixLineWidthByScale(columnTitleHeight, scale) - 0.5 / scale);
+        ctx.translate(
+            fixLineWidthByScale(rowTitleWidth, scale) - 0.5 / scale,
+            fixLineWidthByScale(columnTitleHeight, scale) - 0.5 / scale
+        );
 
         // insert overflow cache
         this._calculateOverflow();
@@ -134,9 +145,15 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
-        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
+        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } =
+            spreadsheetSkeleton;
         const { scaleX = 1, scaleY = 1 } = this.getParentScale();
-        let { startY, endY, startX, endX } = getCellPositionByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation);
+        let { startY, endY, startX, endX } = getCellPositionByIndex(
+            rowIndex,
+            columnIndex,
+            rowHeightAccumulation,
+            columnWidthAccumulation
+        );
 
         startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
         endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
@@ -148,108 +165,6 @@ export class Spreadsheet extends SheetComponent {
             endY,
             startX,
             endX,
-        };
-    }
-
-    override calculateCellIndexByPosition(offsetX: number, offsetY: number, scrollXY: { x: number; y: number }): Nullable<ICellInfo> {
-        const spreadsheetSkeleton = this.getSkeleton();
-        if (!spreadsheetSkeleton) {
-            return;
-        }
-
-        const { scaleX = 1, scaleY = 1 } = this.getParentScale();
-        const { x: scrollX, y: scrollY } = scrollXY;
-
-        // these values are not affected by zooming (ideal positions)
-        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight, mergeData } = spreadsheetSkeleton;
-
-        // so we should map physical positions to ideal positions
-        offsetX = offsetX / scaleX + scrollX - rowTitleWidth;
-        offsetY = offsetY / scaleY + scrollY - columnTitleHeight;
-
-        let row = searchArray(rowHeightAccumulation, offsetY);
-        let column = searchArray(columnWidthAccumulation, offsetX);
-
-        if (row === -1) {
-            const rowLength = rowHeightAccumulation.length - 1;
-            const lastRowValue = rowHeightAccumulation[rowLength];
-            if (lastRowValue <= offsetY) {
-                row = rowHeightAccumulation.length - 1;
-            } else {
-                row = 0;
-            }
-        }
-
-        if (column === -1) {
-            const columnLength = columnWidthAccumulation.length - 1;
-            const lastColumnValue = columnWidthAccumulation[columnLength];
-            if (lastColumnValue <= offsetX) {
-                column = columnWidthAccumulation.length - 1;
-            } else {
-                column = 0;
-            }
-        }
-
-        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, mergeData);
-        const { isMerged, isMergedMainCell } = cellInfo;
-        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
-
-        startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowTitleWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowTitleWidth, scaleX);
-
-        mergeInfo = mergeInfoOffset(mergeInfo, rowTitleWidth, columnTitleHeight, scaleX, scaleY);
-
-        // let endRow = row;
-        // let endColumn = column;
-        // if (isMerged && mergeInfo) {
-        //     endRow = mergeInfo.endRow;
-        //     endColumn = mergeInfo.endColumn;
-        // }
-
-        return {
-            row,
-            column,
-            startY,
-            endY,
-            startX,
-            endX,
-            isMerged,
-            isMergedMainCell,
-            mergeInfo,
-        };
-    }
-
-    override getCellByIndex(row: number, column: number) {
-        const spreadsheetSkeleton = this.getSkeleton();
-        if (!spreadsheetSkeleton) {
-            return;
-        }
-        const { scaleX = 1, scaleY = 1 } = this.getParentScale();
-        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight, mergeData } = spreadsheetSkeleton;
-
-        const cellInfo = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, mergeData);
-        const { isMerged, isMergedMainCell } = cellInfo;
-        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
-
-        startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowTitleWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowTitleWidth, scaleX);
-
-        mergeInfo = mergeInfoOffset(mergeInfo, rowTitleWidth, columnTitleHeight, scaleX, scaleY);
-
-        return {
-            row,
-            column,
-            startY,
-            endY,
-            startX,
-            endX,
-            isMerged,
-            isMergedMainCell,
-            mergeInfo,
         };
     }
 
@@ -414,7 +329,10 @@ export class Spreadsheet extends SheetComponent {
                 allRotatedWidth += rotatedWidth;
             }
 
-            if ((orientation === ORIENTATION_TYPE.UP && i === 0) || (orientation === ORIENTATION_TYPE.DOWN && i === widthCount - 1)) {
+            if (
+                (orientation === ORIENTATION_TYPE.UP && i === 0) ||
+                (orientation === ORIENTATION_TYPE.DOWN && i === widthCount - 1)
+            ) {
                 allRotatedWidth += (rotatedWidth + spaceWidth / sinTheta) / tanTheta;
             }
         }
@@ -572,13 +490,14 @@ export class Spreadsheet extends SheetComponent {
 
     // eslint-disable-next-line max-lines-per-function
     private _calculateOverflow() {
-        const overflowCache = new ObjectMatrix<IRangeData>();
+        const overflowCache = new ObjectMatrix<ISelectionRange>();
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;
         }
         const columnCount = spreadsheetSkeleton.getColumnCount();
-        const { stylesCache, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache, mergeData } = spreadsheetSkeleton;
+        const { stylesCache, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache, mergeData } =
+            spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         fontList &&
             Object.keys(fontList).forEach((fontFormat: string) => {
@@ -586,7 +505,13 @@ export class Spreadsheet extends SheetComponent {
                 fontObjectArray.forEach((row, fontArray) => {
                     fontArray.forEach((column, docsConfig) => {
                         // wrap and angle handler
-                        const { documentSkeleton, angle = 0, verticalAlign, horizontalAlign, wrapStrategy } = docsConfig;
+                        const {
+                            documentSkeleton,
+                            angle = 0,
+                            verticalAlign,
+                            horizontalAlign,
+                            wrapStrategy,
+                        } = docsConfig;
                         const cell = spreadsheetSkeleton.getCellData().getValue(row, column);
 
                         const sheetSkeleton = this.getSkeleton();
@@ -609,7 +534,13 @@ export class Spreadsheet extends SheetComponent {
                             }
 
                             if (angle !== 0) {
-                                const { startY, endY, startX, endX } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, mergeData);
+                                const { startY, endY, startX, endX } = getCellByIndex(
+                                    row,
+                                    column,
+                                    rowHeightAccumulation,
+                                    columnWidthAccumulation,
+                                    mergeData
+                                );
                                 const cellWidth = endX - startX;
                                 const cellHeight = endY - startY;
 
@@ -626,7 +557,13 @@ export class Spreadsheet extends SheetComponent {
                                 }
                             }
 
-                            const position = spreadsheetSkeleton.getOverflowPosition(contentSize, horizontalAlign, row, column, columnCount);
+                            const position = spreadsheetSkeleton.getOverflowPosition(
+                                contentSize,
+                                horizontalAlign,
+                                row,
+                                column,
+                                columnCount
+                            );
 
                             const { startColumn, endColumn } = position;
 
@@ -637,7 +574,13 @@ export class Spreadsheet extends SheetComponent {
                                 endColumn,
                             });
                         } else if (wrapStrategy === WrapStrategy.WRAP && angle !== 0) {
-                            const { startY, endY } = getCellByIndex(row, column, rowHeightAccumulation, columnWidthAccumulation, mergeData);
+                            const { startY, endY } = getCellByIndex(
+                                row,
+                                column,
+                                rowHeightAccumulation,
+                                columnWidthAccumulation,
+                                mergeData
+                            );
 
                             const cellHeight = endY - startY;
                             documentSkeleton.getModel().updateDocumentDataPageSize(cellHeight);
@@ -648,7 +591,13 @@ export class Spreadsheet extends SheetComponent {
                                 return true;
                             }
 
-                            const { startColumn, endColumn } = sheetSkeleton.getOverflowPosition(contentSize, horizontalAlign, row, column, sheetSkeleton.getColumnCount());
+                            const { startColumn, endColumn } = sheetSkeleton.getOverflowPosition(
+                                contentSize,
+                                horizontalAlign,
+                                row,
+                                column,
+                                sheetSkeleton.getColumnCount()
+                            );
                             overflowCache.setValue(row, column, { startRow: row, endRow: row, startColumn, endColumn });
                         }
 

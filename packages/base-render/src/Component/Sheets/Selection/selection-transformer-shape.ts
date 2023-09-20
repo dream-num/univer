@@ -1,28 +1,19 @@
-import { ICellInfo, ISelection, Nullable } from '@univerjs/core';
+import { ISelectionCellWithCoord, ISelectionRangeWithCoord, Nullable } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 
 import { SELECTION_TYPE } from '../../../Basics/Const';
-import { ISelectionDataWithStyle, ISelectionStyle, NORMAL_SELECTION_PLUGIN_STYLE } from '../../../Basics/Selection';
+import {
+    ISelectionDataWithStyle,
+    ISelectionStyle,
+    ISelectionWidgetConfig,
+    NORMAL_SELECTION_PLUGIN_STYLE,
+    SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+    SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
+} from '../../../Basics/Selection';
 import { Group } from '../../../Group';
 import { Scene } from '../../../Scene';
 import { Rect } from '../../../Shape/Rect';
 import { SelectionTransformerModel } from './selection-transformer-model';
-
-// export enum DEFAULT_SELECTION_CONFIG {
-//     strokeColor = 'rgb(1,136,251)',
-//     backgroundColor = 'rgba(1,136,251, 0.1)',
-//     strokeWidth = 2,
-//     fillSideLength = 6,
-//     fillStrokeLength = 1,
-//     fillStrokeColor = 'rgb(255,255,255)',
-// }
-export const DEFAULT_SELECTION_CONFIG = {
-    strokeColor: 'rgb(1,136,251)',
-    backgroundColor: 'rgba(1,136,251, 0.1)',
-    strokeWidth: 2,
-    fillSideLength: 6,
-    fillStrokeLength: 1,
-    fillStrokeColor: 'rgb(255,255,255)',
-};
 
 enum SELECTION_MANAGER_KEY {
     Selection = '__SpreadsheetSelectionShape__',
@@ -38,6 +29,22 @@ enum SELECTION_MANAGER_KEY {
     lineMain = '__SpreadsheetDragLineMainControl__',
     lineContent = '__SpreadsheetDragLineContentControl__',
     line = '__SpreadsheetDragLineControl__',
+
+    rowTitleBackground = '__SpreadSheetSelectionRowTitleBackground__',
+    rowTitleBorder = '__SpreadSheetSelectionRowTitleBorder__',
+    rowTitleGroup = '__SpreadSheetSelectionRowTitleGroup__',
+    columnTitleBackground = '__SpreadSheetSelectionColumnTitleBackground__',
+    columnTitleBorder = '__SpreadSheetSelectionColumnTitleBorder__',
+    columnTitleGroup = '__SpreadSheetSelectionColumnTitleGroup__',
+
+    topLeftWidget = '__SpreadSheetSelectionTopLeftWidget__',
+    topCenterWidget = '__SpreadSheetSelectionTopCenterWidget__',
+    topRightWidget = '__SpreadSheetSelectionTopRightWidget__',
+    middleLeftWidget = '__SpreadSheetSelectionMiddleLeftWidget__',
+    middleRightWidget = '__SpreadSheetSelectionMiddleRightWidget__',
+    bottomLeftWidget = '__SpreadSheetSelectionBottomLeftWidget__',
+    bottomCenterWidget = '__SpreadSheetSelectionBottomCenterWidget__',
+    bottomRightWidget = '__SpreadSheetSelectionBottomRightWidget__',
 }
 
 /**
@@ -64,9 +71,59 @@ export class SelectionTransformerShape {
 
     private _selectionShape: Group;
 
+    private _rowTitleBackground: Rect;
+
+    private _rowTitleBorder: Rect;
+
+    private _rowTitleGroup: Group;
+
+    private _columnTitleBackground: Rect;
+
+    private _columnTitleBorder: Rect;
+
+    private _columnTitleGroup: Group;
+
+    private _topLeftWidget: Rect;
+
+    private _topCenterWidget: Rect;
+
+    private _topRightWidget: Rect;
+
+    private _middleLeftWidget: Rect;
+
+    private _middleRightWidget: Rect;
+
+    private _bottomLeftWidget: Rect;
+
+    private _bottomCenterWidget: Rect;
+
+    private _bottomRightWidget: Rect;
+
     private _selectionModel: SelectionTransformerModel;
 
     private _selectionStyle: Nullable<ISelectionStyle>;
+
+    private _rowTitleWidth: number = 0;
+
+    private _columnTitleHeight: number = 0;
+
+    private _widgetRects: Rect[] = [];
+
+    private _dispose$ = new BehaviorSubject<SelectionTransformerShape>(this);
+
+    readonly dispose$ = this._dispose$.asObservable();
+
+    readonly selectionMoving$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
+
+    readonly selectionMoved$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
+
+    readonly selectionScaling$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
+
+    readonly selectionScaled$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
+
+    readonly selectionFilling$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
+
+    readonly selectionFilled$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
 
     constructor(private _scene: Scene, private _zIndex: number) {
         this._initialize();
@@ -120,14 +177,56 @@ export class SelectionTransformerShape {
         return this._selectionModel;
     }
 
+    get topLeftWidget() {
+        return this._topLeftWidget;
+    }
+
+    get topCenterWidget() {
+        return this._topCenterWidget;
+    }
+
+    get topRightWidget() {
+        return this._topRightWidget;
+    }
+
+    get middleLeftWidget() {
+        return this._middleLeftWidget;
+    }
+
+    get middleRightWidget() {
+        return this._middleRightWidget;
+    }
+
+    get bottomLeftWidget() {
+        return this._bottomLeftWidget;
+    }
+
+    get bottomCenterWidget() {
+        return this._bottomCenterWidget;
+    }
+
+    get bottomRightWidget() {
+        return this._bottomRightWidget;
+    }
+
+    get selectionStyle() {
+        return this._selectionStyle;
+    }
+
     static create(scene: Scene, zIndex: number) {
         return new this(scene, zIndex);
     }
 
-    static fromJson(scene: Scene, zIndex: number, newSelectionData: ISelectionDataWithStyle) {
+    static fromJson(
+        scene: Scene,
+        zIndex: number,
+        newSelectionData: ISelectionDataWithStyle,
+        rowTitleWidth: number,
+        columnTitleHeight: number
+    ) {
         const { selection, cellInfo, style } = newSelectionData;
         const control = SelectionTransformerShape.create(scene, zIndex);
-        control.update(selection, cellInfo, style);
+        control.update(selection, rowTitleWidth, columnTitleHeight, style, cellInfo);
         return control;
     }
 
@@ -136,40 +235,129 @@ export class SelectionTransformerShape {
      *
      * inner update
      */
-    _updateControl(style: Nullable<ISelectionStyle>) {
+    _updateControl(style: Nullable<ISelectionStyle>, rowTitleWidth: number, columnTitleHeight: number) {
         const { startX, startY, endX, endY } = this._selectionModel;
 
-        this.leftControl.resize(undefined, endY - startY);
+        if (style == null) {
+            style = NORMAL_SELECTION_PLUGIN_STYLE;
+        }
+
+        const {
+            strokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.strokeWidth!,
+            stroke = NORMAL_SELECTION_PLUGIN_STYLE.stroke!,
+            widgets = NORMAL_SELECTION_PLUGIN_STYLE.widgets!,
+            hasAutoFill = NORMAL_SELECTION_PLUGIN_STYLE.hasAutoFill!,
+            AutofillSize = NORMAL_SELECTION_PLUGIN_STYLE.AutofillSize!,
+            AutofillStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.AutofillStrokeWidth!,
+            AutofillStroke = NORMAL_SELECTION_PLUGIN_STYLE.AutofillStroke!,
+        } = style;
+
+        const leftAdjustWidth = strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH;
+
+        this.leftControl.transformByState({
+            height: endY - startY,
+            left: -leftAdjustWidth / 2,
+            width: strokeWidth,
+            strokeWidth: SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
+            top: -SELECTION_CONTROL_BORDER_BUFFER_WIDTH / 2,
+        });
+
+        this.leftControl.setProps({
+            fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+        });
+
         this.rightControl.transformByState({
             height: endY - startY,
-            left: endX - startX - DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
+            left: endX - startX - leftAdjustWidth / 2,
+            width: strokeWidth,
+            strokeWidth: SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
+            top: -SELECTION_CONTROL_BORDER_BUFFER_WIDTH / 2,
         });
-        this.topControl.resize(endX - startX + DEFAULT_SELECTION_CONFIG.strokeWidth);
+
+        this.rightControl.setProps({
+            fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+        });
+
+        this.topControl.transformByState({
+            width: endX - startX + strokeWidth,
+            top: -leftAdjustWidth / 2,
+            left: -leftAdjustWidth / 2,
+            height: strokeWidth,
+            strokeWidth: SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
+        });
+
+        this.topControl.setProps({
+            fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+        });
+
         this.bottomControl.transformByState({
-            width: endX - startX + DEFAULT_SELECTION_CONFIG.strokeWidth,
-            top: endY - startY - DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
+            width: endX - startX + strokeWidth,
+            top: endY - startY - leftAdjustWidth / 2,
+            height: strokeWidth,
+            left: -leftAdjustWidth / 2,
+            strokeWidth: SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
         });
 
-        this.fillControl.translate(endX - startX - DEFAULT_SELECTION_CONFIG.fillSideLength / 2, endY - startY - DEFAULT_SELECTION_CONFIG.fillSideLength / 2);
+        this.bottomControl.setProps({
+            fill: stroke,
+            stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+        });
 
-        this._updateBackgroundControl();
+        if (hasAutoFill === true && !this._hasWidgets(widgets)) {
+            this.fillControl.setProps({
+                fill: stroke,
+                stroke: AutofillStroke,
+            });
+            this.fillControl.transformByState({
+                width: AutofillSize - AutofillStrokeWidth,
+                height: AutofillSize - AutofillStrokeWidth,
+                left: endX - startX - AutofillSize / 2,
+                top: endY - startY - AutofillSize / 2,
+                strokeWidth: AutofillStrokeWidth,
+            });
+            this.fillControl.show();
+        } else {
+            this.fillControl.hide();
+        }
+
+        this._updateBackgroundControl(style);
+
+        this._updateBackgroundTitle(style, rowTitleWidth, columnTitleHeight);
+
+        this._updateWidgets(style);
 
         this.selectionShape.show();
         this.selectionShape.translate(startX, startY);
 
         this._selectionStyle = style;
 
+        this._rowTitleWidth = rowTitleWidth || 0;
+
+        this._columnTitleHeight = columnTitleHeight || 0;
+
         this.selectionShape.makeDirty(true);
     }
 
-    update(newSelectionRange: ISelection, highlight: Nullable<ICellInfo>, style: Nullable<ISelectionStyle> = NORMAL_SELECTION_PLUGIN_STYLE) {
+    update(
+        newSelectionRange: ISelectionRangeWithCoord,
+        rowTitleWidth: number,
+        columnTitleHeight: number,
+        style: Nullable<ISelectionStyle> = NORMAL_SELECTION_PLUGIN_STYLE,
+        highlight: Nullable<ISelectionCellWithCoord>
+    ) {
         this._selectionModel.setValue(newSelectionRange, highlight);
-        this._updateControl(style);
+        if (style == null) {
+            style = this._selectionStyle;
+        }
+        this._updateControl(style, rowTitleWidth, columnTitleHeight);
     }
 
     clearHighlight() {
         this._selectionModel.clearCurrentCell();
-        this._updateControl();
+        this._updateControl(this._selectionStyle, this._rowTitleWidth, this._columnTitleHeight);
     }
 
     getScene() {
@@ -187,16 +375,48 @@ export class SelectionTransformerShape {
         this._backgroundControlBottom?.dispose();
         this._fillControl?.dispose();
         this._selectionShape?.dispose();
+
+        this._rowTitleBackground?.dispose();
+
+        this._rowTitleBorder?.dispose();
+
+        this._rowTitleGroup?.dispose();
+
+        this._columnTitleBackground?.dispose();
+
+        this._columnTitleBorder?.dispose();
+
+        this._columnTitleGroup?.dispose();
+
+        this._topLeftWidget?.dispose();
+
+        this._topCenterWidget?.dispose();
+
+        this._topRightWidget?.dispose();
+
+        this._middleLeftWidget?.dispose();
+
+        this._middleRightWidget?.dispose();
+
+        this._bottomLeftWidget?.dispose();
+
+        this._bottomCenterWidget?.dispose();
+
+        this._bottomRightWidget?.dispose();
+
+        this._dispose$.next(this);
+
+        this._dispose$.complete();
     }
 
     /**
      * Get the cell information of the current selection, considering the case of merging cells
      */
-    getCurrentCellInfo(): Nullable<ISelection> {
+    getCurrentCellInfo(): Nullable<ISelectionRangeWithCoord> {
         const currentCell = this.model.currentCell;
 
         if (currentCell) {
-            let currentRangeData: ISelection;
+            let currentRangeData: ISelectionRangeWithCoord;
 
             if (currentCell.isMerged) {
                 const mergeInfo = currentCell.mergeInfo;
@@ -240,61 +460,45 @@ export class SelectionTransformerShape {
         this._selectionModel = new SelectionTransformerModel(SELECTION_TYPE.NORMAL);
         const zIndex = this._zIndex;
         this._leftControl = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
-            top: 0,
-            left: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
-            width: DEFAULT_SELECTION_CONFIG.strokeWidth,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
             zIndex,
         });
+
         this._rightControl = new Rect(SELECTION_MANAGER_KEY.right + zIndex, {
-            width: DEFAULT_SELECTION_CONFIG.strokeWidth,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
             zIndex,
         });
+
         this._topControl = new Rect(SELECTION_MANAGER_KEY.top + zIndex, {
-            top: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
-            left: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
-            height: DEFAULT_SELECTION_CONFIG.strokeWidth,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
             zIndex,
         });
+
         this._bottomControl = new Rect(SELECTION_MANAGER_KEY.bottom + zIndex, {
-            height: DEFAULT_SELECTION_CONFIG.strokeWidth,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
-            left: -DEFAULT_SELECTION_CONFIG.strokeWidth / 2,
             zIndex,
         });
+
         this._backgroundControlTop = new Rect(SELECTION_MANAGER_KEY.backgroundTop + zIndex, {
-            fill: DEFAULT_SELECTION_CONFIG.backgroundColor,
             zIndex: zIndex - 1,
             evented: false,
         });
+
         this._backgroundControlBottom = new Rect(SELECTION_MANAGER_KEY.backgroundBottom + zIndex, {
-            fill: DEFAULT_SELECTION_CONFIG.backgroundColor,
             zIndex: zIndex - 1,
             evented: false,
         });
+
         this._backgroundControlMiddleLeft = new Rect(SELECTION_MANAGER_KEY.backgroundMiddleLeft + zIndex, {
-            fill: DEFAULT_SELECTION_CONFIG.backgroundColor,
             zIndex: zIndex - 1,
             evented: false,
         });
         this._backgroundControlMiddleRight = new Rect(SELECTION_MANAGER_KEY.backgroundMiddleRight + zIndex, {
-            fill: DEFAULT_SELECTION_CONFIG.backgroundColor,
             zIndex: zIndex - 1,
             evented: false,
         });
-        const fillSideLength = DEFAULT_SELECTION_CONFIG.fillSideLength - DEFAULT_SELECTION_CONFIG.fillStrokeLength;
+
         this._fillControl = new Rect(SELECTION_MANAGER_KEY.fill + zIndex, {
-            width: fillSideLength,
-            height: fillSideLength,
-            fill: DEFAULT_SELECTION_CONFIG.strokeColor,
-            strokeWidth: DEFAULT_SELECTION_CONFIG.fillStrokeLength,
-            stroke: DEFAULT_SELECTION_CONFIG.fillStrokeColor,
             zIndex: zIndex + 1,
         });
-        this._selectionShape = new Group(
-            SELECTION_MANAGER_KEY.Selection + zIndex,
+
+        const shapes = [
             this._fillControl,
             this._leftControl,
             this._rightControl,
@@ -303,8 +507,12 @@ export class SelectionTransformerShape {
             this._backgroundControlTop,
             this._backgroundControlMiddleLeft,
             this._backgroundControlMiddleRight,
-            this._backgroundControlBottom
-        );
+            this._backgroundControlBottom,
+        ];
+
+        this._widgetRects = this._initialWidget();
+
+        this._selectionShape = new Group(SELECTION_MANAGER_KEY.Selection + zIndex, ...shapes, ...this._widgetRects);
 
         this._selectionShape.hide();
 
@@ -314,25 +522,188 @@ export class SelectionTransformerShape {
 
         const scene = this.getScene();
         scene.addObject(this._selectionShape);
+
+        this._initialTitle();
     }
 
-    private _updateBackgroundControl() {
-        const {
-            startColumn,
-            startRow,
-            endColumn,
-            endRow,
+    private _initialTitle() {
+        const zIndex = this._zIndex;
+        this._rowTitleBackground = new Rect(SELECTION_MANAGER_KEY.rowTitleBackground + zIndex, {
+            zIndex: zIndex - 1,
+            evented: false,
+        });
 
-            startX,
-            startY,
-            endX,
-            endY,
-        } = this._selectionModel;
+        this._rowTitleBorder = new Rect(SELECTION_MANAGER_KEY.rowTitleBorder + zIndex, {
+            zIndex: zIndex - 1,
+            evented: false,
+        });
+
+        this._rowTitleGroup = new Group(
+            SELECTION_MANAGER_KEY.rowTitleGroup + zIndex,
+            this._rowTitleBackground,
+            this._rowTitleBorder
+        );
+
+        this._rowTitleGroup.hide();
+
+        this._rowTitleGroup.evented = false;
+
+        this._rowTitleGroup.zIndex = zIndex;
+
+        this._columnTitleBackground = new Rect(SELECTION_MANAGER_KEY.columnTitleBackground + zIndex, {
+            zIndex: zIndex - 1,
+            evented: false,
+        });
+
+        this._columnTitleBorder = new Rect(SELECTION_MANAGER_KEY.columnTitleBorder + zIndex, {
+            zIndex: zIndex - 1,
+            evented: false,
+        });
+
+        this._columnTitleGroup = new Group(
+            SELECTION_MANAGER_KEY.columnTitleGroup + zIndex,
+            this._columnTitleBackground,
+            this._columnTitleBorder
+        );
+
+        this._columnTitleGroup.hide();
+
+        this._columnTitleGroup.evented = false;
+
+        this._columnTitleGroup.zIndex = zIndex;
+
+        const scene = this.getScene();
+        const maxLayerIndex = scene.getLayerMaxZIndex();
+        scene.addObjects([this._rowTitleGroup, this._columnTitleGroup], maxLayerIndex);
+    }
+
+    private _initialWidget() {
+        const zIndex = this._zIndex;
+        this._topLeftWidget = new Rect(SELECTION_MANAGER_KEY.topLeftWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._topCenterWidget = new Rect(SELECTION_MANAGER_KEY.topCenterWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._topRightWidget = new Rect(SELECTION_MANAGER_KEY.topRightWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._middleLeftWidget = new Rect(SELECTION_MANAGER_KEY.middleLeftWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._middleRightWidget = new Rect(SELECTION_MANAGER_KEY.middleRightWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._bottomLeftWidget = new Rect(SELECTION_MANAGER_KEY.bottomLeftWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._bottomCenterWidget = new Rect(SELECTION_MANAGER_KEY.bottomCenterWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        this._bottomRightWidget = new Rect(SELECTION_MANAGER_KEY.bottomRightWidget + zIndex, {
+            zIndex: zIndex + 1,
+        });
+
+        return [
+            this._topLeftWidget,
+            this._topCenterWidget,
+            this._topRightWidget,
+            this._middleLeftWidget,
+            this._middleRightWidget,
+            this._bottomLeftWidget,
+            this._bottomCenterWidget,
+            this._bottomRightWidget,
+        ];
+    }
+
+    private _updateBackgroundTitle(style: Nullable<ISelectionStyle>, rowTitleWidth: number, columnTitleHeight: number) {
+        const { startX, startY, endX, endY } = this._selectionModel;
+
+        if (style == null) {
+            style = NORMAL_SELECTION_PLUGIN_STYLE;
+        }
+
+        const {
+            hasRowTitle,
+            rowTitleFill = NORMAL_SELECTION_PLUGIN_STYLE.rowTitleFill!,
+            rowTitleStroke = NORMAL_SELECTION_PLUGIN_STYLE.rowTitleStroke!,
+            rowTitleStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.rowTitleStrokeWidth!,
+
+            hasColumnTitle,
+            columnTitleFill = NORMAL_SELECTION_PLUGIN_STYLE.columnTitleFill!,
+            columnTitleStroke = NORMAL_SELECTION_PLUGIN_STYLE.columnTitleStroke!,
+            columnTitleStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.columnTitleStrokeWidth!,
+        } = style;
+
+        if (hasColumnTitle === true) {
+            this._columnTitleBackground.setProps({
+                fill: columnTitleFill,
+            });
+            this._columnTitleBackground.resize(endX - startX, columnTitleHeight);
+
+            this._columnTitleBorder.setProps({
+                fill: columnTitleStroke,
+            });
+            this._columnTitleBorder.transformByState({
+                width: endX - startX,
+                height: columnTitleStrokeWidth,
+                top: columnTitleHeight - columnTitleStrokeWidth,
+            });
+
+            this._columnTitleGroup.show();
+            this._columnTitleGroup.translate(startX, 0);
+        } else {
+            this._columnTitleGroup.hide();
+        }
+
+        this._columnTitleGroup.makeDirty(true);
+
+        if (hasRowTitle === true) {
+            this._rowTitleBackground.setProps({
+                fill: rowTitleFill,
+            });
+            this._rowTitleBackground.resize(rowTitleWidth, endY - startY);
+
+            this._rowTitleBorder.setProps({
+                fill: rowTitleStroke,
+            });
+            this._rowTitleBorder.transformByState({
+                width: rowTitleStrokeWidth,
+                height: endY - startY,
+                left: rowTitleWidth - rowTitleStrokeWidth,
+            });
+
+            this._rowTitleGroup.show();
+            this._rowTitleGroup.translate(0, startY);
+        } else {
+            this._rowTitleGroup.hide();
+        }
+
+        this._rowTitleGroup.makeDirty(true);
+    }
+
+    private _updateBackgroundControl(style: Nullable<ISelectionStyle>) {
+        const { startX, startY, endX, endY } = this._selectionModel;
+
+        if (style == null) {
+            style = NORMAL_SELECTION_PLUGIN_STYLE;
+        }
+
+        const { strokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.strokeWidth!, fill = NORMAL_SELECTION_PLUGIN_STYLE.fill! } =
+            style;
 
         const highlightSelection = this._selectionModel.highlightToSelection();
 
         if (!highlightSelection) {
             this._backgroundControlTop.resize(endX - startX, endY - startY);
+            this._backgroundControlTop.setProps({ fill });
             this._backgroundControlBottom.resize(0, 0);
             this._backgroundControlMiddleLeft.resize(0, 0);
             this._backgroundControlMiddleRight.resize(0, 0);
@@ -341,7 +712,7 @@ export class SelectionTransformerShape {
 
         const { startX: h_startX, startY: h_startY, endX: h_endX, endY: h_endY } = highlightSelection;
 
-        const strokeOffset = DEFAULT_SELECTION_CONFIG.strokeWidth / 2;
+        const strokeOffset = strokeWidth / 2;
 
         const topConfig = {
             left: -strokeOffset,
@@ -390,5 +761,176 @@ export class SelectionTransformerShape {
             middleBottomConfig.height = 0;
         }
         this._backgroundControlBottom.transformByState(middleBottomConfig);
+
+        this._backgroundControlTop.setProps({ fill });
+        this._backgroundControlMiddleLeft.setProps({ fill });
+        this._backgroundControlMiddleRight.setProps({ fill });
+        this._backgroundControlBottom.setProps({ fill });
+    }
+
+    private _updateWidgets(style: Nullable<ISelectionStyle>) {
+        const { startX, startY, endX, endY } = this._selectionModel;
+
+        if (style == null) {
+            style = NORMAL_SELECTION_PLUGIN_STYLE;
+        }
+
+        const {
+            stroke = NORMAL_SELECTION_PLUGIN_STYLE.stroke!,
+            widgets = NORMAL_SELECTION_PLUGIN_STYLE.widgets!,
+            widgetSize = NORMAL_SELECTION_PLUGIN_STYLE.widgetSize!,
+            widgetStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.widgetStrokeWidth!,
+            widgetStroke = NORMAL_SELECTION_PLUGIN_STYLE.widgetStroke!,
+        } = style;
+
+        const position = {
+            left: -widgetSize / 2,
+            center: (endX - startX) / 2 - widgetSize / 2,
+            right: endX - startX - widgetSize / 2,
+            top: -widgetSize / 2,
+            middle: (endY - startY) / 2 - widgetSize / 2,
+            bottom: endY - startY - widgetSize / 2,
+        };
+
+        const size = widgetSize - widgetStrokeWidth;
+
+        this._widgetRects.forEach((widget) => {
+            widget.setProps({
+                fill: stroke,
+                stroke: widgetStroke,
+            });
+        });
+
+        if (widgets.tl === true) {
+            this._topLeftWidget.transformByState({
+                height: size,
+                width: size,
+                left: position.left,
+                top: position.top,
+                strokeWidth: widgetStrokeWidth,
+            });
+
+            this._topLeftWidget.show();
+        } else {
+            this._topLeftWidget.hide();
+        }
+
+        if (widgets.tc === true) {
+            this._topCenterWidget.transformByState({
+                height: size,
+                width: size,
+                left: position.center,
+                top: position.top,
+                strokeWidth: widgetStrokeWidth,
+            });
+
+            this._topCenterWidget.show();
+        } else {
+            this._topCenterWidget.hide();
+        }
+
+        if (widgets.tr === true) {
+            this._topRightWidget.transformByState({
+                height: size,
+                width: size,
+                left: position.right,
+                top: position.top,
+                strokeWidth: widgetStrokeWidth,
+            });
+
+            this._topRightWidget.show();
+        } else {
+            this._topRightWidget.hide();
+        }
+
+        if (widgets.ml === true) {
+            this._middleLeftWidget.transformByState({
+                height: size,
+                width: size,
+                left: position.left,
+                top: position.middle,
+                strokeWidth: widgetStrokeWidth,
+            });
+
+            this._middleLeftWidget.show();
+        } else {
+            this._middleLeftWidget.hide();
+        }
+
+        if (widgets.mr === true) {
+            this._middleRightWidget.transformByState({
+                height: size,
+                width: size,
+                left: position.right,
+                top: position.middle,
+                strokeWidth: widgetStrokeWidth,
+            });
+
+            this._middleRightWidget.show();
+        } else {
+            this._middleRightWidget.hide();
+        }
+
+        if (widgets.bl === true) {
+            this._bottomLeftWidget.transformByState({
+                height: size,
+                width: size,
+                left: position.left,
+                top: position.bottom,
+                strokeWidth: widgetStrokeWidth,
+            });
+
+            this._bottomLeftWidget.show();
+        } else {
+            this._bottomLeftWidget.hide();
+        }
+
+        if (widgets.bc === true) {
+            this._bottomCenterWidget.transformByState({
+                height: size,
+                width: size,
+                left: position.center,
+                top: position.bottom,
+                strokeWidth: widgetStrokeWidth,
+            });
+
+            this._bottomCenterWidget.show();
+        } else {
+            this._bottomCenterWidget.hide();
+        }
+
+        if (widgets.br === true) {
+            this._bottomRightWidget.transformByState({
+                height: size,
+                width: size,
+                left: position.right,
+                top: position.bottom,
+                strokeWidth: widgetStrokeWidth,
+            });
+
+            this._bottomRightWidget.show();
+        } else {
+            this._bottomRightWidget.hide();
+        }
+    }
+
+    private _hasWidgets(widgets: ISelectionWidgetConfig) {
+        if (widgets == null) {
+            return false;
+        }
+
+        const keys = Object.keys(widgets);
+
+        if (keys.length === 0) {
+            return false;
+        }
+
+        for (const key of keys) {
+            if (widgets[key as keyof ISelectionWidgetConfig] === true) {
+                return true;
+            }
+        }
+
+        return true;
     }
 }

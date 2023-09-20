@@ -15,8 +15,8 @@ import {
     IBorderData,
     ICellData,
     IDocumentData,
-    IRangeData,
     IRangeType,
+    ISelectionRange,
     IStyleData,
     ITextDecoration,
     ITextRotation,
@@ -44,7 +44,7 @@ type IValueOptionsType = {
  * @beta
  */
 export class Range {
-    private _rangeData: IRangeData;
+    private _rangeData: ISelectionRange;
 
     private _worksheet: Worksheet;
 
@@ -66,7 +66,7 @@ export class Range {
         }
     }
 
-    static foreach(rangeData: IRangeData, action: (row: number, column: number) => void): void {
+    static foreach(rangeData: ISelectionRange, action: (row: number, column: number) => void): void {
         const { startRow, startColumn, endRow, endColumn } = rangeData;
         for (let i = startRow; i <= endRow; i++) {
             for (let j = startColumn; j <= endColumn; j++) {
@@ -80,7 +80,7 @@ export class Range {
      *
      * @returns current range
      */
-    getRangeData(): IRangeData {
+    getRangeData(): ISelectionRange {
         return this._rangeData;
     }
 

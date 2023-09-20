@@ -1,17 +1,38 @@
 import { Engine } from '@univerjs/base-render';
 import { DesktopPlatformService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
-import { ICommand, ICommandService, ICurrentUniverService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import {
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    LocaleService,
+    Plugin,
+    PLUGIN_NAMES,
+    PluginType,
+} from '@univerjs/core';
 import { Dependency, Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { DocPluginObserve, install } from './Basics/Observer';
-import { BreakLineCommand, CoverCommand, DeleteCommand, DeleteLeftCommand, IMEInputCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
+import {
+    BreakLineCommand,
+    CoverCommand,
+    DeleteCommand,
+    DeleteLeftCommand,
+    IMEInputCommand,
+    InsertCommand,
+    UpdateCommand,
+} from './commands/commands/core-editing.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { MoveCursorOperation } from './commands/operations/cursor.operation';
 import { DocumentController } from './Controller/DocumentController';
 import { en } from './Locale';
 import { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
-import { MoveCursorDownShortcut, MoveCursorLeftShortcut, MoveCursorRightShortcut, MoveCursorUpShortcut } from './shortcuts/cursor.shortcut';
+import {
+    MoveCursorDownShortcut,
+    MoveCursorLeftShortcut,
+    MoveCursorRightShortcut,
+    MoveCursorUpShortcut,
+} from './shortcuts/cursor.shortcut';
 import { CANVAS_VIEW_KEY } from './View/Render';
 import { CanvasView } from './View/Render/CanvasView';
 import { DocsView } from './View/Render/Views';
@@ -79,7 +100,14 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
             this._injector.get(ICommandService).registerCommand(command);
         });
 
-        [MoveCursorUpShortcut, MoveCursorDownShortcut, MoveCursorRightShortcut, MoveCursorLeftShortcut, DeleteLeftShortcut, BreakLineShortcut].forEach((shortcut) => {
+        [
+            MoveCursorUpShortcut,
+            MoveCursorDownShortcut,
+            MoveCursorRightShortcut,
+            MoveCursorLeftShortcut,
+            DeleteLeftShortcut,
+            BreakLineShortcut,
+        ].forEach((shortcut) => {
             this._injector.get(IShortcutService).registerShortcut(shortcut);
         });
     }
@@ -161,7 +189,10 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
     private _initializeDependencies(docInjector: Injector, univerInjector: Injector) {
         (
             [
-                [CanvasView, { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) }], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
+                [
+                    CanvasView,
+                    { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) },
+                ], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
                 [IPlatformService, { useClass: DesktopPlatformService }],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));

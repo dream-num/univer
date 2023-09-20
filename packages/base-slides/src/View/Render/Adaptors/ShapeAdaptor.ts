@@ -5,22 +5,39 @@ import { Injector } from '@wendellhu/redi';
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../Adaptor';
 
 export class ShapeAdaptor extends ObjectAdaptor {
-    zIndex = 2;
+    override zIndex = 2;
 
-    viewKey = PageElementType.SHAPE;
+    override viewKey = PageElementType.SHAPE;
 
-    check(type: PageElementType) {
+    override check(type: PageElementType) {
         if (type !== this.viewKey) {
             return;
         }
         return this;
     }
 
-    convert(pageElement: IPageElement) {
-        const { id, zIndex, left = 0, top = 0, width, height, angle, scaleX, scaleY, skewX, skewY, flipX, flipY, title, description } = pageElement;
+    override convert(pageElement: IPageElement) {
+        const {
+            id,
+            zIndex,
+            left = 0,
+            top = 0,
+            width,
+            height,
+            angle,
+            scaleX,
+            scaleY,
+            skewX,
+            skewY,
+            flipX,
+            flipY,
+            title,
+            description,
+        } = pageElement;
         const { shapeType, text, shapeProperties, placeholder, link } = pageElement.shape || {};
 
-        const fill = shapeProperties == null ? '' : getColorStyle(shapeProperties.shapeBackgroundFill) || 'rgba(255,255,255,1)';
+        const fill =
+            shapeProperties == null ? '' : getColorStyle(shapeProperties.shapeBackgroundFill) || 'rgba(255,255,255,1)';
 
         const outline = shapeProperties?.outline;
         const strokeStyle: { [key: string]: string | number } = {};

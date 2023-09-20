@@ -25,15 +25,22 @@ export class Font extends SheetExtension {
     }
 
     override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowColumnSegment, rowTitleWidth, columnTitleHeight, stylesCache, dataMergeCache, overflowCache } = spreadsheetSkeleton;
+        const { rowColumnSegment, rowTitleWidth, columnTitleHeight, stylesCache, dataMergeCache, overflowCache } =
+            spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;
         }
 
-        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
+        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } =
+            spreadsheetSkeleton;
 
-        if (!rowHeightAccumulation || !columnWidthAccumulation || columnTotalWidth === undefined || rowTotalHeight === undefined) {
+        if (
+            !rowHeightAccumulation ||
+            !columnWidthAccumulation ||
+            columnTotalWidth === undefined ||
+            rowTotalHeight === undefined
+        ) {
             return;
         }
         ctx.save();
@@ -45,12 +52,25 @@ export class Font extends SheetExtension {
                 const fontObjectArray = fontList[fontFormat];
                 fontObjectArray.forEach((rowIndex, fontArray) => {
                     fontArray.forEach((columnIndex, docsConfig) => {
-                        const cellInfo = this.getCellIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                        const cellInfo = this.getCellIndex(
+                            rowIndex,
+                            columnIndex,
+                            rowHeightAccumulation,
+                            columnWidthAccumulation,
+                            dataMergeCache
+                        );
                         let { startY, endY, startX, endX } = cellInfo;
                         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
                         if (isMerged) {
                             return true;
+                        }
+
+                        if (isMergedMainCell) {
+                            startY = mergeInfo.startY;
+                            endY = mergeInfo.endY;
+                            startX = mergeInfo.startX;
+                            endX = mergeInfo.endX;
                         }
 
                         startY = fixLineWidthByScale(startY, scaleY);
@@ -73,12 +93,39 @@ export class Font extends SheetExtension {
                                 ctx.rect(startX, startY, cellWidth, cellHeight);
                             } else {
                                 if (horizontalAlign === HorizontalAlign.CENTER) {
-                                    this._clipRectangle(ctx, startRow, endRow, startColumn, endColumn, scale, rowHeightAccumulation, columnWidthAccumulation);
+                                    this._clipRectangle(
+                                        ctx,
+                                        startRow,
+                                        endRow,
+                                        startColumn,
+                                        endColumn,
+                                        scale,
+                                        rowHeightAccumulation,
+                                        columnWidthAccumulation
+                                    );
                                 } else if (horizontalAlign === HorizontalAlign.RIGHT) {
                                     // console.log('horizontalAlign === HorizontalAlign.RIGHT', { rowIndex, startColumn, columnIndex, endColumn });
-                                    this._clipRectangle(ctx, startRow, rowIndex, startColumn, columnIndex, scale, rowHeightAccumulation, columnWidthAccumulation);
+                                    this._clipRectangle(
+                                        ctx,
+                                        startRow,
+                                        rowIndex,
+                                        startColumn,
+                                        columnIndex,
+                                        scale,
+                                        rowHeightAccumulation,
+                                        columnWidthAccumulation
+                                    );
                                 } else {
-                                    this._clipRectangle(ctx, rowIndex, endRow, columnIndex, endColumn, scale, rowHeightAccumulation, columnWidthAccumulation);
+                                    this._clipRectangle(
+                                        ctx,
+                                        rowIndex,
+                                        endRow,
+                                        columnIndex,
+                                        endColumn,
+                                        scale,
+                                        rowHeightAccumulation,
+                                        columnWidthAccumulation
+                                    );
                                 }
                             }
                         } else {
@@ -94,7 +141,16 @@ export class Font extends SheetExtension {
         ctx.restore();
     }
 
-    private _renderDocuments(ctx: CanvasRenderingContext2D, docsConfig: fontCacheItem, startX: number, startY: number, endX: number, endY: number, row: number, column: number) {
+    private _renderDocuments(
+        ctx: CanvasRenderingContext2D,
+        docsConfig: fontCacheItem,
+        startX: number,
+        startY: number,
+        endX: number,
+        endY: number,
+        row: number,
+        column: number
+    ) {
         const documents = this.getDocuments();
         const { documentSkeleton, angle, verticalAlign, horizontalAlign, wrapStrategy, content } = docsConfig;
         const cellWidth = endX - startX;

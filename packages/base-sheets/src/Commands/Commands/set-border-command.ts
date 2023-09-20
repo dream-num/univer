@@ -7,7 +7,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    IRangeData,
+    ISelectionRange,
     IStyleData,
     IUndoRedoService,
     Nullable,
@@ -18,9 +18,13 @@ import { IAccessor } from '@wendellhu/redi';
 
 import { BorderStyleManagerService } from '../../Services/border-style-manager.service';
 import { SelectionManagerService } from '../../Services/selection-manager.service';
-import { ISetBorderStylesMutationParams, SetBorderStylesMutation, SetBorderStylesUndoMutationFactory } from '../Mutations/set-border-styles.mutatio';
+import {
+    ISetBorderStylesMutationParams,
+    SetBorderStylesMutation,
+    SetBorderStylesUndoMutationFactory,
+} from '../Mutations/set-border-styles.mutatio';
 
-function forEach(rangeData: IRangeData, action: (row: number, column: number) => void): void {
+function forEach(rangeData: ISelectionRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = rangeData;
     for (let i = startRow; i <= endRow; i++) {
         for (let j = startColumn; j <= endColumn; j++) {
@@ -99,7 +103,7 @@ export const SetBorderColorCommand: ICommand<ISetBorderColorCommandParams> = {
 export interface ISetBorderCommandParams {
     workbookId: string;
     worksheetId: string;
-    range: IRangeData;
+    range: ISelectionRange;
     top: Nullable<boolean>;
     left: Nullable<boolean>;
     bottom: Nullable<boolean>;
@@ -128,7 +132,19 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const { top, left, bottom, right, vertical, horizontal, color = 'black', style = BorderStyleTypes.DASH_DOT, workbookId, worksheetId, range } = params;
+        const {
+            top,
+            left,
+            bottom,
+            right,
+            vertical,
+            horizontal,
+            color = 'black',
+            style = BorderStyleTypes.DASH_DOT,
+            workbookId,
+            worksheetId,
+            range,
+        } = params;
 
         const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)?.getWorkBook();
         if (!workbook) return false;
@@ -322,7 +338,10 @@ export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
             value: mr.getData(),
         };
 
-        const undoSetBorderStylesMutationParams: ISetBorderStylesMutationParams = SetBorderStylesUndoMutationFactory(accessor, setBorderStylesMutationParams);
+        const undoSetBorderStylesMutationParams: ISetBorderStylesMutationParams = SetBorderStylesUndoMutationFactory(
+            accessor,
+            setBorderStylesMutationParams
+        );
 
         // execute do mutations and add undo mutations to undo stack if completed
         const result = commandService.executeCommand(SetBorderStylesMutation.id, setBorderStylesMutationParams);

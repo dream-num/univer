@@ -5,7 +5,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    IRangeData,
+    ISelectionRange,
     IStyleData,
     IUndoRedoService,
     Nullable,
@@ -14,10 +14,14 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../Services/selection-manager.service';
-import { ISetRangeStyleMutationParams, SetRangeStyleMutation, SetRangeStyleUndoMutationFactory } from '../Mutations/set-range-styles.mutation';
+import {
+    ISetRangeStyleMutationParams,
+    SetRangeStyleMutation,
+    SetRangeStyleUndoMutationFactory,
+} from '../Mutations/set-range-styles.mutation';
 
 export interface ICopyFormatToRangeCommandParams {
-    destinationRange: IRangeData;
+    destinationRange: ISelectionRange;
 }
 
 export const CopyFormatToRangeCommand: ICommand = {
@@ -34,7 +38,11 @@ export const CopyFormatToRangeCommand: ICommand = {
         const originRange = selections[0];
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const handleResult = handleCopyRange(accessor, workbookId, worksheetId, originRange, params.destinationRange);
@@ -58,7 +66,10 @@ export const CopyFormatToRangeCommand: ICommand = {
             value: stylesMatrix.getData(),
         };
 
-        const undoMutationParams: ISetRangeStyleMutationParams = SetRangeStyleUndoMutationFactory(accessor, setRangeStyleMutationParams);
+        const undoMutationParams: ISetRangeStyleMutationParams = SetRangeStyleUndoMutationFactory(
+            accessor,
+            setRangeStyleMutationParams
+        );
         const result = commandService.executeCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
@@ -80,10 +91,14 @@ function handleCopyRange(
     accessor: IAccessor,
     workbookId: string,
     worksheetId: string,
-    originRange: IRangeData,
-    destinationRange: IRangeData
-): Nullable<[ICellDataMatrix, IRangeData]> {
-    const worksheet = accessor.get(ICurrentUniverService).getUniverSheetInstance(workbookId)?.getWorkBook().getSheetBySheetId(worksheetId);
+    originRange: ISelectionRange,
+    destinationRange: ISelectionRange
+): Nullable<[ICellDataMatrix, ISelectionRange]> {
+    const worksheet = accessor
+        .get(ICurrentUniverService)
+        .getUniverSheetInstance(workbookId)
+        ?.getWorkBook()
+        .getSheetBySheetId(worksheetId);
     if (!worksheet) return;
 
     const sheetMatrix = worksheet.getCellMatrix();
@@ -106,7 +121,7 @@ function handleCopyRange(
     const destinationColumns = dEndColumn - dStartColumn + 1;
 
     let value: ICellDataMatrix = [];
-    let range: IRangeData;
+    let range: ISelectionRange;
 
     // judge whether N2 is a multiple of N1
     if (destinationRows % originRows === 0 && destinationColumns % originColumns === 0) {

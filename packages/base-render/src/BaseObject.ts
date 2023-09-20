@@ -7,7 +7,20 @@ import { generateRandomKey, toPx } from './Basics/Tools';
 import { Transform } from './Basics/Transform';
 import { IBoundRect, Vector2 } from './Basics/Vector2';
 
-export const BASE_OBJECT_ARRAY = ['top', 'left', 'width', 'height', 'angle', 'scaleX', 'scaleY', 'skewX', 'skewY', 'flipX', 'flipY', 'strokeWidth'];
+export const BASE_OBJECT_ARRAY = [
+    'top',
+    'left',
+    'width',
+    'height',
+    'angle',
+    'scaleX',
+    'scaleY',
+    'skewX',
+    'skewY',
+    'flipX',
+    'flipY',
+    'strokeWidth',
+];
 
 export abstract class BaseObject {
     groupKey?: string;

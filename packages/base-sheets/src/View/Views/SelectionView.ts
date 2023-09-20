@@ -9,7 +9,14 @@ import {
     SpreadsheetColumnTitle,
     SpreadsheetRowTitle,
 } from '@univerjs/base-render';
-import { ICommandService, ICurrentUniverService, ISelectionRange, LocaleService, ObserverManager, Worksheet } from '@univerjs/core';
+import {
+    ICommandService,
+    ICurrentUniverService,
+    ISelection,
+    LocaleService,
+    ObserverManager,
+    Worksheet,
+} from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SetSelectionsOperation } from '../../Commands/Operations/selection.operation';
@@ -21,7 +28,8 @@ export class SelectionView extends BaseView {
 
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @ISelectionTransformerShapeManager private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
+        @ISelectionTransformerShapeManager
+        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
@@ -41,7 +49,7 @@ export class SelectionView extends BaseView {
             worksheet = workbook.getSheets()[0];
         }
 
-        const { spreadsheet, spreadsheetRowTitle, spreadsheetColumnTitle, spreadsheetLeftTopPlaceholder, spreadsheetSkeleton } = this._getSheetObject();
+        const { spreadsheet, spreadsheetLeftTopPlaceholder, spreadsheetSkeleton } = this._getSheetObject();
 
         if (spreadsheet == null) {
             return;
@@ -54,33 +62,44 @@ export class SelectionView extends BaseView {
             }
 
             for (const selectionRange of param) {
-                const selectionData = this._selectionTransformerShapeManager.convertSelectionRangeToData(selectionRange);
+                const selectionData =
+                    this._selectionTransformerShapeManager.convertSelectionRangeToData(selectionRange);
                 this._selectionTransformerShapeManager.addControlToCurrentByRangeData(selectionData);
             }
         });
 
         spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            this._selectionTransformerShapeManager.eventTrigger(evt, spreadsheet.zIndex + 1);
+            if (!this._selectionManagerService.isSelectionEnabled) {
+                return;
+            }
+            this._selectionTransformerShapeManager.eventTrigger(
+                evt,
+                this._selectionManagerService.currentStyle,
+                spreadsheet.zIndex + 1
+            );
             if (evt.button !== 2) {
                 state.stopPropagation();
             }
         });
 
-        spreadsheetRowTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
+        this._initialRowTitle();
 
-        spreadsheetColumnTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
+        this._initialColumnTitle();
 
         spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
 
         this._selectionTransformerShapeManager.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
             const unitId = workbook.getUnitId();
-            const sheetId = worksheet.getSheetId();
+            const sheetId = workbook.getActiveSheet().getSheetId();
 
             this._commandService.executeCommand(SetSelectionsOperation.id, {
                 unitId,
                 sheetId,
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                selections: selectionDataWithStyleList.map((selectionDataWithStyle) => convertSelectionDataToRange(selectionDataWithStyle)),
+                selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
+                    convertSelectionDataToRange(selectionDataWithStyle)
+                ),
             });
 
             const current = selectionDataWithStyleList[selectionDataWithStyleList.length - 1];
@@ -88,7 +107,7 @@ export class SelectionView extends BaseView {
                 return;
             }
             const selectionRange = convertSelectionDataToRange(current);
-            this._observerManager.getObserver<ISelectionRange>('onChangeSelectionObserver')?.notifyObservers({
+            this._observerManager.getObserver<ISelection>('onChangeSelectionObserver')?.notifyObservers({
                 rangeData: selectionRange.rangeData,
                 cellRange: selectionRange.cellRange,
             });
@@ -97,8 +116,46 @@ export class SelectionView extends BaseView {
         this._update(worksheet);
     }
 
+    private _initialRowTitle() {
+        const { spreadsheetRowTitle, spreadsheet, spreadsheetSkeleton } = this._getSheetObject();
+        spreadsheetRowTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            if (!this._selectionManagerService.isSelectionEnabled) {
+                return;
+            }
+            this._selectionTransformerShapeManager.eventTrigger(
+                evt,
+                this._selectionManagerService.currentStyle,
+                spreadsheet.zIndex + 1
+            );
+            if (evt.button !== 2) {
+                state.stopPropagation();
+            }
+        });
+
+        spreadsheetRowTitle?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            console.log('titleMove');
+        });
+    }
+
+    private _initialColumnTitle() {
+        const { spreadsheetColumnTitle, spreadsheet, spreadsheetSkeleton } = this._getSheetObject();
+        spreadsheetColumnTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            if (!this._selectionManagerService.isSelectionEnabled) {
+                return;
+            }
+            this._selectionTransformerShapeManager.eventTrigger(
+                evt,
+                this._selectionManagerService.currentStyle,
+                spreadsheet.zIndex + 1
+            );
+            if (evt.button !== 2) {
+                state.stopPropagation();
+            }
+        });
+    }
+
     private _update(worksheet: Worksheet) {
-        const { spreadsheet, spreadsheetRowTitle, spreadsheetColumnTitle, spreadsheetLeftTopPlaceholder, spreadsheetSkeleton } = this._getSheetObject();
+        const { spreadsheetSkeleton } = this._getSheetObject();
         if (spreadsheetSkeleton == null) {
             return;
         }

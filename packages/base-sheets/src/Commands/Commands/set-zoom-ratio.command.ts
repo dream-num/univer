@@ -1,7 +1,11 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISetZoomRatioMutationParams, SetZoomRatioMutation, SetZoomRatioUndoMutationFactory } from '../Mutations/set-zoom-ratio.mutation';
+import {
+    ISetZoomRatioMutationParams,
+    SetZoomRatioMutation,
+    SetZoomRatioUndoMutationFactory,
+} from '../Mutations/set-zoom-ratio.mutation';
 
 export interface ISetZoomRatioCommandParams {
     zoomRatio?: number;
@@ -19,7 +23,11 @@ export const SetZoomRatioCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        let worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         let zoomRatio = 1;
 
         if (params) {

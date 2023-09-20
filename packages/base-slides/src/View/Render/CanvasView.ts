@@ -1,5 +1,23 @@
-import { Engine, EVENT_TYPE, IRenderingEngine, IWheelEvent, Rect, Scene, ScrollBar, Slide, Viewport } from '@univerjs/base-render';
-import { EventState, getColorStyle, IColorStyle, ICurrentUniverService, ISlidePage, Nullable, ObserverManager } from '@univerjs/core';
+import {
+    Engine,
+    EVENT_TYPE,
+    IRenderingEngine,
+    IWheelEvent,
+    Rect,
+    Scene,
+    ScrollBar,
+    Slide,
+    Viewport,
+} from '@univerjs/base-render';
+import {
+    EventState,
+    getColorStyle,
+    IColorStyle,
+    ICurrentUniverService,
+    ISlidePage,
+    Nullable,
+    ObserverManager,
+} from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ObjectProvider } from './ObjectProvider';

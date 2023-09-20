@@ -35,7 +35,12 @@ export class Line extends docExtension {
 
         const { ul: underline, st: strikethrough, ol: overline } = textStyle;
 
-        const { originTranslate = Vector2.create(0, 0), centerPoint = Vector2.create(0, 0), alignOffset = Vector2.create(0, 0), renderConfig = {} } = this.extensionOffset;
+        const {
+            originTranslate = Vector2.create(0, 0),
+            centerPoint = Vector2.create(0, 0),
+            alignOffset = Vector2.create(0, 0),
+            renderConfig = {},
+        } = this.extensionOffset;
 
         const { centerAngle = 0, vertexAngle = 0 } = renderConfig;
 
@@ -49,8 +54,20 @@ export class Line extends docExtension {
 
                 const startY = fixLineWidthByScale(lineHeight + DEFAULT_OFFSET_SPACING - 0.5, scale);
 
-                const start = calculateRectRotate(originTranslate.addByPoint(left, startY), centerPoint, centerAngle, vertexAngle, alignOffset);
-                const end = calculateRectRotate(originTranslate.addByPoint(left + width, startY), centerPoint, centerAngle, vertexAngle, alignOffset);
+                const start = calculateRectRotate(
+                    originTranslate.addByPoint(left, startY),
+                    centerPoint,
+                    centerAngle,
+                    vertexAngle,
+                    alignOffset
+                );
+                const end = calculateRectRotate(
+                    originTranslate.addByPoint(left + width, startY),
+                    centerPoint,
+                    centerAngle,
+                    vertexAngle,
+                    alignOffset
+                );
                 ctx.moveTo(start.x, start.y);
                 ctx.lineTo(end.x, end.y);
                 ctx.stroke();
@@ -67,8 +84,20 @@ export class Line extends docExtension {
 
                 const startY = fixLineWidthByScale(strikeoutPosition - 0.5, scale);
 
-                const start = calculateRectRotate(originTranslate.addByPoint(left, startY), centerPoint, centerAngle, vertexAngle, alignOffset);
-                const end = calculateRectRotate(originTranslate.addByPoint(left + width, startY), centerPoint, centerAngle, vertexAngle, alignOffset);
+                const start = calculateRectRotate(
+                    originTranslate.addByPoint(left, startY),
+                    centerPoint,
+                    centerAngle,
+                    vertexAngle,
+                    alignOffset
+                );
+                const end = calculateRectRotate(
+                    originTranslate.addByPoint(left + width, startY),
+                    centerPoint,
+                    centerAngle,
+                    vertexAngle,
+                    alignOffset
+                );
 
                 ctx.moveTo(start.x, start.y);
                 ctx.lineTo(end.x, end.y);
@@ -86,8 +115,20 @@ export class Line extends docExtension {
 
                 const startY = fixLineWidthByScale(-DEFAULT_OFFSET_SPACING - 0.5, scale);
 
-                const start = calculateRectRotate(originTranslate.addByPoint(left, startY), centerPoint, centerAngle, vertexAngle, alignOffset);
-                const end = calculateRectRotate(originTranslate.addByPoint(left + width, startY), centerPoint, centerAngle, vertexAngle, alignOffset);
+                const start = calculateRectRotate(
+                    originTranslate.addByPoint(left, startY),
+                    centerPoint,
+                    centerAngle,
+                    vertexAngle,
+                    alignOffset
+                );
+                const end = calculateRectRotate(
+                    originTranslate.addByPoint(left + width, startY),
+                    centerPoint,
+                    centerAngle,
+                    vertexAngle,
+                    alignOffset
+                );
 
                 ctx.moveTo(start.x, start.y);
                 ctx.lineTo(end.x, end.y);

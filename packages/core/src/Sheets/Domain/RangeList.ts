@@ -1,5 +1,5 @@
 import { ICurrentUniverService } from '../../services/current.service';
-import { IRangeData, IRangeType } from '../../Types/Interfaces';
+import { IRangeType, ISelectionRange } from '../../Types/Interfaces';
 import type { Worksheet } from './Worksheet';
 
 /**
@@ -12,7 +12,7 @@ import type { Worksheet } from './Worksheet';
  *
  */
 export class RangeList {
-    private _rangeList: IRangeData[];
+    private _rangeList: ISelectionRange[];
 
     constructor(
         private readonly _worksheet: Worksheet,
@@ -36,7 +36,7 @@ export class RangeList {
         }
     }
 
-    getRangeList(): IRangeData[] {
+    getRangeList(): ISelectionRange[] {
         return this._rangeList;
     }
 

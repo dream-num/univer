@@ -17,7 +17,13 @@ export class FormulaEngineService {
      * @param updateRangeList input external unit data for multi workbook
      * @returns
      */
-    async execute(unitId: string, formulaData: FormulaDataType, interpreterDatasetConfig?: IInterpreterDatasetConfig, forceCalculate = false, updateRangeList: IUnitRange[] = []) {
+    async execute(
+        unitId: string,
+        formulaData: FormulaDataType,
+        interpreterDatasetConfig?: IInterpreterDatasetConfig,
+        forceCalculate = false,
+        updateRangeList: IUnitRange[] = []
+    ) {
         const dependencyGenerator = FormulaDependencyGenerator.create(formulaData, forceCalculate);
 
         const treeList = await dependencyGenerator.generate(updateRangeList, interpreterDatasetConfig);

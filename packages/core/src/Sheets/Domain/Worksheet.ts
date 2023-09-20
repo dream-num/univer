@@ -6,7 +6,7 @@ import { Nullable, ObjectMatrix, Rectangle, Tools } from '../../Shared';
 import { createRowColIter } from '../../Shared/RowColIter';
 import { DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber, SheetTypes } from '../../Types/Enum';
-import { ICellData, IRangeData, IRangeStringData, IRangeType, IWorksheetConfig } from '../../Types/Interfaces';
+import { ICellData, IRangeStringData, IRangeType, ISelectionRange, IWorksheetConfig } from '../../Types/Interfaces';
 import { ColumnManager } from './ColumnManager';
 import { Range } from './Range';
 import { RangeList } from './RangeList';
@@ -123,11 +123,11 @@ export class Worksheet {
         return new Worksheet(copy, this._observerManager, this._currentUniverService);
     }
 
-    getMergeData(): IRangeData[] {
+    getMergeData(): ISelectionRange[] {
         return this._snapshot.mergeData;
     }
 
-    getMergedCells(row: number, col: number): Nullable<IRangeData[]> {
+    getMergedCells(row: number, col: number): Nullable<ISelectionRange[]> {
         const _rectangleList = this._snapshot.mergeData;
         const rectList = [];
         const target = new Rectangle(row, col, row, col);

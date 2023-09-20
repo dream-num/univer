@@ -20,9 +20,15 @@ export class Background extends SheetExtension {
             return;
         }
 
-        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
+        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } =
+            spreadsheetSkeleton;
 
-        if (!rowHeightAccumulation || !columnWidthAccumulation || columnTotalWidth === undefined || rowTotalHeight === undefined) {
+        if (
+            !rowHeightAccumulation ||
+            !columnWidthAccumulation ||
+            columnTotalWidth === undefined ||
+            rowTotalHeight === undefined
+        ) {
             return;
         }
         ctx.save();
@@ -35,11 +41,24 @@ export class Background extends SheetExtension {
                 ctx.beginPath();
                 backgroundCache.forEach((rowIndex, backgroundRow) => {
                     backgroundRow.forEach((columnIndex) => {
-                        const cellInfo = this.getCellIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                        const cellInfo = this.getCellIndex(
+                            rowIndex,
+                            columnIndex,
+                            rowHeightAccumulation,
+                            columnWidthAccumulation,
+                            dataMergeCache
+                        );
                         let { startY, endY, startX, endX } = cellInfo;
-                        const { isMerged } = cellInfo;
+                        const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
                         if (isMerged) {
                             return true;
+                        }
+
+                        if (isMergedMainCell) {
+                            startY = mergeInfo.startY;
+                            endY = mergeInfo.endY;
+                            startX = mergeInfo.startX;
+                            endX = mergeInfo.endX;
                         }
 
                         startY = fixLineWidthByScale(startY, scaleY);

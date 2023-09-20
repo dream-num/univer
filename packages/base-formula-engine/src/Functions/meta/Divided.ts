@@ -9,11 +9,11 @@ import { BaseFunction } from '../BaseFunction';
 const FUNCTION_NAME = 'DIVIDED';
 
 export class Divided extends BaseFunction {
-    get name() {
+    override get name() {
         return FUNCTION_NAME;
     }
 
-    calculate(variant1: FunctionVariantType, variant2: FunctionVariantType) {
+    override calculate(variant1: FunctionVariantType, variant2: FunctionVariantType) {
         if (variant1.isErrorObject() || variant2.isErrorObject()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
@@ -25,7 +25,9 @@ export class Divided extends BaseFunction {
         let result;
 
         if (this.checkArrayType(variant1) && this.checkArrayType(variant2)) {
-            result = (variant1 as BaseReferenceObject).toArrayValueObject().divided((variant2 as BaseReferenceObject).toArrayValueObject());
+            result = (variant1 as BaseReferenceObject)
+                .toArrayValueObject()
+                .divided((variant2 as BaseReferenceObject).toArrayValueObject());
         } else if (this.checkArrayType(variant1)) {
             result = (variant1 as BaseReferenceObject).toArrayValueObject().divided(variant2 as BaseValueObject);
         } else if (this.checkArrayType(variant2)) {

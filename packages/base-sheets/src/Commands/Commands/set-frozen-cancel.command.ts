@@ -1,8 +1,16 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISetFrozenColumnsMutationParams, SetFrozenColumnsMutation, SetFrozenColumnsMutationFactory } from '../Mutations/set-frozen-columns.mutation';
-import { ISetFrozenRowsMutationParams, SetFrozenRowsMutation, SetFrozenRowsMutationFactory } from '../Mutations/set-frozen-rows.mutation';
+import {
+    ISetFrozenColumnsMutationParams,
+    SetFrozenColumnsMutation,
+    SetFrozenColumnsMutationFactory,
+} from '../Mutations/set-frozen-columns.mutation';
+import {
+    ISetFrozenRowsMutationParams,
+    SetFrozenRowsMutation,
+    SetFrozenRowsMutationFactory,
+} from '../Mutations/set-frozen-rows.mutation';
 
 export const SetFrozenCancelCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -13,7 +21,11 @@ export const SetFrozenCancelCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
@@ -26,7 +38,10 @@ export const SetFrozenCancelCommand: ICommand = {
             numColumns: -1,
         };
 
-        const frozenColumnMutationParams: ISetFrozenColumnsMutationParams = SetFrozenColumnsMutationFactory(accessor, cancelColumnMutationParams);
+        const frozenColumnMutationParams: ISetFrozenColumnsMutationParams = SetFrozenColumnsMutationFactory(
+            accessor,
+            cancelColumnMutationParams
+        );
         const frozenResult = commandService.executeCommand(SetFrozenColumnsMutation.id, cancelColumnMutationParams);
 
         const redoMutationParams: ISetFrozenRowsMutationParams = {
@@ -35,20 +50,33 @@ export const SetFrozenCancelCommand: ICommand = {
             numRows: -1,
         };
 
-        const undoMutationParams: ISetFrozenRowsMutationParams = SetFrozenRowsMutationFactory(accessor, redoMutationParams);
+        const undoMutationParams: ISetFrozenRowsMutationParams = SetFrozenRowsMutationFactory(
+            accessor,
+            redoMutationParams
+        );
         const result = commandService.executeCommand(SetFrozenRowsMutation.id, redoMutationParams);
 
         if (result && frozenResult) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return (commandService.executeCommand(SetFrozenColumnsMutation.id, frozenColumnMutationParams) as Promise<boolean>).then((res) => {
+                    return (
+                        commandService.executeCommand(
+                            SetFrozenColumnsMutation.id,
+                            frozenColumnMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
                         if (res) return commandService.executeCommand(SetFrozenRowsMutation.id, undoMutationParams);
                         return false;
                     });
                 },
                 redo() {
-                    return (commandService.executeCommand(SetFrozenColumnsMutation.id, cancelColumnMutationParams) as Promise<boolean>).then((res) => {
+                    return (
+                        commandService.executeCommand(
+                            SetFrozenColumnsMutation.id,
+                            cancelColumnMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
                         if (res) return commandService.executeCommand(SetFrozenRowsMutation.id, redoMutationParams);
                         return false;
                     });

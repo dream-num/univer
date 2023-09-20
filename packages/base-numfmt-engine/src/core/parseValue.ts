@@ -88,7 +88,7 @@ const okDateFormats = [
 // date formats are stored as a token-tree in a trie
 // for minimal looping and branching while parsing
 const dateTrie = {};
-function packDate(f, node) {
+function packDate(f: any, node: { [key: string]: any }) {
     if (f) {
         const char = f[0];
         node[char] = node[char] || {};
@@ -97,7 +97,7 @@ function packDate(f, node) {
         node.$ = true;
     }
 }
-okDateFormats.forEach((fmt) => {
+okDateFormats.forEach((fmt: any) => {
     // add date to token tree
     packDate(fmt, dateTrie);
     // add a variant of the date with time suffixed
@@ -163,7 +163,7 @@ const days = {
 
 const currentYear = new Date().getUTCFullYear();
 
-export function parseNumber(str) {
+export function parseNumber(str: string) {
     // this horrifying expression assumes that we only need #,###.### and never #.###,###
     const parts = /^([\s+%$(-]*)(((?:(?:\d[\d,]*)(?:\.\d*)?|(?:\.\d+)))([eE][+-]?\d+)?)([\s%$)]*)$/.exec(str);
     if (parts) {
@@ -264,7 +264,7 @@ export function parseNumber(str) {
     }
 }
 
-export function isValidDate(y, m, d) {
+export function isValidDate(y: number, m: number, d: number) {
     // day can't be 0
     if (d < 1) {
         return false;
@@ -283,18 +283,21 @@ export function isValidDate(y, m, d) {
         }
     }
     // test any other month
-    else if (((m === 4 || m === 6 || m === 9 || m === 11) && d > 30) || ((m === 1 || m === 3 || m === 5 || m === 7 || m === 8 || m === 10 || m === 12) && d > 31)) {
+    else if (
+        ((m === 4 || m === 6 || m === 9 || m === 11) && d > 30) ||
+        ((m === 1 || m === 3 || m === 5 || m === 7 || m === 8 || m === 10 || m === 12) && d > 31)
+    ) {
         return false;
     }
     return true;
 }
 
-const nextToken = (str, node, data) => {
+const nextToken = (str: string, node: any, data: any): any => {
     const path = data.path || '';
     const matchOrder = Object.keys(node);
     for (let i = 0; i < matchOrder.length; i++) {
         let r;
-        const t = matchOrder[i];
+        const t: any = matchOrder[i];
         if (!node[t]) {
             continue;
         }
@@ -337,8 +340,8 @@ const nextToken = (str, node, data) => {
                 });
             }
         } else if (t === 'F' || t === 'M') {
-            const m = /^([a-z]{3,9})\b/i.exec(str);
-            const v = m && (t === 'F' ? monthsF : monthsM)[m[0].toLowerCase()];
+            const m: any = /^([a-z]{3,9})\b/i.exec(str);
+            const v: string = m && (t === 'F' ? (monthsF as any) : monthsM)[m[0].toLowerCase()];
             if (v) {
                 r = nextToken(str.slice(m[0].length), node[t], {
                     ...data,
@@ -348,8 +351,8 @@ const nextToken = (str, node, data) => {
                 });
             }
         } else if (t === 'l' || t === 'D') {
-            const m = /^([a-z]{3,9})\b/i.exec(str);
-            const v = m && days[m[0].toLowerCase()];
+            const m: any = /^([a-z]{3,9})\b/i.exec(str);
+            const v = m && (days as any)[m[0].toLowerCase()];
             if (v === t) {
                 // the value is ignored
                 r = nextToken(str.slice(m[0].length), node[t], { ...data, path: path + t });
@@ -384,7 +387,7 @@ const nextToken = (str, node, data) => {
     }
 };
 
-export function parseDate(str, opts) {
+export function parseDate(str: string, opts: any) {
     if (!str) return null;
     // possible shortcut: quickly dismiss if there isn't a number?
     const date = nextToken(str.trim(), dateTrie, { path: '' });
@@ -419,7 +422,7 @@ export function parseDate(str, opts) {
                 // both are 2-digits long
                 (date._mon.length === 2 && date.day.length === 2);
             // console.error(date.path);
-            const format = date.path.replace(/[jdlDnmMFyYx-]/g, (a) => {
+            const format = date.path.replace(/[jdlDnmMFyYx-]/g, (a: string) => {
                 if (a === 'j' || a === 'd') {
                     return lead0 ? 'dd' : 'd';
                 }
@@ -458,8 +461,10 @@ export function parseDate(str, opts) {
     return null;
 }
 
-export function parseTime(str) {
-    const parts = /^\s*([10]?\d|2[0-4])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?(\.\d{1,10})?(?:\s*([AP])M?)?\s*$/i.exec(str);
+export function parseTime(str: string) {
+    const parts = /^\s*([10]?\d|2[0-4])(?::([0-5]\d|\d))?(?::([0-5]\d|\d))?(\.\d{1,10})?(?:\s*([AP])M?)?\s*$/i.exec(
+        str
+    );
     if (parts) {
         const [, h, m, s, f, am] = parts;
         // don't allow milliseconds without seconds
@@ -492,7 +497,7 @@ export function parseTime(str) {
     return null;
 }
 
-export function parseBool(str) {
+export function parseBool(str: string) {
     if (/^\s*true\s*$/i.test(str)) {
         return { v: true };
     }
@@ -502,6 +507,6 @@ export function parseBool(str) {
     return null;
 }
 
-export function parseValue(s, opts?): { v: Date | number[]; z: any } | { v: number; z: any } | { v: boolean } {
+export function parseValue(s: string, opts?: string): any {
     return parseNumber(s) ?? parseDate(s, opts) ?? parseTime(s) ?? parseBool(s);
 }

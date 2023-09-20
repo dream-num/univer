@@ -1,4 +1,4 @@
-import { IRangeData, IUnitRange } from '@univerjs/core';
+import { ISelectionRange, IUnitRange } from '@univerjs/core';
 
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { IFormulaData } from '../Basics/Common';
@@ -46,7 +46,7 @@ export class FormulaDependencyTree implements IFormulaData {
         return this._state === FDtreeStateType.SKIP;
     }
 
-    compareRangeData(rangeData: IRangeData) {
+    compareRangeData(rangeData: ISelectionRange) {
         const startRow = rangeData.startRow;
         const startColumn = rangeData.startColumn;
         const endRow = rangeData.endRow;
@@ -59,7 +59,7 @@ export class FormulaDependencyTree implements IFormulaData {
         return true;
     }
 
-    dependencyRange(dependencyRangeList: Map<string, Map<string, IRangeData>>) {
+    dependencyRange(dependencyRangeList: Map<string, Map<string, ISelectionRange>>) {
         if (this.rangeList.length === 0) {
             return false;
         }
@@ -84,7 +84,12 @@ export class FormulaDependencyTree implements IFormulaData {
 
             const { startRow, startColumn, endRow, endColumn } = dependencyRange;
 
-            if (rangeData.startRow > endRow || rangeData.endRow < startRow || rangeData.startColumn > endColumn || rangeData.endColumn < startColumn) {
+            if (
+                rangeData.startRow > endRow ||
+                rangeData.endRow < startRow ||
+                rangeData.startColumn > endColumn ||
+                rangeData.endColumn < startColumn
+            ) {
                 continue;
             } else {
                 return true;
@@ -114,7 +119,11 @@ export class FormulaDependencyTree implements IFormulaData {
             const sheetId = unitRange.sheetId;
             const rangeData = unitRange.rangeData;
 
-            if (dependenceTree.unitId === unitId && dependenceTree.sheetId === sheetId && dependenceTree.compareRangeData(rangeData)) {
+            if (
+                dependenceTree.unitId === unitId &&
+                dependenceTree.sheetId === sheetId &&
+                dependenceTree.compareRangeData(rangeData)
+            ) {
                 return true;
             }
         }

@@ -1,4 +1,4 @@
-import { ISelectionData, ISelectionRange, Nullable } from '@univerjs/core';
+import { ISelection, ISelectionWithCoord, Nullable } from '@univerjs/core';
 
 /**
  * Whether to display the controller that modifies the selection, distributed in 8 locations
@@ -11,7 +11,7 @@ import { ISelectionData, ISelectionRange, Nullable } from '@univerjs/core';
  * bc bottom_center_corner
  * br bottom_right_corner
  */
-export interface ISelectionControlConfig {
+export interface ISelectionWidgetConfig {
     tl?: boolean;
     tc?: boolean;
     tr?: boolean;
@@ -23,29 +23,62 @@ export interface ISelectionControlConfig {
 }
 
 export interface ISelectionStyle {
-    strokeDashArray: number[];
     strokeWidth: number;
     stroke: string;
     fill: string;
-    controls: ISelectionControlConfig;
+    widgets: ISelectionWidgetConfig;
+    widgetSize?: number;
+    widgetStrokeWidth?: number;
+    widgetStroke?: string;
+
     hasAutoFill: boolean;
+    AutofillSize?: number;
+    AutofillStrokeWidth?: number;
+    AutofillStroke?: string;
+
+    hasRowTitle?: boolean;
+    rowTitleFill?: string;
+    rowTitleStroke?: string;
+    rowTitleStrokeWidth?: number;
+
+    hasColumnTitle?: boolean;
+    columnTitleFill?: string;
+    columnTitleStroke?: string;
+    columnTitleStrokeWidth?: number;
 }
 
-export interface ISelectionDataWithStyle extends ISelectionData {
+export interface ISelectionDataWithStyle extends ISelectionWithCoord {
     style: Nullable<ISelectionStyle>;
 }
 
-export interface ISelectionRangeWithStyle extends ISelectionRange {
+export interface ISelectionRangeWithStyle extends ISelection {
     style: Nullable<ISelectionStyle>;
 }
 
-export const NORMAL_SELECTION_PLUGIN_STYLE = {
-    strokeDashArray: [],
+export const NORMAL_SELECTION_PLUGIN_STYLE: ISelectionStyle = {
     strokeWidth: 2,
-    stroke: '#FFF000',
-    fill: 'rgba(0, 0, 0, 0.2)',
-    controls: { tr: true, tl: true, br: true, bl: true },
-    hasAutoFill: false,
+    stroke: 'rgb(1,136,251)',
+    fill: 'rgba(0, 0, 0, 0.1)',
+    // widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
+    widgets: {},
+    widgetSize: 6,
+    widgetStrokeWidth: 1,
+    widgetStroke: 'rgb(255,255,255)',
+
+    hasAutoFill: true,
+    AutofillSize: 6,
+    AutofillStrokeWidth: 1,
+    AutofillStroke: 'rgb(255,255,255)',
+
+    hasRowTitle: true,
+    rowTitleFill: 'rgba(0, 0, 0, 0.1)',
+    rowTitleStroke: 'rgb(1,136,251)',
+    rowTitleStrokeWidth: 1,
+
+    hasColumnTitle: true,
+    columnTitleFill: 'rgba(0, 0, 0, 0.1)',
+    columnTitleStroke: 'rgb(1,136,251)',
+    columnTitleStrokeWidth: 1,
 };
 
 export function convertSelectionDataToRange(selectionDataWithStyle: ISelectionDataWithStyle): ISelectionRangeWithStyle {
@@ -76,3 +109,7 @@ export function convertSelectionDataToRange(selectionDataWithStyle: ISelectionDa
     }
     return result;
 }
+
+export const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 4;
+
+export const SELECTION_CONTROL_BORDER_BUFFER_COLOR = 'rgba(255,255,255, 0.01)';

@@ -1,4 +1,4 @@
-import { BooleanNumber, IRangeData, IScale } from '@univerjs/core';
+import { BooleanNumber, IScale, ISelectionRange } from '@univerjs/core';
 
 import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
@@ -13,16 +13,30 @@ export class BorderAuxiliary extends SheetExtension {
     override zIndex = 10;
 
     override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowColumnSegment, rowTitleWidth = 0, columnTitleHeight = 0, dataMergeCache, overflowCache, stylesCache, showGridlines } = spreadsheetSkeleton;
+        const {
+            rowColumnSegment,
+            rowTitleWidth = 0,
+            columnTitleHeight = 0,
+            dataMergeCache,
+            overflowCache,
+            stylesCache,
+            showGridlines,
+        } = spreadsheetSkeleton;
 
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE) {
             return;
         }
 
-        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
+        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } =
+            spreadsheetSkeleton;
 
-        if (!rowHeightAccumulation || !columnWidthAccumulation || columnTotalWidth === undefined || rowTotalHeight === undefined) {
+        if (
+            !rowHeightAccumulation ||
+            !columnWidthAccumulation ||
+            columnTotalWidth === undefined ||
+            rowTotalHeight === undefined
+        ) {
             return;
         }
 
@@ -62,7 +76,13 @@ export class BorderAuxiliary extends SheetExtension {
         ctx.restore();
     }
 
-    private _clearRectangle(ctx: CanvasRenderingContext2D, scale: number, rowHeightAccumulation: number[], columnWidthAccumulation: number[], dataMergeCache?: IRangeData[]) {
+    private _clearRectangle(
+        ctx: CanvasRenderingContext2D,
+        scale: number,
+        rowHeightAccumulation: number[],
+        columnWidthAccumulation: number[],
+        dataMergeCache?: ISelectionRange[]
+    ) {
         if (dataMergeCache == null) {
             return;
         }

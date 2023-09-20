@@ -75,7 +75,12 @@ export class ScrollBar extends BaseScrollBar {
         ctx.restore();
     }
 
-    override resize(parentWidth: number = 0, parentHeight: number = 0, contentWidth: number = 0, contentHeight: number = 0) {
+    override resize(
+        parentWidth: number = 0,
+        parentHeight: number = 0,
+        contentWidth: number = 0,
+        contentHeight: number = 0
+    ) {
         if (parentWidth === 0 && parentWidth === 0) {
             return;
         }
@@ -136,7 +141,9 @@ export class ScrollBar extends BaseScrollBar {
 
         this.horizontalMinusMiniThumb = 0;
         this.horizontalBarWidth = parentWidth - this._barSize;
-        this.horizontalThumbWidth = ((this.horizontalBarWidth * (this.horizontalBarWidth - this._barBorder)) / contentWidth) * this._thumbLengthRatio;
+        this.horizontalThumbWidth =
+            ((this.horizontalBarWidth * (this.horizontalBarWidth - this._barBorder)) / contentWidth) *
+            this._thumbLengthRatio;
 
         // this._horizontalThumbWidth = this._horizontalThumbWidth < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._horizontalThumbWidth;
         if (this.horizontalThumbWidth < MINI_THUMB_SIZE) {
@@ -178,7 +185,9 @@ export class ScrollBar extends BaseScrollBar {
 
         this.verticalMinusMiniThumb = 0;
         this.verticalBarHeight = parentHeight - this._barSize;
-        this.verticalThumbHeight = ((this.verticalBarHeight * (this.verticalBarHeight - this._barBorder)) / contentHeight) * this._thumbLengthRatio;
+        this.verticalThumbHeight =
+            ((this.verticalBarHeight * (this.verticalBarHeight - this._barBorder)) / contentHeight) *
+            this._thumbLengthRatio;
         // this._verticalThumbHeight = this._verticalThumbHeight < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._verticalThumbHeight;
         if (this.verticalThumbHeight < MINI_THUMB_SIZE) {
             this.verticalMinusMiniThumb = MINI_THUMB_SIZE - this.verticalThumbHeight;
@@ -258,8 +267,14 @@ export class ScrollBar extends BaseScrollBar {
 
         const mainScene = this._mainScene || this._view.scene;
 
-        this.verticalThumbRect.on(EVENT_TYPE.PointerEnter, this._hoverFunc(this._thumbHoverBackgroundColor!, this.verticalThumbRect));
-        this.verticalThumbRect.on(EVENT_TYPE.PointerLeave, this._hoverFunc(this._thumbBackgroundColor!, this.verticalThumbRect));
+        this.verticalThumbRect.on(
+            EVENT_TYPE.PointerEnter,
+            this._hoverFunc(this._thumbHoverBackgroundColor!, this.verticalThumbRect)
+        );
+        this.verticalThumbRect.on(
+            EVENT_TYPE.PointerLeave,
+            this._hoverFunc(this._thumbBackgroundColor!, this.verticalThumbRect)
+        );
 
         // 垂直滚动条槽的点击滚动事件
         this.verticalBarRect.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
@@ -332,8 +347,14 @@ export class ScrollBar extends BaseScrollBar {
 
         const mainScene = this._mainScene || this._view.scene;
 
-        this.horizonThumbRect.on(EVENT_TYPE.PointerEnter, this._hoverFunc(this._thumbHoverBackgroundColor!, this.horizonThumbRect));
-        this.horizonThumbRect.on(EVENT_TYPE.PointerLeave, this._hoverFunc(this._thumbBackgroundColor!, this.horizonThumbRect));
+        this.horizonThumbRect.on(
+            EVENT_TYPE.PointerEnter,
+            this._hoverFunc(this._thumbHoverBackgroundColor!, this.horizonThumbRect)
+        );
+        this.horizonThumbRect.on(
+            EVENT_TYPE.PointerLeave,
+            this._hoverFunc(this._thumbBackgroundColor!, this.horizonThumbRect)
+        );
 
         // 水平滚动条槽的点击滚动事件
         this.horizonBarRect.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {

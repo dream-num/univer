@@ -1,4 +1,4 @@
-import { IRangeData } from '../Types/Interfaces';
+import { ISelectionRange } from '../Types/Interfaces/ISelectionRange';
 import { Tools } from './Tools';
 
 const COLON_SYMBOL = ':';
@@ -9,7 +9,7 @@ const $COLUMN_REGEX = /[^A-Za-z]/g;
 
 export interface IGridRangeName {
     sheetName: string;
-    rangeData: IRangeData;
+    rangeData: ISelectionRange;
 }
 
 function singleReferenceToGrid(refBody: string) {
@@ -39,7 +39,7 @@ export function referenceToGrid(refString: string): IGridRangeName {
         const grid = singleReferenceToGrid(refBody);
         const row = grid.row;
         const column = grid.column;
-        const rangeData: IRangeData = {
+        const rangeData: ISelectionRange = {
             startRow: row,
             startColumn: column,
             endRow: row,
@@ -68,7 +68,7 @@ export function referenceToGrid(refString: string): IGridRangeName {
 
     const endColumn = endGrid.column;
 
-    const rangeData: IRangeData = {
+    const rangeData: ISelectionRange = {
         startRow,
         startColumn,
         endRow,

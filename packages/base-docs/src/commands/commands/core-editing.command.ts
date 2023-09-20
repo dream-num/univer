@@ -14,7 +14,12 @@ import {
 } from '@univerjs/core';
 
 import { InputController } from '../../Controller/InputController';
-import { IDeleteMutationParams, IRetainMutationParams, IRichTextEditingMutationParams, RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import {
+    IDeleteMutationParams,
+    IRetainMutationParams,
+    IRichTextEditingMutationParams,
+    RichTextEditingMutation,
+} from '../mutations/core-editing.mutation';
 
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
@@ -91,7 +96,10 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
 
         // TODO@wzhudev: prepare undo mutation
 
-        const result = await commandService.executeCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(doMutation.id, doMutation.params);
+        const result = await commandService.executeCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: unitId,
@@ -143,7 +151,10 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
 
         doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
 
-        const result = await commandService.executeCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(doMutation.id, doMutation.params);
+        const result = await commandService.executeCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: unitId,
@@ -212,7 +223,10 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             coverType,
         });
 
-        const result = await commandService.executeCommand<IRichTextEditingMutationParams, IRichTextEditingMutationParams>(doMutation.id, doMutation.params);
+        const result = await commandService.executeCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: unitId,
@@ -319,7 +333,10 @@ export const CoverCommand: ICommand<ICoverCommandParams> = {
     },
 };
 
-function getRetainAndDeleteFromReplace(range: ITextSelectionRange, segmentId?: string): Array<IRetainMutationParams | IDeleteMutationParams> {
+function getRetainAndDeleteFromReplace(
+    range: ITextSelectionRange,
+    segmentId?: string
+): Array<IRetainMutationParams | IDeleteMutationParams> {
     const { cursorStart, cursorEnd, isEndBack, isStartBack, isCollapse } = range;
     const dos: Array<IRetainMutationParams | IDeleteMutationParams> = [];
 

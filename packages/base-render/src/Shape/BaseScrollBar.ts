@@ -121,6 +121,14 @@ export class BaseScrollBar {
         this.placeholderBarRect.dispose();
     }
 
+    hasHorizonThumb() {
+        return this.horizonThumbRect.visible;
+    }
+
+    hasVerticalThumb() {
+        return this.verticalThumbRect.visible;
+    }
+
     resize(parentWidth: number = 0, parentHeight: number = 0, contentWidth: number = 0, contentHeight: number = 0) {}
 
     makeDirty(state: boolean) {}

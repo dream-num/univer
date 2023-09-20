@@ -1,7 +1,11 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISetWorksheetConfigMutationParams, SetWorksheetConfigMutation, SetWorksheetConfigUndoMutationFactory } from '../Mutations/set-worksheet-config.mutation';
+import {
+    ISetWorksheetConfigMutationParams,
+    SetWorksheetConfigMutation,
+    SetWorksheetConfigUndoMutationFactory,
+} from '../Mutations/set-worksheet-config.mutation';
 
 export interface ICopySheetToCommandParams {
     workbookId?: string;
@@ -19,9 +23,13 @@ export const CopySheetToCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId =
+            params.worksheetId ||
+            currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         const copyToWorkbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const copyToSheetId = params.copyToSheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const copyToSheetId =
+            params.copyToSheetId ||
+            currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const copyToWorkbook = currentUniverService.getUniverSheetInstance(copyToWorkbookId)?.getWorkBook();
@@ -40,7 +48,10 @@ export const CopySheetToCommand: ICommand = {
             config,
         };
 
-        const undoMutationParams: ISetWorksheetConfigMutationParams = SetWorksheetConfigUndoMutationFactory(accessor, setWorksheetConfigMutationParams);
+        const undoMutationParams: ISetWorksheetConfigMutationParams = SetWorksheetConfigUndoMutationFactory(
+            accessor,
+            setWorksheetConfigMutationParams
+        );
         const result = commandService.executeCommand(SetWorksheetConfigMutation.id, setWorksheetConfigMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
@@ -49,7 +60,10 @@ export const CopySheetToCommand: ICommand = {
                     return commandService.executeCommand(SetWorksheetConfigMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetWorksheetConfigMutation.id, setWorksheetConfigMutationParams);
+                    return commandService.executeCommand(
+                        SetWorksheetConfigMutation.id,
+                        setWorksheetConfigMutationParams
+                    );
                 },
             });
             return true;

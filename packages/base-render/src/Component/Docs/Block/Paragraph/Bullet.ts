@@ -34,7 +34,11 @@ export function dealWidthBullet(
     return bulletSke;
 }
 
-export function getDefaultBulletSke(listId: string, startIndex: number = 1, fontLocale?: IFontLocale): IDocumentSkeletonBullet {
+export function getDefaultBulletSke(
+    listId: string,
+    startIndex: number = 1,
+    fontLocale?: IFontLocale
+): IDocumentSkeletonBullet {
     return {
         listId,
         symbol: '\u25CF', // symbol 列表的内容
@@ -70,7 +74,17 @@ function _getBulletSke(
     fontLocale?: IFontLocale
 ): IDocumentSkeletonBullet {
     const nesting = nestings[nestingLevel];
-    const { bulletAlignment, glyphFormat, textStyle: textStyleFirst, startNumber, glyphType, glyphSymbol, indentFirstLine, hanging, indentStart } = nesting;
+    const {
+        bulletAlignment,
+        glyphFormat,
+        textStyle: textStyleFirst,
+        startNumber,
+        glyphType,
+        glyphSymbol,
+        indentFirstLine,
+        hanging,
+        indentStart,
+    } = nesting;
 
     const textStyle = { ...textStyleConfig, ...textStyleFirst };
 
@@ -104,7 +118,12 @@ function _getBulletSke(
     };
 }
 
-function __generateOrderedListSymbol(glyphFormat: string, nestingLevel: number, nestings: INestingLevel[], listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>) {
+function __generateOrderedListSymbol(
+    glyphFormat: string,
+    nestingLevel: number,
+    nestings: INestingLevel[],
+    listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>
+) {
     // const indexNumber = startNumber + startIndex;
     // parse  <prefix>%[nestingLevelMinusOne]<suffix>, return symbolContent
     // <w:lvl w:ilvl="0">

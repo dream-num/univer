@@ -8,7 +8,11 @@ import { BaseAstNodeFactory } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class LambdaParameterNode extends BaseAstNode {
-    constructor(token: string, private _lambdaParameter: string, private _currentLambdaPrivacyVar: LambdaPrivacyVarType) {
+    constructor(
+        token: string,
+        private _lambdaParameter: string,
+        private _currentLambdaPrivacyVar: LambdaPrivacyVarType
+    ) {
         super(token);
     }
 

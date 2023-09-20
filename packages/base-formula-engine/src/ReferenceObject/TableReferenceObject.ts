@@ -8,7 +8,12 @@ import { BaseReferenceObject } from './BaseReferenceObject';
 // =Table2[222]
 // =Table2[[#All],[222]:[Column4]]
 export class TableReferenceObject extends BaseReferenceObject {
-    constructor(token: string, private _tableData: ISuperTable, private _columnDataString: string, tableOptionMap: Map<string, TableOptionType>) {
+    constructor(
+        token: string,
+        private _tableData: ISuperTable,
+        private _columnDataString: string,
+        tableOptionMap: Map<string, TableOptionType>
+    ) {
         super(token);
         const sheetId = this._tableData.sheetId;
         const rangeData = this._tableData.rangeData;
@@ -53,7 +58,11 @@ export class TableReferenceObject extends BaseReferenceObject {
         return true;
     }
 
-    private _stringToColumnData(columnDataString: string, titleMap: Map<string, number>, tableOptionMap: Map<string, TableOptionType>) {
+    private _stringToColumnData(
+        columnDataString: string,
+        titleMap: Map<string, number>,
+        tableOptionMap: Map<string, TableOptionType>
+    ) {
         columnDataString = columnDataString.substring(1, -1);
         const commaIndex = columnDataString.indexOf(matchToken.COMMA);
         let startColumn = -1;

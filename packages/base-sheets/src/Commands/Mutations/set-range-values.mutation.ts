@@ -4,7 +4,7 @@ import {
     ICopyToOptionsData,
     ICurrentUniverService,
     IMutation,
-    IRangeData,
+    ISelectionRange,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     Tools,
@@ -13,7 +13,7 @@ import { IAccessor } from '@wendellhu/redi';
 
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams {
-    rangeData: IRangeData[];
+    rangeData: ISelectionRange[];
     worksheetId: string;
 
     cellValue?: ObjectMatrixPrimitiveType<ICellData>;

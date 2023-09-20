@@ -3,7 +3,12 @@ import { IKeyValue, Nullable, sortRules, sortRulesByDesc } from '@univerjs/core'
 import { BaseObject } from './BaseObject';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
 import { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './Basics/IEvents';
-import { IObjectFullState, ISceneTransformState, ITransformChangeState, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
+import {
+    IObjectFullState,
+    ISceneTransformState,
+    ITransformChangeState,
+    TRANSFORM_CHANGE_OBSERVABLE_TYPE,
+} from './Basics/Interfaces';
 import { precisionTo, requestNewFrame } from './Basics/Tools';
 import { Transform } from './Basics/Transform';
 import { IBoundRect, Vector2 } from './Basics/Vector2';
@@ -645,7 +650,10 @@ export class Scene extends ThinScene {
                     isPickedObject = o;
                 }
                 break;
-            } else if (o.classType === RENDER_CLASS_TYPE.SCENE_VIEWER && (o as SceneViewer).allowSelectedClipElement()) {
+            } else if (
+                o.classType === RENDER_CLASS_TYPE.SCENE_VIEWER &&
+                (o as SceneViewer).allowSelectedClipElement()
+            ) {
                 const pickedObject = (o as SceneViewer).pick(svCoord);
                 if (pickedObject) {
                     isPickedObject = pickedObject;
@@ -676,7 +684,10 @@ export class Scene extends ThinScene {
     }
 
     override triggerPointerUp(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onPointerUpObserver.notifyObservers(evt)?.stopPropagation && this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+        if (
+            !this.onPointerUpObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
             (this._parent as SceneViewer)?.triggerPointerUp(evt);
             return false;
         }
@@ -684,7 +695,10 @@ export class Scene extends ThinScene {
     }
 
     override triggerMouseWheel(evt: IWheelEvent) {
-        if (!this.onMouseWheelObserver.notifyObservers(evt)?.stopPropagation && this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+        if (
+            !this.onMouseWheelObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
             (this._parent as SceneViewer)?.triggerMouseWheel(evt);
             return false;
         }
@@ -692,7 +706,10 @@ export class Scene extends ThinScene {
     }
 
     override triggerPointerMove(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onPointerMoveObserver.notifyObservers(evt)?.stopPropagation && this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+        if (
+            !this.onPointerMoveObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
             (this._parent as SceneViewer)?.triggerPointerMove(evt);
             return false;
         }
@@ -700,7 +717,10 @@ export class Scene extends ThinScene {
     }
 
     override triggerDblclick(evt: IPointerEvent | IMouseEvent) {
-        if (!this.onDblclickObserver.notifyObservers(evt)?.stopPropagation && this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+        if (
+            !this.onDblclickObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
             (this._parent as SceneViewer)?.triggerDblclick(evt);
             return false;
         }
@@ -709,7 +729,10 @@ export class Scene extends ThinScene {
 
     override triggerPointerDown(evt: IPointerEvent | IMouseEvent) {
         // console.log(this, 'scene');
-        if (!this.onPointerDownObserver.notifyObservers(evt)?.stopPropagation && this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+        if (
+            !this.onPointerDownObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
             (this._parent as SceneViewer)?.triggerPointerDown(evt);
             return false;
         }

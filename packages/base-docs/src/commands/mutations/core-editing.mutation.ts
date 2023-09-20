@@ -63,7 +63,14 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         mutations.forEach((mutation) => {
             if (mutation.t === 'r') {
                 const { coverType, body, len, segmentId } = mutation;
-                const documentBody = UpdateAttributeApply(document, body, len, commonParameter.cursor, coverType, segmentId);
+                const documentBody = UpdateAttributeApply(
+                    document,
+                    body,
+                    len,
+                    commonParameter.cursor,
+                    coverType,
+                    segmentId
+                );
                 commonParameter.moveCursor(len);
                 undoMutations.push({
                     ...mutation,

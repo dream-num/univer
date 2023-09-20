@@ -1,4 +1,11 @@
-import { BooleanNumber, CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import {
+    BooleanNumber,
+    CommandType,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    IUndoRedoService,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
@@ -23,7 +30,11 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        let worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         let rightToLeft = BooleanNumber.FALSE;
 
         if (params) {
@@ -43,8 +54,14 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
             worksheetId,
         };
 
-        const undoMutationParams = SetWorksheetRightToLeftUndoMutationFactory(accessor, setWorksheetRightToLeftMutationParams);
-        const result = commandService.executeCommand(SetWorksheetRightToLeftMutation.id, setWorksheetRightToLeftMutationParams);
+        const undoMutationParams = SetWorksheetRightToLeftUndoMutationFactory(
+            accessor,
+            setWorksheetRightToLeftMutationParams
+        );
+        const result = commandService.executeCommand(
+            SetWorksheetRightToLeftMutation.id,
+            setWorksheetRightToLeftMutationParams
+        );
 
         if (result) {
             undoRedoService.pushUndoRedo({
@@ -53,7 +70,10 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
                     return commandService.executeCommand(SetWorksheetRightToLeftMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetWorksheetRightToLeftMutation.id, setWorksheetRightToLeftMutationParams);
+                    return commandService.executeCommand(
+                        SetWorksheetRightToLeftMutation.id,
+                        setWorksheetRightToLeftMutationParams
+                    );
                 },
             });
             return true;

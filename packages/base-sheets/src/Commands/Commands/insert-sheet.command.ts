@@ -1,10 +1,23 @@
-import { CommandType, DEFAULT_WORKSHEET, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, IWorksheetConfig, Tools } from '@univerjs/core';
+import {
+    CommandType,
+    DEFAULT_WORKSHEET,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    IUndoRedoService,
+    IWorksheetConfig,
+    Tools,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../Mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../Mutations/remove-sheet.mutation';
-import { ISetWorksheetActivateMutationParams, SetWorksheetActivateMutation, SetWorksheetUnActivateMutationFactory } from '../Mutations/set-worksheet-activate.mutation';
+import {
+    ISetWorksheetActivateMutationParams,
+    SetWorksheetActivateMutation,
+    SetWorksheetUnActivateMutationFactory,
+} from '../Mutations/set-worksheet-activate.mutation';
 
 export interface InsertSheetCommandParams {
     workbookId?: string;
@@ -53,7 +66,10 @@ export const InsertSheetCommand: ICommand = {
             sheet: sheetConfig,
             workbookId,
         };
-        const removeSheetMutationParams: IRemoveSheetMutationParams = InsertSheetUndoMutationFactory(accessor, insertSheetMutationParams);
+        const removeSheetMutationParams: IRemoveSheetMutationParams = InsertSheetUndoMutationFactory(
+            accessor,
+            insertSheetMutationParams
+        );
         // execute do mutations and add undo mutations to undo stack if completed
         const result = commandService.executeCommand(InsertSheetMutation.id, insertSheetMutationParams);
 
@@ -61,21 +77,42 @@ export const InsertSheetCommand: ICommand = {
             workbookId,
             worksheetId: sheetConfig.id,
         };
-        const undoMutationParams: ISetWorksheetActivateMutationParams = SetWorksheetUnActivateMutationFactory(accessor, setSheetActiveMutationParams);
-        const activateResult = commandService.executeCommand(SetWorksheetActivateMutation.id, setSheetActiveMutationParams);
+        const undoMutationParams: ISetWorksheetActivateMutationParams = SetWorksheetUnActivateMutationFactory(
+            accessor,
+            setSheetActiveMutationParams
+        );
+        const activateResult = commandService.executeCommand(
+            SetWorksheetActivateMutation.id,
+            setSheetActiveMutationParams
+        );
 
         if (result && activateResult) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return (commandService.executeCommand(SetWorksheetActivateMutation.id, undoMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) return commandService.executeCommand(RemoveSheetMutation.id, removeSheetMutationParams);
+                    return (
+                        commandService.executeCommand(
+                            SetWorksheetActivateMutation.id,
+                            undoMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
+                        if (res)
+                            return commandService.executeCommand(RemoveSheetMutation.id, removeSheetMutationParams);
                         return false;
                     });
                 },
                 redo() {
-                    return (commandService.executeCommand(InsertSheetMutation.id, insertSheetMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) return commandService.executeCommand(SetWorksheetActivateMutation.id, setSheetActiveMutationParams);
+                    return (
+                        commandService.executeCommand(
+                            InsertSheetMutation.id,
+                            insertSheetMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
+                        if (res)
+                            return commandService.executeCommand(
+                                SetWorksheetActivateMutation.id,
+                                setSheetActiveMutationParams
+                            );
                         return false;
                     });
                 },

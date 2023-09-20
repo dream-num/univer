@@ -34,7 +34,7 @@ export function UpdateAttributeApply(
     segmentId?: string
 ): IDocumentBody {
     if (updateBody == null) {
-        return;
+        throw new Error('updateBody is none');
     }
 
     const doc = document.snapshot;
@@ -48,7 +48,13 @@ export function UpdateAttributeApply(
     return updateAttribute(body, updateBody, textLength, currentIndex, coverType);
 }
 
-function updateAttribute(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType): IDocumentBody {
+function updateAttribute(
+    body: IDocumentBody,
+    updateBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    coverType: UpdateDocsAttributeType
+): IDocumentBody {
     const removeTextRuns = updateTextRuns(body, updateBody, textLength, currentIndex, coverType);
 
     const removeParagraphs = updateParagraphs(body, updateBody, textLength, currentIndex, coverType);
@@ -72,7 +78,13 @@ function updateAttribute(body: IDocumentBody, updateBody: IDocumentBody, textLen
     };
 }
 
-function updateTextRuns(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
+function updateTextRuns(
+    body: IDocumentBody,
+    updateBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    coverType: UpdateDocsAttributeType
+) {
     const { textRuns } = body;
 
     const { textRuns: updateDataTextRuns } = updateBody;
@@ -165,7 +177,13 @@ function coverTextRun(updateDataTextRuns: ITextRun[], removeTextRuns: ITextRun[]
     return newUpdateTextRun;
 }
 
-function updateParagraphs(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
+function updateParagraphs(
+    body: IDocumentBody,
+    updateBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    coverType: UpdateDocsAttributeType
+) {
     const { paragraphs } = body;
 
     const { paragraphs: updateDataParagraphs } = updateBody;
@@ -178,10 +196,18 @@ function updateParagraphs(body: IDocumentBody, updateBody: IDocumentBody, textLe
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateParagraphs: IParagraph[] = [];
         for (const updateParagraph of updateDataParagraphs) {
-            const { startIndex: updateStartIndex, paragraphStyle: updateParagraphStyle, bullet: updateBullet } = updateParagraph;
+            const {
+                startIndex: updateStartIndex,
+                paragraphStyle: updateParagraphStyle,
+                bullet: updateBullet,
+            } = updateParagraph;
             let splitUpdateParagraphs: IParagraph[] = [];
             for (const removeParagraph of removeParagraphs) {
-                const { startIndex: removeStartIndex, paragraphStyle: removeParagraphStyle, bullet: removeBullet } = removeParagraph;
+                const {
+                    startIndex: removeStartIndex,
+                    paragraphStyle: removeParagraphStyle,
+                    bullet: removeBullet,
+                } = removeParagraph;
                 let newParagraphStyle;
                 let newBullet;
                 if (coverType === UpdateDocsAttributeType.COVER) {
@@ -212,7 +238,13 @@ function updateParagraphs(body: IDocumentBody, updateBody: IDocumentBody, textLe
     return removeParagraphs;
 }
 
-function updateSectionBreaks(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
+function updateSectionBreaks(
+    body: IDocumentBody,
+    updateBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    coverType: UpdateDocsAttributeType
+) {
     const { sectionBreaks } = body;
 
     const { sectionBreaks: updateDataSectionBreaks } = updateBody;
@@ -254,7 +286,13 @@ function updateSectionBreaks(body: IDocumentBody, updateBody: IDocumentBody, tex
     return removeSectionBreaks;
 }
 
-function updateCustomBlocks(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
+function updateCustomBlocks(
+    body: IDocumentBody,
+    updateBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    coverType: UpdateDocsAttributeType
+) {
     const { customBlocks } = body;
 
     const { customBlocks: updateDataCustomBlocks } = updateBody;
@@ -296,7 +334,13 @@ function updateCustomBlocks(body: IDocumentBody, updateBody: IDocumentBody, text
     return removeCustomBlocks;
 }
 
-function updateTables(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
+function updateTables(
+    body: IDocumentBody,
+    updateBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    coverType: UpdateDocsAttributeType
+) {
     const { tables } = body;
 
     const { tables: updateDataTables } = updateBody;
@@ -338,7 +382,13 @@ function updateTables(body: IDocumentBody, updateBody: IDocumentBody, textLength
     return removeTables;
 }
 
-function updateCustomRanges(body: IDocumentBody, updateBody: IDocumentBody, textLength: number, currentIndex: number, coverType: UpdateDocsAttributeType) {
+function updateCustomRanges(
+    body: IDocumentBody,
+    updateBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    coverType: UpdateDocsAttributeType
+) {
     const { customRanges } = body;
 
     const { tables: updateDataCustomRanges } = updateBody;

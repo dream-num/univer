@@ -3,7 +3,12 @@ import { LexerNode } from '../Analysis/LexerNode';
 import { IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { $SUPER_TABLE_COLUMN_REGEX, REFERENCE_REGEX_SINGLE_COLUMN, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../Basics/Regex';
+import {
+    $SUPER_TABLE_COLUMN_REGEX,
+    REFERENCE_REGEX_SINGLE_COLUMN,
+    REFERENCE_REGEX_SINGLE_ROW,
+    REFERENCE_SINGLE_RANGE_REGEX,
+} from '../Basics/Regex';
 import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
@@ -102,7 +107,10 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
             }
             const tableData = tableMap.get(tableName)!;
             const tableOption = parserDataLoader.getTableOptionMap();
-            return new ReferenceNode(tokenTrim, new TableReferenceObject(tokenTrim, tableData, columnDataString, tableOption));
+            return new ReferenceNode(
+                tokenTrim,
+                new TableReferenceObject(tokenTrim, tableData, columnDataString, tableOption)
+            );
         }
 
         return false;

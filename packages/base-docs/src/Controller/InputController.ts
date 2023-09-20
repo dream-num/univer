@@ -29,7 +29,12 @@ import {
 } from '@univerjs/core';
 import { IDisposable, Inject } from '@wendellhu/redi';
 
-import { DeleteCommand, IMEInputCommand, InsertCommand, UpdateCommand } from '../commands/commands/core-editing.command';
+import {
+    DeleteCommand,
+    IMEInputCommand,
+    InsertCommand,
+    UpdateCommand,
+} from '../commands/commands/core-editing.command';
 import { DocsViewManagerService } from '../services/docs-view-manager/docs-view-manager.service';
 import { DocsView } from '../View/Render/Views';
 
@@ -199,7 +204,8 @@ export class InputController extends Disposable {
         const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
 
         // const content = document.findNodeByCharIndex(cursor - 1)?.content || '';
-        const isUpdateParagraph = isFirstSpan(preSpan) && span !== preSpan && (preIsBullet === true || preIsIndent === true);
+        const isUpdateParagraph =
+            isFirstSpan(preSpan) && span !== preSpan && (preIsBullet === true || preIsIndent === true);
         if (isUpdateParagraph) {
             const paragraph = getParagraphBySpan(preSpan, docsModel.body);
 
@@ -454,7 +460,11 @@ export class InputController extends Disposable {
         });
     }
 
-    private _getTopOrBottomPosition(document: Documents, span: Nullable<IDocumentSkeletonSpan>, direction: boolean): Nullable<INodePosition> {
+    private _getTopOrBottomPosition(
+        document: Documents,
+        span: Nullable<IDocumentSkeletonSpan>,
+        direction: boolean
+    ): Nullable<INodePosition> {
         const referenceSpan = document.findSpanByPosition(this._currentNodePosition);
         if (referenceSpan == null || span == null) {
             return;
@@ -672,7 +682,13 @@ export class InputController extends Disposable {
         return current.slice(oldLen);
     }
 
-    private _adjustSelection(document: Documents, selectionRemain?: TextSelection, span?: Nullable<IDocumentSkeletonSpan>, isBack = false, isSyncScroll = false) {
+    private _adjustSelection(
+        document: Documents,
+        selectionRemain?: TextSelection,
+        span?: Nullable<IDocumentSkeletonSpan>,
+        isBack = false,
+        isSyncScroll = false
+    ) {
         if (span == null) {
             return;
         }
@@ -706,7 +722,12 @@ export class InputController extends Disposable {
         // document.syncSelection();
     }
 
-    private _syncSelection(document: Documents, selectionRemain: TextSelection, newPos: INodePosition, isSyncScroll = false) {
+    private _syncSelection(
+        document: Documents,
+        selectionRemain: TextSelection,
+        newPos: INodePosition,
+        isSyncScroll = false
+    ) {
         document.addSelection(selectionRemain);
 
         selectionRemain.startNodePosition = newPos;
@@ -732,10 +753,23 @@ export class InputController extends Disposable {
             return disposableCollection;
         }
 
-        const { onInputObservable, onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, onSelectionStartObservable } = events;
+        const {
+            onInputObservable,
+            onCompositionstartObservable,
+            onCompositionupdateObservable,
+            onCompositionendObservable,
+            onSelectionStartObservable,
+        } = events;
 
         disposableCollection.add(this._initialInput(onInputObservable, docsModel));
-        disposableCollection.add(this._initialComposition(onCompositionstartObservable, onCompositionupdateObservable, onCompositionendObservable, docsModel));
+        disposableCollection.add(
+            this._initialComposition(
+                onCompositionstartObservable,
+                onCompositionupdateObservable,
+                onCompositionendObservable,
+                docsModel
+            )
+        );
 
         const observer = onSelectionStartObservable.add((nodePosition) => {
             this._currentNodePosition = nodePosition;

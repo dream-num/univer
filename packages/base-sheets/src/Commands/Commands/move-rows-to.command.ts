@@ -25,7 +25,11 @@ export const MoveRowsToCommand: ICommand = {
         }
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
@@ -45,7 +49,10 @@ export const MoveRowsToCommand: ICommand = {
                 },
             ],
         };
-        const undoRemoveRowMutationParams: IInsertRowMutationParams = IRemoveRowMutationFactory(accessor, removeRowMutationParams);
+        const undoRemoveRowMutationParams: IInsertRowMutationParams = IRemoveRowMutationFactory(
+            accessor,
+            removeRowMutationParams
+        );
 
         const removeResult = commandService.executeCommand(RemoveRowMutation.id, removeRowMutationParams);
 
@@ -61,7 +68,10 @@ export const MoveRowsToCommand: ICommand = {
             ],
         };
 
-        const undoMutationParams: IRemoveRowMutationParams = InsertRowMutationFactory(accessor, insertRowMutationParams);
+        const undoMutationParams: IRemoveRowMutationParams = InsertRowMutationFactory(
+            accessor,
+            insertRowMutationParams
+        );
 
         const result = commandService.executeCommand(InsertRowMutation.id, insertRowMutationParams);
 
@@ -71,13 +81,20 @@ export const MoveRowsToCommand: ICommand = {
                 // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
                 URI: workbookId,
                 undo() {
-                    return (commandService.executeCommand(InsertRowMutation.id, undoRemoveRowMutationParams) as Promise<boolean>).then((res) => {
+                    return (
+                        commandService.executeCommand(
+                            InsertRowMutation.id,
+                            undoRemoveRowMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
                         if (res) return commandService.executeCommand(RemoveRowMutation.id, undoMutationParams);
                         return false;
                     });
                 },
                 redo() {
-                    return (commandService.executeCommand(RemoveRowMutation.id, removeRowMutationParams) as Promise<boolean>).then((res) => {
+                    return (
+                        commandService.executeCommand(RemoveRowMutation.id, removeRowMutationParams) as Promise<boolean>
+                    ).then((res) => {
                         if (res) return commandService.executeCommand(InsertRowMutation.id, insertRowMutationParams);
                         return false;
                     });

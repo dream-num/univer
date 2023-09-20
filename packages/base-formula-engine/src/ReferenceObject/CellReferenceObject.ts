@@ -1,4 +1,4 @@
-import { IRangeData, referenceToGrid } from '@univerjs/core';
+import { ISelectionRange, referenceToGrid } from '@univerjs/core';
 
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -32,13 +32,13 @@ export class CellReferenceObject extends BaseReferenceObject {
         return this._createRange(newRangeData);
     }
 
-    override unionRange(rangeData1: IRangeData, rangeData2: IRangeData) {
+    override unionRange(rangeData1: ISelectionRange, rangeData2: ISelectionRange) {
         const startRow1 = rangeData1.startRow;
         const startColumn1 = rangeData1.startColumn;
 
         const startRow2 = rangeData2.startRow;
         const startColumn2 = rangeData2.startColumn;
-        const rangeData: IRangeData = {
+        const rangeData: ISelectionRange = {
             startRow: -1,
             startColumn: -1,
             endRow: -1,
@@ -63,8 +63,12 @@ export class CellReferenceObject extends BaseReferenceObject {
         return rangeData;
     }
 
-    private _createRange(newRangeData: IRangeData) {
-        const rangeReferenceObject = new RangeReferenceObject(newRangeData, this.getForcedSheetId(), this.getForcedUnitId());
+    private _createRange(newRangeData: ISelectionRange) {
+        const rangeReferenceObject = new RangeReferenceObject(
+            newRangeData,
+            this.getForcedSheetId(),
+            this.getForcedUnitId()
+        );
 
         rangeReferenceObject.setUnitData(this.getUnitData());
 

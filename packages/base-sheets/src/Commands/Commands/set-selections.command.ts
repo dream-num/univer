@@ -1,7 +1,14 @@
-import { SetSelectionsOperation } from '@Commands/Operations/selection.operation';
-import { CommandType, Direction, ICommand, ICommandService, ICurrentUniverService, IRangeData } from '@univerjs/core';
+import {
+    CommandType,
+    Direction,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    ISelectionRange,
+} from '@univerjs/core';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../Services/selection-manager.service';
+import { SetSelectionsOperation } from '../Operations/selection.operation';
 
 export interface IChangeSelectionCommandParams {
     direction: Direction;
@@ -25,7 +32,7 @@ export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
 
         const { direction } = params;
         const originSelection = selections[selections.length - 1];
-        const destRange: IRangeData = { ...originSelection };
+        const destRange: ISelectionRange = { ...originSelection };
 
         // FIXME: some error here. The selection does not know if there is a span cell.
         switch (direction) {

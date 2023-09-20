@@ -54,18 +54,35 @@ export class Liquid {
     }
 
     translatePagePadding(page: IDocumentSkeletonPage) {
-        const { marginTop: pagePaddingTop = 0, marginBottom: pagePaddingBottom = 0, marginLeft: pagePaddingLeft = 0, marginRight: pagePaddingRight = 0 } = page;
+        const {
+            marginTop: pagePaddingTop = 0,
+            marginBottom: pagePaddingBottom = 0,
+            marginLeft: pagePaddingLeft = 0,
+            marginRight: pagePaddingRight = 0,
+        } = page;
 
         this.translate(pagePaddingLeft, pagePaddingTop);
     }
 
     restorePagePadding(page: IDocumentSkeletonPage) {
-        const { marginTop: pagePaddingTop = 0, marginBottom: pagePaddingBottom = 0, marginLeft: pagePaddingLeft = 0, marginRight: pagePaddingRight = 0 } = page;
+        const {
+            marginTop: pagePaddingTop = 0,
+            marginBottom: pagePaddingBottom = 0,
+            marginLeft: pagePaddingLeft = 0,
+            marginRight: pagePaddingRight = 0,
+        } = page;
 
         this.translate(-pagePaddingLeft, -pagePaddingTop);
     }
 
-    translatePage(page: IDocumentSkeletonPage, type = PageLayoutType.VERTICAL, left = 0, top = 0, right = 0, bottom = 0) {
+    translatePage(
+        page: IDocumentSkeletonPage,
+        type = PageLayoutType.VERTICAL,
+        left = 0,
+        top = 0,
+        right = 0,
+        bottom = 0
+    ) {
         const {
             sections,
             marginTop: pagePaddingTop = 0,
@@ -119,7 +136,13 @@ export class Liquid {
     }
 
     translateLine(line: IDocumentSkeletonLine, isDraw = false) {
-        const { top: lineTop, marginBottom: lineMarginBottom = 0, marginTop: lineMarginTop = 0, paddingTop: linePaddingTop = 0, paddingBottom: linePaddingBottom = 0 } = line;
+        const {
+            top: lineTop,
+            marginBottom: lineMarginBottom = 0,
+            marginTop: lineMarginTop = 0,
+            paddingTop: linePaddingTop = 0,
+            paddingBottom: linePaddingBottom = 0,
+        } = line;
         const lineOffset = lineTop + (isDraw === true ? lineMarginTop : 0) + linePaddingTop;
         this.translate(0, lineOffset);
         return {

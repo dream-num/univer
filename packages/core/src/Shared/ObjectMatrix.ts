@@ -1,4 +1,4 @@
-import { IRangeData } from '../Types/Interfaces/IRangeData';
+import { ISelectionRange } from '../Types/Interfaces/ISelectionRange';
 import { ObjectArray, ObjectArrayPrimitiveType, PredicateFunction } from './ObjectArray';
 import { Nullable } from './Types';
 
@@ -242,7 +242,7 @@ export class ObjectMatrix<T> {
         return this._option.getLength();
     }
 
-    getRange(): IRangeData {
+    getRange(): ISelectionRange {
         const startRow = 0;
         const startColumn = 0;
         const endRow = this.getSizeOf();
@@ -313,7 +313,7 @@ export class ObjectMatrix<T> {
         return objectMatrix.getData();
     }
 
-    getDataRange(): IRangeData {
+    getDataRange(): ISelectionRange {
         let startRow = 0;
         let startColumn = 0;
         let endColumn = 0;

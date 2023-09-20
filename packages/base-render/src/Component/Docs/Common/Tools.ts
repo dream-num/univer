@@ -218,7 +218,12 @@ export function getNumberUnitValue(unitValue: number | INumberUnit, benchMark: n
 }
 
 // 返回charSpaceApply，选择网格还是字体来计算一个tab的长度，一个tab代表1字符长度
-export function getCharSpaceApply(charSpace: number = 0, defaultTabStop: number, gridType = GridType.LINES, snapToGrid = BooleanNumber.TRUE) {
+export function getCharSpaceApply(
+    charSpace: number = 0,
+    defaultTabStop: number,
+    gridType = GridType.LINES,
+    snapToGrid = BooleanNumber.TRUE
+) {
     let charSpaceApply = 1;
 
     if (validationGrid(gridType, snapToGrid)) {
@@ -230,7 +235,10 @@ export function getCharSpaceApply(charSpace: number = 0, defaultTabStop: number,
 }
 
 export function validationGrid(gridType = GridType.LINES, snapToGrid = BooleanNumber.FALSE) {
-    return snapToGrid === BooleanNumber.TRUE && (gridType === GridType.LINES_AND_CHARS || gridType === GridType.SNAP_TO_CHARS);
+    return (
+        snapToGrid === BooleanNumber.TRUE &&
+        (gridType === GridType.LINES_AND_CHARS || gridType === GridType.SNAP_TO_CHARS)
+    );
 }
 
 export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
@@ -246,7 +254,12 @@ export function getLineHeightConfig(sectionBreakConfig: ISectionBreakConfig, par
 export function getCharSpaceConfig(sectionBreakConfig: ISectionBreakConfig, paragraphConfig: IParagraphConfig) {
     const { paragraphStyle = {} } = paragraphConfig;
 
-    const { charSpace = 0, gridType = GridType.LINES, defaultTabStop = 36, documentTextStyle = {} } = sectionBreakConfig;
+    const {
+        charSpace = 0,
+        gridType = GridType.LINES,
+        defaultTabStop = 36,
+        documentTextStyle = {},
+    } = sectionBreakConfig;
 
     const { fs: documentFontSize = DEFAULT_DOCUMENT_FONTSIZE } = documentTextStyle;
 
@@ -433,7 +446,10 @@ export function lineIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (
     }
 }
 
-export function columnIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (column: IDocumentSkeletonColumn) => void) {
+export function columnIterator(
+    pages: IDocumentSkeletonPage[],
+    iteratorFunction: (column: IDocumentSkeletonColumn) => void
+) {
     for (const page of pages) {
         const { sections } = page;
 
@@ -450,7 +466,13 @@ export function columnIterator(pages: IDocumentSkeletonPage[], iteratorFunction:
 }
 
 // eslint-disable-next-line max-lines-per-function
-export function getPositionHorizon(positionH: ObjectPositionH, column: IDocumentSkeletonColumn, page: IDocumentSkeletonPage, objectWidth: number, isPageBreak: boolean = false) {
+export function getPositionHorizon(
+    positionH: ObjectPositionH,
+    column: IDocumentSkeletonColumn,
+    page: IDocumentSkeletonPage,
+    objectWidth: number,
+    isPageBreak: boolean = false
+) {
     const { relativeFrom, align, posOffset, percent } = positionH;
 
     if (align != null) {

@@ -6,7 +6,7 @@ import { runPart } from './runPart';
 const default_text = parsePart('@');
 const default_color = 'black';
 
-function getPart(value: number, parts: PartType[]): PartType {
+function getPart(value: number, parts: PartType[]): PartType | undefined {
     for (let pi = 0; pi < 3; pi++) {
         const part = parts[pi];
         if (part) {
@@ -58,7 +58,7 @@ export function color(value: number, parts: PartType[]): string {
  * @param opts
  */
 export function formatNumber(value: string | number, parts: PartType[], opts: OptionsData): string {
-    const l10n = getLocale(opts.locale);
+    const l10n = getLocale(opts.locale as any);
     // not a number?
     const text_part = parts[3] ? parts[3] : default_text;
     if (typeof value === 'boolean') {
@@ -72,7 +72,7 @@ export function formatNumber(value: string | number, parts: PartType[], opts: Op
     }
     // guard against non-finite numbers:
     if (!isFinite(value)) {
-        const loc = l10n || defaultLocale;
+        const loc: any = l10n || defaultLocale;
         if (isNaN(value)) {
             return loc.nan;
         }
@@ -88,7 +88,12 @@ export function formatNumber(value: string | number, parts: PartType[], opts: Op
  * @param partitions
  */
 export function isDate(partitions: PartType[]): boolean {
-    return !!((partitions[0] && partitions[0].date) || (partitions[1] && partitions[1].date) || (partitions[2] && partitions[2].date) || (partitions[3] && partitions[3].date));
+    return !!(
+        (partitions[0] && partitions[0].date) ||
+        (partitions[1] && partitions[1].date) ||
+        (partitions[2] && partitions[2].date) ||
+        (partitions[3] && partitions[3].date)
+    );
 }
 
 /**
@@ -97,7 +102,14 @@ export function isDate(partitions: PartType[]): boolean {
  */
 export function isText(partitions: PartType[]): boolean {
     const [part1, part2, part3, part4] = partitions;
-    return !!((!part1 || part1.generated) && (!part2 || part2.generated) && (!part3 || part3.generated) && part4 && part4.text && !part4.generated);
+    return !!(
+        (!part1 || part1.generated) &&
+        (!part2 || part2.generated) &&
+        (!part3 || part3.generated) &&
+        part4 &&
+        part4.text &&
+        !part4.generated
+    );
 }
 
 /**

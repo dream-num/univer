@@ -42,7 +42,11 @@ export function setLineType(ctx: CanvasRenderingContext2D, style: BorderStyleTyp
         ctx.setLineDash([1, 2]);
     } else if (style === BorderStyleTypes.DASH_DOT_DOT || style === BorderStyleTypes.MEDIUM_DASH_DOT_DOT) {
         ctx.setLineDash([2, 2, 5, 2, 2]);
-    } else if (style === BorderStyleTypes.DASH_DOT || style === BorderStyleTypes.MEDIUM_DASH_DOT || style === BorderStyleTypes.SLANT_DASH_DOT) {
+    } else if (
+        style === BorderStyleTypes.DASH_DOT ||
+        style === BorderStyleTypes.MEDIUM_DASH_DOT ||
+        style === BorderStyleTypes.SLANT_DASH_DOT
+    ) {
         ctx.setLineDash([2, 5, 2]);
     } else if (style === BorderStyleTypes.DOTTED) {
         ctx.setLineDash([2]);
@@ -69,7 +73,13 @@ export function getLineWidth(style: BorderStyleTypes) {
     return lineWidth;
 }
 
-export function calculateRectRotate(startPoint: Vector2, centerPoint: Vector2, radiusCenter: number, radiusVertex: number, offsetPoint: Vector2 = Vector2.create(0, 0)) {
+export function calculateRectRotate(
+    startPoint: Vector2,
+    centerPoint: Vector2,
+    radiusCenter: number,
+    radiusVertex: number,
+    offsetPoint: Vector2 = Vector2.create(0, 0)
+) {
     // const centerOffset = Vector2.create(width / 2, height / 2);
 
     const rotationVector = startPoint.add(centerPoint).rotateByPoint(radiusVertex);
@@ -91,7 +101,11 @@ export function getRotateOrientation(angle: number) {
 
 // rotate calculate logic https://www.processon.com/view/link/630df928f346fb0714c9c4ec
 // eslint-disable-next-line max-lines-per-function
-export function getRotateOffsetAndFarthestHypotenuse(lines: IDocumentSkeletonLine[], rectWidth: number, vertexAngle: number) {
+export function getRotateOffsetAndFarthestHypotenuse(
+    lines: IDocumentSkeletonLine[],
+    rectWidth: number,
+    vertexAngle: number
+) {
     const rotateTranslateXList: number[] = [];
     let rotateTranslateY = 0;
     let rotatedHeight = 0;

@@ -21,9 +21,14 @@ export class ScrollTimer {
 
     private _scrollY: number = 0;
 
-    private _scrollFunction: (x?: number, y?: number) => void;
+    private _scrollFunction?: (x?: number, y?: number) => void;
 
-    constructor(private _scene: any, private _padding?: IPaddingData, private _smoothRatioX = 0.05, private _smoothRatioY = 0.05) {
+    constructor(
+        private _scene: any,
+        private _padding?: IPaddingData,
+        private _smoothRatioX = 0.05,
+        private _smoothRatioY = 0.05
+    ) {
         if (!this._padding) {
             this._padding = { t: 20, b: 20, l: 46, r: 60 };
         }
@@ -98,6 +103,11 @@ export class ScrollTimer {
 
     stopScroll() {
         cancelRequestFrame(this._requestNewFrameNumber);
+    }
+
+    dispose() {
+        this.stopScroll();
+        delete this._scrollFunction;
     }
 
     getViewportByCoord(scene?: any) {

@@ -84,7 +84,12 @@ export class TextSelection {
         span: NodePositionStateType.NORMAL,
     };
 
-    constructor(private _scene: ThinScene, public startNodePosition?: Nullable<INodePosition>, public endNodePosition?: Nullable<INodePosition>, public segmentId?: string) {}
+    constructor(
+        private _scene: ThinScene,
+        public startNodePosition?: Nullable<INodePosition>,
+        public endNodePosition?: Nullable<INodePosition>,
+        public segmentId?: string
+    ) {}
 
     getRange() {
         const cursorList = this._rangeList;
@@ -377,7 +382,13 @@ export class TextSelection {
         return resultState;
     }
 
-    private _getSelectionRuler(typeIndex: number, startPosition: INodePosition, endPosition: INodePosition, nextLength: number, current: number) {
+    private _getSelectionRuler(
+        typeIndex: number,
+        startPosition: INodePosition,
+        endPosition: INodePosition,
+        nextLength: number,
+        current: number
+    ) {
         let start_next = 0;
         let end_next = nextLength;
 
@@ -688,35 +699,64 @@ export class TextSelection {
 
         for (let p = 0; p <= pageIndex - 1; p++) {
             const page = pages[p];
-            this._Liquid.translatePage(page, documents.pageLayoutType, documents.pageMarginLeft, documents.pageMarginTop);
+            this._Liquid.translatePage(
+                page,
+                documents.pageLayoutType,
+                documents.pageMarginLeft,
+                documents.pageMarginTop
+            );
         }
 
         for (let p = pageIndex; p <= endPageIndex; p++) {
             const page = pages[p];
             const sections = page.sections;
 
-            const { start_next: start_s, end_next: end_s } = this._getSelectionRuler(NodePositionMap.page, startPosition, endPosition, sections.length - 1, p);
+            const { start_next: start_s, end_next: end_s } = this._getSelectionRuler(
+                NodePositionMap.page,
+                startPosition,
+                endPosition,
+                sections.length - 1,
+                p
+            );
             this._Liquid.translateSave();
             this._Liquid.translatePagePadding(page);
 
             for (let s = start_s; s <= end_s; s++) {
                 const section = sections[s];
                 const columns = section.columns;
-                const { start_next: start_c, end_next: end_c } = this._getSelectionRuler(NodePositionMap.section, startPosition, endPosition, columns.length - 1, s);
+                const { start_next: start_c, end_next: end_c } = this._getSelectionRuler(
+                    NodePositionMap.section,
+                    startPosition,
+                    endPosition,
+                    columns.length - 1,
+                    s
+                );
 
                 this._Liquid.translateSection(section);
 
                 for (let c = start_c; c <= end_c; c++) {
                     const column = columns[c];
                     const lines = column.lines;
-                    const { start_next: start_l, end_next: end_l } = this._getSelectionRuler(NodePositionMap.column, startPosition, endPosition, lines.length - 1, c);
+                    const { start_next: start_l, end_next: end_l } = this._getSelectionRuler(
+                        NodePositionMap.column,
+                        startPosition,
+                        endPosition,
+                        lines.length - 1,
+                        c
+                    );
 
                     this._Liquid.translateColumn(column);
 
                     for (let l = start_l; l <= end_l; l++) {
                         const line = lines[l];
                         const { divides, type, lineHeight = 0 } = line;
-                        const { start_next: start_d, end_next: end_d } = this._getSelectionRuler(NodePositionMap.line, startPosition, endPosition, divides.length - 1, l);
+                        const { start_next: start_d, end_next: end_d } = this._getSelectionRuler(
+                            NodePositionMap.line,
+                            startPosition,
+                            endPosition,
+                            divides.length - 1,
+                            l
+                        );
                         this._Liquid.translateSave();
                         this._Liquid.translateLine(line);
 
@@ -730,7 +770,13 @@ export class TextSelection {
 
                             const spanGroup = divide.spanGroup;
 
-                            const { start_next: start_sp, end_next: end_sp } = this._getSelectionRuler(NodePositionMap.divide, startPosition, endPosition, spanGroup.length - 1, d);
+                            const { start_next: start_sp, end_next: end_sp } = this._getSelectionRuler(
+                                NodePositionMap.divide,
+                                startPosition,
+                                endPosition,
+                                spanGroup.length - 1,
+                                d
+                            );
 
                             let isFirst = false;
 
@@ -755,7 +801,12 @@ export class TextSelection {
             }
 
             this._Liquid.translateRestore();
-            this._Liquid.translatePage(page, documents.pageLayoutType, documents.pageMarginLeft, documents.pageMarginTop);
+            this._Liquid.translatePage(
+                page,
+                documents.pageLayoutType,
+                documents.pageMarginLeft,
+                documents.pageMarginTop
+            );
         }
     }
 

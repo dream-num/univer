@@ -14,7 +14,12 @@ export { ICanvasView } from './Services/tokens';
 // #region commands
 
 // mutations
-export { InsertColMutation, InsertColMutationFactory, InsertRowMutation, InsertRowMutationFactory } from './Commands/Mutations/insert-row-col.mutation';
+export {
+    InsertColMutation,
+    InsertColMutationFactory,
+    InsertRowMutation,
+    InsertRowMutationFactory,
+} from './Commands/Mutations/insert-row-col.mutation';
 export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './Commands/Mutations/insert-sheet.mutation';
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './Commands/Mutations/remove-sheet.mutation';
 export { ISetRangeStyleMutationParams, SetRangeStyleMutation } from './Commands/Mutations/set-range-styles.mutation';
@@ -48,7 +53,12 @@ export {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from './Commands/Commands/set-border-command';
-export { ChangeSelectionCommand, ExpandSelectionCommand, IChangeSelectionCommandParams, IExpandSelectionCommandParams } from './Commands/Commands/set-selections.command';
+export {
+    ChangeSelectionCommand,
+    ExpandSelectionCommand,
+    IChangeSelectionCommandParams,
+    IExpandSelectionCommandParams,
+} from './Commands/Commands/set-selections.command';
 export {
     ResetBackgroundColorCommand,
     ResetTextColorCommand,

@@ -4,7 +4,7 @@ import {
     mergeCellHandler,
     NORMAL_SELECTION_PLUGIN_STYLE,
 } from '@univerjs/base-render';
-import { IRangeData, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
+import { ISelectionRange, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -20,7 +20,7 @@ export interface ISelectionManagerInsertParam extends ISelectionManagerSearchPar
     selectionDatas: ISelectionRangeWithStyle[];
 }
 
-//{ [pluginName: string]: { [unitId: string]: { [sheetId: string]: ISelectionData[] } } }
+//{ [pluginName: string]: { [unitId: string]: { [sheetId: string]: ISelectionWithCoord[] } } }
 export type ISelectionInfo = Map<string, Map<string, Map<string, ISelectionRangeWithStyle[]>>>;
 
 /**
@@ -31,10 +31,51 @@ export class SelectionManagerService implements IDisposable {
 
     private _currentSelection: Nullable<ISelectionManagerSearchParam> = null;
 
+    private _currentStyle: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE;
+
+    private _isSelectionEnabled: boolean = true;
+
     private readonly _selectionInfo$ = new BehaviorSubject<Nullable<ISelectionRangeWithStyle[]>>(null);
 
     // eslint-disable-next-line @typescript-eslint/member-ordering
     readonly selectionInfo$ = this._selectionInfo$.asObservable();
+
+    get isSelectionEnabled() {
+        return this._isSelectionEnabled;
+    }
+
+    get currentStyle() {
+        return this._currentStyle;
+    }
+
+    enableSelection() {
+        this._isSelectionEnabled = true;
+    }
+
+    disableSelection() {
+        this._isSelectionEnabled = false;
+
+        if (this._currentSelection == null) {
+            return;
+        }
+
+        this._selectionInfo.set(this._currentSelection.pluginName, new Map());
+
+        this.refresh(this._currentSelection);
+    }
+
+    resetPlugin() {
+        if (this._currentSelection == null) {
+            return;
+        }
+        this._currentSelection.pluginName = NORMAL_SELECTION_PLUGIN_NAME;
+
+        this.refresh(this._currentSelection);
+    }
+
+    setCurrentStyle(style: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE) {
+        this._currentStyle = style;
+    }
 
     dispose(): void {
         this._selectionInfo$.complete();
@@ -65,7 +106,7 @@ export class SelectionManagerService implements IDisposable {
         return this._getSelectionDatas(this._currentSelection);
     }
 
-    getRangeDatas(): Nullable<IRangeData[]> {
+    getRangeDatas(): Nullable<ISelectionRange[]> {
         const selectionDataList = this.getSelectionDatas();
         if (selectionDataList == null) {
             return;
@@ -138,34 +179,38 @@ export class SelectionManagerService implements IDisposable {
 
     createDefaultAutoFillSelection(): ISelectionStyle {
         return {
-            strokeDashArray: [],
             strokeWidth: 2,
             stroke: '#FFF000',
             fill: 'rgba(0, 0, 0, 0.2)',
-            controls: {},
+            widgets: {},
             hasAutoFill: true,
         };
     }
 
     createCopyPasteSelection(): ISelectionStyle {
         return {
-            strokeDashArray: [1, 0, 1, 1],
             strokeWidth: 2,
             stroke: '#FFF000',
             fill: 'rgba(0, 0, 0, 0.2)',
-            controls: {},
+            widgets: {},
             hasAutoFill: false,
         };
     }
 
     createDefaultSelection(): ISelectionStyle {
-        return NORMAL_SELECTION_PLUGIN_STYLE;
+        return {
+            strokeWidth: 2,
+            stroke: '#FFF000',
+            fill: 'rgba(0, 0, 0, 0.2)',
+            widgets: { tr: true, tl: true, br: true, bl: true },
+            hasAutoFill: false,
+        };
     }
 
     transformCellDataToSelectionData(
         row: number,
         column: number,
-        mergeData: IRangeData[]
+        mergeData: ISelectionRange[]
     ): Nullable<ISelectionRangeWithStyle> {
         const newCellRange = mergeCellHandler(row, column, mergeData);
 

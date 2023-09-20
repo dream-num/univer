@@ -1,7 +1,11 @@
 import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { ISetWorksheetNameMutationParams, SetWorksheetNameMutation, SetWorksheetNameMutationFactory } from '../Mutations/set-worksheet-name.mutation';
+import {
+    ISetWorksheetNameMutationParams,
+    SetWorksheetNameMutation,
+    SetWorksheetNameMutationFactory,
+} from '../Mutations/set-worksheet-name.mutation';
 
 export interface SetWorksheetNameCommandParams {
     name: string;
@@ -22,14 +26,19 @@ export const SetWorksheetNameCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId =
+            params.worksheetId ||
+            currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
 
         const redoMutationParams: ISetWorksheetNameMutationParams = {
             worksheetId,
             name: params.name,
             workbookId,
         };
-        const undoMutationParams: ISetWorksheetNameMutationParams = SetWorksheetNameMutationFactory(accessor, redoMutationParams);
+        const undoMutationParams: ISetWorksheetNameMutationParams = SetWorksheetNameMutationFactory(
+            accessor,
+            redoMutationParams
+        );
         const result = commandService.executeCommand(SetWorksheetNameMutation.id, redoMutationParams);
 
         if (result) {

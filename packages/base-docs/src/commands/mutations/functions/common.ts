@@ -13,7 +13,12 @@ import {
     sortRulesFactory,
 } from '@univerjs/core';
 
-export function insertTextRuns(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
+export function insertTextRuns(
+    body: IDocumentBody,
+    insertBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
     const { textRuns } = body;
 
     if (textRuns == null) {
@@ -80,7 +85,12 @@ export function insertTextRuns(body: IDocumentBody, insertBody: IDocumentBody, t
     }
 }
 
-export function insertParagraphs(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
+export function insertParagraphs(
+    body: IDocumentBody,
+    insertBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
     const { paragraphs } = body;
 
     if (paragraphs == null) {
@@ -137,7 +147,12 @@ export function insertParagraphs(body: IDocumentBody, insertBody: IDocumentBody,
     }
 }
 
-export function insertSectionBreaks(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
+export function insertSectionBreaks(
+    body: IDocumentBody,
+    insertBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
     const { sectionBreaks } = body;
 
     if (sectionBreaks == null) {
@@ -164,7 +179,12 @@ export function insertSectionBreaks(body: IDocumentBody, insertBody: IDocumentBo
     }
 }
 
-export function insertCustomBlocks(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
+export function insertCustomBlocks(
+    body: IDocumentBody,
+    insertBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
     const { customBlocks } = body;
 
     if (customBlocks == null) {
@@ -222,7 +242,12 @@ export function insertTables(body: IDocumentBody, insertBody: IDocumentBody, tex
     }
 }
 
-export function insertCustomRanges(body: IDocumentBody, insertBody: IDocumentBody, textLength: number, currentIndex: number) {
+export function insertCustomRanges(
+    body: IDocumentBody,
+    insertBody: IDocumentBody,
+    textLength: number,
+    currentIndex: number
+) {
     const { customRanges } = body;
 
     if (customRanges == null) {
@@ -305,7 +330,12 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
     return removeTextRuns;
 }
 
-export function deleteParagraphs(body: IDocumentBody, textLength: number, currentIndex: number, closeRemoveAfterFirstNew = false) {
+export function deleteParagraphs(
+    body: IDocumentBody,
+    textLength: number,
+    currentIndex: number,
+    closeRemoveAfterFirstNew = false
+) {
     const { paragraphs } = body;
 
     const startIndex = currentIndex;

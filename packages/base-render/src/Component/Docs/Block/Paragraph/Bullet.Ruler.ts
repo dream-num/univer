@@ -1,5 +1,4 @@
 import { GlyphType, numberToListABC } from '@univerjs/core';
-// import { dealWidthCustomBulletOrderedSymbol } from '../../../../Custom/UseCustom';
 
 export function getBulletOrderedSymbol(startIndex: number, startNumber: number, glyphType: GlyphType | string) {
     // if (!(glyphType in GlyphType)) {
@@ -69,8 +68,36 @@ function roman(startIndex: number, startNumber: number) {
 }
 
 function _convertRoman(num: number, uppercase = false) {
-    const upperLookup = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
-    const lowerLookup = { m: 1000, cm: 900, d: 500, cd: 400, c: 100, xc: 90, l: 50, xl: 40, x: 10, ix: 9, v: 5, iv: 4, i: 1 };
+    const upperLookup = {
+        M: 1000,
+        CM: 900,
+        D: 500,
+        CD: 400,
+        C: 100,
+        XC: 90,
+        L: 50,
+        XL: 40,
+        X: 10,
+        IX: 9,
+        V: 5,
+        IV: 4,
+        I: 1,
+    };
+    const lowerLookup = {
+        m: 1000,
+        cm: 900,
+        d: 500,
+        cd: 400,
+        c: 100,
+        xc: 90,
+        l: 50,
+        xl: 40,
+        x: 10,
+        ix: 9,
+        v: 5,
+        iv: 4,
+        i: 1,
+    };
     let lookup: { [key: string]: number } = lowerLookup;
     if (uppercase) {
         lookup = upperLookup;

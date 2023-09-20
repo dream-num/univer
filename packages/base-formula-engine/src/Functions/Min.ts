@@ -33,7 +33,10 @@ export class Min extends BaseFunction {
     }
 
     private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
-        const validator = accumulatorAll.compare(valueObject as BaseValueObject, compareToken.GREATER_THAN) as BooleanValueObject;
+        const validator = accumulatorAll.compare(
+            valueObject as BaseValueObject,
+            compareToken.GREATER_THAN
+        ) as BooleanValueObject;
         if (validator.getValue()) {
             accumulatorAll = valueObject as BaseValueObject;
         }

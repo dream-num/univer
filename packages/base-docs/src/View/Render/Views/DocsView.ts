@@ -38,7 +38,9 @@ export class DocsView extends BaseView {
             this._useExternalModel = false;
         }
 
-        const docsModel = this._useExternalModel ? externalModel : this._currentUniverService.getCurrentUniverDocInstance()?.getDocument();
+        const docsModel = this._useExternalModel
+            ? externalModel
+            : this._currentUniverService.getCurrentUniverDocInstance()?.getDocument();
         if (docsModel) {
             this._docsViewManagerService.registerCanvasViewForUniverInstance(docsModel!.getUnitId(), this);
         }
@@ -63,7 +65,10 @@ export class DocsView extends BaseView {
                     const drawing = page.skeDrawings.get(k) as IDocumentSkeletonDrawing;
                     if (obj instanceof Picture) {
                         const props = obj.getPictureProps();
-                        obj.translate(drawing.aLeft + docsLeft + (props.liX ?? 0), drawing.aTop + docsTop + (props.liY ?? 0));
+                        obj.translate(
+                            drawing.aLeft + docsLeft + (props.liX ?? 0),
+                            drawing.aTop + docsTop + (props.liY ?? 0)
+                        );
                     } else {
                         obj.translate(drawing.aLeft + docsLeft, drawing.aTop + docsTop);
                     }
@@ -74,7 +79,9 @@ export class DocsView extends BaseView {
 
     protected override _initialize() {
         const scene = this.getScene();
-        const docsModel = this._useExternalModel ? this._model! : this._currentUniverService.getCurrentUniverDocInstance()?.getDocument();
+        const docsModel = this._useExternalModel
+            ? this._model!
+            : this._currentUniverService.getCurrentUniverDocInstance()?.getDocument();
         if (!docsModel) {
             return;
         }

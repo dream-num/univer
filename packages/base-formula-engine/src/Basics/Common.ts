@@ -1,10 +1,10 @@
-import { BooleanNumber, ICellData, IRangeData, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
+import { BooleanNumber, ICellData, ISelectionRange, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
 
 export type SheetDataType = { [sheetId: string]: ObjectMatrix<ICellData> };
 
 export type UnitDataType = { [unitId: string]: SheetDataType };
 
-export type ArrayFormulaDataType = { [sheetId: string]: ObjectMatrix<IRangeData> };
+export type ArrayFormulaDataType = { [sheetId: string]: ObjectMatrix<ISelectionRange> };
 
 export type UnitArrayFormulaDataType = { [unitId: string]: ArrayFormulaDataType };
 
@@ -60,7 +60,7 @@ export interface ISuperTable {
     sheetId: string;
     hasCustomTitle: BooleanNumber;
     titleMap: Map<string, number>;
-    rangeData: IRangeData;
+    rangeData: ISelectionRange;
 }
 
 export enum ConcatenateType {

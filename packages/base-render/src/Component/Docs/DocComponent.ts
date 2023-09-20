@@ -1,7 +1,12 @@
 import { Nullable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from '../../Basics/Const';
-import { IDocumentSkeletonLine, IDocumentSkeletonSpan, PageLayoutType, SpanType } from '../../Basics/IDocumentSkeletonCached';
+import {
+    IDocumentSkeletonLine,
+    IDocumentSkeletonSpan,
+    PageLayoutType,
+    SpanType,
+} from '../../Basics/IDocumentSkeletonCached';
 import { INodeInfo, INodePosition, INodeSearch, ITransformChangeState } from '../../Basics/Interfaces';
 import { IBoundRect } from '../../Basics/Vector2';
 import { Canvas } from '../../Canvas';
@@ -110,7 +115,8 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
 
         span = span < 0 ? 0 : span;
 
-        const spanGroup = skeletonData.pages[page].sections[section].columns[column].lines[line].divides[divide].spanGroup;
+        const spanGroup =
+            skeletonData.pages[page].sections[section].columns[column].lines[line].divides[divide].spanGroup;
 
         if (spanGroup[span].spanType === SpanType.LIST) {
             return spanGroup[span + 1];

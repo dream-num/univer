@@ -67,7 +67,12 @@ export class DrawingsView extends BaseView {
                 objectList.push(rect);
             });
 
-            this._liquid.translatePage(page, documents.pageLayoutType, documents.pageMarginLeft, documents.pageMarginTop);
+            this._liquid.translatePage(
+                page,
+                documents.pageLayoutType,
+                documents.pageMarginLeft,
+                documents.pageMarginTop
+            );
         }
         scene.openTransformer();
         scene.addObjects(objectList);

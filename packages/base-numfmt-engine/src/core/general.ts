@@ -1,7 +1,9 @@
+import { LocaleData } from './locale';
 import { numdec } from './numdec';
+import { PartType } from './parsePart';
 import { round } from './round';
 
-const fixLocale = (s, l10n) => s.replace(/\./, l10n.decimal);
+const fixLocale = (s: string, l10n: any) => s.replace(/\./, l10n.decimal);
 
 /**
  *
@@ -10,12 +12,14 @@ const fixLocale = (s, l10n) => s.replace(/\./, l10n.decimal);
  * @param value
  * @param l10n
  */
-export function general(ret, part, value, l10n) {
+export function general(ret: any[], part: PartType, value: number, l10n: LocaleData) {
     const int = value | 0;
 
     // sign is emitted if there is no condition or
     // if condition operator is one of [ '<>', '>=', '>' ]
-    const showSign = value < 0 && (!part.condition || part.condition[0] === '<>' || part.condition[0] === '>=' || part.condition[0] === '>');
+    const showSign =
+        value < 0 &&
+        (!part.condition || part.condition[0] === '<>' || part.condition[0] === '>=' || part.condition[0] === '>');
     if (typeof value === 'string') {
         // special case
         // [<-25]General;[>25]General;General;General
@@ -54,7 +58,13 @@ export function general(ret, part, value, l10n) {
             } else {
                 m = round(n, 5);
             }
-            ret.push(fixLocale(`${m}`, l10n), l10n.exponent, exp < 0 ? l10n.negative : l10n.positive, x < 10 ? '0' : '', x);
+            ret.push(
+                fixLocale(`${m}`, l10n),
+                l10n.exponent,
+                exp < 0 ? l10n.negative : l10n.positive,
+                x < 10 ? '0' : '',
+                x
+            );
         };
 
         if (exp >= -4 && exp <= -1) {

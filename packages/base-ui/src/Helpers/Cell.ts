@@ -1,5 +1,16 @@
 import { ptToPx, pxToPt } from '@univerjs/base-render';
-import { getBorderStyleType, IBorderData, ICellData, IDocumentData, IKeyValue, IRangeData, IStyleData, ITextDecoration, ITextRun, Tools } from '@univerjs/core';
+import {
+    getBorderStyleType,
+    IBorderData,
+    ICellData,
+    IDocumentData,
+    IKeyValue,
+    ISelectionRange,
+    IStyleData,
+    ITextDecoration,
+    ITextRun,
+    Tools,
+} from '@univerjs/core';
 
 import { textTrim } from '../Utils';
 
@@ -153,7 +164,10 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
             let fs = parseInt(value);
 
             // Double the font size for superscripts and subscripts
-            if (cssText.indexOf('vertical-align') > -1 && (cssText.indexOf('sub') > -1 || cssText.indexOf('sup') > -1)) {
+            if (
+                cssText.indexOf('vertical-align') > -1 &&
+                (cssText.indexOf('sub') > -1 || cssText.indexOf('sup') > -1)
+            ) {
                 fs *= 2;
             }
 
@@ -402,7 +416,13 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
             }
         }
 
-        if (key === 'border-bottom' || key === 'border-top' || key === 'border-left' || key === 'border-right' || key === 'border') {
+        if (
+            key === 'border-bottom' ||
+            key === 'border-top' ||
+            key === 'border-left' ||
+            key === 'border-right' ||
+            key === 'border'
+        ) {
             if (!styleList.bd) {
                 styleList.bd = {};
             }
@@ -675,7 +695,7 @@ export function handlePlainToJson(plain: string) {
 }
 
 // 获取最终sheet数据
-export function handleTableMergeData(data: any[], selection?: IRangeData) {
+export function handleTableMergeData(data: any[], selection?: ISelectionRange) {
     const copyH = data.length;
     const copyC = data[0].length;
     let minH = 0; //应用范围首尾行

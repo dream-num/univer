@@ -14,7 +14,11 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 
-import { IDocumentSkeletonCached, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../Basics/IDocumentSkeletonCached';
+import {
+    IDocumentSkeletonCached,
+    IDocumentSkeletonPage,
+    ISkeletonResourceReference,
+} from '../../Basics/IDocumentSkeletonCached';
 import { IDocsConfig, ISectionBreakConfig } from '../../Basics/Interfaces';
 import { IBoundRect } from '../../Basics/Vector2';
 import { Skeleton } from '../Skeleton';
@@ -287,11 +291,22 @@ export class DocumentSkeleton extends Skeleton {
                 this.__addNewSectionByContinuous(curSkeletonPage, columnProperties, columnSeparatorType);
                 isContinuous = true;
             } else {
-                curSkeletonPage = createSkeletonPage(sectionBreakConfig, skeletonResourceReference, curSkeletonPage?.pageNumber);
+                curSkeletonPage = createSkeletonPage(
+                    sectionBreakConfig,
+                    skeletonResourceReference,
+                    curSkeletonPage?.pageNumber
+                );
             }
 
             // 计算页内布局，block结构
-            const blockInfo = dealWithSections(bodyModel, sectionNode, curSkeletonPage, sectionBreakConfig, skeletonResourceReference, this._renderedBlockIdMap);
+            const blockInfo = dealWithSections(
+                bodyModel,
+                sectionNode,
+                curSkeletonPage,
+                sectionBreakConfig,
+                skeletonResourceReference,
+                this._renderedBlockIdMap
+            );
 
             // todo: 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算lines
             if (sectionTypeNext === SectionType.CONTINUOUS && columnProperties.length > 0) {
@@ -326,14 +341,32 @@ export class DocumentSkeleton extends Skeleton {
     }
 
     // 一页存在多个section的情况，仅在SectionType.CONTINUOUS的情况下出现
-    private __addNewSectionByContinuous(curSkeletonPage: IDocumentSkeletonPage, columnProperties: ISectionColumnProperties[], columnSeparatorType: ColumnSeparatorType) {
+    private __addNewSectionByContinuous(
+        curSkeletonPage: IDocumentSkeletonPage,
+        columnProperties: ISectionColumnProperties[],
+        columnSeparatorType: ColumnSeparatorType
+    ) {
         const sections = curSkeletonPage.sections;
         const lastSection = sections[sections.length - 1];
-        const { pageWidth, pageHeight, marginTop: curPageMT, marginBottom: curPageMB, marginLeft: curPageML, marginRight: curPageMR } = curSkeletonPage;
+        const {
+            pageWidth,
+            pageHeight,
+            marginTop: curPageMT,
+            marginBottom: curPageMB,
+            marginLeft: curPageML,
+            marginRight: curPageMR,
+        } = curSkeletonPage;
         const pageContentWidth = pageWidth - curPageML - curPageMR;
         const pageContentHeight = pageHeight - curPageMT - curPageMB;
         const lastSectionBottom = (lastSection?.top || 0) + (lastSection?.height || 0);
-        const newSection = createSkeletonSection(columnProperties, columnSeparatorType, lastSectionBottom, 0, pageContentWidth, pageContentHeight - lastSectionBottom);
+        const newSection = createSkeletonSection(
+            columnProperties,
+            columnSeparatorType,
+            lastSectionBottom,
+            0,
+            pageContentWidth,
+            pageContentHeight - lastSectionBottom
+        );
         newSection.parent = curSkeletonPage;
         sections.push(newSection);
     }

@@ -5,7 +5,7 @@ import {
     IDocumentData,
     IKeyValue,
     IMutation,
-    IRangeData,
+    ISelectionRange,
     IStyleData,
     ITextStyle,
     Nullable,
@@ -18,7 +18,7 @@ import { IAccessor } from '@wendellhu/redi';
 export interface ISetRangeStyleMutationParams {
     workbookId: string;
     worksheetId: string;
-    range: IRangeData[];
+    range: ISelectionRange[];
     value?: ObjectMatrixPrimitiveType<IStyleData>;
 }
 

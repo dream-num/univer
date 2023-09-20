@@ -119,7 +119,7 @@ export const Tabs = React.memo(
                     <div
                         key={id}
                         id={id}
-                        // onClick={handleClick}
+                        onClick={handleClick}
                         className={tabClassName}
                         onMouseDown={draggable ? (e: any) => dragStart(e) : undefined}
                     >
@@ -234,36 +234,41 @@ export const Tabs = React.memo(
                 const offsetLeft = e.pageX + current.scrollLeft - parentOffsetLeft;
 
                 // 超出边界再回来时，把相应的tab挤掉
-                if (overRight || overLeft) {
-                    if (nextIndex < current.children.length) {
-                        const item = current.children[nextIndex] as HTMLDivElement;
-                        item.style.marginRight = '0';
-                        item.style.marginLeft = '0';
-                    }
-                    if (previousIndex > -1) {
-                        const item = current.children[previousIndex] as HTMLDivElement;
-                        item.style.marginLeft = '0';
-                        item.style.marginRight = '0';
-                    }
+                requestAnimationFrame(() => {
+                    if (!target) return;
+                    if (overRight || overLeft) {
+                        if (nextIndex < current.children.length) {
+                            const item = current.children[nextIndex] as HTMLDivElement;
+                            item.style.marginRight = '0';
+                            item.style.marginLeft = '0';
+                        }
+                        if (previousIndex > -1) {
+                            const item = current.children[previousIndex] as HTMLDivElement;
+                            item.style.marginLeft = '0';
+                            item.style.marginRight = '0';
+                        }
 
-                    const index = list.findIndex((item) => offsetLeft >= item.min && offsetLeft <= item.max);
-                    if (index < 1) {
-                        const item = current.children[0] as HTMLDivElement;
-                        item.style.marginLeft = `${target.offsetWidth}px`;
-                        previousIndex = -1;
-                        nextIndex = 0;
-                    } else if (index === current.children.length - 1) {
-                        const item = current.children[index] as HTMLDivElement;
-                        item.style.marginRight = `${target.offsetWidth}px`;
-                        previousIndex = index;
-                        nextIndex = current.children.length;
-                    } else {
-                        const item = current.children[index - 1] as HTMLDivElement;
-                        item.style.marginRight = `${target.offsetWidth}px`;
-                        previousIndex = index - 1;
-                        nextIndex = index;
+                        let index = list.findIndex((item) => offsetLeft >= item.min && offsetLeft <= item.max);
+                        if (offsetLeft > list[list.length - 1].max) index = current.children.length - 1;
+
+                        if (index < 1) {
+                            const item = current.children[0] as HTMLDivElement;
+                            item.style.marginLeft = `${target.offsetWidth}px`;
+                            previousIndex = -1;
+                            nextIndex = 0;
+                        } else if (index === current.children.length - 1) {
+                            const item = current.children[index] as HTMLDivElement;
+                            item.style.marginRight = `${target.offsetWidth}px`;
+                            previousIndex = index;
+                            nextIndex = current.children.length;
+                        } else {
+                            const item = current.children[index - 1] as HTMLDivElement;
+                            item.style.marginRight = `${target.offsetWidth}px`;
+                            previousIndex = index - 1;
+                            nextIndex = index;
+                        }
                     }
-                }
+                });
 
                 if (nextIndex < current.children.length && offsetLeft > list[nextIndex].min) {
                     const nextElement = current.children[nextIndex] as HTMLDivElement;

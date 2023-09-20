@@ -180,11 +180,27 @@ export function Slider(props: BaseSliderProps) {
             onClick={(e) => onClick(e)}
         >
             <label className="sr-only" htmlFor={idPrevRef.current}></label>
-            <input id={idPrevRef.current} type="range" min={min} value={valuePrev} max={max} step={step} onInput={(e) => onInput(e)} />
+            <input
+                id={idPrevRef.current}
+                type="range"
+                min={min}
+                value={valuePrev}
+                max={max}
+                step={step}
+                onInput={(e) => onInput(e)}
+            />
             {range && (
                 <>
                     <label className="sr-only" htmlFor={idNextRef.current}></label>
-                    <input id={idNextRef.current} type="range" min={min} value={valueNext} max={max} step={step} onInput={(e) => onInput(e)} />
+                    <input
+                        id={idNextRef.current}
+                        type="range"
+                        min={min}
+                        value={valueNext}
+                        max={max}
+                        step={step}
+                        onInput={(e) => onInput(e)}
+                    />
                 </>
             )}
         </div>

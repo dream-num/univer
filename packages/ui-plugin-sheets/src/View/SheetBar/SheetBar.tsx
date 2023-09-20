@@ -21,6 +21,8 @@ import {
     IMenuItem,
     Menu,
     MenuPosition,
+    TabPane,
+    Tabs,
 } from '@univerjs/base-ui';
 import { BooleanNumber, ICommandService, ICurrentUniverService, IKeyValue } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';

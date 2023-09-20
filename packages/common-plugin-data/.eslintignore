@@ -1,7 +1,0 @@
-.eslintrc.js
-**/*.test.js
-dist
-lib
-node_modules
-package.json
-tsconfig.json

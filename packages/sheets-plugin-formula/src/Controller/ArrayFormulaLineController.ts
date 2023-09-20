@@ -82,8 +82,8 @@ export class ArrayFormulaLineControl {
             throw new Error(`not found sheet from id: ${sheetId}`);
         }
 
-        const rowTitleWidth = worksheet.getConfig().rowTitle.width;
-        const columnTitleHeight = worksheet.getConfig().columnTitle.height;
+        const rowHeaderWidth = worksheet.getConfig().rowHeader.width;
+        const columnHeaderHeight = worksheet.getConfig().columnHeader.height;
 
         const rowManager = worksheet.getRowManager();
         const columnManager = worksheet.getColumnManager();
@@ -109,8 +109,8 @@ export class ArrayFormulaLineControl {
         this._arrayFormulaLine = new Rect(ARRAY_FORMULA_LINE_MANAGER_KEY.line, {
             stroke: LINE_COLOR,
             strokeWidth: 1,
-            left: offsetLeft + rowTitleWidth,
-            top: offsetTop + columnTitleHeight,
+            left: offsetLeft + rowHeaderWidth,
+            top: offsetTop + columnHeaderHeight,
             height: totalHeight,
             width: totalWidth,
             evented: false,

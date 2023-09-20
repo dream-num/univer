@@ -128,10 +128,10 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         new SelectionTransformerShapeEvent(control, skeleton, scene);
 
-        const { rowTitleWidth, columnTitleHeight } = skeleton;
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
         // update control
-        control.update(selection, rowTitleWidth, columnTitleHeight, style, cellInfo, selectionType);
+        control.update(selection, rowHeaderWidth, columnHeaderHeight, style, cellInfo, selectionType);
 
         currentControls.push(control);
     }
@@ -321,7 +321,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         const { startRow, startColumn, endColumn, endRow, startY, endY, startX, endX } = actualSelection;
 
-        const { rowTitleWidth, columnTitleHeight } = skeleton;
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
         const startSelectionRange = {
             startColumn,
@@ -392,8 +392,8 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
             };
             selectionControl.update(
                 newSelectionRange,
-                rowTitleWidth,
-                columnTitleHeight,
+                rowHeaderWidth,
+                columnHeaderHeight,
                 style,
                 currentCell,
                 selectionType
@@ -405,8 +405,8 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
             selectionControl.update(
                 startSelectionRange,
-                rowTitleWidth,
-                columnTitleHeight,
+                rowHeaderWidth,
+                columnHeaderHeight,
                 style,
                 cellInfo,
                 selectionType
@@ -540,7 +540,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const { rowTitleWidth, columnTitleHeight } = skeleton;
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
         if (selectedMode === SELECTION_TYPE.ROW) {
             moveOffsetX = Infinity;
@@ -623,7 +623,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
             oldEndColumn !== finalEndColumn ||
             oldEndRow !== finalEndRow
         ) {
-            selectionControl && selectionControl.update(newSelectionRange, rowTitleWidth, columnTitleHeight);
+            selectionControl && selectionControl.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight);
         }
     }
 

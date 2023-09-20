@@ -36,15 +36,15 @@ export interface ISelectionStyle {
     AutofillStrokeWidth?: number;
     AutofillStroke?: string;
 
-    hasRowTitle?: boolean;
-    rowTitleFill?: string;
-    rowTitleStroke?: string;
-    rowTitleStrokeWidth?: number;
+    hasRowHeader?: boolean;
+    rowHeaderFill?: string;
+    rowHeaderStroke?: string;
+    rowHeaderStrokeWidth?: number;
 
-    hasColumnTitle?: boolean;
-    columnTitleFill?: string;
-    columnTitleStroke?: string;
-    columnTitleStrokeWidth?: number;
+    hasColumnHeader?: boolean;
+    columnHeaderFill?: string;
+    columnHeaderStroke?: string;
+    columnHeaderStrokeWidth?: number;
 }
 
 export interface ISelectionDataWithStyle extends ISelectionWithCoord {
@@ -70,15 +70,15 @@ export const NORMAL_SELECTION_PLUGIN_STYLE: ISelectionStyle = {
     AutofillStrokeWidth: 1,
     AutofillStroke: 'rgb(255,255,255)',
 
-    hasRowTitle: true,
-    rowTitleFill: 'rgba(0, 0, 0, 0.1)',
-    rowTitleStroke: 'rgb(1,136,251)',
-    rowTitleStrokeWidth: 1,
+    hasRowHeader: true,
+    rowHeaderFill: 'rgba(0, 0, 0, 0.1)',
+    rowHeaderStroke: 'rgb(1,136,251)',
+    rowHeaderStrokeWidth: 1,
 
-    hasColumnTitle: true,
-    columnTitleFill: 'rgba(0, 0, 0, 0.1)',
-    columnTitleStroke: 'rgb(1,136,251)',
-    columnTitleStrokeWidth: 1,
+    hasColumnHeader: true,
+    columnHeaderFill: 'rgba(0, 0, 0, 0.1)',
+    columnHeaderStroke: 'rgb(1,136,251)',
+    columnHeaderStrokeWidth: 1,
 };
 
 export function convertSelectionDataToRange(selectionDataWithStyle: ISelectionDataWithStyle): ISelectionRangeWithStyle {

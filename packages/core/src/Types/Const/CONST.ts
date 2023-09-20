@@ -1,4 +1,12 @@
-import { BooleanNumber, HorizontalAlign, LocaleType, SheetTypes, TextDirection, VerticalAlign, WrapStrategy } from '../Enum';
+import {
+    BooleanNumber,
+    HorizontalAlign,
+    LocaleType,
+    SheetTypes,
+    TextDirection,
+    VerticalAlign,
+    WrapStrategy,
+} from '../Enum';
 import { IStyleData, IWorkbookConfig, IWorksheetConfig } from '../Interfaces';
 
 /**
@@ -104,11 +112,11 @@ export const DEFAULT_WORKSHEET: IWorksheetConfig = {
     columnData: {},
     status: BooleanNumber.FALSE,
     showGridlines: BooleanNumber.TRUE,
-    rowTitle: {
+    rowHeader: {
         width: DEFAULT_WORKSHEET_ROW_TITLE_WIDTH,
         hidden: BooleanNumber.FALSE,
     },
-    columnTitle: {
+    columnHeader: {
         height: DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT,
         hidden: BooleanNumber.FALSE,
     },
@@ -116,7 +124,6 @@ export const DEFAULT_WORKSHEET: IWorksheetConfig = {
     rightToLeft: BooleanNumber.FALSE,
     pluginMeta: {},
 };
-
 /**
  * Default styles
  */

@@ -2129,11 +2129,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO2: IWorkbookConfig = {
             showGridlines: 0,
             hideRow: [],
             hideColumn: [],
-            rowTitle: {
+            rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
             },
-            columnTitle: {
+            columnHeader: {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },

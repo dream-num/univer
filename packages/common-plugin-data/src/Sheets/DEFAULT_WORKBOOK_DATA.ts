@@ -638,11 +638,11 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
             showGridlines: 1,
             hideRow: [],
             hideColumn: [],
-            rowTitle: {
+            rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
             },
-            columnTitle: {
+            columnHeader: {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },
@@ -1063,11 +1063,11 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookConfig = {
             showGridlines: 1,
             hideRow: [],
             hideColumn: [],
-            rowTitle: {
+            rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
             },
-            columnTitle: {
+            columnHeader: {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },

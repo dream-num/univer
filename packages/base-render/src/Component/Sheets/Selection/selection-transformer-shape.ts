@@ -30,12 +30,12 @@ enum SELECTION_MANAGER_KEY {
     lineContent = '__SpreadsheetDragLineContentControl__',
     line = '__SpreadsheetDragLineControl__',
 
-    rowTitleBackground = '__SpreadSheetSelectionRowTitleBackground__',
-    rowTitleBorder = '__SpreadSheetSelectionRowTitleBorder__',
-    rowTitleGroup = '__SpreadSheetSelectionRowTitleGroup__',
-    columnTitleBackground = '__SpreadSheetSelectionColumnTitleBackground__',
-    columnTitleBorder = '__SpreadSheetSelectionColumnTitleBorder__',
-    columnTitleGroup = '__SpreadSheetSelectionColumnTitleGroup__',
+    rowHeaderBackground = '__SpreadSheetSelectionRowHeaderBackground__',
+    rowHeaderBorder = '__SpreadSheetSelectionRowHeaderBorder__',
+    rowHeaderGroup = '__SpreadSheetSelectionRowHeaderGroup__',
+    columnHeaderBackground = '__SpreadSheetSelectionColumnHeaderBackground__',
+    columnHeaderBorder = '__SpreadSheetSelectionColumnHeaderBorder__',
+    columnHeaderGroup = '__SpreadSheetSelectionColumnHeaderGroup__',
 
     topLeftWidget = '__SpreadSheetSelectionTopLeftWidget__',
     topCenterWidget = '__SpreadSheetSelectionTopCenterWidget__',
@@ -73,21 +73,21 @@ export class SelectionTransformerShape {
 
     private _selectionShape: Group;
 
-    private _rowTitleBackground: Rect;
+    private _rowHeaderBackground: Rect;
 
-    private _rowTitleBorder: Rect;
+    private _rowHeaderBorder: Rect;
 
-    private _rowTitleGroup: Group;
+    private _rowHeaderGroup: Group;
 
-    private _rowTitleHighlight: Rect;
+    private _rowHeaderHighlight: Rect;
 
-    private _columnTitleBackground: Rect;
+    private _columnHeaderBackground: Rect;
 
-    private _columnTitleBorder: Rect;
+    private _columnHeaderBorder: Rect;
 
-    private _columnTitleGroup: Group;
+    private _columnHeaderGroup: Group;
 
-    private _columnTitleHighlight: Rect;
+    private _columnHeaderHighlight: Rect;
 
     private _topLeftWidget: Rect;
 
@@ -109,9 +109,9 @@ export class SelectionTransformerShape {
 
     private _selectionStyle: Nullable<ISelectionStyle>;
 
-    private _rowTitleWidth: number = 0;
+    private _rowHeaderWidth: number = 0;
 
-    private _columnTitleHeight: number = 0;
+    private _columnHeaderHeight: number = 0;
 
     private _widgetRects: Rect[] = [];
 
@@ -227,12 +227,12 @@ export class SelectionTransformerShape {
         scene: Scene,
         zIndex: number,
         newSelectionData: ISelectionDataWithStyle,
-        rowTitleWidth: number,
-        columnTitleHeight: number
+        rowHeaderWidth: number,
+        columnHeaderHeight: number
     ) {
         const { selection, cellInfo, style } = newSelectionData;
         const control = SelectionTransformerShape.create(scene, zIndex);
-        control.update(selection, rowTitleWidth, columnTitleHeight, style, cellInfo);
+        control.update(selection, rowHeaderWidth, columnHeaderHeight, style, cellInfo);
         return control;
     }
 
@@ -241,7 +241,7 @@ export class SelectionTransformerShape {
      *
      * inner update
      */
-    _updateControl(style: Nullable<ISelectionStyle>, rowTitleWidth: number, columnTitleHeight: number) {
+    _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
         const { startX, startY, endX, endY } = this._selectionModel;
 
         if (style == null) {
@@ -331,7 +331,7 @@ export class SelectionTransformerShape {
 
         this._updateBackgroundControl(style);
 
-        this._updateBackgroundTitle(style, rowTitleWidth, columnTitleHeight);
+        this._updateBackgroundTitle(style, rowHeaderWidth, columnHeaderHeight);
 
         this._updateWidgets(style);
 
@@ -340,17 +340,17 @@ export class SelectionTransformerShape {
 
         this._selectionStyle = style;
 
-        this._rowTitleWidth = rowTitleWidth || 0;
+        this._rowHeaderWidth = rowHeaderWidth || 0;
 
-        this._columnTitleHeight = columnTitleHeight || 0;
+        this._columnHeaderHeight = columnHeaderHeight || 0;
 
         this.selectionShape.makeDirty(true);
     }
 
     update(
         newSelectionRange: ISelectionRangeWithCoord,
-        rowTitleWidth: number,
-        columnTitleHeight: number,
+        rowHeaderWidth: number,
+        columnHeaderHeight: number,
         style: Nullable<ISelectionStyle> = NORMAL_SELECTION_PLUGIN_STYLE,
         highlight: Nullable<ISelectionCellWithCoord>,
         selectionType: Nullable<SELECTION_TYPE>
@@ -359,12 +359,12 @@ export class SelectionTransformerShape {
         if (style == null) {
             style = this._selectionStyle;
         }
-        this._updateControl(style, rowTitleWidth, columnTitleHeight);
+        this._updateControl(style, rowHeaderWidth, columnHeaderHeight);
     }
 
     clearHighlight() {
         this._selectionModel.clearCurrentCell();
-        this._updateControl(this._selectionStyle, this._rowTitleWidth, this._columnTitleHeight);
+        this._updateControl(this._selectionStyle, this._rowHeaderWidth, this._columnHeaderHeight);
     }
 
     getScene() {
@@ -383,19 +383,19 @@ export class SelectionTransformerShape {
         this._fillControl?.dispose();
         this._selectionShape?.dispose();
 
-        this._rowTitleBackground?.dispose();
+        this._rowHeaderBackground?.dispose();
 
-        this._rowTitleBorder?.dispose();
+        this._rowHeaderBorder?.dispose();
 
-        this._rowTitleGroup?.dispose();
+        this._rowHeaderGroup?.dispose();
 
-        this._rowTitleBackground?.dispose();
+        this._rowHeaderBackground?.dispose();
 
-        this._columnTitleBackground?.dispose();
+        this._columnHeaderBackground?.dispose();
 
-        this._columnTitleBorder?.dispose();
+        this._columnHeaderBorder?.dispose();
 
-        this._columnTitleGroup?.dispose();
+        this._columnHeaderGroup?.dispose();
 
         this._topLeftWidget?.dispose();
 
@@ -537,53 +537,53 @@ export class SelectionTransformerShape {
 
     private _initialTitle() {
         const zIndex = this._zIndex;
-        this._rowTitleBackground = new Rect(SELECTION_MANAGER_KEY.rowTitleBackground + zIndex, {
+        this._rowHeaderBackground = new Rect(SELECTION_MANAGER_KEY.rowHeaderBackground + zIndex, {
             zIndex: zIndex - 1,
             evented: false,
         });
 
-        this._rowTitleBorder = new Rect(SELECTION_MANAGER_KEY.rowTitleBorder + zIndex, {
+        this._rowHeaderBorder = new Rect(SELECTION_MANAGER_KEY.rowHeaderBorder + zIndex, {
             zIndex: zIndex - 1,
             evented: false,
         });
 
-        this._rowTitleGroup = new Group(
-            SELECTION_MANAGER_KEY.rowTitleGroup + zIndex,
-            this._rowTitleBackground,
-            this._rowTitleBorder
+        this._rowHeaderGroup = new Group(
+            SELECTION_MANAGER_KEY.rowHeaderGroup + zIndex,
+            this._rowHeaderBackground,
+            this._rowHeaderBorder
         );
 
-        this._rowTitleGroup.hide();
+        this._rowHeaderGroup.hide();
 
-        this._rowTitleGroup.evented = false;
+        this._rowHeaderGroup.evented = false;
 
-        this._rowTitleGroup.zIndex = zIndex;
+        this._rowHeaderGroup.zIndex = zIndex;
 
-        this._columnTitleBackground = new Rect(SELECTION_MANAGER_KEY.columnTitleBackground + zIndex, {
+        this._columnHeaderBackground = new Rect(SELECTION_MANAGER_KEY.columnHeaderBackground + zIndex, {
             zIndex: zIndex - 1,
             evented: false,
         });
 
-        this._columnTitleBorder = new Rect(SELECTION_MANAGER_KEY.columnTitleBorder + zIndex, {
+        this._columnHeaderBorder = new Rect(SELECTION_MANAGER_KEY.columnHeaderBorder + zIndex, {
             zIndex: zIndex - 1,
             evented: false,
         });
 
-        this._columnTitleGroup = new Group(
-            SELECTION_MANAGER_KEY.columnTitleGroup + zIndex,
-            this._columnTitleBackground,
-            this._columnTitleBorder
+        this._columnHeaderGroup = new Group(
+            SELECTION_MANAGER_KEY.columnHeaderGroup + zIndex,
+            this._columnHeaderBackground,
+            this._columnHeaderBorder
         );
 
-        this._columnTitleGroup.hide();
+        this._columnHeaderGroup.hide();
 
-        this._columnTitleGroup.evented = false;
+        this._columnHeaderGroup.evented = false;
 
-        this._columnTitleGroup.zIndex = zIndex;
+        this._columnHeaderGroup.zIndex = zIndex;
 
         const scene = this.getScene();
         const maxLayerIndex = scene.getLayerMaxZIndex();
-        scene.addObjects([this._rowTitleGroup, this._columnTitleGroup], maxLayerIndex);
+        scene.addObjects([this._rowHeaderGroup, this._columnHeaderGroup], maxLayerIndex);
     }
 
     private _initialWidget() {
@@ -632,7 +632,11 @@ export class SelectionTransformerShape {
         ];
     }
 
-    private _updateBackgroundTitle(style: Nullable<ISelectionStyle>, rowTitleWidth: number, columnTitleHeight: number) {
+    private _updateBackgroundTitle(
+        style: Nullable<ISelectionStyle>,
+        rowHeaderWidth: number,
+        columnHeaderHeight: number
+    ) {
         const { startX, startY, endX, endY, selectionType } = this._selectionModel;
 
         if (style == null) {
@@ -641,70 +645,70 @@ export class SelectionTransformerShape {
 
         const {
             stroke,
-            hasRowTitle,
-            rowTitleFill = NORMAL_SELECTION_PLUGIN_STYLE.rowTitleFill!,
-            rowTitleStroke = NORMAL_SELECTION_PLUGIN_STYLE.rowTitleStroke!,
-            rowTitleStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.rowTitleStrokeWidth!,
+            hasRowHeader,
+            rowHeaderFill = NORMAL_SELECTION_PLUGIN_STYLE.rowHeaderFill!,
+            rowHeaderStroke = NORMAL_SELECTION_PLUGIN_STYLE.rowHeaderStroke!,
+            rowHeaderStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.rowHeaderStrokeWidth!,
 
-            hasColumnTitle,
-            columnTitleFill = NORMAL_SELECTION_PLUGIN_STYLE.columnTitleFill!,
-            columnTitleStroke = NORMAL_SELECTION_PLUGIN_STYLE.columnTitleStroke!,
-            columnTitleStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.columnTitleStrokeWidth!,
+            hasColumnHeader,
+            columnHeaderFill = NORMAL_SELECTION_PLUGIN_STYLE.columnHeaderFill!,
+            columnHeaderStroke = NORMAL_SELECTION_PLUGIN_STYLE.columnHeaderStroke!,
+            columnHeaderStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.columnHeaderStrokeWidth!,
         } = style;
 
-        if (hasColumnTitle === true) {
-            let highlightTitleColor = columnTitleFill;
+        if (hasColumnHeader === true) {
+            let highlightTitleColor = columnHeaderFill;
             if (selectionType === SELECTION_TYPE.COLUMN) {
                 highlightTitleColor = new TinyColor(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
-            this._columnTitleBackground.setProps({
+            this._columnHeaderBackground.setProps({
                 fill: highlightTitleColor,
             });
-            this._columnTitleBackground.resize(endX - startX, columnTitleHeight);
+            this._columnHeaderBackground.resize(endX - startX, columnHeaderHeight);
 
-            this._columnTitleBorder.setProps({
-                fill: columnTitleStroke,
+            this._columnHeaderBorder.setProps({
+                fill: columnHeaderStroke,
             });
-            this._columnTitleBorder.transformByState({
+            this._columnHeaderBorder.transformByState({
                 width: endX - startX,
-                height: columnTitleStrokeWidth,
-                top: columnTitleHeight - columnTitleStrokeWidth,
+                height: columnHeaderStrokeWidth,
+                top: columnHeaderHeight - columnHeaderStrokeWidth,
             });
 
-            this._columnTitleGroup.show();
-            this._columnTitleGroup.translate(startX, 0);
+            this._columnHeaderGroup.show();
+            this._columnHeaderGroup.translate(startX, 0);
         } else {
-            this._columnTitleGroup.hide();
+            this._columnHeaderGroup.hide();
         }
 
-        this._columnTitleGroup.makeDirty(true);
+        this._columnHeaderGroup.makeDirty(true);
 
-        if (hasRowTitle === true) {
-            let highlightTitleColor = rowTitleFill;
+        if (hasRowHeader === true) {
+            let highlightTitleColor = rowHeaderFill;
             if (selectionType === SELECTION_TYPE.ROW) {
                 highlightTitleColor = new TinyColor(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
-            this._rowTitleBackground.setProps({
+            this._rowHeaderBackground.setProps({
                 fill: highlightTitleColor,
             });
-            this._rowTitleBackground.resize(rowTitleWidth, endY - startY);
+            this._rowHeaderBackground.resize(rowHeaderWidth, endY - startY);
 
-            this._rowTitleBorder.setProps({
-                fill: rowTitleStroke,
+            this._rowHeaderBorder.setProps({
+                fill: rowHeaderStroke,
             });
-            this._rowTitleBorder.transformByState({
-                width: rowTitleStrokeWidth,
+            this._rowHeaderBorder.transformByState({
+                width: rowHeaderStrokeWidth,
                 height: endY - startY,
-                left: rowTitleWidth - rowTitleStrokeWidth,
+                left: rowHeaderWidth - rowHeaderStrokeWidth,
             });
 
-            this._rowTitleGroup.show();
-            this._rowTitleGroup.translate(0, startY);
+            this._rowHeaderGroup.show();
+            this._rowHeaderGroup.translate(0, startY);
         } else {
-            this._rowTitleGroup.hide();
+            this._rowHeaderGroup.hide();
         }
 
-        this._rowTitleGroup.makeDirty(true);
+        this._rowHeaderGroup.makeDirty(true);
     }
 
     private _updateBackgroundControl(style: Nullable<ISelectionStyle>) {

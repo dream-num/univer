@@ -64,10 +64,10 @@ export class EditTooltipsController {
         const editTooltips = this.createIfEditTooltips(key, sheetId);
         if (sheet) {
             const mergedCells = sheet.getMergedCells(row, column);
-            const rowTitle = sheet.getConfig().rowTitle;
-            const columnTitle = sheet.getConfig().columnTitle;
-            let left = rowTitle.width ?? 0;
-            let top = columnTitle.height ?? 0;
+            const rowHeader = sheet.getConfig().rowHeader;
+            const columnHeader = sheet.getConfig().columnHeader;
+            let left = rowHeader.width ?? 0;
+            let top = columnHeader.height ?? 0;
             let height = 0;
             let width = 0;
             if (mergedCells) {

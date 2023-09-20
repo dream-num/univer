@@ -1,4 +1,11 @@
-import { BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookConfig, LocaleType, SheetTypes } from '@univerjs/core';
+import {
+    BooleanNumber,
+    BorderStyleTypes,
+    IDocumentData,
+    IWorkbookConfig,
+    LocaleType,
+    SheetTypes,
+} from '@univerjs/core';
 
 const richTextDemo: IDocumentData = {
     id: 'd',
@@ -1636,11 +1643,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookConfig = {
             showGridlines: 1,
             hideRow: [],
             hideColumn: [],
-            rowTitle: {
+            rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
             },
-            columnTitle: {
+            columnHeader: {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },

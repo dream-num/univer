@@ -348,7 +348,7 @@ export class SelectionTransformerShapeEvent {
 
         const { row, column } = moveActualSelection;
 
-        const { rowTitleWidth, columnTitleHeight } = this._skeleton;
+        const { rowHeaderWidth, columnHeaderHeight } = this._skeleton;
 
         const maxRow = this._skeleton.getRowCount() - 1;
 
@@ -422,7 +422,7 @@ export class SelectionTransformerShapeEvent {
             endColumn,
         };
 
-        this._control.update(this._targetSelection, rowTitleWidth, columnTitleHeight, this._control.selectionStyle);
+        this._control.update(this._targetSelection, rowHeaderWidth, columnHeaderHeight, this._control.selectionStyle);
         this._control.clearHighlight();
         this._control.selectionScaling$.next(this._targetSelection);
     }

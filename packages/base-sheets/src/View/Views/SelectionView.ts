@@ -6,8 +6,8 @@ import {
     Rect,
     Scene,
     Spreadsheet,
-    SpreadsheetColumnTitle,
-    SpreadsheetRowTitle,
+    SpreadsheetColumnHeader,
+    SpreadsheetRowHeader,
 } from '@univerjs/base-render';
 import {
     ICommandService,
@@ -90,9 +90,9 @@ export class SelectionView extends BaseView {
             }
         });
 
-        this._initialRowTitle();
+        this._initialRowHeader();
 
-        this._initialColumnTitle();
+        this._initialColumnHeader();
 
         spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
 
@@ -125,9 +125,9 @@ export class SelectionView extends BaseView {
         this._update(worksheet);
     }
 
-    private _initialRowTitle() {
-        const { spreadsheetRowTitle, spreadsheet, spreadsheetSkeleton } = this._getSheetObject();
-        spreadsheetRowTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+    private _initialRowHeader() {
+        const { spreadsheetRowHeader, spreadsheet, spreadsheetSkeleton } = this._getSheetObject();
+        spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             if (!this._selectionManagerService.isSelectionEnabled) {
                 return;
             }
@@ -148,14 +148,14 @@ export class SelectionView extends BaseView {
             }
         });
 
-        spreadsheetRowTitle?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+        spreadsheetRowHeader?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             console.log('titleMove');
         });
     }
 
-    private _initialColumnTitle() {
-        const { spreadsheetColumnTitle, spreadsheet, spreadsheetSkeleton } = this._getSheetObject();
-        spreadsheetColumnTitle?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+    private _initialColumnHeader() {
+        const { spreadsheetColumnHeader, spreadsheet, spreadsheetSkeleton } = this._getSheetObject();
+        spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             if (!this._selectionManagerService.isSelectionEnabled) {
                 return;
             }
@@ -201,14 +201,14 @@ export class SelectionView extends BaseView {
     private _getSheetObject() {
         const scene = this.getScene();
         const spreadsheet = scene.getObject(SHEET_VIEW_KEY.MAIN) as Spreadsheet;
-        const spreadsheetRowTitle = scene.getObject(SHEET_VIEW_KEY.ROW) as SpreadsheetRowTitle;
-        const spreadsheetColumnTitle = scene.getObject(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnTitle;
+        const spreadsheetRowHeader = scene.getObject(SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+        const spreadsheetColumnHeader = scene.getObject(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
         const spreadsheetLeftTopPlaceholder = scene.getObject(SHEET_VIEW_KEY.LEFT_TOP) as Rect;
 
         return {
             spreadsheet,
-            spreadsheetRowTitle,
-            spreadsheetColumnTitle,
+            spreadsheetRowHeader,
+            spreadsheetColumnHeader,
             spreadsheetLeftTopPlaceholder,
             spreadsheetSkeleton: spreadsheet.getSkeleton(),
         };

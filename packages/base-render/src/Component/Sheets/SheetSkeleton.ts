@@ -98,9 +98,9 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _columnTotalWidth: number;
 
-    private _rowTitleWidth = 0;
+    private _rowHeaderWidth = 0;
 
-    private _columnTitleHeight = 0;
+    private _columnHeaderHeight = 0;
 
     private _rowColumnSegment: IRowColumnSegment;
 
@@ -142,12 +142,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._columnTotalWidth;
     }
 
-    get rowTitleWidth() {
-        return this._rowTitleWidth;
+    get rowHeaderWidth() {
+        return this._rowHeaderWidth;
     }
 
-    get columnTitleHeight() {
-        return this._columnTitleHeight;
+    get columnHeaderHeight() {
+        return this._columnHeaderHeight;
     }
 
     get rowColumnSegment() {
@@ -234,8 +234,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             defaultColumnWidth,
             rowCount,
             columnCount,
-            rowTitle,
-            columnTitle,
+            rowHeader,
+            columnHeader,
             showGridlines,
         } = this._config;
         const { rowTotalHeight, rowHeightAccumulation } = this._generateRowMatrixCache(
@@ -249,8 +249,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             defaultColumnWidth
         );
 
-        this._rowTitleWidth = rowTitle.hidden !== BooleanNumber.TRUE ? rowTitle.width : 0;
-        this._columnTitleHeight = columnTitle.hidden !== BooleanNumber.TRUE ? columnTitle.height : 0;
+        this._rowHeaderWidth = rowHeader.hidden !== BooleanNumber.TRUE ? rowHeader.width : 0;
+        this._columnHeaderHeight = columnHeader.hidden !== BooleanNumber.TRUE ? columnHeader.height : 0;
 
         this._rowTotalHeight = rowTotalHeight;
         this._rowHeightAccumulation = rowHeightAccumulation;
@@ -384,7 +384,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number, scaleX: number, scaleY: number) {
-        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } = this;
+        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = this;
         // const { scaleX = 1, scaleY = 1 } = this.getParentScale();
         let { startY, endY, startX, endX } = getCellPositionByIndex(
             rowIndex,
@@ -393,10 +393,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnWidthAccumulation
         );
 
-        startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowTitleWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowTitleWidth, scaleX);
+        startY = fixLineWidthByScale(startY + columnHeaderHeight, scaleY);
+        endY = fixLineWidthByScale(endY + columnHeaderHeight, scaleY);
+        startX = fixLineWidthByScale(startX + rowHeaderWidth, scaleX);
+        endX = fixLineWidthByScale(endX + rowHeaderWidth, scaleX);
 
         return {
             startY,
@@ -439,10 +439,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { x: scrollX } = scrollXY;
 
         // these values are not affected by zooming (ideal positions)
-        const { columnWidthAccumulation, rowTitleWidth } = this;
+        const { columnWidthAccumulation, rowHeaderWidth } = this;
 
         // so we should map physical positions to ideal positions
-        offsetX = offsetX / scaleX + scrollX - rowTitleWidth;
+        offsetX = offsetX / scaleX + scrollX - rowHeaderWidth;
 
         let column = searchArray(columnWidthAccumulation, offsetX);
 
@@ -463,9 +463,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { y: scrollY } = scrollXY;
 
         // these values are not affected by zooming (ideal positions)
-        const { rowHeightAccumulation, columnTitleHeight } = this;
+        const { rowHeightAccumulation, columnHeaderHeight } = this;
 
-        offsetY = offsetY / scaleY + scrollY - columnTitleHeight;
+        offsetY = offsetY / scaleY + scrollY - columnHeaderHeight;
 
         let row = searchArray(rowHeightAccumulation, offsetY);
 
@@ -483,7 +483,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     getCellByIndex(row: number, column: number, scaleX: number, scaleY: number) {
-        const { rowHeightAccumulation, columnWidthAccumulation, rowTitleWidth, columnTitleHeight } = this;
+        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = this;
 
         const cellInfo = getCellByIndex(
             row,
@@ -495,12 +495,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { isMerged, isMergedMainCell } = cellInfo;
         let { startY, endY, startX, endX, mergeInfo } = cellInfo;
 
-        startY = fixLineWidthByScale(startY + columnTitleHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnTitleHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowTitleWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowTitleWidth, scaleX);
+        startY = fixLineWidthByScale(startY + columnHeaderHeight, scaleY);
+        endY = fixLineWidthByScale(endY + columnHeaderHeight, scaleY);
+        startX = fixLineWidthByScale(startX + rowHeaderWidth, scaleX);
+        endX = fixLineWidthByScale(endX + rowHeaderWidth, scaleX);
 
-        mergeInfo = mergeInfoOffset(mergeInfo, rowTitleWidth, columnTitleHeight, scaleX, scaleY);
+        mergeInfo = mergeInfoOffset(mergeInfo, rowHeaderWidth, columnHeaderHeight, scaleX, scaleY);
 
         return {
             row,
@@ -586,8 +586,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         let dataset_col_st = -1;
         let dataset_col_ed = -1;
 
-        dataset_row_st = searchArray(rowHeightAccumulation, bounds.tl.y - this.columnTitleHeight);
-        dataset_row_ed = searchArray(rowHeightAccumulation, bounds.bl.y - this.columnTitleHeight);
+        dataset_row_st = searchArray(rowHeightAccumulation, bounds.tl.y - this.columnHeaderHeight);
+        dataset_row_ed = searchArray(rowHeightAccumulation, bounds.bl.y - this.columnHeaderHeight);
 
         if (dataset_row_st === -1) {
             dataset_row_st = 0;
@@ -601,8 +601,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             dataset_row_ed = rhaLength - 1;
         }
 
-        dataset_col_st = searchArray(columnWidthAccumulation, bounds.tl.x - this.rowTitleWidth);
-        dataset_col_ed = searchArray(columnWidthAccumulation, bounds.tr.x - this.rowTitleWidth);
+        dataset_col_st = searchArray(columnWidthAccumulation, bounds.tl.x - this.rowHeaderWidth);
+        dataset_col_ed = searchArray(columnWidthAccumulation, bounds.tr.x - this.rowHeaderWidth);
 
         if (dataset_col_st === -1) {
             dataset_col_st = 0;

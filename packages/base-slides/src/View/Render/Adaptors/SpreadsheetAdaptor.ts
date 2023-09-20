@@ -8,8 +8,8 @@ import {
     SceneViewer,
     ScrollBar,
     Spreadsheet,
-    SpreadsheetColumnTitle,
-    SpreadsheetRowTitle,
+    SpreadsheetColumnHeader,
+    SpreadsheetRowHeader,
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/base-render';
@@ -92,11 +92,11 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             this._localeService
         );
 
-        const { rowTotalHeight, columnTotalWidth, rowTitleWidth, columnTitleHeight } = spreadsheetSkeleton;
+        const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
-        const allWidth = columnTotalWidth + worksheet.rowTitle.width || 0;
+        const allWidth = columnTotalWidth + worksheet.rowHeader.width || 0;
 
-        const allHeight = rowTotalHeight + worksheet.columnTitle.height || 0;
+        const allHeight = rowTotalHeight + worksheet.columnHeader.height || 0;
 
         const sv = new SceneViewer(SHEET_VIEW_KEY.SCENE_VIEWER + id, {
             top,
@@ -119,17 +119,17 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             height: allHeight,
         });
 
-        this._updateViewport(id, rowTitleWidth, columnTitleHeight, scene, mainScene);
+        this._updateViewport(id, rowHeaderWidth, columnHeaderHeight, scene, mainScene);
 
         const spreadsheet = new Spreadsheet('testSheetViewer', spreadsheetSkeleton, false);
-        const spreadsheetRowTitle = new SpreadsheetRowTitle(SHEET_VIEW_KEY.ROW, spreadsheetSkeleton);
-        const spreadsheetColumnTitle = new SpreadsheetColumnTitle(SHEET_VIEW_KEY.COLUMN, spreadsheetSkeleton);
+        const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW, spreadsheetSkeleton);
+        const spreadsheetColumnHeader = new SpreadsheetColumnHeader(SHEET_VIEW_KEY.COLUMN, spreadsheetSkeleton);
         const SpreadsheetLeftTopPlaceholder = new Rect(SHEET_VIEW_KEY.LEFT_TOP, {
             zIndex: 2,
             left: -1,
             top: -1,
-            width: rowTitleWidth,
-            height: columnTitleHeight,
+            width: rowHeaderWidth,
+            height: columnHeaderHeight,
             fill: getColor([248, 249, 250]),
             stroke: getColor([217, 217, 217]),
             strokeWidth: 1,
@@ -137,7 +137,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
 
         spreadsheet.zIndex = 10;
         scene.addObjects([spreadsheet], 1);
-        scene.addObjects([spreadsheetRowTitle, spreadsheetColumnTitle, SpreadsheetLeftTopPlaceholder], 2);
+        scene.addObjects([spreadsheetRowHeader, spreadsheetColumnHeader, SpreadsheetLeftTopPlaceholder], 2);
         // spreadsheet.enableSelection();
         return sv;
     }
@@ -145,27 +145,27 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
     // eslint-disable-next-line max-lines-per-function
     private _updateViewport(
         id: string,
-        rowTitleWidth: number,
-        columnTitleHeight: number,
+        rowHeaderWidth: number,
+        columnHeaderHeight: number,
         scene: Scene,
         mainScene: Scene
     ) {
         if (mainScene == null) {
             return;
         }
-        const rowTitleWidthScale = rowTitleWidth * scene.scaleX;
-        const columnTitleHeightScale = columnTitleHeight * scene.scaleY;
+        const rowHeaderWidthScale = rowHeaderWidth * scene.scaleX;
+        const columnHeaderHeightScale = columnHeaderHeight * scene.scaleY;
 
         const viewMain = new Viewport(SHEET_VIEW_KEY.VIEW_MAIN + id, scene, {
-            left: rowTitleWidthScale,
-            top: columnTitleHeightScale,
+            left: rowHeaderWidthScale,
+            top: columnHeaderHeightScale,
             bottom: 0,
             right: 0,
             isWheelPreventDefaultX: true,
         });
         const viewTop = new Viewport(SHEET_VIEW_KEY.VIEW_TOP + id, scene, {
-            left: rowTitleWidthScale,
-            height: columnTitleHeightScale,
+            left: rowHeaderWidthScale,
+            height: columnHeaderHeightScale,
             top: 0,
             right: 0,
             isWheelPreventDefaultX: true,
@@ -173,15 +173,15 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         const viewLeft = new Viewport(SHEET_VIEW_KEY.VIEW_LEFT + id, scene, {
             left: 0,
             bottom: 0,
-            top: columnTitleHeightScale,
-            width: rowTitleWidthScale,
+            top: columnHeaderHeightScale,
+            width: rowHeaderWidthScale,
             isWheelPreventDefaultX: true,
         });
         const viewLeftTop = new Viewport(SHEET_VIEW_KEY.VIEW_LEFT_TOP + id, scene, {
             left: 0,
             top: 0,
-            width: rowTitleWidthScale,
-            height: columnTitleHeightScale,
+            width: rowHeaderWidthScale,
+            height: columnHeaderHeightScale,
             isWheelPreventDefaultX: true,
         });
         // viewMain.linkToViewport(viewLeft, LINK_VIEW_PORT_TYPE.Y);

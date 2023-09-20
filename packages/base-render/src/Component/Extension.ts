@@ -42,6 +42,6 @@ export class ComponentExtension<T, U> {
 }
 
 export const SpreadsheetExtensionRegistry = Registry.create();
-export const SheetRowTitleExtensionRegistry = Registry.create();
-export const SheetColumnTitleExtensionRegistry = Registry.create();
+export const SheetRowHeaderExtensionRegistry = Registry.create();
+export const SheetColumnHeaderExtensionRegistry = Registry.create();
 export const DocumentsSpanAndLineExtensionRegistry = Registry.create();

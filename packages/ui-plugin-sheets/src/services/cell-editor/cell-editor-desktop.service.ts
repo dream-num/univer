@@ -196,6 +196,7 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
         scene.addLayer(Layer.create(scene, [], 0), Layer.create(scene, [], 2));
         const docsView = this._injector.createInstance(DocsView, docModel);
         docsView.initialize(scene);
+        docsView.getDocs().enableEditor();
 
         engine.runRenderLoop(() => {
             scene.render();

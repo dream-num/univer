@@ -19,8 +19,8 @@ import {
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { SetSelectionsOperation } from '../../Commands/Operations/selection.operation';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../Services/selection-manager.service';
+import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry, SHEET_VIEW_KEY } from '../BaseView';
 
 export class SelectionView extends BaseView {

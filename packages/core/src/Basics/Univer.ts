@@ -67,26 +67,19 @@ export class Univer {
     /** Create a univer sheet instance with internal dependency injection. */
     createUniverSheet(config: Partial<IWorkbookConfig>): UniverSheet {
         const sheet = this._univerInjector.createInstance(UniverSheet, config);
-
-        // TODO@wzhudev: clean this
-        sheet.getWorkBook().onUniver();
-
         this._currentUniverService.addSheet(sheet);
         this.initializePluginsForSheet(sheet);
-
         this._tryProgressToReady();
-
+        sheet.onReady();
         return sheet;
     }
 
     createUniverDoc(config: Partial<IDocumentData>): UniverDoc {
         const doc = this._univerInjector.createInstance(UniverDoc, config);
-
         this._currentUniverService.addDoc(doc);
         this.initializePluginsForDoc(doc);
-
         this._tryProgressToReady();
-
+        doc.onReady();
         return doc;
     }
 

@@ -5,6 +5,7 @@ import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { ContextService, IContextService } from '../services/context/context.service';
 import { CurrentUniverService, ICurrentUniverService } from '../services/current.service';
+import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { LocaleService } from '../services/locale.service';
 import { DesktopLogService, ILogService } from '../services/log/log.service';
@@ -73,6 +74,8 @@ export class Univer {
         this._currentUniverService.addSheet(sheet);
         this.initializePluginsForSheet(sheet);
 
+        this._tryProgressToReady();
+
         return sheet;
     }
 
@@ -82,6 +85,8 @@ export class Univer {
         this._currentUniverService.addDoc(doc);
         this.initializePluginsForDoc(doc);
 
+        this._tryProgressToReady();
+
         return doc;
     }
 
@@ -90,6 +95,8 @@ export class Univer {
 
         this._currentUniverService.addSlide(slide);
         this.initializePluginsForSlide(slide);
+
+        this._tryProgressToReady();
 
         return slide;
     }
@@ -160,10 +167,19 @@ export class Univer {
         ]);
     }
 
+    private _tryProgressToReady(): void {
+        const lifecycleService = this._univerInjector.get(LifecycleService);
+        if (lifecycleService.stage < LifecycleStages.Ready) {
+            this._univerPluginStore.forEachPlugin((p) => p.onReady());
+            // TODO: call UniverSheet etc on ready.
+            this._univerInjector.get(LifecycleService).stage = LifecycleStages.Ready;
+        }
+    }
+
     private registerUniverPlugin<T extends Plugin>(plugin: PluginCtor<T>, options?: any): void {
         // For plugins at Univer level. Plugins would be initialized immediately so they can register dependencies.
         const pluginInstance: Plugin = this._univerInjector.createInstance(plugin as unknown as Ctor<any>, options);
-        pluginInstance.onStarting();
+        pluginInstance.onStarting(this._univerInjector);
         this._univerPluginStore.addPlugin(pluginInstance);
     }
 

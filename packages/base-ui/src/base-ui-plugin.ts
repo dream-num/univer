@@ -35,6 +35,9 @@ export class UIPlugin extends Plugin {
     override onStarting(): void {
         this._initDependencies();
         this._initModules();
+    }
+
+    override onReady(): void {
         this._initUI();
     }
 

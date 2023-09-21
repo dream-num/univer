@@ -13,18 +13,10 @@ export enum PluginType {
     Slide,
 }
 
-export interface IPlugin {
-    onStarting?(): void;
-    onReady?(): void;
-    onRendered?(): void;
-    onSteady?(): void;
-    onDestroy(): void;
-}
-
 /**
  * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
  */
-export abstract class Plugin<Obs = any> implements IPlugin {
+export abstract class Plugin<Obs = any> {
     static type: PluginType;
 
     _injector: Injector;
@@ -38,7 +30,7 @@ export abstract class Plugin<Obs = any> implements IPlugin {
         this._observeNames = [];
     }
 
-    onStarting(): void {}
+    onStarting(injector: Injector): void {}
 
     onReady(): void {}
 

@@ -155,12 +155,13 @@ export const Tabs = React.memo(
         let previousIndex = 0;
         // 滚轮滚动距离
         let wheelDistance = 0;
-        let timer: NodeJS.Timeout;
         // 超出右边界再回来
         let overRight = false;
         // 超出左边界再回来
         let overLeft = false;
         let startTime: number;
+        // requestAnimationFrameId
+        let scrollToRightId: number;
 
         const getDistance = (element: HTMLDivElement, direction: 'Left' | 'Top' = 'Left') => {
             let distance = 0;
@@ -199,37 +200,34 @@ export const Tabs = React.memo(
             }
         };
 
-        useEffect(
-            () => () => {
-                if (!parent.current) return;
-                parent.current.removeEventListener('wheel', wheel);
-                parent.current.removeEventListener('mousedown', dragStart);
-            },
-            []
-        );
+        // 动画函数
+        const scrollToAnimation = (current: HTMLDivElement, direction: 'left' | 'right') => () => {
+            let scrollLeft;
+            if (direction === 'left') {
+                scrollLeft = current.scrollLeft - 2;
+            } else {
+                scrollLeft = current.scrollLeft + 2;
+            }
+            current.scrollTo(scrollLeft, 0);
+            scrollToRightId = requestAnimationFrame(scrollToAnimation(current, direction));
+        };
 
         const drag = (e: MouseEvent) => {
             const time = new Date().getTime();
             if (time - startTime < 300) return;
+            cancelAnimationFrame(scrollToRightId);
 
             const current = parent.current;
             if (!current || !target) return;
-            clearInterval(timer);
             const diff = e.pageX - startX;
             const distance = left + diff;
             if (e.pageX > parentOffsetLeft + current.offsetWidth) {
                 target.style.left = `${parentOffsetLeft + current.offsetWidth}px`;
-                timer = setInterval(() => {
-                    const scrollLeft = current.scrollLeft + 2;
-                    current.scrollTo(scrollLeft, 0);
-                }, 10);
+                scrollToAnimation(current, 'right')();
                 overRight = true;
             } else if (e.pageX < parentOffsetLeft) {
                 target.style.left = `${parentOffsetLeft - target.offsetWidth}px`;
-                timer = setInterval(() => {
-                    const scrollLeft = current.scrollLeft - 2;
-                    current.scrollTo(scrollLeft, 0);
-                }, 10);
+                scrollToAnimation(current, 'left')();
                 overLeft = true;
             } else {
                 target.style.left = `${distance}px`;
@@ -303,9 +301,10 @@ export const Tabs = React.memo(
         };
 
         const dragEnd = () => {
+            cancelAnimationFrame(scrollToRightId);
+
             overLeft = false;
             overRight = false;
-            clearInterval(timer);
             window.removeEventListener('mousemove', drag);
             window.removeEventListener('mouseup', dragEnd);
 
@@ -327,45 +326,44 @@ export const Tabs = React.memo(
         };
 
         const dragStart = (e: MouseEvent) => {
-            startTime = new Date().getTime();
-            startX = e.pageX;
-
-            window.addEventListener('mousemove', drag);
-            window.addEventListener('mouseup', dragEnd);
-
-            target = (e.target as HTMLElement)?.closest(`.${styles.tabsTab}`);
-            if (!target) return;
-            const width = target.offsetWidth;
-            const nextElement = target.nextElementSibling as HTMLDivElement;
-            const previousElement = target.previousElementSibling as HTMLDivElement;
-            const targetOffsetLeft = target.offsetLeft;
-            const targetOffsetTop = target.offsetTop;
-
-            const current = parent.current;
-            if (!current) return;
-            parentOffsetLeft = getDistance(parent.current, 'Left');
-            parentOffsetTop = getDistance(parent.current, 'Top');
-            // 点击时距离左边的距离
-            left = targetOffsetLeft + parentOffsetLeft - current.scrollLeft;
-            target.style.left = `${targetOffsetLeft + parentOffsetLeft - current.scrollLeft}px`;
-            target.style.top = `${targetOffsetTop + parentOffsetTop - current.scrollTop}px`;
-            // current.removeChild(target);
-            if (previousElement) {
-                previousElement.style.marginRight = `${width}px`;
-            } else {
-                nextElement.style.marginLeft = `${width}px`;
-            }
-
-            document.body.appendChild(target);
-            target.style.position = 'absolute';
-            // TODO: CSS变量挂在container上，container外层取不到
-            target.style.fontSize = '14px';
-
-            list = getList(current);
-            nextIndex = nextElement
-                ? list.findIndex((item) => item.min === nextElement.offsetLeft)
-                : current.children.length;
-            previousIndex = previousElement ? list.findIndex((item) => item.min === previousElement.offsetLeft) : -1;
+            requestAnimationFrame(() => {
+                startTime = new Date().getTime();
+                startX = e.pageX;
+                window.addEventListener('mousemove', drag);
+                window.addEventListener('mouseup', dragEnd);
+                target = (e.target as HTMLElement).closest(`.${styles.tabsTab}`);
+                if (!target) return;
+                const width = target.offsetWidth;
+                const nextElement = target.nextElementSibling as HTMLDivElement;
+                const previousElement = target.previousElementSibling as HTMLDivElement;
+                const targetOffsetLeft = target.offsetLeft;
+                const targetOffsetTop = target.offsetTop;
+                const current = parent.current;
+                if (!current) return;
+                parentOffsetLeft = getDistance(parent.current, 'Left');
+                parentOffsetTop = getDistance(parent.current, 'Top');
+                // 点击时距离左边的距离
+                left = targetOffsetLeft + parentOffsetLeft - current.scrollLeft;
+                target.style.left = `${targetOffsetLeft + parentOffsetLeft - current.scrollLeft}px`;
+                target.style.top = `${targetOffsetTop + parentOffsetTop - current.scrollTop}px`;
+                // current.removeChild(target);
+                if (previousElement) {
+                    previousElement.style.marginRight = `${width}px`;
+                } else {
+                    nextElement.style.marginLeft = `${width}px`;
+                }
+                document.body.appendChild(target);
+                target.style.position = 'absolute';
+                // TODO: CSS变量挂在container上，container外层取不到
+                target.style.fontSize = '14px';
+                list = getList(current);
+                nextIndex = nextElement
+                    ? list.findIndex((item) => item.min === nextElement.offsetLeft)
+                    : current.children.length;
+                previousIndex = previousElement
+                    ? list.findIndex((item) => item.min === previousElement.offsetLeft)
+                    : -1;
+            });
         };
 
         return (
@@ -392,7 +390,7 @@ export const Tabs = React.memo(
             </div>
         );
     },
-    (prev, next) => prev.children.length === next.children.length
+    (prev, next) => prev.children.length === next.children.length && prev.activeKey === next.activeKey
 );
 
 // tab content

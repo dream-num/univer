@@ -42,8 +42,20 @@
     scrollbar-width: none;
 }
 
-.sheet-bar-tab-pane{
+.sheet-bar-tab-pane {
     padding: 0;
+
+    &.tabs-tab-active {
+        .slide-tab-content {
+            background: #efefef;
+            color: #222;
+        }
+
+        .slide-tab-active-bar {
+            background: #d0d0d0;
+        }
+
+    }
 }
 
 .slide-tab-bar::-webkit-scrollbar {

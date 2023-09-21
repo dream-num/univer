@@ -21,8 +21,6 @@ import {
     IMenuItem,
     Menu,
     MenuPosition,
-    TabPane,
-    Tabs,
 } from '@univerjs/base-ui';
 import { BooleanNumber, ICommandService, ICurrentUniverService, IKeyValue } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
@@ -53,7 +51,7 @@ type SheetState = {
     menuItems: Array<IDisplayMenuItem<IMenuItem>>;
     showMenu: boolean;
     menuStyle: React.CSSProperties;
-    draggable: boolean;
+    activeKey: string;
 };
 
 export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
@@ -95,7 +93,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             menuItems: [],
             showMenu: false,
             menuStyle: {},
-            draggable: false,
+            activeKey: '',
         };
     }
 
@@ -225,7 +223,9 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     //                     data-slide-skip="true"
     //                     style={{ lineHeight: 1 }}
     //                     data-id={item.sheetId}
-    //                     onClick={(e) => this.onContextMenuClick(e)}
+    //                     onMouseDown={(e) => {
+    //                         this.onContextMenuClick(e);
+    //                     }}
     //                 >
     //                     <Icon.NextIcon />
     //                 </div>
@@ -277,6 +277,9 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 color: (sheet.getTabColor() as string) ?? undefined,
                 onMouseDown: (e: MouseEvent) => {
                     const worksheetId = sheet.getSheetId();
+                    // this.setState({
+                    //     activeKey: worksheetId,
+                    // });
 
                     commandService.executeCommand(SetWorksheetActivateCommand.id, {
                         workbookId: workbook.getUnitId(),
@@ -317,7 +320,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     }
 
     override render() {
-        const { sheetList, menuList, sheetUl, showMenu, menuStyle, draggable } = this.state;
+        const { sheetList, menuList, sheetUl, showMenu, menuStyle, activeKey } = this.state;
 
         const { addSheet } = this.props;
 
@@ -339,7 +342,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 </div>
 
                 {/* user s button */}
-                {/* <Tabs draggable className={styles.slideTabBar}>
+                {/* <Tabs draggable className={styles.slideTabBar} activeKey={activeKey}>
                     {sheetList.map((item) => (
                         <TabPane
                             key={item.sheetId}

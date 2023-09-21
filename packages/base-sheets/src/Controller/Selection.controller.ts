@@ -20,7 +20,7 @@ import { Inject } from '@wendellhu/redi';
 import { SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
-import { SheetSkeletonManagerService } from '../services/sheetSkeleton-manager.service';
+import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, SelectionController)
 export class SelectionController extends Disposable {

@@ -11,7 +11,7 @@ import { Inject } from '@wendellhu/redi';
 
 import { CANVAS_VIEW_KEY, SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { columnWidthByHeader, rowHeightByHeader } from '../Basics/SheetHeader';
-import { SheetSkeletonManagerService } from '../services/sheetSkeleton-manager.service';
+import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, ToggleWorksheetController)
 export class ToggleWorksheetController extends Disposable {
@@ -103,7 +103,7 @@ export class ToggleWorksheetController extends Disposable {
                 height: columnHeaderHeightScale,
             });
 
-            spreadsheet.makeDirty();
+            // spreadsheet.makeDirty();
         });
     }
 }

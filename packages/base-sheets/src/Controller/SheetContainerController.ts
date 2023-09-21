@@ -1,3 +1,4 @@
+import { IRenderManagerService } from '@univerjs/base-render';
 import {
     Disposable,
     ICommandInfo,
@@ -12,7 +13,7 @@ import { SetWorksheetActivateMutation } from '../commands/mutations/set-workshee
 import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
 import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
-import { SheetSkeletonManagerService } from '../services/sheetSkeleton-manager.service';
+import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 const updateCommandList = [
     SetWorksheetRowHeightMutation.id,
@@ -26,7 +27,8 @@ export class SheetContainerController extends Disposable {
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -63,6 +65,8 @@ export class SheetContainerController extends Disposable {
                         sheetId,
                     });
                 }
+
+                this._renderManagerService.getCurrent()?.mainComponent?.makeDirty(); // refresh spreadsheet
             })
         );
     }

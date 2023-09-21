@@ -21,7 +21,7 @@ import { ToggleWorksheetController } from './Controller/ToggleWorksheet.controll
 import { en } from './Locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { SelectionManagerService } from './services/selection-manager.service';
-import { SheetSkeletonManagerService } from './services/sheetSkeleton-manager.service';
+import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { CanvasView } from './View/CanvasView';
 
 /**

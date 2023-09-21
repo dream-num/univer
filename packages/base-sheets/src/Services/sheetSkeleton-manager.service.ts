@@ -52,26 +52,26 @@ export class SheetSkeletonManagerService implements IDisposable {
                 param.dirty = false;
             }
             param.skeleton.calculate();
+        } else {
+            const { unitId, sheetId } = searchParm;
+
+            const workbook = this._currentUniverService.getUniverSheetInstance(searchParm.unitId)?.getWorkBook();
+
+            const worksheet = workbook?.getSheetBySheetId(searchParm.sheetId);
+
+            if (worksheet == null || workbook == null) {
+                return;
+            }
+
+            const skeleton = this._buildSkeleton(worksheet, workbook);
+
+            this._sheetSkeletonParam.push({
+                unitId,
+                sheetId,
+                skeleton,
+                dirty: false,
+            });
         }
-
-        const { unitId, sheetId } = searchParm;
-
-        const workbook = this._currentUniverService.getUniverSheetInstance(searchParm.unitId)?.getWorkBook();
-
-        const worksheet = workbook?.getSheetBySheetId(searchParm.sheetId);
-
-        if (worksheet == null || workbook == null) {
-            return;
-        }
-
-        const skeleton = this._buildSkeleton(worksheet, workbook);
-
-        this._sheetSkeletonParam.push({
-            unitId,
-            sheetId,
-            skeleton,
-            dirty: false,
-        });
 
         this._currentSkeleton = searchParm;
 

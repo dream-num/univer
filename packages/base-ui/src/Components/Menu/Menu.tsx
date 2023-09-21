@@ -347,7 +347,16 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { AppContext } from '../../Common/AppContext';
-import { ICustomComponentOption, IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, isValueOptions, IValueOption, MenuItemType } from '../../services/menu/menu';
+import {
+    ICustomComponentOption,
+    IDisplayMenuItem,
+    IMenuButtonItem,
+    IMenuItem,
+    IMenuSelectorItem,
+    isValueOptions,
+    IValueOption,
+    MenuItemType,
+} from '../../services/menu/menu';
 import { IMenuService } from '../../services/menu/menu.service';
 import { joinClassNames } from '../../Utils';
 import { CustomLabel, NeoCustomLabel } from '../CustomLabel/CustomLabel';
@@ -432,7 +441,21 @@ export type BaseMenuStyle = {
 // }
 
 export const Menu = (props: BaseMenuProps) => {
-    const { display, menuId, value, options, onOptionSelect, parent, onClick, deep = 0, menu = [], className = '', style = {}, show = false, clientPosition } = props;
+    const {
+        display,
+        menuId,
+        value,
+        options,
+        onOptionSelect,
+        parent,
+        onClick,
+        deep = 0,
+        menu = [],
+        className = '',
+        style = {},
+        show = false,
+        clientPosition,
+    } = props;
     const context = useContext(AppContext);
     const [isShow, setIsShow] = useState(show);
     const [posStyle, setPosStyle] = useState<BaseMenuStyle>({});
@@ -553,7 +576,11 @@ export const Menu = (props: BaseMenuProps) => {
     };
 
     return (
-        <ul className={joinClassNames(styles.colsMenu, className)} style={{ ...style, ...posStyle, display: isShow ? 'block' : 'none' }} ref={MenuRef}>
+        <ul
+            className={joinClassNames(styles.colsMenu, className)}
+            style={{ ...style, ...posStyle, display: isShow ? 'block' : 'none' }}
+            ref={MenuRef}
+        >
             {/* legacy: render selections */}
             {options?.map((option: IValueOption | ICustomComponentOption, index: number) => {
                 const isValueOption = isValueOptions(option);
@@ -561,7 +588,10 @@ export const Menu = (props: BaseMenuProps) => {
                     return (
                         <li
                             key={index}
-                            className={joinClassNames(styles.colsMenuitem, option.disabled ? styles.colsMenuitemDisabled : '')}
+                            className={joinClassNames(
+                                styles.colsMenuitem,
+                                option.disabled ? styles.colsMenuitemDisabled : ''
+                            )}
                             onClick={() => {
                                 if (option.value) {
                                     onOptionSelect?.(option);
@@ -582,7 +612,13 @@ export const Menu = (props: BaseMenuProps) => {
 
                 const CustomComponent = context.componentManager?.get(option.id) as React.ComponentType<any>;
                 return (
-                    <li key={index} className={joinClassNames(styles.colsMenuitem, option.disabled ? styles.colsMenuitemDisabled : '')}>
+                    <li
+                        key={index}
+                        className={joinClassNames(
+                            styles.colsMenuitem,
+                            option.disabled ? styles.colsMenuitemDisabled : ''
+                        )}
+                    >
                         <CustomComponent
                             onValueChange={(v: string | number) => {
                                 onOptionSelect?.({ value: v, label: option.id });
@@ -719,7 +755,14 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                 onMouseLeave={(e) => mouseLeave(e, index)}
                 // onClick={(e) => handleClick(e, item, index)} // Nested select without click events, like border style
             >
-                <NeoCustomLabel title={item.title} value={value} onChange={onChange} icon={item.icon} display={item.display} label={item.label}></NeoCustomLabel>
+                <NeoCustomLabel
+                    title={item.title}
+                    value={value}
+                    onChange={onChange}
+                    icon={item.icon}
+                    display={item.display}
+                    label={item.label}
+                ></NeoCustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
                 {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
                     <Menu
@@ -749,9 +792,21 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                 onMouseLeave={(e) => mouseLeave(e, index)}
                 // onClick={(e) => handleClick(e, item, index)} // Nested menus without click events, like right menu delete cell
             >
-                <NeoCustomLabel title={item.title} value={item.title} icon={item.icon} display={item.display} label={item.label}></NeoCustomLabel>
+                <NeoCustomLabel
+                    title={item.title}
+                    value={item.title}
+                    icon={item.icon}
+                    display={item.display}
+                    label={item.label}
+                ></NeoCustomLabel>
                 {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
-                    <Menu show={itemShow} menuId={item.id} display={item.display} parent={true} onOptionSelect={onClick}></Menu>
+                    <Menu
+                        show={itemShow}
+                        menuId={item.id}
+                        display={item.display}
+                        parent={true}
+                        onOptionSelect={onClick}
+                    ></Menu>
                 )}
             </li>
         );

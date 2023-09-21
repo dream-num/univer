@@ -9,7 +9,7 @@ import {
     SetUnderlineCommand,
 } from '@univerjs/base-sheets';
 import { IShortcutService } from '@univerjs/base-ui';
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 
 import { QuitCellEditorCommand } from '../services/cell-editor/cell-editor.command';
 import { QuitCellEditorShortcutItem } from '../services/shortcuts/shortcuts';
@@ -40,6 +40,7 @@ import {
 } from './shortcuts/style.shortcut';
 import { ClearSelectionValueShortcutItem } from './shortcuts/value.shortcut';
 
+@OnLifecycle(LifecycleStages.Rendered, DesktopSheetShortcutController)
 export class DesktopSheetShortcutController extends Disposable {
     constructor(
         @IShortcutService private readonly _shortcutService: IShortcutService,

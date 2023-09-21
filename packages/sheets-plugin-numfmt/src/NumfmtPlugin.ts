@@ -1,8 +1,7 @@
 import { ISelectionRange, LocaleService, ObjectMatrixPrimitiveType, Plugin, PluginType } from '@univerjs/core';
-import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { install, NUMFMT_PLUGIN_NAME, NumfmtActionExtensionFactory, NumfmtPluginObserve } from './Basics';
+import { install, NUMFMT_PLUGIN_NAME, NumfmtActionExtensionFactory } from './Basics';
 import { NumfmtController, NumfmtModalController } from './Controller';
 import { INumfmtPluginConfig } from './Interfaces';
 import en from './Locale/en';
@@ -10,7 +9,7 @@ import { NumfmtModel } from './Model';
 import { NumfmtService } from './services/numfmt.service';
 import { INumfmtPluginData } from './Symbol';
 
-export class NumfmtPlugin extends Plugin<NumfmtPluginObserve> {
+export class NumfmtPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     private _numfmtModalController: NumfmtModalController;
@@ -30,18 +29,14 @@ export class NumfmtPlugin extends Plugin<NumfmtPluginObserve> {
 
         this._numfmtPluginData = new NumfmtModel();
         this._injector.add([INumfmtPluginData, { useFactory: () => this._numfmtPluginData }]);
-
-        const sheetContainerUIController = this._injector.get(SheetContainerUIController);
-        sheetContainerUIController.UIDidMount(() => {
-            this.initializeDependencies(_injector);
-            this.registerExtension();
-            this._numfmtController = this._injector.get(NumfmtController);
-            this._numfmtModalController = this._injector.get(NumfmtModalController);
-        });
     }
 
-    override onMounted(): void {
+    override onRendered(): void {
         install(this);
+        this.initializeDependencies(this._injector);
+        this.registerExtension();
+        this._numfmtController = this._injector.get(NumfmtController);
+        this._numfmtModalController = this._injector.get(NumfmtModalController);
         this._localeService.getLocale().load({ en });
         // const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
         // actionRegister.add(this._numfmtActionExtensionFactory);

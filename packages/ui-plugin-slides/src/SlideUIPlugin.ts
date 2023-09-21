@@ -75,7 +75,7 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
 
     initUI() {}
 
-    override onMounted(): void {
+    override onRendered(): void {
         this.initialize();
     }
 

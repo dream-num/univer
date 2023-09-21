@@ -36,7 +36,7 @@ export class <%= projectUpperValue %>Plugin extends Plugin {
 
     }
 
-    onMounted(): void {
+    onRendered(): void {
         this.initialize()
     }
 

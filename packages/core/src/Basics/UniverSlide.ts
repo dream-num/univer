@@ -1,7 +1,7 @@
 import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
 
 import { ObserverManager } from '../Observer';
-import { Plugin, PluginCtor, PluginStore } from '../Plugin';
+import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { GenName, IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
 import { SlideModel } from '../Slides/Domain';
@@ -73,7 +73,7 @@ export class UniverSlide {
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._slideInjector.createInstance(plugin as unknown as Ctor<any>, options);
 
-        pluginInstance.onMounted();
+        pluginInstance.onRendered();
         this._pluginStore.addPlugin(pluginInstance);
     }
 

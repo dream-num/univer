@@ -60,7 +60,7 @@ export class SlidePlugin extends Plugin<SlidePluginObserve> {
         this._canvasEngine = this._injector.get(IRenderingEngine);
     }
 
-    override onMounted(): void {
+    override onRendered(): void {
         this.initialize();
     }
 

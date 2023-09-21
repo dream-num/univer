@@ -15,11 +15,21 @@
 export * from './Basics';
 export * from './Docs/Domain';
 export * from './Observer';
-export * from './Plugin';
-export { CommandType, ICommand, ICommandInfo, ICommandService, IMultiCommand, IMutation, IOperation } from './services/command/command.service';
+export { Plugin, PluginType } from './plugin/plugin';
+export {
+    CommandType,
+    ICommand,
+    ICommandInfo,
+    ICommandService,
+    IMultiCommand,
+    IMutation,
+    IOperation,
+} from './services/command/command.service';
 export { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './services/context/context';
 export { IContextService } from './services/context/context.service';
 export { ICurrentUniverService } from './services/current.service';
+export { LifecycleStages, OnLifecycle } from './services/lifecycle/lifecycle';
+export { LifecycleService } from './services/lifecycle/lifecycle.service';
 export { LocaleService } from './services/locale.service';
 export { DesktopLogService, ILogService } from './services/log/log.service';
 export { DesktopPermissionService, IPermissionService } from './services/permission/permission.service';

@@ -3,7 +3,6 @@ import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { ISlideUIPluginConfig } from '../Basics';
-import { UI } from '../View';
 import { SlideContainerUIController } from './SlideContainerUIController';
 
 export class AppUIController {
@@ -19,15 +18,6 @@ export class AppUIController {
         this._slideContainerUIController = this._injector.createInstance(SlideContainerUIController, config);
         this._injector.add([SlideContainerUIController, { useValue: this._slideContainerUIController }]);
         const UIConfig = this._slideContainerUIController.getUIConfig();
-
-        UI.create({
-            injector: this._injector,
-            locale: this._localeService.getLocale().getCurrentLocale(),
-            componentManager: this._componentManager,
-            changeLocale: this.changeLocale,
-            UIConfig,
-            container: config.container,
-        });
     }
 
     /**

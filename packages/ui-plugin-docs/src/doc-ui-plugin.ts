@@ -22,7 +22,7 @@ export class DocUIPlugin extends Plugin<any> {
         this._initDependencies(_injector);
     }
 
-    override onMounted(): void {
+    override onRendered(): void {
         this._localService.getLocale().load({
             en,
         });

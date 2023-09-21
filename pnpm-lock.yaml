@@ -342,8 +342,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
@@ -391,8 +391,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -486,8 +486,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -541,8 +541,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -599,8 +599,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
@@ -648,8 +648,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -743,8 +743,8 @@ importers:
   packages/core:
     dependencies:
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       dayjs:
         specifier: ^1.11.9
         version: 1.11.9
@@ -856,8 +856,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -920,8 +920,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -984,8 +984,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1048,8 +1048,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       luckyexcel:
         specifier: ^1.0.1
         version: 1.0.1
@@ -1115,8 +1115,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1176,8 +1176,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1225,8 +1225,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
@@ -1283,8 +1283,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
@@ -1344,8 +1344,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.7
-        version: 0.12.7
+        specifier: ^0.12.8
+        version: 0.12.8
       css-vars-ponyfill:
         specifier: ^2.4.6
         version: 2.4.6
@@ -6046,8 +6046,8 @@ packages:
       - supports-color
     dev: true
 
-  /@wendellhu/redi@0.12.7:
-    resolution: {integrity: sha512-HAJhOfAqD1E7O/FGEnz27psFjDq6h3xBbmN9b/j2ijAslleb71WLnHUrhRtMCgIWEm7Ktb8fkk0aK80pJsTlng==}
+  /@wendellhu/redi@0.12.8:
+    resolution: {integrity: sha512-piEmRbwzIZ9SsHDlEUh3thk+kMdLImVHzgvn00C8/dqSbSg/Pgc8J5na7Juh9GGEuI9JR33uc4b8ZzVazchQIg==}
     dev: false
 
   /@yarnpkg/esbuild-plugin-pnp@3.0.0-rc.15(esbuild@0.18.20):

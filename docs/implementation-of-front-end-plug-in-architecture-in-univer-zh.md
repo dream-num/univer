@@ -28,7 +28,7 @@ Luckysheet 2.0 很少用到设计模式，扩展性不好，模块拆分不够�
 
 首先我们在核心构造一个`Plugin`基类，将插件要用到基础属性和方法放在这里，比如插件名称，插件的生命周期。
 
-初始化即安装时调用 `onMounted` 方法，卸载时调用 `onDestroy` 方法。
+初始化即安装时调用 `onRendered` 方法，卸载时调用 `onDestroy` 方法。
 
 > 为便于理解，以下部分代码经过简化，我们主要讲解下思路
 
@@ -44,7 +44,7 @@ export abstract class Plugin {
         return this._name;
     }
 
-    onMounted(): void;
+    onRendered(): void;
 
     onDestroy(): void;
 
@@ -61,7 +61,7 @@ export class SortPlugin extends Plugin {
     }
 
     // 初始化
-    onMounted(): void {
+    onRendered(): void {
         // 插件具体初始化逻辑
     }
 
@@ -86,7 +86,7 @@ export class PluginManager {
 
     _initialize(plugins: Plugin[]) {
         plugins.forEach((plugin: Plugin) => {
-            plugin.onMounted();
+            plugin.onRendered();
         });
     }
 
@@ -160,7 +160,7 @@ export abstract class Plugin {
         return this._context;
     }
 
-    onMounted(ctx: SheetContext): void;
+    onRendered(ctx: SheetContext): void;
 
     onDestroy(): void;
 
@@ -188,7 +188,7 @@ export abstract class Plugin<O = any> {
         this._observeNames = [];
     }
 
-    onMounted(context: SheetContext): void {}
+    onRendered(context: SheetContext): void {}
 
     onDestroy(): void {
         this.deleteObserve(...this._observeNames);

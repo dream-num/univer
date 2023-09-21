@@ -30,7 +30,9 @@ import {
     ISelectionCell,
     ISelectionRange,
     IStyleData,
+    LifecycleStages,
     Nullable,
+    OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -47,6 +49,7 @@ const SHEET_CELL_EDITOR_MODEL_ID = 'sheet.model.cell-editor';
 /**
  * Cell editor for Univer on desktop. Reuse by multi univer sheet documents.
  */
+@OnLifecycle(LifecycleStages.Rendered, ICellEditorService)
 export class DesktopCellEditorService extends Disposable implements ICellEditorService {
     private _containerElement: HTMLDivElement;
 
@@ -71,9 +74,7 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
         @IContextService private readonly _contextService: IContextService
     ) {
         super();
-    }
 
-    initialize(): void {
         this._mountCellEditor();
         this._initListeners();
         this._focusCurrentSheet();

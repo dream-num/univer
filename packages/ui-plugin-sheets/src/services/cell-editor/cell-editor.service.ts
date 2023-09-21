@@ -4,7 +4,6 @@ import { createIdentifier } from '@wendellhu/redi';
 // stack. So cell editor service must be an abstract dependency.
 
 export interface ICellEditorService {
-    initialize(): void;
     enterEditing(): void;
     quitEditing(): void;
 }

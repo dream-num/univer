@@ -1,7 +1,7 @@
 import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
 
 import { DocumentModel } from '../Docs';
-import { Plugin, PluginCtor, PluginStore } from '../Plugin';
+import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { IDocumentData } from '../Types/Interfaces';
 
@@ -37,13 +37,13 @@ export class UniverDoc {
     addPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._injector.createInstance(pluginCtor as unknown as Ctor<any>, options);
 
-        pluginInstance.onMounted();
+        pluginInstance.onRendered();
         this._pluginStore.addPlugin(pluginInstance);
     }
 
     mount(): void {
         // this._pluginStore.forEachPlugin((plugin) => {
-        //     plugin.onMounted();
+        //     plugin.onRendered();
         // });
     }
 

@@ -32,7 +32,7 @@ export class UIPlugin extends Plugin {
         this._injector = injector;
     }
 
-    override onMounted(): void {
+    override onStarting(): void {
         this._initDependencies();
         this._initModules();
         this._initUI();

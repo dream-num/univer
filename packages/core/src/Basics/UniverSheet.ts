@@ -1,8 +1,9 @@
 import { Ctor, Dependency, IDisposable, Injector, Optional } from '@wendellhu/redi';
 
 import { ObserverManager } from '../Observer';
-import { Plugin, PluginCtor, PluginStore } from '../Plugin';
+import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
+import { LifecycleInitializerService } from '../services/lifecycle/lifecycle.service';
 import { GenName, Logger } from '../Shared';
 import { Workbook } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Types/Interfaces';
@@ -25,9 +26,10 @@ export class UniverSheet implements IDisposable {
     constructor(univerSheetData: Partial<IWorkbookConfig> = {}, @Optional(Injector) parentInjector?: Injector) {
         this.univerSheetConfig = univerSheetData;
 
-        this._sheetInjector = this._initializeDependencies(parentInjector);
+        this._sheetInjector = this._initDependencies(parentInjector);
         this.setObserver();
         this._workbook = this._sheetInjector.createInstance(Workbook, univerSheetData);
+        this._sheetInjector.get(LifecycleInitializerService).start();
     }
 
     static newInstance(univerSheetData: Partial<IWorkbookConfig> = {}): UniverSheet {
@@ -58,15 +60,15 @@ export class UniverSheet implements IDisposable {
      */
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._sheetInjector.createInstance(plugin as unknown as Ctor<any>, options);
-
-        pluginInstance.onMounted();
+        pluginInstance.onStarting();
         this._pluginStore.addPlugin(pluginInstance);
     }
 
-    private _initializeDependencies(parentInjector?: Injector): Injector {
+    private _initDependencies(parentInjector?: Injector): Injector {
         const dependencies: Dependency[] = [
             [ObserverManager],
             [GenName],
+            [LifecycleInitializerService],
             [
                 ICommandService,
                 {
@@ -74,9 +76,13 @@ export class UniverSheet implements IDisposable {
                 },
             ],
         ];
+
         return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 
+    /**
+     * @deprecated
+     */
     private setObserver(): void {
         new WorkBookObserverImpl().install(this._sheetInjector.get(ObserverManager));
     }

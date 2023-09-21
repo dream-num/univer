@@ -11,7 +11,7 @@ import {
 } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { DEFAULT_SPREADSHEET_PLUGIN_DATA, install, ISheetPluginConfig } from './Basics';
+import { DEFAULT_SPREADSHEET_PLUGIN_DATA, ISheetPluginConfig } from './Basics';
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { SetSelectionsOperation } from './Commands/Operations/selection.operation';
 import { BasicWorkbookController, CountBarController, SheetContainerController } from './Controller';
@@ -56,7 +56,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             en,
         });
 
-        install(this);
+        // install(this);
 
         this.initConfig();
         this.initController();
@@ -94,9 +94,11 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         this._injector.get(BasicWorkbookController);
     }
 
-    override onMounted(): void {
+    override onStarting(): void {
         this.initialize();
     }
+
+    override onRendered(): void {}
 
     override onDestroy(): void {
         super.onDestroy();

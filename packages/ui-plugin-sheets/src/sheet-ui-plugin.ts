@@ -1,14 +1,8 @@
 import { DragManager, SlotManager, ZIndexManager } from '@univerjs/base-ui';
-import { ICurrentUniverService, IUndoRedoService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
+import { ICurrentUniverService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import {
-    DefaultSheetUIConfig,
-    installObserver,
-    ISheetUIPluginConfig,
-    SHEET_UI_PLUGIN_NAME,
-    SheetUIPluginObserve,
-} from './Basics';
+import { DefaultSheetUIConfig, ISheetUIPluginConfig, SHEET_UI_PLUGIN_NAME, SheetUIPluginObserve } from './Basics';
 import { AppUIController } from './Controller/AppUIController';
 import { SheetClipboardController } from './Controller/clipboard/clipboard.controller';
 import { DesktopSheetShortcutController } from './Controller/shortcut.controller';
@@ -39,9 +33,7 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
         this._config = Tools.deepMerge({}, DefaultSheetUIConfig, config);
     }
 
-    override onMounted(): void {
-        installObserver(this);
-
+    override onStarting(): void {
         /**
          * load more Locale object
          *
@@ -109,11 +101,6 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
         this._dragManager = this._injector.get(DragManager);
         this._zIndexManager = this._injector.get(ZIndexManager);
-
-        this._injector.get(IUndoRedoService);
-        this._injector.get(DesktopSheetShortcutController);
-        this._injector.get(ICellEditorService).initialize();
-        this._injector.get(AppUIController);
     }
 
     private _initModules(): void {

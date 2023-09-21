@@ -1,10 +1,11 @@
 import { Ctor, Injector } from '@wendellhu/redi';
 
 import { ObserverManager } from '../Observer';
-import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../Plugin';
+import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { ContextService, IContextService } from '../services/context/context.service';
 import { CurrentUniverService, ICurrentUniverService } from '../services/current.service';
+import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { LocaleService } from '../services/locale.service';
 import { DesktopLogService, ILogService } from '../services/log/log.service';
 import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
@@ -28,7 +29,7 @@ export class Univer {
     private readonly _univerPluginRegistry = new PluginRegistry();
 
     constructor(univerData: Partial<IUniverData> = {}) {
-        this._univerInjector = this._initializeDependencies();
+        this._univerInjector = this._initDependencies();
         this._setObserver();
 
         // initialize localization info
@@ -137,7 +138,7 @@ export class Univer {
         new UniverObserverImpl().install(this._univerInjector.get(ObserverManager));
     }
 
-    private _initializeDependencies(): Injector {
+    private _initDependencies(): Injector {
         return new Injector([
             [ObserverManager],
             [
@@ -150,6 +151,7 @@ export class Univer {
                 },
             ],
             [LocaleService],
+            [LifecycleService],
             [ILogService, { useClass: DesktopLogService, lazy: true }],
             [ICommandService, { useClass: CommandService, lazy: true }],
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
@@ -161,9 +163,7 @@ export class Univer {
     private registerUniverPlugin<T extends Plugin>(plugin: PluginCtor<T>, options?: any): void {
         // For plugins at Univer level. Plugins would be initialized immediately so they can register dependencies.
         const pluginInstance: Plugin = this._univerInjector.createInstance(plugin as unknown as Ctor<any>, options);
-
-        pluginInstance.onMounted();
-
+        pluginInstance.onStarting();
         this._univerPluginStore.addPlugin(pluginInstance);
     }
 

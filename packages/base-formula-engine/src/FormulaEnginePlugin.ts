@@ -12,7 +12,7 @@ export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
 
     initialize(): void {}
 
-    override onMounted(ctx: SheetContext): void {
+    override onRendered(ctx: SheetContext): void {
         this.initialize();
     }
 

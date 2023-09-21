@@ -35,7 +35,7 @@ export class <%= projectUpperValue %>Plugin extends Plugin<any, SheetContext> {
         this._<%= projectValue %>Controller = new <%= projectUpperValue %>Controller(this);
     }
 
-    onMounted(): void {
+    onRendered(): void {
         this.initialize()
     }
 

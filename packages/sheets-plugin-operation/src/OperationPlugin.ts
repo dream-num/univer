@@ -100,7 +100,7 @@ export class OperationPlugin extends Plugin {
         // copyRegister.delete(this._copyImageExtensionFactory);
     }
 
-    override onMounted(): void {
+    override onRendered(): void {
         this.initialize();
     }
 

@@ -36,7 +36,7 @@ export class ImagePlugin extends Plugin {
         this._injector.add([IImagePluginData, { useFactory: () => this._imagePluginData }]);
     }
 
-    override onMounted(): void {
+    override onRendered(): void {
         install(this);
         const sheetContainerUIController = this._injector.get(SheetContainerUIController);
         sheetContainerUIController.UIDidMount(() => {

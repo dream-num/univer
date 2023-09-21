@@ -13,7 +13,7 @@ export class FilterPlugin extends Plugin {
         this._filterList = FilterList.fromSequence(config || {});
     }
 
-    override onMounted(): void {
+    override onRendered(): void {
         // const config: IConfig = {
         //     context,
         // };

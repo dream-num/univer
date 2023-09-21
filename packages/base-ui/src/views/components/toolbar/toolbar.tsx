@@ -44,10 +44,17 @@ export class Toolbar extends Component<IToolbarProps, IToolbarState> {
 
     override componentDidMount() {
         this.props.getComponent?.(this); // pass the UI to the controller, which is not good...
+
         const menuService = this.context.injector!.get(IMenuService);
-        this.setState({
-            menuItems: menuService.getMenuItems(MenuPosition.TOOLBAR),
-        });
+        const update = () => {
+            this.setState({
+                menuItems: menuService.getMenuItems(MenuPosition.TOOLBAR),
+            });
+        };
+
+        // TODO: dispose
+        menuService.menuChanged$.subscribe(() => update());
+        update();
     }
 
     override render() {

@@ -1,5 +1,5 @@
 import { Engine, IRenderingEngine } from '@univerjs/base-render';
-import { Disposable, toDisposable } from '@univerjs/core';
+import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import { IDisposable, Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import React, { ComponentType } from 'react';
@@ -26,12 +26,21 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
 
     componentRegistered$ = this._componentRegistered$.asObservable();
 
-    constructor(@Inject(Injector) private readonly _injector: Injector, @IRenderingEngine private readonly _renderingEngine: Engine) {
+    constructor(
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
+        @IRenderingEngine private readonly _renderingEngine: Engine
+    ) {
         super();
     }
 
     bootstrapWorkbench(options: IWorkbenchOptions): void {
-        this.disposeWithMe(bootStrap(this._injector, options, (element) => this._renderingEngine.setContainer(element)));
+        this.disposeWithMe(
+            bootStrap(this._injector, options, (element) => {
+                this._renderingEngine.setContainer(element);
+                this._lifecycleService.stage = LifecycleStages.Rendered;
+            })
+        );
     }
 
     registerFooterComponent(component: () => ComponentType): IDisposable {
@@ -45,7 +54,11 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     }
 }
 
-function bootStrap(injector: Injector, options: IWorkbenchOptions, callback: (containerEl: HTMLElement) => void): IDisposable {
+function bootStrap(
+    injector: Injector,
+    options: IWorkbenchOptions,
+    callback: (containerEl: HTMLElement) => void
+): IDisposable {
     let mountContainer: HTMLElement;
 
     const container = options.container;

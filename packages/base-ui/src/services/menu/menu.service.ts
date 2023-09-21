@@ -1,5 +1,6 @@
 import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
+import { debounceTime, Observable, Subject } from 'rxjs';
 
 // TODO@wzhudev: this props should be moved to menu.service.ts to break cycle import
 import { BaseSelectChildrenProps } from '../../Components/Select/Select';
@@ -34,6 +35,8 @@ export interface CustomLabel {
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
 
 export interface IMenuService {
+    menuChanged$: Observable<void>;
+
     addMenuItem(item: IMenuItem): IDisposable;
 
     /** Get menu items for display at a given position or a submenu. */
@@ -46,12 +49,17 @@ export class DesktopMenuService extends Disposable implements IMenuService {
 
     private readonly _menuByPositions = new Map<MenuPosition | string, Array<[string, IMenuItem]>>();
 
+    private _menuChanged$ = new Subject<void>();
+
+    menuChanged$ = this._menuChanged$.asObservable().pipe(debounceTime(0));
+
     constructor(@IShortcutService private readonly _shortcutService: IShortcutService) {
         super();
     }
 
     override dispose(): void {
         this._menuItemMap.clear();
+        this._menuChanged$.complete();
     }
 
     addMenuItem(item: IMenuItem): IDisposable {
@@ -66,6 +74,8 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         } else {
             this.appendMenuToPosition(item, item.positions);
         }
+
+        this._menuChanged$.next();
 
         return toDisposable(() => {
             this._menuItemMap.delete(item.id);
@@ -93,6 +103,8 @@ export class DesktopMenuService extends Disposable implements IMenuService {
                     menus.splice(index, 1);
                 }
             }
+
+            this._menuChanged$.next();
         });
     }
 

@@ -1,4 +1,11 @@
-import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager, IMenuService, MenuPosition } from '@univerjs/base-ui';
+import {
+    BaseSelectChildrenProps,
+    BaseSelectProps,
+    ColorPicker,
+    ComponentManager,
+    IMenuService,
+    MenuPosition,
+} from '@univerjs/base-ui';
 import { IMenuItemFactory } from '@univerjs/base-ui/src/services/menu/menu';
 import { Disposable } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';

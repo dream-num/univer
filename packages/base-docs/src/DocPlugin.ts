@@ -180,7 +180,7 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
         return this._documentController;
     }
 
-    override onMounted(): void {
+    override onRendered(): void {
         this.initialize();
     }
 

@@ -66,7 +66,7 @@ export class FindPlugin extends Plugin<FindPluginObserve> {
     //     // return new TextFinder(workSheet, type, text);
     // }
 
-    override onMounted(): void {
+    override onRendered(): void {
         this.initialize();
     }
 

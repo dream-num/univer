@@ -1,7 +1,7 @@
 import { Ctor, Injector } from '@wendellhu/redi';
 
-import { Nullable } from '../common/type-utils';
-import { Observable, ObserverManager } from '../Observer';
+import { Observable } from '../Observer/Observable';
+import { ObserverManager } from '../Observer/ObserverManager';
 
 export type PluginCtor<T extends Plugin> = Ctor<T> & { type: PluginType };
 
@@ -14,19 +14,11 @@ export enum PluginType {
 }
 
 export interface IPlugin {
-    getPluginName(): string;
-
-    /**
-     * Could setup initialization works at this lifecycle stage.
-     */
-    onMounted(): void;
-
-    /**
-     * Could do some initialization works at this lifecycle stage.
-     */
+    onStarting?(): void;
+    onReady?(): void;
+    onRendered?(): void;
+    onSteady?(): void;
     onDestroy(): void;
-
-    getPluginByName<T extends IPlugin>(name: string): Nullable<T>;
 }
 
 /**
@@ -46,16 +38,15 @@ export abstract class Plugin<Obs = any> implements IPlugin {
         this._observeNames = [];
     }
 
-    /** @deprecated this method will be removed */
-    getPluginByName<T extends IPlugin>(name: string): Nullable<T> {
-        throw new Error('Method not implemented.');
-    }
+    onStarting(): void {}
 
-    onMounted(): void {}
+    onReady(): void {}
 
-    onDestroy(): void {
-        this.deleteObserve(...this._observeNames);
-    }
+    onRendered(): void {}
+
+    onSteady(): void {}
+
+    onDestroy(): void {}
 
     getPluginName(): string {
         return this._name;

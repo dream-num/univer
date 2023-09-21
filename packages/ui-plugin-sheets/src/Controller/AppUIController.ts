@@ -1,5 +1,5 @@
 import { IDesktopUIController, IUIController } from '@univerjs/base-ui';
-import { Disposable, LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
+import { Disposable, LifecycleStages, LocaleService, LocaleType, ObserverManager, OnLifecycle } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
@@ -7,6 +7,7 @@ import { ISheetUIPluginConfig } from '../Basics';
 import { RenderSheetFooter } from '../View/SheetContainer/SheetContainer';
 import { SheetContainerUIController } from './SheetContainerUIController';
 
+@OnLifecycle(LifecycleStages.Rendered, AppUIController)
 export class AppUIController extends Disposable {
     private _sheetContainerController: SheetContainerUIController;
 
@@ -22,7 +23,9 @@ export class AppUIController extends Disposable {
         this._sheetContainerController = this._injector.createInstance(SheetContainerUIController, config);
         this._injector.add([SheetContainerUIController, { useValue: this._sheetContainerController }]);
 
-        this.disposeWithMe(this._uiController.registerFooterComponent(() => connectInjector(RenderSheetFooter, this._injector)));
+        this.disposeWithMe(
+            this._uiController.registerFooterComponent(() => connectInjector(RenderSheetFooter, this._injector))
+        );
     }
 
     /**

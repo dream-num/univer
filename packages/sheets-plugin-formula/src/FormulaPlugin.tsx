@@ -87,7 +87,7 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
         // );
     }
 
-    override onMounted(): void {
+    override onRendered(): void {
         install(this);
 
         this.initialize();

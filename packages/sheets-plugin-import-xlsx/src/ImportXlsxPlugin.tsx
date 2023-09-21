@@ -42,7 +42,7 @@ export class ImportXlsxPlugin extends Plugin<any> {
         // dragAndDropRegister.add(this._dragAndDropExtensionFactory);
     }
 
-    override onMounted(): void {
+    override onRendered(): void {
         this.initialize();
     }
 

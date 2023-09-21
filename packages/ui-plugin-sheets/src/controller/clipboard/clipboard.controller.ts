@@ -1,4 +1,12 @@
-import { Disposable, ICommandService, ICurrentUniverService, Worksheet, WrapStrategy } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    ICurrentUniverService,
+    LifecycleStages,
+    OnLifecycle,
+    Worksheet,
+    WrapStrategy,
+} from '@univerjs/core';
 
 import { SheetCopyCommand, SheetCutCommand, SheetPasteCommand } from '../../commands/commands/clipboard.command';
 import {
@@ -11,6 +19,7 @@ import {
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
  * service. You can create a similar clipboard controller to add logic for your own features.
  */
+@OnLifecycle(LifecycleStages.Rendered, SheetClipboardController)
 export class SheetClipboardController extends Disposable {
     constructor(
         @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,

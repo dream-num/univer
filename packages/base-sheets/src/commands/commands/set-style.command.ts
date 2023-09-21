@@ -469,9 +469,3 @@ export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
         return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
     },
 };
-
-export const SetSpanCommand: ICommand = {
-    type: CommandType.COMMAND,
-    id: 'sheet.command.set-span',
-    handler: async (accessor, params) => true,
-};

@@ -5,8 +5,8 @@ export * from './View';
 
 // #region services
 
-export { BorderStyleManagerService } from './Services/border-style-manager.service';
-export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './Services/selection-manager.service';
+export { BorderStyleManagerService } from './services/border-style-manager.service';
+export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './services/selection-manager.service';
 
 // #endregion
 

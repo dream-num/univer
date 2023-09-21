@@ -6,13 +6,14 @@ import {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/base-render';
-import { Disposable, ICurrentUniverService } from '@univerjs/core';
+import { Disposable, ICurrentUniverService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { CANVAS_VIEW_KEY, SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { columnWidthByHeader, rowHeightByHeader } from '../Basics/SheetHeader';
-import { SheetSkeletonManagerService } from '../Services/sheetSkeleton-manager.service';
+import { SheetSkeletonManagerService } from '../services/sheetSkeleton-manager.service';
 
+@OnLifecycle(LifecycleStages.Rendered, ToggleWorksheetController)
 export class ToggleWorksheetController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,

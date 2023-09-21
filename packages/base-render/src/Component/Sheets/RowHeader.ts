@@ -8,7 +8,7 @@ import { SpreadsheetSkeleton } from './SheetSkeleton';
 export class SpreadsheetRowHeader extends SpreadsheetHeader {
     private _rowHeaderLayoutExtension: RowHeaderLayout;
 
-    constructor(oKey: string, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    constructor(oKey: string, spreadsheetSkeleton?: SpreadsheetSkeleton) {
         super(oKey, spreadsheetSkeleton);
         // this._initialProps(props);
 

@@ -19,9 +19,9 @@ import { FormulaBarController } from './Controller/FormulaBarController';
 import { SelectionController } from './Controller/Selection.controller';
 import { ToggleWorksheetController } from './Controller/ToggleWorksheet.controller';
 import { en } from './Locale';
-import { BorderStyleManagerService } from './Services/border-style-manager.service';
-import { SelectionManagerService } from './Services/selection-manager.service';
-import { SheetSkeletonManagerService } from './Services/sheetSkeleton-manager.service';
+import { BorderStyleManagerService } from './services/border-style-manager.service';
+import { SelectionManagerService } from './services/selection-manager.service';
+import { SheetSkeletonManagerService } from './services/sheetSkeleton-manager.service';
 import { CanvasView } from './View/CanvasView';
 
 /**

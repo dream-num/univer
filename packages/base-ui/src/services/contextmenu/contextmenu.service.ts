@@ -1,4 +1,4 @@
-import { Engine, IMouseEvent, IPointerEvent, IRenderingEngine } from '@univerjs/base-render';
+import { IMouseEvent, IPointerEvent, IRenderManagerService } from '@univerjs/base-render';
 import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
@@ -15,7 +15,7 @@ export const IContextMenuService = createIdentifier<IContextMenuService>('univer
 export class DesktopContextMenuService extends Disposable implements IContextMenuService {
     private _currentHandler: IContextMenuHandler | null = null;
 
-    constructor(@IRenderingEngine private readonly _renderingEngine: Engine) {
+    constructor(@IRenderManagerService private readonly _renderManagerService: IRenderManagerService) {
         super();
     }
 
@@ -28,17 +28,20 @@ export class DesktopContextMenuService extends Disposable implements IContextMen
 
         // FIXME@wzhudev: shouldn't set timeout here, because we should not get pointer down event on mainScene but
         // rendering engine itself
-        setTimeout(() => {
-            const mainScene = this._renderingEngine.getScene('mainScene');
-            const pointerDownOnMain = mainScene!.onPointerDownObserver;
-            const observer = pointerDownOnMain?.add((event: IPointerEvent | IMouseEvent) => {
-                // right click
-                if (event.button === 2) {
-                    event.preventDefault();
-                    this._currentHandler?.handleContextMenu(event);
-                }
-            });
-        }, 200);
+        // setTimeout(() => {
+        //     const mainScene = this._renderManagerService.getCurrent()?.scene;
+        //     if (mainScene == null) {
+        //         return;
+        //     }
+        //     const pointerDownOnMain = mainScene.onPointerDownObserver;
+        //     const observer = pointerDownOnMain?.add((event: IPointerEvent | IMouseEvent) => {
+        //         // right click
+        //         if (event.button === 2) {
+        //             event.preventDefault();
+        //             this._currentHandler?.handleContextMenu(event);
+        //         }
+        //     });
+        // }, 200);
 
         return toDisposable(() => {
             this._currentHandler = null;

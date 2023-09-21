@@ -1,11 +1,18 @@
-import { Disposable, ICommandInfo, ICommandService, ICurrentUniverService } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandInfo,
+    ICommandService,
+    ICurrentUniverService,
+    LifecycleStages,
+    OnLifecycle,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { SetWorksheetActivateMutation } from '../Commands/Mutations/set-worksheet-activate.mutation';
-import { SetWorksheetColWidthMutation } from '../Commands/Mutations/set-worksheet-col-width.mutation';
-import { SetWorksheetRowHeightMutation } from '../Commands/Mutations/set-worksheet-row-height.mutation';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../Services/selection-manager.service';
-import { SheetSkeletonManagerService } from '../Services/sheetSkeleton-manager.service';
+import { SetWorksheetActivateMutation } from '../commands/mutations/set-worksheet-activate.mutation';
+import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
+import { SheetSkeletonManagerService } from '../services/sheetSkeleton-manager.service';
 
 const updateCommandList = [
     SetWorksheetRowHeightMutation.id,
@@ -13,6 +20,7 @@ const updateCommandList = [
     SetWorksheetActivateMutation.id,
 ];
 
+@OnLifecycle(LifecycleStages.Rendered, SheetContainerController)
 export class SheetContainerController extends Disposable {
     constructor(
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,

@@ -10,17 +10,19 @@ import {
     ICommandService,
     ICurrentUniverService,
     ISelection,
+    LifecycleStages,
     ObserverManager,
+    OnLifecycle,
     SELECTION_TYPE,
-    Worksheet,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
-import { SetSelectionsOperation } from '../Commands/Operations/selection.operation';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../Services/selection-manager.service';
-import { SheetSkeletonManagerService } from '../Services/sheetSkeleton-manager.service';
+import { SetSelectionsOperation } from '../commands/operations/selection.operation';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
+import { SheetSkeletonManagerService } from '../services/sheetSkeleton-manager.service';
 
+@OnLifecycle(LifecycleStages.Rendered, SelectionController)
 export class SelectionController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -132,9 +134,7 @@ export class SelectionController extends Disposable {
             }
         });
 
-        spreadsheetRowHeader?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            console.log('titleMove');
-        });
+        spreadsheetRowHeader?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {});
     }
 
     private _initialColumnHeader() {
@@ -205,36 +205,6 @@ export class SelectionController extends Disposable {
                 cellRange: selectionRange.cellRange,
                 selectionType: selectionRange.selectionType,
             });
-        });
-    }
-
-    private _update(worksheet: Worksheet) {
-        const spreadsheetSkeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
-        const { scene } = sheetObject;
-
-        if (spreadsheetSkeleton == null) {
-            return;
-        }
-
-        if (scene) {
-            this._selectionTransformerShapeManager.changeRuntime(spreadsheetSkeleton, scene);
-        }
-
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-
-        const unitId = workbook.getUnitId();
-
-        const sheetId = worksheet.getSheetId();
-
-        this._selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId,
-            sheetId,
         });
     }
 

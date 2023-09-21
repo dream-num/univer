@@ -12,17 +12,23 @@ import {
     Spreadsheet,
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
-    SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/base-render';
-import { EventState, ICurrentUniverService, Nullable, ObserverManager } from '@univerjs/core';
+import {
+    EventState,
+    ICurrentUniverService,
+    LifecycleStages,
+    Nullable,
+    ObserverManager,
+    OnLifecycle,
+    Worksheet,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { CANVAS_VIEW_KEY, SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
-import { columnWidthByHeader, rowHeightByHeader } from '../Basics/SheetHeader';
-import { SheetSkeletonManagerService } from '../Services/sheetSkeleton-manager.service';
+import { SheetSkeletonManagerService } from '../services/sheetSkeleton-manager.service';
 
-// workbook
+@OnLifecycle(LifecycleStages.Ready, CanvasView)
 export class CanvasView {
     // TODO: rename to SheetCanvasView
     private _scene: Nullable<Scene>;
@@ -84,28 +90,18 @@ export class CanvasView {
 
         const sheetId = worksheet.getSheetId();
 
-        const spreadsheetSkeleton = this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId })?.skeleton;
+        this._updateViewport(worksheet);
 
-        if (spreadsheetSkeleton == null) {
-            return;
-        }
-
-        this._selectionTransformerShapeManager.changeRuntime(spreadsheetSkeleton, currentRender.scene);
-
-        this._updateViewport(spreadsheetSkeleton);
-
-        const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+        // const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         // const rowHeaderWidth = rowHeader.hidden !== true ? rowHeader.width : 0;
         // const columnHeaderHeight = columnHeader.hidden !== true ? columnHeader.height : 0;
-        const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN, spreadsheetSkeleton);
-        const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW, spreadsheetSkeleton);
-        const spreadsheetColumnHeader = new SpreadsheetColumnHeader(SHEET_VIEW_KEY.COLUMN, spreadsheetSkeleton);
+        const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
+        const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW);
+        const spreadsheetColumnHeader = new SpreadsheetColumnHeader(SHEET_VIEW_KEY.COLUMN);
         const SpreadsheetLeftTopPlaceholder = new Rect(SHEET_VIEW_KEY.LEFT_TOP, {
             zIndex: 2,
             left: -1,
             top: -1,
-            width: rowHeaderWidth,
-            height: columnHeaderHeight,
             fill: 'rgb(248, 249, 250)',
             stroke: 'rgb(217, 217, 217)',
             strokeWidth: 1,
@@ -119,51 +115,62 @@ export class CanvasView {
 
         scene?.addObjects([spreadsheet], 0);
         scene?.addObjects([spreadsheetRowHeader, spreadsheetColumnHeader, SpreadsheetLeftTopPlaceholder], 2);
-        scene?.transformByState({
-            width: columnWidthByHeader(worksheet) + columnTotalWidth,
-            height: rowHeightByHeader(worksheet) + rowTotalHeight,
-            // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
-            // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
-        });
+
+        this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId });
+
+        // if (spreadsheetSkeleton == null) {
+        //     return;
+        // }
+
+        // this._selectionTransformerShapeManager.changeRuntime(spreadsheetSkeleton, currentRender.scene);
+
+        // scene?.transformByState({
+        //     width: columnWidthByHeader(worksheet) + columnTotalWidth,
+        //     height: rowHeightByHeader(worksheet) + rowTotalHeight,
+        //     // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
+        //     // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
+        // });
     }
 
-    private _updateViewport(spreadsheetSkeleton: SpreadsheetSkeleton) {
+    private _updateViewport(worksheet: Worksheet) {
         const scene = this._scene;
         if (scene == null) {
             return;
         }
 
-        const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+        // const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
-        const rowHeaderWidthScale = rowHeaderWidth * scene.scaleX;
-        const columnHeaderHeightScale = columnHeaderHeight * scene.scaleY;
+        // const rowHeaderWidthScale = rowHeaderWidth * scene.scaleX;
+        // const columnHeaderHeightScale = columnHeaderHeight * scene.scaleY;
+
+        const { rowHeader, columnHeader } = worksheet.getConfig();
 
         const viewMain = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN, scene, {
-            left: rowHeaderWidthScale,
-            top: columnHeaderHeightScale,
+            left: rowHeader.width,
+            top: columnHeader.height,
             bottom: 0,
             right: 0,
             isWheelPreventDefaultX: true,
         });
         const viewTop = new Viewport(CANVAS_VIEW_KEY.VIEW_TOP, scene, {
-            left: rowHeaderWidthScale,
+            left: rowHeader.width,
             top: 0,
-            height: columnHeaderHeightScale,
+            height: columnHeader.height,
             right: 0,
             isWheelPreventDefaultX: true,
         });
         const viewLeft = new Viewport(CANVAS_VIEW_KEY.VIEW_LEFT, scene, {
             left: 0,
-            top: columnHeaderHeightScale,
+            top: columnHeader.height,
             bottom: 0,
-            width: rowHeaderWidthScale,
+            width: rowHeader.width,
             isWheelPreventDefaultX: true,
         });
         const viewLeftTop = new Viewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP, scene, {
             left: 0,
             top: 0,
-            width: rowHeaderWidthScale,
-            height: columnHeaderHeightScale,
+            width: rowHeader.width,
+            height: columnHeader.height,
             isWheelPreventDefaultX: true,
         });
         // viewMain.linkToViewport(viewLeft, LINK_VIEW_PORT_TYPE.Y);

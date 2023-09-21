@@ -34,6 +34,16 @@ export class SheetContainerController extends Disposable {
                     const worksheet = workbook.getActiveSheet();
                     const sheetId = worksheet.getSheetId();
 
+                    if (command.id !== SetWorksheetActivateMutation.id) {
+                        this._sheetSkeletonManagerService.makeDirty(
+                            {
+                                unitId,
+                                sheetId,
+                            },
+                            true
+                        );
+                    }
+
                     this._sheetSkeletonManagerService.setCurrent({
                         unitId,
                         sheetId,
@@ -44,11 +54,7 @@ export class SheetContainerController extends Disposable {
                         unitId,
                         sheetId,
                     });
-
-                    // this.canvasView.updateToSheet(worksheet);
                 }
-
-                // this.canvasView.getSheetView().getSpreadsheet().makeDirty(true);
             })
         );
     }

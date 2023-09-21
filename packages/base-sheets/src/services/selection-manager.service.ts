@@ -33,7 +33,7 @@ export class SelectionManagerService implements IDisposable {
 
     private _currentStyle: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE;
 
-    private _currentDetectMergedCell: boolean = false;
+    private _currentDetectMergedCell: boolean = true;
 
     private _currentSelectionType: SELECTION_TYPE = SELECTION_TYPE.AUTO;
 

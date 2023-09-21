@@ -360,7 +360,13 @@ export function ColorPicker(props: BaseColorPickerProps) {
                             e.nativeEvent.stopImmediatePropagation();
                         }}
                     >
-                        <Button onClick={onSwitch}>{setting ? <CustomLabel label="colorPicker.collapse" /> : <CustomLabel label="colorPicker.customColor" />}</Button>
+                        <Button onClick={onSwitch}>
+                            {setting ? (
+                                <CustomLabel label="colorPicker.collapse" />
+                            ) : (
+                                <CustomLabel label="colorPicker.customColor" />
+                            )}
+                        </Button>
                     </div>
                 </div>
 

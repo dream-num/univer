@@ -1,8 +1,21 @@
-import { CommandType, ICellData, ICommand, ICommandService, ICurrentUniverService, ISelectionRange, IUndoRedoService, ObjectMatrix } from '@univerjs/core';
+import {
+    CommandType,
+    ICellData,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    ISelectionRange,
+    IUndoRedoService,
+    ObjectMatrix,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../Services/selection-manager.service';
-import { ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../Mutations/set-range-values.mutation';
+import {
+    ISetRangeValuesMutationParams,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+} from '../Mutations/set-range-values.mutation';
 
 export interface IMoveRangeToCommandParams {
     destinationRange: ISelectionRange;
@@ -23,7 +36,11 @@ export const MoveRangeToCommand: ICommand = {
         }
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        const worksheetId = currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
@@ -33,7 +50,10 @@ export const MoveRangeToCommand: ICommand = {
             rangeData: [originRange],
             worksheetId,
         };
-        const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, clearMutationParams);
+        const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+            accessor,
+            clearMutationParams
+        );
 
         const clearResult = commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
 
@@ -45,7 +65,11 @@ export const MoveRangeToCommand: ICommand = {
 
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                targetMatrix.setValue(targetStartRow + (r - startRow), targetStartColumn + (c - startColumn), sheetMatrix.getValue(r, c) || {});
+                targetMatrix.setValue(
+                    targetStartRow + (r - startRow),
+                    targetStartColumn + (c - startColumn),
+                    sheetMatrix.getValue(r, c) || {}
+                );
             }
         }
 
@@ -56,7 +80,10 @@ export const MoveRangeToCommand: ICommand = {
             cellValue: targetMatrix.getData(),
         };
 
-        const undoMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
+        const undoMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+            accessor,
+            setRangeValuesMutationParams
+        );
 
         const result = commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
 
@@ -66,14 +93,28 @@ export const MoveRangeToCommand: ICommand = {
                 // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
                 URI: workbookId,
                 undo() {
-                    return (commandService.executeCommand(SetRangeValuesMutation.id, undoClearMutationParams) as Promise<boolean>).then((res) => {
+                    return (
+                        commandService.executeCommand(
+                            SetRangeValuesMutation.id,
+                            undoClearMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
                         if (res) return commandService.executeCommand(SetRangeValuesMutation.id, undoMutationParams);
                         return false;
                     });
                 },
                 redo() {
-                    return (commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams) as Promise<boolean>).then((res) => {
-                        if (res) return commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
+                    return (
+                        commandService.executeCommand(
+                            SetRangeValuesMutation.id,
+                            clearMutationParams
+                        ) as Promise<boolean>
+                    ).then((res) => {
+                        if (res)
+                            return commandService.executeCommand(
+                                SetRangeValuesMutation.id,
+                                setRangeValuesMutationParams
+                            );
                         return false;
                     });
                 },

@@ -68,9 +68,6 @@ export class Univer {
     createUniverSheet(config: Partial<IWorkbookConfig>): UniverSheet {
         const sheet = this._univerInjector.createInstance(UniverSheet, config);
 
-        // TODO@wzhudev: clean this
-        sheet.getWorkBook().onUniver();
-
         this._currentUniverService.addSheet(sheet);
         this.initializePluginsForSheet(sheet);
 

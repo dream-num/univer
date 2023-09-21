@@ -3,19 +3,15 @@ import { ICurrentUniverService, LocaleService, Plugin, PluginType, Tools } from 
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { DefaultSheetUIConfig, ISheetUIPluginConfig, SHEET_UI_PLUGIN_NAME, SheetUIPluginObserve } from './Basics';
-import { AppUIController } from './Controller/AppUIController';
-import { SheetClipboardController } from './Controller/clipboard/clipboard.controller';
-import { DesktopSheetShortcutController } from './Controller/shortcut.controller';
+import { SheetClipboardController } from './controller/clipboard/clipboard.controller';
+import { SheetUIController } from './controller/sheet-ui.controller';
 import { en } from './Locale';
 import { ICellEditorService } from './services/cell-editor/cell-editor.service';
 import { DesktopCellEditorService } from './services/cell-editor/cell-editor-desktop.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
-import { Fx } from './View/FormulaBar';
 
 export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
     static override type = PluginType.Sheet;
-
-    private _appUIController: AppUIController;
 
     private _config: ISheetUIPluginConfig;
 
@@ -50,29 +46,30 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
     override onDestroy(): void {}
 
-    getAppUIController() {
-        return this._appUIController;
-    }
-
+    /**
+     * @deprecated
+     */
     getZIndexManager() {
         return this._zIndexManager;
     }
+
+    // NOTE: should set from fx service
 
     /**
      * Formula Bar API
      * @param str
      */
-    setFormulaContent(str: string) {
-        this._appUIController
-            .getSheetContainerController()
-            .getFormulaBarUIController()
-            .getFormulaBar()
-            .setFormulaContent(str);
-    }
+    // setFormulaContent(str: string) {
+    //     this._appUIController
+    //         .getSheetContainerController()
+    //         .getFormulaBarUIController()
+    //         .getFormulaBar()
+    //         .setFormulaContent(str);
+    // }
 
-    setFx(fx: Fx) {
-        this._appUIController.getSheetContainerController().getFormulaBarUIController().getFormulaBar().setFx(fx);
-    }
+    // setFx(fx: Fx) {
+    //     this._appUIController.getSheetContainerController().getFormulaBarUIController().getFormulaBar().setFx(fx);
+    // }
 
     private _markSheetAsFocused() {
         const currentService = this._injector.get(ICurrentUniverService);
@@ -93,9 +90,8 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
                 [ISheetClipboardService, { useClass: SheetClipboardService }],
 
                 // controllers
-                [DesktopSheetShortcutController],
                 [SheetClipboardController],
-                [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
+                [SheetUIController],
             ] as Dependency[]
         ).forEach((d) => this._injector.add(d));
 

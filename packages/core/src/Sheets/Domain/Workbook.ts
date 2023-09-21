@@ -69,11 +69,6 @@ export class Workbook {
         return typeof range === 'string' || 'startRow' in range || 'row' in range;
     }
 
-    /** @deprecated */
-    onUniver() {
-        this._getDefaultWorkSheet();
-    }
-
     getUnitId() {
         return this._unitId;
     }

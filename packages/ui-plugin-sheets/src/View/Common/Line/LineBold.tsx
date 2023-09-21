@@ -1,7 +1,7 @@
 import { AppContext, BaseComponentProps, CustomLabel, Icon } from '@univerjs/base-ui';
 import { Component } from 'react';
 
-import { BORDER_SIZE_CHILDREN } from '../../../Controller/menu/border.menu';
+import { BORDER_SIZE_CHILDREN } from '../../../controller/menu/border.menu';
 
 interface IState {
     img: string;
@@ -64,12 +64,22 @@ export class LineBold extends Component<IProps, IState> {
         const label = BORDER_SIZE_CHILDREN.find((item) => item.value === value)?.label;
 
         return (
-            <div style={{ paddingBottom: '3px', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+                style={{
+                    paddingBottom: '3px',
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                }}
+            >
                 <span className={'base-sheets-line-bold'} style={{ position: 'relative' }}>
                     <CustomLabel label={title} />
                     <br></br>
                     <CustomLabel label={label} />
-                    <div style={{ width: '100%', height: 0, position: 'absolute', left: 0, bottom: '14px' }}>{imgComponent}</div>
+                    <div style={{ width: '100%', height: 0, position: 'absolute', left: 0, bottom: '14px' }}>
+                        {imgComponent}
+                    </div>
                 </span>
                 <Icon.RightIcon />
             </div>

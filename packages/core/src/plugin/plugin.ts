@@ -13,6 +13,23 @@ export enum PluginType {
     Slide,
 }
 
+<<<<<<< HEAD:packages/core/src/plugin/plugin.ts
+=======
+export interface IPlugin {
+    getPluginName(): string;
+
+    /**
+     * Could setup initialization works at this lifecycle stage.
+     */
+    onMounted?(): void;
+
+    /**
+     * Could do some initialization works at this lifecycle stage.
+     */
+    onDestroy?(): void;
+}
+
+>>>>>>> 8e0395c1 (chore(sheet-ui): cleanup legacy UI system):packages/core/src/Plugin/Plugin.ts
 /**
  * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
  */

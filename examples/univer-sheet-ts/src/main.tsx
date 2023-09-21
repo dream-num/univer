@@ -4,11 +4,11 @@ import { SheetPlugin } from '@univerjs/base-sheets';
 import { UIPlugin } from '@univerjs/base-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { LocaleType, Univer } from '@univerjs/core';
-import { FindPlugin } from '@univerjs/sheets-plugin-find';
-import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
-import { ImagePlugin } from '@univerjs/sheets-plugin-image';
-import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
-import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
+// import { FindPlugin } from '@univerjs/sheets-plugin-find';
+// import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
+// import { ImagePlugin } from '@univerjs/sheets-plugin-image';
+// import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
+// import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
 import { DocUIPlugin } from '@univerjs/ui-plugin-docs';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 
@@ -35,12 +35,12 @@ univer.registerPlugin(UIPlugin, {
 univer.registerPlugin(SheetPlugin);
 univer.registerPlugin(SheetUIPlugin);
 
-// feature plugins
-univer.registerPlugin(NumfmtPlugin);
-univer.registerPlugin(FindPlugin);
-univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
-univer.registerPlugin(ImportXlsxPlugin);
-univer.registerPlugin(ImagePlugin);
+// sheet feature plugins
+// univer.registerPlugin(NumfmtPlugin);
+// univer.registerPlugin(FindPlugin);
+// univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
+// univer.registerPlugin(ImportXlsxPlugin);
+// univer.registerPlugin(ImagePlugin);
 
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);

@@ -19,7 +19,13 @@ export const RightMenuInput: React.FC<IProps> = ({ prefix, suffix, onChange }) =
     return (
         <div>
             <CustomLabel label={prefix} />
-            <Input type="number" placeholder="1" value={inputValue} onClick={(e) => e.stopPropagation()} onChange={handleChange}></Input>
+            <Input
+                type="number"
+                placeholder="1"
+                value={inputValue}
+                onClick={(e) => e.stopPropagation()}
+                onChange={handleChange}
+            ></Input>
             <CustomLabel label={suffix} />
         </div>
     );

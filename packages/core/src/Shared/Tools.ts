@@ -8,7 +8,34 @@ import { Class, IKeyValue } from './Types';
 const rmsPrefix = /^-ms-/;
 const rDashAlpha = /-([a-z])/g;
 
-const alphabets = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+const alphabets = [
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'I',
+    'J',
+    'K',
+    'L',
+    'M',
+    'N',
+    'O',
+    'P',
+    'Q',
+    'R',
+    'S',
+    'T',
+    'U',
+    'V',
+    'W',
+    'X',
+    'Y',
+    'Z',
+];
 
 /**
  * Universal tool library
@@ -60,7 +87,11 @@ export class Tools {
     static getSystemType(): string {
         const sUserAgent = navigator.userAgent;
         const isWin = navigator.platform === 'Win32' || navigator.platform === 'Windows';
-        const isMac = navigator.platform === 'Mac68K' || navigator.platform === 'MacPPC' || navigator.platform === 'Macintosh' || navigator.platform === 'MacIntel';
+        const isMac =
+            navigator.platform === 'Mac68K' ||
+            navigator.platform === 'MacPPC' ||
+            navigator.platform === 'Macintosh' ||
+            navigator.platform === 'MacIntel';
         if (isMac) return 'Mac';
         const isUnix = navigator.platform === 'X11' && !isWin && !isMac;
         if (isUnix) return 'Unix';

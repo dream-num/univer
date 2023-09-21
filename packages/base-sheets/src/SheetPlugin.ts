@@ -13,13 +13,13 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { DEFAULT_SPREADSHEET_PLUGIN_DATA, ISheetPluginConfig } from './Basics';
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
-import { SetSelectionsOperation } from './Commands/Operations/selection.operation';
+import { SetSelectionsOperation } from './commands/operations/selection.operation';
 import { BasicWorkbookController, CountBarController, SheetContainerController } from './Controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { en } from './Locale';
-import { BorderStyleManagerService } from './Services/border-style-manager.service';
-import { SelectionManagerService } from './Services/selection-manager.service';
+import { BorderStyleManagerService } from './services/border-style-manager.service';
+import { SelectionManagerService } from './services/selection-manager.service';
 import { CanvasView } from './View/CanvasView';
 
 /**

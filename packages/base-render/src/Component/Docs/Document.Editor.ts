@@ -1,4 +1,5 @@
-import { DataStreamTreeTokenType, Nullable, Observable, Observer } from '@univerjs/core';
+import { DataStreamTreeTokenType, Nullable, Observable, Observer, RxDisposable } from '@univerjs/core';
+import { fromEvent, Observable as RxObservable, share, takeUntil } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../Basics/Const';
 import { IDocumentSkeletonCached } from '../../Basics/IDocumentSkeletonCached';
@@ -21,7 +22,7 @@ export interface IEditorInputConfig {
     selectionList?: TextSelection[];
 }
 
-export class DocsEditor {
+export class DocsEditor extends RxDisposable {
     onKeydownObservable = new Observable<IEditorInputConfig>();
 
     onInputObservable = new Observable<IEditorInputConfig>();
@@ -33,6 +34,8 @@ export class DocsEditor {
     onCompositionendObservable = new Observable<IEditorInputConfig>();
 
     onSelectionStartObservable = new Observable<Nullable<INodePosition>>();
+
+    onPaste$: RxObservable<ClipboardEvent>;
 
     private _container: HTMLDivElement;
 
@@ -73,10 +76,10 @@ export class DocsEditor {
     private _isIMEInputApply = false;
 
     constructor(private _documents?: DocComponent) {
-        this._initialDom();
+        super();
 
+        this._initDOM();
         this.activeViewport = this._documents?.getFirstViewport();
-
         if (this._documents) {
             this.changeDocuments(this._documents);
         }
@@ -211,14 +214,16 @@ export class DocsEditor {
         this._attachSelectionEvent(this._documents);
     }
 
-    dispose() {
+    override dispose() {
+        super.dispose();
+
         if (this._documents) {
             this._detachEvent(this._documents);
         }
         this._container.remove();
     }
 
-    private _initialDom() {
+    private _initDOM() {
         const container = document.createElement('div');
         container.style.position = 'absolute';
         container.style.left = `0px`;
@@ -237,16 +242,14 @@ export class DocsEditor {
         this._input = inputDom;
         this._cursor = cursorDom;
 
-        this._initialInput();
-
-        this._initialCursorDom();
-
-        this._attachInputEvent();
+        this._initInput();
+        this._initDOMCursor();
+        this._initInputEvents();
 
         document.body.appendChild(container);
     }
 
-    private _initialInput() {
+    private _initInput() {
         this._inputParent.style.cssText = `
             position:absolute;
             height:1px;
@@ -270,7 +273,7 @@ export class DocsEditor {
         `;
     }
 
-    private _initialCursorDom() {
+    private _initDOMCursor() {
         this._cursor.style.cssText = `
             visibility: visible;
             position: absolute;
@@ -594,8 +597,9 @@ export class DocsEditor {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _attachInputEvent() {
-        // NOTE@wzhudev: keydown is probably unnecessary
+    private _initInputEvents() {
+        // TODO: emit these paste event
+
         this._input.addEventListener('keydown', (e) => {
             if (this._isIMEInputApply) {
                 return;
@@ -704,6 +708,15 @@ export class DocsEditor {
                 selectionList,
             });
         });
+
+        this.onPaste$ = (fromEvent(this._input, 'paste') as RxObservable<ClipboardEvent>).pipe(
+            takeUntil(this.dispose$),
+            share()
+        );
+    }
+
+    private _handlePaste(e: ClipboardEvent) {
+        // TODO: emit the paste event to subscribers
     }
 
     // eslint-disable-next-line max-lines-per-function

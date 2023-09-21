@@ -18,9 +18,9 @@ import {
     SelectionManagerService,
     SetRangeValuesCommand,
 } from '@univerjs/base-sheets';
+import { IClipboardService } from '@univerjs/base-ui';
 import {
     createEmptyDocSnapshot,
-    Disposable,
     handleJsonToDom,
     ICommandService,
     IContextService,
@@ -32,11 +32,14 @@ import {
     LifecycleStages,
     Nullable,
     OnLifecycle,
+    RxDisposable,
     toDisposable,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
+import { takeUntil } from 'rxjs';
 
-import { FOCUSING_SHEET_CELL_EDITOR, FOCUSING_SHEET_EDITOR } from '../context/context';
+import { ISheetClipboardService } from '../clipboard/clipboard.service';
+import { SHEET_EDITOR_ACTIVATED } from '../context/context';
 import { ICellEditorService } from './cell-editor.service';
 import { getPositionOfCurrentCell, ICellPosition } from './utils';
 
@@ -47,9 +50,11 @@ const SHEET_CELL_EDITOR_MODEL_ID = 'sheet.model.cell-editor';
 
 /**
  * Cell editor for Univer on desktop. Reuse by multi univer sheet documents.
+ *
+ * This service would also handle paste event for UniverSheet.
  */
 @OnLifecycle(LifecycleStages.Rendered, ICellEditorService)
-export class DesktopCellEditorService extends Disposable implements ICellEditorService {
+export class DesktopCellEditorService extends RxDisposable implements ICellEditorService {
     private _containerElement: HTMLDivElement;
 
     private _editorEngine: Engine;
@@ -69,11 +74,16 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
         @ICommandService private readonly _commandService: ICommandService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @IContextService private readonly _contextService: IContextService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @ISheetClipboardService private readonly _clipboardService: IClipboardService
     ) {
         super();
 
         this._mountCellEditor();
+
+        // since paste event could only be triggered on an editable element such as textarea / input / contenteditable,
+        // we should bind related event handler to cell editor element
+        this._initPasteHandler();
         this._initListeners();
         this._focusCurrentSheet();
     }
@@ -104,8 +114,7 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
         const position = this._positionCellEditor(currentCell);
         await this._updateDocumentModelFromCellModel(position);
 
-        this._contextService.setContextValue(FOCUSING_SHEET_EDITOR, true);
-        this._contextService.setContextValue(FOCUSING_SHEET_CELL_EDITOR, true);
+        this._contextService.setContextValue(SHEET_EDITOR_ACTIVATED, true);
 
         this._currentUniverService.focusUniverInstance(SHEET_CELL_EDITOR_MODEL_ID); // focus the UniverDoc instance to enable rich text editing
         this._getCellEditor()?.activate();
@@ -122,8 +131,7 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
         const currentUniverSheet = this._currentUniverService.getCurrentUniverSheetInstance();
         const workbookId = currentUniverSheet.getUnitId();
         this._currentUniverService.focusUniverInstance(workbookId);
-        this._contextService.setContextValue(FOCUSING_SHEET_EDITOR, false);
-        this._contextService.setContextValue(FOCUSING_SHEET_CELL_EDITOR, false);
+        this._contextService.setContextValue(SHEET_EDITOR_ACTIVATED, false);
 
         const model = this._currentUniverService.getUniverDocInstance(SHEET_CELL_EDITOR_MODEL_ID)!.getDocument();
         const dataStream = model.getBodyModel().getText();
@@ -204,6 +212,20 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
         engine.setContainer(this._containerElement);
     }
 
+    private _initPasteHandler(): void {
+        this._enableEditor();
+
+        const editor = this._getCellEditor();
+        if (!editor) {
+            throw new Error('[DesktopCellEditorService]: Could not init paste handler, cell editor not found!');
+        }
+
+        editor.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((e: ClipboardEvent) => {
+            console.log('paste event', e);
+            // TODO: handle paste event from the editor input element
+        });
+    }
+
     private _positionCellEditor(currentCell: ISelectionCell) {
         const cellInfo = this._selectionTransformerShapeManager.convertCellRangeToInfo(currentCell)!;
 
@@ -267,13 +289,12 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
         const cellEditorModel = this._currentUniverService
             .getUniverDocInstance(SHEET_CELL_EDITOR_MODEL_ID)
             ?.getDocument();
+
         if (!cellEditorModel) {
             throw new Error('Cell editor model not found!');
         }
 
         const cellValue = this._getCellValue();
-        const style = this._getCellStyle();
-
         const snapshot: IDocumentData = {
             id: SHEET_CELL_EDITOR_MODEL_ID,
             body: {
@@ -286,7 +307,6 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
                 marginBottom: 2,
                 marginHeader: 2,
                 marginFooter: 2,
-                // FIXME: width here is not correct
                 pageSize: {
                     height: (position?.minHeight || 0) - 2 * 2,
                     width: (position?.minWidth || 0) - 2 * 2,
@@ -321,6 +341,14 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
 
     private _getCellStyle(): Nullable<IStyleData> {
         return this._getActiveRange()?.getTextStyle();
+    }
+
+    private _enableEditor(): void {
+        return this._injector
+            .get(DocsViewManagerService)
+            .getDocsView(SHEET_CELL_EDITOR_MODEL_ID)
+            ?.getDocs()
+            .enableEditor();
     }
 
     private _getCellEditor(): Nullable<DocsEditor> {

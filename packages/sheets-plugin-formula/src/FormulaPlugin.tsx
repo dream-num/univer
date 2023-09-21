@@ -1,7 +1,6 @@
 import { FormulaEngineService } from '@univerjs/base-formula-engine';
 import { CellEditExtensionManager, CellInputExtensionManager } from '@univerjs/base-ui';
 import { LocaleService, Plugin, PluginType } from '@univerjs/core';
-import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
@@ -9,7 +8,6 @@ import { IFormulaConfig } from './Basics/Interfaces/IFormula';
 import { FormulaPluginObserve, install } from './Basics/Observer';
 import { FormulaCellEditExtensionFactory } from './Basics/Register/FormulaCellEditExtension';
 import { FormulaCellInputExtensionFactory } from './Basics/Register/FormulaCellInputExtension';
-import { firstLoader } from './Controller/FirstLoader';
 import { FormulaController } from './Controller/FormulaController';
 import { FormulaPromptController } from './Controller/FormulaPromptController';
 import { SearchFormulaController } from './Controller/SearchFormulaModalController';
@@ -26,8 +24,14 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
 
     private _formulaPromptController: FormulaPromptController;
 
-    constructor(private _config: IFormulaConfig, @Inject(Injector) override readonly _injector: Injector, @Inject(LocaleService) private readonly _localeService: LocaleService) {
+    constructor(
+        private _config: IFormulaConfig,
+        @Inject(Injector) override readonly _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
         super(FORMULA_PLUGIN_NAME);
+
+        this.initializeDependencies(this._injector);
     }
 
     initialize(): void {
@@ -36,26 +40,6 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
          */
         this._localeService.getLocale().load({
             en,
-        });
-
-        const sheetContainerUIController = this._injector.get(SheetContainerUIController);
-
-        sheetContainerUIController.UIDidMount(() => {
-            this.initializeDependencies(this._injector);
-            this.registerExtension();
-            const formulaBar = sheetContainerUIController.getFormulaBarUIController().getFormulaBar();
-
-            const formulaEngineService = this._injector.get(FormulaEngineService);
-            this._formulaController.setFormulaEngine(formulaEngineService);
-
-            firstLoader(this._formulaController);
-
-            formulaBar.setFx({
-                onClick: () => {
-                    this._searchFormulaController.showFormulaModal('SearchFormula', true);
-                },
-                icon: 'FxIcon',
-            });
         });
 
         // this._arrayFormLineControl.addArrayFormLineToSheet(
@@ -90,7 +74,24 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
     override onRendered(): void {
         install(this);
 
-        this.initialize();
+        // setTimeout(() => {
+        //     this.registerExtension();
+        //     const sheetContainerUIController = this._injector.get(SheetContainerUIController);
+        //     const formulaBar = sheetContainerUIController.getFormulaBarUIController().getFormulaBar();
+
+        //     const formulaEngineService = this._injector.get(FormulaEngineService);
+        //     this._formulaController.setFormulaEngine(formulaEngineService);
+
+        //     firstLoader(this._formulaController);
+
+        //     formulaBar.setFx({
+        //         onClick: () => {
+        //             this._searchFormulaController.showFormulaModal('SearchFormula', true);
+        //         },
+        //         icon: 'FxIcon',
+        //     });
+        //     this.initialize();
+        // }, 200);
     }
 
     override onDestroy(): void {

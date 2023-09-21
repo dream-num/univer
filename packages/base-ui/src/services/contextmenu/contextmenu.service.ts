@@ -12,6 +12,8 @@ export interface IContextMenuService {
 
 export const IContextMenuService = createIdentifier<IContextMenuService>('univer.context-menu-service');
 
+// TODO: support context menu in cell editor?
+
 export class DesktopContextMenuService extends Disposable implements IContextMenuService {
     private _currentHandler: IContextMenuHandler | null = null;
 

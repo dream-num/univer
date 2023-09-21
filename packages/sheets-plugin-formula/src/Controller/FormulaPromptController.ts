@@ -1,4 +1,4 @@
-import { $$, ComponentManager, SlotManager } from '@univerjs/base-ui';
+import { ComponentManager, SlotManager } from '@univerjs/base-ui';
 import { ObserverManager } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
@@ -67,15 +67,11 @@ export class FormulaPromptController {
     }
 
     private _mount() {
-        this._sheetContainerUIController.UIDidMount(() => {
-            const richTextEle = this._sheetContainerUIController.getCellEditorUIController()._richTextEle;
-
-            this.richTextEle = richTextEle;
-            this.richTextEditEle = $$('div', this.richTextEle);
-
-            // Register cell input formula support
-            this.cellInputHandler = new CellInputHandler(this.richTextEditEle);
-        });
+        // const richTextEle = this._sheetContainerUIController.getCellEditorUIController()._richTextEle;
+        // this.richTextEle = richTextEle;
+        // this.richTextEditEle = $$('div', this.richTextEle);
+        // Register cell input formula support
+        // this.cellInputHandler = new CellInputHandler(this.richTextEditEle);
     }
 
     private _onRichTextKeyDownObservable() {
@@ -92,7 +88,14 @@ export class FormulaPromptController {
                     kcode === 108 ||
                     event.ctrlKey ||
                     event.altKey ||
-                    (event.shiftKey && (kcode === 37 || kcode === 38 || kcode === 39 || kcode === 40 || kcode === KeyCode.WIN || kcode === KeyCode.WIN_R || kcode === KeyCode.MENU))
+                    (event.shiftKey &&
+                        (kcode === 37 ||
+                            kcode === 38 ||
+                            kcode === 39 ||
+                            kcode === 40 ||
+                            kcode === KeyCode.WIN ||
+                            kcode === KeyCode.WIN_R ||
+                            kcode === KeyCode.MENU))
                 ) ||
                 kcode === 8 ||
                 kcode === 32 ||
@@ -119,7 +122,14 @@ export class FormulaPromptController {
                     kcode === 108 ||
                     event.ctrlKey ||
                     event.altKey ||
-                    (event.shiftKey && (kcode === 37 || kcode === 38 || kcode === 39 || kcode === 40 || kcode === KeyCode.WIN || kcode === KeyCode.WIN_R || kcode === KeyCode.MENU))
+                    (event.shiftKey &&
+                        (kcode === 37 ||
+                            kcode === 38 ||
+                            kcode === 39 ||
+                            kcode === 40 ||
+                            kcode === KeyCode.WIN ||
+                            kcode === KeyCode.WIN_R ||
+                            kcode === KeyCode.MENU))
                 ) ||
                 kcode === 8 ||
                 kcode === 32 ||

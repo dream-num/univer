@@ -40,6 +40,7 @@ import {
     InsertColMenuItemFactory,
     InsertRowMenuItemFactory,
     ItalicMenuItemFactory,
+    PasteMenuItemFactory,
     RedoMenuItemFactory,
     RemoveColMenuItemFactory,
     RemoveRowMenuItemFactory,
@@ -142,6 +143,8 @@ export class SheetUIController extends Disposable {
             [
                 // context menu
                 CopyMenuItemFactory,
+                PasteMenuItemFactory,
+
                 ClearSelectionMenuItemFactory,
                 InsertRowMenuItemFactory,
                 InsertColMenuItemFactory,

@@ -13,6 +13,7 @@
  *
  * means "A1:B2"
  */
+// TODO@wzhudev: Rename to IRange
 export interface ISelectionRange {
     /**
      * The start row (inclusive) of the range

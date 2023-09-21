@@ -3,15 +3,20 @@ import { BehaviorSubject } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../Shared/lifecycle';
 import { ILogService } from '../log/log.service';
-import { LifecycleStages, LifecycleToModules } from './lifecycle';
+import { LifecycleNameMap, LifecycleStages, LifecycleToModules } from './lifecycle';
 
 export class LifecycleService extends Disposable {
-    private _lifecycle$ = new BehaviorSubject<LifecycleStages>(LifecycleStages.Staring);
+    private _lifecycle$ = new BehaviorSubject<LifecycleStages>(LifecycleStages.Starting);
 
     lifecycle$ = this._lifecycle$.asObservable();
 
     constructor(@ILogService private readonly _logService: ILogService) {
         super();
+
+        this._logService.log(
+            `[LifecycleService]`,
+            `lifecycle progressed to "${LifecycleNameMap[LifecycleStages.Starting]}".`
+        );
     }
 
     get stage(): LifecycleStages {
@@ -27,7 +32,7 @@ export class LifecycleService extends Disposable {
             return;
         }
 
-        this._logService.log('[LifecycleService]: lifecycle progressed to ', stage, ' .');
+        this._logService.log('[LifecycleService]', `lifecycle progressed to "${LifecycleNameMap[stage]}".`);
         this._lifecycle$.next(stage);
     }
 }

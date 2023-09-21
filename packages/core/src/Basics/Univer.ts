@@ -3,6 +3,7 @@ import { Ctor, Injector } from '@wendellhu/redi';
 import { ObserverManager } from '../Observer';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
+import { ConfigService, IConfigService } from '../services/config/config.service';
 import { ContextService, IContextService } from '../services/context/context.service';
 import { CurrentUniverService, ICurrentUniverService } from '../services/current.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
@@ -156,6 +157,7 @@ export class Univer {
             [ICommandService, { useClass: CommandService, lazy: true }],
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
             [IPermissionService, { useClass: DesktopPermissionService }],
+            [IConfigService, { useClass: ConfigService }],
             [IContextService, { useClass: ContextService }],
         ]);
     }

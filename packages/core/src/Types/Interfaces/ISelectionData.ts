@@ -14,9 +14,7 @@ export interface IPosition {
 export interface ISingleCell {
     row: number; // current cell, if cell is in merge,  isMerged is true, If the cell is in the upper left corner, isMergedMainCell is true.
     column: number;
-
     isMerged: boolean;
-
     isMergedMainCell: boolean;
 }
 
@@ -36,7 +34,8 @@ export enum SELECTION_TYPE {
 }
 
 export interface ISelection {
-    rangeData: ISelectionRange;
+    /** range */
+    rangeData: ISelectionRange; // TODO@wzhudev: rename
     cellRange: Nullable<ISelectionCell>;
     selectionType?: SELECTION_TYPE;
 }

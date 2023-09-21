@@ -51,6 +51,8 @@ interface INotifyObserversReturn {
 
 /**
  * Represent an WorkBookObserver registered to a given Observable object.
+ *
+ * @deprecated use rxjs instead
  */
 export class Observer<T = void> {
     /** @hidden */
@@ -75,6 +77,8 @@ export class Observer<T = void> {
 
 /**
  * The Observable class is a simple implementation of the Observable pattern.
+ *
+ * @deprecated use rxjs instead. It is not necessary to create another reactive programming system. Leverage the community.
  *
  * @remarks
  * There's one slight particularity though: a given Observable can notify its observer using a particular mask value, only the Observers registered with this mask value will be notified.
@@ -115,7 +119,11 @@ export class Observable<T> {
      * @param unregisterOnFirstCall defines if the observer as to be unregistered after the next notification
      * @returns the new observer created for the callback
      */
-    add(callback: (eventData: T, eventState: EventState) => void, insertFirst = false, unregisterOnFirstCall = false): Nullable<Observer<T>> {
+    add(
+        callback: (eventData: T, eventState: EventState) => void,
+        insertFirst = false,
+        unregisterOnFirstCall = false
+    ): Nullable<Observer<T>> {
         if (!callback) {
             return null;
         }

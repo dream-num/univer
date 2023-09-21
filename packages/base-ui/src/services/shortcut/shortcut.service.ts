@@ -82,9 +82,13 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         const macCtrl = binding & MetaKeys.MAC_CTRL;
 
         if (this._platformService.isMac) {
-            return `${ctrlKey ? '⌘' : ''}${shiftKey ? '⇧' : ''}${altKey ? '⌥' : ''}${macCtrl ? '⌃' : ''}${String.fromCharCode(binding & 0xff)}`;
+            return `${ctrlKey ? '⌘' : ''}${shiftKey ? '⇧' : ''}${altKey ? '⌥' : ''}${
+                macCtrl ? '⌃' : ''
+            }${String.fromCharCode(binding & 0xff)}`;
         }
-        return `${ctrlKey ? 'Ctrl+' : ''}${shiftKey ? 'Shift+' : ''}${altKey ? 'Alt+' : ''}${String.fromCharCode(binding & 0xff)}`;
+        return `${ctrlKey ? 'Ctrl+' : ''}${shiftKey ? 'Shift+' : ''}${altKey ? 'Alt+' : ''}${String.fromCharCode(
+            binding & 0xff
+        )}`;
     }
 
     private resolveMouseEvent(e: KeyboardEvent): void {
@@ -107,7 +111,12 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
 
         const shouldTrigger = Array.from(shortcuts)
             .sort((s1, s2) => (s1.priority ?? 0) - (s2.priority ?? 0))
-            .find((s) => s.preconditions?.({ getContextValue: this._contextService.getContextValue.bind(this._contextService) }) ?? true);
+            .find(
+                (s) =>
+                    s.preconditions?.({
+                        getContextValue: this._contextService.getContextValue.bind(this._contextService),
+                    }) ?? true
+            );
         if (shouldTrigger) {
             this._commandService.executeCommand(shouldTrigger.id, shouldTrigger.staticParameters);
             return true;

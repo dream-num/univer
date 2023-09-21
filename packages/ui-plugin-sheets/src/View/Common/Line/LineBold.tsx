@@ -1,7 +1,7 @@
 import { AppContext, BaseComponentProps, CustomLabel, Icon } from '@univerjs/base-ui';
 import { Component } from 'react';
 
-import { BORDER_SIZE_CHILDREN } from '../../../controller/menu/border.menu';
+import { BORDER_SIZE_CHILDREN, LINE_BOLD_LABEL } from '../../../controller/menu/border.menu';
 
 interface IState {
     img: string;
@@ -14,7 +14,7 @@ interface IProps extends BaseComponentProps {
 }
 
 export class LineBold extends Component<IProps, IState> {
-    static readonly componentName = 'bold';
+    static readonly componentName = LINE_BOLD_LABEL;
 
     static override contextType = AppContext;
 

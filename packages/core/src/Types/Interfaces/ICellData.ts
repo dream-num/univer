@@ -20,7 +20,10 @@ export interface ICellData {
     // id?: string;
     p?: IDocumentData; // univer docs
     s?: string | Nullable<IStyleData>; // style id
-    v?: Nullable<ICellV>; // origin value
+    /**
+     * Origin value
+     */
+    v?: Nullable<ICellV>;
     m?: Nullable<string>; // formatted value
     // Usually the type is automatically determined based on the data, or the user directly specifies
     t?: CellValueType; // 0 string, 1 number, 2 boolean, 3 force string, green icon

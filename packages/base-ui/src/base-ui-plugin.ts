@@ -10,6 +10,10 @@ import { DesktopClipboardService, IClipboardService } from './services/clipboard
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopMenuService, IMenuService } from './services/menu/menu.service';
+import { DesktopMessageService } from './services/message/desktop-message.service';
+import { IMessageService } from './services/message/message.service';
+import { DesktopNotificationService } from './services/notification/desktop-notification.service';
+import { INotificationService } from './services/notification/notification.service';
 import { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
 import { DesktopShortcutService, IShortcutService } from './services/shortcut/shortcut.service';
 
@@ -54,6 +58,8 @@ export class UIPlugin extends Plugin {
             [IContextMenuService, { useClass: DesktopContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService }],
             [IClipboardService, { useClass: DesktopClipboardService }],
+            [INotificationService, { useClass: DesktopNotificationService }],
+            [IMessageService, { useClass: DesktopMessageService }],
 
             // controllers
             [SharedController],

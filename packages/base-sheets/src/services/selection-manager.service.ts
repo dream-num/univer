@@ -24,7 +24,7 @@ export interface ISelectionManagerInsertParam extends ISelectionManagerSearchPar
 export type ISelectionInfo = Map<string, Map<string, Map<string, ISelectionRangeWithStyle[]>>>;
 
 /**
- * This service is for managing settings border style status.
+ * This service is for selection.
  */
 export class SelectionManagerService implements IDisposable {
     private readonly _selectionInfo: ISelectionInfo = new Map();

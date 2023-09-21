@@ -61,21 +61,32 @@ export class ScrollTimer {
         let x = 0;
         let y = 0;
 
+        let shouldScroll = false;
+
         if (this._moveX < leftBounding + l) {
             x = (this._moveX - leftBounding - l) * this._smoothRatioX;
+            shouldScroll = true;
         }
 
         if (this._moveX > rightBounding - r) {
             x = (this._moveX - rightBounding + r) * this._smoothRatioX;
+            shouldScroll = true;
         }
 
         if (this._moveY < topBounding + t) {
             y = (this._moveY - topBounding - t) * this._smoothRatioY;
+            shouldScroll = true;
         }
 
         if (this._moveY > bottomBounding - b) {
             y = (this._moveY - bottomBounding + b) * this._smoothRatioY;
+            shouldScroll = true;
         }
+
+        if (!shouldScroll) {
+            return;
+        }
+
         const limited = viewport?.scrollBy({
             x,
             y,

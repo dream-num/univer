@@ -1,103 +1,169 @@
-import './Views';
-
 import {
-    Engine,
     EVENT_TYPE,
-    IRenderingEngine,
+    IRender,
+    IRenderManagerService,
     IScrollObserverParam,
+    ISelectionTransformerShapeManager,
     IWheelEvent,
     Layer,
+    Rect,
     Scene,
     ScrollBar,
+    Spreadsheet,
+    SpreadsheetColumnHeader,
+    SpreadsheetRowHeader,
+    SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/base-render';
-import { EventState, ICurrentUniverService, Nullable, ObserverManager, sortRules, Worksheet } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { EventState, ICurrentUniverService, Nullable, ObserverManager } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
-import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
-import { SheetView } from './Views/SheetView';
+import { CANVAS_VIEW_KEY, SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { columnWidthByHeader, rowHeightByHeader } from '../Basics/SheetHeader';
+import { SheetSkeletonManagerService } from '../Services/sheetSkeleton-manager.service';
 
 // workbook
 export class CanvasView {
     // TODO: rename to SheetCanvasView
     private _scene: Nullable<Scene>;
 
-    private _views: BaseView[] = []; // worksheet
-
     constructor(
-        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
-        @Inject(Injector) private readonly _injector: Injector,
-        @IRenderingEngine private readonly _engine: Engine
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @ISelectionTransformerShapeManager
+        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         this._initialize();
     }
 
-    getView(key: string) {
-        for (const view of this._views) {
-            if (view.viewKey === key) {
-                return view;
-            }
-        }
-    }
-
-    getSheetView(): SheetView {
-        return this.getView(CANVAS_VIEW_KEY.SHEET_VIEW) as SheetView;
-    }
-
-    updateToSheet(worksheet: Worksheet) {
-        for (const view of this._views) {
-            view.onSheetChange(worksheet);
-        }
-    }
-
-    // eslint-disable-next-line max-lines-per-function
     private _initialize() {
-        const engine = this._engine;
-        const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook();
-        let worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            worksheet = workbook.getSheets()[0];
-        }
-        const config = worksheet.getConfig();
-        const rowHeader = config.rowHeader;
-        const columnHeader = config.columnHeader;
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
 
-        // How do we know if a business should claim itself as main scene?
-        const scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
-            width: 1500,
-            height: 1000,
-        });
+        const unitId = workbook.getUnitId();
+
+        const renderManager = this._renderManagerService.createRenderWithDefaultEngine(unitId);
+
+        renderManager.setCurrent(unitId);
+
+        const currentRender = renderManager.getCurrent();
+
+        if (currentRender == null) {
+            return;
+        }
+
+        const { scene, engine } = currentRender;
 
         scene.openTransformer();
 
         this._scene = scene;
+
+        // sheet zoom [0 ~ 1]
+        this._observerManager.requiredObserver<{ zoomRatio: number }>('onZoomRatioSheetObservable').add((value) => {
+            this._scene?.scale(value.zoomRatio, value.zoomRatio);
+        });
+
+        scene.addLayer(Layer.create(scene, [], 0), Layer.create(scene, [], 2));
+
+        if (currentRender != null) {
+            this._initialComponent(currentRender);
+        }
+
+        engine.runRenderLoop(() => {
+            scene.render();
+        });
+    }
+
+    private _initialComponent(currentRender: IRender) {
+        const scene = this._scene;
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const worksheet = workbook.getActiveSheet();
+
+        const unitId = workbook.getUnitId();
+
+        const sheetId = worksheet.getSheetId();
+
+        const spreadsheetSkeleton = this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId })?.skeleton;
+
+        if (spreadsheetSkeleton == null) {
+            return;
+        }
+
+        this._selectionTransformerShapeManager.changeRuntime(spreadsheetSkeleton, currentRender.scene);
+
+        this._updateViewport(spreadsheetSkeleton);
+
+        const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+        // const rowHeaderWidth = rowHeader.hidden !== true ? rowHeader.width : 0;
+        // const columnHeaderHeight = columnHeader.hidden !== true ? columnHeader.height : 0;
+        const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN, spreadsheetSkeleton);
+        const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW, spreadsheetSkeleton);
+        const spreadsheetColumnHeader = new SpreadsheetColumnHeader(SHEET_VIEW_KEY.COLUMN, spreadsheetSkeleton);
+        const SpreadsheetLeftTopPlaceholder = new Rect(SHEET_VIEW_KEY.LEFT_TOP, {
+            zIndex: 2,
+            left: -1,
+            top: -1,
+            width: rowHeaderWidth,
+            height: columnHeaderHeight,
+            fill: 'rgb(248, 249, 250)',
+            stroke: 'rgb(217, 217, 217)',
+            strokeWidth: 1,
+        });
+
+        currentRender.mainComponent = spreadsheet;
+        currentRender.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
+        currentRender.components.set(SHEET_VIEW_KEY.ROW, spreadsheetRowHeader);
+        currentRender.components.set(SHEET_VIEW_KEY.COLUMN, spreadsheetColumnHeader);
+        currentRender.components.set(SHEET_VIEW_KEY.LEFT_TOP, SpreadsheetLeftTopPlaceholder);
+
+        scene?.addObjects([spreadsheet], 0);
+        scene?.addObjects([spreadsheetRowHeader, spreadsheetColumnHeader, SpreadsheetLeftTopPlaceholder], 2);
+        scene?.transformByState({
+            width: columnWidthByHeader(worksheet) + columnTotalWidth,
+            height: rowHeightByHeader(worksheet) + rowTotalHeight,
+            // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
+            // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
+        });
+    }
+
+    private _updateViewport(spreadsheetSkeleton: SpreadsheetSkeleton) {
+        const scene = this._scene;
+        if (scene == null) {
+            return;
+        }
+
+        const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+
+        const rowHeaderWidthScale = rowHeaderWidth * scene.scaleX;
+        const columnHeaderHeightScale = columnHeaderHeight * scene.scaleY;
+
         const viewMain = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN, scene, {
-            left: rowHeader.width,
-            top: columnHeader.height,
+            left: rowHeaderWidthScale,
+            top: columnHeaderHeightScale,
             bottom: 0,
             right: 0,
             isWheelPreventDefaultX: true,
         });
         const viewTop = new Viewport(CANVAS_VIEW_KEY.VIEW_TOP, scene, {
-            left: rowHeader.width,
+            left: rowHeaderWidthScale,
             top: 0,
-            height: columnHeader.height,
+            height: columnHeaderHeightScale,
             right: 0,
             isWheelPreventDefaultX: true,
         });
         const viewLeft = new Viewport(CANVAS_VIEW_KEY.VIEW_LEFT, scene, {
             left: 0,
-            top: columnHeader.height,
+            top: columnHeaderHeightScale,
             bottom: 0,
-            width: rowHeader.width,
+            width: rowHeaderWidthScale,
             isWheelPreventDefaultX: true,
         });
         const viewLeftTop = new Viewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP, scene, {
             left: 0,
             top: 0,
-            width: rowHeader.width,
-            height: columnHeader.height,
+            width: rowHeaderWidthScale,
+            height: columnHeaderHeightScale,
             isWheelPreventDefaultX: true,
         });
         // viewMain.linkToViewport(viewLeft, LINK_VIEW_PORT_TYPE.Y);
@@ -121,13 +187,6 @@ export class CanvasView {
                 .makeDirty(true);
         });
 
-        // sheet zoom [0 ~ 1]
-        this._observerManager.requiredObserver<{ zoomRatio: number }>('onZoomRatioSheetObservable').add((value) => {
-            this._scene?.scale(value.zoomRatio, value.zoomRatio);
-        });
-
-        scene.addViewport(viewMain, viewLeft, viewTop, viewLeftTop).attachControl();
-
         // 鼠标滚轮缩放
         scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
@@ -139,7 +198,7 @@ export class CanvasView {
                     ratioDelta /= 2;
                 }
 
-                const sheet = this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 const currentRatio = sheet.getZoomRatio();
                 let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
                 nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
@@ -154,20 +213,6 @@ export class CanvasView {
 
         const scrollbar = new ScrollBar(viewMain);
 
-        scene.addLayer(Layer.create(scene, [], 0), Layer.create(scene, [], 2));
-
-        this._viewLoader(scene);
-
-        engine.runRenderLoop(() => {
-            scene.render();
-        });
-    }
-
-    private _viewLoader(scene: Scene) {
-        CanvasViewRegistry.getData()
-            .sort(sortRules)
-            .forEach((viewFactory) => {
-                this._views.push(viewFactory.create(scene, this._injector));
-            });
+        scene.addViewport(viewMain, viewLeft, viewTop, viewLeftTop).attachControl();
     }
 }

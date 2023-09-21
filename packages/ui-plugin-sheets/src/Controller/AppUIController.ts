@@ -22,7 +22,9 @@ export class AppUIController extends Disposable {
         this._sheetContainerController = this._injector.createInstance(SheetContainerUIController, config);
         this._injector.add([SheetContainerUIController, { useValue: this._sheetContainerController }]);
 
-        this.disposeWithMe(this._uiController.registerFooterComponent(() => connectInjector(RenderSheetFooter, this._injector)));
+        this.disposeWithMe(
+            this._uiController.registerFooterComponent(() => connectInjector(RenderSheetFooter, this._injector))
+        );
     }
 
     /**

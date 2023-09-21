@@ -258,7 +258,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._columnWidthAccumulation = columnWidthAccumulation;
         this._showGridlines = showGridlines;
 
-        this.makeDirty(true);
+        this.makeDirty(false);
 
         return this;
     }

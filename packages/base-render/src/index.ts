@@ -6,6 +6,7 @@ export * from './Custom';
 export * from './Engine';
 export * from './Group';
 export * from './Layer';
+export * from './Render-manager.service';
 export { IRenderingEngine, RenderEngine } from './RenderEngine';
 export * from './Scene';
 export * from './SceneViewer';

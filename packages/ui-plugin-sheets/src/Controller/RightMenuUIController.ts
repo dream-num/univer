@@ -1,4 +1,3 @@
-import { CanvasView } from '@univerjs/base-sheets';
 import {
     BaseMenuItem,
     BaseSelectChildrenProps,
@@ -55,7 +54,6 @@ export class RightMenuUIController extends Disposable {
     constructor(
         _config: SheetRightMenuConfig | undefined,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(CanvasView) private readonly _sheetCanvasView: CanvasView,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IMenuService private readonly _menuService: IMenuService
     ) {

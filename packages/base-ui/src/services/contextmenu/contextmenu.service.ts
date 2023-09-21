@@ -25,18 +25,24 @@ export class DesktopContextMenuService extends Disposable implements IContextMen
         }
 
         this._currentHandler = handler;
-        const pointerDownOnMain = this._renderingEngine.getScene('mainScene')?.onPointerDownObserver;
-        const observer = pointerDownOnMain?.add((event: IPointerEvent | IMouseEvent) => {
-            // right click
-            if (event.button === 2) {
-                event.preventDefault();
-                this._currentHandler?.handleContextMenu(event);
-            }
-        });
+
+        // FIXME@wzhudev: shouldn't set timeout here, because we should not get pointer down event on mainScene but
+        // rendering engine itself
+        setTimeout(() => {
+            const mainScene = this._renderingEngine.getScene('mainScene');
+            const pointerDownOnMain = mainScene!.onPointerDownObserver;
+            const observer = pointerDownOnMain?.add((event: IPointerEvent | IMouseEvent) => {
+                // right click
+                if (event.button === 2) {
+                    event.preventDefault();
+                    this._currentHandler?.handleContextMenu(event);
+                }
+            });
+        }, 200);
 
         return toDisposable(() => {
             this._currentHandler = null;
-            pointerDownOnMain?.remove(observer);
+            // pointerDownOnMain?.remove(observer);
         });
     }
 }

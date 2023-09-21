@@ -48,7 +48,6 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
     override componentDidMount() {
         document.addEventListener('click', this.handleClick);
 
-        // TODO: dispose
         this._disposables.add(
             this.contextMenuService.registerContextMenuHandler({
                 handleContextMenu: this.handleContextMenu,

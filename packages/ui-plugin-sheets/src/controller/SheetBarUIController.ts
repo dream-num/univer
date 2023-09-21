@@ -1,5 +1,5 @@
 import { BaseComponentProps, ColorPicker, ComponentManager, IMenuItemFactory, IMenuService } from '@univerjs/base-ui';
-import { BooleanNumber, Disposable, ICommandService, Nullable } from '@univerjs/core';
+import { BooleanNumber, Disposable, ICommandService, LifecycleStages, Nullable, OnLifecycle } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
@@ -51,6 +51,7 @@ export interface SheetUlProps extends BaseUlProps {
     sheetId: string;
 }
 
+@OnLifecycle(LifecycleStages.Ready, SheetBarUIController)
 export class SheetBarUIController extends Disposable {
     protected _sheetBar: SheetBar;
 

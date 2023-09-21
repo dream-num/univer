@@ -41,10 +41,11 @@ export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
 
         this._initDependencies();
         this._initModules();
-        this._markSheetAsFocused();
     }
 
-    override onDestroy(): void {}
+    override onRendered(): void {
+        this._markSheetAsFocused();
+    }
 
     /**
      * @deprecated

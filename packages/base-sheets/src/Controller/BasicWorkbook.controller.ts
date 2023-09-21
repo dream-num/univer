@@ -1,4 +1,11 @@
-import { Disposable, ICommandService, IWorksheetConfig, ObserverManager } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    IWorksheetConfig,
+    LifecycleStages,
+    ObserverManager,
+    OnLifecycle,
+} from '@univerjs/core';
 import { IDisposable, Inject, SkipSelf } from '@wendellhu/redi';
 
 import { InsertSheetCommand } from '../commands/commands/insert-sheet.command';
@@ -7,6 +14,7 @@ import { RemoveSheetCommand } from '../commands/commands/remove-sheet.command';
 /**
  * The controller to provide the most basic sheet CRUD methods to other modules of sheet modules.
  */
+@OnLifecycle(LifecycleStages.Rendered, BasicWorkbookController)
 export class BasicWorkbookController extends Disposable implements IDisposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

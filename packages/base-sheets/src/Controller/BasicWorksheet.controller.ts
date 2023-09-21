@@ -1,4 +1,4 @@
-import { Disposable, ICommandService, IStyleData } from '@univerjs/core';
+import { Disposable, ICommandService, IStyleData, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
 import {
@@ -85,6 +85,7 @@ export interface IStyleTypeValue<T> {
 /**
  * The controller to provide the most basic sheet CRUD methods to other modules of sheet modules.
  */
+@OnLifecycle(LifecycleStages.Rendered, BasicWorksheetController)
 export class BasicWorksheetController extends Disposable implements IDisposable {
     constructor(@ICommandService private readonly _commandService: ICommandService) {
         super();

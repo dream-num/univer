@@ -5,7 +5,16 @@ import { ICurrentUniverService } from '../../services/current.service';
 import { GenName, Nullable, Tools } from '../../Shared';
 import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
-import { IColumnStartEndData, IGridRange, IRangeArrayData, IRangeStringData, IRangeType, IRowStartEndData, ISelectionRange, IWorkbookConfig } from '../../Types/Interfaces';
+import {
+    IColumnStartEndData,
+    IGridRange,
+    IRangeArrayData,
+    IRangeStringData,
+    IRangeType,
+    IRowStartEndData,
+    ISelectionRange,
+    IWorkbookConfig,
+} from '../../Types/Interfaces';
 import { Styles } from './Styles';
 import { Worksheet } from './Worksheet';
 
@@ -52,6 +61,8 @@ export class Workbook {
         this._unitId = this._config.id;
         this._styles = new Styles(styles);
         this._worksheets = new Map<string, Worksheet>();
+
+        this._getDefaultWorkSheet();
     }
 
     /**
@@ -219,16 +230,16 @@ export class Workbook {
         return this._worksheets.get(sheetId);
     }
 
-    getPluginMeta<T>(name: string): T {
-        return this._config.pluginMeta[name];
-    }
+    // getPluginMeta<T>(name: string): T {
+    //     return this._config.pluginMeta[name];
+    // }
 
-    setPluginMeta<T>(name: string, value: T) {
-        if (!this._config.pluginMeta) {
-            this._config.pluginMeta = {};
-        }
-        return (this._config.pluginMeta[name] = value);
-    }
+    // setPluginMeta<T>(name: string, value: T) {
+    //     if (!this._config.pluginMeta) {
+    //         this._config.pluginMeta = {};
+    //     }
+    //     return (this._config.pluginMeta[name] = value);
+    // }
 
     /**
      * Creates a builder for a conditional formatting rule.

@@ -30,11 +30,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
     private _config: ISheetPluginConfig;
 
-    private _formulaBarController: Nullable<FormulaBarController>;
-
     private _countBarController: Nullable<CountBarController>;
-
-    private _sheetContainerController: Nullable<SheetContainerController>;
 
     constructor(
         config: Partial<ISheetPluginConfig>,
@@ -86,19 +82,16 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     }
 
     initController() {
-        this._sheetContainerController = this._injector.get(SheetContainerController);
-        this._formulaBarController = this._injector.get(FormulaBarController);
+        this._injector.get(SheetContainerController);
+        this._injector.get(FormulaBarController);
         this._countBarController = this._injector.get(CountBarController);
-
-        this._injector.get(BasicWorksheetController);
-        this._injector.get(BasicWorkbookController);
     }
 
-    override onStarting(): void {
+    override onStarting(): void {}
+
+    override onRendered(): void {
         this.initialize();
     }
-
-    override onRendered(): void {}
 
     override onDestroy(): void {
         super.onDestroy();

@@ -16,7 +16,7 @@ import {
     IShortcutService,
     IUIController,
 } from '@univerjs/base-ui';
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
@@ -93,6 +93,7 @@ import {
 } from './shortcuts/style.shortcut';
 import { ClearSelectionValueShortcutItem } from './shortcuts/value.shortcut';
 
+@OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class SheetUIController extends Disposable {
     private _sheetBarUIController: SheetBarUIController;
 

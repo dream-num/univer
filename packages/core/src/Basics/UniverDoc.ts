@@ -40,6 +40,10 @@ export class UniverDoc {
         this._pluginStore.addPlugin(pluginInstance);
     }
 
+    onReady(): void {
+        this._pluginStore.forEachPlugin((p) => p.onReady());
+    }
+
     private _initializeDependencies(parentInjector?: Injector): Injector {
         const dependencies: Dependency[] = [[ICommandService, { useClass: CommandService }]];
         return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);

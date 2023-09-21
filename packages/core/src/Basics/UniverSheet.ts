@@ -48,6 +48,10 @@ export class UniverSheet implements IDisposable {
         return this._workbook;
     }
 
+    onReady(): void {
+        this._pluginStore.forEachPlugin((p) => p.onReady());
+    }
+
     dispose(): void {}
 
     /**

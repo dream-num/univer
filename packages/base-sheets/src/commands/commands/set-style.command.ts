@@ -123,7 +123,6 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
  * Set bold font style to currently selected ranges. If the cell is already bold then it will cancel the bold style.
  */
 export const SetBoldCommand: ICommand = {
-    // TODO@wzhudev: name to toggle bold command?
     type: CommandType.COMMAND,
     id: 'sheet.command.set-bold',
     handler: async (accessor) => {
@@ -132,6 +131,7 @@ export const SetBoldCommand: ICommand = {
         const cellRange = selectionManagerService.getLast()?.cellRange;
         const currentUniverService = accessor.get(ICurrentUniverService);
         const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+
         let currentlyBold = true;
         if (cellRange) {
             currentlyBold = worksheet.getRange(cellRange.row, cellRange.column).getFontWeight() === FontWeight.BOLD;

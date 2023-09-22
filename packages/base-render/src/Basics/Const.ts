@@ -287,9 +287,3 @@ export enum RENDER_CLASS_TYPE {
     LAYER = 'Layer',
     GROUP = 'Group',
 }
-
-export enum SELECTION_TYPE {
-    NORMAL,
-    ROW,
-    COLUMN,
-}

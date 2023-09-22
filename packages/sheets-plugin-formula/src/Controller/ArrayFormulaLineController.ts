@@ -1,7 +1,5 @@
-import { Rect, Scene } from '@univerjs/base-render';
-import { CanvasView, SheetView } from '@univerjs/base-sheets';
+import { IRenderManagerService, Rect } from '@univerjs/base-render';
 import { ICurrentUniverService, ISelectionRange, Workbook } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
 
 enum ARRAY_FORMULA_LINE_MANAGER_KEY {
     top = '__ArrayFormulaLineTopControl__',
@@ -34,17 +32,9 @@ export class ArrayFormulaLineControl {
         private _sheetId: string,
         private _range: ISelectionRange,
         @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
-        @Inject(CanvasView) private readonly _canvasView: CanvasView
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         this._initialize();
-    }
-
-    /**
-     * Return SheetView
-     * @returns
-     */
-    getSheetView(): SheetView {
-        return this._canvasView.getSheetView();
     }
 
     /**
@@ -53,14 +43,6 @@ export class ArrayFormulaLineControl {
      */
     getWorkBook(): Workbook {
         return this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook();
-    }
-
-    /**
-     * Return SheetView Scene
-     * @returns
-     */
-    getSheetViewScene(): Scene {
-        return this.getSheetView().getScene();
     }
 
     dispose() {
@@ -82,8 +64,8 @@ export class ArrayFormulaLineControl {
             throw new Error(`not found sheet from id: ${sheetId}`);
         }
 
-        const rowTitleWidth = worksheet.getConfig().rowTitle.width;
-        const columnTitleHeight = worksheet.getConfig().columnTitle.height;
+        const rowHeaderWidth = worksheet.getConfig().rowHeader.width;
+        const columnHeaderHeight = worksheet.getConfig().columnHeader.height;
 
         const rowManager = worksheet.getRowManager();
         const columnManager = worksheet.getColumnManager();
@@ -109,14 +91,16 @@ export class ArrayFormulaLineControl {
         this._arrayFormulaLine = new Rect(ARRAY_FORMULA_LINE_MANAGER_KEY.line, {
             stroke: LINE_COLOR,
             strokeWidth: 1,
-            left: offsetLeft + rowTitleWidth,
-            top: offsetTop + columnTitleHeight,
+            left: offsetLeft + rowHeaderWidth,
+            top: offsetTop + columnHeaderHeight,
             height: totalHeight,
             width: totalWidth,
             evented: false,
         });
 
-        this.getSheetViewScene().addObject(this._arrayFormulaLine);
+        const scene = this._renderManagerService.getCurrent()?.scene;
+        scene?.addObject(this._arrayFormulaLine);
+
         // this._arrayFormulaLine.makeDirty(true);
     }
 }

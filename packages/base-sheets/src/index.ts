@@ -7,7 +7,6 @@ export * from './View';
 
 export { BorderStyleManagerService } from './services/border-style-manager.service';
 export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './services/selection-manager.service';
-export { ICanvasView } from './services/tokens';
 
 // #endregion
 

@@ -1,4 +1,4 @@
-import { Engine, IRenderingEngine } from '@univerjs/base-render';
+import { IRenderManagerService } from '@univerjs/base-render';
 import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import { IDisposable, Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
@@ -29,7 +29,7 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
-        @IRenderingEngine private readonly _renderingEngine: Engine
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
     }
@@ -37,7 +37,7 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     bootstrapWorkbench(options: IWorkbenchOptions): void {
         this.disposeWithMe(
             bootStrap(this._injector, options, (element) => {
-                this._renderingEngine.setContainer(element);
+                this._renderManagerService.defaultEngine.setContainer(element);
                 this._lifecycleService.stage = LifecycleStages.Rendered;
             })
         );

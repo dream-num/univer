@@ -125,7 +125,11 @@ export class CurrentUniverService extends Disposable implements ICurrentUniverSe
 
     focusUniverInstance(id: string | null): void {
         if (id) {
-            this._focused = this.getUniverSheetInstance(id) || this.getUniverDocInstance(id) || this.getUniverSlideInstance(id) || null;
+            this._focused =
+                this.getUniverSheetInstance(id) ||
+                this.getUniverDocInstance(id) ||
+                this.getUniverSlideInstance(id) ||
+                null;
         }
         this._focused$.next(id);
     }

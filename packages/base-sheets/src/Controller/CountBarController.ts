@@ -5,15 +5,13 @@ export class CountBarController {
     constructor(
         @SkipSelf() @Inject(ObserverManager) private _globalObserverManager: ObserverManager,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
-    ) {}
-
-    listenEventManager(): void {
+    ) {
         this._getCoreObserver<number>('onUIChangeObservable').add(({ name, value }) => {
             switch (name) {
                 case 'changeZoom': {
                     const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
                     if (workbook) {
-                        workbook.getActiveSheet().setZoomRatio(value!);
+                        // workbook.getActiveSheet().setZoomRatio(value!);
                     }
                     break;
                 }

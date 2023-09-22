@@ -28,22 +28,23 @@ export interface ISelectionCellWithCoord extends IPosition, ISingleCell {
     mergeInfo: ISelectionRangeWithCoord; // merge cell, start and end is upper left cell
 }
 
-export enum SelectionType {
+export enum SELECTION_TYPE {
     NORMAL,
     ROW,
     COLUMN,
+    ALL,
 }
 
 export interface ISelection {
     rangeData: ISelectionRange;
     cellRange: Nullable<ISelectionCell>;
-    type?: SelectionType;
+    selectionType?: SELECTION_TYPE;
 }
 
 export interface ISelectionWithCoord {
     selection: ISelectionRangeWithCoord;
     cellInfo: Nullable<ISelectionCellWithCoord>;
-    type?: SelectionType;
+    selectionType?: SELECTION_TYPE;
 }
 
 export interface ITextSelectionRangeStart {

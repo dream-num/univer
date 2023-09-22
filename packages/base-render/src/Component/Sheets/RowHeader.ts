@@ -1,14 +1,14 @@
 import { fixLineWidthByScale, getScale } from '../../Basics/Tools';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
-import { SheetRowTitleExtensionRegistry } from '../Extension';
-import { RowTitleLayout } from './Extensions/RowTitleLayout';
-import { SpreadsheetTitle } from './SheetComponent';
+import { SheetRowHeaderExtensionRegistry } from '../Extension';
+import { RowHeaderLayout } from './Extensions/RowHeaderLayout';
+import { SpreadsheetHeader } from './SheetComponent';
 import { SpreadsheetSkeleton } from './SheetSkeleton';
 
-export class SpreadsheetRowTitle extends SpreadsheetTitle {
-    private _rowTitleLayoutExtension: RowTitleLayout;
+export class SpreadsheetRowHeader extends SpreadsheetHeader {
+    private _rowHeaderLayoutExtension: RowHeaderLayout;
 
-    constructor(oKey: string, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    constructor(oKey: string, spreadsheetSkeleton?: SpreadsheetSkeleton) {
         super(oKey, spreadsheetSkeleton);
         // this._initialProps(props);
 
@@ -17,8 +17,8 @@ export class SpreadsheetRowTitle extends SpreadsheetTitle {
         this.makeDirty(true);
     }
 
-    get rowTitleLayoutExtension() {
-        return this._rowTitleLayoutExtension;
+    get rowHeaderLayoutExtension() {
+        return this._rowHeaderLayoutExtension;
     }
 
     override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
@@ -32,9 +32,9 @@ export class SpreadsheetRowTitle extends SpreadsheetTitle {
 
         const scale = getScale(parentScale);
 
-        const { columnTitleHeight } = spreadsheetSkeleton;
+        const { columnHeaderHeight } = spreadsheetSkeleton;
 
-        ctx.translate(-0.5 / scale, fixLineWidthByScale(columnTitleHeight, scale) - 0.5 / scale);
+        ctx.translate(-0.5 / scale, fixLineWidthByScale(columnHeaderHeight, scale) - 0.5 / scale);
 
         const extensions = this.getExtensionsByOrder();
         for (const extension of extensions) {
@@ -48,17 +48,17 @@ export class SpreadsheetRowTitle extends SpreadsheetTitle {
         if (!skeleton) {
             return false;
         }
-        const { rowTitleWidth, columnTitleHeight } = skeleton;
-        if (oCoord.x >= 0 && oCoord.x <= rowTitleWidth && oCoord.y > columnTitleHeight) {
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+        if (oCoord.x >= 0 && oCoord.x <= rowHeaderWidth && oCoord.y > columnHeaderHeight) {
             return true;
         }
         return false;
     }
 
     private _initialDefaultExtension() {
-        SheetRowTitleExtensionRegistry.getData().forEach((extension) => {
+        SheetRowHeaderExtensionRegistry.getData().forEach((extension) => {
             this.register(extension);
         });
-        this._rowTitleLayoutExtension = this.getExtensionByKey('DefaultRowTitleLayoutExtension') as RowTitleLayout;
+        this._rowHeaderLayoutExtension = this.getExtensionByKey('DefaultRowHeaderLayoutExtension') as RowHeaderLayout;
     }
 }

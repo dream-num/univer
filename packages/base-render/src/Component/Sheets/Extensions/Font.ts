@@ -25,7 +25,7 @@ export class Font extends SheetExtension {
     }
 
     override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowColumnSegment, rowTitleWidth, columnTitleHeight, stylesCache, dataMergeCache, overflowCache } =
+        const { rowColumnSegment, rowHeaderWidth, columnHeaderHeight, stylesCache, dataMergeCache, overflowCache } =
             spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton) {

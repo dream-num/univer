@@ -4,7 +4,6 @@ import {
     ICommandService,
     ICurrentUniverService,
     LocaleService,
-    Nullable,
     Plugin,
     PLUGIN_NAMES,
     PluginType,
@@ -14,12 +13,15 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { DEFAULT_SPREADSHEET_PLUGIN_DATA, ISheetPluginConfig } from './Basics';
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { SetSelectionsOperation } from './commands/operations/selection.operation';
-import { BasicWorkbookController, CountBarController, SheetContainerController } from './Controller';
+import { BasicWorkbookController, CountBarController } from './Controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
+import { SelectionController } from './Controller/selection.controller';
+import { SheetRenderController } from './Controller/sheet-render.controller';
 import { en } from './Locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { SelectionManagerService } from './services/selection-manager.service';
+import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { CanvasView } from './View/CanvasView';
 
 /**
@@ -30,7 +32,11 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
     private _config: ISheetPluginConfig;
 
-    private _countBarController: Nullable<CountBarController>;
+    // private _formulaBarController: Nullable<FormulaBarController>;
+
+    // private _countBarController: Nullable<CountBarController>;
+
+    // private _sheetContainerController: Nullable<SheetContainerController>;
 
     constructor(
         config: Partial<ISheetPluginConfig>,
@@ -56,7 +62,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
         this.initConfig();
         this.initController();
-        this.listenEventManager();
+        // this.listenEventManager();
     }
 
     getConfig() {
@@ -82,9 +88,17 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     }
 
     initController() {
-        this._injector.get(SheetContainerController);
+        this._injector.get(CanvasView);
+
         this._injector.get(FormulaBarController);
-        this._countBarController = this._injector.get(CountBarController);
+        this._injector.get(CountBarController);
+
+        this._injector.get(BasicWorksheetController);
+        this._injector.get(BasicWorkbookController);
+
+        this._injector.get(SelectionController);
+
+        this._injector.get(SheetRenderController);
     }
 
     override onStarting(): void {}
@@ -99,17 +113,19 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         uninstall(this);
     }
 
-    listenEventManager() {
-        // TODO: move these init to controllers not here
-        this._countBarController?.listenEventManager();
-    }
+    // listenEventManager() {
+    //     // TODO: move these init to controllers not here
+    //     this._countBarController?.listenEventManager();
+    // }
 
     private _initializeDependencies(sheetInjector: Injector) {
         const dependencies: Dependency[] = [
+            //views
             [CanvasView],
 
             // services
             [BorderStyleManagerService],
+            [SheetSkeletonManagerService],
             [SelectionManagerService],
             [
                 ISelectionTransformerShapeManager,
@@ -119,11 +135,12 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             ],
 
             // controllers
-            [SheetContainerController],
             [FormulaBarController],
             [CountBarController],
             [BasicWorksheetController],
             [BasicWorkbookController],
+            [SelectionController],
+            [SheetRenderController],
         ];
 
         dependencies.forEach((d) => {

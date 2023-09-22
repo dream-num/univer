@@ -1,14 +1,14 @@
 import { fixLineWidthByScale, getScale } from '../../Basics/Tools';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
-import { SheetColumnTitleExtensionRegistry } from '../Extension';
-import { ColumnTitleLayout } from './Extensions/ColumnTitleLayout';
-import { SpreadsheetTitle } from './SheetComponent';
+import { SheetColumnHeaderExtensionRegistry } from '../Extension';
+import { ColumnHeaderLayout } from './Extensions/ColumnHeaderLayout';
+import { SpreadsheetHeader } from './SheetComponent';
 import { SpreadsheetSkeleton } from './SheetSkeleton';
 
-export class SpreadsheetColumnTitle extends SpreadsheetTitle {
-    private _columnTitleLayoutExtension: ColumnTitleLayout;
+export class SpreadsheetColumnHeader extends SpreadsheetHeader {
+    private _columnHeaderLayoutExtension: ColumnHeaderLayout;
 
-    constructor(oKey: string, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    constructor(oKey: string, spreadsheetSkeleton?: SpreadsheetSkeleton) {
         super(oKey, spreadsheetSkeleton);
         // this._initialProps(props);
 
@@ -17,8 +17,8 @@ export class SpreadsheetColumnTitle extends SpreadsheetTitle {
         this.makeDirty(true);
     }
 
-    get columnTitleLayoutExtension() {
-        return this._columnTitleLayoutExtension;
+    get columnHeaderLayoutExtension() {
+        return this._columnHeaderLayoutExtension;
     }
 
     override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
@@ -32,9 +32,9 @@ export class SpreadsheetColumnTitle extends SpreadsheetTitle {
 
         const scale = getScale(parentScale);
 
-        const { rowTitleWidth } = spreadsheetSkeleton;
+        const { rowHeaderWidth } = spreadsheetSkeleton;
 
-        ctx.translate(fixLineWidthByScale(rowTitleWidth, scale) - 0.5 / scale, -0.5 / scale);
+        ctx.translate(fixLineWidthByScale(rowHeaderWidth, scale) - 0.5 / scale, -0.5 / scale);
 
         const extensions = this.getExtensionsByOrder();
         for (const extension of extensions) {
@@ -48,19 +48,19 @@ export class SpreadsheetColumnTitle extends SpreadsheetTitle {
         if (!skeleton) {
             return false;
         }
-        const { rowTitleWidth, columnTitleHeight } = skeleton;
-        if (oCoord.x > rowTitleWidth && oCoord.y >= 0 && oCoord.y <= columnTitleHeight) {
+        const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+        if (oCoord.x > rowHeaderWidth && oCoord.y >= 0 && oCoord.y <= columnHeaderHeight) {
             return true;
         }
         return false;
     }
 
     private _initialDefaultExtension() {
-        SheetColumnTitleExtensionRegistry.getData().forEach((extension) => {
+        SheetColumnHeaderExtensionRegistry.getData().forEach((extension) => {
             this.register(extension);
         });
-        this._columnTitleLayoutExtension = this.getExtensionByKey(
-            'DefaultColumnTitleLayoutExtension'
-        ) as ColumnTitleLayout;
+        this._columnHeaderLayoutExtension = this.getExtensionByKey(
+            'DefaultColumnHeaderLayoutExtension'
+        ) as ColumnHeaderLayout;
     }
 }

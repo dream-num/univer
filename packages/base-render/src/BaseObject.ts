@@ -315,11 +315,11 @@ export abstract class BaseObject {
     makeDirty(state: boolean = true) {
         this._dirty = state;
         if (state) {
-            // window.clearTimeout(this.__debounceParentTimeout);
-            // this.__debounceParentTimeout = window.setTimeout(() => {
-            //     this.parent?.makeDirty(state);
-            // }, 0);
-            this.parent?.makeDirty(state);
+            window.clearTimeout(this.__debounceParentTimeout);
+            this.__debounceParentTimeout = window.setTimeout(() => {
+                this.parent?.makeDirty(state);
+            }, 0);
+            // this.parent?.makeDirty(state);
         }
         return this;
     }

@@ -4503,11 +4503,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO5: IWorkbookConfig = {
             },
             columnData: {},
             showGridlines: 1,
-            rowTitle: {
+            rowHeader: {
                 width: 46,
                 hidden: 0,
             },
-            columnTitle: {
+            columnHeader: {
                 height: 20,
                 hidden: 0,
             },

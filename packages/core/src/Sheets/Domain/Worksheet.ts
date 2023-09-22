@@ -48,11 +48,11 @@ export class Worksheet {
             cellData: {},
             rowData: {},
             columnData: {},
-            rowTitle: {
+            rowHeader: {
                 width: 46,
                 hidden: BooleanNumber.FALSE,
             },
-            columnTitle: {
+            columnHeader: {
                 height: 20,
                 hidden: BooleanNumber.FALSE,
             },

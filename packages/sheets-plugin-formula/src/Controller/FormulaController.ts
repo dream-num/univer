@@ -1,4 +1,11 @@
-import { ArrayFormulaDataType, FormulaEngineService, IInterpreterDatasetConfig, SheetDataType, SheetNameMapType, UnitDataType } from '@univerjs/base-formula-engine';
+import {
+    ArrayFormulaDataType,
+    FormulaEngineService,
+    IInterpreterDatasetConfig,
+    SheetDataType,
+    SheetNameMapType,
+    UnitDataType,
+} from '@univerjs/base-formula-engine';
 import { SelectionManagerService } from '@univerjs/base-sheets';
 import { ICurrentUniverService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -26,7 +33,11 @@ export class FormulaController {
     ) {
         this._formulaDataModel = new FormulaDataModel(config);
 
-        this._activeSheetId = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+        this._activeSheetId = this._currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getActiveSheet()
+            .getSheetId();
 
         // this._initRegisterComponent();
 
@@ -126,14 +137,18 @@ export class FormulaController {
         const arrayFormula = arrayFormulaData[this._activeSheetId];
         if (!arrayFormula) return;
 
-        const currentCellData = this._selectionManagerService.getLast()?.cellInfo;
+        const currentCellData = this._selectionManagerService.getLast()?.cellRange;
 
         arrayFormula.forValue((r, c, v) => {
             const { startRow, startColumn, endRow, endColumn } = v;
             if (currentCellData) {
                 const { row, column } = currentCellData;
                 if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
-                    const arrayFormulaLineControl = this._sheetInjector.createInstance(ArrayFormulaLineControl, this._activeSheetId, v);
+                    const arrayFormulaLineControl = this._sheetInjector.createInstance(
+                        ArrayFormulaLineControl,
+                        this._activeSheetId,
+                        v
+                    );
                     this._arrayFormulaLineControls.push(arrayFormulaLineControl);
                 }
             }

@@ -6,7 +6,7 @@ import {
     Engine,
     IMouseEvent,
     IPointerEvent,
-    IRenderingEngine,
+    IRenderManagerService,
     ISelectionTransformerShapeManager,
     Layer,
     Scene,
@@ -14,7 +14,6 @@ import {
 } from '@univerjs/base-render';
 import {
     CANVAS_VIEW_KEY,
-    CanvasView,
     ISetRangeValuesCommandParams,
     SelectionManagerService,
     SetRangeValuesCommand,
@@ -41,7 +40,7 @@ import { FOCUSING_SHEET_CELL_EDITOR, FOCUSING_SHEET_EDITOR } from '../context/co
 import { ICellEditorService } from './cell-editor.service';
 import { getPositionOfCurrentCell, ICellPosition } from './utils';
 
-const SHEET_CELL_EDITOR_CLASSNAME = 'univer-cell-editor-container';
+const SHEET_CELL_EDITOR_CLASS_NAME = 'univer-cell-editor-container';
 const SHEET_CELL_EDITOR_MODEL_ID = 'sheet.model.cell-editor';
 
 // TODO: active cell editor when on input or IME input. Should clear the cell editor when activate it with a keystroke.
@@ -64,14 +63,13 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(CanvasView) private readonly _sheetCanvasView: CanvasView,
         @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
         @ISelectionTransformerShapeManager
         private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRenderingEngine private readonly _renderingEngine: Engine,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -150,7 +148,7 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
     private _mountCellEditor(): void {
         // container element
         const containerElement = (this._containerElement = document.createElement('div'));
-        containerElement.classList.add(SHEET_CELL_EDITOR_CLASSNAME);
+        containerElement.classList.add(SHEET_CELL_EDITOR_CLASS_NAME);
         containerElement.style.position = 'fixed';
         containerElement.style.boxSizing = 'border-box';
         containerElement.style.background = 'white';
@@ -208,7 +206,14 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
 
     private _positionCellEditor(currentCell: ISelectionCell) {
         const cellInfo = this._selectionTransformerShapeManager.convertCellRangeToInfo(currentCell)!;
-        const position = getPositionOfCurrentCell(cellInfo, this._renderingEngine);
+
+        const render = this._renderManagerService.getCurrent();
+
+        if (render == null) {
+            return;
+        }
+
+        const position = getPositionOfCurrentCell(cellInfo, render.engine);
 
         this._containerElement.style.display = 'block';
         this._containerElement.style.left = `${position.left}px`;
@@ -229,7 +234,14 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
     }
 
     private _initListeners(): void {
-        const main = this._sheetCanvasView.getSheetView().getSpreadsheet();
+        const render = this._renderManagerService.getCurrent();
+
+        if (render == null) {
+            return;
+        }
+
+        const main = render.mainComponent;
+
         if (main == null) {
             return;
         }
@@ -251,7 +263,7 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
         );
     }
 
-    private async _updateDocumentModelFromCellModel(position: ICellPosition): Promise<void> {
+    private async _updateDocumentModelFromCellModel(position: Nullable<ICellPosition>): Promise<void> {
         const cellEditorModel = this._currentUniverService
             .getUniverDocInstance(SHEET_CELL_EDITOR_MODEL_ID)
             ?.getDocument();
@@ -276,8 +288,8 @@ export class DesktopCellEditorService extends Disposable implements ICellEditorS
                 marginFooter: 2,
                 // FIXME: width here is not correct
                 pageSize: {
-                    height: position.minHeight - 2 * 2,
-                    width: position.minWidth - 2 * 2,
+                    height: (position?.minHeight || 0) - 2 * 2,
+                    width: (position?.minWidth || 0) - 2 * 2,
                 },
             },
         };

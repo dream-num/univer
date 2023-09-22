@@ -24,42 +24,40 @@ export interface ISelectionManagerInsertParam extends ISelectionManagerSearchPar
 export type ISelectionInfo = Map<string, Map<string, Map<string, ISelectionRangeWithStyle[]>>>;
 
 /**
- * This service is for managing settings border style status.
+ * This service is for selection.
  */
 export class SelectionManagerService implements IDisposable {
     private readonly _selectionInfo: ISelectionInfo = new Map();
 
     private _currentSelection: Nullable<ISelectionManagerSearchParam> = null;
 
-    private _currentStyle: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE;
+    // private _currentStyle: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE;
 
-    private _isSelectionEnabled: boolean = true;
+    // private _isSelectionEnabled: boolean = true;
 
     private readonly _selectionInfo$ = new BehaviorSubject<Nullable<ISelectionRangeWithStyle[]>>(null);
 
     // eslint-disable-next-line @typescript-eslint/member-ordering
     readonly selectionInfo$ = this._selectionInfo$.asObservable();
 
-    get isSelectionEnabled() {
-        return this._isSelectionEnabled;
-    }
+    // get isSelectionEnabled() {
+    //     return this._isSelectionEnabled;
+    // }
 
-    get currentStyle() {
-        return this._currentStyle;
-    }
+    // get currentStyle() {
+    //     return this._currentStyle;
+    // }
 
-    enableSelection() {
-        this._isSelectionEnabled = true;
-    }
-
-    disableSelection() {
-        this._isSelectionEnabled = false;
-
+    reset() {
         if (this._currentSelection == null) {
             return;
         }
-
-        this._selectionInfo.set(this._currentSelection.pluginName, new Map());
+        this._currentSelection = {
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId: this._currentSelection?.unitId,
+            sheetId: this._currentSelection?.sheetId,
+        };
+        this._selectionInfo.clear();
 
         this.refresh(this._currentSelection);
     }
@@ -71,10 +69,6 @@ export class SelectionManagerService implements IDisposable {
         this._currentSelection.pluginName = NORMAL_SELECTION_PLUGIN_NAME;
 
         this.refresh(this._currentSelection);
-    }
-
-    setCurrentStyle(style: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE) {
-        this._currentStyle = style;
     }
 
     dispose(): void {

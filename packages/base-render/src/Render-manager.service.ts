@@ -144,4 +144,4 @@ export class RenderManagerService implements IRenderManagerService {
     }
 }
 
-export const IRenderManagerService = createIdentifier<RenderManagerService>('univer.render.manager.service');
+export const IRenderManagerService = createIdentifier<RenderManagerService>('univer.render-manager-service');

@@ -4,7 +4,7 @@ import {
     mergeCellHandler,
     NORMAL_SELECTION_PLUGIN_STYLE,
 } from '@univerjs/base-render';
-import { ISelectionRange, makeCellRangeToRangeData, Nullable, SELECTION_TYPE } from '@univerjs/core';
+import { ISelectionRange, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -31,47 +31,33 @@ export class SelectionManagerService implements IDisposable {
 
     private _currentSelection: Nullable<ISelectionManagerSearchParam> = null;
 
-    private _currentStyle: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE;
+    // private _currentStyle: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE;
 
-    private _currentDetectMergedCell: boolean = true;
-
-    private _currentSelectionType: SELECTION_TYPE = SELECTION_TYPE.AUTO;
-
-    private _isSelectionEnabled: boolean = true;
+    // private _isSelectionEnabled: boolean = true;
 
     private readonly _selectionInfo$ = new BehaviorSubject<Nullable<ISelectionRangeWithStyle[]>>(null);
 
     // eslint-disable-next-line @typescript-eslint/member-ordering
     readonly selectionInfo$ = this._selectionInfo$.asObservable();
 
-    get isSelectionEnabled() {
-        return this._isSelectionEnabled;
-    }
+    // get isSelectionEnabled() {
+    //     return this._isSelectionEnabled;
+    // }
 
-    get currentStyle() {
-        return this._currentStyle;
-    }
+    // get currentStyle() {
+    //     return this._currentStyle;
+    // }
 
-    get isDetectMergedCell() {
-        return this._currentDetectMergedCell;
-    }
-
-    get selectionType() {
-        return this._currentSelectionType;
-    }
-
-    enableSelection() {
-        this._isSelectionEnabled = true;
-    }
-
-    disableSelection() {
-        this._isSelectionEnabled = false;
-
+    reset() {
         if (this._currentSelection == null) {
             return;
         }
-
-        this._selectionInfo.set(this._currentSelection.pluginName, new Map());
+        this._currentSelection = {
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId: this._currentSelection?.unitId,
+            sheetId: this._currentSelection?.sheetId,
+        };
+        this._selectionInfo.clear();
 
         this.refresh(this._currentSelection);
     }
@@ -83,26 +69,6 @@ export class SelectionManagerService implements IDisposable {
         this._currentSelection.pluginName = NORMAL_SELECTION_PLUGIN_NAME;
 
         this.refresh(this._currentSelection);
-    }
-
-    setCurrentStyle(style: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE) {
-        this._currentStyle = style;
-    }
-
-    enableDetectMergedCell() {
-        this._currentDetectMergedCell = true;
-    }
-
-    disableDetectMergedCell() {
-        this._currentDetectMergedCell = false;
-    }
-
-    setCurrentSelectionType(selectionType: SELECTION_TYPE = SELECTION_TYPE.AUTO) {
-        this._currentSelectionType = selectionType;
-    }
-
-    resetCurrentSelectionType() {
-        this.setCurrentSelectionType();
     }
 
     dispose(): void {

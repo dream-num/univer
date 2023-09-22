@@ -63,6 +63,8 @@ export class SelectionController extends Disposable {
 
         this._initialColumnHeader();
 
+        this._commandExecutedListener();
+
         spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
 
         this._userActionSyncListener();
@@ -85,21 +87,7 @@ export class SelectionController extends Disposable {
         }
         const { spreadsheet } = sheetObject;
         spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            if (!this._selectionManagerService.isSelectionEnabled) {
-                return;
-            }
-            let selectionType = this._selectionManagerService.selectionType;
-            if (selectionType === SELECTION_TYPE.AUTO) {
-                selectionType = SELECTION_TYPE.NORMAL;
-            }
-            this._selectionTransformerShapeManager.eventTrigger(
-                evt,
-                this._selectionManagerService.currentStyle,
-                spreadsheet.zIndex + 1,
-                selectionType,
-                SELECTION_TYPE.NORMAL,
-                this._selectionManagerService.isDetectMergedCell
-            );
+            this._selectionTransformerShapeManager.eventTrigger(evt, spreadsheet.zIndex + 1, SELECTION_TYPE.NORMAL);
             if (evt.button !== 2) {
                 state.stopPropagation();
             }
@@ -114,20 +102,10 @@ export class SelectionController extends Disposable {
         const { spreadsheetRowHeader, spreadsheet } = sheetObject;
 
         spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            if (!this._selectionManagerService.isSelectionEnabled) {
-                return;
-            }
-            let selectionType = this._selectionManagerService.selectionType;
-            if (selectionType === SELECTION_TYPE.AUTO) {
-                selectionType = SELECTION_TYPE.ROW;
-            }
             this._selectionTransformerShapeManager.eventTrigger(
                 evt,
-                this._selectionManagerService.currentStyle,
                 (spreadsheet?.zIndex || 1) + 1,
-                selectionType,
-                SELECTION_TYPE.ROW,
-                this._selectionManagerService.isDetectMergedCell
+                SELECTION_TYPE.ROW
             );
             if (evt.button !== 2) {
                 state.stopPropagation();
@@ -144,20 +122,10 @@ export class SelectionController extends Disposable {
         }
         const { spreadsheetColumnHeader, spreadsheet } = sheetObject;
         spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            if (!this._selectionManagerService.isSelectionEnabled) {
-                return;
-            }
-            let selectionType = this._selectionManagerService.selectionType;
-            if (selectionType === SELECTION_TYPE.AUTO) {
-                selectionType = SELECTION_TYPE.COLUMN;
-            }
             this._selectionTransformerShapeManager.eventTrigger(
                 evt,
-                this._selectionManagerService.currentStyle,
                 (spreadsheet?.zIndex || 1) + 1,
-                selectionType,
-                SELECTION_TYPE.COLUMN,
-                this._selectionManagerService.isDetectMergedCell
+                SELECTION_TYPE.COLUMN
             );
             if (evt.button !== 2) {
                 state.stopPropagation();
@@ -235,4 +203,6 @@ export class SelectionController extends Disposable {
             engine,
         };
     }
+
+    private _commandExecutedListener() {}
 }

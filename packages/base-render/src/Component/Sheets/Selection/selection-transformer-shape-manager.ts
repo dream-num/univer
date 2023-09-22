@@ -31,6 +31,16 @@ import { SelectionTransformerShapeEvent } from './selection-transformer-shape-ev
 
 export interface ISelectionTransformerShapeManager {
     readonly selectionRangeWithStyle$: Observable<ISelectionDataWithStyle[]>;
+
+    enableHeaderHighlight(): void;
+    disableHeaderHighlight(): void;
+    enableDetectMergedCell(): void;
+    disableDetectMergedCell(): void;
+    setStyle(style: ISelectionStyle): void;
+    resetStyle(): void;
+    enableSelection(): void;
+    disableSelection(): void;
+
     addControlToCurrentByRangeData(data: ISelectionDataWithStyle): void;
     changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene): void;
     // getSpreadsheet(): void;
@@ -47,14 +57,7 @@ export interface ISelectionTransformerShapeManager {
     convertSelectionRangeToData(selectionRange: ISelectionRangeWithStyle): ISelectionDataWithStyle;
     convertRangeDataToSelection(rangeData: ISelectionRange): ISelectionRangeWithCoord;
     convertCellRangeToInfo(cellRange: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
-    eventTrigger(
-        evt: IPointerEvent | IMouseEvent,
-        style: ISelectionStyle,
-        zIndex: number,
-        selectionType: SELECTION_TYPE,
-        selectedMode: SELECTION_TYPE,
-        isDetectMergedCell: boolean
-    ): void;
+    eventTrigger(evt: IPointerEvent | IMouseEvent, zIndex: number, selectionType: SELECTION_TYPE): void;
     // getMoveCellInfo(direction: Direction, selectionData: Nullable<ISelectionWithCoord>): Nullable<ISelectionWithCoord>;
     // transformCellDataToSelectionData(row: number, column: number): Nullable<ISelectionWithCoord>;
     reset(): void;
@@ -92,6 +95,16 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
     private _scene: Scene;
 
+    // The type of selector determines the type of data range and the highlighting style of the title bar
+    private _isHeaderHighlight: boolean = true;
+
+    // If true, the selector will respond to the range of merged cells and automatically extend the selected range. If false, it will ignore the merged cells.
+    private _isDetectMergedCell: Boolean = true;
+
+    private _selectionStyle: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE;
+
+    private _isSelectionEnabled: boolean = true;
+
     private readonly _selectionRangeWithStyle$ = new BehaviorSubject<ISelectionDataWithStyle[]>([]);
 
     // eslint-disable-next-line @typescript-eslint/member-ordering
@@ -99,6 +112,38 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
     static create() {
         return new SelectionTransformerShapeManager();
+    }
+
+    enableHeaderHighlight() {
+        this._isHeaderHighlight = true;
+    }
+
+    disableHeaderHighlight() {
+        this._isHeaderHighlight = false;
+    }
+
+    enableDetectMergedCell() {
+        this._isDetectMergedCell = true;
+    }
+
+    disableDetectMergedCell() {
+        this._isDetectMergedCell = false;
+    }
+
+    setStyle(style: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE) {
+        this._selectionStyle = style;
+    }
+
+    resetStyle() {
+        this.setStyle();
+    }
+
+    enableSelection() {
+        this._isSelectionEnabled = true;
+    }
+
+    disableSelection() {
+        this._isSelectionEnabled = false;
     }
 
     /**
@@ -124,7 +169,11 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         const scene = this.getScene();
 
-        const control = SelectionTransformerShape.create(this.getScene(), currentControls.length);
+        const control = SelectionTransformerShape.create(
+            this.getScene(),
+            currentControls.length,
+            this._isHeaderHighlight
+        );
 
         new SelectionTransformerShapeEvent(control, skeleton, scene);
 
@@ -132,6 +181,12 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         // update control
         control.update(selection, rowHeaderWidth, columnHeaderHeight, style, cellInfo, selectionType);
+
+        if (this._isHeaderHighlight) {
+            control.enableHeaderHighlight();
+        } else {
+            control.disableHeaderHighlight();
+        }
 
         currentControls.push(control);
     }
@@ -268,19 +323,14 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
      * @param evt component point event
      * @param style selection style, Styles for user-customized selectors
      * @param zIndex Stacking order of the selection object
-     * @param selectionType The type of selector determines the type of data range and the highlighting style of the title bar
-     * @param selectedMode Determines whether the selection is made normally according to the range or by rows and columns
-     * @param isDetectMergedCell If true, the selector will respond to the range of merged cells and automatically extend the selected range. If false, it will ignore the merged cells.
+     * @param selectionType Determines whether the selection is made normally according to the range or by rows and columns
      * @returns
      */
-    eventTrigger(
-        evt: IPointerEvent | IMouseEvent,
-        style: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE,
-        zIndex = 0,
-        selectionType: SELECTION_TYPE = SELECTION_TYPE.NORMAL,
-        selectedMode: SELECTION_TYPE = SELECTION_TYPE.NORMAL,
-        isDetectMergedCell: boolean = true
-    ) {
+    eventTrigger(evt: IPointerEvent | IMouseEvent, zIndex = 0, selectionType: SELECTION_TYPE = SELECTION_TYPE.NORMAL) {
+        if (this._isSelectionEnabled === false) {
+            return;
+        }
+
         const skeleton = this._skeleton;
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
@@ -298,20 +348,13 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        if (selectedMode === SELECTION_TYPE.ROW) {
+        if (selectionType === SELECTION_TYPE.ROW) {
             newEvtOffsetX = 0;
-        } else if (selectedMode === SELECTION_TYPE.COLUMN) {
+        } else if (selectionType === SELECTION_TYPE.COLUMN) {
             newEvtOffsetY = 0;
         }
 
-        const selectionData = this._getSelectedRangeWithMerge(
-            newEvtOffsetX,
-            newEvtOffsetY,
-            scaleX,
-            scaleY,
-            scrollXY,
-            isDetectMergedCell
-        );
+        const selectionData = this._getSelectedRangeWithMerge(newEvtOffsetX, newEvtOffsetY, scaleX, scaleY, scrollXY);
 
         if (!selectionData) {
             return false;
@@ -394,12 +437,16 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
                 newSelectionRange,
                 rowHeaderWidth,
                 columnHeaderHeight,
-                style,
+                this._selectionStyle,
                 currentCell,
                 selectionType
             );
         } else {
-            selectionControl = SelectionTransformerShape.create(scene, curControls.length + zIndex);
+            selectionControl = SelectionTransformerShape.create(
+                scene,
+                curControls.length + zIndex,
+                this._isHeaderHighlight
+            );
 
             new SelectionTransformerShapeEvent(selectionControl, skeleton, scene);
 
@@ -407,7 +454,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
                 startSelectionRange,
                 rowHeaderWidth,
                 columnHeaderHeight,
-                style,
+                this._selectionStyle,
                 cellInfo,
                 selectionType
             );
@@ -428,8 +475,8 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         this._addCancelObserver();
 
-        if (selectedMode === SELECTION_TYPE.ROW || selectedMode === SELECTION_TYPE.COLUMN) {
-            this._moving(newEvtOffsetX, newEvtOffsetY, selectionControl, selectedMode, isDetectMergedCell);
+        if (selectionType === SELECTION_TYPE.ROW || selectionType === SELECTION_TYPE.COLUMN) {
+            this._moving(newEvtOffsetX, newEvtOffsetY, selectionControl, selectionType);
         }
 
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
@@ -439,10 +486,10 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
             );
 
-            this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, selectedMode, isDetectMergedCell);
+            this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, selectionType);
 
             scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
-                this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, selectedMode, isDetectMergedCell);
+                this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, selectionType);
             });
         });
 
@@ -527,8 +574,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         moveOffsetX: number,
         moveOffsetY: number,
         selectionControl: Nullable<SelectionTransformerShape>,
-        selectedMode: SELECTION_TYPE,
-        isDetectMergedCell: boolean = true
+        selectionType: SELECTION_TYPE
     ) {
         const skeleton = this._skeleton;
 
@@ -542,20 +588,13 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
-        if (selectedMode === SELECTION_TYPE.ROW) {
+        if (selectionType === SELECTION_TYPE.ROW) {
             moveOffsetX = Infinity;
-        } else if (selectedMode === SELECTION_TYPE.COLUMN) {
+        } else if (selectionType === SELECTION_TYPE.COLUMN) {
             moveOffsetY = Infinity;
         }
 
-        const selectionData = this._getSelectedRangeWithMerge(
-            moveOffsetX,
-            moveOffsetY,
-            scaleX,
-            scaleY,
-            scrollXY,
-            isDetectMergedCell
-        );
+        const selectionData = this._getSelectedRangeWithMerge(moveOffsetX, moveOffsetY, scaleX, scaleY, scrollXY);
 
         if (!selectionData) {
             return false;
@@ -582,7 +621,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
             endColumn: newEndColumn,
         };
 
-        if (isDetectMergedCell) {
+        if (this._isDetectMergedCell) {
             newBounding = skeleton.getSelectionBounding(newStartRow, newStartColumn, newEndRow, newEndColumn);
         }
 
@@ -668,10 +707,9 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         offsetY: number,
         scaleX: number,
         scaleY: number,
-        scrollXY: { x: number; y: number },
-        isDetectMergedCell: boolean = true
+        scrollXY: { x: number; y: number }
     ): Nullable<ISelectionWithCoord> {
-        if (isDetectMergedCell) {
+        if (this._isDetectMergedCell) {
             const cellInfo = this._skeleton.calculateCellIndexByPosition(offsetX, offsetY, scaleX, scaleY, scrollXY);
             const selection = makeCellToSelection(cellInfo);
             if (selection == null) {

@@ -6,28 +6,47 @@ import {
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
 } from '@univerjs/base-render';
-import { Disposable, ICurrentUniverService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandInfo,
+    ICommandService,
+    ICurrentUniverService,
+    LifecycleStages,
+    OnLifecycle,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { CANVAS_VIEW_KEY, SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { columnWidthByHeader, rowHeightByHeader } from '../Basics/SheetHeader';
+import { SetWorksheetActivateMutation } from '../commands/mutations/set-worksheet-activate.mutation';
+import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-@OnLifecycle(LifecycleStages.Rendered, ToggleWorksheetController)
-export class ToggleWorksheetController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, SheetRenderController)
+export class SheetRenderController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @ICommandService private readonly _commandService: ICommandService,
         @ISelectionTransformerShapeManager
-        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager
+        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
 
         this._initialize();
+
+        this._commandExecutedListener();
     }
 
     private _initialize() {
+        this._initialRenderRefresh();
+    }
+
+    private _initialRenderRefresh() {
         this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
                 return;
@@ -105,5 +124,47 @@ export class ToggleWorksheetController extends Disposable {
 
             // spreadsheet.makeDirty();
         });
+    }
+
+    private _commandExecutedListener() {
+        const updateCommandList = [
+            SetWorksheetRowHeightMutation.id,
+            SetWorksheetColWidthMutation.id,
+            SetWorksheetActivateMutation.id,
+        ];
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (updateCommandList.includes(command.id)) {
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+                    const unitId = workbook.getUnitId();
+                    const worksheet = workbook.getActiveSheet();
+                    const sheetId = worksheet.getSheetId();
+
+                    if (command.id !== SetWorksheetActivateMutation.id) {
+                        this._sheetSkeletonManagerService.makeDirty(
+                            {
+                                unitId,
+                                sheetId,
+                            },
+                            true
+                        );
+                    }
+
+                    this._sheetSkeletonManagerService.setCurrent({
+                        unitId,
+                        sheetId,
+                    });
+
+                    this._selectionManagerService.setCurrentSelection({
+                        pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                        unitId,
+                        sheetId,
+                    });
+                }
+
+                this._renderManagerService.getCurrent()?.mainComponent?.makeDirty(); // refresh spreadsheet
+            })
+        );
     }
 }

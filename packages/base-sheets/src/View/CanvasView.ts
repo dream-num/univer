@@ -77,6 +77,7 @@ export class CanvasView {
         }
 
         engine.runRenderLoop(() => {
+            // document.getElementById('app')!.innerHTML = engine.getFps().toString();
             scene.render();
         });
     }

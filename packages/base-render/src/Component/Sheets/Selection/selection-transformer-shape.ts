@@ -131,7 +131,7 @@ export class SelectionTransformerShape {
 
     readonly selectionFilled$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
 
-    constructor(private _scene: Scene, private _zIndex: number) {
+    constructor(private _scene: Scene, private _zIndex: number, private _isHeaderHighlight: boolean = true) {
         this._initialize();
     }
 
@@ -219,8 +219,8 @@ export class SelectionTransformerShape {
         return this._selectionStyle;
     }
 
-    static create(scene: Scene, zIndex: number) {
-        return new this(scene, zIndex);
+    static create(scene: Scene, zIndex: number, isHeaderHighlight: boolean) {
+        return new this(scene, zIndex, isHeaderHighlight);
     }
 
     static fromJson(
@@ -228,12 +228,21 @@ export class SelectionTransformerShape {
         zIndex: number,
         newSelectionData: ISelectionDataWithStyle,
         rowHeaderWidth: number,
-        columnHeaderHeight: number
+        columnHeaderHeight: number,
+        isHeaderHighlight: boolean
     ) {
         const { selection, cellInfo, style } = newSelectionData;
-        const control = SelectionTransformerShape.create(scene, zIndex);
+        const control = SelectionTransformerShape.create(scene, zIndex, isHeaderHighlight);
         control.update(selection, rowHeaderWidth, columnHeaderHeight, style, cellInfo);
         return control;
+    }
+
+    enableHeaderHighlight() {
+        this._isHeaderHighlight = true;
+    }
+
+    disableHeaderHighlight() {
+        this._isHeaderHighlight = false;
     }
 
     /**
@@ -658,7 +667,7 @@ export class SelectionTransformerShape {
 
         if (hasColumnHeader === true) {
             let highlightTitleColor = columnHeaderFill;
-            if (selectionType === SELECTION_TYPE.COLUMN) {
+            if (this._isHeaderHighlight && selectionType === SELECTION_TYPE.COLUMN) {
                 highlightTitleColor = new TinyColor(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
             this._columnHeaderBackground.setProps({
@@ -685,7 +694,7 @@ export class SelectionTransformerShape {
 
         if (hasRowHeader === true) {
             let highlightTitleColor = rowHeaderFill;
-            if (selectionType === SELECTION_TYPE.ROW) {
+            if (this._isHeaderHighlight && selectionType === SELECTION_TYPE.ROW) {
                 highlightTitleColor = new TinyColor(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
             this._rowHeaderBackground.setProps({

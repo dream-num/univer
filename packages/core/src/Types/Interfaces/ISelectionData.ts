@@ -32,7 +32,7 @@ export enum SELECTION_TYPE {
     NORMAL,
     ROW,
     COLUMN,
-    AUTO,
+    ALL,
 }
 
 export interface ISelection {

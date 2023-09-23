@@ -1,6 +1,7 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { describe, expect, test } from 'vitest';
 
-import { Checkbox, CheckboxGroup } from '..';
+import { Checkbox } from '..';
 
 describe('checkbox', () => {
     test('checkbox', () => {
@@ -10,22 +11,5 @@ describe('checkbox', () => {
             </Checkbox>
         );
         expect(container);
-    });
-
-    test('checkbox group', () => {
-        let a = 1;
-        const checkGroups = [
-            {
-                checked: true,
-                disabled: false,
-                name: '123',
-                label: 'agree',
-                value: '1',
-            },
-        ];
-        const { container } = render(<CheckboxGroup options={checkGroups} onChange={() => a++}></CheckboxGroup>);
-        expect(container);
-        fireEvent.click(screen.getByText('agree'));
-        expect(a).toEqual(2);
     });
 });

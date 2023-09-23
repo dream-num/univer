@@ -1,5 +1,6 @@
 import { ICommandService, Univer } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
+import { afterEach, beforeEach, describe, it } from 'vitest';
 
 import { SetBoldCommand } from '../set-style.command';
 import { createCommandTestBed } from '../testing/create-command-test-bed';

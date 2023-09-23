@@ -17,7 +17,7 @@
         "noImplicitOverride": true,
         "allowJs": true,
         "skipLibCheck": true,
-        "types": ["jest", "node", "@types/jest", "esbuild-style-plugin"]
+        "types": ["node", "esbuild-style-plugin"]
     },
     "include": ["packages/*/src", "examples/*/src"]
 }

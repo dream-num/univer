@@ -5,7 +5,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "turbo jest -- --passWithNoTests",
+        "test": "turbo test -- --passWithNoTests",
         "dev:sheet": "turbo dev:demo --filter ./examples/univer-sheet-ts",
         "dev:slide": "turbo dev:demo --filter ./examples/univer-slide-ts",
         "dev:doc": "turbo dev:demo --filter ./examples/univer-doc-ts",

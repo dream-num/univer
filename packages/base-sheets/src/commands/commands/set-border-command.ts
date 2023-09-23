@@ -11,6 +11,7 @@ import {
     IStyleData,
     IUndoRedoService,
     ObjectMatrix,
+    Rectangle,
     Tools,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
@@ -77,10 +78,31 @@ export const SetBorderColorCommand: ICommand<ISetBorderColorCommandParams> = {
     },
 };
 
-function setStyleValue(matrix: ObjectMatrix<IStyleData>, row: number, column: number, defaultStyle: IBorderData) {
+function setStyleValue(
+    matrix: ObjectMatrix<IStyleData>,
+    row: number,
+    column: number,
+    defaultStyle: IBorderData,
+    mergeData: ISelectionRange[]
+) {
     const style = matrix.getValue(row, column);
-    matrix.setValue(row, column, {
-        bd: style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle,
+    mergeData.forEach((merge) => {
+        const range = {
+            startColumn: column,
+            endColumn: column,
+            startRow: row,
+            endRow: row,
+        };
+        // 如果是合并单元格，将样式设置给左上角
+        if (Rectangle.intersects(merge, range)) {
+            matrix.setValue(merge.startRow, merge.startColumn, {
+                bd: style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle,
+            });
+        } else {
+            matrix.setValue(row, column, {
+                bd: style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle,
+            });
+        }
     });
 }
 
@@ -103,6 +125,7 @@ export const SetBorderCommand: ICommand = {
         const workbookId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const worksheetId = worksheet.getSheetId();
+        const mergeData = worksheet.getConfig().mergeData;
         if (!selections?.length) {
             return false;
         }
@@ -187,58 +210,88 @@ export const SetBorderCommand: ICommand = {
         if (top) {
             // Clear the bottom border of the top range
             forEach(topRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { b: null });
+                setStyleValue(mr, row, column, { b: null }, mergeData);
             });
 
             forEach(topRange, (row, column) => {
-                setStyleValue(mr, row, column, {
-                    t: Tools.deepClone(border),
-                });
+                setStyleValue(
+                    mr,
+                    row,
+                    column,
+                    {
+                        t: Tools.deepClone(border),
+                    },
+                    mergeData
+                );
             });
         }
         if (bottom) {
             // Clear the top border of the lower range
             forEach(bottomRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { t: null });
+                setStyleValue(mr, row, column, { t: null }, mergeData);
             });
 
             forEach(bottomRange, (row, column) => {
-                setStyleValue(mr, row, column, {
-                    b: Tools.deepClone(border),
-                });
+                setStyleValue(
+                    mr,
+                    row,
+                    column,
+                    {
+                        b: Tools.deepClone(border),
+                    },
+                    mergeData
+                );
             });
         }
         if (left) {
             //  Clear the right border of the left range
             forEach(leftRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { r: null });
+                setStyleValue(mr, row, column, { r: null }, mergeData);
             });
 
             forEach(leftRange, (row, column) => {
-                setStyleValue(mr, row, column, {
-                    l: Tools.deepClone(border),
-                });
+                setStyleValue(
+                    mr,
+                    row,
+                    column,
+                    {
+                        l: Tools.deepClone(border),
+                    },
+                    mergeData
+                );
             });
         }
         if (right) {
             //  Clear the left border of the right range
             forEach(rightRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { l: null });
+                setStyleValue(mr, row, column, { l: null }, mergeData);
             });
 
             forEach(rightRange, (row, column) => {
-                setStyleValue(mr, row, column, {
-                    r: Tools.deepClone(border),
-                });
+                setStyleValue(
+                    mr,
+                    row,
+                    column,
+                    {
+                        r: Tools.deepClone(border),
+                    },
+                    mergeData
+                );
             });
         }
         // inner vertical border
         if (vertical) {
             forEach(rangeData, (row, column) => {
                 if (column !== rangeData.endColumn) {
-                    setStyleValue(mr, row, column, {
-                        r: Tools.deepClone(border),
-                    });
+                    setStyleValue(
+                        mr,
+                        row,
+                        column,
+                        {
+                            r: Tools.deepClone(border),
+                        },
+                        mergeData
+                    );
                 }
             });
         }
@@ -246,51 +299,57 @@ export const SetBorderCommand: ICommand = {
         if (horizontal) {
             forEach(rangeData, (row, column) => {
                 if (row !== rangeData.endRow) {
-                    setStyleValue(mr, row, column, {
-                        b: Tools.deepClone(border),
-                    });
+                    setStyleValue(
+                        mr,
+                        row,
+                        column,
+                        {
+                            b: Tools.deepClone(border),
+                        },
+                        mergeData
+                    );
                 }
             });
         }
 
         if (!top && !bottom && !left && !right && !vertical && !horizontal) {
             forEach(topRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { b: null });
+                setStyleValue(mr, row, column, { b: null }, mergeData);
             });
             forEach(topRange, (row, column) => {
-                setStyleValue(mr, row, column, { t: null });
+                setStyleValue(mr, row, column, { t: null }, mergeData);
             });
 
             forEach(bottomRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { t: null });
+                setStyleValue(mr, row, column, { t: null }, mergeData);
             });
             forEach(bottomRange, (row, column) => {
-                setStyleValue(mr, row, column, { b: null });
+                setStyleValue(mr, row, column, { b: null }, mergeData);
             });
 
             forEach(leftRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { r: null });
+                setStyleValue(mr, row, column, { r: null }, mergeData);
             });
             forEach(leftRange, (row, column) => {
-                setStyleValue(mr, row, column, { l: null });
+                setStyleValue(mr, row, column, { l: null }, mergeData);
             });
 
             forEach(rightRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { l: null });
+                setStyleValue(mr, row, column, { l: null }, mergeData);
             });
             forEach(rightRange, (row, column) => {
-                setStyleValue(mr, row, column, { r: null });
+                setStyleValue(mr, row, column, { r: null }, mergeData);
             });
 
             forEach(rangeData, (row, column) => {
                 if (column !== rangeData.endColumn) {
-                    setStyleValue(mr, row, column, { r: null });
+                    setStyleValue(mr, row, column, { r: null }, mergeData);
                 }
             });
 
             forEach(rangeData, (row, column) => {
                 if (row !== rangeData.endRow) {
-                    setStyleValue(mr, row, column, { b: null });
+                    setStyleValue(mr, row, column, { b: null }, mergeData);
                 }
             });
         }

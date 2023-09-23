@@ -79,6 +79,7 @@ export interface IValueOption {
     disabled?: boolean;
     id?: string; // command id
     show?: boolean; // show parent menu or not
+    showAfterClick?: boolean; // show children when clicked or not,暂时性做法
 }
 
 export function isValueOptions(v: IValueOption | ICustomComponentOption): v is IValueOption {

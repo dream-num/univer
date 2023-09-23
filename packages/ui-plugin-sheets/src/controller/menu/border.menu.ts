@@ -25,51 +25,61 @@ export const BORDER_LINE_CHILDREN = [
         label: 'borderLine.borderTop',
         icon: 'TopBorderIcon',
         value: 'top',
+        showAfterClick: true,
     },
     {
         label: 'borderLine.borderBottom',
         icon: 'BottomBorderIcon',
         value: 'bottom',
+        showAfterClick: true,
     },
     {
         label: 'borderLine.borderLeft',
         icon: 'LeftBorderIcon',
         value: 'left',
+        showAfterClick: true,
     },
     {
         label: 'borderLine.borderRight',
         icon: 'RightBorderIcon',
         value: 'right',
+        showAfterClick: true,
     },
     {
         label: 'borderLine.borderNone',
         icon: 'NoneBorderIcon',
         value: 'none',
+        showAfterClick: true,
     },
     {
         label: 'borderLine.borderAll',
         icon: 'FullBorderIcon',
         value: 'all',
+        showAfterClick: true,
     },
     {
         label: 'borderLine.borderOutside',
         icon: 'OuterBorderIcon',
         value: 'outside',
+        showAfterClick: true,
     },
     {
         label: 'borderLine.borderInside',
         icon: 'InnerBorderIcon',
         value: 'inside',
+        showAfterClick: true,
     },
     {
         label: 'borderLine.borderHorizontal',
         icon: 'StripingBorderIcon',
         value: 'horizontal',
+        showAfterClick: true,
     },
     {
         label: 'borderLine.borderVertical',
         icon: 'VerticalBorderIcon',
         value: 'vertical',
+        showAfterClick: true,
     },
 ];
 

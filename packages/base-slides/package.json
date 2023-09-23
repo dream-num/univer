@@ -49,6 +49,7 @@
         "@types/node": "^18.14.0",
         "@types/react": "^18.2.22",
         "@types/react-dom": "^18.2.7",
+        "@vitest/coverage-v8": "^0.34.5",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
         "vitest": "^0.34.5"

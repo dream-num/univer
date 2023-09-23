@@ -42,6 +42,8 @@
     "type": "module",
     "scripts": {
         "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
         "esbuild": "node ./esbuild.config.mjs",
         "api": "node ./api.js",
         "tsc": "tsc",
@@ -63,6 +65,7 @@
     },
     "devDependencies": {
         "@types/node": "^18.14.0",
+        "@vitest/coverage-v8": "^0.34.5",
         "esbuild": "^0.19.3",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",

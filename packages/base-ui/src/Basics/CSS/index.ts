@@ -1,3 +1,1 @@
-import defaultSkin from './Skin/default.module.less';
-
-export { defaultSkin };
+export { default as defaultTheme } from './Skin/default.module.less';

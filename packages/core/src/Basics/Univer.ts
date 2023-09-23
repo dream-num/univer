@@ -1,5 +1,6 @@
-import { Ctor, IDisposable, Injector } from '@wendellhu/redi';
+import { Ctor, Injector } from '@wendellhu/redi';
 
+import { ThemeService } from '..';
 import { ObserverManager } from '../Observer';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
@@ -23,7 +24,7 @@ import { UniverSlide } from './UniverSlide';
 /**
  * Univer.
  */
-export class Univer implements IDisposable {
+export class Univer {
     private readonly _univerInjector: Injector;
 
     private readonly _univerPluginStore = new PluginStore();
@@ -34,12 +35,12 @@ export class Univer implements IDisposable {
         this._univerInjector = this._initDependencies();
         this._setObserver();
 
-        const { locale, locales } = univerData;
+        const { theme, locale, locales } = univerData;
+        theme && this._univerInjector.get(ThemeService).setTheme(theme);
+        // initialize localization info
         locales && this._univerInjector.get(LocaleService).load(locales);
         locale && this._univerInjector.get(LocaleService).setLocale(locale);
     }
-
-    dispose(): void {}
 
     private get _currentUniverService(): ICurrentUniverService {
         return this._univerInjector.get(ICurrentUniverService);
@@ -153,6 +154,7 @@ export class Univer implements IDisposable {
                 },
             ],
             [LocaleService],
+            [ThemeService],
             [LifecycleService],
             [ILogService, { useClass: DesktopLogService, lazy: true }],
             [ICommandService, { useClass: CommandService, lazy: true }],

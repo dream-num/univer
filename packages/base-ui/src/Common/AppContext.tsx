@@ -1,7 +1,7 @@
 /**
  * Use createContext to provide global language and skin settings
  */
-import { LocaleService, ObserverManager } from '@univerjs/core';
+import { LocaleService, ObserverManager, ThemeService } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { createContext } from 'react';
 
@@ -13,6 +13,7 @@ export type AppContextValues = {
     injector: Injector;
     locale: LocaleType;
     localeService: LocaleService;
+    themeService: ThemeService;
     componentManager: ComponentManager;
     zIndexManager: ZIndexManager;
     observerManager: ObserverManager;

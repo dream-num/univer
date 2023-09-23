@@ -12,7 +12,7 @@ function deleteNodeModules(directory) {
         const stat = fs.statSync(filePath);
 
         if (stat.isDirectory()) {
-            if (['node_modules', 'lib', 'dist'].includes(file)) {
+            if (['node_modules', 'lib', 'dist', '.turbo', 'coverage', 'local'].includes(file)) {
                 console.log('Deleting:', filePath);
                 fs.rmSync(filePath, { recursive: true });
             } else {

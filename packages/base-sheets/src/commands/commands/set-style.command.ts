@@ -128,14 +128,14 @@ export const SetBoldCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selectedrange = selectionManagerService.getLast()?.rangeData;
+        const selectedRange = selectionManagerService.getLast()?.rangeData;
         const currentUniverService = accessor.get(ICurrentUniverService);
         const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
 
         let currentlyBold = true;
-        if (selectedrange) {
+        if (selectedRange) {
             currentlyBold =
-                worksheet.getRange(selectedrange.startRow, selectedrange.startColumn).getFontWeight() ===
+                worksheet.getRange(selectedRange.startRow, selectedRange.startColumn).getFontWeight() ===
                 FontWeight.BOLD;
         }
 

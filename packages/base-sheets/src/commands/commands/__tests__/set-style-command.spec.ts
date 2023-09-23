@@ -7,7 +7,7 @@ import { SetRangeStyleMutation } from '../../mutations/set-range-styles.mutation
 import { SetBoldCommand, SetStyleCommand } from '../set-style.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
-describe('test style command', () => {
+describe('Test style commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;

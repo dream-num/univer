@@ -1,7 +1,7 @@
 import { DocPlugin } from '@univerjs/base-docs';
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { UIPlugin } from '@univerjs/base-ui';
+import { defaultTheme, UIPlugin } from '@univerjs/base-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { LocaleType, Univer } from '@univerjs/core';
 // import { FindPlugin } from '@univerjs/sheets-plugin-find';
@@ -16,6 +16,7 @@ import { locales } from './locales';
 
 // univer
 const univer = new Univer({
+    theme: defaultTheme,
     locale: LocaleType.EN,
     locales,
 });

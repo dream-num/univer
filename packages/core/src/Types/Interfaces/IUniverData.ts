@@ -1,7 +1,9 @@
+import { IStyleSheet } from '../../services/theme/Theme';
 import { ILocales } from '../../Shared/Locale';
 import { LocaleType } from '../Enum';
 
 export interface IUniverData {
+    theme: IStyleSheet;
     locale: LocaleType;
     locales: ILocales;
     id: string;

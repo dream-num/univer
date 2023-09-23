@@ -10,7 +10,6 @@ import {
     ISelectionRange,
     IStyleData,
     IUndoRedoService,
-    Nullable,
     ObjectMatrix,
     Tools,
 } from '@univerjs/core';
@@ -42,33 +41,9 @@ export const SetBorderPositionCommand: ICommand<ISetBorderPositionCommandParams>
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: ISetBorderPositionCommandParams) => {
         const commandService = accessor.get(ICommandService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
-        const borderStyleManagerService = accessor.get(BorderStyleManagerService);
-
-        const selections = selectionManagerService.getRangeDatas();
-        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-        if (!selections?.length) {
-            return false;
-        }
-
-        const value = params.value;
-        const borderInfo = borderStyleManagerService.getBorderInfo();
-        const destParams: ISetBorderCommandParams = {
-            workbookId: workbook.getUnitId(),
-            worksheetId: workbook.getActiveSheet().getSheetId(),
-            range: selections[0],
-            top: value === BorderType.TOP || value === BorderType.ALL || value === BorderType.OUTSIDE,
-            left: value === BorderType.LEFT || value === BorderType.ALL || value === BorderType.OUTSIDE,
-            bottom: value === BorderType.BOTTOM || value === BorderType.ALL || value === BorderType.OUTSIDE,
-            right: value === BorderType.RIGHT || value === BorderType.ALL || value === BorderType.OUTSIDE,
-            vertical: value === BorderType.VERTICAL || value === BorderType.ALL || value === BorderType.INSIDE,
-            horizontal: value === BorderType.HORIZONTAL || value === BorderType.ALL || value === BorderType.INSIDE,
-            style: borderInfo.style,
-            color: borderInfo.color,
-        };
-
-        return commandService.executeCommand(SetBorderCommand.id, destParams);
+        const borderManager = accessor.get(BorderStyleManagerService);
+        borderManager.setType(params.value);
+        return commandService.executeCommand(SetBorderCommand.id);
     },
 };
 
@@ -80,9 +55,10 @@ export const SetBorderStyleCommand: ICommand = {
     id: 'sheet.command.set-border-style',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: ISetBorderStyleCommandParams) => {
+        const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
         borderManager.setStyle(params.value);
-        return true;
+        return commandService.executeCommand(SetBorderCommand.id);
     },
 };
 
@@ -94,25 +70,12 @@ export const SetBorderColorCommand: ICommand<ISetBorderColorCommandParams> = {
     id: 'sheet.command.set-border-color',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: ISetBorderColorCommandParams) => {
+        const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
         borderManager.setColor(params.value);
-        return true;
+        return commandService.executeCommand(SetBorderCommand.id);
     },
 };
-
-export interface ISetBorderCommandParams {
-    workbookId: string;
-    worksheetId: string;
-    range: ISelectionRange;
-    top: Nullable<boolean>;
-    left: Nullable<boolean>;
-    bottom: Nullable<boolean>;
-    right: Nullable<boolean>;
-    vertical: Nullable<boolean>;
-    horizontal: Nullable<boolean>;
-    color?: string;
-    style?: BorderStyleTypes;
-}
 
 function setStyleValue(matrix: ObjectMatrix<IStyleData>, row: number, column: number, defaultStyle: IBorderData) {
     const style = matrix.getValue(row, column);
@@ -124,35 +87,35 @@ function setStyleValue(matrix: ObjectMatrix<IStyleData>, row: number, column: nu
 /**
  * The command to clear content in current selected ranges.
  */
-export const SetBorderCommand: ICommand<ISetBorderCommandParams> = {
+export const SetBorderCommand: ICommand = {
     id: 'sheet.command.set-border',
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params: ISetBorderCommandParams) => {
+    handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const {
-            top,
-            left,
-            bottom,
-            right,
-            vertical,
-            horizontal,
-            color = 'black',
-            style = BorderStyleTypes.DASH_DOT,
-            workbookId,
-            worksheetId,
-            range,
-        } = params;
+        const selectionManagerService = accessor.get(SelectionManagerService);
+        const borderStyleManagerService = accessor.get(BorderStyleManagerService);
 
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)?.getWorkBook();
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
-        if (!worksheet) return false;
-        const sheetMatrix = worksheet.getCellMatrix();
-        const rangeData = range;
-        const styles = Tools.deepClone(workbook.getStyles());
+        const selections = selectionManagerService.getRangeDatas();
+        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbookId = workbook.getUnitId();
+        const worksheet = workbook.getActiveSheet();
+        const worksheetId = worksheet.getSheetId();
+        if (!selections?.length) {
+            return false;
+        }
+
+        const { style, color, type, activeBorderType } = borderStyleManagerService.getBorderInfo();
+        if (!activeBorderType) return false;
+        const top = type === BorderType.TOP || type === BorderType.ALL || type === BorderType.OUTSIDE;
+        const left = type === BorderType.LEFT || type === BorderType.ALL || type === BorderType.OUTSIDE;
+        const bottom = type === BorderType.BOTTOM || type === BorderType.ALL || type === BorderType.OUTSIDE;
+        const right = type === BorderType.RIGHT || type === BorderType.ALL || type === BorderType.OUTSIDE;
+        const vertical = type === BorderType.VERTICAL || type === BorderType.ALL || type === BorderType.INSIDE;
+        const horizontal = type === BorderType.HORIZONTAL || type === BorderType.ALL || type === BorderType.INSIDE;
+        const rangeData = selections[0];
 
         // Cells in the surrounding range may need to clear the border
         const topRangeOut = {

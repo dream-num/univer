@@ -392,6 +392,7 @@ export interface BaseSelectProps {
     id?: string;
     options?: IValueOption[];
     title?: string;
+    showAfterClick?: boolean;
 }
 
 export function Select(props: BaseSelectProps) {
@@ -665,7 +666,7 @@ export function Select(props: BaseSelectProps) {
     };
 
     const renderNeo = () => {
-        const { tooltip, onClick, display, value, icon, title, id, options, type } = props;
+        const { tooltip, onClick, display, value, icon, title, id, options, type, showAfterClick = false } = props;
 
         const onClickInner = (...args: unknown[]) => {
             onClick?.(args[1] as number | string);
@@ -695,6 +696,7 @@ export function Select(props: BaseSelectProps) {
                         onOptionSelect,
                         value,
                         display: displayInSubMenu,
+                        showAfterClick,
                     }}
                     icon={<NextIcon />}
                 >

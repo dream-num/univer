@@ -1,11 +1,14 @@
 import { IWorkbookConfig, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { SelectionManagerService } from '../../../services/selection-manager.service';
+
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
         sheet1: {
+            id: 'sheet1',
             cellData: {
                 '0': {
                     '0': {
@@ -44,6 +47,10 @@ export function createCommandTestBed() {
 
             this._injector = _injector;
             get = this._injector.get.bind(this._injector);
+        }
+
+        override onStarting(injector: Injector): void {
+            injector.add([SelectionManagerService]);
         }
 
         override onDestroy(): void {

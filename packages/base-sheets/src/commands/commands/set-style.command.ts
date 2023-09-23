@@ -128,13 +128,15 @@ export const SetBoldCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const cellRange = selectionManagerService.getLast()?.cellRange;
+        const selectedrange = selectionManagerService.getLast()?.rangeData;
         const currentUniverService = accessor.get(ICurrentUniverService);
         const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
 
         let currentlyBold = true;
-        if (cellRange) {
-            currentlyBold = worksheet.getRange(cellRange.row, cellRange.column).getFontWeight() === FontWeight.BOLD;
+        if (selectedrange) {
+            currentlyBold =
+                worksheet.getRange(selectedrange.startRow, selectedrange.startColumn).getFontWeight() ===
+                FontWeight.BOLD;
         }
 
         const setStyleParams: ISetStyleParams<BooleanNumber> = {

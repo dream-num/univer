@@ -19,7 +19,15 @@ export class DesktopLogService extends Disposable implements ILogService {
     private logEnabled = true;
 
     log(...args: any[]): void {
-        if (this.logEnabled) {
+        if (!this.logEnabled || !args.length) {
+            return;
+        }
+
+        const firstArg = args[0];
+        const withTag = /^\[(.*?)\]/g.test(firstArg);
+        if (withTag) {
+            console.log(`\x1B[97;104m${firstArg}\x1B[0m:`, ...args.slice(1));
+        } else {
             console.log(...args);
         }
     }

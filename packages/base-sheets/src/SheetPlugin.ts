@@ -16,7 +16,7 @@ import { SetSelectionsOperation } from './commands/operations/selection.operatio
 import { BasicWorkbookController, CountBarController } from './Controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
-import { SelectionController } from './Controller/selection.controller';
+import { SelectionController } from './Controller/Selection.controller';
 import { SheetRenderController } from './Controller/sheet-render.controller';
 import { en } from './Locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';

@@ -13,11 +13,15 @@ import { IAccessor } from '@wendellhu/redi';
 
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams {
-    rangeData: ISelectionRange[];
+    workbookId?: string;
     worksheetId: string;
+    rangeData: ISelectionRange[];
 
     cellValue?: ObjectMatrixPrimitiveType<ICellData>;
-    workbookId?: string;
+
+    /**
+     * @deprecated not a good design
+     */
     options?: ICopyToOptionsData;
 }
 

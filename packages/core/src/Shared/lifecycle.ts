@@ -1,5 +1,5 @@
 import { IDisposable } from '@wendellhu/redi';
-import { Subscription, SubscriptionLike } from 'rxjs';
+import { Subject, Subscription, SubscriptionLike } from 'rxjs';
 import { isSubscription } from 'rxjs/internal/Subscription';
 
 export function toDisposable(subscription: SubscriptionLike): IDisposable;
@@ -50,5 +50,15 @@ export class Disposable implements IDisposable {
 
     dispose(): void {
         this._collection.dispose();
+    }
+}
+
+export class RxDisposable extends Disposable implements IDisposable {
+    protected dispose$ = new Subject<void>();
+
+    override dispose(): void {
+        super.dispose();
+        this.dispose$.next();
+        this.dispose$.complete();
     }
 }

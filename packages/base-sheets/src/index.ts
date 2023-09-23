@@ -22,6 +22,16 @@ export {
 export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './commands/mutations/insert-sheet.mutation';
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
 export { ISetRangeStyleMutationParams, SetRangeStyleMutation } from './commands/mutations/set-range-styles.mutation';
+export { ISetRangeValuesMutationParams, SetRangeValuesMutation } from './commands/mutations/set-range-values.mutation';
+export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
+export { SetWorksheetActivateMutation } from './commands/mutations/set-worksheet-activate.mutation';
+export {
+    SetWorksheetColWidthMutation,
+    SetWorksheetColWidthMutationFactory,
+} from './commands/mutations/set-worksheet-col-width.mutation';
+export { SetWorksheetHideMutation } from './commands/mutations/set-worksheet-hide.mutation';
+export { SetWorksheetNameMutation } from './commands/mutations/set-worksheet-name.mutation';
+export { SetWorksheetOrderMutation } from './commands/mutations/set-worksheet-order.mutation';
 
 // operations
 export { SetSelectionsOperation } from './commands/operations/selection.operation';
@@ -97,9 +107,4 @@ export { SetWorksheetNameCommand } from './commands/commands/set-worksheet-name.
 export { SetWorksheetRowHideCommand } from './commands/commands/set-worksheet-row-hide.command';
 export { SetWorksheetRowShowCommand } from './commands/commands/set-worksheet-row-show.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
-export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
-export { SetWorksheetActivateMutation } from './commands/mutations/set-worksheet-activate.mutation';
-export { SetWorksheetHideMutation } from './commands/mutations/set-worksheet-hide.mutation';
-export { SetWorksheetNameMutation } from './commands/mutations/set-worksheet-name.mutation';
-export { SetWorksheetOrderMutation } from './commands/mutations/set-worksheet-order.mutation';
 export * from './Locale';

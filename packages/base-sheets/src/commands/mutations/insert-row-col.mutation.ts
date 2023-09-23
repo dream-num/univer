@@ -8,6 +8,8 @@ import {
     IRemoveRowMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 
+// TODO: InsertRowMutation should have an undo factory
+
 export const InsertRowMutationFactory = (
     accessor: IAccessor,
     params: IInsertRowMutationParams

@@ -3,8 +3,8 @@ import { BooleanNumber, Disposable, ICommandService, LifecycleStages, Nullable, 
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const';
-import { RenameSheetCommand } from '../commands/rename.command';
-import { ShowMenuListCommand } from '../commands/unhide.command';
+import { RenameSheetCommand } from '../commands/commands/rename.command';
+import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import { SheetBar } from '../View/SheetBar';
 import {
     ChangeColorSheetMenuItemFactory,

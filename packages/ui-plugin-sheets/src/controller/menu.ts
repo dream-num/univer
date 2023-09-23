@@ -35,11 +35,13 @@ import {
 import {
     ColorPicker,
     CopyCommand,
+    CutCommand,
     DisplayTypes,
     IMenuButtonItem,
     IMenuSelectorItem,
     MenuItemType,
     MenuPosition,
+    PasteCommand,
     SelectTypes,
 } from '@univerjs/base-ui';
 import {
@@ -60,8 +62,8 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
-import { RenameSheetCommand } from '../commands/rename.command';
-import { ShowMenuListCommand } from '../commands/unhide.command';
+import { RenameSheetCommand } from '../commands/commands/rename.command';
+import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 
 export const CONTEXT_MENU_INPUT_LABEL = 'CONTEXT_MENU_INPUT';
 
@@ -92,8 +94,6 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.redos <= 0)),
     };
 }
-
-// TODO@wzhudev: in the future we will support add rich format value to in-cell texts. Then we would make some changes to how these menu items works.
 
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
@@ -893,6 +893,9 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
     };
 }
 
+// #region - copy cut paste
+// TODO@wzhudev: maybe we should move these menu factory to base-ui
+
 export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: CopyCommand.id,
@@ -901,6 +904,26 @@ export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         positions: [MenuPosition.CONTEXT_MENU],
     };
 }
+
+export function CutMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: CutCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'contextMenu.cut',
+        positions: [MenuPosition.CONTEXT_MENU],
+    };
+}
+
+export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: PasteCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'rightClick.paste',
+        positions: [MenuPosition.CONTEXT_MENU],
+    };
+}
+
+// #endregion
 
 export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {

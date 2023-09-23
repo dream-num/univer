@@ -1,46 +1,124 @@
-import { SelectionManagerService } from '@univerjs/base-sheets';
-import { IClipboardInterfaceService } from '@univerjs/base-ui';
-import { Disposable, ICellData, ICurrentUniverService, ILogService, ObjectMatrix, toDisposable } from '@univerjs/core';
+import { ISetRangeValuesMutationParams, SelectionManagerService, SetRangeValuesMutation } from '@univerjs/base-sheets';
+import {
+    HTML_CLIPBOARD_MIME_TYPE,
+    IClipboardInterfaceService,
+    PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
+} from '@univerjs/base-ui';
+import {
+    Disposable,
+    ICellData,
+    ICommandInfo,
+    ICommandService,
+    ICurrentUniverService,
+    ILogService,
+    ISelectionRange,
+    IUndoRedoService,
+    ObjectMatrix,
+    ObjectMatrixPrimitiveType,
+    toDisposable,
+} from '@univerjs/core';
 import { createIdentifier, IDisposable, Inject } from '@wendellhu/redi';
+
+export type ICellDataWithSpanInfo = ICellData & { rowSpan?: number; colSpan?: number };
 
 export interface IClipboardPropertyItem {
     [key: string]: string;
 }
 
+export interface IParsedCellValue {
+    rowSpan?: number;
+    colSpan?: number;
+    properties: IClipboardPropertyItem;
+    content: string;
+}
+
 /**
- * ClipboardHook could:
+ * `ClipboardHook` could:
  * 1. Before copy/cut/paste, decide whether to execute the command and prepare caches if necessary.
  * 1. When copying, decide what content could be written into clipboard.
  * 1. When pasting, get access to the clipboard content and append mutations to the paste command.
  */
 export interface ISheetClipboardHook {
-    onBeforeCopy?(): void;
-    onBeforeCut?(): void;
-    onBeforePaste?(): void;
+    priority?: number;
 
-    onGetContent(row: number, col: number): string;
-
+    /**
+     * The callback would be called after the clipboard service has decided what region need to be copied.
+     * Features could use this hook to build copying cache or any other pre-copy jobs.
+     */
+    onBeforeCopy?(workbookId: string, worksheetId: string, range: ISelectionRange): void;
+    /**
+     *
+     * @param row
+     * @param col
+     * @return content
+     */
+    onCopyCellContent?(row: number, col: number): string;
     /**
      * Properties that would be appended to the td element.
      * @param row row of the the copied cell
      * @param col col of the the copied cell
      */
-    onCopy?(row: number, col: number, rowSpan?: number, colSpan?: number): IClipboardPropertyItem | null;
-    onCut?(row: number, col: number): IClipboardPropertyItem | null;
-    onPaste?(row: number, col: number): void;
-
+    onCopyCellStyle?(row: number, col: number, rowSpan?: number, colSpan?: number): IClipboardPropertyItem | null;
+    /**
+     * Properties that would be appended to the tr element.
+     * @param row each row of the the copied range
+     */
     onCopyRow?(row: number): IClipboardPropertyItem | null;
-    onCutRow?(row: number): IClipboardPropertyItem | null;
-    onPasteRow?(row: number): void;
-
+    /**
+     * Properties that would be appended to the col element.
+     * @param col each col of the copied range
+     */
     onCopyColumn?(col: number): IClipboardPropertyItem | null;
-    onCutColumn?(row: number): IClipboardPropertyItem | null;
-    onPasteColumn?(row: number): void;
-
+    /**
+     * Would be called after copy content has been written into clipboard.
+     * Features could do some cleaning up jobs here.
+     */
     onAfterCopy?(): void;
-    onAfterCut?(): void;
-    onAfterPaste?(): void;
 
+    // We do not need cut hooks. We could just use copy hooks to do the same thing,
+    // and tell paste hooks that the source is from a cut command.
+
+    // Unlike copy hooks, paste hooks would be called **only once each** because features would do batch mutations.
+
+    /**
+     * The callback would be called after the clipboard service has decided what region need to be pasted.
+     * Features could use this hook to build copying cache or any other pre-copy jobs.
+     *
+     * @returns if it block copying it should return false
+     */
+    onBeforePaste?(workbookId: string, worksheetId: string, range: ISelectionRange): boolean;
+    /**
+     *
+     * @param row
+     * @param col
+     */
+    onPasteCells?(
+        range: ISelectionRange,
+        matrix: ObjectMatrix<IParsedCellValue>
+    ): {
+        undos: ICommandInfo[];
+        redos: ICommandInfo[];
+    };
+    onPasteRows?(
+        range: ISelectionRange,
+        rowProperties: IClipboardPropertyItem[]
+    ): {
+        undos: ICommandInfo[];
+        redos: ICommandInfo[];
+    };
+    onPasteColumns?(
+        range: ISelectionRange,
+        colProperties: IClipboardPropertyItem[]
+    ): {
+        undos: ICommandInfo[];
+        redos: ICommandInfo[];
+    };
+    onAfterPaste?(success: boolean): void;
+
+    /**
+     * The callback would be called before the clipboard service decides what region need to be copied from or pasted to.
+     * It would jump over these filtered rows when copying or pasting.
+     */
     getFilteredOutRows?(): number[];
 }
 
@@ -50,7 +128,7 @@ export interface ISheetClipboardHook {
 export interface ISheetClipboardService {
     copy(): Promise<boolean>;
     cut(): Promise<boolean>;
-    paste(): Promise<boolean>;
+    paste(item: ClipboardItem): Promise<boolean>;
 
     addClipboardHook(hook: ISheetClipboardHook): IDisposable;
 }
@@ -64,7 +142,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @ILogService private readonly _logService: ILogService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService
+        @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
+        @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
     }
@@ -86,14 +166,15 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // 3. calculate selection matrix, span cells would only - maybe warn uses that cells are too may in the future
         const { startColumn, startRow, endColumn, endRow } = selection.rangeData;
-        const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const worksheet = workbook.getActiveSheet();
         const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
 
         // 4. use filteredRows into to remove rows for the matrix
         // TODO: filtering
 
         // tell hooks to get ready for copying
-        hooks.forEach((h) => h.onBeforeCopy?.());
+        hooks.forEach((h) => h.onBeforeCopy?.(workbook.getUnitId(), worksheet.getSheetId(), selection.rangeData));
 
         // 5. generate html and pure text contents by calling all clipboard hooks
         // col styles
@@ -104,13 +185,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             // TODO: cols here should filtered out those in span cells
             rowContents.push(getRowContent(row, cols, hooks, matrix));
         });
-        // final result
-        const html = `<google-sheets-html-origin><style type="text/css"><!--td {border: 1px solid #cccccc;}br {mso-data-placement:same-cell;}--></style><table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}<tbody>${rowContents.join(
-            ''
-        )}</tbody></table>`;
 
-        // 6. write html and maybe plain text info the clipboard interface
-        await this._clipboardInterfaceService.write('table', html);
+        const html = `<google-sheets-html-origin><style type="text/css"><!--td {border: 1px solid #cccccc;}br {mso-data-placement:same-cell;}--></style>
+<table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}
+<tbody>${rowContents.join('')}</tbody></table>`;
+
+        // TODO: plain text copying is not implemented yet
+        // 6. write html and get plain text info the clipboard interface
+        await this._clipboardInterfaceService.write('TODO: plain text copy is not implemented', html);
 
         // tell hooks to clean up
         hooks.forEach((h) => h.onAfterCopy?.());
@@ -119,16 +201,36 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     async cut(): Promise<boolean> {
+        // TODO: pretty the same as `copy` but we should mark the cutting area and highlight it with a selection
         return true;
     }
 
-    async paste(): Promise<boolean> {
-        return true;
+    async paste(item: ClipboardItem): Promise<boolean> {
+        const types = item.types;
+        const text =
+            types.indexOf(PLAIN_TEXT_CLIPBOARD_MIME_TYPE) !== -1
+                ? await item.getType(PLAIN_TEXT_CLIPBOARD_MIME_TYPE).then((blob) => blob.text())
+                : '';
+        const html =
+            types.indexOf(HTML_CLIPBOARD_MIME_TYPE) !== -1
+                ? await item.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob.text())
+                : '';
+
+        if (html && isLegalSpreadsheetHTMLContent(html)) {
+            // Firstly see if the html content is in good format.
+            // In another word, if it is copied from any spreadsheet apps (including Univer itself).
+            return this._pasteHTML(html);
+        }
+
+        if (text) {
+            return this._pastePlainText(text);
+        }
+
+        return false;
     }
 
     addClipboardHook(hook: ISheetClipboardHook): IDisposable {
         this._clipboardHooks.push(hook);
-
         return toDisposable(() => {
             const index = this._clipboardHooks.indexOf(hook);
             if (index > -1) {
@@ -137,10 +239,288 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         });
     }
 
-    getCellContentClipboardHooks(): Readonly<ISheetClipboardHook[]> {
-        return this._clipboardHooks.slice();
+    private async _pastePlainText(text: string): Promise<boolean> {
+        // this._logService.log('[SheetClipboardService]', 'pasting plain text content.', text);
+
+        // TODO: maybe we should support pasting rich text values here? That is not supported yet.
+        const target = this._getPastingTarget();
+        if (!target.selection) {
+            return false;
+        }
+
+        const rangeData = target.selection.rangeData;
+        const cellValue: ObjectMatrixPrimitiveType<ICellData> = {
+            [rangeData.startRow]: {
+                [rangeData.endColumn]: {
+                    v: text,
+                },
+            },
+        };
+
+        const setRangeValuesParams: ISetRangeValuesMutationParams = {
+            workbookId: target.workbookId,
+            worksheetId: target.worksheetId,
+            rangeData: [target.selection.rangeData],
+            cellValue,
+        };
+
+        const result = this._commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesParams);
+        return result;
+    }
+
+    private async _pasteHTML(html: string): Promise<boolean> {
+        // this._logService.log('[SheetClipboardService]', 'pasting html content', html);
+
+        // TODO: support internal pasting
+        if (true) {
+            return this._pasteExternal(html);
+        }
+
+        return this._pasteInternal();
+    }
+
+    private async _pasteExternal(html: string): Promise<boolean> {
+        // this._logService.log('[SheetClipboardService]', 'pasting external content', html);
+
+        // steps of pasting:
+        const target = this._getPastingTarget();
+        const { selection, workbookId, worksheetId } = target;
+        if (!selection) {
+            return false;
+        }
+
+        // 1. get properties of the table by parsing raw html content, including col properties / row properties
+        // cell properties and cell contents.
+        const colProperties = parseColGroup(html);
+        const { rowProperties, rowCount, colCount, cellMatrix } = parseTableRows(html);
+        if (!cellMatrix) {
+            return false;
+        }
+
+        // 2. get filtered rows in the target pasting area and get the final pasting matrix
+        // we also handle transpose pasting at this step
+        // note: handle transpose before filtering
+        // matrix before adjustment -> transpose -> filtering -> matrix under adjustment
+        // TODO: not implemented yet
+
+        // 3. call hooks with cell position and properties and get mutations (both do mutations and undo mutations)
+        // we also handle 'copy value only' or 'copy style only' as this step
+        const pastedRange = { ...selection.rangeData };
+        pastedRange.endColumn = pastedRange.startColumn + colCount;
+        pastedRange.endRow = pastedRange.startRow + rowCount;
+        const hooks = this._clipboardHooks;
+        const enabledHooks: ISheetClipboardHook[] = [];
+        const disableCopying = hooks.some(
+            (h) => enabledHooks.push(h) && h.onBeforePaste?.(workbookId, worksheetId, pastedRange) === false
+        );
+        if (disableCopying) {
+            enabledHooks.forEach((h) => h.onAfterPaste?.(false));
+            return false;
+        }
+
+        const redoMutationsInfo: ICommandInfo[] = [];
+        const undoMutationsInfo: ICommandInfo[] = [];
+
+        hooks.forEach((h) => {
+            const rowReturn = h.onPasteRows?.(pastedRange, rowProperties);
+            if (rowReturn) {
+                redoMutationsInfo.push(...rowReturn.redos);
+                undoMutationsInfo.push(...rowReturn.undos);
+            }
+
+            const colReturn = h.onPasteColumns?.(pastedRange, colProperties || new Array(colCount).map(() => ({})));
+            if (colReturn) {
+                redoMutationsInfo.push(...colReturn.redos);
+                undoMutationsInfo.push(...colReturn.undos);
+            }
+
+            const contentReturn = h.onPasteCells?.(pastedRange, cellMatrix);
+            if (contentReturn) {
+                redoMutationsInfo.push(...contentReturn.redos);
+                undoMutationsInfo.push(...contentReturn.undos);
+            }
+        });
+
+        // 4. execute these mutations
+        this._logService.log('[SheetClipboardService]', 'pasting mutations', {
+            undoMutationsInfo,
+            redoMutationsInfo,
+        });
+
+        const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));
+        if (result) {
+            // add to undo redo services
+        }
+
+        return result;
+    }
+
+    private async _pasteInternal(): Promise<boolean> {
+        // internal pasting is pretty much like `_pasteExternal`
+        return true;
+        // NOTE: if the source is from a cut command, we should invoke a move mutation instead
+    }
+
+    // NOTE: why there are some differences between internal and external pasting?
+
+    private _getPastingTarget() {
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const worksheet = workbook.getActiveSheet();
+        const selection = this._selectionManagerService.getLast();
+        return {
+            workbookId: workbook.getUnitId(),
+            worksheetId: worksheet.getSheetId(),
+            selection,
+        };
     }
 }
+
+// #region paste parsing
+
+/**
+ * Parse columns and their properties from colgroup element.
+ *
+ * @param raw content
+ * @returns cols and their properties
+ */
+function parseColGroup(raw: string): IClipboardPropertyItem[] | null {
+    const COLGROUP_TAG_REGEX = /<colgroup([\s\S]*?)>(.*?)<\/colgroup>/;
+    const colgroupMatch = raw.match(COLGROUP_TAG_REGEX);
+    if (!colgroupMatch || !colgroupMatch[2]) {
+        return null;
+    }
+
+    const COL_TAG_REGEX = /<col([\s\S]*?)>/g;
+    const colMatches = colgroupMatch[2].matchAll(COL_TAG_REGEX);
+    if (!colMatches) {
+        return null;
+    }
+
+    return Array.from(colMatches).map((colMatch) => parseProperties(colMatch[1]));
+}
+
+/**
+ * This function parses <tr> elements in the table. So it would return several things.
+ * @param html raw content
+ * @returns
+ */
+function parseTableRows(html: string): {
+    rowProperties: IClipboardPropertyItem[];
+    rowCount: number;
+    colCount: number;
+    cellMatrix: ObjectMatrix<IParsedCellValue> | null;
+} {
+    const ROWS_REGEX = /<tr([\s\S]*?)>([\s\S]*?)<\/tr>/gi;
+    const rowMatches = html.matchAll(ROWS_REGEX);
+    if (!rowMatches) {
+        return {
+            rowProperties: [],
+            rowCount: 0,
+            colCount: 0,
+            cellMatrix: null,
+        };
+    }
+
+    const rowMatchesAsArray = Array.from(rowMatches);
+    const rowProperties = rowMatchesAsArray.map((rowMatch) => parseProperties(rowMatch[1]));
+
+    const { colCount, cellMatrix } = parseTableCells(rowMatchesAsArray.map((rowMatch) => rowMatch[2]));
+
+    return {
+        rowProperties,
+        rowCount: rowProperties.length,
+        colCount,
+        cellMatrix,
+    };
+}
+
+/**
+ *
+ * @param tdStrings
+ */
+function parseTableCells(tdStrings: string[]) {
+    const cellMatrix = new ObjectMatrix<IParsedCellValue>();
+    const maxRowOfCol = new Map<number, number>();
+    const TDS_REGEX = /<td([\s\S]*?)>([\s\S]*?)<\/td>/gi;
+
+    let colCount = 0;
+    let colIndex = 0;
+    let rowIndex = 0;
+
+    tdStrings.forEach((trStr, r) => {
+        const isFirstRow = r === 0;
+        const cellMatches = trStr.matchAll(TDS_REGEX);
+
+        colIndex = 0;
+
+        Array.from(cellMatches).forEach((cellMatch) => {
+            const cellProperties = parseProperties(cellMatch[1]);
+            const content = cellMatch[2];
+            const rowSpan = cellProperties.rowspan ? +cellProperties.rowspan : 1;
+            const colSpan = cellProperties.colspan ? +cellProperties.colspan : 1;
+
+            if (!isFirstRow) {
+                for (let i = colIndex; i < colCount; i++) {
+                    const thisPosOccupied = maxRowOfCol.get(i)! >= rowIndex;
+                    if (!thisPosOccupied) {
+                        colIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            const value: IParsedCellValue = {
+                content,
+                properties: cellProperties,
+            };
+            if (colSpan > 1) value.colSpan = +colSpan;
+            if (rowSpan > 1) value.rowSpan = +rowSpan;
+
+            // when iterating the first row, we should calc colCount as well
+            if (isFirstRow) {
+                colCount += colSpan;
+            }
+
+            // update maxRowOfCol
+            for (let i = colIndex; i < colIndex + colSpan; i++) {
+                maxRowOfCol.set(i, rowIndex + rowSpan - 1);
+            }
+
+            // set value to matrix
+            cellMatrix.setValue(rowIndex, colIndex, value);
+
+            // point to next colIndex
+            colIndex += colSpan;
+        });
+
+        rowIndex += 1;
+    });
+
+    return {
+        colCount,
+        cellMatrix,
+    };
+}
+
+function parseProperties(propertyStr: string): IClipboardPropertyItem {
+    if (!propertyStr) {
+        return {};
+    }
+
+    const PROPERTY_REGEX = /([\w-]+)="([^"]*)"/gi;
+    const propertyMatches = propertyStr.matchAll(PROPERTY_REGEX);
+    const property: IClipboardPropertyItem = {};
+    Array.from(propertyMatches).forEach((m) => {
+        const [_, key, val] = m;
+        property[key] = val;
+    });
+
+    return property;
+}
+
+// #endregion
+
+// #region copy generation
 
 /**
  *
@@ -148,9 +528,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
  * @param cols
  * @param hooks
  */
-export function getTableContent(matrix: number[][], cols: number[], hooks: ISheetClipboardHook[]) {}
+function getTableContent(matrix: number[][], cols: number[], hooks: ISheetClipboardHook[]) {}
 
-export function getSingleCellContent() {}
+function getSingleCellContent() {}
 
 /**
  * Get content of a single td element.
@@ -162,15 +542,15 @@ function getTDContent(
     row: number,
     col: number,
     hooks: ISheetClipboardHook[],
-    matrix: ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>
 ) {
     const v = matrix.getValue(row, col);
     const properties = hooks
-        .map((hook) => hook.onCopy?.(row, col, v?.rowSpan, v?.colSpan))
+        .map((hook) => hook.onCopyCellStyle?.(row, col, v?.rowSpan, v?.colSpan))
         .filter((v) => !!v) as IClipboardPropertyItem[];
     const mergedProperties = mergeProperties(properties);
     const str = zipClipboardPropertyItemToString(mergedProperties);
-    const content = hooks.reduce((acc, hook) => acc || hook.onGetContent?.(row, col) || '', '');
+    const content = hooks.reduce((acc, hook) => acc || hook.onCopyCellContent?.(row, col) || '', '');
     return `<td${str}>${content}</td>`;
 }
 
@@ -185,7 +565,7 @@ function getRowContent(
     row: number,
     cols: number[],
     hooks: ISheetClipboardHook[],
-    matrix: ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>
 ) {
     const properties = hooks.map((hook) => hook.onCopyRow?.(row)).filter((v) => !!v) as IClipboardPropertyItem[];
     const mergedProperties = mergeProperties(properties);
@@ -241,3 +621,9 @@ function getArrayFromTo(f: number, to: number): number[] {
     }
     return arr;
 }
+
+function isLegalSpreadsheetHTMLContent(html: string): boolean {
+    return html.indexOf('<table') !== -1; // NOTE: This is just a temporary implementation. Definitely would be changed later.
+}
+
+// #endregion

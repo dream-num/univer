@@ -1,6 +1,6 @@
 import { KeyCode, MetaKeys } from '../shortcut/keycode';
 import { IShortcutItem } from '../shortcut/shortcut.service';
-import { CopyCommand, CutCommand } from './clipboard.command';
+import { CopyCommand, CutCommand, PasteCommand } from './clipboard.command';
 
 export const CopyShortcutItem: IShortcutItem = {
     id: CopyCommand.id,
@@ -13,6 +13,6 @@ export const CutShortcutItem: IShortcutItem = {
 };
 
 export const PasteShortcutItem: IShortcutItem = {
-    id: CopyCommand.id,
+    id: PasteCommand.id,
     binding: KeyCode.V | MetaKeys.CTRL_COMMAND,
 };

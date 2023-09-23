@@ -29,7 +29,10 @@ export class SlideContainerUIController {
         @Inject(DragManager) private readonly _dragManager: DragManager
     ) {
         this._config = config;
-        this._toolbarController = this._injector.createInstance(ToolbarUIController, this._config.layout?.toolbarConfig);
+        this._toolbarController = this._injector.createInstance(
+            ToolbarUIController,
+            this._config.layout?.toolbarConfig
+        );
         this._infoBarController = this._injector.createInstance(InfoBarUIController);
         this._slideBarController = this._injector.createInstance(SlideBarUIController);
         // this._dragManager = this._injector.createInstance(DragManager);

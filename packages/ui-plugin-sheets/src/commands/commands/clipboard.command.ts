@@ -1,8 +1,8 @@
-import { CopyCommand, CutCommand, PasteCommand } from '@univerjs/base-ui';
-import { CommandType, FOCUSING_SHEET, IContextService, IMultiCommand } from '@univerjs/core';
+import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/base-ui';
+import { CommandType, FOCUSING_SHEET, IContextService, ILogService, IMultiCommand } from '@univerjs/core';
 
 import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
-import { FOCUSING_SHEET_EDITOR } from '../../services/context/context';
+import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
 
 export const SheetCopyCommand: IMultiCommand = {
     id: CopyCommand.id,
@@ -11,7 +11,7 @@ export const SheetCopyCommand: IMultiCommand = {
     multi: true,
     priority: 1000,
     preconditions: (contextService: IContextService) =>
-        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
+        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(SHEET_EDITOR_ACTIVATED),
     handler: async (accessor) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.copy();
@@ -25,10 +25,11 @@ export const SheetCutCommand: IMultiCommand = {
     multi: true,
     priority: 1000,
     preconditions: (contextService: IContextService) =>
-        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
-    handler: async (accessor, params) =>
-        // TODO@wzhudev: the same as SheetCopyCommand but we should dispatch a delete command as well
-        true,
+        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(SHEET_EDITOR_ACTIVATED),
+    handler: async (accessor, params) => {
+        const sheetClipboardService = accessor.get(ISheetClipboardService);
+        return sheetClipboardService.cut();
+    },
 };
 
 export const SheetPasteCommand: IMultiCommand = {
@@ -38,6 +39,34 @@ export const SheetPasteCommand: IMultiCommand = {
     name: 'sheet.command.paste',
     priority: 1000,
     preconditions: (contextService: IContextService) =>
-        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(FOCUSING_SHEET_EDITOR),
-    handler: async (accessor, params) => true,
+        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(SHEET_EDITOR_ACTIVATED),
+    handler: async (accessor) => {
+        const logService = accessor.get(ILogService);
+
+        // use cell editor to get ClipboardData first
+        // if that doesn't work, use the browser's clipboard API
+        // this clipboard API would ask user for permission, so we may need to notify user (and retry perhaps)
+        logService.log('[SheetPasteCommand]', 'the focusing element is', document.activeElement);
+
+        const result = document.execCommand('paste');
+        if (!result) {
+            logService.log(
+                '[SheetPasteCommand]',
+                'failed to execute paste command on the activeElement, trying to use clipboard API.'
+            );
+
+            const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
+            const clipboardItems = await clipboardInterfaceService.read();
+            const sheetClipboardService = accessor.get(ISheetClipboardService);
+
+            // logService.log('[SheetPasteCommand]: clipboard data is', clipboardItems);
+            if (clipboardItems.length !== 0) {
+                return sheetClipboardService.paste(clipboardItems[0]);
+            }
+
+            return false;
+        }
+
+        return false;
+    },
 };

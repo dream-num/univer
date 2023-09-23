@@ -1,6 +1,9 @@
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
+export const PLAIN_TEXT_CLIPBOARD_MIME_TYPE = 'text/plain';
+export const HTML_CLIPBOARD_MIME_TYPE = 'text/html';
+
 /**
  * This interface provides an interface to access system's clipboard.
  */
@@ -10,13 +13,6 @@ export interface IClipboardInterfaceService {
      * @param text
      */
     writeText(text: string): Promise<void>;
-
-    /**
-     * Read plain text from clipboard. Use read() to read both plain text and html.
-     * @returns plain text
-     */
-    readText(): Promise<string>;
-
     /**
      * Write both plain text and html into clipboard.
      * @param text
@@ -25,9 +21,14 @@ export interface IClipboardInterfaceService {
     write(text: string, html: string): Promise<void>;
 
     /**
-     * Read both plain text and html from clipboard.
+     * Read plain text from clipboard. Use read() to read both plain text and html.
+     * @returns plain text
      */
-    read(): Promise<{ text: string; html: string }>;
+    readText(): Promise<string>;
+    /**
+     * Read `ClipboardItem[]` from clipboard.
+     */
+    read(): Promise<ClipboardItem[]>;
 
     // NOTE: maybe we should add an interface to support image copy
 }
@@ -42,7 +43,8 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
             // write both pure text content and html content to the clipboard
             return await navigator.clipboard.write([
                 new ClipboardItem({
-                    'text/html': new Blob([html], { type: 'text/html' }),
+                    [PLAIN_TEXT_CLIPBOARD_MIME_TYPE]: new Blob([text], { type: PLAIN_TEXT_CLIPBOARD_MIME_TYPE }),
+                    [HTML_CLIPBOARD_MIME_TYPE]: new Blob([html], { type: HTML_CLIPBOARD_MIME_TYPE }),
                 }),
             ]);
         } catch (error) {
@@ -75,7 +77,9 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
         document.removeChild(container);
     }
 
-    read(): Promise<{ text: string; html: string }> {}
+    async read(): Promise<ClipboardItem[]> {
+        return navigator.clipboard.read();
+    }
 
     async readText(): Promise<string> {
         try {
@@ -85,8 +89,6 @@ export class BrowserClipboardService extends Disposable implements IClipboardInt
 
             return '';
         }
-
-        // TODO: fallback to traditional way
     }
 }
 

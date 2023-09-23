@@ -243,7 +243,7 @@ export class CommandService implements ICommandService {
             };
 
             // emit command execution info
-            this._commandExecutedListeners.forEach((l) => l(commandInfo));
+            this._commandExecutedListeners.forEach((listener) => listener(commandInfo));
 
             return result;
         }
@@ -296,7 +296,8 @@ export class CommandService implements ICommandService {
         params?: P
     ): Promise<R> {
         this._log.log(
-            `${'|-'.repeat(this._commandExecutingLevel)}[ICommandService]: executing command "${command.id}".`
+            '[CommandService]',
+            `${'|-'.repeat(this._commandExecutingLevel)}executing command "${command.id}".`
         );
 
         this._commandExecutingLevel++;
@@ -307,7 +308,6 @@ export class CommandService implements ICommandService {
         } catch (e) {
             result = false;
             this._commandExecutingLevel = 0;
-
             throw e;
         }
 
@@ -356,7 +356,7 @@ class MultiCommand implements IMultiCommand {
         for (const item of this._implementations) {
             const preconditions = item.command.preconditions;
             if (preconditions?.(contextService)) {
-                logService.log(`[MultiCommand]: executing implementation "${item.command.name}".`);
+                logService.log(`[MultiCommand]`, `executing implementation "${item.command.name}".`);
                 const result = await item.injector.invoke(item.command.handler, params);
                 if (result) {
                     return true;

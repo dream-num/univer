@@ -61,13 +61,13 @@ import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { SHEET_UI_PLUGIN_NAME } from '../Basics/Const/PLUGIN_NAME';
-import { RenameSheetCommand } from '../commands/commands/rename.command';
-import { ShowMenuListCommand } from '../commands/commands/unhide.command';
+import { SHEET_UI_PLUGIN_NAME } from '../../Basics/Const/PLUGIN_NAME';
+import { RenameSheetCommand } from '../../commands/commands/rename.command';
+import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
 
 export const CONTEXT_MENU_INPUT_LABEL = 'CONTEXT_MENU_INPUT';
 
-export { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './menu/border.menu';
+export { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './border.menu';
 
 export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const undoRedoService = accessor.get(IUndoRedoService);
@@ -109,17 +109,14 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         positions: [MenuPosition.TOOLBAR],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
-            function update() {
-                subscriber.next(!editable);
-            }
-
-            update();
 
             // it can hook in other business logic via permissionService and sheet business logic
             const permission$ = permissionService.editable$.subscribe((e) => {
                 editable = e;
-                update();
+                subscriber.next(!editable);
             });
+
+            subscriber.next(!editable);
 
             return () => {
                 permission$.unsubscribe();

@@ -38,6 +38,7 @@
     "type": "module",
     "scripts": {
         "test": "vitest run",
+        "test:watch": "vitest watch",
         "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {

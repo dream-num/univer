@@ -1,4 +1,4 @@
-import { Ctor, Injector } from '@wendellhu/redi';
+import { Ctor, IDisposable, Injector } from '@wendellhu/redi';
 
 import { ObserverManager } from '../Observer';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
@@ -23,7 +23,7 @@ import { UniverSlide } from './UniverSlide';
 /**
  * Univer.
  */
-export class Univer {
+export class Univer implements IDisposable {
     private readonly _univerInjector: Injector;
 
     private readonly _univerPluginStore = new PluginStore();
@@ -34,11 +34,12 @@ export class Univer {
         this._univerInjector = this._initDependencies();
         this._setObserver();
 
-        // initialize localization info
         const { locale, locales } = univerData;
         locales && this._univerInjector.get(LocaleService).load(locales);
         locale && this._univerInjector.get(LocaleService).setLocale(locale);
     }
+
+    dispose(): void {}
 
     private get _currentUniverService(): ICurrentUniverService {
         return this._univerInjector.get(ICurrentUniverService);

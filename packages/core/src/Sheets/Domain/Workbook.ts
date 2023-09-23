@@ -411,6 +411,8 @@ export class Workbook {
         return item;
     }
 
+    // FIXME: now we always create worksheet from DEFAULT_WORKSHEET?
+
     /**
      * Get Default Sheet
      * @private

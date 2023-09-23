@@ -25,6 +25,7 @@ import { QuitCellEditorShortcutItem } from '../services/shortcuts/shortcuts';
 import { RightMenuInput } from '../View/RightMenu/RightMenuInput';
 import { RightMenuItem } from '../View/RightMenu/RightMenuItem';
 import { RenderSheetFooter } from '../View/SheetContainer/SheetContainer';
+import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
@@ -57,8 +58,7 @@ import {
     UndoMenuItemFactory,
     VerticalAlignMenuItemFactory,
     WrapTextMenuItemFactory,
-} from './menu';
-import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
+} from './menu/menu';
 import {
     CellMergeAllMenuItemFactory,
     CellMergeCancelMenuItemFactory,

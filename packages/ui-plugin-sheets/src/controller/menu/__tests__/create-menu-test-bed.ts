@@ -1,3 +1,5 @@
+import { SelectionManagerService } from '@univerjs/base-sheets';
+import { DesktopMenuService, DesktopShortcutService, IMenuService, IShortcutService } from '@univerjs/base-ui';
 import { IWorkbookConfig, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -6,6 +8,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     appVersion: '3.0.0-alpha',
     sheets: {
         sheet1: {
+            id: 'sheet1',
             cellData: {
                 '0': {
                     '0': {
@@ -28,7 +31,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     timeZone: '',
 };
 
-export function createCommandTestBed() {
+export function createMenuTestBed() {
     const univer = new Univer();
 
     let get: Injector['get'] | null = null;
@@ -44,6 +47,12 @@ export function createCommandTestBed() {
 
             this._injector = _injector;
             get = this._injector.get.bind(this._injector);
+        }
+
+        override onStarting(injector: Injector): void {
+            injector.add([SelectionManagerService]);
+            injector.add([IShortcutService, { useClass: DesktopShortcutService }]);
+            injector.add([IMenuService, { useClass: DesktopMenuService }]);
         }
 
         override onDestroy(): void {

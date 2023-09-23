@@ -13,7 +13,7 @@ import {
     HideSheetMenuItemFactory,
     RenameSheetMenuItemFactory,
     UnHideSheetMenuItemFactory,
-} from './menu';
+} from './menu/menu';
 
 export interface BaseUlProps extends BaseComponentProps {
     label?: string | JSX.Element | string[];

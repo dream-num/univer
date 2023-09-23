@@ -24,6 +24,6 @@ export class DesktopPermissionService extends Disposable implements IPermissionS
     }
 
     setEditable(editable: boolean): void {
-        this._editable$.next(true);
+        this._editable$.next(editable);
     }
 }

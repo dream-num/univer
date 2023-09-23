@@ -79,7 +79,20 @@ const getSizeClass = (size?: SizeType) => {
  * Button Component
  */
 export function Button(props: IBaseButtonProps) {
-    const { children, className, style, type = 'default', shape, size, htmlType, danger = false, disabled = false, block = false, loading = false, onClick } = props;
+    const {
+        children,
+        className,
+        style,
+        type = 'default',
+        shape,
+        size,
+        htmlType,
+        danger = false,
+        disabled = false,
+        block = false,
+        loading = false,
+        onClick,
+    } = props;
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         if (disabled) {

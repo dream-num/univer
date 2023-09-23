@@ -40,6 +40,7 @@
     },
     "devDependencies": {
         "@types/node": "^18.14.0",
-        "esbuild": "^0.19.3"
+        "esbuild": "^0.19.3",
+        "vitest": "^0.34.5"
     }
 }

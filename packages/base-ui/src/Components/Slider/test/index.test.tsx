@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
+import { describe, expect, test } from 'vitest';
 
 import { Slider } from '../Slider';
 
@@ -11,16 +12,16 @@ describe('Slider', () => {
     test('click onClick function', () => {
         let a = 1;
 
-        render(
+        const { container } = render(
             <Slider
                 id={'test'}
                 onClick={() => {
                     a++;
                 }}
-            ></Slider>
+            />
         );
 
-        fireEvent.click(screen.getByRole('slider-group'));
+        fireEvent.click(container.querySelector('[role=slider-group]')!);
 
         expect(a).toEqual(2);
     });
@@ -28,7 +29,7 @@ describe('Slider', () => {
     test('test change event', () => {
         let a = 1;
         const { container } = render(<Slider onChange={() => a++} />);
-        const slider = screen.getByRole('slider-group');
+        const slider = container.querySelector('[role=slider-group]')!;
         const input = slider.querySelector('input');
         fireEvent.input(input!);
         expect(a).toEqual(2);

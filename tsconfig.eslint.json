@@ -6,6 +6,7 @@
     "packages/**/*",
     "examples/**/*",
     "scripts/**/*",
-    ".eslintrc.cjs"
+    ".eslintrc.cjs",
+    "./vitest.workspace.ts"
   ],
 }

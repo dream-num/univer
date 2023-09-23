@@ -1,4 +1,5 @@
 import { fireEvent, render } from '@testing-library/react';
+import { describe, expect, test } from 'vitest';
 
 import { InputNumber } from '../InputNumber';
 
@@ -7,9 +8,10 @@ describe('input number', () => {
         const { container } = render(<InputNumber value={0} />);
         expect(container);
     });
+
     test('min max', () => {
         const { container } = render(<InputNumber value={0} min={0} max={5} />);
-        const input = container.querySelector('input');
+        const input = container.querySelector('input') as HTMLInputElement;
         const buttonAddition = container?.querySelectorAll('button')[0];
         const buttonSubtraction = container?.querySelectorAll('button')[1];
 
@@ -42,10 +44,11 @@ describe('input number', () => {
     test('blur event', () => {
         let a = 1;
         const { container } = render(<InputNumber value={0} onBlur={() => a++} disabled />);
-        fireEvent.click(document.querySelector('input')!);
-        fireEvent.blur(document.querySelector('input')!);
+        fireEvent.click(container.querySelector('input')!);
+        fireEvent.blur(container.querySelector('input')!);
         expect(a).toEqual(2);
     });
+
     test('press enter event', () => {
         let a = 0;
         const { container } = render(

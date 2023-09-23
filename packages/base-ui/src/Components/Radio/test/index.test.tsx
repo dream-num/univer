@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, test } from 'vitest';
 
 import { Radio, RadioGroup } from '..';
 
@@ -15,6 +16,7 @@ describe('RadioGroup', () => {
             <Radio value="1" label="1"></Radio>
         </RadioGroup>
     );
+
     test('click Radio', async () => {
         render(group);
 

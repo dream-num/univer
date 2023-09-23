@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
+import { describe, expect, test } from 'vitest';
 
 import { Button } from '..';
 
@@ -6,7 +7,7 @@ describe('Button', () => {
     test('renders correctly', () => {
         const { container } = render(
             <Button type="primary" onClick={() => {}}>
-                lol
+                btn1
             </Button>
         );
         expect(container);
@@ -15,17 +16,17 @@ describe('Button', () => {
     test('click onClick function', () => {
         let a = 1;
 
-        render(
+        const { container } = render(
             <Button
                 onClick={() => {
                     a++;
                 }}
             >
-                lol
+                btn2
             </Button>
         );
 
-        fireEvent.click(screen.getByText('lol'));
+        fireEvent.click(container.querySelector('button')!);
 
         expect(a).toEqual(2);
     });
@@ -33,18 +34,18 @@ describe('Button', () => {
     test('should prevent event when button is disabled', () => {
         let a = 1;
 
-        render(
+        const { container } = render(
             <Button
                 disabled
                 onClick={() => {
                     a++;
                 }}
             >
-                lol
+                btn3
             </Button>
         );
 
-        fireEvent.click(screen.getByText('lol'));
+        fireEvent.click(container.querySelector('button')!);
 
         expect(a).toEqual(1);
     });

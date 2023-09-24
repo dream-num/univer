@@ -6,6 +6,7 @@
     "type": "module",
     "scripts": {
         "test": "turbo test -- --passWithNoTests",
+        "coverage": "turbo coverage -- --passWithNoTests",
         "dev:sheet": "turbo dev:demo --filter ./examples/univer-sheet-ts",
         "dev:slide": "turbo dev:demo --filter ./examples/univer-slide-ts",
         "dev:doc": "turbo dev:demo --filter ./examples/univer-doc-ts",

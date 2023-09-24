@@ -3,6 +3,8 @@
     "pipeline": {
         "test": {
         },
+        "coverage": {
+        },
         "esbuild": {
         },
         "esbuild:demo": {

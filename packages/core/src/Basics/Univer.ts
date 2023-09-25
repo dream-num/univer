@@ -238,4 +238,6 @@ export class Univer {
             slide.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
         });
     }
+
+    dispose(): void {}
 }

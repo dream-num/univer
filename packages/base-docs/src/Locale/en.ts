@@ -447,7 +447,7 @@ export default {
         confirm: 'Confirm',
         orderAZ: 'A-Z order',
         orderZA: 'Z-A order',
-        clearContent: 'Clear content',
+        clearContent: 'Clear Contents',
         matrix: 'Matrix operation',
         sortSelection: 'Sort',
         filterSelection: 'Filter',

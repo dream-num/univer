@@ -477,7 +477,6 @@ export class Tools {
      */
     static removeNull(value: IKeyValue): object {
         if (this.isObject(value)) {
-            const clone = {};
             Object.keys(value).forEach((key) => {
                 const item = value[key];
                 if (item == null) {
@@ -486,7 +485,6 @@ export class Tools {
                     Tools.removeNull(item);
                 }
             });
-            return clone;
         }
         return value;
     }

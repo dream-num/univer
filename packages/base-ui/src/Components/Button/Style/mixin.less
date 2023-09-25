@@ -20,7 +20,7 @@
 
         &,
         &:hover,
-        &:active,&-active {
+        &:active{
             .button-color(@color; @background; @border);
             text-shadow: none;
             box-shadow: none;
@@ -35,7 +35,7 @@
         .button-color(@color, fade(@background, 70%), fade(@background, 70%))
     }
 
-    &:active, &-active {
+    &:active {
         .button-color(@color, fade(@background, 50%), fade(@background, 50%))
     }
 
@@ -46,7 +46,7 @@
     .button-color(@color; @background; @board);
 
     &:hover,
-    &:active, &-active {
+    &:active {
         .button-color(@primary-color, @background, @primary-color);
     }
 
@@ -63,7 +63,7 @@
         border-color: transparent;
     }
 
-    &:active, &-active {
+    &:active {
         color: var(--text-color);
         background: #eee;
         border-color: transparent;
@@ -117,7 +117,7 @@
         .button-color(fade(@error-color, 70%); @bg; fade(@error-color, 70%))
     }
 
-    &:active, &-active {
+    &:active {
         .button-color(fade(@error-color, 50%); @bg; fade(@error-color, 50%))
     }
 

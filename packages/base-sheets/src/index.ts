@@ -67,6 +67,8 @@ export {
     ExpandSelectionCommand,
     IChangeSelectionCommandParams,
     IExpandSelectionCommandParams,
+    ISelectAllCommandParams,
+    SelectAllCommand,
 } from './commands/commands/set-selections.command';
 export {
     ResetBackgroundColorCommand,

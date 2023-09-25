@@ -3,9 +3,13 @@ import {
     ExpandSelectionCommand,
     IChangeSelectionCommandParams,
     IExpandSelectionCommandParams,
+    ISelectAllCommandParams,
+    SelectAllCommand,
 } from '@univerjs/base-sheets';
 import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
 import { Direction, FOCUSING_SHEET } from '@univerjs/core';
+
+import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
 
 export const MoveSelectionDownShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
     id: ChangeSelectionCommand.id,
@@ -171,5 +175,16 @@ export const ExpandSelectionEndRightShortcutItem: IShortcutItem<IExpandSelection
     staticParameters: {
         direction: Direction.RIGHT,
         toEnd: true,
+    },
+};
+
+export const SelectAllShortcutItem: IShortcutItem<ISelectAllCommandParams> = {
+    id: SelectAllCommand.id,
+    binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) =>
+        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(SHEET_EDITOR_ACTIVATED),
+    staticParameters: {
+        expandToGapFirst: true,
+        loop: true,
     },
 };

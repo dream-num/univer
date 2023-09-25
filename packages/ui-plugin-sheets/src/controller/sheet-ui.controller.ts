@@ -1,6 +1,7 @@
 import {
     ChangeSelectionCommand,
     ExpandSelectionCommand,
+    SelectAllCommand,
     SetBoldCommand,
     SetFontFamilyCommand,
     SetFontSizeCommand,
@@ -21,7 +22,6 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
 import { QuitCellEditorCommand } from '../services/cell-editor/cell-editor.command';
-import { QuitCellEditorShortcutItem } from '../services/shortcuts/shortcuts';
 import { RightMenuInput } from '../View/RightMenu/RightMenuInput';
 import { RightMenuItem } from '../View/RightMenu/RightMenuItem';
 import { RenderSheetFooter } from '../View/SheetContainer/SheetContainer';
@@ -67,6 +67,7 @@ import {
     CellMergeVerticalMenuItemFactory,
 } from './menu/merge.menu';
 import { SheetBarUIController } from './SheetBarUIController';
+import { QuitCellEditorShortcutItem } from './shortcuts/editor.shortcut';
 import {
     ExpandSelectionDownShortcutItem,
     ExpandSelectionEndDownShortcutItem,
@@ -85,6 +86,7 @@ import {
     MoveSelectionRightShortcutItem,
     MoveSelectionTabShortcutItem,
     MoveSelectionUpShortcutItem,
+    SelectAllShortcutItem,
 } from './shortcuts/selection.shortcut';
 import {
     SetBoldShortcutItem,
@@ -118,6 +120,7 @@ export class SheetUIController extends Disposable {
     private _initialize(): void {
         // init custom component
         const componentManager = this._componentManager;
+
         // FIXME: no dispose logic
         componentManager.register(CONTEXT_MENU_INPUT_LABEL, RightMenuInput);
         componentManager.register(RightMenuItem.name, RightMenuItem);
@@ -126,6 +129,7 @@ export class SheetUIController extends Disposable {
         [
             ChangeSelectionCommand,
             ExpandSelectionCommand,
+            SelectAllCommand,
             SetBoldCommand,
             SetItalicCommand,
             SetStrikeThroughCommand,
@@ -188,6 +192,7 @@ export class SheetUIController extends Disposable {
 
         // init shortcuts
         [
+            // selection shortcuts
             MoveSelectionDownShortcutItem,
             MoveSelectionUpShortcutItem,
             MoveSelectionLeftShortcutItem,
@@ -205,12 +210,15 @@ export class SheetUIController extends Disposable {
             ExpandSelectionEndUpShortcutItem,
             ExpandSelectionEndLeftShortcutItem,
             ExpandSelectionEndRightShortcutItem,
+            SelectAllShortcutItem,
 
+            // toggle cell style shortcuts
             SetBoldShortcutItem,
             SetItalicShortcutItem,
             SetUnderlineShortcutItem,
             SetStrikeThroughShortcutItem,
 
+            // cell content editing shortcuts
             ClearSelectionValueShortcutItem,
             QuitCellEditorShortcutItem,
         ].forEach((item) => {

@@ -1,2 +1,4 @@
+packages/base-sheets/src/commands/commands/set-selections.command.ts @wzhudev
+packages/ui-plugin-sheets/src/controller/shortcuts/selection.shortcut.ts @wzhudev
 
 docs/graphs.tldr @wzhudev

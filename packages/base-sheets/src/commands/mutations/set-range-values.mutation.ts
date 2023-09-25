@@ -13,7 +13,7 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { mergeRichTextStyle, mergeStyle, transformStyle } from './set-border-styles.mutatio';
+import { mergeRichTextStyle, mergeStyle, transformStyle } from './set-border-styles.mutation';
 
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams {
@@ -142,30 +142,23 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 cellMatrix?.setValue(row, col, {});
             } else {
                 const oldVal = cellMatrix.getValue(row, col) || {};
-                let dirty = false;
 
                 if (newVal.p !== undefined) {
                     oldVal.p = newVal.p;
-                    dirty = true;
                 }
 
                 // Set to null, clear content
                 if (newVal.v !== undefined) {
                     oldVal.v = newVal.v;
-                    dirty = true;
+                    oldVal.m = String(oldVal.v);
                 }
 
                 if (newVal.m !== undefined) {
                     oldVal.m = newVal.m;
-                    dirty = true;
-                } else {
-                    oldVal.m = String(oldVal.v);
-                    dirty = true;
                 }
 
                 if (newVal.t !== undefined) {
                     oldVal.t = newVal.t;
-                    dirty = true;
                 }
 
                 // handle style
@@ -194,8 +187,6 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                     if (oldVal.p) {
                         mergeRichTextStyle(oldVal.p, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
                     }
-
-                    dirty = true;
                 }
 
                 cellMatrix.setValue(row, col, Tools.removeNull(oldVal));

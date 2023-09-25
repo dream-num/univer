@@ -22,7 +22,7 @@ import {
     ISetBorderStylesMutationParams,
     SetBorderStylesMutation,
     SetBorderStylesUndoMutationFactory,
-} from '../mutations/set-border-styles.mutatio';
+} from '../mutations/set-border-styles.mutation';
 
 function forEach(rangeData: ISelectionRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = rangeData;

@@ -22,6 +22,9 @@ export interface ICommand<P extends object = object, R = boolean> {
     readonly type: CommandType;
 
     handler(accessor: IAccessor, params?: P): Promise<R>;
+
+    /** When this command is unregistered, this function would be called. */
+    onDispose?: () => void;
 }
 
 export interface IMultiCommand<P extends object = object, R = boolean> extends ICommand<P, R> {
@@ -128,6 +131,8 @@ class CommandRegistry {
         return toDisposable(() => {
             this.commands.delete(command.id);
             this.commandInjector.delete(command.id);
+
+            command.onDispose?.();
         });
     }
 
@@ -338,6 +343,8 @@ class MultiCommand implements IMultiCommand {
         return toDisposable(() => {
             const index = this._implementations.indexOf(registry);
             this._implementations.splice(index, 1);
+
+            implementation.onDispose?.();
         });
     }
 

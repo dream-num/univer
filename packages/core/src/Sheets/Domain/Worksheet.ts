@@ -153,6 +153,8 @@ export class Worksheet {
         endCol: number
     ): ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }> {
         const matrix = this.getCellMatrix();
+
+        // get all merged cells
         const mergedCellsInRange = this._snapshot.mergeData.filter((rect) => {
             const rectRange = new Rectangle(rect);
             const targetRange = new Rectangle(row, col, endRow, endCol);
@@ -161,6 +163,7 @@ export class Worksheet {
 
         const ret = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>();
 
+        // iterate all cells in the range
         createRowColIter(row, endRow, col, endCol).forEach((row, col) => {
             const v = matrix.getValue(row, col);
             if (v) {
@@ -174,7 +177,7 @@ export class Worksheet {
             createRowColIter(startRow, endRow, startColumn, endColumn).forEach((row, col) => {
                 if (row === startRow && col === startColumn) {
                     ret.setValue(row, col, {
-                        ...ret.getValue(row, col),
+                        ...matrix.getValue(row, col),
                         rowSpan: endRow - startRow + 1,
                         colSpan: endColumn - startColumn + 1,
                     });

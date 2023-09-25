@@ -3,9 +3,13 @@ import {
     ExpandSelectionCommand,
     IChangeSelectionCommandParams,
     IExpandSelectionCommandParams,
+    ISelectAllCommandParams,
+    SelectAllCommand,
 } from '@univerjs/base-sheets';
 import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
 import { Direction, FOCUSING_SHEET } from '@univerjs/core';
+
+import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
 
 export const MoveSelectionDownShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
     id: ChangeSelectionCommand.id,
@@ -59,8 +63,8 @@ export const MoveSelectionEndDownShortcutItem: IShortcutItem<IChangeSelectionCom
     binding: KeyCode.ARROW_DOWN | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
-        direction: Direction.LEFT,
-        toEnd: true,
+        direction: Direction.DOWN,
+        toNextGap: true,
     },
 };
 
@@ -70,7 +74,7 @@ export const MoveSelectionEndUpShortcutItem: IShortcutItem<IChangeSelectionComma
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.UP,
-        toEnd: true,
+        toNextGap: true,
     },
 };
 
@@ -80,7 +84,7 @@ export const MoveSelectionEndLeftShortcutItem: IShortcutItem<IChangeSelectionCom
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.LEFT,
-        toEnd: true,
+        toNextGap: true,
     },
 };
 
@@ -90,7 +94,7 @@ export const MoveSelectionEndRightShortcutItem: IShortcutItem<IChangeSelectionCo
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.RIGHT,
-        toEnd: true,
+        toNextGap: true,
     },
 };
 
@@ -135,41 +139,56 @@ export const ExpandSelectionRightShortcutItem: IShortcutItem<IExpandSelectionCom
 // continuous selection to continuous end
 
 export const ExpandSelectionEndDownShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
-    id: ExpandSelectionCommand.id,
+    id: ChangeSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.DOWN,
-        toEnd: true,
+        toNextGap: true,
+        expand: true,
     },
 };
 
 export const ExpandSelectionEndUpShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
-    id: ExpandSelectionCommand.id,
+    id: ChangeSelectionCommand.id,
     binding: KeyCode.ARROW_UP | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.UP,
-        toEnd: true,
+        toNextGap: true,
+        expand: true,
     },
 };
 
 export const ExpandSelectionEndLeftShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
-    id: ExpandSelectionCommand.id,
+    id: ChangeSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.LEFT,
-        toEnd: true,
+        toNextGap: true,
+        expand: true,
     },
 };
 
 export const ExpandSelectionEndRightShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
-    id: ExpandSelectionCommand.id,
+    id: ChangeSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.RIGHT,
-        toEnd: true,
+        toNextGap: true,
+        expand: true,
+    },
+};
+
+export const SelectAllShortcutItem: IShortcutItem<ISelectAllCommandParams> = {
+    id: SelectAllCommand.id,
+    binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
+    preconditions: (contextService) =>
+        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(SHEET_EDITOR_ACTIVATED),
+    staticParameters: {
+        expandToGapFirst: true,
+        loop: true,
     },
 };

@@ -29,9 +29,8 @@ export interface ISetRangeValuesCommandParams {
      * 1. ICellData: Normal cell data
      * 2. ICellData[][]: The two-dimensional array indicates the data of multiple cells
      * 3. ObjectMatrixPrimitiveType<ICellData>: Bring the row/column information MATRIX, indicating the data of multiple cells
-     * 4. null: clear all
      */
-    value: ICellData | ICellData[][] | ObjectMatrixPrimitiveType<ICellData> | null;
+    value: ICellData | ICellData[][] | ObjectMatrixPrimitiveType<ICellData>;
 }
 
 /**
@@ -65,20 +64,38 @@ export const SetRangeValuesCommand: ICommand = {
         const cellValue = new ObjectMatrix<ICellData>();
         let realCellValue: ObjectMatrixPrimitiveType<ICellData> | undefined;
 
-        // FIXME: this is actually not ideal
-        for (let i = 0; i < currentSelections.length; i++) {
-            const { startRow, startColumn, endRow, endColumn } = currentSelections[i];
-            if (Tools.isArray(value)) {
+        // for (let i = 0; i < currentSelections.length; i++) {
+        //     const { startRow, startColumn, endRow, endColumn } = currentSelections[i];
+        //     if (Tools.isArray(value)) {
+        //         for (let r = 0; r <= endRow - startRow; r++) {
+        //             for (let c = 0; c <= endColumn - startColumn; c++) {
+        //                 cellValue.setValue(r + startRow, c + startColumn, value[r][c]);
+        //             }
+        //         }
+        //     } else if (isICellData(value)) {
+        //         cellValue.setValue(startRow, startColumn, value);
+        //     } else {
+        //         realCellValue = value as ObjectMatrixPrimitiveType<ICellData>;
+        //     }
+        // }
+        if (Tools.isArray(value)) {
+            for (let i = 0; i < currentSelections.length; i++) {
+                const { startRow, startColumn, endRow, endColumn } = currentSelections[i];
+
                 for (let r = 0; r <= endRow - startRow; r++) {
                     for (let c = 0; c <= endColumn - startColumn; c++) {
                         cellValue.setValue(r + startRow, c + startColumn, value[r][c]);
                     }
                 }
-            } else if (isICellData(value) || value === null) {
-                cellValue.setValue(startRow, startColumn, value);
-            } else {
-                realCellValue = value as ObjectMatrixPrimitiveType<ICellData>;
             }
+        } else if (isICellData(value)) {
+            for (let i = 0; i < currentSelections.length; i++) {
+                const { startRow, startColumn } = currentSelections[i];
+
+                cellValue.setValue(startRow, startColumn, value);
+            }
+        } else {
+            realCellValue = value as ObjectMatrixPrimitiveType<ICellData>;
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {

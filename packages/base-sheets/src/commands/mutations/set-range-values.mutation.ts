@@ -5,6 +5,7 @@ import {
     ICurrentUniverService,
     IMutation,
     ISelectionRange,
+    IStyleData,
     Nullable,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
@@ -12,12 +13,17 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
+import { mergeRichTextStyle, mergeStyle, transformStyle } from './set-border-styles.mutatio';
+
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams {
     rangeData: ISelectionRange[]; // FIXME: maybe don't need this
     worksheetId: string;
     workbookId: string;
 
+    /**
+     * null for clear all
+     */
     cellValue?: ObjectMatrixPrimitiveType<ICellData | null>;
 
     /**
@@ -44,20 +50,27 @@ export const SetRangeValuesUndoMutationFactory = (
         throw new Error('universheet is null error!');
     }
 
-    const worksheet = universheet.getWorkBook().getSheetBySheetId(worksheetId);
+    const workbook = universheet.getWorkBook();
+
+    const worksheet = workbook.getSheetBySheetId(worksheetId);
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
     }
 
     const cellMatrix = worksheet.getCellMatrix();
+    const styles = workbook.getStyles();
     const undoData = new ObjectMatrix<ICellData>();
 
     const newValues = new ObjectMatrix(cellValue);
 
     // for (let i = 0; i < rangeData.length; i++) {
-    newValues.forValue((row, col) => {
-        const value = cellMatrix?.getValue(row, col);
-        undoData.setValue(row, col, Tools.deepClone(setNull(value)));
+    newValues.forValue((row, col, newVal) => {
+        const cell = Tools.deepClone(cellMatrix?.getValue(row, col)) || {}; // clone cell data，prevent modify the original data
+        const oldStyle = styles.getStyleByCell(cell);
+        const newStyle = transformStyle(oldStyle, newVal && newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
+        cell.s = newStyle;
+
+        undoData.setValue(row, col, Tools.deepClone(setNull(cell)));
     });
     // for (let i = 0; i < params.rangeData.length; i++) {
     //     const { startRow, endRow, startColumn, endColumn } = params.rangeData[i];
@@ -108,8 +121,6 @@ function setNull(value: Nullable<ICellData>) {
     return value;
 }
 
-// TODO@Dushusir: this would cover style as well. Which is not expected.
-// Deal with style and abandon Set-Style Mutation
 export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, boolean> = {
     id: 'sheet.mutation.set-range-values',
     type: CommandType.MUTATION,
@@ -121,6 +132,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
             return false;
         }
         const cellMatrix = worksheet.getCellMatrix();
+        const styles = workbook.getStyles();
         const { cellValue } = params;
         const newValues = new ObjectMatrix(cellValue);
 
@@ -155,6 +167,37 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                     oldVal.t = newVal.t;
                     dirty = true;
                 }
+
+                // handle style
+                if (newVal.s !== undefined) {
+                    // use null to clear style
+                    const oldStyle = styles.getStyleByCell(oldVal);
+
+                    if (oldStyle == null) {
+                        // clear
+                        delete oldVal.s;
+                    }
+
+                    // set style
+                    const merge = mergeStyle(oldStyle, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
+
+                    // then remove null
+                    merge && Tools.removeNull(merge);
+
+                    if (Tools.isEmptyObject(merge)) {
+                        delete oldVal.s;
+                    } else {
+                        oldVal.s = styles.setValue(merge);
+                    }
+
+                    // When the rich text sets the cell style, you need to modify the style of all rich text
+                    if (oldVal.p) {
+                        mergeRichTextStyle(oldVal.p, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
+                    }
+
+                    dirty = true;
+                }
+
                 cellMatrix.setValue(row, col, Tools.removeNull(oldVal));
             }
         });

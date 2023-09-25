@@ -21,8 +21,8 @@ import {
 /**
  * The command to clear content in current selected ranges.
  */
-export const ClearSelectionContentCommand: ICommand = {
-    id: 'sheet.command.clear-selection-content',
+export const ClearSelectionFormatCommand: ICommand = {
+    id: 'sheet.command.clear-selection-format',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -71,7 +71,7 @@ export const ClearSelectionContentCommand: ICommand = {
     },
 };
 
-// Generate cellValue from rangeData and set v/m to null
+// Generate cellValue from rangeData and set s to null
 function generateNullCellValue(rangeData: ISelectionRange[]): ObjectMatrixPrimitiveType<ICellData> {
     const cellValue = new ObjectMatrix<ICellData>();
     rangeData.forEach((range: ISelectionRange) => {
@@ -79,8 +79,7 @@ function generateNullCellValue(rangeData: ISelectionRange[]): ObjectMatrixPrimit
         for (let i = startRow; i <= endRow; i++) {
             for (let j = startColumn; j <= endColumn; j++) {
                 cellValue.setValue(i, j, {
-                    v: null,
-                    m: null,
+                    s: null,
                 });
             }
         }

@@ -2,6 +2,7 @@ import {
     FontWeight,
     ICommandService,
     ICurrentUniverService,
+    RedoCommand,
     SELECTION_TYPE,
     UndoCommand,
     Univer,
@@ -72,6 +73,9 @@ describe('Test style commands', () => {
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getFontBold()).toBe(FontWeight.BOLD);
+                // undo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getFontBold()).toBe(FontWeight.NORMAL);
             });
         });
 

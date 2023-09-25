@@ -189,15 +189,18 @@ export function mergeStyle(
             backupStyle[k] = Object.assign(backupStyle[k], newStyle[k]);
         } else {
             backupStyle[k] = (newStyle as IKeyValue)[k];
+        }
+    }
 
-            // overline/strikethrough/underline add color
-            if ('cl' in backupStyle) {
-                if (['ul', 'ol', 'st'].includes(k)) {
-                    backupStyle[k].cl = backupStyle.cl;
-                }
+    // Overline/Strikethrough/Underline color follows text color
+    if ('cl' in backupStyle) {
+        for (const k in newStyle) {
+            if (['ul', 'ol', 'st'].includes(k)) {
+                backupStyle[k].cl = backupStyle.cl;
             }
         }
     }
+
     return backupStyle;
 }
 
@@ -207,39 +210,6 @@ export function mergeStyle(
  * @param newStyle
  */
 export function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleData>) {
-    // p.body?.blockElements.forEach((blockElement) => {
-    //     if (blockElement.blockType === 0) {
-    //         const paragraph = blockElement.paragraph;
-    //         paragraph?.elements.forEach((element) => {
-    //             if (!element.tr) {
-    //                 element.tr = {};
-    //             }
-
-    //             const textRun = element.tr as ITextRun;
-
-    //             if (!textRun.ts) {
-    //                 textRun.ts = {};
-    //             }
-
-    //             const oldStyle = textRun.ts;
-
-    //             const merge = mergeStyle(
-    //                 oldStyle as Nullable<IStyleData>,
-    //                 newStyle,
-    //                 true
-    //             );
-
-    //             // then remove null
-    //             merge && Tools.removeNull(merge);
-
-    //             if (Tools.isEmptyObject(merge)) {
-    //                 delete textRun.ts;
-    //             } else {
-    //                 textRun.ts = merge as ITextStyle;
-    //             }
-    //         });
-    //     }
-    // });
     p.body?.textRuns?.forEach((textRun) => {
         if (!textRun.ts) {
             textRun.ts = {};

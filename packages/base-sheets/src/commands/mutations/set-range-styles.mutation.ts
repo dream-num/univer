@@ -28,6 +28,7 @@ export interface ISetRangeStyleMutationParams {
  * @param {IAccessor} accessor - injector accessor
  * @param {ISetRangeStyleMutationParams} params - do mutation params
  * @returns {ISetRangeStyleMutationParams} undo mutation params
+ *
  */
 export const SetRangeStyleUndoMutationFactory = (
     accessor: IAccessor,
@@ -69,6 +70,9 @@ export const SetRangeStyleUndoMutationFactory = (
     } as ISetRangeStyleMutationParams;
 };
 
+/**
+ * @deprecated use set range values mutation instead
+ */
 export const SetRangeStyleMutation: IMutation<ISetRangeStyleMutationParams, boolean> = {
     id: 'sheet.mutation.set-range-style',
     type: CommandType.MUTATION,

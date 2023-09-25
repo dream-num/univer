@@ -146,6 +146,8 @@ export class Engine extends ThinEngine<Scene> {
     override dispose() {
         super.dispose();
         const eventPrefix = getPointerPrefix();
+        this._canvasEle.removeEventListener(`${eventPrefix}leave`, this._pointerMoveEvent);
+        this._canvasEle.removeEventListener(`${eventPrefix}enter`, this._pointerMoveEvent);
         this._canvasEle.removeEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
         this._canvasEle.removeEventListener(`${eventPrefix}down`, this._pointerDownEvent);
         this._canvasEle.removeEventListener(`${eventPrefix}up`, this._pointerUpEvent);
@@ -485,6 +487,8 @@ export class Engine extends ThinEngine<Scene> {
             }
         };
 
+        this._canvasEle.addEventListener(`${eventPrefix}enter`, this._pointerMoveEvent);
+        this._canvasEle.addEventListener(`${eventPrefix}leave`, this._pointerMoveEvent);
         this._canvasEle.addEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
         this._canvasEle.addEventListener(`${eventPrefix}down`, this._pointerDownEvent);
         this._canvasEle.addEventListener(`${eventPrefix}up`, this._pointerUpEvent);

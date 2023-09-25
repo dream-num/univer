@@ -17,3 +17,7 @@ export enum SHEET_VIEW_KEY {
     COLUMN = '__SpreadsheetColumnHeader__',
     LEFT_TOP = '__SpreadsheetLeftTopPlaceholder__',
 }
+
+export const SHEET_COMPONENT_MAIN_LAYER_INDEX = 0;
+
+export const SHEET_COMPONENT_HEADER_LAYER_INDEX = 2;

@@ -36,7 +36,7 @@ export class Circle extends Shape<ICircleProps> {
         return this._radius;
     }
 
-    static drawWith(ctx: CanvasRenderingContext2D, props: ICircleProps | Circle) {
+    static override drawWith(ctx: CanvasRenderingContext2D, props: ICircleProps | Circle) {
         let { radius } = props;
 
         radius = radius ?? 10;
@@ -54,7 +54,7 @@ export class Circle extends Shape<ICircleProps> {
         this._renderPaintInOrder(ctx, props);
     }
 
-    toJson() {
+    override toJson() {
         const props: IKeyValue = {};
         CIRCLE_OBJECT_ARRAY.forEach((key) => {
             if (this[key as keyof Circle]) {
@@ -67,7 +67,7 @@ export class Circle extends Shape<ICircleProps> {
         };
     }
 
-    protected _draw(ctx: CanvasRenderingContext2D) {
+    protected override _draw(ctx: CanvasRenderingContext2D) {
         Circle.drawWith(ctx, this);
     }
 

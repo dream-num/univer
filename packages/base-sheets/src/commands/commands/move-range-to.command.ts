@@ -49,6 +49,7 @@ export const MoveRangeToCommand: ICommand = {
         const clearMutationParams: ISetRangeValuesMutationParams = {
             rangeData: [originRange],
             worksheetId,
+            workbookId,
         };
         const undoClearMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,

@@ -1,9 +1,9 @@
-// 编写ClearSelectionContentCommand测试用例
 import {
     ICellData,
     ICommandService,
     ICurrentUniverService,
     Nullable,
+    RedoCommand,
     SELECTION_TYPE,
     UndoCommand,
     Univer,
@@ -67,10 +67,15 @@ describe('Test clear selection content commands', () => {
                 }
 
                 expect(await commandService.executeCommand(ClearSelectionContentCommand.id)).toBeTruthy();
-                expect(getValue()?.v).toBe(null);
+                expect(getValue()).toStrictEqual({});
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getValue()?.v).toBe('A1');
+                expect(getValue()).toStrictEqual({
+                    v: 'A1',
+                });
+                // undo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual({});
             });
         });
 

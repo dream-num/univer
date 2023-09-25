@@ -24,7 +24,14 @@ export interface ISetRangeValuesCommandParams {
     worksheetId?: string;
     workbookId?: string;
     range?: ISelectionRange;
-    value: ICellData | ICellData[][] | ObjectMatrixPrimitiveType<ICellData>;
+
+    /**
+     * 1. ICellData: Normal cell data
+     * 2. ICellData[][]: The two-dimensional array indicates the data of multiple cells
+     * 3. ObjectMatrixPrimitiveType<ICellData>: Bring the row/column information MATRIX, indicating the data of multiple cells
+     * 4. null: clear all
+     */
+    value: ICellData | ICellData[][] | ObjectMatrixPrimitiveType<ICellData> | null;
 }
 
 /**
@@ -67,7 +74,7 @@ export const SetRangeValuesCommand: ICommand = {
                         cellValue.setValue(r + startRow, c + startColumn, value[r][c]);
                     }
                 }
-            } else if (isICellData(value)) {
+            } else if (isICellData(value) || value === null) {
                 cellValue.setValue(startRow, startColumn, value);
             } else {
                 realCellValue = value as ObjectMatrixPrimitiveType<ICellData>;

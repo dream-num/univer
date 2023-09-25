@@ -130,12 +130,10 @@ export class Worksheet {
     getMergedCells(row: number, col: number): Nullable<ISelectionRange[]> {
         const _rectangleList = this._snapshot.mergeData;
         const rectList = [];
-        const target = new Rectangle(row, col, row, col);
         for (let i = 0; i < _rectangleList.length; i++) {
-            const rectangle = _rectangleList[i];
-            if (target!.intersects(new Rectangle(rectangle))) {
-                // return rectangle;
-                rectList.push(rectangle);
+            const range = _rectangleList[i];
+            if (Rectangle.intersects({ startRow: row, startColumn: col, endRow: row, endColumn: col }, range)) {
+                rectList.push(range);
             }
         }
 
@@ -155,11 +153,9 @@ export class Worksheet {
         const matrix = this.getCellMatrix();
 
         // get all merged cells
-        const mergedCellsInRange = this._snapshot.mergeData.filter((rect) => {
-            const rectRange = new Rectangle(rect);
-            const targetRange = new Rectangle(row, col, endRow, endCol);
-            return rectRange.intersects(targetRange);
-        });
+        const mergedCellsInRange = this._snapshot.mergeData.filter((rect) =>
+            Rectangle.intersects({ startRow: row, startColumn: col, endRow: row, endColumn: col }, rect)
+        );
 
         const ret = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>();
 

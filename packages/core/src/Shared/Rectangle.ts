@@ -1,5 +1,4 @@
 import { ISelectionRange } from '../Types/Interfaces/ISelectionRange';
-import { Tools } from './Tools';
 import { Nullable } from './Types';
 
 // TODO: it seems that this wrapper is not necessary. Only static methods are good.
@@ -8,45 +7,6 @@ import { Nullable } from './Types';
  * A square area containing four position information: startRow, startColumn, endRow, and endColumn
  */
 export class Rectangle implements ISelectionRange {
-    startRow: number;
-
-    startColumn: number;
-
-    endRow: number;
-
-    endColumn: number;
-
-    constructor();
-    constructor(rectangle: ISelectionRange);
-    constructor(startRow: number, startColumn: number, endRow: number, endColumn: number);
-    constructor(...argument: any[]) {
-        if (Tools.hasLength(argument, 0)) {
-            this.startRow = 0;
-            this.startColumn = 0;
-            this.endRow = 0;
-            this.endColumn = 0;
-            return;
-        }
-        if (Tools.hasLength(argument, 1)) {
-            const rectangle = argument[0];
-            this.startRow = rectangle.startRow;
-            this.startColumn = rectangle.startColumn;
-            this.endRow = rectangle.endRow;
-            this.endColumn = rectangle.endColumn;
-            return;
-        }
-        if (Tools.hasLength(argument, 4)) {
-            const startRow = argument[0];
-            const startColumn = argument[1];
-            const endRow = argument[2];
-            const endColumn = argument[3];
-            this.startRow = startRow;
-            this.startColumn = startColumn;
-            this.endRow = endRow;
-            this.endColumn = endColumn;
-        }
-    }
-
     static equals(src: ISelectionRange, target: ISelectionRange): boolean {
         return (
             src.endRow === target.endRow &&
@@ -138,30 +98,68 @@ export class Rectangle implements ISelectionRange {
         };
     }
 
-    intersects(rectangle: Rectangle): boolean {
-        return Rectangle.intersects(this, rectangle);
+    static subtract(src: ISelectionRange, target: ISelectionRange): Nullable<ISelectionRange[]> {
+        const intersected = Rectangle.getIntersects(src, target);
+        if (!intersected) {
+            return [src];
+        }
+
+        const result: ISelectionRange[] = [];
+        const { startRow, endRow, startColumn, endColumn } = intersected;
+        const { startRow: srcStartRow, endRow: srcEndRow, startColumn: srcStartColumn, endColumn: srcEndColumn } = src;
+
+        // subtract could result in eight pieces and these eight pieces and be merged to at most four pieces
     }
 
-    union(rectangle: Rectangle) {
-        const { startRow, startColumn, endRow, endColumn } = this;
-        return new Rectangle(
-            rectangle.startRow < this.startRow ? rectangle.startRow : startRow,
-            rectangle.startColumn < startColumn ? rectangle.startColumn : startColumn,
-            rectangle.endRow > endRow ? rectangle.endRow : endRow,
-            rectangle.endColumn > endColumn ? rectangle.endColumn : endColumn
+    static contains(src: ISelectionRange, target: ISelectionRange): boolean {
+        return (
+            src.startRow <= target.startRow &&
+            src.endRow >= target.endRow &&
+            src.startColumn <= target.startColumn &&
+            src.endColumn >= target.endColumn
         );
     }
 
-    getData() {
-        return {
-            startRow: this.startRow,
-            startColumn: this.startColumn,
-            endRow: this.endRow,
-            endColumn: this.endColumn,
-        };
+    static realContain(src: ISelectionRange, target: ISelectionRange): boolean {
+        return (
+            Rectangle.contains(src, target) &&
+            (src.startRow < target.startRow ||
+                src.endRow > target.endRow ||
+                src.startColumn < target.startColumn ||
+                src.endColumn > target.endColumn)
+        );
     }
 
-    equals(rectangle: Rectangle) {
-        return Rectangle.equals(this, rectangle);
-    }
+    // /**
+    //  * @deprecated use static methods
+    //  * @param rectangle
+    //  * @returns
+    //  */
+    // intersects(rectangle: Rectangle): boolean {
+    //     return Rectangle.intersects(this, rectangle);
+    // }
+
+    // /**
+    //  * @deprecated use static methods
+    //  * @param rectangle
+    //  * @returns
+    //  */
+    // union(rectangle: Rectangle) {
+    //     const { startRow, startColumn, endRow, endColumn } = this;
+    //     return new Rectangle(
+    //         rectangle.startRow < this.startRow ? rectangle.startRow : startRow,
+    //         rectangle.startColumn < startColumn ? rectangle.startColumn : startColumn,
+    //         rectangle.endRow > endRow ? rectangle.endRow : endRow,
+    //         rectangle.endColumn > endColumn ? rectangle.endColumn : endColumn
+    //     );
+    // }
+
+    // getData() {
+    //     return {
+    //         startRow: this.startRow,
+    //         startColumn: this.startColumn,
+    //         endRow: this.endRow,
+    //         endColumn: this.endColumn,
+    //     };
+    // }
 }

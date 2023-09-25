@@ -64,7 +64,7 @@ export const MoveSelectionEndDownShortcutItem: IShortcutItem<IChangeSelectionCom
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.DOWN,
-        toNextGap: true,
+        jumpOver: true,
     },
 };
 
@@ -74,7 +74,7 @@ export const MoveSelectionEndUpShortcutItem: IShortcutItem<IChangeSelectionComma
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.UP,
-        toNextGap: true,
+        jumpOver: true,
     },
 };
 
@@ -84,7 +84,7 @@ export const MoveSelectionEndLeftShortcutItem: IShortcutItem<IChangeSelectionCom
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.LEFT,
-        toNextGap: true,
+        jumpOver: true,
     },
 };
 
@@ -94,11 +94,9 @@ export const MoveSelectionEndRightShortcutItem: IShortcutItem<IChangeSelectionCo
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.RIGHT,
-        toNextGap: true,
+        jumpOver: true,
     },
 };
-
-// continuous selection by cell
 
 export const ExpandSelectionDownShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
@@ -144,8 +142,7 @@ export const ExpandSelectionEndDownShortcutItem: IShortcutItem<IExpandSelectionC
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.DOWN,
-        toNextGap: true,
-        expand: true,
+        jumpOver: true,
     },
 };
 
@@ -155,8 +152,7 @@ export const ExpandSelectionEndUpShortcutItem: IShortcutItem<IExpandSelectionCom
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.UP,
-        toNextGap: true,
-        expand: true,
+        jumpOver: true,
     },
 };
 
@@ -166,8 +162,7 @@ export const ExpandSelectionEndLeftShortcutItem: IShortcutItem<IExpandSelectionC
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.LEFT,
-        toNextGap: true,
-        expand: true,
+        jumpOver: true,
     },
 };
 
@@ -177,8 +172,7 @@ export const ExpandSelectionEndRightShortcutItem: IShortcutItem<IExpandSelection
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.RIGHT,
-        toNextGap: true,
-        expand: true,
+        jumpOver: true,
     },
 };
 

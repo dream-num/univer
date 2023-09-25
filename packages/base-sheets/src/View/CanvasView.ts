@@ -25,7 +25,12 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { CANVAS_VIEW_KEY, SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import {
+    CANVAS_VIEW_KEY,
+    SHEET_COMPONENT_HEADER_LAYER_INDEX,
+    SHEET_COMPONENT_MAIN_LAYER_INDEX,
+    SHEET_VIEW_KEY,
+} from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, CanvasView)
@@ -114,8 +119,11 @@ export class CanvasView {
         currentRender.components.set(SHEET_VIEW_KEY.COLUMN, spreadsheetColumnHeader);
         currentRender.components.set(SHEET_VIEW_KEY.LEFT_TOP, SpreadsheetLeftTopPlaceholder);
 
-        scene?.addObjects([spreadsheet], 0);
-        scene?.addObjects([spreadsheetRowHeader, spreadsheetColumnHeader, SpreadsheetLeftTopPlaceholder], 2);
+        scene?.addObjects([spreadsheet], SHEET_COMPONENT_MAIN_LAYER_INDEX);
+        scene?.addObjects(
+            [spreadsheetRowHeader, spreadsheetColumnHeader, SpreadsheetLeftTopPlaceholder],
+            SHEET_COMPONENT_HEADER_LAYER_INDEX
+        );
 
         this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId });
 

@@ -17,7 +17,7 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -49,19 +49,15 @@ export class SelectionController extends Disposable {
             return;
         }
 
-        const { spreadsheet, spreadsheetLeftTopPlaceholder } = sheetObject;
-
-        if (spreadsheet == null) {
-            return;
-        }
+        const { spreadsheetLeftTopPlaceholder } = sheetObject;
 
         this._onChangeListener();
 
-        this._initialMain();
+        this._initialMain(sheetObject);
 
-        this._initialRowHeader();
+        this._initialRowHeader(sheetObject);
 
-        this._initialColumnHeader();
+        this._initialColumnHeader(sheetObject);
 
         this._commandExecutedListener();
 
@@ -80,11 +76,7 @@ export class SelectionController extends Disposable {
         });
     }
 
-    private _initialMain() {
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
+    private _initialMain(sheetObject: ISheetObjectParam) {
         const { spreadsheet } = sheetObject;
         spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             this._selectionTransformerShapeManager.eventTrigger(evt, spreadsheet.zIndex + 1, SELECTION_TYPE.NORMAL);
@@ -94,11 +86,7 @@ export class SelectionController extends Disposable {
         });
     }
 
-    private _initialRowHeader() {
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
+    private _initialRowHeader(sheetObject: ISheetObjectParam) {
         const { spreadsheetRowHeader, spreadsheet } = sheetObject;
 
         spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
@@ -115,11 +103,7 @@ export class SelectionController extends Disposable {
         spreadsheetRowHeader?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {});
     }
 
-    private _initialColumnHeader() {
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
+    private _initialColumnHeader(sheetObject: ISheetObjectParam) {
         const { spreadsheetColumnHeader, spreadsheet } = sheetObject;
         spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             this._selectionTransformerShapeManager.eventTrigger(
@@ -177,31 +161,7 @@ export class SelectionController extends Disposable {
     }
 
     private _getSheetObject() {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-
-        const unitId = workbook.getUnitId();
-
-        const currentRender = this._renderManagerService.getRenderById(unitId);
-
-        if (currentRender == null) {
-            return;
-        }
-
-        const { components, mainComponent, scene, engine } = currentRender;
-
-        const spreadsheet = mainComponent;
-        const spreadsheetRowHeader = components.get(SHEET_VIEW_KEY.ROW);
-        const spreadsheetColumnHeader = components.get(SHEET_VIEW_KEY.COLUMN);
-        const spreadsheetLeftTopPlaceholder = components.get(SHEET_VIEW_KEY.LEFT_TOP);
-
-        return {
-            spreadsheet,
-            spreadsheetRowHeader,
-            spreadsheetColumnHeader,
-            spreadsheetLeftTopPlaceholder,
-            scene,
-            engine,
-        };
+        return getSheetObject(this._currentUniverService, this._renderManagerService);
     }
 
     private _commandExecutedListener() {}

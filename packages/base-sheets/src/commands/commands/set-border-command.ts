@@ -2,6 +2,7 @@ import {
     BorderStyleTypes,
     BorderType,
     CommandType,
+    IBorderData,
     IBorderStyleData,
     ICommand,
     ICommandService,
@@ -40,6 +41,7 @@ export const SetBorderPositionCommand: ICommand<ISetBorderPositionCommandParams>
     id: 'sheet.command.set-border-position',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: ISetBorderPositionCommandParams) => {
+        if (!params.value) return false;
         const commandService = accessor.get(ICommandService);
         const borderManager = accessor.get(BorderStyleManagerService);
         borderManager.setType(params.value);
@@ -195,125 +197,157 @@ export const SetBorderCommand: ICommand = {
             return res;
         };
 
+        function setBorderStyle(range: ISelectionRange, defaultStyle: IBorderData, reserve?: boolean) {
+            forEach(range, (row, column) => {
+                const rectangle = hasMerge(row, column);
+
+                let bdStyle = defaultStyle;
+
+                if (rectangle) {
+                    if (reserve) {
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        bdStyle = style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle;
+                    }
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
+                        bd: bdStyle,
+                    });
+                } else {
+                    if (reserve) {
+                        const style = mr.getValue(row, column);
+                        bdStyle = style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle;
+                    }
+                    mr.setValue(row, column, { bd: bdStyle });
+                }
+            });
+        }
+
         if (top) {
             // Clear the bottom border of the top range
-            forEach(topRangeOut, (row, column) => {
-                const defaultStyle = { bd: { b: null } };
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
-                } else {
-                    mr.setValue(row, column, defaultStyle);
-                }
-            });
+            // forEach(topRangeOut, (row, column) => {
+            //     const defaultStyle = { bd: { b: null } };
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+            //     } else {
+            //         mr.setValue(row, column, defaultStyle);
+            //     }
+            // });
 
-            forEach(topRange, (row, column) => {
-                const style = mr.getValue(row, column);
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
-                        bd: style?.bd
-                            ? Object.assign(style.bd, { t: Tools.deepClone(border) })
-                            : { t: Tools.deepClone(border) },
-                    });
-                } else {
-                    mr.setValue(row, column, {
-                        bd: style?.bd
-                            ? Object.assign(style.bd, { t: Tools.deepClone(border) })
-                            : { t: Tools.deepClone(border) },
-                    });
-                }
-            });
+            // forEach(topRange, (row, column) => {
+            //     const style = mr.getValue(row, column);
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, {
+            //             bd: style?.bd
+            //                 ? Object.assign(style.bd, { t: Tools.deepClone(border) })
+            //                 : { t: Tools.deepClone(border) },
+            //         });
+            //     } else {
+            //         mr.setValue(row, column, {
+            //             bd: style?.bd
+            //                 ? Object.assign(style.bd, { t: Tools.deepClone(border) })
+            //                 : { t: Tools.deepClone(border) },
+            //         });
+            //     }
+            // });
+            setBorderStyle(topRangeOut, { b: null });
+            setBorderStyle(topRange, { t: Tools.deepClone(border) }, true);
         }
         if (bottom) {
             // Clear the top border of the lower range
-            forEach(bottomRangeOut, (row, column) => {
-                const defaultStyle = { bd: { t: null } };
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
-                } else {
-                    mr.setValue(row, column, defaultStyle);
-                }
-            });
+            // forEach(bottomRangeOut, (row, column) => {
+            //     const defaultStyle = { bd: { t: null } };
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+            //     } else {
+            //         mr.setValue(row, column, defaultStyle);
+            //     }
+            // });
 
-            forEach(bottomRange, (row, column) => {
-                const style = mr.getValue(row, column);
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
-                        bd: style?.bd
-                            ? Object.assign(style.bd, { b: Tools.deepClone(border) })
-                            : { b: Tools.deepClone(border) },
-                    });
-                } else {
-                    mr.setValue(row, column, {
-                        bd: style?.bd
-                            ? Object.assign(style.bd, { b: Tools.deepClone(border) })
-                            : { b: Tools.deepClone(border) },
-                    });
-                }
-            });
+            // forEach(bottomRange, (row, column) => {
+            //     const style = mr.getValue(row, column);
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, {
+            //             bd: style?.bd
+            //                 ? Object.assign(style.bd, { b: Tools.deepClone(border) })
+            //                 : { b: Tools.deepClone(border) },
+            //         });
+            //     } else {
+            //         mr.setValue(row, column, {
+            //             bd: style?.bd
+            //                 ? Object.assign(style.bd, { b: Tools.deepClone(border) })
+            //                 : { b: Tools.deepClone(border) },
+            //         });
+            //     }
+            // });
+            setBorderStyle(bottomRangeOut, { t: null });
+            setBorderStyle(bottomRange, { b: Tools.deepClone(border) }, true);
         }
         if (left) {
             //  Clear the right border of the left range
-            forEach(leftRangeOut, (row, column) => {
-                const defaultStyle = { bd: { r: null } };
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
-                } else {
-                    mr.setValue(row, column, defaultStyle);
-                }
-            });
+            // forEach(leftRangeOut, (row, column) => {
+            //     const defaultStyle = { bd: { r: null } };
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+            //     } else {
+            //         mr.setValue(row, column, defaultStyle);
+            //     }
+            // });
 
-            forEach(leftRange, (row, column) => {
-                const style = mr.getValue(row, column);
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
-                        bd: style?.bd
-                            ? Object.assign(style.bd, { l: Tools.deepClone(border) })
-                            : { l: Tools.deepClone(border) },
-                    });
-                } else {
-                    mr.setValue(row, column, {
-                        bd: style?.bd
-                            ? Object.assign(style.bd, { l: Tools.deepClone(border) })
-                            : { l: Tools.deepClone(border) },
-                    });
-                }
-            });
+            // forEach(leftRange, (row, column) => {
+            //     const style = mr.getValue(row, column);
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, {
+            //             bd: style?.bd
+            //                 ? Object.assign(style.bd, { l: Tools.deepClone(border) })
+            //                 : { l: Tools.deepClone(border) },
+            //         });
+            //     } else {
+            //         mr.setValue(row, column, {
+            //             bd: style?.bd
+            //                 ? Object.assign(style.bd, { l: Tools.deepClone(border) })
+            //                 : { l: Tools.deepClone(border) },
+            //         });
+            //     }
+            // });
+            setBorderStyle(leftRangeOut, { r: null });
+            setBorderStyle(leftRange, { l: Tools.deepClone(border) }, true);
         }
         if (right) {
             //  Clear the left border of the right range
-            forEach(rightRangeOut, (row, column) => {
-                const defaultStyle = { bd: { l: null } };
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
-                } else {
-                    mr.setValue(row, column, defaultStyle);
-                }
-            });
+            // forEach(rightRangeOut, (row, column) => {
+            //     const defaultStyle = { bd: { l: null } };
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+            //     } else {
+            //         mr.setValue(row, column, defaultStyle);
+            //     }
+            // });
 
-            forEach(rightRange, (row, column) => {
-                const style = mr.getValue(row, column);
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
-                        bd: style?.bd
-                            ? Object.assign(style.bd, { r: Tools.deepClone(border) })
-                            : { r: Tools.deepClone(border) },
-                    });
-                } else {
-                    mr.setValue(row, column, {
-                        bd: style?.bd
-                            ? Object.assign(style.bd, { r: Tools.deepClone(border) })
-                            : { r: Tools.deepClone(border) },
-                    });
-                }
-            });
+            // forEach(rightRange, (row, column) => {
+            //     const style = mr.getValue(row, column);
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, {
+            //             bd: style?.bd
+            //                 ? Object.assign(style.bd, { r: Tools.deepClone(border) })
+            //                 : { r: Tools.deepClone(border) },
+            //         });
+            //     } else {
+            //         mr.setValue(row, column, {
+            //             bd: style?.bd
+            //                 ? Object.assign(style.bd, { r: Tools.deepClone(border) })
+            //                 : { r: Tools.deepClone(border) },
+            //         });
+            //     }
+            // });
+            setBorderStyle(rightRangeOut, { l: null });
+            setBorderStyle(rightRange, { r: Tools.deepClone(border) }, true);
         }
         // inner vertical border
         if (vertical) {
@@ -367,99 +401,14 @@ export const SetBorderCommand: ICommand = {
         }
 
         if (!top && !bottom && !left && !right && !vertical && !horizontal) {
-            forEach(topRangeOut, (row, column) => {
-                const defaultStyle = { bd: { b: null } };
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
-                } else {
-                    mr.setValue(row, column, defaultStyle);
-                }
-            });
-
-            forEach(topRange, (row, column) => {
-                const style = mr.getValue(row, column);
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
-                        bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
-                    });
-                } else {
-                    mr.setValue(row, column, {
-                        bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
-                    });
-                }
-            });
-
-            forEach(bottomRangeOut, (row, column) => {
-                const defaultStyle = { bd: { t: null } };
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
-                } else {
-                    mr.setValue(row, column, defaultStyle);
-                }
-            });
-
-            forEach(bottomRange, (row, column) => {
-                const style = mr.getValue(row, column);
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
-                        bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
-                    });
-                } else {
-                    mr.setValue(row, column, {
-                        bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
-                    });
-                }
-            });
-
-            forEach(leftRangeOut, (row, column) => {
-                const defaultStyle = { bd: { r: null } };
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
-                } else {
-                    mr.setValue(row, column, defaultStyle);
-                }
-            });
-            forEach(leftRange, (row, column) => {
-                const style = mr.getValue(row, column);
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
-                        bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
-                    });
-                } else {
-                    mr.setValue(row, column, {
-                        bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
-                    });
-                }
-            });
-
-            forEach(rightRangeOut, (row, column) => {
-                const defaultStyle = { bd: { l: null } };
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
-                } else {
-                    mr.setValue(row, column, defaultStyle);
-                }
-            });
-            forEach(rightRange, (row, column) => {
-                const style = mr.getValue(row, column);
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
-                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
-                        bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
-                    });
-                } else {
-                    mr.setValue(row, column, {
-                        bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
-                    });
-                }
-            });
+            setBorderStyle(topRangeOut, { b: null });
+            setBorderStyle(topRange, { t: null }, true);
+            setBorderStyle(bottomRangeOut, { t: null });
+            setBorderStyle(bottomRange, { b: null }, true);
+            setBorderStyle(leftRangeOut, { r: null });
+            setBorderStyle(leftRange, { l: null }, true);
+            setBorderStyle(rightRangeOut, { l: null });
+            setBorderStyle(rightRange, { r: null }, true);
 
             forEach(rangeData, (row, column) => {
                 const rectangle = hasMerge(row, column);
@@ -479,7 +428,6 @@ export const SetBorderCommand: ICommand = {
                     }
                 }
             });
-
             forEach(rangeData, (row, column) => {
                 const rectangle = hasMerge(row, column);
                 if (rectangle) {
@@ -498,6 +446,131 @@ export const SetBorderCommand: ICommand = {
                     }
                 }
             });
+
+            // forEach(topRangeOut, (row, column) => {
+            //     const defaultStyle = { bd: { b: null } };
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+            //     } else {
+            //         mr.setValue(row, column, defaultStyle);
+            //     }
+            // });
+            // forEach(topRange, (row, column) => {
+            //     const style = mr.getValue(row, column);
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, {
+            //             bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
+            //         });
+            //     } else {
+            //         mr.setValue(row, column, {
+            //             bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
+            //         });
+            //     }
+            // });
+            // forEach(bottomRangeOut, (row, column) => {
+            //     const defaultStyle = { bd: { t: null } };
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+            //     } else {
+            //         mr.setValue(row, column, defaultStyle);
+            //     }
+            // });
+            // forEach(bottomRange, (row, column) => {
+            //     const style = mr.getValue(row, column);
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, {
+            //             bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+            //         });
+            //     } else {
+            //         mr.setValue(row, column, {
+            //             bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+            //         });
+            //     }
+            // });
+            // forEach(leftRangeOut, (row, column) => {
+            //     const defaultStyle = { bd: { r: null } };
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+            //     } else {
+            //         mr.setValue(row, column, defaultStyle);
+            //     }
+            // });
+            // forEach(leftRange, (row, column) => {
+            //     const style = mr.getValue(row, column);
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, {
+            //             bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
+            //         });
+            //     } else {
+            //         mr.setValue(row, column, {
+            //             bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
+            //         });
+            //     }
+            // });
+            // forEach(rightRangeOut, (row, column) => {
+            //     const defaultStyle = { bd: { l: null } };
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+            //     } else {
+            //         mr.setValue(row, column, defaultStyle);
+            //     }
+            // });
+            // forEach(rightRange, (row, column) => {
+            //     const style = mr.getValue(row, column);
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         mr.setValue(rectangle.startRow, rectangle.startColumn, {
+            //             bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+            //         });
+            //     } else {
+            //         mr.setValue(row, column, {
+            //             bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+            //         });
+            //     }
+            // });
+            // forEach(rangeData, (row, column) => {
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         if (rectangle.endColumn !== rangeData.endColumn) {
+            //             const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+            //             mr.setValue(row, column, {
+            //                 bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+            //             });
+            //         }
+            //     } else {
+            //         if (column !== rangeData.endColumn) {
+            //             const style = mr.getValue(row, column);
+            //             mr.setValue(row, column, {
+            //                 bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+            //             });
+            //         }
+            //     }
+            // });
+            // forEach(rangeData, (row, column) => {
+            //     const rectangle = hasMerge(row, column);
+            //     if (rectangle) {
+            //         if (rectangle.endRow !== rangeData.endRow) {
+            //             const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+            //             mr.setValue(row, column, {
+            //                 bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+            //             });
+            //         }
+            //     } else {
+            //         if (row !== rangeData.endRow) {
+            //             const style = mr.getValue(row, column);
+            //             mr.setValue(row, column, {
+            //                 bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+            //             });
+            //         }
+            //     }
+            // });
         }
 
         const setBorderStylesMutationParams: ISetBorderStylesMutationParams = {

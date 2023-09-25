@@ -185,7 +185,6 @@ export const Dropdown = (props: BaseDropdownProps) => {
                 onClick={props.menu.onClick}
                 value={props.menu.value}
                 menu={props.menu.menu}
-                showAfterClick={props.menu.showAfterClick}
                 className={props.menu.className}
                 style={{ ...props.menu.style, ...menuStyle }}
                 onOptionSelect={(v) => {

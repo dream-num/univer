@@ -11,11 +11,17 @@ import {
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
 import { SetSelectionsOperation } from '../operations/selection.operation';
-import { expandToContinuousRange, expandToWholeSheet } from './utils/selection-util';
+import {
+    expandToContinuousRange,
+    expandToNextGapCell,
+    expandToWholeSheet,
+    findNextGapCell,
+} from './utils/selection-util';
 
 export interface IChangeSelectionCommandParams {
     direction: Direction;
-    toEnd?: boolean;
+    toNextGap?: boolean;
+    expand?: boolean;
 }
 
 export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
@@ -33,33 +39,54 @@ export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
             return false;
         }
 
-        const { direction } = params;
-        const originSelection = selections[selections.length - 1];
-        const destRange: ISelectionRange = { ...originSelection };
+        const { direction, toNextGap, expand } = params;
+        const startRange = selections[selections.length - 1];
 
-        // FIXME: some error here. The selection does not know if there is a span cell.
-        switch (direction) {
-            case Direction.UP:
-                destRange.startRow = Math.max(0, originSelection.startRow - 1);
-                destRange.endRow = destRange.startRow;
-                break;
-            case Direction.DOWN:
-                destRange.startRow = Math.min(originSelection.endRow + 1, currentWorksheet.getRowCount() - 1);
-                destRange.endRow = destRange.startRow;
-                break;
-            case Direction.LEFT:
-                destRange.startColumn = Math.max(0, originSelection.startColumn - 1);
-                destRange.endColumn = destRange.startColumn;
-                break;
-            case Direction.RIGHT:
-                destRange.startColumn = Math.min(originSelection.endColumn + 1, currentWorksheet.getColumnCount() - 1);
-                destRange.endColumn = destRange.startColumn;
-                break;
-            default:
-                break;
+        let destRange: ISelectionRange = { ...startRange };
+
+        if (!toNextGap) {
+            // navigation must be within the worksheet's range
+            switch (direction) {
+                case Direction.UP:
+                    destRange.startRow = Math.max(0, startRange.startRow - 1);
+                    destRange.endRow = destRange.startRow;
+                    break;
+                case Direction.DOWN:
+                    destRange.startRow = Math.min(startRange.endRow + 1, currentWorksheet.getRowCount() - 1);
+                    destRange.endRow = destRange.startRow;
+                    break;
+                case Direction.LEFT:
+                    destRange.startColumn = Math.max(0, startRange.startColumn - 1);
+                    destRange.endColumn = destRange.startColumn;
+                    break;
+                case Direction.RIGHT:
+                    destRange.startColumn = Math.min(startRange.endColumn + 1, currentWorksheet.getColumnCount() - 1);
+                    destRange.endColumn = destRange.startColumn;
+                    break;
+                default:
+                    break;
+            }
+
+            // deal with merged cells
+            currentWorksheet
+                .getMatrixWithMergedCells(
+                    destRange.startRow,
+                    destRange.startColumn,
+                    destRange.startRow,
+                    destRange.startColumn
+                )
+                .forValue((row, col, value) => {
+                    destRange.startRow = row;
+                    destRange.startColumn = col;
+                    destRange.endRow = row + (value.rowSpan !== undefined ? value.rowSpan - 1 : 0);
+                    destRange.endColumn = col + (value.colSpan !== undefined ? value.colSpan - 1 : 0);
+                });
+        } else if (!expand) {
+            destRange = findNextGapCell(destRange, direction, currentWorksheet);
+        } else {
+            destRange = expandToNextGapCell(destRange, direction, currentWorksheet);
+            console.log('debug expand to:', destRange);
         }
-
-        // TODO: deal with `toEnd` parameter here
 
         return commandService.executeCommand(SetSelectionsOperation.id, {
             unitId: currentWorkbook.getUnitId(),
@@ -86,7 +113,8 @@ export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
 
 export interface IExpandSelectionCommandParams {
     direction: Direction;
-    toEnd?: boolean;
+    toNextGap?: boolean;
+    expand?: boolean;
 }
 
 export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
@@ -97,11 +125,10 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
 
 export interface ISelectAllCommandParams {
     expandToGapFirst?: boolean;
-    loop?: boolean; // TODO: if we want to implement this loop feature we must record the first range
-    // NOTE: google sheet would not support loop when you switch a worksheet
+    loop?: boolean;
 }
 
-const RANGES_STACK: ISelectionRange[] = [];
+let RANGES_STACK: ISelectionRange[] = [];
 
 let SELECTED_RANGE_WORKSHEET = '';
 
@@ -111,8 +138,9 @@ let SELECTED_RANGE_WORKSHEET = '';
 export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
     id: 'sheet.command.select-all',
     type: CommandType.COMMAND,
-    onDisposed() {
-        RANGES_STACK.length = 0;
+    onDispose() {
+        RANGES_STACK = [];
+        SELECTED_RANGE_WORKSHEET = '';
     },
     handler: async (accessor, params = { expandToGapFirst: true, loop: false }) => {
         const selectionManager = accessor.get(SelectionManagerService);
@@ -129,7 +157,7 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
 
         const id = `${currentWorkbook.getUnitId()}|${currentWorksheet.getSheetId()}`;
         if (id !== SELECTED_RANGE_WORKSHEET) {
-            RANGES_STACK.length = 0;
+            RANGES_STACK = [];
             SELECTED_RANGE_WORKSHEET = id;
         }
 
@@ -145,7 +173,7 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
             currentRange.startColumn === 0;
 
         if (!RANGES_STACK.some((s) => Rectangle.equals(s, currentRange))) {
-            RANGES_STACK.length = 0;
+            RANGES_STACK = [];
             RANGES_STACK.push(currentRange);
         }
 

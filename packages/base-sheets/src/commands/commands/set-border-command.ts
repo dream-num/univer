@@ -2,7 +2,6 @@ import {
     BorderStyleTypes,
     BorderType,
     CommandType,
-    IBorderData,
     IBorderStyleData,
     ICommand,
     ICommandService,
@@ -77,34 +76,6 @@ export const SetBorderColorCommand: ICommand<ISetBorderColorCommandParams> = {
         return commandService.executeCommand(SetBorderCommand.id);
     },
 };
-
-function setStyleValue(
-    matrix: ObjectMatrix<IStyleData>,
-    row: number,
-    column: number,
-    defaultStyle: IBorderData,
-    mergeData: ISelectionRange[]
-) {
-    const style = matrix.getValue(row, column);
-    mergeData.forEach((merge) => {
-        const range = {
-            startColumn: column,
-            endColumn: column,
-            startRow: row,
-            endRow: row,
-        };
-        // 如果是合并单元格，将样式设置给左上角
-        if (Rectangle.intersects(merge, range)) {
-            matrix.setValue(merge.startRow, merge.startColumn, {
-                bd: style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle,
-            });
-        } else {
-            matrix.setValue(row, column, {
-                bd: style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle,
-            });
-        }
-    });
-}
 
 /**
  * The command to clear content in current selected ranges.
@@ -207,149 +178,324 @@ export const SetBorderCommand: ICommand = {
             },
         };
 
+        const hasMerge = (row: number, column: number): ISelectionRange | null => {
+            let res: ISelectionRange | null = null;
+            mergeData.forEach((merge) => {
+                if (
+                    Rectangle.intersects(merge, {
+                        startColumn: column,
+                        endColumn: column,
+                        startRow: row,
+                        endRow: row,
+                    })
+                ) {
+                    res = merge;
+                }
+            });
+            return res;
+        };
+
         if (top) {
             // Clear the bottom border of the top range
             forEach(topRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { b: null }, mergeData);
+                const defaultStyle = { bd: { b: null } };
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+                } else {
+                    mr.setValue(row, column, defaultStyle);
+                }
             });
 
             forEach(topRange, (row, column) => {
-                setStyleValue(
-                    mr,
-                    row,
-                    column,
-                    {
-                        t: Tools.deepClone(border),
-                    },
-                    mergeData
-                );
+                const style = mr.getValue(row, column);
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
+                        bd: style?.bd
+                            ? Object.assign(style.bd, { t: Tools.deepClone(border) })
+                            : { t: Tools.deepClone(border) },
+                    });
+                } else {
+                    mr.setValue(row, column, {
+                        bd: style?.bd
+                            ? Object.assign(style.bd, { t: Tools.deepClone(border) })
+                            : { t: Tools.deepClone(border) },
+                    });
+                }
             });
         }
         if (bottom) {
             // Clear the top border of the lower range
             forEach(bottomRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { t: null }, mergeData);
+                const defaultStyle = { bd: { t: null } };
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+                } else {
+                    mr.setValue(row, column, defaultStyle);
+                }
             });
 
             forEach(bottomRange, (row, column) => {
-                setStyleValue(
-                    mr,
-                    row,
-                    column,
-                    {
-                        b: Tools.deepClone(border),
-                    },
-                    mergeData
-                );
+                const style = mr.getValue(row, column);
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
+                        bd: style?.bd
+                            ? Object.assign(style.bd, { b: Tools.deepClone(border) })
+                            : { b: Tools.deepClone(border) },
+                    });
+                } else {
+                    mr.setValue(row, column, {
+                        bd: style?.bd
+                            ? Object.assign(style.bd, { b: Tools.deepClone(border) })
+                            : { b: Tools.deepClone(border) },
+                    });
+                }
             });
         }
         if (left) {
             //  Clear the right border of the left range
             forEach(leftRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { r: null }, mergeData);
+                const defaultStyle = { bd: { r: null } };
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+                } else {
+                    mr.setValue(row, column, defaultStyle);
+                }
             });
 
             forEach(leftRange, (row, column) => {
-                setStyleValue(
-                    mr,
-                    row,
-                    column,
-                    {
-                        l: Tools.deepClone(border),
-                    },
-                    mergeData
-                );
+                const style = mr.getValue(row, column);
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
+                        bd: style?.bd
+                            ? Object.assign(style.bd, { l: Tools.deepClone(border) })
+                            : { l: Tools.deepClone(border) },
+                    });
+                } else {
+                    mr.setValue(row, column, {
+                        bd: style?.bd
+                            ? Object.assign(style.bd, { l: Tools.deepClone(border) })
+                            : { l: Tools.deepClone(border) },
+                    });
+                }
             });
         }
         if (right) {
             //  Clear the left border of the right range
             forEach(rightRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { l: null }, mergeData);
+                const defaultStyle = { bd: { l: null } };
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+                } else {
+                    mr.setValue(row, column, defaultStyle);
+                }
             });
 
             forEach(rightRange, (row, column) => {
-                setStyleValue(
-                    mr,
-                    row,
-                    column,
-                    {
-                        r: Tools.deepClone(border),
-                    },
-                    mergeData
-                );
+                const style = mr.getValue(row, column);
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
+                        bd: style?.bd
+                            ? Object.assign(style.bd, { r: Tools.deepClone(border) })
+                            : { r: Tools.deepClone(border) },
+                    });
+                } else {
+                    mr.setValue(row, column, {
+                        bd: style?.bd
+                            ? Object.assign(style.bd, { r: Tools.deepClone(border) })
+                            : { r: Tools.deepClone(border) },
+                    });
+                }
             });
         }
         // inner vertical border
         if (vertical) {
             forEach(rangeData, (row, column) => {
-                if (column !== rangeData.endColumn) {
-                    setStyleValue(
-                        mr,
-                        row,
-                        column,
-                        {
-                            r: Tools.deepClone(border),
-                        },
-                        mergeData
-                    );
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    if (rectangle.endColumn !== rangeData.endColumn) {
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        mr.setValue(row, column, {
+                            bd: style?.bd
+                                ? Object.assign(style.bd, { r: Tools.deepClone(border) })
+                                : { r: Tools.deepClone(border) },
+                        });
+                    }
+                } else {
+                    if (column !== rangeData.endColumn) {
+                        const style = mr.getValue(row, column);
+                        mr.setValue(row, column, {
+                            bd: style?.bd
+                                ? Object.assign(style.bd, { r: Tools.deepClone(border) })
+                                : { r: Tools.deepClone(border) },
+                        });
+                    }
                 }
             });
         }
         // inner horizontal border
         if (horizontal) {
             forEach(rangeData, (row, column) => {
-                if (row !== rangeData.endRow) {
-                    setStyleValue(
-                        mr,
-                        row,
-                        column,
-                        {
-                            b: Tools.deepClone(border),
-                        },
-                        mergeData
-                    );
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    if (rectangle.endRow !== rangeData.endRow) {
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        mr.setValue(row, column, {
+                            bd: style?.bd
+                                ? Object.assign(style.bd, { b: Tools.deepClone(border) })
+                                : { b: Tools.deepClone(border) },
+                        });
+                    }
+                } else {
+                    if (row !== rangeData.endRow) {
+                        const style = mr.getValue(row, column);
+                        mr.setValue(row, column, {
+                            bd: style?.bd
+                                ? Object.assign(style.bd, { b: Tools.deepClone(border) })
+                                : { b: Tools.deepClone(border) },
+                        });
+                    }
                 }
             });
         }
 
         if (!top && !bottom && !left && !right && !vertical && !horizontal) {
             forEach(topRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { b: null }, mergeData);
+                const defaultStyle = { bd: { b: null } };
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+                } else {
+                    mr.setValue(row, column, defaultStyle);
+                }
             });
+
             forEach(topRange, (row, column) => {
-                setStyleValue(mr, row, column, { t: null }, mergeData);
+                const style = mr.getValue(row, column);
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
+                        bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
+                    });
+                } else {
+                    mr.setValue(row, column, {
+                        bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
+                    });
+                }
             });
 
             forEach(bottomRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { t: null }, mergeData);
+                const defaultStyle = { bd: { t: null } };
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+                } else {
+                    mr.setValue(row, column, defaultStyle);
+                }
             });
+
             forEach(bottomRange, (row, column) => {
-                setStyleValue(mr, row, column, { b: null }, mergeData);
+                const style = mr.getValue(row, column);
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
+                        bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+                    });
+                } else {
+                    mr.setValue(row, column, {
+                        bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+                    });
+                }
             });
 
             forEach(leftRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { r: null }, mergeData);
+                const defaultStyle = { bd: { r: null } };
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+                } else {
+                    mr.setValue(row, column, defaultStyle);
+                }
             });
             forEach(leftRange, (row, column) => {
-                setStyleValue(mr, row, column, { l: null }, mergeData);
+                const style = mr.getValue(row, column);
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
+                        bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
+                    });
+                } else {
+                    mr.setValue(row, column, {
+                        bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
+                    });
+                }
             });
 
             forEach(rightRangeOut, (row, column) => {
-                setStyleValue(mr, row, column, { l: null }, mergeData);
+                const defaultStyle = { bd: { l: null } };
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, defaultStyle);
+                } else {
+                    mr.setValue(row, column, defaultStyle);
+                }
             });
             forEach(rightRange, (row, column) => {
-                setStyleValue(mr, row, column, { r: null }, mergeData);
-            });
-
-            forEach(rangeData, (row, column) => {
-                if (column !== rangeData.endColumn) {
-                    setStyleValue(mr, row, column, { r: null }, mergeData);
+                const style = mr.getValue(row, column);
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
+                        bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+                    });
+                } else {
+                    mr.setValue(row, column, {
+                        bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+                    });
                 }
             });
 
             forEach(rangeData, (row, column) => {
-                if (row !== rangeData.endRow) {
-                    setStyleValue(mr, row, column, { b: null }, mergeData);
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    if (rectangle.endColumn !== rangeData.endColumn) {
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        mr.setValue(row, column, {
+                            bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+                        });
+                    }
+                } else {
+                    if (column !== rangeData.endColumn) {
+                        const style = mr.getValue(row, column);
+                        mr.setValue(row, column, {
+                            bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+                        });
+                    }
+                }
+            });
+
+            forEach(rangeData, (row, column) => {
+                const rectangle = hasMerge(row, column);
+                if (rectangle) {
+                    if (rectangle.endRow !== rangeData.endRow) {
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        mr.setValue(row, column, {
+                            bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+                        });
+                    }
+                } else {
+                    if (row !== rangeData.endRow) {
+                        const style = mr.getValue(row, column);
+                        mr.setValue(row, column, {
+                            bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+                        });
+                    }
                 }
             });
         }

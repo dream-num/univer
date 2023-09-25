@@ -113,7 +113,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                         if (value instanceof Object && value.id) {
                             commandId = value.id;
                         }
-                        commandService.executeCommand(id, value);
+                        commandService.executeCommand(commandId, value);
                     }}
                     type={selectType!}
                 ></Select>

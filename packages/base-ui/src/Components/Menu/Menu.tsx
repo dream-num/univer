@@ -390,8 +390,6 @@ export interface BaseMenuProps {
         clientX: number;
         clientY: number;
     }; //Right-click menu adaptive position, send the location of the mouse click
-
-    showAfterClick?: boolean;
 }
 
 export type BaseMenuStyle = {
@@ -669,6 +667,7 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     const [menuItems, setMenuItems] = useState<Array<IDisplayMenuItem<IMenuItem>>>([]);
     const [disabledSubscription, setDisabledSubscription] = useState<Subscription | undefined>();
     const [valueSubscription, setValueSubscription] = useState<Subscription | undefined>();
+    const [hiddenSubscription, setHiddenSubscription] = useState<Subscription | undefined>();
     const [itemShow, setItemShow] = useState<boolean>(false);
 
     const mouseEnter = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
@@ -716,6 +715,12 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
         setValueSubscription(
             menuItem.value$?.subscribe((newValue) => {
                 setValue(newValue);
+            })
+        );
+
+        setHiddenSubscription(
+            menuItem.hidden$?.subscribe((newValue) => {
+                console.log(newValue);
             })
         );
 

@@ -148,7 +148,6 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         type: MenuItemType.SELECTOR,
         selectType: SelectTypes.NEO,
         selections: [...BORDER_LINE_CHILDREN],
-        value$: borderStyleManagerService.borderInfo$.pipe(map((info) => info.color)),
     };
 }
 

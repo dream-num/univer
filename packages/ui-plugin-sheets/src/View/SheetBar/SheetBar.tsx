@@ -396,11 +396,11 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                     show={showMenu}
                     style={menuStyle}
                     onOptionSelect={(params) => {
-                        const { label: commandId } = params;
+                        const { label: commandId, value } = params;
                         const commandService: ICommandService = (this.context as IKeyValue).injector.get(
                             ICommandService
                         );
-                        commandService.executeCommand(commandId as string);
+                        commandService.executeCommand(commandId as string, { value });
                     }}
                 />
 

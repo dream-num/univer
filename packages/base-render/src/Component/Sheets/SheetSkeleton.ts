@@ -425,9 +425,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         scaleY: number,
         scrollXY: { x: number; y: number }
     ) {
-        const row = this.getCellRowPositionByOffsetY(offsetY, scaleY, scrollXY);
+        const row = this.getRowPositionByOffsetY(offsetY, scaleY, scrollXY);
 
-        const column = this.getCellColumnPositionByOffsetX(offsetX, scaleX, scrollXY);
+        const column = this.getColumnPositionByOffsetX(offsetX, scaleX, scrollXY);
 
         return {
             row,
@@ -435,14 +435,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getCellColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
-        const { x: scrollX } = scrollXY;
+    getColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
+        offsetX = this.getTransformOffsetX(offsetX, scaleX, scrollXY);
 
-        // these values are not affected by zooming (ideal positions)
-        const { columnWidthAccumulation, rowHeaderWidth } = this;
-
-        // so we should map physical positions to ideal positions
-        offsetX = offsetX / scaleX + scrollX - rowHeaderWidth;
+        const { columnWidthAccumulation } = this;
 
         let column = searchArray(columnWidthAccumulation, offsetX);
 
@@ -459,13 +455,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         return column;
     }
 
-    getCellRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
-        const { y: scrollY } = scrollXY;
+    getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
+        const { rowHeightAccumulation } = this;
 
-        // these values are not affected by zooming (ideal positions)
-        const { rowHeightAccumulation, columnHeaderHeight } = this;
-
-        offsetY = offsetY / scaleY + scrollY - columnHeaderHeight;
+        offsetY = this.getTransformOffsetY(offsetY, scaleY, scrollXY);
 
         let row = searchArray(rowHeightAccumulation, offsetY);
 
@@ -480,6 +473,55 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         return row;
+    }
+
+    getTransformOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
+        const { x: scrollX } = scrollXY;
+
+        // so we should map physical positions to ideal positions
+        offsetX = offsetX / scaleX + scrollX - this.rowHeaderWidth;
+
+        return offsetX;
+    }
+
+    getTransformOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
+        const { y: scrollY } = scrollXY;
+
+        // these values are not affected by zooming (ideal positions)
+        offsetY = offsetY / scaleY + scrollY - this.columnHeaderHeight;
+
+        return offsetY;
+    }
+
+    getOffsetByPositionX(column: number): number {
+        const { columnWidthAccumulation, rowHeaderWidth } = this;
+
+        const lastColumnIndex = columnWidthAccumulation.length - 1;
+        const columnValue = columnWidthAccumulation[column];
+        if (columnValue != null) {
+            return columnValue + rowHeaderWidth;
+        }
+
+        if (column < 0) {
+            return rowHeaderWidth;
+        }
+
+        return columnWidthAccumulation[lastColumnIndex] + rowHeaderWidth;
+    }
+
+    getOffsetByPositionY(row: number) {
+        const { rowHeightAccumulation, columnHeaderHeight } = this;
+        const lastRowIndex = rowHeightAccumulation.length - 1;
+        const rowValue = rowHeightAccumulation[row];
+        if (rowValue != null) {
+            return rowValue + columnHeaderHeight;
+        }
+
+        if (row < 0) {
+            return columnHeaderHeight;
+        }
+
+        return rowHeightAccumulation[lastRowIndex] + columnHeaderHeight;
     }
 
     getCellByIndex(row: number, column: number, scaleX: number, scaleY: number) {

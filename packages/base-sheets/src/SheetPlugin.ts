@@ -16,6 +16,8 @@ import { SetSelectionsOperation } from './commands/operations/selection.operatio
 import { BasicWorkbookController, CountBarController } from './Controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
+import { HeaderMenuController } from './Controller/header-menu.controller';
+import { HeaderResizeController } from './Controller/header-resize.controller';
 import { SelectionController } from './Controller/Selection.controller';
 import { SheetRenderController } from './Controller/sheet-render.controller';
 import { en } from './Locale';
@@ -99,6 +101,10 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         this._injector.get(SelectionController);
 
         this._injector.get(SheetRenderController);
+
+        this._injector.get(HeaderMenuController);
+
+        this._injector.get(HeaderResizeController);
     }
 
     override onStarting(): void {}
@@ -141,6 +147,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [BasicWorkbookController],
             [SelectionController],
             [SheetRenderController],
+            [HeaderMenuController],
+            [HeaderResizeController],
         ];
 
         dependencies.forEach((d) => {

@@ -38,6 +38,15 @@ export interface ISelectionRange {
 }
 
 /**
+ * Transform an `ISelectionRange` object to an array.
+ * @param range
+ * @returns [rowStart, colStart, rowEnd, colEnd]
+ */
+export function selectionToArray(range: ISelectionRange): [number, number, number, number] {
+    return [range.startRow, range.startColumn, range.endRow, range.endColumn];
+}
+
+/**
  * Range data of grid
  */
 export interface IGridRange {

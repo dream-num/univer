@@ -5,6 +5,8 @@ import {
     ISelectionCell,
     ISelectionRange,
     ObjectMatrix,
+    Rectangle,
+    selectionToArray,
     Worksheet,
 } from '@univerjs/core';
 
@@ -284,6 +286,36 @@ export function expandToNextGapCell(
     return destRange;
 }
 
+/**
+ * Adjust the range to align merged cell's borders.
+ */
+export function alignToMergedCellsBorders(startRange: ISelectionRange, worksheet: Worksheet) {
+    const coveredMergedCells = worksheet.getMatrixWithMergedCells(...selectionToArray(startRange));
+    const exceededMergedCells: ISelectionRange[] = [];
+
+    coveredMergedCells.forValue((row, col, value) => {
+        if (value.colSpan !== undefined && value.rowSpan !== undefined) {
+            const mergedCellRange = {
+                startRow: row,
+                startColumn: col,
+                endRow: row + value.rowSpan! - 1,
+                endColumn: col + value.colSpan! - 1,
+            };
+
+            if (!Rectangle.contains(startRange, mergedCellRange)) {
+                exceededMergedCells.push(mergedCellRange);
+            }
+        }
+    });
+
+    if (exceededMergedCells.length === 0) {
+        return startRange;
+    }
+
+    const union = Rectangle.union(startRange, ...exceededMergedCells);
+    return alignToMergedCellsBorders(union, worksheet);
+}
+
 export function expandToNextCell(
     startRange: ISelectionRange,
     direction: Direction,
@@ -297,12 +329,7 @@ export function expandToNextCell(
         endColumn: Math.max(startRange.endColumn, next.endColumn),
     };
 
-    // 看起来腾讯文档的选区扩展算法跟我想的差不多
-
-    // TODO: deal with merged cell, this is rather complicated
-    // and not the same as `expandToContinuousRange`
-    // time complexity of this algorithm could be O(n^2) as n is the number of merged cells in this worksheet
-    return destRange;
+    return alignToMergedCellsBorders(Rectangle.union(startRange, destRange), worksheet);
 }
 
 /**

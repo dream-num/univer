@@ -1,12 +1,10 @@
 import { ISelectionRange } from '../Types/Interfaces/ISelectionRange';
 import { Nullable } from './Types';
 
-// TODO: it seems that this wrapper is not necessary. Only static methods are good.
-
 /**
- * A square area containing four position information: startRow, startColumn, endRow, and endColumn
+ * This class provides a set of methods to calculate `ISelectionRange`.
  */
-export class Rectangle implements ISelectionRange {
+export class Rectangle {
     static equals(src: ISelectionRange, target: ISelectionRange): boolean {
         return (
             src.endRow === target.endRow &&
@@ -127,6 +125,18 @@ export class Rectangle implements ISelectionRange {
                 src.endRow > target.endRow ||
                 src.startColumn < target.startColumn ||
                 src.endColumn > target.endColumn)
+        );
+    }
+
+    static union(...ranges: ISelectionRange[]): ISelectionRange {
+        return ranges.reduce(
+            (acc, current) => ({
+                startRow: Math.min(acc.startRow, current.startRow),
+                startColumn: Math.min(acc.startColumn, current.startColumn),
+                endRow: Math.max(acc.endRow, current.endRow),
+                endColumn: Math.max(acc.endColumn, current.endColumn),
+            }),
+            ranges[0]
         );
     }
 

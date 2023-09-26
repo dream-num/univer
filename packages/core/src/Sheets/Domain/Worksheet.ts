@@ -154,7 +154,7 @@ export class Worksheet {
 
         // get all merged cells
         const mergedCellsInRange = this._snapshot.mergeData.filter((rect) =>
-            Rectangle.intersects({ startRow: row, startColumn: col, endRow: row, endColumn: col }, rect)
+            Rectangle.intersects({ startRow: row, startColumn: col, endRow, endColumn: endCol }, rect)
         );
 
         const ret = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>();

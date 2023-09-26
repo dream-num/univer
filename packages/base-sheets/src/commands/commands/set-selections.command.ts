@@ -23,6 +23,8 @@ import {
     shrinkToNextGapCell,
 } from './utils/selection-util';
 
+// TODO@wzhudev: we also need to handle when the current selection is the whole spreadsheet, whole rows or whole columns
+
 export interface IChangeSelectionCommandParams {
     direction: Direction;
 

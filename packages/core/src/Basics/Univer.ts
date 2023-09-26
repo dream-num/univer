@@ -42,8 +42,6 @@ export class Univer {
         locale && this._univerInjector.get(LocaleService).setLocale(locale);
     }
 
-    dispose() {}
-
     private get _currentUniverService(): ICurrentUniverService {
         return this._univerInjector.get(ICurrentUniverService);
     }

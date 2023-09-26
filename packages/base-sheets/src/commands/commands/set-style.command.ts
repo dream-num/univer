@@ -159,13 +159,14 @@ export const SetItalicCommand: ICommand = {
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const cellRange = selectionManagerService.getLast()?.cellRange;
+        const rangeData = selectionManagerService.getLast()?.rangeData;
         const currentUniverService = accessor.get(ICurrentUniverService);
         const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
 
         let currentlyItalic = true;
-        if (cellRange) {
-            currentlyItalic = worksheet.getRange(cellRange.row, cellRange.column).getFontStyle() === FontItalic.ITALIC;
+        if (rangeData) {
+            currentlyItalic =
+                worksheet.getRange(rangeData.startRow, rangeData.startColumn).getFontStyle() === FontItalic.ITALIC;
         }
 
         const setStyleParams: ISetStyleParams<BooleanNumber> = {
@@ -188,13 +189,13 @@ export const SetUnderlineCommand: ICommand = {
     handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const cellRange = selectionManagerService.getLast()?.cellRange;
+        const rangeData = selectionManagerService.getLast()?.rangeData;
         const currentUniverService = accessor.get(ICurrentUniverService);
         const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
 
         let currentlyUnderline = true;
-        if (cellRange) {
-            currentlyUnderline = !!worksheet.getRange(cellRange.row, cellRange.column).getUnderline().s;
+        if (rangeData) {
+            currentlyUnderline = !!worksheet.getRange(rangeData.startRow, rangeData.startColumn).getUnderline().s;
         }
 
         const setStyleParams: ISetStyleParams<{ s: number }> = {
@@ -220,13 +221,14 @@ export const SetStrikeThroughCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
 
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const cellRange = selectionManagerService.getLast()?.cellRange;
+        const rangeData = selectionManagerService.getLast()?.rangeData;
         const currentUniverService = accessor.get(ICurrentUniverService);
         const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
 
         let currentlyStrokeThrough = true;
-        if (cellRange) {
-            currentlyStrokeThrough = !!worksheet.getRange(cellRange.row, cellRange.column).getStrikeThrough().s;
+        if (rangeData) {
+            currentlyStrokeThrough = !!worksheet.getRange(rangeData.startRow, rangeData.startColumn).getStrikeThrough()
+                .s;
         }
 
         const setStyleParams: ISetStyleParams<{ s: number }> = {

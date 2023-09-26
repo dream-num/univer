@@ -1,7 +1,4 @@
 import { BaseComponentProps, Container, Content, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
-import defaultSkin from '@univerjs/base-ui/Basics/CSS/Skin/default.module.less';
-import { Tools } from '@univerjs/core';
-import cssVars from 'css-vars-ponyfill';
 import { Component, createRef } from 'react';
 
 import { ISlideUIPluginConfig } from '../../Basics';
@@ -103,53 +100,6 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
 
         const id = typeof container === 'string' ? container : container.id;
 
-        // get all skins
-        const skins = {
-            default: defaultSkin,
-        };
-
-        // current skin set by user
-        let currentSkin = skins[skin];
-
-        // transform "primaryColor" to "--primary-color"
-        currentSkin = Object.fromEntries(
-            Object.keys(currentSkin).map((item) => [
-                `--${item.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`,
-                currentSkin[item],
-            ])
-        );
-
-        // ie11 does not support css variables, use css-vars-ponyfill to handle
-        if (Tools.isIEBrowser()) {
-            cssVars({
-                // Options...
-
-                // The container is invalid as rootElement, so the default setting is root.
-                // Disadvantages: In ie11, only one set of skins can be used for multiple workbooks, and it is the skin set by the last workbook
-                rootElement: root, // default
-
-                variables: currentSkin,
-            });
-        } else {
-            // set css variable
-            const sheet = getSkinStyleSheet(id);
-
-            /**
-             *  covert object to style, remove " and replace , to ;
-             *
-             *  Example:
-             *
-             *  before: {--primary-color:"#0188fb",--primary-color-hover:"#5391ff"}
-             *  after:  {--primary-color:#0188fb;--primary-color-hover:#5391ff;}
-             */
-
-            sheet.insertRule(
-                `#${id} ${JSON.stringify(currentSkin)
-                    .replace(/"/g, '')
-                    .replace(/,(?=--)/g, ';')}`
-            );
-        }
-
         /**
          * get skin style sheet
          * @param id
@@ -198,7 +148,7 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
      *
      * @returns {void}
      */
-    render() {
+    override render() {
         const { methods } = this.props;
         const { layout } = this.props.config;
         const config = layout?.slideContainerConfig!;

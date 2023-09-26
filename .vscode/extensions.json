@@ -1,11 +1,12 @@
 {
-  "recommendations": [
-    "dbaeumer.vscode-eslint",
-    "editorconfig.editorconfig",
-    "esbenp.prettier-vscode",
-    "gruntfuggly.todo-tree",
-    "intellsmi.comment-translate",
-    "streetsidesoftware.code-spell-checker",
-    "tldraw-org.tldraw-vscode"
-  ]
+    "recommendations": [
+        "dbaeumer.vscode-eslint",
+        "editorconfig.editorconfig",
+        "esbenp.prettier-vscode",
+        "gruntfuggly.todo-tree",
+        "intellsmi.comment-translate",
+        "streetsidesoftware.code-spell-checker",
+        "tldraw-org.tldraw-vscode",
+        "kingwl.vscode-vitest-runner"
+    ]
 }

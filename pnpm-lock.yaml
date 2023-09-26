@@ -317,9 +317,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.8
         version: 0.12.8
-      css-vars-ponyfill:
-        specifier: ^2.4.6
-        version: 2.4.6
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -538,9 +535,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.8
         version: 0.12.8
-      css-vars-ponyfill:
-        specifier: ^2.4.6
-        version: 2.4.6
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1101,9 +1095,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.8
         version: 0.12.8
-      css-vars-ponyfill:
-        specifier: ^2.4.6
-        version: 2.4.6
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1153,9 +1144,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.8
         version: 0.12.8
-      css-vars-ponyfill:
-        specifier: ^2.4.6
-        version: 2.4.6
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1211,9 +1199,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.12.8
         version: 0.12.8
-      css-vars-ponyfill:
-        specifier: ^2.4.6
-        version: 2.4.6
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -6127,6 +6112,7 @@ packages:
 
   /balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
+    dev: true
 
   /base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
@@ -6704,13 +6690,6 @@ packages:
     resolution: {integrity: sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==}
     engines: {node: '>=8'}
     dev: true
-
-  /css-vars-ponyfill@2.4.6:
-    resolution: {integrity: sha512-FqUFzMlI5jpPl73R9FrUuittWM/t7RDEnyp0603MCNEy6PI/1PALIX1d15cui6UAN/V8tnIWZDMz6WoZD87eGQ==}
-    dependencies:
-      balanced-match: 1.0.2
-      get-css-data: 2.1.0
-    dev: false
 
   /css.escape@1.5.1:
     resolution: {integrity: sha512-YUifsXXuknHlUsmlgyY0PKzgPOr7/FjCePfHNt0jxm83wHZi44VDMQ7/fGNkjY3/jV1MC+1CmZbaHzugyeRtpg==}
@@ -8033,10 +8012,6 @@ packages:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
     engines: {node: 6.* || 8.* || >= 10.*}
     dev: true
-
-  /get-css-data@2.1.0:
-    resolution: {integrity: sha512-HtPrzGk8aBF9rLeQNuImcXci7YVqsMEKzVflEWaCJu25ehxyDNiZRWoSxqSFUBfma8LERqKo70t/TcaGjIsM9g==}
-    dev: false
 
   /get-func-name@2.0.0:
     resolution: {integrity: sha512-Hm0ixYtaSZ/V7C8FJrtZIuBBI+iSgL+1Aq82zSu8VQNB4S3Gk8e7Qs3VwBDJAhmRZcFqkl3tQu36g/Foh5I5ig==}

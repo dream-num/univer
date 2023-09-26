@@ -1,5 +1,3 @@
-import '../Basics/CSS/Skin/default.module.less';
-
 import { LocaleService, ObserverManager, ThemeService } from '@univerjs/core';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { ComponentType, useEffect, useRef, useState } from 'react';

@@ -46,8 +46,9 @@ class Theme {
         );
 
         // 3. insert new theme
+        // TODO: CSS selector should be configurable
         this.styleSheet.insertRule(
-            `#${'univer-container'} ${JSON.stringify(currentSkin)
+            `:root ${JSON.stringify(currentSkin)
                 .replace(/"/g, '')
                 .replace(/,(?=--)/g, ';')}`
         );

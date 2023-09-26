@@ -1,10 +1,10 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { Disposable, toDisposable } from '../Shared/lifecycle';
-import { ILocales } from '../Shared/Locale';
-import { Tools } from '../Shared/Tools';
-import { Nullable } from '../Shared/Types';
-import { LocaleType } from '../Types/Enum/LocaleType';
+import { Disposable, toDisposable } from '../../Shared/lifecycle';
+import { ILocales } from '../../Shared/Locale';
+import { Tools } from '../../Shared/Tools';
+import { Nullable } from '../../Shared/Types';
+import { LocaleType } from '../../Types/Enum/LocaleType';
 
 /**
  * get value from Locale object and key
@@ -18,14 +18,13 @@ function getValue(locale: ILocales[LocaleType], key: string): Nullable<string | 
     if (!locale) return;
 
     try {
-        return locale[key] ? locale[key] : key.split('.').reduce((a, b) => a[b], locale);
+        if (locale[key]) return locale[key];
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return key.split('.').reduce((a: any, b: string) => a[b], locale);
     } catch (error) {
         console.error('Key %s not found', key);
     }
-}
-
-interface ILanguagePack {
-    [key: string]: string | object;
 }
 
 /**

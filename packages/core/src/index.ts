@@ -5,8 +5,15 @@ export * from './Basics';
 export * from './Docs/Domain';
 export * from './Observer';
 export { Plugin, PluginType } from './plugin/plugin';
-export type { ICommand, ICommandInfo, IMultiCommand, IMutation, IOperation } from './services/command/command.service';
-export { CommandType, ICommandService } from './services/command/command.service';
+export {
+    CommandType,
+    type ICommand,
+    type ICommandInfo,
+    ICommandService,
+    type IMultiCommand,
+    type IMutation,
+    type IOperation,
+} from './services/command/command.service';
 export { IConfigService } from './services/config/config.service';
 export { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './services/context/context';
 export { IContextService } from './services/context/context.service';
@@ -20,8 +27,7 @@ export * from './services/theme/theme.service';
 export { IUndoRedoService, LocalUndoRedoService, RedoCommand, UndoCommand } from './services/undoredo/undoredo.service';
 export * from './Shared';
 export { Disposable, DisposableCollection, fromObservable, RxDisposable, toDisposable } from './Shared/lifecycle';
-export type { IRowColIter } from './Shared/RowColIter';
-export { createRowColIter } from './Shared/RowColIter';
+export { createRowColIter, type IRowColIter } from './Shared/RowColIter';
 export * from './Sheets';
 export * from './Slides/Domain';
 export * from './Types/Const';

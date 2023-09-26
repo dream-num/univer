@@ -17,6 +17,7 @@ import { BasicWorkbookController, CountBarController } from './Controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { HeaderMenuController } from './Controller/header-menu.controller';
+import { HeaderMoveController } from './Controller/header-move.controller';
 import { HeaderResizeController } from './Controller/header-resize.controller';
 import { SelectionController } from './Controller/Selection.controller';
 import { SheetRenderController } from './Controller/sheet-render.controller';
@@ -105,6 +106,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         this._injector.get(HeaderMenuController);
 
         this._injector.get(HeaderResizeController);
+
+        this._injector.get(HeaderMoveController);
     }
 
     override onStarting(): void {}
@@ -149,6 +152,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [SheetRenderController],
             [HeaderMenuController],
             [HeaderResizeController],
+            [HeaderMoveController],
         ];
 
         dependencies.forEach((d) => {

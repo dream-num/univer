@@ -38,14 +38,18 @@ export class ScrollTimer {
         return new ScrollTimer(scene, padding);
     }
 
-    startScroll(offsetX: number, offsetY: number) {
+    startScroll(offsetX: number, offsetY: number, targetViewport?: any) {
         this._offsetX = offsetX;
         this._offsetY = offsetY;
 
         this._moveX = offsetX;
         this._moveY = offsetY;
 
-        this._viewport = this.getViewportByCoord(this._scene);
+        if (targetViewport != null) {
+            this._viewport = targetViewport;
+        } else {
+            this._viewport = this.getViewportByCoord(this._scene);
+        }
 
         this._runRenderLoop();
     }

@@ -43,6 +43,10 @@ export class InputManager {
 
     private _onPointerUp: (evt: IPointerEvent) => void;
 
+    private _onPointerEnter: (evt: IPointerEvent) => void;
+
+    private _onPointerLeave: (evt: IPointerEvent) => void;
+
     private _onMouseWheel: (evt: IWheelEvent) => void;
 
     // Keyboard
@@ -60,12 +64,15 @@ export class InputManager {
 
     private _doubleClickOccurred = 0;
 
+    private _currentObject: Nullable<BaseObject | ThinScene>;
+
     constructor(scene: ThinScene) {
         this._scene = scene;
     }
 
     // 处理事件，比如mouseleave,mouseenter的触发。
-    mouseLeaveEnterHandler(o: Nullable<BaseObject | ThinScene>, evt: IMouseEvent) {
+    mouseLeaveEnterHandler(evt: IMouseEvent) {
+        const o = this._currentObject;
         if (o === null || o === undefined) {
             this._currentMouseEnterPicked?.triggerPointerLeave(evt);
             this._currentMouseEnterPicked = null;
@@ -78,12 +85,57 @@ export class InputManager {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    attachControl(hasDown: boolean = true, hasUp: boolean = true, hasMove: boolean = true, hasWheel: boolean = true) {
+    attachControl(
+        hasDown: boolean = true,
+        hasUp: boolean = true,
+        hasMove: boolean = true,
+        hasWheel: boolean = true,
+        hasEnter: boolean = true,
+        hasLeave: boolean = true
+    ) {
         const engine = this._scene.getEngine();
 
         if (!engine) {
             return;
         }
+
+        this._onPointerEnter = (evt: IMouseEvent) => {
+            // preserve compatibility with Safari when pointerId is not present
+            if ((evt as IPointerEvent).pointerId === undefined) {
+                (evt as IPointerEvent as any).pointerId = 0;
+            }
+
+            this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            const isStop = this._currentObject?.triggerPointerMove(evt);
+
+            this.mouseLeaveEnterHandler(evt);
+
+            // if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
+            //     if (this._scene.onPointerMoveObserver.hasObservers()) {
+            //         this._scene.onPointerMoveObserver.notifyObservers(evt);
+            //     }
+            // }
+        };
+
+        this._onPointerLeave = (evt: IMouseEvent) => {
+            // preserve compatibility with Safari when pointerId is not present
+            if ((evt as IPointerEvent).pointerId === undefined) {
+                (evt as IPointerEvent as any).pointerId = 0;
+            }
+
+            // this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            // const isStop = this._currentObject?.triggerPointerMove(evt);
+
+            this._currentObject = null;
+
+            this.mouseLeaveEnterHandler(evt);
+
+            // if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
+            //     if (this._scene.onPointerMoveObserver.hasObservers()) {
+            //         this._scene.onPointerMoveObserver.notifyObservers(evt);
+            //     }
+            // }
+        };
 
         this._onPointerMove = (evt: IMouseEvent) => {
             // preserve compatibility with Safari when pointerId is not present
@@ -91,12 +143,12 @@ export class InputManager {
                 (evt as IPointerEvent as any).pointerId = 0;
             }
 
-            const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
-            const isStop = currentObject?.triggerPointerMove(evt);
+            this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            const isStop = this._currentObject?.triggerPointerMove(evt);
 
-            this.mouseLeaveEnterHandler(currentObject, evt);
+            this.mouseLeaveEnterHandler(evt);
 
-            if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
+            if (this._checkDirectSceneEventTrigger(!isStop, this._currentObject)) {
                 if (this._scene.onPointerMoveObserver.hasObservers()) {
                     this._scene.onPointerMoveObserver.notifyObservers(evt);
                 }
@@ -219,6 +271,16 @@ export class InputManager {
                         eventData.inputIndex === PointerInput.MouseWheelZ)
                 ) {
                     this._onMouseWheel(evt as IWheelEvent);
+                }
+
+                if (hasEnter && eventData.currentState === 2) {
+                    // this._onPointerUp(evt as IPointerEvent);
+                    this._onPointerEnter(evt as IPointerEvent);
+                }
+
+                if (hasLeave && eventData.currentState === 3) {
+                    // this._onPointerUp(evt as IPointerEvent);
+                    this._onPointerLeave(evt as IPointerEvent);
                 }
             }
         });

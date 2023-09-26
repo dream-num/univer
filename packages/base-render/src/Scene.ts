@@ -599,6 +599,8 @@ export class Scene extends ThinScene {
         this.onPointerDownObserver.clear();
         this.onPointerMoveObserver.clear();
         this.onPointerUpObserver.clear();
+        this.onPointerEnterObserver.clear();
+        this.onPointerLeaveObserver.clear();
         this.onDblclickObserver.clear();
         this.onMouseWheelObserver.clear();
         this.onKeyDownObservable.clear();
@@ -750,7 +752,10 @@ export class Scene extends ThinScene {
 
     override triggerPointerLeave(evt: IPointerEvent | IMouseEvent) {
         // this.onPointerLeaveObserver.notifyObservers(evt);
-        if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+        if (
+            !this.onPointerLeaveObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
             (this._parent as SceneViewer)?.triggerPointerLeave(evt);
             return false;
         }
@@ -768,7 +773,10 @@ export class Scene extends ThinScene {
 
     override triggerPointerEnter(evt: IPointerEvent | IMouseEvent) {
         // this.onPointerEnterObserver.notifyObservers(evt);
-        if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+        if (
+            !this.onPointerEnterObserver.notifyObservers(evt)?.stopPropagation &&
+            this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
+        ) {
             (this._parent as SceneViewer)?.triggerPointerEnter(evt);
             return false;
         }

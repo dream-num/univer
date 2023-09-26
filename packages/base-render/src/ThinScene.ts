@@ -16,6 +16,10 @@ export abstract class ThinScene {
 
     onPointerUpObserver = new Observable<IPointerEvent | IMouseEvent>();
 
+    onPointerEnterObserver = new Observable<IPointerEvent | IMouseEvent>();
+
+    onPointerLeaveObserver = new Observable<IPointerEvent | IMouseEvent>();
+
     onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
 
     onMouseWheelObserver = new Observable<IWheelEvent>();

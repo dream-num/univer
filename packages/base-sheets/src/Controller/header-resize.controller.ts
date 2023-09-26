@@ -65,11 +65,11 @@ export class HeaderResizeController extends Disposable {
 
     private _resizeHelperShape: Nullable<Rect>;
 
-    private _startOffsetX: number;
+    private _startOffsetX: number = Infinity;
 
-    private _startOffsetY: number;
+    private _startOffsetY: number = Infinity;
 
-    private _sheetObject: ISheetObjectParam;
+    private _sheetObject!: ISheetObjectParam;
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -360,7 +360,7 @@ export class HeaderResizeController extends Disposable {
 
                 this._columnResizeRect?.show();
 
-                scene.setCursor(CURSOR_TYPE.ROW_RESIZE);
+                scene.setCursor(CURSOR_TYPE.COLUMN_RESIZE);
             });
 
             this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {

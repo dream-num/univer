@@ -4,30 +4,20 @@
 export * from './Basics';
 export * from './Docs/Domain';
 export * from './Observer';
-export { Plugin, PluginType } from './plugin/plugin';
-export {
-    CommandType,
-    ICommand,
-    ICommandInfo,
-    ICommandService,
-    IMultiCommand,
-    IMutation,
-    IOperation,
-} from './services/command/command.service';
-export { IConfigService } from './services/config/config.service';
-export { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './services/context/context';
-export { IContextService } from './services/context/context.service';
-export { ICurrentUniverService } from './services/current.service';
-export { LifecycleStages, OnLifecycle } from './services/lifecycle/lifecycle';
-export { LifecycleService } from './services/lifecycle/lifecycle.service';
-export { LocaleService } from './services/locale.service';
-export { DesktopLogService, ILogService } from './services/log/log.service';
-export { DesktopPermissionService, IPermissionService } from './services/permission/permission.service';
+export * from './plugin/plugin';
+export * from './services/command/command.service';
+export * from './services/config/config.service';
+export * from './services/context/context';
+export * from './services/context/context.service';
+export * from './services/current.service';
+export * from './services/lifecycle/lifecycle';
+export * from './services/lifecycle/lifecycle.service';
+export * from './services/locale/locale.service';
+export * from './services/log/log.service';
+export * from './services/permission/permission.service';
 export * from './services/theme/theme.service';
-export { IUndoRedoService, LocalUndoRedoService, RedoCommand, UndoCommand } from './services/undoredo/undoredo.service';
+export * from './services/undoredo/undoredo.service';
 export * from './Shared';
-export { Disposable, DisposableCollection, fromObservable, RxDisposable, toDisposable } from './Shared/lifecycle';
-export { createRowColIter, IRowColIter } from './Shared/RowColIter';
 export * from './Sheets';
 export * from './Slides/Domain';
 export * from './Types/Const';

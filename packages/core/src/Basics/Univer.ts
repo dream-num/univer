@@ -9,7 +9,7 @@ import { ContextService, IContextService } from '../services/context/context.ser
 import { CurrentUniverService, ICurrentUniverService } from '../services/current.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
-import { LocaleService } from '../services/locale.service';
+import { LocaleService } from '../services/locale/locale.service';
 import { DesktopLogService, ILogService } from '../services/log/log.service';
 import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';

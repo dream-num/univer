@@ -137,7 +137,7 @@ export const ExpandSelectionRightShortcutItem: IShortcutItem<IExpandSelectionCom
 // continuous selection to continuous end
 
 export const ExpandSelectionEndDownShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+    id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
@@ -147,7 +147,7 @@ export const ExpandSelectionEndDownShortcutItem: IShortcutItem<IExpandSelectionC
 };
 
 export const ExpandSelectionEndUpShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+    id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_UP | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
@@ -157,7 +157,7 @@ export const ExpandSelectionEndUpShortcutItem: IShortcutItem<IExpandSelectionCom
 };
 
 export const ExpandSelectionEndLeftShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+    id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
@@ -167,7 +167,7 @@ export const ExpandSelectionEndLeftShortcutItem: IShortcutItem<IExpandSelectionC
 };
 
 export const ExpandSelectionEndRightShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+    id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {

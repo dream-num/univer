@@ -41,7 +41,7 @@ export function getRangeAtPosition(row: number, col: number, worksheet: Workshee
     return destRange;
 }
 
-export function moveToNextSelection(
+export function findNextRange(
     startRange: ISelectionRange,
     direction: Direction,
     worksheet: Worksheet
@@ -68,35 +68,189 @@ export function moveToNextSelection(
             break;
     }
 
-    // FIXME: 这里需要根据那一列的合并单元格情况做扩展
-    // destRange = getRangeAtPosition(destRange.startRow, destRange.startColumn, worksheet);
     return destRange;
 }
 
-/**
- * If the current cell has value
- */
-export function moveToNextGapCell(
+export function findNextGapRange(
     startRange: ISelectionRange,
     direction: Direction,
     worksheet: Worksheet
 ): ISelectionRange {
-    let destRange: ISelectionRange = { ...startRange };
-    const expandedRange = expandToNextGapCell(destRange, direction, worksheet);
-    const row =
-        Direction.UP === direction
-            ? expandedRange.startRow
-            : Direction.DOWN === direction
-            ? expandedRange.endRow
-            : startRange.startRow;
-    const column =
-        Direction.LEFT === direction
-            ? expandedRange.startColumn
-            : Direction.RIGHT === direction
-            ? expandedRange.endColumn
-            : startRange.startColumn;
+    let destRange = { ...startRange };
+    const maxRow = worksheet.getMaxRows();
 
-    destRange = getRangeAtPosition(row, column, worksheet);
+    const { startRow, startColumn, endRow, endColumn } = getLastArrayOfRange(startRange, direction, worksheet);
+    let currentPositionHasValue = rangeHasValue(worksheet, startRow, startColumn, endRow, endColumn).hasValue;
+    let firstMove = true;
+    let shouldContinue = true;
+
+    while (shouldContinue) {
+        if (Direction.UP === direction) {
+            if (destRange.startRow === 0) {
+                shouldContinue = false;
+                break;
+            }
+
+            const destRow = destRange.startRow - 1; // it may decrease if there are merged cell
+            const { hasValue: nextRangeHasValue, matrix } = rangeHasValue(
+                worksheet,
+                destRow,
+                destRange.startColumn,
+                destRow,
+                destRange.endColumn
+            );
+
+            if (currentPositionHasValue && !nextRangeHasValue && !firstMove) {
+                shouldContinue = false;
+                break;
+            } else {
+                const r = {
+                    startColumn: destRange.startColumn,
+                    endColumn: destRange.endColumn,
+                    startRow: 1_000_000_000,
+                    endRow: 0,
+                };
+                matrix.forValue((row, _, value) => {
+                    r.startRow = Math.min(row, r.startRow);
+                    r.endRow = Math.max(row + (value.rowSpan || 1) - 1, r.endRow);
+                });
+                destRange = r;
+
+                if (!currentPositionHasValue && nextRangeHasValue) {
+                    shouldContinue = false;
+                    break;
+                }
+
+                currentPositionHasValue = nextRangeHasValue;
+                firstMove = false;
+            }
+        }
+
+        if (Direction.DOWN === direction) {
+            if (destRange.endRow === maxRow - 1) {
+                shouldContinue = false;
+                break;
+            }
+
+            const nextRow = destRange.endRow + 1;
+            const { hasValue: nextRangeHasValue, matrix } = rangeHasValue(
+                worksheet,
+                nextRow,
+                destRange.startColumn,
+                nextRow,
+                destRange.endColumn
+            );
+
+            if (currentPositionHasValue && !nextRangeHasValue && !firstMove) {
+                shouldContinue = false;
+                break;
+            } else {
+                const r = {
+                    startColumn: destRange.startColumn,
+                    endColumn: destRange.endColumn,
+                    startRow: 1_000_000_000,
+                    endRow: 0,
+                };
+                matrix.forValue((row, _, value) => {
+                    r.startRow = Math.min(r.startRow, row);
+                    r.endRow = Math.max(row + (value.rowSpan || 1) - 1, r.endRow);
+                });
+                destRange = r;
+
+                if (!currentPositionHasValue && nextRangeHasValue) {
+                    shouldContinue = false;
+                    break;
+                }
+
+                currentPositionHasValue = nextRangeHasValue;
+                firstMove = false;
+            }
+        }
+
+        if (Direction.LEFT === direction) {
+            if (destRange.startColumn === 0) {
+                shouldContinue = false;
+                break;
+            }
+
+            const destCol = destRange.startColumn - 1;
+            const { hasValue: nextRangeHasValue, matrix } = rangeHasValue(
+                worksheet,
+                destRange.startRow,
+                destCol,
+                destRange.endRow,
+                destCol
+            );
+
+            if (currentPositionHasValue && !nextRangeHasValue && !firstMove) {
+                shouldContinue = false;
+                break;
+            } else {
+                const r = {
+                    startRow: destRange.startRow,
+                    endRow: destRange.endRow,
+                    startColumn: 1_000_000_000,
+                    endColumn: 0,
+                };
+                matrix.forValue((_, col, value) => {
+                    r.startColumn = Math.min(col, r.startColumn);
+                    r.endColumn = Math.max(col + (value.colSpan || 1) - 1, r.endColumn);
+                });
+
+                destRange = r;
+
+                if (!currentPositionHasValue && nextRangeHasValue) {
+                    shouldContinue = false;
+                    break;
+                }
+
+                currentPositionHasValue = nextRangeHasValue;
+                firstMove = false;
+            }
+        }
+
+        if (Direction.RIGHT === direction) {
+            if (destRange.endColumn === worksheet.getMaxColumns() - 1) {
+                shouldContinue = false;
+                break;
+            }
+
+            const destCol = destRange.endColumn + 1;
+            const { hasValue: nextRangeHasValue, matrix } = rangeHasValue(
+                worksheet,
+                destRange.startRow,
+                destCol,
+                destRange.endRow,
+                destCol
+            );
+
+            if (currentPositionHasValue && !nextRangeHasValue && !firstMove) {
+                shouldContinue = false;
+                break;
+            } else {
+                const r = {
+                    startRow: destRange.startRow,
+                    endRow: destRange.endRow,
+                    startColumn: 1_000_000_000,
+                    endColumn: 0,
+                };
+                matrix.forValue((_, col, value) => {
+                    r.startColumn = Math.min(col, r.startColumn);
+                    r.endColumn = Math.max(col + (value.colSpan || 1) - 1, r.endColumn);
+                });
+                destRange = r;
+
+                if (!currentPositionHasValue && nextRangeHasValue) {
+                    shouldContinue = false;
+                    break;
+                }
+
+                currentPositionHasValue = nextRangeHasValue;
+                firstMove = false;
+            }
+        }
+    }
+
     return destRange;
 }
 
@@ -105,23 +259,16 @@ export function expandToNextGapCell(
     direction: Direction,
     worksheet: Worksheet
 ): ISelectionRange {
-    const params: IExpandParams = {
-        left: Direction.LEFT === direction,
-        right: Direction.RIGHT === direction,
-        up: Direction.UP === direction,
-        down: Direction.DOWN === direction,
-    };
-
     const destRange = { ...startRange };
     const maxRow = worksheet.getMaxRows();
 
-    const { startRow, startColumn, endRow, endColumn } = getLastArrayOfRange(startRange, direction);
+    const { startRow, startColumn, endRow, endColumn } = getLastArrayOfRange(startRange, direction, worksheet);
     let currentPositionHasValue = rangeHasValue(worksheet, startRow, startColumn, endRow, endColumn).hasValue;
     let firstMove = true;
     let shouldContinue = true;
 
     while (shouldContinue) {
-        if (params.up) {
+        if (Direction.UP === direction) {
             if (destRange.startRow === 0) {
                 shouldContinue = false;
                 break;
@@ -162,7 +309,7 @@ export function expandToNextGapCell(
             }
         }
 
-        if (params.down) {
+        if (Direction.DOWN === direction) {
             if (destRange.endRow === maxRow - 1) {
                 shouldContinue = false;
                 break;
@@ -183,14 +330,8 @@ export function expandToNextGapCell(
             } else {
                 matrix.forValue((row, col, value) => {
                     destRange.startColumn = Math.min(col, destRange.startColumn);
-                    destRange.endRow = Math.max(
-                        row + (value.rowSpan !== undefined ? value.rowSpan - 1 : 0),
-                        destRange.endRow
-                    );
-                    destRange.endColumn = Math.max(
-                        col + (value.rowSpan === undefined ? 0 : value.rowSpan - 1),
-                        destRange.endColumn
-                    );
+                    destRange.endRow = Math.max(row + (value.rowSpan || 1) - 1, destRange.endRow);
+                    destRange.endColumn = Math.max(col + (value.colSpan || 1) - 1, destRange.endColumn);
                 });
 
                 if (!currentPositionHasValue && nextRangeHasValue) {
@@ -203,7 +344,7 @@ export function expandToNextGapCell(
             }
         }
 
-        if (params.left) {
+        if (Direction.LEFT === direction) {
             if (destRange.startColumn === 0) {
                 shouldContinue = false;
                 break;
@@ -241,7 +382,7 @@ export function expandToNextGapCell(
             }
         }
 
-        if (params.right) {
+        if (Direction.RIGHT === direction) {
             if (destRange.endColumn === worksheet.getMaxColumns() - 1) {
                 shouldContinue = false;
                 break;
@@ -289,7 +430,7 @@ export function expandToNextGapCell(
 /**
  * Adjust the range to align merged cell's borders.
  */
-export function alignToMergedCellsBorders(startRange: ISelectionRange, worksheet: Worksheet) {
+export function alignToMergedCellsBorders(startRange: ISelectionRange, worksheet: Worksheet, shouldRecursive = true) {
     const coveredMergedCells = worksheet.getMatrixWithMergedCells(...selectionToArray(startRange));
     const exceededMergedCells: ISelectionRange[] = [];
 
@@ -313,7 +454,10 @@ export function alignToMergedCellsBorders(startRange: ISelectionRange, worksheet
     }
 
     const union = Rectangle.union(startRange, ...exceededMergedCells);
-    return alignToMergedCellsBorders(union, worksheet);
+    if (shouldRecursive) {
+        return alignToMergedCellsBorders(union, worksheet, shouldRecursive);
+    }
+    return union;
 }
 
 export function expandToNextCell(
@@ -321,7 +465,7 @@ export function expandToNextCell(
     direction: Direction,
     worksheet: Worksheet
 ): ISelectionRange {
-    const next = moveToNextSelection(startRange, direction, worksheet);
+    const next = findNextRange(startRange, direction, worksheet);
     const destRange: ISelectionRange = {
         startRow: Math.min(startRange.startRow, next.startRow),
         startColumn: Math.min(startRange.startColumn, next.startColumn),
@@ -346,17 +490,42 @@ export function shrinkToNextGapCell(
 ): ISelectionRange {
     // use `moveToNextGapCell` reversely to get the next going to cell
     const reversedDirection = getReverseDirection(direction);
-    const next = moveToNextGapCell(getLastArrayOfRange(startRange, reversedDirection), direction, worksheet);
+    const nextGap = findNextGapRange(
+        getLastArrayOfRange(startRange, reversedDirection, worksheet),
+        direction,
+        worksheet
+    );
 
-    // 这里具体用哪个去 min 应该取决于方向
-    const destRange: ISelectionRange = {
-        startRow: Math.min(anchorRange.startRow, next.startRow),
-        startColumn: Math.min(anchorRange.startColumn, next.startColumn),
-        endRow: Math.max(anchorRange.endRow, next.endRow),
-        endColumn: Math.max(anchorRange.endColumn, next.endColumn),
-    };
-
-    return destRange;
+    // if next exceed the startRange we should just expand anchorRange with
+    if (direction === Direction.UP && nextGap.startRow <= startRange.startRow) {
+        return alignToMergedCellsBorders(
+            { ...anchorRange, startColumn: startRange.startColumn, endColumn: startRange.endColumn },
+            worksheet,
+            true
+        );
+    }
+    if (direction === Direction.DOWN && nextGap.endRow >= startRange.endRow) {
+        return alignToMergedCellsBorders(
+            { ...anchorRange, startColumn: startRange.startColumn, endColumn: startRange.endColumn },
+            worksheet,
+            true
+        );
+    }
+    if (direction === Direction.LEFT && nextGap.startColumn <= startRange.startColumn) {
+        return alignToMergedCellsBorders(
+            { ...anchorRange, startRow: startRange.startRow, endRow: startRange.endRow },
+            worksheet,
+            true
+        );
+    }
+    if (direction === Direction.RIGHT && nextGap.endColumn >= startRange.endColumn) {
+        return alignToMergedCellsBorders(
+            { ...anchorRange, startRow: startRange.startRow, endRow: startRange.endRow },
+            worksheet,
+            true
+        );
+    }
+    return Rectangle.union(anchorRange, nextGap);
 }
 
 /**
@@ -373,7 +542,7 @@ export function shrinkToNextCell(
 ): ISelectionRange {
     // use `moveToNextCell` reversely to get the next going to cell
     const reversedDirection = getReverseDirection(direction);
-    const next = moveToNextSelection(getLastArrayOfRange(startRange, reversedDirection), direction, worksheet);
+    const next = findNextRange(getLastArrayOfRange(startRange, reversedDirection, worksheet), direction, worksheet);
 
     const destRange: ISelectionRange = {
         startRow: Math.min(anchorRange.startRow, next.startRow),
@@ -499,40 +668,47 @@ export function expandToWholeSheet(worksheet: Worksheet): ISelectionRange {
     };
 }
 
-function getLastArrayOfRange(startRange: ISelectionRange, direction: Direction): ISelectionRange {
-    // TODO: 这里需要根据范围内的合并单元格情况做扩展，扩展到范围内的所有合并单元格
+function getLastArrayOfRange(startRange: ISelectionRange, direction: Direction, worksheet: Worksheet): ISelectionRange {
+    let destRange: ISelectionRange;
     switch (direction) {
         case Direction.UP:
-            return {
+            destRange = {
                 startRow: startRange.startRow,
                 startColumn: startRange.startColumn,
                 endRow: startRange.startRow,
                 endColumn: startRange.endColumn,
             };
+
+            break;
         case Direction.DOWN:
-            return {
+            destRange = {
                 startRow: startRange.endRow,
                 startColumn: startRange.startColumn,
                 endRow: startRange.endRow,
                 endColumn: startRange.endColumn,
             };
+            break;
         case Direction.LEFT:
-            return {
+            destRange = {
                 startRow: startRange.startRow,
                 startColumn: startRange.startColumn,
                 endRow: startRange.endRow,
                 endColumn: startRange.startColumn,
             };
+            break;
         case Direction.RIGHT:
-            return {
+            destRange = {
                 startRow: startRange.startRow,
                 startColumn: startRange.endColumn,
                 endRow: startRange.endRow,
                 endColumn: startRange.endColumn,
             };
+            break;
         default:
             throw new Error('Invalid direction');
     }
+
+    return alignToMergedCellsBorders(destRange, worksheet, false);
 }
 
 function rangeHasValue(

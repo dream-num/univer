@@ -16,9 +16,9 @@ import {
     expandToNextCell,
     expandToNextGapCell,
     expandToWholeSheet,
+    findNextGapRange,
+    findNextRange,
     getRangeAtPosition,
-    moveToNextGapCell,
-    moveToNextSelection,
     shrinkToNextCell,
     shrinkToNextGapCell,
 } from './utils/selection-util';
@@ -48,8 +48,8 @@ export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
         const { direction, jumpOver } = params;
         const startRange = selection.rangeData;
         let destRange = jumpOver
-            ? moveToNextGapCell(startRange, direction, currentWorksheet)
-            : moveToNextSelection(startRange, direction, currentWorksheet);
+            ? findNextGapRange(startRange, direction, currentWorksheet)
+            : findNextRange(startRange, direction, currentWorksheet);
 
         destRange = getRangeAtPosition(destRange.startRow, destRange.startColumn, currentWorksheet);
 
@@ -100,6 +100,12 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
             return false;
         }
 
+        if (cellRange.startRow === -1) {
+            // FIXME@DR-Univer
+            // It maybe be related to click event handling. Try to click on C10 cell and use shift+arrow to expand selection.
+            throw new Error('startRow is -1! @DR-Univer');
+        }
+
         const { jumpOver, direction } = params;
         const isShrink = (function isShrink() {
             switch (direction) {
@@ -113,8 +119,6 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
                     return startRange.startColumn < cellRange.startColumn;
             }
         })();
-
-        // 往回收缩的时候有一点 bad case 但是应该很好解决
 
         const destRange = !isShrink
             ? jumpOver

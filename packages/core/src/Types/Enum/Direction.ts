@@ -1,11 +1,8 @@
-/**
- * Direction: Top/Bottom/Left/Right
- */
 export enum Direction {
-    LEFT,
-    RIGHT,
     UP,
+    RIGHT,
     DOWN,
+    LEFT,
 }
 
 export function getReverseDirection(direction: Direction): Direction {

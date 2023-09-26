@@ -1,5 +1,5 @@
 // Excel uses symmetric arithmetic rounding
-export function round(value: number, places: number = 0) {
+export function round(value: number, places: number = 0): number {
     if (typeof value !== 'number') {
         return value;
     }

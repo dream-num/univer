@@ -67,20 +67,21 @@ export function formatNumber(value: string | number, parts: PartType[], opts: Op
     if (value == null) {
         return '';
     }
-    if (typeof value !== 'number') {
+    // FIXME Both runPart and isFinite require Number type
+    if (typeof value === 'number') {
         return runPart(value, text_part, opts, l10n);
     }
     // guard against non-finite numbers:
-    if (!isFinite(value)) {
+    if (!isFinite(Number(value))) {
         const loc: any = l10n || defaultLocale;
-        if (isNaN(value)) {
+        if (isNaN(Number(value))) {
             return loc.nan;
         }
-        return (value < 0 ? loc.negative : '') + loc.infinity;
+        return (Number(value) < 0 ? loc.negative : '') + loc.infinity;
     }
     // find and run the pattern part that applies to this number
-    const part = getPart(value, parts);
-    return part ? runPart(value, part, opts, l10n) : '';
+    const part = getPart(Number(value), parts);
+    return part ? runPart(Number(value), part, opts, l10n) : '';
 }
 
 /**

@@ -44,12 +44,13 @@ export function options(opts: OptionsData = {}): OptionsData {
     if (opts) {
         for (const key in opts) {
             if (key in defaultOptions) {
-                const value = opts[key];
+                const k = key as keyof OptionsData;
+                const value = opts[k];
                 if (value == null) {
                     // set back to default
-                    globalOptions[key] = defaultOptions[key];
+                    globalOptions[k] = defaultOptions[k] as undefined;
                 } else {
-                    globalOptions[key] = value;
+                    globalOptions[k] = value as any;
                 }
             }
         }

@@ -1,16 +1,32 @@
 import { codeToLocale } from './core/codeToLocale';
 import { dec2frac } from './core/dec2frac';
 import { color, formatNumber, isDate, isPercent, isText } from './core/formatNumber';
-import { addLocale, getLocale, parseLocale } from './core/locale';
+import { addLocale, getLocale, LocaleData, parseLocale } from './core/locale';
 import { options, OptionsData } from './core/options';
+import { PartType } from './core/parsePart';
 import { parseCatch, parsePattern, PatternType } from './core/parsePattern';
 import { parseBool, parseDate, parseNumber, parseTime, parseValue } from './core/parseValue';
 import { round } from './core/round';
 import { dateFromSerial, dateToSerial } from './core/serialDate';
 
 export interface FormatterType {
+    pattern: string | undefined;
+    error: string;
+    options: (opts?: OptionsData) => {
+        overflow?: string | undefined;
+        dateErrorThrows?: boolean | undefined;
+        dateSpanLarge?: boolean | undefined;
+        dateErrorNumber?: boolean | undefined;
+        invalid?: string | undefined;
+        locale?: string | undefined;
+        leap1900?: boolean | undefined;
+        nbsp?: boolean | undefined;
+        throws?: boolean | undefined;
+        ignoreTimezone?: boolean | undefined;
+    };
+    locale: string;
     (value: number | string | null | unknown | void, opts?: OptionsData): string;
-    color(value, ops?): string;
+    color(value: number | string | null | unknown | void, ops?: OptionsData | undefined): string;
     isDate(): boolean;
     isText(): boolean;
     isPercent(): boolean;
@@ -21,7 +37,7 @@ const _cache: { [key: string]: PatternType } = {};
 function getFormatter(parseData: PatternType, initOpts: OptionsData = {}): FormatterType {
     const { pattern, partitions, locale } = parseData;
 
-    const getRuntimeOptions = (opts) => {
+    const getRuntimeOptions = (opts: OptionsData = {}) => {
         const runOpts = { ...options(), ...initOpts, ...opts };
         if (locale) {
             runOpts.locale = locale;
@@ -29,20 +45,20 @@ function getFormatter(parseData: PatternType, initOpts: OptionsData = {}): Forma
         return runOpts;
     };
 
-    const formatter = (value, opts) => {
+    const formatter: FormatterType = (value: number | string | null | unknown | void, opts?: OptionsData) => {
         if (value) {
             const o = getRuntimeOptions(opts);
-            return formatNumber(dateToSerial(value, o), partitions, o);
+            return formatNumber(dateToSerial(value as any[] | Date, o) as string | number, partitions as PartType[], o);
         }
         return String();
     };
     formatter.color = (value, opts = {}) => {
         const o = getRuntimeOptions(opts);
-        return color(dateToSerial(value, o), partitions);
+        return color(dateToSerial(value as any[] | Date, o) as number, partitions as PartType[]);
     };
-    formatter.isPercent = () => isPercent(partitions);
-    formatter.isDate = () => isDate(partitions);
-    formatter.isText = () => isText(partitions);
+    formatter.isPercent = () => isPercent(partitions as PartType[]);
+    formatter.isDate = () => isDate(partitions as PartType[]);
+    formatter.isText = () => isText(partitions as PartType[]);
     formatter.pattern = pattern;
     if (parseData.error) {
         formatter.error = parseData.error;
@@ -81,16 +97,16 @@ numfmt.round = round;
 numfmt.codeToLocale = codeToLocale;
 numfmt.getLocale = getLocale;
 numfmt.parseLocale = parseLocale;
-numfmt.addLocale = (options, l4e) => {
+numfmt.addLocale = (options: LocaleData, l4e: string) => {
     const c = parseLocale(l4e);
     // when locale is changed, expire all cached patterns
-    delete _cache[c.lang];
-    delete _cache[c.language];
+    delete _cache[c.lang || ''];
+    delete _cache[c.language || ''];
     return addLocale(options, c);
 };
 
 // SSF interface compatibility
-function format(pattern, value, l4e, noThrows = false) {
+function format(pattern: string | undefined, value: any[] | Date, l4e: any, noThrows = false) {
     const opts = l4e && typeof l4e === 'object' ? l4e : { locale: l4e, throws: !noThrows };
     return numfmt(pattern, opts)(dateToSerial(value, opts), opts);
 }

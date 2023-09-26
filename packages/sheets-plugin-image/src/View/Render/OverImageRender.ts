@@ -10,7 +10,10 @@ export class OverImageRender {
 
     private _mainScene: Scene;
 
-    constructor(@Inject(Injector) readonly _injector: Injector, @Inject(ObserverManager) private _observerManager: ObserverManager) {
+    constructor(
+        @Inject(Injector) readonly _injector: Injector,
+        @Inject(ObserverManager) private _observerManager: ObserverManager
+    ) {
         const engine = _injector.get(IRenderingEngine);
         this._mainScene = engine.getScene('mainScene') as Scene;
         if (this._mainScene == null) {

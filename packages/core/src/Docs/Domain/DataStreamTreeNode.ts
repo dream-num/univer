@@ -157,7 +157,11 @@ export class DataStreamTreeNode {
         this.endIndex = segments[1];
 
         if (this.content != null) {
-            this.content = deleteContent(this.content || '', startIndex - originStartIndex, endIndex - originStartIndex + 1);
+            this.content = deleteContent(
+                this.content || '',
+                startIndex - originStartIndex,
+                endIndex - originStartIndex + 1
+            );
         }
     }
 

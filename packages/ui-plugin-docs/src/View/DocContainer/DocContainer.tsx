@@ -109,7 +109,12 @@ export class DocContainer extends Component<BaseDocContainerProps> {
         let currentSkin = skins[skin];
 
         // transform "primaryColor" to "--primary-color"
-        currentSkin = Object.fromEntries(Object.keys(currentSkin).map((item) => [`--${item.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`, currentSkin[item]]));
+        currentSkin = Object.fromEntries(
+            Object.keys(currentSkin).map((item) => [
+                `--${item.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`,
+                currentSkin[item],
+            ])
+        );
 
         // ie11 does not support css variables, use css-vars-ponyfill to handle
         if (Tools.isIEBrowser()) {
@@ -208,13 +213,26 @@ export class DocContainer extends Component<BaseDocContainerProps> {
                             >
                                 {/* innerLeft */}
                             </Sider>
-                            <Content className={config.contentSplit === 'vertical' ? style.contentContainerVertical : style.contentContainerHorizontal}>
+                            <Content
+                                className={
+                                    config.contentSplit === 'vertical'
+                                        ? style.contentContainerVertical
+                                        : style.contentContainerHorizontal
+                                }
+                            >
                                 {!!config.contentSplit && (
                                     <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
-                                        <div className={style.hoverCursor} onMouseDown={this.handleSplitBarMouseDown}></div>
+                                        <div
+                                            className={style.hoverCursor}
+                                            onMouseDown={this.handleSplitBarMouseDown}
+                                        ></div>
                                     </Container>
                                 )}
-                                <Container onContextMenu={(e) => e.preventDefault()} ref={this.contentRef} className={style.contentInnerRightContainer}></Container>
+                                <Container
+                                    onContextMenu={(e) => e.preventDefault()}
+                                    ref={this.contentRef}
+                                    className={style.contentInnerRightContainer}
+                                ></Container>
                                 {/* extend main content */}
                             </Content>
 

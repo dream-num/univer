@@ -1,6 +1,15 @@
 import { ISelectionTransformerShapeManager } from '@univerjs/base-render';
 import { SelectionManagerService } from '@univerjs/base-sheets';
-import { FormatType, ICellData, ICurrentUniverService, IGridRange, Nullable, ObjectMatrix, Range, Worksheet } from '@univerjs/core';
+import {
+    FormatType,
+    ICellData,
+    ICurrentUniverService,
+    IGridRange,
+    Nullable,
+    ObjectMatrix,
+    Range,
+    Worksheet,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { FindType } from '../IData';
@@ -33,7 +42,8 @@ export class TextFinder {
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionTransformerShapeManager private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager
+        @ISelectionTransformerShapeManager
+        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager
     ) {}
 
     /**
@@ -122,7 +132,10 @@ export class TextFinder {
         let sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
         for (let i = 0; i < this._range.length; i++) {
             if (sheetId !== this._range[i].sheetId) {
-                sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._range[i].sheetId);
+                sheet = this._currentUniverService
+                    .getCurrentUniverSheetInstance()
+                    .getWorkBook()
+                    .getSheetBySheetId(this._range[i].sheetId);
             }
             const range = this._range[i];
             if (!sheet) continue;
@@ -142,7 +155,10 @@ export class TextFinder {
     replaceWith(replaceText: string): number {
         if (!this._range.length) return 0;
         const range = this._range[this._index];
-        const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(range.sheetId);
+        const sheet = this._currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getWorkBook()
+            .getSheetBySheetId(range.sheetId);
         if (!sheet) return 0;
 
         this._replaceText(sheet, range, replaceText);
@@ -169,7 +185,11 @@ export class TextFinder {
     }
 
     // 开始查找
-    searchText(text: string | FormatType, type: FindType = 'text', searchRange: SelectSearch = SelectSearch.CurrentSheet): TextFinder | null {
+    searchText(
+        text: string | FormatType,
+        type: FindType = 'text',
+        searchRange: SelectSearch = SelectSearch.CurrentSheet
+    ): TextFinder | null {
         if (!text) return null;
         // 查找范围变化或者初始化rangeData
         if (this._searchRange !== searchRange || !this._rangeData.length) {
@@ -241,7 +261,10 @@ export class TextFinder {
     private _mathTxt(): IGridRange[] {
         const range: IGridRange[] = [];
         for (let i = 0; i < this._rangeData.length; i++) {
-            const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(this._rangeData[i].sheetId);
+            const sheet = this._currentUniverService
+                .getCurrentUniverSheetInstance()
+                .getWorkBook()
+                .getSheetBySheetId(this._rangeData[i].sheetId);
             if (!sheet) return [];
             let matrix: ObjectMatrix<ICellData> = new ObjectMatrix<ICellData>();
             if (this._matchFormula) {
@@ -253,7 +276,10 @@ export class TextFinder {
             if (this._matchEntire) {
                 matrix.forValue((row, col, value) => {
                     if (!value.m) return;
-                    if ((this._matchCase && value.m === this._text) || (this._text as string).toLowerCase() === value.m.toLowerCase()) {
+                    if (
+                        (this._matchCase && value.m === this._text) ||
+                        (this._text as string).toLowerCase() === value.m.toLowerCase()
+                    ) {
                         range.push({
                             sheetId: this._rangeData[i].sheetId,
                             rangeData: {
@@ -309,7 +335,11 @@ export class TextFinder {
         const sheetId = range.sheetId;
         const mergeData = workbook.getActiveSheet().getMergeData();
 
-        const selectionRange = this._selectionManagerService.transformCellDataToSelectionData(range.rangeData.startColumn, range.rangeData.endColumn, mergeData);
+        const selectionRange = this._selectionManagerService.transformCellDataToSelectionData(
+            range.rangeData.startColumn,
+            range.rangeData.endColumn,
+            mergeData
+        );
         if (selectionRange == null) {
             return;
         }

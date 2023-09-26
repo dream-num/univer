@@ -71,7 +71,14 @@ export function CheckboxGroup(props: BaseCheckboxGroupProps) {
     return (
         <div className={styles.checkboxGroup} ref={ref}>
             {options.map((item) => (
-                <Checkbox key={item.name} name={item.name} disabled={item.disabled} checked={item.checked} onChange={handelChange} value={item.value}>
+                <Checkbox
+                    key={item.name}
+                    name={item.name}
+                    disabled={item.disabled}
+                    checked={item.checked}
+                    onChange={handelChange}
+                    value={item.value}
+                >
                     {item.label}
                 </Checkbox>
             ))}

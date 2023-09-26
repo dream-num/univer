@@ -15,7 +15,11 @@ export const DataBar = (props: BarProps) => {
     return (
         <div style={{ display: 'flex' }}>
             {list.map((item, index) => (
-                <div key={index} onClick={() => handleClick(item, index)} style={{ width: '28px', height: '26px', background, backgroundPosition: `${item.x} ${item.y}` }}></div>
+                <div
+                    key={index}
+                    onClick={() => handleClick(item, index)}
+                    style={{ width: '28px', height: '26px', background, backgroundPosition: `${item.x} ${item.y}` }}
+                ></div>
             ))}
         </div>
     );

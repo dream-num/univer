@@ -1,4 +1,4 @@
-import { IKeyType, IKeyValue, Nullable } from '../../Shared/Types';
+import { IKeyType, Nullable } from '../../Shared/Types';
 import { LocaleType } from '../Enum';
 import { INamedRange } from './INamedRange';
 import { IStyleData } from './IStyleData';

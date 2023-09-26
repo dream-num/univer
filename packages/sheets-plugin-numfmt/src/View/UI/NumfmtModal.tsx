@@ -1,7 +1,8 @@
-import { BaseComponentProps} from '@univerjs/base-ui';
-import { Component } from 'react';
 import { SheetPlugin } from '@univerjs/base-sheets';
+import { BaseComponentProps } from '@univerjs/base-ui';
 import { PLUGIN_NAMES } from '@univerjs/core';
+import { Component } from 'react';
+
 import { NUMFMT_PLUGIN_NAME } from '../../Basics/Const';
 import { ModalDataProps } from '../../Controller/NumfmtModalController';
 import { NumfmtPlugin } from '../../NumfmtPlugin';
@@ -13,14 +14,12 @@ interface IState {
 }
 
 export class NumfmtModal extends Component<IProps, IState> {
-
     constructor(props: IProps) {
         super(props);
         this.initialize(props);
     }
 
     initialize(props: IProps): void {
-
         this.state = {
             modalData: [],
         };
@@ -32,7 +31,9 @@ export class NumfmtModal extends Component<IProps, IState> {
     }
 
     setModal(modalData: ModalDataProps[]): void {
-        const SheetPlugin: SheetPlugin = this.getContext().getPluginManager().getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        const SheetPlugin: SheetPlugin = this.getContext()
+            .getPluginManager()
+            .getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
         modalData.forEach((item): void => {
             const Label = this.context.componentManager.get(item.children.name);
             if (Label) {

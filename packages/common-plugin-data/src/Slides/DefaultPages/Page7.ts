@@ -147,7 +147,13 @@ export const DEFAULT_SEVEN_PAGE = {
                             0.9,
                             generateUnlimitedSlideData(
                                 0.9,
-                                generateUnlimitedSlideData(0.9, generateUnlimitedSlideData(0.9, generateUnlimitedSlideData(0.9, generateUnlimitedSlideData(0.9))))
+                                generateUnlimitedSlideData(
+                                    0.9,
+                                    generateUnlimitedSlideData(
+                                        0.9,
+                                        generateUnlimitedSlideData(0.9, generateUnlimitedSlideData(0.9))
+                                    )
+                                )
                             )
                         )
                     )

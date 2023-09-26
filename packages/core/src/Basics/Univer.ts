@@ -46,6 +46,10 @@ export class Univer {
         return this._univerInjector.get(ICurrentUniverService);
     }
 
+    dispose(): void {
+        // left empty for purpose
+    }
+
     /** Register a plugin into univer. */
     registerPlugin<T extends Plugin>(plugin: PluginCtor<T>, configs?: any): void {
         // TODO: type of `configs` could be optimized here using typescript infer

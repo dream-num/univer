@@ -109,7 +109,13 @@ export function Slot(props: IProps) {
         slotGroup.forEach((item, index) => {
             const Label = context?.componentManager?.get(item.component.name) as React.ComponentType<any>;
             if (Label) {
-                arr.push(<Label key={index} ref={(ref: any) => (_refs.current[index as any] = ref)} {...item.component.props} />);
+                arr.push(
+                    <Label
+                        key={index}
+                        ref={(ref: any) => (_refs.current[index as any] = ref)}
+                        {...item.component.props}
+                    />
+                );
             }
         });
         return arr;

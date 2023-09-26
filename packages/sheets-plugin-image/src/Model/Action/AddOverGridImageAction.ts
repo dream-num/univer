@@ -18,7 +18,10 @@ export interface IAddOverGridImageActionData extends ISheetActionData {
     borderWidth: number;
 }
 
-export class AddOverGridImageAction extends SheetActionBase<IAddOverGridImageActionData, IRemoveOverGridImageActionData> {
+export class AddOverGridImageAction extends SheetActionBase<
+    IAddOverGridImageActionData,
+    IRemoveOverGridImageActionData
+> {
     static NAME = 'AddImagePropertyAction';
 
     constructor(actionData: IAddOverGridImageActionData, commandUnit: CommandUnit, observers: ActionObservers) {

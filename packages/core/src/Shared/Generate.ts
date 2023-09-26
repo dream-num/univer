@@ -164,7 +164,11 @@ export function generate(value: string): any {
     } else if (/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test(value)) {
         m = value.toString();
         ct = { fa: '@', t: 's' };
-    } else if (isRealNum(value) && Math.abs(parseFloat(value)) > 0 && (Math.abs(parseFloat(value)) >= 1e11 || Math.abs(parseFloat(value)) < 1e-9)) {
+    } else if (
+        isRealNum(value) &&
+        Math.abs(parseFloat(value)) > 0 &&
+        (Math.abs(parseFloat(value)) >= 1e11 || Math.abs(parseFloat(value)) < 1e-9)
+    ) {
         v = numeral(value).value();
         const str = v.toExponential();
         if (str.indexOf('.') > -1) {
@@ -302,7 +306,10 @@ export function generate(value: string): any {
         m = value.toString();
         ct = { fa: 'General', t: 'n' };
         v = parseFloat(value);
-    } else if (isdatetime(value) && (value.toString().indexOf('.') > -1 || value.toString().indexOf(':') > -1 || value.toString().length < 16)) {
+    } else if (
+        isdatetime(value) &&
+        (value.toString().indexOf('.') > -1 || value.toString().indexOf(':') > -1 || value.toString().length < 16)
+    ) {
         v = datenum_local(parseDate(value.toString().replace(/-/g, '/')));
 
         if (v.toString().indexOf('.') > -1) {

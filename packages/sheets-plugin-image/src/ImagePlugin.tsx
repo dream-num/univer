@@ -49,7 +49,12 @@ export class ImagePlugin extends Plugin {
     }
 
     private _initializeDependencies(sheetInjector: Injector) {
-        const dependencies: Dependency[] = [[OverGridImageController], [CellImageController], [OverImageRender], [UploadService]];
+        const dependencies: Dependency[] = [
+            [OverGridImageController],
+            [CellImageController],
+            [OverImageRender],
+            [UploadService],
+        ];
         dependencies.forEach((d) => {
             sheetInjector.add(d);
         });

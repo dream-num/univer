@@ -8,7 +8,11 @@ export interface ISetFormulaRangeActionData extends ISheetActionData {
     formulaData: FormulaDataType;
 }
 
-export class SetFormulaRangeDataAction extends SheetActionBase<ISetFormulaRangeActionData, ISetFormulaRangeActionData, FormulaDataType> {
+export class SetFormulaRangeDataAction extends SheetActionBase<
+    ISetFormulaRangeActionData,
+    ISetFormulaRangeActionData,
+    FormulaDataType
+> {
     constructor(actionData: ISetFormulaRangeActionData, commandUnit: CommandUnit, observers: ActionObservers) {
         super(actionData, commandUnit, observers);
         this._doActionData = {

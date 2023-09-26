@@ -1,6 +1,9 @@
 import { KEYBOARD_KEYS } from '../Types/Const/KEYBOARD_KEYS';
 
-const allKeys = Object.keys(KEYBOARD_KEYS).reduce((acc, category) => [...acc, ...KEYBOARD_KEYS[category]], [] as string[]);
+const allKeys = Object.keys(KEYBOARD_KEYS).reduce(
+    (acc, category) => [...acc, ...KEYBOARD_KEYS[category]],
+    [] as string[]
+);
 
 /**
  * Reference of non-printable Keyboard Event.key values

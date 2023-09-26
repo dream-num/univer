@@ -411,7 +411,8 @@ export default {
         chooseText: 'Confirm color',
 
         tipNameRepeat: 'The name of the tab page cannot be repeated! Please revise',
-        noMoreSheet: 'The workbook contains at least one visual worksheet. To delete the selected worksheet, please insert a new worksheet or show a hidden worksheet.',
+        noMoreSheet:
+            'The workbook contains at least one visual worksheet. To delete the selected worksheet, please insert a new worksheet or show a hidden worksheet.',
         confirmDelete: 'Are you sure to delete',
         redoDelete: 'Can be undo by Ctrl+Z',
         noHide: "Can't hide, at least keep one sheet tag",

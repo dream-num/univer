@@ -1,5 +1,6 @@
 import { BaseComponentProps, Modal } from '@univerjs/base-ui';
 import { Component } from 'react';
+
 import { SearchFormulaModalData } from '../../../Basics/Interfaces/IFormula';
 
 interface IProps extends BaseComponentProps {}
@@ -48,7 +49,15 @@ export class SearchFormulaModal extends Component<IProps, IState> {
                 {modalData.map((item, index) => {
                     if (!item.show) return;
                     return (
-                        <Modal key={index} isDrag={true} mask={item.mask} title={item.label?.funParams.n} visible={item.show} group={item.group} onCancel={item.onCancel}>
+                        <Modal
+                            key={index}
+                            isDrag={true}
+                            mask={item.mask}
+                            title={item.label?.funParams.n}
+                            visible={item.show}
+                            group={item.group}
+                            onCancel={item.onCancel}
+                        >
                             {item.modal}
                         </Modal>
                     );

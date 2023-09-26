@@ -1,6 +1,16 @@
-import { BaseButtonProps, BaseModalProps, BaseSelectProps, FunctionComponent, Button, Modal, Select, AppContext } from '@univerjs/base-ui';
-import { Component } from 'react';
+import {
+    AppContext,
+    BaseButtonProps,
+    BaseModalProps,
+    BaseSelectProps,
+    Button,
+    FunctionComponent,
+    Modal,
+    Select,
+} from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
+import { Component } from 'react';
+
 import { IConfig } from '../../../Basics/Interfaces/IFormula';
 import styles from './index.module.less';
 
@@ -48,16 +58,20 @@ class IfGenerate extends Component<IProps, IState> {
      */
     override UNSAFE_componentWillMount() {
         this.setLocale();
-        this._localeObserver = this.context.observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.add(() => {
-            this.setLocale();
-        });
+        this._localeObserver = this.context.observerManager
+            .requiredObserver('onAfterChangeUILocaleObservable', 'core')
+            ?.add(() => {
+                this.setLocale();
+            });
     }
 
     /**
      * destory
      */
     override componentWillUnmount() {
-        this.context.observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.remove(this._localeObserver);
+        this.context.observerManager
+            .requiredObserver('onAfterChangeUILocaleObservable', 'core')
+            ?.remove(this._localeObserver);
     }
 
     setLocale() {
@@ -69,7 +83,14 @@ class IfGenerate extends Component<IProps, IState> {
     render() {
         const { locale } = this.state;
         return (
-            <Modal title={locale.formula.if} width={320} isDrag={true} footer={false} visible={this.props.visible} onCancel={this.props.onCancel}>
+            <Modal
+                title={locale.formula.if}
+                width={320}
+                isDrag={true}
+                footer={false}
+                visible={this.props.visible}
+                onCancel={this.props.onCancel}
+            >
                 <div className={styles.ifGenerate}>
                     <div>
                         <div className={styles.label}>{locale.ifFormula.ifGenCompareValueTitle}</div>
@@ -106,7 +127,16 @@ class IfGenerate extends Component<IProps, IState> {
                                 <input type="text" />
                             </div>
                         </div>
-                        <div style={{ textAlign: 'center', backgroundColor: '#1890ff', color: '#fff', fontSize: '14px', padding: '5px', borderRadius: '3px' }}>
+                        <div
+                            style={{
+                                textAlign: 'center',
+                                backgroundColor: '#1890ff',
+                                color: '#fff',
+                                fontSize: '14px',
+                                padding: '5px',
+                                borderRadius: '3px',
+                            }}
+                        >
                             {locale.ifFormula.ifGenCutSame}
                         </div>
                     </div>

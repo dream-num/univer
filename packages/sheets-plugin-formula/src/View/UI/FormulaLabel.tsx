@@ -6,7 +6,6 @@ interface IProps {
 }
 
 export class FormulaLabel extends Component<IProps> {
-
     render() {
         // const SumIcon = this._render.renderFunction('SumIcon');
         const { label } = this.props;

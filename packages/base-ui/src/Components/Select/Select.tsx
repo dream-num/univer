@@ -611,7 +611,12 @@ export function Select(props: BaseSelectProps) {
         return (
             <div className={`${styles.selectInput} ${className}`}>
                 <Dropdown onMainClick={onMainClick} tooltip={tooltip} menu={{ menu, onClick }}>
-                    <Input onPressEnter={(e) => handlePressEnter(e)} onBlur={onPressEnter} type="number" value={`${props.label as number}` ?? (content as string)} />
+                    <Input
+                        onPressEnter={(e) => handlePressEnter(e)}
+                        onBlur={onPressEnter}
+                        type="number"
+                        value={`${props.label as number}` ?? (content as string)}
+                    />
                 </Dropdown>
             </div>
         );
@@ -671,7 +676,12 @@ export function Select(props: BaseSelectProps) {
         };
 
         const iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
-        const displayInSubMenu = display === DisplayTypes.ICON ? DisplayTypes.LABEL : display === DisplayTypes.INPUT ? DisplayTypes.LABEL : display;
+        const displayInSubMenu =
+            display === DisplayTypes.ICON
+                ? DisplayTypes.LABEL
+                : display === DisplayTypes.INPUT
+                ? DisplayTypes.LABEL
+                : display;
 
         return (
             <div className={`${styles.selectDouble}`}>
@@ -689,7 +699,13 @@ export function Select(props: BaseSelectProps) {
                     icon={<NextIcon />}
                 >
                     <div className={styles.selectLabel}>
-                        <NeoCustomLabel icon={iconToDisplay} display={display} title={title!} value={value} onChange={(v) => onClick?.(v)} />
+                        <NeoCustomLabel
+                            icon={iconToDisplay}
+                            display={display}
+                            title={title!}
+                            value={value}
+                            onChange={(v) => onClick?.(v)}
+                        />
                     </div>
                 </Dropdown>
             </div>

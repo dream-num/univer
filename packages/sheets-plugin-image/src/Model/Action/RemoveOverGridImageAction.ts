@@ -7,7 +7,10 @@ export interface IRemoveOverGridImageActionData extends ISheetActionData {
     id: string;
 }
 
-export class RemoveOverGridImageAction extends SheetActionBase<IRemoveOverGridImageActionData, IAddOverGridImageActionData> {
+export class RemoveOverGridImageAction extends SheetActionBase<
+    IRemoveOverGridImageActionData,
+    IAddOverGridImageActionData
+> {
     static NAME = 'RemoveOverGridImageAction';
 
     constructor(actionData: IRemoveOverGridImageActionData, commandUnit: CommandUnit, observers: ActionObservers) {

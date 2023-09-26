@@ -6,7 +6,10 @@ type AnyObject = {
 
 export function deepCompare(arg1: AnyObject, arg2: AnyObject): boolean {
     if (Object.prototype.toString.call(arg1) === Object.prototype.toString.call(arg2)) {
-        if (Object.prototype.toString.call(arg1) === '[object Object]' || Object.prototype.toString.call(arg1) === '[object Array]') {
+        if (
+            Object.prototype.toString.call(arg1) === '[object Object]' ||
+            Object.prototype.toString.call(arg1) === '[object Array]'
+        ) {
             if (Object.keys(arg1).length !== Object.keys(arg2).length) {
                 return false;
             }

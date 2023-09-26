@@ -325,17 +325,27 @@ export class UniverCopy extends Copy {
                 // }
 
                 if (cellValue && cellValue.s) {
-                    const cellStyle = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles().getStyleByCell(cellValue);
+                    const cellStyle = this._currentUniverService
+                        .getCurrentUniverSheetInstance()
+                        .getWorkBook()
+                        .getStyles()
+                        .getStyleByCell(cellValue);
                     // const cellStyle = this.getContext().getWorkBook().getStyles().get(cellValue.s);
                     if (cellStyle) {
                         style += handleStyleToString(cellStyle);
                     }
                 }
 
-                const cellRange = this._selectionManagerService.transformCellDataToSelectionData(r, c, mergeData)?.cellRange;
+                const cellRange = this._selectionManagerService.transformCellDataToSelectionData(
+                    r,
+                    c,
+                    mergeData
+                )?.cellRange;
                 if (cellRange?.isMerged || (!cellRange?.isMerged && cellRange?.isMergedMainCell)) {
                     if (cellRange.isMergedMainCell) {
-                        span = `rowSpan="${cellRange.endRow - cellRange.startRow + 1}" colSpan="${cellRange.endColumn - cellRange.startColumn + 1}"`;
+                        span = `rowSpan="${cellRange.endRow - cellRange.startRow + 1}" colSpan="${
+                            cellRange.endColumn - cellRange.startColumn + 1
+                        }"`;
                     } else {
                         continue;
                     }
@@ -350,7 +360,9 @@ export class UniverCopy extends Copy {
                         angle = +match[0];
                         ver = +match[1] ?? 0;
                     }
-                    column += `<td ${span} ${ver ? `data-vertical=${ver}` : ''} style="display:inline-block;transform: rotate(${angle}deg);${style}">`;
+                    column += `<td ${span} ${
+                        ver ? `data-vertical=${ver}` : ''
+                    } style="display:inline-block;transform: rotate(${angle}deg);${style}">`;
                 } else {
                     column = `<td ${span} style="${style}">`;
                 }

@@ -107,7 +107,12 @@ export namespace BorderTree {
         }
 
         equals(other: BorderTree.Node) {
-            return this.minX === other.minX && this.minY === other.minY && other.maxX === this.maxX && other.maxY === this.maxY;
+            return (
+                this.minX === other.minX &&
+                this.minY === other.minY &&
+                other.maxX === this.maxX &&
+                other.maxY === this.maxY
+            );
         }
     }
 }

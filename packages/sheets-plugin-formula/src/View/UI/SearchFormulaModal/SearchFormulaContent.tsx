@@ -1,5 +1,6 @@
-import { BaseComponentProps, debounce, Input, Select, CustomLabel } from '@univerjs/base-ui';
+import { BaseComponentProps, CustomLabel, debounce, Input, Select } from '@univerjs/base-ui';
 import { Component, createRef } from 'react';
+
 import { FormulaType, FunListILabel, Label } from '../../../Basics';
 import styles from './index.module.less';
 
@@ -128,7 +129,9 @@ export class SearchFormulaContent extends Component<IProps, IState> {
                         <CustomLabel label="formula.formulaMore.findFunctionTitle" />;
                     </div>
                     <Input
-                        placeholder={(<CustomLabel label="formula.formulaMore.tipInputFunctionName" />) as unknown as string}
+                        placeholder={
+                            (<CustomLabel label="formula.formulaMore.tipInputFunctionName" />) as unknown as string
+                        }
                         onChange={debounce(this.changeInput.bind(this), 50)}
                     />
                 </div>
@@ -137,7 +140,12 @@ export class SearchFormulaContent extends Component<IProps, IState> {
                         <CustomLabel label="formula.formulaMore.selectCategory" />
                     </div>
                     <div className={styles.functionSelector}>
-                        <Select onClick={this.selectType.bind(this)} type={0} children={this.getSelect()} hideSelectedIcon={true}></Select>
+                        <Select
+                            onClick={this.selectType.bind(this)}
+                            type={0}
+                            children={this.getSelect()}
+                            hideSelectedIcon={true}
+                        ></Select>
                     </div>
                 </div>
                 <div className={styles.functionList} ref={this.functionListRef}>
@@ -146,7 +154,11 @@ export class SearchFormulaContent extends Component<IProps, IState> {
                     </div>
                     <ul className={styles.functionLists}>
                         {functionList?.map((item, index) => (
-                            <li key={index} className={`${styles.functionListsItem}`} onClick={() => this.handleClick(item, index)}>
+                            <li
+                                key={index}
+                                className={`${styles.functionListsItem}`}
+                                onClick={() => this.handleClick(item, index)}
+                            >
                                 <div className={styles.functionListsItemName}>{item.n}</div>
                                 <div className={styles.functionListsItemDetail}>{item.d}</div>
                             </li>

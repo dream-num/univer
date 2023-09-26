@@ -4,7 +4,10 @@ import { AddFilterCriteria, RemoveFilterCriteria } from '../Apply';
 import { ACTION_NAMES } from '../Const/ACTION_NAME';
 import { IAddFilterCriteriaActionData, IRemoveFilterCriteriaAction } from '../IData/FilterType';
 
-export class AddFilterCriteriaAction extends SheetActionBase<IAddFilterCriteriaActionData, IRemoveFilterCriteriaAction> {
+export class AddFilterCriteriaAction extends SheetActionBase<
+    IAddFilterCriteriaActionData,
+    IRemoveFilterCriteriaAction
+> {
     constructor(actionData: IAddFilterCriteriaActionData, workbook: Workbook, observers: ActionObservers) {
         super(
             actionData,

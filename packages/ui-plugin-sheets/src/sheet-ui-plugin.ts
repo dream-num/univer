@@ -2,7 +2,7 @@ import { DragManager, SlotManager, ZIndexManager } from '@univerjs/base-ui';
 import { ICurrentUniverService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { SHEET_UI_PLUGIN_NAME, SheetUIPluginObserve } from './Basics';
+import { SHEET_UI_PLUGIN_NAME } from './Basics';
 import { SheetClipboardController } from './controller/clipboard/clipboard.controller';
 import { SheetUIController } from './controller/sheet-ui.controller';
 import { en } from './Locale';
@@ -10,7 +10,7 @@ import { ICellEditorService } from './services/cell-editor/cell-editor.service';
 import { DesktopCellEditorService } from './services/cell-editor/cell-editor-desktop.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 
-export class SheetUIPlugin extends Plugin<SheetUIPluginObserve> {
+export class SheetUIPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(

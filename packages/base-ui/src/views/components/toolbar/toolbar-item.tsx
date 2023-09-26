@@ -7,7 +7,14 @@ import { Button } from '../../../Components/Button/Button';
 import { CustomLabel } from '../../../Components/CustomLabel/CustomLabel';
 import { Select } from '../../../Components/Select/Select';
 import { Tooltip } from '../../../Components/Tooltip/Tooltip';
-import { IDisplayMenuItem, IMenuButtonItem, IMenuItem, IMenuSelectorItem, IValueOption, MenuItemType } from '../../../services/menu/menu';
+import {
+    IDisplayMenuItem,
+    IMenuButtonItem,
+    IMenuItem,
+    IMenuSelectorItem,
+    IValueOption,
+    MenuItemType,
+} from '../../../services/menu/menu';
 import styles from './index.module.less';
 
 export interface IToolbarItemStatus {
@@ -108,7 +115,13 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
 
         return (
             <Tooltip title={this.getTooltip()} placement="bottom">
-                <Button active={activated} className={styles.textButton} type="text" disabled={disabled} onClick={() => commandService.executeCommand(props.id)}>
+                <Button
+                    active={activated}
+                    className={styles.textButton}
+                    type="text"
+                    disabled={disabled}
+                    onClick={() => commandService.executeCommand(props.id)}
+                >
                     <CustomLabel label={icon ? { name: icon } : title} />
                 </Button>
             </Tooltip>
@@ -116,6 +129,8 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
     }
 
     private getTooltip(): string {
-        return this.context.localeService?.t(this.props.tooltip) + (this.props.shortcut ? ` (${this.props.shortcut})` : '');
+        return (
+            this.context.localeService?.t(this.props.tooltip) + (this.props.shortcut ? ` (${this.props.shortcut})` : '')
+        );
     }
 }

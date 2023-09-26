@@ -72,10 +72,18 @@ export function ColorPickerPanel(props: IProps) {
 
     return (
         <div className={styles.colorPickerPanel} onClick={(e) => e.stopPropagation()}>
-            <RgbaStringColorPicker className={styles.colorPicker} color={currentColor} onChange={debounce(setColor, 500)} />
+            <RgbaStringColorPicker
+                className={styles.colorPicker}
+                color={currentColor}
+                onChange={debounce(setColor, 500)}
+            />
             <div className={styles.colorPickerPanelSetting}>
                 <div className={styles.panelInput}>
-                    {rgb ? <RgbaColorInput color={currentColor} onChange={debounce(setColor, 500)} /> : <HexColorInput color={currentColor} onChange={debounce(setColor, 500)} />}
+                    {rgb ? (
+                        <RgbaColorInput color={currentColor} onChange={debounce(setColor, 500)} />
+                    ) : (
+                        <HexColorInput color={currentColor} onChange={debounce(setColor, 500)} />
+                    )}
                 </div>
 
                 <div className={styles.panelColor}>

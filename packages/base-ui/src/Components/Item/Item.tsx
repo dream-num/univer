@@ -49,7 +49,11 @@ export interface BaseItemProps extends BaseMenuItem {
 
 export function Item({ selected, label, suffix, disabled, className, style, onClick }: BaseItemProps) {
     return (
-        <div className={`${styles.selectItem} ${disabled ? styles.selectDisabledItem : ''} ${className || ''}`} style={style} onClick={onClick}>
+        <div
+            className={`${styles.selectItem} ${disabled ? styles.selectDisabledItem : ''} ${className || ''}`}
+            style={style}
+            onClick={onClick}
+        >
             {selected && (
                 <span className={styles.selectItemSelected}>
                     <Icon.CorrectIcon />

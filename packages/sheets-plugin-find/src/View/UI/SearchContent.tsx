@@ -1,5 +1,5 @@
-import { Component } from 'react';
 import { Nullable } from '@univerjs/core';
+import { Component } from 'react';
 
 interface SearchProps {
     config: any;
@@ -25,7 +25,6 @@ type LabelProps = {
 };
 
 export class SearchContent extends Component<SearchProps, SearchState> {
-
     // initialize() {
     //     this.state = {
     //         tab: [],

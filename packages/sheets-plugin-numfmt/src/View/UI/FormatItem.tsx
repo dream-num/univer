@@ -1,12 +1,12 @@
 import { AppContext, AppContextValues, BaseMenuItem, Icon, joinClassNames } from '@univerjs/base-ui';
-import { ComponentChildren, useContext } from 'react';
+import React, { useContext } from 'react';
 
 import styles from './FormatItem.module.less';
 
 export interface BaseFormatItemProps extends BaseMenuItem {
     selected?: boolean;
     labelText?: string;
-    suffix?: ComponentChildren;
+    suffix?: React.ReactNode;
     border?: boolean;
 }
 

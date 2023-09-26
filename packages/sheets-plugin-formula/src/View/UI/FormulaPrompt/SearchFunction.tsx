@@ -50,8 +50,6 @@ export class SearchFunction extends Component<IProps, IState> {
 
     override componentWillUpdate(nextProps: any) {}
 
-    onKeyDown(event: Event) {}
-
     getContentRef() {
         return this.contentRef;
     }
@@ -76,12 +74,11 @@ export class SearchFunction extends Component<IProps, IState> {
         return this.state;
     }
 
-    render() {
+    override render() {
         const { selectIndex, formula, searchActive, position } = this.state;
         return (
             <ul
                 className={styles.searchFunction}
-                onKeyDown={this.onKeyDown.bind(this)}
                 style={{
                     display: searchActive ? 'block' : 'none',
                     position: 'absolute',

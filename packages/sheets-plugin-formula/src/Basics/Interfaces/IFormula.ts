@@ -1,5 +1,4 @@
 import { FormulaDataType } from '@univerjs/base-formula-engine';
-import { ComponentChildren } from '@univerjs/base-ui';
 
 import { FormulaType } from '../Const/FunctionList';
 
@@ -65,5 +64,5 @@ export interface SearchFormulaModalData {
     titleLocale?: string;
     onCancel?: () => void;
     children: ICustomComponent;
-    modal?: ComponentChildren; // 渲染的组件
+    modal?: React.ReactNode; // 渲染的组件
 }

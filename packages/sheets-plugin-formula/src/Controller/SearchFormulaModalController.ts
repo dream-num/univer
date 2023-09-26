@@ -1,6 +1,5 @@
 import { ComponentManager } from '@univerjs/base-ui';
 import { ISelection, ObserverManager } from '@univerjs/core';
-import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 
 import {
@@ -27,7 +26,6 @@ export class SearchFormulaController {
     private _cellRangeModalData: SearchFormulaModalData;
 
     constructor(
-        @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager
     ) {
@@ -143,16 +141,16 @@ export class SearchFormulaController {
     }
 
     private _initRegisterComponent() {
-        this._sheetContainerUIController
-            .getMainSlotController()
-            .addSlot(FORMULA_PLUGIN_NAME + SearchFormulaModal.name, {
-                component: SearchFormulaModal,
-                props: {
-                    getComponent: (ref: SearchFormulaModal) => {
-                        this._formulaModal = ref;
-                    },
-                },
-            });
+        // this._sheetContainerUIController
+        //     .getMainSlotController()
+        //     .addSlot(FORMULA_PLUGIN_NAME + SearchFormulaModal.name, {
+        //         component: SearchFormulaModal,
+        //         props: {
+        //             getComponent: (ref: SearchFormulaModal) => {
+        //                 this._formulaModal = ref;
+        //             },
+        //         },
+        //     });
         this._componentManager.register(FORMULA_PLUGIN_NAME + SearchItem.name, SearchItem);
         this._componentManager.register(FORMULA_PLUGIN_NAME + SearchFormulaContent.name, SearchFormulaContent);
     }

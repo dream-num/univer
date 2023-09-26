@@ -32,6 +32,9 @@ export class SearchItem extends Component<IProps, IState> {
     override componentDidMount() {
         const { funParams } = this.props;
         const description = funParams?.funParams.p?.[0];
+
+        if (!description) return;
+
         this.setState({
             description,
         });
@@ -40,6 +43,8 @@ export class SearchItem extends Component<IProps, IState> {
     handleClick(index: number) {
         const { funParams } = this.props;
         const description = funParams?.funParams.p?.[index];
+
+        if (!description) return;
 
         this.setState({
             description,
@@ -55,7 +60,7 @@ export class SearchItem extends Component<IProps, IState> {
         });
     }
 
-    render() {
+    override render() {
         const { funParams, calc } = this.props;
         const { description, rangeList } = this.state;
 
@@ -80,6 +85,7 @@ export class SearchItem extends Component<IProps, IState> {
                                         ) as unknown as string
                                     }
                                     value={rangeList[index]}
+                                    onClick={() => {}}
                                 />
                             </div>
                             <span>={'{}'}</span>

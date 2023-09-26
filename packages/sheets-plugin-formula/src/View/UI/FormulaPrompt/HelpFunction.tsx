@@ -72,7 +72,7 @@ export class HelpFunction extends Component<IProps, IState> {
         return this.contentRef;
     }
 
-    render() {
+    override render() {
         const { activeIndex, functionInfo, helpFormulaActive, position } = this.state;
 
         return (
@@ -143,7 +143,7 @@ interface IHelpProps {
 interface IHelpState {}
 
 class Help extends Component<IHelpProps, IHelpState> {
-    render() {
+    override render() {
         return (
             <div>
                 <span>

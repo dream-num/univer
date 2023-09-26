@@ -1,6 +1,7 @@
 import { IWorkbookConfig, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../../services/selection-manager.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
@@ -51,6 +52,7 @@ export function createCommandTestBed() {
 
         override onStarting(injector: Injector): void {
             injector.add([SelectionManagerService]);
+            injector.add([BorderStyleManagerService]);
         }
 
         override onDestroy(): void {

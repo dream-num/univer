@@ -198,6 +198,7 @@ export const SetBorderCommand: ICommand = {
         };
 
         function setBorderStyle(range: ISelectionRange, defaultStyle: IBorderData, reserve?: boolean) {
+            if (range.startRow < 0 || range.startColumn < 0) return;
             forEach(range, (row, column) => {
                 const rectangle = hasMerge(row, column);
 

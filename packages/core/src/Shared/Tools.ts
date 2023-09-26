@@ -436,10 +436,6 @@ export class Tools {
         return /iPhone/i.test(navigator.userAgent);
     }
 
-    static isIEBrowser(): boolean {
-        return this.getBrowserType().startsWith('IE');
-    }
-
     static itCount(count: number): Function {
         return (callback: Function) => {
             for (let i = 0; i < count; i++) {

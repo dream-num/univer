@@ -49,7 +49,6 @@
         "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
         "@wendellhu/redi": "^0.12.8",
-        "css-vars-ponyfill": "^2.4.6",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "rxjs": "^7.8.1"

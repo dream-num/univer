@@ -40,8 +40,8 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "esbuild": "node ./esbuild.config.mjs",
-        "storybook": "storybook dev -p 6006",
-        "build-storybook": "storybook build"
+        "sb": "storybook dev -p 6006 --no-open",
+        "sb:build": "storybook build"
     },
     "dependencies": {
         "@univerjs/base-render": "workspace:^0.0.1",

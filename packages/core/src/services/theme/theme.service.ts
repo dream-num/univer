@@ -1,7 +1,7 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../Shared/lifecycle';
-import { IStyleSheet, themeInstance } from './Theme';
+import { IStyleSheet, themeInstance } from './theme';
 
 export class ThemeService extends Disposable {
     private currentTheme: IStyleSheet;

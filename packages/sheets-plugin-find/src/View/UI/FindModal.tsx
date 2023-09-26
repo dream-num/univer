@@ -1,6 +1,17 @@
-import { BaseCheckboxGroupOptions, BaseComponentProps, Button, CellRange, CheckboxGroup, CustomLabel, Icon, Input, Modal, Select } from '@univerjs/base-ui';
+import {
+    BaseCheckboxGroupOptions,
+    BaseComponentProps,
+    Button,
+    CellRange,
+    CheckboxGroup,
+    CustomLabel,
+    Icon,
+    Input,
+    Modal,
+    Select,
+} from '@univerjs/base-ui';
 import { BaseItemProps } from '@univerjs/base-ui/src/Components/Item/Item';
-import { Component, createRef } from 'react';
+import { Component } from 'react';
 
 import styles from './index.module.less';
 
@@ -38,7 +49,6 @@ export enum SelectSearch {
 }
 
 export class FindModal extends Component<IProps, IState> {
-
     private _matchGroup: BaseCheckboxGroupOptions[] = [];
 
     private _select: BaseItemProps[] = [];
@@ -223,7 +233,10 @@ export class FindModal extends Component<IProps, IState> {
                     ) : null}
                 </div>
                 {hideAdvanced ? (
-                    <p style={{ display: hideAdvanced ? 'block' : 'none' }} onClick={() => this.handleHideAdvanced(false)}>
+                    <p
+                        style={{ display: hideAdvanced ? 'block' : 'none' }}
+                        onClick={() => this.handleHideAdvanced(false)}
+                    >
                         <CustomLabel label="find.replace" />/<CustomLabel label="find.advanced" />
                         <Icon.Format.NextIcon />
                     </p>
@@ -239,12 +252,19 @@ export class FindModal extends Component<IProps, IState> {
                             <span>
                                 <CustomLabel label="find.search" />
                             </span>
-                            <Select onClick={this.selectSearch.bind(this)} type={0} children={this.getSelect()}></Select>
+                            <Select
+                                onClick={this.selectSearch.bind(this)}
+                                type={0}
+                                children={this.getSelect()}
+                            ></Select>
                             {showRange ? <CellRange /> : null}
                         </div>
                         <div className={styles.box}>
                             <span></span>
-                            <CheckboxGroup options={this.getMatchGroup()} onChange={this.handleChange.bind(this)}></CheckboxGroup>
+                            <CheckboxGroup
+                                options={this.getMatchGroup()}
+                                onChange={this.handleChange.bind(this)}
+                            ></CheckboxGroup>
                         </div>
                         <div className={styles.buttonGroup}>
                             <Button type="primary">

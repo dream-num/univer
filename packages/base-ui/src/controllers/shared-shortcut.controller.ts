@@ -19,7 +19,10 @@ export const RedoShortcutItem: IShortcutItem = {
  * Define shared UI behavior across Univer business.
  */
 export class SharedController extends Disposable {
-    constructor(@IShortcutService private readonly _shortcutService: IShortcutService, @ICommandService private readonly _commandService: ICommandService) {
+    constructor(
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
         super();
     }
 
@@ -29,7 +32,9 @@ export class SharedController extends Disposable {
     }
 
     private _registerCommands(): void {
-        [CutCommand, CopyCommand, PasteCommand].forEach((command) => this.disposeWithMe(this._commandService.registerAsMultipleCommand(command)));
+        [CutCommand, CopyCommand, PasteCommand].forEach((command) =>
+            this.disposeWithMe(this._commandService.registerAsMultipleCommand(command))
+        );
     }
 
     private _registerShortcuts(): void {

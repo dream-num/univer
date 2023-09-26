@@ -146,9 +146,15 @@ export class CellInputHandler {
                     // all browsers, except IE before version 9
                     if (currSelection?.anchorNode instanceof HTMLElement && currSelection.anchorNode?.matches('div')) {
                         const editorlen = $$('span', $editer).length;
-                        _this.functionRangeIndex = [editorlen - 1, $$('span', $editer)[editorlen - 1].textContent.length];
+                        _this.functionRangeIndex = [
+                            editorlen - 1,
+                            $$('span', $editer)[editorlen - 1].textContent.length,
+                        ];
                     } else {
-                        _this.functionRangeIndex = [getNodeIndex(currSelection.anchorNode?.parentNode), currSelection.anchorOffset];
+                        _this.functionRangeIndex = [
+                            getNodeIndex(currSelection.anchorNode?.parentNode),
+                            currSelection.anchorOffset,
+                        ];
                     }
                 } else {
                     // Internet Explorer before version 9
@@ -231,7 +237,12 @@ export class CellInputHandler {
                 return pfri;
             }
             if (p.length > n.length) {
-                if (p != null && v_a[i + 1] != null && v_a[i + 1].substr(0, 1) === '"' && (p.indexOf('{') > -1 || p.indexOf('}') > -1)) {
+                if (
+                    p != null &&
+                    v_a[i + 1] != null &&
+                    v_a[i + 1].substr(0, 1) === '"' &&
+                    (p.indexOf('{') > -1 || p.indexOf('}') > -1)
+                ) {
                     pfri[0] += 1;
                     pfri[1] = 1;
                 }
@@ -262,7 +273,12 @@ export class CellInputHandler {
                     pfri[1] = 0;
                 }
             } else if (p.length === n.length) {
-                if (v_a[i + 1] != null && (v_a[i + 1].substr(0, 1) === '"' || v_a[i + 1].substr(0, 1) === '{' || v_a[i + 1].substr(0, 1) === '}')) {
+                if (
+                    v_a[i + 1] != null &&
+                    (v_a[i + 1].substr(0, 1) === '"' ||
+                        v_a[i + 1].substr(0, 1) === '{' ||
+                        v_a[i + 1].substr(0, 1) === '}')
+                ) {
                     pfri[0] += 1;
                     pfri[1] = 1;
                 } else if (p != null && p.length > 2 && p.substr(0, 1) === '"' && p.substr(p.length - 1, 1) === '"') {
@@ -279,7 +295,12 @@ export class CellInputHandler {
 
                 return pfri;
             } else if (p.length > n.length) {
-                if (v_a[i + 1] != null && (v_a[i + 1].substr(0, 1) === '"' || v_a[i + 1].substr(0, 1) === '{' || v_a[i + 1].substr(0, 1) === '}')) {
+                if (
+                    v_a[i + 1] != null &&
+                    (v_a[i + 1].substr(0, 1) === '"' ||
+                        v_a[i + 1].substr(0, 1) === '{' ||
+                        v_a[i + 1].substr(0, 1) === '}')
+                ) {
                     pfri[0] += 1;
                     pfri[1] = 1;
                 }
@@ -306,14 +327,35 @@ export class CellInputHandler {
                     pfri[1] = 1;
                 }
             } else if (p.length === n.length) {
-                if (vp_a[i + 1] != null && (vp_a[i + 1].substr(0, 1) === '"' || vp_a[i + 1].substr(0, 1) === '{' || vp_a[i + 1].substr(0, 1) === '}')) {
+                if (
+                    vp_a[i + 1] != null &&
+                    (vp_a[i + 1].substr(0, 1) === '"' ||
+                        vp_a[i + 1].substr(0, 1) === '{' ||
+                        vp_a[i + 1].substr(0, 1) === '}')
+                ) {
                     pfri[1] = n.length;
-                } else if (v_a[i + 1] != null && v_a[i + 1].substr(0, 1) === '"' && (v_a[i + 1].substr(0, 1) === '{' || v_a[i + 1].substr(0, 1) === '}')) {
+                } else if (
+                    v_a[i + 1] != null &&
+                    v_a[i + 1].substr(0, 1) === '"' &&
+                    (v_a[i + 1].substr(0, 1) === '{' || v_a[i + 1].substr(0, 1) === '}')
+                ) {
                     pfri[0] += 1;
                     pfri[1] = 1;
-                } else if (n != null && n.substr(0, 1) === '"' && n.substr(n.length - 1, 1) === '"' && p.substr(0, 1) === '"' && p.substr(p.length - 1, 1) === ')') {
+                } else if (
+                    n != null &&
+                    n.substr(0, 1) === '"' &&
+                    n.substr(n.length - 1, 1) === '"' &&
+                    p.substr(0, 1) === '"' &&
+                    p.substr(p.length - 1, 1) === ')'
+                ) {
                     pfri[1] = n.length;
-                } else if (n != null && n.substr(0, 1) === '{' && n.substr(n.length - 1, 1) === '}' && p.substr(0, 1) === '{' && p.substr(p.length - 1, 1) === ')') {
+                } else if (
+                    n != null &&
+                    n.substr(0, 1) === '{' &&
+                    n.substr(n.length - 1, 1) === '}' &&
+                    p.substr(0, 1) === '{' &&
+                    p.substr(p.length - 1, 1) === ')'
+                ) {
                     pfri[1] = n.length;
                 } else {
                     pfri[0] = pfri[0] + vlen - vplen;
@@ -331,7 +373,11 @@ export class CellInputHandler {
                 } else if (v_a[i + 1] != null && /{.*?}/.test(v_a[i + 1])) {
                     pfri[0] += 1;
                     pfri[1] = v_a[i + 1].length;
-                } else if (p != null && v_a[i + 1].substr(0, 1) === '"' && (p.indexOf('{') > -1 || p.indexOf('}') > -1)) {
+                } else if (
+                    p != null &&
+                    v_a[i + 1].substr(0, 1) === '"' &&
+                    (p.indexOf('{') > -1 || p.indexOf('}') > -1)
+                ) {
                     pfri[0] += 1;
                     pfri[1] = 1;
                 }
@@ -446,7 +492,9 @@ export class CellInputHandler {
                 str = '';
             } else if (s === ')' && matchConfig.squote === 0 && matchConfig.dquote === 0 && matchConfig.braces === 0) {
                 matchConfig.bracket -= 1;
-                function_str += `${_this.functionHTML(str)}<span dir="auto" class="universheet-formula-text-rpar">)</span>`;
+                function_str += `${_this.functionHTML(
+                    str
+                )}<span dir="auto" class="universheet-formula-text-rpar">)</span>`;
                 str = '';
             } else if (s === '{' && matchConfig.squote === 0 && matchConfig.dquote === 0) {
                 str += '{';
@@ -468,7 +516,9 @@ export class CellInputHandler {
                     matchConfig.dquote += 1;
 
                     if (str.length > 0) {
-                        function_str += `${_this.functionHTML(str)}<span dir="auto" class="universheet-formula-text-string">"`;
+                        function_str += `${_this.functionHTML(
+                            str
+                        )}<span dir="auto" class="universheet-formula-text-string">"`;
                     } else {
                         function_str += `<span dir="auto" class="universheet-formula-text-string">"`;
                     }
@@ -482,16 +532,25 @@ export class CellInputHandler {
                 matchConfig.squote = matchConfig.squote === 0 ? 1 : 0;
             } else if (s === ',' && matchConfig.squote === 0 && matchConfig.dquote === 0 && matchConfig.braces === 0) {
                 // matchConfig.comma += 1;
-                function_str += `${_this.functionHTML(str)}<span dir="auto" class="universheet-formula-text-comma">,</span>`;
+                function_str += `${_this.functionHTML(
+                    str
+                )}<span dir="auto" class="universheet-formula-text-comma">,</span>`;
                 str = '';
             } else if (s === '&' && matchConfig.squote === 0 && matchConfig.dquote === 0 && matchConfig.braces === 0) {
                 if (str.length > 0) {
-                    function_str += `${_this.functionHTML(str)}<span dir="auto" class="universheet-formula-text-calc">&</span>`;
+                    function_str += `${_this.functionHTML(
+                        str
+                    )}<span dir="auto" class="universheet-formula-text-calc">&</span>`;
                     str = '';
                 } else {
                     function_str += '<span dir="auto" class="universheet-formula-text-calc">&</span>';
                 }
-            } else if (s in _this.operatorjson && matchConfig.squote === 0 && matchConfig.dquote === 0 && matchConfig.braces === 0) {
+            } else if (
+                s in _this.operatorjson &&
+                matchConfig.squote === 0 &&
+                matchConfig.dquote === 0 &&
+                matchConfig.braces === 0
+            ) {
                 let s_next = '';
                 if (i + 1 < funcstack.length) {
                     s_next = funcstack[i + 1];
@@ -507,17 +566,25 @@ export class CellInputHandler {
 
                 if (s + s_next in _this.operatorjson) {
                     if (str.length > 0) {
-                        function_str += `${_this.functionHTML(str)}<span dir="auto" class="universheet-formula-text-calc">${s}${s_next}</span>`;
+                        function_str += `${_this.functionHTML(
+                            str
+                        )}<span dir="auto" class="universheet-formula-text-calc">${s}${s_next}</span>`;
                         str = '';
                     } else {
                         function_str += `<span dir="auto" class="universheet-formula-text-calc">${s}${s_next}</span>`;
                     }
 
                     i++;
-                } else if (!/[^0-9]/.test(s_next) && s === '-' && (s_pre === '(' || s_pre == null || s_pre === ',' || s_pre === ' ' || s_pre in _this.operatorjson)) {
+                } else if (
+                    !/[^0-9]/.test(s_next) &&
+                    s === '-' &&
+                    (s_pre === '(' || s_pre == null || s_pre === ',' || s_pre === ' ' || s_pre in _this.operatorjson)
+                ) {
                     str += s;
                 } else if (str.length > 0) {
-                    function_str += `${_this.functionHTML(str)}<span dir="auto" class="universheet-formula-text-calc">${s}</span>`;
+                    function_str += `${_this.functionHTML(
+                        str
+                    )}<span dir="auto" class="universheet-formula-text-calc">${s}</span>`;
                     str = '';
                 } else {
                     function_str += `<span dir="auto" class="universheet-formula-text-calc">${s}</span>`;
@@ -529,9 +596,9 @@ export class CellInputHandler {
             if (i === funcstack.length - 1) {
                 // function_str += str;
                 if (_this.iscelldata(str.trim())) {
-                    function_str += `<span class="universheet-formula-functionrange-cell" rangeindex="${_this.functionHTMLIndex}" dir="auto" style="color:${
-                        LUCKY_COLOR[_this.functionHTMLIndex]
-                    };">${str}</span>`;
+                    function_str += `<span class="universheet-formula-functionrange-cell" rangeindex="${
+                        _this.functionHTMLIndex
+                    }" dir="auto" style="color:${LUCKY_COLOR[_this.functionHTMLIndex]};">${str}</span>`;
                     _this.functionHTMLIndex++;
                 } else if (matchConfig.dquote > 0) {
                     function_str += `${str}</span>`;
@@ -544,13 +611,19 @@ export class CellInputHandler {
                         let alltxt = '';
 
                         if (arraystart > 0) {
-                            alltxt += `<span dir="auto" class="universheet-formula-text-color">${str.substr(0, arraystart)}</span>`;
+                            alltxt += `<span dir="auto" class="universheet-formula-text-color">${str.substr(
+                                0,
+                                arraystart
+                            )}</span>`;
                         }
 
                         alltxt += `<span dir="auto" style="color:#959a05" class="universheet-formula-text-array">${arraytxt}</span>`;
 
                         if (arraystart + arraytxt.length < str.length) {
-                            alltxt += `<span dir="auto" class="universheet-formula-text-color">${str.substr(arraystart + arraytxt.length, str.length)}</span>`;
+                            alltxt += `<span dir="auto" class="universheet-formula-text-color">${str.substr(
+                                arraystart + arraytxt.length,
+                                str.length
+                            )}</span>`;
                         }
 
                         function_str += alltxt;
@@ -602,7 +675,8 @@ export class CellInputHandler {
             }
             return false;
         }
-        reg_cellRange = /^(((([a-zA-Z]+)|([$][a-zA-Z]+))(([0-9]+)|([$][0-9]+)))|((([a-zA-Z]+)|([$][a-zA-Z]+)))|((([0-9]+)|([$][0-9]+s))))$/g;
+        reg_cellRange =
+            /^(((([a-zA-Z]+)|([$][a-zA-Z]+))(([0-9]+)|([$][0-9]+)))|((([a-zA-Z]+)|([$][a-zA-Z]+)))|((([0-9]+)|([$][0-9]+s))))$/g;
 
         rangetxt = rangetxt.split(':');
 
@@ -774,7 +848,10 @@ export class CellInputHandler {
 
         const $prev = currSelection;
         const $span = $editer.querySelectorAll('span');
-        const currentIndex = [].indexOf.call(currSelection.parentNode!.querySelectorAll(currSelection.tagName), currSelection as never);
+        const currentIndex = [].indexOf.call(
+            currSelection.parentNode!.querySelectorAll(currSelection.tagName),
+            currSelection as never
+        );
         // currentIndex = currSelection.parentNode.childNodes.length - 1,
         let i = currentIndex;
 
@@ -792,7 +869,10 @@ export class CellInputHandler {
             while (--i > 0) {
                 $cur = $span[`${i}`];
 
-                if ($cur.className === 'universheet-formula-text-func' || $cur.textContent!.trim().toUpperCase() in _this.functionlistPosition) {
+                if (
+                    $cur.className === 'universheet-formula-text-func' ||
+                    $cur.textContent!.trim().toUpperCase() in _this.functionlistPosition
+                ) {
                     funcName = $cur.textContent;
                     paramindex = null;
                     let endstate = true;

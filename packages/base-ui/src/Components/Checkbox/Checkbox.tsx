@@ -67,7 +67,15 @@ export function Checkbox(props: BaseCheckboxProps) {
         <label className={styles.checkboxWrapper}>
             <span className={classes}>
                 <span className={styles.checkboxInner} />
-                <input className={styles.checkboxInput} type="checkbox" name={name} checked={checked} disabled={disabled} value={value} onChange={handleChange} />
+                <input
+                    className={styles.checkboxInput}
+                    type="checkbox"
+                    name={name}
+                    checked={checked}
+                    disabled={disabled}
+                    value={value}
+                    onChange={handleChange}
+                />
             </span>
             {children && <span>{children}</span>}
         </label>

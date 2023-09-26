@@ -88,12 +88,14 @@ export class Clipboard {
                     } else {
                         reader.readAsText(blob);
                     }
-                    const promise: Promise<PasteType | null> = new Promise((resolve: (value: PasteType) => void, reject) => {
-                        reader.onload = (e) => {
-                            const item: PasteType = { type, result: reader.result };
-                            resolve(item);
-                        };
-                    }).then(
+                    const promise: Promise<PasteType | null> = new Promise(
+                        (resolve: (value: PasteType) => void, reject) => {
+                            reader.onload = (e) => {
+                                const item: PasteType = { type, result: reader.result };
+                                resolve(item);
+                            };
+                        }
+                    ).then(
                         (res) => res,
                         () => null
                     );

@@ -3,7 +3,14 @@ import { ISelection, ObserverManager } from '@univerjs/core';
 import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { FORMULA_PLUGIN_NAME, FormulaType, FunList, FunParams, SearchFormulaModalData, SelectCategoryType } from '../Basics';
+import {
+    FORMULA_PLUGIN_NAME,
+    FormulaType,
+    FunList,
+    FunParams,
+    SearchFormulaModalData,
+    SelectCategoryType,
+} from '../Basics';
 import { SearchFormulaContent } from '../View/UI/SearchFormulaModal/SearchFormulaContent';
 import { SearchFormulaModal } from '../View/UI/SearchFormulaModal/SearchFormulaModal';
 import { SearchItem } from '../View/UI/SearchFormulaModal/SearchItem';
@@ -136,14 +143,16 @@ export class SearchFormulaController {
     }
 
     private _initRegisterComponent() {
-        this._sheetContainerUIController.getMainSlotController().addSlot(FORMULA_PLUGIN_NAME + SearchFormulaModal.name, {
-            component: SearchFormulaModal,
-            props: {
-                getComponent: (ref: SearchFormulaModal) => {
-                    this._formulaModal = ref;
+        this._sheetContainerUIController
+            .getMainSlotController()
+            .addSlot(FORMULA_PLUGIN_NAME + SearchFormulaModal.name, {
+                component: SearchFormulaModal,
+                props: {
+                    getComponent: (ref: SearchFormulaModal) => {
+                        this._formulaModal = ref;
+                    },
                 },
-            },
-        });
+            });
         this._componentManager.register(FORMULA_PLUGIN_NAME + SearchItem.name, SearchItem);
         this._componentManager.register(FORMULA_PLUGIN_NAME + SearchFormulaContent.name, SearchFormulaContent);
     }

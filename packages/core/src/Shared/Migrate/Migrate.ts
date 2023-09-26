@@ -1,5 +1,14 @@
 import { BooleanNumber, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../Types/Enum';
-import { ICellData, IColumnData, IRowData, IStyleData, ITextRun, ITextStyle, IWorkbookConfig, IWorksheetConfig } from '../../Types/Interfaces';
+import {
+    ICellData,
+    IColumnData,
+    IRowData,
+    IStyleData,
+    ITextRun,
+    ITextStyle,
+    IWorkbookConfig,
+    IWorksheetConfig,
+} from '../../Types/Interfaces';
 import { ObjectArrayPrimitiveType } from '../ObjectArray';
 import { Tools } from '../Tools';
 import { IKeyValue } from '../Types';

@@ -10,7 +10,17 @@ export class OverImageShape extends Picture {
         this._property = property;
     }
 
-    static drawRoundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, tl: number, tr: number, bl: number, br: number) {
+    static drawRoundRect(
+        ctx: CanvasRenderingContext2D,
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        tl: number,
+        tr: number,
+        bl: number,
+        br: number
+    ) {
         ctx.beginPath();
         ctx.moveTo(x + tl, y);
         ctx.lineTo(x + width - tr, y);

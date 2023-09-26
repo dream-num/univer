@@ -11,7 +11,9 @@ export class FilterCriteriaColumn extends Serializer {
     static newInstance(sequence: IFilterCriteriaColumn): FilterCriteriaColumn {
         const criteriaColumn = new FilterCriteriaColumn();
         criteriaColumn._column = sequence.column;
-        criteriaColumn._criteria = FilterCriteria.fromSequence(sequence.criteria as Sequence) as unknown as FilterCriteria;
+        criteriaColumn._criteria = FilterCriteria.fromSequence(
+            sequence.criteria as Sequence
+        ) as unknown as FilterCriteria;
         return criteriaColumn;
     }
 

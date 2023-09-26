@@ -38,7 +38,16 @@ export class CellTextStyle {
 
     constructor(ele: HTMLDivElement) {
         this.inlineStyleAffectAttribute = { bl: 1, it: 1, ff: 1, cl: 1, un: 1, fs: 1, fc: 1, bg: 1 };
-        this.inlineStyleAffectCssName = { 'font-weight': 1, 'font-style': 1, 'font-family': 1, 'text-decoration': 1, 'border-bottom': 1, 'font-size': 1, color: 1, background: 1 };
+        this.inlineStyleAffectCssName = {
+            'font-weight': 1,
+            'font-style': 1,
+            'font-family': 1,
+            'text-decoration': 1,
+            'border-bottom': 1,
+            'font-size': 1,
+            color: 1,
+            background: 1,
+        };
 
         this.univerToCssName = {
             bl: 'font-weight',
@@ -164,7 +173,10 @@ export class CellTextStyle {
                 }
 
                 selectTextContent($textEditor.querySelectorAll('span')[seletedNodeIndex]);
-            } else if ((startContainer.parentNode as HTMLElement).tagName === 'SPAN' && (endContainer.parentNode as HTMLElement).tagName === 'SPAN') {
+            } else if (
+                (startContainer.parentNode as HTMLElement).tagName === 'SPAN' &&
+                (endContainer.parentNode as HTMLElement).tagName === 'SPAN'
+            ) {
                 const startSpan = startContainer.parentNode as HTMLElement;
                 const endSpan = endContainer.parentNode as HTMLElement;
 
@@ -388,7 +400,11 @@ export class CellTextStyle {
                 s = s.toLowerCase();
                 const key = textTrim(s.substr(0, s.indexOf(':')));
                 const value = textTrim(s.substr(s.indexOf(':') + 1));
-                if (key === ukey || (oUkey === 'cl' && key === 'lucky-strike') || (oUkey === 'un' && key === 'lucky-underline')) {
+                if (
+                    key === ukey ||
+                    (oUkey === 'cl' && key === 'lucky-strike') ||
+                    (oUkey === 'un' && key === 'lucky-underline')
+                ) {
                     continue;
                 } else if (key.length > 0) {
                     newCss += `${key}:${value};`;
@@ -454,7 +470,11 @@ export class CellTextStyle {
                 style += `font-size: ${value}pt;`;
             }
 
-            if ((key === 'fc' && value !== '#000000') || checksAF != null || (checksCF != null && checksCF.textColor != null)) {
+            if (
+                (key === 'fc' && value !== '#000000') ||
+                checksAF != null ||
+                (checksCF != null && checksCF.textColor != null)
+            ) {
                 if (checksCF != null && checksCF.textColor != null) {
                     style += `color: ${checksCF.textColor};`;
                 } else if (checksAF != null) {

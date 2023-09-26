@@ -4,7 +4,10 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { ImportXlsxController } from '../../Controller/ImportXlsxController';
 
 export class DragAndDropExtension extends BaseDragAndDropExtension {
-    constructor(data: File[], @Inject(ImportXlsxController) private readonly _importXlsxController: ImportXlsxController) {
+    constructor(
+        data: File[],
+        @Inject(ImportXlsxController) private readonly _importXlsxController: ImportXlsxController
+    ) {
         super(data);
     }
 

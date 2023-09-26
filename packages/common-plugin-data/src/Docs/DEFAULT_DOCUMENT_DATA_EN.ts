@@ -1,4 +1,13 @@
-import { BooleanNumber, ColumnSeparatorType, IDocumentData, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, SectionType, WrapTextType } from '@univerjs/core';
+import {
+    BooleanNumber,
+    ColumnSeparatorType,
+    IDocumentData,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PositionedObjectLayoutType,
+    SectionType,
+    WrapTextType,
+} from '@univerjs/core';
 
 import { DEFAULT_LIST_TEST } from './DEFAULT_LIST';
 

@@ -130,7 +130,20 @@ export interface ModalProps extends BaseModalProps {
 }
 
 export function Modal(props: BaseModalProps) {
-    const { title, width = 500, top = 0, style, children, className = '', group = [], isDrag = false, mask = true, footer = true, onCancel, visible: propsVisible } = props;
+    const {
+        title,
+        width = 500,
+        top = 0,
+        style,
+        children,
+        className = '',
+        group = [],
+        isDrag = false,
+        mask = true,
+        footer = true,
+        onCancel,
+        visible: propsVisible,
+    } = props;
 
     const [visible, setVisible] = useState<boolean>(propsVisible || false);
 

@@ -166,7 +166,11 @@ export class DocumentBodyModelSimple implements IDisposable {
         }
     }
 
-    private _batchParent(parent: DataStreamTreeNode, children: DataStreamTreeNode[], nodeType = DataStreamTreeNodeType.SECTION_BREAK) {
+    private _batchParent(
+        parent: DataStreamTreeNode,
+        children: DataStreamTreeNode[],
+        nodeType = DataStreamTreeNodeType.SECTION_BREAK
+    ) {
         for (const child of children) {
             child.parent = parent;
             parent.children.push(child);
@@ -252,7 +256,13 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
 
             const { firstNode: insertedFirstNode, lastNode: insertedLastNode } = insertedNodeSplit;
 
-            insertedNode.parent?.children.splice(insertedNode.getPositionInParent(), 1, insertedFirstNode, ...insertNodes, insertedLastNode);
+            insertedNode.parent?.children.splice(
+                insertedNode.getPositionInParent(),
+                1,
+                insertedFirstNode,
+                ...insertNodes,
+                insertedLastNode
+            );
 
             this.foreachTop(insertedNode.parent, (currentNode) => {
                 // currentNode.endIndex += dataStreamLen;
@@ -325,7 +335,10 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         return null;
     }
 
-    foreachTop(node: Nullable<DataStreamTreeNode>, func: (node: DataStreamTreeNode | DocumentBodyModelOrSimple) => void) {
+    foreachTop(
+        node: Nullable<DataStreamTreeNode>,
+        func: (node: DataStreamTreeNode | DocumentBodyModelOrSimple) => void
+    ) {
         let parent: Nullable<DataStreamTreeNode> = node;
         while (parent) {
             func(parent);
@@ -623,7 +636,12 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             newNode.plus(insertStartIndex + 1);
         });
 
-        insertedNode.parent?.children.splice(insertedNode.getPositionInParent(), 1, insertedFirstNode, insertedLastNode);
+        insertedNode.parent?.children.splice(
+            insertedNode.getPositionInParent(),
+            1,
+            insertedFirstNode,
+            insertedLastNode
+        );
 
         this.foreachTop(insertedNode.parent, (currentNode) => {
             // currentNode.endIndex += dataStreamLen;

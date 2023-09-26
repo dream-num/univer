@@ -11,7 +11,9 @@ export class Color {
     }
 
     static rgbColorToHexValue(color: RgbColor): string {
-        return `#${((1 << 24) + (color.getRed() << 16) + (color.getGreen() << 8) + color.getBlue()).toString(16).slice(1)}`;
+        return `#${((1 << 24) + (color.getRed() << 16) + (color.getGreen() << 8) + color.getBlue())
+            .toString(16)
+            .slice(1)}`;
     }
 
     static hexValueToRgbColor(hexValue: string): RgbColor {
@@ -123,7 +125,9 @@ export class HLSColor {
         const builder = new ColorBuilder();
 
         if (this._saturation === 0) {
-            builder.setRgbColor(`rgba(${this._lightness * 255},${this._lightness * 255},${this._lightness * 255},${this._alpha * 255})`);
+            builder.setRgbColor(
+                `rgba(${this._lightness * 255},${this._lightness * 255},${this._lightness * 255},${this._alpha * 255})`
+            );
             return builder.asRgbColor();
         }
 
@@ -143,7 +147,9 @@ export class HLSColor {
         const tB = hue - 1.0 / 3.0;
         const blue = this.setColor(t1, t2, tB);
 
-        builder.setRgbColor(`rgba(${Math.round(red * 255)},${Math.round(green * 255)},${Math.round(blue * 255)},${this._alpha * 255})`);
+        builder.setRgbColor(
+            `rgba(${Math.round(red * 255)},${Math.round(green * 255)},${Math.round(blue * 255)},${this._alpha * 255})`
+        );
         return builder.asRgbColor();
     }
 
@@ -195,7 +201,9 @@ export class HLSColor {
 export class RgbColor extends Color {
     static RGB_COLOR_AMT: number = 0;
 
-    static RGBA_EXTRACT: RegExp = new RegExp(`\\s*rgba\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d.\\d|\\d\\s*)\\)\\s*`);
+    static RGBA_EXTRACT: RegExp = new RegExp(
+        `\\s*rgba\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d.\\d|\\d\\s*)\\)\\s*`
+    );
 
     static RGB_EXTRACT: RegExp = new RegExp(`\\s*rgb\\s*\\((\\s*\\d+\\s*),(\\s*\\d+\\s*),(\\s*\\d+\\s*)\\)\\s*`);
 
@@ -304,7 +312,12 @@ export class RgbColor extends Color {
 
     override equals(color: Color): boolean {
         if (color instanceof RgbColor) {
-            return color._red === this._red && color._blue === this._blue && color._green === this._green && color._alpha === this._alpha;
+            return (
+                color._red === this._red &&
+                color._blue === this._blue &&
+                color._green === this._green &&
+                color._alpha === this._alpha
+            );
         }
         return false;
     }

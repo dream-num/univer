@@ -1,6 +1,14 @@
 import { Nullable } from '../../Shared/Types';
 import { BorderStyleTypes } from '../Enum/BorderStyleTypes';
-import { BaselineOffset, BooleanNumber, HorizontalAlign, TextDecoration, TextDirection, VerticalAlign, WrapStrategy } from '../Enum/TextStyle';
+import {
+    BaselineOffset,
+    BooleanNumber,
+    HorizontalAlign,
+    TextDecoration,
+    TextDirection,
+    VerticalAlign,
+    WrapStrategy,
+} from '../Enum/TextStyle';
 import { ThemeColorType } from '../Enum/ThemeColorType';
 
 /**

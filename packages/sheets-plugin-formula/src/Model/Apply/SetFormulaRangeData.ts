@@ -3,7 +3,11 @@ import { Tools, Workbook } from '@univerjs/core';
 
 import { FormulaController } from '../../Controller/FormulaController';
 
-export function SetFormulaRangeData(workbook: Workbook, formulaData: FormulaDataType, _formulaController: FormulaController): FormulaDataType {
+export function SetFormulaRangeData(
+    workbook: Workbook,
+    formulaData: FormulaDataType,
+    _formulaController: FormulaController
+): FormulaDataType {
     const formulaDataModel = _formulaController.getDataModel();
 
     // store old result

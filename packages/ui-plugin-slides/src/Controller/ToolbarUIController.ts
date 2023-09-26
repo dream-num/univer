@@ -1,6 +1,16 @@
 import { BorderInfo } from '@univerjs/base-slides';
 import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager } from '@univerjs/base-ui';
-import { BorderType, HorizontalAlign, ICurrentUniverService, IKeyValue, ObserverManager, Tools, UIObserver, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import {
+    BorderType,
+    HorizontalAlign,
+    ICurrentUniverService,
+    IKeyValue,
+    ObserverManager,
+    Tools,
+    UIObserver,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
 import { ComponentChildren } from 'react';
 
@@ -100,7 +110,9 @@ export class ToolbarUIController {
     }
 
     setUIObserve<T>(msg: UIObserver<T>) {
-        this._globalObserverManager.requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core').notifyObservers(msg);
+        this._globalObserverManager
+            .requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core')
+            .notifyObservers(msg);
     }
 
     changeColor(color: string) {

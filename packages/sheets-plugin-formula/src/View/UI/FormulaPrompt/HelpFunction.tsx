@@ -1,6 +1,7 @@
 import { BaseComponentProps, CustomLabel } from '@univerjs/base-ui';
-import { Component, createRef } from 'react';
 import { IKeyValue } from '@univerjs/core';
+import { Component, createRef } from 'react';
+
 import { FormulaParamType, FormulaType } from '../../../Basics';
 import styles from './index.module.less';
 
@@ -45,7 +46,13 @@ export class HelpFunction extends Component<IProps, IState> {
         this.props.getComponent?.(this);
     }
 
-    updateState(helpFormulaActive: boolean, activeIndex: number = 0, functionInfo: FormulaType = {}, position = { left: 0, top: 0 }, cb?: () => void) {
+    updateState(
+        helpFormulaActive: boolean,
+        activeIndex: number = 0,
+        functionInfo: FormulaType = {},
+        position = { left: 0, top: 0 },
+        cb?: () => void
+    ) {
         this.setState(
             {
                 helpFormulaActive,
@@ -71,7 +78,12 @@ export class HelpFunction extends Component<IProps, IState> {
         return (
             <div
                 className={styles.helpFunction}
-                style={{ display: helpFormulaActive ? 'block' : 'none', position: 'absolute', left: `${position.left}px`, top: `${position.top}px` }}
+                style={{
+                    display: helpFormulaActive ? 'block' : 'none',
+                    position: 'absolute',
+                    left: `${position.left}px`,
+                    top: `${position.top}px`,
+                }}
                 ref={this.contentRef}
             >
                 <div className={styles.helpFunctionTitle}>

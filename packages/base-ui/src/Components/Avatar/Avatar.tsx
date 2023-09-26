@@ -50,7 +50,18 @@ export interface BaseAvatarProps extends BaseComponentProps {
  * Avatar Component
  */
 export function Avatar(props: BaseAvatarProps) {
-    const { children, style, title, alt, shape = 'circle', size = 'default', src, fit = 'fill', onError, onLoad } = props;
+    const {
+        children,
+        style,
+        title,
+        alt,
+        shape = 'circle',
+        size = 'default',
+        src,
+        fit = 'fill',
+        onError,
+        onLoad,
+    } = props;
 
     const sizeStyle =
         typeof size === 'number'

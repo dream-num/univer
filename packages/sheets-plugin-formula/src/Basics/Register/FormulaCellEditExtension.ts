@@ -65,7 +65,9 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
                         const value = rowArray[Number(cellColumn)];
                         if (Number(cellRow) === row && Number(cellColumn) === column) {
                             // Get the content of the formula and convert it into a DOM structure
-                            formula = this._formulaPromptController.cellInputHandler.functionHTMLGenerate(value.formula);
+                            formula = this._formulaPromptController.cellInputHandler.functionHTMLGenerate(
+                                value.formula
+                            );
                             return false;
                         }
                     });

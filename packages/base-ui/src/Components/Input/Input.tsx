@@ -10,7 +10,18 @@ export interface BaseInputProps extends BaseComponentProps {
      * The type of input
      * @default 'text'
      */
-    type?: 'text' | 'button' | 'checkbox' | 'file' | 'hidden' | 'image' | 'password' | 'radio' | 'reset' | 'submit' | 'number';
+    type?:
+        | 'text'
+        | 'button'
+        | 'checkbox'
+        | 'file'
+        | 'hidden'
+        | 'image'
+        | 'password'
+        | 'radio'
+        | 'reset'
+        | 'submit'
+        | 'number';
 
     /**
      * The input content value

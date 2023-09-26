@@ -1,5 +1,6 @@
 import { ColorPickerCircleButton, SiderModal } from '@univerjs/base-ui';
 import { Component, VNode } from 'react';
+
 import { BorderType, NormalType } from '../../../Basics';
 import Style from './ImagePanelUI.module.less';
 
@@ -25,7 +26,9 @@ export class ImagePanelUI extends Component<ImagePanelUIProps> {
     }
 
     initialize(props: ImagePanelUIProps) {
-        const imagePlugin = this.getContext().getPluginManager().getPluginByName<OverGridImagePlugin>(OVER_GRID_IMAGE_PLUGIN_NAME)!;
+        const imagePlugin = this.getContext()
+            .getPluginManager()
+            .getPluginByName<OverGridImagePlugin>(OVER_GRID_IMAGE_PLUGIN_NAME)!;
         this.state = {};
         imagePlugin.getObserver('onActiveImage')!.add((data) => {
             this._width = data.width;

@@ -1,6 +1,6 @@
-import { UniverSheet } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
 import { DEFAULT_WORKBOOK_DATA } from '@univerjs/common-plugin-data';
+import { UniverSheet } from '@univerjs/core';
 
 const uiDefaultConfigUp = {
     container: 'universheet-demo-up',

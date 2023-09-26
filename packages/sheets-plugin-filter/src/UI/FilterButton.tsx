@@ -1,8 +1,9 @@
 import { BaseSelectProps, Icon, Select } from '@univerjs/base-ui';
-import { Component } from 'react';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
-import { IProps } from '../IData';
+import { Component } from 'react';
+
 import { FilterPlugin } from '../FilterPlugin';
+import { IProps } from '../IData';
 
 interface IState {
     filter: IToolbarItemProps;
@@ -55,16 +56,20 @@ export class FilterButton extends Component<IProps, IState> {
         this.setLocale();
 
         // subscribe Locale change event
-        this._localeObserver = this.context.observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.add(() => {
-            this.setLocale();
-        });
+        this._localeObserver = this.context.observerManager
+            .requiredObserver('onAfterChangeUILocaleObservable', 'core')
+            ?.add(() => {
+                this.setLocale();
+            });
     }
 
     /**
      * destory
      */
     override componentWillUnmount() {
-        this.context.observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.remove(this._localeObserver);
+        this.context.observerManager
+            .requiredObserver('onAfterChangeUILocaleObservable', 'core')
+            ?.remove(this._localeObserver);
     }
 
     /**
@@ -98,6 +103,14 @@ export class FilterButton extends Component<IProps, IState> {
      */
     render() {
         const { filter } = this.state;
-        return <Select tooltip={filter.tooltip} key={filter.locale} children={filter.children as BaseSelectProps[]} label={filter.label} icon={filter.icon} />;
+        return (
+            <Select
+                tooltip={filter.tooltip}
+                key={filter.locale}
+                children={filter.children as BaseSelectProps[]}
+                label={filter.label}
+                icon={filter.icon}
+            />
+        );
     }
 }

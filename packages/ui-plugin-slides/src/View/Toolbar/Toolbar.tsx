@@ -1,5 +1,15 @@
-import { AppContext, BaseComponentProps, Button, Container, debounce, Select, Tooltip, CustomLabel } from '@univerjs/base-ui';
+import {
+    AppContext,
+    BaseComponentProps,
+    Button,
+    Container,
+    CustomLabel,
+    debounce,
+    Select,
+    Tooltip,
+} from '@univerjs/base-ui';
 import { Component, createRef } from 'react';
+
 import { SlideUIPlugin } from '../..';
 import { SLIDE_UI_PLUGIN_NAME } from '../../Basics';
 import { IToolbarItemProps } from '../../Controller';
@@ -136,7 +146,9 @@ export class Toolbar extends Component<IProps, IState> {
                 if (moreIndex !== null) {
                     this.setState(
                         {
-                            defaultToolList: this.state.defaultToolList.concat(this.state.moreToolList.slice(0, last ? moreIndex + 1 : moreIndex)),
+                            defaultToolList: this.state.defaultToolList.concat(
+                                this.state.moreToolList.slice(0, last ? moreIndex + 1 : moreIndex)
+                            ),
                             moreToolList: last ? [] : this.state.moreToolList.slice(moreIndex),
                         },
                         () => {
@@ -193,7 +205,13 @@ export class Toolbar extends Component<IProps, IState> {
                 if (item.show) {
                     return (
                         <Tooltip key={index} title={item.tooltip} placement={'bottom'}>
-                            <Button unActive={item.unActive} className={styles.textButton} type="text" active={item.active} onClick={item.onClick}>
+                            <Button
+                                unActive={item.unActive}
+                                className={styles.textButton}
+                                type="text"
+                                active={item.active}
+                                onClick={item.onClick}
+                            >
                                 <CustomLabel label={item.label} />
                             </Button>
                         </Tooltip>
@@ -232,8 +250,15 @@ export class Toolbar extends Component<IProps, IState> {
                 <div className={`${styles.toolbarWarp} ${styles.toolbar}`} ref={this.toolbarRef}>
                     {this.getToolbarList(defaultToolList)}
 
-                    <div ref={this.moreBtnRef} className={styles.moreButton} style={{ visibility: moreToolList.length ? 'visible' : 'hidden' }}>
-                        <Tooltip title={(<CustomLabel label="toolbar.toolMoreTip" />) as unknown as string} placement={'bottom'}>
+                    <div
+                        ref={this.moreBtnRef}
+                        className={styles.moreButton}
+                        style={{ visibility: moreToolList.length ? 'visible' : 'hidden' }}
+                    >
+                        <Tooltip
+                            title={(<CustomLabel label="toolbar.toolMoreTip" />) as unknown as string}
+                            placement={'bottom'}
+                        >
                             <Button type="text" onClick={this.showMore}>
                                 <div style={{ fontSize: '14px' }}>
                                     <CustomLabel label="toolbar.toolMore" />
@@ -244,7 +269,11 @@ export class Toolbar extends Component<IProps, IState> {
                 </div>
 
                 {moreToolList.length ? (
-                    <div style={{ visibility: showMore ? 'visible' : 'hidden' }} className={`${styles.moreTool} ${styles.toolbar}`} ref={this.moreToolRef}>
+                    <div
+                        style={{ visibility: showMore ? 'visible' : 'hidden' }}
+                        className={`${styles.moreTool} ${styles.toolbar}`}
+                        ref={this.moreToolRef}
+                    >
                         {this.getToolbarList(moreToolList)}
                     </div>
                 ) : (

@@ -272,7 +272,8 @@ export default {
 
             execfunctionError: 'Error in the formula',
             execfunctionSelfError: 'The formula cannot refer to its own cell',
-            execfunctionSelfErrorResult: 'The formula cannot refer to its own cell, which will lead to inaccurate calculation results',
+            execfunctionSelfErrorResult:
+                'The formula cannot refer to its own cell, which will lead to inaccurate calculation results',
 
             allowRepeatText: 'Repeat',
             allowOptionText: 'Option',

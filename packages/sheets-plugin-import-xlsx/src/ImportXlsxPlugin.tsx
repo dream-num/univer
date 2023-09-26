@@ -16,7 +16,11 @@ export class ImportXlsxPlugin extends Plugin<any> {
 
     private _dragAndDropExtensionFactory: DragAndDropExtensionFactory;
 
-    constructor(config: IImportXlsxPluginConfig, @Inject(Injector) override readonly _injector: Injector, @Inject(LocaleService) private readonly _localeService: LocaleService) {
+    constructor(
+        config: IImportXlsxPluginConfig,
+        @Inject(Injector) override readonly _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
         super(IMPORT_XLSX_PLUGIN_NAME);
     }
 

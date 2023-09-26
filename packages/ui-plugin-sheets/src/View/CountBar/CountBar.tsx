@@ -98,7 +98,14 @@ export class CountBar extends Component<CountBarProps, CountState> {
                     <Icon.Math.AddIcon />
                 </Button>
                 <div className={styles.countSlider}>
-                    <Slider onChange={this.onChange} value={[20, 50]} min={this.min} max={this.max} range onClick={this.handleClick} />
+                    <Slider
+                        onChange={this.onChange}
+                        value={[20, 50]}
+                        min={this.min}
+                        max={this.max}
+                        range
+                        onClick={this.handleClick}
+                    />
                 </div>
                 <Button onClick={this.reduceZoom}>
                     <Icon.Math.ReduceIcon />

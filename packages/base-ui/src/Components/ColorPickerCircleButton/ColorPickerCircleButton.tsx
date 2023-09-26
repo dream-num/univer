@@ -59,7 +59,13 @@ export interface BaseColorPickerCircleButtonProps {
 //     }
 // }
 
-export function ColorPickerCircleButton({ color, onClick, onCancel, style, colorPickerStyle }: BaseColorPickerCircleButtonProps) {
+export function ColorPickerCircleButton({
+    color,
+    onClick,
+    onCancel,
+    style,
+    colorPickerStyle,
+}: BaseColorPickerCircleButtonProps) {
     const ref = useRef<HTMLDivElement>(null);
     const [currentColorPickerStyle, setCurrentColorPickerStyle] = useState(colorPickerStyle);
     /**
@@ -78,7 +84,10 @@ export function ColorPickerCircleButton({ color, onClick, onCancel, style, color
             ref={ref}
             onClick={handleColorSelectButtonClick}
         >
-            <span className={`${Styles.colorSelectCircle} ${Styles.verticalMiddle}`} style={{ backgroundColor: color }}></span>
+            <span
+                className={`${Styles.colorSelectCircle} ${Styles.verticalMiddle}`}
+                style={{ backgroundColor: color }}
+            ></span>
             <NextIcon className={Styles.verticalMiddle} /> {/* Replace with your NextIcon component */}
             {/* Replace ColorPicker with your actual ColorPicker component */}
             <ColorPicker color={color} onClick={onClick} onCancel={onCancel} style={currentColorPickerStyle} />

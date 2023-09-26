@@ -1,6 +1,7 @@
 import { BaseComponentProps, CustomLabel } from '@univerjs/base-ui';
-import { Component, createRef } from 'react';
 import { IKeyValue } from '@univerjs/core';
+import { Component, createRef } from 'react';
+
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {}
@@ -61,7 +62,13 @@ export class SearchFunction extends Component<IProps, IState> {
      * @param formula
      * @param selectIndex
      */
-    updateState(searchActive: boolean, formula: IKeyValue[] = [], selectIndex: number = 0, position = { left: 0, top: 0 }, cb?: () => void) {
+    updateState(
+        searchActive: boolean,
+        formula: IKeyValue[] = [],
+        selectIndex: number = 0,
+        position = { left: 0, top: 0 },
+        cb?: () => void
+    ) {
         this.setState({ searchActive, formula, selectIndex, position }, cb);
     }
 
@@ -75,7 +82,12 @@ export class SearchFunction extends Component<IProps, IState> {
             <ul
                 className={styles.searchFunction}
                 onKeyDown={this.onKeyDown.bind(this)}
-                style={{ display: searchActive ? 'block' : 'none', position: 'absolute', left: `${position.left}px`, top: `${position.top}px` }}
+                style={{
+                    display: searchActive ? 'block' : 'none',
+                    position: 'absolute',
+                    left: `${position.left}px`,
+                    top: `${position.top}px`,
+                }}
                 ref={this.contentRef}
             >
                 {formula.map((item: any, i: number) => (

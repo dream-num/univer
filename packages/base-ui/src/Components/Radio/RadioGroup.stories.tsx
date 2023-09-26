@@ -10,7 +10,10 @@ const meta: Meta<typeof RadioGroup> = {
     },
     tags: ['autodocs'],
     args: {
-        children: [<Radio value="test" label="test"></Radio>, <Radio value="test1" label="test1" style={{ marginLeft: '10px' }}></Radio>],
+        children: [
+            <Radio value="test" label="test"></Radio>,
+            <Radio value="test1" label="test1" style={{ marginLeft: '10px' }}></Radio>,
+        ],
     },
 };
 

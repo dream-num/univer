@@ -35,7 +35,13 @@ export class RectTree {
         return -1;
     }
 
-    static multiSelect(array: RectTree.Node[], left: number, right: number, n: number, compare: Compare<RectTree.Node>) {
+    static multiSelect(
+        array: RectTree.Node[],
+        left: number,
+        right: number,
+        n: number,
+        compare: Compare<RectTree.Node>
+    ) {
         // 对数组进行排序，以便项目以 n 个未排序项目为一组，各组在彼此之间排序；
         // 将选择算法与二元分治法相结合
         const stack: number[] = [left, right];
@@ -261,7 +267,9 @@ export class RectTree {
 
         const splitIndex = this._chooseSplitIndex(node, m, M);
 
-        const newNode = RectTree.Node.makeParentNode(node.childrenNodes.splice(splitIndex, node.childrenNodes.length - splitIndex));
+        const newNode = RectTree.Node.makeParentNode(
+            node.childrenNodes.splice(splitIndex, node.childrenNodes.length - splitIndex)
+        );
         newNode.height = node.height;
         newNode.leaf = node.leaf;
 
@@ -597,11 +605,15 @@ export namespace RectTree {
         }
 
         contains(other: RectTree.Node) {
-            return this.minX <= other.minX && this.minY <= other.minY && other.maxX <= this.maxX && other.maxY <= this.maxY;
+            return (
+                this.minX <= other.minX && this.minY <= other.minY && other.maxX <= this.maxX && other.maxY <= this.maxY
+            );
         }
 
         intersects(other: RectTree.Node) {
-            return other.minX <= this.maxX && other.minY <= this.maxY && other.maxX >= this.minX && other.maxY >= this.minY;
+            return (
+                other.minX <= this.maxX && other.minY <= this.maxY && other.maxX >= this.minX && other.maxY >= this.minY
+            );
         }
 
         extend(other: RectTree.Node): RectTree.Node {
@@ -613,7 +625,10 @@ export namespace RectTree {
         }
 
         enlargedArea(other: RectTree.Node) {
-            return (Math.max(other.maxX, this.maxX) - Math.min(other.minX, this.minX)) * (Math.max(other.maxY, this.maxY) - Math.min(other.minY, this.minY));
+            return (
+                (Math.max(other.maxX, this.maxX) - Math.min(other.minX, this.minX)) *
+                (Math.max(other.maxY, this.maxY) - Math.min(other.minY, this.minY))
+            );
         }
 
         intersectionArea(other: RectTree.Node) {

@@ -29,7 +29,10 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     },
                 };
 
-                if (newSheet.cellData[rowIndex] && (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd?.r) {
+                if (
+                    newSheet.cellData[rowIndex] &&
+                    (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd?.r
+                ) {
                     delete (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd?.r;
                 }
             }
@@ -41,7 +44,10 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     },
                 };
 
-                if (newSheet.cellData[rowIndex] && (newSheet.cellData[rowIndex][Number(colIndex) + 1]?.s as IStyleData)?.bd?.l) {
+                if (
+                    newSheet.cellData[rowIndex] &&
+                    (newSheet.cellData[rowIndex][Number(colIndex) + 1]?.s as IStyleData)?.bd?.l
+                ) {
                     delete (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd?.l;
                 }
             }
@@ -53,7 +59,10 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     },
                 };
 
-                if (newSheet.cellData[rowIndex - 1] && (newSheet.cellData[rowIndex][colIndex]?.s as IStyleData)?.bd?.b) {
+                if (
+                    newSheet.cellData[rowIndex - 1] &&
+                    (newSheet.cellData[rowIndex][colIndex]?.s as IStyleData)?.bd?.b
+                ) {
                     delete (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd?.b;
                 }
             }
@@ -65,12 +74,18 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                     },
                 };
 
-                if (newSheet.cellData[Number(rowIndex) + 1] && (newSheet.cellData[rowIndex][colIndex]?.s as IStyleData)?.bd?.t) {
+                if (
+                    newSheet.cellData[Number(rowIndex) + 1] &&
+                    (newSheet.cellData[rowIndex][colIndex]?.s as IStyleData)?.bd?.t
+                ) {
                     delete (newSheet.cellData[rowIndex][colIndex - 1]?.s as IStyleData)?.bd?.t;
                 }
             }
 
-            (newSheet.cellData[rowIndex][colIndex].s as IStyleData).bd = Object.assign((newSheet.cellData[rowIndex][colIndex].s as IStyleData).bd || {}, newBorder);
+            (newSheet.cellData[rowIndex][colIndex].s as IStyleData).bd = Object.assign(
+                (newSheet.cellData[rowIndex][colIndex].s as IStyleData).bd || {},
+                newBorder
+            );
         } else if (borderInfo.rangeType === 'range') {
             for (const range of borderInfo.range) {
                 const startRow = range.row[0];
@@ -103,7 +118,10 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign(
+                                    (newSheet.cellData[r][c].s as IStyleData).bd || {},
+                                    newBorder
+                                );
                             }
                         }
 
@@ -141,7 +159,10 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign(
+                                    (newSheet.cellData[r][c].s as IStyleData).bd || {},
+                                    newBorder
+                                );
                             }
                         }
 
@@ -179,7 +200,10 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign(
+                                    (newSheet.cellData[r][c].s as IStyleData).bd || {},
+                                    newBorder
+                                );
                             }
                         }
 
@@ -217,7 +241,10 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign(
+                                    (newSheet.cellData[r][c].s as IStyleData).bd || {},
+                                    newBorder
+                                );
                             }
                         }
 
@@ -376,7 +403,10 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     };
                                 }
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign(
+                                    (newSheet.cellData[r][c].s as IStyleData).bd || {},
+                                    newBorder
+                                );
                             }
                         }
 
@@ -501,7 +531,10 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign(
+                                    (newSheet.cellData[r][c].s as IStyleData).bd || {},
+                                    newBorder
+                                );
                             }
                         }
 
@@ -539,7 +572,10 @@ export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
                                     },
                                 };
 
-                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign((newSheet.cellData[r][c].s as IStyleData).bd || {}, newBorder);
+                                (newSheet.cellData[r][c].s as IStyleData).bd = Object.assign(
+                                    (newSheet.cellData[r][c].s as IStyleData).bd || {},
+                                    newBorder
+                                );
                             }
                         }
 

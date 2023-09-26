@@ -30,7 +30,12 @@ export class SetImageTypeAction extends SheetActionBase<ISetImageTypeData, ISetI
         const context = worksheet.getContext();
         const manager = context.getPluginManager();
         const plugin = manager.getPluginByName(OVER_GRID_IMAGE_PLUGIN_NAME) as OverGridImagePlugin;
-        return SetOverGridImageTypeApply(plugin, this._doActionData.sheetId, this._doActionData.id, this._doActionData.type);
+        return SetOverGridImageTypeApply(
+            plugin,
+            this._doActionData.sheetId,
+            this._doActionData.id,
+            this._doActionData.type
+        );
     }
 
     undo(): void {
@@ -38,7 +43,12 @@ export class SetImageTypeAction extends SheetActionBase<ISetImageTypeData, ISetI
         const context = worksheet.getContext();
         const manager = context.getPluginManager();
         const plugin = manager.getPluginByName(OVER_GRID_IMAGE_PLUGIN_NAME) as OverGridImagePlugin;
-        SetOverGridImageTypeApply(plugin, this._oldActionData.sheetId, this._oldActionData.id, this._oldActionData.type);
+        SetOverGridImageTypeApply(
+            plugin,
+            this._oldActionData.sheetId,
+            this._oldActionData.id,
+            this._oldActionData.type
+        );
     }
 
     validate(): boolean {

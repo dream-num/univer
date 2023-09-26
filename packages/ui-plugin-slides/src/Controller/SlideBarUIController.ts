@@ -9,7 +9,10 @@ export class SlideBarUIController {
 
     private _pages: ISlidePage[] = [];
 
-    constructor(@Inject(CanvasView) private readonly _canvasView: CanvasView, @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(
+        @Inject(CanvasView) private readonly _canvasView: CanvasView,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+    ) {
         this._initialize();
     }
 

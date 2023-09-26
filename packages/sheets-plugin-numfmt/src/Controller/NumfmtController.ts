@@ -1,5 +1,13 @@
 import { ComponentManager, IMenuService } from '@univerjs/base-ui';
-import { Disposable, ICommandService, ICurrentUniverService, ISelectionRange, ObjectMatrix, ObjectMatrixPrimitiveType, Range } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    ICurrentUniverService,
+    ISelectionRange,
+    ObjectMatrix,
+    ObjectMatrixPrimitiveType,
+    Range,
+} from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { NUMFMT_PLUGIN_NAME } from '../Basics/Const';
@@ -94,7 +102,9 @@ export class NumfmtController extends Disposable {
 
         this._initializeContextMenu();
 
-        [ShowModalOperation, SetNumfmtRangeDataCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        [ShowModalOperation, SetNumfmtRangeDataCommand].forEach((command) =>
+            this.disposeWithMe(this._commandService.registerCommand(command))
+        );
     }
 
     getNumfmtBySheetIdConfig(sheetId: string): ObjectMatrixPrimitiveType<string> {

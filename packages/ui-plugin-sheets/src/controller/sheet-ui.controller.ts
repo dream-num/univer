@@ -10,6 +10,7 @@ import {
     SetUnderlineCommand,
 } from '@univerjs/base-sheets';
 import {
+    ColorPicker,
     ComponentManager,
     IDesktopUIController,
     IMenuItemFactory,
@@ -21,6 +22,9 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univ
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
+import { SHEET_UI_PLUGIN_NAME } from '../Basics';
+import { RenameSheetCommand } from '../commands/commands/rename.command';
+import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import { QuitCellEditorCommand } from '../services/cell-editor/cell-editor.command';
 import { RightMenuInput } from '../View/RightMenu/RightMenuInput';
 import { RightMenuItem } from '../View/RightMenu/RightMenuItem';
@@ -29,14 +33,18 @@ import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
+    ChangeColorSheetMenuItemFactory,
     ClearSelectionMenuItemFactory,
     CONTEXT_MENU_INPUT_LABEL,
     CopyMenuItemFactory,
+    CopySheetMenuItemFactory,
     DeleteRangeMenuItemFactory,
     DeleteRangeMoveLeftMenuItemFactory,
     DeleteRangeMoveUpMenuItemFactory,
+    DeleteSheetMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
+    HideSheetMenuItemFactory,
     HorizontalAlignMenuItemFactory,
     InsertColMenuItemFactory,
     InsertRowMenuItemFactory,
@@ -45,6 +53,7 @@ import {
     RedoMenuItemFactory,
     RemoveColMenuItemFactory,
     RemoveRowMenuItemFactory,
+    RenameSheetMenuItemFactory,
     ResetBackgroundColorMenuItemFactory,
     ResetTextColorMenuItemFactory,
     SetBorderColorMenuItemFactory,
@@ -56,6 +65,7 @@ import {
     TextRotateMenuItemFactory,
     UnderlineMenuItemFactory,
     UndoMenuItemFactory,
+    UnHideSheetMenuItemFactory,
     VerticalAlignMenuItemFactory,
     WrapTextMenuItemFactory,
 } from './menu/menu';
@@ -66,7 +76,6 @@ import {
     CellMergeMenuItemFactory,
     CellMergeVerticalMenuItemFactory,
 } from './menu/merge.menu';
-import { SheetBarUIController } from './SheetBarUIController';
 import { QuitCellEditorShortcutItem } from './shortcuts/editor.shortcut';
 import {
     ExpandSelectionDownShortcutItem,
@@ -98,8 +107,6 @@ import { ClearSelectionValueShortcutItem } from './shortcuts/value.shortcut';
 
 @OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class SheetUIController extends Disposable {
-    private _sheetBarUIController: SheetBarUIController;
-
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
@@ -109,9 +116,6 @@ export class SheetUIController extends Disposable {
         @IUIController private readonly _uiController: IDesktopUIController
     ) {
         super();
-
-        this._sheetBarUIController = this._injector.createInstance(SheetBarUIController);
-        this._injector.add([SheetBarUIController, { useFactory: () => this._sheetBarUIController }]);
 
         this._initialize();
         this._initUI();
@@ -124,6 +128,7 @@ export class SheetUIController extends Disposable {
         // FIXME: no dispose logic
         componentManager.register(CONTEXT_MENU_INPUT_LABEL, RightMenuInput);
         componentManager.register(RightMenuItem.name, RightMenuItem);
+        componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
 
         // init commands
         [
@@ -138,6 +143,9 @@ export class SheetUIController extends Disposable {
             SetFontSizeCommand,
 
             QuitCellEditorCommand,
+
+            ShowMenuListCommand,
+            RenameSheetCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
@@ -185,6 +193,14 @@ export class SheetUIController extends Disposable {
                 VerticalAlignMenuItemFactory,
                 WrapTextMenuItemFactory,
                 TextRotateMenuItemFactory,
+
+                // sheetbar
+                DeleteSheetMenuItemFactory,
+                CopySheetMenuItemFactory,
+                RenameSheetMenuItemFactory,
+                ChangeColorSheetMenuItemFactory,
+                HideSheetMenuItemFactory,
+                UnHideSheetMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));

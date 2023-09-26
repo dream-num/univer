@@ -1,4 +1,12 @@
-import { BaseSelectProps, Icon, Select } from '@univerjs/base-ui';
+import {
+    AppContext,
+    IMenuSelectorItem,
+    IValueOption,
+    MenuItemType,
+    MenuPosition,
+    Select,
+    SelectTypes,
+} from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { Component } from 'react';
 
@@ -6,12 +14,14 @@ import { FilterPlugin } from '../FilterPlugin';
 import { IProps } from '../IData';
 
 interface IState {
-    filter: IToolbarItemProps;
+    filter: IMenuSelectorItem<unknown>;
     isFilter: boolean;
     filterPlugin: FilterPlugin | null;
 }
 
 export class FilterButton extends Component<IProps, IState> {
+    static override contextType = AppContext;
+
     protected _localeObserver: Nullable<Observer<Workbook>>;
 
     constructor(props: IProps) {
@@ -22,21 +32,22 @@ export class FilterButton extends Component<IProps, IState> {
     initialize(props: IProps) {
         this.state = {
             filter: {
-                locale: 'filter',
-                type: 'select',
-                label: <Icon.Data.FilterRankIcon />,
-                icon: <Icon.NextIcon />,
-                show: true,
-                children: [
+                id: 'filter',
+                title: 'filter',
+                type: MenuItemType.SELECTOR,
+                selectType: SelectTypes.NEO,
+                positions: [MenuPosition.TOOLBAR],
+                icon: 'FilterRankIcon',
+                selections: [
                     {
-                        locale: 'filter.filter',
-                        icon: <Icon.Data.FilterIcon />,
-                        onClick: () => {},
+                        label: 'filter.filter',
+                        value: 'filter',
+                        // icon: 'FilterIcon',
                     },
                     {
-                        locale: 'filter.clearFilter',
-                        icon: <Icon.Data.CleanIcon />,
-                        onClick: () => {},
+                        label: 'filter.clearFilter',
+                        value: 'clearFilter',
+                        // icon: 'CleanIcon',
                     },
                 ],
             },
@@ -56,39 +67,38 @@ export class FilterButton extends Component<IProps, IState> {
         this.setLocale();
 
         // subscribe Locale change event
-        this._localeObserver = this.context.observerManager
-            .requiredObserver('onAfterChangeUILocaleObservable', 'core')
-            ?.add(() => {
-                this.setLocale();
-            });
+        const observerManager = (this.context as any).injector!.get('observerManager');
+        this._localeObserver = observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.add(() => {
+            this.setLocale();
+        });
     }
 
     /**
      * destory
      */
     override componentWillUnmount() {
-        this.context.observerManager
-            .requiredObserver('onAfterChangeUILocaleObservable', 'core')
-            ?.remove(this._localeObserver);
+        const observerManager = (this.context as any).injector!.get('observerManager');
+        observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.remove(this._localeObserver);
     }
 
     /**
      * set text by config setting and Locale message
      */
     setLocale() {
-        const locale = this.context.localeService.getLocale();
+        const locale = (this.context as any).injector!.get('localeService');
+        // const locale = this.context.localeService.getLocale();
         this.setState((prevState: IState) => {
             const item = prevState.filter;
             // set current Locale string for tooltip
-            item.tooltip = locale.get(`${item.locale}Label`);
+            item.tooltip = locale.get(`${item.title}Label`);
 
             // set current Locale string for select
-            item.children?.forEach((ele: IToolbarItemProps) => {
-                if (ele.locale) {
-                    ele.label = locale.get(`${ele.locale}`);
+            (item.selections as IValueOption[])?.forEach((ele) => {
+                if (ele.label) {
+                    ele.label = locale.get(`${ele.label}`);
                 }
             });
-            item.label = typeof item.label === 'object' ? item.label : item.children![0].label;
+            item.label = typeof item.label === 'object' ? item.label : (item.selections![0] as IValueOption).label;
 
             return {
                 filter: item,
@@ -101,16 +111,8 @@ export class FilterButton extends Component<IProps, IState> {
      *
      * @returns {void}
      */
-    render() {
+    override render() {
         const { filter } = this.state;
-        return (
-            <Select
-                tooltip={filter.tooltip}
-                key={filter.locale}
-                children={filter.children as BaseSelectProps[]}
-                label={filter.label}
-                icon={filter.icon}
-            />
-        );
+        return <Select tooltip={filter.tooltip} children={filter.selections as IValueOption[]} icon={filter.icon} />;
     }
 }

@@ -287,7 +287,7 @@ export class SheetClipboardController extends Disposable {
             },
 
             onPasteCells(range, matrix) {
-                return self._onPasteCells(range, matrix, workbookId, worksheetId);
+                return self._onPasteCells(range, matrix, workbookId!, worksheetId!);
             },
 
             onAfterPaste(success) {

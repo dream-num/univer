@@ -37,7 +37,7 @@ export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectPr
     style?: React.CSSProperties;
     hidden?: BooleanNumber;
     addSheet?: () => void;
-    onMouseDown?: (e: MouseEvent) => void;
+    onMouseDown?: (e: React.MouseEvent) => void;
     selectSheet?: (slideItemIndex: number) => void;
     changeSheetName?: (sheetId: string, name: string) => void;
     dragEnd?: (elements: HTMLElement[]) => void;
@@ -146,7 +146,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     };
 
     // 隐藏下拉
-    hideSelect = (e: MouseEvent) => {
+    hideSelect = () => {
         this.setState({
             showMenu: false,
         });
@@ -275,7 +275,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 index: `${index}`,
                 selected: sheet.getStatus() === BooleanNumber.TRUE,
                 color: (sheet.getTabColor() as string) ?? undefined,
-                onMouseDown: (e: MouseEvent) => {
+                onMouseDown: () => {
                     const worksheetId = sheet.getSheetId();
                     // this.setState({
                     //     activeKey: worksheetId,
@@ -332,10 +332,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                         <Icon.Math.AddIcon style={{ fontSize: '20px' }} />
                     </Button>
                     {/* all sheets button */}
-                    <Button
-                        className={styles.sheetBarOptionsButton}
-                        onClick={(e: MouseEvent) => this.ref.current?.showMenu(true)}
-                    >
+                    <Button className={styles.sheetBarOptionsButton} onClick={() => this.ref.current?.showMenu(true)}>
                         <Icon.MenuIcon style={{ fontSize: '20px' }} />
                         <SheetBarMenu menu={menuList as ISheetBarMenuItem[]}></SheetBarMenu>
                     </Button>
@@ -406,10 +403,10 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
                 {/* prev next scroll button */}
                 <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>
-                    <Button className={styles.sheetBarOptionsButton} onClick={this.scrollLeft}>
+                    <Button className={styles.sheetBarOptionsButton}>
                         <Icon.NextIcon rotate={90} style={{ padding: '5px' }} />
                     </Button>
-                    <Button className={styles.sheetBarOptionsButton} onClick={this.scrollRight}>
+                    <Button className={styles.sheetBarOptionsButton}>
                         <Icon.NextIcon rotate={-90} style={{ padding: '5px' }} />
                     </Button>
                 </div>

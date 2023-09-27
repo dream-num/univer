@@ -5,7 +5,7 @@ export * from './Common';
 export * from './Components';
 export { SharedController } from './controllers/shared-shortcut.controller';
 export { IUIController } from './controllers/ui/ui.controller';
-export { IDesktopUIController } from './controllers/ui/ui-desktop.controller';
+export { type IDesktopUIController } from './controllers/ui/ui-desktop.controller';
 export * from './Enum';
 export * from './Helpers';
 export * from './Locale';
@@ -19,16 +19,16 @@ export {
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from './services/clipboard/clipboard-interface.service';
 export {
-    ICustomComponentOption,
-    ICustomComponentProps,
-    IDisplayMenuItem,
-    IMenuButtonItem,
-    IMenuItem,
-    IMenuItemFactory,
-    IMenuSelectorItem,
+    type ICustomComponentOption,
+    type ICustomComponentProps,
+    type IDisplayMenuItem,
+    type IMenuButtonItem,
+    type IMenuItem,
+    type IMenuItemFactory,
+    type IMenuSelectorItem,
     isCustomComponentOption,
     isValueOptions,
-    IValueOption,
+    type IValueOption,
     MenuItemType,
     MenuPosition,
 } from './services/menu/menu';
@@ -39,5 +39,5 @@ export { DesktopNotificationService } from './services/notification/desktop-noti
 export { INotificationService } from './services/notification/notification.service';
 export { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
-export { DesktopShortcutService, IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
+export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
 export * from './Utils';

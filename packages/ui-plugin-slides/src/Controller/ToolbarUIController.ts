@@ -12,10 +12,9 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { Inject, SkipSelf } from '@wendellhu/redi';
-import { ComponentChildren } from 'react';
 
 import { DefaultToolbarConfig, SLIDE_UI_PLUGIN_NAME, SlideToolbarConfig } from '../Basics';
-import { Toolbar } from '../View';
+import { Toolbar } from '../View/Toolbar';
 import { TEXT_ROTATE_CHILDREN } from '../View/Toolbar/Const';
 import styles from '../View/Toolbar/index.module.less';
 
@@ -35,7 +34,7 @@ export interface IToolbarItemProps extends BaseToolbarSelectProps {
     toolbarType?: ToolbarType;
     tooltip?: string; //tooltip文字
     border?: boolean;
-    suffix?: ComponentChildren;
+    suffix?: React.ReactNode;
 }
 
 export class ToolbarUIController {
@@ -254,7 +253,7 @@ export class ToolbarUIController {
     }
 
     hideTooltip() {
-        const dom = this._toolbar.base as HTMLDivElement;
+        const dom = (this._toolbar as any).current as HTMLDivElement;
         const tooltip = dom.querySelectorAll(`.${styles.tooltipTitle}.${styles.bottom}`);
         tooltip.forEach((item) => {
             (item as HTMLSpanElement).style.display = 'none';

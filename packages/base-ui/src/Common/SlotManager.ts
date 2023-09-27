@@ -9,7 +9,7 @@ export type SlotComponent = {
 };
 
 export type SlotGroupProps = Map<string, Map<string, SlotComponent>>;
-export type SlotList = Map<string, Slot>;
+export type SlotList = Map<string, typeof Slot>;
 
 export class SlotManager {
     // slot配置
@@ -18,7 +18,7 @@ export class SlotManager {
     // slot实例
     private _slotList: SlotList = new Map();
 
-    getComponent = (ref: Slot) => {
+    getComponent = (ref: any) => {
         this._slotList.set(ref.props.name, ref);
         const slot = this._slotGroup.get(ref.props.name);
         if (!slot) return;
@@ -34,7 +34,7 @@ export class SlotManager {
             slot.set(component.name, component);
         }
 
-        const item = this._slotList.get(slotName);
+        const item = this._slotList.get(slotName) as any;
         item?.setSlot(component, cb);
     }
 
@@ -45,17 +45,17 @@ export class SlotManager {
         if (!SlotComponent) return;
         const component = SlotComponent.get(name);
         if (!component) return;
-        slot.removeSlot(component);
+        (slot as any).removeSlot(component);
     }
 
-    getSlot(slotName: string): Nullable<Slot> {
+    getSlot(slotName: string): Nullable<typeof Slot> {
         const slot = this._slotList.get(slotName);
         if (slot) return slot;
     }
 
     removeSlot(name: string) {
         this._slotGroup.delete(name);
-        const slot = this._slotList.get(name);
+        const slot = this._slotList.get(name) as any;
         if (slot) {
             slot.setSlotAll(new Map());
             this._slotList.delete(name);

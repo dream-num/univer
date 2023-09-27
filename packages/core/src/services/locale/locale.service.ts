@@ -47,7 +47,7 @@ export class LocaleService extends Disposable {
         this.disposeWithMe(toDisposable(() => this._locale$.complete()));
     }
 
-    t(key: string): string {
+    t(key?: string): string {
         return this.get(key);
     }
 

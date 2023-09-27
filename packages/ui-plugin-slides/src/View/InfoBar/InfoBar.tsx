@@ -35,7 +35,7 @@ export class InfoBar extends Component<IProps, IState> {
         });
     }
 
-    render() {
+    override render() {
         const { renameSheet } = this.props;
         if (!this.state.infoList) return;
 

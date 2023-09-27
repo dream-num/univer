@@ -39,7 +39,7 @@ export class DocContainer extends Component<BaseDocContainerProps> {
      * split mouse down
      * @param e
      */
-    handleSplitBarMouseDown = (e: MouseEvent) => {
+    handleSplitBarMouseDown = (e: React.MouseEvent) => {
         e = e || window.event; // Compatible with IE browser
         // Store the current mouse position
         this.leftContentLeft = this.splitLeftRef.current?.getBoundingClientRect().left!;

@@ -3,7 +3,7 @@ import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
 import { IDocUIPluginConfig } from '../Basics';
-import { DocContainer } from '../View';
+import { DocContainer } from '../View/DocContainer';
 
 export class DocContainerUIController {
     private _docContainer: DocContainer;

@@ -16,7 +16,7 @@ import { IToolbarItemProps } from '../../Controller';
 import styles from './index.module.less';
 
 interface IProps extends BaseComponentProps {
-    style?: JSX.CSSProperties;
+    style?: React.CSSProperties;
     toolList: IToolbarItemProps[];
 }
 
@@ -31,13 +31,11 @@ interface IState {
 export class Toolbar extends Component<IProps, IState> {
     static override contextType = AppContext;
 
-    toolbarRef = createRef();
+    toolbarRef = createRef<HTMLDivElement>();
 
-    moreBtnRef = createRef();
+    moreBtnRef = createRef<HTMLDivElement>();
 
-    moreToolRef = createRef();
-
-    SelectRef = createRef();
+    moreToolRef = createRef<HTMLDivElement>();
 
     clientWidth = 0;
 
@@ -79,7 +77,7 @@ export class Toolbar extends Component<IProps, IState> {
     };
 
     hide = (e: Event) => {
-        if (this.moreToolRef.current.contains(e.target)) return;
+        if (this.moreToolRef.current?.contains(e.target as Node)) return;
         e.stopImmediatePropagation();
         this.setState({ showMore: false });
         document.removeEventListener('click', this.hide, true);
@@ -89,8 +87,8 @@ export class Toolbar extends Component<IProps, IState> {
         if (!this.clientWidth) {
             this.clientWidth = document.documentElement.clientWidth;
         }
-        const list = this.toolbarRef.current.querySelectorAll(`.${styles.toolbarWarp} > div`);
-        const moreButtonWidth = this.moreBtnRef.current.clientWidth;
+        const list = this.toolbarRef.current?.querySelectorAll(`.${styles.toolbarWarp} > div`)!;
+        const moreButtonWidth = this.moreBtnRef.current?.clientWidth ?? 0;
         let width = 60 + moreButtonWidth;
         let index = null;
 
@@ -127,7 +125,7 @@ export class Toolbar extends Component<IProps, IState> {
                     toolWidth += list[i].clientWidth + 6;
                 }
 
-                const moreList = this.moreToolRef.current.querySelectorAll(`.${styles.moreTool} > div`);
+                const moreList = this.moreToolRef.current?.querySelectorAll(`.${styles.moreTool} > div`)!;
                 let moreIndex = null;
                 let last = false; //最后一个元素
 
@@ -176,14 +174,15 @@ export class Toolbar extends Component<IProps, IState> {
     };
 
     resetUl = () => {
-        const wrapper = this.getContext()
+        // @ts-ignore
+        const wrapper = this.context()
             .getPluginManager()
             .getPluginByName<SlideUIPlugin>(SLIDE_UI_PLUGIN_NAME)
             ?.getAppUIController()
             .getSlideContainerController()
             .getContentRef().current!;
         const height = `${(wrapper as HTMLDivElement).offsetHeight}px`;
-        const ul = this.toolbarRef.current.querySelectorAll('ul');
+        const ul = this.toolbarRef.current?.querySelectorAll('ul')!;
         for (let i = 0; i < ul.length; i++) {
             ul[i].style.maxHeight = height;
         }
@@ -205,13 +204,7 @@ export class Toolbar extends Component<IProps, IState> {
                 if (item.show) {
                     return (
                         <Tooltip key={index} title={item.tooltip} placement={'bottom'}>
-                            <Button
-                                unActive={item.unActive}
-                                className={styles.textButton}
-                                type="text"
-                                active={item.active}
-                                onClick={item.onClick}
-                            >
+                            <Button className={styles.textButton} active={item.active} onClick={item.onClick}>
                                 <CustomLabel label={item.label} />
                             </Button>
                         </Tooltip>
@@ -242,7 +235,7 @@ export class Toolbar extends Component<IProps, IState> {
         });
     }
 
-    render() {
+    override render() {
         const { defaultToolList, moreToolList, showMore } = this.state;
 
         return (
@@ -259,7 +252,7 @@ export class Toolbar extends Component<IProps, IState> {
                             title={(<CustomLabel label="toolbar.toolMoreTip" />) as unknown as string}
                             placement={'bottom'}
                         >
-                            <Button type="text" onClick={this.showMore}>
+                            <Button onClick={this.showMore}>
                                 <div style={{ fontSize: '14px' }}>
                                     <CustomLabel label="toolbar.toolMore" />
                                 </div>

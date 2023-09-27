@@ -28,6 +28,8 @@ export interface IToolbarItemStatus {
 export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbarItemStatus> {
     static override contextType = AppContext;
 
+    declare context: React.ContextType<typeof AppContext>;
+
     private disabledSubscription: Subscription | undefined;
 
     private activatedSubscription: Subscription | undefined;
@@ -133,7 +135,6 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                 <Button
                     active={activated}
                     className={styles.textButton}
-                    type="text"
                     disabled={disabled}
                     onClick={() => commandService.executeCommand(props.id)}
                 >

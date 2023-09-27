@@ -7,7 +7,11 @@ import { ThinScene } from './ThinScene';
 export class Layer {
     private _objects: BaseObject[] = [];
 
-    constructor(private _scene: ThinScene, objects: BaseObject[] = [], private _zIndex: number = 1) {
+    constructor(
+        private _scene: ThinScene,
+        objects: BaseObject[] = [],
+        private _zIndex: number = 1
+    ) {
         this.addObjects(objects);
     }
 

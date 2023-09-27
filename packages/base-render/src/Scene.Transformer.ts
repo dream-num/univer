@@ -190,7 +190,10 @@ export class Transformer implements ITransformerConfig {
 
     private _selectedObjectMap = new Map<string, BaseObject>();
 
-    constructor(private _scene: ThinScene, config?: ITransformerConfig) {
+    constructor(
+        private _scene: ThinScene,
+        config?: ITransformerConfig
+    ) {
         this._initialProps(config);
     }
 

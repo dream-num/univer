@@ -17,7 +17,10 @@ export class DataStreamTreeNode {
 
     blocks: number[] = [];
 
-    constructor(public nodeType: DataStreamTreeNodeType, public content?: string) {}
+    constructor(
+        public nodeType: DataStreamTreeNodeType,
+        public content?: string
+    ) {}
 
     static create(nodeType: DataStreamTreeNodeType, content?: string) {
         return new DataStreamTreeNode(nodeType, content);

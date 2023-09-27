@@ -12,7 +12,10 @@ export const IRenderingEngine = createIdentifier<Engine>('univer.render-engine')
 export class RenderEngine extends Plugin {
     static override type = PluginType.Univer;
 
-    constructor(_config: undefined, @Inject(Injector) override readonly _injector: Injector) {
+    constructor(
+        _config: undefined,
+        @Inject(Injector) override readonly _injector: Injector
+    ) {
         super(PLUGIN_NAMES.BASE_RENDER);
         this._injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
 

@@ -12,7 +12,10 @@ import { NODE_ORDER_MAP, NodeType } from './NodeType';
 export const LAMBDA_TOKEN: string = 'LAMBDA';
 
 export class LambdaNode extends BaseAstNode {
-    constructor(token: string, private _lambdaId: string) {
+    constructor(
+        token: string,
+        private _lambdaId: string
+    ) {
         super(token);
     }
 

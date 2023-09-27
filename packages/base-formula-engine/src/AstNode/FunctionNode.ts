@@ -14,7 +14,10 @@ import { NODE_ORDER_MAP, NodeType } from './NodeType';
 import { PrefixNode } from './PrefixNode';
 
 export class FunctionNode extends BaseAstNode {
-    constructor(token: string, private _functionExecutor: BaseFunction) {
+    constructor(
+        token: string,
+        private _functionExecutor: BaseFunction
+    ) {
         super(token);
 
         if (this._functionExecutor.isAsync()) {

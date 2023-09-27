@@ -28,7 +28,7 @@
     }
 }
 
-.btn-primary(@color: var(--bg); @background: @primary-color) {
+.btn-primary(@color: @bg-color-secondary; @background: @primary-color) {
     .button-color(@color; @background; @background);
 
     &:hover {
@@ -42,7 +42,7 @@
     .button-disabled()
 }
 
-.btn-default(@color: var(--text-color); @background: var(--bg); @board: var(--border-color-base); ) {
+.btn-default(@color: var(--text-color); @background: @bg-color-secondary; @board: var(--border-color-base); ) {
     .button-color(@color; @background; @board);
 
     &:hover,
@@ -107,7 +107,7 @@
 }
 
 .btn-danger() {
-    .btn-primary(var(--bg), @error-color);
+    .btn-primary(@bg-color-secondary, @error-color);
 }
 
 .btn-danger-default() {

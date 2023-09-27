@@ -2,6 +2,12 @@ export interface IStyleSheet {
     [key: string]: string;
 }
 
+function convertToDashCase(input: string): string {
+    const dashCase = input.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`).replace(/(\d+)/g, '-$1');
+
+    return `--${dashCase}`;
+}
+
 class Theme {
     private styleSheet;
 
@@ -35,12 +41,10 @@ class Theme {
          *  before: {--primary-color:"#0188fb",--primary-color-hover:"#5391ff"}
          *  after:  {--primary-color:#0188fb;--primary-color-hover:#5391ff;}
          */
+
         let currentSkin = theme;
         currentSkin = Object.fromEntries(
-            Object.keys(theme).map((item) => [
-                `--${item.replace(/([A-Z0-9])/g, '-$1').toLowerCase()}`,
-                currentSkin[item],
-            ])
+            Object.keys(theme).map((item) => [convertToDashCase(item), currentSkin[item]])
         );
 
         // 3. insert new theme

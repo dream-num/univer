@@ -1,12 +1,14 @@
+@import '../../Basics/CSS/Skin/default.module.less';
+
 .color-picker-outer {
     width: fit-content;
     display: block;
-    background-color: var(--bg);
+    background-color: @bg-color-secondary;
     padding: 10px;
     // padding-bottom: 0;
     border-radius: 10px;
     // left: 0; // set outside
-    box-shadow: var(--box-shadow-base);
+    box-shadow: @box-shadow-base;
     z-index: 4;
     height: fit-content;
 }

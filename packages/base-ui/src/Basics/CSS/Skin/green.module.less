@@ -1,75 +1,20 @@
-// Main skin variables, green skin
 @import './base.less';
-
-@link-color: #217346; // 链接色
-@bg: #fff; //Basics background color for most Components
-@bg-hover: #efefef;
-@heading-color: rgba(0, 0, 0, 0.85); // 标题色
-@text-color: rgba(0, 0, 0, 0.65); // 主文本色
-@text-color-secondary: rgba(0, 0, 0, 0.45); // 次文本色
-@disabled-color: rgba(0, 0, 0, 0.25); // 失效色
-@disabled-bg: rgba(0, 0, 0, 0.04); //失效背景色
-@border-color-base: rgba(0, 0, 0, 0.15); // 边框色
-@border-color-base-hover: @gray-6; // 边框 hover高亮色
-@box-shadow-base: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05); // 浮层阴影
-
-// Export all skin variables, call variables in js
-
-:export {
-    --border-radius-base: @border-radius-base;
-    --border-width-base: @border-width-base;
-    --border-style-base: @border-style-base;
-    --line-height-base: @line-height-base;
-    --font-weight: @font-weight;
-    --font-size-base: @font-size-base;
-    --font-size-lg: @font-size-lg;
-    --font-size-sm: @font-size-sm;
-
-    --padding-base: @padding-base;
-    --margin-base: @margin-base;
-
-    --gray-1: @gray-1;
-    --gray-2: @gray-2;
-    --gray-3: @gray-3;
-    --gray-4: @gray-4;
-    --gray-5: @gray-5;
-    --gray-6: @gray-6;
-    --gray-7: @gray-7;
-    --gray-8: @gray-8;
-    --gray-9: @gray-9;
-    --gray-10: @gray-10;
-    --gray-11: @gray-11;
-    --gray-12: @gray-12;
-    --gray-13: @gray-13;
-    --gray-14: @gray-14;
-    --gray-15: @gray-15;
-    --gray-16: @gray-16;
-    --gray-17: @gray-17;
-
-    --link-color: @link-color;
-    --bg: @bg;
-    --font-size: @font-size-base;
-    --heading-color: @heading-color;
-    --text-color: @text-color;
-    --text-color-secondary: @text-color-secondary;
-    --disabled-color: @disabled-color;
-    --disabled-bg: @disabled-bg;
-    --border-color-base: @border-color-base;
-    --box-shadow-base: @box-shadow-base;
-    --border-color-base-hover: @border-color-base-hover;
-}
-
 
 /**
  * new design system
  */
-@info-color: @blue-500;
+// Functional
+@info-color: @blue-400;
 @success-color: @green-500;
 @warning-color: @gold-400;
 @error-color: @red-400;
 
+// Brand / 品牌
 @primary-color: @green-700;
 @primary-color-hover: @green-600;
+
+// Link
+@link-color: @blue-500;
 
 :export {
     // Fuctional / 功能
@@ -81,4 +26,7 @@
     // Brand / 品牌
     --primary-color: @primary-color;
     --primary-color-hover: @primary-color-hover;
+
+    // Link
+    --link-color: @link-color;
 }

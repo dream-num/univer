@@ -24,7 +24,6 @@ describe('Test set range values commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let currentUniverService: ICurrentUniverService;
     let selectionManager: SelectionManagerService;
     let getValue: () => any;
     let getStyle: () => any;
@@ -37,9 +36,6 @@ describe('Test set range values commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
-
-        currentUniverService = get(ICurrentUniverService);
-        currentUniverService.focusUniverInstance('test'); // used in undo
 
         selectionManager = get(SelectionManagerService);
         selectionManager.setCurrentSelection({

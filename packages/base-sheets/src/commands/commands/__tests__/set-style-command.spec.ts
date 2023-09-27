@@ -19,7 +19,6 @@ describe('Test style commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let currentUniverService: ICurrentUniverService;
 
     beforeEach(() => {
         const testBed = createCommandTestBed();
@@ -30,9 +29,6 @@ describe('Test style commands', () => {
         commandService.registerCommand(SetBoldCommand);
         commandService.registerCommand(SetStyleCommand);
         commandService.registerCommand(SetRangeStyleMutation);
-
-        currentUniverService = get(ICurrentUniverService);
-        currentUniverService.focusUniverInstance('test'); // used in undo
     });
 
     afterEach(() => {

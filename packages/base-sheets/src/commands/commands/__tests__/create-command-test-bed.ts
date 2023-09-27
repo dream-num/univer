@@ -1,4 +1,4 @@
-import { IWorkbookConfig, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ICurrentUniverService, IWorkbookConfig, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../../services/selection-manager.service';
@@ -64,6 +64,10 @@ export function createCommandTestBed() {
     if (!get) {
         throw new Error('[TestPlugin]: not hooked on!');
     }
+
+    // focus, used in undo
+    const currentUniverService = (get as Injector['get'])(ICurrentUniverService);
+    currentUniverService.focusUniverInstance('test');
 
     return {
         univer,

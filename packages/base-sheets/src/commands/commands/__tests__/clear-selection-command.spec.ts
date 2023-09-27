@@ -24,7 +24,6 @@ describe('Test clear selection content commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let currentUniverService: ICurrentUniverService;
 
     beforeEach(() => {
         const testBed = createCommandTestBed();
@@ -37,9 +36,6 @@ describe('Test clear selection content commands', () => {
         commandService.registerCommand(ClearSelectionAllCommand);
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
-
-        currentUniverService = get(ICurrentUniverService);
-        currentUniverService.focusUniverInstance('test'); // used in undo
     });
 
     afterEach(() => {

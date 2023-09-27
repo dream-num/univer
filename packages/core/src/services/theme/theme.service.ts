@@ -7,7 +7,7 @@ export class ThemeService extends Disposable {
     private currentTheme: IStyleSheet;
 
     // TODO: dark mode
-    private darkMode: boolean;
+    private darkMode: boolean = false;
 
     readonly currentTheme$: Observable<IStyleSheet>;
 

@@ -17,9 +17,9 @@ export type ObjectMatrixPrimitiveType<T> = {
  * @beta
  */
 export class ObjectMatrix<T> {
-    private _option: ObjectArray<ObjectArrayPrimitiveType<T>>;
+    private _option!: ObjectArray<ObjectArrayPrimitiveType<T>>;
 
-    private _matrix: ObjectMatrixPrimitiveType<T>;
+    private _matrix!: ObjectMatrixPrimitiveType<T>;
 
     constructor(matrix: ObjectMatrixPrimitiveType<T> = {}) {
         this._setOriginValue(matrix);

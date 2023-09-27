@@ -92,11 +92,11 @@ export class Entry<K, V> {
 }
 
 export class LRUMap<K, V> {
-    _keymap: Map<K, Entry<K, V>>;
+    _keymap!: Map<K, Entry<K, V>>;
 
-    size: number;
+    size: number = 0;
 
-    limit: number;
+    limit!: number;
 
     oldest: Entry<K, V> | undefined;
 

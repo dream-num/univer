@@ -3,7 +3,7 @@ import { ColorType, ThemeColors, ThemeColorType } from '../../Types/Enum';
 import { Color, RgbColor, ThemeColor } from './Color';
 
 export class ColorBuilder {
-    private _themeValue: ThemeColorType;
+    private _themeValue: ThemeColorType = ThemeColorType.LIGHT1;
 
     private _themeColors: ThemeColors;
 

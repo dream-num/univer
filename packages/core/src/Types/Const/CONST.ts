@@ -56,13 +56,9 @@ export const DEFAULT_WORKBOOK: IWorkbookConfig = {
     extensions: [],
     id: '',
     sheetOrder: [],
-    socketEnable: BooleanNumber.FALSE,
-    socketUrl: '',
     name: '',
     timeZone: '',
     appVersion: '',
-    theme: '',
-    skin: '',
     locale: LocaleType.EN,
     creator: '',
     styles: {},
@@ -70,7 +66,6 @@ export const DEFAULT_WORKBOOK: IWorkbookConfig = {
     lastModifiedBy: '',
     createdTime: '',
     modifiedTime: '',
-    pluginMeta: {},
     namedRanges: [],
 };
 

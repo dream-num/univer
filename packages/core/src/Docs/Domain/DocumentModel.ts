@@ -15,11 +15,11 @@ export type DocumentModelOrSimple = DocumentModelSimple | DocumentModel;
 export class DocumentModelSimple {
     snapshot: IDocumentData;
 
-    headerTreeMap: Map<string, DocumentBodyModel>;
+    headerTreeMap!: Map<string, DocumentBodyModel>; // sub class should guarantee this is not null
 
-    footerTreeMap: Map<string, DocumentBodyModel>;
+    footerTreeMap!: Map<string, DocumentBodyModel>; // sub class should guarantee this is not null
 
-    bodyModel: DocumentBodyModel;
+    bodyModel!: DocumentBodyModel; // sub class should guarantee this is not null
 
     constructor(snapshot: Partial<IDocumentData>) {
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };

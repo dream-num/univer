@@ -6,13 +6,11 @@ class Theme {
     private styleSheet;
 
     constructor() {
-        if (!this.styleSheet) {
-            const $style = document.createElement('style');
-            document.head.appendChild($style);
+        const $style = document.createElement('style');
+        document.head.appendChild($style);
 
-            const index = document.styleSheets.length - 1;
-            this.styleSheet = document.styleSheets[index];
-        }
+        const index = document.styleSheets.length - 1;
+        this.styleSheet = document.styleSheets[index];
     }
 
     setTheme(theme: IStyleSheet) {

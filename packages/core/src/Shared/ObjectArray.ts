@@ -52,10 +52,11 @@ const likeArr = (value: object): number => {
  * @beta
  */
 export class ObjectArray<T> {
-    private _array: ObjectArrayPrimitiveType<T>;
+    private _array!: ObjectArrayPrimitiveType<T>;
 
-    private _length: number;
+    private _length: number = 0;
 
+    // FIXME: fix constructor function overload
     constructor();
     constructor(array: ObjectArrayPrimitiveType<T>);
     constructor(size: number);

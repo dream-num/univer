@@ -452,8 +452,6 @@ export namespace RectTree {
     export class Node {
         minX: number;
 
-        range: Range;
-
         minY: number;
 
         maxX: number;

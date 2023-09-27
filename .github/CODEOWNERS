@@ -1,4 +1,21 @@
-packages/base-sheets/src/commands/commands/set-selections.command.ts @wzhudev
-packages/ui-plugin-sheets/src/controller/shortcuts/selection.shortcut.ts @wzhudev
+# core
+packages/core @DR-Univer @wzhudev
 
+# rendering
+packages/base-render @DR-Univer @wzhudev
+
+# business cores
+packages/base-docs @wzhudev @DR-Univer @Jocs
+packages/base-sheets @wzhudev @DR-Univer
+packages/base-slides @wzhudev @DR-Univer @jikkai
+
+# ui
+packages/base-ui @jikkai @wzhudev
+packages/ui-plugin-docs @jikkai @wzhudev
+packages/ui-plugin-sheets @jikkai @wzhudev
+packages/ui-plugin-slides @jikkai @wzhudev
+
+# documents
 docs/graphs.tldr @wzhudev
+
+# sheet-plugins TBD

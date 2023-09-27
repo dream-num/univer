@@ -6,7 +6,6 @@ import { ZIndexManager } from './Common/ZIndexManager';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
-import { DesktopClipboardService, IClipboardService } from './services/clipboard/clipboard.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopMenuService, IMenuService } from './services/menu/menu.service';
@@ -59,7 +58,6 @@ export class UIPlugin extends Plugin {
             [IMenuService, { useClass: DesktopMenuService }],
             [IContextMenuService, { useClass: DesktopContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService }],
-            [IClipboardService, { useClass: DesktopClipboardService }],
             [INotificationService, { useClass: DesktopNotificationService }],
             [IMessageService, { useClass: DesktopMessageService }],
 

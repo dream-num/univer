@@ -11,15 +11,12 @@ import {
     SelectCategoryType,
 } from '../Basics';
 import { SearchFormulaContent } from '../View/UI/SearchFormulaModal/SearchFormulaContent';
-import { SearchFormulaModal } from '../View/UI/SearchFormulaModal/SearchFormulaModal';
 import { SearchItem } from '../View/UI/SearchFormulaModal/SearchItem';
 
 export class SearchFormulaController {
     private _modalData: SearchFormulaModalData[];
 
-    private _formulaModal: SearchFormulaModal;
-
-    private _searchItem: SearchItem;
+    // private _formulaModal!: SearchFormulaModal;
 
     private _funParams: FunParams;
 
@@ -114,7 +111,7 @@ export class SearchFormulaController {
         if (index > -1) {
             this._modalData[index].show = show;
 
-            this._formulaModal.setModal(this._modalData);
+            // this._formulaModal.setModal(this._modalData);
         }
     }
 

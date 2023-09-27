@@ -2,6 +2,5 @@
 
 export * from './CSS/index';
 export * from './Interfaces/index';
-export * from './Register/index';
 export * from './Shared/index';
 // @endindex

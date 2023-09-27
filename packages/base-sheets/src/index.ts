@@ -12,6 +12,7 @@ export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './service
 
 // #region commands
 
+export { type IInsertColMutationParams, type IInsertRowMutationParams } from './Basics/Interfaces/MutationInterface';
 export {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -100,12 +101,17 @@ export { SetRangeValuesMutation } from './commands/mutations/set-range-values.mu
 export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
 export { SetWorksheetActivateMutation } from './commands/mutations/set-worksheet-activate.mutation';
 export {
+    type ISetWorksheetColWidthMutationParams,
     SetWorksheetColWidthMutation,
     SetWorksheetColWidthMutationFactory,
 } from './commands/mutations/set-worksheet-col-width.mutation';
 export { SetWorksheetHideMutation } from './commands/mutations/set-worksheet-hide.mutation';
 export { SetWorksheetNameMutation } from './commands/mutations/set-worksheet-name.mutation';
 export { SetWorksheetOrderMutation } from './commands/mutations/set-worksheet-order.mutation';
+export {
+    type ISetWorksheetRowHeightMutationParams,
+    SetWorksheetRowHeightMutation,
+} from './commands/mutations/set-worksheet-row-height.mutation';
 export { SetSelectionsOperation } from './commands/operations/selection.operation';
 export * from './Locale';
 

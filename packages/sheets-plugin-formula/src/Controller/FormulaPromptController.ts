@@ -8,15 +8,20 @@ import { CellInputHandler } from './CellInputHandler';
 import { KeyCode } from './keyCode';
 
 export class FormulaPromptController {
-    cellInputHandler: CellInputHandler;
+    // FIXME: strict initialization
+    cellInputHandler!: CellInputHandler;
 
-    richTextEle: HTMLElement;
+    // FIXME: strict initialization
+    richTextEle!: HTMLElement;
 
-    richTextEditEle: HTMLElement;
+    // FIXME: strict initialization
+    richTextEditEle!: HTMLElement;
 
-    private _searchFunction: SearchFunction;
+    // FIXME: strict initialization
+    private _searchFunction!: SearchFunction;
 
-    private _helpFunction: HelpFunction;
+    // FIXME: strict initialization
+    private _helpFunction!: HelpFunction;
 
     constructor(
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,

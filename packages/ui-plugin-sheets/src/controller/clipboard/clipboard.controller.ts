@@ -1,21 +1,15 @@
 import {
+    IInsertColMutationParams,
+    IInsertRowMutationParams,
     InsertColMutation,
     InsertRowMutation,
     ISetRangeValuesMutationParams,
-    SetRangeValuesMutation,
-} from '@univerjs/base-sheets';
-import {
-    IInsertColMutationParams,
-    IInsertRowMutationParams,
-} from '@univerjs/base-sheets/Basics/Interfaces/MutationInterface.js';
-import {
     ISetWorksheetColWidthMutationParams,
-    SetWorksheetColWidthMutation,
-} from '@univerjs/base-sheets/commands/mutations/set-worksheet-col-width.mutation.js';
-import {
     ISetWorksheetRowHeightMutationParams,
+    SetRangeValuesMutation,
+    SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
-} from '@univerjs/base-sheets/commands/mutations/set-worksheet-row-height.mutation.js';
+} from '@univerjs/base-sheets';
 import { IMessageService } from '@univerjs/base-ui';
 import {
     BooleanNumber,

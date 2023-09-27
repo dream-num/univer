@@ -2,7 +2,6 @@ import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { IMPORT_XLSX_PLUGIN_NAME } from './Basics';
-import { DragAndDropExtensionFactory } from './Basics/Register/DragAndDropExtension';
 import { ImportXlsxController } from './Controller/ImportXlsxController';
 import { en } from './Locale';
 import { UploadService } from './services/upload.service';
@@ -13,8 +12,6 @@ export class ImportXlsxPlugin extends Plugin<any> {
     static override type = PluginType.Sheet;
 
     private _importXlsxController!: ImportXlsxController;
-
-    private _dragAndDropExtensionFactory: DragAndDropExtensionFactory;
 
     constructor(
         config: IImportXlsxPluginConfig,

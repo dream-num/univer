@@ -4,6 +4,10 @@ export function firstLoader(formulaController: FormulaController) {
     const dataModel = formulaController.getDataModel();
     const engine = formulaController.getFormulaEngine();
 
+    if (!engine) {
+        throw new Error();
+    }
+
     const sheetDataPromise = engine.execute(
         formulaController.getUnitId(),
         dataModel.getFormulaData(),

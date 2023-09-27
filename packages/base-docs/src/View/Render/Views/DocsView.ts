@@ -56,7 +56,12 @@ export class DocsView extends BaseView {
 
     scrollToCenter() {
         const { docsLeft, docsTop } = this._documents.calculatePagePosition();
-        const pages = this._documentSkeleton.getSkeletonData().pages;
+        const pages = this._documentSkeleton.getSkeletonData()?.pages;
+
+        if (!pages) {
+            return;
+        }
+
         for (let i = 0; i < pages.length; i++) {
             const page = pages[i];
             for (const k of page.skeDrawings.keys()) {
@@ -134,7 +139,10 @@ export class DocsView extends BaseView {
         // }
         // documents.calculatePagePosition();
 
-        const pages = documentSkeleton.getSkeletonData().pages;
+        const pages = documentSkeleton.getSkeletonData()?.pages;
+        if (!pages) {
+            throw new Error();
+        }
 
         const { pageMarginLeft, pageMarginTop, docsLeft, docsTop } = documents.calculatePagePosition();
 

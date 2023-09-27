@@ -6,16 +6,16 @@ type CellDataType = string | number | boolean;
 
 export class FormulaCacheLoader {
     // Workbook data
-    private _sheetData: SheetDataType;
+    private _sheetData: SheetDataType = {};
 
     // Active worksheet name
-    private _activeSheetName: string;
+    private _activeSheetName: string = '';
 
     // 18.5.1.2 table (Table)
-    private _tableData: { [tableName: string]: string };
+    private _tableData: { [tableName: string]: string } = {};
 
     // 18.2.6 definedNames (Defined Names)
-    private _definedNames: { [name: string]: string };
+    private _definedNames: { [name: string]: string } = {};
 
     // formula runtime data
     private _sheetDataCache: SheetDataType = {};

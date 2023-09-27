@@ -5,6 +5,15 @@ import { Nullable } from './Types';
  * This class provides a set of methods to calculate `ISelectionRange`.
  */
 export class Rectangle {
+    static clone(src: ISelectionRange): ISelectionRange {
+        return {
+            startRow: src.startRow,
+            startColumn: src.startColumn,
+            endRow: src.endRow,
+            endColumn: src.endColumn,
+        };
+    }
+
     static equals(src: ISelectionRange, target: ISelectionRange): boolean {
         return (
             src.endRow === target.endRow &&

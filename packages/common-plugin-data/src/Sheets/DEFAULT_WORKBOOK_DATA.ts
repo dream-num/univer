@@ -303,16 +303,11 @@ const richTextTest: IDocumentData = {
  */
 export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
     id: 'workbook-01',
-    theme: 'default',
     locale: LocaleType.EN,
     creator: 'univer',
     name: 'universheet',
-    skin: 'default',
-    socketUrl: '',
-    socketEnable: BooleanNumber.FALSE,
     extensions: [],
     sheetOrder: ['sheet-01', 'sheet-02', 'sheet-03', 'sheet-04', 'sheet-05', 'sheet-06'],
-    pluginMeta: {},
     styles: {
         '1': {
             cl: {
@@ -745,16 +740,11 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
  */
 export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookConfig = {
     id: 'workbook-02',
-    theme: 'default',
     locale: LocaleType.EN,
     creator: 'univer',
     name: 'universheet',
-    skin: 'default',
-    socketUrl: '',
-    socketEnable: BooleanNumber.FALSE,
     extensions: [],
     sheetOrder: [],
-    pluginMeta: {},
     styles: {
         '1': {
             cl: {

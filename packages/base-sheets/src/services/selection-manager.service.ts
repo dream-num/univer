@@ -4,7 +4,7 @@ import {
     mergeCellHandler,
     NORMAL_SELECTION_PLUGIN_STYLE,
 } from '@univerjs/base-render';
-import { ISelectionRange, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
+import { ISelectionCell, ISelectionRange, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -121,8 +121,11 @@ export class SelectionManagerService implements IDisposable {
         return this._getFirstByParam(this._currentSelection);
     }
 
-    getLast(): Readonly<Nullable<ISelectionRangeWithStyle>> {
-        return this._getLastByParam(this._currentSelection);
+    getLast(): Readonly<Nullable<ISelectionRangeWithStyle & { cellRange: ISelectionCell }>> {
+        // The last selection position must have a cellRange.
+        return this._getLastByParam(this._currentSelection) as Readonly<
+            Nullable<ISelectionRangeWithStyle & { cellRange: ISelectionCell }>
+        >;
     }
 
     add(selectionDatas: ISelectionRangeWithStyle[]) {

@@ -35,9 +35,9 @@ export enum SELECTION_TYPE {
 
 export interface ISelection {
     /** range */
-    rangeData: ISelectionRange; // TODO@wzhudev: rename
-    cellRange: Nullable<ISelectionCell>;
-    selectionType?: SELECTION_TYPE;
+    rangeData: ISelectionRange; // TODO@wzhudev: rename to range
+    cellRange: Nullable<ISelectionCell>; // rename to primary
+    selectionType?: SELECTION_TYPE; // should be a property of IRange instead of ISelection
 }
 
 export interface ISelectionWithCoord {

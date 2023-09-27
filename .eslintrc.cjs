@@ -98,7 +98,7 @@ module.exports = {
         // '@typescript-eslint/member-ordering': 'error',
         '@typescript-eslint/no-explicit-any': 'warn',
         '@typescript-eslint/no-redeclare': 'off', // dependency interface and dependency token share the same name
-        '@typescript-eslint/no-unused-vars': 'off',
+        '@typescript-eslint/no-unused-vars': 'warn',
         'grouped-accessor-pairs': 'off',
         'no-magic-numbers': ['warn', { ignore: [0, 1, -1, 2] }],
         'no-unsafe-optional-chaining': 'off',

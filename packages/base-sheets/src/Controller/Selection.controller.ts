@@ -79,6 +79,7 @@ export class SelectionController extends Disposable {
     private _initialMain(sheetObject: ISheetObjectParam) {
         const { spreadsheet } = sheetObject;
         spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            this._selectionTransformerShapeManager.enableDetectMergedCell();
             this._selectionTransformerShapeManager.eventTrigger(evt, spreadsheet.zIndex + 1, SELECTION_TYPE.NORMAL);
             if (evt.button !== 2) {
                 state.stopPropagation();
@@ -90,6 +91,7 @@ export class SelectionController extends Disposable {
         const { spreadsheetRowHeader, spreadsheet } = sheetObject;
 
         spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            this._selectionTransformerShapeManager.disableDetectMergedCell();
             this._selectionTransformerShapeManager.eventTrigger(
                 evt,
                 (spreadsheet?.zIndex || 1) + 1,
@@ -106,6 +108,7 @@ export class SelectionController extends Disposable {
     private _initialColumnHeader(sheetObject: ISheetObjectParam) {
         const { spreadsheetColumnHeader, spreadsheet } = sheetObject;
         spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            this._selectionTransformerShapeManager.disableDetectMergedCell();
             this._selectionTransformerShapeManager.eventTrigger(
                 evt,
                 (spreadsheet?.zIndex || 1) + 1,

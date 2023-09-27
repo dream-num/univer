@@ -58,6 +58,10 @@ export class Engine extends ThinEngine<Scene> {
 
     private _pointerWheelEvent: (evt: any) => void;
 
+    private _pointerEnterEvent: (evt: any) => void;
+
+    private _pointerLeaveEvent: (evt: any) => void;
+
     /** previous pointer position */
     private pointer: { [deviceSlot: number]: number } = {};
 
@@ -146,8 +150,8 @@ export class Engine extends ThinEngine<Scene> {
     override dispose() {
         super.dispose();
         const eventPrefix = getPointerPrefix();
-        this._canvasEle.removeEventListener(`${eventPrefix}leave`, this._pointerMoveEvent);
-        this._canvasEle.removeEventListener(`${eventPrefix}enter`, this._pointerMoveEvent);
+        this._canvasEle.removeEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);
+        this._canvasEle.removeEventListener(`${eventPrefix}enter`, this._pointerEnterEvent);
         this._canvasEle.removeEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
         this._canvasEle.removeEventListener(`${eventPrefix}down`, this._pointerDownEvent);
         this._canvasEle.removeEventListener(`${eventPrefix}up`, this._pointerUpEvent);
@@ -444,6 +448,28 @@ export class Engine extends ThinEngine<Scene> {
             }
         };
 
+        this._pointerEnterEvent = (evt: any) => {
+            const deviceType = this.__getPointerType(evt);
+            // Store previous values for event
+            const deviceEvent = evt as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+
+            deviceEvent.currentState = 2;
+
+            this.onInputChangedObservable.notifyObservers(deviceEvent);
+        };
+
+        this._pointerLeaveEvent = (evt: any) => {
+            const deviceType = this.__getPointerType(evt);
+            // Store previous values for event
+            const deviceEvent = evt as IPointerEvent;
+            deviceEvent.deviceType = deviceType;
+
+            deviceEvent.currentState = 3;
+
+            this.onInputChangedObservable.notifyObservers(deviceEvent);
+        };
+
         this._pointerBlurEvent = (evt: any) => {
             if (this.__mouseId >= 0 && this._canvasEle.hasPointerCapture(this.__mouseId)) {
                 this._canvasEle.releasePointerCapture(this.__mouseId);
@@ -487,8 +513,8 @@ export class Engine extends ThinEngine<Scene> {
             }
         };
 
-        this._canvasEle.addEventListener(`${eventPrefix}enter`, this._pointerMoveEvent);
-        this._canvasEle.addEventListener(`${eventPrefix}leave`, this._pointerMoveEvent);
+        this._canvasEle.addEventListener(`${eventPrefix}enter`, this._pointerEnterEvent);
+        this._canvasEle.addEventListener(`${eventPrefix}leave`, this._pointerLeaveEvent);
         this._canvasEle.addEventListener(`${eventPrefix}move`, this._pointerMoveEvent);
         this._canvasEle.addEventListener(`${eventPrefix}down`, this._pointerDownEvent);
         this._canvasEle.addEventListener(`${eventPrefix}up`, this._pointerUpEvent);

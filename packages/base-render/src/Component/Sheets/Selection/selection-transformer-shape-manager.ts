@@ -497,8 +497,6 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
             this._endSelection();
             this._selectionRangeWithStyle$.next(this.getSelectionDataWithStyle());
         });
-
-        // state.stopPropagation();
     }
 
     convertSelectionRangeToData(selectionRange: ISelectionRangeWithStyle): ISelectionDataWithStyle {

@@ -19,7 +19,6 @@ export class CanvasView {
     private _views: BaseView[] = [];
 
     constructor(
-        // TODO@wzhudev: CanvasView should not be a singleton
         /** @deprecated This a temporary solution. CanvasView should not be a singleton. */
         private standalone = true,
         @IRenderingEngine private readonly _engine: Engine,

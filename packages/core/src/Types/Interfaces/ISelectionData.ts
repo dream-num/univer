@@ -12,7 +12,7 @@ export interface IPosition {
 }
 
 export interface ISingleCell {
-    actualRow: number; // current cell, if cell is in merge,  isMerged is true, If the cell is in the upper left corner, isMergedMainCell is true.
+    actualRow: number;
     actualColumn: number;
     isMerged: boolean;
     isMergedMainCell: boolean;
@@ -27,9 +27,8 @@ export interface ISelectionCellWithCoord extends IPosition, ISingleCell {
 }
 
 export interface ISelection {
-    /** range */
-    range: IRange; // TODO@wzhudev: rename to range
-    primary: Nullable<ISelectionCell>; // rename to primary
+    range: IRange;
+    primary: Nullable<ISelectionCell>;
 }
 
 export interface ISelectionWithCoord {

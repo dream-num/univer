@@ -1,12 +1,13 @@
 import React from 'react';
 import { type Preview } from '@storybook/react';
-import { defaultTheme } from '../src/Basics/CSS';
+import { defaultTheme, greenTheme } from '../src/Basics/CSS';
 import { ThemeService } from '@univerjs/core'
 
 const themeService = new ThemeService();
 
 const themes = {
     default: defaultTheme,
+    green: greenTheme
 }
 
 const preview: Preview = {

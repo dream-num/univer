@@ -12,9 +12,9 @@ import { INumfmtPluginData } from './Symbol';
 export class NumfmtPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
-    private _numfmtModalController: NumfmtModalController;
+    private _numfmtModalController!: NumfmtModalController;
 
-    private _numfmtController: NumfmtController;
+    private _numfmtController!: NumfmtController;
 
     private _numfmtPluginData: NumfmtModel;
 

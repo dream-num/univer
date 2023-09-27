@@ -17,9 +17,9 @@ import { ArrayFormulaLineControl } from './ArrayFormulaLineController';
 export class FormulaController {
     private _formulaDataModel: FormulaDataModel;
 
-    private _formulaEngine: FormulaEngineService;
+    private _formulaEngine?: FormulaEngineService;
 
-    private _interpreterCalculatePropsCache: IInterpreterDatasetConfig;
+    private _interpreterCalculatePropsCache?: IInterpreterDatasetConfig;
 
     private _activeSheetId: string;
 

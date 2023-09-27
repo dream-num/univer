@@ -1,12 +1,4 @@
-import {
-    AppContext,
-    BaseModalProps,
-    BaseSelectProps,
-    Button,
-    IBaseButtonProps,
-    Modal,
-    Select,
-} from '@univerjs/base-ui';
+import { AppContext, BaseSelectProps, Button, Modal, Select } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
 import { Component } from 'react';
 
@@ -28,12 +20,6 @@ interface IState {
 
 class IfGenerate extends Component<IProps, IState> {
     static override contextType = AppContext;
-
-    Button: IBaseButtonProps;
-
-    Modal: BaseModalProps;
-
-    Select: BaseSelectProps;
 
     private _localeObserver: Nullable<Observer<Workbook>>;
 

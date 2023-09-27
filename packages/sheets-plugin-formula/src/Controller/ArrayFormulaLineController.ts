@@ -14,15 +14,7 @@ const LINE_COLOR = '#3969b9';
  * Ant Line Controller
  */
 export class ArrayFormulaLineControl {
-    private _leftControl: Rect;
-
-    private _rightControl: Rect;
-
-    private _topControl: Rect;
-
-    private _bottomControl: Rect;
-
-    private _arrayFormulaLine: Rect;
+    private _arrayFormulaLine!: Rect;
 
     /**
      * Create ArrayFormLineController
@@ -46,10 +38,6 @@ export class ArrayFormulaLineControl {
     }
 
     dispose() {
-        this._leftControl?.dispose();
-        this._rightControl?.dispose();
-        this._topControl?.dispose();
-        this._bottomControl?.dispose();
         this._arrayFormulaLine?.dispose();
     }
 

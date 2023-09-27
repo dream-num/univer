@@ -58,13 +58,13 @@ export class CellInputHandler {
 
     // inputValue: string;
 
-    formula: IKeyValue[];
+    formula: IKeyValue[] = [];
 
     functionlistPosition: object;
 
     funcName: Nullable<string>;
 
-    paramindex: number;
+    paramindex: number = 0;
 
     searchFunctionCell: any;
 

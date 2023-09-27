@@ -1,13 +1,10 @@
 import { FormulaEngineService } from '@univerjs/base-formula-engine';
-import { CellEditExtensionManager, CellInputExtensionManager } from '@univerjs/base-ui';
 import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { IFormulaConfig } from './Basics/Interfaces/IFormula';
 import { FormulaPluginObserve, install } from './Basics/Observer';
-import { FormulaCellEditExtensionFactory } from './Basics/Register/FormulaCellEditExtension';
-import { FormulaCellInputExtensionFactory } from './Basics/Register/FormulaCellInputExtension';
 import { FormulaController } from './Controller/FormulaController';
 import { FormulaPromptController } from './Controller/FormulaPromptController';
 import { SearchFormulaController } from './Controller/SearchFormulaModalController';
@@ -18,11 +15,11 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
 
     // protected _formulaActionExtensionFactory: FormulaActionExtensionFactory;
 
-    private _formulaController: FormulaController;
+    private _formulaController!: FormulaController;
 
-    private _searchFormulaController: SearchFormulaController;
+    private _searchFormulaController!: SearchFormulaController;
 
-    private _formulaPromptController: FormulaPromptController;
+    private _formulaPromptController!: FormulaPromptController;
 
     constructor(
         private _config: IFormulaConfig,
@@ -97,22 +94,6 @@ export class FormulaPlugin extends Plugin<FormulaPluginObserve> {
     override onDestroy(): void {
         // const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
         // actionRegister.delete(this._formulaActionExtensionFactory);
-    }
-
-    registerExtension() {
-        const cellEditRegister = CellEditExtensionManager.create();
-        const formulaCellEditExtensionFactory = this._injector.createInstance(FormulaCellEditExtensionFactory);
-        this._injector.add([FormulaCellEditExtensionFactory, { useValue: formulaCellEditExtensionFactory }]);
-        cellEditRegister.add(formulaCellEditExtensionFactory);
-
-        const cellInputRegister = CellInputExtensionManager.create();
-        const formulaCellInputExtensionFactory = this._injector.createInstance(FormulaCellInputExtensionFactory);
-        this._injector.add([FormulaCellInputExtensionFactory, { useValue: formulaCellInputExtensionFactory }]);
-        cellInputRegister.add(formulaCellInputExtensionFactory);
-
-        // const actionRegister = this._commandManager.getActionExtensionManager().getRegister();
-        // this._formulaActionExtensionFactory = new FormulaActionExtensionFactory(this._injector);
-        // actionRegister.add(this._formulaActionExtensionFactory);
     }
 
     getFormulaEngine() {

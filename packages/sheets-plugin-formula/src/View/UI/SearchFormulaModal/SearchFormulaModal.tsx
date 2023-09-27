@@ -1,4 +1,4 @@
-import { BaseComponentProps, Modal } from '@univerjs/base-ui';
+import { BaseComponentProps, Modal, ModalButtonGroup } from '@univerjs/base-ui';
 import { Component } from 'react';
 
 import { SearchFormulaModalData } from '../../../Basics/Interfaces/IFormula';
@@ -26,7 +26,7 @@ export class SearchFormulaModal extends Component<IProps, IState> {
     }
 
     setModal(modalData: SearchFormulaModalData[]) {
-        const componentManager = this.context.componentManager;
+        const componentManager = (this.context as any).injector!.get('componentManager');
 
         modalData.forEach((item) => {
             const Label = componentManager?.get(item.children.name!);
@@ -41,7 +41,7 @@ export class SearchFormulaModal extends Component<IProps, IState> {
         });
     }
 
-    render() {
+    override render() {
         const { modalData } = this.state;
         // Set Provider for entire Container
         return (
@@ -55,7 +55,7 @@ export class SearchFormulaModal extends Component<IProps, IState> {
                             mask={item.mask}
                             title={item.label?.funParams.n}
                             visible={item.show}
-                            group={item.group}
+                            group={item.group as ModalButtonGroup[]} // FIXME type error
                             onCancel={item.onCancel}
                         >
                             {item.modal}

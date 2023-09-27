@@ -1,6 +1,5 @@
 import { ComponentManager, SlotManager } from '@univerjs/base-ui';
 import { ObserverManager } from '@univerjs/core';
-import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { FORMULA_PLUGIN_NAME, FunList } from '../Basics';
@@ -20,7 +19,6 @@ export class FormulaPromptController {
     private _helpFunction: HelpFunction;
 
     constructor(
-        @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @Inject(SlotManager) private readonly _slotManager: SlotManager
@@ -161,7 +159,8 @@ export class FormulaPromptController {
         const width = parseInt(this.richTextEle.style.minWidth);
         let left = parseInt(this.richTextEle.style.left);
         let top = parseInt(this.richTextEle.style.top) + height;
-        const sheetContainer = this._sheetContainerUIController.getContentRef().current;
+        // const sheetContainer = this._sheetContainerUIController.getContentRef().current;
+        const sheetContainer: any = null; // FIXME get container position?
 
         if (!sheetContainer) return;
 

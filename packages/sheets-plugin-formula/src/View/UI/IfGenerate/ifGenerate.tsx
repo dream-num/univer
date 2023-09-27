@@ -1,10 +1,9 @@
 import {
     AppContext,
-    BaseButtonProps,
     BaseModalProps,
     BaseSelectProps,
     Button,
-    FunctionComponent,
+    IBaseButtonProps,
     Modal,
     Select,
 } from '@univerjs/base-ui';
@@ -17,7 +16,7 @@ import styles from './index.module.less';
 interface IProps {
     visible: boolean;
     onOk: () => void;
-    onCancel: (e: Event) => void;
+    onCancel: (e: React.MouseEvent<HTMLSpanElement, MouseEvent>) => void;
     config: IConfig;
 }
 
@@ -30,11 +29,11 @@ interface IState {
 class IfGenerate extends Component<IProps, IState> {
     static override contextType = AppContext;
 
-    Button: FunctionComponent<BaseButtonProps>;
+    Button: IBaseButtonProps;
 
-    Modal: FunctionComponent<BaseModalProps>;
+    Modal: BaseModalProps;
 
-    Select: FunctionComponent<BaseSelectProps>;
+    Select: BaseSelectProps;
 
     private _localeObserver: Nullable<Observer<Workbook>>;
 
@@ -58,29 +57,28 @@ class IfGenerate extends Component<IProps, IState> {
      */
     override UNSAFE_componentWillMount() {
         this.setLocale();
-        this._localeObserver = this.context.observerManager
-            .requiredObserver('onAfterChangeUILocaleObservable', 'core')
-            ?.add(() => {
-                this.setLocale();
-            });
+        const observerManager = (this.context as any).injector!.get('observerManager');
+        this._localeObserver = observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.add(() => {
+            this.setLocale();
+        });
     }
 
     /**
      * destory
      */
     override componentWillUnmount() {
-        this.context.observerManager
-            .requiredObserver('onAfterChangeUILocaleObservable', 'core')
-            ?.remove(this._localeObserver);
+        const observerManager = (this.context as any).injector!.get('observerManager');
+        observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.remove(this._localeObserver);
     }
 
     setLocale() {
-        const locale = this.context.localeService.getLocale().get('formula');
+        const localeService = (this.context as any).injector!.get('localeService');
+        const locale = localeService.getLocale().get('formula');
 
         this.setState({ locale });
     }
 
-    render() {
+    override render() {
         const { locale } = this.state;
         return (
             <Modal

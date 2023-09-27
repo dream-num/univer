@@ -1,6 +1,5 @@
 import { BaseCellEditExtension, BaseCellEditExtensionFactory, ICell } from '@univerjs/base-ui';
 import { ICurrentUniverService, ISelectionRange, Nullable } from '@univerjs/core';
-import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FormulaController } from '../../Controller/FormulaController';
@@ -21,8 +20,7 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
         @Inject(Injector) private readonly _sheetInjector: Injector,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(FormulaController) private readonly _formulaController: FormulaController,
-        @Inject(FormulaPromptController) private readonly _formulaPromptController: FormulaPromptController,
-        @Inject(SheetContainerUIController) private readonly _sheetContainerUIController: SheetContainerUIController
+        @Inject(FormulaPromptController) private readonly _formulaPromptController: FormulaPromptController
     ) {
         super();
     }
@@ -93,7 +91,7 @@ export class FormulaCellEditExtensionFactory extends BaseCellEditExtensionFactor
                 if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
                     formula = '';
                     // .getFormulaBarUIController().getFormulaBar().setFormulaContent(str);
-                    this._sheetContainerUIController.getFormulaBarUIController().getFormulaBar().setFormulaContent('');
+                    // this._sheetContainerUIController.getFormulaBarUIController().getFormulaBar().setFormulaContent('');
                     return false;
                 }
             });

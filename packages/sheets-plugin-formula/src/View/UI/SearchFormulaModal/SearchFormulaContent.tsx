@@ -15,7 +15,7 @@ interface IState {
 }
 
 export class SearchFormulaContent extends Component<IProps, IState> {
-    functionListRef = createRef();
+    functionListRef = createRef<HTMLDivElement>();
 
     constructor(props: IProps) {
         super(props);
@@ -77,12 +77,14 @@ export class SearchFormulaContent extends Component<IProps, IState> {
     }
 
     highLightLi(index: number) {
-        const item = this.functionListRef.current.querySelectorAll(`.${styles.functionListsItem}`);
+        const item = this.functionListRef.current?.querySelectorAll(`.${styles.functionListsItem}`);
+        if (!item) return;
+
         for (let i = 0; i < item.length; i++) {
             item[i].classList.remove(styles.functionListsItemActive);
         }
-        item[index].classList.add(styles.functionListsItemActive);
-        item[index].click();
+        (item[index] as HTMLElement).classList.add(styles.functionListsItemActive);
+        (item[index] as HTMLElement).click();
     }
 
     handleClick(item: FormulaType, index: number) {
@@ -119,7 +121,7 @@ export class SearchFormulaContent extends Component<IProps, IState> {
         return functionList as FormulaType[];
     }
 
-    render() {
+    override render() {
         const { functionList } = this.state;
 
         return (

@@ -1,8 +1,10 @@
-import { ComponentChildren, ComponentManager } from '@univerjs/base-ui';
+import { ComponentManager } from '@univerjs/base-ui';
 import { LocaleService, ObserverManager } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
+import React from 'react';
 
 import { CURRENCYDETAIL, DATEFMTLISG, NUMBERFORMAT, NUMFMT_PLUGIN_NAME } from '../Basics/Const';
+import { NumfmtModel } from '../Model/NumfmtModel';
 import { INumfmtPluginData } from '../Symbol';
 import { FormatContent } from '../View/UI/FormatContent';
 import { NumfmtModal } from '../View/UI/NumfmtModal';
@@ -24,7 +26,7 @@ export interface ModalDataProps {
         props: any;
     };
     group: GroupProps[];
-    modal?: ComponentChildren; // 渲染的组件
+    modal?: React.ReactNode; // 渲染的组件
     onCancel?: () => void;
 }
 
@@ -117,10 +119,9 @@ export class NumfmtModalController {
         ];
         this._componentManager.register(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
         this._componentManager.register(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
-        this._observerManager.getObserver<NumfmtModal>('onNumfmtModalDidMountObservable')!.add((component): void => {
-            this._numfmtModal = component;
-            this.resetModalData();
-        });
+        // this._observerManager.getObserver<NumfmtModal>('onNumfmtModalDidMountObservable')!.add((component): void => {
+        //     this.resetModalData();
+        // });
     }
 
     resetContentData(data: any[]): any[] {
@@ -144,7 +145,9 @@ export class NumfmtModalController {
                 });
             }
         });
-        this._numfmtPluginData.setModal(this._modalData);
+
+        // TODO update modal data
+        // this._numfmtPluginData.setModal(this._modalData);
     }
 
     showModal(name: string, show: boolean): void {

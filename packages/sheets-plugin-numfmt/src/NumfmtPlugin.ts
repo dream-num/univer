@@ -1,7 +1,7 @@
 import { ISelectionRange, LocaleService, ObjectMatrixPrimitiveType, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { install, NUMFMT_PLUGIN_NAME, NumfmtActionExtensionFactory } from './Basics';
+import { NUMFMT_PLUGIN_NAME } from './Basics';
 import { NumfmtController, NumfmtModalController } from './Controller';
 import { INumfmtPluginConfig } from './Interfaces';
 import en from './Locale/en';
@@ -18,8 +18,6 @@ export class NumfmtPlugin extends Plugin {
 
     private _numfmtPluginData: NumfmtModel;
 
-    private _numfmtActionExtensionFactory: NumfmtActionExtensionFactory;
-
     constructor(
         config: Partial<INumfmtPluginConfig>,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
@@ -32,7 +30,6 @@ export class NumfmtPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        install(this);
         this.initializeDependencies(this._injector);
         this.registerExtension();
         this._numfmtController = this._injector.get(NumfmtController);

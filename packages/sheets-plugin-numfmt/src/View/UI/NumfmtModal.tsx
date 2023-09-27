@@ -1,11 +1,7 @@
-import { SheetPlugin } from '@univerjs/base-sheets';
-import { BaseComponentProps } from '@univerjs/base-ui';
-import { PLUGIN_NAMES } from '@univerjs/core';
+import { AppContext, BaseComponentProps, ComponentManager } from '@univerjs/base-ui';
 import { Component } from 'react';
 
-import { NUMFMT_PLUGIN_NAME } from '../../Basics/Const';
 import { ModalDataProps } from '../../Controller/NumfmtModalController';
-import { NumfmtPlugin } from '../../NumfmtPlugin';
 
 interface IProps extends BaseComponentProps {}
 
@@ -14,6 +10,8 @@ interface IState {
 }
 
 export class NumfmtModal extends Component<IProps, IState> {
+    static override contextType = AppContext;
+
     constructor(props: IProps) {
         super(props);
         this.initialize(props);
@@ -25,17 +23,12 @@ export class NumfmtModal extends Component<IProps, IState> {
         };
     }
 
-    override componentDidMount(): void {
-        const plugin = this.getContext().getPluginManager().getPluginByName<NumfmtPlugin>(NUMFMT_PLUGIN_NAME)!;
-        plugin.getObserver('onNumfmtModalDidMountObservable')!.notifyObservers(this);
-    }
+    override componentDidMount(): void {}
 
     setModal(modalData: ModalDataProps[]): void {
-        const SheetPlugin: SheetPlugin = this.getContext()
-            .getPluginManager()
-            .getPluginByName<SheetPlugin>(PLUGIN_NAMES.SPREADSHEET)!;
+        const componentManager: ComponentManager = (this.context as any).injector.get(ComponentManager);
         modalData.forEach((item): void => {
-            const Label = this.context.componentManager.get(item.children.name);
+            const Label = componentManager.get(item.children.name) as JSX.ElementType;
             if (Label) {
                 const props = item.children.props ?? {};
                 item.modal = <Label {...props} />;
@@ -49,7 +42,7 @@ export class NumfmtModal extends Component<IProps, IState> {
      *
      * @returns {void}
      */
-    render() {
+    override render() {
         // const Modal = this._render.renderFunction('Modal');
         // const { modalData } = this.state;
         // // Set Provider for entire Container

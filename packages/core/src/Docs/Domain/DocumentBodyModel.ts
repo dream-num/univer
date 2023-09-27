@@ -11,9 +11,9 @@ export type DocumentBodyModelOrSimple = DocumentBodyModelSimple | DocumentBodyMo
 export class DocumentBodyModelSimple implements IDisposable {
     children: DataStreamTreeNode[] = [];
 
-    readonly modelChange$: Observable<void>;
+    protected readonly _modelChange$: Subject<void> = new Subject();
 
-    protected readonly _modelChange$: Subject<void>;
+    readonly modelChange$: Observable<void> = this._modelChange$.asObservable();
 
     constructor(
         /** @deprecated this does not hold true fact about the text model, do not use this directly */
@@ -22,9 +22,6 @@ export class DocumentBodyModelSimple implements IDisposable {
         if (this.body == null) {
             return;
         }
-
-        this._modelChange$ = new Subject();
-        this.modelChange$ = this._modelChange$.asObservable();
 
         this.children = this._transformToTree(this.body.dataStream);
     }

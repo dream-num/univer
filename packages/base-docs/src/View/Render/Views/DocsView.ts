@@ -14,9 +14,9 @@ export class DocsView extends BaseView {
 
     override viewKey = CANVAS_VIEW_KEY.DOCS_VIEW;
 
-    private _documentSkeleton: DocumentSkeleton;
+    private _documentSkeleton!: DocumentSkeleton;
 
-    private _documents: Documents;
+    private _documents!: Documents;
 
     private readonly _useExternalModel: boolean;
 

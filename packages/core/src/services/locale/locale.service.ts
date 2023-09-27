@@ -31,9 +31,9 @@ function getValue(locale: ILocales[LocaleType], key: string): Nullable<string | 
  * This service provides i18n and timezone / location features to other modules.
  */
 export class LocaleService extends Disposable {
-    currentLocale: LocaleType;
+    currentLocale: LocaleType = LocaleType.EN;
 
-    locales: ILocales;
+    locales: ILocales | null = null;
 
     readonly locale$: Observable<Nullable<LocaleType>>;
 
@@ -76,9 +76,12 @@ export class LocaleService extends Disposable {
      * @returns Get the translation corresponding to the Key
      */
     get(key: string | undefined): string {
-        if (key) {
-            const { locales, currentLocale } = this;
+        const { locales, currentLocale } = this;
+        if (!locales) {
+            throw new Error();
+        }
 
+        if (key) {
             return (getValue(locales[currentLocale], key) as string) || key;
         }
         return String();
@@ -86,6 +89,10 @@ export class LocaleService extends Disposable {
 
     getObject<T>(key: string): T {
         const { locales, currentLocale } = this;
+        if (!locales) {
+            throw new Error();
+        }
+
         return getValue(locales[currentLocale], key) as unknown as T;
     }
 

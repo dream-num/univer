@@ -1,4 +1,3 @@
-import { Engine } from '@univerjs/base-render';
 import { DesktopPlatformService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
 import {
     ICommand,
@@ -33,7 +32,6 @@ import {
     MoveCursorRightShortcut,
     MoveCursorUpShortcut,
 } from './shortcuts/cursor.shortcut';
-import { CANVAS_VIEW_KEY } from './View/Render';
 import { CanvasView } from './View/Render/CanvasView';
 import { DocsView } from './View/Render/Views';
 
@@ -48,11 +46,7 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
     private _config: IDocPluginConfig;
 
-    private _canvasView: CanvasView;
-
-    private _canvasEngine: Engine;
-
-    private _documentController: DocumentController;
+    private _canvasView!: CanvasView;
 
     constructor(
         config: Partial<IDocPluginConfig> = {},
@@ -79,7 +73,6 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
             this.initCanvasView();
         }
 
-        this._initController();
         this._markDocAsFocused();
     }
 
@@ -112,10 +105,6 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
         });
     }
 
-    _initController() {
-        this._documentController = new DocumentController(this._injector);
-    }
-
     initCanvasView() {
         this._canvasView = this._injector.get(CanvasView);
     }
@@ -128,24 +117,8 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
      * @deprecated use DI to get underlying dependencies
      * @returns
      */
-    getCanvasEngine() {
-        return this._canvasEngine;
-    }
-
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
     getCanvasView() {
         return this._canvasView;
-    }
-
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
-    getMainScene() {
-        return this._canvasEngine.getScene(CANVAS_VIEW_KEY.MAIN_SCENE);
     }
 
     /**
@@ -172,14 +145,6 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
         return this.getMainComponent().getEditorInputEvent();
     }
 
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
-    getDocumentController() {
-        return this._documentController;
-    }
-
     override onRendered(): void {
         this.initialize();
     }
@@ -194,6 +159,7 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
                     { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) },
                 ], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
                 [IPlatformService, { useClass: DesktopPlatformService }],
+                [DocumentController],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
 

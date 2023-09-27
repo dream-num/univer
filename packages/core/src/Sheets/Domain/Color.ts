@@ -67,13 +67,13 @@ export class Color {
 }
 
 export class HLSColor {
-    private _saturation: number;
+    private _saturation: number = 0;
 
-    private _hue: number;
+    private _hue: number = 0;
 
-    private _lightness: number;
+    private _lightness: number = 0;
 
-    private _alpha: number;
+    private _alpha: number = 0;
 
     constructor(rgbColor: RgbColor) {
         const red = rgbColor.getRed() / 255;

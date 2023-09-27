@@ -37,7 +37,6 @@ export { RemoveSheetCommand } from './commands/commands/remove-sheet.command';
 export { RemoveWorksheetMergeCommand } from './commands/commands/remove-worksheet-merge.command';
 export type {
     ISetBorderColorCommandParams,
-    ISetBorderCommandParams,
     ISetBorderPositionCommandParams,
     ISetBorderStyleCommandParams,
 } from './commands/commands/set-border-command';

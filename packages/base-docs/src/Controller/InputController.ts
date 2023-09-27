@@ -44,13 +44,13 @@ import { DocsView } from '../View/Render/Views';
 export class InputController extends Disposable {
     private _previousIMEContent: string = '';
 
-    private _previousIMEStart: number;
+    private _previousIMEStart: number = -1;
 
     private _currentNodePosition: Nullable<INodePosition>;
 
-    private _editorDisposables: DisposableCollection | null;
+    private _editorDisposables: DisposableCollection | null = null;
 
-    private _currentDocsView: DocsView | null;
+    private _currentDocsView: DocsView | null = null;
 
     constructor(
         @Inject(DocsViewManagerService) private readonly _docsViewManager: DocsViewManagerService,

@@ -1,8 +1,7 @@
-import { LocaleType, Univer } from '@univerjs/core';
 import { RenderEngine } from '@univerjs/base-render';
-
 import { SlidePlugin } from '@univerjs/base-slides';
 import { DEFAULT_SLIDE_DATA } from '@univerjs/common-plugin-data';
+import { LocaleType, Univer } from '@univerjs/core';
 import { SlideUIPlugin } from '@univerjs/ui-plugin-slides';
 
 // univer
@@ -27,7 +26,7 @@ univer.registerPlugin(SlideUIPlugin, {
 // use for console test
 declare global {
     interface Window {
-        univer?: any;
+        univer?: Univer;
     }
 }
 

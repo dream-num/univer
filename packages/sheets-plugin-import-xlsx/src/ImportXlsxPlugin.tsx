@@ -12,7 +12,7 @@ export interface IImportXlsxPluginConfig {}
 export class ImportXlsxPlugin extends Plugin<any> {
     static override type = PluginType.Sheet;
 
-    private _importXlsxController: ImportXlsxController;
+    private _importXlsxController!: ImportXlsxController;
 
     private _dragAndDropExtensionFactory: DragAndDropExtensionFactory;
 

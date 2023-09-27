@@ -5,8 +5,6 @@ import { ObservableHooks } from './ObservableHooks';
  * WorkBookObserver hook
  */
 export class PathObservableHooks<T = any> {
-    namespace: string;
-
     name: string;
 
     observableHooks: ObservableHooks<T>;

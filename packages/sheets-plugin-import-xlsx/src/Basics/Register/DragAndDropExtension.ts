@@ -12,7 +12,7 @@ export class DragAndDropExtension extends BaseDragAndDropExtension {
     }
 
     override execute() {
-        this._importXlsxController.handleFiles(this._data);
+        // this._importXlsxController.handleFiles(this._data);
     }
 }
 

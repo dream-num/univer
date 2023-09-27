@@ -6,11 +6,7 @@ export class BaseView {
 
     viewKey = '';
 
-    private _scene: Scene;
-
-    // constructor(private _scene: Scene, private _plugin: Plugin) {
-    //     this._initialize();
-    // }
+    private _scene!: Scene; // this is ensure to be initialized by concrete classes
 
     getScene() {
         return this._scene;

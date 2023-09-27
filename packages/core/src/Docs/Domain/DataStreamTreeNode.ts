@@ -7,9 +7,9 @@ export class DataStreamTreeNode {
 
     parent: Nullable<DataStreamTreeNode>;
 
-    startIndex: number;
+    startIndex: number = -1;
 
-    endIndex: number;
+    endIndex: number = -1;
 
     // isBullet: boolean = false;
 

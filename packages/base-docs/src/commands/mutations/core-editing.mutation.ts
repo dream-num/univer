@@ -109,7 +109,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 };
 
 class CommonParameter {
-    cursor: number;
+    cursor: number = 0;
 
     reset() {
         this.cursor = 0;

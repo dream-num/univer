@@ -46,7 +46,10 @@ export function createCommandTestBed(workbookConfig?: IWorkbookConfig) {
     class TestPlugin extends Plugin {
         static override type = PluginType.Sheet;
 
-        constructor(_config: undefined, @Inject(Injector) _injector: Injector) {
+        constructor(
+            _config: undefined,
+            @Inject(Injector) override readonly _injector: Injector
+        ) {
             super('test-plugin');
 
             this._injector = _injector;

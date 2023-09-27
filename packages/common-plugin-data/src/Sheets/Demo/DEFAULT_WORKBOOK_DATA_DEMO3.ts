@@ -46,13 +46,9 @@ const richTextDemo: IDocumentData = {
 
 export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookConfig = {
     id: 'workbook-01',
-    theme: 'default',
     locale: LocaleType.EN,
     creator: 'univer',
     name: 'universheet',
-    skin: 'default',
-    socketUrl: '',
-    socketEnable: BooleanNumber.FALSE,
     extensions: [],
     sheetOrder: ['sheet-0001'],
     pluginMeta: {},

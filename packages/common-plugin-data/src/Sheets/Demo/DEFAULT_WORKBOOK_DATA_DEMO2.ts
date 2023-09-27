@@ -2,16 +2,11 @@ import { BooleanNumber, BorderStyleTypes, IWorkbookConfig, LocaleType, SheetType
 
 export const DEFAULT_WORKBOOK_DATA_DEMO2: IWorkbookConfig = {
     id: 'workbook-01',
-    theme: 'default',
     locale: LocaleType.EN,
     creator: 'univer',
     name: 'universheet',
-    skin: 'default',
-    socketUrl: '',
-    socketEnable: BooleanNumber.FALSE,
     extensions: [],
     sheetOrder: ['sheet-0002'],
-    pluginMeta: {},
     styles: {
         '1': {
             fs: 30,

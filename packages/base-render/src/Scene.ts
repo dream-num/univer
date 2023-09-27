@@ -27,7 +27,7 @@ export class Scene extends ThinScene {
 
     private _isFirstDirty: boolean = true;
 
-    private _maxZIndex: 0;
+    private _maxZIndex: number = 0;
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
 
@@ -41,7 +41,7 @@ export class Scene extends ThinScene {
     private _transformerOpenState = false;
 
     /** @hidden */
-    private _inputManager: InputManager;
+    private _inputManager: Nullable<InputManager>;
 
     constructor(
         sceneKey: string,

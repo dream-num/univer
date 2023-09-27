@@ -5,7 +5,7 @@ import { cancelRequestFrame, requestNewFrame } from './Basics/Tools';
 import { Vector2 } from './Basics/Vector2';
 
 export class ScrollTimer {
-    private _requestNewFrameNumber: number;
+    private _requestNewFrameNumber: number = -1;
 
     private _viewport: Nullable<any>;
 
@@ -21,7 +21,7 @@ export class ScrollTimer {
 
     private _scrollY: number = 0;
 
-    private _scrollFunction?: (x?: number, y?: number) => void;
+    private _scrollFunction: Nullable<(x?: number, y?: number) => void>;
 
     constructor(
         private _scene: any,

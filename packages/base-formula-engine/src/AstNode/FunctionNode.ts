@@ -38,7 +38,11 @@ export class FunctionNode extends BaseAstNode {
         const children = this.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
-            variants.push(children[i].getValue());
+            const object = children[i].getValue();
+            if (object == null) {
+                continue;
+            }
+            variants.push(object);
         }
 
         const resultVariant = this._functionExecutor.calculate(...variants);
@@ -55,7 +59,11 @@ export class FunctionNode extends BaseAstNode {
         const children = this.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
-            variants.push(children[i].getValue());
+            const object = children[i].getValue();
+            if (object == null) {
+                continue;
+            }
+            variants.push(object);
         }
 
         const resultVariant = this._functionExecutor.calculate(...variants);
@@ -80,7 +88,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
 
     override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
         if (typeof param === 'string') {
-            return false;
+            return;
         }
         const token = param.getToken();
         let tokenTrim = token.trim().toUpperCase();
@@ -118,7 +126,6 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             }
             return functionNode;
         }
-        return false;
     }
 }
 

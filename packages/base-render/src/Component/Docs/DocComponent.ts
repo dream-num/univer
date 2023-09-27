@@ -16,17 +16,17 @@ import { DOCS_EXTENSION_TYPE } from './DocExtension';
 import { DocumentSkeleton } from './DocSkeleton';
 
 export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE> {
-    pageWidth: number;
+    pageWidth: number = 100;
 
-    pageHeight: number;
+    pageHeight: number = 100;
 
-    pageMarginLeft: number;
+    pageMarginLeft: number = 0;
 
-    pageMarginTop: number;
+    pageMarginTop: number = 0;
 
-    pageLayoutType: PageLayoutType;
+    pageLayoutType: PageLayoutType = PageLayoutType.VERTICAL;
 
-    protected _cacheCanvas: Canvas;
+    protected _cacheCanvas: Nullable<Canvas>;
 
     constructor(
         oKey: string,
@@ -109,6 +109,10 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
 
         const skeletonData = skeleton.getSkeletonData();
 
+        if (skeletonData == null) {
+            return;
+        }
+
         const { divide, line, column, section, page, isBack } = position;
 
         let { span } = position;
@@ -180,6 +184,10 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
         }
 
         const skeletonData = skeleton.getSkeletonData();
+
+        if (!skeletonData) {
+            return;
+        }
 
         const pages = skeletonData.pages;
 

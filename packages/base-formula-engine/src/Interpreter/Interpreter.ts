@@ -49,6 +49,10 @@ export class Interpreter {
 
         const value = node.getValue();
 
+        if (value == null) {
+            throw new Error('node value is null');
+        }
+
         return Promise.resolve(value);
     }
 
@@ -63,7 +67,13 @@ export class Interpreter {
 
         this._execute(node);
 
-        return node.getValue();
+        const value = node.getValue();
+
+        if (value == null) {
+            throw new Error('node value is null');
+        }
+
+        return value;
     }
 
     executePreCalculateNode(node: PreCalculateNodeType) {

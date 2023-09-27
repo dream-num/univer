@@ -1,4 +1,4 @@
-import { EventState } from '@univerjs/core';
+import { EventState, Nullable } from '@univerjs/core';
 
 import { COLORS, EVENT_TYPE } from '../Basics/Const';
 import { IMouseEvent, IPointerEvent } from '../Basics/IEvents';
@@ -13,7 +13,7 @@ import { Rect } from './Rect';
 const MINI_THUMB_SIZE = 17;
 
 export class ScrollBar extends BaseScrollBar {
-    protected _view: Viewport;
+    protected _view!: Viewport;
 
     private _barSize = 14;
 
@@ -37,11 +37,11 @@ export class ScrollBar extends BaseScrollBar {
 
     private _enableVertical: boolean = true;
 
-    private _mainScene?: ThinScene;
+    private _mainScene: Nullable<ThinScene>;
 
-    private _lastX: number;
+    private _lastX: number = -1;
 
-    private _lastY: number;
+    private _lastY: number = -1;
 
     private _isHorizonMove = false;
 

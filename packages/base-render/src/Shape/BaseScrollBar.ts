@@ -22,27 +22,27 @@ export interface IScrollBarProps {
 }
 
 export class BaseScrollBar {
-    horizontalThumbWidth: number;
+    horizontalThumbWidth: number = 0;
 
     horizontalMinusMiniThumb: number = 0;
 
-    horizontalBarWidth: number;
+    horizontalBarWidth: number = 0;
 
-    verticalThumbHeight: number;
+    verticalThumbHeight: number = 0;
 
-    verticalBarHeight: number;
+    verticalBarHeight: number = 0;
 
     verticalMinusMiniThumb: number = 0;
 
-    horizonBarRect: Rect;
+    horizonBarRect!: Rect;
 
-    horizonThumbRect: Rect;
+    horizonThumbRect!: Rect;
 
-    verticalBarRect: Rect;
+    verticalBarRect!: Rect;
 
-    verticalThumbRect: Rect;
+    verticalThumbRect!: Rect;
 
-    placeholderBarRect: Rect;
+    placeholderBarRect!: Rect;
 
     constructor(props?: IScrollBarProps) {
         this.setProps(props);

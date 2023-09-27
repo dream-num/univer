@@ -7,5 +7,4 @@ export type {
     SheetNameMapType,
     UnitDataType,
 } from './Basics/Common';
-export { FormulaEnginePlugin } from './FormulaEnginePlugin';
 export { FormulaEngineService } from './Service/FormulaEngine.service';

@@ -50,13 +50,12 @@ export class AstRootNodeFactory extends BaseAstNodeFactory {
 
     override checkAndCreateNodeType(param: LexerNode | string) {
         if (!(param instanceof LexerNode)) {
-            return false;
+            return;
         }
         const token = param.getToken();
         if (token === DEFAULT_TOKEN_TYPE_ROOT) {
             return new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
         }
-        return false;
     }
 }
 

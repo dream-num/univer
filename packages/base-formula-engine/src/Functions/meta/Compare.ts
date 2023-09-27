@@ -9,7 +9,7 @@ import { BaseFunction } from '../BaseFunction';
 const FUNCTION_NAME = 'COMPARE';
 
 export class Compare extends BaseFunction {
-    private _compareType: compareToken;
+    private _compareType: compareToken = compareToken.EQUALS;
 
     override get name() {
         return FUNCTION_NAME;

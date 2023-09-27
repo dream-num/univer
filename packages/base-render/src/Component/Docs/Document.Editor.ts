@@ -35,15 +35,15 @@ export class DocsEditor extends RxDisposable {
 
     onSelectionStartObservable = new Observable<Nullable<INodePosition>>();
 
-    onPaste$: RxObservable<ClipboardEvent>;
+    onPaste$!: RxObservable<ClipboardEvent>;
 
-    private _container: HTMLDivElement;
+    private _container!: HTMLDivElement;
 
-    private _inputParent: HTMLDivElement;
+    private _inputParent!: HTMLDivElement;
 
-    private _input: HTMLDivElement;
+    private _input!: HTMLDivElement;
 
-    private _cursor: HTMLDivElement;
+    private _cursor!: HTMLDivElement;
 
     private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
@@ -57,9 +57,9 @@ export class DocsEditor extends RxDisposable {
 
     private _skeletonObserver: Nullable<Observer<IDocumentSkeletonCached>>;
 
-    private _viewportScrollX: number;
+    private _viewportScrollX: number = 0;
 
-    private _viewportScrollY: number;
+    private _viewportScrollY: number = 0;
 
     private _textSelectionList: TextSelection[] = [];
 

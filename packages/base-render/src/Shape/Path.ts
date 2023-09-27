@@ -31,11 +31,16 @@ export interface IPathProps extends IShapeProps {
 export const PATH_OBJECT_ARRAY = ['dataArray'];
 
 export class Path extends Shape<IPathProps> {
-    private _dataArray: IPathDataArray[];
+    private _dataArray: IPathDataArray[] = [];
 
     private pathLength: number = 0;
 
-    private _selfRectCache: IPathFixConfig;
+    private _selfRectCache: IPathFixConfig = {
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0,
+    };
 
     private _reCalculateCache: boolean = true;
 
@@ -166,7 +171,7 @@ export class Path extends Shape<IPathProps> {
             }
         }
 
-        this._renderPaintInOrder(ctx, props);
+        this._renderPaintInOrder(ctx, props as IPathProps);
     }
 
     static getLineLength(x1: number, y1: number, x2: number, y2: number) {

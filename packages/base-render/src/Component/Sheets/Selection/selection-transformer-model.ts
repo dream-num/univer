@@ -7,25 +7,25 @@ import {
 } from '@univerjs/core';
 
 export class SelectionTransformerModel implements ISelectionRangeWithCoord {
-    private _startColumn: number;
+    private _startColumn: number = -1;
 
-    private _startRow: number;
+    private _startRow: number = -1;
 
-    private _endColumn: number;
+    private _endColumn: number = -1;
 
-    private _endRow: number;
+    private _endRow: number = -1;
 
-    private _startX: number;
+    private _startX: number = 0;
 
-    private _startY: number;
+    private _startY: number = 0;
 
-    private _endX: number;
+    private _endX: number = 0;
 
-    private _endY: number;
+    private _endY: number = 0;
 
     private _currentCell: Nullable<ISelectionCellWithCoord>;
 
-    private _selectionType: SELECTION_TYPE;
+    private _selectionType: SELECTION_TYPE = SELECTION_TYPE.NORMAL;
 
     get startColumn() {
         return this._startColumn;

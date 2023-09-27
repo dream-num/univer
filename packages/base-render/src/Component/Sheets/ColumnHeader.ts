@@ -6,7 +6,7 @@ import { SpreadsheetHeader } from './SheetComponent';
 import { SpreadsheetSkeleton } from './SheetSkeleton';
 
 export class SpreadsheetColumnHeader extends SpreadsheetHeader {
-    private _columnHeaderLayoutExtension: ColumnHeaderLayout;
+    private _columnHeaderLayoutExtension!: ColumnHeaderLayout;
 
     constructor(oKey: string, spreadsheetSkeleton?: SpreadsheetSkeleton) {
         super(oKey, spreadsheetSkeleton);

@@ -4,7 +4,7 @@ import { Inject } from '@wendellhu/redi';
 import { IFontLocale } from '../Basics/Interfaces';
 
 export class Skeleton extends Disposable {
-    private _fontLocale: IFontLocale;
+    private _fontLocale!: IFontLocale;
 
     private _dirty = true;
 

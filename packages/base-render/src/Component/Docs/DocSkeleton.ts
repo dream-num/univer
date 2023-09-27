@@ -7,6 +7,7 @@ import {
     ISectionBreak,
     ISectionColumnProperties,
     LocaleService,
+    Nullable,
     Observable,
     PageOrientType,
     SectionType,
@@ -44,9 +45,9 @@ export enum DocumentSkeletonState {
 export class DocumentSkeleton extends Skeleton {
     onRecalculateChangeObservable = new Observable<IDocumentSkeletonCached>();
 
-    private _docModel: DocumentModelOrSimple;
+    private _docModel!: DocumentModelOrSimple;
 
-    private _skeletonData: IDocumentSkeletonCached;
+    private _skeletonData: Nullable<IDocumentSkeletonCached>;
 
     private _renderedBlockIdMap = new Map<string, boolean>();
 

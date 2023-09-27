@@ -78,6 +78,10 @@ export class FormulaDependencyGenerator {
 
             formulaInterpreter.setCurrentPosition(tree.row, tree.column, tree.sheetId, tree.unitId);
 
+            if (tree.node == null) {
+                throw new Error('tree node is null');
+            }
+
             const rangeList = await this._getRangeListByNode(tree.node, formulaInterpreter);
 
             for (let r = 0, rLen = rangeList.length; r < rLen; r++) {

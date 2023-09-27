@@ -1,3 +1,5 @@
+import { Nullable } from '@univerjs/core';
+
 import { LexerNode } from '../Analysis/LexerNode';
 import { BaseAstNode } from './BaseAstNode';
 
@@ -16,7 +18,5 @@ export class BaseAstNodeFactory {
         return new BaseAstNode(token);
     }
 
-    checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: any): false | BaseAstNode {
-        return false;
-    }
+    checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: any): Nullable<BaseAstNode> {}
 }

@@ -154,7 +154,9 @@ export const COLORS = {
 };
 
 export enum SHAPE_TYPE {
-    rect = 'rect',
+    RECT = 'rect',
+    CIRCLE = 'circle',
+    PATH = 'path',
 }
 
 // MOUSEOUT = 'mouseout',

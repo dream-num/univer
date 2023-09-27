@@ -187,6 +187,7 @@ export const Dropdown = (props: BaseDropdownProps) => {
                 menu={props.menu.menu}
                 className={props.menu.className}
                 style={{ ...props.menu.style, ...menuStyle }}
+                onClose={props.menu.onClose}
                 onOptionSelect={(v) => {
                     props.menu.onOptionSelect?.(v);
                     // There is no need to hide the menu after selecting the border color or style.

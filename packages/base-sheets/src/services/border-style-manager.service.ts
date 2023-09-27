@@ -6,6 +6,7 @@ export interface IBorderInfo {
     type: BorderType;
     color: string;
     style: BorderStyleTypes;
+    activeBorderType: boolean; // When you click on the border type, then click on the color and style, it should take effect immediately.
 }
 
 /**
@@ -16,6 +17,7 @@ export class BorderStyleManagerService implements IDisposable {
         type: BorderType.ALL,
         color: '#000000',
         style: BorderStyleTypes.THIN,
+        activeBorderType: false,
     };
 
     private readonly _borderInfo$ = new BehaviorSubject<IBorderInfo>(this._borderInfo);
@@ -29,6 +31,7 @@ export class BorderStyleManagerService implements IDisposable {
 
     setType(type: BorderType): void {
         this._borderInfo.type = type;
+        this.setActiveBorderType(true);
         this.refresh();
     }
 
@@ -40,6 +43,10 @@ export class BorderStyleManagerService implements IDisposable {
     setStyle(style: BorderStyleTypes): void {
         this._borderInfo.style = style;
         this.refresh();
+    }
+
+    setActiveBorderType(status: boolean) {
+        this._borderInfo.activeBorderType = status;
     }
 
     getBorderInfo(): Readonly<IBorderInfo> {

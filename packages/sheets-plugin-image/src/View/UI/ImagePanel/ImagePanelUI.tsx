@@ -1,7 +1,7 @@
 import { ColorPickerCircleButton, SiderModal } from '@univerjs/base-ui';
-import { Component, VNode } from 'react';
+import { Component } from 'react';
 
-import { BorderType, NormalType } from '../../../Basics';
+import { BorderType, NormalType, OVER_GRID_IMAGE_PLUGIN_NAME } from '../../../Basics';
 import Style from './ImagePanelUI.module.less';
 
 export interface ImagePanelUIProps {
@@ -26,18 +26,14 @@ export class ImagePanelUI extends Component<ImagePanelUIProps> {
     }
 
     initialize(props: ImagePanelUIProps) {
-        const imagePlugin = this.getContext()
-            .getPluginManager()
-            .getPluginByName<OverGridImagePlugin>(OVER_GRID_IMAGE_PLUGIN_NAME)!;
-        this.state = {};
-        imagePlugin.getObserver('onActiveImage')!.add((data) => {
-            this._width = data.width;
-            this._height = data.height;
-            this._radius = data.radius;
-        });
+        // imagePlugin.getObserver('onActiveImage')!.add((data) => {
+        //     this._width = data.width;
+        //     this._height = data.height;
+        //     this._radius = data.radius;
+        // });
     }
 
-    render(): VNode {
+    override render() {
         return (
             <SiderModal name={OVER_GRID_IMAGE_PLUGIN_NAME} title={'图片设置'} style={{}}>
                 <div className={Style.imagePanelSetting}>

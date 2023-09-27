@@ -41,7 +41,7 @@ export class ObjectProvider {
         CanvasObjectProviderRegistry.getData()
             .sort(sortRules)
             .forEach((adaptorFactory: ObjectAdaptor) => {
-                this._adaptors.push(adaptorFactory.create(this._injector));
+                this._adaptors.push(adaptorFactory.create(this._injector) as unknown as ObjectAdaptor);
             });
     }
 }

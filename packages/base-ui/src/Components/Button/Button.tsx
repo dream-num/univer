@@ -62,6 +62,12 @@ export interface IBaseButtonProps extends BaseComponentProps {
 
     /** Set the handler to handle `click` event */
     onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+
+    /**
+     * Set the button is activated
+     * @default false
+     */
+    active?: boolean;
 }
 
 const getSizeClass = (size?: SizeType) => {
@@ -91,6 +97,7 @@ export function Button(props: IBaseButtonProps) {
         disabled = false,
         block = false,
         loading = false,
+        active = false,
         onClick,
     } = props;
 
@@ -112,6 +119,7 @@ export function Button(props: IBaseButtonProps) {
             [`${styles.btn}-danger`]: !!danger,
             [`${styles.btn}-block`]: block,
             [`${styles.btn}-loading`]: loading,
+            [`${styles.btn}-${type}-active`]: active,
         },
         className
     );

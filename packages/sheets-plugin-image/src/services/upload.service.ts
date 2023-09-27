@@ -13,7 +13,7 @@ export class UploadService {
 
     upload() {
         const { _selectionManagerService, _currentUniverService, _injector } = this;
-        const selection = _selectionManagerService.getLast()?.selection;
+        const selection = _selectionManagerService.getLast()?.rangeData;
         const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
         if (selection == null) {
             return;

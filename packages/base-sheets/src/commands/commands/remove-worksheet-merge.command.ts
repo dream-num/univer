@@ -1,4 +1,11 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import {
+    CommandType,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    IUndoRedoService,
+    Rectangle,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
@@ -40,6 +47,18 @@ export const RemoveWorksheetMergeCommand: ICommand = {
             worksheetId,
             ranges: selections,
         };
+
+        // 范围内没有合并单元格return
+        let hasMerge = false;
+        const mergeData = worksheet.getConfig().mergeData;
+        selections.forEach((selection) => {
+            mergeData.forEach((merge) => {
+                if (Rectangle.intersects(selection, merge)) {
+                    hasMerge = true;
+                }
+            });
+        });
+        if (!hasMerge) return false;
 
         const undoMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(
             accessor,

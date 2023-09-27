@@ -61,7 +61,7 @@ export class LocationContent extends Component<LocationProps, LocationState> {
     //     this.setValue({ radioGroup });
     // };
 
-    render() {
+    override render() {
         // const CheckboxGroup = this.Render.renderFunction('CheckboxGroup');
         // const Radio = this.Render.renderFunction('Radio');
         // const RadioGroup = this.Render.renderFunction('RadioGroup');

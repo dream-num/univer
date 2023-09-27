@@ -167,9 +167,12 @@ export const SetItalicCommand: ICommand = {
             .getCurrentUniverSheetInstance()
             .getWorkBook()
             .getActiveSheet();
-        const currentlyItalic =
-            worksheet.getRange(selection.cellRange.row, selection.cellRange.column).getFontStyle() ===
-            FontItalic.ITALIC;
+        let currentlyItalic = true;
+        if (selection.cellRange) {
+            currentlyItalic =
+                worksheet.getRange(selection.cellRange.startRow, selection.cellRange.startColumn).getFontStyle() ===
+                FontItalic.ITALIC;
+        }
 
         const setStyleParams: ISetStyleParams<BooleanNumber> = {
             style: {
@@ -199,9 +202,12 @@ export const SetUnderlineCommand: ICommand = {
             .getCurrentUniverSheetInstance()
             .getWorkBook()
             .getActiveSheet();
-        const currentlyUnderline = !!worksheet
-            .getRange(selection.cellRange.row, selection.cellRange.column)
-            .getUnderline().s;
+        let currentlyUnderline = true;
+        if (selection.cellRange) {
+            currentlyUnderline = !!worksheet
+                .getRange(selection.cellRange.startRow, selection.cellRange.startColumn)
+                .getUnderline().s;
+        }
 
         const setStyleParams: ISetStyleParams<{ s: number }> = {
             style: {
@@ -233,9 +239,12 @@ export const SetStrikeThroughCommand: ICommand = {
             .getCurrentUniverSheetInstance()
             .getWorkBook()
             .getActiveSheet();
-        const currentlyStrokeThrough = !!worksheet
-            .getRange(selection.cellRange.row, selection.cellRange.column)
-            .getStrikeThrough().s;
+        let currentlyStrokeThrough = true;
+        if (selection.cellRange) {
+            currentlyStrokeThrough = !!worksheet
+                .getRange(selection.cellRange.row, selection.cellRange.column)
+                .getStrikeThrough().s;
+        }
 
         const setStyleParams: ISetStyleParams<{ s: number }> = {
             style: {
@@ -464,13 +473,13 @@ export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
             return false;
         }
 
+        const value = typeof params.value === 'number' ? { a: params.value } : { a: 0, v: BooleanNumber.TRUE };
+
         const commandService = accessor.get(ICommandService);
         const setStyleParams: ISetStyleParams<ITextRotation> = {
             style: {
                 type: 'tr',
-                value: {
-                    a: params.value as number,
-                },
+                value,
             },
         };
 

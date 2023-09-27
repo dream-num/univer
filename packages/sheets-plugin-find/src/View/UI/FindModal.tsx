@@ -1,6 +1,7 @@
 import {
     BaseCheckboxGroupOptions,
     BaseComponentProps,
+    BaseItemProps,
     Button,
     CellRange,
     CheckboxGroup,
@@ -10,7 +11,6 @@ import {
     Modal,
     Select,
 } from '@univerjs/base-ui';
-import { BaseItemProps } from '@univerjs/base-ui/src/Components/Item/Item';
 import { Component } from 'react';
 
 import styles from './index.module.less';
@@ -18,7 +18,7 @@ import styles from './index.module.less';
 type searchResult = {
     count: number;
     current: number;
-    replaceCount?: number;
+    replaceCount: number;
 };
 
 // Types for props
@@ -53,8 +53,8 @@ export class FindModal extends Component<IProps, IState> {
 
     private _select: BaseItemProps[] = [];
 
-    constructor() {
-        super();
+    constructor(props: IProps) {
+        super(props);
         this.state = {
             show: false,
             hideAdvanced: true,
@@ -188,7 +188,7 @@ export class FindModal extends Component<IProps, IState> {
         });
     }
 
-    onChange(e) {
+    onChange(e: React.ChangeEvent<HTMLInputElement>) {
         const value = e.target.value;
         this.setState({
             value,
@@ -200,7 +200,7 @@ export class FindModal extends Component<IProps, IState> {
      *
      * @returns {void}
      */
-    render() {
+    override render() {
         const { show, hideAdvanced, showRange, current, count } = this.state;
         // Set Provider for entire Container
         return (
@@ -257,7 +257,7 @@ export class FindModal extends Component<IProps, IState> {
                                 type={0}
                                 children={this.getSelect()}
                             ></Select>
-                            {showRange ? <CellRange /> : null}
+                            {showRange ? <CellRange onClick={() => {}} /> : null}
                         </div>
                         <div className={styles.box}>
                             <span></span>

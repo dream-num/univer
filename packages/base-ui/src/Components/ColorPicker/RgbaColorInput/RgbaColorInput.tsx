@@ -1,11 +1,10 @@
 import { Color, Nullable } from '@univerjs/core';
-import { useRef } from 'react';
 
 import { Input } from '../../Input';
 
 interface IProps {
     color: Nullable<string>;
-    onChange: (...arg: any) => void;
+    onChange: (value: string) => void;
 }
 
 export function RgbaColorInput(props: IProps) {
@@ -23,10 +22,10 @@ export function RgbaColorInput(props: IProps) {
         rgba.push('1');
     }
 
-    const inputRef = useRef<HTMLInputElement>(null);
-    const onChange = () => {
-        props.onChange((inputRef.current! as any).base.value);
+    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = (e.target as HTMLInputElement).value;
+        props.onChange(value);
     };
 
-    return <Input ref={inputRef} type="text" value={`rgba(${rgba})`} onChange={onChange} />;
+    return <Input type="text" value={`rgba(${rgba})`} onChange={onChange} />;
 }

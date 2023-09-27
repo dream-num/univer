@@ -385,6 +385,7 @@ export interface BaseMenuProps {
     value?: string | number;
     options?: Array<IValueOption | ICustomComponentOption>;
     onOptionSelect?: (option: IValueOption) => void;
+    onClose?: () => void;
     show?: boolean;
     clientPosition?: {
         clientX: number;
@@ -485,6 +486,9 @@ export const Menu = (props: BaseMenuProps) => {
     // };
 
     const showMenu = (show: boolean) => {
+        if (!show) {
+            props.onClose?.();
+        }
         setIsShow(show);
         getStyle();
     };
@@ -594,7 +598,10 @@ export const Menu = (props: BaseMenuProps) => {
                             )}
                             onClick={() => {
                                 if (option.value) {
-                                    onOptionSelect?.(option);
+                                    onOptionSelect?.({
+                                        ...option,
+                                        show: option.showAfterClick,
+                                    });
                                 }
                             }}
                         >
@@ -621,7 +628,10 @@ export const Menu = (props: BaseMenuProps) => {
                     >
                         <CustomComponent
                             onValueChange={(v: string | number) => {
-                                onOptionSelect?.({ value: v, label: option.id });
+                                onOptionSelect?.({
+                                    value: v,
+                                    label: option.id,
+                                });
                             }}
                         />
                     </li>

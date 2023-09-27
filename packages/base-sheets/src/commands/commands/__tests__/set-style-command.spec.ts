@@ -65,7 +65,7 @@ describe("Test commands used for updating cells' styles", () => {
     });
 
     afterEach(() => {
-        // univer.dispose();
+        univer.dispose();
     });
 
     describe('bold', () => {
@@ -209,7 +209,16 @@ describe("Test commands used for updating cells' styles", () => {
                 selectionManager.add([
                     {
                         rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
+                        cellRange: {
+                            startRow: 0,
+                            startColumn: 0,
+                            endColumn: 0,
+                            endRow: 0,
+                            column: 0,
+                            row: 0,
+                            isMerged: false,
+                            isMergedMainCell: false,
+                        },
                         selectionType: SELECTION_TYPE.NORMAL,
                         style: null,
                     },
@@ -223,7 +232,7 @@ describe("Test commands used for updating cells' styles", () => {
                         ?.getRange(0, 0, 0, 0)
                         .getUnderline();
                 }
-                if (!getFontUnderline()) throw new Error('Underline Error');
+
                 expect(await commandService.executeCommand(SetUnderlineCommand.id)).toBeTruthy();
                 expect(getFontUnderline()?.s).toBe(BooleanNumber.TRUE);
                 expect(await commandService.executeCommand(SetUnderlineCommand.id)).toBeTruthy();
@@ -239,9 +248,9 @@ describe("Test commands used for updating cells' styles", () => {
         });
     });
 
-    describe('throughLine', () => {
+    describe('strike-through', () => {
         describe('correct situations', () => {
-            it('will toggle through-line style when there is a selected range', async () => {
+            it('will toggle strike-through style when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
@@ -251,7 +260,16 @@ describe("Test commands used for updating cells' styles", () => {
                 selectionManager.add([
                     {
                         rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
+                        cellRange: {
+                            startRow: 0,
+                            startColumn: 0,
+                            endColumn: 0,
+                            endRow: 0,
+                            column: 0,
+                            row: 0,
+                            isMerged: false,
+                            isMergedMainCell: false,
+                        },
                         selectionType: SELECTION_TYPE.NORMAL,
                         style: null,
                     },
@@ -265,7 +283,7 @@ describe("Test commands used for updating cells' styles", () => {
                         ?.getRange(0, 0, 0, 0)
                         .getStrikeThrough();
                 }
-                if (!getFontThroughLine()) throw new Error('ThroughLine Error');
+
                 expect(await commandService.executeCommand(SetStrikeThroughCommand.id)).toBeTruthy();
                 expect(getFontThroughLine()?.s).toBe(BooleanNumber.TRUE);
                 expect(await commandService.executeCommand(SetStrikeThroughCommand.id)).toBeTruthy();

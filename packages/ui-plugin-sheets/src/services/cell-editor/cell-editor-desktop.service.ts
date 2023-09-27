@@ -18,7 +18,6 @@ import {
     SelectionManagerService,
     SetRangeValuesCommand,
 } from '@univerjs/base-sheets';
-import { IClipboardService } from '@univerjs/base-ui';
 import {
     createEmptyDocSnapshot,
     handleJsonToDom,
@@ -38,7 +37,6 @@ import {
 import { Inject, Injector } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
-import { ISheetClipboardService } from '../clipboard/clipboard.service';
 import { SHEET_EDITOR_ACTIVATED } from '../context/context';
 import { ICellEditorService } from './cell-editor.service';
 import { getPositionOfCurrentCell, ICellPosition } from './utils';
@@ -74,8 +72,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
         @ICommandService private readonly _commandService: ICommandService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @IContextService private readonly _contextService: IContextService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISheetClipboardService private readonly _clipboardService: IClipboardService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 

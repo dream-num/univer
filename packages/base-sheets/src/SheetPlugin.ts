@@ -1,12 +1,5 @@
 import { ISelectionTransformerShapeManager, SelectionTransformerShapeManager } from '@univerjs/base-render';
-import {
-    ICommandService,
-    ICurrentUniverService,
-    LocaleService,
-    Plugin,
-    PLUGIN_NAMES,
-    PluginType,
-} from '@univerjs/core';
+import { ICommandService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
@@ -32,14 +25,7 @@ import { CanvasView } from './View/CanvasView';
 export class SheetPlugin extends Plugin<SheetPluginObserve> {
     static override type = PluginType.Sheet;
 
-    // private _formulaBarController: Nullable<FormulaBarController>;
-
-    // private _countBarController: Nullable<CountBarController>;
-
-    // private _sheetContainerController: Nullable<SheetContainerController>;
-
     constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector
@@ -55,10 +41,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             en,
         });
 
-        // install(this);
-
         this.initController();
-        // this.listenEventManager();
     }
 
     initController() {

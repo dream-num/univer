@@ -1,10 +1,11 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 
+import { Nullable } from '../../common/type-utils';
 import { Disposable, toDisposable } from '../../Shared/lifecycle';
 import { IStyleSheet, themeInstance } from './theme';
 
 export class ThemeService extends Disposable {
-    private currentTheme: IStyleSheet;
+    private currentTheme: Nullable<IStyleSheet>;
 
     // TODO: dark mode
     private darkMode: boolean = false;
@@ -26,6 +27,9 @@ export class ThemeService extends Disposable {
     }
 
     getCurrentTheme() {
+        if (!this.currentTheme) {
+            throw new Error('[ThemeService]: current theme is not set!');
+        }
         return this.currentTheme;
     }
 

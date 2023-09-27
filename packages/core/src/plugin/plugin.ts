@@ -19,7 +19,7 @@ export enum PluginType {
 export abstract class Plugin<Obs = any> {
     static type: PluginType;
 
-    abstract injector: Injector;
+    protected abstract _injector: Injector;
 
     private _name: string;
 

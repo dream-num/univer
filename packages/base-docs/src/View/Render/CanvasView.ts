@@ -16,8 +16,6 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
 
 export class CanvasView {
-    private _scene: Scene;
-
     private _views: BaseView[] = [];
 
     constructor(
@@ -45,10 +43,10 @@ export class CanvasView {
     private _initialize() {
         const engine = this._engine;
 
-        const scene = (this._scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
+        const scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
             width: 1024,
             height: 2000,
-        }));
+        });
 
         const viewMain = new Viewport(CANVAS_VIEW_KEY.DOCS_VIEW, scene, {
             left: 0,

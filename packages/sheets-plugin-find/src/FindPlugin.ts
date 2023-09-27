@@ -28,11 +28,11 @@ export class FindPlugin extends Plugin<FindPluginObserve> {
         config: Partial<IFindPluginConfig>,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(Injector) private readonly _sheetInjector: Injector
+        @Inject(Injector) protected readonly _injector: Injector
     ) {
         super(FIND_PLUGIN_NAME);
 
-        this.initializeDependencies(_sheetInjector);
+        this.initializeDependencies(_injector);
     }
 
     // installTo(universheetInstance: UniverSheet) {
@@ -71,8 +71,8 @@ export class FindPlugin extends Plugin<FindPluginObserve> {
     }
 
     initController() {
-        this._findController = this._sheetInjector.get(FindController);
-        this._findModalController = this._sheetInjector.get(FindModalController);
+        this._findController = this._injector.get(FindController);
+        this._findModalController = this._injector.get(FindModalController);
     }
 
     initializeDependencies(sheetInjector: Injector) {

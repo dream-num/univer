@@ -9,7 +9,7 @@ export class ColorBuilder {
 
     private _themeTint: number;
 
-    private _rgbValue: string;
+    private _rgbValue: string = '';
 
     private _colorType: ColorType;
 

@@ -1,4 +1,4 @@
-import { ICommandService, ICurrentUniverService, Univer } from '@univerjs/core';
+import { ICommandService, ICurrentUniverService, RedoCommand, UndoCommand, Univer } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -27,12 +27,9 @@ describe('Test tab color commands', () => {
 
     describe('Set several specific colors', () => {
         function getTabColor() {
-            return get(ICurrentUniverService)
-                .getUniverSheetInstance('test')
-                ?.getWorkBook()
-                ?.getActiveSheet()
-                ?.getTabColor();
+            return get(ICurrentUniverService).getUniverSheetInstance('test')?.getActiveSheet()?.getTabColor();
         }
+
         describe('correct situations', () => {
             it('will set tab color to #cccccc', async () => {
                 expect(await commandService.executeCommand(SetTabColorCommand.id, { value: '#cccccc' })).toBeTruthy();
@@ -40,6 +37,16 @@ describe('Test tab color commands', () => {
             });
             it('will set tab color to red', async () => {
                 expect(await commandService.executeCommand(SetTabColorCommand.id, { value: 'red' })).toBeTruthy();
+                expect(getTabColor()).toBe('red');
+            });
+            // undo
+            it('will undo set tab color', async () => {
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getTabColor()).toBe('#cccccc');
+            });
+            // redo
+            it('will redo set tab color', async () => {
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getTabColor()).toBe('red');
             });
         });

@@ -431,15 +431,15 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         const currentCell = selectionControl && selectionControl.model.currentCell;
 
         if (selectionControl && evt.shiftKey && currentCell) {
-            const { row, column } = currentCell;
+            const { actualRow, actualColumn } = currentCell;
 
             // TODO startCell position calculate error
-            const startCell = skeleton.getNoMergeCellPositionByIndex(row, column, scaleX, scaleY);
+            const startCell = skeleton.getNoMergeCellPositionByIndex(actualRow, actualColumn, scaleX, scaleY);
             const endCell = skeleton.getNoMergeCellPositionByIndex(endRow, endColumn, scaleX, scaleY);
 
             const newSelectionRange = {
-                startColumn: column,
-                startRow: row,
+                startColumn: actualColumn,
+                startRow: actualRow,
                 endColumn: startSelectionRange.startColumn,
                 endRow: startSelectionRange.startRow,
                 startY: startCell?.startY || 0,
@@ -569,17 +569,18 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         if (scene == null || skeleton == null) {
             return;
         }
-        const { row, column, isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = primary;
+        const { actualRow, actualColumn, isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } =
+            primary;
         const { scaleX, scaleY } = scene.getAncestorScale();
 
-        const cellPosition = skeleton.getNoMergeCellPositionByIndex(row, column, scaleX, scaleY);
+        const cellPosition = skeleton.getNoMergeCellPositionByIndex(actualRow, actualColumn, scaleX, scaleY);
 
         const startCell = skeleton.getNoMergeCellPositionByIndex(startRow, startColumn, scaleX, scaleY);
         const endCell = skeleton.getNoMergeCellPositionByIndex(endRow, endColumn, scaleX, scaleY);
 
         return {
-            row,
-            column,
+            actualRow,
+            actualColumn,
             isMerged,
             isMergedMainCell,
             startX: cellPosition.startX,
@@ -792,8 +793,8 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         };
 
         const primaryWithCoord = {
-            row,
-            column,
+            actualRow: row,
+            actualColumn: column,
 
             isMerged: false,
 

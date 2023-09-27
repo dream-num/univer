@@ -97,11 +97,11 @@ export function convertSelectionDataToRange(
         style,
     };
     if (primaryWithCoord != null) {
-        const { row, column, isMerged, isMergedMainCell } = primaryWithCoord;
+        const { actualRow, actualColumn, isMerged, isMergedMainCell } = primaryWithCoord;
         const { startRow, startColumn, endRow, endColumn } = primaryWithCoord.mergeInfo;
         result.primary = {
-            row,
-            column,
+            actualRow,
+            actualColumn,
             isMerged,
             isMergedMainCell,
             startRow,

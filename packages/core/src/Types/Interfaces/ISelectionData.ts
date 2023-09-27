@@ -12,8 +12,8 @@ export interface IPosition {
 }
 
 export interface ISingleCell {
-    row: number; // current cell, if cell is in merge,  isMerged is true, If the cell is in the upper left corner, isMergedMainCell is true.
-    column: number;
+    actualRow: number; // current cell, if cell is in merge,  isMerged is true, If the cell is in the upper left corner, isMergedMainCell is true.
+    actualColumn: number;
     isMerged: boolean;
     isMergedMainCell: boolean;
 }

@@ -137,7 +137,8 @@ export const SetBoldCommand: ICommand = {
             .getWorkBook()
             .getActiveSheet();
         const currentlyBold =
-            worksheet.getRange(selection.primary.row, selection.primary.column).getFontWeight() === FontWeight.BOLD;
+            worksheet.getRange(selection.primary.actualRow, selection.primary.actualColumn).getFontWeight() ===
+            FontWeight.BOLD;
 
         const setStyleParams: ISetStyleParams<BooleanNumber> = {
             style: {
@@ -242,7 +243,7 @@ export const SetStrikeThroughCommand: ICommand = {
         let currentlyStrokeThrough = true;
         if (selection.primary) {
             currentlyStrokeThrough = !!worksheet
-                .getRange(selection.primary.row, selection.primary.column)
+                .getRange(selection.primary.actualRow, selection.primary.actualColumn)
                 .getStrikeThrough().s;
         }
 

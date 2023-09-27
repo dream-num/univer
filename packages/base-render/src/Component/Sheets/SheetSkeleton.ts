@@ -574,8 +574,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         mergeInfo = mergeInfoOffset(mergeInfo, rowHeaderWidth, columnHeaderHeight, scaleX, scaleY);
 
         return {
-            row,
-            column,
+            actualRow: row,
+            actualColumn: column,
             startY,
             endY,
             startX,

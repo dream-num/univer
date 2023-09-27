@@ -19,12 +19,12 @@ export function makeCellToSelection(cellInfo: Nullable<ISelectionCellWithCoord>)
     if (!cellInfo) {
         return;
     }
-    const { row, column, isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+    const { actualRow, actualColumn, isMerged, isMergedMainCell, mergeInfo } = cellInfo;
     let { startY, endY, startX, endX } = cellInfo;
-    let startRow = row;
-    let startColumn = column;
-    let endRow = row;
-    let endColumn = column;
+    let startRow = actualRow;
+    let startColumn = actualColumn;
+    let endRow = actualRow;
+    let endColumn = actualColumn;
     if (isMerged && mergeInfo) {
         const {
             startRow: mergeStartRow,
@@ -74,18 +74,18 @@ export function makeCellRangeToRangeData(cellInfo: Nullable<ISelectionCell>): Nu
         return;
     }
     const {
-        row,
-        column,
+        actualRow,
+        actualColumn,
         isMerged,
         startRow: mergeStartRow,
         startColumn: mergeStartColumn,
         endRow: mergeEndRow,
         endColumn: mergeEndColumn,
     } = cellInfo;
-    let startRow = row;
-    let startColumn = column;
-    let endRow = row;
-    let endColumn = column;
+    let startRow = actualRow;
+    let startColumn = actualColumn;
+    let endRow = actualRow;
+    let endColumn = actualColumn;
     if (isMerged) {
         startRow = mergeStartRow;
         startColumn = mergeStartColumn;

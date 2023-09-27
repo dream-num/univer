@@ -107,7 +107,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
             return;
         }
 
-        this._currentEditingCell = getRangeFromCellInfo(currentCell);
+        this._currentEditingCell = getRangeFromPrimary(currentCell);
         const position = this._positionCellEditor(currentCell);
         await this._updateDocumentModelFromCellModel(position);
 
@@ -359,22 +359,22 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
     private _getActiveRange() {
         const primary = this._selectionManagerService.getLast()?.primary;
         if (!primary) return;
-        let { row, column } = primary;
+        let { actualRow, actualColumn } = primary;
 
         if (primary.isMerged) {
-            row = primary.startRow;
-            column = primary.startColumn;
+            actualRow = primary.startRow;
+            actualColumn = primary.startColumn;
         }
 
         return this._currentUniverService
             .getCurrentUniverSheetInstance()
             .getWorkBook()
             .getActiveSheet()
-            .getRange(row, column);
+            .getRange(actualRow, actualColumn);
     }
 }
 
-function getRangeFromCellInfo(cellInfo: ISelectionCell): IRange {
+function getRangeFromPrimary(primary: ISelectionCell): IRange {
     let startRow: number;
     let startColumn: number;
 
@@ -382,15 +382,15 @@ function getRangeFromCellInfo(cellInfo: ISelectionCell): IRange {
 
     let endColumn: number;
 
-    if (cellInfo.isMerged) {
-        startRow = cellInfo.startRow;
-        startColumn = cellInfo.startColumn;
+    if (primary.isMerged) {
+        startRow = primary.startRow;
+        startColumn = primary.startColumn;
 
-        endRow = cellInfo.endRow;
-        endColumn = cellInfo.endColumn;
+        endRow = primary.endRow;
+        endColumn = primary.endColumn;
     } else {
-        startRow = endRow = cellInfo.row;
-        startColumn = endColumn = cellInfo.column;
+        startRow = endRow = primary.actualRow;
+        startColumn = endColumn = primary.actualColumn;
     }
 
     return {

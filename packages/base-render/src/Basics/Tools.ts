@@ -562,8 +562,8 @@ export function getCellByIndex(
     return {
         isMerged,
         isMergedMainCell,
-        row,
-        column,
+        actualRow: row,
+        actualColumn: column,
         startY,
         endY,
         startX,

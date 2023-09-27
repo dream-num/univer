@@ -23,8 +23,8 @@ export function getRangeAtPosition(row: number, col: number, worksheet: Workshee
     const matrix = worksheet.getMatrixWithMergedCells(row, col, row, col);
     matrix.forValue((row, col, value) => {
         destRange = {
-            row,
-            column: col,
+            actualRow: row,
+            actualColumn: col,
             startRow: row,
             startColumn: col,
             isMerged: value.rowSpan !== undefined || value.colSpan !== undefined,

@@ -453,12 +453,12 @@ export class SelectionTransformerShape {
                     endY: mergeInfo.endY,
                 };
             } else {
-                const { row, column, startX, endX, startY, endY } = currentCell;
+                const { actualRow, actualColumn, startX, endX, startY, endY } = currentCell;
                 currentRangeData = {
-                    startRow: row,
-                    endRow: row,
-                    startColumn: column,
-                    endColumn: column,
+                    startRow: actualRow,
+                    endRow: actualRow,
+                    startColumn: actualColumn,
+                    endColumn: actualColumn,
                     startX,
                     endX,
                     startY,

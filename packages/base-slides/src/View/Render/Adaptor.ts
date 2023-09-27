@@ -5,7 +5,7 @@ import { Injector } from '@wendellhu/redi';
 export class ObjectAdaptor {
     zIndex = 0;
 
-    viewKey: PageElementType;
+    viewKey: PageElementType | null = null;
 
     check(type: PageElementType) {
         if (type !== this.viewKey) {

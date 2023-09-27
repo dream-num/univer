@@ -16,11 +16,11 @@ export class SlidePlugin extends Plugin<SlidePluginObserve> {
 
     private _config: ISlidePluginConfig;
 
-    private _canvasEngine: Engine;
+    private _canvasEngine: Engine | null = null;
 
-    private _canvasView: CanvasView;
+    private _canvasView: CanvasView | null = null;
 
-    private _toolbarController: ToolbarController;
+    private _toolbarController: ToolbarController | null = null;
 
     constructor(
         config: Partial<ISlidePluginConfig> = {},

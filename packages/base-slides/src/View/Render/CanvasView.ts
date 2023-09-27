@@ -29,15 +29,15 @@ export enum SLIDE_KEY {
 }
 
 export class CanvasView {
-    private _scene: Scene;
+    private _scene: Scene | null = null;
 
     private _slideThumbEngine = new Map<string, Engine>();
 
-    private _slide: Slide;
+    private _slide: Slide | null = null;
 
-    private _ObjectProvider: ObjectProvider;
+    private _ObjectProvider: ObjectProvider | null = null;
 
-    private _activePageId: string;
+    private _activePageId: string = '';
 
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
@@ -66,7 +66,7 @@ export class CanvasView {
                 continue;
             }
 
-            this._createScene(id, this._slide, pages[i]);
+            this._createScene(id, this._slide!, pages[i]);
 
             // this._thumbSceneRender(id);
         }
@@ -88,7 +88,7 @@ export class CanvasView {
 
         this._activePageId = pages[0].id;
 
-        this._slide.activeFirstPage();
+        this._slide?.activeFirstPage();
     }
 
     activePage(pageId?: string) {
@@ -115,16 +115,16 @@ export class CanvasView {
 
         this._activePageId = pageId;
 
-        if (this._slide.hasPage(id)) {
+        if (this._slide?.hasPage(id)) {
             this._slide.changePage(id);
             return;
         }
 
-        this._createScene(id, this._slide, page);
+        this._createScene(id, this._slide!, page);
     }
 
     scrollToCenter() {
-        const viewMain = this._scene.getViewport(SLIDE_KEY.VIEW);
+        const viewMain = this._scene?.getViewport(SLIDE_KEY.VIEW);
         if (!viewMain) return;
         const { left: viewPortLeft, top: viewPortTop } = this._getCenterPositionViewPort();
 
@@ -204,7 +204,7 @@ export class CanvasView {
 
     private _createSlide() {
         const model = this._currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
-        const mainScene = this._scene;
+        const mainScene = this._scene!;
 
         const { width: sceneWidth, height: sceneHeight } = mainScene;
 
@@ -251,9 +251,9 @@ export class CanvasView {
     }
 
     private _getCenterPositionViewPort() {
-        const { width, height } = this._scene;
+        const { width, height } = this._scene!;
 
-        const engine = this._scene.getEngine();
+        const engine = this._scene!.getEngine();
 
         const canvasWidth = engine?.width || 0;
         const canvasHeight = engine?.height || 0;
@@ -271,13 +271,13 @@ export class CanvasView {
             return;
         }
 
-        const { width, height } = this._slide;
+        const { width, height } = this._slide!;
 
         const { width: pageWidth = width, height: pageHeight = height } = thumbEngine;
 
         const thumbContext = thumbEngine.getCanvas().getContext();
 
-        this._slide.renderToThumb(thumbContext, id, pageWidth / width, pageHeight / height);
+        this._slide?.renderToThumb(thumbContext, id, pageWidth / width, pageHeight / height);
     }
 
     private _createThumb(thumbDom: HTMLElement, pageId: string) {
@@ -308,11 +308,11 @@ export class CanvasView {
         const { pageElements, pageBackgroundFill } = page;
 
         // SceneViewers
-        const objects = this._ObjectProvider.convertToRenderObjects(pageElements, this._scene);
+        const objects = this._ObjectProvider?.convertToRenderObjects(pageElements, this._scene!);
         scene.openTransformer();
         this._addBackgroundRect(scene, pageBackgroundFill);
         // So finally SceneViewers are added to the scene as objects. How can we do optimizations on this?
-        scene.addObjects(objects);
+        scene.addObjects(objects!);
 
         const transformer = scene.getTransformer();
 
@@ -324,7 +324,7 @@ export class CanvasView {
             this._thumbSceneRender(this._activePageId);
         });
 
-        this._slide.addPage(scene);
+        this._slide?.addPage(scene);
 
         return scene;
     }

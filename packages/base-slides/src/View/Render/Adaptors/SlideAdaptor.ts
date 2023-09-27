@@ -18,7 +18,7 @@ export class SlideAdaptor extends ObjectAdaptor {
 
     override viewKey = PageElementType.SLIDE;
 
-    private _ObjectProvider: ObjectProvider;
+    private _ObjectProvider: ObjectProvider | null = null;
 
     constructor(@Inject(Injector) private _injector: Injector) {
         super();
@@ -125,13 +125,13 @@ export class SlideAdaptor extends ObjectAdaptor {
 
         const { pageElements, pageBackgroundFill } = page;
 
-        const objects = this._ObjectProvider.convertToRenderObjects(pageElements, mainScene);
+        const objects = this._ObjectProvider?.convertToRenderObjects(pageElements, mainScene);
 
         scene.openTransformer();
 
         this._addBackgroundRect(scene, pageBackgroundFill, model);
 
-        scene.addObjects(objects);
+        scene.addObjects(objects!);
 
         return scene;
     }

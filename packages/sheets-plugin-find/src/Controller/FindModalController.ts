@@ -6,7 +6,7 @@ import { TextFinder } from '../Domain';
 import { FindModal } from '../View/UI/FindModal';
 
 export class FindModalController {
-    private _findModal: FindModal;
+    private _findModal: FindModal | null = null;
 
     constructor(
         @Inject(TextFinder) private _textFinder: TextFinder,

@@ -80,13 +80,9 @@ const richTextDemo1: IDocumentData = {
 
 export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     id: 'workbook-01',
-    theme: 'default',
     locale: LocaleType.EN,
     creator: 'univer',
     name: 'UniverSheet Demo',
-    skin: 'default',
-    socketUrl: '',
-    socketEnable: BooleanNumber.FALSE,
     extensions: [],
     sheetOrder: [
         'sheet-0010',
@@ -100,7 +96,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
         'sheet-0002',
         'sheet-0001',
     ],
-    pluginMeta: {},
     styles: {
         '1': {
             fs: 30,

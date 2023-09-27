@@ -12,62 +12,51 @@ export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './service
 
 // #region commands
 
-// mutations
 export {
-    InsertColMutation,
-    InsertColMutationFactory,
-    InsertRowMutation,
-    InsertRowMutationFactory,
-} from './commands/mutations/insert-row-col.mutation';
-export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './commands/mutations/insert-sheet.mutation';
-export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
-export { ISetRangeStyleMutationParams, SetRangeStyleMutation } from './commands/mutations/set-range-styles.mutation';
-export { ISetRangeValuesMutationParams, SetRangeValuesMutation } from './commands/mutations/set-range-values.mutation';
-export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
-export { SetWorksheetActivateMutation } from './commands/mutations/set-worksheet-activate.mutation';
-export {
-    SetWorksheetColWidthMutation,
-    SetWorksheetColWidthMutationFactory,
-} from './commands/mutations/set-worksheet-col-width.mutation';
-export { SetWorksheetHideMutation } from './commands/mutations/set-worksheet-hide.mutation';
-export { SetWorksheetNameMutation } from './commands/mutations/set-worksheet-name.mutation';
-export { SetWorksheetOrderMutation } from './commands/mutations/set-worksheet-order.mutation';
-
-// operations
-export { SetSelectionsOperation } from './commands/operations/selection.operation';
-
-// commands
+    AddWorksheetMergeAllCommand,
+    AddWorksheetMergeCommand,
+    AddWorksheetMergeHorizontalCommand,
+    AddWorksheetMergeVerticalCommand,
+} from './commands/commands/add-worksheet-merge.command';
 export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';
+export { CopySheetCommand } from './commands/commands/copy-worksheet.command';
 export { DeleteRangeMoveLeftCommand } from './commands/commands/delete-range-move-left.command';
 export { DeleteRangeMoveUpCommand } from './commands/commands/delete-range-move-up.command';
+export type { InsertColCommandParams, InsertRowCommandParams } from './commands/commands/insert-row-col.command';
 export {
     InsertColAfterCommand,
     InsertColBeforeCommand,
     InsertColCommand,
-    InsertColCommandParams,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
     InsertRowCommand,
-    InsertRowCommandParams,
 } from './commands/commands/insert-row-col.command';
 export { InsertSheetCommand } from './commands/commands/insert-sheet.command';
 export { RemoveColCommand, RemoveRowCommand } from './commands/commands/remove-row-col.command';
-export {
+export { RemoveSheetCommand } from './commands/commands/remove-sheet.command';
+export { RemoveWorksheetMergeCommand } from './commands/commands/remove-worksheet-merge.command';
+export type {
     ISetBorderColorCommandParams,
     ISetBorderCommandParams,
     ISetBorderPositionCommandParams,
     ISetBorderStyleCommandParams,
+} from './commands/commands/set-border-command';
+export {
     SetBorderColorCommand,
     SetBorderCommand,
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from './commands/commands/set-border-command';
-export {
-    ChangeSelectionCommand,
-    ExpandSelectionCommand,
+export type { ISetRangeValuesCommandParams } from './commands/commands/set-range-values.command';
+export { SetRangeValuesCommand } from './commands/commands/set-range-values.command';
+export type {
     IChangeSelectionCommandParams,
     IExpandSelectionCommandParams,
     ISelectAllCommandParams,
+} from './commands/commands/set-selections.command';
+export {
+    ChangeSelectionCommand,
+    ExpandSelectionCommand,
     SelectAllCommand,
 } from './commands/commands/set-selections.command';
 export {
@@ -87,26 +76,38 @@ export {
     SetUnderlineCommand,
     SetVerticalTextAlignCommand,
 } from './commands/commands/set-style.command';
+export { SetTabColorCommand } from './commands/commands/set-tab-color.command';
 export { SetWorksheetActivateCommand } from './commands/commands/set-worksheet-activate.command';
 export { SetWorksheetColWidthCommand } from './commands/commands/set-worksheet-col-width.command';
-export { SetWorksheetOrderCommand } from './commands/commands/set-worksheet-order.command';
-export { SetWorksheetRowHeightCommand } from './commands/commands/set-worksheet-row-height.command';
-
-// #endregion
-export {
-    AddWorksheetMergeAllCommand,
-    AddWorksheetMergeCommand,
-    AddWorksheetMergeHorizontalCommand,
-    AddWorksheetMergeVerticalCommand,
-} from './commands/commands/add-worksheet-merge.command';
-export { CopySheetCommand } from './commands/commands/copy-worksheet.command';
-export { RemoveSheetCommand } from './commands/commands/remove-sheet.command';
-export { RemoveWorksheetMergeCommand } from './commands/commands/remove-worksheet-merge.command';
-export { ISetRangeValuesCommandParams, SetRangeValuesCommand } from './commands/commands/set-range-values.command';
-export { SetTabColorCommand } from './commands/commands/set-tab-color.command';
 export { SetWorksheetHideCommand } from './commands/commands/set-worksheet-hide.command';
 export { SetWorksheetNameCommand } from './commands/commands/set-worksheet-name.command';
+export { SetWorksheetOrderCommand } from './commands/commands/set-worksheet-order.command';
+export { SetWorksheetRowHeightCommand } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetRowHideCommand } from './commands/commands/set-worksheet-row-hide.command';
 export { SetWorksheetRowShowCommand } from './commands/commands/set-worksheet-row-show.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
+export {
+    InsertColMutation,
+    InsertColMutationFactory,
+    InsertRowMutation,
+    InsertRowMutationFactory,
+} from './commands/mutations/insert-row-col.mutation';
+export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './commands/mutations/insert-sheet.mutation';
+export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
+export type { ISetRangeStyleMutationParams } from './commands/mutations/set-range-styles.mutation';
+export { SetRangeStyleMutation } from './commands/mutations/set-range-styles.mutation';
+export type { ISetRangeValuesMutationParams } from './commands/mutations/set-range-values.mutation';
+export { SetRangeValuesMutation } from './commands/mutations/set-range-values.mutation';
+export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
+export { SetWorksheetActivateMutation } from './commands/mutations/set-worksheet-activate.mutation';
+export {
+    SetWorksheetColWidthMutation,
+    SetWorksheetColWidthMutationFactory,
+} from './commands/mutations/set-worksheet-col-width.mutation';
+export { SetWorksheetHideMutation } from './commands/mutations/set-worksheet-hide.mutation';
+export { SetWorksheetNameMutation } from './commands/mutations/set-worksheet-name.mutation';
+export { SetWorksheetOrderMutation } from './commands/mutations/set-worksheet-order.mutation';
+export { SetSelectionsOperation } from './commands/operations/selection.operation';
 export * from './Locale';
+
+// #endregion

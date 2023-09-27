@@ -23,7 +23,7 @@ export { LifecycleService } from './services/lifecycle/lifecycle.service';
 export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService } from './services/log/log.service';
 export { DesktopPermissionService, IPermissionService } from './services/permission/permission.service';
-export * from './services/theme/theme.service';
+export { ThemeService } from './services/theme/theme.service';
 export { IUndoRedoService, LocalUndoRedoService, RedoCommand, UndoCommand } from './services/undoredo/undoredo.service';
 export * from './Shared';
 export { Disposable, DisposableCollection, fromObservable, RxDisposable, toDisposable } from './Shared/lifecycle';

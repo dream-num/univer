@@ -42,14 +42,12 @@ export class Univer {
         locale && this._univerInjector.get(LocaleService).setLocale(locale);
     }
 
-    dispose() {}
+    dispose(): void {
+        // left empty for purpose
+    }
 
     private get _currentUniverService(): ICurrentUniverService {
         return this._univerInjector.get(ICurrentUniverService);
-    }
-
-    dispose(): void {
-        // left empty for purpose
     }
 
     /** Register a plugin into univer. */
@@ -238,6 +236,4 @@ export class Univer {
             slide.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
         });
     }
-
-    dispose(): void {}
 }

@@ -14,6 +14,9 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                     '0': {
                         v: 'A1',
                     },
+                    '1': {
+                        v: 'A2',
+                    },
                 },
             },
         },
@@ -31,10 +34,10 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     timeZone: '',
 };
 
-export function createCommandTestBed() {
+export function createCommandTestBed(workbookConfig?: IWorkbookConfig) {
     const univer = new Univer();
 
-    let get: Injector['get'] | null = null;
+    let get: Injector['get'] | undefined;
 
     /**
      * This plugin hooks into Sheet's DI system to expose API to test scripts
@@ -42,7 +45,7 @@ export function createCommandTestBed() {
     class TestPlugin extends Plugin {
         static override type = PluginType.Sheet;
 
-        constructor(@Inject(Injector) _injector: Injector) {
+        constructor(_config: undefined, @Inject(Injector) _injector: Injector) {
             super('test-plugin');
 
             this._injector = _injector;
@@ -54,19 +57,18 @@ export function createCommandTestBed() {
         }
 
         override onDestroy(): void {
-            get = null;
+            get = undefined;
         }
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO);
 
-    if (!get) {
+    if (get === undefined) {
         throw new Error('[TestPlugin]: not hooked on!');
     }
 
-    // focus, used in undo
-    const currentUniverService = (get as Injector['get'])(ICurrentUniverService);
+    const currentUniverService = get(ICurrentUniverService);
     currentUniverService.focusUniverInstance('test');
 
     return {

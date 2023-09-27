@@ -18,7 +18,7 @@ export type ICellV = string | number | boolean;
 export interface ICellData {
     // The unique key, a random string, is used for the plug-in to associate the cell. When the cell information changes, the plug-in does not need to change the data, reducing the pressure on the back-end interface
     // id?: string;
-    p?: IDocumentData; // univer docs
+    p?: Nullable<IDocumentData>; // univer docs, set null for cell clear all
     s?: string | Nullable<IStyleData>; // style id
     /**
      * Origin value
@@ -26,7 +26,7 @@ export interface ICellData {
     v?: Nullable<ICellV>;
     m?: Nullable<string>; // formatted value
     // Usually the type is automatically determined based on the data, or the user directly specifies
-    t?: CellValueType; // 0 string, 1 number, 2 boolean, 3 force string, green icon
+    t?: Nullable<CellValueType>; // 0 string, 1 number, 2 boolean, 3 force string, green icon, set null for cell clear all
     // f?: string; // formula '=SUM(1)'
     /**
      * format

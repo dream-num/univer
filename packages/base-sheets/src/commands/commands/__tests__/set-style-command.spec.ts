@@ -1,4 +1,12 @@
-import { FontWeight, ICommandService, ICurrentUniverService, SELECTION_TYPE, Univer } from '@univerjs/core';
+import {
+    FontWeight,
+    ICommandService,
+    ICurrentUniverService,
+    RedoCommand,
+    SELECTION_TYPE,
+    UndoCommand,
+    Univer,
+} from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -11,6 +19,7 @@ describe('Test style commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
+    let currentUniverService: ICurrentUniverService;
 
     beforeEach(() => {
         const testBed = createCommandTestBed();
@@ -21,6 +30,9 @@ describe('Test style commands', () => {
         commandService.registerCommand(SetBoldCommand);
         commandService.registerCommand(SetStyleCommand);
         commandService.registerCommand(SetRangeStyleMutation);
+
+        currentUniverService = get(ICurrentUniverService);
+        currentUniverService.focusUniverInstance('test'); // used in undo
     });
 
     afterEach(() => {
@@ -57,6 +69,12 @@ describe('Test style commands', () => {
                 expect(await commandService.executeCommand(SetBoldCommand.id)).toBeTruthy();
                 expect(getFontBold()).toBe(FontWeight.BOLD);
                 expect(await commandService.executeCommand(SetBoldCommand.id)).toBeTruthy();
+                expect(getFontBold()).toBe(FontWeight.NORMAL);
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getFontBold()).toBe(FontWeight.BOLD);
+                // undo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getFontBold()).toBe(FontWeight.NORMAL);
             });
         });

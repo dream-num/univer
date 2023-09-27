@@ -130,13 +130,14 @@ export class ObjectArray<T> {
     }
 
     set(index: number, value: T): void {
-        if (define(value)) {
-            const length = this._length;
-            this._array[index] = value;
-            if (index >= length) {
-                this._length = index + 1;
-            }
+        // Accept NULL, for cell clear all
+        // if (define(value)) {
+        const length = this._length;
+        this._array[index] = value;
+        if (index >= length) {
+            this._length = index + 1;
         }
+        // }
     }
 
     pop(): Nullable<T> {

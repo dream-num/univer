@@ -19,10 +19,10 @@ import {
 } from '../mutations/set-range-values.mutation';
 
 /**
- * The command to clear content in current selected ranges.
+ * The command to clear all in current selected ranges.
  */
-export const ClearSelectionContentCommand: ICommand = {
-    id: 'sheet.command.clear-selection-content',
+export const ClearSelectionAllCommand: ICommand = {
+    id: 'sheet.command.clear-selection-all',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -71,17 +71,14 @@ export const ClearSelectionContentCommand: ICommand = {
     },
 };
 
-// Generate cellValue from rangeData and set v/m to null
+// Generate cellValue from rangeData and set null
 function generateNullCellValue(rangeData: ISelectionRange[]): ObjectMatrixPrimitiveType<ICellData> {
     const cellValue = new ObjectMatrix<ICellData>();
     rangeData.forEach((range: ISelectionRange) => {
         const { startRow, startColumn, endRow, endColumn } = range;
         for (let i = startRow; i <= endRow; i++) {
             for (let j = startColumn; j <= endColumn; j++) {
-                cellValue.setValue(i, j, {
-                    v: null,
-                    m: null,
-                });
+                cellValue.setValue(i, j, null);
             }
         }
     });

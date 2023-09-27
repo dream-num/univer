@@ -1,5 +1,5 @@
 import { IMouseEvent } from '@univerjs/base-render';
-import { DisposableCollection } from '@univerjs/core';
+import { DisposableCollection, ICommandService } from '@univerjs/core';
 import { RediContext, WithDependency } from '@wendellhu/redi/react-bindings';
 import React, { Component, createRef } from 'react';
 
@@ -13,10 +13,12 @@ export interface IContextMenuProps extends BaseMenuItem {}
 
 export interface IContextMenuState {
     visible: boolean;
-    srcElement?: HTMLElement; // FIXME: any?
-    eventType: string | null;
     children: IContextMenuProps[];
     menuItems: Array<IDisplayMenuItem<IMenuItem>>;
+    clientPosition: {
+        clientX: number;
+        clientY: number;
+    };
 }
 
 export class ContextMenu extends Component<IContextMenuProps, IContextMenuState> {
@@ -27,8 +29,6 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
     @WithDependency(IContextMenuService)
     private declare contextMenuService: IContextMenuService;
 
-    private menuRef = createRef<Menu>();
-
     private rootRef = createRef<HTMLDivElement>();
 
     private _disposables = new DisposableCollection();
@@ -38,10 +38,12 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
 
         this.state = {
             visible: false,
-            srcElement: null, // WTF: this property is weird
-            eventType: null, // WTF: this property is weird
             children: [] as IContextMenuProps[],
             menuItems: [] as Array<IDisplayMenuItem<IMenuItem>>,
+            clientPosition: {
+                clientX: 0,
+                clientY: 0,
+            },
         };
     }
 
@@ -61,12 +63,23 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
     }
 
     override render() {
-        const { visible } = this.state;
+        const { visible, clientPosition } = this.state;
 
         return (
             visible && (
                 <div ref={this.rootRef} className={styles.contextMenu} onContextMenu={(e) => e.preventDefault()}>
-                    <Menu menuId={MenuPosition.CONTEXT_MENU} onClick={this.handleClick} show={visible} />
+                    <Menu
+                        menuId={MenuPosition.CONTEXT_MENU}
+                        onClick={this.handleClick}
+                        clientPosition={clientPosition}
+                        show={visible}
+                        onOptionSelect={(params) => {
+                            const { label: commandId, value } = params;
+                            const commandService = this.context.injector?.get(ICommandService);
+                            commandService && commandService.executeCommand(commandId as string, { value });
+                            this.setState({ visible: false });
+                        }}
+                    />
                 </div>
             )
         );
@@ -75,64 +88,29 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
     handleContextMenu = async (event: IMouseEvent, rect?: any, down?: boolean) => {
         event.preventDefault();
 
-        // FIXME: srcElement is deprecated
         // FIXME: contextmenu position algorithm is not correct
-        this.setState({ visible: true, srcElement: event.srcElement, eventType: event.type }, () => {
+        this.setState({ visible: true }, () => {
             new Promise<void>((resolve, reject) => {
                 resolve();
             }).then(() => {
-                // clientX/Y 获取到的是触发点相对于浏览器可视区域左上角距离
-                const clickX = !down ? event.clientX : rect.x;
-                const clickY = !down ? event.clientY : rect.y;
-
-                // window.innerWidth/innerHeight 获取的是当前浏览器窗口的视口宽度/高度
-                const screenW = window.innerWidth;
-                const screenH = window.innerHeight;
-                // 获取自定义菜单的宽度/高度
-                const currentUl = this.menuRef.current?.getMenuRef().current;
-                const rootW = currentUl?.offsetWidth || 0;
-                const rootH = currentUl?.offsetHeight || 0;
-
-                // right为true，说明鼠标点击的位置到浏览器的右边界的宽度可以放下菜单。否则，菜单放到左边。
-                // bottom为true，说明鼠标点击位置到浏览器的下边界的高度可以放下菜单。否则，菜单放到上边。
-                const right = screenW - clickX > rootW;
-                const left = !right;
-                const bottom = screenH - clickY > rootH;
-                const top = !bottom;
-
-                const current = this.rootRef.current;
-                if (!current) {
-                    return;
-                }
-
-                if (right) {
-                    current.style.left = `${clickX}px`;
-                }
-                if (left) {
-                    current.style.left = `${clickX - rootW}px`;
-                }
-
-                if (bottom) {
-                    current.style.top = `${clickY}px`;
-                }
-                if (top) {
-                    current.style.top = `${clickY - rootH}px`;
-                }
+                // clientX/Y obtains the distance between the trigger point and the upper left corner of the browser's visible area.
+                this.setState({
+                    clientPosition: {
+                        clientX: event.clientX,
+                        clientY: event.clientY,
+                    },
+                });
             });
         });
     };
 
     private handleClick = (e: MouseEvent) => {
-        const { visible, eventType, srcElement } = this.state;
+        const { visible } = this.state;
         if (!this.rootRef.current) {
             return;
         }
 
-        if (eventType === 'click' && srcElement && srcElement.contains(e.target)) {
-            return;
-        }
-
-        if (this.rootRef.current.contains(e.target)) {
+        if (this.rootRef.current.contains(e.target as Node)) {
             return;
         }
 

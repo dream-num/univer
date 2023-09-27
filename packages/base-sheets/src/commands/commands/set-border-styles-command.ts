@@ -21,7 +21,7 @@ import {
     ISetBorderStylesMutationParams,
     SetBorderStylesMutation,
     SetBorderStylesUndoMutationFactory,
-} from '../mutations/set-border-styles.mutatio';
+} from '../mutations/set-border-styles.mutation';
 
 export interface ISetBorderCommandParams {
     workbookId?: string;

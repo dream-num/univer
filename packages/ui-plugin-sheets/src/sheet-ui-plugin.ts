@@ -5,6 +5,7 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { SHEET_UI_PLUGIN_NAME } from './Basics';
 import { SheetClipboardController } from './controller/clipboard/clipboard.controller';
 import { SheetUIController } from './controller/sheet-ui.controller';
+import { en } from './Locale';
 import { ICellEditorService } from './services/cell-editor/cell-editor.service';
 import { DesktopCellEditorService } from './services/cell-editor/cell-editor-desktop.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
@@ -17,6 +18,10 @@ export class SheetUIPlugin extends Plugin {
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super(SHEET_UI_PLUGIN_NAME);
+
+        this._localeService.getLocale().load({
+            en,
+        });
     }
 
     override onStarting(injector: Injector): void {

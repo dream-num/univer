@@ -336,11 +336,8 @@ export class UniverCopy extends Copy {
                     }
                 }
 
-                const cellRange = this._selectionManagerService.transformCellDataToSelectionData(
-                    r,
-                    c,
-                    mergeData
-                )?.cellRange;
+                const cellRange = this._selectionManagerService.transformCellDataToSelectionData(r, c, mergeData)
+                    ?.cellRange;
                 if (cellRange?.isMerged || (!cellRange?.isMerged && cellRange?.isMergedMainCell)) {
                     if (cellRange.isMergedMainCell) {
                         span = `rowSpan="${cellRange.endRow - cellRange.startRow + 1}" colSpan="${

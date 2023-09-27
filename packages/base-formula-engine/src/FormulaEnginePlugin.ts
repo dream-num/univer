@@ -6,7 +6,10 @@ import { FormulaEnginePluginObserver } from './Analysis/LexerNode';
 interface IFormulaEnginePlugin {}
 
 export class FormulaEnginePlugin extends Plugin<FormulaEnginePluginObserver> {
-    constructor(config: IFormulaEnginePlugin, @Inject(Injector) private readonly _sheetInjector: Injector) {
+    constructor(
+        config: IFormulaEnginePlugin,
+        @Inject(Injector) private readonly _sheetInjector: Injector
+    ) {
         super('formulaEngine');
     }
 

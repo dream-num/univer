@@ -14,7 +14,10 @@ import { FormulaDependencyTree } from './DependencyTree';
 export class FormulaDependencyGenerator {
     private _updateRangeFlattenCache = new Map<string, Map<string, ISelectionRange>>();
 
-    constructor(private _formulaData: FormulaDataType, private _forceCalculate = false) {}
+    constructor(
+        private _formulaData: FormulaDataType,
+        private _forceCalculate = false
+    ) {}
 
     static create(formulaData: FormulaDataType, forceCalculate = false) {
         return new FormulaDependencyGenerator(formulaData, forceCalculate);

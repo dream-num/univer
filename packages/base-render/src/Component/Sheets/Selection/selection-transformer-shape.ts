@@ -131,7 +131,11 @@ export class SelectionTransformerShape {
 
     readonly selectionFilled$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
 
-    constructor(private _scene: Scene, private _zIndex: number, private _isHeaderHighlight: boolean = true) {
+    constructor(
+        private _scene: Scene,
+        private _zIndex: number,
+        private _isHeaderHighlight: boolean = true
+    ) {
         this._initialize();
     }
 

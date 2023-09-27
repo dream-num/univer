@@ -15,7 +15,10 @@ import { BaseAstNodeFactory } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class SuffixNode extends BaseAstNode {
-    constructor(private _operatorString: string, private _functionExecutor?: BaseFunction) {
+    constructor(
+        private _operatorString: string,
+        private _functionExecutor?: BaseFunction
+    ) {
         super(_operatorString);
     }
 

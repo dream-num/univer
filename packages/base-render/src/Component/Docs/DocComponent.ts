@@ -28,7 +28,11 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
 
     protected _cacheCanvas: Canvas;
 
-    constructor(oKey: string, private _skeleton?: DocumentSkeleton, private _allowCache: boolean = false) {
+    constructor(
+        oKey: string,
+        private _skeleton?: DocumentSkeleton,
+        private _allowCache: boolean = false
+    ) {
         super(oKey);
         if (this._allowCache) {
             this._cacheCanvas = new Canvas();

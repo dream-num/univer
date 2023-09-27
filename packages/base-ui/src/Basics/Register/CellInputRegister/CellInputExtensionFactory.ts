@@ -4,7 +4,10 @@ import { ICell } from '../../Interfaces/Cell';
  * Modify cell value
  */
 export class BaseCellInputExtension {
-    constructor(protected _cell: ICell, protected _value: string) {}
+    constructor(
+        protected _cell: ICell,
+        protected _value: string
+    ) {}
 
     getCell(): ICell {
         return this._cell;

@@ -67,7 +67,11 @@ export class RichText extends BaseObject {
 
     private _cl?: IColorStyle;
 
-    constructor(private _localeService: LocaleService, key?: string, props?: IRichTextProps) {
+    constructor(
+        private _localeService: LocaleService,
+        key?: string,
+        props?: IRichTextProps
+    ) {
         super(key);
         if (props?.richText) {
             this._documentData = props.richText;

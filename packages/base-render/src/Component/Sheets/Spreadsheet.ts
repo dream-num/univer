@@ -57,7 +57,11 @@ export class Spreadsheet extends SheetComponent {
         pageMarginTop: 0,
     });
 
-    constructor(oKey: string, spreadsheetSkeleton?: SpreadsheetSkeleton, private _allowCache: boolean = true) {
+    constructor(
+        oKey: string,
+        spreadsheetSkeleton?: SpreadsheetSkeleton,
+        private _allowCache: boolean = true
+    ) {
         super(oKey, spreadsheetSkeleton);
 
         if (this._allowCache) {

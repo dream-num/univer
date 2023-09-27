@@ -21,7 +21,7 @@ export const HEADER_MENU_SHAPE_WIDTH_HEIGHT = 12;
 export const HEADER_MENU_SHAPE_THUMB_SIZE = 4;
 
 export class HeaderMenuResizeShape<
-    T extends IHeaderMenuShapeResizeProps = IHeaderMenuShapeResizeProps
+    T extends IHeaderMenuShapeResizeProps = IHeaderMenuShapeResizeProps,
 > extends Shape<T> {
     private _size: number = HEADER_MENU_SHAPE_WIDTH_HEIGHT;
 

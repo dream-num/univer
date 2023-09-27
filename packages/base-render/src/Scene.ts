@@ -43,7 +43,11 @@ export class Scene extends ThinScene {
     /** @hidden */
     private _inputManager: InputManager;
 
-    constructor(sceneKey: string, private _parent: ThinEngine<Scene> | SceneViewer, state?: ISceneTransformState) {
+    constructor(
+        sceneKey: string,
+        private _parent: ThinEngine<Scene> | SceneViewer,
+        state?: ISceneTransformState
+    ) {
         super(sceneKey);
 
         if (state) {

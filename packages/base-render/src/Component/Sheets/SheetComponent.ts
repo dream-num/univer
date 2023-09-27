@@ -9,7 +9,10 @@ import { SpreadsheetSkeleton } from './SheetSkeleton';
 export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE> {
     // protected _cacheCanvas = new Canvas();
 
-    constructor(oKey: string, private _skeleton?: SpreadsheetSkeleton) {
+    constructor(
+        oKey: string,
+        private _skeleton?: SpreadsheetSkeleton
+    ) {
         super(oKey);
     }
 

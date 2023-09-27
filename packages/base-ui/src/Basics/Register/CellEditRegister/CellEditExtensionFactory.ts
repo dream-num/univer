@@ -4,7 +4,10 @@ import { ICell } from '../../Interfaces/Cell';
  * Modify cell value
  */
 export class BaseCellEditExtension {
-    constructor(protected _cell: ICell, protected _value: string) {
+    constructor(
+        protected _cell: ICell,
+        protected _value: string
+    ) {
         //
     }
 

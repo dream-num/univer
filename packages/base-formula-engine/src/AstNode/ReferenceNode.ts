@@ -20,7 +20,10 @@ import { BaseAstNodeFactory } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class ReferenceNode extends BaseAstNode {
-    constructor(private _operatorString: string, private _referenceObject: BaseReferenceObject) {
+    constructor(
+        private _operatorString: string,
+        private _referenceObject: BaseReferenceObject
+    ) {
         super(_operatorString);
     }
 

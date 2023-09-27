@@ -13,7 +13,10 @@ import { NODE_ORDER_MAP, NodeType } from './NodeType';
 const UNION_EXECUTOR_NAME = 'UNION';
 
 export class UnionNode extends BaseAstNode {
-    constructor(private _operatorString: string, private _functionExecutor: BaseFunction) {
+    constructor(
+        private _operatorString: string,
+        private _functionExecutor: BaseFunction
+    ) {
         super(_operatorString);
     }
 

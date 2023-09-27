@@ -1,4 +1,11 @@
-import { ICommandService, ICurrentUniverService, ISelectionRange, SELECTION_TYPE, Univer } from '@univerjs/core';
+import {
+    ICommandService,
+    ICurrentUniverService,
+    ISelectionRange,
+    SELECTION_TYPE,
+    UndoCommand,
+    Univer,
+} from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -22,6 +29,7 @@ describe('Test style commands', () => {
     beforeEach(() => {
         const testBed = createCommandTestBed();
         univer = testBed.univer;
+
         get = testBed.get;
 
         commandService = get(ICommandService);
@@ -67,6 +75,8 @@ describe('Test style commands', () => {
                 expect(getMerge()?.length).toBe(0);
                 expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
                 expect(getMerge()).toStrictEqual([{ startRow: 0, startColumn: 0, endRow: 5, endColumn: 5 }]);
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getMerge()?.length).toBe(0);
             });
         });
 

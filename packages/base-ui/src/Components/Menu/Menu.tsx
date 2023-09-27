@@ -385,6 +385,7 @@ export interface BaseMenuProps {
     value?: string | number;
     options?: Array<IValueOption | ICustomComponentOption>;
     onOptionSelect?: (option: IValueOption) => void;
+    onClose?: () => void;
     show?: boolean;
     clientPosition?: {
         clientX: number;
@@ -485,6 +486,9 @@ export const Menu = (props: BaseMenuProps) => {
     // };
 
     const showMenu = (show: boolean) => {
+        if (!show) {
+            props.onClose?.();
+        }
         setIsShow(show);
         getStyle();
     };

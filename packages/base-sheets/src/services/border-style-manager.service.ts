@@ -31,7 +31,7 @@ export class BorderStyleManagerService implements IDisposable {
 
     setType(type: BorderType): void {
         this._borderInfo.type = type;
-        this._borderInfo.activeBorderType = true;
+        this.setActiveBorderType(true);
         this.refresh();
     }
 
@@ -43,6 +43,10 @@ export class BorderStyleManagerService implements IDisposable {
     setStyle(style: BorderStyleTypes): void {
         this._borderInfo.style = style;
         this.refresh();
+    }
+
+    setActiveBorderType(status: boolean) {
+        this._borderInfo.activeBorderType = status;
     }
 
     getBorderInfo(): Readonly<IBorderInfo> {

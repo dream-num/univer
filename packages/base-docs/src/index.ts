@@ -1,13 +1,13 @@
 export {
     CoverCommand,
     DeleteCommand,
-    ICoverCommandParams,
-    IDeleteCommandParams,
-    IIMEInputCommandParams,
-    IInsertCommandParams,
+    type ICoverCommandParams,
+    type IDeleteCommandParams,
+    type IIMEInputCommandParams,
+    type IInsertCommandParams,
     IMEInputCommand,
     InsertCommand,
-    IUpdateCommandParams,
+    type IUpdateCommandParams,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
 export * from './DocPlugin';

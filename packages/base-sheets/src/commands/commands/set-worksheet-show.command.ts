@@ -46,6 +46,7 @@ export const SetWorksheetShowCommand: ICommand = {
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
+        if (!worksheet) return false;
 
         const hidden = worksheet.getConfig().hidden;
         if (hidden === BooleanNumber.FALSE) return false;

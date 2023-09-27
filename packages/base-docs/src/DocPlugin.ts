@@ -1,4 +1,3 @@
-import { Engine } from '@univerjs/base-render';
 import { DesktopPlatformService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
 import {
     ICommand,
@@ -33,7 +32,6 @@ import {
     MoveCursorRightShortcut,
     MoveCursorUpShortcut,
 } from './shortcuts/cursor.shortcut';
-import { CANVAS_VIEW_KEY } from './View/Render';
 import { CanvasView } from './View/Render/CanvasView';
 import { DocsView } from './View/Render/Views';
 
@@ -48,9 +46,7 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
 
     private _config: IDocPluginConfig;
 
-    private _canvasView: CanvasView;
-
-    private _canvasEngine: Engine;
+    private _canvasView!: CanvasView;
 
     private _documentController: DocumentController;
 
@@ -128,24 +124,8 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
      * @deprecated use DI to get underlying dependencies
      * @returns
      */
-    getCanvasEngine() {
-        return this._canvasEngine;
-    }
-
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
     getCanvasView() {
         return this._canvasView;
-    }
-
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
-    getMainScene() {
-        return this._canvasEngine.getScene(CANVAS_VIEW_KEY.MAIN_SCENE);
     }
 
     /**

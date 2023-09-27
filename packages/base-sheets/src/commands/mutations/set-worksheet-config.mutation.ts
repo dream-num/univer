@@ -1,12 +1,14 @@
 import { CommandType, ICurrentUniverService, IMutation, IWorksheetConfig, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
+/** @deprecated */
 export interface ISetWorksheetConfigMutationParams {
     workbookId: string;
     worksheetId: string;
     config: IWorksheetConfig;
 }
 
+/** @deprecated */
 export const SetWorksheetConfigUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetConfigMutationParams
@@ -22,6 +24,7 @@ export const SetWorksheetConfigUndoMutationFactory = (
     };
 };
 
+/** @deprecated */
 export const SetWorksheetConfigMutation: IMutation<ISetWorksheetConfigMutationParams> = {
     id: 'sheet.mutation.set-worksheet-config',
     type: CommandType.MUTATION,
@@ -30,7 +33,9 @@ export const SetWorksheetConfigMutation: IMutation<ISetWorksheetConfigMutationPa
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;
-        worksheet.setConfig(params.config);
+
+        // TODO: setConfig is going to be deprecated
+        // worksheet.setConfig(params.config);
 
         return true;
     },

@@ -310,7 +310,7 @@ export function ColorPicker(props: BaseColorPickerProps) {
     };
 
     const onSwitch = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        (e as unknown as MouseEvent).stopImmediatePropagation();
+        e.nativeEvent.stopImmediatePropagation();
 
         new Promise((resolve, reject) => {
             setSetting(!setting);

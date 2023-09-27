@@ -11,6 +11,11 @@
 
     &-primary {
         .btn-primary();
+        &-active {
+            color: var(--text-color);
+            background: #eee;
+            border-color: transparent;
+        }
     }
 
     &-danger {
@@ -19,6 +24,11 @@
 
     &-text {
         .btn-text();
+        &-active {
+            color: var(--text-color);
+            background: #eee;
+            border-color: transparent;
+        }
     }
 
     &-round {
@@ -36,7 +46,7 @@
     &-loading {
         position: relative;
     }
-
+    
     &::before {
         position: absolute;
         top: -@border-width-base;

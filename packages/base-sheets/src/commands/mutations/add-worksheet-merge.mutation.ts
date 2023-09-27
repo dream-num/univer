@@ -43,7 +43,6 @@ export const AddWorksheetMergeMutation: IMutation<IAddWorksheetMergeMutationPara
         for (let i = 0; i < mergeAppendData.length; i++) {
             mergeConfigData.push(mergeAppendData[i]);
         }
-
         return true;
     },
 };

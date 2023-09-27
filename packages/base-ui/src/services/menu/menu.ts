@@ -53,6 +53,7 @@ interface IMenuItemBase<V> {
     disabled$?: Observable<boolean>;
     /** On observable value that should emit the value of the corresponding selection component. */
     value$?: Observable<V>;
+    onClose?: () => void;
 }
 
 export interface IMenuButtonItem<V = undefined> extends IMenuItemBase<V> {
@@ -79,6 +80,7 @@ export interface IValueOption {
     disabled?: boolean;
     id?: string; // command id
     show?: boolean; // show parent menu or not
+    showAfterClick?: boolean; // show children when clicked or not,暂时性做法
 }
 
 export function isValueOptions(v: IValueOption | ICustomComponentOption): v is IValueOption {

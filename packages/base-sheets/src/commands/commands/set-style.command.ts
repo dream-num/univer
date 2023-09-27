@@ -464,13 +464,13 @@ export const SetTextRotationCommand: ICommand<ISetTextRotationCommandParams> = {
             return false;
         }
 
+        const value = typeof params.value === 'number' ? { a: params.value } : { a: 0, v: BooleanNumber.TRUE };
+
         const commandService = accessor.get(ICommandService);
         const setStyleParams: ISetStyleParams<ITextRotation> = {
             style: {
                 type: 'tr',
-                value: {
-                    a: params.value as number,
-                },
+                value,
             },
         };
 

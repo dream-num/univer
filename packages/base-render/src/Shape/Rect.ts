@@ -11,7 +11,7 @@ export interface IRectProps extends IShapeProps {
 export const RECT_OBJECT_ARRAY = ['radius'];
 
 export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
-    private _radius: number;
+    private _radius: number = 0;
 
     constructor(key?: string, props?: T) {
         super(key, props);

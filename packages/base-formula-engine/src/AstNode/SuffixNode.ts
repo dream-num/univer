@@ -15,7 +15,10 @@ import { BaseAstNodeFactory } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class SuffixNode extends BaseAstNode {
-    constructor(private _operatorString: string, private _functionExecutor?: BaseFunction) {
+    constructor(
+        private _operatorString: string,
+        private _functionExecutor?: BaseFunction
+    ) {
         super(_operatorString);
     }
 
@@ -27,6 +30,9 @@ export class SuffixNode extends BaseAstNode {
         const children = this.getChildren();
         const value = children[0].getValue();
         let result: FunctionVariantType;
+        if (value == null) {
+            throw new Error('object is null');
+        }
         if (this._operatorString === suffixToken.PERCENTAGE) {
             result = this._functionExecutor!.calculate(value, new NumberValueObject(100)) as FunctionVariantType;
         } else if (this._operatorString === suffixToken.POUND) {
@@ -79,13 +85,13 @@ export class SuffixNodeFactory extends BaseAstNodeFactory {
 
     override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
         if (!(param instanceof LexerNode)) {
-            return false;
+            return;
         }
 
         const tokenTrim = param.getToken().trim();
 
         if (tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
-            return false;
+            return;
         }
 
         let functionName = '';
@@ -94,7 +100,7 @@ export class SuffixNodeFactory extends BaseAstNodeFactory {
         } else if (tokenTrim === suffixToken.POUND) {
             return new SuffixNode(tokenTrim);
         } else {
-            return false;
+            return;
         }
 
         const functionExecutor = parserDataLoader.getExecutor(functionName);

@@ -6,7 +6,7 @@ import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseValueObject, CalculateValueType } from './BaseValueObject';
 
 export class BooleanValueObject extends BaseValueObject {
-    private _value: boolean;
+    private _value: boolean = false;
 
     constructor(rawValue: string | number | boolean, isForce = false) {
         super(rawValue);

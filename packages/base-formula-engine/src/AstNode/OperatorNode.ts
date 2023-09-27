@@ -25,7 +25,10 @@ const POWER_EXECUTOR_NAME = 'POWER';
 const COMPARE_EXECUTOR_NAME = 'COMPARE';
 
 export class OperatorNode extends BaseAstNode {
-    constructor(private _operatorString: string, private _functionExecutor: BaseFunction) {
+    constructor(
+        private _operatorString: string,
+        private _functionExecutor: BaseFunction
+    ) {
         super(_operatorString);
     }
 
@@ -38,9 +41,12 @@ export class OperatorNode extends BaseAstNode {
         if (this._functionExecutor.name === COMPARE_EXECUTOR_NAME) {
             (this._functionExecutor as Compare).setCompareType(this.getToken() as compareToken);
         }
-        this.setValue(
-            this._functionExecutor.calculate(children[0].getValue(), children[1].getValue()) as FunctionVariantType
-        );
+        const object1 = children[0].getValue();
+        const object2 = children[1].getValue();
+        if (object1 == null || object2 == null) {
+            throw new Error('object1 or object2 is null');
+        }
+        this.setValue(this._functionExecutor.calculate(object1, object2) as FunctionVariantType);
     }
 }
 
@@ -78,18 +84,17 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
 
     override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
         if (param instanceof LexerNode) {
-            return false;
+            return;
         }
         const tokenTrim = param.trim();
 
         if (tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
-            return false;
+            return;
         }
 
         if (OPERATOR_TOKEN_SET.has(tokenTrim)) {
             return this.create(tokenTrim, parserDataLoader);
         }
-        return false;
     }
 }
 

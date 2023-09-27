@@ -13,7 +13,10 @@ import { NODE_ORDER_MAP, NodeType } from './NodeType';
 const UNION_EXECUTOR_NAME = 'UNION';
 
 export class UnionNode extends BaseAstNode {
-    constructor(private _operatorString: string, private _functionExecutor: BaseFunction) {
+    constructor(
+        private _operatorString: string,
+        private _functionExecutor: BaseFunction
+    ) {
         super(_operatorString);
     }
 
@@ -25,6 +28,11 @@ export class UnionNode extends BaseAstNode {
         const children = this.getChildren();
         const leftNode = children[0].getValue();
         const rightNode = children[1].getValue();
+
+        if (leftNode == null || rightNode == null) {
+            throw new Error('leftNode and rightNode');
+        }
+
         let result: FunctionVariantType;
         if (this._operatorString === matchToken.COLON) {
             result = this._functionExecutor.calculate(leftNode, rightNode) as FunctionVariantType;
@@ -51,7 +59,7 @@ export class UnionNodeFactory extends BaseAstNodeFactory {
 
     override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
         if (!(param instanceof LexerNode)) {
-            return false;
+            return;
         }
 
         const token = param.getToken();
@@ -59,11 +67,11 @@ export class UnionNodeFactory extends BaseAstNodeFactory {
         const tokenTrim = token.trim();
 
         if (tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
-            return false;
+            return;
         }
 
         if (tokenTrim !== matchToken.COLON) {
-            return false;
+            return;
         }
 
         return this.create(tokenTrim, parserDataLoader);

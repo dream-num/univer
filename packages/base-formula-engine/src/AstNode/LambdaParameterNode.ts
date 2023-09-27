@@ -36,7 +36,7 @@ export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
     }
 
     override create(param: LexerNode): BaseAstNode {
-        const lambdaId = param.getLambdaId();
+        // const lambdaId = param.getLambdaId();
         const currentLambdaPrivacyVar = param.getLambdaPrivacyVar();
         const lambdaParameter = param.getLambdaParameter();
 
@@ -49,12 +49,12 @@ export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
 
     override checkAndCreateNodeType(param: LexerNode | string) {
         if (!(param instanceof LexerNode)) {
-            return false;
+            return;
         }
 
         const token = param.getToken().trim();
         if (token !== DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
-            return false;
+            return;
         }
 
         return this.create(param);

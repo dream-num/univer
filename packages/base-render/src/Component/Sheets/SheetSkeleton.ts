@@ -92,27 +92,36 @@ const DEFAULT_ROTATE_ANGLE = 90;
 export class SpreadsheetSkeleton extends Skeleton {
     private _rowHeightAccumulation: number[];
 
-    private _rowTotalHeight: number;
+    private _rowTotalHeight: number = 0;
 
     private _columnWidthAccumulation: number[];
 
-    private _columnTotalWidth: number;
+    private _columnTotalWidth: number = 0;
 
     private _rowHeaderWidth = 0;
 
     private _columnHeaderHeight = 0;
 
-    private _rowColumnSegment: IRowColumnSegment;
+    private _rowColumnSegment: IRowColumnSegment = {
+        startRow: -1,
+        endRow: -1,
+        startColumn: -1,
+        endColumn: -1,
+    };
 
     private _dataMergeCache: ISelectionRange[];
 
     // private _dataMergeCacheAll: ObjectMatrix<ISelectionRange>;
 
-    private _overflowCache: ObjectMatrix<ISelectionRange>;
+    private _overflowCache: ObjectMatrix<ISelectionRange> = new ObjectMatrix();
 
-    private _stylesCache: IStylesCache;
+    private _stylesCache: IStylesCache = {
+        background: {},
+        font: {},
+        border: new ObjectMatrix<BorderCache>(),
+    };
 
-    private _showGridlines: BooleanNumber;
+    private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
 
     private _marginTop: number = 0;
 

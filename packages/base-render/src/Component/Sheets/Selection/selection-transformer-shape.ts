@@ -53,59 +53,59 @@ const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
  * The main selection canvas component
  */
 export class SelectionTransformerShape {
-    private _leftControl: Rect;
+    private _leftControl!: Rect;
 
-    private _rightControl: Rect;
+    private _rightControl!: Rect;
 
-    private _topControl: Rect;
+    private _topControl!: Rect;
 
-    private _bottomControl: Rect;
+    private _bottomControl!: Rect;
 
-    private _backgroundControlTop: Rect;
+    private _backgroundControlTop!: Rect;
 
-    private _backgroundControlBottom: Rect;
+    private _backgroundControlBottom!: Rect;
 
-    private _backgroundControlMiddleLeft: Rect;
+    private _backgroundControlMiddleLeft!: Rect;
 
-    private _backgroundControlMiddleRight: Rect;
+    private _backgroundControlMiddleRight!: Rect;
 
-    private _fillControl: Rect;
+    private _fillControl!: Rect;
 
-    private _selectionShape: Group;
+    private _selectionShape!: Group;
 
-    private _rowHeaderBackground: Rect;
+    private _rowHeaderBackground!: Rect;
 
-    private _rowHeaderBorder: Rect;
+    private _rowHeaderBorder!: Rect;
 
-    private _rowHeaderGroup: Group;
+    private _rowHeaderGroup!: Group;
 
-    private _rowHeaderHighlight: Rect;
+    private _rowHeaderHighlight!: Rect;
 
-    private _columnHeaderBackground: Rect;
+    private _columnHeaderBackground!: Rect;
 
-    private _columnHeaderBorder: Rect;
+    private _columnHeaderBorder!: Rect;
 
-    private _columnHeaderGroup: Group;
+    private _columnHeaderGroup!: Group;
 
-    private _columnHeaderHighlight: Rect;
+    private _columnHeaderHighlight!: Rect;
 
-    private _topLeftWidget: Rect;
+    private _topLeftWidget!: Rect;
 
-    private _topCenterWidget: Rect;
+    private _topCenterWidget!: Rect;
 
-    private _topRightWidget: Rect;
+    private _topRightWidget!: Rect;
 
-    private _middleLeftWidget: Rect;
+    private _middleLeftWidget!: Rect;
 
-    private _middleRightWidget: Rect;
+    private _middleRightWidget!: Rect;
 
-    private _bottomLeftWidget: Rect;
+    private _bottomLeftWidget!: Rect;
 
-    private _bottomCenterWidget: Rect;
+    private _bottomCenterWidget!: Rect;
 
-    private _bottomRightWidget: Rect;
+    private _bottomRightWidget!: Rect;
 
-    private _selectionModel: SelectionTransformerModel;
+    private _selectionModel!: SelectionTransformerModel;
 
     private _selectionStyle: Nullable<ISelectionStyle>;
 
@@ -131,7 +131,11 @@ export class SelectionTransformerShape {
 
     readonly selectionFilled$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
 
-    constructor(private _scene: Scene, private _zIndex: number, private _isHeaderHighlight: boolean = true) {
+    constructor(
+        private _scene: Scene,
+        private _zIndex: number,
+        private _isHeaderHighlight: boolean = true
+    ) {
         this._initialize();
     }
 

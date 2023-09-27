@@ -92,7 +92,7 @@ export class Group extends BaseObject {
         return objects;
     }
 
-    getObjects() {
+    override getObjects() {
         return this._objects;
     }
 

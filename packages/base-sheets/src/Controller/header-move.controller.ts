@@ -285,6 +285,14 @@ export class HeaderMoveController extends Disposable {
 
         const { startX: cellStartX, startY: cellStartY, endX: cellEndX, endY: cellEndY } = startCell;
 
+        const selectionWithCoord = this._selectionTransformerShapeManager.convertRangeDataToSelection(
+            matchSelectionData.rangeData
+        );
+
+        if (selectionWithCoord == null) {
+            return;
+        }
+
         const {
             startX: selectedStartX,
             endX: selectedEndX,
@@ -295,7 +303,7 @@ export class HeaderMoveController extends Disposable {
             startColumn: selectedStartColumn,
             endRow: selectedEndRow,
             endColumn: selectedEndColumn,
-        } = this._selectionTransformerShapeManager.convertRangeDataToSelection(matchSelectionData.rangeData);
+        } = selectionWithCoord;
 
         if (initialType === HEADER_MOVE_TYPE.ROW) {
             this._moveHelperBackgroundShape?.transformByState({

@@ -17,9 +17,9 @@ export type LambdaPrivacyVarType = Map<string, Nullable<BaseAstNode>>;
 export class BaseAstNode {
     private _children: BaseAstNode[] = [];
 
-    private _parent: BaseAstNode;
+    private _parent: Nullable<BaseAstNode>;
 
-    private _valueObject: FunctionVariantType;
+    private _valueObject: Nullable<FunctionVariantType>;
 
     private _calculateState = false;
 
@@ -70,11 +70,11 @@ export class BaseAstNode {
         return this._token;
     }
 
-    setValue(value: FunctionVariantType) {
+    setValue(value: Nullable<FunctionVariantType>) {
         this._valueObject = value;
     }
 
-    getValue(): FunctionVariantType {
+    getValue(): Nullable<FunctionVariantType> {
         return this._valueObject;
     }
 

@@ -12,7 +12,10 @@ import { NODE_ORDER_MAP, NodeType } from './NodeType';
 export const LAMBDA_TOKEN: string = 'LAMBDA';
 
 export class LambdaNode extends BaseAstNode {
-    constructor(token: string, private _lambdaId: string) {
+    constructor(
+        token: string,
+        private _lambdaId: string
+    ) {
         super(token);
     }
 
@@ -71,7 +74,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
             }
         }
 
-        lambdaRuntime.registerLambdaPrivacyVar(lambdaId, currentLambdaPrivacyVar);
+        lambdaRuntime?.registerLambdaPrivacyVar(lambdaId, currentLambdaPrivacyVar);
 
         this._updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
 
@@ -80,12 +83,12 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
 
     override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
         if (!(param instanceof LexerNode)) {
-            return false;
+            return;
         }
 
         const token = param.getToken().trim().toUpperCase();
         if (token !== LAMBDA_TOKEN) {
-            return false;
+            return;
         }
 
         return this.create(param, parserDataLoader);

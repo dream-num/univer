@@ -251,6 +251,10 @@ export class Documents extends DocComponent {
 
         const skeletonData = documentSkeleton.getSkeletonData();
 
+        if (skeletonData == null) {
+            return;
+        }
+
         const { pages } = skeletonData;
         const parentScale = this.getParentScale();
         const extensions = this.getExtensionsByOrder();
@@ -514,6 +518,10 @@ export class Documents extends DocComponent {
         this._findLiquid.reset();
 
         const skeletonData = skeleton.getSkeletonData();
+
+        if (skeletonData == null) {
+            return;
+        }
 
         const pages = skeletonData.pages;
 

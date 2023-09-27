@@ -1,9 +1,12 @@
+import { Nullable } from '@univerjs/core';
+
+import { AstRootNode } from '../AstNode/AstRootNode';
 import { FormulaASTCache } from '../AstNode/CacheLRU';
 import { LexerTreeMaker } from './Lexer';
 import { AstTreeMaker } from './Parser';
 
 export function generateAstNode(formulaString: string) {
-    let astNode = FormulaASTCache.get(formulaString);
+    let astNode: Nullable<AstRootNode> = FormulaASTCache.get(formulaString);
 
     if (astNode) {
         return astNode;
@@ -16,6 +19,10 @@ export function generateAstNode(formulaString: string) {
     const astTreeMaker = AstTreeMaker.create();
 
     astNode = astTreeMaker.parse(lexerNode);
+
+    if (astNode == null) {
+        throw new Error('astNode is null');
+    }
 
     FormulaASTCache.set(formulaString, astNode);
 

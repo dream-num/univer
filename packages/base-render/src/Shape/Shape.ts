@@ -21,22 +21,22 @@ export interface IShapeProps extends IObjectFullState {
     allowCache?: boolean;
     paintFirst?: PaintFirst;
 
-    stroke?: string | CanvasGradient;
+    stroke?: Nullable<string | CanvasGradient>;
     strokeScaleEnabled?: boolean; // strokeUniform: boolean;
-    fill?: string | CanvasGradient;
+    fill?: Nullable<string | CanvasGradient>;
     fillAfterStrokeEnabled?: boolean;
     hitStrokeWidth?: number | string;
     strokeLineJoin?: LineJoin;
     strokeLineCap?: LineCap;
-    shadowColor?: string;
+    shadowColor?: Nullable<string>;
     shadowBlur?: number;
-    shadowOffset?: Vector2;
+    shadowOffset?: Nullable<Vector2>;
     shadowOffsetX?: number;
     shadowOffsetY?: number;
     shadowOpacity?: number;
     shadowEnabled?: boolean;
     shadowForStrokeEnabled?: boolean;
-    strokeDashArray?: number[];
+    strokeDashArray?: Nullable<number[]>;
     strokeDashOffset?: number;
     strokeMiterLimit?: number;
     strokeWidth?: number;
@@ -72,7 +72,7 @@ export const SHAPE_OBJECT_ARRAY = [
 ];
 
 export abstract class Shape<T> extends BaseObject {
-    protected _cacheCanvas: Canvas;
+    protected _cacheCanvas: Nullable<Canvas>;
 
     private _hoverCursor: Nullable<string>;
 
@@ -84,45 +84,45 @@ export abstract class Shape<T> extends BaseObject {
 
     private _allowCache: boolean = false;
 
-    private _paintFirst: PaintFirst;
+    private _paintFirst: PaintFirst = 'fill';
 
-    private _stroke: string | CanvasGradient;
+    private _stroke: Nullable<string | CanvasGradient>;
 
-    private _strokeScaleEnabled: boolean; // strokeUniform: boolean;
+    private _strokeScaleEnabled: boolean = false; // strokeUniform: boolean;
 
-    private _fill: string | CanvasGradient;
+    private _fill: Nullable<string | CanvasGradient>;
 
-    private _fillAfterStrokeEnabled: boolean;
+    private _fillAfterStrokeEnabled: boolean = false;
 
-    private _hitStrokeWidth: number | string;
+    private _hitStrokeWidth: number | string = 0;
 
-    private _strokeLineJoin: LineJoin;
+    private _strokeLineJoin: LineJoin = 'round';
 
-    private _strokeLineCap: LineCap;
+    private _strokeLineCap: LineCap = 'round';
 
-    private _shadowColor: string;
+    private _shadowColor: Nullable<string>;
 
-    private _shadowBlur: number;
+    private _shadowBlur: number = 0;
 
-    private _shadowOffset: Vector2;
+    private _shadowOffset: Nullable<Vector2>;
 
-    private _shadowOffsetX: number;
+    private _shadowOffsetX: number = 0;
 
-    private _shadowOffsetY: number;
+    private _shadowOffsetY: number = 0;
 
-    private _shadowOpacity: number;
+    private _shadowOpacity: number = 0;
 
-    private _shadowEnabled: boolean;
+    private _shadowEnabled: boolean = false;
 
-    private _shadowForStrokeEnabled: boolean;
+    private _shadowForStrokeEnabled: boolean = false;
 
-    private _strokeDashArray: number[];
+    private _strokeDashArray: Nullable<number[]>;
 
-    private _strokeDashOffset: number;
+    private _strokeDashOffset: number = 0;
 
-    private _strokeMiterLimit: number;
+    private _strokeMiterLimit: number = 0;
 
-    private _type: SHAPE_TYPE;
+    private _type: SHAPE_TYPE = SHAPE_TYPE.RECT;
 
     constructor(key?: string, props?: T) {
         super(key);
@@ -340,6 +340,9 @@ export abstract class Shape<T> extends BaseObject {
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         if (this._allowCache) {
             if (this.isDirty()) {
+                if (this._cacheCanvas == null) {
+                    throw new Error('cache canvas is null');
+                }
                 const ctx = this._cacheCanvas.getContext();
                 this._cacheCanvas.clear();
                 ctx.save();

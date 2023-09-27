@@ -42,7 +42,6 @@ export class ValueNodeFactory extends BaseAstNodeFactory {
         } else {
             return this.create(token);
         }
-        return false;
     }
 
     override create(param: string): BaseAstNode {
@@ -51,7 +50,7 @@ export class ValueNodeFactory extends BaseAstNodeFactory {
 
     override checkAndCreateNodeType(param: LexerNode | string) {
         if (param instanceof LexerNode) {
-            return false;
+            return;
         }
         return this._checkValueNode(param);
     }

@@ -42,11 +42,20 @@ export class SelectionTransformerShapeEvent {
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    private _helperSelection: Rect;
+    private _helperSelection!: Rect;
 
-    private _scrollTimer: ScrollTimer;
+    private _scrollTimer!: ScrollTimer;
 
-    private _targetSelection: ISelectionRangeWithCoord;
+    private _targetSelection: ISelectionRangeWithCoord = {
+        startY: 0,
+        endY: 0,
+        startX: 0,
+        endX: 0,
+        startRow: -1,
+        endRow: -1,
+        startColumn: -1,
+        endColumn: -1,
+    };
 
     private _isInMergeState: boolean = false;
 

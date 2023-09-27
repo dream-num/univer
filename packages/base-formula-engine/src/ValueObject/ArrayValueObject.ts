@@ -25,9 +25,9 @@ export function fromObjectToString(array: IArrayValueObject) {
 export class ArrayValueObject extends BaseValueObject {
     private _value: CalculateValueType[][];
 
-    private _rowCount: number;
+    private _rowCount: number = -1;
 
-    private _columnCount: number;
+    private _columnCount: number = -1;
 
     constructor(rawValue: string | IArrayValueObject) {
         if (rawValue instanceof String) {

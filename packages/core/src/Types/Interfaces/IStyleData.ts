@@ -137,22 +137,22 @@ export interface IStyleBase {
     /**
      * background
      */
-    bg?: IColorStyle;
+    bg?: Nullable<IColorStyle>;
 
     /**
      * border
      */
-    bd?: IBorderData;
+    bd?: Nullable<IBorderData>;
 
     /**
      * foreground
      */
-    cl?: IColorStyle;
+    cl?: Nullable<IColorStyle>;
 
     /**
      * (Subscript 下标 /Superscript上标 Text)
      */
-    va?: BaselineOffset;
+    va?: Nullable<BaselineOffset>;
 }
 
 /**

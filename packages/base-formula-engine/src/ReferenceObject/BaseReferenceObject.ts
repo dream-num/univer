@@ -13,25 +13,30 @@ export type NodeValueType = BaseValueObject | BaseReferenceObject | ErrorValueOb
 export type FunctionVariantType = BaseValueObject | BaseReferenceObject | ErrorValueObject;
 
 export class BaseReferenceObject extends ObjectClassType {
-    private _forcedSheetId: string;
+    private _forcedSheetId: string = '';
 
-    private _forcedSheetName: string;
+    private _forcedSheetName: string = '';
 
-    private _defaultSheetId: string;
+    private _defaultSheetId: string = '';
 
-    private _rangeData: ISelectionRange;
+    private _rangeData: ISelectionRange = {
+        startColumn: -1,
+        startRow: -1,
+        endRow: -1,
+        endColumn: -1,
+    };
 
-    private _unitData: UnitDataType;
+    private _unitData: UnitDataType = {};
 
     private _rowCount: number = 0;
 
     private _columnCount: number = 0;
 
-    private _defaultUnitId: string;
+    private _defaultUnitId: string = '';
 
-    private _forcedUnitId: string;
+    private _forcedUnitId: string = '';
 
-    private _runtimeData: UnitDataType;
+    private _runtimeData: UnitDataType = {};
 
     constructor(private _token: string) {
         super();

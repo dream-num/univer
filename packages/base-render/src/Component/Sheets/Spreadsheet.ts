@@ -34,17 +34,17 @@ import { SpreadsheetSkeleton } from './SheetSkeleton';
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
 export class Spreadsheet extends SheetComponent {
-    private _borderAuxiliaryExtension: BorderAuxiliary;
+    private _borderAuxiliaryExtension!: BorderAuxiliary;
 
-    private _backgroundExtension: Background;
+    private _backgroundExtension!: Background;
 
-    private _borderExtension: Border;
+    private _borderExtension!: Border;
 
-    private _fontExtension: Font;
+    private _fontExtension!: Font;
 
-    private _cacheCanvas: Canvas;
+    private _cacheCanvas!: Canvas;
 
-    private _boundsCache?: IBoundRect;
+    private _boundsCache: Nullable<IBoundRect>;
 
     private _cacheOffsetX = 0;
 
@@ -57,7 +57,11 @@ export class Spreadsheet extends SheetComponent {
         pageMarginTop: 0,
     });
 
-    constructor(oKey: string, spreadsheetSkeleton?: SpreadsheetSkeleton, private _allowCache: boolean = true) {
+    constructor(
+        oKey: string,
+        spreadsheetSkeleton?: SpreadsheetSkeleton,
+        private _allowCache: boolean = true
+    ) {
         super(oKey, spreadsheetSkeleton);
 
         if (this._allowCache) {

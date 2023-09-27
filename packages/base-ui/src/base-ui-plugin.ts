@@ -25,6 +25,8 @@ const DEFAULT_SLIDE_PLUGIN_DATA = {};
  * UI plugin provides basic interaction with users. Including workbench (menus, UI parts, notifications etc.), copy paste, shortcut.
  */
 export class UIPlugin extends Plugin {
+    protected override _injector: Injector;
+
     static override type = PluginType.Univer;
 
     private _config: IUIPluginConfig;

@@ -5,7 +5,7 @@ import { Inject } from '@wendellhu/redi';
 import { SlideBar } from '../View/SlideBar/SlideBar';
 
 export class SlideBarUIController {
-    private _slideBar: SlideBar;
+    private _slideBar?: SlideBar;
 
     private _pages: ISlidePage[] = [];
 
@@ -24,17 +24,17 @@ export class SlideBarUIController {
 
     setSlideBar() {
         const canvasView = this._getCanvasView();
-        this._slideBar.setSlide(this._pages, () => {
-            const slideBarRef = this._slideBar.slideBarRef;
+        this._slideBar!.setSlide(this._pages, () => {
+            const slideBarRef = this._slideBar!.slideBarRef;
             const thumbList = slideBarRef.current?.childNodes[0].childNodes;
             canvasView.createSlidePages(thumbList, this._pages);
         });
 
-        canvasView.getSlide().onSlideChangePageByNavigationObservable.add((pageId) => {
-            if (this._slideBar.state.activePageId === pageId || pageId == null) {
+        canvasView.getSlide()!.onSlideChangePageByNavigationObservable.add((pageId) => {
+            if (this._slideBar!.state.activePageId === pageId || pageId == null) {
                 return;
             }
-            this._slideBar.setState({
+            this._slideBar!.setState({
                 activePageId: pageId,
             });
             canvasView.activePage(pageId);
@@ -50,8 +50,8 @@ export class SlideBarUIController {
         const newPage = model.addPage();
         this._pages.push(newPage);
 
-        this._slideBar.setSlide(this._pages, () => {
-            const slideBarRef = this._slideBar.slideBarRef;
+        this._slideBar!.setSlide(this._pages, () => {
+            const slideBarRef = this._slideBar!.slideBarRef;
             const thumbList = slideBarRef.current?.childNodes[0].childNodes;
             canvasView.createSlidePages(thumbList, this._pages);
         });

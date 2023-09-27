@@ -15,28 +15,28 @@ export interface BaseInfoBarProps {
 }
 
 export class InfoBarUIController {
-    private _infoBarModel: InfoBarModel;
+    private _infoBarModel?: InfoBarModel;
 
-    private _infoBar: InfoBar;
+    private _infoBar?: InfoBar;
 
-    private _infoList: BaseInfoBarProps;
+    private _infoList?: BaseInfoBarProps;
 
     // constructor() { }
 
     getComponent = (ref: InfoBar) => {
         this._infoBar = ref;
         this._refreshComponent();
-        this.resetInfoList(this._infoList);
+        this.resetInfoList(this._infoList!);
     };
 
     resetInfoList(list: BaseInfoBarProps) {
-        this._infoBar.setInfoList(list);
+        this._infoBar!.setInfoList(list);
     }
 
     setSlideName(e: FocusEvent) {
         const target = e.target as HTMLInputElement;
         const name = target.value;
-        this._infoBarModel.setName(name);
+        this._infoBarModel!.setName(name);
     }
 
     private _refreshComponent(): void {

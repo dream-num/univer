@@ -6,7 +6,7 @@ import { IDocUIPluginConfig } from '../Basics';
 import { DocContainer } from '../View/DocContainer';
 
 export class DocContainerUIController {
-    private _docContainer: DocContainer;
+    private _docContainer?: DocContainer;
 
     constructor(
         private readonly _config: IDocUIPluginConfig,
@@ -67,7 +67,7 @@ export class DocContainerUIController {
     };
 
     getContentRef() {
-        return this._docContainer.getContentRef();
+        return this._docContainer!.getContentRef();
     }
 
     UIDidMount(cb: Function) {

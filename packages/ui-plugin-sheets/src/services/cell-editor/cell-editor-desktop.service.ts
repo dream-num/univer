@@ -55,11 +55,11 @@ const SHEET_CELL_EDITOR_MODEL_ID = 'sheet.model.cell-editor';
  */
 @OnLifecycle(LifecycleStages.Rendered, ICellEditorService)
 export class DesktopCellEditorService extends RxDisposable implements ICellEditorService {
-    private _containerElement: HTMLDivElement;
+    private _containerElement?: HTMLDivElement;
 
-    private _editorEngine: Engine;
+    private _editorEngine?: Engine;
 
-    private _editorScene: Scene;
+    private _editorScene?: Scene;
 
     /** This flag indicated whether the cell editor is visible (as it always handles keyboard events when a UniverSheet is focused). */
     private _activated = false;
@@ -91,7 +91,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
     override dispose(): void {
         super.dispose();
 
-        document.body.removeChild(this._containerElement);
+        document.body.removeChild(this._containerElement!);
     }
 
     async enterEditing() {
@@ -237,22 +237,22 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
 
         const position = getPositionOfCurrentCell(cellInfo, render.engine);
 
-        this._containerElement.style.display = 'block';
-        this._containerElement.style.left = `${position.left}px`;
-        this._containerElement.style.top = `${position.top}px`;
-        this._containerElement.style.minHeight = `${position.minHeight}px`;
-        this._containerElement.style.minWidth = `${position.minWidth}px`;
-        this._containerElement.style.maxHeight = `${position.maxHeight}px`;
-        this._containerElement.style.maxWidth = `${position.maxWidth}px`;
+        this._containerElement!.style.display = 'block';
+        this._containerElement!.style.left = `${position.left}px`;
+        this._containerElement!.style.top = `${position.top}px`;
+        this._containerElement!.style.minHeight = `${position.minHeight}px`;
+        this._containerElement!.style.minWidth = `${position.minWidth}px`;
+        this._containerElement!.style.maxHeight = `${position.maxHeight}px`;
+        this._containerElement!.style.maxWidth = `${position.maxWidth}px`;
 
-        this._editorEngine.resize();
-        this._containerElement.focus();
+        this._editorEngine!.resize();
+        this._containerElement!.focus();
 
         return position;
     }
 
     private _hideCellEditor(): void {
-        this._containerElement.style.display = 'none';
+        this._containerElement!.style.display = 'none';
     }
 
     private _initListeners(): void {

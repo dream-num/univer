@@ -40,7 +40,7 @@ export class RichText extends Component<BaseRichTextProps, IRichTextState> {
 
     ref = createRef<HTMLDivElement>();
 
-    cellTextStyle: CellTextStyle;
+    cellTextStyle?: CellTextStyle;
 
     hooks = new Map<string, (args: any) => void>();
 

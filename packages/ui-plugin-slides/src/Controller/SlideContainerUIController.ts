@@ -9,7 +9,7 @@ import { SlideBarUIController } from './SlideBarUIController';
 import { ToolbarUIController } from './ToolbarUIController';
 
 export class SlideContainerUIController {
-    private _slideContainer: SlideContainer;
+    private _slideContainer?: SlideContainer;
 
     private _toolbarController: ToolbarUIController;
 
@@ -87,7 +87,7 @@ export class SlideContainerUIController {
     };
 
     getContentRef() {
-        return this._slideContainer.getContentRef();
+        return this._slideContainer!.getContentRef();
     }
 
     getToolbarController() {
@@ -102,7 +102,7 @@ export class SlideContainerUIController {
 
     private setSlideContainer() {
         // handle drag event
-        const slideContainer = this._slideContainer.getContentRef().current;
+        const slideContainer = this._slideContainer!.getContentRef().current;
         if (!slideContainer) {
             throw new Error('slideContainer is not ready');
         }

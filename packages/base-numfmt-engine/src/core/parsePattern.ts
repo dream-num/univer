@@ -36,8 +36,8 @@ export function parsePattern(pattern: string): PatternType {
             l10n_override = resolveLocale(part.locale);
         }
         partitions.push(part);
-        more = p.charAt(part.pattern.length) === ';' ? 1 : 0;
-        p = p.slice(part.pattern.length + more);
+        more = part.pattern && p.charAt((part.pattern || '').length) === ';' ? 1 : 0;
+        p = p.slice((part.pattern || '').length + more);
         i++;
     } while (more && i < 4 && conditions < 3);
 
@@ -66,15 +66,17 @@ export function parsePattern(pattern: string): PatternType {
         }
         // missing negative
         if (partitions.length < 2) {
-            const part = parsePart(partitions[0].pattern);
+            const part = parsePart(partitions[0].pattern || '');
             // the volatile minus only happens if there is a single pattern
-            part.tokens.unshift({ type: 'minus', volatile: true });
+            if (part.tokens) {
+                part.tokens.unshift({ type: 'minus', volatile: true });
+            }
             part.generated = true;
             partitions.push(part);
         }
         // missing zero
         if (partitions.length < 3) {
-            const part = parsePart(partitions[0].pattern);
+            const part = parsePart(partitions[0].pattern || '');
             part.generated = true;
             partitions.push(part);
         }
@@ -91,26 +93,26 @@ export function parsePattern(pattern: string): PatternType {
 
         partitions[0].condition = ['>', 0];
         partitions[1].condition = ['<', 0];
-        partitions[2].condition = null;
+        partitions[2].condition = undefined;
     }
 
     return {
         pattern,
         partitions,
-        locale: l10n_override,
+        locale: l10n_override as string | undefined,
     };
 }
 
 export function parseCatch(pattern: string): PatternType {
     try {
         return parsePattern(pattern);
-    } catch (err) {
+    } catch (err: unknown) {
         const errPart = { tokens: [{ type: 'error' }] };
         return {
             pattern,
-            locale: null,
+            locale: undefined,
             partitions: [errPart, errPart, errPart, errPart],
-            error: err.message,
+            error: (err as Error).message,
         };
     }
 }

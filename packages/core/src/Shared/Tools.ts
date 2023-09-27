@@ -436,10 +436,6 @@ export class Tools {
         return /iPhone/i.test(navigator.userAgent);
     }
 
-    static isIEBrowser(): boolean {
-        return this.getBrowserType().startsWith('IE');
-    }
-
     static itCount(count: number): Function {
         return (callback: Function) => {
             for (let i = 0; i < count; i++) {
@@ -481,7 +477,6 @@ export class Tools {
      */
     static removeNull(value: IKeyValue): object {
         if (this.isObject(value)) {
-            const clone = {};
             Object.keys(value).forEach((key) => {
                 const item = value[key];
                 if (item == null) {
@@ -490,7 +485,6 @@ export class Tools {
                     Tools.removeNull(item);
                 }
             });
-            return clone;
         }
         return value;
     }

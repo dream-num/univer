@@ -1,9 +1,6 @@
 import { toYMD } from './toYMD';
 
-const floor = Math.floor;
-const DAYSIZE = 86400;
-
-export function dateToSerial(value, opts) {
+export function dateToSerial(value: Date | any[], opts?: { ignoreTimezone?: boolean }): number | any[] | Date {
     let ts = null;
     if (Array.isArray(value)) {
         const [y, m, d, hh, mm, ss] = value;
@@ -24,24 +21,24 @@ export function dateToSerial(value, opts) {
     return value;
 }
 
-export function dateFromSerial(value, opts) {
+export function dateFromSerial(value: number, opts?: { leap1900?: boolean; nativeDate?: boolean }): number[] | Date {
     let date = value | 0;
-    const t = DAYSIZE * (value - date);
-    let time = floor(t); // in seconds
+    const t = 86400 * (value - date);
+    let time = Math.floor(t); // in seconds
     // date "epsilon" correction
     if (t - time > 0.9999) {
         time += 1;
-        if (time === DAYSIZE) {
+        if (time === 86400) {
             time = 0;
             date += 1;
         }
     }
     // serial date/time to gregorian calendar
-    const x = time < 0 ? DAYSIZE + time : time;
+    const x = time < 0 ? 86400 + time : time;
     const [y, m, d] = toYMD(value, 0, opts && opts.leap1900);
-    const hh = floor(x / 60 / 60) % 60;
-    const mm = floor(x / 60) % 60;
-    const ss = floor(x) % 60;
+    const hh = Math.floor(x / 3600) % 24;
+    const mm = Math.floor(x / 60) % 60;
+    const ss = Math.floor(x) % 60;
     // return it as a native date object
     if (opts && opts.nativeDate) {
         const dt = new Date(0);

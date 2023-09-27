@@ -4,7 +4,6 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    ILogService,
     ISelectionRange,
     Rectangle,
 } from '@univerjs/core';
@@ -27,9 +26,7 @@ import {
 
 export interface IChangeSelectionCommandParams {
     direction: Direction;
-
     jumpOver?: boolean;
-    expand?: boolean;
 }
 
 export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
@@ -65,7 +62,7 @@ export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {
-                    rangeData: destRange,
+                    rangeData: Rectangle.clone(destRange),
                     cellRange: getRangeAtPosition(destRange.startRow, destRange.startColumn, currentWorksheet),
                 },
             ],
@@ -172,7 +169,6 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
     handler: async (accessor, params = { expandToGapFirst: true, loop: false }) => {
         const selectionManager = accessor.get(SelectionManagerService);
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const logService = accessor.get(ILogService);
 
         const currentSelection = selectionManager.getLast();
         const currentWorkbook = currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook();

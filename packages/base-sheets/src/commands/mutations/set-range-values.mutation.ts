@@ -5,19 +5,26 @@ import {
     ICurrentUniverService,
     IMutation,
     ISelectionRange,
+    IStyleData,
+    Nullable,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     Tools,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
+import { mergeRichTextStyle, mergeStyle, transformStyle } from './set-border-styles.mutation';
+
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams {
-    workbookId?: string;
+    rangeData: ISelectionRange[]; // FIXME: maybe don't need this
     worksheetId: string;
-    rangeData: ISelectionRange[];
+    workbookId: string;
 
-    cellValue?: ObjectMatrixPrimitiveType<ICellData>;
+    /**
+     * null for clear all
+     */
+    cellValue?: ObjectMatrixPrimitiveType<ICellData | null>;
 
     /**
      * @deprecated not a good design
@@ -36,28 +43,45 @@ export const SetRangeValuesUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetRangeValuesMutationParams
 ): ISetRangeValuesMutationParams => {
+    const { workbookId, worksheetId, cellValue } = params;
     const currentUniverService = accessor.get(ICurrentUniverService);
-    const worksheet = currentUniverService
-        .getCurrentUniverSheetInstance()
-        .getWorkBook()
-        .getSheetBySheetId(params.worksheetId);
+    const universheet = currentUniverService.getUniverSheetInstance(workbookId);
+    if (universheet == null) {
+        throw new Error('universheet is null error!');
+    }
+
+    const workbook = universheet.getWorkBook();
+
+    const worksheet = workbook.getSheetBySheetId(worksheetId);
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
     }
-    const cellMatrix = worksheet.getCellMatrix();
 
+    const cellMatrix = worksheet.getCellMatrix();
+    const styles = workbook.getStyles();
     const undoData = new ObjectMatrix<ICellData>();
 
-    for (let i = 0; i < params.rangeData.length; i++) {
-        const { startRow, endRow, startColumn, endColumn } = params.rangeData[i];
+    const newValues = new ObjectMatrix(cellValue);
 
-        for (let r = startRow; r <= endRow; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-                const value = cellMatrix?.getValue(r, c);
-                undoData.setValue(r, c, Tools.deepClone(value as ICellData));
-            }
-        }
-    }
+    // for (let i = 0; i < rangeData.length; i++) {
+    newValues.forValue((row, col, newVal) => {
+        const cell = Tools.deepClone(cellMatrix?.getValue(row, col)) || {}; // clone cell data，prevent modify the original data
+        const oldStyle = styles.getStyleByCell(cell);
+        const newStyle = transformStyle(oldStyle, newVal && newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
+        cell.s = newStyle;
+
+        undoData.setValue(row, col, Tools.deepClone(setNull(cell)));
+    });
+    // for (let i = 0; i < params.rangeData.length; i++) {
+    //     const { startRow, endRow, startColumn, endColumn } = params.rangeData[i];
+
+    //     for (let r = startRow; r <= endRow; r++) {
+    //         for (let c = startColumn; c <= endColumn; c++) {
+    //             const value = cellMatrix?.getValue(r, c);
+    //             undoData.setValue(r, c, Tools.deepClone(value as ICellData));
+    //         }
+    //     }
+    // }
 
     return {
         ...Tools.deepClone(params),
@@ -66,7 +90,37 @@ export const SetRangeValuesUndoMutationFactory = (
     } as ISetRangeValuesMutationParams;
 };
 
-// TODO@Dushusir: this would cover style as well. Which is not expected.
+/**
+ * Supplement the data of the cell, set the other value to NULL, Used to reset properties when undoing
+ * @param value
+ * @returns
+ */
+function setNull(value: Nullable<ICellData>) {
+    if (value == null) return null;
+
+    if (value.p === undefined) {
+        value.p = null;
+    }
+
+    if (value.v === undefined) {
+        value.v = null;
+    }
+
+    if (value.m === undefined) {
+        value.m = null;
+    }
+
+    if (value.t === undefined) {
+        value.t = null;
+    }
+
+    if (value.s === undefined) {
+        value.s = null;
+    }
+
+    return value;
+}
+
 export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, boolean> = {
     id: 'sheet.mutation.set-range-values',
     type: CommandType.MUTATION,
@@ -77,59 +131,67 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
         if (!worksheet) {
             return false;
         }
-
         const cellMatrix = worksheet.getCellMatrix();
-        const { cellValue, rangeData } = params;
+        const styles = workbook.getStyles();
+        const { cellValue } = params;
         const newValues = new ObjectMatrix(cellValue);
 
-        for (let i = 0; i < rangeData.length; i++) {
-            const { startRow, startColumn, endColumn, endRow } = rangeData[i];
-
-            // clear selection content
-            // createRowColIter(startRow, endRow, startColumn, endColumn).forEach((r, c) => {
-            //     if (cellMatrix.getValue(r, c)) {
-            //         cellMatrix.setValue(r, c, { v: null });
-            //     }
-            // });
-
-            newValues.forValue((row, col, newVal) => {
+        newValues.forValue((row, col, newVal) => {
+            // clear all
+            if (!newVal) {
+                cellMatrix?.setValue(row, col, {});
+            } else {
                 const oldVal = cellMatrix.getValue(row, col) || {};
 
-                // clear all
-                if (!newVal) {
-                    cellMatrix?.setValue(row, col, {
-                        v: null,
-                    });
-                } else {
-                    let dirty = false;
-
-                    if (newVal.p != null) {
-                        oldVal.p = newVal.p;
-                        dirty = true;
-                    }
-
-                    if (newVal.v != null) {
-                        oldVal.v = newVal.v;
-                        dirty = true;
-                    }
-
-                    if (newVal.m != null) {
-                        oldVal.m = newVal.m;
-                        dirty = true;
-                    } else {
-                        oldVal.m = String(oldVal.v);
-                        dirty = true;
-                    }
-
-                    if (newVal.t != null) {
-                        oldVal.t = newVal.t;
-                        dirty = true;
-                    }
-
-                    cellMatrix.setValue(row, col, oldVal);
+                if (newVal.p !== undefined) {
+                    oldVal.p = newVal.p;
                 }
-            });
-        }
+
+                // Set to null, clear content
+                if (newVal.v !== undefined) {
+                    oldVal.v = newVal.v;
+                    oldVal.m = String(oldVal.v);
+                }
+
+                if (newVal.m !== undefined) {
+                    oldVal.m = newVal.m;
+                }
+
+                if (newVal.t !== undefined) {
+                    oldVal.t = newVal.t;
+                }
+
+                // handle style
+                if (newVal.s !== undefined) {
+                    // use null to clear style
+                    const oldStyle = styles.getStyleByCell(oldVal);
+
+                    if (oldStyle == null) {
+                        // clear
+                        delete oldVal.s;
+                    }
+
+                    // set style
+                    const merge = mergeStyle(oldStyle, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
+
+                    // then remove null
+                    merge && Tools.removeNull(merge);
+
+                    if (Tools.isEmptyObject(merge)) {
+                        delete oldVal.s;
+                    } else {
+                        oldVal.s = styles.setValue(merge);
+                    }
+
+                    // When the rich text sets the cell style, you need to modify the style of all rich text
+                    if (oldVal.p) {
+                        mergeRichTextStyle(oldVal.p, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
+                    }
+                }
+
+                cellMatrix.setValue(row, col, Tools.removeNull(oldVal));
+            }
+        });
 
         return true;
     },

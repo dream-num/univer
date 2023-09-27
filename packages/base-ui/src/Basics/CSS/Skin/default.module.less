@@ -1,5 +1,4 @@
-// Main skin variables, default skin
-@import './base.module.less';
+@import './base.less';
 
 @primary-color: #0188fb; // 全局主色 //也用作info-color信息色
 @primary-color-hover: #5391ff; // 全局主色 hover
@@ -16,10 +15,6 @@
 @box-shadow-base: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05); // 浮层阴影
 
 :export {
-    --success-color: @success-color;
-    --warning-color: @warning-color;
-    --error-color: @error-color;
-
     --border-radius-base: @border-radius-base;
     --border-width-base: @border-width-base;
     --border-style-base: @border-style-base;
@@ -50,8 +45,6 @@
     --gray-16: @gray-16;
     --gray-17: @gray-17;
 
-    --primary-color: @primary-color;
-    --primary-color-hover: @primary-color-hover;
     --link-color: @link-color;
     --bg: @bg;
     --bg-hover: @bg-hover;
@@ -66,158 +59,25 @@
     --border-color-base-hover: @border-color-base-hover;
 }
 
+/**
+ * new design system
+ */
+@info-color: @blue-500;
+@success-color: @green-500;
+@warning-color: @gold-400;
+@error-color: @red-400;
+
+@primary-color: @blue-700;
+@primary-color-hover: @blue-600;
+
 :export {
-    // Ramu / 瑞木 / Red
-    --red-50: @red-50;
-    --red-100: @red-100;
-    --red-200: @red-200;
-    --red-300: @red-300;
-    --red-400: @red-400;
-    --red-500: @red-500;
-    --red-600: @red-600;
-    --red-700: @red-700;
-    --red-800: @red-800;
-    --red-900: @red-900;
+    // Fuctional / 功能
+    --info-color: @info-color;
+    --success-color: @success-color;
+    --warning-color: @warning-color;
+    --error-color: @error-color;
 
-    // Hemerocallis / 萱草 / Orange
-    --orange-50: @orange-50;
-    --orange-100: @orange-100;
-    --orange-200: @orange-200;
-    --orange-300: @orange-300;
-    --orange-400: @orange-400;
-    --orange-500: @orange-500;
-    --orange-600: @orange-600;
-    --orange-700: @orange-700;
-    --orange-800: @orange-800;
-    --orange-900: @orange-900;
-
-    // Marigold / 万寿菊 / Gold
-    --gold-50: @gold-50;
-    --gold-100: @gold-100;
-    --gold-200: @gold-200;
-    --gold-300: @gold-300;
-    --gold-400: @gold-400;
-    --gold-500: @gold-500;
-    --gold-600: @gold-600;
-    --gold-700: @gold-700;
-    --gold-800: @gold-800;
-    --gold-900: @gold-900;
-
-    // forsythia suspensa / 连翘 / Yellow
-    --yellow-50: @yellow-50;
-    --yellow-100: @yellow-100;
-    --yellow-200: @yellow-200;
-    --yellow-300: @yellow-300;
-    --yellow-400: @yellow-400;
-    --yellow-500: @yellow-500;
-    --yellow-600: @yellow-600;
-    --yellow-700: @yellow-700;
-    --yellow-800: @yellow-800;
-    --yellow-900: @yellow-900;
-
-    // eustoma grandiflorum / 洋桔梗 / Verdancy
-    --verdancy-50: @verdancy-50;
-    --verdancy-100: @verdancy-100;
-    --verdancy-200: @verdancy-200;
-    --verdancy-300: @verdancy-300;
-    --verdancy-400: @verdancy-400;
-    --verdancy-500: @verdancy-500;
-    --verdancy-600: @verdancy-600;
-    --verdancy-700: @verdancy-700;
-    --verdancy-800: @verdancy-800;
-    --verdancy-900: @verdancy-900;
-
-    // asparagus fern / 文竹 / Green
-    --green-50: @green-50;
-    --green-100: @green-100;
-    --green-200: @green-200;
-    --green-300: @green-300;
-    --green-400: @green-400;
-    --green-500: @green-500;
-    --green-600: @green-600;
-    --green-700: @green-700;
-    --green-800: @green-800;
-    --green-900: @green-900;
-
-    // 霁 / Jiqing
-    --jiqing-50: @jiqing-50;
-    --jiqing-100: @jiqing-100;
-    --jiqing-200: @jiqing-200;
-    --jiqing-300: @jiqing-300;
-    --jiqing-400: @jiqing-400;
-    --jiqing-500: @jiqing-500;
-    --jiqing-600: @jiqing-600;
-    --jiqing-700: @jiqing-700;
-    --jiqing-800: @jiqing-800;
-    --jiqing-900: @jiqing-900;
-
-    // cornflower / 矢车菊 / blue
-    --blue-50: @blue-50;
-    --blue-100: @blue-100;
-    --blue-200: @blue-200;
-    --blue-300: @blue-300;
-    --blue-400: @blue-400;
-    --blue-500: @blue-500;
-    --blue-600: @blue-600;
-    --blue-700: @blue-700;
-    --blue-800: @blue-800;
-    --blue-900: @blue-900;
-
-    // Hyacinth / 风信子 / Hyacinth blue
-    --hyacinth-50: @hyacinth-50;
-    --hyacinth-100: @hyacinth-100;
-    --hyacinth-200: @hyacinth-200;
-    --hyacinth-300: @hyacinth-300;
-    --hyacinth-400: @hyacinth-400;
-    --hyacinth-500: @hyacinth-500;
-    --hyacinth-600: @hyacinth-600;
-    --hyacinth-700: @hyacinth-700;
-    --hyacinth-800: @hyacinth-800;
-    --hyacinth-900: @hyacinth-900;
-
-    // Violet / 紫罗兰 / Purple
-    --purple-50: @purple-50;
-    --purple-100: @purple-100;
-    --purple-200: @purple-200;
-    --purple-300: @purple-300;
-    --purple-400: @purple-400;
-    --purple-500: @purple-500;
-    --purple-600: @purple-600;
-    --purple-700: @purple-700;
-    --purple-800: @purple-800;
-    --purple-900: @purple-900;
-
-    // Sorrel pulp / 酢浆 / Magenta
-    --magenta-50: @magenta-50;
-    --magenta-100: @magenta-100;
-    --magenta-200: @magenta-200;
-    --magenta-300: @magenta-300;
-    --magenta-400: @magenta-400;
-    --magenta-500: @magenta-500;
-    --magenta-600: @magenta-600;
-    --magenta-700: @magenta-700;
-    --magenta-800: @magenta-800;
-    --magenta-900: @magenta-900;
-
-    // 灰 / Grey
-    --grey-50: @grey-50;
-    --grey-100: @grey-100;
-    --grey-200: @grey-200;
-    --grey-300: @grey-300;
-    --grey-400: @grey-400;
-    --grey-500: @grey-500;
-    --grey-600: @grey-600;
-    --grey-700: @grey-700;
-    --grey-800: @grey-800;
-    --grey-900: @grey-900;
-    --grey-950: @grey-950;
-    --grey-1000: @grey-1000;
-
-    --color-black: @color-black;
-    --color-white: @color-white;
-
-    --color-info: @blue-500;
-    --color-success: @green-500;
-    --color-warning: @gold-500;
-    --color-error: @red-500;
+    // Brand / 品牌
+    --primary-color: @primary-color;
+    --primary-color-hover: @primary-color-hover;
 }

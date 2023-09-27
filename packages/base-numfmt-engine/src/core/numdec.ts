@@ -9,7 +9,7 @@ const zero = {
 };
 
 // returns the count of digits (including - and .) need to represent the number
-export function numdec(value, incl_sign = true) {
+export function numdec(value: number, incl_sign = true) {
     const v = Math.abs(value);
 
     // shortcut zero

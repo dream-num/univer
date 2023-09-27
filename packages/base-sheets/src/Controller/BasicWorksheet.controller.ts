@@ -63,7 +63,7 @@ import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
-import { SetBorderStylesMutation } from '../commands/mutations/set-border-styles.mutatio';
+import { SetBorderStylesMutation } from '../commands/mutations/set-border-styles.mutation';
 import { SetRangeFormattedValueMutation } from '../commands/mutations/set-range-formatted-value.mutation';
 import { SetRangeStyleMutation } from '../commands/mutations/set-range-styles.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';

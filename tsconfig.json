@@ -17,6 +17,7 @@
         "noImplicitOverride": true,
         "allowJs": true,
         "skipLibCheck": true,
+        "isolatedModules": true,
         "types": ["node", "esbuild-style-plugin"]
     },
     "include": ["packages/*/src", "examples/*/src"]

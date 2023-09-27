@@ -1,8 +1,6 @@
 // Main skin variables, green skin
-@import './base.module.less';
+@import './base.less';
 
-@primary-color: #004b1c; // 全局主色 //也用作info-color信息色
-@primary-color-hover: #0e5c2f; // 全局主色 hover
 @link-color: #217346; // 链接色
 @bg: #fff; //Basics background color for most Components
 @bg-hover: #efefef;
@@ -18,10 +16,6 @@
 // Export all skin variables, call variables in js
 
 :export {
-    --success-color: @success-color;
-    --warning-color: @warning-color;
-    --error-color: @error-color;
-
     --border-radius-base: @border-radius-base;
     --border-width-base: @border-width-base;
     --border-style-base: @border-style-base;
@@ -52,8 +46,6 @@
     --gray-16: @gray-16;
     --gray-17: @gray-17;
 
-    --primary-color: @primary-color;
-    --primary-color-hover: @primary-color-hover;
     --link-color: @link-color;
     --bg: @bg;
     --font-size: @font-size-base;
@@ -65,4 +57,28 @@
     --border-color-base: @border-color-base;
     --box-shadow-base: @box-shadow-base;
     --border-color-base-hover: @border-color-base-hover;
+}
+
+
+/**
+ * new design system
+ */
+@info-color: @blue-500;
+@success-color: @green-500;
+@warning-color: @gold-400;
+@error-color: @red-400;
+
+@primary-color: @green-700;
+@primary-color-hover: @green-600;
+
+:export {
+    // Fuctional / 功能
+    --info-color: @info-color;
+    --success-color: @success-color;
+    --warning-color: @warning-color;
+    --error-color: @error-color;
+
+    // Brand / 品牌
+    --primary-color: @primary-color;
+    --primary-color-hover: @primary-color-hover;
 }

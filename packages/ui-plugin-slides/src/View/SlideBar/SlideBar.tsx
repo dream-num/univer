@@ -65,7 +65,7 @@ export class SlideBar extends Component<IProps, SlideBarState> {
         this.props.activeSlide(pageId);
     }
 
-    render() {
+    override render() {
         const { addSlide } = this.props;
         const { slideList } = this.state;
 
@@ -84,9 +84,7 @@ export class SlideBar extends Component<IProps, SlideBarState> {
                     ))}
                 </div>
                 <div className={styles.slideAddButton}>
-                    <Button type="text" onClick={addSlide}>
-                        +
-                    </Button>
+                    <Button onClick={addSlide}>+</Button>
                 </div>
             </div>
         );

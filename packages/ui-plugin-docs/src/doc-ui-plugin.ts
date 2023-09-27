@@ -5,7 +5,6 @@ import { DefaultDocUiConfig, IDocUIPluginConfig, installObserver } from './Basic
 import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { AppUIController } from './Controller';
 import { DocClipboardController } from './Controller/clipboard.controller';
-import { en } from './Locale';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 
 export class DocUIPlugin extends Plugin<any> {
@@ -23,10 +22,6 @@ export class DocUIPlugin extends Plugin<any> {
     }
 
     override onRendered(): void {
-        this._localService.getLocale().load({
-            en,
-        });
-
         installObserver(this);
 
         this._initModules();

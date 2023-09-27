@@ -13,7 +13,7 @@ interface CountState {
 }
 
 interface CountBarProps extends BaseComponentProps {
-    changeRatio: (ratio: string) => void;
+    changeRatio?: (ratio: string) => void;
     onChange?: (value: string) => void;
 }
 

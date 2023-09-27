@@ -27,8 +27,6 @@ export class Toolbar extends Component<IToolbarProps, IToolbarState> {
 
     moreToolRef = createRef();
 
-    SelectRef = createRef();
-
     clientWidth = 0;
 
     constructor(props: IToolbarProps) {

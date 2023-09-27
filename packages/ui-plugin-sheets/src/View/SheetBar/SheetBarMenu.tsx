@@ -9,7 +9,7 @@ export interface ISheetBarMenuItem {
     selected?: boolean;
     index?: string;
     sheetId?: string;
-    onClick?: (e?: MouseEvent) => void;
+    onClick?: (e?: React.MouseEvent) => void;
 }
 
 export interface ISheetBarMenuProps {

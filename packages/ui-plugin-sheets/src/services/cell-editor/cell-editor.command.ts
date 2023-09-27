@@ -8,5 +8,7 @@ export const QuitCellEditorCommand: ICommand = {
     handler: async (accessor) => {
         const cellEditorService = accessor.get(ICellEditorService);
         cellEditorService.quitEditing();
+
+        return true;
     },
 };

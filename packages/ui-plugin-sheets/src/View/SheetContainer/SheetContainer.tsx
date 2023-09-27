@@ -13,8 +13,8 @@ export interface BaseSheetContainerProps extends BaseComponentProps {
 export function RenderSheetFooter() {
     return (
         <>
-            <SheetBar></SheetBar>
-            <CountBar></CountBar>
+            <SheetBar />
+            <CountBar />
         </>
     );
 }

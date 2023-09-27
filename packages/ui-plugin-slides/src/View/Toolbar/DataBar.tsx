@@ -13,7 +13,7 @@ export const DataBar = (props: BarProps) => {
     };
 
     return (
-        <div style="display: flex;">
+        <div style={{ display: 'flex' }}>
             {list.map((item, index) => (
                 <div
                     key={index}

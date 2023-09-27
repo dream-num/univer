@@ -1,22 +1,25 @@
 import { AppContext, BaseComponentProps, CustomLabel, Icon } from '@univerjs/base-ui';
+import { BorderStyleTypes } from '@univerjs/core';
 import { Component } from 'react';
 
 import { BORDER_SIZE_CHILDREN, LINE_BOLD_LABEL } from '../../../controller/menu/border.menu';
 
 interface IState {
-    img: string;
+    img: BorderStyleTypes;
 }
 
 interface IProps extends BaseComponentProps {
     label: string;
     title: string;
-    value: string;
+    value: BorderStyleTypes;
 }
 
 export class LineBold extends Component<IProps, IState> {
     static readonly componentName = LINE_BOLD_LABEL;
 
     static override contextType = AppContext;
+
+    declare context: React.ContextType<typeof AppContext>;
 
     constructor(props: IProps) {
         super(props);
@@ -25,7 +28,7 @@ export class LineBold extends Component<IProps, IState> {
 
     initialize() {
         this.state = {
-            img: '',
+            img: BorderStyleTypes.NONE,
         };
     }
 
@@ -39,17 +42,17 @@ export class LineBold extends Component<IProps, IState> {
         });
     }
 
-    setImg(img: string = '') {
+    setImg(img: BorderStyleTypes = BorderStyleTypes.NONE) {
         this.setState({
             img,
         });
     }
 
-    getImg(img: string) {
+    getImg(img: BorderStyleTypes) {
         if (!img) return null;
         const span = document.querySelector('.base-sheets-line-bold') as HTMLDivElement;
         const props = { width: span.offsetWidth };
-        const Img = this.context.componentManager.get(img);
+        const Img = this.context.componentManager.get(img as unknown as string) as any;
         if (Img) {
             return <Img {...(props as any)} />;
         }

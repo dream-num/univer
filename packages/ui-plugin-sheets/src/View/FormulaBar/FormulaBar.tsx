@@ -21,6 +21,8 @@ export interface BaseFormulaBarProps extends BaseComponentProps {}
 export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
     static override contextType = AppContext;
 
+    declare context: React.ContextType<typeof AppContext>;
+
     // formulaContent = createRef<HTMLDivElement>();
 
     constructor(props: BaseFormulaBarProps) {
@@ -48,7 +50,7 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
         // console.dir(value);
     };
 
-    printChange = (e: KeyboardEvent) => {
+    printChange = (e: React.KeyboardEvent) => {
         this.onkeyUp(e.target);
     };
 
@@ -77,7 +79,7 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
 
     getIcon(name: string) {
         const componentManager = this.context.componentManager;
-        const Icon = componentManager?.get(name);
+        const Icon = componentManager?.get(name) as any;
         return <Icon />;
     }
 

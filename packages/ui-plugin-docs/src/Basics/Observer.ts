@@ -1,7 +1,7 @@
 import { Observable } from '@univerjs/core';
 
 import { DocUIPlugin } from '../doc-ui-plugin';
-import { DocContainer } from '../View';
+import { DocContainer } from '../View/DocContainer';
 
 export type DocUIPluginObserve = {
     onUIDidMount: Observable<DocContainer>;

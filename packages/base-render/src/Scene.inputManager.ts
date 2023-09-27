@@ -31,36 +31,36 @@ export class InputManager {
     /** This is a defensive check to not allow control attachment prior to an already active one. If already attached, previous control is unattached before attaching the new one. */
     private _alreadyAttached = false;
 
-    private _alreadyAttachedTo: HTMLElement;
+    // private _alreadyAttachedTo: HTMLElement;
 
     // WorkBookObserver
     private _onInputObserver: Nullable<Observer<IEvent>>;
 
     // Pointers
-    private _onPointerMove: (evt: IMouseEvent) => void;
+    private _onPointerMove!: (evt: IMouseEvent) => void;
 
-    private _onPointerDown: (evt: IPointerEvent) => void;
+    private _onPointerDown!: (evt: IPointerEvent) => void;
 
-    private _onPointerUp: (evt: IPointerEvent) => void;
+    private _onPointerUp!: (evt: IPointerEvent) => void;
 
-    private _onPointerEnter: (evt: IPointerEvent) => void;
+    private _onPointerEnter!: (evt: IPointerEvent) => void;
 
-    private _onPointerLeave: (evt: IPointerEvent) => void;
+    private _onPointerLeave!: (evt: IPointerEvent) => void;
 
-    private _onMouseWheel: (evt: IWheelEvent) => void;
+    private _onMouseWheel!: (evt: IWheelEvent) => void;
 
     // Keyboard
-    private _onKeyDown: (evt: IKeyboardEvent) => void;
+    private _onKeyDown!: (evt: IKeyboardEvent) => void;
 
-    private _onKeyUp: (evt: IKeyboardEvent) => void;
+    private _onKeyUp!: (evt: IKeyboardEvent) => void;
 
-    private _scene: ThinScene;
+    private _scene!: ThinScene;
 
     private _currentMouseEnterPicked: Nullable<BaseObject | ThinScene>;
 
     private _startingPosition = new Vector2(Infinity, Infinity);
 
-    private _delayedTimeout: number;
+    private _delayedTimeout: number = -1;
 
     private _doubleClickOccurred = 0;
 

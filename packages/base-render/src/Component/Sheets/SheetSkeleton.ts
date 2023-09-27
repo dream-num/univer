@@ -90,11 +90,11 @@ interface IRowColumnSegment {
 const DEFAULT_ROTATE_ANGLE = 90;
 
 export class SpreadsheetSkeleton extends Skeleton {
-    private _rowHeightAccumulation: number[];
+    private _rowHeightAccumulation: number[] = [];
 
     private _rowTotalHeight: number = 0;
 
-    private _columnWidthAccumulation: number[];
+    private _columnWidthAccumulation: number[] = [];
 
     private _columnTotalWidth: number = 0;
 
@@ -109,7 +109,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         endColumn: -1,
     };
 
-    private _dataMergeCache: ISelectionRange[];
+    private _dataMergeCache: ISelectionRange[] = [];
 
     // private _dataMergeCacheAll: ObjectMatrix<ISelectionRange>;
 

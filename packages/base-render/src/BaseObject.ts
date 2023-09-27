@@ -101,7 +101,7 @@ export abstract class BaseObject {
 
     private _transform = new Transform();
 
-    private __debounceParentTimeout: number;
+    private __debounceParentTimeout: number = -1;
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
 

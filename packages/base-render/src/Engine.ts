@@ -1,4 +1,4 @@
-import { Observable } from '@univerjs/core';
+import { Nullable, Observable } from '@univerjs/core';
 
 import { CURSOR_TYPE } from './Basics/Const';
 import { DeviceType, IKeyboardEvent, IPointerEvent, PointerInput } from './Basics/IEvents';
@@ -23,7 +23,7 @@ export class Engine extends ThinEngine<Scene> {
      */
     onEndFrameObservable = new Observable<Engine>();
 
-    private _container: HTMLElement;
+    private _container: Nullable<HTMLElement>;
 
     private _canvas: Canvas = new Canvas();
 

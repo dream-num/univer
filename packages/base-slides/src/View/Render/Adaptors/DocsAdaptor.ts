@@ -3,6 +3,7 @@ import {
     Documents,
     DocumentSkeleton,
     EVENT_TYPE,
+    IDocumentSkeletonDrawing,
     IPageRenderConfig,
     IWheelEvent,
     Liquid,
@@ -154,7 +155,13 @@ export class DocsAdaptor extends ObjectAdaptor {
 
         const { left: docsLeft, top: docsTop } = documents;
 
-        const { pages } = documentSkeleton.getSkeletonData();
+        const skeletonData = documentSkeleton.getSkeletonData();
+
+        if (skeletonData == null) {
+            return;
+        }
+
+        const { pages } = skeletonData;
         const objectList: BaseObject[] = [];
         const pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
 
@@ -169,7 +176,7 @@ export class DocsAdaptor extends ObjectAdaptor {
 
             this._liquid.translatePagePadding(page);
 
-            skeDrawings.forEach((drawing) => {
+            skeDrawings.forEach((drawing: IDocumentSkeletonDrawing) => {
                 const { aLeft, aTop, height, width, drawingOrigin } = drawing;
 
                 const { objectProperties } = drawingOrigin;

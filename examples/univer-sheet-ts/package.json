@@ -29,7 +29,6 @@
         "@univerjs/sheets-plugin-image": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-import-xlsx": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-numfmt": "workspace:^0.0.1",
-        "@univerjs/sheets-plugin-operation": "workspace:^0.0.1",
         "@univerjs/ui-plugin-docs": "workspace:^0.0.1",
         "@univerjs/ui-plugin-sheets": "workspace:^0.0.1",
         "react": "^18.2.0",

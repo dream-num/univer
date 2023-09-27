@@ -180,9 +180,6 @@ importers:
       '@univerjs/sheets-plugin-numfmt':
         specifier: workspace:^0.0.1
         version: link:../../packages/sheets-plugin-numfmt
-      '@univerjs/sheets-plugin-operation':
-        specifier: workspace:^0.0.1
-        version: link:../../packages/sheets-plugin-operation
       '@univerjs/ui-plugin-docs':
         specifier: workspace:^0.0.1
         version: link:../../packages/ui-plugin-docs
@@ -1028,55 +1025,6 @@ importers:
       ts-node:
         specifier: ^10.9.1
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
-      vitest:
-        specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
-
-  packages/sheets-plugin-operation:
-    dependencies:
-      '@univerjs/base-render':
-        specifier: workspace:^0.0.1
-        version: link:../base-render
-      '@univerjs/base-sheets':
-        specifier: workspace:^0.0.1
-        version: link:../base-sheets
-      '@univerjs/base-ui':
-        specifier: workspace:^0.0.1
-        version: link:../base-ui
-      '@univerjs/common-plugin-data':
-        specifier: workspace:^0.0.1
-        version: link:../common-plugin-data
-      '@univerjs/core':
-        specifier: workspace:^0.0.1
-        version: link:../core
-      '@univerjs/ui-plugin-sheets':
-        specifier: workspace:^0.0.1
-        version: link:../ui-plugin-sheets
-      '@wendellhu/redi':
-        specifier: ^0.12.8
-        version: 0.12.8
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
-      react-dom:
-        specifier: ^18.2.0
-        version: 18.2.0(react@18.2.0)
-    devDependencies:
-      '@types/react':
-        specifier: ^18.2.22
-        version: 18.2.22
-      '@types/react-dom':
-        specifier: ^18.2.7
-        version: 18.2.7
-      '@vitest/coverage-v8':
-        specifier: ^0.34.5
-        version: 0.34.5(vitest@0.34.5)
-      esbuild:
-        specifier: ^0.19.3
-        version: 0.19.3
-      less:
-        specifier: 4.2.0
-        version: 4.2.0
       vitest:
         specifier: ^0.34.5
         version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)

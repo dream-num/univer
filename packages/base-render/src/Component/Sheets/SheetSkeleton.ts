@@ -114,6 +114,10 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _showGridlines: BooleanNumber;
 
+    private _marginTop: number = 0;
+
+    private _marginLeft: number = 0;
+
     constructor(
         private _config: IWorksheetConfig,
         private _cellData: ObjectMatrix<ICellData>,
@@ -174,6 +178,14 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._config.mergeData;
     }
 
+    get rowHeaderWidthAndMarginLeft() {
+        return this.rowHeaderWidth + this._marginLeft;
+    }
+
+    get columnHeaderHeightAndMarginTop() {
+        return this.columnHeaderHeight + this._marginTop;
+    }
+
     // get dataMergeCacheAll() {
     //     return this._dataMergeCacheAll;
     // }
@@ -201,6 +213,14 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     setOverflowCache(value: ObjectMatrix<ISelectionRange>) {
         this._overflowCache = value;
+    }
+
+    setMarginLeft(left: number) {
+        this._marginLeft = left;
+    }
+
+    setMarginTop(top: number) {
+        this._marginTop = top;
     }
 
     calculate(bounds?: IBoundRect) {

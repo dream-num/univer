@@ -378,7 +378,9 @@ export class HeaderMoveController extends Disposable {
         if (
             matchSelectionData == null ||
             matchSelectionData.selectionType === SELECTION_TYPE.ALL ||
-            matchSelectionData.selectionType === SELECTION_TYPE.NORMAL
+            matchSelectionData.selectionType === SELECTION_TYPE.NORMAL ||
+            (matchSelectionData.selectionType === SELECTION_TYPE.ROW && type !== HEADER_MOVE_TYPE.ROW) ||
+            (matchSelectionData.selectionType === SELECTION_TYPE.COLUMN && type !== HEADER_MOVE_TYPE.COLUMN)
         ) {
             return false;
         }

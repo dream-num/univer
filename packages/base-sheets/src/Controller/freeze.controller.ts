@@ -5,8 +5,6 @@ import {
     IRenderManagerService,
     ISelectionTransformerShapeManager,
     Rect,
-    ScrollTimer,
-    Vector2,
 } from '@univerjs/base-render';
 import {
     Disposable,
@@ -21,7 +19,7 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { getCoordByOffset, getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
-import { CANVAS_VIEW_KEY, SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -69,10 +67,6 @@ export class FreezeController extends Disposable {
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _sheetObject!: ISheetObjectParam;
-
-    private _startOffsetX: number = -Infinity;
-
-    private _startOffsetY: number = -Infinity;
 
     private _changeToRow: number = -1;
 
@@ -127,6 +121,10 @@ export class FreezeController extends Disposable {
             return;
         }
 
+        const engine = this._sheetObject.engine;
+        const canvasMaxWidth = engine?.width || 0;
+        const canvasMaxHeight = engine?.height || 0;
+
         const scene = this._sheetObject.scene;
 
         const { startX, endX, startY, endY } = position;
@@ -134,27 +132,37 @@ export class FreezeController extends Disposable {
         const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } =
             skeleton;
 
+        const shapeWidth =
+            canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
+                ? canvasMaxWidth
+                : columnTotalWidth + columnHeaderHeightAndMarginTop;
+
+        const shapeHeight =
+            canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
+                ? canvasMaxWidth
+                : columnTotalWidth + columnHeaderHeightAndMarginTop;
+
         if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
                 fill: FREEZE_NORMAL_HEADER_COLOR,
                 width: rowHeaderWidthAndMarginLeft,
                 height: FREEZE_SIZE,
                 left: 0,
-                top: endY - FREEZE_SIZE,
+                top: startY - FREEZE_SIZE,
                 zIndex: 3,
             });
 
             let fill = FREEZE_NORMAL_HEADER_COLOR;
-            if (freezeRow === -1) {
+            if (freezeRow === -1 || freezeRow === 0) {
                 fill = FREEZE_NORMAL_MAIN_COLOR;
             }
 
             this._rowFreezeMainRect = new Rect(FREEZE_ROW_MAIN_NAME, {
                 fill,
-                width: columnTotalWidth + rowHeaderWidthAndMarginLeft,
+                width: shapeWidth,
                 height: FREEZE_SIZE,
                 left: 0,
-                top: endY - FREEZE_SIZE,
+                top: startY - FREEZE_SIZE,
                 zIndex: 3,
             });
 
@@ -164,21 +172,21 @@ export class FreezeController extends Disposable {
                 fill: FREEZE_NORMAL_HEADER_COLOR,
                 width: FREEZE_SIZE,
                 height: columnHeaderHeightAndMarginTop,
-                left: endX - FREEZE_SIZE,
+                left: startX - FREEZE_SIZE,
                 top: 0,
                 zIndex: 3,
             });
 
             let fill = FREEZE_NORMAL_HEADER_COLOR;
-            if (freezeColumn === -1) {
+            if (freezeColumn === -1 || freezeRow === 0) {
                 fill = FREEZE_NORMAL_MAIN_COLOR;
             }
 
             this._columnFreezeMainRect = new Rect(FREEZE_COLUMN_MAIN_NAME, {
                 fill,
                 width: FREEZE_SIZE,
-                height: rowTotalHeight + columnHeaderHeightAndMarginTop,
-                left: endX - FREEZE_SIZE,
+                height: shapeHeight,
+                left: startX - FREEZE_SIZE,
                 top: 0,
                 zIndex: 3,
             });
@@ -249,19 +257,21 @@ export class FreezeController extends Disposable {
 
         this._freezeDownObservers.push(
             freezeObjectHeaderRect?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-                this._FreezeDown(evt, freezeDirectionType);
+                this._FreezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
             })
         );
 
         this._freezeDownObservers.push(
             freezeObjectMainRect?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-                this._FreezeDown(evt, freezeDirectionType);
+                this._FreezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
             })
         );
     }
 
     private _FreezeDown(
         evt: IPointerEvent | IMouseEvent,
+        freezeObjectHeaderRect: Rect,
+        freezeObjectMainRect: Rect,
         freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW
     ) {
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
@@ -271,36 +281,56 @@ export class FreezeController extends Disposable {
 
         const { scene } = this._sheetObject;
 
-        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-
-        const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
-
-        const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
-
-        this._startOffsetX = newEvtOffsetX;
-
-        this._startOffsetY = newEvtOffsetY;
-
-        const { startX, startY, endX, endY, row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
-
         scene.setCursor(CURSOR_TYPE.GRABBING);
 
         scene.disableEvent();
 
-        const scrollTimer = ScrollTimer.create(scene);
-
-        const mainViewport = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
-
-        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, mainViewport);
-
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
-            const { x: newMoveOffsetX, y: newMoveOffsetY } = scene.getRelativeCoord(
-                Vector2.FromArray([moveOffsetX, moveOffsetY])
+            const { startX, startY, endX, endY, row, column } = getCoordByOffset(
+                moveEvt.offsetX,
+                moveEvt.offsetY,
+                scene,
+                skeleton
             );
 
             scene.setCursor(CURSOR_TYPE.GRABBING);
+
+            if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
+                freezeObjectHeaderRect
+                    .transformByState({
+                        top: startY - FREEZE_SIZE / 2,
+                    })
+                    ?.setProps({
+                        fill: FREEZE_ACTIVE_COLOR,
+                    });
+                freezeObjectMainRect
+                    .transformByState({
+                        top: startY - FREEZE_SIZE / 2,
+                    })
+                    ?.setProps({
+                        fill: FREEZE_NORMAL_HEADER_COLOR,
+                    });
+                this._changeToRow = row;
+            } else {
+                freezeObjectHeaderRect
+                    .transformByState({
+                        left: startX - FREEZE_SIZE / 2,
+                    })
+                    ?.setProps({
+                        fill: FREEZE_ACTIVE_COLOR,
+                    });
+                freezeObjectMainRect
+                    .transformByState({
+                        left: startX - FREEZE_SIZE / 2,
+                    })
+                    ?.setProps({
+                        fill: FREEZE_NORMAL_HEADER_COLOR,
+                    });
+
+                this._changeToColumn = column;
+            }
 
             // this._columnMoving(newMoveOffsetX, newMoveOffsetY, matchSelectionData, initialType);
         });
@@ -308,13 +338,66 @@ export class FreezeController extends Disposable {
         this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
             scene.resetCursor();
             scene.enableEvent();
+            this._clearObserverEvent();
+
+            const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } =
+                skeleton;
+
+            if (
+                (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW &&
+                    (this._changeToRow === 0 || this._changeToRow === -1)) ||
+                (freezeDirectionType === FREEZE_DIRECTION_TYPE.COLUMN &&
+                    (this._changeToColumn === 0 || this._changeToColumn === -1))
+            ) {
+                freezeObjectHeaderRect.setProps({
+                    fill: FREEZE_NORMAL_HEADER_COLOR,
+                });
+                freezeObjectMainRect.setProps({
+                    fill: FREEZE_NORMAL_MAIN_COLOR,
+                });
+            } else {
+                freezeObjectHeaderRect?.setProps({
+                    fill: FREEZE_NORMAL_HEADER_COLOR,
+                });
+                freezeObjectMainRect?.setProps({
+                    fill: FREEZE_NORMAL_HEADER_COLOR,
+                });
+            }
 
             if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
+                if (this._changeToRow === 0 || this._changeToRow === -1) {
+                    freezeObjectHeaderRect.transformByState({
+                        top: columnHeaderHeightAndMarginTop - FREEZE_SIZE,
+                    });
+
+                    freezeObjectMainRect.transformByState({
+                        top: columnHeaderHeightAndMarginTop - FREEZE_SIZE,
+                    });
+                }
+
                 alert(`moveColumnTo: ${this._changeToRow}`);
             } else {
+                if (this._changeToColumn === 0 || this._changeToColumn === -1) {
+                    freezeObjectHeaderRect.transformByState({
+                        left: rowHeaderWidthAndMarginLeft - FREEZE_SIZE,
+                    });
+
+                    freezeObjectMainRect.transformByState({
+                        left: rowHeaderWidthAndMarginLeft - FREEZE_SIZE,
+                    });
+                }
+
                 alert(`moveColumnTo: ${this._changeToColumn}`);
             }
         });
+    }
+
+    private _clearObserverEvent() {
+        const { scene } = this._sheetObject;
+        scene.onPointerMoveObserver.remove(this._moveObserver);
+        scene.onPointerUpObserver.remove(this._upObserver);
+        this._moveObserver = null;
+        this._upObserver = null;
     }
 
     private _clearFreeze() {

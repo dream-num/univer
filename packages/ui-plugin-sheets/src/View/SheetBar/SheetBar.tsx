@@ -402,7 +402,11 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                         const commandService: ICommandService = (this.context as IKeyValue).injector.get(
                             ICommandService
                         );
-                        commandService.executeCommand(commandId as string, { value });
+                        if (commandId === SetWorksheetShowCommand.id) {
+                            commandService.executeCommand(commandId as string, { worksheetId: value });
+                        } else {
+                            commandService.executeCommand(commandId as string, { value });
+                        }
                     }}
                 />
 

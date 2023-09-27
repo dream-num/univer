@@ -33,6 +33,7 @@ import {
     SetWorksheetRowHeightCommand,
     SetWorksheetRowHideCommand,
     SetWorksheetRowShowCommand,
+    SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
 import {
     ColorPicker,
@@ -47,6 +48,7 @@ import {
     SelectTypes,
 } from '@univerjs/base-ui';
 import {
+    BooleanNumber,
     FontItalic,
     FontWeight,
     HorizontalAlign,
@@ -65,7 +67,6 @@ import { map } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from '../../Basics/Const/PLUGIN_NAME';
 import { RenameSheetCommand } from '../../commands/commands/rename.command';
-import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
 
 export const CONTEXT_MENU_INPUT_LABEL = 'CONTEXT_MENU_INPUT';
 
@@ -1223,11 +1224,47 @@ export function HideSheetMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function UnHideSheetMenuItemFactory(): IMenuButtonItem {
+export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<any> {
+    // const worksheetManagerService = accessor.get(IWorksheetManagerService);
+
+    // interface IWorksheetManagerService {
+    //     worksheets$; // Observable<Worksheet[]>;
+    // }
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const commandService = accessor.get(ICommandService);
+    const hiddenList = currentUniverService
+        .getCurrentUniverSheetInstance()
+        .getSheets()
+        .filter((s) => s.getConfig().hidden === BooleanNumber.TRUE)
+        .map((s) => ({
+            label: s.getConfig().name,
+            value: s.getConfig().id,
+        }));
+
     return {
-        id: ShowMenuListCommand.id,
-        type: MenuItemType.BUTTON,
+        id: SetWorksheetShowCommand.id,
+        type: MenuItemType.SELECTOR,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',
+        selectType: SelectTypes.NEO,
+        selections: new Observable((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                if (c.id !== SetWorksheetHideCommand.id && c.id !== SetWorksheetShowCommand.id) {
+                    return;
+                }
+                const newList = currentUniverService
+                    .getCurrentUniverSheetInstance()
+                    .getSheets()
+                    .filter((s) => s.getConfig().hidden === BooleanNumber.TRUE)
+                    .map((s) => ({
+                        label: s.getConfig().name,
+                        value: s.getConfig().id,
+                    }));
+                console.log('hiddenList', newList);
+                subscriber.next(newList);
+            });
+            subscriber.next(hiddenList);
+            return disposable.dispose;
+        }),
     };
 }

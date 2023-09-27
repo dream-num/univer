@@ -344,7 +344,7 @@
 // }
 import { isRealNum } from '@univerjs/core';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { of } from 'rxjs';
+import { isObservable, of, Subscription } from 'rxjs';
 
 import { AppContext } from '../../Common/AppContext';
 import {
@@ -674,6 +674,9 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     const [menuItems, setMenuItems] = useState<Array<IDisplayMenuItem<IMenuItem>>>([]);
     const [itemShow, setItemShow] = useState<boolean>(false);
 
+    const [selections, setSelections] = useState<Array<IValueOption | ICustomComponentOption>>([]);
+    const [selectionsSubscription, setSelectionsSubscription] = useState<Subscription | undefined>();
+
     const mouseEnter = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
         setItemShow(true);
     };
@@ -692,9 +695,22 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     };
 
     useEffect(() => {
+        if (menuItem.type === MenuItemType.SELECTOR) {
+            if (isObservable(menuItem.selections)) {
+                setSelectionsSubscription(
+                    menuItem.selections.subscribe?.((selections) => {
+                        setSelections(selections);
+                    })
+                );
+            } else {
+                setSelections(menuItem.selections || []);
+            }
+        }
         getSubMenus();
 
-        return () => {};
+        return () => {
+            selectionsSubscription?.unsubscribe();
+        };
     }, [menuItem]);
 
     const disabled = useObservable<boolean>(menuItem.disabled$ || of(false), false, true);
@@ -760,7 +776,7 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                     min={item.min}
                 ></NeoCustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
-                {(menuItems.length > 0 || (item as IMenuSelectorItem).selections?.length) && (
+                {(menuItems.length > 0 || selections?.length > 0) && (
                     <Menu
                         show={itemShow}
                         onOptionSelect={(v) => {
@@ -769,7 +785,7 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                             setItemShow(false); // hide current menu
                         }}
                         menuId={item.id}
-                        options={item.selections}
+                        options={selections}
                         display={item.display}
                         parent={true}
                     ></Menu>
@@ -795,7 +811,7 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                     display={item.display}
                     label={item.label}
                 ></NeoCustomLabel>
-                {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
+                {(menuItems.length > 0 || selections?.length) && (
                     <Menu
                         show={itemShow}
                         menuId={item.id}

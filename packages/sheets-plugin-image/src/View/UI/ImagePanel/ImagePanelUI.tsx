@@ -14,11 +14,11 @@ export interface ImagePanelUIProps {
 }
 
 export class ImagePanelUI extends Component<ImagePanelUIProps> {
-    private _width: number;
+    private _width: number = 0;
 
-    private _height: number;
+    private _height: number = 0;
 
-    private _radius: number;
+    private _radius: number = 0;
 
     constructor(props: ImagePanelUIProps) {
         super(props);

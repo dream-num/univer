@@ -18,11 +18,11 @@ export interface IFindPluginConfig {}
 export class FindPlugin extends Plugin<FindPluginObserve> {
     static override type = PluginType.Sheet;
 
-    private _config: IFindPluginConfig;
+    private _config: IFindPluginConfig = {};
 
-    private _findController: FindController;
+    private _findController: FindController | null = null;
 
-    private _findModalController: FindModalController;
+    private _findModalController: FindModalController | null = null;
 
     constructor(
         config: Partial<IFindPluginConfig>,

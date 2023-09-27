@@ -17,13 +17,13 @@ import { OverImageRender } from './View/Render';
 export class ImagePlugin extends Plugin {
     static override type = PluginType.Sheet;
 
-    protected _overGridImageController: OverGridImageController;
+    protected _overGridImageController: OverGridImageController | null = null;
 
-    protected _overImageRender: OverImageRender;
+    protected _overImageRender: OverImageRender | null = null;
 
     protected _imagePluginData: Map<string, IOverGridImageProperty>;
 
-    protected _cellImageController: CellImageController;
+    protected _cellImageController: CellImageController | null = null;
 
     constructor(
         private _config: IOverGridImagePluginConfig,

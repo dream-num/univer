@@ -17,17 +17,17 @@ import { getRegExpStr } from '../Util/util';
 import { SelectSearch } from '../View/UI/FindModal';
 
 export class TextFinder {
-    private _text: string | FormatType;
+    private _text: string | FormatType = '';
 
     private _type: FindType = 'text'; // 查找类型
 
     private _searchRange: SelectSearch = SelectSearch.CurrentSheet; //查找范围
 
-    private _range: IGridRange[]; // 保存匹配到的单元格range格式
+    private _range: IGridRange[] = []; // 保存匹配到的单元格range格式
 
     private _rangeData: IGridRange[] = []; // rangList每个单元格range格式
 
-    private _index: number;
+    private _index: number = -1;
 
     private _matchCase: boolean = false; // 大小写匹配
 

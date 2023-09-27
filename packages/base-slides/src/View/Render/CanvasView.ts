@@ -29,15 +29,15 @@ export enum SLIDE_KEY {
 }
 
 export class CanvasView {
-    private _scene: Scene;
+    private _scene: Scene | null = null;
 
     private _slideThumbEngine = new Map<string, Engine>();
 
-    private _slide: Slide;
+    private _slide: Slide | null = null;
 
-    private _ObjectProvider: ObjectProvider;
+    private _ObjectProvider: ObjectProvider | null = null;
 
-    private _activePageId: string;
+    private _activePageId: string = '';
 
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
@@ -66,7 +66,7 @@ export class CanvasView {
                 continue;
             }
 
-            this._createScene(id, this._slide, pages[i]);
+            this._createScene(id, this._slide!, pages[i]);
 
             // this._thumbSceneRender(id);
         }
@@ -88,7 +88,7 @@ export class CanvasView {
 
         this._activePageId = pages[0].id;
 
-        this._slide.activeFirstPage();
+        this._slide?.activeFirstPage();
     }
 
     activePage(pageId?: string) {
@@ -115,18 +115,19 @@ export class CanvasView {
 
         this._activePageId = pageId;
 
-        if (this._slide.hasPage(id)) {
+        if (this._slide?.hasPage(id)) {
             this._slide.changePage(id);
             return;
         }
 
-        this._createScene(id, this._slide, page);
+        this._createScene(id, this._slide!, page);
     }
 
     scrollToCenter() {
-        const viewMain = this._scene.getViewport(SLIDE_KEY.VIEW);
-        if (!viewMain) return;
-        const { left: viewPortLeft, top: viewPortTop } = this._getCenterPositionViewPort();
+        const viewMain = this._scene?.getViewport(SLIDE_KEY.VIEW);
+        const getCenterPositionViewPort = this._getCenterPositionViewPort();
+        if (!viewMain || !getCenterPositionViewPort) return;
+        const { left: viewPortLeft, top: viewPortTop } = getCenterPositionViewPort;
 
         const { x, y } = viewMain.getBarScroll(viewPortLeft, viewPortTop);
 
@@ -179,8 +180,9 @@ export class CanvasView {
         });
 
         ScrollBar.attachTo(viewMain);
-
-        const { left: viewPortLeft, top: viewPortTop } = this._getCenterPositionViewPort();
+        const getCenterPositionViewPort = this._getCenterPositionViewPort();
+        if (!getCenterPositionViewPort) return;
+        const { left: viewPortLeft, top: viewPortTop } = getCenterPositionViewPort;
 
         const { x, y } = viewMain.getBarScroll(viewPortLeft, viewPortTop);
 
@@ -205,6 +207,7 @@ export class CanvasView {
     private _createSlide() {
         const model = this._currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
         const mainScene = this._scene;
+        if (!mainScene) return;
 
         const { width: sceneWidth, height: sceneHeight } = mainScene;
 
@@ -251,6 +254,7 @@ export class CanvasView {
     }
 
     private _getCenterPositionViewPort() {
+        if (!this._scene) return;
         const { width, height } = this._scene;
 
         const engine = this._scene.getEngine();
@@ -267,7 +271,7 @@ export class CanvasView {
     private _thumbSceneRender(id: string) {
         const thumbEngine = this._slideThumbEngine.get(id);
 
-        if (thumbEngine == null) {
+        if (thumbEngine == null || !this._slide) {
             return;
         }
 
@@ -287,6 +291,8 @@ export class CanvasView {
     }
 
     private _createScene(pageId: string, parent: Engine | Slide, page: ISlidePage) {
+        if (!this._scene || !this._ObjectProvider) return;
+
         const { width, height } = parent;
 
         const scene = new Scene(pageId, parent, {
@@ -309,6 +315,7 @@ export class CanvasView {
 
         // SceneViewers
         const objects = this._ObjectProvider.convertToRenderObjects(pageElements, this._scene);
+        if (!objects || !this._slide) return;
         scene.openTransformer();
         this._addBackgroundRect(scene, pageBackgroundFill);
         // So finally SceneViewers are added to the scene as objects. How can we do optimizations on this?

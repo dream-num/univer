@@ -576,10 +576,10 @@ export function getCellByIndex(
 export function mergeCellHandler(row: number, column: number, mergeData?: ISelectionRange[]) {
     let isMerged = false; // The upper left cell only renders the content
     let isMergedMainCell = false;
-    let newEndRow = -1;
-    let newEndColumn = -1;
-    let mergeRow = -1;
-    let mergeColumn = -1;
+    let newEndRow = row;
+    let newEndColumn = column;
+    let mergeRow = row;
+    let mergeColumn = column;
 
     if (mergeData == null) {
         return {

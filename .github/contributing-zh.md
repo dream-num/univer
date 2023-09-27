@@ -28,6 +28,7 @@ pnpm 管理的多包项目，
 ### ESM
 
 #### 安装
+
 ```shell
 npm i @univerjs/core @univerjs/base-render @univerjs/base-ui @univerjs/base-sheets @univerjs/ui-plugin-sheets
 ```
@@ -63,6 +64,7 @@ npm run api
 ```sh
 npm run clean
 ```
+
 PS: 如果失败请重新clean一下
 
 ## 脚本
@@ -120,21 +122,28 @@ pnpm install
 ### PR流程
 
 1. 新建分支，进行开发
+
 ```sh
 git checkout -b my-dev
 ```
+
 2. 提交分支
+
 ```sh
 git pull origin my-dev --rebase
 git add .
 git commit -m "new"
 git push origin my-dev
 ```
+
 3. commit中间执行rebase，不定期从dev同步最新代码到你的分支
+
 ```sh
 git rebase dev
 ```
+
 4. [可选]如果有冲突，解决冲突并继续
+
 ```sh
 git add .
 git rebase --continue
@@ -519,7 +528,7 @@ git rebase --continue
             export class AlternatingColorsPlugin extends Plugin {
                 initialize(context: SheetContext): void {
                     // 其他代码
-                    const rangeData = {
+                    const range = {
                         startRow: 0,
                         endRow: 10,
                         startColumn: 0,
@@ -542,7 +551,7 @@ git rebase --continue
                     const panelItem: ISlotProps = {
                         name: ALTERNATING_COLORS_PLUGIN_NAME,
                         type: ISlotElement.JSX,
-                        content: <AlternatingColorsSide config={{ rangeData: rangeData, context: context, banding: banding, alternatingColors: this._alternatingColors }} />,
+                        content: <AlternatingColorsSide config={{ range: range, context: context, banding: banding, alternatingColors: this._alternatingColors }} />,
                     };
                     context.getPluginManager().getPluginByName<SheetPlugin>('spreadsheet')?.addSider(panelItem);
                 }
@@ -595,7 +604,9 @@ context.getWorkBook();
 ```js
 const activeSheetId = context.getWorkBook().getActiveSheet().getSheetId();
 // add new AlternatingColors meta data
-context.getWorkBook().setPluginMeta < IKeyType < IBandedRange >> (ALTERNATING_COLORS_PLUGIN_NAME, { [activeSheetId]: [] });
+context.getWorkBook().setPluginMeta <
+    IKeyType <
+    IBandedRange >> (ALTERNATING_COLORS_PLUGIN_NAME, { [activeSheetId]: [] });
 ```
 
 ### 国际化
@@ -674,7 +685,10 @@ const s = `${style.AlternatingColorsSideSetting}`;
 我们允许为同一组快捷键注册多个监听。
 
 ```ts
-const onKeyDownObservable = this._plugin.getGlobalContext().getObserverManager().getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
+const onKeyDownObservable = this._plugin
+    .getGlobalContext()
+    .getObserverManager()
+    .getObserver<KeyboardEvent>('onKeyDownObservable', 'core');
 
 onKeyDownObservable?.add((evt: KeyboardEvent) => {
     // handle Ctrl + A
@@ -894,7 +908,6 @@ export class AlternatingColorsPlugin extends Plugin {
     /**
      * {@inheritDoc Plugin.onMapping}
      */
-
 }
 ```
 
@@ -1263,16 +1276,19 @@ npm run build
 ### 发布 npm
 
 1. 选择需要修改版本的包
+
 ```shell
 pnpm changeset add
 ```
 
 2. 更新版本号被依赖的版本号
+
 ```shell
 pnpm changeset version
 ```
 
 3. 发布npm
+
 ```shell
 pnpm publish -r
 

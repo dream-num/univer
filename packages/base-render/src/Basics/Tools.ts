@@ -1,10 +1,10 @@
 import {
     BaselineOffset,
     FontStyleType,
+    IRange,
+    IRangeWithCoord,
     IScale,
     ISelectionCellWithCoord,
-    ISelectionRange,
-    ISelectionRangeWithCoord,
     IStyleBase,
     Nullable,
     Tools,
@@ -507,7 +507,7 @@ export function getCellByIndex(
     column: number,
     rowHeightAccumulation: number[],
     columnWidthAccumulation: number[],
-    mergeData: ISelectionRange[]
+    mergeData: IRange[]
 ): ISelectionCellWithCoord {
     // eslint-disable-next-line prefer-const
     let { startY, endY, startX, endX } = getCellPositionByIndex(
@@ -573,7 +573,7 @@ export function getCellByIndex(
 }
 
 // WTF: this name doesn't express any useful information about what is this used for
-export function mergeCellHandler(row: number, column: number, mergeData?: ISelectionRange[]) {
+export function mergeCellHandler(row: number, column: number, mergeData?: IRange[]) {
     let isMerged = false; // The upper left cell only renders the content
     let isMergedMainCell = false;
     let newEndRow = row;
@@ -633,7 +633,7 @@ export function mergeCellHandler(row: number, column: number, mergeData?: ISelec
 }
 
 export function mergeInfoOffset(
-    mergeInfo: ISelectionRangeWithCoord,
+    mergeInfo: IRangeWithCoord,
     offsetX: number,
     offsetY: number,
     scaleX: number,

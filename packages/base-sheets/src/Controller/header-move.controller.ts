@@ -3,8 +3,8 @@ import {
     IMouseEvent,
     IPointerEvent,
     IRenderManagerService,
-    ISelectionRangeWithStyle,
     ISelectionTransformerShapeManager,
+    ISelectionWithStyle,
     Rect,
     ScrollTimer,
     Vector2,
@@ -18,7 +18,7 @@ import {
     Observer,
     ObserverManager,
     OnLifecycle,
-    SELECTION_TYPE,
+    RANGE_TYPE,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -255,7 +255,7 @@ export class HeaderMoveController extends Disposable {
     private _columnMoving(
         moveOffsetX: number,
         moveOffsetY: number,
-        matchSelectionData: ISelectionRangeWithStyle,
+        matchSelectionData: ISelectionWithStyle,
         initialType: HEADER_MOVE_TYPE
     ) {
         const { scene } = this._sheetObject;
@@ -286,7 +286,7 @@ export class HeaderMoveController extends Disposable {
         const { startX: cellStartX, startY: cellStartY, endX: cellEndX, endY: cellEndY } = startCell;
 
         const selectionWithCoord = this._selectionTransformerShapeManager.convertRangeDataToSelection(
-            matchSelectionData.rangeData
+            matchSelectionData.range
         );
 
         if (selectionWithCoord == null) {
@@ -368,8 +368,8 @@ export class HeaderMoveController extends Disposable {
         const rangeDatas = this._selectionManagerService.getSelectionDatas();
 
         const matchSelectionData = rangeDatas?.find((data) => {
-            const rangeData = data.rangeData;
-            const { startRow, endRow, startColumn, endColumn } = rangeData;
+            const range = data.range;
+            const { startRow, endRow, startColumn, endColumn } = range;
             if (type === HEADER_MOVE_TYPE.COLUMN) {
                 if (rowOrColumn >= startColumn && rowOrColumn <= endColumn) {
                     return true;
@@ -383,12 +383,14 @@ export class HeaderMoveController extends Disposable {
             return false;
         });
 
+        const range = matchSelectionData?.range;
         if (
             matchSelectionData == null ||
-            matchSelectionData.selectionType === SELECTION_TYPE.ALL ||
-            matchSelectionData.selectionType === SELECTION_TYPE.NORMAL ||
-            (matchSelectionData.selectionType === SELECTION_TYPE.ROW && type !== HEADER_MOVE_TYPE.ROW) ||
-            (matchSelectionData.selectionType === SELECTION_TYPE.COLUMN && type !== HEADER_MOVE_TYPE.COLUMN)
+            range == null ||
+            range.rangeType === RANGE_TYPE.ALL ||
+            range.rangeType === RANGE_TYPE.NORMAL ||
+            (range.rangeType === RANGE_TYPE.ROW && type !== HEADER_MOVE_TYPE.ROW) ||
+            (range.rangeType === RANGE_TYPE.COLUMN && type !== HEADER_MOVE_TYPE.COLUMN)
         ) {
             return false;
         }

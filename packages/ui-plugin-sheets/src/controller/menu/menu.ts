@@ -129,11 +129,11 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     return;
                 }
 
-                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let isBold = FontWeight.NORMAL;
-                if (cellRange != null) {
-                    const range = worksheet.getRange(cellRange.startRow, cellRange.startColumn);
+                if (primary != null) {
+                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     isBold = range?.getFontWeight();
                 }
 
@@ -182,11 +182,11 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     return;
                 }
 
-                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let isItalic = FontItalic.NORMAL;
-                if (cellRange != null) {
-                    const range = worksheet.getRange(cellRange.startRow, cellRange.startColumn);
+                if (primary != null) {
+                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     isItalic = range?.getFontStyle();
                 }
 
@@ -235,11 +235,11 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     return;
                 }
 
-                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let isUnderline;
-                if (cellRange != null) {
-                    const range = worksheet.getRange(cellRange.startRow, cellRange.startColumn);
+                if (primary != null) {
+                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     isUnderline = range?.getUnderline();
                 }
 
@@ -288,11 +288,11 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                     return;
                 }
 
-                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let st;
-                if (cellRange != null) {
-                    const range = worksheet.getRange(cellRange.startRow, cellRange.startColumn);
+                if (primary != null) {
+                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     st = range?.getStrikeThrough();
                 }
 
@@ -494,11 +494,11 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                     return;
                 }
 
-                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let ff;
-                if (cellRange != null) {
-                    const range = worksheet.getRange(cellRange.startRow, cellRange.startColumn);
+                if (primary != null) {
+                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     ff = range?.getFontFamily();
                 }
 
@@ -551,11 +551,11 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                     return;
                 }
 
-                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let fs;
-                if (cellRange != null) {
-                    const range = worksheet.getRange(cellRange.startRow, cellRange.startColumn);
+                if (primary != null) {
+                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     fs = range?.getFontSize();
                 }
 
@@ -689,11 +689,11 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
                     return;
                 }
 
-                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let ha;
-                if (cellRange != null) {
-                    const range = worksheet.getRange(cellRange.startRow, cellRange.startColumn);
+                if (primary != null) {
+                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     ha = range?.getHorizontalAlignment();
                 }
 
@@ -745,11 +745,11 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                     return;
                 }
 
-                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let va;
-                if (cellRange != null) {
-                    const range = worksheet.getRange(cellRange.startRow, cellRange.startColumn);
+                if (primary != null) {
+                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     va = range?.getVerticalAlignment();
                 }
 
@@ -801,11 +801,11 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
                     return;
                 }
 
-                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let ws;
-                if (cellRange != null) {
-                    const range = worksheet.getRange(cellRange.startRow, cellRange.startColumn);
+                if (primary != null) {
+                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     ws = range?.getWrapStrategy();
                 }
 
@@ -872,11 +872,11 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
                     return;
                 }
 
-                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let tr;
-                if (cellRange != null) {
-                    const range = worksheet.getRange(cellRange.startRow, cellRange.startColumn);
+                if (primary != null) {
+                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     tr = range?.getTextRotation();
                 }
 
@@ -1005,11 +1005,11 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         },
         value$: new Observable((subscriber) => {
             function update() {
-                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let rowHeight;
-                if (cellRange != null) {
-                    const range = worksheet.getRange(cellRange.startRow, cellRange.startColumn);
+                if (primary != null) {
+                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     rowHeight = range?.getHeight();
                 }
 
@@ -1049,11 +1049,11 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         },
         value$: new Observable((subscriber) => {
             function update() {
-                const cellRange = selectionManagerService.getLast()?.cellRange;
+                const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let rowHeight;
-                if (cellRange != null) {
-                    const range = worksheet.getRange(cellRange.startRow, cellRange.startColumn);
+                if (primary != null) {
+                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     rowHeight = range?.getWidth();
                 }
 

@@ -211,7 +211,7 @@ export class TextFinder {
             const sheetId = sheet.getSheetId();
             const rangeList: IGridRange = {
                 sheetId,
-                rangeData: {
+                range: {
                     startRow: 0,
                     endRow: sheet.getLastRow(),
                     startColumn: 0,
@@ -270,7 +270,7 @@ export class TextFinder {
             if (this._matchFormula) {
                 // matrix = this._rangeData[i].getValue().f;
             } else {
-                matrix = sheet.getRange(this._rangeData[i].rangeData).getMatrix();
+                matrix = sheet.getRange(this._rangeData[i].range).getMatrix();
             }
 
             if (this._matchEntire) {
@@ -282,7 +282,7 @@ export class TextFinder {
                     ) {
                         range.push({
                             sheetId: this._rangeData[i].sheetId,
-                            rangeData: {
+                            range: {
                                 startRow: row,
                                 endRow: row,
                                 startColumn: col,
@@ -313,7 +313,7 @@ export class TextFinder {
                         reg.lastIndex = 0;
                         range.push({
                             sheetId: this._rangeData[i].sheetId,
-                            rangeData: {
+                            range: {
                                 startRow: row,
                                 endRow: row,
                                 startColumn: col,
@@ -336,8 +336,8 @@ export class TextFinder {
         const mergeData = workbook.getActiveSheet().getMergeData();
 
         const selectionRange = this._selectionManagerService.transformCellDataToSelectionData(
-            range.rangeData.startColumn,
-            range.rangeData.endColumn,
+            range.range.startColumn,
+            range.range.endColumn,
             mergeData
         );
         if (selectionRange == null) {
@@ -353,7 +353,7 @@ export class TextFinder {
     }
 
     private _replaceText(sheet: Worksheet, range: IGridRange, text: string) {
-        const value = sheet.getRange(range.rangeData).getValue();
+        const value = sheet.getRange(range.range).getValue();
         if (!value || !value.m) return 0;
         if (!this._matchEntire) {
             let match;
@@ -362,9 +362,9 @@ export class TextFinder {
                 match = 'g';
             }
             const reg = new RegExp(getRegExpStr(this._text as string), match);
-            // sheet.getRange(range.rangeData).setValue(value.m.replace(reg, text));
+            // sheet.getRange(range.range).setValue(value.m.replace(reg, text));
         } else {
-            // sheet.getRange(range.rangeData).setValue(text);
+            // sheet.getRange(range.range).setValue(text);
         }
     }
 }

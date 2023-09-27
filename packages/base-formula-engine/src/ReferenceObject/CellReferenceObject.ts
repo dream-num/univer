@@ -1,4 +1,4 @@
-import { ISelectionRange, referenceToGrid } from '@univerjs/core';
+import { IRange, referenceToGrid } from '@univerjs/core';
 
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -10,7 +10,7 @@ export class CellReferenceObject extends BaseReferenceObject {
         super(token);
         const grid = referenceToGrid(token);
         this.setForcedSheetName(grid.sheetName);
-        this.setRangeData(grid.rangeData);
+        this.setRangeData(grid.range);
     }
 
     override isCell() {
@@ -32,38 +32,38 @@ export class CellReferenceObject extends BaseReferenceObject {
         return this._createRange(newRangeData);
     }
 
-    override unionRange(rangeData1: ISelectionRange, rangeData2: ISelectionRange) {
+    override unionRange(rangeData1: IRange, rangeData2: IRange) {
         const startRow1 = rangeData1.startRow;
         const startColumn1 = rangeData1.startColumn;
 
         const startRow2 = rangeData2.startRow;
         const startColumn2 = rangeData2.startColumn;
-        const rangeData: ISelectionRange = {
+        const range: IRange = {
             startRow: -1,
             startColumn: -1,
             endRow: -1,
             endColumn: -1,
         };
         if (startRow1 > startRow2) {
-            rangeData.startRow = startRow2;
-            rangeData.endRow = startRow1;
+            range.startRow = startRow2;
+            range.endRow = startRow1;
         } else {
-            rangeData.startRow = startRow1;
-            rangeData.endRow = startRow2;
+            range.startRow = startRow1;
+            range.endRow = startRow2;
         }
 
         if (startColumn1 > startColumn2) {
-            rangeData.startColumn = startColumn2;
-            rangeData.endColumn = startColumn1;
+            range.startColumn = startColumn2;
+            range.endColumn = startColumn1;
         } else {
-            rangeData.startColumn = startColumn1;
-            rangeData.endColumn = startColumn2;
+            range.startColumn = startColumn1;
+            range.endColumn = startColumn2;
         }
 
-        return rangeData;
+        return range;
     }
 
-    private _createRange(newRangeData: ISelectionRange) {
+    private _createRange(newRangeData: IRange) {
         const rangeReferenceObject = new RangeReferenceObject(
             newRangeData,
             this.getForcedSheetId(),

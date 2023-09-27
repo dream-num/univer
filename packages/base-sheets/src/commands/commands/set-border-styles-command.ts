@@ -6,7 +6,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    ISelectionRange,
+    IRange,
     IStyleData,
     IUndoRedoService,
     Nullable,
@@ -26,7 +26,7 @@ import {
 export interface ISetBorderCommandParams {
     workbookId?: string;
     worksheetId?: string;
-    range?: ISelectionRange;
+    range?: IRange;
     top?: Nullable<boolean>;
     left?: Nullable<boolean>;
     bottom?: Nullable<boolean>;
@@ -37,8 +37,8 @@ export interface ISetBorderCommandParams {
     style?: BorderStyleTypes;
 }
 
-function forEach(rangeData: ISelectionRange, action: (row: number, column: number) => void): void {
-    const { startRow, startColumn, endRow, endColumn } = rangeData;
+function forEach(range: IRange, action: (row: number, column: number) => void): void {
+    const { startRow, startColumn, endRow, endColumn } = range;
     for (let i = startRow; i <= endRow; i++) {
         for (let j = startColumn; j <= endColumn; j++) {
             action(i, j);
@@ -86,64 +86,64 @@ export const SetBorderCommand: ICommand = {
         if (!worksheet) return false;
         const sheetMatrix = worksheet.getCellMatrix();
         const styles = workbook.getStyles();
-        const rangeData = range;
+        const range = range;
 
         // Cells in the surrounding range may need to clear the border
         const topRangeOut = {
-            startRow: rangeData.startRow - 1,
-            startColumn: rangeData.startColumn,
-            endRow: rangeData.startRow - 1,
-            endColumn: rangeData.endColumn,
+            startRow: range.startRow - 1,
+            startColumn: range.startColumn,
+            endRow: range.startRow - 1,
+            endColumn: range.endColumn,
         };
 
         const leftRangeOut = {
-            startRow: rangeData.startRow,
-            startColumn: rangeData.startColumn - 1,
-            endRow: rangeData.endRow,
-            endColumn: rangeData.startColumn - 1,
+            startRow: range.startRow,
+            startColumn: range.startColumn - 1,
+            endRow: range.endRow,
+            endColumn: range.startColumn - 1,
         };
 
         const bottomRangeOut = {
-            startRow: rangeData.endRow + 1,
-            startColumn: rangeData.startColumn,
-            endRow: rangeData.endRow + 1,
-            endColumn: rangeData.endColumn,
+            startRow: range.endRow + 1,
+            startColumn: range.startColumn,
+            endRow: range.endRow + 1,
+            endColumn: range.endColumn,
         };
 
         const rightRangeOut = {
-            startRow: rangeData.startRow,
-            startColumn: rangeData.endColumn + 1,
-            endRow: rangeData.endRow,
-            endColumn: rangeData.endColumn + 1,
+            startRow: range.startRow,
+            startColumn: range.endColumn + 1,
+            endRow: range.endRow,
+            endColumn: range.endColumn + 1,
         };
 
         // Cells in the upper, lower, left and right ranges
         const topRange = {
-            startRow: rangeData.startRow,
-            startColumn: rangeData.startColumn,
-            endRow: rangeData.startRow,
-            endColumn: rangeData.endColumn,
+            startRow: range.startRow,
+            startColumn: range.startColumn,
+            endRow: range.startRow,
+            endColumn: range.endColumn,
         };
 
         const leftRange = {
-            startRow: rangeData.startRow,
-            startColumn: rangeData.startColumn,
-            endRow: rangeData.endRow,
-            endColumn: rangeData.startColumn,
+            startRow: range.startRow,
+            startColumn: range.startColumn,
+            endRow: range.endRow,
+            endColumn: range.startColumn,
         };
 
         const bottomRange = {
-            startRow: rangeData.endRow,
-            startColumn: rangeData.startColumn,
-            endRow: rangeData.endRow,
-            endColumn: rangeData.endColumn,
+            startRow: range.endRow,
+            startColumn: range.startColumn,
+            endRow: range.endRow,
+            endColumn: range.endColumn,
         };
 
         const rightRange = {
-            startRow: rangeData.startRow,
-            startColumn: rangeData.endColumn,
-            endRow: rangeData.endRow,
-            endColumn: rangeData.endColumn,
+            startRow: range.startRow,
+            startColumn: range.endColumn,
+            endRow: range.endRow,
+            endColumn: range.endColumn,
         };
 
         const mr = new ObjectMatrix<IStyleData>();
@@ -283,9 +283,9 @@ export const SetBorderCommand: ICommand = {
         // inner vertical border
         if (vertical === true || vertical === false) {
             // current range
-            forEach(rangeData, (row, column) => {
+            forEach(range, (row, column) => {
                 // Set the right border except the last column
-                if (column !== rangeData.endColumn) {
+                if (column !== range.endColumn) {
                     // update
                     if (vertical === true) {
                         const style = Tools.deepMerge(
@@ -309,7 +309,7 @@ export const SetBorderCommand: ICommand = {
                 }
 
                 // Except for the first column, clear the left border
-                if (column !== rangeData.startColumn) {
+                if (column !== range.startColumn) {
                     const style = Tools.deepMerge(
                         Tools.deepClone(styles.get(sheetMatrix.getValue(row, column)?.s)) || {},
                         {
@@ -323,9 +323,9 @@ export const SetBorderCommand: ICommand = {
         // inner horizontal border
         if (horizontal === true || horizontal === false) {
             // current range
-            forEach(rangeData, (row, column) => {
+            forEach(range, (row, column) => {
                 // Except for the last row, set the bottom border
-                if (row !== rangeData.endRow) {
+                if (row !== range.endRow) {
                     // update
                     if (horizontal === true) {
                         const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
@@ -343,7 +343,7 @@ export const SetBorderCommand: ICommand = {
                 }
 
                 // Except for the first row, clear the top border
-                if (row !== rangeData.startRow) {
+                if (row !== range.startRow) {
                     const style = Tools.deepMerge(styles.get(sheetMatrix.getValue(row, column)?.s) || {}, {
                         bd: { t: null },
                     });

@@ -8,8 +8,8 @@ import {
     ITextDecoration,
     ITextRotation,
     Nullable,
+    RANGE_TYPE,
     RedoCommand,
-    SELECTION_TYPE,
     UndoCommand,
     Univer,
     VerticalAlign,
@@ -90,8 +90,8 @@ describe("Test commands used for updating cells' styles", () => {
                 });
                 selectionManagerService.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: {
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: {
                             startRow: 0,
                             startColumn: 0,
                             endColumn: 0,
@@ -101,7 +101,6 @@ describe("Test commands used for updating cells' styles", () => {
                             isMerged: false,
                             isMergedMainCell: false,
                         },
-                        selectionType: SELECTION_TYPE.NORMAL,
                         style: null,
                     },
                 ]);
@@ -158,8 +157,8 @@ describe("Test commands used for updating cells' styles", () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 1, endRow: 0 },
-                        cellRange: {
+                        range: { startRow: 0, startColumn: 0, endColumn: 1, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: {
                             startRow: 0,
                             startColumn: 0,
                             endColumn: 0,
@@ -169,7 +168,6 @@ describe("Test commands used for updating cells' styles", () => {
                             isMerged: false,
                             isMergedMainCell: false,
                         },
-                        selectionType: SELECTION_TYPE.NORMAL,
                         style: null,
                     },
                 ]);
@@ -208,8 +206,8 @@ describe("Test commands used for updating cells' styles", () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: {
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: {
                             startRow: 0,
                             startColumn: 0,
                             endColumn: 0,
@@ -219,7 +217,6 @@ describe("Test commands used for updating cells' styles", () => {
                             isMerged: false,
                             isMergedMainCell: false,
                         },
-                        selectionType: SELECTION_TYPE.NORMAL,
                         style: null,
                     },
                 ]);
@@ -259,8 +256,8 @@ describe("Test commands used for updating cells' styles", () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: {
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: {
                             startRow: 0,
                             startColumn: 0,
                             endColumn: 0,
@@ -270,7 +267,6 @@ describe("Test commands used for updating cells' styles", () => {
                             isMerged: false,
                             isMergedMainCell: false,
                         },
-                        selectionType: SELECTION_TYPE.NORMAL,
                         style: null,
                     },
                 ]);
@@ -310,9 +306,8 @@ describe("Test commands used for updating cells' styles", () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
@@ -350,9 +345,8 @@ describe("Test commands used for updating cells' styles", () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
@@ -390,9 +384,8 @@ describe("Test commands used for updating cells' styles", () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
@@ -430,9 +423,8 @@ describe("Test commands used for updating cells' styles", () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
@@ -472,9 +464,8 @@ describe("Test commands used for updating cells' styles", () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
@@ -514,9 +505,8 @@ describe("Test commands used for updating cells' styles", () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
@@ -558,9 +548,8 @@ describe("Test commands used for updating cells' styles", () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
@@ -602,9 +591,8 @@ describe("Test commands used for updating cells' styles", () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);

@@ -1841,7 +1841,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookConfig = {
             name: 'namedRange',
             range: {
                 sheetId: 'sheet-0003',
-                rangeData: {
+                range: {
                     startRow: 0,
                     startColumn: 0,
                     endRow: 1,

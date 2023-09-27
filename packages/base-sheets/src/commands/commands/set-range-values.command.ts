@@ -4,7 +4,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    ISelectionRange,
+    IRange,
     isICellData,
     IUndoRedoService,
     ObjectMatrix,
@@ -23,7 +23,7 @@ import {
 export interface ISetRangeValuesCommandParams {
     worksheetId?: string;
     workbookId?: string;
-    range?: ISelectionRange;
+    range?: IRange;
 
     /**
      * 1. ICellData: Normal cell data
@@ -99,7 +99,7 @@ export const SetRangeValuesCommand: ICommand = {
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            rangeData: currentSelections,
+            range: currentSelections,
             worksheetId,
             workbookId,
             cellValue: realCellValue ?? cellValue.getMatrix(),

@@ -1,4 +1,4 @@
-import { ISelectionRange, IUnitRange, Nullable } from '@univerjs/core';
+import { IRange, IUnitRange, Nullable } from '@univerjs/core';
 
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { IFormulaData } from '../Basics/Common';
@@ -46,11 +46,11 @@ export class FormulaDependencyTree implements IFormulaData {
         return this._state === FDtreeStateType.SKIP;
     }
 
-    compareRangeData(rangeData: ISelectionRange) {
-        const startRow = rangeData.startRow;
-        const startColumn = rangeData.startColumn;
-        const endRow = rangeData.endRow;
-        const endColumn = rangeData.endColumn;
+    compareRangeData(range: IRange) {
+        const startRow = range.startRow;
+        const startColumn = range.startColumn;
+        const endRow = range.endRow;
+        const endColumn = range.endColumn;
 
         if (this.row < startRow || this.row > endRow || this.column < startColumn || this.column > endColumn) {
             return false;
@@ -59,7 +59,7 @@ export class FormulaDependencyTree implements IFormulaData {
         return true;
     }
 
-    dependencyRange(dependencyRangeList: Map<string, Map<string, ISelectionRange>>) {
+    dependencyRange(dependencyRangeList: Map<string, Map<string, IRange>>) {
         if (this.rangeList.length === 0) {
             return false;
         }
@@ -68,7 +68,7 @@ export class FormulaDependencyTree implements IFormulaData {
             const unitRange = this.rangeList[r];
             const unitId = unitRange.unitId;
             const sheetId = unitRange.sheetId;
-            const rangeData = unitRange.rangeData;
+            const range = unitRange.range;
 
             if (!dependencyRangeList.has(unitId)) {
                 continue;
@@ -85,10 +85,10 @@ export class FormulaDependencyTree implements IFormulaData {
             const { startRow, startColumn, endRow, endColumn } = dependencyRange;
 
             if (
-                rangeData.startRow > endRow ||
-                rangeData.endRow < startRow ||
-                rangeData.startColumn > endColumn ||
-                rangeData.endColumn < startColumn
+                range.startRow > endRow ||
+                range.endRow < startRow ||
+                range.startColumn > endColumn ||
+                range.endColumn < startColumn
             ) {
                 continue;
             } else {
@@ -117,12 +117,12 @@ export class FormulaDependencyTree implements IFormulaData {
             const unitRange = this.rangeList[r];
             const unitId = unitRange.unitId;
             const sheetId = unitRange.sheetId;
-            const rangeData = unitRange.rangeData;
+            const range = unitRange.range;
 
             if (
                 dependenceTree.unitId === unitId &&
                 dependenceTree.sheetId === sheetId &&
-                dependenceTree.compareRangeData(rangeData)
+                dependenceTree.compareRangeData(range)
             ) {
                 return true;
             }

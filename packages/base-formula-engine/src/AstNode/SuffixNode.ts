@@ -58,12 +58,12 @@ export class SuffixNode extends BaseAstNode {
         }
 
         const cellValue = value as CellReferenceObject;
-        const rangeData = cellValue.getRangeData();
+        const range = cellValue.getRangeData();
         const unitId = cellValue.getUnitId();
         const sheetId = cellValue.getSheetId();
         const formulaData = interpreterDatasetConfig?.formulaData;
 
-        const formulaString = formulaData?.[unitId]?.[sheetId]?.[rangeData.startRow]?.[rangeData.startColumn]?.formula;
+        const formulaString = formulaData?.[unitId]?.[sheetId]?.[range.startRow]?.[range.startColumn]?.formula;
 
         if (!formulaString) {
             return ErrorValueObject.create(ErrorType.VALUE);

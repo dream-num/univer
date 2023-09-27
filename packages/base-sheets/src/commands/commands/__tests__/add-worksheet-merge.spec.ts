@@ -1,9 +1,9 @@
 import {
     ICommandService,
     ICurrentUniverService,
-    ISelectionRange,
+    IRange,
+    RANGE_TYPE,
     RedoCommand,
-    SELECTION_TYPE,
     UndoCommand,
     Univer,
 } from '@univerjs/core';
@@ -58,14 +58,13 @@ describe('Test style commands', () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
 
-                function getMerge(): ISelectionRange[] | undefined {
+                function getMerge(): IRange[] | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
                         ?.getWorkBook()
@@ -102,14 +101,13 @@ describe('Test style commands', () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
 
-                function getMerge(): ISelectionRange[] | undefined {
+                function getMerge(): IRange[] | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
                         ?.getWorkBook()
@@ -143,14 +141,13 @@ describe('Test style commands', () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
 
-                function getMerge(): ISelectionRange[] | undefined {
+                function getMerge(): IRange[] | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
                         ?.getWorkBook()
@@ -184,14 +181,13 @@ describe('Test style commands', () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
 
-                function getMerge(): ISelectionRange[] | undefined {
+                function getMerge(): IRange[] | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
                         ?.getWorkBook()

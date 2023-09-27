@@ -1,5 +1,5 @@
 import { Nullable } from '../../Shared/Types';
-import { ISelectionRange } from './ISelectionRange';
+import { IRange } from './IRange';
 
 /**
  * Properties of selection data
@@ -18,32 +18,23 @@ export interface ISingleCell {
     isMergedMainCell: boolean;
 }
 
-export interface ISelectionRangeWithCoord extends IPosition, ISelectionRange {}
+export interface IRangeWithCoord extends IPosition, IRange {}
 
-export interface ISelectionCell extends ISelectionRange, ISingleCell {}
+export interface ISelectionCell extends IRange, ISingleCell {}
 
 export interface ISelectionCellWithCoord extends IPosition, ISingleCell {
-    mergeInfo: ISelectionRangeWithCoord; // merge cell, start and end is upper left cell
-}
-
-export enum SELECTION_TYPE {
-    NORMAL,
-    ROW,
-    COLUMN,
-    ALL,
+    mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell
 }
 
 export interface ISelection {
     /** range */
-    rangeData: ISelectionRange; // TODO@wzhudev: rename to range
-    cellRange: Nullable<ISelectionCell>; // rename to primary
-    selectionType?: SELECTION_TYPE; // should be a property of IRange instead of ISelection
+    range: IRange; // TODO@wzhudev: rename to range
+    primary: Nullable<ISelectionCell>; // rename to primary
 }
 
 export interface ISelectionWithCoord {
-    selection: ISelectionRangeWithCoord;
-    cellInfo: Nullable<ISelectionCellWithCoord>;
-    selectionType?: SELECTION_TYPE;
+    rangeWithCoord: IRangeWithCoord;
+    primaryWithCoord: Nullable<ISelectionCellWithCoord>;
 }
 
 export interface ITextSelectionRangeStart {

@@ -1,11 +1,11 @@
-import { ISelectionRange } from '../Types/Interfaces/ISelectionRange';
+import { IRange } from '../Types/Interfaces/IRange';
 import { Nullable } from './Types';
 
 /**
- * This class provides a set of methods to calculate `ISelectionRange`.
+ * This class provides a set of methods to calculate `IRange`.
  */
 export class Rectangle {
-    static clone(src: ISelectionRange): ISelectionRange {
+    static clone(src: IRange): IRange {
         return {
             startRow: src.startRow,
             startColumn: src.startColumn,
@@ -14,7 +14,7 @@ export class Rectangle {
         };
     }
 
-    static equals(src: ISelectionRange, target: ISelectionRange): boolean {
+    static equals(src: IRange, target: IRange): boolean {
         return (
             src.endRow === target.endRow &&
             src.endColumn === target.endColumn &&
@@ -23,7 +23,7 @@ export class Rectangle {
         );
     }
 
-    static intersects(src: ISelectionRange, target: ISelectionRange): boolean {
+    static intersects(src: IRange, target: IRange): boolean {
         const currentStartRow = src.startRow;
         const currentEndRow = src.endRow;
         const currentStartColumn = src.startColumn;
@@ -42,7 +42,7 @@ export class Rectangle {
         return zx <= x && zy <= y;
     }
 
-    static getIntersects(src: ISelectionRange, target: ISelectionRange): Nullable<ISelectionRange> {
+    static getIntersects(src: IRange, target: IRange): Nullable<IRange> {
         const currentStartRow = src.startRow;
         const currentEndRow = src.endRow;
         const currentStartColumn = src.startColumn;
@@ -105,20 +105,20 @@ export class Rectangle {
         };
     }
 
-    static subtract(src: ISelectionRange, target: ISelectionRange): Nullable<ISelectionRange[]> {
+    static subtract(src: IRange, target: IRange): Nullable<IRange[]> {
         const intersected = Rectangle.getIntersects(src, target);
         if (!intersected) {
             return [src];
         }
 
-        const result: ISelectionRange[] = [];
+        const result: IRange[] = [];
         const { startRow, endRow, startColumn, endColumn } = intersected;
         const { startRow: srcStartRow, endRow: srcEndRow, startColumn: srcStartColumn, endColumn: srcEndColumn } = src;
 
         // subtract could result in eight pieces and these eight pieces and be merged to at most four pieces
     }
 
-    static contains(src: ISelectionRange, target: ISelectionRange): boolean {
+    static contains(src: IRange, target: IRange): boolean {
         return (
             src.startRow <= target.startRow &&
             src.endRow >= target.endRow &&
@@ -127,7 +127,7 @@ export class Rectangle {
         );
     }
 
-    static realContain(src: ISelectionRange, target: ISelectionRange): boolean {
+    static realContain(src: IRange, target: IRange): boolean {
         return (
             Rectangle.contains(src, target) &&
             (src.startRow < target.startRow ||
@@ -137,7 +137,7 @@ export class Rectangle {
         );
     }
 
-    static union(...ranges: ISelectionRange[]): ISelectionRange {
+    static union(...ranges: IRange[]): IRange {
         return ranges.reduce(
             (acc, current) => ({
                 startRow: Math.min(acc.startRow, current.startRow),

@@ -132,7 +132,7 @@ export class SearchFormulaController {
         this._initRegisterComponent();
 
         this._observerManager.getObserver<ISelection>('onChangeSelectionObserver')?.add((selection) => {
-            const info = selection.cellRange;
+            const info = selection.primary;
             // this._searchItem.changeRange(info?.startColumn.toString() ?? '');
         });
     }

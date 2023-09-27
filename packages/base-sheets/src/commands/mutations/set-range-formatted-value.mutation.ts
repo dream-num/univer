@@ -4,7 +4,7 @@ import {
     ICellV,
     ICurrentUniverService,
     IMutation,
-    ISelectionRange,
+    IRange,
     Nullable,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
@@ -15,7 +15,7 @@ import { IAccessor } from '@wendellhu/redi';
 export interface ISetRangeFormattedValueMutationParams {
     workbookId: string;
     worksheetId: string;
-    range: ISelectionRange[];
+    range: IRange[];
     value: ObjectMatrixPrimitiveType<ICellV>;
 }
 
@@ -39,9 +39,9 @@ export const SetRangeFormattedValueUndoMutationFactory = (
 
     const undoData = new ObjectMatrix<ICellV>();
     for (let i = 0; i < params.range.length; i++) {
-        const rangeData = params.range[i];
-        for (let j = rangeData.startRow; j <= rangeData.endRow; j++) {
-            for (let k = rangeData.startColumn; k <= rangeData.endColumn; k++) {
+        const range = params.range[i];
+        for (let j = range.startRow; j <= range.endRow; j++) {
+            for (let k = range.startColumn; k <= range.endColumn; k++) {
                 const cell: Nullable<ICellData> = cellMatrix?.getValue(j, k);
                 undoData.setValue(j, k, (cell && cell.v) || '');
             }
@@ -68,9 +68,9 @@ export const SetRangeFormattedValueMutation: IMutation<ISetRangeFormattedValueMu
         const target = new ObjectMatrix(params.value);
 
         for (let i = 0; i < params.range.length; i++) {
-            const rangeData = params.range[i];
-            for (let j = rangeData.startRow; j <= rangeData.endRow; j++) {
-                for (let k = rangeData.startColumn; k <= rangeData.endColumn; k++) {
+            const range = params.range[i];
+            for (let j = range.startRow; j <= range.endRow; j++) {
+                for (let k = range.startColumn; k <= range.endColumn; k++) {
                     const value = target.getValue(j, k);
                     const cell: Nullable<ICellData> = cellMatrix.getValue(j, k);
                     // update new value, cell may be undefined

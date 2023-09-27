@@ -712,7 +712,7 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
             name: 'namedRange01',
             range: {
                 sheetId: 'sheet-01',
-                rangeData: {
+                range: {
                     startRow: 0,
                     startColumn: 0,
                     endRow: 1,
@@ -725,7 +725,7 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
             name: 'namedRange02',
             range: {
                 sheetId: 'sheet-01',
-                rangeData: {
+                range: {
                     startRow: 4,
                     startColumn: 2,
                     endRow: 5,
@@ -1078,7 +1078,7 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookConfig = {
             name: 'namedRange0001',
             range: {
                 sheetId: 'sheet-0001',
-                rangeData: {
+                range: {
                     startRow: 0,
                     startColumn: 0,
                     endRow: 1,

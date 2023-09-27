@@ -14,7 +14,7 @@ import { IStyleData, IWorkbookConfig, IWorksheetConfig } from '../Interfaces';
  */
 export const DEFAULT_RANGE_ARRAY = {
     sheetId: '',
-    rangeData: {
+    range: {
         startRow: -1,
         endRow: -1,
         startColumn: -1,

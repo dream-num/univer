@@ -16,7 +16,7 @@ export class TableReferenceObject extends BaseReferenceObject {
     ) {
         super(token);
         const sheetId = this._tableData.sheetId;
-        const rangeData = this._tableData.rangeData;
+        const range = this._tableData.range;
         const titleMap = this._tableData.titleMap;
 
         this.setForcedSheetIdDirect(sheetId);
@@ -28,9 +28,9 @@ export class TableReferenceObject extends BaseReferenceObject {
         let startRow = -1;
         let endRow = -1;
 
-        const tableStartRow = rangeData.startRow;
+        const tableStartRow = range.startRow;
 
-        const tableEndRow = rangeData.startColumn;
+        const tableEndRow = range.startColumn;
 
         if (type === TableOptionType.ALL) {
             startRow = tableStartRow;

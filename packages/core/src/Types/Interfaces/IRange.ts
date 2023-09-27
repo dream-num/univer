@@ -1,3 +1,10 @@
+export enum RANGE_TYPE {
+    NORMAL,
+    ROW,
+    COLUMN,
+    ALL,
+}
+
 /**
  * Range data structure
  *
@@ -14,7 +21,7 @@
  * means "A1:B2"
  */
 // TODO@wzhudev: Rename to IRange
-export interface ISelectionRange {
+export interface IRange {
     /**
      * The start row (inclusive) of the range
      * startRow
@@ -35,14 +42,16 @@ export interface ISelectionRange {
      * endColumn
      */
     endColumn: number;
+
+    rangeType?: RANGE_TYPE;
 }
 
 /**
- * Transform an `ISelectionRange` object to an array.
+ * Transform an `IRange` object to an array.
  * @param range
  * @returns [rowStart, colStart, rowEnd, colEnd]
  */
-export function selectionToArray(range: ISelectionRange): [number, number, number, number] {
+export function selectionToArray(range: IRange): [number, number, number, number] {
     return [range.startRow, range.startColumn, range.endRow, range.endColumn];
 }
 
@@ -51,7 +60,7 @@ export function selectionToArray(range: ISelectionRange): [number, number, numbe
  */
 export interface IGridRange {
     sheetId: string;
-    rangeData: ISelectionRange;
+    range: IRange;
 }
 
 /**
@@ -119,9 +128,9 @@ export type IRangeCellData = {
 /**
  * range types
  *
- * Allow users to provide one of three formats, we need to convert to ISelectionRange to store
+ * Allow users to provide one of three formats, we need to convert to IRange to store
  */
-export type IRangeType = ISelectionRange | IRangeStringData | IRangeArrayData | IRangeCellData;
+export type IRangeType = IRange | IRangeStringData | IRangeArrayData | IRangeCellData;
 
 // export interface IInfoObjData extends IRangeArrayData {
 //     sheetId?: Nullable<string>;

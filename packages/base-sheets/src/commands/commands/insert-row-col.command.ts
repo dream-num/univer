@@ -5,7 +5,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    ISelectionRange,
+    IRange,
     IUndoRedoService,
     Nullable,
     ObjectMatrix,
@@ -46,7 +46,7 @@ export interface InsertRowCommandParams {
 export interface InsertRowCommandBaseParams {
     workbookId: string;
     worksheetId: string;
-    range: ISelectionRange;
+    range: IRange;
 }
 
 export const InsertRowCommand: ICommand = {
@@ -207,7 +207,7 @@ export const InsertRowBeforeCommand: ICommand<InsertRowCommandParams> = {
             .getWorkBook()
             .getActiveSheet()
             .getSheetId();
-        let range: ISelectionRange;
+        let range: IRange;
         const selections = selectionManagerService.getRangeDatas();
         if (selections && selections.length === 1) {
             range = selections[0];
@@ -254,7 +254,7 @@ export const InsertRowAfterCommand: ICommand<InsertRowCommandParams> = {
             .getWorkBook()
             .getActiveSheet()
             .getSheetId();
-        let range: ISelectionRange;
+        let range: IRange;
         const selections = selectionManagerService.getRangeDatas();
         if (selections && selections.length === 1) {
             range = selections[0];
@@ -294,7 +294,7 @@ export interface InsertColCommandParams {
 export interface InsertColCommandBaseParams {
     workbookId: string;
     worksheetId: string;
-    range: ISelectionRange;
+    range: IRange;
 }
 
 export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
@@ -455,7 +455,7 @@ export const InsertColBeforeCommand: ICommand<InsertColCommandParams> = {
             .getWorkBook()
             .getActiveSheet()
             .getSheetId();
-        let range: ISelectionRange;
+        let range: IRange;
         const selections = selectionManagerService.getRangeDatas();
         if (selections && selections.length === 1) {
             range = selections[0];
@@ -502,7 +502,7 @@ export const InsertColAfterCommand: ICommand<InsertColCommandParams> = {
             .getWorkBook()
             .getActiveSheet()
             .getSheetId();
-        let range: ISelectionRange;
+        let range: IRange;
         const selections = selectionManagerService.getRangeDatas();
         if (selections && selections.length === 1) {
             range = selections[0];

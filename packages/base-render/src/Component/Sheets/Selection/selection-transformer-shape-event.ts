@@ -1,5 +1,5 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import { ISelectionRangeWithCoord, Nullable, Observer } from '@univerjs/core';
+import { IRangeWithCoord, Nullable, Observer } from '@univerjs/core';
 
 import {
     CURSOR_TYPE,
@@ -22,7 +22,7 @@ const SELECTION_CONTROL_DELETING_LIGHTEN = 35;
 
 export interface ISelectionTransformerShapeTargetSelection {
     originControl: SelectionTransformerShape;
-    targetSelection: ISelectionRangeWithCoord;
+    targetSelection: IRangeWithCoord;
 }
 
 export class SelectionTransformerShapeEvent {
@@ -46,7 +46,7 @@ export class SelectionTransformerShapeEvent {
 
     private _scrollTimer!: ScrollTimer;
 
-    private _targetSelection: ISelectionRangeWithCoord = {
+    private _targetSelection: IRangeWithCoord = {
         startY: 0,
         endY: 0,
         startX: 0,

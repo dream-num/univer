@@ -137,7 +137,7 @@ export class FormulaController {
         const arrayFormula = arrayFormulaData[this._activeSheetId];
         if (!arrayFormula) return;
 
-        const currentCellData = this._selectionManagerService.getLast()?.cellRange;
+        const currentCellData = this._selectionManagerService.getLast()?.primary;
 
         arrayFormula.forValue((r, c, v) => {
             const { startRow, startColumn, endRow, endColumn } = v;

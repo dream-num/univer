@@ -19,7 +19,7 @@ import {
     ICommandService,
     IConfigService,
     ICurrentUniverService,
-    ISelectionRange,
+    IRange,
     LifecycleStages,
     LocaleService,
     ObjectArray,
@@ -291,7 +291,7 @@ export class SheetClipboardController extends Disposable {
     }
 
     private _onPasteCells(
-        range: ISelectionRange,
+        range: IRange,
         matrix: ObjectMatrix<IParsedCellValue>,
         workbookId: string,
         worksheetId: string
@@ -318,7 +318,7 @@ export class SheetClipboardController extends Disposable {
         const setContentMutation: ISetRangeValuesMutationParams = {
             workbookId,
             worksheetId,
-            rangeData: [range],
+            range: [range],
             cellValue: valueMatrix.getData(),
         };
 

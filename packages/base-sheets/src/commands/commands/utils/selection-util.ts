@@ -2,8 +2,8 @@ import {
     Direction,
     getReverseDirection,
     ICellData,
+    IRange,
     ISelectionCell,
-    ISelectionRange,
     ObjectMatrix,
     Rectangle,
     selectionToArray,
@@ -41,12 +41,8 @@ export function getRangeAtPosition(row: number, col: number, worksheet: Workshee
     return destRange;
 }
 
-export function findNextRange(
-    startRange: ISelectionRange,
-    direction: Direction,
-    worksheet: Worksheet
-): ISelectionRange {
-    const destRange: ISelectionRange = { ...startRange };
+export function findNextRange(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
+    const destRange: IRange = { ...startRange };
     switch (direction) {
         case Direction.UP:
             destRange.startRow = Math.max(0, startRange.startRow - 1);
@@ -71,11 +67,7 @@ export function findNextRange(
     return destRange;
 }
 
-export function findNextGapRange(
-    startRange: ISelectionRange,
-    direction: Direction,
-    worksheet: Worksheet
-): ISelectionRange {
+export function findNextGapRange(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
     let destRange = { ...startRange };
     const maxRow = worksheet.getMaxRows();
 
@@ -254,11 +246,7 @@ export function findNextGapRange(
     return destRange;
 }
 
-export function expandToNextGapCell(
-    startRange: ISelectionRange,
-    direction: Direction,
-    worksheet: Worksheet
-): ISelectionRange {
+export function expandToNextGapCell(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
     const destRange = { ...startRange };
     const maxRow = worksheet.getMaxRows();
 
@@ -430,9 +418,9 @@ export function expandToNextGapCell(
 /**
  * Adjust the range to align merged cell's borders.
  */
-export function alignToMergedCellsBorders(startRange: ISelectionRange, worksheet: Worksheet, shouldRecursive = true) {
+export function alignToMergedCellsBorders(startRange: IRange, worksheet: Worksheet, shouldRecursive = true) {
     const coveredMergedCells = worksheet.getMatrixWithMergedCells(...selectionToArray(startRange));
-    const exceededMergedCells: ISelectionRange[] = [];
+    const exceededMergedCells: IRange[] = [];
 
     coveredMergedCells.forValue((row, col, value) => {
         if (value.colSpan !== undefined && value.rowSpan !== undefined) {
@@ -460,13 +448,9 @@ export function alignToMergedCellsBorders(startRange: ISelectionRange, worksheet
     return union;
 }
 
-export function expandToNextCell(
-    startRange: ISelectionRange,
-    direction: Direction,
-    worksheet: Worksheet
-): ISelectionRange {
+export function expandToNextCell(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
     const next = findNextRange(startRange, direction, worksheet);
-    const destRange: ISelectionRange = {
+    const destRange: IRange = {
         startRow: Math.min(startRange.startRow, next.startRow),
         startColumn: Math.min(startRange.startColumn, next.startColumn),
         endRow: Math.max(startRange.endRow, next.endRow),
@@ -483,11 +467,11 @@ export function expandToNextCell(
  * @param worksheet
  */
 export function shrinkToNextGapCell(
-    startRange: ISelectionRange,
-    anchorRange: ISelectionRange,
+    startRange: IRange,
+    anchorRange: IRange,
     direction: Direction,
     worksheet: Worksheet
-): ISelectionRange {
+): IRange {
     // use `moveToNextGapCell` reversely to get the next going to cell
     const reversedDirection = getReverseDirection(direction);
     const nextGap = findNextGapRange(
@@ -535,16 +519,16 @@ export function shrinkToNextGapCell(
  * @param worksheet
  */
 export function shrinkToNextCell(
-    startRange: ISelectionRange,
-    anchorRange: ISelectionRange,
+    startRange: IRange,
+    anchorRange: IRange,
     direction: Direction,
     worksheet: Worksheet
-): ISelectionRange {
+): IRange {
     // use `moveToNextCell` reversely to get the next going to cell
     const reversedDirection = getReverseDirection(direction);
     const next = findNextRange(getLastArrayOfRange(startRange, reversedDirection, worksheet), direction, worksheet);
 
-    const destRange: ISelectionRange = {
+    const destRange: IRange = {
         startRow: Math.min(anchorRange.startRow, next.startRow),
         startColumn: Math.min(anchorRange.startColumn, next.startColumn),
         endRow: Math.max(anchorRange.endRow, next.endRow),
@@ -554,17 +538,13 @@ export function shrinkToNextCell(
     return destRange;
 }
 
-export function expandToContinuousRange(
-    startRange: ISelectionRange,
-    directions: IExpandParams,
-    worksheet: Worksheet
-): ISelectionRange {
+export function expandToContinuousRange(startRange: IRange, directions: IExpandParams, worksheet: Worksheet): IRange {
     const { left, right, up, down } = directions;
     const maxRow = worksheet.getMaxRows();
     const maxColumn = worksheet.getMaxColumns();
 
     let changed = true;
-    const destRange: ISelectionRange = { ...startRange }; // startRange should not be used below
+    const destRange: IRange = { ...startRange }; // startRange should not be used below
 
     while (changed) {
         changed = false;
@@ -659,7 +639,7 @@ export function expandToContinuousRange(
     return destRange;
 }
 
-export function expandToWholeSheet(worksheet: Worksheet): ISelectionRange {
+export function expandToWholeSheet(worksheet: Worksheet): IRange {
     return {
         startRow: 0,
         startColumn: 0,
@@ -668,8 +648,8 @@ export function expandToWholeSheet(worksheet: Worksheet): ISelectionRange {
     };
 }
 
-function getLastArrayOfRange(startRange: ISelectionRange, direction: Direction, worksheet: Worksheet): ISelectionRange {
-    let destRange: ISelectionRange;
+function getLastArrayOfRange(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
+    let destRange: IRange;
     switch (direction) {
         case Direction.UP:
             destRange = {

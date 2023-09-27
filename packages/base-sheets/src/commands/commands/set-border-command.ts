@@ -7,7 +7,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    ISelectionRange,
+    IRange,
     IStyleData,
     IUndoRedoService,
     ObjectMatrix,
@@ -24,8 +24,8 @@ import {
     SetBorderStylesUndoMutationFactory,
 } from '../mutations/set-border-styles.mutation';
 
-function forEach(rangeData: ISelectionRange, action: (row: number, column: number) => void): void {
-    const { startRow, startColumn, endRow, endColumn } = rangeData;
+function forEach(range: IRange, action: (row: number, column: number) => void): void {
+    const { startRow, startColumn, endRow, endColumn } = range;
     for (let i = startRow; i <= endRow; i++) {
         for (let j = startColumn; j <= endColumn; j++) {
             action(i, j);
@@ -111,64 +111,64 @@ export const SetBorderCommand: ICommand = {
         const right = type === BorderType.RIGHT || type === BorderType.ALL || type === BorderType.OUTSIDE;
         const vertical = type === BorderType.VERTICAL || type === BorderType.ALL || type === BorderType.INSIDE;
         const horizontal = type === BorderType.HORIZONTAL || type === BorderType.ALL || type === BorderType.INSIDE;
-        const rangeData = selections[0];
+        const range = selections[0];
 
         // Cells in the surrounding range may need to clear the border
         const topRangeOut = {
-            startRow: rangeData.startRow - 1,
-            startColumn: rangeData.startColumn,
-            endRow: rangeData.startRow - 1,
-            endColumn: rangeData.endColumn,
+            startRow: range.startRow - 1,
+            startColumn: range.startColumn,
+            endRow: range.startRow - 1,
+            endColumn: range.endColumn,
         };
 
         const leftRangeOut = {
-            startRow: rangeData.startRow,
-            startColumn: rangeData.startColumn - 1,
-            endRow: rangeData.endRow,
-            endColumn: rangeData.startColumn - 1,
+            startRow: range.startRow,
+            startColumn: range.startColumn - 1,
+            endRow: range.endRow,
+            endColumn: range.startColumn - 1,
         };
 
         const bottomRangeOut = {
-            startRow: rangeData.endRow + 1,
-            startColumn: rangeData.startColumn,
-            endRow: rangeData.endRow + 1,
-            endColumn: rangeData.endColumn,
+            startRow: range.endRow + 1,
+            startColumn: range.startColumn,
+            endRow: range.endRow + 1,
+            endColumn: range.endColumn,
         };
 
         const rightRangeOut = {
-            startRow: rangeData.startRow,
-            startColumn: rangeData.endColumn + 1,
-            endRow: rangeData.endRow,
-            endColumn: rangeData.endColumn + 1,
+            startRow: range.startRow,
+            startColumn: range.endColumn + 1,
+            endRow: range.endRow,
+            endColumn: range.endColumn + 1,
         };
 
         // Cells in the upper, lower, left and right ranges
         const topRange = {
-            startRow: rangeData.startRow,
-            startColumn: rangeData.startColumn,
-            endRow: rangeData.startRow,
-            endColumn: rangeData.endColumn,
+            startRow: range.startRow,
+            startColumn: range.startColumn,
+            endRow: range.startRow,
+            endColumn: range.endColumn,
         };
 
         const leftRange = {
-            startRow: rangeData.startRow,
-            startColumn: rangeData.startColumn,
-            endRow: rangeData.endRow,
-            endColumn: rangeData.startColumn,
+            startRow: range.startRow,
+            startColumn: range.startColumn,
+            endRow: range.endRow,
+            endColumn: range.startColumn,
         };
 
         const bottomRange = {
-            startRow: rangeData.endRow,
-            startColumn: rangeData.startColumn,
-            endRow: rangeData.endRow,
-            endColumn: rangeData.endColumn,
+            startRow: range.endRow,
+            startColumn: range.startColumn,
+            endRow: range.endRow,
+            endColumn: range.endColumn,
         };
 
         const rightRange = {
-            startRow: rangeData.startRow,
-            startColumn: rangeData.endColumn,
-            endRow: rangeData.endRow,
-            endColumn: rangeData.endColumn,
+            startRow: range.startRow,
+            startColumn: range.endColumn,
+            endRow: range.endRow,
+            endColumn: range.endColumn,
         };
 
         const mr = new ObjectMatrix<IStyleData>();
@@ -180,8 +180,8 @@ export const SetBorderCommand: ICommand = {
             },
         };
 
-        const hasMerge = (row: number, column: number): ISelectionRange | null => {
-            let res: ISelectionRange | null = null;
+        const hasMerge = (row: number, column: number): IRange | null => {
+            let res: IRange | null = null;
             mergeData.forEach((merge) => {
                 if (
                     Rectangle.intersects(merge, {
@@ -197,7 +197,7 @@ export const SetBorderCommand: ICommand = {
             return res;
         };
 
-        function setBorderStyle(range: ISelectionRange, defaultStyle: IBorderData, reserve?: boolean) {
+        function setBorderStyle(range: IRange, defaultStyle: IBorderData, reserve?: boolean) {
             if (range.startRow < 0 || range.startColumn < 0) return;
             forEach(range, (row, column) => {
                 const rectangle = hasMerge(row, column);
@@ -240,10 +240,10 @@ export const SetBorderCommand: ICommand = {
         }
         // inner vertical border
         if (vertical) {
-            forEach(rangeData, (row, column) => {
+            forEach(range, (row, column) => {
                 const rectangle = hasMerge(row, column);
                 if (rectangle) {
-                    if (rectangle.endColumn !== rangeData.endColumn) {
+                    if (rectangle.endColumn !== range.endColumn) {
                         const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
                         mr.setValue(row, column, {
                             bd: style?.bd
@@ -252,7 +252,7 @@ export const SetBorderCommand: ICommand = {
                         });
                     }
                 } else {
-                    if (column !== rangeData.endColumn) {
+                    if (column !== range.endColumn) {
                         const style = mr.getValue(row, column);
                         mr.setValue(row, column, {
                             bd: style?.bd
@@ -265,10 +265,10 @@ export const SetBorderCommand: ICommand = {
         }
         // inner horizontal border
         if (horizontal) {
-            forEach(rangeData, (row, column) => {
+            forEach(range, (row, column) => {
                 const rectangle = hasMerge(row, column);
                 if (rectangle) {
-                    if (rectangle.endRow !== rangeData.endRow) {
+                    if (rectangle.endRow !== range.endRow) {
                         const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
                         mr.setValue(row, column, {
                             bd: style?.bd
@@ -277,7 +277,7 @@ export const SetBorderCommand: ICommand = {
                         });
                     }
                 } else {
-                    if (row !== rangeData.endRow) {
+                    if (row !== range.endRow) {
                         const style = mr.getValue(row, column);
                         mr.setValue(row, column, {
                             bd: style?.bd
@@ -299,17 +299,17 @@ export const SetBorderCommand: ICommand = {
             setBorderStyle(rightRangeOut, { l: null });
             setBorderStyle(rightRange, { r: null }, true);
 
-            forEach(rangeData, (row, column) => {
+            forEach(range, (row, column) => {
                 const rectangle = hasMerge(row, column);
                 if (rectangle) {
-                    if (rectangle.endColumn !== rangeData.endColumn) {
+                    if (rectangle.endColumn !== range.endColumn) {
                         const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
                         mr.setValue(row, column, {
                             bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
                         });
                     }
                 } else {
-                    if (column !== rangeData.endColumn) {
+                    if (column !== range.endColumn) {
                         const style = mr.getValue(row, column);
                         mr.setValue(row, column, {
                             bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
@@ -317,17 +317,17 @@ export const SetBorderCommand: ICommand = {
                     }
                 }
             });
-            forEach(rangeData, (row, column) => {
+            forEach(range, (row, column) => {
                 const rectangle = hasMerge(row, column);
                 if (rectangle) {
-                    if (rectangle.endRow !== rangeData.endRow) {
+                    if (rectangle.endRow !== range.endRow) {
                         const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
                         mr.setValue(row, column, {
                             bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
                         });
                     }
                 } else {
-                    if (row !== rangeData.endRow) {
+                    if (row !== range.endRow) {
                         const style = mr.getValue(row, column);
                         mr.setValue(row, column, {
                             bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },

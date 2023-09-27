@@ -5,7 +5,7 @@ import {
     ICellData,
     IDocumentData,
     IKeyValue,
-    ISelectionRange,
+    IRange,
     IStyleData,
     ITextDecoration,
     ITextRun,
@@ -695,7 +695,7 @@ export function handlePlainToJson(plain: string) {
 }
 
 // 获取最终sheet数据
-export function handleTableMergeData(data: any[], selection?: ISelectionRange) {
+export function handleTableMergeData(data: any[], selection?: IRange) {
     const copyH = data.length;
     const copyC = data[0].length;
     let minH = 0; //应用范围首尾行

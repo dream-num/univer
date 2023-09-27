@@ -6,7 +6,7 @@ import {
     ICommandService,
     ICurrentUniverService,
     IOptionData,
-    ISelectionRange,
+    IRange,
     IUndoRedoService,
     Nullable,
     ObjectMatrix,
@@ -21,7 +21,7 @@ import {
 } from '../mutations/set-range-values.mutation';
 
 export interface ICopyRangeToCommandParams {
-    destinationRange: ISelectionRange;
+    destinationRange: IRange;
     options?: IOptionData;
 }
 
@@ -59,7 +59,7 @@ export const CopyRangeToCommand: ICommand = {
         );
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            rangeData: [range],
+            range: [range],
             worksheetId,
             workbookId,
             cellValue: cellValue.getData(),
@@ -133,9 +133,9 @@ function handleCopyRange(
     accessor: IAccessor,
     workbookId: string,
     worksheetId: string,
-    originRange: ISelectionRange,
-    destinationRange: ISelectionRange
-): Nullable<[ICellDataMatrix, ISelectionRange]> {
+    originRange: IRange,
+    destinationRange: IRange
+): Nullable<[ICellDataMatrix, IRange]> {
     const worksheet = accessor
         .get(ICurrentUniverService)
         .getUniverSheetInstance(workbookId)
@@ -163,7 +163,7 @@ function handleCopyRange(
     const destinationColumns = dEndColumn - dStartColumn + 1;
 
     let value: ICellDataMatrix = [];
-    let range: ISelectionRange;
+    let range: IRange;
 
     // judge whether N2 is a multiple of N1
     if (destinationRows % originRows === 0 && destinationColumns % originColumns === 0) {

@@ -1,4 +1,4 @@
-import { ISelectionRange, IUnitRange, ObjectMatrix } from '@univerjs/core';
+import { IRange, IUnitRange, ObjectMatrix } from '@univerjs/core';
 
 import { generateAstNode } from '../Analysis/Tools';
 import { FunctionNode, PrefixNode, SuffixNode } from '../AstNode';
@@ -12,7 +12,7 @@ import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { FormulaDependencyTree } from './DependencyTree';
 
 export class FormulaDependencyGenerator {
-    private _updateRangeFlattenCache = new Map<string, Map<string, ISelectionRange>>();
+    private _updateRangeFlattenCache = new Map<string, Map<string, IRange>>();
 
     constructor(
         private _formulaData: FormulaDataType,
@@ -27,10 +27,10 @@ export class FormulaDependencyGenerator {
         if (this._forceCalculate) {
             return;
         }
-        this._updateRangeFlattenCache = new Map<string, Map<string, ISelectionRange>>();
+        this._updateRangeFlattenCache = new Map<string, Map<string, IRange>>();
         for (let i = 0; i < updateRangeList.length; i++) {
             const gridRange = updateRangeList[i];
-            const range = gridRange.rangeData;
+            const range = gridRange.range;
             const sheetId = gridRange.sheetId;
             const unitId = gridRange.unitId;
 
@@ -94,29 +94,29 @@ export class FormulaDependencyGenerator {
         return Promise.resolve(this._calculateRunList(updateTreeList));
     }
 
-    private _addFlattenCache(unitId: string, sheetId: string, rangeData: ISelectionRange) {
+    private _addFlattenCache(unitId: string, sheetId: string, range: IRange) {
         let unitMatrix = this._updateRangeFlattenCache.get(unitId);
         if (!unitMatrix) {
-            unitMatrix = new Map<string, ISelectionRange>();
+            unitMatrix = new Map<string, IRange>();
             this._updateRangeFlattenCache.set(unitId, unitMatrix);
         }
 
-        unitMatrix.set(sheetId, rangeData);
+        unitMatrix.set(sheetId, range);
 
         // let sheetMatrix = unitMatrix.get(sheetId);
         // if (!sheetMatrix) {
-        //     sheetMatrix = new ObjectMatrix<ISelectionRange>();
+        //     sheetMatrix = new ObjectMatrix<IRange>();
         //     unitMatrix.set(sheetId, sheetMatrix);
         // }
 
         // // don't use destructuring assignment
-        // const startRow = rangeData.startRow;
+        // const startRow = range.startRow;
 
-        // const startColumn = rangeData.startColumn;
+        // const startColumn = range.startColumn;
 
-        // const endRow = rangeData.endRow;
+        // const endRow = range.endRow;
 
-        // const endColumn = rangeData.endColumn;
+        // const endColumn = range.endColumn;
 
         // // don't use chained calls
         // for (let r = startRow; r <= endRow; r++) {
@@ -227,9 +227,9 @@ export class FormulaDependencyGenerator {
             return false;
         }
 
-        const rangeData = sheetRangeMap.get(sheetId)!;
+        const range = sheetRangeMap.get(sheetId)!;
 
-        if (tree.compareRangeData(rangeData)) {
+        if (tree.compareRangeData(range)) {
             return true;
         }
 

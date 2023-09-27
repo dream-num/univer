@@ -4,7 +4,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    ISelectionRange,
+    IRange,
     Rectangle,
 } from '@univerjs/core';
 
@@ -45,7 +45,7 @@ export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
         }
 
         const { direction, jumpOver } = params;
-        const startRange = selection.rangeData;
+        const startRange = selection.range;
         let destRange = jumpOver
             ? findNextGapRange(startRange, direction, currentWorksheet)
             : findNextRange(startRange, direction, currentWorksheet);
@@ -62,8 +62,8 @@ export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {
-                    rangeData: Rectangle.clone(destRange),
-                    cellRange: getRangeAtPosition(destRange.startRow, destRange.startColumn, currentWorksheet),
+                    range: Rectangle.clone(destRange),
+                    primary: getRangeAtPosition(destRange.startRow, destRange.startColumn, currentWorksheet),
                 },
             ],
         });
@@ -93,13 +93,13 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
             return false;
         }
 
-        const startRange = selection.rangeData;
-        const cellRange = selection.cellRange;
-        if (!cellRange) {
+        const startRange = selection.range;
+        const primary = selection.primary;
+        if (!primary) {
             return false;
         }
 
-        if (cellRange.startRow === -1) {
+        if (primary.startRow === -1) {
             // FIXME@DR-Univer
             // It maybe be related to click event handling. Try to click on C10 cell and use shift+arrow to expand selection.
             throw new Error('startRow is -1! @DR-Univer');
@@ -109,13 +109,13 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         const isShrink = (function isShrink() {
             switch (direction) {
                 case Direction.DOWN:
-                    return startRange.startRow < cellRange.startRow;
+                    return startRange.startRow < primary.startRow;
                 case Direction.UP:
-                    return startRange.endRow > cellRange.endRow;
+                    return startRange.endRow > primary.endRow;
                 case Direction.LEFT:
-                    return startRange.endColumn > cellRange.endColumn;
+                    return startRange.endColumn > primary.endColumn;
                 case Direction.RIGHT:
-                    return startRange.startColumn < cellRange.startColumn;
+                    return startRange.startColumn < primary.startColumn;
             }
         })();
 
@@ -124,8 +124,8 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
                 ? expandToNextGapCell(startRange, direction, currentWorksheet)
                 : expandToNextCell(startRange, direction, currentWorksheet)
             : jumpOver
-            ? shrinkToNextGapCell(startRange, cellRange, direction, currentWorksheet)
-            : shrinkToNextCell(startRange, cellRange, direction, currentWorksheet);
+            ? shrinkToNextGapCell(startRange, primary, direction, currentWorksheet)
+            : shrinkToNextCell(startRange, primary, direction, currentWorksheet);
 
         if (Rectangle.equals(destRange, startRange)) {
             return false;
@@ -137,10 +137,10 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {
-                    rangeData: destRange,
-                    // cellRange: expand
-                    // ? selection.cellRange
-                    cellRange, // this remains unchanged
+                    range: destRange,
+                    // primary: expand
+                    // ? selection.primary
+                    primary, // this remains unchanged
                 },
             ],
         });
@@ -152,7 +152,7 @@ export interface ISelectAllCommandParams {
     loop?: boolean;
 }
 
-let RANGES_STACK: ISelectionRange[] = [];
+let RANGES_STACK: IRange[] = [];
 
 let SELECTED_RANGE_WORKSHEET = '';
 
@@ -188,7 +188,7 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         const maxRow = currentWorksheet.getMaxRows();
         const maxCol = currentWorksheet.getMaxColumns();
         const { expandToGapFirst, loop } = params;
-        const currentRange = currentSelection.rangeData;
+        const currentRange = currentSelection.range;
         const isWholeSheetSelected =
             currentRange.endColumn === maxCol - 1 &&
             currentRange.endRow === maxRow - 1 &&
@@ -200,7 +200,7 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
             RANGES_STACK.push(currentRange);
         }
 
-        let destRange: ISelectionRange;
+        let destRange: IRange;
 
         if (isWholeSheetSelected) {
             if (loop) {
@@ -237,8 +237,8 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {
-                    rangeData: destRange,
-                    cellRange: {
+                    range: destRange,
+                    primary: {
                         row: destRange.startRow,
                         column: destRange.startColumn,
                         isMerged: false,

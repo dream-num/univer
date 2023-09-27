@@ -1,5 +1,5 @@
 import { ICurrentUniverService } from '../../services/current.service';
-import { IRangeType, ISelectionRange } from '../../Types/Interfaces';
+import { IRange, IRangeType } from '../../Types/Interfaces';
 import type { Worksheet } from './Worksheet';
 
 /**
@@ -12,7 +12,7 @@ import type { Worksheet } from './Worksheet';
  *
  */
 export class RangeList {
-    private _rangeList: ISelectionRange[];
+    private _rangeList: IRange[];
 
     constructor(
         private readonly _worksheet: Worksheet,
@@ -27,7 +27,7 @@ export class RangeList {
             // this._rangeList.push(
             //     new TransformTool(this._workbook).transformRangeType(range)
             // );
-            this._rangeList.push(workbook.transformRangeType(range).rangeData);
+            this._rangeList.push(workbook.transformRangeType(range).range);
         });
 
         // The user entered an invalid range
@@ -36,7 +36,7 @@ export class RangeList {
         }
     }
 
-    getRangeList(): ISelectionRange[] {
+    getRangeList(): IRange[] {
         return this._rangeList;
     }
 

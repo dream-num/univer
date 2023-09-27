@@ -25,8 +25,8 @@ import {
     IContextService,
     ICurrentUniverService,
     IDocumentData,
+    IRange,
     ISelectionCell,
-    ISelectionRange,
     IStyleData,
     LifecycleStages,
     Nullable,
@@ -62,7 +62,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
     /** This flag indicated whether the cell editor is visible (as it always handles keyboard events when a UniverSheet is focused). */
     private _activated = false;
 
-    private _currentEditingCell: Nullable<ISelectionRange> = null;
+    private _currentEditingCell: Nullable<IRange> = null;
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -102,7 +102,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
         // 1. get cell info at the given positions
         // 2. mount cell editor at the given position.
         // 3. set quitting editor callbacks.
-        const currentCell = this._selectionManagerService.getLast()?.cellRange;
+        const currentCell = this._selectionManagerService.getLast()?.primary;
         if (!currentCell) {
             return;
         }
@@ -357,13 +357,13 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
     }
 
     private _getActiveRange() {
-        const cellRange = this._selectionManagerService.getLast()?.cellRange;
-        if (!cellRange) return;
-        let { row, column } = cellRange;
+        const primary = this._selectionManagerService.getLast()?.primary;
+        if (!primary) return;
+        let { row, column } = primary;
 
-        if (cellRange.isMerged) {
-            row = cellRange.startRow;
-            column = cellRange.startColumn;
+        if (primary.isMerged) {
+            row = primary.startRow;
+            column = primary.startColumn;
         }
 
         return this._currentUniverService
@@ -374,7 +374,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
     }
 }
 
-function getRangeFromCellInfo(cellInfo: ISelectionCell): ISelectionRange {
+function getRangeFromCellInfo(cellInfo: ISelectionCell): IRange {
     let startRow: number;
     let startColumn: number;
 

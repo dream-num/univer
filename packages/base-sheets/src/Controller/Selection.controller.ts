@@ -13,7 +13,7 @@ import {
     LifecycleStages,
     ObserverManager,
     OnLifecycle,
-    SELECTION_TYPE,
+    RANGE_TYPE,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -80,7 +80,7 @@ export class SelectionController extends Disposable {
         const { spreadsheet } = sheetObject;
         spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             this._selectionTransformerShapeManager.enableDetectMergedCell();
-            this._selectionTransformerShapeManager.eventTrigger(evt, spreadsheet.zIndex + 1, SELECTION_TYPE.NORMAL);
+            this._selectionTransformerShapeManager.eventTrigger(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL);
             if (evt.button !== 2) {
                 state.stopPropagation();
             }
@@ -92,11 +92,7 @@ export class SelectionController extends Disposable {
 
         spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             this._selectionTransformerShapeManager.disableDetectMergedCell();
-            this._selectionTransformerShapeManager.eventTrigger(
-                evt,
-                (spreadsheet?.zIndex || 1) + 1,
-                SELECTION_TYPE.ROW
-            );
+            this._selectionTransformerShapeManager.eventTrigger(evt, (spreadsheet?.zIndex || 1) + 1, RANGE_TYPE.ROW);
             if (evt.button !== 2) {
                 state.stopPropagation();
             }
@@ -109,11 +105,7 @@ export class SelectionController extends Disposable {
         const { spreadsheetColumnHeader, spreadsheet } = sheetObject;
         spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             this._selectionTransformerShapeManager.disableDetectMergedCell();
-            this._selectionTransformerShapeManager.eventTrigger(
-                evt,
-                (spreadsheet?.zIndex || 1) + 1,
-                SELECTION_TYPE.COLUMN
-            );
+            this._selectionTransformerShapeManager.eventTrigger(evt, (spreadsheet?.zIndex || 1) + 1, RANGE_TYPE.COLUMN);
             if (evt.button !== 2) {
                 state.stopPropagation();
             }
@@ -127,9 +119,9 @@ export class SelectionController extends Disposable {
                 return;
             }
 
-            for (const selectionRange of param) {
+            for (const selectionWithStyle of param) {
                 const selectionData =
-                    this._selectionTransformerShapeManager.convertSelectionRangeToData(selectionRange);
+                    this._selectionTransformerShapeManager.convertSelectionRangeToData(selectionWithStyle);
                 this._selectionTransformerShapeManager.addControlToCurrentByRangeData(selectionData);
             }
         });
@@ -156,9 +148,8 @@ export class SelectionController extends Disposable {
             }
             const selectionRange = convertSelectionDataToRange(current);
             this._observerManager.getObserver<ISelection>('onChangeSelectionObserver')?.notifyObservers({
-                rangeData: selectionRange.rangeData,
-                cellRange: selectionRange.cellRange,
-                selectionType: selectionRange.selectionType,
+                range: selectionRange.range,
+                primary: selectionRange.primary,
             });
         });
     }

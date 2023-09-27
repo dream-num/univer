@@ -4,7 +4,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    ISelectionRange,
+    IRange,
     IUndoRedoService,
     ObjectMatrix,
 } from '@univerjs/core';
@@ -18,7 +18,7 @@ import {
 } from '../mutations/set-range-values.mutation';
 
 export interface IMoveRangeToCommandParams {
-    destinationRange: ISelectionRange;
+    destinationRange: IRange;
 }
 
 export const MoveRangeToCommand: ICommand = {
@@ -47,7 +47,7 @@ export const MoveRangeToCommand: ICommand = {
         if (!worksheet) return false;
 
         const clearMutationParams: ISetRangeValuesMutationParams = {
-            rangeData: [originRange],
+            range: [originRange],
             worksheetId,
             workbookId,
         };
@@ -75,7 +75,7 @@ export const MoveRangeToCommand: ICommand = {
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            rangeData: [params.destinationRange],
+            range: [params.destinationRange],
             worksheetId,
             workbookId,
             cellValue: targetMatrix.getData(),

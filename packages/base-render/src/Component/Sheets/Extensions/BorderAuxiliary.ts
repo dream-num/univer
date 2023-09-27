@@ -1,4 +1,4 @@
-import { BooleanNumber, IScale, ISelectionRange } from '@univerjs/core';
+import { BooleanNumber, IRange, IScale } from '@univerjs/core';
 
 import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
@@ -81,7 +81,7 @@ export class BorderAuxiliary extends SheetExtension {
         scale: number,
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
-        dataMergeCache?: ISelectionRange[]
+        dataMergeCache?: IRange[]
     ) {
         if (dataMergeCache == null) {
             return;

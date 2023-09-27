@@ -137,7 +137,7 @@ export const SetBoldCommand: ICommand = {
             .getWorkBook()
             .getActiveSheet();
         const currentlyBold =
-            worksheet.getRange(selection.cellRange.row, selection.cellRange.column).getFontWeight() === FontWeight.BOLD;
+            worksheet.getRange(selection.primary.row, selection.primary.column).getFontWeight() === FontWeight.BOLD;
 
         const setStyleParams: ISetStyleParams<BooleanNumber> = {
             style: {
@@ -168,9 +168,9 @@ export const SetItalicCommand: ICommand = {
             .getWorkBook()
             .getActiveSheet();
         let currentlyItalic = true;
-        if (selection.cellRange) {
+        if (selection.primary) {
             currentlyItalic =
-                worksheet.getRange(selection.cellRange.startRow, selection.cellRange.startColumn).getFontStyle() ===
+                worksheet.getRange(selection.primary.startRow, selection.primary.startColumn).getFontStyle() ===
                 FontItalic.ITALIC;
         }
 
@@ -203,9 +203,9 @@ export const SetUnderlineCommand: ICommand = {
             .getWorkBook()
             .getActiveSheet();
         let currentlyUnderline = true;
-        if (selection.cellRange) {
+        if (selection.primary) {
             currentlyUnderline = !!worksheet
-                .getRange(selection.cellRange.startRow, selection.cellRange.startColumn)
+                .getRange(selection.primary.startRow, selection.primary.startColumn)
                 .getUnderline().s;
         }
 
@@ -240,9 +240,9 @@ export const SetStrikeThroughCommand: ICommand = {
             .getWorkBook()
             .getActiveSheet();
         let currentlyStrokeThrough = true;
-        if (selection.cellRange) {
+        if (selection.primary) {
             currentlyStrokeThrough = !!worksheet
-                .getRange(selection.cellRange.row, selection.cellRange.column)
+                .getRange(selection.primary.row, selection.primary.column)
                 .getStrikeThrough().s;
         }
 

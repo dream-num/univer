@@ -4,8 +4,8 @@ import {
     ICurrentUniverService,
     IStyleData,
     Nullable,
+    RANGE_TYPE,
     RedoCommand,
-    SELECTION_TYPE,
     UndoCommand,
     Univer,
 } from '@univerjs/core';
@@ -53,9 +53,8 @@ describe('Test clear selection content commands', () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
@@ -100,9 +99,8 @@ describe('Test clear selection content commands', () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
@@ -171,9 +169,8 @@ describe('Test clear selection content commands', () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);

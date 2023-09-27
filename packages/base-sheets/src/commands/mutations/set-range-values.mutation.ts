@@ -4,7 +4,7 @@ import {
     ICopyToOptionsData,
     ICurrentUniverService,
     IMutation,
-    ISelectionRange,
+    IRange,
     IStyleData,
     Nullable,
     ObjectMatrix,
@@ -17,7 +17,7 @@ import { mergeRichTextStyle, mergeStyle, transformStyle } from './set-border-sty
 
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams {
-    rangeData: ISelectionRange[]; // FIXME: maybe don't need this
+    range: IRange[]; // FIXME: maybe don't need this
     worksheetId: string;
     workbookId: string;
 
@@ -63,7 +63,7 @@ export const SetRangeValuesUndoMutationFactory = (
 
     const newValues = new ObjectMatrix(cellValue);
 
-    // for (let i = 0; i < rangeData.length; i++) {
+    // for (let i = 0; i < range.length; i++) {
     newValues.forValue((row, col, newVal) => {
         const cell = Tools.deepClone(cellMatrix?.getValue(row, col)) || {}; // clone cell data，prevent modify the original data
         const oldStyle = styles.getStyleByCell(cell);
@@ -72,8 +72,8 @@ export const SetRangeValuesUndoMutationFactory = (
 
         undoData.setValue(row, col, Tools.deepClone(setNull(cell)));
     });
-    // for (let i = 0; i < params.rangeData.length; i++) {
-    //     const { startRow, endRow, startColumn, endColumn } = params.rangeData[i];
+    // for (let i = 0; i < params.range.length; i++) {
+    //     const { startRow, endRow, startColumn, endColumn } = params.range[i];
 
     //     for (let r = startRow; r <= endRow; r++) {
     //         for (let c = startColumn; c <= endColumn; c++) {

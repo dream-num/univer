@@ -9,9 +9,9 @@ import {
     IDocumentData,
     IDocumentRenderConfig,
     IPaddingData,
+    IRange,
     IRowData,
     ISelectionCellWithCoord,
-    ISelectionRange,
     isEmptyCell,
     IStyleBase,
     IStyleData,
@@ -109,11 +109,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         endColumn: -1,
     };
 
-    private _dataMergeCache: ISelectionRange[] = [];
+    private _dataMergeCache: IRange[] = [];
 
-    // private _dataMergeCacheAll: ObjectMatrix<ISelectionRange>;
+    // private _dataMergeCacheAll: ObjectMatrix<IRange>;
 
-    private _overflowCache: ObjectMatrix<ISelectionRange> = new ObjectMatrix();
+    private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
 
     private _stylesCache: IStylesCache = {
         background: {},
@@ -220,7 +220,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._styles;
     }
 
-    setOverflowCache(value: ObjectMatrix<ISelectionRange>) {
+    setOverflowCache(value: ObjectMatrix<IRange>) {
         this._overflowCache = value;
     }
 
@@ -556,15 +556,15 @@ export class SpreadsheetSkeleton extends Skeleton {
     getCellByIndex(row: number, column: number, scaleX: number, scaleY: number) {
         const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = this;
 
-        const cellInfo = getCellByIndex(
+        const primary = getCellByIndex(
             row,
             column,
             rowHeightAccumulation,
             columnWidthAccumulation,
             this._config.mergeData
         );
-        const { isMerged, isMergedMainCell } = cellInfo;
-        let { startY, endY, startX, endX, mergeInfo } = cellInfo;
+        const { isMerged, isMergedMainCell } = primary;
+        let { startY, endY, startX, endX, mergeInfo } = primary;
 
         startY = fixLineWidthByScale(startY + columnHeaderHeight, scaleY);
         endY = fixLineWidthByScale(endY + columnHeaderHeight, scaleY);
@@ -778,7 +778,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     // private _calculateOverflowCache() {
     //     const { font: fontList } = this.stylesCache;
     //     // const mergeRangeCache = this._getMergeRangeCache();
-    //     const overflowCache = new ObjectMatrix<ISelectionRange>();
+    //     const overflowCache = new ObjectMatrix<IRange>();
     //     const columnCount = this.getColumnCount();
     //     fontList &&
     //         Object.keys(fontList).forEach((fontFormat: string) => {
@@ -998,8 +998,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         // dataMergeCache &&
-        //     dataMergeCache.forEach((rowIndex: number, row: ObjectArray<ISelectionRange>) => {
-        //         row.forEach((columnIndex: number, mainCell: ISelectionRange) => {
+        //     dataMergeCache.forEach((rowIndex: number, row: ObjectArray<IRange>) => {
+        //         row.forEach((columnIndex: number, mainCell: IRange) => {
         //             if (!mainCell) {
         //                 return true;
         //             }
@@ -1285,7 +1285,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    private _getMergeCells(mergeData: ISelectionRange[], rowColumnSegment?: IRowColumnSegment) {
+    private _getMergeCells(mergeData: IRange[], rowColumnSegment?: IRowColumnSegment) {
         // const rowColumnSegment = this._rowColumnSegment;
         const endColumnLast = this.columnWidthAccumulation.length - 1;
         if (!rowColumnSegment) {
@@ -1300,7 +1300,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             };
         }
         const { startRow, startColumn, endRow, endColumn } = rowColumnSegment;
-        const cacheDataMerge: ISelectionRange[] = [];
+        const cacheDataMerge: IRange[] = [];
         for (let i = 0; i < mergeData.length; i++) {
             const {
                 startRow: mergeStartRow,

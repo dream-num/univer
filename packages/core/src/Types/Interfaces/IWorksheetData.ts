@@ -4,8 +4,8 @@ import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { BooleanNumber, SheetTypes } from '../Enum';
 import { ICellData } from './ICellData';
 import { IColumnData } from './IColumnData';
+import { IRange, IRangeType } from './IRange';
 import { IRowData } from './IRowData';
-import { IRangeType, ISelectionRange } from './ISelectionRange';
 
 // type MetaData = {
 //     metadataId?: string;
@@ -47,7 +47,7 @@ export interface IWorksheetConfig {
     scrollLeft: number;
     defaultColumnWidth: number;
     defaultRowHeight: number;
-    mergeData: ISelectionRange[];
+    mergeData: IRange[];
     hideRow: [];
     hideColumn: [];
     status: BooleanNumber;

@@ -54,8 +54,8 @@ export const SetRangeFormattedValueCommand: ICommand = {
         let cellValue = new ObjectMatrix<ICellV>();
         const value = params.value;
         for (let i = 0; i < ranges.length; i++) {
-            const rangeData = ranges[i];
-            const { startRow, startColumn, endRow, endColumn } = rangeData;
+            const range = ranges[i];
+            const { startRow, startColumn, endRow, endColumn } = range;
             if (Tools.isArray(value)) {
                 for (let r = 0; r <= endRow - startRow; r++) {
                     for (let c = 0; c <= endColumn - startColumn; c++) {

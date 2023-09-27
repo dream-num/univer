@@ -1,4 +1,4 @@
-import { ISelectionRange } from '@univerjs/core';
+import { IRange } from '@univerjs/core';
 
 import { getCellByIndex } from '../../../Basics/Tools';
 import { ComponentExtension } from '../../Extension';
@@ -16,7 +16,7 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
         columnIndex: number,
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
-        dataMergeCache: ISelectionRange[]
+        dataMergeCache: IRange[]
     ) {
         return getCellByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
     }

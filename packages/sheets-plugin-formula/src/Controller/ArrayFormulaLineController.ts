@@ -1,5 +1,5 @@
 import { IRenderManagerService, Rect } from '@univerjs/base-render';
-import { ICurrentUniverService, ISelectionRange, Workbook } from '@univerjs/core';
+import { ICurrentUniverService, IRange, Workbook } from '@univerjs/core';
 
 enum ARRAY_FORMULA_LINE_MANAGER_KEY {
     top = '__ArrayFormulaLineTopControl__',
@@ -22,7 +22,7 @@ export class ArrayFormulaLineControl {
      */
     constructor(
         private _sheetId: string,
-        private _range: ISelectionRange,
+        private _range: IRange,
         @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {

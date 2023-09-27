@@ -1,10 +1,10 @@
-import { CommandType, ICurrentUniverService, IMutation, ISelectionRange } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, IRange } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetRowHideMutationParams {
     workbookId: string;
     worksheetId: string;
-    ranges: ISelectionRange[];
+    ranges: IRange[];
 }
 
 export const SetWorksheetRowHideMutationFactory = (accessor: IAccessor, params: ISetWorksheetRowHideMutationParams) => {

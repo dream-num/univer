@@ -4,7 +4,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    ISelectionRange,
+    IRange,
     IUndoRedoService,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
@@ -48,7 +48,7 @@ export const AddWorksheetMergeCommand: ICommand = {
         let ranges = selections;
 
         if (params && params.value != null) {
-            const rectangles: ISelectionRange[] = [];
+            const rectangles: IRange[] = [];
             for (let i = 0; i < ranges.length; i++) {
                 const { startRow, endRow, startColumn, endColumn } = ranges[i];
                 if (params.value === Dimension.ROWS) {

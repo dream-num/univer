@@ -1,11 +1,11 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import { ISelectionCellWithCoord, ISelectionRangeWithCoord, Nullable, SELECTION_TYPE } from '@univerjs/core';
+import { IRangeWithCoord, ISelectionCellWithCoord, Nullable, RANGE_TYPE } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 import {
-    ISelectionDataWithStyle,
     ISelectionStyle,
     ISelectionWidgetConfig,
+    ISelectionWithCoordAndStyle,
     NORMAL_SELECTION_PLUGIN_STYLE,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
@@ -119,17 +119,17 @@ export class SelectionTransformerShape {
 
     readonly dispose$ = this._dispose$.asObservable();
 
-    readonly selectionMoving$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
+    readonly selectionMoving$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
 
-    readonly selectionMoved$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
+    readonly selectionMoved$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
 
-    readonly selectionScaling$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
+    readonly selectionScaling$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
 
-    readonly selectionScaled$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
+    readonly selectionScaled$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
 
-    readonly selectionFilling$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
+    readonly selectionFilling$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
 
-    readonly selectionFilled$ = new BehaviorSubject<Nullable<ISelectionRangeWithCoord>>(null);
+    readonly selectionFilled$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
 
     constructor(
         private _scene: Scene,
@@ -230,14 +230,14 @@ export class SelectionTransformerShape {
     static fromJson(
         scene: Scene,
         zIndex: number,
-        newSelectionData: ISelectionDataWithStyle,
+        newSelectionData: ISelectionWithCoordAndStyle,
         rowHeaderWidth: number,
         columnHeaderHeight: number,
         isHeaderHighlight: boolean
     ) {
-        const { selection, cellInfo, style } = newSelectionData;
+        const { rangeWithCoord, primaryWithCoord, style } = newSelectionData;
         const control = SelectionTransformerShape.create(scene, zIndex, isHeaderHighlight);
-        control.update(selection, rowHeaderWidth, columnHeaderHeight, style, cellInfo);
+        control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
         return control;
     }
 
@@ -361,14 +361,13 @@ export class SelectionTransformerShape {
     }
 
     update(
-        newSelectionRange: ISelectionRangeWithCoord,
+        newSelectionRange: IRangeWithCoord,
         rowHeaderWidth: number,
         columnHeaderHeight: number,
         style: Nullable<ISelectionStyle> = NORMAL_SELECTION_PLUGIN_STYLE,
-        highlight: Nullable<ISelectionCellWithCoord>,
-        selectionType: Nullable<SELECTION_TYPE>
+        highlight: Nullable<ISelectionCellWithCoord>
     ) {
-        this._selectionModel.setValue(newSelectionRange, highlight, selectionType);
+        this._selectionModel.setValue(newSelectionRange, highlight);
         if (style == null) {
             style = this._selectionStyle;
         }
@@ -434,11 +433,11 @@ export class SelectionTransformerShape {
     /**
      * Get the cell information of the current selection, considering the case of merging cells
      */
-    getCurrentCellInfo(): Nullable<ISelectionRangeWithCoord> {
+    getCurrentCellInfo(): Nullable<IRangeWithCoord> {
         const currentCell = this.model.currentCell;
 
         if (currentCell) {
-            let currentRangeData: ISelectionRangeWithCoord;
+            let currentRangeData: IRangeWithCoord;
 
             if (currentCell.isMerged) {
                 const mergeInfo = currentCell.mergeInfo;
@@ -471,7 +470,7 @@ export class SelectionTransformerShape {
         }
     }
 
-    getValue(): ISelectionDataWithStyle {
+    getValue(): ISelectionWithCoordAndStyle {
         return {
             ...this._selectionModel.getValue(),
             style: this._selectionStyle,
@@ -650,7 +649,7 @@ export class SelectionTransformerShape {
         rowHeaderWidth: number,
         columnHeaderHeight: number
     ) {
-        const { startX, startY, endX, endY, selectionType } = this._selectionModel;
+        const { startX, startY, endX, endY, rangeType } = this._selectionModel;
 
         if (style == null) {
             style = NORMAL_SELECTION_PLUGIN_STYLE;
@@ -671,7 +670,7 @@ export class SelectionTransformerShape {
 
         if (hasColumnHeader === true) {
             let highlightTitleColor = columnHeaderFill;
-            if (this._isHeaderHighlight && selectionType === SELECTION_TYPE.COLUMN) {
+            if (this._isHeaderHighlight && rangeType === RANGE_TYPE.COLUMN) {
                 highlightTitleColor = new TinyColor(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
             this._columnHeaderBackground.setProps({
@@ -698,7 +697,7 @@ export class SelectionTransformerShape {
 
         if (hasRowHeader === true) {
             let highlightTitleColor = rowHeaderFill;
-            if (this._isHeaderHighlight && selectionType === SELECTION_TYPE.ROW) {
+            if (this._isHeaderHighlight && rangeType === RANGE_TYPE.ROW) {
                 highlightTitleColor = new TinyColor(stroke).setAlpha(SELECTION_TITLE_HIGHLIGHT_ALPHA).toString();
             }
             this._rowHeaderBackground.setProps({

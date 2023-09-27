@@ -1,10 +1,10 @@
 import {
-    ISelectionRangeWithStyle,
     ISelectionStyle,
+    ISelectionWithStyle,
     mergeCellHandler,
     NORMAL_SELECTION_PLUGIN_STYLE,
 } from '@univerjs/base-render';
-import { ISelectionCell, ISelectionRange, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
+import { IRange, ISelectionCell, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -17,11 +17,11 @@ export interface ISelectionManagerSearchParam {
 }
 
 export interface ISelectionManagerInsertParam extends ISelectionManagerSearchParam {
-    selectionDatas: ISelectionRangeWithStyle[];
+    selectionDatas: ISelectionWithStyle[];
 }
 
 //{ [pluginName: string]: { [unitId: string]: { [sheetId: string]: ISelectionWithCoord[] } } }
-export type ISelectionInfo = Map<string, Map<string, Map<string, ISelectionRangeWithStyle[]>>>;
+export type ISelectionInfo = Map<string, Map<string, Map<string, ISelectionWithStyle[]>>>;
 
 /**
  * This service is for selection.
@@ -35,7 +35,7 @@ export class SelectionManagerService implements IDisposable {
 
     // private _isSelectionEnabled: boolean = true;
 
-    private readonly _selectionInfo$ = new BehaviorSubject<Nullable<ISelectionRangeWithStyle[]>>(null);
+    private readonly _selectionInfo$ = new BehaviorSubject<Nullable<ISelectionWithStyle[]>>(null);
 
     // eslint-disable-next-line @typescript-eslint/member-ordering
     readonly selectionInfo$ = this._selectionInfo$.asObservable();
@@ -90,24 +90,22 @@ export class SelectionManagerService implements IDisposable {
         return this._selectionInfo;
     }
 
-    getSelectionDatasByParam(
-        param: Nullable<ISelectionManagerSearchParam>
-    ): Readonly<Nullable<ISelectionRangeWithStyle[]>> {
+    getSelectionDatasByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionWithStyle[]>> {
         return this._getSelectionDatas(param);
     }
 
-    getSelectionDatas(): Readonly<Nullable<ISelectionRangeWithStyle[]>> {
+    getSelectionDatas(): Readonly<Nullable<ISelectionWithStyle[]>> {
         return this._getSelectionDatas(this._currentSelection);
     }
 
-    getRangeDatas(): Nullable<ISelectionRange[]> {
+    getRangeDatas(): Nullable<IRange[]> {
         const selectionDataList = this.getSelectionDatas();
         if (selectionDataList == null) {
             return;
         }
-        return selectionDataList.map((selectionData: ISelectionRangeWithStyle) => {
-            const rangeData = selectionData.rangeData;
-            const { startRow, startColumn, endRow, endColumn } = rangeData;
+        return selectionDataList.map((selectionData: ISelectionWithStyle) => {
+            const range = selectionData.range;
+            const { startRow, startColumn, endRow, endColumn } = range;
             return {
                 startRow,
                 startColumn,
@@ -117,18 +115,18 @@ export class SelectionManagerService implements IDisposable {
         });
     }
 
-    getFirst(): Readonly<Nullable<ISelectionRangeWithStyle>> {
+    getFirst(): Readonly<Nullable<ISelectionWithStyle>> {
         return this._getFirstByParam(this._currentSelection);
     }
 
-    getLast(): Readonly<Nullable<ISelectionRangeWithStyle & { cellRange: ISelectionCell }>> {
-        // The last selection position must have a cellRange.
+    getLast(): Readonly<Nullable<ISelectionWithStyle & { primary: ISelectionCell }>> {
+        // The last selection position must have a primary.
         return this._getLastByParam(this._currentSelection) as Readonly<
-            Nullable<ISelectionRangeWithStyle & { cellRange: ISelectionCell }>
+            Nullable<ISelectionWithStyle & { primary: ISelectionCell }>
         >;
     }
 
-    add(selectionDatas: ISelectionRangeWithStyle[]) {
+    add(selectionDatas: ISelectionWithStyle[]) {
         if (this._currentSelection == null) {
             return;
         }
@@ -138,7 +136,7 @@ export class SelectionManagerService implements IDisposable {
         });
     }
 
-    replace(selectionDatas: ISelectionRangeWithStyle[]) {
+    replace(selectionDatas: ISelectionWithStyle[]) {
         if (this._currentSelection == null) {
             return;
         }
@@ -149,7 +147,7 @@ export class SelectionManagerService implements IDisposable {
         this.refresh(this._currentSelection);
     }
 
-    replaceWithNoRefresh(selectionDatas: ISelectionRangeWithStyle[]) {
+    replaceWithNoRefresh(selectionDatas: ISelectionWithStyle[]) {
         if (this._currentSelection == null) {
             return;
         }
@@ -204,11 +202,7 @@ export class SelectionManagerService implements IDisposable {
         };
     }
 
-    transformCellDataToSelectionData(
-        row: number,
-        column: number,
-        mergeData: ISelectionRange[]
-    ): Nullable<ISelectionRangeWithStyle> {
+    transformCellDataToSelectionData(row: number, column: number, mergeData: IRange[]): Nullable<ISelectionWithStyle> {
         const newCellRange = mergeCellHandler(row, column, mergeData);
 
         const newSelectionData = makeCellRangeToRangeData(newCellRange);
@@ -218,8 +212,8 @@ export class SelectionManagerService implements IDisposable {
         }
 
         return {
-            rangeData: newSelectionData,
-            cellRange: newCellRange,
+            range: newSelectionData,
+            primary: newCellRange,
             style: NORMAL_SELECTION_PLUGIN_STYLE,
         };
     }
@@ -236,17 +230,13 @@ export class SelectionManagerService implements IDisposable {
         this._selectionInfo$.next(this._getSelectionDatas(param));
     }
 
-    private _getFirstByParam(
-        param: Nullable<ISelectionManagerSearchParam>
-    ): Readonly<Nullable<ISelectionRangeWithStyle>> {
+    private _getFirstByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionWithStyle>> {
         const selectionData = this._getSelectionDatas(param);
 
         return selectionData?.[0];
     }
 
-    private _getLastByParam(
-        param: Nullable<ISelectionManagerSearchParam>
-    ): Readonly<Nullable<ISelectionRangeWithStyle>> {
+    private _getLastByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionWithStyle>> {
         const selectionData = this._getSelectionDatas(param);
 
         return selectionData?.[selectionData.length - 1];

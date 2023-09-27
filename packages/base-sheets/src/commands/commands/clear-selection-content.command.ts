@@ -4,7 +4,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
-    ISelectionRange,
+    IRange,
     IUndoRedoService,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
@@ -40,7 +40,7 @@ export const ClearSelectionContentCommand: ICommand = {
         }
 
         const clearMutationParams: ISetRangeValuesMutationParams = {
-            rangeData: selections,
+            range: selections,
             worksheetId,
             workbookId,
             cellValue: generateNullCellValue(selections),
@@ -71,10 +71,10 @@ export const ClearSelectionContentCommand: ICommand = {
     },
 };
 
-// Generate cellValue from rangeData and set v/m to null
-function generateNullCellValue(rangeData: ISelectionRange[]): ObjectMatrixPrimitiveType<ICellData> {
+// Generate cellValue from range and set v/m to null
+function generateNullCellValue(range: IRange[]): ObjectMatrixPrimitiveType<ICellData> {
     const cellValue = new ObjectMatrix<ICellData>();
-    rangeData.forEach((range: ISelectionRange) => {
+    range.forEach((range: IRange) => {
         const { startRow, startColumn, endRow, endColumn } = range;
         for (let i = startRow; i <= endRow; i++) {
             for (let j = startColumn; j <= endColumn; j++) {

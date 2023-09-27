@@ -617,7 +617,7 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookConfig = {
             name: 'namedRange',
             range: {
                 sheetId: 'sheet-0001',
-                rangeData: {
+                range: {
                     startRow: 0,
                     startColumn: 0,
                     endRow: 1,

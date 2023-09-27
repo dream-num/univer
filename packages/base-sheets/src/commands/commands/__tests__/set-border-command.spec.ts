@@ -4,8 +4,8 @@ import {
     IBorderData,
     ICommandService,
     ICurrentUniverService,
-    ISelectionRange,
-    SELECTION_TYPE,
+    IRange,
+    RANGE_TYPE,
     Univer,
 } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
@@ -63,19 +63,13 @@ describe('Test style commands', () => {
                 });
                 selectionManager.add([
                     {
-                        rangeData: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5 },
-                        cellRange: null,
-                        selectionType: SELECTION_TYPE.NORMAL,
+                        range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
                         style: null,
                     },
                 ]);
 
-                function getBorder({
-                    startRow,
-                    endRow,
-                    startColumn,
-                    endColumn,
-                }: ISelectionRange): IBorderData | undefined {
+                function getBorder({ startRow, endRow, startColumn, endColumn }: IRange): IBorderData | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
                         ?.getWorkBook()

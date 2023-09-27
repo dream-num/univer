@@ -1,4 +1,4 @@
-import { ISelectionRange, referenceToGrid } from '@univerjs/core';
+import { IRange, referenceToGrid } from '@univerjs/core';
 
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -9,13 +9,13 @@ export class ColumnReferenceObject extends BaseReferenceObject {
         super(token);
         const grid = referenceToGrid(token);
         this.setForcedSheetName(grid.sheetName);
-        const rangeData: ISelectionRange = {
-            startColumn: grid.rangeData.startColumn,
+        const range: IRange = {
+            startColumn: grid.range.startColumn,
             startRow: -1,
             endColumn: -1,
             endRow: -1,
         };
-        this.setRangeData(rangeData);
+        this.setRangeData(range);
     }
 
     override isColumn() {

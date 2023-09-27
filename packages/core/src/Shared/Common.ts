@@ -7,15 +7,15 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../Types/Enum';
-import { ISelectionRange } from '../Types/Interfaces';
+import { IRange } from '../Types/Interfaces';
 import { ICellData } from '../Types/Interfaces/ICellData';
 import { IDocumentData } from '../Types/Interfaces/IDocumentData';
-import { ISelectionCell, ISelectionCellWithCoord, ISelectionRangeWithCoord } from '../Types/Interfaces/ISelectionData';
+import { IRangeWithCoord, ISelectionCell, ISelectionCellWithCoord } from '../Types/Interfaces/ISelectionData';
 import { IColorStyle, IStyleData } from '../Types/Interfaces/IStyleData';
 import { Tools } from './Tools';
 import { Nullable } from './Types';
 
-export function makeCellToSelection(cellInfo: Nullable<ISelectionCellWithCoord>): Nullable<ISelectionRangeWithCoord> {
+export function makeCellToSelection(cellInfo: Nullable<ISelectionCellWithCoord>): Nullable<IRangeWithCoord> {
     if (!cellInfo) {
         return;
     }
@@ -69,7 +69,7 @@ export function makeCellToSelection(cellInfo: Nullable<ISelectionCellWithCoord>)
     };
 }
 
-export function makeCellRangeToRangeData(cellInfo: Nullable<ISelectionCell>): Nullable<ISelectionRange> {
+export function makeCellRangeToRangeData(cellInfo: Nullable<ISelectionCell>): Nullable<IRange> {
     if (!cellInfo) {
         return;
     }

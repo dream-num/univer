@@ -1,6 +1,6 @@
 // This file provide operations to change selection of sheets.
 
-import { ISelectionRangeWithStyle } from '@univerjs/base-render';
+import { ISelectionWithStyle } from '@univerjs/base-render';
 import { CommandType, IOperation } from '@univerjs/core';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
@@ -9,7 +9,7 @@ export interface ISetSelectionsOperationParams {
     unitId: string;
     sheetId: string;
     pluginName: string;
-    selections: ISelectionRangeWithStyle[];
+    selections: ISelectionWithStyle[];
 }
 
 export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> = {

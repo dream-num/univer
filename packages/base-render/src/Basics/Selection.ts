@@ -47,11 +47,11 @@ export interface ISelectionStyle {
     columnHeaderStrokeWidth?: number;
 }
 
-export interface ISelectionDataWithStyle extends ISelectionWithCoord {
+export interface ISelectionWithCoordAndStyle extends ISelectionWithCoord {
     style: Nullable<ISelectionStyle>;
 }
 
-export interface ISelectionRangeWithStyle extends ISelection {
+export interface ISelectionWithStyle extends ISelection {
     style: Nullable<ISelectionStyle>;
 }
 
@@ -81,23 +81,25 @@ export const NORMAL_SELECTION_PLUGIN_STYLE: ISelectionStyle = {
     columnHeaderStrokeWidth: 1,
 };
 
-export function convertSelectionDataToRange(selectionDataWithStyle: ISelectionDataWithStyle): ISelectionRangeWithStyle {
-    const { selection, cellInfo, style, selectionType } = selectionDataWithStyle;
-    const result: ISelectionRangeWithStyle = {
-        rangeData: {
-            startRow: selection.startRow,
-            startColumn: selection.startColumn,
-            endRow: selection.endRow,
-            endColumn: selection.endColumn,
+export function convertSelectionDataToRange(
+    selectionWithCoordAndStyle: ISelectionWithCoordAndStyle
+): ISelectionWithStyle {
+    const { rangeWithCoord, primaryWithCoord, style } = selectionWithCoordAndStyle;
+    const result: ISelectionWithStyle = {
+        range: {
+            startRow: rangeWithCoord.startRow,
+            startColumn: rangeWithCoord.startColumn,
+            endRow: rangeWithCoord.endRow,
+            endColumn: rangeWithCoord.endColumn,
+            rangeType: rangeWithCoord.rangeType,
         },
-        cellRange: null,
+        primary: null,
         style,
-        selectionType,
     };
-    if (cellInfo != null) {
-        const { row, column, isMerged, isMergedMainCell } = cellInfo;
-        const { startRow, startColumn, endRow, endColumn } = cellInfo.mergeInfo;
-        result.cellRange = {
+    if (primaryWithCoord != null) {
+        const { row, column, isMerged, isMergedMainCell } = primaryWithCoord;
+        const { startRow, startColumn, endRow, endColumn } = primaryWithCoord.mergeInfo;
+        result.primary = {
             row,
             column,
             isMerged,

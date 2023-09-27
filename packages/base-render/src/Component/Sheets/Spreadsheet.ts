@@ -1,7 +1,7 @@
 import {
     CellValueType,
     HorizontalAlign,
-    ISelectionRange,
+    IRange,
     Nullable,
     ObjectMatrix,
     sortRules,
@@ -494,7 +494,7 @@ export class Spreadsheet extends SheetComponent {
 
     // eslint-disable-next-line max-lines-per-function
     private _calculateOverflow() {
-        const overflowCache = new ObjectMatrix<ISelectionRange>();
+        const overflowCache = new ObjectMatrix<IRange>();
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;

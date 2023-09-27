@@ -9,7 +9,7 @@ import {
     DisposableCollection,
     ICommandService,
     IPermissionService,
-    SELECTION_TYPE,
+    RANGE_TYPE,
     toDisposable,
     Univer,
 } from '@univerjs/core';
@@ -63,8 +63,8 @@ describe('Test menu items', () => {
         });
         selectionManager.add([
             {
-                rangeData: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
-                cellRange: {
+                range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                primary: {
                     startRow: 0,
                     startColumn: 0,
                     endColumn: 0,
@@ -74,7 +74,6 @@ describe('Test menu items', () => {
                     isMerged: false,
                     isMergedMainCell: false,
                 },
-                selectionType: SELECTION_TYPE.NORMAL,
                 style: null,
             },
         ]);

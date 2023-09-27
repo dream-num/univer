@@ -11,7 +11,7 @@ import {
     ICommandService,
     ICurrentUniverService,
     ILogService,
-    ISelectionRange,
+    IRange,
     IUndoRedoService,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
@@ -45,7 +45,7 @@ export interface ISheetClipboardHook {
      * The callback would be called after the clipboard service has decided what region need to be copied.
      * Features could use this hook to build copying cache or any other pre-copy jobs.
      */
-    onBeforeCopy?(workbookId: string, worksheetId: string, range: ISelectionRange): void;
+    onBeforeCopy?(workbookId: string, worksheetId: string, range: IRange): void;
     /**
      *
      * @param row
@@ -86,28 +86,28 @@ export interface ISheetClipboardHook {
      *
      * @returns if it block copying it should return false
      */
-    onBeforePaste?(workbookId: string, worksheetId: string, range: ISelectionRange): boolean;
+    onBeforePaste?(workbookId: string, worksheetId: string, range: IRange): boolean;
     /**
      *
      * @param row
      * @param col
      */
     onPasteCells?(
-        range: ISelectionRange,
+        range: IRange,
         matrix: ObjectMatrix<IParsedCellValue>
     ): {
         undos: ICommandInfo[];
         redos: ICommandInfo[];
     };
     onPasteRows?(
-        range: ISelectionRange,
+        range: IRange,
         rowProperties: IClipboardPropertyItem[]
     ): {
         undos: ICommandInfo[];
         redos: ICommandInfo[];
     };
     onPasteColumns?(
-        range: ISelectionRange,
+        range: IRange,
         colProperties: IClipboardPropertyItem[]
     ): {
         undos: ICommandInfo[];
@@ -165,7 +165,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }, new Set<number>());
 
         // 3. calculate selection matrix, span cells would only - maybe warn uses that cells are too may in the future
-        const { startColumn, startRow, endColumn, endRow } = selection.rangeData;
+        const { startColumn, startRow, endColumn, endRow } = selection.range;
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
         const worksheet = workbook.getActiveSheet();
         const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
@@ -174,7 +174,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // TODO: filtering
 
         // tell hooks to get ready for copying
-        hooks.forEach((h) => h.onBeforeCopy?.(workbook.getUnitId(), worksheet.getSheetId(), selection.rangeData));
+        hooks.forEach((h) => h.onBeforeCopy?.(workbook.getUnitId(), worksheet.getSheetId(), selection.range));
 
         // 5. generate html and pure text contents by calling all clipboard hooks
         // col styles
@@ -248,10 +248,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
-        const rangeData = target.selection.rangeData;
+        const range = target.selection.range;
         const cellValue: ObjectMatrixPrimitiveType<ICellData> = {
-            [rangeData.startRow]: {
-                [rangeData.endColumn]: {
+            [range.startRow]: {
+                [range.endColumn]: {
                     v: text,
                 },
             },
@@ -260,7 +260,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const setRangeValuesParams: ISetRangeValuesMutationParams = {
             workbookId: target.workbookId,
             worksheetId: target.worksheetId,
-            rangeData: [target.selection.rangeData],
+            range: [target.selection.range],
             cellValue,
         };
 
@@ -305,7 +305,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // 3. call hooks with cell position and properties and get mutations (both do mutations and undo mutations)
         // we also handle 'copy value only' or 'copy style only' as this step
-        const pastedRange = { ...selection.rangeData };
+        const pastedRange = { ...selection.range };
         pastedRange.endColumn = pastedRange.startColumn + colCount;
         pastedRange.endRow = pastedRange.startRow + rowCount;
         const hooks = this._clipboardHooks;

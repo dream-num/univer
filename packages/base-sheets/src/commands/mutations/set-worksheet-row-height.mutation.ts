@@ -1,10 +1,10 @@
-import { CommandType, ICurrentUniverService, IMutation, ISelectionRange, ObjectArray } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, IRange, ObjectArray } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetRowHeightMutationParams {
     workbookId: string;
     worksheetId: string;
-    ranges: ISelectionRange[];
+    ranges: IRange[];
     rowHeight: number | ObjectArray<number>;
 }
 

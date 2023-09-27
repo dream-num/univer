@@ -12,6 +12,6 @@ export const DEFAULT_NAMED_RANGE: INamedRange = {
     name: 'namedRange01',
     range: {
         sheetId: 'sheet-01',
-        rangeData: DEFAULT_SELECTION,
+        range: DEFAULT_SELECTION,
     },
 };

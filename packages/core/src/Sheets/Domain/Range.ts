@@ -15,8 +15,8 @@ import {
     IBorderData,
     ICellData,
     IDocumentData,
+    IRange,
     IRangeType,
-    ISelectionRange,
     IStyleData,
     ITextDecoration,
     ITextRotation,
@@ -44,7 +44,7 @@ type IValueOptionsType = {
  * @beta
  */
 export class Range {
-    private _rangeData: ISelectionRange;
+    private _rangeData: IRange;
 
     private _worksheet: Worksheet;
 
@@ -57,7 +57,7 @@ export class Range {
         this._rangeData = this._currentUniverService
             .getCurrentUniverSheetInstance()
             .getWorkBook()
-            .transformRangeType(range).rangeData;
+            .transformRangeType(range).range;
         this._worksheet = workSheet;
 
         // The user entered an invalid range
@@ -66,8 +66,8 @@ export class Range {
         }
     }
 
-    static foreach(rangeData: ISelectionRange, action: (row: number, column: number) => void): void {
-        const { startRow, startColumn, endRow, endColumn } = rangeData;
+    static foreach(range: IRange, action: (row: number, column: number) => void): void {
+        const { startRow, startColumn, endRow, endColumn } = range;
         for (let i = startRow; i <= endRow; i++) {
             for (let j = startColumn; j <= endColumn; j++) {
                 action(i, j);
@@ -80,7 +80,7 @@ export class Range {
      *
      * @returns current range
      */
-    getRangeData(): ISelectionRange {
+    getRangeData(): IRange {
         return this._rangeData;
     }
 

@@ -8,11 +8,11 @@ import { BooleanNumber } from '../../Types/Enum';
 import {
     IColumnStartEndData,
     IGridRange,
+    IRange,
     IRangeArrayData,
     IRangeStringData,
     IRangeType,
     IRowStartEndData,
-    ISelectionRange,
     IWorkbookConfig,
 } from '../../Types/Interfaces';
 import { Styles } from './Styles';
@@ -67,11 +67,11 @@ export class Workbook {
 
     /**
      *
-     * @param rangeData
+     * @param range
      * @returns
      */
-    static rangeDataToRangeStringData(rangeData: ISelectionRange) {
-        const { startRow, endRow, startColumn, endColumn } = rangeData;
+    static rangeDataToRangeStringData(range: IRange) {
+        const { startRow, endRow, startColumn, endColumn } = range;
 
         return `${Tools.chatAtABC(startColumn) + (startRow + 1)}:${Tools.chatAtABC(endColumn)}${endRow + 1}`;
     }
@@ -156,7 +156,7 @@ export class Workbook {
     //     return null;
     // }
 
-    setActiveRangeList(rangeList: IRangeType[]): Nullable<ISelectionRange[]> {
+    setActiveRangeList(rangeList: IRangeType[]): Nullable<IRange[]> {
         const workSheet = this.getActiveSheet();
         if (workSheet) {
             const activeRangeList = workSheet.getRangeList(rangeList);
@@ -299,7 +299,7 @@ export class Workbook {
             const rangeArrayData = range as IRangeArrayData;
             return {
                 sheetId: '',
-                rangeData: {
+                range: {
                     startRow: rangeArrayData.row[0],
                     startColumn: rangeArrayData.column[0],
                     endRow: rangeArrayData.row[1],
@@ -309,7 +309,7 @@ export class Workbook {
             // ref : https://www.typescriptlang.org/docs/handbook/advanced-types.html#using-the-in-operator
         }
         if (typeof range !== 'string' && 'startRow' in range) {
-            return { sheetId: '', rangeData: range };
+            return { sheetId: '', range };
         }
         return DEFAULT_RANGE_ARRAY;
     }
@@ -356,7 +356,7 @@ export class Workbook {
             if (!Number.isNaN(row) && !Number.isNaN(col)) {
                 const item = {
                     sheetId: sheetTxt,
-                    rangeData: {
+                    range: {
                         startRow: row,
                         endRow: row,
                         startColumn: col,
@@ -401,7 +401,7 @@ export class Workbook {
 
         const item = {
             sheetId: this.getSheetBySheetName(sheetTxt)?.getSheetId() || '',
-            rangeData: {
+            range: {
                 startRow: row[0],
                 endRow: row[1],
                 startColumn: col[0],

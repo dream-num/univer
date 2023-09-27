@@ -1,12 +1,13 @@
 import {
+    IRangeWithCoord,
     ISelectionCellWithCoord,
-    ISelectionRangeWithCoord,
+    ISelectionWithCoord,
     makeCellToSelection,
     Nullable,
-    SELECTION_TYPE,
+    RANGE_TYPE,
 } from '@univerjs/core';
 
-export class SelectionTransformerModel implements ISelectionRangeWithCoord {
+export class SelectionTransformerModel implements IRangeWithCoord {
     private _startColumn: number = -1;
 
     private _startRow: number = -1;
@@ -25,7 +26,7 @@ export class SelectionTransformerModel implements ISelectionRangeWithCoord {
 
     private _currentCell: Nullable<ISelectionCellWithCoord>;
 
-    private _selectionType: SELECTION_TYPE = SELECTION_TYPE.NORMAL;
+    private _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL;
 
     get startColumn() {
         return this._startColumn;
@@ -63,18 +64,18 @@ export class SelectionTransformerModel implements ISelectionRangeWithCoord {
         return this._currentCell;
     }
 
-    get selectionType() {
-        return this._selectionType;
+    get rangeType() {
+        return this._rangeType;
     }
 
-    isEqual(selectionRange: ISelectionRangeWithCoord) {
+    isEqual(rangeWithCoord: IRangeWithCoord) {
         const { startColumn, startRow, endColumn, endRow } = this;
         const {
             startColumn: newStartColumn,
             startRow: newStartRow,
             endColumn: newEndColumn,
             endRow: newEndRow,
-        } = selectionRange;
+        } = rangeWithCoord;
         // if (type !== newType) {
         //     return false;
         // }
@@ -89,14 +90,14 @@ export class SelectionTransformerModel implements ISelectionRangeWithCoord {
         return false;
     }
 
-    isInclude(selectionRange: ISelectionRangeWithCoord) {
+    isInclude(rangeWithCoord: IRangeWithCoord) {
         const { startColumn, startRow, endColumn, endRow } = this;
         const {
             startColumn: newStartColumn,
             startRow: newStartRow,
             endColumn: newEndColumn,
             endRow: newEndRow,
-        } = selectionRange;
+        } = rangeWithCoord;
 
         // if (type !== newType) {
         //     return false;
@@ -114,7 +115,7 @@ export class SelectionTransformerModel implements ISelectionRangeWithCoord {
         return makeCellToSelection(this._currentCell);
     }
 
-    getSelection() {
+    getRange() {
         return {
             startColumn: this._startColumn,
             startRow: this._startRow,
@@ -125,6 +126,8 @@ export class SelectionTransformerModel implements ISelectionRangeWithCoord {
             startY: this._startY,
             endX: this._endX,
             endY: this._endY,
+
+            rangeType: this.rangeType,
         };
     }
 
@@ -132,13 +135,13 @@ export class SelectionTransformerModel implements ISelectionRangeWithCoord {
         return this._currentCell;
     }
 
-    getSelectionType() {
-        return this._selectionType;
+    getRangeType() {
+        return this._rangeType;
     }
 
-    getValue() {
+    getValue(): ISelectionWithCoord {
         return {
-            selection: {
+            rangeWithCoord: {
                 startColumn: this._startColumn,
                 startRow: this._startRow,
                 endColumn: this._endColumn,
@@ -148,17 +151,14 @@ export class SelectionTransformerModel implements ISelectionRangeWithCoord {
                 startY: this._startY,
                 endX: this._endX,
                 endY: this._endY,
+
+                rangeType: this._rangeType,
             },
-            cellInfo: this._currentCell,
-            selectionType: this._selectionType,
+            primaryWithCoord: this._currentCell,
         };
     }
 
-    setValue(
-        newSelectionRange: ISelectionRangeWithCoord,
-        currentCell: Nullable<ISelectionCellWithCoord>,
-        selectionType: Nullable<SELECTION_TYPE>
-    ) {
+    setValue(newSelectionRange: IRangeWithCoord, currentCell: Nullable<ISelectionCellWithCoord>) {
         const {
             startColumn,
             startRow,
@@ -169,6 +169,8 @@ export class SelectionTransformerModel implements ISelectionRangeWithCoord {
             startY,
             endX,
             endY,
+
+            rangeType,
         } = newSelectionRange;
 
         this._startColumn = startColumn;
@@ -187,8 +189,8 @@ export class SelectionTransformerModel implements ISelectionRangeWithCoord {
 
         this._endY = endY;
 
-        if (selectionType != null) {
-            this._selectionType = selectionType;
+        if (rangeType != null) {
+            this._rangeType = rangeType;
         }
 
         this.setCurrentCell(currentCell);

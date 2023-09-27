@@ -1,4 +1,4 @@
-import { BorderStyleTypes, IScale, ISelectionRange, ObjectMatrix } from '@univerjs/core';
+import { BorderStyleTypes, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../../Basics/Const';
 import { drawLineByBorderType, getLineWidth, setLineType } from '../../../Basics/Draw';
@@ -103,7 +103,7 @@ export class Border extends SheetExtension {
     }
 
     private _getOverflowExclusion(
-        overflowCache: ObjectMatrix<ISelectionRange>,
+        overflowCache: ObjectMatrix<IRange>,
         type: BORDER_TYPE,
         borderRow: number,
         borderColumn: number

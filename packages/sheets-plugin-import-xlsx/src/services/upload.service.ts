@@ -1,7 +1,8 @@
 import { BasicWorkbookController } from '@univerjs/base-sheets';
 import { ICurrentUniverService, IKeyValue, migrate, Tools } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import * as LuckyExcel from 'luckyexcel';
+// @ts-ignore
+import * as LuckyExcel from 'luckyexcel'; // no type definition for package luckyexcel
 
 export class UploadService {
     constructor(

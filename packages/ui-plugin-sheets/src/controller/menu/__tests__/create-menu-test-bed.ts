@@ -40,6 +40,8 @@ export function createMenuTestBed() {
      * This plugin hooks into Sheet's DI system to expose API to test scripts
      */
     class TestPlugin extends Plugin {
+        protected override _injector: Injector;
+
         static override type = PluginType.Sheet;
 
         constructor(@Inject(Injector) _injector: Injector) {

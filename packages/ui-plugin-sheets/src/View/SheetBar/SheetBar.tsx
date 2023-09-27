@@ -74,9 +74,9 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
     cloneTarget: any = null;
 
-    startLeft: number;
+    startLeft: number = 0;
 
-    startClientX: number;
+    startClientX: number = 0;
 
     private _renderKey: number = 1;
 

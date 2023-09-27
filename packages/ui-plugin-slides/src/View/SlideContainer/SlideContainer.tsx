@@ -17,13 +17,13 @@ export interface BaseSlideContainerProps extends BaseComponentProps {
  * One universlide instance DOM container
  */
 export class SlideContainer extends Component<BaseSlideContainerProps> {
-    leftContentLeft: number;
+    leftContentLeft: number = 0;
 
-    leftContentTop: number;
+    leftContentTop: number = 0;
 
-    rightBorderX: number;
+    rightBorderX: number = 0;
 
-    rightBorderY: number;
+    rightBorderY: number = 0;
 
     splitLeftRef = createRef<HTMLDivElement>();
 

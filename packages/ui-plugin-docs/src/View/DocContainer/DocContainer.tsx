@@ -14,13 +14,13 @@ export interface BaseDocContainerProps extends BaseComponentProps {
  * One univerdoc instance DOM container
  */
 export class DocContainer extends Component<BaseDocContainerProps> {
-    leftContentLeft: number;
+    leftContentLeft: number = 0;
 
-    leftContentTop: number;
+    leftContentTop: number = 0;
 
-    rightBorderX: number;
+    rightBorderX: number = 0;
 
-    rightBorderY: number;
+    rightBorderY: number = 0;
 
     splitLeftRef = createRef<HTMLDivElement>();
 

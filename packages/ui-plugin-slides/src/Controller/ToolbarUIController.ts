@@ -38,7 +38,7 @@ export interface IToolbarItemProps extends BaseToolbarSelectProps {
 }
 
 export class ToolbarUIController {
-    private _toolbar: Toolbar;
+    private _toolbar?: Toolbar;
 
     private _toolList: IToolbarItemProps[];
 

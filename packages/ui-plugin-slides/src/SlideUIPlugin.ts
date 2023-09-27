@@ -13,13 +13,13 @@ import { en } from './Locale';
 export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
     static override type = PluginType.Slide;
 
-    private _appUIController: AppUIController;
+    private _appUIController?: AppUIController;
 
     private _config: ISlideUIPluginConfig;
 
-    private _dragManager: DragManager;
+    private _dragManager?: DragManager;
 
-    private _componentManager: ComponentManager;
+    private _componentManager?: ComponentManager;
 
     constructor(
         config: Partial<ISlideUIPluginConfig> = {},
@@ -54,7 +54,7 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
 
     initRender() {
         const engine = this._injector.get(IRenderingEngine);
-        const container = this._appUIController.getSlideContainerController().getContentRef().current;
+        const container = this._appUIController!.getSlideContainerController().getContentRef().current;
         if (!container) {
             throw new Error('container is not ready');
         }
@@ -95,15 +95,15 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
      * @returns
      */
     UIDidMount(cb: Function) {
-        this._appUIController.getSlideContainerController().UIDidMount(cb);
+        this._appUIController!.getSlideContainerController().UIDidMount(cb);
     }
 
     addToolButton(config: IToolbarItemProps) {
-        this._appUIController.getSlideContainerController().getToolbarController().addToolbarConfig(config);
+        this._appUIController!.getSlideContainerController().getToolbarController().addToolbarConfig(config);
     }
 
     deleteToolButton(name: string) {
-        this._appUIController.getSlideContainerController().getToolbarController().deleteToolbarConfig(name);
+        this._appUIController!.getSlideContainerController().getToolbarController().deleteToolbarConfig(name);
     }
 
     private initializeDependencies(): void {

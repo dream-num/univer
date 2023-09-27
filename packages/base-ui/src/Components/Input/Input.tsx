@@ -7,6 +7,14 @@ import styles from './Style/index.module.less';
 // Component Interface
 export interface BaseInputProps extends BaseComponentProps {
     /**
+     * Input's class name
+     */
+    className?: string;
+
+    /** Semantic DOM style */
+    style?: React.CSSProperties;
+
+    /**
      * The type of input
      * @default 'text'
      */
@@ -79,11 +87,6 @@ export interface BaseInputProps extends BaseComponentProps {
     onValueChange?: (value: string) => void;
 
     /**
-     * Input's class name
-     */
-    className?: string;
-
-    /**
      * Whether the input is read only
      * @default false
      */
@@ -127,7 +130,7 @@ export function Input(props: BaseInputProps) {
         if (e.key === 'Enter') {
             onPressEnter?.(e);
             ref.current?.blur();
-            v && onValueChange?.(v);
+            // v && onValueChange?.(v);
         }
     };
 
@@ -147,13 +150,24 @@ export function Input(props: BaseInputProps) {
         const { onBlur, onValueChange } = props;
         onBlur?.(e);
         const v = getValue();
+        setValue(v);
         v && onValueChange?.(v);
         setFocused(false);
     };
 
     const getValue = () => ref.current?.value;
 
-    const { id, disabled, type = 'text', placeholder, bordered = true, className = '', readonly, maxLength } = props;
+    const {
+        id,
+        disabled,
+        type = 'text',
+        placeholder,
+        bordered = true,
+        className = '',
+        style = {},
+        readonly,
+        maxLength,
+    } = props;
 
     const classes = joinClassNames(
         styles.input,
@@ -167,6 +181,7 @@ export function Input(props: BaseInputProps) {
     return (
         <input
             type={type}
+            style={style}
             onBlur={onBlur}
             onFocus={onFocus}
             className={classes}

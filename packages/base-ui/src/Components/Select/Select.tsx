@@ -707,6 +707,11 @@ export function Select(props: BaseSelectProps) {
                             title={title!}
                             value={value}
                             onChange={(v) => onClick?.(v)}
+                            onFocus={() => {
+                                console.info(
+                                    'TODO: 需要待Dropdown与Menu分离之后，直接控制Dropdown展示文字大小下拉选项'
+                                );
+                            }}
                         />
                     </div>
                 </Dropdown>

@@ -50,7 +50,6 @@
   background: var(--bg-hover);
 }
 .select-component .select-double .dropdown {
-  height: 24px;
   padding-right: 0;
 }
 .select-component .select-double .drop-content {

@@ -1,14 +1,14 @@
 @import '../../../Basics/CSS/Skin/default.module.less';
 
 .active() {
-    border-right-width: @border-width-base !important;
+    // border-right-width: @border-width-base !important;
     outline: 0;
     box-shadow: @box-shadow-base;
 }
 
 .hover(@color: var(--primary-color-hover)) {
     border-color: @color;
-    border-right-width: @border-width-base !important;
+    // border-right-width: @border-width-base !important;
 }
 
 .disabled() {
@@ -58,12 +58,11 @@
     }
 
     &-borderless {
-        border: none;
+        border: @border-width-base @border-style-base transparent;
         box-shadow: none;
 
         &:hover {
-            border: @border-width-base @border-style-base var(--border-color-base);
-            .hover();
+            border: @border-width-base @border-style-base transparent;
         }
 
         &:focus,
@@ -71,5 +70,16 @@
             border: @border-width-base @border-style-base var(--primary-color-hover);
             .active();
         }
+    }
+
+    // Remove Arrows/Spinners
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button{
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    &[type=number] {
+        -moz-appearance: textfield;
     }
 }

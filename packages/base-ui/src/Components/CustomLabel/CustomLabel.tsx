@@ -25,6 +25,7 @@ export interface INeoCustomLabelProps {
     value?: string | number | undefined;
     selected?: boolean;
     onChange?(v: string | number): void;
+    onFocus?: (e: React.FocusEvent<HTMLInputElement, Element>) => void;
 }
 
 /**
@@ -36,7 +37,7 @@ export function NeoCustomLabel(
     props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title'> & INeoCustomLabelProps
 ): JSX.Element | null {
     const context = useContext(AppContext);
-    const { display, value, title, icon, label, onChange, selected } = props;
+    const { display, value, title, icon, label, onChange, selected, onFocus } = props;
 
     if (display === DisplayTypes.COLOR) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,7 +53,22 @@ export function NeoCustomLabel(
     }
 
     if (display === DisplayTypes.INPUT) {
-        return <Input onValueChange={(v) => onChange?.(v as unknown as string)} type="number" value={`${value}`} />;
+        return (
+            <Input
+                onValueChange={(v) => onChange?.(v as unknown as string)}
+                onFocus={onFocus}
+                type="number"
+                value={`${value}`}
+                bordered={false}
+                style={{
+                    width: '32px',
+                    height: '24px',
+                    padding: '2px',
+                    textAlign: 'center',
+                    background: 'transparent',
+                }}
+            />
+        );
     }
 
     if (display === DisplayTypes.ICON && icon) {

@@ -108,12 +108,9 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                         if (value instanceof Object && value.id) {
                             commandId = value.id;
                         }
-                        commandService.executeCommand(commandId, value);
-                    }} // TODO@wzhudev: should be merged to a single API on value change
-                    onPressEnter={(value) => {
-                        let commandId = id;
-                        if (value instanceof Object && value.id) {
-                            commandId = value.id;
+
+                        if (typeof value === 'string') {
+                            value = { value };
                         }
                         commandService.executeCommand(commandId, value);
                     }}

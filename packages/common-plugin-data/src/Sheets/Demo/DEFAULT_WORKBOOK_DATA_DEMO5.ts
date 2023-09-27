@@ -1,17 +1,12 @@
-import { BooleanNumber, BorderStyleTypes, IWorkbookConfig, LocaleType } from '@univerjs/core';
+import { BorderStyleTypes, IWorkbookConfig, LocaleType } from '@univerjs/core';
 
 export const DEFAULT_WORKBOOK_DATA_DEMO5: IWorkbookConfig = {
     id: 'workbook-01',
-    theme: 'default',
     locale: LocaleType.EN,
     creator: 'univer',
     name: 'universheet',
-    skin: 'default',
-    socketUrl: '',
-    socketEnable: BooleanNumber.FALSE,
     extensions: [],
     sheetOrder: ['sheet-0005'],
-    pluginMeta: {},
     styles: {
         idtqdi: {
             ht: 2,

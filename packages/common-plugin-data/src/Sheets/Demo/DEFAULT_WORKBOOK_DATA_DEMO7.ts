@@ -1,17 +1,12 @@
-import { BooleanNumber, IWorkbookConfig, LocaleType } from '@univerjs/core';
+import { IWorkbookConfig, LocaleType } from '@univerjs/core';
 
 export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookConfig = {
     id: 'workbook-01',
-    theme: 'default',
     locale: LocaleType.EN,
     creator: 'univer',
     name: 'universheet',
-    skin: 'default',
-    socketUrl: '',
-    socketEnable: BooleanNumber.FALSE,
     extensions: [],
     sheetOrder: ['sheet-0012'],
-    pluginMeta: {},
     styles: {
         '1': {
             fs: 30,

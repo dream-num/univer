@@ -4,16 +4,11 @@ import { PAGE5_RICHTEXT_1 } from '../Slides/RichText/PAGE5_RICHTEXT_1';
 
 export const SLIDE_WORKBOOK_DATA: IWorkbookConfig = {
     id: 'workbook-01',
-    theme: 'default',
     locale: LocaleType.EN,
     creator: 'univer',
     name: 'universheet',
-    skin: 'default',
-    socketUrl: '',
-    socketEnable: BooleanNumber.FALSE,
     extensions: [],
     sheetOrder: ['sheet-0001'],
-    pluginMeta: {},
     styles: {
         '1': {
             vt: 2,

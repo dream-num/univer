@@ -164,6 +164,7 @@ describe('Test commands used for change selections', () => {
                 startColumn: 0,
                 endRow: 1,
                 endColumn: 1,
+                rangeType: RANGE_TYPE.NORMAL,
             });
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
@@ -175,6 +176,7 @@ describe('Test commands used for change selections', () => {
                 startColumn: 0,
                 endRow: 19,
                 endColumn: 19,
+                rangeType: RANGE_TYPE.NORMAL,
             });
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
@@ -186,6 +188,7 @@ describe('Test commands used for change selections', () => {
                 startColumn: 0,
                 endRow: 0,
                 endColumn: 0,
+                rangeType: RANGE_TYPE.NORMAL,
             });
         });
 
@@ -201,6 +204,7 @@ describe('Test commands used for change selections', () => {
                 startColumn: 0,
                 endRow: 19,
                 endColumn: 19,
+                rangeType: RANGE_TYPE.NORMAL,
             });
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
@@ -212,6 +216,7 @@ describe('Test commands used for change selections', () => {
                 startColumn: 0,
                 endRow: 0,
                 endColumn: 0,
+                rangeType: RANGE_TYPE.NORMAL,
             });
         });
 
@@ -227,6 +232,7 @@ describe('Test commands used for change selections', () => {
                 startColumn: 0,
                 endRow: 19,
                 endColumn: 19,
+                rangeType: RANGE_TYPE.NORMAL,
             });
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
@@ -238,6 +244,7 @@ describe('Test commands used for change selections', () => {
                 startColumn: 0,
                 endRow: 19,
                 endColumn: 19,
+                rangeType: RANGE_TYPE.NORMAL,
             });
         });
     });

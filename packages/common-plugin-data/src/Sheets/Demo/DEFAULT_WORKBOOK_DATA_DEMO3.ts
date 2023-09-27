@@ -51,7 +51,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookConfig = {
     name: 'universheet',
     extensions: [],
     sheetOrder: ['sheet-0001'],
-    pluginMeta: {},
     styles: {
         '1': {
             fs: 30,

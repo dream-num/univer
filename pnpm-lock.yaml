@@ -692,6 +692,9 @@ importers:
       '@types/node':
         specifier: ^18.14.0
         version: 18.14.0
+      '@types/numeral':
+        specifier: ^2.0.3
+        version: 2.0.3
       '@vitest/coverage-v8':
         specifier: ^0.34.5
         version: 0.34.5(vitest@0.34.5)
@@ -5539,6 +5542,10 @@ packages:
 
   /@types/normalize-package-data@2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
+    dev: true
+
+  /@types/numeral@2.0.3:
+    resolution: {integrity: sha512-37VDYvFbx/I+Ve1kwcDUq5+qvgNl+uy9YUZhBMJ6YWHBtr2+d6CAgdn4R81NqBlZbTpvLxJOTUhwbki7+90+qQ==}
     dev: true
 
   /@types/pretty-hrtime@1.0.1:

@@ -5,6 +5,7 @@ import { DefaultDocUiConfig, IDocUIPluginConfig, installObserver } from './Basic
 import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { AppUIController } from './Controller';
 import { DocClipboardController } from './Controller/clipboard.controller';
+import { en } from './Locale';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 
 export class DocUIPlugin extends Plugin<any> {
@@ -13,9 +14,13 @@ export class DocUIPlugin extends Plugin<any> {
     constructor(
         private readonly _config: IDocUIPluginConfig,
         @Inject(Injector) override _injector: Injector,
-        @Inject(LocaleService) private readonly _localService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super(DOC_UI_PLUGIN_NAME);
+
+        this._localeService.getLocale().load({
+            en,
+        });
 
         this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);
         this._initDependencies(_injector);

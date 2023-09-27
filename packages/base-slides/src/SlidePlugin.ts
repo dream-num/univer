@@ -1,5 +1,5 @@
 import { Engine, IRenderingEngine } from '@univerjs/base-render';
-import { ICurrentUniverService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { ICurrentUniverService, ILanguagePack, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { install, SlidePluginObserve, uninstall } from './Basics/Observer';
@@ -36,7 +36,7 @@ export class SlidePlugin extends Plugin<SlidePluginObserve> {
 
     initialize(): void {
         this._localeService.getLocale().load({
-            en,
+            en: en as unknown as ILanguagePack,
         });
         install(this);
         // this.initConfig();

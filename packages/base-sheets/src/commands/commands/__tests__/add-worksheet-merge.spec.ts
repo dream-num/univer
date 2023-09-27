@@ -2,6 +2,7 @@ import {
     ICommandService,
     ICurrentUniverService,
     ISelectionRange,
+    RedoCommand,
     SELECTION_TYPE,
     UndoCommand,
     Univer,
@@ -77,6 +78,8 @@ describe('Test style commands', () => {
                 expect(getMerge()).toStrictEqual([{ startRow: 0, startColumn: 0, endRow: 5, endColumn: 5 }]);
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getMerge()?.length).toBe(0);
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getMerge()).toStrictEqual([{ startRow: 0, startColumn: 0, endRow: 5, endColumn: 5 }]);
             });
         });
 
@@ -201,6 +204,10 @@ describe('Test style commands', () => {
                 expect(getMerge()?.length).toBe(6);
                 expect(getMerge()?.[0]).toStrictEqual({ startRow: 0, startColumn: 0, endColumn: 5, endRow: 0 });
                 expect(await commandService.executeCommand(RemoveWorksheetMergeCommand.id)).toBeTruthy();
+                expect(getMerge()?.length).toBe(0);
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getMerge()?.length).toBe(6);
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getMerge()?.length).toBe(0);
             });
         });

@@ -1,6 +1,5 @@
 import { uninstall } from '@univerjs/base-sheets';
 import { LocaleService, Plugin, PluginType } from '@univerjs/core';
-import { SheetContainerUIController } from '@univerjs/ui-plugin-sheets';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { install, IOverGridImagePluginConfig, IOverGridImageProperty, OVER_GRID_IMAGE_PLUGIN_NAME } from './Basics';
@@ -38,10 +37,7 @@ export class ImagePlugin extends Plugin {
 
     override onRendered(): void {
         install(this);
-        const sheetContainerUIController = this._injector.get(SheetContainerUIController);
-        sheetContainerUIController.UIDidMount(() => {
-            this._initializeDependencies(this._injector);
-        });
+        this._initializeDependencies(this._injector);
     }
 
     override onDestroy(): void {

@@ -47,7 +47,7 @@ export class SearchContent extends Component<SearchProps, SearchState> {
     //     });
     // }
 
-    render() {
+    override render() {
         // const Tab = this.Render.renderFunction('Tab');
         // const TabPane = this.Render.renderFunction('TabPane');
         // const Button = this.Render.renderFunction('Button');

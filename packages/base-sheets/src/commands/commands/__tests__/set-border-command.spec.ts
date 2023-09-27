@@ -12,7 +12,11 @@ import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
+import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetBorderStylesMutation } from '../../mutations/set-border-styles.mutation';
+import { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand } from '../add-worksheet-merge.command';
+import { RemoveWorksheetMergeCommand } from '../remove-worksheet-merge.command';
 import {
     SetBorderColorCommand,
     SetBorderCommand,
@@ -36,6 +40,11 @@ describe('Test style commands', () => {
         commandService.registerCommand(SetBorderStyleCommand);
         commandService.registerCommand(SetBorderCommand);
         commandService.registerCommand(SetBorderPositionCommand);
+        commandService.registerCommand(AddWorksheetMergeCommand);
+        commandService.registerCommand(AddWorksheetMergeAllCommand);
+        commandService.registerCommand(RemoveWorksheetMergeCommand);
+        commandService.registerCommand(AddWorksheetMergeMutation);
+        commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(SetBorderStylesMutation);
     });
 
@@ -215,6 +224,23 @@ describe('Test style commands', () => {
                 ).toBeTruthy();
                 expect(getBorder({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 })?.b).toBeUndefined();
 
+                expect(
+                    await commandService.executeCommand(SetBorderPositionCommand.id, { value: BorderType.ALL })
+                ).toBeTruthy();
+                expect(
+                    await commandService.executeCommand(SetBorderColorCommand.id, { value: '#aaaaaa' })
+                ).toBeTruthy();
+                expect(
+                    await commandService.executeCommand(SetBorderStyleCommand.id, {
+                        value: BorderStyleTypes.SLANT_DASH_DOT,
+                    })
+                ).toBeTruthy();
+                expect(getBorder({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 0 })?.b).toStrictEqual({
+                    s: BorderStyleTypes.SLANT_DASH_DOT,
+                    cl: { rgb: '#aaaaaa' },
+                });
+
+                expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
                 expect(
                     await commandService.executeCommand(SetBorderPositionCommand.id, { value: BorderType.ALL })
                 ).toBeTruthy();

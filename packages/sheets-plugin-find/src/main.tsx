@@ -1,29 +1,29 @@
-const uiDefaultConfigUp = {
-    container: 'universheet-demo-up',
-};
-const uiDefaultConfigDown = {
-    container: 'universheet-demo-down',
-    layout: {
-        outerLeft: false,
+// const uiDefaultConfigUp = {
+//     container: 'universheet-demo-up',
+// };
+// const uiDefaultConfigDown = {
+//     container: 'universheet-demo-down',
+//     layout: {
+//         outerLeft: false,
 
-        outerRight: true,
+//         outerRight: true,
 
-        innerLeft: false,
+//         innerLeft: false,
 
-        innerRight: false,
+//         innerRight: false,
 
-        toolbar: true,
+//         toolbar: true,
 
-        toolbarConfig: {
-            undoRedo: true,
-            font: true,
-        },
-        contentSplit: true,
-    },
-};
-const uiDefaultConfigLeft = {
-    container: 'universheet-demo-left',
-};
-const uiDefaultConfigRight = {
-    container: 'universheet-demo-right',
-};
+//         toolbarConfig: {
+//             undoRedo: true,
+//             font: true,
+//         },
+//         contentSplit: true,
+//     },
+// };
+// const uiDefaultConfigLeft = {
+//     container: 'universheet-demo-left',
+// };
+// const uiDefaultConfigRight = {
+//     container: 'universheet-demo-right',
+// };

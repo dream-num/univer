@@ -14,7 +14,7 @@ export class ImageUploadButtonUI extends Component<ImageUploadButtonUIProps> {
         this.state = {};
     }
 
-    render() {
+    override render() {
         // const Props: IToolbarItemProps = {
         //     locale: 'ImageUploadButtonUI',
         //     type: 'single',

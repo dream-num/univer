@@ -4,6 +4,7 @@ import { SheetPlugin } from '@univerjs/base-sheets';
 import { greenTheme, UIPlugin } from '@univerjs/base-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { LocaleType, Univer } from '@univerjs/core';
+import { FindPlugin } from '@univerjs/sheets-plugin-find';
 // import { FindPlugin } from '@univerjs/sheets-plugin-find';
 // import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
 // import { ImagePlugin } from '@univerjs/sheets-plugin-image';
@@ -38,7 +39,7 @@ univer.registerPlugin(SheetUIPlugin);
 
 // sheet feature plugins
 // univer.registerPlugin(NumfmtPlugin);
-// univer.registerPlugin(FindPlugin);
+univer.registerPlugin(FindPlugin);
 // univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
 // univer.registerPlugin(ImportXlsxPlugin);
 // univer.registerPlugin(ImagePlugin);

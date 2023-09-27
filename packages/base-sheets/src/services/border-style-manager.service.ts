@@ -6,7 +6,7 @@ export interface IBorderInfo {
     type: BorderType;
     color: string;
     style: BorderStyleTypes;
-    activeBorderType: boolean; // 模仿谷歌，在点击边框类型后，再点击颜色和style能直接生效
+    activeBorderType: boolean; // When you click on the border type, then click on the color and style, it should take effect immediately.
 }
 
 /**

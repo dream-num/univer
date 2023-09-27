@@ -1,5 +1,7 @@
 import '../Functions';
 
+import { Nullable } from '@univerjs/core';
+
 import { LambdaRuntime } from '../AstNode/LambdaRuntime';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { ISuperTable, TableOptionType } from './Common';
@@ -17,7 +19,7 @@ export class ParserDataLoader {
     // 18.2.6 definedNames (Defined Names)
     private _definedNameMap: Map<string, string> = new Map();
 
-    private _lambdaRuntime: LambdaRuntime;
+    private _lambdaRuntime: Nullable<LambdaRuntime>;
 
     registerFunction(...functions: BaseFunction[]) {
         for (let i = 0; i < functions.length; i++) {

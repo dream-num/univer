@@ -71,7 +71,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         // }
 
         if (!isLexerNode && tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
-            return false;
+            return;
         }
 
         if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(tokenTrim)) {
@@ -115,8 +115,6 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
                 new TableReferenceObject(tokenTrim, tableData, columnDataString, tableOption)
             );
         }
-
-        return false;
     }
 }
 

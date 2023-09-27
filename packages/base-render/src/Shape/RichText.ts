@@ -37,35 +37,41 @@ interface MyInterface {
 export const RICHTEXT_OBJECT_ARRAY = ['text', 'richText'];
 
 export class RichText extends BaseObject {
-    private _documentData: IDocumentData;
+    private _documentData!: IDocumentData;
 
     private _allowCache: boolean = false;
 
-    private _cacheCanvas: Canvas;
+    private _cacheCanvas: Nullable<Canvas>;
 
-    private _documentSkeleton: DocumentSkeleton;
+    private _documentSkeleton!: DocumentSkeleton;
 
-    private _documents: Documents;
+    private _documents!: Documents;
 
     private _ff?: Nullable<string>;
 
-    private _fs?: number;
+    private _fs?: number = 12;
 
-    private _it?: BooleanNumber;
+    private _it?: BooleanNumber = BooleanNumber.FALSE;
 
-    private _bl?: BooleanNumber;
+    private _bl?: BooleanNumber = BooleanNumber.FALSE;
 
-    private _ul?: ITextDecoration;
+    private _ul?: ITextDecoration = {
+        s: BooleanNumber.FALSE,
+    };
 
-    private _st?: ITextDecoration;
+    private _st?: ITextDecoration = {
+        s: BooleanNumber.FALSE,
+    };
 
-    private _ol?: ITextDecoration;
+    private _ol?: ITextDecoration = {
+        s: BooleanNumber.FALSE,
+    };
 
-    private _bg?: IColorStyle;
+    private _bg?: Nullable<IColorStyle>;
 
-    private _bd?: IBorderData;
+    private _bd?: Nullable<IBorderData>;
 
-    private _cl?: IColorStyle;
+    private _cl?: Nullable<IColorStyle>;
 
     constructor(
         private _localeService: LocaleService,
@@ -183,6 +189,9 @@ export class RichText extends BaseObject {
         mainCtx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         if (this._allowCache) {
             if (this.isDirty()) {
+                if (this._cacheCanvas == null) {
+                    throw new Error('cache canvas is null');
+                }
                 const ctx = this._cacheCanvas.getContext();
                 this._cacheCanvas.clear();
                 ctx.save();

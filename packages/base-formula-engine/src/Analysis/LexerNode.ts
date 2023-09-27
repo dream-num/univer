@@ -1,6 +1,7 @@
 import { Nullable, Observable } from '@univerjs/core';
 
 import { LambdaPrivacyVarType } from '../AstNode/BaseAstNode';
+import { DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
 
 interface LexerNodeJson {
     token: string;
@@ -13,9 +14,9 @@ export type FormulaEnginePluginObserver = {
 };
 
 export class LexerNode {
-    private _parent: LexerNode;
+    private _parent: Nullable<LexerNode>;
 
-    private _token: string;
+    private _token: string = DEFAULT_TOKEN_TYPE_ROOT;
 
     private _children: Array<LexerNode | string> = [];
 
@@ -23,7 +24,7 @@ export class LexerNode {
 
     private _lambdaPrivacyVar: Nullable<LambdaPrivacyVarType>;
 
-    private _lambdaParameter: string;
+    private _lambdaParameter: string = '';
 
     getLambdaId() {
         return this._lambdaId;

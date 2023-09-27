@@ -1,4 +1,4 @@
-import { Observable } from '@univerjs/core';
+import { Nullable, Observable } from '@univerjs/core';
 
 import { CURSOR_TYPE } from './Basics/Const';
 import { DeviceType, IKeyboardEvent, IPointerEvent, PointerInput } from './Basics/IEvents';
@@ -23,21 +23,21 @@ export class Engine extends ThinEngine<Scene> {
      */
     onEndFrameObservable = new Observable<Engine>();
 
-    private _container: HTMLElement;
+    private _container: Nullable<HTMLElement>;
 
     private _canvas: Canvas = new Canvas();
 
-    private _canvasEle: HTMLCanvasElement;
+    private _canvasEle!: HTMLCanvasElement;
 
     private _renderingQueueLaunched = false;
 
     private _activeRenderLoops = new Array<() => void>();
 
-    private _renderFunction: any;
+    private _renderFunction = () => {};
 
-    private _requestNewFrameHandler: number;
+    private _requestNewFrameHandler: number = -1;
 
-    private _frameId: number;
+    private _frameId: number = -1;
 
     private _usingSafari: boolean = IsSafari();
 
@@ -48,19 +48,19 @@ export class Engine extends ThinEngine<Scene> {
 
     private _performanceMonitor = new PerformanceMonitor();
 
-    private _pointerMoveEvent: (evt: any) => void;
+    private _pointerMoveEvent!: (evt: any) => void;
 
-    private _pointerDownEvent: (evt: any) => void;
+    private _pointerDownEvent!: (evt: any) => void;
 
-    private _pointerUpEvent: (evt: Event) => void;
+    private _pointerUpEvent!: (evt: Event) => void;
 
-    private _pointerBlurEvent: (evt: any) => void;
+    private _pointerBlurEvent!: (evt: any) => void;
 
-    private _pointerWheelEvent: (evt: any) => void;
+    private _pointerWheelEvent!: (evt: any) => void;
 
-    private _pointerEnterEvent: (evt: any) => void;
+    private _pointerEnterEvent!: (evt: any) => void;
 
-    private _pointerLeaveEvent: (evt: any) => void;
+    private _pointerLeaveEvent!: (evt: any) => void;
 
     /** previous pointer position */
     private pointer: { [deviceSlot: number]: number } = {};

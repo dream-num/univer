@@ -1,4 +1,4 @@
-import { ISelectionRange, IUnitRange } from '@univerjs/core';
+import { ISelectionRange, IUnitRange, Nullable } from '@univerjs/core';
 
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { IFormulaData } from '../Basics/Common';
@@ -10,21 +10,21 @@ export enum FDtreeStateType {
 }
 
 export class FormulaDependencyTree implements IFormulaData {
-    node: BaseAstNode;
+    node: Nullable<BaseAstNode>;
 
     children: FormulaDependencyTree[] = [];
 
     parents: FormulaDependencyTree[] = [];
 
-    formula: string;
+    formula: string = '';
 
-    row: number;
+    row: number = -1;
 
-    column: number;
+    column: number = -1;
 
-    sheetId: string;
+    sheetId: string = '';
 
-    unitId: string;
+    unitId: string = '';
 
     rangeList: IUnitRange[] = [];
 

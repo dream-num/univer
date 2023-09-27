@@ -6,7 +6,7 @@ import { Nullable } from '@univerjs/core';
 export class PerformanceMonitor {
     private _enabled: boolean = true;
 
-    private _rollingFrameTime: RollingAverage;
+    private _rollingFrameTime!: RollingAverage;
 
     private _lastFrameTimeMs: Nullable<number>;
 
@@ -135,20 +135,20 @@ export class RollingAverage {
     /**
      * Current average
      */
-    average: number;
+    average: number = 0;
 
     /**
      * Current variance
      */
-    variance: number;
+    variance: number = 0;
 
-    protected _samples: number[];
+    protected _samples: number[] = [];
 
-    protected _sampleCount: number;
+    protected _sampleCount: number = 0;
 
-    protected _pos: number;
+    protected _pos: number = 0;
 
-    protected _m2: number; // sum of squares of differences from the (current) mean
+    protected _m2: number = 0; // sum of squares of differences from the (current) mean
 
     /**
      * constructor

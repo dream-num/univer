@@ -28,6 +28,9 @@ export class PrefixNode extends BaseAstNode {
         const children = this.getChildren();
         const value = children[0].getValue();
         let result: FunctionVariantType;
+        if (value == null) {
+            throw new Error('object is null');
+        }
         if (this._operatorString === prefixToken.MINUS) {
             result = this._functionExecutor!.calculate(new NumberValueObject(0), value) as FunctionVariantType;
         } else if (this._operatorString === prefixToken.AT) {
@@ -77,14 +80,14 @@ export class PrefixNodeFactory extends BaseAstNodeFactory {
 
     override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
         if (!(param instanceof LexerNode)) {
-            return false;
+            return;
         }
 
         const token = param.getToken();
         const tokenTrim = token.trim();
 
         if (tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
-            return false;
+            return;
         }
 
         let functionName = '';
@@ -93,7 +96,7 @@ export class PrefixNodeFactory extends BaseAstNodeFactory {
         } else if (tokenTrim === prefixToken.AT) {
             return new PrefixNode(tokenTrim);
         } else {
-            return false;
+            return;
         }
 
         const functionExecutor = parserDataLoader.getExecutor(functionName);

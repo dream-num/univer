@@ -61,8 +61,8 @@ interface IChangeObserverConfig {
 
 export interface ITransformerConfig {
     hoverEnabled?: boolean;
-    hoverEnterFunc?: (e: IPointerEvent | IMouseEvent) => void;
-    hoverLeaveFunc?: (e: IPointerEvent | IMouseEvent) => void;
+    hoverEnterFunc?: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
+    hoverLeaveFunc?: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
 
     rotateEnabled?: boolean;
     rotationSnaps?: number[];
@@ -90,7 +90,7 @@ export interface ITransformerConfig {
 
     flipEnabled?: boolean;
     ignoreStroke?: boolean;
-    boundBoxFunc?: (oldBox: BaseObject, newBox: BaseObject) => BaseObject;
+    boundBoxFunc?: Nullable<(oldBox: BaseObject, newBox: BaseObject) => BaseObject>;
     useSingleNodeRotation?: boolean;
     shouldOverdrawWholeArea?: boolean;
 }
@@ -103,9 +103,9 @@ export interface ITransformerConfig {
 export class Transformer implements ITransformerConfig {
     hoverEnabled = false;
 
-    hoverEnterFunc?: (e: IPointerEvent | IMouseEvent) => void;
+    hoverEnterFunc: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
 
-    hoverLeaveFunc?: (e: IPointerEvent | IMouseEvent) => void;
+    hoverLeaveFunc: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
 
     resizeEnabled = true;
 
@@ -156,11 +156,11 @@ export class Transformer implements ITransformerConfig {
 
     ignoreStroke = false;
 
-    boundBoxFunc?: (oldBox: BaseObject, newBox: BaseObject) => BaseObject;
+    boundBoxFunc: Nullable<(oldBox: BaseObject, newBox: BaseObject) => BaseObject>;
 
-    useSingleNodeRotation?: boolean;
+    useSingleNodeRotation: boolean = false;
 
-    shouldOverdrawWholeArea?: boolean;
+    shouldOverdrawWholeArea: boolean = false;
 
     onChangeStartObservable = new Observable<IChangeObserverConfig>();
 
@@ -172,13 +172,13 @@ export class Transformer implements ITransformerConfig {
 
     onCreateControlObservable = new Observable<Group>();
 
-    private _startOffsetX: number;
+    private _startOffsetX: number = -1;
 
-    private _startOffsetY: number;
+    private _startOffsetY: number = -1;
 
-    private _viewportScrollX: number;
+    private _viewportScrollX: number = -1;
 
-    private _viewportScrollY: number;
+    private _viewportScrollY: number = -1;
 
     private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 

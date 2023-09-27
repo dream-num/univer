@@ -1,8 +1,7 @@
-import { FunctionVariantType } from '../../Basics/Common';
 import { ErrorType } from '../../Basics/ErrorType';
 import { FORMULA_FUNCTION_REGISTRY } from '../../Basics/Registry';
 import { ErrorValueObject } from '../../OtherObject/ErrorValueObject';
-import { BaseReferenceObject } from '../../ReferenceObject/BaseReferenceObject';
+import { BaseReferenceObject, FunctionVariantType } from '../../ReferenceObject/BaseReferenceObject';
 import { BaseValueObject } from '../../ValueObject/BaseValueObject';
 import { BaseFunction } from '../BaseFunction';
 

@@ -23,7 +23,7 @@ enum bracketType {
 }
 
 export class LexerTreeMaker {
-    private _currentLexerNode: LexerNode;
+    private _currentLexerNode: LexerNode = new LexerNode();
 
     private _upLevel = 0;
 
@@ -88,11 +88,14 @@ export class LexerTreeMaker {
 
         this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
 
-        const state = this._nodeMaker(this._formulaString);
+        // const state = this._nodeMaker(this._formulaString);
 
         // console.log('error', state);
 
-        this._currentLexerNode = this._getTopNode(this._currentLexerNode);
+        const node = this._getTopNode(this._currentLexerNode);
+        if (node) {
+            this._currentLexerNode = node;
+        }
 
         return this._currentLexerNode;
     }
@@ -287,18 +290,27 @@ export class LexerTreeMaker {
         if (parent && parent.getToken() === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
             // lambda will skip to more one level
             if (parent?.getParent()?.getParent()) {
-                this._currentLexerNode = this._currentLexerNode.getParent()?.getParent().getParent();
+                const node = this._currentLexerNode.getParent()?.getParent()?.getParent();
+                if (node) {
+                    this._currentLexerNode = node;
+                }
                 state = true;
             }
         } else {
             if (parent?.getParent()) {
-                this._currentLexerNode = this._currentLexerNode.getParent().getParent();
+                const node = this._currentLexerNode.getParent()?.getParent();
+                if (node) {
+                    this._currentLexerNode = node;
+                }
                 state = true;
             }
         }
 
         for (let i = 0; i < this._upLevel; i++) {
-            this._currentLexerNode = this._currentLexerNode?.getParent();
+            const node = this._currentLexerNode?.getParent();
+            if (node) {
+                this._currentLexerNode = node;
+            }
             if (this._currentLexerNode) {
                 state = true;
             } else {
@@ -330,8 +342,8 @@ export class LexerTreeMaker {
     }
 
     private _getTopNode(lexerNode: LexerNode) {
-        let parentNode = lexerNode;
-        while (parentNode.getParent()) {
+        let parentNode: Nullable<LexerNode> = lexerNode;
+        while (parentNode?.getParent()) {
             parentNode = parentNode.getParent();
         }
         return parentNode;
@@ -567,7 +579,10 @@ export class LexerTreeMaker {
                         subLexerNode_at.addChildren(subLexerNode_op);
                         subLexerNode_op.setParent(subLexerNode_at);
                         if (subLexerNode_at.getParent()) {
-                            subLexerNode_main = subLexerNode_at.getParent();
+                            const node = subLexerNode_at.getParent();
+                            if (node) {
+                                subLexerNode_main = node;
+                            }
                         } else {
                             subLexerNode_main = subLexerNode_at;
                         }

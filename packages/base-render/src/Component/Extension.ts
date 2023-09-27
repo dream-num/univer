@@ -1,4 +1,4 @@
-import { IDocumentRenderConfig, IScale, Registry } from '@univerjs/core';
+import { IDocumentRenderConfig, IScale, Nullable, Registry } from '@univerjs/core';
 
 import { BaseObject } from '../BaseObject';
 import { getScale } from '../Basics/Tools';
@@ -14,19 +14,19 @@ export interface IExtensionConfig {
 }
 
 export class ComponentExtension<T, U> {
-    uKey: string;
+    uKey: string = '';
 
-    type: U;
+    type!: U;
 
-    zIndex: number;
+    zIndex: number = 0;
 
-    parent: BaseObject;
+    parent: Nullable<BaseObject>;
 
     translateX = 0;
 
     translateY = 0;
 
-    extensionOffset: IExtensionConfig;
+    extensionOffset: IExtensionConfig = {};
 
     draw(ctx: CanvasRenderingContext2D, parentScale: IScale, skeleton: T) {
         /* abstract */

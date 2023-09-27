@@ -59,7 +59,7 @@ export class Documents extends DocComponent {
 
     private _hasEditor = false;
 
-    private _editor: DocsEditor;
+    private _editor: Nullable<DocsEditor>;
 
     private _skeletonObserver: Nullable<Observer<IDocumentSkeletonCached>>;
 
@@ -103,16 +103,16 @@ export class Documents extends DocComponent {
         return new Documents(oKey, documentSkeleton, config);
     }
 
-    getEditor(): DocsEditor {
+    getEditor(): Nullable<DocsEditor> {
         return this._editor;
     }
 
     getActiveSelection() {
-        return this._editor.getActiveTextSelection();
+        return this._editor?.getActiveTextSelection();
     }
 
     getSelection() {
-        return this._editor.getTextSelectionList();
+        return this._editor?.getTextSelectionList();
     }
 
     calculatePagePosition() {
@@ -185,7 +185,7 @@ export class Documents extends DocComponent {
     }
 
     getEditorInputEvent() {
-        if (!this._hasEditor) {
+        if (!this._hasEditor || this._editor == null) {
             return;
         }
         const {
@@ -210,14 +210,14 @@ export class Documents extends DocComponent {
         if (!this._hasEditor) {
             return;
         }
-        return this._editor.remain();
+        return this._editor?.remain();
     }
 
     addSelection(textSelection: TextSelection) {
         if (!this._hasEditor) {
             return;
         }
-        return this._editor.add(textSelection);
+        return this._editor?.add(textSelection);
     }
 
     override syncSelection() {
@@ -225,7 +225,7 @@ export class Documents extends DocComponent {
             return;
         }
 
-        return this._editor.sync();
+        return this._editor?.sync();
     }
 
     override scrollBySelection() {
@@ -233,7 +233,7 @@ export class Documents extends DocComponent {
             return;
         }
 
-        this._editor.scroll();
+        this._editor?.scroll();
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -250,6 +250,10 @@ export class Documents extends DocComponent {
         this._drawLiquid.reset();
 
         const skeletonData = documentSkeleton.getSkeletonData();
+
+        if (skeletonData == null) {
+            return;
+        }
 
         const { pages } = skeletonData;
         const parentScale = this.getParentScale();
@@ -514,6 +518,10 @@ export class Documents extends DocComponent {
         this._findLiquid.reset();
 
         const skeletonData = skeleton.getSkeletonData();
+
+        if (skeletonData == null) {
+            return;
+        }
 
         const pages = skeletonData.pages;
 

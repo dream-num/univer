@@ -64,7 +64,7 @@ export class TextSelection {
 
     private _anchorShape: Nullable<Rect>;
 
-    private _rangeList: ITextSelectionRange[];
+    private _rangeList: ITextSelectionRange[] = [];
 
     private _currentStartState: ICurrentNodePositionState = {
         page: NodePositionStateType.NORMAL,
@@ -688,6 +688,10 @@ export class TextSelection {
         this._Liquid.reset();
 
         const skeletonData = skeleton.getSkeletonData();
+
+        if (skeletonData == null) {
+            return [];
+        }
 
         const pages = skeletonData.pages;
 

@@ -35,6 +35,10 @@ export class FormulaEngineService {
             const astNode = tree.node;
             let value: FunctionVariantType;
 
+            if (astNode == null) {
+                throw new Error('astNode is null');
+            }
+
             interpreter.setCurrentPosition(tree.row, tree.column, tree.sheetId, tree.unitId);
 
             if (interpreter.checkAsyncNode(astNode)) {
@@ -68,6 +72,10 @@ export class FormulaEngineService {
         // console.log('astNode', astNode.serialize());
 
         const interpreter = Interpreter.create();
+
+        if (astNode == null) {
+            return;
+        }
 
         if (interpreter.checkAsyncNode(astNode)) {
             const resultPromise = interpreter.executeAsync(astNode);

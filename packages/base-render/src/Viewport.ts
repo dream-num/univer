@@ -52,9 +52,9 @@ export class Viewport {
 
     scrollY: number = 0;
 
-    actualScrollX: number;
+    actualScrollX: number = 0;
 
-    actualScrollY: number;
+    actualScrollY: number = 0;
 
     onMouseWheelObserver = new Observable<IWheelEvent>();
 
@@ -64,7 +64,7 @@ export class Viewport {
 
     onScrollStopObserver = new Observable<IScrollObserverParam>();
 
-    private _viewPortKey: string;
+    private _viewPortKey: string = '';
 
     private _dirty: boolean = true;
 
@@ -92,11 +92,11 @@ export class Viewport {
 
     private _height: Nullable<number>;
 
-    private _scene: ThinScene;
+    private _scene!: ThinScene;
 
-    private _cacheCanvas: Canvas;
+    private _cacheCanvas: Nullable<Canvas>;
 
-    private _scrollBar?: BaseScrollBar;
+    private _scrollBar?: Nullable<BaseScrollBar>;
 
     private _isWheelPreventDefaultX: boolean = false;
 
@@ -104,7 +104,7 @@ export class Viewport {
 
     private _allowCache: boolean = false;
 
-    private _scrollStopNum: number;
+    private _scrollStopNum: number = 0;
 
     private _preScrollX: Nullable<number> = 0;
 
@@ -388,6 +388,9 @@ export class Viewport {
             sceneTrans.multiply(
                 Transform.create([1, 0, 0, 1, -this.left / this._scene.scaleX, -this.top / this._scene.scaleY])
             );
+            if (this._cacheCanvas == null) {
+                throw new Error('cache canvas is null');
+            }
             ctx = this._cacheCanvas.getContext();
             this._cacheCanvas.clear();
         }
@@ -794,7 +797,7 @@ export class Viewport {
     }
 
     private _applyCache(ctx?: CanvasRenderingContext2D) {
-        if (!ctx) {
+        if (!ctx || this._cacheCanvas == null) {
             return;
         }
         const pixelRatio = this._cacheCanvas.getPixelRatio();

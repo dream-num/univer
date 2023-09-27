@@ -13,11 +13,11 @@ export class Font extends SheetExtension {
 
     override zIndex = 40;
 
-    changeFontColor: ObjectMatrix<IColorStyle>;
+    changeFontColor: ObjectMatrix<IColorStyle> = new ObjectMatrix();
 
     getDocuments() {
         const parent = this.parent as SheetComponent;
-        return parent.getDocuments();
+        return parent?.getDocuments();
     }
 
     setChangeFontColor(r: number, c: number, color: IColorStyle) {
@@ -152,6 +152,11 @@ export class Font extends SheetExtension {
         column: number
     ) {
         const documents = this.getDocuments();
+
+        if (documents == null) {
+            throw new Error('documents is null');
+        }
+
         const { documentSkeleton, angle, verticalAlign, horizontalAlign, wrapStrategy, content } = docsConfig;
         const cellWidth = endX - startX;
         const cellHeight = endY - startY;

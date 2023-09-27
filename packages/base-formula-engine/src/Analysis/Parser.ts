@@ -1,5 +1,7 @@
 import '../AstNode';
 
+import { Nullable } from '@univerjs/core';
+
 import { AstRootNode } from '../AstNode/AstRootNode';
 import { BaseAstNode, ErrorNode } from '../AstNode/BaseAstNode';
 import { BaseAstNodeFactory } from '../AstNode/BaseAstNodeFactory';
@@ -17,11 +19,11 @@ import {
 import { LexerNode } from './LexerNode';
 
 export class AstTreeMaker {
-    static maker: AstTreeMaker;
+    static maker: AstTreeMaker = new AstTreeMaker();
 
     private _parserDataLoader = new ParserDataLoader();
 
-    private _astNodeFactoryList: BaseAstNodeFactory[];
+    private _astNodeFactoryList: BaseAstNodeFactory[] = [];
 
     static create() {
         if (!this.maker) {
@@ -49,7 +51,7 @@ export class AstTreeMaker {
         const parentAstNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
 
         const lambdaRuntime = this._parserDataLoader.getLambdaRuntime();
-        const currentLambdaPrivacyVar = lambdaRuntime.getCurrentPrivacyVar(lambdaId);
+        const currentLambdaPrivacyVar = lambdaRuntime?.getCurrentPrivacyVar(lambdaId);
 
         if (!currentLambdaPrivacyVar) {
             return false;
@@ -62,14 +64,14 @@ export class AstTreeMaker {
 
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
-            let astNode: BaseAstNode | false = false;
+            let astNode: Nullable<BaseAstNode> = null;
             if (item instanceof LexerNode) {
                 astNode = this._parse(item, parentAstNode);
             } else {
                 return false;
             }
 
-            // astNode.setParent(parentAstNode);
+            // astNode?.setParent(parentAstNode);
         }
 
         const parentChildren = parentAstNode.getChildren();
@@ -86,20 +88,20 @@ export class AstTreeMaker {
     }
 
     private _getTopParent(node: BaseAstNode) {
-        let parent: BaseAstNode = node;
-        while (parent.getParent()) {
+        let parent: Nullable<BaseAstNode> = node;
+        while (parent?.getParent()) {
             parent = parent.getParent();
-            console.log(parent);
+            // console.log(parent);
         }
         return parent;
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _parse(lexerNode: LexerNode, parent: BaseAstNode): BaseAstNode {
+    private _parse(lexerNode: LexerNode, parent: BaseAstNode): Nullable<BaseAstNode> {
         const children = lexerNode.getChildren();
         const childrenCount = children.length;
         const calculateStack: BaseAstNode[] = [];
-        let currentAstNode: false | BaseAstNode = false;
+        let currentAstNode: Nullable<BaseAstNode> = null;
         // console.log('lexerNode', lexerNode, children);
         if (lexerNode.getToken() === DEFAULT_TOKEN_TYPE_PARAMETER) {
             currentAstNode = parent;
@@ -115,7 +117,7 @@ export class AstTreeMaker {
             }
 
             currentAstNode = this._checkAstNode(lexerNode);
-            if (currentAstNode === false) {
+            if (currentAstNode == null) {
                 // console.log('error2', currentAstNode, lexerNode);
                 return ErrorNode.create(ErrorType.ERROR);
             }
@@ -135,7 +137,7 @@ export class AstTreeMaker {
             }
 
             const item = children[i];
-            let astNode: BaseAstNode | false = false;
+            let astNode: Nullable<BaseAstNode> = null;
             if (item instanceof LexerNode) {
                 astNode = this._parse(item, currentAstNode);
                 if (astNode === currentAstNode) {
@@ -145,12 +147,15 @@ export class AstTreeMaker {
                 astNode = this._checkAstNode(item);
             }
 
-            if (astNode === false) {
+            if (astNode == null) {
                 // console.log('error3', astNode, currentAstNode, lexerNode);
                 return ErrorNode.create(ErrorType.ERROR);
             }
 
             astNode = this._getTopParent(astNode);
+            if (astNode == null) {
+                return;
+            }
             // console.log('bugfix1', astNode, astNode.nodeType, currentAstNode, lexerNode);
             switch (astNode.nodeType) {
                 case NodeType.ERROR:
@@ -216,12 +221,12 @@ export class AstTreeMaker {
     }
 
     private _checkAstNode(item: LexerNode | string) {
-        let astNode: BaseAstNode | false = false;
+        let astNode: Nullable<BaseAstNode> = null;
         const astNodeFactoryListCount = this._astNodeFactoryList.length;
         for (let x = 0; x < astNodeFactoryListCount; x++) {
             const astNodeFactory = this._astNodeFactoryList[x];
             astNode = astNodeFactory.checkAndCreateNodeType(item, this._parserDataLoader);
-            if (astNode !== false) {
+            if (astNode != null) {
                 break;
             }
         }

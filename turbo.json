@@ -8,7 +8,8 @@
         "esbuild": {
         },
         "esbuild:demo": {
-            "cache": false
+        },
+        "build:doc": {
         },
         "dev:demo": {
             "cache": false,

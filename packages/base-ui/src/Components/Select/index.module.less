@@ -1,3 +1,5 @@
+@import '../../Basics/CSS//Skin/default.module.less';
+
 .select-component {
     position: relative;
     margin: 0 3px;
@@ -20,7 +22,7 @@
         white-space: nowrap;
 
         &:hover {
-            background: var(--bg-hover);
+            background: @bg-color-hover;
         }
     }
 
@@ -29,7 +31,7 @@
         align-items: center;
 
         &:hover {
-            background: var(--bg-hover);
+            background: @bg-color-hover;
         }
 
         input {
@@ -60,7 +62,7 @@
 
     .select-double {
         &:hover {
-            background: var(--bg-hover);
+            background: @bg-color-hover;
         }
 
         .dropdown {

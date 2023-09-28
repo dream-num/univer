@@ -1,54 +1,3 @@
-/*
-1. 所有的变量加到这里，复用
-2. 组件要用的话，在这定义好，导入组件使用
-3. 需要作为皮肤变量的，导入到所有皮肤中导出使用
-*/
-
-// base css variables
-
-@border-radius-base: 2px; // 组件/浮层圆角
-@border-width-base: 1px;
-@border-style-base: solid;
-@line-height-base: 1.5715;
-@font-weight: 400;
-@font-size-base: 14px; // 主字号
-@font-size-lg: @font-size-base + 2px;
-@font-size-sm: @font-size-base - 2px;
-
-@padding-base: 1em; // 主padding size
-@margin-base: 1em; // 主margin size
-
-@gray-1: #ffffff;
-@gray-2: #fafafa;
-@gray-3: #f5f5f5;
-@gray-4: #f0f0f0;
-@gray-5: #d9d9d9;
-@gray-6: #bfbfbf;
-@gray-7: #8c8c8c;
-@gray-8: #595959;
-@gray-9: #434343;
-@gray-10: #262626;
-@gray-11: #1f1f1f;
-@gray-12: #141414;
-@gray-13: #000000;
-@gray-14: #efefef;
-@gray-15: #e0e0e0;
-@gray-16: #ececec;
-@gray-17: #cbcbcb;
-
-
-// TODO remove
-@link-color: #1890ff; // 链接色
-@bg: #fff; //Basics background color for most Components
-@heading-color: @gray-10; // 标题色
-@text-color: #333; // 主文本色
-@text-color-secondary: @gray-7; // 次文本色
-@disabled-color: @gray-6; // 失效色
-@disabled-bg: @gray-3; //失效背景色
-@border-color-base: @gray-5; // 边框色
-@border-color-base-hover: @gray-6; // 边框 hover高亮色
-@box-shadow-base: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05); // 浮层阴影
-
 /**
  * new design system
  */
@@ -88,7 +37,7 @@
 @gold-800: #a97100;
 @gold-900: #8f5f00;
 
-// forsythia suspensa / 连翘 / Yellow
+// Forsythia Suspensa / 连翘 / Yellow
 @yellow-50: #fefbe6;
 @yellow-100: #fef7cd;
 @yellow-200: #fdf09b;
@@ -100,7 +49,7 @@
 @yellow-800: #c5a300;
 @yellow-900: #b19401;
 
-// eustoma grandiflorum / 洋桔梗 / Verdancy
+// Eustoma Grandiflorum / 洋桔梗 / Verdancy
 @verdancy-50: #f7fde8;
 @verdancy-100: #effbd0;
 @verdancy-200: #def6a2;
@@ -136,7 +85,7 @@
 @jiqing-800: #008a8a;
 @jiqing-900: #007676;
 
-// cornflower / 矢车菊 / blue
+// Cornflower / 矢车菊 / Blue
 @blue-50: #e5f3ff;
 @blue-100: #cce6ff;
 @blue-200: #99ceff;
@@ -148,7 +97,7 @@
 @blue-800: #0063c0;
 @blue-900: #0053a0;
 
-// Hyacinth / 风信子 / Hyacinth blue
+// Hyacinth / 风信子 / Hyacinth Blue
 @hyacinth-50: #e8ecfd;
 @hyacinth-100: #d0d9fb;
 @hyacinth-200: #a2b3f6;
@@ -198,8 +147,26 @@
 @grey-950: #606060;
 @grey-1000: #505050;
 
+// 黑 / 白 / Black / White
 @color-black: #35322b;
 @color-white: #ffffff;
+
+// Box Shadow
+@box-shadow-base: 0 4px 12px @grey-300;
+@box-shadow-lg: 0 4px 24px 0 @grey-300;
+
+// Background
+@bg-color: @grey-50;
+@bg-color-hover: @grey-100;
+@bg-color-secondary: @color-white;
+
+// Text Color
+@text-color: @color-black;
+@text-color-secondary: @grey-600;
+@text-color-tertiary: @grey-200;
+
+// Border Color
+@border-color: @grey-300;
 
 :export {
     // Ramu / 瑞木 / Red
@@ -351,4 +318,97 @@
     // 黑 / 白 / Black / White
     --color-black: @color-black;
     --color-white: @color-white;
+
+    // Box Shadow
+    --box-shadow-base: @box-shadow-base;
+    --box-shadow-lg: @box-shadow-lg;
+
+    // Background
+    --bg-color: @bg-color;
+    --bg-color-hover: @bg-color-hover;
+    --bg-color-secondary: @bg-color-secondary;
+
+    // Text Color
+    --text-color: @text-color;
+    --text-color-secondary: @text-color-secondary;
+    --text-color-tertiary: @text-color-tertiary;
+
+    // Border Color
+    --border-color: @border-color;
+}
+
+// TODO: to be removed
+
+// base css variables
+@border-radius-base: 2px; // 组件/浮层圆角
+@border-width-base: 1px;
+@border-style-base: solid;
+@line-height-base: 1.5715;
+@font-weight: 400;
+@font-size-base: 14px; // 主字号
+@font-size-lg: @font-size-base + 2px;
+@font-size-sm: @font-size-base - 2px;
+
+@padding-base: 1em; // 主padding size
+@margin-base: 1em; // 主margin size
+
+@gray-3: #f5f5f5;
+@gray-4: #f0f0f0;
+@gray-5: #d9d9d9;
+@gray-6: #bfbfbf;
+@gray-7: #8c8c8c;
+@gray-8: #595959;
+@gray-9: #434343;
+@gray-10: #262626;
+@gray-11: #1f1f1f;
+@gray-12: #141414;
+@gray-13: #000000;
+@gray-14: #efefef;
+@gray-15: #e0e0e0;
+@gray-16: #ececec;
+@gray-17: #cbcbcb;
+
+
+@heading-color: @gray-10; // 标题色
+@disabled-color: @gray-6; // 失效色
+@disabled-bg: @gray-3; //失效背景色
+
+@border-color-base: @gray-5; // 边框色
+@border-color-base-hover: @gray-6; // 边框 hover高亮色
+
+:export {
+    --border-radius-base: @border-radius-base;
+    --border-width-base: @border-width-base;
+    --border-style-base: @border-style-base;
+    --line-height-base: @line-height-base;
+    --font-weight: @font-weight;
+    --font-size-base: @font-size-base;
+    --font-size-lg: @font-size-lg;
+    --font-size-sm: @font-size-sm;
+
+    --padding-base: @padding-base;
+    --margin-base: @margin-base;
+
+    --gray-3: @gray-3;
+    --gray-4: @gray-4;
+    --gray-5: @gray-5;
+    --gray-6: @gray-6;
+    --gray-7: @gray-7;
+    --gray-8: @gray-8;
+    --gray-9: @gray-9;
+    --gray-10: @gray-10;
+    --gray-11: @gray-11;
+    --gray-12: @gray-12;
+    --gray-13: @gray-13;
+    --gray-14: @gray-14;
+    --gray-15: @gray-15;
+    --gray-16: @gray-16;
+    --gray-17: @gray-17;
+
+    --font-size: @font-size-base;
+    --heading-color: @heading-color;
+    --disabled-color: @disabled-color;
+    --disabled-bg: @disabled-bg;
+    --border-color-base: @border-color-base;
+    --border-color-base-hover: @border-color-base-hover;
 }

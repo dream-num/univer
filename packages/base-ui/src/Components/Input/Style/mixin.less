@@ -3,7 +3,7 @@
 .active() {
     border-right-width: @border-width-base !important;
     outline: 0;
-    box-shadow: var(--box-shadow-base);
+    box-shadow: @box-shadow-base;
 }
 
 .hover(@color: var(--primary-color-hover)) {
@@ -34,7 +34,7 @@
     color: var(--text-color);
     font-size: @font-size-base;
     line-height: @line-height-base;
-    background-color: var(--bg);
+    background-color: @bg-color-secondary;
     background-image: none;
     border: @border-width-base @border-style-base var(--border-color-base);
     border-radius: @border-radius-base;

@@ -4,19 +4,25 @@ interface IProps {
 
 const levelMap = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950', '1000'];
 
+function convertToLessVar(input: string): string {
+    const dashCase = input.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`).replace(/(\d+)/g, '-$1');
+
+    return `@${dashCase}`;
+}
+
+function convertToCSSVar(input: string): string {
+    const dashCase = input.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`).replace(/(\d+)/g, '-$1');
+
+    return `--${dashCase}`;
+}
+
 export function Palette(props: IProps) {
     const { theme } = props;
 
     function generateColors(name: string, maxLevel: number) {
         const colors = [];
         for (let i = 0; i < maxLevel; i++) {
-            const key = `${name}${levelMap[i]}`;
-
-            colors.push({
-                bg: theme[key],
-                name: key,
-                less: `@${name}-${levelMap[i]}`,
-            });
+            colors.push(`${name}${levelMap[i]}`);
         }
 
         return colors;
@@ -25,58 +31,31 @@ export function Palette(props: IProps) {
     const palettes = [
         {
             title: 'Brand / 品牌',
-            colors: [
-                {
-                    bg: theme.primaryColor,
-                    name: 'primaryColor',
-                    less: '@primary-color',
-                },
-                {
-                    bg: theme.primaryColorHover,
-                    name: 'primaryColorHover',
-                    less: '@primary-color-hover',
-                },
-            ],
+            colors: ['primaryColor', 'primaryColorHover'],
         },
         {
             title: 'Fuctional / 功能',
-            colors: [
-                {
-                    bg: theme.infoColor,
-                    name: 'infoColor',
-                    less: '@info-color',
-                },
-                {
-                    bg: theme.successColor,
-                    name: 'successColor',
-                    less: '@success-color',
-                },
-                {
-                    bg: theme.warningColor,
-                    name: 'warningColor',
-                    less: '@warning-color',
-                },
-                {
-                    bg: theme.errorColor,
-                    name: 'errorColor',
-                    less: '@error-color',
-                },
-            ],
+            colors: ['infoColor', 'successColor', 'warningColor', 'errorColor'],
         },
         {
-            title: '黑 / 白 / Black / White',
-            colors: [
-                {
-                    bg: theme.colorBlack,
-                    name: 'colorBlack',
-                    less: '@color-black',
-                },
-                {
-                    bg: theme.colorWhite,
-                    name: 'colorWhite',
-                    less: '@color-white',
-                },
-            ],
+            title: 'Text Color',
+            colors: ['textColor', 'textColorSecondary', 'textColorTertiary'],
+        },
+        {
+            title: 'Link',
+            colors: ['linkColor'],
+        },
+        {
+            title: 'Background',
+            colors: ['bgColor', 'bgColorHover', 'bgColorSecondary'],
+        },
+        {
+            title: 'Border Color',
+            colors: ['borderColor'],
+        },
+        {
+            title: 'Box Shadow',
+            colors: ['boxShadowBase', 'boxShadowLg'],
         },
         {
             title: 'Ramu / 瑞木 / Red',
@@ -126,6 +105,10 @@ export function Palette(props: IProps) {
             title: '灰 / Grey',
             colors: generateColors('grey', 12),
         },
+        {
+            title: '黑 / 白 / Black / White',
+            colors: ['colorBlack', 'colorWhite'],
+        },
     ];
 
     return (
@@ -139,12 +122,13 @@ export function Palette(props: IProps) {
                                 <th>name</th>
                                 <th>value</th>
                                 <th>Less variable</th>
+                                <th>CSS variable</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             {palette.colors.map((color) => (
-                                <tr key={color.name}>
+                                <tr key={color}>
                                     <td>
                                         <div
                                             style={{
@@ -154,21 +138,24 @@ export function Palette(props: IProps) {
                                                 fontSize: '13px',
                                             }}
                                         >
-                                            <div
-                                                style={{
-                                                    display: 'inline-block',
-                                                    width: '16px',
-                                                    height: '16px',
-                                                    backgroundColor: color.bg,
-                                                }}
-                                            />
-                                            {color.name}
+                                            {theme[color].startsWith('#') && (
+                                                <div
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        width: '16px',
+                                                        height: '16px',
+                                                        backgroundColor: theme[color],
+                                                    }}
+                                                />
+                                            )}
+                                            {color}
                                         </div>
                                     </td>
                                     <td>
-                                        <pre style={{ fontSize: '13px' }}>{color.bg}</pre>
+                                        <pre style={{ fontSize: '13px' }}>{theme[color]}</pre>
                                     </td>
-                                    <td>{color.less}</td>
+                                    <td>{convertToLessVar(color)}</td>
+                                    <td>{convertToCSSVar(color)}</td>
                                 </tr>
                             ))}
                         </tbody>

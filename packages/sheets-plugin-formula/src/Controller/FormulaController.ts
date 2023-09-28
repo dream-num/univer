@@ -142,8 +142,13 @@ export class FormulaController {
         arrayFormula.forValue((r, c, v) => {
             const { startRow, startColumn, endRow, endColumn } = v;
             if (currentCellData) {
-                const { row, column } = currentCellData;
-                if (row >= startRow && row < endRow && column >= startColumn && column < endColumn) {
+                const { actualRow, actualColumn } = currentCellData;
+                if (
+                    actualRow >= startRow &&
+                    actualRow < endRow &&
+                    actualColumn >= startColumn &&
+                    actualColumn < endColumn
+                ) {
                     const arrayFormulaLineControl = this._sheetInjector.createInstance(
                         ArrayFormulaLineControl,
                         this._activeSheetId,

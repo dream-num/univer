@@ -4,6 +4,7 @@ import {
     IRange,
     IRangeWithCoord,
     IScale,
+    ISelectionCell,
     ISelectionCellWithCoord,
     IStyleBase,
     Nullable,
@@ -573,7 +574,7 @@ export function getCellByIndex(
 }
 
 // WTF: this name doesn't express any useful information about what is this used for
-export function mergeCellHandler(row: number, column: number, mergeData?: IRange[]) {
+export function mergeCellHandler(row: number, column: number, mergeData?: IRange[]): ISelectionCell {
     let isMerged = false; // The upper left cell only renders the content
     let isMergedMainCell = false;
     let newEndRow = row;
@@ -583,8 +584,8 @@ export function mergeCellHandler(row: number, column: number, mergeData?: IRange
 
     if (mergeData == null) {
         return {
-            row,
-            column,
+            actualRow: row,
+            actualColumn: column,
             isMergedMainCell,
             isMerged,
             endRow: newEndRow,
@@ -621,8 +622,8 @@ export function mergeCellHandler(row: number, column: number, mergeData?: IRange
     }
 
     return {
-        row,
-        column,
+        actualRow: row,
+        actualColumn: column,
         isMergedMainCell,
         isMerged,
         endRow: newEndRow,

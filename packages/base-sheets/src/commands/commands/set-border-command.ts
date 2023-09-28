@@ -206,7 +206,7 @@ export const SetBorderCommand: ICommand = {
 
                 if (rectangle) {
                     if (reserve) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        const style = Tools.deepClone(mr.getValue(rectangle.startRow, rectangle.startColumn));
                         bdStyle = style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle;
                     }
                     mr.setValue(rectangle.startRow, rectangle.startColumn, {
@@ -214,7 +214,7 @@ export const SetBorderCommand: ICommand = {
                     });
                 } else {
                     if (reserve) {
-                        const style = mr.getValue(row, column);
+                        const style = Tools.deepClone(mr.getValue(row, column));
                         bdStyle = style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle;
                     }
                     mr.setValue(row, column, { bd: bdStyle });
@@ -244,7 +244,7 @@ export const SetBorderCommand: ICommand = {
                 const rectangle = hasMerge(row, column);
                 if (rectangle) {
                     if (rectangle.endColumn !== range.endColumn) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        const style = Tools.deepClone(mr.getValue(rectangle.startRow, rectangle.startColumn));
                         mr.setValue(row, column, {
                             bd: style?.bd
                                 ? Object.assign(style.bd, { r: Tools.deepClone(border) })
@@ -253,7 +253,7 @@ export const SetBorderCommand: ICommand = {
                     }
                 } else {
                     if (column !== range.endColumn) {
-                        const style = mr.getValue(row, column);
+                        const style = Tools.deepClone(mr.getValue(row, column));
                         mr.setValue(row, column, {
                             bd: style?.bd
                                 ? Object.assign(style.bd, { r: Tools.deepClone(border) })
@@ -269,7 +269,7 @@ export const SetBorderCommand: ICommand = {
                 const rectangle = hasMerge(row, column);
                 if (rectangle) {
                     if (rectangle.endRow !== range.endRow) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        const style = Tools.deepClone(mr.getValue(rectangle.startRow, rectangle.startColumn));
                         mr.setValue(row, column, {
                             bd: style?.bd
                                 ? Object.assign(style.bd, { b: Tools.deepClone(border) })
@@ -278,7 +278,7 @@ export const SetBorderCommand: ICommand = {
                     }
                 } else {
                     if (row !== range.endRow) {
-                        const style = mr.getValue(row, column);
+                        const style = Tools.deepClone(mr.getValue(row, column));
                         mr.setValue(row, column, {
                             bd: style?.bd
                                 ? Object.assign(style.bd, { b: Tools.deepClone(border) })
@@ -303,14 +303,14 @@ export const SetBorderCommand: ICommand = {
                 const rectangle = hasMerge(row, column);
                 if (rectangle) {
                     if (rectangle.endColumn !== range.endColumn) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        const style = Tools.deepClone(mr.getValue(rectangle.startRow, rectangle.startColumn));
                         mr.setValue(row, column, {
                             bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
                         });
                     }
                 } else {
                     if (column !== range.endColumn) {
-                        const style = mr.getValue(row, column);
+                        const style = Tools.deepClone(mr.getValue(row, column));
                         mr.setValue(row, column, {
                             bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
                         });
@@ -321,14 +321,14 @@ export const SetBorderCommand: ICommand = {
                 const rectangle = hasMerge(row, column);
                 if (rectangle) {
                     if (rectangle.endRow !== range.endRow) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        const style = Tools.deepClone(mr.getValue(rectangle.startRow, rectangle.startColumn));
                         mr.setValue(row, column, {
                             bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
                         });
                     }
                 } else {
                     if (row !== range.endRow) {
-                        const style = mr.getValue(row, column);
+                        const style = Tools.deepClone(mr.getValue(row, column));
                         mr.setValue(row, column, {
                             bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
                         });

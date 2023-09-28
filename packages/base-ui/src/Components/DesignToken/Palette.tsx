@@ -54,6 +54,10 @@ export function Palette(props: IProps) {
             colors: ['borderColor'],
         },
         {
+            title: 'Border Radius',
+            colors: ['borderRadiusBase', 'borderRadiusLg'],
+        },
+        {
             title: 'Box Shadow',
             colors: ['boxShadowBase', 'boxShadowLg'],
         },

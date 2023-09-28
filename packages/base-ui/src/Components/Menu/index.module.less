@@ -6,8 +6,8 @@
     width: max-content;
     padding: 6px 0;
     font-size: 13px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
     overflow: hidden;
     overflow-y: auto;
     text-align: center;
@@ -29,7 +29,7 @@
         padding: 3px 0;
 
         &:hover {
-            background-color: @gray-14;
+            background-color: var(--bg-color-hover);
         }
     }
 
@@ -42,15 +42,15 @@
 
     .cols-menuitem-disabled {
         pointer-events: none;
-        color: @gray-15;
+        color: var(--gray-200);
     }
 }
 
 .menu-button() {
     border-radius: 0;
     transition: opacity 218ms;
-    background: var(--bg);
-    box-shadow: @box-shadow-base;
+    background: var(--bg-color-secondary);
+    box-shadow: var(--box-shadow-base);
     cursor: default;
     margin: 0;
     outline: 0;

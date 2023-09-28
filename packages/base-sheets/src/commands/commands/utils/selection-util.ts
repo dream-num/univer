@@ -5,6 +5,7 @@ import {
     IRange,
     ISelectionCell,
     ObjectMatrix,
+    RANGE_TYPE,
     Rectangle,
     selectionToArray,
     Worksheet,
@@ -31,6 +32,7 @@ export function getRangeAtPosition(row: number, col: number, worksheet: Workshee
             isMergedMainCell: value.rowSpan !== undefined && value.colSpan !== undefined,
             endRow: row + (value.rowSpan !== undefined ? value.rowSpan - 1 : 0),
             endColumn: col + (value.colSpan !== undefined ? value.colSpan - 1 : 0),
+            rangeType: RANGE_TYPE.NORMAL,
         };
     });
 
@@ -533,6 +535,7 @@ export function shrinkToNextCell(
         startColumn: Math.min(anchorRange.startColumn, next.startColumn),
         endRow: Math.max(anchorRange.endRow, next.endRow),
         endColumn: Math.max(anchorRange.endColumn, next.endColumn),
+        rangeType: RANGE_TYPE.NORMAL,
     };
 
     return destRange;
@@ -645,6 +648,7 @@ export function expandToWholeSheet(worksheet: Worksheet): IRange {
         startColumn: 0,
         endRow: worksheet.getMaxRows() - 1,
         endColumn: worksheet.getMaxColumns() - 1,
+        rangeType: RANGE_TYPE.NORMAL,
     };
 }
 
@@ -657,6 +661,7 @@ function getLastArrayOfRange(startRange: IRange, direction: Direction, worksheet
                 startColumn: startRange.startColumn,
                 endRow: startRange.startRow,
                 endColumn: startRange.endColumn,
+                rangeType: RANGE_TYPE.NORMAL,
             };
 
             break;
@@ -666,6 +671,7 @@ function getLastArrayOfRange(startRange: IRange, direction: Direction, worksheet
                 startColumn: startRange.startColumn,
                 endRow: startRange.endRow,
                 endColumn: startRange.endColumn,
+                rangeType: RANGE_TYPE.NORMAL,
             };
             break;
         case Direction.LEFT:
@@ -674,6 +680,7 @@ function getLastArrayOfRange(startRange: IRange, direction: Direction, worksheet
                 startColumn: startRange.startColumn,
                 endRow: startRange.endRow,
                 endColumn: startRange.startColumn,
+                rangeType: RANGE_TYPE.NORMAL,
             };
             break;
         case Direction.RIGHT:
@@ -682,6 +689,7 @@ function getLastArrayOfRange(startRange: IRange, direction: Direction, worksheet
                 startColumn: startRange.endColumn,
                 endRow: startRange.endRow,
                 endColumn: startRange.endColumn,
+                rangeType: RANGE_TYPE.NORMAL,
             };
             break;
         default:

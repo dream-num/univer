@@ -1,4 +1,4 @@
-import { IRange } from '../Types/Interfaces/IRange';
+import { IRange, RANGE_TYPE } from '../Types/Interfaces/IRange';
 import { Nullable } from './Types';
 
 /**
@@ -11,6 +11,7 @@ export class Rectangle {
             startColumn: src.startColumn,
             endRow: src.endRow,
             endColumn: src.endColumn,
+            rangeType: src.rangeType,
         };
     }
 
@@ -19,7 +20,10 @@ export class Rectangle {
             src.endRow === target.endRow &&
             src.endColumn === target.endColumn &&
             src.startRow === target.startRow &&
-            src.startColumn === target.startColumn
+            src.startColumn === target.startColumn &&
+            (src.rangeType === target.rangeType ||
+                (src.rangeType === undefined && target.rangeType === RANGE_TYPE.NORMAL) ||
+                (target.rangeType === undefined && src.rangeType === RANGE_TYPE.NORMAL))
         );
     }
 
@@ -102,21 +106,22 @@ export class Rectangle {
             endRow,
             startColumn,
             endColumn,
+            rangeType: RANGE_TYPE.NORMAL, // TODO: this may not be accurate
         };
     }
 
-    static subtract(src: IRange, target: IRange): Nullable<IRange[]> {
-        const intersected = Rectangle.getIntersects(src, target);
-        if (!intersected) {
-            return [src];
-        }
+    // static subtract(src: IRange, target: IRange): Nullable<IRange[]> {
+    //     const intersected = Rectangle.getIntersects(src, target);
+    //     if (!intersected) {
+    //         return [src];
+    //     }
 
-        const result: IRange[] = [];
-        const { startRow, endRow, startColumn, endColumn } = intersected;
-        const { startRow: srcStartRow, endRow: srcEndRow, startColumn: srcStartColumn, endColumn: srcEndColumn } = src;
+    //     const result: IRange[] = [];
+    //     const { startRow, endRow, startColumn, endColumn } = intersected;
+    //     const { startRow: srcStartRow, endRow: srcEndRow, startColumn: srcStartColumn, endColumn: srcEndColumn } = src;
 
-        // subtract could result in eight pieces and these eight pieces and be merged to at most four pieces
-    }
+    //     // subtract could result in eight pieces and these eight pieces and be merged to at most four pieces
+    // }
 
     static contains(src: IRange, target: IRange): boolean {
         return (
@@ -138,47 +143,16 @@ export class Rectangle {
     }
 
     static union(...ranges: IRange[]): IRange {
+        // TODO: range type may not be accurate
         return ranges.reduce(
             (acc, current) => ({
                 startRow: Math.min(acc.startRow, current.startRow),
                 startColumn: Math.min(acc.startColumn, current.startColumn),
                 endRow: Math.max(acc.endRow, current.endRow),
                 endColumn: Math.max(acc.endColumn, current.endColumn),
+                rangeType: RANGE_TYPE.NORMAL,
             }),
             ranges[0]
         );
     }
-
-    // /**
-    //  * @deprecated use static methods
-    //  * @param rectangle
-    //  * @returns
-    //  */
-    // intersects(rectangle: Rectangle): boolean {
-    //     return Rectangle.intersects(this, rectangle);
-    // }
-
-    // /**
-    //  * @deprecated use static methods
-    //  * @param rectangle
-    //  * @returns
-    //  */
-    // union(rectangle: Rectangle) {
-    //     const { startRow, startColumn, endRow, endColumn } = this;
-    //     return new Rectangle(
-    //         rectangle.startRow < this.startRow ? rectangle.startRow : startRow,
-    //         rectangle.startColumn < startColumn ? rectangle.startColumn : startColumn,
-    //         rectangle.endRow > endRow ? rectangle.endRow : endRow,
-    //         rectangle.endColumn > endColumn ? rectangle.endColumn : endColumn
-    //     );
-    // }
-
-    // getData() {
-    //     return {
-    //         startRow: this.startRow,
-    //         startColumn: this.startColumn,
-    //         endRow: this.endRow,
-    //         endColumn: this.endColumn,
-    //     };
-    // }
 }

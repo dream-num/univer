@@ -86,7 +86,6 @@ export const SetBorderCommand: ICommand = {
         if (!worksheet) return false;
         const sheetMatrix = worksheet.getCellMatrix();
         const styles = workbook.getStyles();
-        const range = range;
 
         // Cells in the surrounding range may need to clear the border
         const topRangeOut = {

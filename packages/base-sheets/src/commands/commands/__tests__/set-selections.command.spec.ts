@@ -82,6 +82,7 @@ describe('Test commands used for change selections', () => {
             startColumn,
             endRow,
             endColumn,
+            rangeType: RANGE_TYPE.NORMAL,
         });
     }
 

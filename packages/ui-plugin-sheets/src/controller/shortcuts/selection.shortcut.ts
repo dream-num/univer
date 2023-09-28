@@ -1,9 +1,9 @@
 import {
-    ChangeSelectionCommand,
     ExpandSelectionCommand,
-    IChangeSelectionCommandParams,
     IExpandSelectionCommandParams,
+    IMoveSelectionCommandParams,
     ISelectAllCommandParams,
+    MoveSelectionCommand,
     SelectAllCommand,
 } from '@univerjs/base-sheets';
 import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
@@ -11,8 +11,8 @@ import { Direction, FOCUSING_SHEET } from '@univerjs/core';
 
 import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
 
-export const MoveSelectionDownShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+export const MoveSelectionDownShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
+    id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
@@ -20,8 +20,8 @@ export const MoveSelectionDownShortcutItem: IShortcutItem<IChangeSelectionComman
     },
 };
 
-export const MoveSelectionUpShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+export const MoveSelectionUpShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
+    id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_UP,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
@@ -29,8 +29,8 @@ export const MoveSelectionUpShortcutItem: IShortcutItem<IChangeSelectionCommandP
     },
 };
 
-export const MoveSelectionLeftShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+export const MoveSelectionLeftShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
+    id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
@@ -38,8 +38,8 @@ export const MoveSelectionLeftShortcutItem: IShortcutItem<IChangeSelectionComman
     },
 };
 
-export const MoveSelectionRightShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+export const MoveSelectionRightShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
+    id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
@@ -47,8 +47,8 @@ export const MoveSelectionRightShortcutItem: IShortcutItem<IChangeSelectionComma
     },
 };
 
-export const MoveSelectionTabShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+export const MoveSelectionTabShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
+    id: MoveSelectionCommand.id,
     binding: KeyCode.TAB,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
@@ -58,8 +58,8 @@ export const MoveSelectionTabShortcutItem: IShortcutItem<IChangeSelectionCommand
 
 // move selection to continuous end
 
-export const MoveSelectionEndDownShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+export const MoveSelectionEndDownShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
+    id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
@@ -68,8 +68,8 @@ export const MoveSelectionEndDownShortcutItem: IShortcutItem<IChangeSelectionCom
     },
 };
 
-export const MoveSelectionEndUpShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+export const MoveSelectionEndUpShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
+    id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_UP | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
@@ -78,8 +78,8 @@ export const MoveSelectionEndUpShortcutItem: IShortcutItem<IChangeSelectionComma
     },
 };
 
-export const MoveSelectionEndLeftShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+export const MoveSelectionEndLeftShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
+    id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
@@ -88,8 +88,8 @@ export const MoveSelectionEndLeftShortcutItem: IShortcutItem<IChangeSelectionCom
     },
 };
 
-export const MoveSelectionEndRightShortcutItem: IShortcutItem<IChangeSelectionCommandParams> = {
-    id: ChangeSelectionCommand.id,
+export const MoveSelectionEndRightShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
+    id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {

@@ -20,23 +20,25 @@ export enum RANGE_TYPE {
  *
  * means "A1:B2"
  */
-// TODO@wzhudev: Rename to IRange
 export interface IRange {
     /**
      * The start row (inclusive) of the range
      * startRow
      */
     startRow: number;
+
     /**
      * The start column (inclusive) of the range
      * startColumn
      */
     startColumn: number;
+
     /**
      * The end row (exclusive) of the range
      * endRow
      */
     endRow: number;
+
     /**
      * The end column (exclusive) of the range
      * endColumn

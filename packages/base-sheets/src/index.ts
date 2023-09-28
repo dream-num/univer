@@ -50,13 +50,13 @@ export {
 export type { ISetRangeValuesCommandParams } from './commands/commands/set-range-values.command';
 export { SetRangeValuesCommand } from './commands/commands/set-range-values.command';
 export type {
-    IChangeSelectionCommandParams,
     IExpandSelectionCommandParams,
+    IMoveSelectionCommandParams,
     ISelectAllCommandParams,
 } from './commands/commands/set-selections.command';
 export {
-    ChangeSelectionCommand,
     ExpandSelectionCommand,
+    MoveSelectionCommand,
     SelectAllCommand,
 } from './commands/commands/set-selections.command';
 export {

@@ -1,4 +1,12 @@
-import { ICurrentUniverService, IWorkbookConfig, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import {
+    ICurrentUniverService,
+    ILogService,
+    IWorkbookConfig,
+    LocaleType,
+    Plugin,
+    PluginType,
+    Univer,
+} from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
@@ -75,6 +83,9 @@ export function createCommandTestBed(workbookConfig?: IWorkbookConfig) {
 
     const currentUniverService = get(ICurrentUniverService);
     currentUniverService.focusUniverInstance('test');
+
+    const logService = get(ILogService);
+    logService.toggleLogEnabled(false); // change this to `true` to debug tests via logs
 
     return {
         univer,

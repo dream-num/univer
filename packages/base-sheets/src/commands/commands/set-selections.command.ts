@@ -5,65 +5,83 @@ import {
     ICommandService,
     ICurrentUniverService,
     IRange,
+    RANGE_TYPE,
     Rectangle,
 } from '@univerjs/core';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import {
+    checkIfShrink,
     expandToContinuousRange,
     expandToNextCell,
-    expandToNextGapCell,
+    expandToNextGapRange,
     expandToWholeSheet,
     findNextGapRange,
     findNextRange,
-    getRangeAtPosition,
+    getCellAtRowCol,
+    getStartRange,
     shrinkToNextCell,
-    shrinkToNextGapCell,
+    shrinkToNextGapRange,
 } from './utils/selection-util';
 
 // TODO@wzhudev: we also need to handle when the current selection is the whole spreadsheet, whole rows or whole columns
 
-export interface IChangeSelectionCommandParams {
+export interface IMoveSelectionCommandParams {
     direction: Direction;
     jumpOver?: boolean;
 }
 
-export const ChangeSelectionCommand: ICommand<IChangeSelectionCommandParams> = {
-    id: 'sheet.command.change-selection',
+/**
+ * Move selection
+ */
+export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
+    id: 'sheet.command.move-selection',
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const currentWorkbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
-        const currentWorksheet = currentWorkbook.getActiveSheet();
-        const selectionManagerService = accessor.get(SelectionManagerService);
-        const commandService = accessor.get(ICommandService);
+        if (!params) {
+            return false;
+        }
 
-        const selection = selectionManagerService.getLast();
-        if (!selection || !params) {
+        const workbook = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance().getWorkBook();
+        const worksheet = workbook.getActiveSheet();
+        const selection = accessor.get(SelectionManagerService).getLast();
+        if (!selection) {
             return false;
         }
 
         const { direction, jumpOver } = params;
-        const startRange = selection.range;
-        let destRange = jumpOver
-            ? findNextGapRange(startRange, direction, currentWorksheet)
-            : findNextRange(startRange, direction, currentWorksheet);
+        const { range, primary } = selection;
+        const startRange = getStartRange(range, primary, direction);
 
-        destRange = getRangeAtPosition(destRange.startRow, destRange.startColumn, currentWorksheet);
+        // the start range is from the primary selection range
+        const next = jumpOver
+            ? findNextGapRange(startRange, direction, worksheet)
+            : findNextRange(startRange, direction, worksheet);
+        const destRange = getCellAtRowCol(next.startRow, next.startColumn, worksheet);
 
         if (Rectangle.equals(destRange, startRange)) {
             return false;
         }
 
-        return commandService.executeCommand(SetSelectionsOperation.id, {
-            unitId: currentWorkbook.getUnitId(),
-            sheetId: currentWorksheet.getSheetId(),
+        return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
+            unitId: workbook.getUnitId(),
+            sheetId: worksheet.getSheetId(),
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {
                     range: Rectangle.clone(destRange),
-                    primary: getRangeAtPosition(destRange.startRow, destRange.startColumn, currentWorksheet),
+                    primary: {
+                        startRow: destRange.startRow,
+                        startColumn: destRange.startColumn,
+                        endRow: destRange.endRow,
+                        endColumn: destRange.endColumn,
+                        actualRow: next.startRow,
+                        actualColumn: next.startColumn,
+                        isMerged: destRange.isMerged,
+                        isMergedMainCell:
+                            destRange.startRow === next.startRow && destRange.startColumn === next.startColumn,
+                    },
                 },
             ],
         });
@@ -82,64 +100,48 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
     id: 'sheet.command.expand-selection',
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const currentWorkbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        if (!params) {
+            return false;
+        }
+
+        const currentWorkbook = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance().getWorkBook();
         const currentWorksheet = currentWorkbook.getActiveSheet();
-        const selectionManagerService = accessor.get(SelectionManagerService);
-        const commandService = accessor.get(ICommandService);
 
-        const selection = selectionManagerService.getLast();
-        if (!selection || !params) {
+        const selection = accessor.get(SelectionManagerService).getLast();
+        if (!selection) {
             return false;
         }
 
-        const startRange = selection.range;
-        const primary = selection.primary;
-        if (!primary) {
-            return false;
-        }
-
-        if (primary.startRow === -1) {
-            // FIXME@DR-Univer
-            // It maybe be related to click event handling. Try to click on C10 cell and use shift+arrow to expand selection.
-            throw new Error('startRow is -1! @DR-Univer');
-        }
-
+        const { range: startRange, primary } = selection;
         const { jumpOver, direction } = params;
-        const isShrink = (function isShrink() {
-            switch (direction) {
-                case Direction.DOWN:
-                    return startRange.startRow < primary.startRow;
-                case Direction.UP:
-                    return startRange.endRow > primary.endRow;
-                case Direction.LEFT:
-                    return startRange.endColumn > primary.endColumn;
-                case Direction.RIGHT:
-                    return startRange.startColumn < primary.startColumn;
-            }
-        })();
+
+        const isShrink = checkIfShrink(selection, direction, currentWorksheet);
 
         const destRange = !isShrink
             ? jumpOver
-                ? expandToNextGapCell(startRange, direction, currentWorksheet)
+                ? expandToNextGapRange(startRange, direction, currentWorksheet)
                 : expandToNextCell(startRange, direction, currentWorksheet)
             : jumpOver
-            ? shrinkToNextGapCell(startRange, primary, direction, currentWorksheet)
-            : shrinkToNextCell(startRange, primary, direction, currentWorksheet);
+            ? shrinkToNextGapRange(
+                  startRange,
+                  // TODO: should fix on SelectionManagerService's side
+                  { ...Rectangle.clone(primary), rangeType: RANGE_TYPE.NORMAL },
+                  direction,
+                  currentWorksheet
+              )
+            : shrinkToNextCell(startRange, direction, currentWorksheet);
 
         if (Rectangle.equals(destRange, startRange)) {
             return false;
         }
 
-        return commandService.executeCommand(SetSelectionsOperation.id, {
+        return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId: currentWorkbook.getUnitId(),
             sheetId: currentWorksheet.getSheetId(),
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {
                     range: destRange,
-                    // primary: expand
-                    // ? selection.primary
                     primary, // this remains unchanged
                 },
             ],
@@ -167,44 +169,41 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         SELECTED_RANGE_WORKSHEET = '';
     },
     handler: async (accessor, params = { expandToGapFirst: true, loop: false }) => {
-        const selectionManager = accessor.get(SelectionManagerService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const selection = accessor.get(SelectionManagerService).getLast();
+        const workbook = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance()?.getWorkBook();
+        const worksheet = workbook.getActiveSheet();
 
-        const currentSelection = selectionManager.getLast();
-        const currentWorkbook = currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook();
-        const currentWorksheet = currentWorkbook.getActiveSheet();
-
-        if (!currentSelection || !currentWorksheet) {
+        if (!selection || !worksheet) {
             return false;
         }
 
-        const id = `${currentWorkbook.getUnitId()}|${currentWorksheet.getSheetId()}`;
+        const id = `${workbook.getUnitId()}|${worksheet.getSheetId()}`;
         if (id !== SELECTED_RANGE_WORKSHEET) {
             RANGES_STACK = [];
             SELECTED_RANGE_WORKSHEET = id;
         }
 
-        const commandService = accessor.get(ICommandService);
-        const maxRow = currentWorksheet.getMaxRows();
-        const maxCol = currentWorksheet.getMaxColumns();
+        const maxRow = worksheet.getMaxRows();
+        const maxCol = worksheet.getMaxColumns();
         const { expandToGapFirst, loop } = params;
-        const currentRange = currentSelection.range;
+        const { range, primary } = selection;
         const isWholeSheetSelected =
-            currentRange.endColumn === maxCol - 1 &&
-            currentRange.endRow === maxRow - 1 &&
-            currentRange.startRow === 0 &&
-            currentRange.startColumn === 0;
+            range.endColumn === maxCol - 1 &&
+            range.endRow === maxRow - 1 &&
+            range.startRow === 0 &&
+            range.startColumn === 0;
 
-        if (!RANGES_STACK.some((s) => Rectangle.equals(s, currentRange))) {
+        if (!RANGES_STACK.some((s) => Rectangle.equals(s, range))) {
             RANGES_STACK = [];
-            RANGES_STACK.push(currentRange);
+            RANGES_STACK.push(range);
         }
 
         let destRange: IRange;
 
+        // determined what kind of adjustment it should get
         if (isWholeSheetSelected) {
             if (loop) {
-                const currentSelectionIndex = RANGES_STACK.findIndex((s) => Rectangle.equals(s, currentRange));
+                const currentSelectionIndex = RANGES_STACK.findIndex((s) => Rectangle.equals(s, range));
                 if (currentSelectionIndex !== RANGES_STACK.length - 1) {
                     return false;
                 }
@@ -214,40 +213,27 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
                 return false;
             }
         } else if (expandToGapFirst) {
-            destRange = expandToContinuousRange(
-                currentRange,
-                { left: true, right: true, up: true, down: true },
-                currentWorksheet
-            );
-
-            if (Rectangle.equals(destRange, currentRange)) {
-                destRange = expandToWholeSheet(currentWorksheet);
+            destRange = expandToContinuousRange(range, { left: true, right: true, up: true, down: true }, worksheet);
+            if (Rectangle.equals(destRange, range)) {
+                // already to gaps
+                destRange = expandToWholeSheet(worksheet);
             }
         } else {
-            destRange = expandToWholeSheet(currentWorksheet);
+            destRange = expandToWholeSheet(worksheet);
         }
 
         if (!RANGES_STACK.some((s) => Rectangle.equals(s, destRange))) {
             RANGES_STACK.push(destRange);
         }
 
-        return commandService.executeCommand(SetSelectionsOperation.id, {
-            unitId: currentWorkbook.getUnitId(),
-            sheetId: currentWorksheet.getSheetId(),
+        return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
+            unitId: workbook.getUnitId(),
+            sheetId: worksheet.getSheetId(),
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {
                     range: destRange,
-                    primary: {
-                        row: destRange.startRow,
-                        column: destRange.startColumn,
-                        isMerged: false,
-                        isMergedMainCell: false,
-                        startRow: destRange.startRow,
-                        startColumn: destRange.startColumn,
-                        endRow: destRange.endRow,
-                        endColumn: destRange.endColumn,
-                    },
+                    primary, // this remains unchanged
                 },
             ],
         });

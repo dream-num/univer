@@ -1,6 +1,6 @@
 import {
-    ChangeSelectionCommand,
     ExpandSelectionCommand,
+    MoveSelectionCommand,
     SelectAllCommand,
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -132,7 +132,7 @@ export class SheetUIController extends Disposable {
 
         // init commands
         [
-            ChangeSelectionCommand,
+            MoveSelectionCommand,
             ExpandSelectionCommand,
             SelectAllCommand,
             SetBoldCommand,

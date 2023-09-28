@@ -1,30 +1,29 @@
-import { Direction, ICommandService, RANGE_TYPE, Univer } from '@univerjs/core';
+/* eslint-disable no-magic-numbers */
+
+import { Direction, ICommandService, IWorkbookConfig, RANGE_TYPE, Univer } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import {
-    ChangeSelectionCommand,
-    IChangeSelectionCommandParams,
+    ExpandSelectionCommand,
+    IExpandSelectionCommandParams,
+    IMoveSelectionCommandParams,
     ISelectAllCommandParams,
+    MoveSelectionCommand,
     SelectAllCommand,
 } from '../set-selections.command';
-import { createSelectionCommandTestBed } from './create-selection-command-test-bed';
+import {
+    createSelectionCommandTestBed,
+    SELECTION_WITH_EMPTY_CELLS_DATA,
+    SELECTION_WITH_MERGED_CELLS_DATA,
+} from './create-selection-command-test-bed';
 
 describe('Test commands used for change selections', () => {
-    let univer: Univer;
+    let univer: Univer | null = null;
     let get: Injector['get'];
     let commandService: ICommandService;
     let selectionManagerService: SelectionManagerService;
-
-    beforeEach(() => {
-        const testBed = createSelectionCommandTestBed();
-        univer = testBed.univer;
-        get = testBed.get;
-
-        commandService = get(ICommandService);
-        selectionManagerService = get(SelectionManagerService);
-    });
 
     function select00() {
         selectionManagerService.setCurrentSelection({
@@ -51,7 +50,16 @@ describe('Test commands used for change selections', () => {
         ]);
     }
 
-    function select(startRow: number, startColumn: number, endRow: number, endColumn: number) {
+    function select(
+        startRow: number,
+        startColumn: number,
+        endRow: number,
+        endColumn: number,
+        actualRow: number,
+        actualColumn: number,
+        isMerged: boolean,
+        isMergedMainCell: boolean
+    ) {
         selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId: 'test',
@@ -66,10 +74,10 @@ describe('Test commands used for change selections', () => {
                     startColumn,
                     endRow,
                     endColumn,
-                    actualRow: startRow,
-                    actualColumn: startColumn,
-                    isMerged: false,
-                    isMergedMainCell: false,
+                    actualRow,
+                    actualColumn,
+                    isMerged,
+                    isMergedMainCell,
                 },
                 style: null,
             },
@@ -86,75 +94,289 @@ describe('Test commands used for change selections', () => {
         });
     }
 
-    afterEach(() => {
-        univer.dispose();
-    });
+    function disposeTestBed() {
+        univer?.dispose();
+        univer = null;
+    }
 
-    describe('Simple movement', () => {
+    function prepareTestBed(snapshot?: IWorkbookConfig) {
+        const testBed = createSelectionCommandTestBed(snapshot);
+        univer = testBed.univer;
+        get = testBed.get;
+
+        commandService = get(ICommandService);
+        selectionManagerService = get(SelectionManagerService);
+    }
+
+    afterEach(disposeTestBed);
+
+    describe('Simple movement to next cell', () => {
+        beforeEach(() => prepareTestBed());
+
         it('Should move selection with command', async () => {
             select00();
 
-            await commandService.executeCommand<IChangeSelectionCommandParams>(ChangeSelectionCommand.id, {
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
             });
             expectSelectionToBe(0, 0, 0, 0);
 
-            await commandService.executeCommand<IChangeSelectionCommandParams>(ChangeSelectionCommand.id, {
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.RIGHT,
             });
             expectSelectionToBe(0, 1, 0, 1);
 
-            await commandService.executeCommand<IChangeSelectionCommandParams>(ChangeSelectionCommand.id, {
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.DOWN,
             });
             expectSelectionToBe(1, 1, 1, 1);
 
-            await commandService.executeCommand<IChangeSelectionCommandParams>(ChangeSelectionCommand.id, {
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
             });
             expectSelectionToBe(1, 0, 1, 0);
 
-            await commandService.executeCommand<IChangeSelectionCommandParams>(ChangeSelectionCommand.id, {
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.UP,
             });
             expectSelectionToBe(0, 0, 0, 0);
         });
+    });
 
-        describe('With merged cells', () => {
-            it('Should select merged cell and move to next cell', async () => {
-                // FIXME: 在跨越选区的时候，需要考虑选区的合并单元格，特别是这样的情形
-                // D4 | E4 | F4
-                // ---|    |---
-                // D5 | E5 | F5
-                // 从 F5 向左移动两次，应该选中 D5 而非 D4
-                // 所以一个选区信息可能有三个部分，选区的范围，选区的单元格范围，选区的合并单元格范围
-                // Google Sheet 和腾讯文档 Sheet 的行为都是这样
-                expect(true).toBeTruthy();
+    describe('Move cell to/through merged cells', () => {
+        beforeEach(() => prepareTestBed(SELECTION_WITH_MERGED_CELLS_DATA));
+
+        /**
+         * A1 | B1 | C1
+         * ---|    |----
+         * A2 |    | C2
+         *
+         * When user clicks on C2 and move cursor left twice, A2 should not selected not A1.
+         */
+        it('Should select merged cell and move to next cell', async () => {
+            select00();
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.LEFT,
             });
+            expectSelectionToBe(0, 0, 0, 0);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            });
+            expectSelectionToBe(0, 1, 1, 1);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            });
+            expectSelectionToBe(0, 2, 0, 2);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.DOWN,
+            });
+            expectSelectionToBe(1, 2, 1, 2);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.LEFT,
+            });
+            expectSelectionToBe(0, 1, 1, 1);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.LEFT,
+            });
+            expectSelectionToBe(1, 0, 1, 0);
         });
     });
 
-    describe('Move to next gap cell', () => {
-        it('placeholder', () => {
-            expect(true).toBeTruthy();
+    describe('Move to next cell that has value (skip cell)', () => {
+        beforeEach(() => prepareTestBed(SELECTION_WITH_EMPTY_CELLS_DATA));
+
+        it('Works on move', async () => {
+            select00();
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                jumpOver: true,
+            });
+            expectSelectionToBe(0, 2, 0, 2);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                jumpOver: true,
+            });
+            expectSelectionToBe(0, 5, 1, 6);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                jumpOver: true,
+            });
+            expectSelectionToBe(0, 19, 0, 19);
         });
     });
 
-    describe('Expand to next selection or shrink', () => {
-        it('placeholder', () => {
-            expect(true).toBeTruthy();
+    describe('Expand to next selection or shrink to previous selection', () => {
+        beforeEach(() => prepareTestBed(SELECTION_WITH_EMPTY_CELLS_DATA));
+
+        // it('Should not expand when hitting worksheet boundary', () => {})
+
+        it('Works on expand', async () => {
+            select00();
+
+            // expand
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            });
+            expectSelectionToBe(0, 0, 0, 1); // A1:B1
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            });
+            expectSelectionToBe(0, 0, 0, 2); // A1:C1
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            });
+            expectSelectionToBe(0, 0, 0, 3); // A1:D1
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            });
+            expectSelectionToBe(0, 0, 0, 4); // A1:E1
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            });
+            expectSelectionToBe(0, 0, 1, 6); // A1:G2, because that is a merged cell
+
+            // shrink
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.LEFT,
+            });
+            expectSelectionToBe(0, 0, 1, 4); // A1:E2
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.LEFT,
+            });
+            expectSelectionToBe(0, 0, 1, 3); // A1:D2
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.LEFT,
+            });
+            expectSelectionToBe(0, 0, 1, 2); // A1:C2
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.LEFT,
+            });
+            expectSelectionToBe(0, 0, 1, 1); // A1:B2
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.LEFT,
+            });
+            expectSelectionToBe(0, 0, 1, 0); // A1:A2
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.LEFT,
+            });
+            expectSelectionToBe(0, 0, 1, 0); // A1:A2, remain unchanged when hitting boundary
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.UP,
+            });
+            expectSelectionToBe(0, 0, 0, 0); // A1:A1
         });
     });
 
-    describe('Expand to next gap position or shrink', () => {
-        it('placeholder', () => {
-            expect(true).toBeTruthy();
+    /**
+     * A1 | B1 | C1
+     * ---|    |----
+     * A2 |    | C2
+     *
+     * When A1:C1 is selected and B2 is the primary cell, shrink should only shrink to one side.
+     */
+    describe('Shrink edge case', () => {
+        beforeEach(() => prepareTestBed(SELECTION_WITH_MERGED_CELLS_DATA));
+
+        it('Should shrink on side when primary is in the middle of selections', async () => {
+            select(0, 0, 1, 2, 1, 1, true, false);
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.LEFT,
+            });
+            expectSelectionToBe(0, 0, 1, 1);
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            });
+            expectSelectionToBe(0, 1, 1, 1);
         });
     });
 
-    describe('Expand selection', () => {
+    describe('Expand to next gap position or shrink to previous gap', () => {
+        beforeEach(() => prepareTestBed(SELECTION_WITH_EMPTY_CELLS_DATA));
+
+        it('Works on gap expand', async () => {
+            select00();
+
+            // expand
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                jumpOver: true,
+            });
+            expectSelectionToBe(0, 0, 0, 2); // A1:C1
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                jumpOver: true,
+            });
+            expectSelectionToBe(0, 0, 1, 6); // A1:G2, because that is a merged cell
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                jumpOver: true,
+            });
+            expectSelectionToBe(0, 0, 1, 19);
+
+            // shrink
+
+            console.log('debug', selectionManagerService.getLast());
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.LEFT,
+                jumpOver: true,
+            });
+            expectSelectionToBe(0, 0, 1, 6); // A1:G2
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.LEFT,
+                jumpOver: true,
+            });
+            expectSelectionToBe(0, 0, 1, 2); // A1:C2
+
+            await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
+                direction: Direction.LEFT,
+                jumpOver: true,
+            });
+            expectSelectionToBe(0, 0, 1, 0); // A1:A2
+        });
+    });
+
+    describe('Select all', () => {
+        beforeEach(() => prepareTestBed());
+
         it('Should first select all neighbor cells, and then the whole sheet', async () => {
             select00();
+
+            const unchangedPrimaryInfo = {
+                startRow: 0,
+                startColumn: 0,
+                endRow: 0,
+                endColumn: 0,
+                actualRow: 0,
+                actualColumn: 0,
+                isMerged: false,
+                isMergedMainCell: false,
+            };
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
                 loop: true,
@@ -167,6 +389,7 @@ describe('Test commands used for change selections', () => {
                 endColumn: 1,
                 rangeType: RANGE_TYPE.NORMAL,
             });
+            expect(selectionManagerService.getLast()!.primary).toEqual(unchangedPrimaryInfo);
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
                 loop: true,
@@ -179,6 +402,7 @@ describe('Test commands used for change selections', () => {
                 endColumn: 19,
                 rangeType: RANGE_TYPE.NORMAL,
             });
+            expect(selectionManagerService.getLast()!.primary).toEqual(unchangedPrimaryInfo);
 
             await commandService.executeCommand<ISelectAllCommandParams>(SelectAllCommand.id, {
                 loop: true,
@@ -191,6 +415,7 @@ describe('Test commands used for change selections', () => {
                 endColumn: 0,
                 rangeType: RANGE_TYPE.NORMAL,
             });
+            expect(selectionManagerService.getLast()!.primary).toEqual(unchangedPrimaryInfo);
         });
 
         it('Should directly select all if `expandToGapFirst` is false', async () => {

@@ -271,14 +271,10 @@ export class InputManager {
                         eventData.inputIndex === PointerInput.MouseWheelZ)
                 ) {
                     this._onMouseWheel(evt as IWheelEvent);
-                }
-
-                if (hasEnter && eventData.currentState === 2) {
+                } else if (hasEnter && eventData.currentState === 2) {
                     // this._onPointerUp(evt as IPointerEvent);
                     this._onPointerEnter(evt as IPointerEvent);
-                }
-
-                if (hasLeave && eventData.currentState === 3) {
+                } else if (hasLeave && eventData.currentState === 3) {
                     // this._onPointerUp(evt as IPointerEvent);
                     this._onPointerLeave(evt as IPointerEvent);
                 }

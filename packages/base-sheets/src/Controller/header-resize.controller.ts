@@ -5,6 +5,7 @@ import {
     IRenderManagerService,
     ISelectionTransformerShapeManager,
     Rect,
+    Vector2,
 } from '@univerjs/base-render';
 import {
     Disposable,
@@ -302,7 +303,7 @@ export class HeaderResizeController extends Disposable {
 
             const viewPort = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
 
-            const scrollBarVerticalHeight = (viewPort?.getScrollBar()?.verticalBarRect.width || 0) + 10;
+            const scrollBarVerticalWidth = (viewPort?.getScrollBar()?.verticalBarRect.width || 0) + 10;
 
             const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
 
@@ -340,6 +341,12 @@ export class HeaderResizeController extends Disposable {
             scene.disableEvent();
 
             this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                const relativeCoords = scene.getRelativeCoord(
+                    Vector2.FromArray([this._startOffsetX, this._startOffsetY])
+                );
+
+                const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords);
+
                 const transformCoord = getTransformCoord(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
 
                 const { x: moveOffsetX, y: moveOffsetY } = transformCoord;
@@ -350,8 +357,8 @@ export class HeaderResizeController extends Disposable {
                     moveChangeX = -(cell.endX - cell.startX) + 2;
                     return;
                 }
-                if (currentOffsetX + moveChangeX > canvasMaxWidth - scrollBarVerticalHeight) {
-                    moveChangeX = canvasMaxHeight - currentOffsetX - scrollBarVerticalHeight;
+                if (currentOffsetX + moveChangeX > canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x) {
+                    moveChangeX = canvasMaxHeight - currentOffsetX - scrollBarVerticalWidth;
                     return;
                 }
 
@@ -425,7 +432,7 @@ export class HeaderResizeController extends Disposable {
 
             const viewPort = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
 
-            const scrollBarHorizontalWidth = (viewPort?.getScrollBar()?.horizonBarRect.height || 0) + 10;
+            const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonBarRect.height || 0) + 10;
 
             const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
 
@@ -461,6 +468,12 @@ export class HeaderResizeController extends Disposable {
             scene.disableEvent();
 
             this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                const relativeCoords = scene.getRelativeCoord(
+                    Vector2.FromArray([this._startOffsetX, this._startOffsetY])
+                );
+
+                const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords);
+
                 const transformCoord = getTransformCoord(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
 
                 const { x: moveOffsetX, y: moveOffsetY } = transformCoord;
@@ -471,8 +484,8 @@ export class HeaderResizeController extends Disposable {
                     moveChangeY = -(cell.endY - cell.startY) + 2;
                     return;
                 }
-                if (currentOffsetY + moveChangeY > canvasMaxHeight - scrollBarHorizontalWidth) {
-                    moveChangeY = canvasMaxHeight - currentOffsetY - scrollBarHorizontalWidth;
+                if (currentOffsetY + moveChangeY > canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y) {
+                    moveChangeY = canvasMaxHeight - currentOffsetY - scrollBarHorizontalHeight;
                     return;
                 }
 

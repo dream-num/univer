@@ -21,6 +21,10 @@ import { Inject } from '@wendellhu/redi';
 import { getCoordByOffset, getSheetObject, getTransformCoord, ISheetObjectParam } from '../Basics/component-tools';
 import { CANVAS_VIEW_KEY, SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import {
+    DeltaWorksheetColumnWidthCommand,
+    IDeltaWorksheetColumnWidthCommandParams,
+} from '../commands/commands/set-worksheet-col-width.command';
+import {
     DeltaWorksheetRowHeightCommand,
     IDeltaWorksheetRowHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
@@ -376,7 +380,13 @@ export class HeaderResizeController extends Disposable {
                 this._resizeHelperShape = null;
                 this._columnResizeRect?.hide();
 
-                // alert(`${this._currentColumn}:${moveChangeX}`);
+                this._commandService.executeCommand<IDeltaWorksheetColumnWidthCommandParams>(
+                    DeltaWorksheetColumnWidthCommand.id,
+                    {
+                        deltaX: moveChangeX,
+                        anchorCol: this._currentColumn,
+                    }
+                );
             });
         });
 
@@ -501,7 +511,6 @@ export class HeaderResizeController extends Disposable {
                         anchorRow: this._currentRow,
                     }
                 );
-                // alert(`${this._currentRow}:${moveChangeY}`);
             });
         });
 

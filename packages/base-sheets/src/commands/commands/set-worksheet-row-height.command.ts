@@ -22,7 +22,7 @@ export interface IDeltaWorksheetRowHeightCommand {
 
 export const DeltaWorksheetRowHeightCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command-delta-worksheet-row-height',
+    id: 'sheet.command.delta-row-height',
     handler: async (accessor: IAccessor, params: IDeltaWorksheetRowHeightCommand) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getRangeDatas();

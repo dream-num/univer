@@ -46,7 +46,10 @@ import {
 } from '../commands/commands/set-style.command';
 import { SetTabColorCommand } from '../commands/commands/set-tab-color.command';
 import { SetWorksheetActivateCommand } from '../commands/commands/set-worksheet-activate.command';
-import { SetWorksheetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
+import {
+    DeltaWorksheetColumnWidthCommand,
+    SetWorksheetColWidthCommand,
+} from '../commands/commands/set-worksheet-col-width.command';
 import { SetWorksheetHideCommand } from '../commands/commands/set-worksheet-hide.command';
 import { SetWorksheetNameCommand } from '../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-order.command';
@@ -139,6 +142,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetOrderMutation,
 
             DeltaWorksheetRowHeightCommand,
+            DeltaWorksheetColumnWidthCommand,
 
             // #endregion
 

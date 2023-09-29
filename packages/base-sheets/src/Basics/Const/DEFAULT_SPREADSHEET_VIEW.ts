@@ -1,6 +1,9 @@
 export enum CANVAS_VIEW_KEY {
     MAIN_SCENE = 'mainScene',
     VIEW_MAIN = 'viewMain',
+    VIEW_MAIN_LEFT_TOP = 'viewMainLeftTop',
+    VIEW_MAIN_TOP = 'viewMainTop',
+    VIEW_MAIN_LEFT = 'viewMainLeft',
     VIEW_TOP = 'viewTop',
     VIEW_LEFT = 'viewLeft',
     VIEW_LEFT_TOP = 'viewLeftTop',

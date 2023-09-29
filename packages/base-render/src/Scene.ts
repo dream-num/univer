@@ -428,7 +428,15 @@ export class Scene extends ThinScene {
         return this;
     }
 
-    removeViewport() {}
+    override removeViewport(key: string) {
+        for (let i = 0, len = this._viewports.length; i < len; i++) {
+            const viewport = this._viewports[i];
+            if (viewport.viewPortKey === key) {
+                this._viewports.splice(i, 1);
+                return viewport;
+            }
+        }
+    }
 
     override getViewports() {
         return this._viewports;

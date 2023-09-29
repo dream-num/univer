@@ -2,6 +2,7 @@
 export * from './ICellData';
 export * from './IColumnData';
 export * from './IDocumentData';
+export * from './IFreeze';
 export * from './IImageProperties';
 export * from './INamedRange';
 export * from './IObserveData';

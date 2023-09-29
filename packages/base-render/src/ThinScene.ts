@@ -183,4 +183,6 @@ export abstract class ThinScene {
     getViewports(): any[] {
         return [];
     }
+
+    removeViewport(key: string) {}
 }

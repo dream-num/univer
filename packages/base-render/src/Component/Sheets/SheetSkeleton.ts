@@ -413,7 +413,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     getNoMergeCellPositionByIndex(rowIndex: number, columnIndex: number, scaleX: number, scaleY: number) {
-        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = this;
+        const {
+            rowHeightAccumulation,
+            columnWidthAccumulation,
+            rowHeaderWidthAndMarginLeft,
+            columnHeaderHeightAndMarginTop,
+        } = this;
         // const { scaleX = 1, scaleY = 1 } = this.getParentScale();
         let { startY, endY, startX, endX } = getCellPositionByIndex(
             rowIndex,
@@ -422,10 +427,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnWidthAccumulation
         );
 
-        startY = fixLineWidthByScale(startY + columnHeaderHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnHeaderHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowHeaderWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowHeaderWidth, scaleX);
+        startY = fixLineWidthByScale(startY + columnHeaderHeightAndMarginTop, scaleY);
+        endY = fixLineWidthByScale(endY + columnHeaderHeightAndMarginTop, scaleY);
+        startX = fixLineWidthByScale(startX + rowHeaderWidthAndMarginLeft, scaleX);
+        endX = fixLineWidthByScale(endX + rowHeaderWidthAndMarginLeft, scaleX);
 
         return {
             startY,
@@ -508,7 +513,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { x: scrollX } = scrollXY;
 
         // so we should map physical positions to ideal positions
-        offsetX = offsetX / scaleX + scrollX - this.rowHeaderWidth;
+        offsetX = offsetX / scaleX + scrollX - this.rowHeaderWidthAndMarginLeft;
 
         return offsetX;
     }
@@ -517,44 +522,49 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { y: scrollY } = scrollXY;
 
         // these values are not affected by zooming (ideal positions)
-        offsetY = offsetY / scaleY + scrollY - this.columnHeaderHeight;
+        offsetY = offsetY / scaleY + scrollY - this.columnHeaderHeightAndMarginTop;
 
         return offsetY;
     }
 
     getOffsetByPositionX(column: number): number {
-        const { columnWidthAccumulation, rowHeaderWidth } = this;
+        const { columnWidthAccumulation, rowHeaderWidthAndMarginLeft } = this;
 
         const lastColumnIndex = columnWidthAccumulation.length - 1;
         const columnValue = columnWidthAccumulation[column];
         if (columnValue != null) {
-            return columnValue + rowHeaderWidth;
+            return columnValue + rowHeaderWidthAndMarginLeft;
         }
 
         if (column < 0) {
-            return rowHeaderWidth;
+            return rowHeaderWidthAndMarginLeft;
         }
 
-        return columnWidthAccumulation[lastColumnIndex] + rowHeaderWidth;
+        return columnWidthAccumulation[lastColumnIndex] + rowHeaderWidthAndMarginLeft;
     }
 
     getOffsetByPositionY(row: number) {
-        const { rowHeightAccumulation, columnHeaderHeight } = this;
+        const { rowHeightAccumulation, columnHeaderHeightAndMarginTop } = this;
         const lastRowIndex = rowHeightAccumulation.length - 1;
         const rowValue = rowHeightAccumulation[row];
         if (rowValue != null) {
-            return rowValue + columnHeaderHeight;
+            return rowValue + columnHeaderHeightAndMarginTop;
         }
 
         if (row < 0) {
-            return columnHeaderHeight;
+            return columnHeaderHeightAndMarginTop;
         }
 
-        return rowHeightAccumulation[lastRowIndex] + columnHeaderHeight;
+        return rowHeightAccumulation[lastRowIndex] + columnHeaderHeightAndMarginTop;
     }
 
     getCellByIndex(row: number, column: number, scaleX: number, scaleY: number) {
-        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = this;
+        const {
+            rowHeightAccumulation,
+            columnWidthAccumulation,
+            rowHeaderWidthAndMarginLeft,
+            columnHeaderHeightAndMarginTop,
+        } = this;
 
         const primary = getCellByIndex(
             row,
@@ -566,12 +576,51 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { isMerged, isMergedMainCell } = primary;
         let { startY, endY, startX, endX, mergeInfo } = primary;
 
-        startY = fixLineWidthByScale(startY + columnHeaderHeight, scaleY);
-        endY = fixLineWidthByScale(endY + columnHeaderHeight, scaleY);
-        startX = fixLineWidthByScale(startX + rowHeaderWidth, scaleX);
-        endX = fixLineWidthByScale(endX + rowHeaderWidth, scaleX);
+        startY = fixLineWidthByScale(startY + columnHeaderHeightAndMarginTop, scaleY);
+        endY = fixLineWidthByScale(endY + columnHeaderHeightAndMarginTop, scaleY);
+        startX = fixLineWidthByScale(startX + rowHeaderWidthAndMarginLeft, scaleX);
+        endX = fixLineWidthByScale(endX + rowHeaderWidthAndMarginLeft, scaleX);
 
-        mergeInfo = mergeInfoOffset(mergeInfo, rowHeaderWidth, columnHeaderHeight, scaleX, scaleY);
+        mergeInfo = mergeInfoOffset(
+            mergeInfo,
+            rowHeaderWidthAndMarginLeft,
+            columnHeaderHeightAndMarginTop,
+            scaleX,
+            scaleY
+        );
+
+        return {
+            actualRow: row,
+            actualColumn: column,
+            startY,
+            endY,
+            startX,
+            endX,
+            isMerged,
+            isMergedMainCell,
+            mergeInfo,
+        };
+    }
+
+    getCellByIndexWithNoHeader(row: number, column: number, scaleX: number, scaleY: number) {
+        const { rowHeightAccumulation, columnWidthAccumulation } = this;
+
+        const primary = getCellByIndex(
+            row,
+            column,
+            rowHeightAccumulation,
+            columnWidthAccumulation,
+            this._config.mergeData
+        );
+        const { isMerged, isMergedMainCell } = primary;
+        let { startY, endY, startX, endX, mergeInfo } = primary;
+
+        startY = fixLineWidthByScale(startY, scaleY);
+        endY = fixLineWidthByScale(endY, scaleY);
+        startX = fixLineWidthByScale(startX, scaleX);
+        endX = fixLineWidthByScale(endX, scaleX);
+
+        mergeInfo = mergeInfoOffset(mergeInfo, 0, 0, scaleX, scaleY);
 
         return {
             actualRow: row,
@@ -657,8 +706,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         let dataset_col_st = -1;
         let dataset_col_ed = -1;
 
-        dataset_row_st = searchArray(rowHeightAccumulation, bounds.tl.y - this.columnHeaderHeight);
-        dataset_row_ed = searchArray(rowHeightAccumulation, bounds.bl.y - this.columnHeaderHeight);
+        dataset_row_st = searchArray(rowHeightAccumulation, bounds.tl.y - this.columnHeaderHeightAndMarginTop);
+        dataset_row_ed = searchArray(rowHeightAccumulation, bounds.bl.y - this.columnHeaderHeightAndMarginTop);
 
         if (dataset_row_st === -1) {
             dataset_row_st = 0;
@@ -672,8 +721,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             dataset_row_ed = rhaLength - 1;
         }
 
-        dataset_col_st = searchArray(columnWidthAccumulation, bounds.tl.x - this.rowHeaderWidth);
-        dataset_col_ed = searchArray(columnWidthAccumulation, bounds.tr.x - this.rowHeaderWidth);
+        dataset_col_st = searchArray(columnWidthAccumulation, bounds.tl.x - this.rowHeaderWidthAndMarginLeft);
+        dataset_col_ed = searchArray(columnWidthAccumulation, bounds.tr.x - this.rowHeaderWidthAndMarginLeft);
 
         if (dataset_col_st === -1) {
             dataset_col_st = 0;

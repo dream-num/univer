@@ -26,7 +26,6 @@ export const SetWorksheetRowHeightCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         const selections = selectionManagerService.getRangeDatas();
-        console.info('current selections', selections);
         if (!selections?.length) return false;
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService

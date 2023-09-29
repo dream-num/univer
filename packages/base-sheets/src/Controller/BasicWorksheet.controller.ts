@@ -46,17 +46,11 @@ import {
 } from '../commands/commands/set-style.command';
 import { SetTabColorCommand } from '../commands/commands/set-tab-color.command';
 import { SetWorksheetActivateCommand } from '../commands/commands/set-worksheet-activate.command';
-import {
-    DeltaWorksheetColumnWidthCommand,
-    SetWorksheetColWidthCommand,
-} from '../commands/commands/set-worksheet-col-width.command';
+import { DeltaColumnWidthCommand, SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
 import { SetWorksheetHideCommand } from '../commands/commands/set-worksheet-hide.command';
 import { SetWorksheetNameCommand } from '../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-order.command';
-import {
-    DeltaWorksheetRowHeightCommand,
-    SetWorksheetRowHeightCommand,
-} from '../commands/commands/set-worksheet-row-height.command';
+import { DeltaRowHeightCommand, SetRowHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetRowHideCommand } from '../commands/commands/set-worksheet-row-hide.command';
 import { SetWorksheetRowShowCommand } from '../commands/commands/set-worksheet-row-show.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
@@ -130,9 +124,9 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             RemoveColCommand,
             RemoveColMutation,
 
-            SetWorksheetColWidthCommand,
+            SetColWidthCommand,
             SetWorksheetColWidthMutation,
-            SetWorksheetRowHeightCommand,
+            SetRowHeightCommand,
             SetWorksheetRowHeightMutation,
             SetWorksheetRowHideCommand,
             SetWorksheetRowHideMutation,
@@ -141,8 +135,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetOrderCommand,
             SetWorksheetOrderMutation,
 
-            DeltaWorksheetRowHeightCommand,
-            DeltaWorksheetColumnWidthCommand,
+            DeltaRowHeightCommand,
+            DeltaColumnWidthCommand,
 
             // #endregion
 

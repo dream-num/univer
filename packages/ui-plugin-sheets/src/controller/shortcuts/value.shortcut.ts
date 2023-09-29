@@ -4,6 +4,7 @@ import { FOCUSING_SHEET } from '@univerjs/core';
 
 export const ClearSelectionValueShortcutItem: IShortcutItem = {
     id: ClearSelectionContentCommand.id,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: (contextService) =>
+        contextService.getContextValue(FOCUSING_SHEET) && document.activeElement?.tagName === 'canvas',
     binding: KeyCode.BACKSPACE,
 };

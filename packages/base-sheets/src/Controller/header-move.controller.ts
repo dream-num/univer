@@ -66,9 +66,13 @@ export class HeaderMoveController extends Disposable {
 
     private _scrollTimer!: ScrollTimer;
 
-    private _changeToColumn: number = -Infinity;
+    private _changeFromColumn = -1;
 
-    private _changeToRow: number = -Infinity;
+    private _changeFromRow = -1;
+
+    private _changeToColumn = -1;
+
+    private _changeToRow = -1;
 
     override dispose(): void {
         this._moveHelperBackgroundShape?.dispose();
@@ -196,6 +200,12 @@ export class HeaderMoveController extends Disposable {
                     skeleton
                 );
 
+                if (initialType === HEADER_MOVE_TYPE.ROW) {
+                    this._changeFromRow = row;
+                } else {
+                    this._changeFromColumn = column;
+                }
+
                 const matchSelectionData = this._checkInHeaderRange(
                     initialType === HEADER_MOVE_TYPE.ROW ? row : column,
                     initialType
@@ -246,9 +256,13 @@ export class HeaderMoveController extends Disposable {
                         console.log(this._changeToRow);
                         // this._commandService.executeCommand();
                         // alert(`moveColumnTo: ${this._changeToRow}`);
+
+                        this._changeToRow = this._changeFromRow = -1;
                     } else {
                         console.log(this._changeToColumn);
                         // alert(`moveColumnTo: ${this._changeToColumn}`);
+
+                        this._changeToColumn = this._changeFromColumn = -1;
                     }
                 });
             })
@@ -368,7 +382,7 @@ export class HeaderMoveController extends Disposable {
     }
 
     private _checkInHeaderRange(rowOrColumn: number, type: HEADER_MOVE_TYPE = HEADER_MOVE_TYPE.ROW) {
-        const rangeDatas = this._selectionManagerService.getSelectionDatas();
+        const rangeDatas = this._selectionManagerService.getSelections();
 
         const matchSelectionData = rangeDatas?.find((data) => {
             const range = data.range;

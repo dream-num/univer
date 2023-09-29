@@ -5,6 +5,7 @@ import {
     ICurrentUniverService,
     IUndoRedoService,
     RANGE_TYPE,
+    Rectangle,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -15,17 +16,17 @@ import {
     SetWorksheetColWidthMutationFactory,
 } from '../mutations/set-worksheet-col-width.mutation';
 
-export interface IDeltaWorksheetColumnWidthCommandParams {
+export interface IDeltaColumnWidthCommandParams {
     anchorCol: number;
     deltaX: number;
 }
 
-export const DeltaWorksheetColumnWidthCommand: ICommand<IDeltaWorksheetColumnWidthCommandParams> = {
+export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.delta-column-width',
-    handler: async (accessor: IAccessor, params: IDeltaWorksheetColumnWidthCommandParams) => {
+    handler: async (accessor: IAccessor, params: IDeltaColumnWidthCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getRangeDatas();
+        const selections = selectionManagerService.getSelections();
         if (!selections?.length) {
             return false;
         }
@@ -40,8 +41,9 @@ export const DeltaWorksheetColumnWidthCommand: ICommand<IDeltaWorksheetColumnWid
         const anchorColWidth = worksheet.getColumnWidth(anchorCol);
         const destColumnWidth = anchorColWidth + deltaX;
 
-        const colSelections = selections.filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
-        const rangeType = colSelections.some((r) => {
+        const colSelections = selections.filter((s) => s.range.rangeType === RANGE_TYPE.COLUMN);
+        const rangeType = colSelections.some((s) => {
+            const r = s.range;
             if (r.startColumn <= anchorCol && anchorCol <= r.endColumn) {
                 return true;
             }
@@ -56,7 +58,7 @@ export const DeltaWorksheetColumnWidthCommand: ICommand<IDeltaWorksheetColumnWid
             redoMutationParams = {
                 worksheetId,
                 workbookId,
-                ranges: colSelections,
+                ranges: colSelections.map((s) => Rectangle.clone(s.range)),
                 colWidth: destColumnWidth,
             };
         } else {
@@ -100,14 +102,14 @@ export const DeltaWorksheetColumnWidthCommand: ICommand<IDeltaWorksheetColumnWid
     },
 };
 
-export interface SetWorksheetColWidthCommandParams {
+export interface ISetColWidthCommandParams {
     value: number;
 }
 
-export const SetWorksheetColWidthCommand: ICommand = {
+export const SetColWidthCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-col-width',
-    handler: async (accessor: IAccessor, params: SetWorksheetColWidthCommandParams) => {
+    handler: async (accessor: IAccessor, params: ISetColWidthCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

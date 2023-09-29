@@ -49,7 +49,7 @@ describe('Test style commands', () => {
     });
 
     afterEach(() => {
-        // univer.dispose();
+        univer.dispose();
     });
 
     describe('set border style', () => {

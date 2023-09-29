@@ -94,12 +94,13 @@ export class SelectionManagerService implements IDisposable {
         return this._getSelectionDatas(param);
     }
 
-    getSelectionDatas(): Readonly<Nullable<ISelectionWithStyle[]>> {
+    getSelections(): Readonly<Nullable<ISelectionWithStyle[]>> {
         return this._getSelectionDatas(this._currentSelection);
     }
 
+    /** @deprecated use getSelectionsData instead */
     getRangeDatas(): Nullable<IRange[]> {
-        const selectionDataList = this.getSelectionDatas();
+        const selectionDataList = this.getSelections();
         if (selectionDataList == null) {
             return;
         }

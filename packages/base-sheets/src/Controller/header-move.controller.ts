@@ -243,8 +243,11 @@ export class HeaderMoveController extends Disposable {
                     this._scrollTimer?.dispose();
 
                     if (initialType === HEADER_MOVE_TYPE.ROW) {
+                        console.log(this._changeToRow);
+                        // this._commandService.executeCommand();
                         // alert(`moveColumnTo: ${this._changeToRow}`);
                     } else {
+                        console.log(this._changeToColumn);
                         // alert(`moveColumnTo: ${this._changeToColumn}`);
                     }
                 });

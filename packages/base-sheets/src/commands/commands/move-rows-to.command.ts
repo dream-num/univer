@@ -77,8 +77,6 @@ export const MoveRowsToCommand: ICommand = {
 
         if (removeResult && result) {
             undoRedoService.pushUndoRedo({
-                // 如果有多个 mutation 构成一个封装项目，那么要封装在同一个 undo redo element 里面
-                // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
                 URI: workbookId,
                 undo() {
                     return (

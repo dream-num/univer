@@ -83,11 +83,11 @@ export {
 } from './commands/commands/set-style.command';
 export { SetTabColorCommand } from './commands/commands/set-tab-color.command';
 export { SetWorksheetActivateCommand } from './commands/commands/set-worksheet-activate.command';
-export { SetWorksheetColWidthCommand } from './commands/commands/set-worksheet-col-width.command';
+export { SetColWidthCommand as SetWorksheetColWidthCommand } from './commands/commands/set-worksheet-col-width.command';
 export { SetWorksheetHideCommand } from './commands/commands/set-worksheet-hide.command';
 export { SetWorksheetNameCommand } from './commands/commands/set-worksheet-name.command';
 export { SetWorksheetOrderCommand } from './commands/commands/set-worksheet-order.command';
-export { SetWorksheetRowHeightCommand } from './commands/commands/set-worksheet-row-height.command';
+export { SetRowHeightCommand as SetWorksheetRowHeightCommand } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetRowHideCommand } from './commands/commands/set-worksheet-row-hide.command';
 export { SetWorksheetRowShowCommand } from './commands/commands/set-worksheet-row-show.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';

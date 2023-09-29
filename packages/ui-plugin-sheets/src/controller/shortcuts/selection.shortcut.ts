@@ -56,6 +56,15 @@ export const MoveSelectionTabShortcutItem: IShortcutItem<IMoveSelectionCommandPa
     },
 };
 
+export const MoveBackSelectionShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
+    id: MoveSelectionCommand.id,
+    binding: KeyCode.TAB | MetaKeys.SHIFT,
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    staticParameters: {
+        direction: Direction.LEFT,
+    },
+};
+
 // move selection to continuous end
 
 export const MoveSelectionEndDownShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {

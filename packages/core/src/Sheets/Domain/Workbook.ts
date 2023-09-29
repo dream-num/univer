@@ -122,7 +122,6 @@ export class Workbook {
             return worksheet.getStatus() === BooleanNumber.TRUE;
         });
         if (!activeSheetId) {
-            console.warn('No active sheet, get first sheet');
             return this._worksheets.get(sheetOrder[0]) as Worksheet;
         }
         return this._worksheets.get(activeSheetId) as Worksheet;

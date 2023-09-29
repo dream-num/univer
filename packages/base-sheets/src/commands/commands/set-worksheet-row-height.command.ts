@@ -5,6 +5,7 @@ import {
     ICurrentUniverService,
     IUndoRedoService,
     RANGE_TYPE,
+    Rectangle,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -15,17 +16,17 @@ import {
     SetWorksheetRowHeightMutationFactory,
 } from '../mutations/set-worksheet-row-height.mutation';
 
-export interface IDeltaWorksheetRowHeightCommand {
+export interface IDeltaRowHeightCommand {
     anchorRow: number;
     deltaY: number;
 }
 
-export const DeltaWorksheetRowHeightCommand: ICommand = {
+export const DeltaRowHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.delta-row-height',
-    handler: async (accessor: IAccessor, params: IDeltaWorksheetRowHeightCommand) => {
+    handler: async (accessor: IAccessor, params: IDeltaRowHeightCommand) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getRangeDatas();
+        const selections = selectionManagerService.getSelections();
         if (!selections?.length) {
             return false;
         }
@@ -40,8 +41,9 @@ export const DeltaWorksheetRowHeightCommand: ICommand = {
         const anchorRowHeight = worksheet.getRowHeight(anchorRow);
         const destRowHeight = anchorRowHeight + deltaY;
 
-        const rowSelections = selections.filter((r) => r.rangeType === RANGE_TYPE.ROW);
-        const rangeType = rowSelections.some((r) => {
+        const rowSelections = selections.filter((s) => s.range.rangeType === RANGE_TYPE.ROW);
+        const rangeType = rowSelections.some((s) => {
+            const r = s.range;
             if (r.startRow <= anchorRow && anchorRow <= r.endRow) {
                 return true;
             }
@@ -56,7 +58,7 @@ export const DeltaWorksheetRowHeightCommand: ICommand = {
             redoMutationParams = {
                 worksheetId,
                 workbookId,
-                ranges: rowSelections,
+                ranges: rowSelections.map((s) => Rectangle.clone(s.range)),
                 rowHeight: destRowHeight,
             };
         } else {
@@ -100,13 +102,13 @@ export const DeltaWorksheetRowHeightCommand: ICommand = {
     },
 };
 
-export interface SetWorksheetRowHeightCommandParams {
+export interface ISetRowHeightCommandParams {
     value: number;
 }
-export const SetWorksheetRowHeightCommand: ICommand = {
+export const SetRowHeightCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-worksheet-row-height',
-    handler: async (accessor: IAccessor, params: SetWorksheetRowHeightCommandParams) => {
+    id: 'sheet.command.set-row-height',
+    handler: async (accessor: IAccessor, params: ISetRowHeightCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

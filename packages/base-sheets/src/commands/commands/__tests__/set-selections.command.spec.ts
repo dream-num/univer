@@ -340,7 +340,6 @@ describe('Test commands used for change selections', () => {
 
             // shrink
 
-            console.log('debug', selectionManagerService.getLast());
             await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
                 direction: Direction.LEFT,
                 jumpOver: true,

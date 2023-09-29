@@ -19,7 +19,7 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { getCoordByOffset, getSheetObject, getTransformCoord, ISheetObjectParam } from '../Basics/component-tools';
+import { getCoordByOffset, getSheetObject, getTransformCoord } from '../Basics/component-tools';
 import { CANVAS_VIEW_KEY, SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import {
     DeltaColumnWidthCommand,
@@ -70,8 +70,6 @@ export class HeaderResizeController extends Disposable {
 
     private _startOffsetY: number = Infinity;
 
-    private _sheetObject!: ISheetObjectParam;
-
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
@@ -97,11 +95,12 @@ export class HeaderResizeController extends Disposable {
 
         this._columnResizeRect = null;
 
-        if (this._sheetObject == null) {
-            return;
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            throw new Error('sheetObject is null');
         }
 
-        const { spreadsheetRowHeader, spreadsheetColumnHeader } = this._sheetObject;
+        const { spreadsheetRowHeader, spreadsheetColumnHeader } = sheetObject;
 
         this._Observers.forEach((observer) => {
             spreadsheetRowHeader.onPointerMoveObserver.remove(observer);
@@ -118,8 +117,6 @@ export class HeaderResizeController extends Disposable {
         if (sheetObject == null) {
             throw new Error('sheetObject is null');
         }
-
-        this._sheetObject = sheetObject;
 
         const { scene } = sheetObject;
 
@@ -146,7 +143,11 @@ export class HeaderResizeController extends Disposable {
     }
 
     private _initialHover(initialType: HEADER_RESIZE_TYPE = HEADER_RESIZE_TYPE.ROW) {
-        const { spreadsheetRowHeader, spreadsheetColumnHeader, scene } = this._sheetObject;
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
+        const { spreadsheetRowHeader, spreadsheetColumnHeader, scene } = sheetObject;
 
         const eventBindingObject =
             initialType === HEADER_RESIZE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
@@ -238,7 +239,13 @@ export class HeaderResizeController extends Disposable {
     }
 
     private _initialHoverResize(initialType: HEADER_RESIZE_TYPE = HEADER_RESIZE_TYPE.ROW) {
-        const { scene } = this._sheetObject;
+        const sheetObject = this._getSheetObject();
+
+        if (sheetObject == null) {
+            return;
+        }
+
+        const { scene } = sheetObject;
 
         const eventBindingObject =
             initialType === HEADER_RESIZE_TYPE.ROW ? this._rowResizeRect : this._columnResizeRect;
@@ -278,6 +285,14 @@ export class HeaderResizeController extends Disposable {
             if (skeleton == null) {
                 return;
             }
+
+            const sheetObject = this._getSheetObject();
+
+            if (sheetObject == null) {
+                return;
+            }
+
+            const { scene } = sheetObject;
 
             const viewPort = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
 
@@ -400,7 +415,13 @@ export class HeaderResizeController extends Disposable {
             });
 
             this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-                const scene = this._sheetObject.scene;
+                const sheetObject = getSheetObject(this._currentUniverService, this._renderManagerService);
+
+                if (sheetObject == null) {
+                    return;
+                }
+
+                const { scene } = sheetObject;
                 scene.resetCursor();
                 this._clearObserverEvent();
                 scene.enableEvent();
@@ -433,7 +454,13 @@ export class HeaderResizeController extends Disposable {
     }
 
     private _clearObserverEvent() {
-        const { scene } = this._sheetObject;
+        const sheetObject = this._getSheetObject();
+
+        if (sheetObject == null) {
+            return;
+        }
+
+        const { scene } = sheetObject;
         scene.onPointerMoveObserver.remove(this._moveObserver);
         scene.onPointerUpObserver.remove(this._upObserver);
         this._moveObserver = null;

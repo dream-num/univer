@@ -10,6 +10,11 @@ export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './service
 
 // #endregion
 
+// #region rendering
+
+export { getSheetObject } from './Basics/component-tools';
+// #endregion
+
 // #region commands
 
 export { type IInsertColMutationParams, type IInsertRowMutationParams } from './Basics/Interfaces/MutationInterface';

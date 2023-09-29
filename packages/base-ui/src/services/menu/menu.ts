@@ -9,10 +9,6 @@ export const enum MenuPosition {
     VOID = 'void',
     TOOLBAR = 'toolbar',
     CONTEXT_MENU = 'contextMenu',
-    TAB_CONTEXT_MENU = 'tabContextMenu',
-    ROW_HEADER_CONTEXT_MENU = 'rowHeaderContextMenu',
-    COL_HEADER_CONTEXT_MENU = 'colHeaderContextMenu',
-    SHEET_BAR = 'sheetBar',
 }
 
 export const enum MenuItemType {

@@ -69,6 +69,13 @@ export const CONTEXT_MENU_INPUT_LABEL = 'CONTEXT_MENU_INPUT';
 
 export { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './border.menu';
 
+export enum SheetMenuPosition {
+    TAB_CONTEXT_MENU = 'tabContextMenu',
+    ROW_HEADER_CONTEXT_MENU = 'rowHeaderContextMenu',
+    COL_HEADER_CONTEXT_MENU = 'colHeaderContextMenu',
+    SHEET_BAR = 'sheetBar',
+}
+
 export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const undoRedoService = accessor.get(IUndoRedoService);
 
@@ -569,7 +576,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     };
 }
 
-export function ResetTextColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ResetTextColorMenuItemFactory(): IMenuButtonItem {
     return {
         id: ResetTextColorCommand.id,
         type: MenuItemType.BUTTON,
@@ -610,7 +617,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
     };
 }
 
-export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ResetBackgroundColorMenuItemFactory(): IMenuButtonItem {
     return {
         id: ResetBackgroundColorCommand.id,
         type: MenuItemType.BUTTON,
@@ -893,81 +900,97 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
 // #region - copy cut paste
 // TODO@wzhudev: maybe we should move these menu factory to base-ui
 
-export function CopyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function CopyMenuItemFactory(): IMenuButtonItem {
     return {
         id: CopyCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.copy',
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [
+            MenuPosition.CONTEXT_MENU,
+            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
+            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
+        ],
     };
 }
 
-export function CutMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function CutMenuItemFactory(): IMenuButtonItem {
     return {
         id: CutCommand.id,
         type: MenuItemType.BUTTON,
         title: 'contextMenu.cut',
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [
+            MenuPosition.CONTEXT_MENU,
+            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
+            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
+        ],
     };
 }
 
-export function PasteMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function PasteMenuItemFactory(): IMenuButtonItem {
     return {
         id: PasteCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.paste',
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [
+            MenuPosition.CONTEXT_MENU,
+            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
+            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
+        ],
     };
 }
 
 // #endregion
 
-export function ClearSelectionMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ClearSelectionMenuItemFactory(): IMenuButtonItem {
     return {
         id: ClearSelectionContentCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearContent',
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [
+            MenuPosition.CONTEXT_MENU,
+            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
+            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
+        ],
     };
 }
 
-export function InsertRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertRowMenuItemFactory(): IMenuButtonItem {
     return {
         id: InsertRowAfterCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.insertRow',
     };
 }
 
-export function InsertColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function InsertColMenuItemFactory(): IMenuButtonItem {
     return {
         id: InsertColAfterCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.insertColumn',
     };
 }
 
-export function RemoveRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function RemoveRowMenuItemFactory(): IMenuButtonItem {
     return {
         id: RemoveRowCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.deleteSelectedRow',
     };
 }
 
-export function HideRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function HideRowMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetWorksheetRowHideCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.hideSelectedRow',
     };
 }
 
-export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function ShowRowMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetWorksheetRowShowCommand.id,
         type: MenuItemType.BUTTON,
@@ -976,11 +999,11 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function RemoveColMenuItemFactory(): IMenuButtonItem {
     return {
         id: RemoveColCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.deleteSelectedColumn',
     };
 }
@@ -993,7 +1016,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     return {
         id: SetWorksheetRowHeightCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.rowHeight',
         display: DisplayTypes.CUSTOM,
         label: {
@@ -1038,7 +1061,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         id: SetWorksheetColWidthCommand.id,
         type: MenuItemType.BUTTON,
         display: DisplayTypes.CUSTOM,
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.columnWidth',
         label: {
             name: CONTEXT_MENU_INPUT_LABEL,
@@ -1074,7 +1097,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 }
 
 const DELETE_RANGE_MENU_ID = 'sheet.menu.delete-range';
-export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function DeleteRangeMenuItemFactory(): IMenuSelectorItem<string> {
     return {
         id: DELETE_RANGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -1084,7 +1107,7 @@ export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
     };
 }
 
-export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DeleteRangeMoveLeftMenuItemFactory(): IMenuButtonItem {
     return {
         id: DeleteRangeMoveLeftCommand.id,
         type: MenuItemType.BUTTON,
@@ -1093,7 +1116,7 @@ export function DeleteRangeMoveLeftMenuItemFactory(accessor: IAccessor): IMenuBu
     };
 }
 
-export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DeleteRangeMoveUpMenuItemFactory(): IMenuButtonItem {
     return {
         id: DeleteRangeMoveUpCommand.id,
         type: MenuItemType.BUTTON,
@@ -1103,38 +1126,38 @@ export function DeleteRangeMoveUpMenuItemFactory(accessor: IAccessor): IMenuButt
 }
 
 // right menu in main sheet bar
-export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DeleteSheetMenuItemFactory(): IMenuButtonItem {
     return {
         id: RemoveSheetCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.SHEET_BAR],
+        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.delete',
     };
 }
 
-export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function CopySheetMenuItemFactory(): IMenuButtonItem {
     return {
         id: CopySheetCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.SHEET_BAR],
+        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.copy',
     };
 }
 
-export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function RenameSheetMenuItemFactory(): IMenuButtonItem {
     return {
         id: RenameSheetCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.SHEET_BAR],
+        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.rename',
     };
 }
 
-export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
     return {
         id: SetTabColorCommand.id,
         title: 'sheetConfig.changeColor',
-        positions: [MenuPosition.SHEET_BAR],
+        positions: [SheetMenuPosition.SHEET_BAR],
         display: DisplayTypes.COLOR,
         selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,
@@ -1146,20 +1169,20 @@ export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelec
     };
 }
 
-export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function HideSheetMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetWorksheetHideCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.SHEET_BAR],
+        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.hide',
     };
 }
 
-export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function UnHideSheetMenuItemFactory(): IMenuButtonItem {
     return {
         id: ShowMenuListCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.SHEET_BAR],
+        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',
     };
 }

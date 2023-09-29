@@ -107,10 +107,13 @@ export interface IEvent extends Event {
 }
 
 // TODO@wzhudev: this interface maybe not necessary
+
 /**
  * Native friendly interface for UIEvent Object
  */
-export interface IUIEvent extends IEvent, UIEvent {}
+export interface IUIEvent extends IEvent, UIEvent {
+    // TODO@wzhudev: should add a stack to mark RenderObjects that the event targets to
+}
 
 /**
  * Native friendly interface for KeyboardEvent Object
@@ -339,11 +342,11 @@ export enum DeviceType {
     /** Generic */
     Generic = 0,
     /** Keyboard */
-    Keyboard = 1,
+    Keyboard,
     /** Mouse */
-    Mouse = 2,
+    Mouse,
     /** Touch Pointers */
-    Touch = 3,
+    Touch,
 }
 
 // Device Enums

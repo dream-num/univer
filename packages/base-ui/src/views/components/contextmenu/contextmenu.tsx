@@ -5,7 +5,7 @@ import React, { Component, createRef } from 'react';
 
 import { BaseMenuItem, Menu } from '../../../Components';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
-import { IDisplayMenuItem, IMenuItem, MenuPosition } from '../../../services/menu/menu';
+import { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
 import styles from './contextmenu.module.less';
 
 // WTF: props here is not correct
@@ -15,6 +15,7 @@ export interface IContextMenuState {
     visible: boolean;
     children: IContextMenuProps[];
     menuItems: Array<IDisplayMenuItem<IMenuItem>>;
+    menuType: string;
     clientPosition: {
         clientX: number;
         clientY: number;
@@ -40,6 +41,7 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
             visible: false,
             children: [] as IContextMenuProps[],
             menuItems: [] as Array<IDisplayMenuItem<IMenuItem>>,
+            menuType: '',
             clientPosition: {
                 clientX: 0,
                 clientY: 0,
@@ -63,13 +65,13 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
     }
 
     override render() {
-        const { visible, clientPosition } = this.state;
+        const { visible, clientPosition, menuType } = this.state;
 
         return (
             visible && (
                 <div ref={this.rootRef} className={styles.contextMenu} onContextMenu={(e) => e.preventDefault()}>
                     <Menu
-                        menuId={MenuPosition.CONTEXT_MENU}
+                        menuId={menuType}
                         onClick={this.handleClick}
                         clientPosition={clientPosition}
                         show={visible}
@@ -85,12 +87,11 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
         );
     }
 
-    handleContextMenu = async (event: IMouseEvent, rect?: any, down?: boolean) => {
+    handleContextMenu = async (event: IMouseEvent, menuType: string) => {
         event.preventDefault();
 
-        // FIXME: contextmenu position algorithm is not correct
         this.setState({ visible: true }, () => {
-            new Promise<void>((resolve, reject) => {
+            new Promise<void>((resolve) => {
                 resolve();
             }).then(() => {
                 // clientX/Y obtains the distance between the trigger point and the upper left corner of the browser's visible area.
@@ -99,6 +100,7 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
                         clientX: event.clientX,
                         clientY: event.clientY,
                     },
+                    menuType,
                 });
             });
         });

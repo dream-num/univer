@@ -371,12 +371,12 @@ export class HeaderResizeController extends Disposable {
                 this._resizeHelperShape?.dispose();
                 this._resizeHelperShape = null;
                 this._columnResizeRect?.hide();
-                alert(`${this._currentColumn}:${moveChangeX}`);
+                // alert(`${this._currentColumn}:${moveChangeX}`);
             });
         });
 
         this._columnResizeRect.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            alert(this._currentColumn);
+            // alert(this._currentColumn);
         });
     }
 
@@ -488,12 +488,12 @@ export class HeaderResizeController extends Disposable {
                 this._resizeHelperShape?.dispose();
                 this._resizeHelperShape = null;
                 this._rowResizeRect?.hide();
-                alert(`${this._currentRow}:${moveChangeY}`);
+                // alert(`${this._currentRow}:${moveChangeY}`);
             });
         });
 
         this._rowResizeRect.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            alert(this._currentRow);
+            // alert(this._currentRow);
         });
     }
 

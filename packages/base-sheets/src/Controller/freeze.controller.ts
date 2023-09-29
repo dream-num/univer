@@ -375,7 +375,7 @@ export class FreezeController extends Disposable {
                     });
                 }
 
-                alert(`moveColumnTo: ${this._changeToRow}`);
+                // alert(`moveColumnTo: ${this._changeToRow}`);
             } else {
                 if (this._changeToColumn === 0 || this._changeToColumn === -1) {
                     freezeObjectHeaderRect.transformByState({
@@ -387,7 +387,7 @@ export class FreezeController extends Disposable {
                     });
                 }
 
-                alert(`moveColumnTo: ${this._changeToColumn}`);
+                // alert(`moveColumnTo: ${this._changeToColumn}`);
             }
         });
     }

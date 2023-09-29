@@ -337,13 +337,14 @@ export class Engine extends ThinEngine<Scene> {
             }
         };
 
-        this._pointerDownEvent = (_evt: Event) => {
-            const evt = _evt as IPointerEvent;
+        this._pointerDownEvent = (nativeEvent: Event) => {
+            const evt = nativeEvent as IPointerEvent;
+            // TODO: maybe we should wrap the native event to an CustomEvent
+
             const deviceType = this.__getPointerType(evt);
             const previousHorizontal = this.pointer[PointerInput.Horizontal];
             const previousVertical = this.pointer[PointerInput.Vertical];
             const previousButton = this.pointer[evt.button + 2];
-            // console.log('pointerDownEvent_1', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this.__pointer);
 
             if (deviceType === DeviceType.Mouse) {
                 // Mouse; Among supported browsers, value is either 1 or 0 for mouse

@@ -16,12 +16,11 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { CANVAS_VIEW_KEY, SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
-import { columnWidthByHeader, rowHeightByHeader } from '../Basics/SheetHeader';
+import { SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SetWorksheetActivateMutation } from '../commands/mutations/set-worksheet-activate.mutation';
 import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
 import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
+import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetRenderController)
@@ -75,9 +74,7 @@ export class SheetRenderController extends Disposable {
             const spreadsheetColumnHeader = components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
             const spreadsheetLeftTopPlaceholder = components.get(SHEET_VIEW_KEY.LEFT_TOP) as Rect;
 
-            this._selectionTransformerShapeManager.changeRuntime(spreadsheetSkeleton, scene);
-
-            const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+            const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
             spreadsheet?.updateSkeleton(spreadsheetSkeleton);
             spreadsheetRowHeader?.updateSkeleton(spreadsheetSkeleton);
@@ -87,40 +84,40 @@ export class SheetRenderController extends Disposable {
                 height: columnHeaderHeight,
             });
 
-            scene?.transformByState({
-                width: columnWidthByHeader(worksheet) + columnTotalWidth,
-                height: rowHeightByHeader(worksheet) + rowTotalHeight,
-                // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
-                // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
-            });
+            // scene?.transformByState({
+            //     width: columnWidthByHeader(worksheet) + columnTotalWidth,
+            //     height: rowHeightByHeader(worksheet) + rowTotalHeight,
+            //     // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
+            //     // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
+            // });
 
-            const rowHeaderWidthScale = rowHeaderWidth * scene.scaleX;
-            const columnHeaderHeightScale = columnHeaderHeight * scene.scaleY;
+            // const rowHeaderWidthScale = rowHeaderWidth * scene.scaleX;
+            // const columnHeaderHeightScale = columnHeaderHeight * scene.scaleY;
 
-            const viewMain = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
-            const viewTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_TOP);
-            const viewLeft = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT);
-            const viewLeftTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP);
+            // const viewMain = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
+            // const viewTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_TOP);
+            // const viewLeft = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT);
+            // const viewLeftTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP);
 
-            viewMain?.resize({
-                left: rowHeaderWidthScale,
-                top: columnHeaderHeightScale,
-            });
+            // viewMain?.resize({
+            //     left: rowHeaderWidthScale,
+            //     top: columnHeaderHeightScale,
+            // });
 
-            viewTop?.resize({
-                left: rowHeaderWidthScale,
-                height: columnHeaderHeightScale,
-            });
+            // viewTop?.resize({
+            //     left: rowHeaderWidthScale,
+            //     height: columnHeaderHeightScale,
+            // });
 
-            viewLeft?.resize({
-                top: columnHeaderHeightScale,
-                width: rowHeaderWidthScale,
-            });
+            // viewLeft?.resize({
+            //     top: columnHeaderHeightScale,
+            //     width: rowHeaderWidthScale,
+            // });
 
-            viewLeftTop?.resize({
-                width: rowHeaderWidthScale,
-                height: columnHeaderHeightScale,
-            });
+            // viewLeftTop?.resize({
+            //     width: rowHeaderWidthScale,
+            //     height: columnHeaderHeightScale,
+            // });
 
             // spreadsheet.makeDirty();
         });
@@ -152,12 +149,6 @@ export class SheetRenderController extends Disposable {
                     }
 
                     this._sheetSkeletonManagerService.setCurrent({
-                        unitId,
-                        sheetId,
-                    });
-
-                    this._selectionManagerService.setCurrentSelection({
-                        pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                         unitId,
                         sheetId,
                     });

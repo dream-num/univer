@@ -182,6 +182,34 @@ export class CanvasView {
             height: columnHeader.height,
             isWheelPreventDefaultX: true,
         });
+
+        const viewMainLeftTop = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN_LEFT_TOP, scene, {
+            left: 0,
+            top: 0,
+            width: 0,
+            height: 0,
+            isWheelPreventDefaultX: true,
+            active: false,
+        });
+
+        const viewMainLeft = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN_LEFT, scene, {
+            left: 0,
+            top: 0,
+            width: 0,
+            height: 0,
+            isWheelPreventDefaultX: true,
+            active: false,
+        });
+
+        const viewMainTop = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN_TOP, scene, {
+            left: 0,
+            top: 0,
+            width: 0,
+            height: 0,
+            isWheelPreventDefaultX: true,
+            active: false,
+        });
+
         // viewMain.linkToViewport(viewLeft, LINK_VIEW_PORT_TYPE.Y);
         // viewMain.linkToViewport(viewTop, LINK_VIEW_PORT_TYPE.X);
         // syncing scroll on the main area to headerbars
@@ -196,6 +224,20 @@ export class CanvasView {
                 .makeDirty(true);
 
             viewLeft
+                .updateScroll({
+                    scrollY,
+                    actualScrollY,
+                })
+                .makeDirty(true);
+
+            viewMainTop
+                .updateScroll({
+                    scrollX,
+                    actualScrollX,
+                })
+                .makeDirty(true);
+
+            viewMainLeft
                 .updateScroll({
                     scrollY,
                     actualScrollY,
@@ -229,6 +271,8 @@ export class CanvasView {
 
         const scrollbar = new ScrollBar(viewMain);
 
-        scene.addViewport(viewMain, viewLeft, viewTop, viewLeftTop).attachControl();
+        scene
+            .addViewport(viewMain, viewLeft, viewTop, viewLeftTop, viewMainLeftTop, viewMainLeft, viewMainTop)
+            .attachControl();
     }
 }

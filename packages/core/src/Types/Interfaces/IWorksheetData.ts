@@ -2,6 +2,7 @@ import { IKeyValue } from '../../Shared';
 import { ObjectArrayType } from '../../Shared/ObjectArray';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
 import { BooleanNumber, SheetTypes } from '../Enum';
+import { IFreeze } from '.';
 import { ICellData } from './ICellData';
 import { IColumnData } from './IColumnData';
 import { IRange, IRangeType } from './IRange';
@@ -40,6 +41,16 @@ export interface IWorksheetConfig {
     hidden: BooleanNumber;
     freezeRow: number;
     freezeColumn: number;
+    freeze: IFreeze;
+    /**
+     *  * 18.3.1.87 sheetView (Worksheet View)
+     * topLeftCell
+     */
+    sheetViewStartRow: number;
+    sheetViewStartColumn: number;
+    /**
+     * row and column  count in worksheet, not like excel, it is unlimited
+     */
     rowCount: number;
     columnCount: number;
     zoomRatio: number;

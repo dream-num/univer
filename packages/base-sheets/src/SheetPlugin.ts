@@ -11,10 +11,12 @@ import { FreezeController } from './Controller/freeze.controller';
 import { HeaderMenuController } from './Controller/header-menu.controller';
 import { HeaderMoveController } from './Controller/header-move.controller';
 import { HeaderResizeController } from './Controller/header-resize.controller';
+import { ScrollController } from './Controller/scroll.controller';
 import { SelectionController } from './Controller/Selection.controller';
 import { SheetRenderController } from './Controller/sheet-render.controller';
 import { en } from './Locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
+import { ScrollManagerService } from './services/scroll-manager.service';
 import { SelectionManagerService } from './services/selection-manager.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { CanvasView } from './View/CanvasView';
@@ -63,6 +65,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
         this._injector.get(HeaderMoveController);
 
+        this._injector.get(ScrollController);
+
         this._injector.get(FreezeController);
     }
 
@@ -98,6 +102,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
                     useClass: SelectionTransformerShapeManager,
                 },
             ],
+            [ScrollManagerService],
 
             // controllers
             [FormulaBarController],
@@ -110,6 +115,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [HeaderResizeController],
             [HeaderMoveController],
             [FreezeController],
+            [ScrollController],
         ];
 
         dependencies.forEach((d) => {

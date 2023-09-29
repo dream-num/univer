@@ -59,6 +59,8 @@ export class SelectionController extends Disposable {
 
         this._initialColumnHeader(sheetObject);
 
+        this._skeletonListener();
+
         this._commandExecutedListener();
 
         spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
@@ -159,4 +161,29 @@ export class SelectionController extends Disposable {
     }
 
     private _commandExecutedListener() {}
+
+    private _skeletonListener() {
+        this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+            if (param == null) {
+                return;
+            }
+            const { unitId, sheetId, skeleton } = param;
+
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+
+            if (currentRender == null) {
+                return;
+            }
+
+            const { scene } = currentRender;
+
+            this._selectionTransformerShapeManager.changeRuntime(skeleton, scene);
+
+            this._selectionManagerService.setCurrentSelection({
+                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                unitId,
+                sheetId,
+            });
+        });
+    }
 }

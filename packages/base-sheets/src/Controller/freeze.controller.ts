@@ -19,7 +19,7 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { getCoordByOffset, getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { CANVAS_VIEW_KEY, SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -71,6 +71,10 @@ export class FreezeController extends Disposable {
     private _changeToRow: number = -1;
 
     private _changeToColumn: number = -1;
+
+    private _changeToOffsetX: number = 0;
+
+    private _changeToOffsetY: number = 0;
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -138,9 +142,17 @@ export class FreezeController extends Disposable {
                 : columnTotalWidth + columnHeaderHeightAndMarginTop;
 
         const shapeHeight =
-            canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
-                ? canvasMaxWidth
-                : columnTotalWidth + columnHeaderHeightAndMarginTop;
+            canvasMaxHeight > rowTotalHeight + columnHeaderHeightAndMarginTop
+                ? canvasMaxHeight
+                : rowTotalHeight + columnHeaderHeightAndMarginTop;
+
+        this._changeToRow = freezeRow;
+
+        this._changeToColumn = freezeColumn;
+
+        this._changeToOffsetX = startX;
+
+        this._changeToOffsetY = startY;
 
         if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
@@ -286,8 +298,6 @@ export class FreezeController extends Disposable {
         scene.disableEvent();
 
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-
             const { startX, startY, endX, endY, row, column } = getCoordByOffset(
                 moveEvt.offsetX,
                 moveEvt.offsetY,
@@ -313,6 +323,7 @@ export class FreezeController extends Disposable {
                         fill: FREEZE_NORMAL_HEADER_COLOR,
                     });
                 this._changeToRow = row;
+                this._changeToOffsetY = startY;
             } else {
                 freezeObjectHeaderRect
                     .transformByState({
@@ -330,6 +341,7 @@ export class FreezeController extends Disposable {
                     });
 
                 this._changeToColumn = column;
+                this._changeToOffsetX = startX;
             }
 
             // this._columnMoving(newMoveOffsetX, newMoveOffsetY, matchSelectionData, initialType);
@@ -389,7 +401,29 @@ export class FreezeController extends Disposable {
 
                 alert(`moveColumnTo: ${this._changeToColumn}`);
             }
+
+            this._updateViewport(freezeDirectionType, this._changeToOffsetX, this._changeToOffsetY);
         });
+    }
+
+    private _updateViewport(
+        freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW,
+        offsetX: number = 0,
+        offsetY: number = 0
+    ) {
+        const { scene } = this._sheetObject;
+
+        const viewportLeft = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT);
+        const viewportTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_TOP);
+        const viewportLeftTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP);
+        const viewportMain = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
+        const viewMainLeftTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN_LEFT_TOP);
+        const viewMainLeft = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN_LEFT);
+        const viewMainTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN_TOP);
+
+        if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
+            viewportLeft?.resize({});
+        }
     }
 
     private _clearObserverEvent() {

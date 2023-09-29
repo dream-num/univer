@@ -1,4 +1,4 @@
-import { EventState, IKeyValue, Nullable, Observable } from '@univerjs/core';
+import { EventState, Nullable, Observable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from './Basics/Const';
 import { IWheelEvent, PointerInput } from './Basics/IEvents';
@@ -23,6 +23,7 @@ interface IViewProps extends IViewPosition {
     attachY?: boolean;
     isWheelPreventDefaultX?: boolean;
     isWheelPreventDefaultY?: boolean;
+    active?: boolean;
 }
 
 export interface IScrollObserverParam {
@@ -48,10 +49,19 @@ enum SCROLL_TYPE {
 }
 
 export class Viewport {
+    /**
+     * The offset of the scrollbar equals the distance from the top to the scrollbar
+     * use getActualScroll, convert to actualScrollX, actualScrollY
+     *
+     */
     scrollX: number = 0;
 
     scrollY: number = 0;
 
+    /**
+     * The actual scroll offset equals the distance from the content area position to the top, and there is a conversion relationship with scrollX and scrollY
+     * use getBarScroll, convert to scrollX, scrollY
+     */
     actualScrollX: number = 0;
 
     actualScrollY: number = 0;
@@ -112,6 +122,8 @@ export class Viewport {
 
     private _renderClipState = true;
 
+    private _active = true;
+
     constructor(viewPortKey: string, scene: ThinScene, props?: IViewProps) {
         this._viewPortKey = viewPortKey;
 
@@ -122,15 +134,21 @@ export class Viewport {
         this.bottom = props?.bottom || 0;
         this.right = props?.right || 0;
 
-        if (props?.width) {
-            this.width = props?.width;
-            this._widthOrigin = this.width;
+        if (props?.active != null) {
+            this._active = props.active;
         }
 
-        if (props?.height) {
-            this.height = props?.height;
-            this._heightOrigin = this.height;
-        }
+        // if (props?.width) {
+        //     this.width = props?.width;
+        //     this._widthOrigin = this.width;
+        // }
+
+        // if (props?.height) {
+        //     this.height = props?.height;
+        //     this._heightOrigin = this.height;
+        // }
+
+        this._setWithAndHeight(props);
 
         if (this._allowCache) {
             this._cacheCanvas = new Canvas();
@@ -222,6 +240,14 @@ export class Viewport {
         this._right = toPx(num, this.scene.getParent()?.width);
     }
 
+    enable() {
+        this._active = true;
+    }
+
+    disable() {
+        this._active = false;
+    }
+
     resetSize() {
         this._resizeCacheCanvasAndScrollBar(true);
     }
@@ -239,13 +265,21 @@ export class Viewport {
         if (positionKeys.length === 0) {
             return;
         }
-        this._width = undefined;
-        this._height = undefined;
-        positionKeys.forEach((pKey) => {
-            if (position[pKey as keyof IViewPosition] !== undefined) {
-                (this as IKeyValue)[pKey] = position[pKey as keyof IViewPosition];
-            }
-        });
+        // this._width = undefined;
+        // this._height = undefined;
+        // positionKeys.forEach((pKey) => {
+        //     if (position[pKey as keyof IViewPosition] !== undefined) {
+        //         (this as IKeyValue)[pKey] = position[pKey as keyof IViewPosition];
+        //     }
+        // });
+
+        this.top = position.top || 0;
+        this.left = position.left || 0;
+        this.bottom = position.bottom || 0;
+        this.right = position.right || 0;
+
+        this._setWithAndHeight(position);
+
         this._resizeCacheCanvasAndScrollBar();
     }
 
@@ -268,10 +302,20 @@ export class Viewport {
         return this._dirty;
     }
 
+    /**
+     * scroll to position, absolute
+     * @param pos
+     * @returns
+     */
     scrollTo(pos: IScrollBarPosition) {
         return this._scroll(SCROLL_TYPE.scrollTo, pos);
     }
 
+    /**
+     * current position plus offset, relative
+     * @param pos
+     * @returns
+     */
     scrollBy(pos: IScrollBarPosition) {
         return this._scroll(SCROLL_TYPE.scrollBy, pos);
     }
@@ -283,8 +327,8 @@ export class Viewport {
             x *= this._scrollBar.ratioScrollX; // convert to scroll coord
             y *= this._scrollBar.ratioScrollY;
             const { scaleX, scaleY } = this.scene;
-            x = Math.round(x) * scaleX;
-            y = Math.round(y) * scaleY;
+            x *= scaleX;
+            y *= scaleY;
         } else {
             if (this.scrollX !== undefined) {
                 x = this.scrollX;
@@ -307,8 +351,8 @@ export class Viewport {
             x /= this._scrollBar.ratioScrollX; // 转换为内容区实际滚动距离
             y /= this._scrollBar.ratioScrollY;
             const { scaleX, scaleY } = this.scene;
-            x = Math.round(x) / scaleX;
-            y = Math.round(y) / scaleY;
+            x /= scaleX;
+            y /= scaleY;
         } else {
             if (this.actualScrollX !== undefined) {
                 x = this.actualScrollX;
@@ -319,8 +363,8 @@ export class Viewport {
             }
         }
         return {
-            x,
-            y,
+            x: Math.round(x),
+            y: Math.round(y),
         };
     }
 
@@ -367,6 +411,9 @@ export class Viewport {
     }
 
     render(parentCtx?: CanvasRenderingContext2D) {
+        if (this._active === false) {
+            return;
+        }
         const mainCtx = parentCtx || this._scene.getEngine()?.getCanvas().getContext();
         // console.log(this.viewPortKey, this._cacheCanvas);
         if (!this.isDirty() && this._allowCache) {
@@ -576,6 +623,9 @@ export class Viewport {
         this.onScrollBeforeObserver.clear();
         this.onScrollStopObserver.clear();
         this._scrollBar?.dispose();
+        this._cacheCanvas?.dispose();
+
+        this._scene.removeViewport(this._viewPortKey);
     }
 
     private _resizeCacheCanvasAndScrollBar(forceCalculate = false) {
@@ -596,8 +646,8 @@ export class Viewport {
         let width;
         let height;
 
-        if (!forceCalculate && this._widthOrigin !== undefined) {
-            width = this._widthOrigin!;
+        if (!forceCalculate && this._widthOrigin != null) {
+            width = this._widthOrigin;
         } else {
             const referenceWidth = parent.width;
             const containerWidth =
@@ -605,8 +655,8 @@ export class Viewport {
             width = containerWidth - (this._left + this._right);
         }
 
-        if (!forceCalculate && this._heightOrigin !== undefined) {
-            height = this._heightOrigin!;
+        if (!forceCalculate && this._heightOrigin != null) {
+            height = this._heightOrigin;
         } else {
             const referenceHeight = parent.height;
             const containerHeight =
@@ -693,19 +743,27 @@ export class Viewport {
             return;
         }
 
-        if (x !== undefined && this._scrollBar.hasHorizonThumb()) {
-            if (scrollType === SCROLL_TYPE.scrollBy) {
-                this.scrollX += x;
+        if (x !== undefined) {
+            if (this._scrollBar.hasHorizonThumb()) {
+                if (scrollType === SCROLL_TYPE.scrollBy) {
+                    this.scrollX += x;
+                } else {
+                    this.scrollX = x;
+                }
             } else {
-                this.scrollX = x;
+                this.scrollX = 0;
             }
         }
 
-        if (y !== undefined && this._scrollBar.hasVerticalThumb()) {
-            if (scrollType === SCROLL_TYPE.scrollBy) {
-                this.scrollY += y;
+        if (y !== undefined) {
+            if (this._scrollBar.hasVerticalThumb()) {
+                if (scrollType === SCROLL_TYPE.scrollBy) {
+                    this.scrollY += y;
+                } else {
+                    this.scrollY = y;
+                }
             } else {
-                this.scrollY = y;
+                this.scrollY = 0;
             }
         }
 
@@ -815,5 +873,17 @@ export class Viewport {
             this.width || 0,
             this.height || 0
         );
+    }
+
+    private _setWithAndHeight(props?: IViewProps) {
+        if (props?.width) {
+            this.width = props?.width;
+            this._widthOrigin = this.width;
+        }
+
+        if (props?.height) {
+            this.height = props?.height;
+            this._heightOrigin = this.height;
+        }
     }
 }

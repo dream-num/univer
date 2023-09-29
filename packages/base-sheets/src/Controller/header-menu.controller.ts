@@ -61,7 +61,6 @@ export class HeaderMenuController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionTransformerShapeManager
         private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
-
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager
     ) {

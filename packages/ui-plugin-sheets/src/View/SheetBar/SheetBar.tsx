@@ -20,12 +20,12 @@ import {
     IDisplayMenuItem,
     IMenuItem,
     Menu,
-    MenuPosition,
 } from '@univerjs/base-ui';
 import { BooleanNumber, ICommandService, ICurrentUniverService, IKeyValue } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { Component, createRef } from 'react';
 
+import { SheetMenuPosition } from '../../controller/menu/menu';
 import styles from './index.module.less';
 import { ISheetBarMenuItem, SheetBarMenu } from './SheetBarMenu';
 
@@ -389,7 +389,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 <Menu
                     className={styles.sheetUl}
                     menu={sheetUl}
-                    menuId={MenuPosition.SHEET_BAR}
+                    menuId={SheetMenuPosition.SHEET_BAR}
                     show={showMenu}
                     style={menuStyle}
                     onOptionSelect={(params) => {

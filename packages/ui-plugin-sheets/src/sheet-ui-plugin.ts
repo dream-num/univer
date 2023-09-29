@@ -4,6 +4,7 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { SHEET_UI_PLUGIN_NAME } from './Basics';
 import { SheetClipboardController } from './controller/clipboard/clipboard.controller';
+import { SheetContextMenuController } from './controller/contextmenu/contextmenu.controller';
 import { SheetUIController } from './controller/sheet-ui.controller';
 import { en } from './Locale';
 import { ICellEditorService } from './services/cell-editor/cell-editor.service';
@@ -38,6 +39,7 @@ export class SheetUIPlugin extends Plugin {
 
                 // controllers
                 [SheetClipboardController],
+                [SheetContextMenuController],
                 [SheetUIController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));

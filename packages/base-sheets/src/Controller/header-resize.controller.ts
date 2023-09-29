@@ -20,6 +20,14 @@ import { Inject } from '@wendellhu/redi';
 
 import { getCoordByOffset, getSheetObject, getTransformCoord, ISheetObjectParam } from '../Basics/component-tools';
 import { CANVAS_VIEW_KEY, SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import {
+    DeltaWorksheetColumnWidthCommand,
+    IDeltaWorksheetColumnWidthCommandParams,
+} from '../commands/commands/set-worksheet-col-width.command';
+import {
+    DeltaWorksheetRowHeightCommand,
+    IDeltaWorksheetRowHeightCommand,
+} from '../commands/commands/set-worksheet-row-height.command';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import {
@@ -371,12 +379,19 @@ export class HeaderResizeController extends Disposable {
                 this._resizeHelperShape?.dispose();
                 this._resizeHelperShape = null;
                 this._columnResizeRect?.hide();
-                alert(`${this._currentColumn}:${moveChangeX}`);
+
+                this._commandService.executeCommand<IDeltaWorksheetColumnWidthCommandParams>(
+                    DeltaWorksheetColumnWidthCommand.id,
+                    {
+                        deltaX: moveChangeX,
+                        anchorCol: this._currentColumn,
+                    }
+                );
             });
         });
 
         this._columnResizeRect.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            alert(this._currentColumn);
+            // alert(this._currentColumn);
         });
     }
 
@@ -488,12 +503,19 @@ export class HeaderResizeController extends Disposable {
                 this._resizeHelperShape?.dispose();
                 this._resizeHelperShape = null;
                 this._rowResizeRect?.hide();
-                alert(`${this._currentRow}:${moveChangeY}`);
+
+                this._commandService.executeCommand<IDeltaWorksheetRowHeightCommand>(
+                    DeltaWorksheetRowHeightCommand.id,
+                    {
+                        deltaY: moveChangeY,
+                        anchorRow: this._currentRow,
+                    }
+                );
             });
         });
 
         this._rowResizeRect.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            alert(this._currentRow);
+            // alert(this._currentRow);
         });
     }
 

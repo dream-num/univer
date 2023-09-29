@@ -734,7 +734,6 @@ export class Scene extends ThinScene {
     }
 
     override triggerPointerDown(evt: IPointerEvent | IMouseEvent) {
-        // console.log(this, 'scene');
         if (
             !this.onPointerDownObserver.notifyObservers(evt)?.stopPropagation &&
             this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER
@@ -742,6 +741,7 @@ export class Scene extends ThinScene {
             (this._parent as SceneViewer)?.triggerPointerDown(evt);
             return false;
         }
+
         return true;
     }
 

@@ -46,11 +46,17 @@ import {
 } from '../commands/commands/set-style.command';
 import { SetTabColorCommand } from '../commands/commands/set-tab-color.command';
 import { SetWorksheetActivateCommand } from '../commands/commands/set-worksheet-activate.command';
-import { SetWorksheetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
+import {
+    DeltaWorksheetColumnWidthCommand,
+    SetWorksheetColWidthCommand,
+} from '../commands/commands/set-worksheet-col-width.command';
 import { SetWorksheetHideCommand } from '../commands/commands/set-worksheet-hide.command';
 import { SetWorksheetNameCommand } from '../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-order.command';
-import { SetWorksheetRowHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
+import {
+    DeltaWorksheetRowHeightCommand,
+    SetWorksheetRowHeightCommand,
+} from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetRowHideCommand } from '../commands/commands/set-worksheet-row-hide.command';
 import { SetWorksheetRowShowCommand } from '../commands/commands/set-worksheet-row-show.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
@@ -109,6 +115,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetHideCommand,
             SetWorksheetHideMutation,
 
+            // #region row col commands & mutations
+
             InsertRowCommand,
             InsertRowBeforeCommand,
             InsertRowAfterCommand,
@@ -132,6 +140,11 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetRowShowMutation,
             SetWorksheetOrderCommand,
             SetWorksheetOrderMutation,
+
+            DeltaWorksheetRowHeightCommand,
+            DeltaWorksheetColumnWidthCommand,
+
+            // #endregion
 
             SetRangeValuesCommand,
             TrimWhitespaceCommand,

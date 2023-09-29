@@ -18,6 +18,11 @@ export {
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from './services/clipboard/clipboard-interface.service';
 export {
+    DesktopContextMenuService,
+    type IContextMenuHandler,
+    IContextMenuService,
+} from './services/contextmenu/contextmenu.service';
+export {
     type ICustomComponentOption,
     type ICustomComponentProps,
     type IDisplayMenuItem,

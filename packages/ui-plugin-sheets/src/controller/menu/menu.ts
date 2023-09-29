@@ -1016,7 +1016,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     return {
         id: SetWorksheetRowHeightCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
+        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.rowHeight',
         display: DisplayTypes.CUSTOM,
         label: {
@@ -1061,7 +1061,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         id: SetWorksheetColWidthCommand.id,
         type: MenuItemType.BUTTON,
         display: DisplayTypes.CUSTOM,
-        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
+        positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.columnWidth',
         label: {
             name: CONTEXT_MENU_INPUT_LABEL,

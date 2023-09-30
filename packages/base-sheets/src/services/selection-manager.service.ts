@@ -98,7 +98,7 @@ export class SelectionManagerService implements IDisposable {
         return this._getSelectionDatas(this._currentSelection);
     }
 
-    /** @deprecated use getSelectionsData instead */
+    /** @deprecated use `getSelections` instead */
     getRangeDatas(): Nullable<IRange[]> {
         const selectionDataList = this.getSelections();
         if (selectionDataList == null) {

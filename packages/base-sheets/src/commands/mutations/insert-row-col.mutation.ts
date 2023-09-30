@@ -5,13 +5,13 @@ import {
     IInsertColMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
-    IRemoveRowMutationParams,
+    IRemoveRowsMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 
 export const InsertRowMutationUndoFactory = (
     accessor: IAccessor,
     params: IInsertRowMutationParams
-): IRemoveRowMutationParams => {
+): IRemoveRowsMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
     const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
 

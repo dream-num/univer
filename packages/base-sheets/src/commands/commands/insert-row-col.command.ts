@@ -22,7 +22,7 @@ import {
     IInsertRangeMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
-    IRemoveRowMutationParams,
+    IRemoveRowsMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
@@ -71,7 +71,10 @@ export const InsertRowCommand: ICommand = {
             ranges: [params.range],
         };
 
-        const undoMutationParams: IRemoveRowMutationParams = InsertRowMutationUndoFactory(accessor, redoMutationParams);
+        const undoMutationParams: IRemoveRowsMutationParams = InsertRowMutationUndoFactory(
+            accessor,
+            redoMutationParams
+        );
         const result = commandService.executeCommand(InsertRowMutation.id, redoMutationParams);
 
         const { startRow, endRow, startColumn, endColumn } = params.range;

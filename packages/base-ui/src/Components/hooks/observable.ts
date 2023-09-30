@@ -8,7 +8,7 @@ export function useObservable<T>(
     defaultValue?: T,
     shouldHaveSyncValue?: true
 ): T | undefined {
-    const observableRef = useRef<Observable | null>(null);
+    const observableRef = useRef<Observable<T> | null>(null);
     const subscriptionRef = useRef<Subscription | null>(null);
 
     let setValue: React.Dispatch<React.SetStateAction<T | undefined>>;

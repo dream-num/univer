@@ -18,7 +18,7 @@ import {
     IInsertRangeMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
-    IRemoveRowMutationParams,
+    IRemoveRowsMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
@@ -28,9 +28,9 @@ import { InsertRangeMutation } from '../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../mutations/insert-row-col.mutation';
 import {
     IRemoveColMutationFactory,
-    IRemoveRowMutationFactory,
     RemoveColMutation,
     RemoveRowMutation,
+    RemoveRowsMutationFactory,
 } from '../mutations/remove-row-col.mutation';
 import {
     RemoveWorksheetMergeMutation,
@@ -65,13 +65,13 @@ export const RemoveRowCommand: ICommand = {
             item.endColumn = worksheet.getMaxColumns();
         });
 
-        const redoMutationParams: IRemoveRowMutationParams = {
+        const redoMutationParams: IRemoveRowsMutationParams = {
             workbookId,
             worksheetId,
             ranges: selections,
         };
 
-        const undoMutationParams: IInsertRowMutationParams = IRemoveRowMutationFactory(accessor, redoMutationParams);
+        const undoMutationParams: IInsertRowMutationParams = RemoveRowsMutationFactory(redoMutationParams, worksheet);
         const result = commandService.executeCommand(RemoveRowMutation.id, redoMutationParams);
 
         const deleteRangeValueMutationParams: IDeleteRangeMutationParams = {

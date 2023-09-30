@@ -6,19 +6,10 @@ import {
     ISelectionTransformerShapeManager,
     Rect,
 } from '@univerjs/base-render';
-import {
-    Disposable,
-    ICommandService,
-    ICurrentUniverService,
-    LifecycleStages,
-    Nullable,
-    Observer,
-    ObserverManager,
-    OnLifecycle,
-} from '@univerjs/core';
+import { Disposable, ICurrentUniverService, LifecycleStages, Nullable, Observer, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { getCoordByOffset, getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
+import { getCoordByOffset, getSheetObject } from '../Basics/component-tools';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -29,6 +20,11 @@ const HEADER_MENU_CONTROLLER_SHAPE = '__SpreadsheetHeaderMenuSHAPEControllerShap
 const HEADER_MENU_CONTROLLER_MENU = '__SpreadsheetHeaderMenuMAINControllerShape__';
 
 const HEADER_MENU_CONTROLLER_SHAPE_COLOR = 'rgba(0, 0, 0, 0.1)';
+
+enum HEADER_HOVER_TYPE {
+    ROW,
+    COLUMN,
+}
 
 /**
  * header highlight
@@ -42,27 +38,15 @@ export class HeaderMenuController extends Disposable {
 
     private _currentColumn: number = Infinity;
 
-    private _rowEnterObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _rowMoveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _rowLeaveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _columnEnterObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _columnMoveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _columnLeaveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _Observers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionTransformerShapeManager
-        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+        @Inject(SelectionManagerService)
+        private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
 
@@ -80,13 +64,14 @@ export class HeaderMenuController extends Disposable {
 
         const { spreadsheetRowHeader, spreadsheetColumnHeader } = sheetObject;
 
-        spreadsheetRowHeader.onPointerEnterObserver.remove(this._rowEnterObserver);
-        spreadsheetRowHeader.onPointerMoveObserver.remove(this._rowMoveObserver);
-        spreadsheetRowHeader.onPointerLeaveObserver.remove(this._rowLeaveObserver);
-
-        spreadsheetColumnHeader.onPointerEnterObserver.remove(this._columnEnterObserver);
-        spreadsheetColumnHeader.onPointerMoveObserver.remove(this._columnMoveObserver);
-        spreadsheetColumnHeader.onPointerLeaveObserver.remove(this._columnLeaveObserver);
+        this._Observers.forEach((observer) => {
+            spreadsheetRowHeader.onPointerEnterObserver.remove(observer);
+            spreadsheetRowHeader.onPointerMoveObserver.remove(observer);
+            spreadsheetRowHeader.onPointerLeaveObserver.remove(observer);
+            spreadsheetColumnHeader.onPointerEnterObserver.remove(observer);
+            spreadsheetColumnHeader.onPointerMoveObserver.remove(observer);
+            spreadsheetColumnHeader.onPointerLeaveObserver.remove(observer);
+        });
     }
 
     private _initialize() {
@@ -106,24 +91,32 @@ export class HeaderMenuController extends Disposable {
 
         scene.addObjects([this._hoverRect, this._hoverMenu], SHEET_COMPONENT_HEADER_LAYER_INDEX);
 
-        this._initialRowHover(sheetObject);
+        this._initialHover(HEADER_HOVER_TYPE.ROW);
 
-        this._initialColumnHover(sheetObject);
+        this._initialHover(HEADER_HOVER_TYPE.COLUMN);
 
-        this._initialHoverMenu(sheetObject);
+        this._initialHoverMenu();
     }
 
-    private _initialRowHover(sheetObject: ISheetObjectParam) {
-        const { spreadsheetRowHeader } = sheetObject;
+    private _initialHover(initialType: HEADER_HOVER_TYPE = HEADER_HOVER_TYPE.ROW) {
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
 
-        this._rowEnterObserver = spreadsheetRowHeader?.onPointerEnterObserver.add(
-            (evt: IPointerEvent | IMouseEvent, state) => {
+        const { spreadsheetColumnHeader, spreadsheetRowHeader, scene } = sheetObject;
+
+        const eventBindingObject =
+            initialType === HEADER_HOVER_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
+
+        this._Observers.push(
+            eventBindingObject?.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 this._hoverRect?.show();
-            }
+            })
         );
 
-        this._rowMoveObserver = spreadsheetRowHeader?.onPointerMoveObserver.add(
-            (evt: IPointerEvent | IMouseEvent, state) => {
+        this._Observers.push(
+            eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                 if (skeleton == null) {
                     return;
@@ -143,92 +136,56 @@ export class HeaderMenuController extends Disposable {
                     skeleton
                 );
 
-                this._hoverRect?.transformByState({
-                    width: rowHeaderWidth,
-                    height: endY - startY,
-                    left: 0,
-                    top: startY,
-                });
-            }
+                if (initialType === HEADER_HOVER_TYPE.ROW) {
+                    this._hoverRect?.transformByState({
+                        width: rowHeaderWidth,
+                        height: endY - startY,
+                        left: 0,
+                        top: startY,
+                    });
+                } else {
+                    this._currentColumn = column;
+
+                    this._hoverRect?.transformByState({
+                        width: endX - startX,
+                        height: columnHeaderHeight,
+                        left: startX,
+                        top: 0,
+                    });
+
+                    if (this._hoverMenu == null) {
+                        return;
+                    }
+
+                    if (endX - startX < columnHeaderHeight * 2) {
+                        this._hoverMenu.hide();
+                        return;
+                    }
+
+                    const menuSize = columnHeaderHeight * 0.8;
+
+                    this._hoverMenu.transformByState({
+                        left: endX - columnHeaderHeight,
+                        top: columnHeaderHeight / 2 - menuSize / 2,
+                    });
+
+                    this._hoverMenu.setShapeProps({ size: menuSize });
+
+                    this._hoverMenu.show();
+                }
+            })
         );
 
-        this._rowLeaveObserver = spreadsheetRowHeader?.onPointerLeaveObserver.add(
-            (evt: IPointerEvent | IMouseEvent, state) => {
-                this._hoverRect?.hide();
-            }
-        );
-    }
-
-    private _initialColumnHover(sheetObject: ISheetObjectParam) {
-        const { spreadsheetColumnHeader } = sheetObject;
-
-        this._columnEnterObserver = spreadsheetColumnHeader?.onPointerEnterObserver.add(
-            (evt: IPointerEvent | IMouseEvent, state) => {
-                this._hoverRect?.show();
-            }
-        );
-
-        this._columnMoveObserver = spreadsheetColumnHeader?.onPointerMoveObserver.add(
-            (evt: IPointerEvent | IMouseEvent, state) => {
-                const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                if (skeleton == null) {
-                    return;
-                }
-
-                const sheetObject = this._getSheetObject();
-                if (sheetObject == null) {
-                    return;
-                }
-
-                const { rowHeaderWidth, columnHeaderHeight } = skeleton;
-
-                const { startX, startY, endX, endY, row, column } = getCoordByOffset(
-                    evt.offsetX,
-                    evt.offsetY,
-                    sheetObject.scene,
-                    skeleton
-                );
-
-                this._currentColumn = column;
-
-                this._hoverRect?.transformByState({
-                    width: endX - startX,
-                    height: columnHeaderHeight,
-                    left: startX,
-                    top: 0,
-                });
-
-                if (this._hoverMenu == null) {
-                    return;
-                }
-
-                if (endX - startX < columnHeaderHeight * 2) {
-                    this._hoverMenu.hide();
-                    return;
-                }
-
-                const menuSize = columnHeaderHeight * 0.8;
-
-                this._hoverMenu.transformByState({
-                    left: endX - columnHeaderHeight,
-                    top: columnHeaderHeight / 2 - menuSize / 2,
-                });
-
-                this._hoverMenu.setShapeProps({ size: menuSize });
-
-                this._hoverMenu.show();
-            }
-        );
-
-        this._columnLeaveObserver = spreadsheetColumnHeader?.onPointerLeaveObserver.add(
-            (evt: IPointerEvent | IMouseEvent, state) => {
+        this._Observers.push(
+            eventBindingObject?.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                console.trace();
                 this._hoverRect?.hide();
                 this._hoverMenu?.hide();
-            }
+            })
         );
     }
 
-    private _initialHoverMenu(sheetObject: ISheetObjectParam) {
+    private _initialHoverMenu() {
         // const { scene, spreadsheet, spreadsheetColumnHeader } = sheetObject;
         if (this._hoverMenu == null) {
             return;
@@ -270,12 +227,6 @@ export class HeaderMenuController extends Disposable {
         });
 
         this._hoverMenu.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            // this._selectionTransformerShapeManager.eventTrigger(
-            //     evt,
-            //     (spreadsheet?.zIndex || 1) + 1,
-            //     SELECTION_TYPE.COLUMN
-            // );
-
             const sheetObject = this._getSheetObject();
             if (sheetObject == null) {
                 return;

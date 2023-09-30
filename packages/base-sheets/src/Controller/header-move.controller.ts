@@ -11,12 +11,10 @@ import {
 } from '@univerjs/base-render';
 import {
     Disposable,
-    ICommandService,
     ICurrentUniverService,
     LifecycleStages,
     Nullable,
     Observer,
-    ObserverManager,
     OnLifecycle,
     RANGE_TYPE,
 } from '@univerjs/core';
@@ -104,13 +102,10 @@ export class HeaderMoveController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionTransformerShapeManager
         private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
-
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
 

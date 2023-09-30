@@ -1,12 +1,4 @@
-import {
-    CURSOR_TYPE,
-    IMouseEvent,
-    IPointerEvent,
-    IRenderManagerService,
-    ISelectionTransformerShapeManager,
-    Rect,
-    Vector2,
-} from '@univerjs/base-render';
+import { CURSOR_TYPE, IMouseEvent, IPointerEvent, IRenderManagerService, Rect, Vector2 } from '@univerjs/base-render';
 import {
     Disposable,
     ICommandService,
@@ -14,7 +6,6 @@ import {
     LifecycleStages,
     Nullable,
     Observer,
-    ObserverManager,
     OnLifecycle,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
@@ -26,7 +17,6 @@ import {
     IDeltaColumnWidthCommandParams,
 } from '../commands/commands/set-worksheet-col-width.command';
 import { DeltaRowHeightCommand, IDeltaRowHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
-import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import {
     HEADER_MENU_SHAPE_THUMB_SIZE,
@@ -74,12 +64,7 @@ export class HeaderResizeController extends Disposable {
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionTransformerShapeManager
-        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
-
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 

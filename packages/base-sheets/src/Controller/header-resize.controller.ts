@@ -175,12 +175,14 @@ export class HeaderResizeController extends Disposable {
                         return;
                     }
 
+                    const rowSize = rowHeaderWidth / 3;
+
                     this._rowResizeRect.transformByState({
-                        left: rowHeaderWidth / 2 - rowHeaderWidth / 8,
+                        left: rowHeaderWidth / 2 - rowSize / 2,
                         top,
                     });
                     this._rowResizeRect.setShapeProps({
-                        size: rowHeaderWidth / 4,
+                        size: rowSize,
                     });
                     this._rowResizeRect.show();
                 } else {
@@ -203,12 +205,14 @@ export class HeaderResizeController extends Disposable {
                         return;
                     }
 
+                    const columnSize = columnHeaderHeight * 0.7;
+
                     this._columnResizeRect.transformByState({
                         left,
-                        top: columnHeaderHeight / 2 - columnHeaderHeight / 4,
+                        top: columnHeaderHeight / 2 - columnSize / 2,
                     });
                     this._columnResizeRect.setShapeProps({
-                        size: columnHeaderHeight / 2,
+                        size: columnSize,
                     });
                     this._columnResizeRect.show();
                 }

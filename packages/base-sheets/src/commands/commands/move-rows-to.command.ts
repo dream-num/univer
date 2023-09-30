@@ -3,7 +3,7 @@ import { IAccessor } from '@wendellhu/redi';
 
 import { IInsertRowMutationParams, IRemoveRowMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
-import { InsertRowMutation, InsertRowMutationFactory } from '../mutations/insert-row-col.mutation';
+import { InsertRowMutation, InsertRowMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { IRemoveRowMutationFactory, RemoveRowMutation } from '../mutations/remove-row-col.mutation';
 
 export interface IMoveRowsToCommandParams {
@@ -68,7 +68,7 @@ export const MoveRowsToCommand: ICommand = {
             ],
         };
 
-        const undoMutationParams: IRemoveRowMutationParams = InsertRowMutationFactory(
+        const undoMutationParams: IRemoveRowMutationParams = InsertRowMutationUndoFactory(
             accessor,
             insertRowMutationParams
         );

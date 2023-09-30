@@ -4,7 +4,9 @@ import {
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveUpCommand,
     InsertColAfterCommand,
+    InsertColBeforeCommand,
     InsertRowAfterCommand,
+    InsertRowBeforeCommand,
     RemoveColCommand,
     RemoveRowCommand,
     RemoveSheetCommand,
@@ -954,21 +956,64 @@ export function ClearSelectionMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function InsertRowMenuItemFactory(): IMenuButtonItem {
+export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const selectionManager = accessor.get(SelectionManagerService);
+
     return {
-        id: InsertRowAfterCommand.id,
+        id: InsertRowBeforeCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
-        title: 'rightClick.insertRow',
+        title: 'rightClick.insertRowBefore',
+        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU, MenuPosition.CONTEXT_MENU],
+        hidden$: new Observable((observer) => {
+            // if there are multi selections this item should be hidden
+            const selections = selectionManager.getSelections();
+            observer.next(selections?.length !== 1);
+        }),
     };
 }
 
-export function InsertColMenuItemFactory(): IMenuButtonItem {
+export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const selectionManager = accessor.get(SelectionManagerService);
+    return {
+        id: InsertRowAfterCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
+        title: 'rightClick.insertRow',
+        hidden$: new Observable((observer) => {
+            // if there are multi selections this item should be hidden
+            const selections = selectionManager.getSelections();
+            observer.next(selections?.length !== 1);
+        }),
+    };
+}
+
+export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const selectionManager = accessor.get(SelectionManagerService);
+    return {
+        id: InsertColBeforeCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU, MenuPosition.CONTEXT_MENU],
+        title: 'rightClick.insertColumnBefore',
+        hidden$: new Observable((observer) => {
+            // if there are multi selections this item should be hidden
+            const selections = selectionManager.getSelections();
+            observer.next(selections?.length !== 1);
+        }),
+    };
+}
+
+export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const selectionManager = accessor.get(SelectionManagerService);
     return {
         id: InsertColAfterCommand.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.insertColumn',
+        hidden$: new Observable((observer) => {
+            // if there are multi selections this item should be hidden
+            const selections = selectionManager.getSelections();
+            observer.next(selections?.length !== 1);
+        }),
     };
 }
 
@@ -1032,8 +1077,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
                 let rowHeight;
                 if (primary != null) {
-                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                    rowHeight = range?.getHeight();
+                    rowHeight = worksheet.getRowHeight(primary.startRow);
                 }
 
                 subscriber.next(rowHeight ?? 0);
@@ -1074,13 +1118,13 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             function update() {
                 const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
-                let rowHeight;
+
+                let colWidth: number = 0;
                 if (primary != null) {
-                    const range = worksheet.getRange(primary.startRow, primary.startColumn);
-                    rowHeight = range?.getWidth();
+                    colWidth = worksheet.getColumnWidth(primary.startColumn);
                 }
 
-                subscriber.next(rowHeight ?? 0);
+                subscriber.next(colWidth);
             }
 
             const disposable = commandService.onCommandExecuted((c) => {

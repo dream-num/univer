@@ -3,6 +3,7 @@ import {
     Dimension,
     ICellData,
     ICommand,
+    ICommandInfo,
     ICommandService,
     ICurrentUniverService,
     IRange,
@@ -10,6 +11,7 @@ import {
     Nullable,
     ObjectMatrix,
     Tools,
+    Worksheet,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -31,7 +33,7 @@ import {
     InsertColMutation,
     InsertColMutationFactory,
     InsertRowMutation,
-    InsertRowMutationFactory,
+    InsertRowMutationUndoFactory,
 } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../mutations/remove-row-col.mutation';
 import {
@@ -39,11 +41,11 @@ import {
     RemoveWorksheetMergeMutationFactory,
 } from '../mutations/remove-worksheet-merge.mutation';
 
-export interface InsertRowCommandParams {
+export interface IInsertRowCommandParams {
     value: number;
 }
 
-export interface InsertRowCommandBaseParams {
+export interface IInsertRowCommandBaseParams {
     workbookId: string;
     worksheetId: string;
     range: IRange;
@@ -53,7 +55,7 @@ export const InsertRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row',
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params: InsertRowCommandBaseParams) => {
+    handler: async (accessor: IAccessor, params: IInsertRowCommandBaseParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -68,7 +70,8 @@ export const InsertRowCommand: ICommand = {
             worksheetId: params.worksheetId,
             ranges: [params.range],
         };
-        const undoMutationParams: IRemoveRowMutationParams = InsertRowMutationFactory(accessor, redoMutationParams);
+
+        const undoMutationParams: IRemoveRowMutationParams = InsertRowMutationUndoFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(InsertRowMutation.id, redoMutationParams);
 
         const { startRow, endRow, startColumn, endColumn } = params.range;
@@ -193,27 +196,26 @@ export const InsertRowCommand: ICommand = {
     },
 };
 
-export const InsertRowBeforeCommand: ICommand<InsertRowCommandParams> = {
+export const InsertRowBeforeCommand: ICommand<IInsertRowCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row-before',
-    handler: async (accessor: IAccessor, params?: InsertRowCommandParams) => {
-        const commandService = accessor.get(ICommandService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+    handler: async (accessor: IAccessor, params?: IInsertRowCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
+        const selections = selectionManagerService.getRangeDatas();
+        let range: IRange;
+        if (selections && selections.length === 1) {
+            range = selections[0];
+        } else {
+            return false;
+        }
 
+        const currentUniverService = accessor.get(ICurrentUniverService);
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService
             .getCurrentUniverSheetInstance()
             .getWorkBook()
             .getActiveSheet()
             .getSheetId();
-        let range: IRange;
-        const selections = selectionManagerService.getRangeDatas();
-        if (selections && selections.length === 1) {
-            range = selections[0];
-        } else {
-            return false;
-        }
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
         if (!workbook) return false;
@@ -225,7 +227,7 @@ export const InsertRowBeforeCommand: ICommand<InsertRowCommandParams> = {
             count = params.value ?? 1;
         }
 
-        const insertRowParams: InsertRowCommandBaseParams = {
+        const insertRowParams: IInsertRowCommandBaseParams = {
             workbookId,
             worksheetId,
             range: {
@@ -236,14 +238,14 @@ export const InsertRowBeforeCommand: ICommand<InsertRowCommandParams> = {
             },
         };
 
-        return commandService.executeCommand(InsertRowCommand.id, insertRowParams);
+        return accessor.get(ICommandService).executeCommand(InsertRowCommand.id, insertRowParams);
     },
 };
 
-export const InsertRowAfterCommand: ICommand<InsertRowCommandParams> = {
+export const InsertRowAfterCommand: ICommand<IInsertRowCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row-after',
-    handler: async (accessor: IAccessor, params: InsertRowCommandParams) => {
+    handler: async (accessor: IAccessor, params: IInsertRowCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const currentUniverService = accessor.get(ICurrentUniverService);
         const selectionManagerService = accessor.get(SelectionManagerService);
@@ -267,12 +269,14 @@ export const InsertRowAfterCommand: ICommand<InsertRowCommandParams> = {
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
-        let count = range.endRow - range.startRow + 1;
+        let count: number;
         if (params) {
             count = params.value ?? 1;
+        } else {
+            count = range.endRow - range.startRow + 1;
         }
 
-        const insertRowParams: InsertRowCommandBaseParams = {
+        const insertRowParams: IInsertRowCommandBaseParams = {
             workbookId,
             worksheetId,
             range: {
@@ -534,3 +538,47 @@ export const InsertColAfterCommand: ICommand<InsertColCommandParams> = {
         return commandService.executeCommand(InsertColCommand.id, insertColParams);
     },
 };
+
+/**
+ * When inserting a row, the inserted row should copy cell styles from the anchor row.
+ */
+export function InsertRowMutationFactory(
+    anchorRow: number,
+    rowCount: number,
+    workbookId: string,
+    worksheet: Worksheet
+): ICommandInfo[] {
+    const worksheetId = worksheet.getSheetId();
+    const redoMutations: ICommandInfo[] = [];
+
+    // TODO: insert before or insert after
+
+    redoMutations.push({
+        id: InsertRowMutation.id,
+        params: {
+            workbookId,
+            worksheetId,
+            ranges: [
+                {
+                    startRow: anchorRow,
+                    endRow: anchorRow + rowCount - 1,
+                    startColumn: 0,
+                    endColumn: worksheet.getColumnCount() - 1,
+                },
+            ],
+        },
+    });
+
+    // copy cell styles to previous rows
+
+    return redoMutations;
+}
+
+export function InsertColumnMutationFactory(
+    anchorColumn: number,
+    columnCount: number,
+    worksheetId: string,
+    worksheet: Worksheet
+): ICommandInfo[] {
+    return [];
+}

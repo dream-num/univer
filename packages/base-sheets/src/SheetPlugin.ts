@@ -28,6 +28,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     static override type = PluginType.Sheet;
 
     constructor(
+        config: undefined,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector

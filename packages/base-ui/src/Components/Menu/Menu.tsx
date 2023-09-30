@@ -342,9 +342,8 @@
 //         }
 //     }
 // }
-import { isRealNum } from '@univerjs/core';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Subscription } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 
 import { AppContext } from '../../Common/AppContext';
 import {
@@ -360,6 +359,7 @@ import {
 import { IMenuService } from '../../services/menu/menu.service';
 import { joinClassNames } from '../../Utils';
 import { CustomLabel, NeoCustomLabel } from '../CustomLabel/CustomLabel';
+import { useObservable } from '../hooks/observable';
 import { BaseMenuItem } from '../Item/Item';
 import { DisplayTypes } from '../Select/Select';
 import styles from './index.module.less';
@@ -667,10 +667,8 @@ export interface IMenuItemState {
 export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     const context = useContext(AppContext);
     const [disabled, setDisabled] = useState(false);
-    const [value, setValue] = useState<any>(undefined);
     const [menuItems, setMenuItems] = useState<Array<IDisplayMenuItem<IMenuItem>>>([]);
     const [disabledSubscription, setDisabledSubscription] = useState<Subscription | undefined>();
-    const [valueSubscription, setValueSubscription] = useState<Subscription | undefined>();
     const [itemShow, setItemShow] = useState<boolean>(false);
 
     const mouseEnter = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
@@ -703,9 +701,8 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
      * @param e
      */
     const onChange = (v: string | number) => {
-        const newValue = isRealNum(v) && typeof v === 'string' ? parseInt(v) : v;
-
-        setValue(newValue);
+        // const newValue = isRealNum(v) && typeof v === 'string' ? parseInt(v) : v;
+        // setValue(newValue);
     };
 
     useEffect(() => {
@@ -715,19 +712,17 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
             })
         );
 
-        setValueSubscription(
-            menuItem.value$?.subscribe((newValue) => {
-                setValue(newValue);
-            })
-        );
-
         getSubMenus();
 
         return () => {
             disabledSubscription?.unsubscribe();
-            valueSubscription?.unsubscribe();
         };
     }, [menuItem]);
+
+    const hidden = useObservable(menuItem.hidden$ || of(false), false, true);
+    const value = useObservable<string | number | undefined>(menuItem.value$ || of(undefined), undefined, true);
+
+    console.log('debug 222 - use value', value);
 
     const renderButtonType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
@@ -756,7 +751,7 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     };
 
     const renderSelectorType = () => {
-        const item = menuItem as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
+        const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
 
         return (
             <li
@@ -774,7 +769,7 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                     label={item.label}
                 ></NeoCustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
-                {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
+                {(menuItems.length > 0 || (item as IMenuSelectorItem).selections?.length) && (
                     <Menu
                         show={itemShow}
                         onOptionSelect={(v) => {
@@ -793,7 +788,7 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     };
 
     const renderSubItemsType = () => {
-        const item = menuItem as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
+        const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
 
         return (
             <li
@@ -821,6 +816,10 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
             </li>
         );
     };
+
+    if (hidden) {
+        return null;
+    }
 
     return (
         <>

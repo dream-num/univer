@@ -90,20 +90,26 @@ export class ContextMenu extends Component<IContextMenuProps, IContextMenuState>
     handleContextMenu = async (event: IMouseEvent, menuType: string) => {
         event.preventDefault();
 
-        this.setState({ visible: true }, () => {
-            new Promise<void>((resolve) => {
-                resolve();
-            }).then(() => {
-                // clientX/Y obtains the distance between the trigger point and the upper left corner of the browser's visible area.
-                this.setState({
-                    clientPosition: {
-                        clientX: event.clientX,
-                        clientY: event.clientY,
-                    },
-                    menuType,
-                });
+        const showMenu = () => {
+            this.setState({
+                visible: true,
+                clientPosition: {
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                },
+                menuType,
             });
-        });
+        };
+
+        // if it is visible, should set it to visible and set back to refresh inner contents
+
+        if (this.state.visible) {
+            this.setState({ visible: false }, () => {
+                setTimeout(() => showMenu(), 200);
+            });
+        } else {
+            showMenu();
+        }
     };
 
     private handleClick = (e: MouseEvent) => {

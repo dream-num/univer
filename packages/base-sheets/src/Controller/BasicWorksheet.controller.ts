@@ -22,6 +22,7 @@ import {
     InsertRowCommand,
 } from '../commands/commands/insert-row-col.command';
 import { InsertSheetCommand } from '../commands/commands/insert-sheet.command';
+import { MoveRowsCommand } from '../commands/commands/move-rows.command';
 import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
 import { RemoveSheetCommand } from '../commands/commands/remove-sheet.command';
 import { RemoveWorksheetMergeCommand } from '../commands/commands/remove-worksheet-merge.command';
@@ -123,6 +124,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             InsertColMutation,
             RemoveColCommand,
             RemoveColMutation,
+            MoveRowsCommand,
 
             SetColWidthCommand,
             SetWorksheetColWidthMutation,

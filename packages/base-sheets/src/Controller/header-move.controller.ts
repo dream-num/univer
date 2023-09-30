@@ -22,6 +22,8 @@ import { Inject } from '@wendellhu/redi';
 
 import { getCoordByOffset, getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
 import { CANVAS_VIEW_KEY, SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { IMoveColumnsCommandParams, MoveColumnsCommand } from '../commands/commands/move-columns-to.command';
+import { IMoveRowsCommandParams, MoveRowsCommand } from '../commands/commands/move-rows.command';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -240,22 +242,33 @@ export class HeaderMoveController extends Disposable {
                     });
                 });
 
-                this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+                this._upObserver = scene.onPointerUpObserver.add((_upEvt: IPointerEvent | IMouseEvent) => {
                     this._disposeBackgroundAndLine();
                     scene.resetCursor();
                     scene.enableEvent();
                     this._clearObserverEvent();
                     this._scrollTimer?.dispose();
 
-                    if (initialType === HEADER_MOVE_TYPE.ROW) {
-                        console.log(this._changeToRow);
-                        // this._commandService.executeCommand();
-                        // alert(`moveColumnTo: ${this._changeToRow}`);
+                    // when multi ranges are selected, we should only move the range that contains
+                    // `changeFromRow`
 
+                    if (initialType === HEADER_MOVE_TYPE.ROW) {
+                        if (this._changeFromRow !== this._changeToRow) {
+                            this._commandService.executeCommand<IMoveRowsCommandParams>(MoveRowsCommand.id, {
+                                fromRow: this._changeFromRow,
+                                toRow: this._changeToRow,
+                            });
+                        }
+
+                        // reset dragging status
                         this._changeToRow = this._changeFromRow = -1;
                     } else {
-                        console.log(this._changeToColumn);
-                        // alert(`moveColumnTo: ${this._changeToColumn}`);
+                        if (this._changeFromColumn !== this._changeToColumn) {
+                            this._commandService.executeCommand<IMoveColumnsCommandParams>(MoveColumnsCommand.id, {
+                                fromColumn: this._changeFromColumn,
+                                toColumn: this._changeToColumn,
+                            });
+                        }
 
                         this._changeToColumn = this._changeFromColumn = -1;
                     }

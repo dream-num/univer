@@ -302,7 +302,7 @@ export class CommandService implements ICommandService {
     ): Promise<R> {
         this._log.log(
             '[CommandService]',
-            `${'|-'.repeat(this._commandExecutingLevel)}executing command "${command.id}".`
+            `${'|-'.repeat(this._commandExecutingLevel)}executing command "${command.id}"`
         );
 
         this._commandExecutingLevel++;

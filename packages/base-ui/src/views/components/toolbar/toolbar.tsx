@@ -57,6 +57,7 @@ export class Toolbar extends Component<IToolbarProps, IToolbarState> {
 
     override render() {
         const { menuItems } = this.state;
+
         return (
             <Container style={{ position: 'relative' }}>
                 <div className={`${styles.toolbarWarp} ${styles.toolbar}`} ref={this.toolbarRef}>

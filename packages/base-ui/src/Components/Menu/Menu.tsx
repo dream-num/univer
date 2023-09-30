@@ -343,7 +343,7 @@
 //     }
 // }
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { of, Subscription } from 'rxjs';
+import { of } from 'rxjs';
 
 import { AppContext } from '../../Common/AppContext';
 import {
@@ -354,6 +354,7 @@ import {
     IMenuSelectorItem,
     isValueOptions,
     IValueOption,
+    MenuItemDefaultValueType,
     MenuItemType,
 } from '../../services/menu/menu';
 import { IMenuService } from '../../services/menu/menu.service';
@@ -666,9 +667,7 @@ export interface IMenuItemState {
 
 export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     const context = useContext(AppContext);
-    const [disabled, setDisabled] = useState(false);
     const [menuItems, setMenuItems] = useState<Array<IDisplayMenuItem<IMenuItem>>>([]);
-    const [disabledSubscription, setDisabledSubscription] = useState<Subscription | undefined>();
     const [itemShow, setItemShow] = useState<boolean>(false);
 
     const mouseEnter = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
@@ -688,14 +687,6 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
         }
     };
 
-    // const handleClick = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, item: IDisplayMenuItem<IMenuItem>, index: number) => {
-    //     // const commandService: ICommandService = context.injector.get(ICommandService);
-    //     onClick();
-
-    //     const itemValue = value;
-    //     // !(item.subMenuItems && item.subMenuItems.length > 0) && commandService.executeCommand(item.id, { value });
-    // };
-
     /**
      * user input change value from CustomLabel
      * @param e
@@ -706,23 +697,14 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     };
 
     useEffect(() => {
-        setDisabledSubscription(
-            menuItem.disabled$?.subscribe((disabled) => {
-                setDisabled(disabled);
-            })
-        );
-
         getSubMenus();
 
-        return () => {
-            disabledSubscription?.unsubscribe();
-        };
+        return () => {};
     }, [menuItem]);
 
+    const disabled = useObservable<boolean>(menuItem.disabled$ || of(false), false, true);
     const hidden = useObservable(menuItem.hidden$ || of(false), false, true);
-    const value = useObservable<string | number | undefined>(menuItem.value$ || of(undefined), undefined, true);
-
-    console.log('debug 222 - use value', value);
+    const value = useObservable<MenuItemDefaultValueType>(menuItem.value$ || of(undefined), undefined, true);
 
     const renderButtonType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;

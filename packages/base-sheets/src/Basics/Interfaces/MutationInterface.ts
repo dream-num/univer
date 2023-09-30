@@ -39,7 +39,7 @@ export interface IInsertColMutationParams {
 }
 
 /** Params of InsertRowMutation */
-export interface IRemoveRowMutationParams {
+export interface IRemoveRowsMutationParams {
     workbookId: string;
     worksheetId: string;
     ranges: IRange[];

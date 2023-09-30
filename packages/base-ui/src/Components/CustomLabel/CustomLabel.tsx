@@ -79,6 +79,7 @@ export function NeoCustomLabel(
         <Item
             selected={selected}
             label={title}
+            value={value}
             suffix={LabelComponent ? <LabelComponent /> : null}
             disabled={false}
         ></Item>

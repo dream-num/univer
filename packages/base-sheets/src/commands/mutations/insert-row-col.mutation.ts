@@ -8,9 +8,7 @@ import {
     IRemoveRowMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 
-// TODO: InsertRowMutation should have an undo factory
-
-export const InsertRowMutationFactory = (
+export const InsertRowMutationUndoFactory = (
     accessor: IAccessor,
     params: IInsertRowMutationParams
 ): IRemoveRowMutationParams => {
@@ -32,15 +30,15 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
     id: 'sheet.mutation.insert-row',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
+        const { workbookId, worksheetId, ranges, rowInfo } = params;
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
 
+        const universheet = currentUniverService.getUniverSheetInstance(workbookId);
         if (universheet == null) {
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
-
+        const worksheet = universheet.getWorkBook().getSheetBySheetId(worksheetId);
         if (worksheet == null) {
             throw new Error('worksheet is null error!');
         }
@@ -50,8 +48,8 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
         const rowWrapper = new ObjectArray(rowPrimitive);
         const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
 
-        for (let i = 0; i < params.ranges.length; i++) {
-            const range = params.ranges[i];
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
             const rowIndex = range.startRow;
             const rowCount = range.endRow - range.startRow + 1;
 
@@ -60,8 +58,9 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
                     h: defaultRowHeight,
                     hd: 0,
                 };
-                if (params.rowInfo) {
-                    rowWrapper.insert(j, params.rowInfo.get(j) ?? defaultRowInfo);
+
+                if (rowInfo) {
+                    rowWrapper.insert(j, rowInfo.get(j) ?? defaultRowInfo);
                 } else {
                     rowWrapper.insert(j, defaultRowInfo);
                 }

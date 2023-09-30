@@ -97,7 +97,7 @@ export function isCustomComponentOption(v: IValueOption | ICustomComponentOption
     return typeof (v as ICustomComponentOption).id !== 'undefined';
 }
 
-export interface IMenuSelectorItem<V> extends IMenuItemBase<V> {
+export interface IMenuSelectorItem<V = MenuItemDefaultValueType> extends IMenuItemBase<V> {
     type: MenuItemType.SELECTOR | MenuItemType.SUBITEMS;
 
     /** @deprecated this parameter would be removed after we complete refactoring, because they will be all NEO */
@@ -115,7 +115,9 @@ export function isMenuSelectorItem<T>(v: IMenuItem): v is IMenuSelectorItem<T> {
     return v.type === MenuItemType.SELECTOR || v.type === MenuItemType.SUBITEMS;
 }
 
-export type IMenuItem = IMenuButtonItem | IMenuSelectorItem<unknown>;
+export type MenuItemDefaultValueType = string | number | undefined;
+
+export type IMenuItem = IMenuButtonItem | IMenuSelectorItem<MenuItemDefaultValueType>;
 
 export type IDisplayMenuItem<T extends IMenuItem> = T & {
     shortcut?: string;

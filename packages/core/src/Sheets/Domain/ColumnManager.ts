@@ -1,8 +1,7 @@
 import { Nullable, Tools } from '../../Shared';
 import { ObjectArray, ObjectArrayType } from '../../Shared/ObjectArray';
 import { BooleanNumber } from '../../Types/Enum';
-import { IColumnData } from '../../Types/Interfaces';
-import { Worksheet } from './Worksheet';
+import { IColumnData, IWorksheetConfig } from '../../Types/Interfaces';
 
 /**
  * Manage configuration information of all columns, get column width, column length, set column width, etc.
@@ -10,10 +9,10 @@ import { Worksheet } from './Worksheet';
 export class ColumnManager {
     private _columnData: ObjectArray<IColumnData>;
 
-    private _workSheet: Worksheet;
-
-    constructor(workSheet: Worksheet, data: ObjectArrayType<Partial<IColumnData>>) {
-        this._workSheet = workSheet;
+    constructor(
+        private readonly _config: IWorksheetConfig,
+        data: ObjectArrayType<Partial<IColumnData>>
+    ) {
         this._columnData = Tools.createObjectArray(data) as ObjectArray<IColumnData>;
     }
 
@@ -56,9 +55,8 @@ export class ColumnManager {
      */
     getColumnWidth(columnPos: number, numColumns: number): number;
     getColumnWidth(...argument: any): number {
-        const { _workSheet } = this;
         const { _columnData } = this;
-        const config = _workSheet.getConfig();
+        const config = this._config;
         let width: number = 0;
         if (argument.length === 1) {
             const column = _columnData.obtain(argument[0], {
@@ -97,9 +95,8 @@ export class ColumnManager {
      * @returns
      */
     getColumnOrCreate(columnPos: number): IColumnData {
-        const { _workSheet } = this;
         const { _columnData } = this;
-        const config = _workSheet.getConfig();
+        const config = this._config;
         const column = _columnData.get(columnPos);
         if (column) {
             return column;

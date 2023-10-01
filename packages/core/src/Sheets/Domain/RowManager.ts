@@ -1,7 +1,6 @@
 import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../../Shared';
 import { BooleanNumber } from '../../Types/Enum';
-import { IRowData } from '../../Types/Interfaces';
-import type { Worksheet } from './Worksheet';
+import { IRowData, IWorksheetConfig } from '../../Types/Interfaces';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
@@ -9,10 +8,10 @@ import type { Worksheet } from './Worksheet';
 export class RowManager {
     private _rowData: ObjectArray<IRowData>;
 
-    private _workSheet: Worksheet;
-
-    constructor(workSheet: Worksheet, data: ObjectArrayType<Partial<IRowData>>) {
-        this._workSheet = workSheet;
+    constructor(
+        private readonly _config: IWorksheetConfig,
+        data: ObjectArrayType<Partial<IRowData>>
+    ) {
         this._rowData = Tools.createObjectArray(data) as ObjectArray<IRowData>;
     }
 
@@ -47,9 +46,8 @@ export class RowManager {
      */
     getRowHeight(rowPos: number, numRows: number): number;
     getRowHeight(...argument: any): number {
-        const { _workSheet } = this;
         const { _rowData } = this;
-        const config = _workSheet.getConfig();
+        const config = this._config;
         let height: number = 0;
         if (argument.length === 1) {
             const row = _rowData.obtain(argument[0], {
@@ -94,13 +92,12 @@ export class RowManager {
      * @returns
      */
     getRowOrCreate(rowPos: number): IRowData {
-        const { _workSheet } = this;
         const { _rowData } = this;
         const row = _rowData.get(rowPos);
         if (row) {
             return row;
         }
-        const config = _workSheet.getConfig();
+        const config = this._config;
         const create = { hd: BooleanNumber.FALSE, h: config.defaultRowHeight };
         _rowData.set(rowPos, create);
         return create;

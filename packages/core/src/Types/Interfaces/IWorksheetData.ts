@@ -1,10 +1,10 @@
-import { IKeyValue } from '../../Shared';
 import { ObjectArrayType } from '../../Shared/ObjectArray';
 import { ObjectMatrixPrimitiveType } from '../../Shared/ObjectMatrix';
+import { IKeyValue } from '../../Shared/Types';
 import { BooleanNumber, SheetTypes } from '../Enum';
-import { IFreeze } from '.';
 import { ICellData } from './ICellData';
 import { IColumnData } from './IColumnData';
+import { IFreeze } from './IFreeze';
 import { IRange, IRangeType } from './IRange';
 import { IRowData } from './IRowData';
 

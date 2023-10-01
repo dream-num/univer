@@ -65,8 +65,8 @@ export class Worksheet {
         this._sheetId = this._snapshot.id ?? Tools.generateRandomId(6);
         this._initialized = false;
         this._cellData = new ObjectMatrix<ICellData>(cellData);
-        this._rowManager = new RowManager(this, rowData);
-        this._columnManager = new ColumnManager(this, columnData);
+        this._rowManager = new RowManager(this._snapshot, rowData);
+        this._columnManager = new ColumnManager(this._snapshot, columnData);
     }
 
     /**

@@ -1,6 +1,5 @@
 import { Ctor, Injector } from '@wendellhu/redi';
 
-import { ThemeService } from '..';
 import { ObserverManager } from '../Observer';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
@@ -12,6 +11,7 @@ import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { LocaleService } from '../services/locale/locale.service';
 import { DesktopLogService, ILogService } from '../services/log/log.service';
 import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
+import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
 import { Nullable } from '../Shared';
 import { LocaleType } from '../Types/Enum/LocaleType';
@@ -151,10 +151,14 @@ export class Univer {
             [
                 ICurrentUniverService,
                 {
-                    useFactory: () =>
-                        new CurrentUniverService({
-                            createUniverDoc: (data) => this.createUniverDoc(data),
-                        }),
+                    useFactory: (contextService: IContextService) =>
+                        new CurrentUniverService(
+                            {
+                                createUniverDoc: (data) => this.createUniverDoc(data),
+                            },
+                            contextService
+                        ),
+                    deps: [IContextService],
                 },
             ],
             [LocaleService],

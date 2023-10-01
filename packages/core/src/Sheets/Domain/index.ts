@@ -1,5 +1,3 @@
-export * from './Color';
-export * from './ColorBuilder';
 export * from './ColumnManager';
 export * from './Range';
 export * from './RowManager';

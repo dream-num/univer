@@ -1,14 +1,6 @@
 import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../../Shared';
 import { DEFAULT_STYLES } from '../../Types/Const';
-import {
-    BooleanNumber,
-    Dimension,
-    FontItalic,
-    FontWeight,
-    HorizontalAlign,
-    VerticalAlign,
-    WrapStrategy,
-} from '../../Types/Enum';
+import { BooleanNumber, FontItalic, FontWeight, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../Types/Enum';
 import {
     IBorderData,
     ICellData,
@@ -303,16 +295,6 @@ export class Range {
     }
 
     /**
-     * Notify other Components
-     * TODO: 待触发更新测试
-     */
-    // notifyUpdated() {
-    //     this._context.onAfterChangeRangeDataObservable.notifyObservers(
-    //         this._worksheet
-    //     );
-    // }
-
-    /**
      * Returns the font color of the cell in the top-left corner of the range, in CSS notation
      */
     getFontColor(): Nullable<string> {
@@ -443,22 +425,6 @@ export class Range {
     }
 
     /**
-     * Returns the formula (A1 notation) for the top-left cell of the range, or an empty string if the cell is empty or doesn't contain a formula.
-     */
-    // getFormula(): string {
-    //     return this.getFormulas()[0][0];
-    // }
-
-    /**
-     * Returns the formulas (A1 notation) for the cells in the range.
-     */
-    // getFormulas(): string[][] {
-    //     return this.getValues().map((row) =>
-    //         row.map((cell: Nullable<ICellData>) => cell?.f || '')
-    //     );
-    // }
-
-    /**
      * Returns the grid ID of the range's parent sheet.
      */
     getGridId(): string {
@@ -508,22 +474,6 @@ export class Range {
     }
 
     /**
-     * 	Returns the note associated with the given range.
-     */
-    // getNote(): string {
-    //     return this.getNotes()[0][0];
-    // }
-
-    /**
-     * 	Returns the notes associated with the cells in the range.
-     */
-    // getNotes(): string[][] {
-    //     return this.getValues().map((row) =>
-    //         row.map((cell: Nullable<ICellData>) => cell?.n || '')
-    //     );
-    // }
-
-    /**
      * Returns the number of columns in this range.
      */
     getNumColumns(): number {
@@ -538,22 +488,6 @@ export class Range {
         const { startRow, endRow } = this._range;
         return endRow - startRow + 1;
     }
-
-    /**
-     * Get the number or date formatting of the top-left cell of the given range.
-     */
-    // getNumberFormat(): string {
-    //     return this.getNumberFormats()[0][0];
-    // }
-
-    /**
-     * Returns the number or date formats for the cells in the range.
-     */
-    // getNumberFormats(): string[][] {
-    //     return this.getValues().map((row) =>
-    //         row.map((cell: Nullable<ICellData>) => cell?.fm?.f || '')
-    //     );
-    // }
 
     /**
      * Returns the Rich Text value for the top left cell of the range, or null if the cell value is not text.
@@ -683,212 +617,9 @@ export class Range {
         return this.getWrapStrategies()[0][0];
     }
 
-    /**
-     * Returns true if the range is totally blank.
-     */
-    isBlank(): boolean {
-        const data = this.getValues();
-        return data.some((items) => items.some((item) => item?.m === ''));
-    }
-
-    /**
-     * Returns a copy of the range expanded in the four cardinal Directions to cover all adjacent cells
-     * with data in them.
-     *
-     * @returns This range, for chaining.
-     */
-    getDataRegion(): Range;
-    /**
-     * Returns a copy of the range expanded Direction.UP and Direction.DOWN if the specified dimension is Dimension.ROWS, or Direction.NEXT and Direction.PREVIOUS if the dimension is Dimension.COLUMNS.
-     *
-     * @returns This range, for chaining.
-     */
-    getDataRegion(dimension: Dimension): Range;
-    // eslint-disable-next-line max-lines-per-function
-    getDataRegion(...argument: any): Range {
-        const { startRow, endRow, startColumn, endColumn } = this._range;
-        let numRows: number;
-        let numColumns: number;
-
-        const data = this._worksheet.getCellMatrix();
-        if (Tools.isNumber(argument[0])) {
-            const dimension = argument[0];
-
-            if (dimension === Dimension.COLUMNS) {
-                let start: number = startRow;
-                let end: number = startRow;
-                const rowMax = this._worksheet.getRowCount();
-                for (let i = 1; i < startRow; i++) {
-                    const element = data.getValue(startRow - i, startColumn);
-                    if (!element) {
-                        start = startRow - i + 1;
-                        break;
-                    }
-                }
-                const j = 0;
-                while (j < rowMax - startRow) {
-                    const element = data.getValue(startRow + j, startColumn);
-                    if (!element) {
-                        end = startRow - j - 1;
-                        break;
-                    }
-                }
-
-                numColumns = start - end;
-                numRows = 0;
-                return this._worksheet.getRange(startRow, start, numRows, numColumns);
-            }
-            if (dimension === Dimension.ROWS) {
-                let start: number = startRow;
-                let end: number = startRow;
-                const colMax = this._worksheet.getColumnCount();
-                for (let i = 1; i < startRow; i++) {
-                    const element = data.getValue(startRow, startColumn - i);
-                    if (!element) {
-                        start = startRow - i + 1;
-                        break;
-                    }
-                }
-                const j = 0;
-                while (j < colMax - startColumn) {
-                    const element = data.getValue(startRow, startColumn + j);
-                    if (!element) {
-                        end = startRow - j - 1;
-                        break;
-                    }
-                }
-
-                numColumns = 0;
-                numRows = start - end;
-                return this._worksheet.getRange(start, startColumn, numRows, numColumns);
-            }
-        } else {
-            let rowStart: number = startRow;
-            let rowEnd: number = startRow;
-            const rowMax = this._worksheet.getRowCount();
-            for (let i = 1; i < startRow; i++) {
-                const element = data.getValue(startRow - i, startColumn);
-                if (!element) {
-                    rowStart = startRow - i + 1;
-                    break;
-                }
-            }
-            const rj = 0;
-            while (rj < rowMax - startRow) {
-                const element = data.getValue(startRow + rj, startColumn);
-                if (!element) {
-                    rowEnd = startRow - rj - 1;
-                    break;
-                }
-            }
-
-            let columnStart: number = startRow;
-            let columnEnd: number = startRow;
-            const colMax = this._worksheet.getColumnCount();
-            for (let i = 1; i < startRow; i++) {
-                const element = data.getValue(startRow, startColumn - i);
-                if (!element) {
-                    columnStart = startRow - i + 1;
-                    break;
-                }
-            }
-            const cj = 0;
-            while (cj < colMax - startColumn) {
-                const element = data.getValue(startRow, startColumn + cj);
-                if (!element) {
-                    columnEnd = startRow - cj - 1;
-                    break;
-                }
-            }
-
-            numColumns = columnStart - columnEnd;
-            numColumns = rowStart - rowEnd;
-            numRows = startRow;
-            return this._worksheet.getRange(rowStart, columnStart, numRows, numColumns);
-        }
-        return this;
-    }
-
-    /**
-     * Whether the current range and the incoming range have an intersection
-     *
-     * @param range the incoming range
-     * @returns Intersect or not
-     */
-    isIntersection(range: Range): boolean {
-        const currentStartRow = this._range.startRow;
-        const currentEndRow = this._range.endRow;
-        const currentStartColumn = this._range.startColumn;
-        const currentEndColumn = this._range.endColumn;
-
-        const incomingStartRow = range.getRangeData().startRow;
-        const incomingEndRow = range.getRangeData().endRow;
-        const incomingStartColumn = range.getRangeData().startColumn;
-        const incomingEndColumn = range.getRangeData().endColumn;
-
-        const zx = Math.abs(currentStartColumn + currentEndColumn - incomingStartColumn - incomingEndColumn);
-        const x = Math.abs(currentStartColumn - currentEndColumn) + Math.abs(incomingStartColumn - incomingEndColumn);
-        const zy = Math.abs(currentStartRow + currentEndRow - incomingStartRow - incomingEndRow);
-        const y = Math.abs(currentStartRow - currentEndRow) + Math.abs(incomingStartRow - incomingEndRow);
-        if (zx <= x && zy <= y) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * get row matrix
-     * @returns
-     */
-    getRowMatrix(index: number) {
-        const { startColumn, endColumn } = this._range;
-
-        const sheetMatrix = this._worksheet.getCellMatrix();
-        const rangeMatrix = new ObjectMatrix<ICellData>();
-
-        for (let r = index; r <= index; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-                rangeMatrix.setValue(r, c, sheetMatrix.getValue(r, c) || {});
-            }
-        }
-
-        return rangeMatrix;
-    }
-
-    /**
-     * get column matrix
-     * @returns
-     */
-    getColumnMatrix(index: number) {
-        const { startRow, endRow } = this._range;
-
-        const sheetMatrix = this._worksheet.getCellMatrix();
-        const rangeMatrix = new ObjectMatrix<ICellData>();
-
-        for (let r = startRow; r <= endRow; r++) {
-            for (let c = index; c <= index; c++) {
-                rangeMatrix.setValue(r, c, sheetMatrix.getValue(r, c) || {});
-            }
-        }
-
-        return rangeMatrix;
-    }
-
     forEach(action: (row: number, column: number) => void): void {
         Range.foreach(this._range, action);
     }
-
-    /**
-     * Determine whether a range is legal
-     */
-    isValid(): boolean {
-        if (Object.values(this._range).includes(-1)) {
-            return false;
-        }
-        return true;
-    }
-
-    // FIXME@wzhudev: 内部调用这个 API 的时候需要先
 
     /**
      *

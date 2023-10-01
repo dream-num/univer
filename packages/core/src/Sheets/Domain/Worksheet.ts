@@ -236,15 +236,6 @@ export class Worksheet {
     }
 
     /**
-     * Sets the width of the given column to fit its contents.
-     * @param columnPosition
-     */
-    // todo  调用columnManage的API
-    // autoResizeColumn(columnPosition: number): WorkSheet {
-    //     return this;
-    // }
-
-    /**
      * Returns the number of frozen columns.
      * @returns the number of frozen columns
      */

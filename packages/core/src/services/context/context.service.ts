@@ -1,11 +1,10 @@
 import { createIdentifier } from '@wendellhu/redi';
 
-import { UniverDoc } from '../../Basics/UniverDoc';
-import { UniverSheet } from '../../Basics/UniverSheet';
-import { UniverSlide } from '../../Basics/UniverSlide';
-import { Disposable, fromObservable } from '../../Shared/lifecycle';
-import { ICurrentUniverService } from '../current.service';
-import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './context';
+// import { UniverDoc } from '../../Basics/UniverDoc';
+// import { UniverSheet } from '../../Basics/UniverSheet';
+// import { UniverSlide } from '../../Basics/UniverSlide';
+import { Disposable } from '../../Shared/lifecycle';
+// import { ICurrentUniverService } from '../current.service';
 
 export interface IContextService {
     getContextValue(key: string): boolean;
@@ -19,18 +18,6 @@ export const IContextService = createIdentifier<IContextService>('univer.context
 export class ContextService extends Disposable implements IContextService {
     private readonly _contextMap = new Map<string, boolean>();
 
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
-        super();
-
-        this.disposeWithMe(
-            fromObservable(
-                this._currentUniverService.focused$.subscribe(() => {
-                    this.handleFocusedUniverChange();
-                })
-            )
-        );
-    }
-
     getContextValue(key: string): boolean {
         return this._contextMap.get(key) ?? false;
     }
@@ -39,16 +26,16 @@ export class ContextService extends Disposable implements IContextService {
         this._contextMap.set(key, value);
     }
 
-    private handleFocusedUniverChange() {
-        [FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE].forEach((k) => this.setContextValue(k, false));
+    // private handleFocusedUniverChange() {
+    //     [FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE].forEach((k) => this.setContextValue(k, false));
 
-        const current = this._currentUniverService.getFocusedUniverInstance();
-        if (current instanceof UniverSheet) {
-            this.setContextValue(FOCUSING_SHEET, true);
-        } else if (current instanceof UniverDoc) {
-            this.setContextValue(FOCUSING_DOC, true);
-        } else if (current instanceof UniverSlide) {
-            this.setContextValue(FOCUSING_SLIDE, true);
-        }
-    }
+    //     const current = this._currentUniverService.getFocusedUniverInstance();
+    //     if (current instanceof UniverSheet) {
+    //         this.setContextValue(FOCUSING_SHEET, true);
+    //     } else if (current instanceof UniverDoc) {
+    //         this.setContextValue(FOCUSING_DOC, true);
+    //     } else if (current instanceof UniverSlide) {
+    //         this.setContextValue(FOCUSING_SLIDE, true);
+    //     }
+    // }
 }

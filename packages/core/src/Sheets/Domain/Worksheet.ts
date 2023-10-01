@@ -185,16 +185,23 @@ export class Worksheet {
         return ret;
     }
 
+    getRange(range: IRange): Range;
     getRange(startRow: number, startColumn: number): Range;
     getRange(startRow: number, startColumn: number, endRow: number, endColumn: number): Range;
-    getRange(startRow: number, startColumn: number, endRow?: number, endColumn?: number): Range {
+    getRange(startRowOrRange: number | IRange, startColumn?: number, endRow?: number, endColumn?: number): Range {
+        if (typeof startRowOrRange === 'object') {
+            return new Range(this, startRowOrRange, {
+                getStyles: () => this._styles,
+            });
+        }
+
         return new Range(
             this,
             {
-                startRow,
-                startColumn,
-                endColumn: endColumn || startColumn,
-                endRow: endRow || startRow,
+                startRow: startRowOrRange,
+                startColumn: startColumn!,
+                endColumn: endColumn || startColumn!,
+                endRow: endRow || startRowOrRange,
             },
             {
                 getStyles: () => this._styles,

@@ -211,11 +211,6 @@ export const DEFAULT_STYLES: IStyleData = {
     },
 };
 
-export const DEFAULT_DOC = {
-    id: 'default_doc',
-    documentStyle: {},
-};
-
 export const DEFAULT_SLIDE = {
     id: 'default_slide',
     title: 'defaultSlide',

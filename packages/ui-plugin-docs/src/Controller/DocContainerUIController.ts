@@ -1,4 +1,3 @@
-import { Engine, IRenderingEngine } from '@univerjs/base-render';
 import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
 import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
@@ -13,8 +12,7 @@ export class DocContainerUIController {
         @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
-        @IRenderingEngine private readonly _renderingEngine: Engine
+        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
     ) {}
 
     getUIConfig() {
@@ -36,19 +34,6 @@ export class DocContainerUIController {
         if (!container) {
             throw new Error('container is not ready');
         }
-
-        const engine = this._renderingEngine;
-        // engine.setContainer(container);
-
-        // TODO: rendering engine should handle this problem internally
-
-        window.addEventListener('resize', () => {
-            engine.resize();
-        });
-
-        setTimeout(() => {
-            engine.resize();
-        });
 
         this._observerManager.requiredObserver<DocContainer>('onUIDidMount')?.notifyObservers(this._docContainer);
         this._globalObserverManager.requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);

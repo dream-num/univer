@@ -22,7 +22,6 @@ export class DocsView extends BaseView {
 
     private _model: DocumentModel | null = null;
 
-    // TODO: wzhudev this is strange that DocsView depends on current univer service
     constructor(
         externalModel: DocumentModel | undefined,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
@@ -87,6 +86,7 @@ export class DocsView extends BaseView {
         const docsModel = this._useExternalModel
             ? this._model!
             : this._currentUniverService.getCurrentUniverDocInstance()?.getDocument();
+
         if (!docsModel) {
             return;
         }

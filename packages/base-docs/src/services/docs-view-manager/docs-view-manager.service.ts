@@ -1,8 +1,8 @@
-import { Disposable, fromObservable, ICurrentUniverService, toDisposable } from '@univerjs/core';
+import { Disposable, ICurrentUniverService, toDisposable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
-import type { DocsView } from '../../View/Render/Views/DocsView';
+import { DocsView } from '../../View/Render/Views/DocsView';
 
 /**
  * This services manages instances of doc CanvasView and determines which one
@@ -11,7 +11,7 @@ import type { DocsView } from '../../View/Render/Views/DocsView';
 export class DocsViewManagerService extends Disposable {
     readonly current$: Observable<DocsView | null>;
 
-    private readonly _current$: Subject<DocsView | null> = new Subject();
+    private readonly _current$ = new BehaviorSubject<DocsView | null>(null);
 
     private readonly _viewsMap = new Map<string, DocsView>();
 
@@ -19,7 +19,7 @@ export class DocsViewManagerService extends Disposable {
         super();
 
         this.disposeWithMe(
-            fromObservable(
+            toDisposable(
                 this._currentUniverService.focused$.subscribe((id) => {
                     if (!id) {
                         this._current$.next(null);

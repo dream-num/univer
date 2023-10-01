@@ -1,11 +1,11 @@
 import './Views';
 
 import {
-    Engine,
     EVENT_TYPE,
-    IRenderingEngine,
+    IRenderManagerService,
     IWheelEvent,
     Layer,
+    RenderManagerService,
     Scene,
     ScrollBar,
     Viewport,
@@ -21,7 +21,8 @@ export class CanvasView {
     constructor(
         /** @deprecated This a temporary solution. CanvasView should not be a singleton. */
         private standalone = true,
-        @IRenderingEngine private readonly _engine: Engine,
+        @IRenderManagerService private readonly _rms: RenderManagerService,
+        // @IRenderingEngine private readonly _engine: Engine,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._initialize();
@@ -40,7 +41,7 @@ export class CanvasView {
     }
 
     private _initialize() {
-        const engine = this._engine;
+        const engine = this._rms.defaultEngine;
 
         const scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
             width: 1024,

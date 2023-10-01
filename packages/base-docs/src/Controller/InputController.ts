@@ -19,7 +19,6 @@ import {
     Disposable,
     DisposableCollection,
     DocumentModel,
-    fromObservable,
     ICommandService,
     ICurrentUniverService,
     IParagraph,
@@ -60,7 +59,7 @@ export class InputController extends Disposable {
         super();
 
         this.disposeWithMe(
-            fromObservable(
+            toDisposable(
                 this._docsViewManager.current$.subscribe((docsView) => {
                     this._currentDocsView?.getDocs().disableEditor();
                     this._editorDisposables?.dispose();

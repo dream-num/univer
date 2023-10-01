@@ -66,7 +66,6 @@ export const DEFAULT_WORKBOOK: IWorkbookConfig = {
     lastModifiedBy: '',
     createdTime: '',
     modifiedTime: '',
-    namedRanges: [],
 };
 
 export const DEFAULT_WORKSHEET_ROW_COUNT = 1000;

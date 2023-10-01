@@ -24187,19 +24187,19 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             },
         },
     },
-    namedRanges: [
-        {
-            namedRangeId: 'named-rang',
-            name: 'namedRange',
-            range: {
-                sheetId: 'sheet-0001',
-                range: {
-                    startRow: 0,
-                    startColumn: 0,
-                    endRow: 1,
-                    endColumn: 1,
-                },
-            },
-        },
-    ],
+    // namedRanges: [
+    //     {
+    //         namedRangeId: 'named-rang',
+    //         name: 'namedRange',
+    //         range: {
+    //             sheetId: 'sheet-0001',
+    //             range: {
+    //                 startRow: 0,
+    //                 startColumn: 0,
+    //                 endRow: 1,
+    //                 endColumn: 1,
+    //             },
+    //         },
+    //     },
+    // ],
 };

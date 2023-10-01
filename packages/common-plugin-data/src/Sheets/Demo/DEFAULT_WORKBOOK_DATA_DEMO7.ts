@@ -26742,5 +26742,4 @@ export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookConfig = {
         //     "pluginMeta": {}
         // }
     },
-    namedRanges: [],
 };

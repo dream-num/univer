@@ -11,7 +11,7 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { getCoordByOffset, getSheetObject, getTransformCoord } from '../Basics/component-tools';
-import { CANVAS_VIEW_KEY, SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import {
     DeltaColumnWidthCommand,
     IDeltaColumnWidthCommandParams,
@@ -283,7 +283,7 @@ export class HeaderResizeController extends Disposable {
 
             const { scene } = sheetObject;
 
-            const viewPort = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
+            const viewPort = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
             const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonBarRect.height || 0) + 10;
 

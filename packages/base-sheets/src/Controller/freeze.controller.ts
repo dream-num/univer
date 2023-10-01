@@ -3,23 +3,27 @@ import {
     IMouseEvent,
     IPointerEvent,
     IRenderManagerService,
+    IScrollObserverParam,
     ISelectionTransformerShapeManager,
     Rect,
 } from '@univerjs/base-render';
 import {
     Disposable,
+    ICommandInfo,
     ICommandService,
     ICurrentUniverService,
     LifecycleStages,
     Nullable,
     Observer,
-    ObserverManager,
     OnLifecycle,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { getCoordByOffset, getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
-import { CANVAS_VIEW_KEY, SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { getCoordByOffset, getSheetObject } from '../Basics/component-tools';
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
+import { ScrollManagerService } from '../services/scroll-manager.service';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -66,7 +70,7 @@ export class FreezeController extends Disposable {
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    private _sheetObject!: ISheetObjectParam;
+    private _viewportObservers: Array<Nullable<Observer<IScrollObserverParam>>> = [];
 
     private _changeToRow: number = -1;
 
@@ -85,7 +89,7 @@ export class FreezeController extends Disposable {
         private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
 
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+        @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService
     ) {
         super();
 
@@ -93,15 +97,19 @@ export class FreezeController extends Disposable {
     }
 
     private _initialize() {
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
+        // const sheetObject = this._getSheetObject();
+        // if (sheetObject == null) {
+        //     return;
+        // }
 
-        this._sheetObject = sheetObject;
+        // this._sheetObject = sheetObject;
 
-        this._createFreeze(FREEZE_DIRECTION_TYPE.ROW);
-        this._createFreeze(FREEZE_DIRECTION_TYPE.COLUMN);
+        // this._createFreeze(FREEZE_DIRECTION_TYPE.ROW);
+        // this._createFreeze(FREEZE_DIRECTION_TYPE.COLUMN);
+
+        this._skeletonListener();
+
+        this._commandExecutedListener();
     }
 
     private _createFreeze(freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW) {
@@ -117,7 +125,7 @@ export class FreezeController extends Disposable {
             return;
         }
 
-        const { freezeRow, freezeColumn } = config;
+        const { startRow: freezeRow, startColumn: freezeColumn, ySplit, xSplit } = config;
 
         const position = this._getPositionByIndex(freezeRow, freezeColumn);
 
@@ -125,11 +133,16 @@ export class FreezeController extends Disposable {
             return;
         }
 
-        const engine = this._sheetObject.engine;
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
+
+        const engine = sheetObject.engine;
         const canvasMaxWidth = engine?.width || 0;
         const canvasMaxHeight = engine?.height || 0;
 
-        const scene = this._sheetObject.scene;
+        const scene = sheetObject.scene;
 
         const { startX, endX, startY, endY } = position;
 
@@ -171,9 +184,9 @@ export class FreezeController extends Disposable {
 
             this._rowFreezeMainRect = new Rect(FREEZE_ROW_MAIN_NAME, {
                 fill,
-                width: shapeWidth,
+                width: shapeWidth * 2,
                 height: FREEZE_SIZE,
-                left: 0,
+                left: rowHeaderWidthAndMarginLeft,
                 top: startY - FREEZE_SIZE,
                 zIndex: 3,
             });
@@ -190,16 +203,16 @@ export class FreezeController extends Disposable {
             });
 
             let fill = FREEZE_NORMAL_HEADER_COLOR;
-            if (freezeColumn === -1 || freezeRow === 0) {
+            if (freezeColumn === -1 || freezeColumn === 0) {
                 fill = FREEZE_NORMAL_MAIN_COLOR;
             }
 
             this._columnFreezeMainRect = new Rect(FREEZE_COLUMN_MAIN_NAME, {
                 fill,
                 width: FREEZE_SIZE,
-                height: shapeHeight,
+                height: shapeHeight * 2,
                 left: startX - FREEZE_SIZE,
-                top: 0,
+                top: columnHeaderHeightAndMarginTop,
                 zIndex: 3,
             });
 
@@ -291,7 +304,12 @@ export class FreezeController extends Disposable {
             return;
         }
 
-        const { scene } = this._sheetObject;
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
+
+        const { scene } = sheetObject;
 
         scene.setCursor(CURSOR_TYPE.GRABBING);
 
@@ -402,32 +420,491 @@ export class FreezeController extends Disposable {
                 // alert(`moveColumnTo: ${this._changeToColumn}`);
             }
 
-            this._updateViewport(freezeDirectionType, this._changeToOffsetX, this._changeToOffsetY);
+            const sheetViewScroll = this._scrollManagerService.getCurrentScroll() || {
+                sheetViewStartRow: 0,
+                sheetViewStartColumn: 0,
+            };
+
+            const { sheetViewStartRow, sheetViewStartColumn } = sheetViewScroll;
+
+            // this._updateViewport(
+            //     this._changeToRow,
+            //     this._changeToColumn,
+            //     this._changeToRow - sheetViewStartRow,
+            //     this._changeToColumn - sheetViewStartColumn
+            // );
+
+            let ySplit = this._changeToRow - sheetViewStartRow;
+
+            ySplit = ySplit < 0 ? 0 : ySplit;
+
+            let xSplit = this._changeToColumn - sheetViewStartColumn;
+
+            xSplit = xSplit < 0 ? 0 : xSplit;
+
+            this._commandService.executeCommand(SetFrozenCommand.id, {
+                startRow: this._changeToRow,
+                startColumn: this._changeToColumn,
+                ySplit,
+                xSplit,
+            });
         });
     }
 
-    private _updateViewport(
-        freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW,
-        offsetX: number = 0,
-        offsetY: number = 0
-    ) {
-        const { scene } = this._sheetObject;
+    private _updateViewport(row: number = -1, column: number = -1, ySplit: number = 0, xSplit: number = 0) {
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
+        const { scene } = sheetObject;
 
-        const viewportLeft = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT);
-        const viewportTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_TOP);
-        const viewportLeftTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP);
-        const viewportMain = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
-        const viewMainLeftTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN_LEFT_TOP);
-        const viewMainLeft = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN_LEFT);
-        const viewMainTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN_TOP);
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        if (skeleton == null) {
+            return;
+        }
 
-        if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
-            viewportLeft?.resize({});
+        const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
+
+        const viewColumnLeft = scene.getViewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT);
+        const viewColumnRight = scene.getViewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT);
+
+        const viewRowTop = scene.getViewport(VIEWPORT_KEY.VIEW_ROW_TOP);
+        const viewRowBottom = scene.getViewport(VIEWPORT_KEY.VIEW_ROW_BOTTOM);
+
+        const viewLeftTop = scene.getViewport(VIEWPORT_KEY.VIEW_LEFT_TOP);
+
+        const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const viewMainLeftTop = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
+        const viewMainLeft = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT);
+        const viewMainTop = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_TOP);
+
+        if (
+            viewColumnLeft == null ||
+            viewColumnRight == null ||
+            viewRowTop == null ||
+            viewRowBottom == null ||
+            viewLeftTop == null ||
+            viewMain == null ||
+            viewMainLeftTop == null ||
+            viewMainLeft == null ||
+            viewMainTop == null
+        ) {
+            return;
+        }
+
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        const rowHeaderWidthScale = rowHeaderWidthAndMarginLeft * scene.scaleX;
+        const columnHeaderHeightScale = columnHeaderHeightAndMarginTop * scene.scaleY;
+
+        this._viewportObservers.forEach((obs) => {
+            viewMain.onScrollAfterObserver.remove(obs);
+        });
+
+        viewColumnRight.resize({
+            left: rowHeaderWidthScale,
+            top: 0,
+            height: columnHeaderHeightScale,
+            right: 0,
+        });
+
+        viewRowBottom.resize({
+            left: 0,
+            top: columnHeaderHeightScale,
+            bottom: 0,
+            width: rowHeaderWidthScale,
+        });
+
+        viewLeftTop.resize({
+            left: 0,
+            top: 0,
+            width: rowHeaderWidthScale,
+            height: columnHeaderHeightScale,
+        });
+
+        this._viewportObservers.push(
+            viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
+                const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
+
+                viewColumnRight
+                    .updateScroll({
+                        scrollX,
+                        actualScrollX,
+                    })
+                    .makeDirty(true);
+
+                viewRowBottom
+                    .updateScroll({
+                        scrollY,
+                        actualScrollY,
+                    })
+                    .makeDirty(true);
+            })
+        );
+
+        let isTopView = true;
+
+        let isLeftView = true;
+
+        viewMainLeftTop.enable();
+
+        if (row === -1 || row === 0) {
+            isTopView = false;
+        }
+
+        if (column === -1 || column === 0) {
+            isLeftView = false;
+        }
+
+        const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(
+            row - ySplit,
+            column - xSplit,
+            scaleX,
+            scaleY
+        );
+        const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(row, column, scaleX, scaleY);
+
+        viewMainLeftTop.disable();
+        viewMainTop.disable();
+        viewMainLeft.disable();
+        viewRowTop.disable();
+        viewColumnLeft.disable();
+
+        viewMainLeftTop.resetPadding();
+        viewMainTop.resetPadding();
+        viewMainLeft.resetPadding();
+        viewRowTop.resetPadding();
+        viewColumnLeft.resetPadding();
+
+        if (isTopView === false && isLeftView === false) {
+            viewMain.resize({
+                left: rowHeaderWidthScale,
+                top: columnHeaderHeightScale,
+                bottom: 0,
+                right: 0,
+            });
+            viewMain.resetPadding();
+            viewMain.scrollTo({
+                x: 0,
+                y: 0,
+            });
+        } else if (isTopView === true && isLeftView === false) {
+            const topGap = endSheetView.startY - startSheetView.startY;
+            viewMain.resize({
+                left: rowHeaderWidthScale,
+                top: columnHeaderHeightScale + topGap,
+                bottom: 0,
+                right: 0,
+            });
+            viewMain.setPadding({
+                startY: startSheetView.startY,
+                endY: endSheetView.startY,
+                startX: 0,
+                endX: 0,
+            });
+            viewMain.scrollTo({
+                y: 0,
+            });
+            viewMainTop.resize({
+                left: rowHeaderWidthScale,
+                top: columnHeaderHeightScale,
+                height: topGap,
+                right: 0,
+            });
+            // const config = viewMain.getBarScroll(startSheetView.startX, startSheetView.startY);
+            viewMainTop
+                .updateScroll({
+                    actualScrollY: startSheetView.startY,
+                    x: viewMain.scrollX,
+                    actualScrollX: viewMain.actualScrollX,
+                })
+                .makeDirty(true);
+            viewRowTop.resize({
+                left: 0,
+                top: columnHeaderHeightScale,
+                width: rowHeaderWidthScale,
+                height: topGap,
+            });
+            viewRowTop
+                .updateScroll({
+                    actualScrollY: startSheetView.startY,
+                })
+                .makeDirty(true);
+            viewRowBottom.resize({
+                left: 0,
+                top: columnHeaderHeightScale + topGap,
+                bottom: 0,
+                width: rowHeaderWidthScale,
+            });
+            this._viewportObservers.push(
+                viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
+                    const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
+
+                    viewMainTop
+                        .updateScroll({
+                            scrollX,
+                            actualScrollX,
+                        })
+                        .makeDirty(true);
+                })
+            );
+
+            viewMainTop.enable();
+            viewRowTop.enable();
+        } else if (isTopView === false && isLeftView === true) {
+            const leftGap = endSheetView.startX - startSheetView.startX;
+            viewMain.resize({
+                left: rowHeaderWidthScale + leftGap,
+                top: columnHeaderHeightScale,
+                bottom: 0,
+                right: 0,
+            });
+            viewMain.setPadding({
+                startX: startSheetView.startX,
+                endX: endSheetView.startX,
+                startY: 0,
+                endY: 0,
+            });
+            viewMain.scrollTo({
+                x: 0,
+            });
+            viewMainLeft.resize({
+                left: rowHeaderWidthScale,
+                top: columnHeaderHeightScale,
+                width: leftGap,
+                bottom: 0,
+                right: 0,
+            });
+            viewMainLeft
+                .updateScroll({
+                    actualScrollX: startSheetView.startX,
+                    y: viewMain.scrollY,
+                    actualScrollY: viewMain.actualScrollY,
+                })
+                .makeDirty(true);
+            viewColumnLeft.resize({
+                left: rowHeaderWidthScale,
+                top: 0,
+                width: leftGap,
+                height: columnHeaderHeightScale,
+            });
+            viewColumnLeft
+                .updateScroll({
+                    actualScrollX: startSheetView.startX,
+                })
+                .makeDirty(true);
+            viewColumnRight.resize({
+                left: rowHeaderWidthScale + leftGap,
+                top: 0,
+                height: columnHeaderHeightScale,
+                right: 0,
+            });
+
+            this._viewportObservers.push(
+                viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
+                    const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
+
+                    viewMainLeft
+                        .updateScroll({
+                            scrollY,
+                            actualScrollY,
+                        })
+                        .makeDirty(true);
+                })
+            );
+
+            viewMainLeft.enable();
+            viewColumnLeft.enable();
+        } else {
+            const leftGap = endSheetView.startX - startSheetView.startX;
+            const topGap = endSheetView.startY - startSheetView.startY;
+            viewMain.resize({
+                left: rowHeaderWidthScale + leftGap,
+                top: columnHeaderHeightScale + topGap,
+                bottom: 0,
+                right: 0,
+            });
+            viewMain.setPadding({
+                startY: startSheetView.startY,
+                endY: endSheetView.startY,
+                startX: startSheetView.startX,
+                endX: endSheetView.startX,
+            });
+            viewMain.scrollTo({
+                x: 0,
+                y: 0,
+            });
+            viewMainLeft.resize({
+                left: rowHeaderWidthScale,
+                top: columnHeaderHeightScale + topGap,
+                width: leftGap,
+                bottom: 0,
+            });
+            viewMainLeft
+                .updateScroll({
+                    actualScrollX: startSheetView.startX,
+                    y: viewMain.scrollY,
+                    actualScrollY: viewMain.actualScrollY,
+                })
+                .makeDirty(true);
+            viewMainTop.resize({
+                left: rowHeaderWidthScale + leftGap,
+                top: columnHeaderHeightScale,
+                height: topGap,
+                right: 0,
+            });
+            viewMainTop
+                .updateScroll({
+                    actualScrollY: startSheetView.startY,
+                    x: viewMain.scrollX,
+                    actualScrollX: viewMain.actualScrollX,
+                })
+                .makeDirty(true);
+            viewMainLeftTop.resize({
+                left: rowHeaderWidthScale,
+                top: columnHeaderHeightScale,
+                width: leftGap,
+                height: topGap,
+            });
+
+            viewMainLeftTop
+                .updateScroll({
+                    actualScrollX: startSheetView.startX,
+                    actualScrollY: startSheetView.startY,
+                })
+                .makeDirty(true);
+
+            viewRowTop.resize({
+                left: 0,
+                top: columnHeaderHeightScale,
+                width: rowHeaderWidthScale,
+                height: topGap,
+            });
+
+            viewRowTop
+                .updateScroll({
+                    actualScrollY: startSheetView.startY,
+                })
+                .makeDirty(true);
+
+            viewRowBottom.resize({
+                left: 0,
+                top: columnHeaderHeightScale + topGap,
+                bottom: 0,
+                width: rowHeaderWidthScale,
+            });
+
+            viewColumnLeft.resize({
+                left: rowHeaderWidthScale,
+                top: 0,
+                width: leftGap,
+                height: columnHeaderHeightScale,
+            });
+
+            viewColumnLeft
+                .updateScroll({
+                    actualScrollX: startSheetView.startX,
+                })
+                .makeDirty(true);
+
+            viewColumnRight.resize({
+                left: rowHeaderWidthScale + leftGap,
+                top: 0,
+                height: columnHeaderHeightScale,
+                right: 0,
+            });
+
+            this._viewportObservers.forEach((obs) => {
+                viewMain.onScrollAfterObserver.remove(obs);
+            });
+
+            this._viewportObservers.push(
+                viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
+                    const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
+
+                    viewRowBottom
+                        .updateScroll({
+                            scrollY,
+                            actualScrollY,
+                        })
+                        .makeDirty(true);
+
+                    viewColumnRight
+                        .updateScroll({
+                            scrollX,
+                            actualScrollX,
+                        })
+                        .makeDirty(true);
+
+                    viewMainLeft
+                        .updateScroll({
+                            scrollY,
+                            actualScrollY,
+                        })
+                        .makeDirty(true);
+
+                    viewMainTop
+                        .updateScroll({
+                            scrollX,
+                            actualScrollX,
+                        })
+                        .makeDirty(true);
+                })
+            );
+
+            viewMainLeftTop.enable();
+            viewMainTop.enable();
+            viewMainLeft.enable();
+            viewRowTop.enable();
+            viewColumnLeft.enable();
+
+            // viewMain.disable();
+            // viewRowBottom.disable();
         }
     }
 
+    private _skeletonListener() {
+        this._scrollManagerService.scrollInfo$.subscribe((param) => {
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+            const worksheet = workbook.getActiveSheet();
+
+            const freeze = worksheet.getConfig().freeze;
+
+            const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = freeze;
+
+            this._refreshFreeze(startRow, startColumn, ySplit, xSplit);
+        });
+    }
+
+    private _commandExecutedListener() {
+        const updateCommandList = [SetFrozenMutation.id];
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (updateCommandList.includes(command.id)) {
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+                    const worksheet = workbook.getActiveSheet();
+
+                    const freeze = worksheet.getConfig().freeze;
+
+                    if (freeze == null) {
+                        return;
+                    }
+
+                    const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = worksheet.getConfig().freeze;
+
+                    this._refreshFreeze(startRow, startColumn, ySplit, xSplit);
+                }
+            })
+        );
+    }
+
     private _clearObserverEvent() {
-        const { scene } = this._sheetObject;
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
+        const { scene } = sheetObject;
         scene.onPointerMoveObserver.remove(this._moveObserver);
         scene.onPointerUpObserver.remove(this._upObserver);
         this._moveObserver = null;
@@ -440,7 +917,10 @@ export class FreezeController extends Disposable {
         this._columnFreezeHeaderRect?.dispose();
         this._columnFreezeMainRect?.dispose();
 
-        const sheetObject = this._sheetObject;
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
 
         const { scene } = sheetObject;
 
@@ -455,7 +935,12 @@ export class FreezeController extends Disposable {
     }
 
     private _getPositionByIndex(row: number, column: number) {
-        const { scaleX, scaleY } = this._sheetObject.scene.getAncestorScale();
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
+
+        const { scaleX, scaleY } = sheetObject.scene.getAncestorScale();
 
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
         const position = skeleton?.getNoMergeCellPositionByIndex(row, column, scaleX, scaleY);
@@ -463,7 +948,7 @@ export class FreezeController extends Disposable {
             return;
         }
 
-        if (position != null && !isNaN(position.endX)) {
+        if (position != null && (!isNaN(position.endX) || !isNaN(position.endY))) {
             return position;
         }
         const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
@@ -483,13 +968,19 @@ export class FreezeController extends Disposable {
             return;
         }
 
-        return {
-            freezeRow: config.freezeRow,
-            freezeColumn: config.freezeColumn,
-        };
+        return config.freeze;
     }
 
     private _getSheetObject() {
         return getSheetObject(this._currentUniverService, this._renderManagerService);
+    }
+
+    private _refreshFreeze(startRow: number, startColumn: number, ySplit: number, xSplit: number) {
+        this._clearFreeze();
+
+        this._createFreeze(FREEZE_DIRECTION_TYPE.ROW);
+        this._createFreeze(FREEZE_DIRECTION_TYPE.COLUMN);
+
+        this._updateViewport(startRow, startColumn, ySplit, xSplit);
     }
 }

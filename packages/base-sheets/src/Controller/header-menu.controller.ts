@@ -178,7 +178,6 @@ export class HeaderMenuController extends Disposable {
 
         this._Observers.push(
             eventBindingObject?.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-                console.trace();
                 this._hoverRect?.hide();
                 this._hoverMenu?.hide();
             })

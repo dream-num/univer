@@ -1,4 +1,4 @@
-import { EventState, Nullable, Observable } from '@univerjs/core';
+import { EventState, IPosition, Nullable, Observable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from './Basics/Const';
 import { IWheelEvent, PointerInput } from './Basics/IEvents';
@@ -124,6 +124,14 @@ export class Viewport {
 
     private _active = true;
 
+    private _paddingStartX: number = 0;
+
+    private _paddingEndX: number = 0;
+
+    private _paddingStartY: number = 0;
+
+    private _paddingEndY: number = 0;
+
     constructor(viewPortKey: string, scene: ThinScene, props?: IViewProps) {
         this._viewPortKey = viewPortKey;
 
@@ -220,6 +228,10 @@ export class Viewport {
         this._height = h;
     }
 
+    get isActive() {
+        return this._active;
+    }
+
     private set top(num: number | string) {
         this._topOrigin = num;
         this._top = toPx(num, this._scene?.getParent()?.height);
@@ -287,6 +299,25 @@ export class Viewport {
         this._resizeCacheCanvasAndScrollBar();
     }
 
+    setPadding(param: IPosition) {
+        const { startX = 0, startY = 0, endX = 0, endY = 0 } = param;
+        this._paddingStartX = startX;
+        this._paddingEndX = endX;
+        this._paddingStartY = startY;
+        this._paddingEndY = endY;
+
+        this._resizeCacheCanvasAndScrollBar();
+    }
+
+    resetPadding() {
+        this.setPadding({
+            startX: 0,
+            endX: 0,
+            startY: 0,
+            endY: 0,
+        });
+    }
+
     makeDirty(state: boolean = true, refreshParent = false) {
         this._dirty = state;
 
@@ -321,8 +352,8 @@ export class Viewport {
     }
 
     getBarScroll(actualX: number, actualY: number) {
-        let x = actualX;
-        let y = actualY;
+        let x = actualX - this._paddingStartX;
+        let y = actualY - this._paddingStartY;
         if (this._scrollBar) {
             x *= this._scrollBar.ratioScrollX; // convert to scroll coord
             y *= this._scrollBar.ratioScrollY;
@@ -353,6 +384,10 @@ export class Viewport {
             const { scaleX, scaleY } = this.scene;
             x /= scaleX;
             y /= scaleY;
+
+            // console.log(y, this._scrollBar.miniThumbRatioY);
+            // x *= this._scrollBar.miniThumbRatioX;
+            // y *= this._scrollBar.miniThumbRatioY;
         } else {
             if (this.actualScrollX !== undefined) {
                 x = this.actualScrollX;
@@ -363,8 +398,8 @@ export class Viewport {
             }
         }
         return {
-            x: Math.round(x),
-            y: Math.round(y),
+            x: Math.round(x + this._paddingStartX),
+            y: Math.round(y + this._paddingStartY),
         };
     }
 
@@ -421,6 +456,10 @@ export class Viewport {
             return;
         }
         const sceneTrans = this._scene.transform.clone();
+
+        // if (this._viewPortKey === 'viewMainTop') {
+        //     console.log(this._viewPortKey, this.scrollX, this.scrollY, this.actualScrollX, this.actualScrollY);
+        // }
 
         sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.actualScrollX || 0, -this.actualScrollY || 0]));
 
@@ -493,7 +532,7 @@ export class Viewport {
 
     // eslint-disable-next-line max-lines-per-function
     onMouseWheel(evt: IWheelEvent, state: EventState) {
-        if (!this._scrollBar) {
+        if (!this._scrollBar || this._active === false) {
             return;
         }
         let isLimitedStore;
@@ -530,8 +569,9 @@ export class Viewport {
             const allHeight = this._scene.height;
             const viewHeight = this.height || 1;
             // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
-            const scrollNum = (viewHeight / allHeight) * deltaFactor;
+            let scrollNum = (viewHeight / allHeight) * deltaFactor;
             if (evt.shiftKey) {
+                scrollNum *= 3;
                 if (evt.deltaY > 0) {
                     isLimitedStore = this.scrollBy({
                         x: scrollNum,
@@ -583,6 +623,9 @@ export class Viewport {
 
     // 自己是否被选中
     isHit(coord: Vector2) {
+        if (this._active === false) {
+            return;
+        }
         const { width, height } = this._getViewPortSize();
         // const pixelRatio = this.getPixelRatio();
         // coord = Transform.create([pixelRatio, 0, 0, pixelRatio, 0, 0]).applyPoint(
@@ -634,10 +677,12 @@ export class Viewport {
         this.width = width;
         this.height = height;
 
-        const contentWidth = this._scene.width * this._scene.scaleX;
-        const contentHeight = this._scene.height * this._scene.scaleY;
+        const contentWidth = (this._scene.width - this._paddingEndX) * this._scene.scaleX;
+
+        const contentHeight = (this._scene.height - this._paddingEndY) * this._scene.scaleY;
 
         this._scrollBar?.resize(width, height, contentWidth, contentHeight);
+
         this.makeDirty(true);
     }
 
@@ -879,11 +924,17 @@ export class Viewport {
         if (props?.width) {
             this.width = props?.width;
             this._widthOrigin = this.width;
+        } else {
+            this.width = null;
+            this._widthOrigin = null;
         }
 
         if (props?.height) {
             this.height = props?.height;
             this._heightOrigin = this.height;
+        } else {
+            this.height = null;
+            this._heightOrigin = null;
         }
     }
 }

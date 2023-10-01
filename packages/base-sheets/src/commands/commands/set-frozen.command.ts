@@ -2,19 +2,22 @@ import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRed
 import { IAccessor } from '@wendellhu/redi';
 
 import {
-    ISetFrozenColumnsMutationParams,
-    SetFrozenColumnsMutation,
-    SetFrozenColumnsMutationFactory,
-} from '../mutations/set-frozen-columns.mutation';
+    ISetFrozenMutationParams,
+    SetFrozenMutation,
+    SetFrozenMutationFactory,
+} from '../mutations/set-frozen.mutation';
 
-interface ISetFrozenColumnsCommandParams {
-    value: number;
+interface ISetFrozenCommandParams {
+    startRow: number;
+    startColumn: number;
+    ySplit: number;
+    xSplit: number;
 }
 
-export const SetFrozenColumnsCommand: ICommand = {
+export const SetFrozenCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-frozen-columns',
-    handler: async (accessor: IAccessor, params: ISetFrozenColumnsCommandParams) => {
+    id: 'sheet.command.set-frozen',
+    handler: async (accessor: IAccessor, params: ISetFrozenCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -31,26 +34,23 @@ export const SetFrozenColumnsCommand: ICommand = {
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
-        const redoMutationParams: ISetFrozenColumnsMutationParams = {
+        const redoMutationParams: ISetFrozenMutationParams = {
             workbookId,
             worksheetId,
-            numColumns: params.value,
+            ...params,
         };
 
-        const undoMutationParams: ISetFrozenColumnsMutationParams = SetFrozenColumnsMutationFactory(
-            accessor,
-            redoMutationParams
-        );
-        const result = commandService.executeCommand(SetFrozenColumnsMutation.id, redoMutationParams);
+        const undoMutationParams: ISetFrozenMutationParams = SetFrozenMutationFactory(accessor, redoMutationParams);
+        const result = commandService.executeCommand(SetFrozenMutation.id, redoMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetFrozenColumnsMutation.id, undoMutationParams);
+                    return commandService.executeCommand(SetFrozenMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetFrozenColumnsMutation.id, redoMutationParams);
+                    return commandService.executeCommand(SetFrozenMutation.id, redoMutationParams);
                 },
             });
             return true;

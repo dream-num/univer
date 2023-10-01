@@ -66,14 +66,35 @@ export class BaseScrollBar {
         if (this.horizontalThumbWidth === undefined || this.horizontalBarWidth === undefined) {
             return 1;
         }
-        return (this.horizontalThumbWidth - this.horizontalMinusMiniThumb) / this.horizontalBarWidth;
+        return (
+            ((this.horizontalThumbWidth - this.horizontalMinusMiniThumb) * this.miniThumbRatioX) /
+            this.horizontalBarWidth
+        );
     }
 
     get ratioScrollY(): number {
         if (this.verticalThumbHeight === undefined || this.verticalBarHeight === undefined) {
             return 1;
         }
-        return (this.verticalThumbHeight - this.verticalMinusMiniThumb) / this.verticalBarHeight;
+        return (
+            ((this.verticalThumbHeight - this.verticalMinusMiniThumb) * this.miniThumbRatioY) / this.verticalBarHeight
+        );
+    }
+
+    get miniThumbRatioX() {
+        const limit = this.horizontalBarWidth - this.horizontalThumbWidth;
+
+        const actual = this.horizontalBarWidth - (this.horizontalThumbWidth - this.horizontalMinusMiniThumb);
+
+        return limit / actual;
+    }
+
+    get miniThumbRatioY() {
+        const limit = this.verticalBarHeight - this.verticalThumbHeight;
+
+        const actual = this.verticalBarHeight - (this.verticalThumbHeight - this.verticalMinusMiniThumb);
+
+        return limit / actual;
     }
 
     setProps(props?: IScrollBarProps) {

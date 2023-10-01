@@ -28,7 +28,7 @@ export class ScrollManagerService {
         this._scrollInfo$.complete();
     }
 
-    setCurrentSelection(param: IScrollManagerSearchParam) {
+    setCurrentScroll(param: IScrollManagerSearchParam) {
         this._currentScroll = param;
 
         this._refresh(param);

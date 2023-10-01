@@ -440,6 +440,29 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    getNoMergeCellPositionByIndexWithNoHeader(rowIndex: number, columnIndex: number, scaleX: number, scaleY: number) {
+        const { rowHeightAccumulation, columnWidthAccumulation } = this;
+        // const { scaleX = 1, scaleY = 1 } = this.getParentScale();
+        let { startY, endY, startX, endX } = getCellPositionByIndex(
+            rowIndex,
+            columnIndex,
+            rowHeightAccumulation,
+            columnWidthAccumulation
+        );
+
+        startY = fixLineWidthByScale(startY, scaleY);
+        endY = fixLineWidthByScale(endY, scaleY);
+        startX = fixLineWidthByScale(startX, scaleX);
+        endX = fixLineWidthByScale(endX, scaleX);
+
+        return {
+            startY,
+            endY,
+            startX,
+            endX,
+        };
+    }
+
     calculateCellIndexByPosition(
         offsetX: number,
         offsetY: number,
@@ -709,31 +732,41 @@ export class SpreadsheetSkeleton extends Skeleton {
         dataset_row_st = searchArray(rowHeightAccumulation, bounds.tl.y - this.columnHeaderHeightAndMarginTop);
         dataset_row_ed = searchArray(rowHeightAccumulation, bounds.bl.y - this.columnHeaderHeightAndMarginTop);
 
-        if (dataset_row_st === -1) {
+        if (dataset_row_st === -1 && dataset_row_ed === -1) {
             dataset_row_st = 0;
-        }
+            dataset_row_ed = 0;
+        } else {
+            if (dataset_row_st === -1) {
+                dataset_row_st = 0;
+            }
 
-        if (dataset_row_ed === -1) {
-            dataset_row_ed = rhaLength - 1;
-        }
+            if (dataset_row_ed === -1) {
+                dataset_row_ed = rhaLength - 1;
+            }
 
-        if (dataset_row_ed >= rhaLength) {
-            dataset_row_ed = rhaLength - 1;
+            if (dataset_row_ed >= rhaLength) {
+                dataset_row_ed = rhaLength - 1;
+            }
         }
 
         dataset_col_st = searchArray(columnWidthAccumulation, bounds.tl.x - this.rowHeaderWidthAndMarginLeft);
         dataset_col_ed = searchArray(columnWidthAccumulation, bounds.tr.x - this.rowHeaderWidthAndMarginLeft);
 
-        if (dataset_col_st === -1) {
+        if (dataset_col_st === -1 && dataset_col_ed === -1) {
             dataset_col_st = 0;
-        }
+            dataset_col_ed = 0;
+        } else {
+            if (dataset_col_st === -1) {
+                dataset_col_st = 0;
+            }
 
-        if (dataset_col_ed === -1) {
-            dataset_col_ed = cwaLength - 1;
-        }
+            if (dataset_col_ed === -1) {
+                dataset_col_ed = cwaLength - 1;
+            }
 
-        if (dataset_col_ed >= cwaLength) {
-            dataset_col_ed = cwaLength - 1;
+            if (dataset_col_ed >= cwaLength) {
+                dataset_col_ed = cwaLength - 1;
+            }
         }
 
         return {

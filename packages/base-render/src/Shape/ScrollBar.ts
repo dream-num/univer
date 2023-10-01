@@ -184,10 +184,9 @@ export class ScrollBar extends BaseScrollBar {
         }
 
         this.verticalMinusMiniThumb = 0;
-        this.verticalBarHeight = parentHeight - this._barSize;
+        this.verticalBarHeight = parentHeight - this._barSize - this._barBorder;
         this.verticalThumbHeight =
-            ((this.verticalBarHeight * (this.verticalBarHeight - this._barBorder)) / contentHeight) *
-            this._thumbLengthRatio;
+            ((this.verticalBarHeight * this.verticalBarHeight) / contentHeight) * this._thumbLengthRatio;
         // this._verticalThumbHeight = this._verticalThumbHeight < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._verticalThumbHeight;
         if (this.verticalThumbHeight < MINI_THUMB_SIZE) {
             this.verticalMinusMiniThumb = MINI_THUMB_SIZE - this.verticalThumbHeight;

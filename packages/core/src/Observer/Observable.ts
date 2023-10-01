@@ -78,7 +78,7 @@ export class Observer<T = void> {
 /**
  * The Observable class is a simple implementation of the Observable pattern.
  *
- * @deprecated use rxjs instead. It is not necessary to create another reactive programming system. Leverage the community.
+ * @deprecated use rxjs instead
  *
  * @remarks
  * There's one slight particularity though: a given Observable can notify its observer using a particular mask value, only the Observers registered with this mask value will be notified.

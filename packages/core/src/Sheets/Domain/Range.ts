@@ -1,26 +1,16 @@
-import { ICurrentUniverService } from '../../services/current.service';
 import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../../Shared';
-import { DEFAULT_RANGE, DEFAULT_STYLES } from '../../Types/Const';
-import {
-    BooleanNumber,
-    Dimension,
-    Direction,
-    FontItalic,
-    FontWeight,
-    HorizontalAlign,
-    VerticalAlign,
-    WrapStrategy,
-} from '../../Types/Enum';
+import { DEFAULT_STYLES } from '../../Types/Const';
+import { BooleanNumber, FontItalic, FontWeight, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../Types/Enum';
 import {
     IBorderData,
     ICellData,
     IDocumentData,
     IRange,
-    IRangeType,
     IStyleData,
     ITextDecoration,
     ITextRotation,
 } from '../../Types/Interfaces';
+import { Styles } from './Styles';
 import type { Worksheet } from './Worksheet';
 
 /**
@@ -33,6 +23,10 @@ type IValueOptionsType = {
     isIncludeStyle?: boolean;
 };
 
+export interface IRangeDependencies {
+    getStyles(): Readonly<Styles>;
+}
+
 /**
  * Access and modify spreadsheet ranges.
  *
@@ -44,26 +38,17 @@ type IValueOptionsType = {
  * @beta
  */
 export class Range {
-    private _rangeData: IRange;
+    private _range: IRange;
 
     private _worksheet: Worksheet;
 
     constructor(
         workSheet: Worksheet,
-        range: IRangeType,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        range: IRange,
+        private readonly _deps: IRangeDependencies
     ) {
-        // Convert the range passed in by the user into a standard format
-        this._rangeData = this._currentUniverService
-            .getCurrentUniverSheetInstance()
-            .getWorkBook()
-            .transformRangeType(range).range;
+        this._range = range;
         this._worksheet = workSheet;
-
-        // The user entered an invalid range
-        if (Object.values(this._rangeData).includes(-1)) {
-            console.error('Invalid range,default set index -1');
-        }
     }
 
     static foreach(range: IRange, action: (row: number, column: number) => void): void {
@@ -81,11 +66,12 @@ export class Range {
      * @returns current range
      */
     getRangeData(): IRange {
-        return this._rangeData;
+        return this._range;
     }
 
     /**
-     * Returns the value of the top-left cell in the range. The value may be of type Number, Boolean, Date, or String depending on the value of the cell. Empty cells return an empty string.
+     * Returns the value of the top-left cell in the range. The value may be of type Number, Boolean, Date, or String
+     * depending on the value of the cell. Empty cells return an empty string.
      * @returns  The value in this cell
      */
     getValue(): Nullable<ICellData> {
@@ -95,14 +81,18 @@ export class Range {
     /**
      * Returns the rectangular grid of values for this range.
      *
-     * Returns a two-dimensional array of values, indexed by row, then by column. The values may be of type Number, Boolean, Date, or String, depending on the value of the cell. Empty cells are represented by an empty string in the array. Remember that while a range index starts at 0, 0, same as the JavaScript array is indexed from [0][0].
+     * Returns a two-dimensional array of values, indexed by row, then by column. The values may be of type Number,
+     * Boolean, Date, or String, depending on the value of the cell. Empty cells are represented by an empty string
+     * in the array. Remember that while a range index starts at 0, 0, same as the JavaScript array is indexed from [0][0].
      *
-     * In web apps, a Date value isn't a legal parameter. getValues() fails to return data to a web app if the range contains a cell with a Date value. Instead, transform all the values retrieved from the sheet to a supported JavaScript primitive like a Number, Boolean, or String.
+     * In web apps, a Date value isn't a legal parameter. getValues() fails to return data to a web app if the range
+     * contains a cell with a Date value. Instead, transform all the values retrieved from the sheet to a supported
+     * JavaScript primitive like a Number, Boolean, or String.
      *
      * @returns  A two-dimensional array of values.
      */
     getValues(): Array<Array<Nullable<ICellData>>> {
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
+        const { startRow, endRow, startColumn, endColumn } = this._range;
         const range: Array<Array<Nullable<ICellData>>> = [];
         for (let r = startRow; r <= endRow; r++) {
             const row: Array<Nullable<ICellData>> = [];
@@ -120,7 +110,7 @@ export class Range {
      * @returns range matrix
      */
     getMatrix(): ObjectMatrix<ICellData> {
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
+        const { startRow, endRow, startColumn, endColumn } = this._range;
 
         const sheetMatrix = this._worksheet.getCellMatrix();
         const rangeMatrix = new ObjectMatrix<ICellData>();
@@ -140,7 +130,7 @@ export class Range {
      * @returns range matrix object
      */
     getMatrixObject(): ObjectMatrix<ICellData> {
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
+        const { startRow, endRow, startColumn, endColumn } = this._range;
 
         const sheetMatrix = this._worksheet.getCellMatrix();
         const rangeMatrix = new ObjectMatrix<ICellData>();
@@ -197,7 +187,7 @@ export class Range {
      * @returns The string description of the range in A1 notation.
      */
     getA1Notation(): string {
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
+        const { startRow, endRow, startColumn, endColumn } = this._range;
         let start;
         let end;
         if (startColumn < endColumn) {
@@ -227,7 +217,7 @@ export class Range {
      * @returns  — A two-dimensional array of color codes of the backgrounds.
      */
     getBackgrounds(): string[][] {
-        const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
+        const styles = this._deps.getStyles();
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 let rgbColor: string = DEFAULT_STYLES.bg?.rgb!;
@@ -245,7 +235,7 @@ export class Range {
      * @returns  — A range containing a single cell at the specified coordinates.
      */
     getCell(row: number, column: number): Range {
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
+        const { startRow, endRow, startColumn, endColumn } = this._range;
         const cell = {
             startRow: startRow + row,
             endRow: startRow + row,
@@ -253,7 +243,7 @@ export class Range {
             endColumn: startColumn + column,
         };
 
-        return new Range(this._worksheet, cell, this._currentUniverService);
+        return new Range(this._worksheet, cell, this._deps);
     }
 
     /**
@@ -262,7 +252,7 @@ export class Range {
      * @returns  — The range's starting column position in the spreadsheet.
      */
     getColumn(): number {
-        return this._rangeData.startColumn;
+        return this._range.startColumn;
     }
 
     /**
@@ -279,13 +269,13 @@ export class Range {
      * @returns Returns a value in object format
      */
     getObjectValues(options: IValueOptionsType = {}): ObjectMatrixPrimitiveType<ICellData> {
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
+        const { startRow, endRow, startColumn, endColumn } = this._range;
 
         // get object values from sheet matrix, or use this.getMatrix() create a new matrix then this.getMatrix().getData()
         const values = this._worksheet.getCellMatrix().getFragments(startRow, endRow, startColumn, endColumn).getData();
 
         if (options.isIncludeStyle) {
-            const style = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
+            const style = this._deps.getStyles();
             for (let r = 0; r <= endRow - startRow; r++) {
                 for (let c = 0; c <= endColumn - startColumn; c++) {
                     // handle null
@@ -305,16 +295,6 @@ export class Range {
     }
 
     /**
-     * Notify other Components
-     * TODO: 待触发更新测试
-     */
-    // notifyUpdated() {
-    //     this._context.onAfterChangeRangeDataObservable.notifyObservers(
-    //         this._worksheet
-    //     );
-    // }
-
-    /**
      * Returns the font color of the cell in the top-left corner of the range, in CSS notation
      */
     getFontColor(): Nullable<string> {
@@ -325,7 +305,7 @@ export class Range {
      * Returns the font colors of the cells in the range in CSS notation (such as '#ffffff' or 'white').
      */
     getFontColors(): Array<Array<Nullable<string>>> {
-        const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
+        const styles = this._deps.getStyles();
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 const cellStyle = styles.getStyleByCell(cell);
@@ -445,22 +425,6 @@ export class Range {
     }
 
     /**
-     * Returns the formula (A1 notation) for the top-left cell of the range, or an empty string if the cell is empty or doesn't contain a formula.
-     */
-    // getFormula(): string {
-    //     return this.getFormulas()[0][0];
-    // }
-
-    /**
-     * Returns the formulas (A1 notation) for the cells in the range.
-     */
-    // getFormulas(): string[][] {
-    //     return this.getValues().map((row) =>
-    //         row.map((cell: Nullable<ICellData>) => cell?.f || '')
-    //     );
-    // }
-
-    /**
      * Returns the grid ID of the range's parent sheet.
      */
     getGridId(): string {
@@ -471,7 +435,7 @@ export class Range {
      * Returns the height of the range.
      */
     getHeight(): number {
-        const { _rangeData, _worksheet } = this;
+        const { _range: _rangeData, _worksheet } = this;
         const { startRow, endRow } = _rangeData;
         let h = 0;
         for (let i = 0; i <= endRow - startRow; i++) {
@@ -499,78 +463,21 @@ export class Range {
      * Returns the end column position.
      */
     getLastColumn(): number {
-        return this._rangeData.endColumn;
+        return this._range.endColumn;
     }
 
     /**
      * 	Returns the end row position.
      */
     getLastRow(): number {
-        return this._rangeData.endRow;
+        return this._range.endRow;
     }
-
-    /**
-     * Starting at the cell in the first column and row of the range, returns the next cell in the given direction that is the edge of a contiguous range of cells with data in them or the cell at the edge of the spreadsheet in that direction.
-     * @param direction
-     * @returns The data region edge cell or the cell at the edge of the spreadsheet.
-     */
-    getNextDataCell(direction: Direction): Range {
-        const { _worksheet } = this;
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
-        const maxRow = _worksheet.getMaxRows();
-        const maxColumn = _worksheet.getMaxColumns();
-        if (direction === Direction.DOWN) {
-            for (let i = 0; i < maxRow - startColumn; i++) {
-                const value = this._worksheet.getCellMatrix().getValue(startRow + i, startColumn);
-                if (value) _worksheet.getRange(startRow + i, startColumn, startRow + i, startColumn);
-            }
-            return _worksheet.getRange(maxRow, startColumn, maxRow, startColumn);
-        }
-        if (direction === Direction.UP) {
-            for (let i = 0; i < startRow; i++) {
-                const value = this._worksheet.getCellMatrix().getValue(startRow - i, startColumn);
-                if (value) _worksheet.getRange(startRow - i, startColumn, startRow - i, startRow);
-            }
-            return _worksheet.getRange(0, startColumn, 0, startColumn);
-        }
-        if (direction === Direction.RIGHT) {
-            for (let i = 0; i < maxColumn - startColumn; i++) {
-                const value = this._worksheet.getCellMatrix().getValue(startRow, startColumn + i);
-                if (value) _worksheet.getRange(startRow, startColumn + i, startRow, startColumn + i);
-            }
-            return _worksheet.getRange(startRow, maxColumn, startRow, maxColumn);
-        }
-        if (direction === Direction.LEFT) {
-            for (let i = 0; i < maxRow - startColumn; i++) {
-                const value = this._worksheet.getCellMatrix().getValue(startRow, startColumn - i);
-                if (value) _worksheet.getRange(startRow, startColumn - i, startRow, startColumn - i);
-            }
-            return _worksheet.getRange(startRow, 0, startRow, 0);
-        }
-        return _worksheet.getRange(DEFAULT_RANGE);
-    }
-
-    /**
-     * 	Returns the note associated with the given range.
-     */
-    // getNote(): string {
-    //     return this.getNotes()[0][0];
-    // }
-
-    /**
-     * 	Returns the notes associated with the cells in the range.
-     */
-    // getNotes(): string[][] {
-    //     return this.getValues().map((row) =>
-    //         row.map((cell: Nullable<ICellData>) => cell?.n || '')
-    //     );
-    // }
 
     /**
      * Returns the number of columns in this range.
      */
     getNumColumns(): number {
-        const { startColumn, endColumn } = this._rangeData;
+        const { startColumn, endColumn } = this._range;
         return endColumn - startColumn + 1;
     }
 
@@ -578,25 +485,9 @@ export class Range {
      * Returns the number of rows in this range.
      */
     getNumRows(): number {
-        const { startRow, endRow } = this._rangeData;
+        const { startRow, endRow } = this._range;
         return endRow - startRow + 1;
     }
-
-    /**
-     * Get the number or date formatting of the top-left cell of the given range.
-     */
-    // getNumberFormat(): string {
-    //     return this.getNumberFormats()[0][0];
-    // }
-
-    /**
-     * Returns the number or date formats for the cells in the range.
-     */
-    // getNumberFormats(): string[][] {
-    //     return this.getValues().map((row) =>
-    //         row.map((cell: Nullable<ICellData>) => cell?.fm?.f || '')
-    //     );
-    // }
 
     /**
      * Returns the Rich Text value for the top left cell of the range, or null if the cell value is not text.
@@ -616,7 +507,7 @@ export class Range {
      * Returns the row position for this range.
      */
     getRowIndex(): number {
-        return this._rangeData.startRow;
+        return this._range.startRow;
     }
 
     /**
@@ -667,7 +558,7 @@ export class Range {
      * Returns the text styles for the cells in the range.
      */
     getTextStyles(): Array<Array<Nullable<IStyleData>>> {
-        const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
+        const styles = this._deps.getStyles();
         return this.getValues().map((row) => row.map((cell: Nullable<ICellData>) => styles.getStyleByCell(cell)));
     }
 
@@ -689,7 +580,7 @@ export class Range {
      * Returns the width of the range in columns.
      */
     getWidth(): number {
-        const { _rangeData, _worksheet } = this;
+        const { _range: _rangeData, _worksheet } = this;
         const { startColumn, endColumn } = _rangeData;
         let w = 0;
         for (let i = 0; i <= endColumn - startColumn; i++) {
@@ -726,260 +617,8 @@ export class Range {
         return this.getWrapStrategies()[0][0];
     }
 
-    /**
-     * Returns true if the range is totally blank.
-     */
-    isBlank(): boolean {
-        const data = this.getValues();
-        return data.some((items) => items.some((item) => item?.m === ''));
-    }
-
-    /**
-     * Returns a copy of the range expanded in the four cardinal Directions to cover all adjacent cells
-     * with data in them.
-     *
-     * @returns This range, for chaining.
-     */
-    getDataRegion(): Range;
-    /**
-     * Returns a copy of the range expanded Direction.UP and Direction.DOWN if the specified dimension is Dimension.ROWS, or Direction.NEXT and Direction.PREVIOUS if the dimension is Dimension.COLUMNS.
-     *
-     * @returns This range, for chaining.
-     */
-    getDataRegion(dimension: Dimension): Range;
-    // eslint-disable-next-line max-lines-per-function
-    getDataRegion(...argument: any): Range {
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
-        let numRows: number;
-        let numColumns: number;
-
-        const data = this._worksheet.getCellMatrix();
-        if (Tools.isNumber(argument[0])) {
-            const dimension = argument[0];
-
-            if (dimension === Dimension.COLUMNS) {
-                let start: number = startRow;
-                let end: number = startRow;
-                const rowMax = this._worksheet.getRowCount();
-                for (let i = 1; i < startRow; i++) {
-                    const element = data.getValue(startRow - i, startColumn);
-                    if (!element) {
-                        start = startRow - i + 1;
-                        break;
-                    }
-                }
-                const j = 0;
-                while (j < rowMax - startRow) {
-                    const element = data.getValue(startRow + j, startColumn);
-                    if (!element) {
-                        end = startRow - j - 1;
-                        break;
-                    }
-                }
-
-                numColumns = start - end;
-                numRows = 0;
-                return this._worksheet.getRange(startRow, start, numRows, numColumns);
-            }
-            if (dimension === Dimension.ROWS) {
-                let start: number = startRow;
-                let end: number = startRow;
-                const colMax = this._worksheet.getColumnCount();
-                for (let i = 1; i < startRow; i++) {
-                    const element = data.getValue(startRow, startColumn - i);
-                    if (!element) {
-                        start = startRow - i + 1;
-                        break;
-                    }
-                }
-                const j = 0;
-                while (j < colMax - startColumn) {
-                    const element = data.getValue(startRow, startColumn + j);
-                    if (!element) {
-                        end = startRow - j - 1;
-                        break;
-                    }
-                }
-
-                numColumns = 0;
-                numRows = start - end;
-                return this._worksheet.getRange(start, startColumn, numRows, numColumns);
-            }
-        } else {
-            let rowStart: number = startRow;
-            let rowEnd: number = startRow;
-            const rowMax = this._worksheet.getRowCount();
-            for (let i = 1; i < startRow; i++) {
-                const element = data.getValue(startRow - i, startColumn);
-                if (!element) {
-                    rowStart = startRow - i + 1;
-                    break;
-                }
-            }
-            const rj = 0;
-            while (rj < rowMax - startRow) {
-                const element = data.getValue(startRow + rj, startColumn);
-                if (!element) {
-                    rowEnd = startRow - rj - 1;
-                    break;
-                }
-            }
-
-            let columnStart: number = startRow;
-            let columnEnd: number = startRow;
-            const colMax = this._worksheet.getColumnCount();
-            for (let i = 1; i < startRow; i++) {
-                const element = data.getValue(startRow, startColumn - i);
-                if (!element) {
-                    columnStart = startRow - i + 1;
-                    break;
-                }
-            }
-            const cj = 0;
-            while (cj < colMax - startColumn) {
-                const element = data.getValue(startRow, startColumn + cj);
-                if (!element) {
-                    columnEnd = startRow - cj - 1;
-                    break;
-                }
-            }
-
-            numColumns = columnStart - columnEnd;
-            numColumns = rowStart - rowEnd;
-            numRows = startRow;
-            return this._worksheet.getRange(rowStart, columnStart, numRows, numColumns);
-        }
-        return this;
-    }
-
-    /**
-     * Whether the current range and the incoming range have an intersection
-     *
-     * @param range the incoming range
-     * @returns Intersect or not
-     */
-    isIntersection(range: Range): boolean {
-        const currentStartRow = this._rangeData.startRow;
-        const currentEndRow = this._rangeData.endRow;
-        const currentStartColumn = this._rangeData.startColumn;
-        const currentEndColumn = this._rangeData.endColumn;
-
-        const incomingStartRow = range.getRangeData().startRow;
-        const incomingEndRow = range.getRangeData().endRow;
-        const incomingStartColumn = range.getRangeData().startColumn;
-        const incomingEndColumn = range.getRangeData().endColumn;
-
-        const zx = Math.abs(currentStartColumn + currentEndColumn - incomingStartColumn - incomingEndColumn);
-        const x = Math.abs(currentStartColumn - currentEndColumn) + Math.abs(incomingStartColumn - incomingEndColumn);
-        const zy = Math.abs(currentStartRow + currentEndRow - incomingStartRow - incomingEndRow);
-        const y = Math.abs(currentStartRow - currentEndRow) + Math.abs(incomingStartRow - incomingEndRow);
-        if (zx <= x && zy <= y) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Returns a new range that is offset from this range by the given number of rows and columns (which can be negative). The new range is the same size as the original range.
-     * @param rowOffset The number of rows down from the range's top-left cell; negative values represent rows up from the range's top-left cell.
-     * @param columnOffset 	The number of columns right from the range's top-left cell; negative values represent columns left from the range's top-left cell.
-     * @returns Range — This range, for chaining.
-     */
-    offset(rowOffset: number, columnOffset: number): Range;
-
-    /**
-     * Returns a new range that is relative to the current range, whose upper left point is offset from the current range by the given rows and columns, and with the given height in cells.
-     * @param rowOffset The number of rows down from the range's top-left cell; negative values represent rows up from the range's top-left cell.
-     * @param columnOffset The number of columns right from the range's top-left cell; negative values represent columns left from the range's top-left cell.
-     * @param numRows The height in rows of the new range.
-     * @returns Range — This range, for chaining.
-     */
-    offset(rowOffset: number, columnOffset: number, numRows: number): Range;
-
-    /**
-     * Returns a new range that is relative to the current range, whose upper left point is offset from the current range by the given rows and columns, and with the given height and width in cells.
-     * @param rowOffset The number of rows down from the range's top-left cell; negative values represent rows up from the range's top-left cell.
-     * @param columnOffset The number of columns right from the range's top-left cell; negative values represent columns left from the range's top-left cell.
-     * @param numRows The height in rows of the new range.
-     * @param numColumns 	The width in columns of the new range.
-     * @returns Range — This range, for chaining.
-     */
-    offset(rowOffset: number, columnOffset: number, numRows: number, numColumns: number): Range;
-    offset(...argument: any): Range {
-        const { startRow, endRow, startColumn, endColumn } = this._rangeData;
-        const rowOffset = argument[0];
-        const columnOffset = argument[1];
-        const numRows = argument[2];
-        const numColumns = argument[3];
-
-        const offset = {
-            startRow: startRow + rowOffset,
-            endRow: endRow + rowOffset,
-            startColumn: startColumn + columnOffset,
-            endColumn: endColumn + columnOffset,
-        };
-
-        if (Tools.isNumber(numRows)) {
-            offset.endRow = offset.startRow + numRows - 1;
-        }
-
-        if (Tools.isNumber(numColumns)) {
-            offset.endColumn = offset.endColumn + numColumns - 1;
-        }
-
-        return new Range(this._worksheet, offset, this._currentUniverService);
-    }
-
-    /**
-     * get row matrix
-     * @returns
-     */
-    getRowMatrix(index: number) {
-        const { startColumn, endColumn } = this._rangeData;
-
-        const sheetMatrix = this._worksheet.getCellMatrix();
-        const rangeMatrix = new ObjectMatrix<ICellData>();
-
-        for (let r = index; r <= index; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-                rangeMatrix.setValue(r, c, sheetMatrix.getValue(r, c) || {});
-            }
-        }
-
-        return rangeMatrix;
-    }
-
-    /**
-     * get column matrix
-     * @returns
-     */
-    getColumnMatrix(index: number) {
-        const { startRow, endRow } = this._rangeData;
-
-        const sheetMatrix = this._worksheet.getCellMatrix();
-        const rangeMatrix = new ObjectMatrix<ICellData>();
-
-        for (let r = startRow; r <= endRow; r++) {
-            for (let c = index; c <= index; c++) {
-                rangeMatrix.setValue(r, c, sheetMatrix.getValue(r, c) || {});
-            }
-        }
-
-        return rangeMatrix;
-    }
-
     forEach(action: (row: number, column: number) => void): void {
-        Range.foreach(this._rangeData, action);
-    }
-
-    /**
-     * Determine whether a range is legal
-     */
-    isValid(): boolean {
-        if (Object.values(this._rangeData).includes(-1)) {
-            return false;
-        }
-        return true;
+        Range.foreach(this._range, action);
     }
 
     /**
@@ -987,11 +626,10 @@ export class Range {
      * @param arg Shorthand for the style that gets
      * @returns style value
      */
-    private _getStyles<K>(arg: keyof IStyleData): Array<Array<IStyleData[keyof IStyleData]>> {
-        const styles = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getStyles();
+    private _getStyles(arg: keyof IStyleData): Array<Array<IStyleData[keyof IStyleData]>> {
+        const styles = this._deps.getStyles();
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
-                // const style = getStyle(styles, cell);
                 const style = styles && styles.getStyleByCell(cell);
                 return (style && style[arg]) || DEFAULT_STYLES[arg];
             })

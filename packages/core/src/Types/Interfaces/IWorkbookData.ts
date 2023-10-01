@@ -1,6 +1,5 @@
 import { IKeyType, Nullable } from '../../Shared/Types';
 import { LocaleType } from '../Enum';
-import { INamedRange } from './INamedRange';
 import { IStyleData } from './IStyleData';
 import { IWorksheetConfig } from './IWorksheetData';
 
@@ -22,7 +21,6 @@ export interface IWorkbookConfig {
     locale: LocaleType;
     modifiedTime: string;
     name: string;
-    namedRanges: INamedRange[];
     sheetOrder: string[]; // sheet id order list ['xxxx-sheet3', 'xxxx-sheet1','xxxx-sheet2']
     sheets: { [sheetId: string]: Partial<IWorksheetConfig> };
     styles: IKeyType<Nullable<IStyleData>>;

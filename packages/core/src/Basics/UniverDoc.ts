@@ -1,6 +1,6 @@
 import { Ctor, Dependency, Inject, Injector, Optional } from '@wendellhu/redi';
 
-import { DocumentModel } from '../Docs';
+import { DocumentModel } from '../Docs/Domain/DocumentModel';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';

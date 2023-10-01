@@ -1,7 +1,11 @@
-import { Tools } from '../../Shared';
-import { DEFAULT_DOC } from '../../Types/Const';
+import { Tools } from '../../Shared/Tools';
 import { IDocumentData } from '../../Types/Interfaces/IDocumentData';
 import { DocumentBodyModel } from './DocumentBodyModel';
+
+export const DEFAULT_DOC = {
+    id: 'default_doc',
+    documentStyle: {},
+};
 
 interface IDrawingUpdateConfig {
     left: number;

@@ -138,56 +138,6 @@ export class Workbook {
         });
     }
 
-    // getActiveRange(): Nullable<Range> {
-    //     const workSheet = this.getActiveSheet();
-    //     if (workSheet) {
-    //         const selection = workSheet.getSelection();
-    //         return selection.getActiveRange();
-    //     }
-    //     return null;
-    // }
-
-    // setActiveRange(range: Range): Nullable<Range> {
-    //     const workSheet = this.getActiveSheet();
-    //     if (workSheet) {
-    //         return workSheet.setActiveSelection(range);
-    //     }
-    //     return null;
-    // }
-
-    setActiveRangeList(rangeList: IRangeType[]): Nullable<IRange[]> {
-        const workSheet = this.getActiveSheet();
-        if (workSheet) {
-            const activeRangeList = workSheet.getRangeList(rangeList);
-            activeRangeList.activate();
-            return activeRangeList.getRangeList();
-        }
-        return null;
-    }
-
-    // getActiveRangeList(): Nullable<RangeList> {
-    //     const workSheet = this.getActiveSheet();
-    //     if (workSheet) {
-    //         const selection = workSheet.getSelection();
-    //         return selection.getActiveRangeList();
-    //     }
-    //     return null;
-    // }
-
-    // getSelection(): Nullable<Selection> {
-    //     const workSheet = this.getActiveSheet();
-    //     if (workSheet) {
-    //         return workSheet.getSelection();
-    //     }
-    // }
-
-    // getCurrentCell(): Nullable<Range> {
-    //     const selection = this.getSelection();
-    //     if (selection) {
-    //         return selection.getCurrentCell();
-    //     }
-    // }
-
     getSheetSize(): number {
         return this._config.sheetOrder.length;
     }
@@ -432,7 +382,7 @@ export class Workbook {
         for (const sheetId in sheets) {
             const config = sheets[sheetId];
             config.name = this._genName.sheetName(config.name);
-            const worksheet = new Worksheet(config, this._observerManager, this._currentUniverService);
+            const worksheet = new Worksheet(config, this._observerManager, this._styles);
             _worksheets.set(sheetId, worksheet);
             if (!sheetOrder.includes(sheetId)) {
                 sheetOrder.push(sheetId);
@@ -441,9 +391,5 @@ export class Workbook {
                 firstWorksheet = worksheet;
             }
         }
-
-        // if (firstWorksheet) {
-        //     firstWorksheet.activate();
-        // }
     }
 }

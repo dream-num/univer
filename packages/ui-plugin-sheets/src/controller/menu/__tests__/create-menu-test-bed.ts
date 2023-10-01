@@ -25,7 +25,6 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     locale: LocaleType.EN,
     modifiedTime: '',
     name: '',
-    namedRanges: [],
     sheetOrder: [],
     styles: {},
     timeZone: '',

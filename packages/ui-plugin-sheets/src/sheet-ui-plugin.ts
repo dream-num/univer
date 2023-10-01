@@ -49,24 +49,6 @@ export class SheetUIPlugin extends Plugin {
         this._markSheetAsFocused();
     }
 
-    // NOTE: should set from fx service
-
-    /**
-     * Formula Bar API
-     * @param str
-     */
-    // setFormulaContent(str: string) {
-    //     this._appUIController
-    //         .getSheetContainerController()
-    //         .getFormulaBarUIController()
-    //         .getFormulaBar()
-    //         .setFormulaContent(str);
-    // }
-
-    // setFx(fx: Fx) {
-    //     this._appUIController.getSheetContainerController().getFormulaBarUIController().getFormulaBar().setFx(fx);
-    // }
-
     private _markSheetAsFocused() {
         const currentService = this._injector.get(ICurrentUniverService);
         const c = currentService.getCurrentUniverSheetInstance();

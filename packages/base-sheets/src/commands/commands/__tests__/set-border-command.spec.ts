@@ -69,12 +69,12 @@ describe('Test style commands', () => {
                     },
                 ]);
 
-                function getBorder({ startRow, endRow, startColumn, endColumn }: IRange): IBorderData | undefined {
+                function getBorder({ startRow, startColumn }: IRange): IBorderData | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
                         ?.getWorkBook()
                         .getSheetBySheetId('sheet1')
-                        ?.getRange({ startRow, endRow, startColumn, endColumn })
+                        ?.getRange(startRow, startColumn)
                         .getBorder();
                 }
 

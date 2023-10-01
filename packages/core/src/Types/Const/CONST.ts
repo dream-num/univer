@@ -66,7 +66,6 @@ export const DEFAULT_WORKBOOK: IWorkbookConfig = {
     lastModifiedBy: '',
     createdTime: '',
     modifiedTime: '',
-    namedRanges: [],
 };
 
 export const DEFAULT_WORKSHEET_ROW_COUNT = 1000;
@@ -217,11 +216,6 @@ export const DEFAULT_STYLES: IStyleData = {
         b: 0,
         l: 0,
     },
-};
-
-export const DEFAULT_DOC = {
-    id: 'default_doc',
-    documentStyle: {},
 };
 
 export const DEFAULT_SLIDE = {

@@ -38533,5 +38533,4 @@ export const DEFAULT_WORKBOOK_DATA_DEMO8: IWorkbookConfig = {
             pluginMeta: {},
         },
     },
-    namedRanges: [],
 };

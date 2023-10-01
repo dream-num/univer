@@ -1,4 +1,4 @@
-import { LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
+import { ICurrentUniverService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { DefaultDocUiConfig, IDocUIPluginConfig, installObserver } from './Basics';
@@ -30,6 +30,7 @@ export class DocUIPlugin extends Plugin<any> {
         installObserver(this);
 
         this._initModules();
+        this._markDocAsFocused();
     }
 
     override onDestroy(): void {}
@@ -50,6 +51,12 @@ export class DocUIPlugin extends Plugin<any> {
         dependencies.forEach((d) => {
             injector.add(d);
         });
+    }
+
+    private _markDocAsFocused() {
+        const currentService = this._injector.get(ICurrentUniverService);
+        const c = currentService.getCurrentUniverDocInstance();
+        currentService.focusUniverInstance(c.getUnitId());
     }
 
     private _initModules(): void {

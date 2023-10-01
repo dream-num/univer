@@ -4,7 +4,7 @@ import { DocumentModel } from '../Docs';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleService } from '../services/lifecycle/lifecycle.service';
+import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { IDocumentData } from '../Types/Interfaces';
 
 /**
@@ -33,6 +33,8 @@ export class UniverDoc {
                 this._pluginStore.forEachPlugin((p) => p.onRendered());
             }
         });
+
+        this._injector.get(LifecycleInitializerService).start();
     }
 
     getDocument(): DocumentModel {
@@ -57,7 +59,10 @@ export class UniverDoc {
     }
 
     private _initializeDependencies(parentInjector?: Injector): Injector {
-        const dependencies: Dependency[] = [[ICommandService, { useClass: CommandService }]];
+        const dependencies: Dependency[] = [
+            [ICommandService, { useClass: CommandService }],
+            [LifecycleInitializerService],
+        ];
         return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 }

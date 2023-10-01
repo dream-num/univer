@@ -1,8 +1,10 @@
-import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
+import { Ctor, Dependency, Inject, Injector, Optional } from '@wendellhu/redi';
 
 import { DocumentModel } from '../Docs';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
+import { LifecycleStages } from '../services/lifecycle/lifecycle';
+import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { IDocumentData } from '../Types/Interfaces';
 
 /**
@@ -17,10 +19,20 @@ export class UniverDoc {
 
     private readonly _injector: Injector;
 
-    constructor(docData: Partial<IDocumentData> = {}, @Optional(Injector) _injector: Injector) {
+    constructor(
+        docData: Partial<IDocumentData> = {},
+        @Optional(Injector) _injector: Injector,
+        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
+    ) {
         this.univerDocConfig = docData;
         this._injector = this._initializeDependencies(_injector);
         this._document = this._injector.createInstance(DocumentModel, docData);
+
+        this._lifecycleService.lifecycle$.subscribe((stage) => {
+            if (stage === LifecycleStages.Rendered) {
+                this._pluginStore.forEachPlugin((p) => p.onRendered());
+            }
+        });
     }
 
     getDocument(): DocumentModel {

@@ -145,8 +145,12 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
         return this.getMainComponent().getEditorInputEvent();
     }
 
-    override onRendered(): void {
+    override onReady(): void {
         this.initialize();
+    }
+
+    override onRendered(): void {
+        // this.initialize();
     }
 
     override onDestroy(): void {}

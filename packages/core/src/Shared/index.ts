@@ -1,5 +1,6 @@
-// @index(['./*.ts','./**/index.ts'], f => `export * from '${f.path}'`)
 export * from './ArraySearch';
+export * from './color/Color';
+export * from './color/ColorBuilder';
 export * from './CommandEnum';
 export * from './Common';
 export * from './Compare';
@@ -29,4 +30,3 @@ export * from './Tools';
 export * from './Tuples';
 export * from './Types';
 export * from './TypeStore';
-// @endindex

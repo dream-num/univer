@@ -1,4 +1,4 @@
-import { Nullable } from '../../Shared';
+import { Nullable } from '../../common/type-utils';
 import { THEME_COLORS } from '../../Types/Const/THEME_COLOR_MAP';
 import { ColorType, ThemeColors, ThemeColorType } from '../../Types/Enum';
 import { ColorBuilder } from './ColorBuilder';

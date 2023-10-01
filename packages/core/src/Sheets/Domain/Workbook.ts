@@ -1,7 +1,6 @@
 import { forwardRef, Inject, Injector } from '@wendellhu/redi';
 
 import { ObserverManager } from '../../Observer';
-import { ICurrentUniverService } from '../../services/current.service';
 import { GenName, Nullable, Tools } from '../../Shared';
 import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
@@ -46,7 +45,6 @@ export class Workbook {
 
     constructor(
         workbookData: Partial<IWorkbookConfig> = {},
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
         @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(Injector) readonly _injector: Injector

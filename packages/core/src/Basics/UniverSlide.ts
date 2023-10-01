@@ -3,7 +3,7 @@ import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
 import { ObserverManager } from '../Observer';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { GenName, IOHttp, IOHttpConfig, Logger } from '../Shared';
-import { ColorBuilder } from '../Sheets/Domain/ColorBuilder';
+import { ColorBuilder } from '../Shared/color/ColorBuilder';
 import { SlideModel } from '../Slides/Domain';
 import { ISlideData } from '../Types/Interfaces';
 import { VersionCode, VersionEnv } from './Version';

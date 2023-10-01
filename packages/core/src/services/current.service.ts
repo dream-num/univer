@@ -1,4 +1,4 @@
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Inject } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { UniverDoc } from '../Basics/UniverDoc';
@@ -7,6 +7,8 @@ import { UniverSlide } from '../Basics/UniverSlide';
 import { Nullable } from '../Shared';
 import { Disposable } from '../Shared/lifecycle';
 import { IDocumentData } from '../Types/Interfaces';
+import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './context/context';
+import { ContextService } from './context/context.service';
 
 export interface IUniverHandler {
     createUniverDoc(data: Partial<IDocumentData>): UniverDoc;
@@ -54,7 +56,10 @@ export class CurrentUniverService extends Disposable implements ICurrentUniverSe
 
     private readonly _slides: UniverSlide[] = [];
 
-    constructor(private readonly _handler: IUniverHandler) {
+    constructor(
+        private readonly _handler: IUniverHandler,
+        @Inject(ContextService) private readonly _contextService: ContextService
+    ) {
         super();
 
         this._focused$ = new BehaviorSubject<string | null>(null);
@@ -131,7 +136,18 @@ export class CurrentUniverService extends Disposable implements ICurrentUniverSe
                 this.getUniverSlideInstance(id) ||
                 null;
         }
+
         this._focused$.next(id);
+
+        [FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE].forEach((k) => this._contextService.setContextValue(k, false));
+
+        if (this._focused instanceof UniverSheet) {
+            this._contextService.setContextValue(FOCUSING_SHEET, true);
+        } else if (this._focused instanceof UniverDoc) {
+            this._contextService.setContextValue(FOCUSING_DOC, true);
+        } else if (this._focused instanceof UniverSlide) {
+            this._contextService.setContextValue(FOCUSING_SLIDE, true);
+        }
     }
 
     getFocusedUniverInstance(): UniverSheet | UniverDoc | UniverSlide | null {

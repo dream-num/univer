@@ -1,4 +1,3 @@
-import { ColorBuilder } from '../Sheets/Domain';
 import {
     BaselineOffset,
     BorderStyleTypes,
@@ -12,6 +11,7 @@ import { ICellData } from '../Types/Interfaces/ICellData';
 import { IDocumentData } from '../Types/Interfaces/IDocumentData';
 import { IRangeWithCoord, ISelectionCell, ISelectionCellWithCoord } from '../Types/Interfaces/ISelectionData';
 import { IColorStyle, IStyleData } from '../Types/Interfaces/IStyleData';
+import { ColorBuilder } from './color/ColorBuilder';
 import { Tools } from './Tools';
 import { Nullable } from './Types';
 

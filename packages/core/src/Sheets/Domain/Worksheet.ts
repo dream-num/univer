@@ -1,16 +1,13 @@
-import { Inject } from '@wendellhu/redi';
-
 import { ObserverManager } from '../../Observer';
-import { ICurrentUniverService } from '../../services/current.service';
 import { Nullable, ObjectMatrix, Rectangle, Tools } from '../../Shared';
 import { createRowColIter } from '../../Shared/RowColIter';
 import { DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber, SheetTypes } from '../../Types/Enum';
-import { ICellData, IRange, IRangeStringData, IRangeType, IWorksheetConfig } from '../../Types/Interfaces';
+import { ICellData, IRange, IWorksheetConfig } from '../../Types/Interfaces';
 import { ColumnManager } from './ColumnManager';
 import { Range } from './Range';
-import { RangeList } from './RangeList';
 import { RowManager } from './RowManager';
+import { Styles } from './Styles';
 
 /**
  * Access and modify spreadsheet sheets.
@@ -37,8 +34,8 @@ export class Worksheet {
 
     constructor(
         snapshot: Partial<IWorksheetConfig>,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        private readonly _observerManager: ObserverManager,
+        private readonly _styles: Styles
     ) {
         const mergedSnapshot: IWorksheetConfig = {
             ...DEFAULT_WORKSHEET,
@@ -120,7 +117,7 @@ export class Worksheet {
     clone(): Worksheet {
         const { _snapshot: _config } = this;
         const copy = Tools.deepClone(_config);
-        return new Worksheet(copy, this._observerManager, this._currentUniverService);
+        return new Worksheet(copy, this._observerManager, this._styles);
     }
 
     getMergeData(): IRange[] {
@@ -188,93 +185,21 @@ export class Worksheet {
         return ret;
     }
 
-    // WTF: this function signature is so ridiculous...
-
-    /**
-     * Returns User Selection Range
-     * @param range range types
-     * @returns range instance
-     */
-    getRange(range: IRangeType): Range;
-    /**
-     * Returns User Selection Range
-     * @param row row index
-     * @param column column index
-     * @returns range instance
-     */
-    getRange(row: number, column: number): Range;
-    /**
-     * Returns User Selection Range
-     * @param row row index
-     * @param column column index
-     * @param numRows row count
-     * @returns range instance
-     */
-    getRange(row: number, column: number, numRows: number): Range;
-    /**
-     * Returns User Selection Range
-     * @param row row index
-     * @param column column index
-     * @param numRows row count
-     * @param numColumns column count
-     * @returns range instance
-     */
-    getRange(row: number, column: number, numRows: number, numColumns: number): Range;
-    /**
-     * Returns User Selection Range
-     * @param a1Notation One of the range types
-     * @remarks {@link IRangeStringData} e.g.,"A1:B2","sheet1!A1:B2","A1","1:1","A:A","AA1:BB2"
-     * @returns range instance
-     */
-    getRange(a1Notation: IRangeStringData): Range;
-    getRange(...argument: any): Nullable<Range> {
-        if (Tools.hasLength(argument, 1)) {
-            return new Range(this, argument[0], this._currentUniverService);
-        }
-        if (Tools.hasLength(argument, 2)) {
-            return new Range(
-                this,
-                {
-                    row: [argument[0], argument[0]],
-                    column: [argument[1], argument[1]],
-                },
-                this._currentUniverService
-            );
-        }
-        if (Tools.hasLength(argument, 3)) {
-            return new Range(
-                this,
-                {
-                    row: [argument[0], argument[2]],
-                    column: [argument[1], argument[1]],
-                },
-                this._currentUniverService
-            );
-        }
-        if (Tools.hasLength(argument, 4)) {
-            return new Range(
-                this,
-                {
-                    row: [argument[0], argument[2]],
-                    column: [argument[1], argument[3]],
-                },
-                this._currentUniverService
-            );
-        }
-    }
-
-    /**
-     * Returns User Multiple Selection Range List
-     * @param rangeList range types array
-     * @returns RangeList Instance
-     */
-    getRangeList(rangeList: IRangeType[]): RangeList {
-        /**
-         * get range instance from range string or array
-         * const range = universheet.getRange('A1:B2')
-         * range.activate() // Activate the current range as the current selection
-         */
-        return new RangeList(this, rangeList, this._currentUniverService);
+    getRange(startRow: number, startColumn: number): Range;
+    getRange(startRow: number, startColumn: number, endRow: number, endColumn: number): Range;
+    getRange(startRow: number, startColumn: number, endRow?: number, endColumn?: number): Range {
+        return new Range(
+            this,
+            {
+                startRow,
+                startColumn,
+                endColumn: endColumn || startColumn,
+                endRow: endRow || startRow,
+            },
+            {
+                getStyles: () => this._styles,
+            }
+        );
     }
 
     /**
@@ -374,21 +299,6 @@ export class Worksheet {
     }
 
     /**
-     * Gets the position of the sheet in its parent spreadsheet. Starts at 1.
-     * @returns Gets the position of the sheet in its parent spreadsheet. Starts at 1.
-     */
-    getIndex(): Nullable<number> {
-        const worksheets = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheets();
-        const index = worksheets.findIndex((sheet) => sheet && sheet.getSheetId() === this._sheetId);
-
-        if (index > -1) {
-            return index + 1;
-        }
-
-        return null;
-    }
-
-    /**
      * isSheetHidden
      * @returns hidden status of sheet
      */
@@ -480,41 +390,5 @@ export class Worksheet {
      */
     getLastColumn(): number {
         return this._cellData.getRange().endColumn;
-    }
-
-    /**
-     * Returns the rectangular grid of values for this range starting at the given coordinates. A -1 value given as the row or column position is equivalent to getting the very last row or column that has data in the sheet.
-     * @param startRow row start index
-     * @param startColumn column start index
-     * @param numRows row count
-     * @param numColumns column count
-     * @returns the rectangular grid of values for this range starting at the given coordinates. A -1 value given as the row or column position is equivalent to getting the very last row or column that has data in the sheet.
-     */
-    getSheetValues(
-        startRow: number,
-        startColumn: number,
-        numRows: number,
-        numColumns: number
-    ): Array<Array<Nullable<ICellData>>> {
-        const range = new Range(
-            this,
-            {
-                startRow,
-                startColumn,
-                endRow: startRow + numRows - 1,
-                endColumn: startColumn + numColumns - 1,
-            },
-            this._currentUniverService
-        );
-        return range.getValues();
-    }
-
-    /**
-     * Returns a Range corresponding to the dimensions in which data is present.
-     * @returns a Range corresponding to the dimensions in which data is present.
-     */
-    getDataRange(): Range {
-        const range = new Range(this, this._cellData.getRange(), this._currentUniverService);
-        return range;
     }
 }

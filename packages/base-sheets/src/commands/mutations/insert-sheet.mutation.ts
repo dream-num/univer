@@ -39,10 +39,7 @@ export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean>
         sheetOrder.splice(index, 0, sheet.id);
 
         const worksheets = workbook.getWorksheets();
-        worksheets.set(
-            sheet.id,
-            new Worksheet(sheet, accessor.get(ObserverManager), accessor.get(ICurrentUniverService))
-        );
+        worksheets.set(sheet.id, new Worksheet(sheet, accessor.get(ObserverManager), workbook.getStyles()));
 
         return true;
     },

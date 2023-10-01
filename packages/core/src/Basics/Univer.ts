@@ -151,10 +151,14 @@ export class Univer {
             [
                 ICurrentUniverService,
                 {
-                    useFactory: () =>
-                        new CurrentUniverService({
-                            createUniverDoc: (data) => this.createUniverDoc(data),
-                        }),
+                    useFactory: (contextService: IContextService) =>
+                        new CurrentUniverService(
+                            {
+                                createUniverDoc: (data) => this.createUniverDoc(data),
+                            },
+                            contextService
+                        ),
+                    deps: [IContextService],
                 },
             ],
             [LocaleService],

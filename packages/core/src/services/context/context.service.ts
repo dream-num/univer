@@ -5,8 +5,6 @@ import { Disposable } from '../../Shared/lifecycle';
 export interface IContextService {
     getContextValue(key: string): boolean;
     setContextValue(key: string, value: boolean): void;
-
-    // TODO: actually it should provide an `evaluate` method to evaluate the context value. An callback in shortcut service works but not looks nice.
 }
 
 export const IContextService = createIdentifier<IContextService>('univer.context-service');

@@ -1,4 +1,4 @@
-import { createIdentifier, Inject } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { UniverDoc } from '../Basics/UniverDoc';
@@ -8,7 +8,7 @@ import { Nullable } from '../Shared';
 import { Disposable } from '../Shared/lifecycle';
 import { IDocumentData } from '../Types/Interfaces';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './context/context';
-import { ContextService } from './context/context.service';
+import { IContextService } from './context/context.service';
 
 export interface IUniverHandler {
     createUniverDoc(data: Partial<IDocumentData>): UniverDoc;
@@ -58,7 +58,7 @@ export class CurrentUniverService extends Disposable implements ICurrentUniverSe
 
     constructor(
         private readonly _handler: IUniverHandler,
-        @Inject(ContextService) private readonly _contextService: ContextService
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 

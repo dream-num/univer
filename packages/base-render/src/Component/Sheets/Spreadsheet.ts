@@ -227,7 +227,8 @@ export class Spreadsheet extends SheetComponent {
         if (this._allowCache) {
             this._cacheOffsetX = 0;
             this._cacheOffsetY = 0;
-            if (this.isDirty()) {
+
+            if (this.isDirty() || this._checkNewBounds(bounds)) {
                 const newBounds = bounds;
                 const ctx = this._cacheCanvas.getContext();
 
@@ -353,6 +354,26 @@ export class Spreadsheet extends SheetComponent {
     //     this._cacheCanvas?.setPixelRatio(Math.max(scaleX, scaleY) * getDevicePixelRatio());
     //     this.makeDirty(true);
     // }
+
+    private _checkNewBounds(bounds?: IBoundRect) {
+        const oldBounds = this._boundsCache;
+        if (oldBounds === bounds) {
+            return false;
+        }
+
+        if (bounds == null || oldBounds == null) {
+            return true;
+        }
+
+        const { tl, br } = bounds;
+        const { tl: oldTl, br: oldBr } = oldBounds;
+
+        if (tl.equals(oldTl) && br.equals(oldBr)) {
+            return false;
+        }
+
+        return true;
+    }
 
     protected _applyCache(ctx?: CanvasRenderingContext2D) {
         if (!ctx) {

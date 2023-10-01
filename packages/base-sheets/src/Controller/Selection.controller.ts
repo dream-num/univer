@@ -18,6 +18,7 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
+import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -79,10 +80,16 @@ export class SelectionController extends Disposable {
     }
 
     private _initialMain(sheetObject: ISheetObjectParam) {
-        const { spreadsheet } = sheetObject;
+        const { spreadsheet, scene } = sheetObject;
+        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             this._selectionTransformerShapeManager.enableDetectMergedCell();
-            this._selectionTransformerShapeManager.eventTrigger(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL);
+            this._selectionTransformerShapeManager.eventTrigger(
+                evt,
+                spreadsheet.zIndex + 1,
+                RANGE_TYPE.NORMAL,
+                viewportMain
+            );
             if (evt.button !== 2) {
                 state.stopPropagation();
             }
@@ -90,11 +97,16 @@ export class SelectionController extends Disposable {
     }
 
     private _initialRowHeader(sheetObject: ISheetObjectParam) {
-        const { spreadsheetRowHeader, spreadsheet } = sheetObject;
-
+        const { spreadsheetRowHeader, spreadsheet, scene } = sheetObject;
+        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             this._selectionTransformerShapeManager.disableDetectMergedCell();
-            this._selectionTransformerShapeManager.eventTrigger(evt, (spreadsheet?.zIndex || 1) + 1, RANGE_TYPE.ROW);
+            this._selectionTransformerShapeManager.eventTrigger(
+                evt,
+                (spreadsheet?.zIndex || 1) + 1,
+                RANGE_TYPE.ROW,
+                viewportMain
+            );
             if (evt.button !== 2) {
                 state.stopPropagation();
             }
@@ -104,10 +116,16 @@ export class SelectionController extends Disposable {
     }
 
     private _initialColumnHeader(sheetObject: ISheetObjectParam) {
-        const { spreadsheetColumnHeader, spreadsheet } = sheetObject;
+        const { spreadsheetColumnHeader, spreadsheet, scene } = sheetObject;
+        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             this._selectionTransformerShapeManager.disableDetectMergedCell();
-            this._selectionTransformerShapeManager.eventTrigger(evt, (spreadsheet?.zIndex || 1) + 1, RANGE_TYPE.COLUMN);
+            this._selectionTransformerShapeManager.eventTrigger(
+                evt,
+                (spreadsheet?.zIndex || 1) + 1,
+                RANGE_TYPE.COLUMN,
+                viewportMain
+            );
             if (evt.button !== 2) {
                 state.stopPropagation();
             }

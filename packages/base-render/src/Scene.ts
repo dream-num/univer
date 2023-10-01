@@ -133,7 +133,7 @@ export class Scene extends ThinScene {
     isDirty(): boolean {
         for (let i = 0; i < this._viewports.length; i++) {
             const vp = this._viewports[i];
-            if (vp.isDirty() === true) {
+            if (vp.isDirty() === true && vp.isActive) {
                 return true;
             }
         }

@@ -1,5 +1,5 @@
 import { Engine } from '@univerjs/base-render';
-import { CANVAS_VIEW_KEY } from '@univerjs/base-sheets';
+import { CANVAS_VIEW_KEY, VIEWPORT_KEY } from '@univerjs/base-sheets';
 import { ISelectionCellWithCoord } from '@univerjs/core';
 
 export interface ICellPosition {
@@ -35,8 +35,9 @@ export function getPositionOfCurrentCell(currentCell: ISelectionCellWithCoord, r
     }
 
     const mainScene = renderingEngine.getScene(CANVAS_VIEW_KEY.MAIN_SCENE);
-    const scrollX = mainScene?.getViewport(CANVAS_VIEW_KEY.VIEW_TOP)?.actualScrollX || 0;
-    const scrollY = mainScene?.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT)?.actualScrollY || 0;
+    const mainView = mainScene?.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+    const scrollX = mainView?.actualScrollX || 0;
+    const scrollY = mainView?.actualScrollY || 0;
 
     const canvasElement = renderingEngine.getCanvasElement();
     const sheetContentRect = canvasElement.getBoundingClientRect();

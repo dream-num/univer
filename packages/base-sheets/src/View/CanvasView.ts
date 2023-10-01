@@ -2,7 +2,6 @@ import {
     EVENT_TYPE,
     IRender,
     IRenderManagerService,
-    IScrollObserverParam,
     ISelectionTransformerShapeManager,
     IWheelEvent,
     Layer,
@@ -26,10 +25,10 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import {
-    CANVAS_VIEW_KEY,
     SHEET_COMPONENT_HEADER_LAYER_INDEX,
     SHEET_COMPONENT_MAIN_LAYER_INDEX,
     SHEET_VIEW_KEY,
+    VIEWPORT_KEY,
 } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -96,7 +95,7 @@ export class CanvasView {
 
         const sheetId = worksheet.getSheetId();
 
-        this._updateViewport(worksheet);
+        this._addViewport(worksheet);
 
         // const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         // const rowHeaderWidth = rowHeader.hidden !== true ? rowHeader.width : 0;
@@ -141,7 +140,7 @@ export class CanvasView {
         // });
     }
 
-    private _updateViewport(worksheet: Worksheet) {
+    private _addViewport(worksheet: Worksheet) {
         const scene = this._scene;
         if (scene == null) {
             return;
@@ -154,28 +153,40 @@ export class CanvasView {
 
         const { rowHeader, columnHeader } = worksheet.getConfig();
 
-        const viewMain = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN, scene, {
+        const viewMain = new Viewport(VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: rowHeader.width,
             top: columnHeader.height,
             bottom: 0,
             right: 0,
             isWheelPreventDefaultX: true,
         });
-        const viewTop = new Viewport(CANVAS_VIEW_KEY.VIEW_TOP, scene, {
-            left: rowHeader.width,
-            top: 0,
-            height: columnHeader.height,
-            right: 0,
+        const viewRowTop = new Viewport(VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
+            active: false,
             isWheelPreventDefaultX: true,
         });
-        const viewLeft = new Viewport(CANVAS_VIEW_KEY.VIEW_LEFT, scene, {
+
+        const viewRowBottom = new Viewport(VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
             left: 0,
             top: columnHeader.height,
             bottom: 0,
             width: rowHeader.width,
             isWheelPreventDefaultX: true,
         });
-        const viewLeftTop = new Viewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP, scene, {
+
+        const viewColumnLeft = new Viewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
+            active: false,
+            isWheelPreventDefaultX: true,
+        });
+
+        const viewColumnRight = new Viewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
+            left: rowHeader.width,
+            top: 0,
+            height: columnHeader.height,
+            right: 0,
+            isWheelPreventDefaultX: true,
+        });
+
+        const viewLeftTop = new Viewport(VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
             left: 0,
             top: 0,
             width: rowHeader.width,
@@ -183,29 +194,17 @@ export class CanvasView {
             isWheelPreventDefaultX: true,
         });
 
-        const viewMainLeftTop = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN_LEFT_TOP, scene, {
-            left: 0,
-            top: 0,
-            width: 0,
-            height: 0,
+        const viewMainLeftTop = new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
         });
 
-        const viewMainLeft = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN_LEFT, scene, {
-            left: 0,
-            top: 0,
-            width: 0,
-            height: 0,
+        const viewMainLeft = new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
             isWheelPreventDefaultX: true,
             active: false,
         });
 
-        const viewMainTop = new Viewport(CANVAS_VIEW_KEY.VIEW_MAIN_TOP, scene, {
-            left: 0,
-            top: 0,
-            width: 0,
-            height: 0,
+        const viewMainTop = new Viewport(VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
         });
@@ -213,37 +212,37 @@ export class CanvasView {
         // viewMain.linkToViewport(viewLeft, LINK_VIEW_PORT_TYPE.Y);
         // viewMain.linkToViewport(viewTop, LINK_VIEW_PORT_TYPE.X);
         // syncing scroll on the main area to headerbars
-        viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-            const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
+        // viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
+        //     const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
 
-            viewTop
-                .updateScroll({
-                    scrollX,
-                    actualScrollX,
-                })
-                .makeDirty(true);
+        //     viewTop
+        //         .updateScroll({
+        //             scrollX,
+        //             actualScrollX,
+        //         })
+        //         .makeDirty(true);
 
-            viewLeft
-                .updateScroll({
-                    scrollY,
-                    actualScrollY,
-                })
-                .makeDirty(true);
+        //     viewLeft
+        //         .updateScroll({
+        //             scrollY,
+        //             actualScrollY,
+        //         })
+        //         .makeDirty(true);
 
-            viewMainTop
-                .updateScroll({
-                    scrollX,
-                    actualScrollX,
-                })
-                .makeDirty(true);
+        //     viewMainTop
+        //         .updateScroll({
+        //             scrollX,
+        //             actualScrollX,
+        //         })
+        //         .makeDirty(true);
 
-            viewMainLeft
-                .updateScroll({
-                    scrollY,
-                    actualScrollY,
-                })
-                .makeDirty(true);
-        });
+        //     viewMainLeft
+        //         .updateScroll({
+        //             scrollY,
+        //             actualScrollY,
+        //         })
+        //         .makeDirty(true);
+        // });
 
         // 鼠标滚轮缩放
         scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
@@ -272,7 +271,17 @@ export class CanvasView {
         const scrollbar = new ScrollBar(viewMain);
 
         scene
-            .addViewport(viewMain, viewLeft, viewTop, viewLeftTop, viewMainLeftTop, viewMainLeft, viewMainTop)
+            .addViewport(
+                viewMain,
+                viewColumnLeft,
+                viewColumnRight,
+                viewRowTop,
+                viewRowBottom,
+                viewLeftTop,
+                viewMainLeftTop,
+                viewMainLeft,
+                viewMainTop
+            )
             .attachControl();
     }
 }

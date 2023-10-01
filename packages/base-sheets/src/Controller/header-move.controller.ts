@@ -21,7 +21,7 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { getCoordByOffset, getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
-import { CANVAS_VIEW_KEY, SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -218,7 +218,7 @@ export class HeaderMoveController extends Disposable {
 
                 const scrollTimer = ScrollTimer.create(scene);
 
-                const mainViewport = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
+                const mainViewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
                 scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, mainViewport);
 

@@ -1,6 +1,7 @@
 import { Disposable, ICommandService, IStyleData, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
+import { SetFrozenCancelCommand, SetFrozenCommand, SetFrozenMutation } from '..';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -172,6 +173,9 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             RemoveSheetMutation,
             InsertSheetCommand,
             InsertSheetMutation,
+            SetFrozenCommand,
+            SetFrozenMutation,
+            SetFrozenCancelCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

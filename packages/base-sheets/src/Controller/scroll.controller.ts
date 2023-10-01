@@ -3,8 +3,7 @@ import { Disposable, ICommandService, ICurrentUniverService, LifecycleStages, On
 import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject } from '../Basics/component-tools';
-import { CANVAS_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
-import { columnWidthByHeader, rowHeightByHeader } from '../Basics/SheetHeader';
+import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { ISheetSkeletonManagerParam, SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -41,7 +40,7 @@ export class ScrollController extends Disposable {
             return;
         }
 
-        const viewportMain = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
+        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         viewportMain?.onScrollAfterObserver.add((param) => {
             const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
             if (skeleton == null) {
@@ -91,7 +90,7 @@ export class ScrollController extends Disposable {
 
             const { scaleX, scaleY } = sheetObject.scene.getAncestorScale();
 
-            const viewportMain = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
+            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
             if (viewportMain == null) {
                 return;
@@ -134,27 +133,24 @@ export class ScrollController extends Disposable {
                 return;
             }
 
-            this._updateViewport(param);
+            this._updateSceneSize(param);
 
-            this._scrollManagerService.setCurrentSelection({
+            this._scrollManagerService.setCurrentScroll({
                 unitId,
                 sheetId,
             });
         });
     }
 
-    private _updateViewport(param: ISheetSkeletonManagerParam) {
+    private _updateSceneSize(param: ISheetSkeletonManagerParam) {
         if (param == null) {
             return;
         }
-        const { unitId, sheetId } = param;
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        const { skeleton } = param;
+        // const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
         const scene = this._renderManagerService.getCurrent()?.scene;
-        const workbook = this._currentUniverService.getUniverSheetInstance(unitId)?.getWorkBook();
 
-        const worksheet = workbook?.getSheetBySheetId(sheetId);
-
-        if (skeleton == null || scene == null || workbook == null || worksheet == null) {
+        if (skeleton == null || scene == null) {
             return;
         }
 
@@ -162,39 +158,39 @@ export class ScrollController extends Disposable {
             skeleton;
 
         scene?.transformByState({
-            width: columnWidthByHeader(worksheet) + columnTotalWidth,
-            height: rowHeightByHeader(worksheet) + rowTotalHeight,
+            width: rowHeaderWidthAndMarginLeft + columnTotalWidth,
+            height: columnHeaderHeightAndMarginTop + rowTotalHeight,
             // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
             // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
         });
 
-        const rowHeaderWidthScale = rowHeaderWidthAndMarginLeft * scene.scaleX;
-        const columnHeaderHeightScale = columnHeaderHeightAndMarginTop * scene.scaleY;
+        // const rowHeaderWidthScale = rowHeaderWidthAndMarginLeft * scene.scaleX;
+        // const columnHeaderHeightScale = columnHeaderHeightAndMarginTop * scene.scaleY;
 
-        const viewMain = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
-        const viewTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_TOP);
-        const viewLeft = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT);
-        const viewLeftTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP);
+        // const viewMain = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
+        // const viewTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_TOP);
+        // const viewLeft = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT);
+        // const viewLeftTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP);
 
-        viewMain?.resize({
-            left: rowHeaderWidthScale,
-            top: columnHeaderHeightScale,
-        });
+        // viewMain?.resize({
+        //     left: rowHeaderWidthScale,
+        //     top: columnHeaderHeightScale,
+        // });
 
-        viewTop?.resize({
-            left: rowHeaderWidthScale,
-            height: columnHeaderHeightScale,
-        });
+        // viewTop?.resize({
+        //     left: rowHeaderWidthScale,
+        //     height: columnHeaderHeightScale,
+        // });
 
-        viewLeft?.resize({
-            top: columnHeaderHeightScale,
-            width: rowHeaderWidthScale,
-        });
+        // viewLeft?.resize({
+        //     top: columnHeaderHeightScale,
+        //     width: rowHeaderWidthScale,
+        // });
 
-        viewLeftTop?.resize({
-            width: rowHeaderWidthScale,
-            height: columnHeaderHeightScale,
-        });
+        // viewLeftTop?.resize({
+        //     width: rowHeaderWidthScale,
+        //     height: columnHeaderHeightScale,
+        // });
     }
 
     private _getSheetObject() {

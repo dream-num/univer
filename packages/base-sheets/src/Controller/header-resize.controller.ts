@@ -11,7 +11,7 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { getCoordByOffset, getSheetObject, getTransformCoord } from '../Basics/component-tools';
-import { CANVAS_VIEW_KEY, SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import {
     DeltaColumnWidthCommand,
     IDeltaColumnWidthCommandParams,
@@ -175,12 +175,14 @@ export class HeaderResizeController extends Disposable {
                         return;
                     }
 
+                    const rowSize = rowHeaderWidth / 3;
+
                     this._rowResizeRect.transformByState({
-                        left: rowHeaderWidth / 2 - rowHeaderWidth / 8,
+                        left: rowHeaderWidth / 2 - rowSize / 2,
                         top,
                     });
                     this._rowResizeRect.setShapeProps({
-                        size: rowHeaderWidth / 4,
+                        size: rowSize,
                     });
                     this._rowResizeRect.show();
                 } else {
@@ -203,12 +205,14 @@ export class HeaderResizeController extends Disposable {
                         return;
                     }
 
+                    const columnSize = columnHeaderHeight * 0.7;
+
                     this._columnResizeRect.transformByState({
                         left,
-                        top: columnHeaderHeight / 2 - columnHeaderHeight / 4,
+                        top: columnHeaderHeight / 2 - columnSize / 2,
                     });
                     this._columnResizeRect.setShapeProps({
-                        size: columnHeaderHeight / 2,
+                        size: columnSize,
                     });
                     this._columnResizeRect.show();
                 }
@@ -279,7 +283,7 @@ export class HeaderResizeController extends Disposable {
 
             const { scene } = sheetObject;
 
-            const viewPort = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
+            const viewPort = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
             const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonBarRect.height || 0) + 10;
 

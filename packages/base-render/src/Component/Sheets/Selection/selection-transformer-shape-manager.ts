@@ -24,6 +24,7 @@ import {
 import { Vector2 } from '../../../Basics/Vector2';
 import { Scene } from '../../../Scene';
 import { ScrollTimer } from '../../../ScrollTimer';
+import { Viewport } from '../../../Viewport';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SelectionTransformerModel } from './selection-transformer-model';
 import { SelectionTransformerShape } from './selection-transformer-shape';
@@ -57,7 +58,7 @@ export interface ISelectionTransformerShapeManager {
     convertSelectionRangeToData(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
     convertRangeDataToSelection(range: IRange): Nullable<IRangeWithCoord>;
     convertCellRangeToInfo(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
-    eventTrigger(evt: IPointerEvent | IMouseEvent, zIndex: number, rangeType: RANGE_TYPE): void;
+    eventTrigger(evt: IPointerEvent | IMouseEvent, zIndex: number, rangeType: RANGE_TYPE, viewport?: Viewport): void;
     // getMoveCellInfo(direction: Direction, selectionData: Nullable<ISelectionWithCoord>): Nullable<ISelectionWithCoord>;
     // transformCellDataToSelectionData(row: number, column: number): Nullable<ISelectionWithCoord>;
     reset(): void;
@@ -335,7 +336,12 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
      * @param rangeType Determines whether the selection is made normally according to the range or by rows and columns
      * @returns
      */
-    eventTrigger(evt: IPointerEvent | IMouseEvent, zIndex = 0, rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL) {
+    eventTrigger(
+        evt: IPointerEvent | IMouseEvent,
+        zIndex = 0,
+        rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL,
+        viewport?: Viewport
+    ) {
         if (this._isSelectionEnabled === false) {
             return;
         }
@@ -482,7 +488,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         this._endSelection();
 
         const scrollTimer = ScrollTimer.create(this.getScene());
-        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY);
+        scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewport);
 
         this._scrollTimer = scrollTimer;
 
@@ -499,10 +505,10 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
             );
 
-            this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType);
+            this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType, viewport);
 
             scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
-                this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType);
+                this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType, viewport);
             });
         });
 
@@ -610,7 +616,8 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         moveOffsetX: number,
         moveOffsetY: number,
         selectionControl: Nullable<SelectionTransformerShape>,
-        rangeType: RANGE_TYPE
+        rangeType: RANGE_TYPE,
+        viewport?: Viewport
     ) {
         const skeleton = this._skeleton;
 
@@ -622,7 +629,10 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         const { startRow, startColumn, endRow, endColumn } = this._startSelectionRange;
 
-        const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
+        const scrollXY = scene.getScrollXYByRelativeCoords(
+            Vector2.FromArray([this._startOffsetX, this._startOffsetY]),
+            viewport
+        );
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 

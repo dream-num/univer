@@ -52,6 +52,8 @@ export {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from './commands/commands/set-border-command';
+export { SetFrozenCommand } from './commands/commands/set-frozen.command';
+export { SetFrozenCancelCommand } from './commands/commands/set-frozen-cancel.command';
 export type { ISetRangeValuesCommandParams } from './commands/commands/set-range-values.command';
 export { SetRangeValuesCommand } from './commands/commands/set-range-values.command';
 export type {
@@ -99,6 +101,7 @@ export {
 } from './commands/mutations/insert-row-col.mutation';
 export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './commands/mutations/insert-sheet.mutation';
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
+export { SetFrozenMutation } from './commands/mutations/set-frozen.mutation';
 export type { ISetRangeStyleMutationParams } from './commands/mutations/set-range-styles.mutation';
 export { SetRangeStyleMutation } from './commands/mutations/set-range-styles.mutation';
 export type { ISetRangeValuesMutationParams } from './commands/mutations/set-range-values.mutation';

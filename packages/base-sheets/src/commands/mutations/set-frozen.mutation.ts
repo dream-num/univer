@@ -1,16 +1,19 @@
 import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-export interface ISetFrozenRowsMutationParams {
+export interface ISetFrozenMutationParams {
     workbookId: string;
     worksheetId: string;
-    numRows: number;
+    startRow: number;
+    startColumn: number;
+    ySplit: number;
+    xSplit: number;
 }
 
-export const SetFrozenRowsMutationFactory = (
+export const SetFrozenMutationFactory = (
     accessor: IAccessor,
-    params: ISetFrozenRowsMutationParams
-): ISetFrozenRowsMutationParams => {
+    params: ISetFrozenMutationParams
+): ISetFrozenMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
     const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
 
@@ -23,19 +26,19 @@ export const SetFrozenRowsMutationFactory = (
         throw new Error('worksheet is null error!');
     }
     const config = worksheet.getConfig();
-    const oldStatus = config.freezeRow;
+    const freeze = config.freeze;
 
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
-        numRows: oldStatus,
+        ...freeze,
     };
 };
 
-export const SetFrozenRowsMutation: IMutation<ISetFrozenRowsMutationParams> = {
-    id: 'sheet.mutation.set-frozen-rows',
+export const SetFrozenMutation: IMutation<ISetFrozenMutationParams> = {
+    id: 'sheet.mutation.set-frozen',
     type: CommandType.MUTATION,
-    handler: async (accessor: IAccessor, params: ISetFrozenRowsMutationParams) => {
+    handler: async (accessor: IAccessor, params: ISetFrozenMutationParams) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
         const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
 
@@ -46,7 +49,8 @@ export const SetFrozenRowsMutation: IMutation<ISetFrozenRowsMutationParams> = {
         const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;
         const config = worksheet.getConfig();
-        config.freezeRow = params.numRows;
+        const { startRow, startColumn, ySplit, xSplit } = params;
+        config.freeze = { startRow, startColumn, ySplit, xSplit };
 
         return true;
     },

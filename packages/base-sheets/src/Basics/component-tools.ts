@@ -11,7 +11,7 @@ import {
 } from '@univerjs/base-render';
 import { ICurrentUniverService, Nullable } from '@univerjs/core';
 
-import { CANVAS_VIEW_KEY, SHEET_VIEW_KEY } from './Const/DEFAULT_SPREADSHEET_VIEW';
+import { SHEET_VIEW_KEY, VIEWPORT_KEY } from './Const/DEFAULT_SPREADSHEET_VIEW';
 
 export interface ISheetObjectParam {
     spreadsheet: Spreadsheet;
@@ -89,7 +89,7 @@ export function getCoordByOffset(evtOffsetX: number, evtOffsetY: number, scene: 
 export function getTransformCoord(evtOffsetX: number, evtOffsetY: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
     const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
-    const viewMain = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
+    const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
     const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords, viewMain);
     const { scaleX, scaleY } = scene.getAncestorScale();

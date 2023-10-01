@@ -23,6 +23,7 @@ export interface IWorkbookConfig {
     name: string;
     sheetOrder: string[]; // sheet id order list ['xxxx-sheet3', 'xxxx-sheet1','xxxx-sheet2']
     sheets: { [sheetId: string]: Partial<IWorksheetConfig> };
+    namedRanges: any[];
     styles: IKeyType<Nullable<IStyleData>>;
     timeZone: string;
 }

@@ -66,7 +66,6 @@ export const SELECTION_WITH_EMPTY_CELLS_DATA: IWorkbookConfig = {
     locale: LocaleType.EN,
     modifiedTime: '',
     name: '',
-    namedRanges: [],
     sheetOrder: [],
     styles: {},
     timeZone: '',

@@ -1,5 +1,4 @@
 import { ComponentManager } from '@univerjs/base-ui';
-import { ISelection, ObserverManager } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import {
@@ -22,10 +21,7 @@ export class SearchFormulaController {
 
     private _cellRangeModalData: SearchFormulaModalData;
 
-    constructor(
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
-    ) {
+    constructor(@Inject(ComponentManager) private readonly _componentManager: ComponentManager) {
         this._funParams = {
             funParams: {},
         };
@@ -130,11 +126,6 @@ export class SearchFormulaController {
 
     private _initialize() {
         this._initRegisterComponent();
-
-        this._observerManager.getObserver<ISelection>('onChangeSelectionObserver')?.add((selection) => {
-            const info = selection.primary;
-            // this._searchItem.changeRange(info?.startColumn.toString() ?? '');
-        });
     }
 
     private _initRegisterComponent() {

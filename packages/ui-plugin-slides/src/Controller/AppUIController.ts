@@ -1,6 +1,6 @@
 import { ComponentManager } from '@univerjs/base-ui';
-import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
-import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
+import { LocaleService, LocaleType } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { ISlideUIPluginConfig } from '../Basics';
 import { SlideContainerUIController } from './SlideContainerUIController';
@@ -12,7 +12,6 @@ export class AppUIController {
         config: ISlideUIPluginConfig,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         this._slideContainerUIController = this._injector.createInstance(SlideContainerUIController, config);
@@ -29,9 +28,6 @@ export class AppUIController {
      */
     changeLocale = (locale: string) => {
         this._localeService.getLocale().change(locale as LocaleType);
-
-        // publish
-        this._globalObserverManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
     };
 
     getSlideContainerController() {

@@ -1,6 +1,6 @@
-import { ComponentManager, DragManager } from '@univerjs/base-ui';
-import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
-import { Inject, Injector, Self, SkipSelf } from '@wendellhu/redi';
+import { ComponentManager } from '@univerjs/base-ui';
+import { LocaleService, LocaleType } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { ISlideUIPluginConfig } from '../Basics';
 import { SlideContainer } from '../View/SlideContainer';
@@ -21,12 +21,9 @@ export class SlideContainerUIController {
 
     constructor(
         config: ISlideUIPluginConfig,
-        @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Self() @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(DragManager) private readonly _dragManager: DragManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         this._config = config;
         this._toolbarController = this._injector.createInstance(
@@ -66,9 +63,6 @@ export class SlideContainerUIController {
     // 获取SlideContainer组件
     getComponent = (ref: SlideContainer) => {
         this._slideContainer = ref;
-        this._observerManager.getObserver<SlideContainer>('onUIDidMount')?.notifyObservers(this._slideContainer);
-        this._globalObserverManager.requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
-
         this.setSlideContainer();
     };
 
@@ -81,9 +75,6 @@ export class SlideContainerUIController {
      */
     changeLocale = (locale: string) => {
         this._localeService.getLocale().change(locale as LocaleType);
-
-        // publish
-        this._globalObserverManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
     };
 
     getContentRef() {
@@ -96,8 +87,6 @@ export class SlideContainerUIController {
 
     UIDidMount(cb: Function) {
         if (this._slideContainer) return cb(this._slideContainer);
-
-        this._observerManager.getObserver('onUIDidMount')?.add(() => cb(this._slideContainer));
     }
 
     private setSlideContainer() {
@@ -106,6 +95,5 @@ export class SlideContainerUIController {
         if (!slideContainer) {
             throw new Error('slideContainer is not ready');
         }
-        this._dragManager.handleDragAction(slideContainer);
     }
 }

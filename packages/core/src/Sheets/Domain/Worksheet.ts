@@ -1,4 +1,3 @@
-import { ObserverManager } from '../../Observer';
 import { Nullable, ObjectMatrix, Rectangle, Tools } from '../../Shared';
 import { createRowColIter } from '../../Shared/RowColIter';
 import { DEFAULT_WORKSHEET } from '../../Types/Const';
@@ -34,7 +33,6 @@ export class Worksheet {
 
     constructor(
         snapshot: Partial<IWorksheetConfig>,
-        private readonly _observerManager: ObserverManager,
         private readonly _styles: Styles
     ) {
         const mergedSnapshot: IWorksheetConfig = {
@@ -117,7 +115,7 @@ export class Worksheet {
     clone(): Worksheet {
         const { _snapshot: _config } = this;
         const copy = Tools.deepClone(_config);
-        return new Worksheet(copy, this._observerManager, this._styles);
+        return new Worksheet(copy, this._styles);
     }
 
     getMergeData(): IRange[] {

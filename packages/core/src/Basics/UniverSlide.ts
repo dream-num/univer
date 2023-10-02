@@ -1,6 +1,5 @@
 import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
 
-import { ObserverManager } from '../Observer';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { GenName, IOHttp, IOHttpConfig, Logger } from '../Shared';
 import { ColorBuilder } from '../Shared/color/ColorBuilder';
@@ -82,7 +81,7 @@ export class UniverSlide {
     }
 
     private _initializeDependencies(parentInjector?: Injector): Injector {
-        const dependencies: Dependency[] = [[ObserverManager], [GenName]];
+        const dependencies: Dependency[] = [[GenName]];
         return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 }

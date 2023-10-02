@@ -52,7 +52,6 @@ export class InfoBarController {
                 },
             },
         };
-        this._initialize();
     }
 
     resetInfoList(list: BaseInfoBarProps) {
@@ -69,14 +68,5 @@ export class InfoBarController {
         const target = e.target as HTMLInputElement;
         const name = target.value;
         this._infoBarModel.setName(name);
-    }
-
-    private _initialize() {
-        // const context = this._plugin.context;
-        // const manager = context.getObserverManager();
-        // manager.requiredObserver<InfoBar>('onInfoBarDidMountObservable', PLUGIN_NAMES.SLIDE).add((component) => {
-        //     this._infoBar = component;
-        //     this.resetInfoList(this._infoList);
-        // });
     }
 }

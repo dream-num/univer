@@ -1,8 +1,5 @@
 import { Ctor, Injector } from '@wendellhu/redi';
 
-import { Observable } from '../Observer/Observable';
-import { ObserverManager } from '../Observer/ObserverManager';
-
 export type PluginCtor<T extends Plugin> = Ctor<T> & { type: PluginType };
 
 /** Plugin types for different kinds of business. */
@@ -16,21 +13,19 @@ export enum PluginType {
 /**
  * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
  */
-export abstract class Plugin<Obs = any> {
+export abstract class Plugin {
     static type: PluginType;
 
     protected abstract _injector: Injector;
 
     private _name: string;
 
-    private _observeNames: Array<keyof Obs & string>;
-
     protected constructor(name: string) {
         this._name = name;
-        this._observeNames = [];
     }
 
-    onStarting(injector: Injector): void {}
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    onStarting(_injector: Injector): void {}
 
     onReady(): void {}
 
@@ -43,20 +38,6 @@ export abstract class Plugin<Obs = any> {
     getPluginName(): string {
         return this._name;
     }
-
-    /** @deprecated this method will be removed */
-    pushToObserve<K extends keyof Obs & string>(...names: K[]): void {
-        const manager = (this._injector as Injector).get(ObserverManager);
-        names.forEach((name) => {
-            if (!this._observeNames.includes(name)) {
-                this._observeNames.push(name);
-            }
-            manager.addObserver(name, this._name, new Observable());
-        });
-    }
-
-    /** @deprecated */
-    deleteObserve<K extends keyof Obs & string>(...names: K[]): void {}
 }
 
 interface IPluginRegistryItem {

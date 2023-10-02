@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injector } from '@wendellhu/redi';
 
-import { ObserverManager } from '../../Observer';
 import { GenName, Nullable, Tools } from '../../Shared';
 import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
@@ -46,7 +45,6 @@ export class Workbook {
     constructor(
         workbookData: Partial<IWorkbookConfig> = {},
         @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(Injector) readonly _injector: Injector
     ) {
         this._config = Tools.commonExtend(DEFAULT_WORKBOOK, workbookData);
@@ -380,7 +378,7 @@ export class Workbook {
         for (const sheetId in sheets) {
             const config = sheets[sheetId];
             config.name = this._genName.sheetName(config.name);
-            const worksheet = new Worksheet(config, this._observerManager, this._styles);
+            const worksheet = new Worksheet(config, this._styles);
             _worksheets.set(sheetId, worksheet);
             if (!sheetOrder.includes(sheetId)) {
                 sheetOrder.push(sheetId);

@@ -1,5 +1,5 @@
 import { ComponentManager } from '@univerjs/base-ui';
-import { LocaleService, ObserverManager } from '@univerjs/core';
+import { LocaleService } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import React from 'react';
 
@@ -35,7 +35,6 @@ export class NumfmtModalController {
 
     constructor(
         @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
@@ -119,9 +118,6 @@ export class NumfmtModalController {
         ];
         this._componentManager.register(NUMFMT_PLUGIN_NAME + FormatContent.name, FormatContent);
         this._componentManager.register(NUMFMT_PLUGIN_NAME + NumfmtModal.name, NumfmtModal);
-        // this._observerManager.getObserver<NumfmtModal>('onNumfmtModalDidMountObservable')!.add((component): void => {
-        //     this.resetModalData();
-        // });
     }
 
     resetContentData(data: any[]): any[] {

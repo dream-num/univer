@@ -2,9 +2,7 @@ import { ISelectionTransformerShapeManager, SelectionTransformerShapeManager } f
 import { ICommandService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { SetSelectionsOperation } from './commands/operations/selection.operation';
-import { CountBarController } from './Controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { FreezeController } from './Controller/freeze.controller';
@@ -25,7 +23,7 @@ import { SheetCanvasView } from './View/sheet-canvas-view';
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
  */
-export class SheetPlugin extends Plugin<SheetPluginObserve> {
+export class SheetPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(
@@ -50,26 +48,15 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
     initController() {
         this._injector.get(SheetCanvasView);
-
         this._injector.get(FormulaBarController);
-        this._injector.get(CountBarController);
-
         this._injector.get(BasicWorksheetController);
-
         this._injector.get(SelectionController);
-
         this._injector.get(SheetRenderController);
-
         this._injector.get(HeaderMenuController);
-
         this._injector.get(HeaderResizeController);
-
         this._injector.get(HeaderMoveController);
-
         this._injector.get(ScrollController);
-
         this._injector.get(FreezeController);
-
         this._injector.get(ZoomController);
     }
 
@@ -81,8 +68,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
     override onDestroy(): void {
         super.onDestroy();
-
-        uninstall(this);
     }
 
     // listenEventManager() {
@@ -109,7 +94,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
 
             // controllers
             [FormulaBarController],
-            [CountBarController],
             [BasicWorksheetController],
             [SelectionController],
             [SheetRenderController],

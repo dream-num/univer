@@ -2,7 +2,6 @@ import { Engine, IRenderingEngine } from '@univerjs/base-render';
 import { ICurrentUniverService, ILanguagePack, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { install, SlidePluginObserve, uninstall } from './Basics/Observer';
 import { ToolbarController } from './Controller';
 import { en } from './Locale';
 import { CanvasView } from './View/Render';
@@ -11,7 +10,7 @@ export interface ISlidePluginConfig {}
 
 const DEFAULT_SLIDE_PLUGIN_DATA = {};
 
-export class SlidePlugin extends Plugin<SlidePluginObserve> {
+export class SlidePlugin extends Plugin {
     static override type = PluginType.Slide;
 
     private _config: ISlidePluginConfig;
@@ -38,19 +37,13 @@ export class SlidePlugin extends Plugin<SlidePluginObserve> {
         this._localeService.getLocale().load({
             en: en as unknown as ILanguagePack,
         });
-        install(this);
-        // this.initConfig();
         this.initController();
         this.initCanvasEngine();
-        // this.registerExtension();
-        // this.listenEventManager();
     }
 
     getConfig() {
         return this._config;
     }
-
-    // initConfig() { }
 
     initController() {
         this._toolbarController = this._injector.get(ToolbarController);
@@ -66,17 +59,7 @@ export class SlidePlugin extends Plugin<SlidePluginObserve> {
 
     override onDestroy(): void {
         super.onDestroy();
-        uninstall(this);
     }
-
-    // registerExtension() { }
-
-    // listenEventManager() {
-    //     this._getCoreObserver<boolean>('onUIDidMountObservable').add(({ name, value }) => {
-    //         // TODO: scroll in UI or render here?
-    //         // this.getCanvasView().scrollToCenter();
-    //     });
-    // }
 
     getCanvasEngine() {
         return this._canvasEngine;
@@ -85,10 +68,6 @@ export class SlidePlugin extends Plugin<SlidePluginObserve> {
     getCanvasView() {
         return this._canvasView;
     }
-
-    // protected _getCoreObserver<T>(type: string) {
-    //     return this.getGlobalContext().getObserverManager().requiredObserver<UIObserver<T>>(type, 'core');
-    // }
 
     private _initializeDependencies(slideInjector: Injector) {
         const dependencies: Dependency[] = [[CanvasView], [ToolbarController]];

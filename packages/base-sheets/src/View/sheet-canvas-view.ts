@@ -12,14 +12,7 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/base-render';
-import {
-    ICurrentUniverService,
-    LifecycleStages,
-    Nullable,
-    ObserverManager,
-    OnLifecycle,
-    Worksheet,
-} from '@univerjs/core';
+import { ICurrentUniverService, LifecycleStages, Nullable, OnLifecycle, Worksheet } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import {
@@ -36,7 +29,6 @@ export class SheetCanvasView {
 
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionTransformerShapeManager
         private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
@@ -65,11 +57,6 @@ export class SheetCanvasView {
         scene.openTransformer();
 
         this._scene = scene;
-
-        // sheet zoom [0 ~ 1]
-        // this._observerManager.requiredObserver<{ zoomRatio: number }>('onZoomRatioSheetObservable').add((value) => {
-        //     this._scene?.scale(value.zoomRatio, value.zoomRatio);
-        // });
 
         scene.addLayer(Layer.create(scene, [], 0), Layer.create(scene, [], 2));
 

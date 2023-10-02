@@ -17,7 +17,6 @@ import { Nullable } from '../Shared';
 import { LocaleType } from '../Types/Enum/LocaleType';
 import { IDocumentData, ISlideData, IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverDoc } from './UniverDoc';
-import { UniverObserverImpl } from './UniverObserverImpl';
 import { UniverSheet } from './UniverSheet';
 import { UniverSlide } from './UniverSlide';
 
@@ -33,11 +32,9 @@ export class Univer {
 
     constructor(univerData: Partial<IUniverData> = {}) {
         this._univerInjector = this._initDependencies();
-        this._setObserver();
 
         const { theme, locale, locales } = univerData;
         theme && this._univerInjector.get(ThemeService).setTheme(theme);
-        // initialize localization info
         locales && this._univerInjector.get(LocaleService).load(locales);
         locale && this._univerInjector.get(LocaleService).setLocale(locale);
     }
@@ -139,10 +136,6 @@ export class Univer {
 
     getCurrentUniverSlideInstance() {
         return this._currentUniverService.getCurrentUniverSlideInstance();
-    }
-
-    protected _setObserver(): void {
-        new UniverObserverImpl().install(this._univerInjector.get(ObserverManager));
     }
 
     private _initDependencies(): Injector {

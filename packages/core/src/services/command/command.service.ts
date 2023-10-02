@@ -1,5 +1,6 @@
 import { createIdentifier, IAccessor, IDisposable, Inject, Injector, Optional, SkipSelf } from '@wendellhu/redi';
 
+import { sequence } from '../../common/promise/sequence';
 import { toDisposable } from '../../Shared/lifecycle';
 import { IKeyValue } from '../../Shared/Types';
 import { IContextService } from '../context/context.service';
@@ -373,4 +374,9 @@ class MultiCommand implements IMultiCommand {
 
         return false;
     };
+}
+
+export function sequenceExecute(tasks: ICommandInfo[], commandService: ICommandService) {
+    const promises = tasks.map((task) => () => commandService.executeCommand(task.id, task.params));
+    return sequence(promises);
 }

@@ -1,14 +1,9 @@
-import { BasicWorkbookController } from '@univerjs/base-sheets';
 import { ICurrentUniverService, IKeyValue, migrate, Tools } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
 // @ts-ignore
 import * as LuckyExcel from 'luckyexcel'; // no type definition for package luckyexcel
 
 export class UploadService {
-    constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @Inject(BasicWorkbookController) private readonly _basicWorkbookController: BasicWorkbookController
-    ) {}
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {}
 
     upload() {
         const input = document.createElement('input');
@@ -57,7 +52,11 @@ export class UploadService {
                 return console.error('No content');
             }
 
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook();
+            if (!workbook) {
+                return false;
+            }
+
             const workbookId = workbook.getUnitId();
             const order = Tools.deepClone(workbook.getConfig().sheetOrder);
 
@@ -66,14 +65,14 @@ export class UploadService {
                 const sheetData = sheets[sheetId];
                 // workbook.insertSheet(sheetData);
                 const index = order.length - 1 + i;
-                this._basicWorkbookController.insertSheet(index, sheetData, workbookId);
+                // this._basicWorkbookController.insertSheet(index, sheetData, workbookId);
             });
 
             // remove other sheets
             order.forEach((sheetId: string) => {
                 // workbook.removeSheetBySheetId(sheetId);
                 // workbook.removeSheetBySheetId(sheetId);
-                this._basicWorkbookController.removeSheet(sheetId, workbookId);
+                // this._basicWorkbookController.removeSheet(sheetId, workbookId);
             });
         });
     }

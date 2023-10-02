@@ -111,7 +111,7 @@ export interface IMenuSelectorItem<V = MenuItemDefaultValueType> extends IMenuIt
     selections?: Array<IValueOption | ICustomComponentOption>;
 }
 
-export function isMenuSelectorItem<T>(v: IMenuItem): v is IMenuSelectorItem<T> {
+export function isMenuSelectorItem<T extends MenuItemDefaultValueType>(v: IMenuItem): v is IMenuSelectorItem<T> {
     return v.type === MenuItemType.SELECTOR || v.type === MenuItemType.SUBITEMS;
 }
 

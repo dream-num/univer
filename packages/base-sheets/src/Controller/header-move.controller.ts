@@ -11,6 +11,7 @@ import {
 } from '@univerjs/base-render';
 import {
     Disposable,
+    ICommandService,
     ICurrentUniverService,
     LifecycleStages,
     Nullable,
@@ -105,6 +106,7 @@ export class HeaderMoveController extends Disposable {
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @ICommandService private readonly _commandService: ICommandService,
         @ISelectionTransformerShapeManager
         private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService

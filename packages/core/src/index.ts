@@ -13,6 +13,7 @@ export {
     type IMultiCommand,
     type IMutation,
     type IOperation,
+    sequenceExecute,
 } from './services/command/command.service';
 export { IConfigService } from './services/config/config.service';
 export { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './services/context/context';

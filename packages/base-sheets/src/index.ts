@@ -30,7 +30,7 @@ export { DeleteRangeMoveLeftCommand } from './commands/commands/delete-range-mov
 export { DeleteRangeMoveUpCommand } from './commands/commands/delete-range-move-up.command';
 export type {
     InsertColCommandParams,
-    IInsertRowCommandParams as InsertRowCommandParams,
+    IInsertRowBeforeOrAfterCommandParams as InsertRowCommandParams,
 } from './commands/commands/insert-row-col.command';
 export {
     InsertColAfterCommand,

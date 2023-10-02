@@ -28,9 +28,10 @@ export class UniverSheet implements IDisposable {
         this.univerSheetConfig = univerSheetData;
 
         this._sheetInjector = this._initDependencies(parentInjector);
-        this.setObserver();
         this._workbook = this._sheetInjector.createInstance(Workbook, univerSheetData);
         this._sheetInjector.get(LifecycleInitializerService).start();
+
+        new WorkBookObserverImpl().install(this._sheetInjector.get(ObserverManager));
     }
 
     static newInstance(univerSheetData: Partial<IWorkbookConfig> = {}): UniverSheet {
@@ -83,12 +84,5 @@ export class UniverSheet implements IDisposable {
         ];
 
         return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
-    }
-
-    /**
-     * @deprecated
-     */
-    private setObserver(): void {
-        new WorkBookObserverImpl().install(this._sheetInjector.get(ObserverManager));
     }
 }

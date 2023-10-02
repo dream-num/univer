@@ -3,7 +3,7 @@ import { Nullable, ObjectMatrix, Rectangle, Tools } from '../../Shared';
 import { createRowColIter } from '../../Shared/RowColIter';
 import { DEFAULT_WORKSHEET } from '../../Types/Const';
 import { BooleanNumber, SheetTypes } from '../../Types/Enum';
-import { ICellData, IRange, IWorksheetConfig } from '../../Types/Interfaces';
+import { ICellData, IFreeze, IRange, IWorksheetConfig } from '../../Types/Interfaces';
 import { ColumnManager } from './ColumnManager';
 import { Range } from './Range';
 import { RowManager } from './RowManager';
@@ -235,19 +235,11 @@ export class Worksheet {
     }
 
     /**
-     * Returns the number of frozen rows.
-     * @returns the number of frozen rows
+     * Returns  frozen.
+     * @returns  frozen
      */
-    getFrozenRows(): number {
-        return this._snapshot.freezeRow;
-    }
-
-    /**
-     * Returns the number of frozen columns.
-     * @returns the number of frozen columns
-     */
-    getFrozenColumns(): number {
-        return this._snapshot.freezeColumn;
+    getFreeze(): IFreeze {
+        return this._snapshot.freeze;
     }
 
     /**

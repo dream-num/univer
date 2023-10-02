@@ -176,6 +176,9 @@ export class Scene extends ThinScene {
         return this;
     }
 
+    /**
+     * scale to value, absolute
+     */
     scale(scaleX?: number, scaleY?: number) {
         const preScaleX = this.scaleX;
         if (scaleX !== undefined) {
@@ -199,6 +202,9 @@ export class Scene extends ThinScene {
         return this;
     }
 
+    /**
+     * current scale plus offset, relative
+     */
     scaleBy(scaleX?: number, scaleY?: number) {
         const preScaleX = this.scaleX;
         if (scaleX !== undefined) {

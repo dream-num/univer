@@ -1,12 +1,25 @@
 import { IRenderManagerService, ISelectionTransformerShapeManager, IWheelEvent } from '@univerjs/base-render';
-import { Disposable, ICommandService, ICurrentUniverService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandInfo,
+    ICommandService,
+    ICurrentUniverService,
+    LifecycleStages,
+    OnLifecycle,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { SetZoomRatioMutation } from '../commands/mutations/set-zoom-ratio.mutation';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
+
+interface ISetWorksheetMutationParams {
+    workbookId: string;
+    worksheetId: string;
+}
 
 @OnLifecycle(LifecycleStages.Rendered, ZoomController)
 export class ZoomController extends Disposable {
@@ -27,6 +40,8 @@ export class ZoomController extends Disposable {
     }
 
     private _initialize() {
+        this._skeletonListener();
+        this._commandExecutedListener();
         this._zoomEventBinding();
     }
 
@@ -55,10 +70,54 @@ export class ZoomController extends Disposable {
             let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
             nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
 
-            // sheet.setZoomRatio(nextRatio);
+            this._updateViewZoom(nextRatio);
 
             e.preventDefault();
         });
+    }
+
+    private _skeletonListener() {
+        this._sheetSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
+            if (param == null) {
+                return;
+            }
+
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+
+            const worksheet = workbook.getActiveSheet();
+
+            const zoomRatio = worksheet.getZoomRatio() || 1;
+
+            this._updateViewZoom(zoomRatio);
+        });
+    }
+
+    private _commandExecutedListener() {
+        const updateCommandList = [SetZoomRatioMutation.id];
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (updateCommandList.includes(command.id)) {
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+                    const worksheet = workbook.getActiveSheet();
+
+                    const params = command.params;
+                    const { workbookId, worksheetId } = params as ISetWorksheetMutationParams;
+                    if (!(workbookId === workbook.getUnitId() && worksheetId === worksheet.getSheetId())) {
+                        return;
+                    }
+
+                    const zoomRatio = worksheet.getConfig().zoomRatio || 1;
+
+                    this._updateViewZoom(zoomRatio);
+                }
+            })
+        );
+    }
+
+    private _updateViewZoom(zoomRatio: number) {
+        const sheetObject = this._getSheetObject();
+        sheetObject?.scene.scale(zoomRatio, zoomRatio);
     }
 
     private _getSheetObject() {

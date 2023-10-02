@@ -22,7 +22,7 @@ import { Inject } from '@wendellhu/redi';
 import { getCoordByOffset, getSheetObject } from '../Basics/component-tools';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
-import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
+import { ISetFrozenMutationParams, SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -107,7 +107,7 @@ export class FreezeController extends Disposable {
         // this._createFreeze(FREEZE_DIRECTION_TYPE.ROW);
         // this._createFreeze(FREEZE_DIRECTION_TYPE.COLUMN);
 
-        this._skeletonListener();
+        this._scrollListener();
 
         this._commandExecutedListener();
     }
@@ -863,7 +863,7 @@ export class FreezeController extends Disposable {
         }
     }
 
-    private _skeletonListener() {
+    private _scrollListener() {
         this._scrollManagerService.scrollInfo$.subscribe((param) => {
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
             const worksheet = workbook.getActiveSheet();
@@ -884,6 +884,12 @@ export class FreezeController extends Disposable {
                 if (updateCommandList.includes(command.id)) {
                     const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
                     const worksheet = workbook.getActiveSheet();
+
+                    const params = command.params as ISetFrozenMutationParams;
+                    const { workbookId, worksheetId } = params;
+                    if (workbookId === workbook.getUnitId() && worksheetId === worksheet.getSheetId()) {
+                        return;
+                    }
 
                     const freeze = worksheet.getConfig().freeze;
 

@@ -23,6 +23,11 @@ import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-workshe
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
+interface ISetWorksheetMutationParams {
+    workbookId: string;
+    worksheetId: string;
+}
+
 @OnLifecycle(LifecycleStages.Rendered, SheetRenderController)
 export class SheetRenderController extends Disposable {
     constructor(
@@ -137,6 +142,12 @@ export class SheetRenderController extends Disposable {
                     const unitId = workbook.getUnitId();
                     const worksheet = workbook.getActiveSheet();
                     const sheetId = worksheet.getSheetId();
+
+                    const params = command.params;
+                    const { workbookId, worksheetId } = params as ISetWorksheetMutationParams;
+                    if (!(workbookId === workbook.getUnitId() && worksheetId === worksheet.getSheetId())) {
+                        return;
+                    }
 
                     if (command.id !== SetWorksheetActivateMutation.id) {
                         this._sheetSkeletonManagerService.makeDirty(

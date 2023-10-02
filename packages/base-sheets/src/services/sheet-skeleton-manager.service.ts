@@ -28,7 +28,14 @@ export class SheetSkeletonManagerService implements IDisposable {
 
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
 
+    private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
+
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
+
+    /**
+     *  Pre-triggered logic during registration
+     */
+    readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
@@ -36,6 +43,7 @@ export class SheetSkeletonManagerService implements IDisposable {
     ) {}
 
     dispose(): void {
+        this._currentSkeletonBefore$.complete();
         this._currentSkeleton$.complete();
         this._sheetSkeletonParam = [];
     }
@@ -74,6 +82,8 @@ export class SheetSkeletonManagerService implements IDisposable {
         }
 
         this._currentSkeleton = searchParm;
+
+        this._currentSkeletonBefore$.next(this.getCurrent());
 
         this._currentSkeleton$.next(this.getCurrent());
 

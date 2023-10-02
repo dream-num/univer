@@ -255,7 +255,7 @@ export class HeaderMoveController extends Disposable {
                     // `changeFromRow`
 
                     if (initialType === HEADER_MOVE_TYPE.ROW) {
-                        if (this._changeFromRow !== this._changeToRow) {
+                        if (this._changeFromRow !== this._changeToRow && this._changeToRow !== -1) {
                             this._commandService.executeCommand<IMoveRowsCommandParams>(MoveRowsCommand.id, {
                                 fromRow: this._changeFromRow,
                                 toRow: this._changeToRow,
@@ -265,7 +265,7 @@ export class HeaderMoveController extends Disposable {
                         // reset dragging status
                         this._changeToRow = this._changeFromRow = -1;
                     } else {
-                        if (this._changeFromColumn !== this._changeToColumn) {
+                        if (this._changeFromColumn !== this._changeToColumn && this._changeToColumn !== -1) {
                             this._commandService.executeCommand<IMoveColumnsCommandParams>(MoveColumnsCommand.id, {
                                 fromColumn: this._changeFromColumn,
                                 toColumn: this._changeToColumn,

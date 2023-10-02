@@ -1,4 +1,5 @@
 import {
+    BooleanNumber,
     CommandType,
     Dimension,
     Direction,
@@ -8,8 +9,11 @@ import {
     ICommandService,
     ICurrentUniverService,
     IRange,
+    IRowData,
+    IStyleData,
     IUndoRedoService,
     Nullable,
+    ObjectArray,
     ObjectMatrix,
     sequenceExecute,
     Tools,
@@ -67,10 +71,20 @@ export const InsertRowCommand: ICommand = {
         const worksheet = workbook.getSheetBySheetId(params.worksheetId)!;
 
         // insert rows & undos
+        const { range, direction } = params;
+        const { startRow, endRow, startColumn, endColumn } = range;
+        const anchorRow = direction === Direction.UP ? startRow : startRow - 1;
+        const height = worksheet.getRowHeight(anchorRow);
         const redoInsertMutationParams: IInsertRowMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
             ranges: [params.range],
+            rowInfo: new ObjectArray<IRowData>(
+                new Array(range.endRow - range.startRow + 1).fill(undefined).map(() => ({
+                    h: height,
+                    hd: BooleanNumber.FALSE,
+                }))
+            ),
         };
         const undoMutationParams: IRemoveRowsMutationParams = InsertRowMutationUndoFactory(
             accessor,
@@ -78,11 +92,16 @@ export const InsertRowCommand: ICommand = {
         );
 
         // insert range values & undos
-        const { startRow, endRow, startColumn, endColumn } = params.range;
         const cellValue = new ObjectMatrix<ICellData>();
-        for (let i = startRow; i <= endRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                cellValue.setValue(i, j, { v: '', m: '' }); // FIXME@wzhudev: should copy styles
+        const worksheetMatrix = worksheet.getCellMatrix();
+        const cellStyleByColumn = new Map<number, string | Nullable<IStyleData>>();
+        for (let row = startRow; row <= endRow; row++) {
+            for (let column = startColumn; column <= endColumn; column++) {
+                if (!cellStyleByColumn.has(column)) {
+                    cellStyleByColumn.set(column, worksheetMatrix.getValue(anchorRow, column)?.s);
+                }
+                const s = cellStyleByColumn.get(column);
+                cellValue.setValue(row, column, { v: '', m: '', s });
             }
         }
         const insertRangeMutationParams: IInsertRangeMutationParams = {
@@ -98,13 +117,14 @@ export const InsertRowCommand: ICommand = {
         );
 
         // update merged cells & undos
+        // NOTE: the problem of our algorithm is that we created a lot of merging cells mutations and un-merging cell mutations
         const mergeData = Tools.deepClone(worksheet.getMergeData());
         for (let i = 0; i < mergeData.length; i++) {
             const merge = mergeData[i];
             const count = endRow - startRow + 1;
             if (startRow > merge.endRow) {
                 continue;
-            } else if (endRow < merge.startRow) {
+            } else if (startRow <= merge.startRow) {
                 merge.startRow += count;
                 merge.endRow += count;
             } else {
@@ -149,8 +169,8 @@ export const InsertRowCommand: ICommand = {
                             [
                                 { id: DeleteRangeMutation.id, params: undoInsertRangeMutationParams },
                                 { id: RemoveRowMutation.id, params: undoMutationParams },
-                                { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
                                 { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeMutationParams },
+                                { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
                             ],
                             commandService
                         )
@@ -176,6 +196,7 @@ export const InsertRowCommand: ICommand = {
 };
 
 export interface IInsertRowBeforeOrAfterCommandParams {
+    /** how many rows need to be inserted */
     value: number;
 }
 
@@ -218,7 +239,7 @@ export const InsertRowBeforeCommand: ICommand<IInsertRowBeforeOrAfterCommandPara
                 startRow: range.startRow,
                 endRow: range.startRow + rowCount - 1,
                 startColumn: 0,
-                endColumn: 0,
+                endColumn: worksheet.getLastColumn() - 1,
             },
         };
 
@@ -255,7 +276,7 @@ export const InsertRowAfterCommand: ICommand<IInsertRowBeforeOrAfterCommandParam
 
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
-        const rowCount = params?.value || range.endRow - range.startRow + 1;
+        const rowCount = range.endRow - range.startRow + 1;
 
         const insertRowParams: IInsertRowCommandParams = {
             workbookId,
@@ -265,7 +286,7 @@ export const InsertRowAfterCommand: ICommand<IInsertRowBeforeOrAfterCommandParam
                 startRow: range.endRow + 1,
                 endRow: range.endRow + rowCount,
                 startColumn: 0,
-                endColumn: 0,
+                endColumn: worksheet.getMaxColumns() - 1,
             },
         };
 

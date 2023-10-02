@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, ObjectArray } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, ObjectArray, Rectangle } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
@@ -22,7 +22,7 @@ export const InsertRowMutationUndoFactory = (
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
-        ranges: params.ranges,
+        ranges: params.ranges.map((r) => Rectangle.clone(r)),
     };
 };
 
@@ -46,7 +46,10 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
         const manager = worksheet.getRowManager();
         const rowPrimitive = manager.getRowData().toJSON();
         const rowWrapper = new ObjectArray(rowPrimitive);
-        const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
+        const defaultRowInfo = {
+            h: worksheet.getConfig().defaultRowHeight,
+            hd: 0,
+        };
 
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
@@ -54,11 +57,6 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
             const rowCount = range.endRow - range.startRow + 1;
 
             for (let j = rowIndex; j < rowIndex + rowCount; j++) {
-                const defaultRowInfo = {
-                    h: defaultRowHeight,
-                    hd: 0,
-                };
-
                 if (rowInfo) {
                     rowWrapper.insert(j, rowInfo.get(j) ?? defaultRowInfo);
                 } else {

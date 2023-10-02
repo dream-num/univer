@@ -60,9 +60,9 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
             const start = range.startRow;
-            const end = range.endRow - range.startRow + 1;
+            const end = range.endRow;
 
-            for (let j = start; j < end; j++) {
+            for (let j = start; j <= end; j++) {
                 rowWrapper.splice(j, 1);
             }
         }

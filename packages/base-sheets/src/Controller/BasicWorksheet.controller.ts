@@ -1,7 +1,6 @@
 import { Disposable, ICommandService, IStyleData, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
-import { SetFrozenCancelCommand, SetFrozenCommand, SetFrozenMutation } from '..';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -32,6 +31,8 @@ import {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from '../commands/commands/set-border-command';
+import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
 import { SetRangeFormattedValueCommand } from '../commands/commands/set-range-formatted-value.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
 import {
@@ -65,6 +66,7 @@ import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remo
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { SetBorderStylesMutation } from '../commands/mutations/set-border-styles.mutation';
+import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetRangeFormattedValueMutation } from '../commands/mutations/set-range-formatted-value.mutation';
 import { SetRangeStyleMutation } from '../commands/mutations/set-range-styles.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';

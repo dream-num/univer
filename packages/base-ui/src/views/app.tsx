@@ -1,4 +1,4 @@
-import { LocaleService, ObserverManager, ThemeService } from '@univerjs/core';
+import { LocaleService, ThemeService } from '@univerjs/core';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { ComponentType, useEffect, useRef, useState } from 'react';
 
@@ -23,7 +23,6 @@ export function App(props: IUniverAppProps) {
     const injector = useInjector();
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
-    const observerManager = useDependency(ObserverManager);
     const zIndexManager = useDependency(ZIndexManager);
     const componentManager = useDependency(ComponentManager);
 
@@ -56,9 +55,7 @@ export function App(props: IUniverAppProps) {
     }, []);
 
     return (
-        <AppContext.Provider
-            value={{ injector, localeService, themeService, locale, componentManager, zIndexManager, observerManager }}
-        >
+        <AppContext.Provider value={{ injector, localeService, themeService, locale, componentManager, zIndexManager }}>
             {/* TODO: UI here is not fine tuned */}
             <div
                 style={{

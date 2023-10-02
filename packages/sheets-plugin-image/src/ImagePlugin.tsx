@@ -1,8 +1,7 @@
-import { uninstall } from '@univerjs/base-sheets';
 import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { install, IOverGridImagePluginConfig, IOverGridImageProperty, OVER_GRID_IMAGE_PLUGIN_NAME } from './Basics';
+import { IOverGridImagePluginConfig, IOverGridImageProperty, OVER_GRID_IMAGE_PLUGIN_NAME } from './Basics';
 import { CellImageController, OverGridImageController } from './Controller';
 import { UploadService } from './services/upload.service';
 import { IImagePluginData } from './Symbol';
@@ -36,12 +35,7 @@ export class ImagePlugin extends Plugin {
     }
 
     override onRendered(): void {
-        install(this);
         this._initializeDependencies(this._injector);
-    }
-
-    override onDestroy(): void {
-        uninstall(this);
     }
 
     private _initializeDependencies(sheetInjector: Injector) {

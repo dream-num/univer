@@ -1,6 +1,5 @@
 import { Ctor, Injector } from '@wendellhu/redi';
 
-import { ObserverManager } from '../Observer';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { ConfigService, IConfigService } from '../services/config/config.service';
@@ -140,7 +139,6 @@ export class Univer {
 
     private _initDependencies(): Injector {
         return new Injector([
-            [ObserverManager],
             [
                 ICurrentUniverService,
                 {

@@ -43,18 +43,6 @@ class IfGenerate extends Component<IProps, IState> {
      */
     override UNSAFE_componentWillMount() {
         this.setLocale();
-        const observerManager = (this.context as any).injector!.get('observerManager');
-        this._localeObserver = observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.add(() => {
-            this.setLocale();
-        });
-    }
-
-    /**
-     * destory
-     */
-    override componentWillUnmount() {
-        const observerManager = (this.context as any).injector!.get('observerManager');
-        observerManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')?.remove(this._localeObserver);
     }
 
     setLocale() {

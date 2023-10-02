@@ -74,7 +74,6 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
 
     override componentDidMount() {
         this.props.getComponent?.(this);
-        // this._context.getObserverManager().getObserver<FormulaBar>('onFormulaBarDidMountObservable')?.notifyObservers(this);
     }
 
     getIcon(name: string) {

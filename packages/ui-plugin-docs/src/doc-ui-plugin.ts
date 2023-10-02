@@ -1,7 +1,7 @@
 import { ICurrentUniverService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { DefaultDocUiConfig, IDocUIPluginConfig, installObserver } from './Basics';
+import { DefaultDocUiConfig, IDocUIPluginConfig } from './Basics';
 import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { AppUIController } from './Controller';
 import { DocClipboardController } from './Controller/clipboard.controller';
@@ -27,8 +27,6 @@ export class DocUIPlugin extends Plugin<any> {
     }
 
     override onRendered(): void {
-        installObserver(this);
-
         this._initModules();
         this._markDocAsFocused();
     }

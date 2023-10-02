@@ -1,5 +1,5 @@
-import { LocaleService, LocaleType, ObserverManager } from '@univerjs/core';
-import { Inject, Injector, SkipSelf } from '@wendellhu/redi';
+import { LocaleService, LocaleType } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { IDocUIPluginConfig } from '../Basics';
 import { DocContainer } from '../View/DocContainer';
@@ -9,10 +9,8 @@ export class DocContainerUIController {
 
     constructor(
         private readonly _config: IDocUIPluginConfig,
-        @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+        @Inject(Injector) private readonly _injector: Injector
     ) {}
 
     getUIConfig() {
@@ -34,9 +32,6 @@ export class DocContainerUIController {
         if (!container) {
             throw new Error('container is not ready');
         }
-
-        this._observerManager.requiredObserver<DocContainer>('onUIDidMount')?.notifyObservers(this._docContainer);
-        this._globalObserverManager.requiredObserver<boolean>('onUIDidMountObservable', 'core').notifyObservers(true);
     };
 
     /**
@@ -48,7 +43,6 @@ export class DocContainerUIController {
      */
     changeLocale = (locale: string) => {
         this._localeService.getLocale().change(locale as LocaleType);
-        this._globalObserverManager.requiredObserver('onAfterChangeUILocaleObservable', 'core')!.notifyObservers();
     };
 
     getContentRef() {

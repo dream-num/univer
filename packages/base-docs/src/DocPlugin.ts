@@ -10,7 +10,6 @@ import {
 } from '@univerjs/core';
 import { Dependency, Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
-import { DocPluginObserve, install } from './Basics/Observer';
 import {
     BreakLineCommand,
     CoverCommand,
@@ -41,7 +40,7 @@ export interface IDocPluginConfig {
 
 const DEFAULT_DOCUMENT_PLUGIN_DATA = {};
 
-export class DocPlugin extends Plugin<DocPluginObserve> {
+export class DocPlugin extends Plugin {
     static override type = PluginType.Doc;
 
     private _config: IDocPluginConfig;
@@ -66,8 +65,6 @@ export class DocPlugin extends Plugin<DocPluginObserve> {
         this._localeService.getLocale().load({
             en,
         });
-
-        install(this);
 
         if (this._config.standalone) {
             this.initCanvasView();

@@ -159,15 +159,6 @@ export class RichText extends Component<BaseRichTextProps, IRichTextState> {
     override componentDidMount() {
         this.props.getComponent?.(this);
         this.cellTextStyle = new CellTextStyle(this.ref.current!);
-
-        // this._context.getObserverManager().getObserver<RichText>('onRichTextDidMountObservable', 'core')?.notifyObservers(this);
-    }
-
-    /**
-     * destory
-     */
-    override componentWillUnmount() {
-        // this._context.getObserverManager().getObserver<WorkBook>('onAfterChangeUILocaleObservable', 'workbook')?.remove(this._localeObserver);
     }
 
     override render() {

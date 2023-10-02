@@ -1,11 +1,9 @@
 import { ComponentManager, SlotManager } from '@univerjs/base-ui';
-import { ObserverManager } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { FORMULA_PLUGIN_NAME, FunList } from '../Basics';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
 import { CellInputHandler } from './CellInputHandler';
-import { KeyCode } from './keyCode';
 
 export class FormulaPromptController {
     // FIXME: strict initialization
@@ -24,7 +22,6 @@ export class FormulaPromptController {
     private _helpFunction!: HelpFunction;
 
     constructor(
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @Inject(SlotManager) private readonly _slotManager: SlotManager
     ) {
@@ -77,84 +74,9 @@ export class FormulaPromptController {
         // this.cellInputHandler = new CellInputHandler(this.richTextEditEle);
     }
 
-    private _onRichTextKeyDownObservable() {
-        this._observerManager.getObserver<KeyboardEvent>('onRichTextKeyDownObservable')?.add((event: KeyboardEvent) => {
-            const ctrlKey = event.ctrlKey;
-            const altKey = event.altKey;
-            const shiftKey = event.shiftKey;
-            const kcode = event.keyCode;
-            if (
-                !(
-                    (kcode >= 112 && kcode <= 123) ||
-                    kcode <= 46 ||
-                    kcode === 144 ||
-                    kcode === 108 ||
-                    event.ctrlKey ||
-                    event.altKey ||
-                    (event.shiftKey &&
-                        (kcode === 37 ||
-                            kcode === 38 ||
-                            kcode === 39 ||
-                            kcode === 40 ||
-                            kcode === KeyCode.WIN ||
-                            kcode === KeyCode.WIN_R ||
-                            kcode === KeyCode.MENU))
-                ) ||
-                kcode === 8 ||
-                kcode === 32 ||
-                kcode === 46 ||
-                (event.ctrlKey && kcode === 86)
-            ) {
-                // handle input
-                this.cellInputHandler.functionInputHandler(this.richTextEditEle, kcode);
-            }
-        });
-    }
+    private _onRichTextKeyDownObservable() {}
 
-    private _onRichTextKeyUpObservable() {
-        this._observerManager.getObserver<KeyboardEvent>('onRichTextKeyUpObservable')?.add((event: KeyboardEvent) => {
-            const kcode = event.keyCode;
-            if (kcode === KeyCode.ENTER) {
-                this._searchFunction.updateState(false);
-                this._helpFunction.updateState(false);
-            } else if (
-                !(
-                    (kcode >= 112 && kcode <= 123) ||
-                    kcode <= 46 ||
-                    kcode === 144 ||
-                    kcode === 108 ||
-                    event.ctrlKey ||
-                    event.altKey ||
-                    (event.shiftKey &&
-                        (kcode === 37 ||
-                            kcode === 38 ||
-                            kcode === 39 ||
-                            kcode === 40 ||
-                            kcode === KeyCode.WIN ||
-                            kcode === KeyCode.WIN_R ||
-                            kcode === KeyCode.MENU))
-                ) ||
-                kcode === 8 ||
-                kcode === 32 ||
-                kcode === 46 ||
-                (event.ctrlKey && kcode === 86)
-            ) {
-                this._update();
-            }
-            const value = this.cellInputHandler.getInputValue();
-            if (value.length > 0 && value.substr(0, 1) === '=' && (kcode !== 229 || value.length === 1)) {
-                if (kcode === 13) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    const searchFunctionState = this._searchFunction.getState();
-                    if (searchFunctionState.searchActive) {
-                        const func = searchFunctionState.formula[searchFunctionState.selectIndex] as any;
-                        this.cellInputHandler.searchFunctionEnter(func.n);
-                    }
-                }
-            }
-        });
-    }
+    private _onRichTextKeyUpObservable() {}
 
     private _update() {
         this.cellInputHandler.searchFunction(this.richTextEditEle);

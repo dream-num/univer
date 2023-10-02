@@ -1,23 +1,21 @@
 import { IRenderingEngine } from '@univerjs/base-render';
 import { CanvasView } from '@univerjs/base-slides';
-import { ComponentManager, DragManager } from '@univerjs/base-ui';
+import { ComponentManager } from '@univerjs/base-ui';
 import { LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { DefaultSlideUIConfig, installObserver, ISlideUIPluginConfig, SlideUIPluginObserve } from './Basics';
+import { DefaultSlideUIConfig, ISlideUIPluginConfig } from './Basics';
 import { SLIDE_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { IToolbarItemProps } from './Controller';
 import { AppUIController } from './Controller/AppUIController';
 import { en } from './Locale';
 
-export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
+export class SlideUIPlugin extends Plugin {
     static override type = PluginType.Slide;
 
     private _appUIController?: AppUIController;
 
     private _config: ISlideUIPluginConfig;
-
-    private _dragManager?: DragManager;
 
     private _componentManager?: ComponentManager;
 
@@ -34,7 +32,6 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
     }
 
     initialize(): void {
-        installObserver(this);
         /**
          * load more Locale object
          */
@@ -107,13 +104,9 @@ export class SlideUIPlugin extends Plugin<SlideUIPluginObserve> {
     }
 
     private initializeDependencies(): void {
-        this._injector.add([DragManager]);
         this._injector.add([ComponentManager]);
 
-        // TODO: maybe we don't have to instantiate these dependencies manually
-        this._dragManager = this._injector.get(DragManager);
         this._componentManager = this._injector.get(ComponentManager);
-
         this._appUIController = this._injector.createInstance(AppUIController, this._config);
     }
 }

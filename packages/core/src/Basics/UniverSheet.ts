@@ -1,6 +1,5 @@
 import { Ctor, Dependency, IDisposable, Injector, Optional } from '@wendellhu/redi';
 
-import { ObserverManager } from '../Observer';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { LifecycleInitializerService } from '../services/lifecycle/lifecycle.service';
@@ -9,7 +8,6 @@ import { Logger } from '../Shared/Logger';
 import { Workbook } from '../Sheets/Domain';
 import { IWorkbookConfig } from '../Types/Interfaces';
 import { VersionCode, VersionEnv } from './Version';
-import { WorkBookObserverImpl } from './WorkBookObserverImpl';
 
 /**
  * Externally provided UniverSheet root instance
@@ -30,8 +28,6 @@ export class UniverSheet implements IDisposable {
         this._sheetInjector = this._initDependencies(parentInjector);
         this._workbook = this._sheetInjector.createInstance(Workbook, univerSheetData);
         this._sheetInjector.get(LifecycleInitializerService).start();
-
-        new WorkBookObserverImpl().install(this._sheetInjector.get(ObserverManager));
     }
 
     static newInstance(univerSheetData: Partial<IWorkbookConfig> = {}): UniverSheet {
@@ -72,7 +68,6 @@ export class UniverSheet implements IDisposable {
 
     private _initDependencies(parentInjector?: Injector): Injector {
         const dependencies: Dependency[] = [
-            [ObserverManager],
             [GenName],
             [LifecycleInitializerService],
             [

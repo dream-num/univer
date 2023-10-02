@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, ObserverManager, Worksheet } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, Worksheet } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
@@ -39,7 +39,7 @@ export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean>
         sheetOrder.splice(index, 0, sheet.id);
 
         const worksheets = workbook.getWorksheets();
-        worksheets.set(sheet.id, new Worksheet(sheet, accessor.get(ObserverManager), workbook.getStyles()));
+        worksheets.set(sheet.id, new Worksheet(sheet, workbook.getStyles()));
 
         return true;
     },

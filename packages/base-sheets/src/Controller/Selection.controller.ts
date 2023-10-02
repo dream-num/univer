@@ -9,9 +9,7 @@ import {
     Disposable,
     ICommandService,
     ICurrentUniverService,
-    ISelection,
     LifecycleStages,
-    ObserverManager,
     OnLifecycle,
     RANGE_TYPE,
 } from '@univerjs/core';
@@ -32,9 +30,7 @@ export class SelectionController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionTransformerShapeManager
         private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
-
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
 
@@ -160,16 +156,6 @@ export class SelectionController extends Disposable {
                 selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
                     convertSelectionDataToRange(selectionDataWithStyle)
                 ),
-            });
-
-            const current = selectionDataWithStyleList[selectionDataWithStyleList.length - 1];
-            if (current == null) {
-                return;
-            }
-            const selectionRange = convertSelectionDataToRange(current);
-            this._observerManager.getObserver<ISelection>('onChangeSelectionObserver')?.notifyObservers({
-                range: selectionRange.range,
-                primary: selectionRange.primary,
             });
         });
     }

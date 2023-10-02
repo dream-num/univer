@@ -2,7 +2,6 @@ import { ICurrentUniverService, LocaleService, Plugin, PluginType } from '@unive
 // import { TextFinder } from './Domain/TextFind';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { FindPluginObserve } from './Basics/Observer';
 import { FIND_PLUGIN_NAME } from './Const/PLUGIN_NAME';
 import { FindController } from './Controller/FindController';
 import { FindModalController } from './Controller/FindModalController';
@@ -15,7 +14,7 @@ import { FindService } from './services/find.service';
 
 export interface IFindPluginConfig {}
 
-export class FindPlugin extends Plugin<FindPluginObserve> {
+export class FindPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     private _config: IFindPluginConfig = {};

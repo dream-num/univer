@@ -1,5 +1,4 @@
 import { IRenderingEngine, Scene } from '@univerjs/base-render';
-import { ObserverManager } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { IOverGridImageProperty } from '../../Basics';
@@ -10,10 +9,7 @@ export class OverImageRender {
 
     private _mainScene: Scene;
 
-    constructor(
-        @Inject(Injector) readonly _injector: Injector,
-        @Inject(ObserverManager) private _observerManager: ObserverManager
-    ) {
+    constructor(@Inject(Injector) readonly _injector: Injector) {
         const engine = _injector.get(IRenderingEngine);
         this._mainScene = engine.getScene('mainScene') as Scene;
         if (this._mainScene == null) {

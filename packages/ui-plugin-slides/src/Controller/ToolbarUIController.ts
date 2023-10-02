@@ -5,13 +5,12 @@ import {
     HorizontalAlign,
     ICurrentUniverService,
     IKeyValue,
-    ObserverManager,
     Tools,
     UIObserver,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import { Inject, SkipSelf } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 
 import { DefaultToolbarConfig, SLIDE_UI_PLUGIN_NAME, SlideToolbarConfig } from '../Basics';
 import { Toolbar } from '../View/Toolbar';
@@ -57,8 +56,6 @@ export class ToolbarUIController {
     constructor(
         config: SlideToolbarConfig | undefined,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @SkipSelf() @Inject(ObserverManager) private readonly _globalObserverManager: ObserverManager,
-        @Inject(ObserverManager) private readonly _observerManager: ObserverManager,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         this._config = Tools.deepMerge({}, DefaultToolbarConfig, config);
@@ -108,11 +105,8 @@ export class ToolbarUIController {
         this._toolbar?.setToolbar(this._toolList);
     }
 
-    setUIObserve<T>(msg: UIObserver<T>) {
-        this._globalObserverManager
-            .requiredObserver<UIObserver<T>>('onUIChangeObservable', 'core')
-            .notifyObservers(msg);
-    }
+    /** @deprecated */
+    setUIObserve<T>(msg: UIObserver<T>) {}
 
     changeColor(color: string) {
         const strikethroughItem = this._toolList.find((item) => item.name === 'strikethrough');

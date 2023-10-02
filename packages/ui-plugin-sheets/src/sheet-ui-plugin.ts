@@ -15,6 +15,7 @@ export class SheetUIPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(
+        config: undefined,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {

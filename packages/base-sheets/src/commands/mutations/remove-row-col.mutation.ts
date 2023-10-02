@@ -1,29 +1,25 @@
-import { CommandType, IColumnData, ICurrentUniverService, IMutation, IRowData, ObjectArray } from '@univerjs/core';
+import {
+    CommandType,
+    IColumnData,
+    ICurrentUniverService,
+    IMutation,
+    IRowData,
+    ObjectArray,
+    Worksheet,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
     IInsertColMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
-    IRemoveRowMutationParams,
+    IRemoveRowsMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 
-export const IRemoveRowMutationFactory = (
-    accessor: IAccessor,
-    params: IRemoveRowMutationParams
+export const RemoveRowsMutationFactory = (
+    params: IRemoveRowsMutationParams,
+    worksheet: Worksheet
 ): IInsertRowMutationParams => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
-
-    if (universheet == null) {
-        throw new Error('universheet is null error!');
-    }
-
-    const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
-    if (worksheet == null) {
-        throw new Error('universheet is null error!');
-    }
-
     const manager = worksheet.getRowManager();
     const rowPrimitive = manager.getRowData().toJSON();
     const rowWrapper = new ObjectArray(rowPrimitive);
@@ -31,7 +27,6 @@ export const IRemoveRowMutationFactory = (
 
     for (let i = 0; i < params.ranges.length; i++) {
         const range = params.ranges[i];
-
         const slice = rowWrapper.slice(range.startRow, range.endRow);
         rowInfo.concat(slice);
     }
@@ -44,7 +39,7 @@ export const IRemoveRowMutationFactory = (
     };
 };
 
-export const RemoveRowMutation: IMutation<IRemoveRowMutationParams> = {
+export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
     id: 'sheet.mutation.remove-row',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {

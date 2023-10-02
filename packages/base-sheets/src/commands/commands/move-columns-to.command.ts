@@ -6,14 +6,15 @@ import { SelectionManagerService } from '../../services/selection-manager.servic
 import { InsertColMutation, InsertColMutationFactory } from '../mutations/insert-row-col.mutation';
 import { IRemoveColMutationFactory, RemoveColMutation } from '../mutations/remove-row-col.mutation';
 
-export interface IMoveColumnsToCommandParams {
-    destinationIndex: number;
+export interface IMoveColumnsCommandParams {
+    fromColumn: number;
+    toColumn: number;
 }
 
-export const MoveColumnsToCommand: ICommand = {
+export const MoveColumnsCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.move-columns-to',
-    handler: async (accessor: IAccessor, params: IMoveColumnsToCommandParams) => {
+    id: 'sheet.command.move-columns',
+    handler: async (accessor: IAccessor, params: IMoveColumnsCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -60,8 +61,8 @@ export const MoveColumnsToCommand: ICommand = {
             ...undoRemoveColumnMutationParams,
             ranges: [
                 {
-                    startColumn: params.destinationIndex,
-                    endColumn: params.destinationIndex + endColumn - startColumn,
+                    startColumn: params.toColumn,
+                    endColumn: params.toColumn + endColumn - startColumn,
                     startRow: 0,
                     endRow: 0,
                 },

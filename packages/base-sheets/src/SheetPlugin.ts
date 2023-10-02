@@ -4,7 +4,7 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { SheetPluginObserve, uninstall } from './Basics/Observer';
 import { SetSelectionsOperation } from './commands/operations/selection.operation';
-import { BasicWorkbookController, CountBarController } from './Controller';
+import { CountBarController } from './Controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { FreezeController } from './Controller/freeze.controller';
@@ -28,6 +28,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     static override type = PluginType.Sheet;
 
     constructor(
+        config: undefined,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector
@@ -53,7 +54,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         this._injector.get(CountBarController);
 
         this._injector.get(BasicWorksheetController);
-        this._injector.get(BasicWorkbookController);
 
         this._injector.get(SelectionController);
 
@@ -108,7 +108,6 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [FormulaBarController],
             [CountBarController],
             [BasicWorksheetController],
-            [BasicWorkbookController],
             [SelectionController],
             [SheetRenderController],
             [HeaderMenuController],

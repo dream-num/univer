@@ -1,5 +1,5 @@
 import { CustomLabel, ICustomComponentProps, Input } from '@univerjs/base-ui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface IProps extends ICustomComponentProps<string> {
     prefix: string;
@@ -7,14 +7,18 @@ interface IProps extends ICustomComponentProps<string> {
     onKeyUp?: (e: Event) => void;
 }
 
-export const RightMenuInput: React.FC<IProps> = ({ prefix, suffix, onChange }) => {
-    const [inputValue, setInputValue] = useState<string>(''); // Initialized to an empty string
+export const RightMenuInput: React.FC<IProps> = ({ prefix, suffix, value, onChange }) => {
+    const [inputValue, setInputValue] = useState<string>(); // Initialized to an empty string
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value;
         setInputValue(newValue);
         onChange(newValue);
     };
+
+    useEffect(() => {
+        setInputValue(value);
+    }, [value]);
 
     return (
         <div>

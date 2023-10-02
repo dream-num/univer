@@ -1,6 +1,5 @@
 import { nanoid } from 'nanoid';
 
-import { Environment } from '../Basics/Environment';
 import { ObjectArray, ObjectArrayPrimitiveType } from './ObjectArray';
 import { ObjectMatrix, ObjectMatrixPrimitiveType } from './ObjectMatrix';
 import { Class, IKeyValue } from './Types';
@@ -52,18 +51,6 @@ export class Tools {
         const last = index % alphabets.length;
         str += alphabets[last];
         return str;
-    }
-
-    static getEnvironment(): Environment {
-        const { appVersion } = navigator;
-        const system = this.getSystemType();
-        return {
-            app_version: appVersion,
-            os: system,
-            os_version: system,
-            device_id: '',
-            platform: 'web',
-        };
     }
 
     static indexAt(code: string): number {

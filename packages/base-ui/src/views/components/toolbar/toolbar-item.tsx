@@ -59,7 +59,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         }
 
         if (this.props.type === MenuItemType.SELECTOR) {
-            const props = this.props as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
+            const props = this.props as IDisplayMenuItem<IMenuSelectorItem>;
             this.currentValueSubscription = props.value$?.subscribe((value) => {
                 this.setState({ value });
             });
@@ -87,7 +87,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         const commandService: ICommandService = context.injector.get(ICommandService);
         const { disabled, value } = state;
 
-        const props = this.props as IDisplayMenuItem<IMenuSelectorItem<unknown>>;
+        const props = this.props as IDisplayMenuItem<IMenuSelectorItem>;
         const { icon, title, label, display, selectType, selections, id, onClose } = props;
 
         return (

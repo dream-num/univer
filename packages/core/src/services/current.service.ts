@@ -30,6 +30,8 @@ export interface ICurrentUniverService {
     getUniverSheetInstance(id: string): Nullable<UniverSheet>;
     getUniverDocInstance(id: string): Nullable<UniverDoc>;
     getUniverSlideInstance(id: string): Nullable<UniverSlide>;
+
+    // TODO: this should be nullable
     getCurrentUniverSheetInstance(): UniverSheet;
     getCurrentUniverDocInstance(): UniverDoc;
     getCurrentUniverSlideInstance(): UniverSlide;

@@ -14,12 +14,13 @@ import { HeaderResizeController } from './Controller/header-resize.controller';
 import { ScrollController } from './Controller/scroll.controller';
 import { SelectionController } from './Controller/Selection.controller';
 import { SheetRenderController } from './Controller/sheet-render.controller';
+import { ZoomController } from './Controller/zoom.controller';
 import { en } from './Locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
 import { SelectionManagerService } from './services/selection-manager.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
-import { CanvasView } from './View/CanvasView';
+import { SheetCanvasView } from './View/sheet-canvas-view';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -47,7 +48,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     }
 
     initController() {
-        this._injector.get(CanvasView);
+        this._injector.get(SheetCanvasView);
 
         this._injector.get(FormulaBarController);
         this._injector.get(CountBarController);
@@ -68,6 +69,8 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
         this._injector.get(ScrollController);
 
         this._injector.get(FreezeController);
+
+        this._injector.get(ZoomController);
     }
 
     override onStarting(): void {}
@@ -90,7 +93,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
     private _initializeDependencies(sheetInjector: Injector) {
         const dependencies: Dependency[] = [
             //views
-            [CanvasView],
+            [SheetCanvasView],
 
             // services
             [BorderStyleManagerService],
@@ -116,6 +119,7 @@ export class SheetPlugin extends Plugin<SheetPluginObserve> {
             [HeaderMoveController],
             [FreezeController],
             [ScrollController],
+            [ZoomController],
         ];
 
         dependencies.forEach((d) => {

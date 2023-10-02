@@ -147,7 +147,7 @@ export class ScrollController extends Disposable {
             return;
         }
         const { skeleton } = param;
-        // const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+
         const scene = this._renderManagerService.getCurrent()?.scene;
 
         if (skeleton == null || scene == null) {
@@ -160,37 +160,7 @@ export class ScrollController extends Disposable {
         scene?.transformByState({
             width: rowHeaderWidthAndMarginLeft + columnTotalWidth,
             height: columnHeaderHeightAndMarginTop + rowTotalHeight,
-            // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
-            // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
         });
-
-        // const rowHeaderWidthScale = rowHeaderWidthAndMarginLeft * scene.scaleX;
-        // const columnHeaderHeightScale = columnHeaderHeightAndMarginTop * scene.scaleY;
-
-        // const viewMain = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
-        // const viewTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_TOP);
-        // const viewLeft = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT);
-        // const viewLeftTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP);
-
-        // viewMain?.resize({
-        //     left: rowHeaderWidthScale,
-        //     top: columnHeaderHeightScale,
-        // });
-
-        // viewTop?.resize({
-        //     left: rowHeaderWidthScale,
-        //     height: columnHeaderHeightScale,
-        // });
-
-        // viewLeft?.resize({
-        //     top: columnHeaderHeightScale,
-        //     width: rowHeaderWidthScale,
-        // });
-
-        // viewLeftTop?.resize({
-        //     width: rowHeaderWidthScale,
-        //     height: columnHeaderHeightScale,
-        // });
     }
 
     private _getSheetObject() {

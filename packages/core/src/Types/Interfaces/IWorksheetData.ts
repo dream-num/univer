@@ -39,15 +39,7 @@ export interface IWorksheetConfig {
      * @defaultValue `BooleanNumber.FALSE`
      */
     hidden: BooleanNumber;
-    freezeRow: number;
-    freezeColumn: number;
     freeze: IFreeze;
-    /**
-     *  * 18.3.1.87 sheetView (Worksheet View)
-     * topLeftCell
-     */
-    sheetViewStartRow: number;
-    sheetViewStartColumn: number;
     /**
      * row and column  count in worksheet, not like excel, it is unlimited
      */

@@ -1,5 +1,4 @@
 import {
-    EVENT_TYPE,
     IRender,
     IRenderManagerService,
     ISelectionTransformerShapeManager,
@@ -14,7 +13,6 @@ import {
     Viewport,
 } from '@univerjs/base-render';
 import {
-    EventState,
     ICurrentUniverService,
     LifecycleStages,
     Nullable,
@@ -32,9 +30,8 @@ import {
 } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-@OnLifecycle(LifecycleStages.Ready, CanvasView)
-export class CanvasView {
-    // TODO: rename to SheetCanvasView
+@OnLifecycle(LifecycleStages.Ready, SheetCanvasView)
+export class SheetCanvasView {
     private _scene: Nullable<Scene>;
 
     constructor(
@@ -70,9 +67,9 @@ export class CanvasView {
         this._scene = scene;
 
         // sheet zoom [0 ~ 1]
-        this._observerManager.requiredObserver<{ zoomRatio: number }>('onZoomRatioSheetObservable').add((value) => {
-            this._scene?.scale(value.zoomRatio, value.zoomRatio);
-        });
+        // this._observerManager.requiredObserver<{ zoomRatio: number }>('onZoomRatioSheetObservable').add((value) => {
+        //     this._scene?.scale(value.zoomRatio, value.zoomRatio);
+        // });
 
         scene.addLayer(Layer.create(scene, [], 0), Layer.create(scene, [], 2));
 
@@ -125,19 +122,6 @@ export class CanvasView {
         );
 
         this._sheetSkeletonManagerService.setCurrent({ sheetId, unitId });
-
-        // if (spreadsheetSkeleton == null) {
-        //     return;
-        // }
-
-        // this._selectionTransformerShapeManager.changeRuntime(spreadsheetSkeleton, currentRender.scene);
-
-        // scene?.transformByState({
-        //     width: columnWidthByHeader(worksheet) + columnTotalWidth,
-        //     height: rowHeightByHeader(worksheet) + rowTotalHeight,
-        //     // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
-        //     // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
-        // });
     }
 
     private _addViewport(worksheet: Worksheet) {
@@ -145,11 +129,6 @@ export class CanvasView {
         if (scene == null) {
             return;
         }
-
-        // const { rowTotalHeight, columnTotalWidth, rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
-
-        // const rowHeaderWidthScale = rowHeaderWidth * scene.scaleX;
-        // const columnHeaderHeightScale = columnHeaderHeight * scene.scaleY;
 
         const { rowHeader, columnHeader } = worksheet.getConfig();
 
@@ -209,66 +188,17 @@ export class CanvasView {
             active: false,
         });
 
-        // viewMain.linkToViewport(viewLeft, LINK_VIEW_PORT_TYPE.Y);
-        // viewMain.linkToViewport(viewTop, LINK_VIEW_PORT_TYPE.X);
-        // syncing scroll on the main area to headerbars
-        // viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-        //     const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
-
-        //     viewTop
-        //         .updateScroll({
-        //             scrollX,
-        //             actualScrollX,
-        //         })
-        //         .makeDirty(true);
-
-        //     viewLeft
-        //         .updateScroll({
-        //             scrollY,
-        //             actualScrollY,
-        //         })
-        //         .makeDirty(true);
-
-        //     viewMainTop
-        //         .updateScroll({
-        //             scrollX,
-        //             actualScrollX,
-        //         })
-        //         .makeDirty(true);
-
-        //     viewMainLeft
-        //         .updateScroll({
-        //             scrollY,
-        //             actualScrollY,
-        //         })
-        //         .makeDirty(true);
-        // });
-
-        // 鼠标滚轮缩放
-        scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
-            const e = evt as IWheelEvent;
+        // mouse scroll
+        scene.onMouseWheelObserver.add((e: IWheelEvent, state) => {
             if (e.ctrlKey) {
-                const deltaFactor = Math.abs(e.deltaX);
-                let ratioDelta = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
-                ratioDelta *= e.deltaY > 0 ? -1 : 1;
-                if (scene.scaleX < 1) {
-                    ratioDelta /= 2;
-                }
-
-                const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
-                const currentRatio = sheet.getZoomRatio();
-                let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
-                nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
-
-                // sheet.setZoomRatio(nextRatio);
-
-                e.preventDefault();
-            } else {
-                viewMain.onMouseWheel(e, state);
+                return;
             }
+
+            viewMain.onMouseWheel(e, state);
         });
 
-        const scrollbar = new ScrollBar(viewMain);
+        // create a scroll bar
+        new ScrollBar(viewMain);
 
         scene
             .addViewport(

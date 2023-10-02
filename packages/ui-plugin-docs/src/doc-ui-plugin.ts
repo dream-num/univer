@@ -8,7 +8,7 @@ import { DocClipboardController } from './Controller/clipboard.controller';
 import { en } from './Locale';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 
-export class DocUIPlugin extends Plugin<any> {
+export class DocUIPlugin extends Plugin {
     static override type = PluginType.Doc;
 
     constructor(

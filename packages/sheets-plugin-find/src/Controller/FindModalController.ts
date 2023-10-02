@@ -1,5 +1,4 @@
-import { ComponentManager, SlotManager } from '@univerjs/base-ui';
-import { SHEET_UI_PLUGIN_NAME } from '@univerjs/ui-plugin-sheets';
+import { ComponentManager } from '@univerjs/base-ui';
 import { Inject } from '@wendellhu/redi';
 
 import { TextFinder } from '../Domain';
@@ -10,8 +9,7 @@ export class FindModalController {
 
     constructor(
         @Inject(TextFinder) private _textFinder: TextFinder,
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(SlotManager) private readonly _slotManager: SlotManager
+        @Inject(ComponentManager) private _componentManager: ComponentManager
     ) {
         this._initialize();
     }
@@ -77,20 +75,5 @@ export class FindModalController {
 
     private _initialize() {
         this._componentManager.register(FindModal.name, FindModal);
-        this._slotManager.setSlotComponent('main', {
-            name: SHEET_UI_PLUGIN_NAME + FindModal.name,
-            component: {
-                name: FindModal.name,
-                props: {
-                    getComponent: this.getComponent.bind(this),
-                    findNext: this.findNext.bind(this),
-                    findPrevious: this.findPrevious.bind(this),
-                    replaceText: this.replaceText.bind(this),
-                    replaceAll: this.replaceAll.bind(this),
-                    matchCase: this.matchCase.bind(this),
-                    matchEntireCell: this.matchEntireCell.bind(this),
-                },
-            },
-        });
     }
 }

@@ -65,7 +65,6 @@ import React, { useContext, useRef, useState } from 'react';
 
 import { BaseComponentProps } from '../../BaseComponent';
 import { AppContext } from '../../Common/AppContext';
-import { SlotComponent } from '../../Common/SlotManager';
 
 interface IProps extends BaseComponentProps {
     name: string;

@@ -1,6 +1,7 @@
 import { Disposable, ICommandService, IStyleData, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
+import { SetZoomRatioCommand, SetZoomRatioMutation } from '..';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -180,6 +181,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetFrozenCommand,
             SetFrozenMutation,
             SetFrozenCancelCommand,
+            SetZoomRatioCommand,
+            SetZoomRatioMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

@@ -64,6 +64,13 @@ export function orderSearchArray(arr: number[], pos: number) {
 export function searchArray(arr: number[], num: number) {
     let index: number = arr.length - 1;
 
+    if (num < arr[0]) {
+        return -1;
+    }
+    if (num > arr[arr.length - 1]) {
+        return Infinity;
+    }
+
     if (arr.length < 40 || num <= arr[20] || num >= arr[index - 20]) {
         index = orderSearchArray(arr, num);
     } else {

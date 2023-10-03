@@ -740,11 +740,9 @@ export class SpreadsheetSkeleton extends Skeleton {
                 dataset_row_st = 0;
             }
 
-            if (dataset_row_ed === -1) {
+            if (dataset_row_ed === Infinity) {
                 dataset_row_ed = rhaLength - 1;
-            }
-
-            if (dataset_row_ed >= rhaLength) {
+            } else if (dataset_row_ed >= rhaLength) {
                 dataset_row_ed = rhaLength - 1;
             }
         }
@@ -760,11 +758,9 @@ export class SpreadsheetSkeleton extends Skeleton {
                 dataset_col_st = 0;
             }
 
-            if (dataset_col_ed === -1) {
+            if (dataset_col_ed === Infinity) {
                 dataset_col_ed = cwaLength - 1;
-            }
-
-            if (dataset_col_ed >= cwaLength) {
+            } else if (dataset_col_ed >= cwaLength) {
                 dataset_col_ed = cwaLength - 1;
             }
         }

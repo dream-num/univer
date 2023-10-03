@@ -67,7 +67,6 @@ export class Scene extends ThinScene {
             parent.addSubScene(this);
         }
         this._parent?.onTransformChangeObservable.add((change: ITransformChangeState) => {
-            this._resetViewportSize();
             this._setTransForm();
         });
 
@@ -176,6 +175,9 @@ export class Scene extends ThinScene {
         return this;
     }
 
+    /**
+     * scale to value, absolute
+     */
     scale(scaleX?: number, scaleY?: number) {
         const preScaleX = this.scaleX;
         if (scaleX !== undefined) {
@@ -199,6 +201,9 @@ export class Scene extends ThinScene {
         return this;
     }
 
+    /**
+     * current scale plus offset, relative
+     */
     scaleBy(scaleX?: number, scaleY?: number) {
         const preScaleX = this.scaleX;
         if (scaleX !== undefined) {
@@ -803,12 +808,6 @@ export class Scene extends ThinScene {
         return defaultLayer;
     }
 
-    private _resetViewportSize() {
-        this.getViewports().forEach((vp: Viewport) => {
-            vp.resetSize();
-        });
-    }
-
     private _setTransForm() {
         const composeResult = Transform.create().composeMatrix({
             scaleX: this.scaleX,
@@ -817,7 +816,7 @@ export class Scene extends ThinScene {
 
         this.transform = composeResult;
         this.getViewports().forEach((vp: Viewport) => {
-            vp.resizeScrollBar();
+            vp.resetSizeAndScrollBar();
         });
         this.makeDirty(true);
     }

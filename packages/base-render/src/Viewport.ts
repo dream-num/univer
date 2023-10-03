@@ -10,10 +10,10 @@ import { BaseScrollBar } from './Shape/BaseScrollBar';
 import { ThinScene } from './ThinScene';
 
 interface IViewPosition {
-    top?: number | string;
-    left?: number | string;
-    bottom?: number | string;
-    right?: number | string;
+    top?: number;
+    left?: number;
+    bottom?: number;
+    right?: number;
     width?: number;
     height?: number;
 }
@@ -78,13 +78,13 @@ export class Viewport {
 
     private _dirty: boolean = true;
 
-    private _topOrigin: number | string = 0;
+    private _topOrigin: number = 0;
 
-    private _leftOrigin: number | string = 0;
+    private _leftOrigin: number = 0;
 
-    private _bottomOrigin: number | string = 0;
+    private _bottomOrigin: number = 0;
 
-    private _rightOrigin: number | string = 0;
+    private _rightOrigin: number = 0;
 
     private _widthOrigin: Nullable<number>;
 
@@ -232,22 +232,22 @@ export class Viewport {
         return this._active;
     }
 
-    private set top(num: number | string) {
+    private set top(num: number) {
         this._topOrigin = num;
         this._top = toPx(num, this._scene?.getParent()?.height);
     }
 
-    private set left(num: number | string) {
+    private set left(num: number) {
         this._leftOrigin = num;
         this._left = toPx(num, this.scene.getParent()?.width);
     }
 
-    private set bottom(num: number | string) {
+    private set bottom(num: number) {
         this._bottomOrigin = num;
         this._bottom = toPx(num, this.scene.getParent()?.height);
     }
 
-    private set right(num: number | string) {
+    private set right(num: number) {
         this._rightOrigin = num;
         this._right = toPx(num, this.scene.getParent()?.width);
     }
@@ -260,8 +260,8 @@ export class Viewport {
         this._active = false;
     }
 
-    resetSize() {
-        this._resizeCacheCanvasAndScrollBar(true);
+    resetSizeAndScrollBar() {
+        this._resizeCacheCanvasAndScrollBar();
     }
 
     setScrollBar(instance: BaseScrollBar) {
@@ -292,10 +292,6 @@ export class Viewport {
 
         this._setWithAndHeight(position);
 
-        this._resizeCacheCanvasAndScrollBar();
-    }
-
-    resizeScrollBar() {
         this._resizeCacheCanvasAndScrollBar();
     }
 
@@ -489,7 +485,9 @@ export class Viewport {
         if (!applyCanvasState && this._renderClipState) {
             ctx.beginPath();
             // DEPT: left is set by upper views but width and height is not
-            ctx.rect(this.left, this.top, (this.width || 0) * m[0], (this.height || 0) * m[3]);
+            const scaleX = m[0] < 1 ? 1 : m[0];
+            const scaleY = m[3] < 1 ? 1 : m[3];
+            ctx.rect(this.left, this.top, (this.width || 0) * scaleX, (this.height || 0) * scaleY);
             ctx.clip();
         }
 
@@ -633,9 +631,9 @@ export class Viewport {
         // );
         if (
             coord.x >= this.left &&
-            coord.x <= this.left + width &&
+            coord.x <= this.left + (width || 0) &&
             coord.y >= this.top &&
-            coord.y <= this.top + height
+            coord.y <= this.top + (height || 0)
         ) {
             return true;
         }
@@ -671,11 +669,8 @@ export class Viewport {
         this._scene.removeViewport(this._viewPortKey);
     }
 
-    private _resizeCacheCanvasAndScrollBar(forceCalculate = false) {
-        const { width, height } = this._getViewPortSize(forceCalculate);
-
-        this.width = width;
-        this.height = height;
+    private _resizeCacheCanvasAndScrollBar() {
+        const { width, height } = this._getViewPortSize();
 
         const contentWidth = (this._scene.width - this._paddingEndX) * this._scene.scaleX;
 
@@ -686,28 +681,63 @@ export class Viewport {
         this.makeDirty(true);
     }
 
-    private _getViewPortSize(forceCalculate = false) {
-        const parent = this._scene?.getParent();
+    private _getViewPortSize() {
+        const parent = this._scene.getParent();
+
+        const { width: parentWidth, height: parentHeight } = parent;
+
+        const { scaleX = 1, scaleY = 1 } = this._scene;
+
         let width;
         let height;
 
-        if (!forceCalculate && this._widthOrigin != null) {
-            width = this._widthOrigin;
-        } else {
-            const referenceWidth = parent.width;
-            const containerWidth =
-                parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceWidth * parent.scaleX : referenceWidth;
-            width = containerWidth - (this._left + this._right);
+        let left = this.left * scaleX;
+        let top = this.top * scaleY;
+
+        if (this._leftOrigin != null) {
+            left = this._leftOrigin * scaleX;
         }
 
-        if (!forceCalculate && this._heightOrigin != null) {
-            height = this._heightOrigin;
-        } else {
-            const referenceHeight = parent.height;
-            const containerHeight =
-                parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceHeight * parent.scaleY : referenceHeight;
-            height = containerHeight - (this._top + this._bottom);
+        if (this._topOrigin != null) {
+            top = this._topOrigin * scaleY;
         }
+
+        if (this._widthOrigin != null) {
+            width = this._widthOrigin * scaleX;
+        } else {
+            width = parentWidth - (left + this._right);
+            this.width = width;
+        }
+
+        if (this._heightOrigin != null) {
+            height = this._heightOrigin * scaleY;
+        } else {
+            height = parentHeight - (top + this._bottom);
+            this.height = height;
+        }
+
+        this._left = left;
+        this._top = top;
+        // this._width = width;
+        // this._height = height;
+
+        // if (!forceCalculate && this._widthOrigin != null) {
+        //     width = this._widthOrigin;
+        // } else {
+        //     const referenceWidth = parent.width;
+        //     const containerWidth =
+        //         parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceWidth * parent.scaleX : referenceWidth;
+        //     width = containerWidth - (this._left + this._right);
+        // }
+
+        // if (!forceCalculate && this._heightOrigin != null) {
+        //     height = this._heightOrigin;
+        // } else {
+        //     const referenceHeight = parent.height;
+        //     const containerHeight =
+        //         parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceHeight * parent.scaleY : referenceHeight;
+        //     height = containerHeight - (this._top + this._bottom);
+        // }
 
         return {
             width,

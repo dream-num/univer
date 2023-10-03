@@ -76,6 +76,13 @@ export class SelectionManagerService implements IDisposable {
         // this._currentSelection$.complete();
     }
 
+    refreshSelection() {
+        if (this._currentSelection == null) {
+            return;
+        }
+        this.refresh(this._currentSelection);
+    }
+
     setCurrentSelection(param: ISelectionManagerSearchParam) {
         this._currentSelection = param;
 

@@ -1,4 +1,4 @@
-import { IKeyValue } from '@univerjs/core';
+import { IKeyValue, Nullable } from '@univerjs/core';
 
 import { Vector2 } from '../Basics/Vector2';
 import { ThinScene } from '../ThinScene';
@@ -150,7 +150,12 @@ export class BaseScrollBar {
         return this.verticalThumbRect.visible;
     }
 
-    resize(parentWidth: number = 0, parentHeight: number = 0, contentWidth: number = 0, contentHeight: number = 0) {}
+    resize(
+        parentWidth: Nullable<number> = 0,
+        parentHeight: Nullable<number> = 0,
+        contentWidth: number = 0,
+        contentHeight: number = 0
+    ) {}
 
     makeDirty(state: boolean) {}
 

@@ -499,15 +499,21 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         let column = searchArray(columnWidthAccumulation, offsetX);
 
-        if (column === -1) {
-            const columnLength = columnWidthAccumulation.length - 1;
-            const lastColumnValue = columnWidthAccumulation[columnLength];
-            if (lastColumnValue <= offsetX) {
-                column = columnWidthAccumulation.length - 1;
-            } else {
-                column = 0;
-            }
+        if (column === Infinity) {
+            column = columnWidthAccumulation.length - 1;
+        } else if (column === -1) {
+            column = 0;
         }
+
+        // if (column === -1) {
+        //     const columnLength = columnWidthAccumulation.length - 1;
+        //     const lastColumnValue = columnWidthAccumulation[columnLength];
+        //     if (lastColumnValue <= offsetX) {
+        //         column = columnWidthAccumulation.length - 1;
+        //     } else {
+        //         column = 0;
+        //     }
+        // }
 
         return column;
     }
@@ -519,15 +525,21 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         let row = searchArray(rowHeightAccumulation, offsetY);
 
-        if (row === -1) {
-            const rowLength = rowHeightAccumulation.length - 1;
-            const lastRowValue = rowHeightAccumulation[rowLength];
-            if (lastRowValue <= offsetY) {
-                row = rowHeightAccumulation.length - 1;
-            } else {
-                row = 0;
-            }
+        if (row === Infinity) {
+            row = rowHeightAccumulation.length - 1;
+        } else if (row === -1) {
+            row = 0;
         }
+
+        // if (row === -1) {
+        //     const rowLength = rowHeightAccumulation.length - 1;
+        //     const lastRowValue = rowHeightAccumulation[rowLength];
+        //     if (lastRowValue <= offsetY) {
+        //         row = rowHeightAccumulation.length - 1;
+        //     } else {
+        //         row = 0;
+        //     }
+        // }
 
         return row;
     }
@@ -740,11 +752,9 @@ export class SpreadsheetSkeleton extends Skeleton {
                 dataset_row_st = 0;
             }
 
-            if (dataset_row_ed === -1) {
+            if (dataset_row_ed === Infinity) {
                 dataset_row_ed = rhaLength - 1;
-            }
-
-            if (dataset_row_ed >= rhaLength) {
+            } else if (dataset_row_ed >= rhaLength) {
                 dataset_row_ed = rhaLength - 1;
             }
         }
@@ -760,11 +770,9 @@ export class SpreadsheetSkeleton extends Skeleton {
                 dataset_col_st = 0;
             }
 
-            if (dataset_col_ed === -1) {
+            if (dataset_col_ed === Infinity) {
                 dataset_col_ed = cwaLength - 1;
-            }
-
-            if (dataset_col_ed >= cwaLength) {
+            } else if (dataset_col_ed >= cwaLength) {
                 dataset_col_ed = cwaLength - 1;
             }
         }

@@ -320,6 +320,8 @@ export class HeaderMoveController extends Disposable {
             return;
         }
 
+        const scale = Math.max(scaleX, scaleX);
+
         const {
             startX: selectedStartX,
             endX: selectedEndX,
@@ -337,33 +339,35 @@ export class HeaderMoveController extends Disposable {
                 height: selectedEndY - selectedStartY,
                 width: columnTotalWidth + rowHeaderWidth,
                 left: 0,
-                top: selectedStartY + moveOffsetY - this._startOffsetY + scrollXY.y,
+                top: selectedStartY + (moveOffsetY - this._startOffsetY) / scale,
             });
         } else {
             this._moveHelperBackgroundShape?.transformByState({
                 height: rowTotalHeight + columnHeaderHeight,
                 width: selectedEndX - selectedStartX,
-                left: selectedStartX + moveOffsetX - this._startOffsetX + scrollXY.x,
+                left: selectedStartX + (moveOffsetX - this._startOffsetX) / scale,
                 top: 0,
             });
         }
 
         this._moveHelperBackgroundShape?.show();
 
+        const HEADER_MOVE_CONTROLLER_LINE_SIZE_SCALE = HEADER_MOVE_CONTROLLER_LINE_SIZE / scale;
+
         if (initialType === HEADER_MOVE_TYPE.ROW) {
             let top = 0;
             if (row <= selectedStartRow) {
-                top = cellStartY - HEADER_MOVE_CONTROLLER_LINE_SIZE / 2;
+                top = cellStartY - HEADER_MOVE_CONTROLLER_LINE_SIZE_SCALE / 2;
                 this._changeToRow = row;
             } else if (row > selectedEndRow) {
-                top = cellEndY - HEADER_MOVE_CONTROLLER_LINE_SIZE / 2;
+                top = cellEndY - HEADER_MOVE_CONTROLLER_LINE_SIZE_SCALE / 2;
                 this._changeToRow = row + 1;
             } else {
                 return;
             }
 
             this._moveHelperLineShape?.transformByState({
-                height: HEADER_MOVE_CONTROLLER_LINE_SIZE,
+                height: HEADER_MOVE_CONTROLLER_LINE_SIZE_SCALE,
                 width: columnTotalWidth,
                 left: rowHeaderWidth,
                 top,
@@ -371,10 +375,10 @@ export class HeaderMoveController extends Disposable {
         } else {
             let left = 0;
             if (column <= selectedStartColumn) {
-                left = cellStartX - HEADER_MOVE_CONTROLLER_LINE_SIZE / 2;
+                left = cellStartX - HEADER_MOVE_CONTROLLER_LINE_SIZE_SCALE / 2;
                 this._changeToColumn = column;
             } else if (column > selectedEndColumn) {
-                left = cellEndX - HEADER_MOVE_CONTROLLER_LINE_SIZE / 2;
+                left = cellEndX - HEADER_MOVE_CONTROLLER_LINE_SIZE_SCALE / 2;
                 this._changeToColumn = column + 1;
             } else {
                 return;
@@ -382,7 +386,7 @@ export class HeaderMoveController extends Disposable {
 
             this._moveHelperLineShape?.transformByState({
                 height: rowTotalHeight,
-                width: HEADER_MOVE_CONTROLLER_LINE_SIZE,
+                width: HEADER_MOVE_CONTROLLER_LINE_SIZE_SCALE,
                 left,
                 top: columnHeaderHeight,
             });

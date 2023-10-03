@@ -55,14 +55,24 @@ export class HeaderMenuResizeShape<
 
         let top = 0;
 
+        const scene = this.getScene();
+
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        const scale = Math.max(scaleX, scaleY);
+
+        const HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE = HEADER_MENU_SHAPE_WIDTH_HEIGHT / scale;
+
+        const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
+
         if (this.mode === HEADER_RESIZE_SHAPE_TYPE.VERTICAL) {
-            width = HEADER_MENU_SHAPE_THUMB_SIZE;
+            width = HEADER_MENU_SHAPE_THUMB_SIZE_SCALE;
 
-            left = HEADER_MENU_SHAPE_WIDTH_HEIGHT - HEADER_MENU_SHAPE_THUMB_SIZE;
+            left = HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE;
         } else {
-            height = HEADER_MENU_SHAPE_THUMB_SIZE;
+            height = HEADER_MENU_SHAPE_THUMB_SIZE_SCALE;
 
-            top = HEADER_MENU_SHAPE_WIDTH_HEIGHT - HEADER_MENU_SHAPE_THUMB_SIZE;
+            top = HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE;
         }
 
         // background
@@ -79,7 +89,7 @@ export class HeaderMenuResizeShape<
             width,
             height,
             fill: HEADER_MENU_SHAPE_RECT_FILL,
-            radius: HEADER_MENU_SHAPE_THUMB_SIZE,
+            radius: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
         });
 
         ctx.save();
@@ -90,7 +100,7 @@ export class HeaderMenuResizeShape<
             width,
             height,
             fill: HEADER_MENU_SHAPE_RECT_FILL,
-            radius: HEADER_MENU_SHAPE_THUMB_SIZE,
+            radius: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
         });
         ctx.restore();
     }

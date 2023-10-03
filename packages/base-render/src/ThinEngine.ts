@@ -92,4 +92,6 @@ export abstract class ThinEngine<T extends IDisposable> extends Disposable {
     abstract getCanvasElement(): HTMLCanvasElement;
 
     abstract setCanvasCursor(val: CURSOR_TYPE): void;
+
+    abstract getPixelRatio(): number;
 }

@@ -22,6 +22,8 @@ export const BASE_OBJECT_ARRAY = [
     'strokeWidth',
 ];
 
+let DEBOUNCE_PARENT_TIMEOUT = -1;
+
 export abstract class BaseObject {
     groupKey?: string;
 
@@ -315,10 +317,10 @@ export abstract class BaseObject {
     makeDirty(state: boolean = true) {
         this._dirty = state;
         if (state) {
-            window.clearTimeout(this.__debounceParentTimeout);
-            this.__debounceParentTimeout = window.setTimeout(() => {
+            window.clearTimeout(DEBOUNCE_PARENT_TIMEOUT);
+            DEBOUNCE_PARENT_TIMEOUT = window.setTimeout(() => {
                 this.parent?.makeDirty(state);
-            }, 0);
+            }, 10);
             // this.parent?.makeDirty(state);
         }
         return this;

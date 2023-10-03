@@ -10,7 +10,11 @@ import {
 
 import { BaseObject } from '../../BaseObject';
 import { ORIENTATION_TYPE, RENDER_CLASS_TYPE } from '../../Basics/Const';
-import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
+import {
+    getRotateOffsetAndFarthestHypotenuse,
+    getRotateOrientation,
+    getTranslateInSpreadContextWithPixelRatio,
+} from '../../Basics/Draw';
 import { IDocumentSkeletonColumn } from '../../Basics/IDocumentSkeletonCached';
 import { ITransformChangeState } from '../../Basics/Interfaces';
 import { fixLineWidthByScale, getCellByIndex, getCellPositionByIndex, getScale } from '../../Basics/Tools';
@@ -113,13 +117,26 @@ export class Spreadsheet extends SheetComponent {
 
         spreadsheetSkeleton.calculate(bounds);
 
+        const segment = spreadsheetSkeleton.rowColumnSegment;
+
+        if (
+            (segment.startRow === -1 && segment.endRow === -1) ||
+            (segment.startColumn === -1 && segment.endColumn === -1)
+        ) {
+            return;
+        }
+
         const scale = getScale(parentScale);
+
+        const engine = this.getScene().getEngine() as Engine;
+
+        const fixTranslate = getTranslateInSpreadContextWithPixelRatio(engine.getPixelRatio());
 
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
         ctx.translate(
-            fixLineWidthByScale(rowHeaderWidth, scale) - 0.5 / scale,
-            fixLineWidthByScale(columnHeaderHeight, scale) - 0.5 / scale
+            fixLineWidthByScale(rowHeaderWidth, scale) - fixTranslate / scale,
+            fixLineWidthByScale(columnHeaderHeight, scale) - fixTranslate / scale
         );
 
         // insert overflow cache

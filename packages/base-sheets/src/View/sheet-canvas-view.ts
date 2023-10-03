@@ -65,7 +65,7 @@ export class SheetCanvasView {
         }
 
         engine.runRenderLoop(() => {
-            // document.getElementById('app')!.innerHTML = engine.getFps().toString();
+            document.getElementById('app')!.innerHTML = engine.getFps().toString();
             scene.render();
         });
     }

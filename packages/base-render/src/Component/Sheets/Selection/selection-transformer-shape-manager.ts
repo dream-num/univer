@@ -483,9 +483,9 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         this.hasSelection = true;
 
-        scene.disableEvent();
-
         this._endSelection();
+
+        scene.disableEvent();
 
         const scrollTimer = ScrollTimer.create(this.getScene());
         scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewport);

@@ -882,6 +882,16 @@ export class Viewport {
     }
 
     private _calViewportRelativeBounding() {
+        if (this._active === false) {
+            return {
+                tl: Vector2.FromArray([-1, -1]),
+                tr: Vector2.FromArray([-1, -1]),
+                bl: Vector2.FromArray([-1, -1]),
+                br: Vector2.FromArray([-1, -1]),
+                dx: -1,
+                dy: -1,
+            };
+        }
         const ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
         const ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
         const xFrom: number = this.left;

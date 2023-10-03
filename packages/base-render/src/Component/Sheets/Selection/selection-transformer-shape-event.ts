@@ -72,7 +72,7 @@ export class SelectionTransformerShapeEvent {
 
         this._initialFill();
 
-        this._control.dispose$.subscribe((control: SelectionTransformerShape) => {
+        this._control.dispose$.subscribe(() => {
             this.dispose();
         });
     }
@@ -95,11 +95,11 @@ export class SelectionTransformerShapeEvent {
         const { leftControl, rightControl, topControl, bottomControl } = this._control;
 
         [leftControl, rightControl, topControl, bottomControl].forEach((control) => {
-            control.onPointerEnterObserver.add((evt: IMouseEvent | IPointerEvent) => {
+            control.onPointerEnterObserver.add(() => {
                 control.setCursor(CURSOR_TYPE.MOVE);
             });
 
-            control.onPointerLeaveObserver.add((evt: IMouseEvent | IPointerEvent) => {
+            control.onPointerLeaveObserver.add(() => {
                 control.resetCursor();
             });
 
@@ -247,10 +247,11 @@ export class SelectionTransformerShapeEvent {
 
         this._relativeSelectionColumnLength = originEndColumn - originStartColumn;
 
-        const style = this._control.selectionStyle;
+        const style = this._control.selectionStyle!;
+        const scale = this._getScale();
         this._helperSelection = new Rect(HELPER_SELECTION_TEMP_NAME, {
-            stroke: style?.stroke,
-            strokeWidth: style?.strokeWidth,
+            stroke: style.stroke,
+            strokeWidth: style.strokeWidth / scale,
         });
         scene.addObject(this._helperSelection);
 
@@ -638,12 +639,14 @@ export class SelectionTransformerShapeEvent {
             });
         }
 
+        const SELECTION_CONTROL_BORDER_BUFFER_WIDTH_SCALE = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / this._getScale();
+
         if ((startRow === endRow && isRowDropping === true) || (startColumn === endColumn && isRowDropping === false)) {
             this._helperSelection.hide();
         } else {
             this._helperSelection.transformByState({
-                left: startX - SELECTION_CONTROL_BORDER_BUFFER_WIDTH / 2,
-                top: startY - SELECTION_CONTROL_BORDER_BUFFER_WIDTH / 2,
+                left: startX - SELECTION_CONTROL_BORDER_BUFFER_WIDTH_SCALE / 2,
+                top: startY - SELECTION_CONTROL_BORDER_BUFFER_WIDTH_SCALE / 2,
                 width: endX - startX,
                 height: endY - startY,
             });
@@ -706,11 +709,17 @@ export class SelectionTransformerShapeEvent {
             strokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.strokeWidth;
         }
 
+        const scale = this._getScale();
+
+        strokeWidth /= scale;
+
+        const SELECTION_CONTROL_BORDER_BUFFER_WIDTH_SCALE = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / scale;
+
         const darkenColor = new TinyColor(stroke).darken(2).toString();
 
         this._helperSelection = new Rect(HELPER_SELECTION_TEMP_NAME, {
             stroke: darkenColor,
-            strokeWidth: strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH / 2,
+            strokeWidth: strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH_SCALE / 2,
         });
         scene.addObject(this._helperSelection);
 
@@ -889,5 +898,10 @@ export class SelectionTransformerShapeEvent {
             endRowOrColumn,
             isLighten,
         };
+    }
+
+    private _getScale() {
+        const { scaleX, scaleY } = this._scene.getAncestorScale();
+        return Math.max(scaleX, scaleY);
     }
 }

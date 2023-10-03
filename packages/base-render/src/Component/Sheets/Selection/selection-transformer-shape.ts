@@ -262,14 +262,24 @@ export class SelectionTransformerShape {
         }
 
         const {
-            strokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.strokeWidth!,
             stroke = NORMAL_SELECTION_PLUGIN_STYLE.stroke!,
             widgets = NORMAL_SELECTION_PLUGIN_STYLE.widgets!,
             hasAutoFill = NORMAL_SELECTION_PLUGIN_STYLE.hasAutoFill!,
-            AutofillSize = NORMAL_SELECTION_PLUGIN_STYLE.AutofillSize!,
-            AutofillStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.AutofillStrokeWidth!,
+
             AutofillStroke = NORMAL_SELECTION_PLUGIN_STYLE.AutofillStroke!,
         } = style;
+
+        let {
+            strokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.strokeWidth!,
+            AutofillSize = NORMAL_SELECTION_PLUGIN_STYLE.AutofillSize!,
+            AutofillStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.AutofillStrokeWidth!,
+        } = style;
+
+        const scale = this._getScale();
+
+        strokeWidth /= scale;
+        AutofillSize /= scale;
+        AutofillStrokeWidth /= scale;
 
         const leftAdjustWidth = strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH;
 
@@ -655,18 +665,28 @@ export class SelectionTransformerShape {
             style = NORMAL_SELECTION_PLUGIN_STYLE;
         }
 
+        const scale = this._getScale();
+
         const {
             stroke,
             hasRowHeader,
             rowHeaderFill = NORMAL_SELECTION_PLUGIN_STYLE.rowHeaderFill!,
             rowHeaderStroke = NORMAL_SELECTION_PLUGIN_STYLE.rowHeaderStroke!,
-            rowHeaderStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.rowHeaderStrokeWidth!,
 
             hasColumnHeader,
             columnHeaderFill = NORMAL_SELECTION_PLUGIN_STYLE.columnHeaderFill!,
             columnHeaderStroke = NORMAL_SELECTION_PLUGIN_STYLE.columnHeaderStroke!,
+        } = style;
+
+        let {
+            rowHeaderStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.rowHeaderStrokeWidth!,
+
             columnHeaderStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.columnHeaderStrokeWidth!,
         } = style;
+
+        rowHeaderStrokeWidth /= scale;
+
+        columnHeaderStrokeWidth /= scale;
 
         if (hasColumnHeader === true) {
             let highlightTitleColor = columnHeaderFill;
@@ -730,8 +750,13 @@ export class SelectionTransformerShape {
             style = NORMAL_SELECTION_PLUGIN_STYLE;
         }
 
-        const { strokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.strokeWidth!, fill = NORMAL_SELECTION_PLUGIN_STYLE.fill! } =
-            style;
+        const scale = this._getScale();
+
+        const { fill = NORMAL_SELECTION_PLUGIN_STYLE.fill! } = style;
+
+        let { strokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.strokeWidth! } = style;
+
+        strokeWidth /= scale;
 
         const highlightSelection = this._selectionModel.highlightToSelection();
 
@@ -812,10 +837,19 @@ export class SelectionTransformerShape {
         const {
             stroke = NORMAL_SELECTION_PLUGIN_STYLE.stroke!,
             widgets = NORMAL_SELECTION_PLUGIN_STYLE.widgets!,
-            widgetSize = NORMAL_SELECTION_PLUGIN_STYLE.widgetSize!,
-            widgetStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.widgetStrokeWidth!,
             widgetStroke = NORMAL_SELECTION_PLUGIN_STYLE.widgetStroke!,
         } = style;
+
+        const scale = this._getScale();
+
+        let {
+            widgetSize = NORMAL_SELECTION_PLUGIN_STYLE.widgetSize!,
+            widgetStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.widgetStrokeWidth!,
+        } = style;
+
+        widgetSize /= scale;
+
+        widgetStrokeWidth /= scale;
 
         const position = {
             left: -widgetSize / 2,
@@ -966,5 +1000,10 @@ export class SelectionTransformerShape {
         }
 
         return true;
+    }
+
+    private _getScale() {
+        const { scaleX, scaleY } = this._scene.getAncestorScale();
+        return Math.max(scaleX, scaleY);
     }
 }

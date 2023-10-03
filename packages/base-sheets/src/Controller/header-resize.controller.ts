@@ -155,17 +155,26 @@ export class HeaderResizeController extends Disposable {
 
                 const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
 
-                if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                    let top = startY - HEADER_MENU_SHAPE_WIDTH_HEIGHT / 2;
+                const { scaleX, scaleY } = scene.getAncestorScale();
 
-                    if (transformCoord.y <= startY + HEADER_MENU_SHAPE_WIDTH_HEIGHT / 2 && transformCoord.y >= startY) {
+                const scale = Math.max(scaleX, scaleY);
+
+                const HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE = HEADER_MENU_SHAPE_WIDTH_HEIGHT / scale;
+
+                if (initialType === HEADER_RESIZE_TYPE.ROW) {
+                    let top = startY - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
+
+                    if (
+                        transformCoord.y <= startY + HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
+                        transformCoord.y >= startY
+                    ) {
                         this._currentRow = row - 1;
                     } else if (
-                        transformCoord.y >= endY - HEADER_MENU_SHAPE_WIDTH_HEIGHT / 2 &&
+                        transformCoord.y >= endY - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
                         transformCoord.y <= endY
                     ) {
                         this._currentRow = row;
-                        top = endY - HEADER_MENU_SHAPE_WIDTH_HEIGHT / 2;
+                        top = endY - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
                     } else {
                         this._rowResizeRect.hide();
                         return;
@@ -186,16 +195,19 @@ export class HeaderResizeController extends Disposable {
                     });
                     this._rowResizeRect.show();
                 } else {
-                    let left = startX - HEADER_MENU_SHAPE_WIDTH_HEIGHT / 2;
+                    let left = startX - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
 
-                    if (transformCoord.x <= startX + HEADER_MENU_SHAPE_WIDTH_HEIGHT / 2 && transformCoord.x >= startX) {
+                    if (
+                        transformCoord.x <= startX + HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
+                        transformCoord.x >= startX
+                    ) {
                         this._currentColumn = column - 1;
                     } else if (
-                        transformCoord.x >= endX - HEADER_MENU_SHAPE_WIDTH_HEIGHT / 2 &&
+                        transformCoord.x >= endX - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2 &&
                         transformCoord.x <= endX
                     ) {
                         this._currentColumn = column;
-                        left = endX - HEADER_MENU_SHAPE_WIDTH_HEIGHT / 2;
+                        left = endX - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
                     } else {
                         this._columnResizeRect.hide();
                         return;
@@ -317,20 +329,24 @@ export class HeaderResizeController extends Disposable {
                     ? canvasMaxHeight
                     : rowTotalHeight + columnHeaderHeight;
 
+            const scale = Math.max(scaleX, scaleY);
+
+            const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
+
             if (initialType === HEADER_RESIZE_TYPE.ROW) {
                 this._resizeHelperShape = new Rect(HEADER_RESIZE_CONTROLLER_SHAPE_HELPER, {
                     width: shapeWidth,
-                    height: HEADER_MENU_SHAPE_THUMB_SIZE,
+                    height: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
                     fill: HEADER_RESIZE_CONTROLLER_SHAPE_HELPER_COLOR,
                     left: 0,
-                    top: currentOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE / 2,
+                    top: currentOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
                 });
             } else {
                 this._resizeHelperShape = new Rect(HEADER_RESIZE_CONTROLLER_SHAPE_HELPER, {
-                    width: HEADER_MENU_SHAPE_THUMB_SIZE,
+                    width: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
                     height: shapeHeight,
                     fill: HEADER_RESIZE_CONTROLLER_SHAPE_HELPER_COLOR,
-                    left: currentOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE / 2,
+                    left: currentOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
                     top: 0,
                 });
             }
@@ -354,9 +370,15 @@ export class HeaderResizeController extends Disposable {
 
                 const { x: moveOffsetX, y: moveOffsetY } = transformCoord;
 
-                moveChangeX = moveOffsetX - this._startOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE / 2;
+                const { scaleX, scaleY } = scene.getAncestorScale();
 
-                moveChangeY = moveOffsetY - this._startOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE / 2;
+                const scale = Math.max(scaleX, scaleY);
+
+                const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
+
+                moveChangeX = moveOffsetX - this._startOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2;
+
+                moveChangeY = moveOffsetY - this._startOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2;
 
                 if (initialType === HEADER_RESIZE_TYPE.ROW) {
                     if (moveChangeY < -(cell.endY - cell.startY) + 2) {
@@ -373,7 +395,7 @@ export class HeaderResizeController extends Disposable {
                     });
 
                     this._rowResizeRect?.transformByState({
-                        top: rowResizeRectY + moveChangeY + HEADER_MENU_SHAPE_THUMB_SIZE / 2,
+                        top: rowResizeRectY + moveChangeY + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
                     });
 
                     this._rowResizeRect?.show();
@@ -394,7 +416,7 @@ export class HeaderResizeController extends Disposable {
                     });
 
                     this._columnResizeRect?.transformByState({
-                        left: rowResizeRectX + moveChangeX + HEADER_MENU_SHAPE_THUMB_SIZE / 2,
+                        left: rowResizeRectX + moveChangeX + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
                     });
 
                     this._columnResizeRect?.show();

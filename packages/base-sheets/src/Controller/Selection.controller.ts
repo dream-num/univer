@@ -7,6 +7,7 @@ import {
 } from '@univerjs/base-render';
 import {
     Disposable,
+    ICommandInfo,
     ICommandService,
     ICurrentUniverService,
     ISelection,
@@ -19,6 +20,7 @@ import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { ISetZoomRatioMutationParams, SetZoomRatioMutation } from '../commands/mutations/set-zoom-ratio.mutation';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -178,7 +180,26 @@ export class SelectionController extends Disposable {
         return getSheetObject(this._currentUniverService, this._renderManagerService);
     }
 
-    private _commandExecutedListener() {}
+    private _commandExecutedListener() {
+        const updateCommandList = [SetZoomRatioMutation.id];
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (updateCommandList.includes(command.id)) {
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+                    const worksheet = workbook.getActiveSheet();
+
+                    const params = command.params as ISetZoomRatioMutationParams;
+                    const { workbookId, worksheetId } = params;
+                    if (!(workbookId === workbook.getUnitId() && worksheetId === worksheet.getSheetId())) {
+                        return;
+                    }
+
+                    this._selectionManagerService.refreshSelection();
+                }
+            })
+        );
+    }
 
     private _skeletonListener() {
         this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {

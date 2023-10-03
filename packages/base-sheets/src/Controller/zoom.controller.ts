@@ -23,8 +23,6 @@ interface ISetWorksheetMutationParams {
 
 @OnLifecycle(LifecycleStages.Rendered, ZoomController)
 export class ZoomController extends Disposable {
-    private _debounceParentTimeout: number = -1;
-
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
@@ -73,16 +71,11 @@ export class ZoomController extends Disposable {
             let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
             nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
 
-            window.clearTimeout(this._debounceParentTimeout);
-            this._debounceParentTimeout = window.setTimeout(() => {
-                this._commandService.executeCommand(SetZoomRatioMutation.id, {
-                    zoomRatio: nextRatio,
-                    workbookId: workbook.getUnitId(),
-                    worksheetId: sheet.getSheetId(),
-                });
-            }, 0);
-
-            this._updateViewZoom(nextRatio);
+            this._commandService.executeCommand(SetZoomRatioMutation.id, {
+                zoomRatio: nextRatio,
+                workbookId: workbook.getUnitId(),
+                worksheetId: sheet.getSheetId(),
+            });
 
             e.preventDefault();
         });

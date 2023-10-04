@@ -50,7 +50,16 @@ import {
 export interface IInsertRowCommandParams {
     workbookId: string;
     worksheetId: string;
+
+    /**
+     * whether it is inserting row after (DOWN) or inserting before (UP)
+     *
+     * this determines styles of the cells in the inserted rows
+     */
     direction: Direction.UP | Direction.DOWN;
+    /**
+     * position of the inserted rows
+     */
     range: IRange;
 }
 
@@ -149,6 +158,9 @@ export const InsertRowCommand: ICommand = {
             accessor,
             addMergeMutationParams
         );
+
+        // there should be a hook to update ranges of various features
+        // TODO@wzhudev: create RowColMutationService
 
         const result = await sequenceExecute(
             [
@@ -250,7 +262,7 @@ export const InsertRowBeforeCommand: ICommand<IInsertRowBeforeOrAfterCommandPara
 export const InsertRowAfterCommand: ICommand<IInsertRowBeforeOrAfterCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row-after',
-    handler: async (accessor: IAccessor, params: IInsertRowBeforeOrAfterCommandParams) => {
+    handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections()?.map((s) => s.range);
         let range: IRange;
@@ -276,7 +288,7 @@ export const InsertRowAfterCommand: ICommand<IInsertRowBeforeOrAfterCommandParam
 
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
-        const rowCount = range.endRow - range.startRow + 1;
+        const count = range.endRow - range.startRow + 1;
 
         const insertRowParams: IInsertRowCommandParams = {
             workbookId,
@@ -284,9 +296,9 @@ export const InsertRowAfterCommand: ICommand<IInsertRowBeforeOrAfterCommandParam
             direction: Direction.DOWN,
             range: {
                 startRow: range.endRow + 1,
-                endRow: range.endRow + rowCount,
+                endRow: range.endRow + count,
                 startColumn: 0,
-                endColumn: worksheet.getMaxColumns() - 1,
+                endColumn: worksheet.getLastColumn(),
             },
         };
 
@@ -294,21 +306,18 @@ export const InsertRowAfterCommand: ICommand<IInsertRowBeforeOrAfterCommandParam
     },
 };
 
-export interface InsertColCommandParams {
-    value: number;
-}
-
-export interface InsertColCommandBaseParams {
+export interface IInsertColCommandParams {
     workbookId: string;
     worksheetId: string;
     range: IRange;
+    direction: Direction.LEFT | Direction.RIGHT;
 }
 
-export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
+export const InsertColCommand: ICommand<IInsertColCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col',
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params: InsertColCommandBaseParams) => {
+    handler: async (accessor: IAccessor, params: IInsertColCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -448,41 +457,39 @@ export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
     },
 };
 
-export const InsertColBeforeCommand: ICommand<InsertColCommandParams> = {
+export const InsertColBeforeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col-before',
-    handler: async (accessor: IAccessor, params?: InsertColCommandParams) => {
-        const commandService = accessor.get(ICommandService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+    handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
+        const selections = selectionManagerService.getSelections();
         let range: IRange;
-        const selections = selectionManagerService.getRangeDatas();
-        if (selections && selections.length === 1) {
-            range = selections[0];
+
+        if (selections?.length === 1) {
+            range = selections[0].range;
         } else {
             return false;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
-        if (!worksheet) return false;
-
-        let count = range.endColumn - range.startColumn + 1;
-        if (params) {
-            count = params.value ?? 1;
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        if (!workbook) {
+            return false;
         }
 
-        const insertColParams: InsertColCommandBaseParams = {
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return false;
+        }
+
+        const workbookId = workbook.getUnitId();
+        const worksheetId = worksheet.getSheetId();
+        const count = range.endColumn - range.startColumn + 1;
+
+        const insertColParams: IInsertColCommandParams = {
             workbookId,
             worksheetId,
+            direction: Direction.LEFT,
             range: {
                 startColumn: range.startColumn,
                 endColumn: range.startColumn + count - 1,
@@ -491,54 +498,52 @@ export const InsertColBeforeCommand: ICommand<InsertColCommandParams> = {
             },
         };
 
-        return commandService.executeCommand(InsertColCommand.id, insertColParams);
+        return accessor.get(ICommandService).executeCommand(InsertColCommand.id, insertColParams);
     },
 };
 
-export const InsertColAfterCommand: ICommand<InsertColCommandParams> = {
+export const InsertColAfterCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col-after',
-    handler: async (accessor: IAccessor, params?: InsertColCommandParams) => {
-        const commandService = accessor.get(ICommandService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+    handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
+        const selections = selectionManagerService.getSelections();
         let range: IRange;
-        const selections = selectionManagerService.getRangeDatas();
-        if (selections && selections.length === 1) {
-            range = selections[0];
+
+        if (selections?.length === 1) {
+            range = selections[0].range;
         } else {
             return false;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
-        if (!worksheet) return false;
-
-        let count = range.endColumn - range.startColumn + 1;
-        if (params) {
-            count = params.value ?? 1;
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        if (!workbook) {
+            return false;
         }
 
-        const insertColParams: InsertColCommandBaseParams = {
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return false;
+        }
+
+        const workbookId = workbook.getUnitId();
+        const worksheetId = worksheet.getSheetId();
+        const count = range.endColumn - range.startColumn + 1;
+
+        const insertColParams: IInsertColCommandParams = {
             workbookId,
             worksheetId,
+            direction: Direction.RIGHT,
             range: {
                 startColumn: range.endColumn + 1,
                 endColumn: range.endColumn + count,
                 startRow: 0,
-                endRow: worksheet.getLastColumn(),
+                endRow: worksheet.getLastRow(),
             },
         };
 
-        return commandService.executeCommand(InsertColCommand.id, insertColParams);
+        return accessor.get(ICommandService).executeCommand(InsertColCommand.id, insertColParams);
     },
 };
 

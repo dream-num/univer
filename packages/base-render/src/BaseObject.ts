@@ -22,8 +22,6 @@ export const BASE_OBJECT_ARRAY = [
     'strokeWidth',
 ];
 
-let DEBOUNCE_PARENT_TIMEOUT = -1;
-
 export abstract class BaseObject {
     groupKey?: string;
 
@@ -91,7 +89,7 @@ export abstract class BaseObject {
 
     private _strokeWidth: number = 0;
 
-    private _parent: any;
+    private _parent: any; // Todo: The object must be mounted to a scene or group. 'Any' is used here to avoid circular dependencies. This will be resolved later through dependency injection.
 
     private _zIndex: number = 0;
 
@@ -102,8 +100,6 @@ export abstract class BaseObject {
     private _debounceParentDirty: boolean = true;
 
     private _transform = new Transform();
-
-    private __debounceParentTimeout: number = -1;
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
 
@@ -317,9 +313,14 @@ export abstract class BaseObject {
     makeDirty(state: boolean = true) {
         this._dirty = state;
         if (state) {
-            window.clearTimeout(DEBOUNCE_PARENT_TIMEOUT);
-            DEBOUNCE_PARENT_TIMEOUT = window.setTimeout(() => {
-                this.parent?.makeDirty(state);
+            const scene = this.getScene();
+            if (scene == null) {
+                this._dirty = false;
+                return;
+            }
+            window.clearTimeout(scene.debounceParentTimeout);
+            scene.debounceParentTimeout = window.setTimeout(() => {
+                this._parent?.makeDirty(state);
             }, 10);
             // this.parent?.makeDirty(state);
         }

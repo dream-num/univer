@@ -132,15 +132,14 @@ export class Viewport {
 
     private _paddingEndY: number = 0;
 
+    private _isRelativeX: boolean = false;
+
+    private _isRelativeY: boolean = false;
+
     constructor(viewPortKey: string, scene: ThinScene, props?: IViewProps) {
         this._viewPortKey = viewPortKey;
 
         this._scene = scene;
-
-        this.top = props?.top || 0;
-        this.left = props?.left || 0;
-        this.bottom = props?.bottom || 0;
-        this.right = props?.right || 0;
 
         if (props?.active != null) {
             this._active = props.active;
@@ -229,6 +228,13 @@ export class Viewport {
     }
 
     get isActive() {
+        if (this._active === false) {
+            return false;
+        }
+
+        if ((this.height || 0) <= 0 || (this.width || 0) <= 0) {
+            return false;
+        }
         return this._active;
     }
 
@@ -284,11 +290,6 @@ export class Viewport {
         //         (this as IKeyValue)[pKey] = position[pKey as keyof IViewPosition];
         //     }
         // });
-
-        this.top = position.top || 0;
-        this.left = position.left || 0;
-        this.bottom = position.bottom || 0;
-        this.right = position.right || 0;
 
         this._setWithAndHeight(position);
 
@@ -442,7 +443,7 @@ export class Viewport {
     }
 
     render(parentCtx?: CanvasRenderingContext2D) {
-        if (this._active === false) {
+        if (this.isActive === false) {
             return;
         }
         const mainCtx = parentCtx || this._scene.getEngine()?.getCanvas().getContext();
@@ -485,8 +486,7 @@ export class Viewport {
         if (!applyCanvasState && this._renderClipState) {
             ctx.beginPath();
             // DEPT: left is set by upper views but width and height is not
-            const scaleX = m[0] < 1 ? 1 : m[0];
-            const scaleY = m[3] < 1 ? 1 : m[3];
+            const { scaleX, scaleY } = this._getBoundScale(m[0], m[3]);
             ctx.rect(this.left, this.top, (this.width || 0) * scaleX, (this.height || 0) * scaleY);
             ctx.clip();
         }
@@ -530,7 +530,7 @@ export class Viewport {
 
     // eslint-disable-next-line max-lines-per-function
     onMouseWheel(evt: IWheelEvent, state: EventState) {
-        if (!this._scrollBar || this._active === false) {
+        if (!this._scrollBar || this.isActive === false) {
             return;
         }
         let isLimitedStore;
@@ -621,7 +621,7 @@ export class Viewport {
 
     // 自己是否被选中
     isHit(coord: Vector2) {
-        if (this._active === false) {
+        if (this.isActive === false) {
             return;
         }
         const { width, height } = this._getViewPortSize();
@@ -882,7 +882,7 @@ export class Viewport {
     }
 
     private _calViewportRelativeBounding() {
-        if (this._active === false) {
+        if (this.isActive === false) {
             return {
                 tl: Vector2.FromArray([-1, -1]),
                 tr: Vector2.FromArray([-1, -1]),
@@ -892,12 +892,15 @@ export class Viewport {
                 dy: -1,
             };
         }
+
+        const { scaleX, scaleY } = this._getBoundScale(this.scene.scaleX, this.scene.scaleY);
+
         const ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
         const ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
         const xFrom: number = this.left;
-        const xTo: number = (this.width || 0) + this.left;
+        const xTo: number = (this.width || 0) * scaleX + this.left;
         const yFrom: number = this.top;
-        const yTo: number = (this.height || 0) + this.top;
+        const yTo: number = (this.height || 0) * scaleY + this.top;
 
         let differenceX = 0;
         let differenceY = 0;
@@ -961,20 +964,36 @@ export class Viewport {
     }
 
     private _setWithAndHeight(props?: IViewProps) {
+        this.top = props?.top || 0;
+        this.left = props?.left || 0;
+        this.bottom = props?.bottom || 0;
+        this.right = props?.right || 0;
+
         if (props?.width) {
             this.width = props?.width;
             this._widthOrigin = this.width;
+            this._isRelativeX = false;
         } else {
             this.width = null;
             this._widthOrigin = null;
+            this._isRelativeX = true;
         }
 
         if (props?.height) {
             this.height = props?.height;
             this._heightOrigin = this.height;
+            this._isRelativeY = false;
         } else {
             this.height = null;
             this._heightOrigin = null;
+            this._isRelativeY = true;
         }
+    }
+
+    private _getBoundScale(scaleX: number, scaleY: number) {
+        scaleX = this._isRelativeX ? (scaleX < 1 ? 1 : scaleX) : scaleX;
+        scaleY = this._isRelativeY ? (scaleY < 1 ? 1 : scaleY) : scaleY;
+
+        return { scaleX, scaleY };
     }
 }

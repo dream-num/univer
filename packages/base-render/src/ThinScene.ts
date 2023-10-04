@@ -28,6 +28,8 @@ export abstract class ThinScene {
 
     onKeyUpObservable = new Observable<IKeyboardEvent>();
 
+    debounceParentTimeout: number = -1;
+
     private _sceneKey: string = '';
 
     private _width: number = 100;

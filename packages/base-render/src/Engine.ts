@@ -113,6 +113,10 @@ export class Engine extends ThinEngine<Scene> {
         return this._canvas.getCanvasEle();
     }
 
+    getPixelRatio() {
+        return this._canvas.getPixelRatio();
+    }
+
     setContainer(elem: HTMLElement) {
         this._container = elem;
         this._container.appendChild(this._canvasEle);

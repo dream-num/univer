@@ -28,13 +28,13 @@ export class SheetSkeletonManagerService implements IDisposable {
 
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
 
-    private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
-
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
 
     /**
-     *  Pre-triggered logic during registration
+     * CurrentSkeletonBefore for pre-triggered logic during registration
      */
+    private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
+
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 
     constructor(

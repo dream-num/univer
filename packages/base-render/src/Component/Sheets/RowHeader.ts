@@ -1,5 +1,7 @@
+import { getTranslateInSpreadContextWithPixelRatio } from '../../Basics/Draw';
 import { fixLineWidthByScale, getScale } from '../../Basics/Tools';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
+import { Engine } from '../../Engine';
 import { SheetRowHeaderExtensionRegistry } from '../Extension';
 import { RowHeaderLayout } from './Extensions/RowHeaderLayout';
 import { SpreadsheetHeader } from './SheetComponent';
@@ -30,11 +32,21 @@ export class SpreadsheetRowHeader extends SpreadsheetHeader {
 
         spreadsheetSkeleton.calculate(bounds);
 
+        const segment = spreadsheetSkeleton.rowColumnSegment;
+
+        if (segment.startRow === -1 && segment.endRow === -1) {
+            return;
+        }
+
         const scale = getScale(parentScale);
 
         const { columnHeaderHeight } = spreadsheetSkeleton;
 
-        ctx.translate(-0.5 / scale, fixLineWidthByScale(columnHeaderHeight, scale) - 0.5 / scale);
+        const engine = this.getScene().getEngine() as Engine;
+
+        const fixTranslate = getTranslateInSpreadContextWithPixelRatio(engine.getPixelRatio());
+
+        ctx.translate(-fixTranslate / scale, fixLineWidthByScale(columnHeaderHeight, scale) - fixTranslate / scale);
 
         const extensions = this.getExtensionsByOrder();
         for (const extension of extensions) {

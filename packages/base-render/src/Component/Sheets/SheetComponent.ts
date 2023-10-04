@@ -1,4 +1,4 @@
-import { Nullable, searchArray } from '@univerjs/core';
+import { Nullable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from '../../Basics/Const';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
@@ -78,69 +78,6 @@ export class SheetComponent extends RenderComponent<SpreadsheetSkeleton, SHEET_E
         endRow: number;
         endColumn: number;
     }> {}
-
-    /**
-     *
-     * @param rowHeightAccumulation Row layout information
-     * @param columnWidthAccumulation Column layout information
-     * @param bounds The range of the visible area of the canvas
-     * @returns The range cell index of the canvas visible area
-     */
-    protected _getBounding(rowHeightAccumulation: number[], columnWidthAccumulation: number[], bounds?: IBoundRect) {
-        const rhaLength = rowHeightAccumulation.length;
-        const cwaLength = columnWidthAccumulation.length;
-
-        if (!bounds) {
-            return {
-                startRow: 0,
-                endRow: rhaLength - 1,
-                startColumn: 0,
-                endColumn: cwaLength - 1,
-            };
-        }
-
-        let dataset_row_st = -1;
-        let dataset_row_ed = -1;
-        let dataset_col_st = -1;
-        let dataset_col_ed = -1;
-
-        dataset_row_st = searchArray(rowHeightAccumulation, bounds.tl.y);
-        dataset_row_ed = searchArray(rowHeightAccumulation, bounds.bl.y);
-
-        if (dataset_row_st === -1) {
-            dataset_row_st = 0;
-        }
-
-        if (dataset_row_ed === -1) {
-            dataset_row_ed = rhaLength - 1;
-        }
-
-        if (dataset_row_ed >= rhaLength) {
-            dataset_row_ed = rhaLength - 1;
-        }
-
-        dataset_col_st = searchArray(columnWidthAccumulation, bounds.tl.x);
-        dataset_col_ed = searchArray(columnWidthAccumulation, bounds.tr.x);
-
-        if (dataset_col_st === -1) {
-            dataset_col_st = 0;
-        }
-
-        if (dataset_col_ed === -1) {
-            dataset_col_ed = cwaLength - 1;
-        }
-
-        if (dataset_col_ed >= cwaLength) {
-            dataset_col_ed = cwaLength - 1;
-        }
-
-        return {
-            startRow: dataset_row_st - 1,
-            endRow: dataset_row_ed + 1,
-            startColumn: dataset_col_st - 1,
-            endColumn: dataset_col_ed + 1,
-        };
-    }
 
     protected _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         /* abstract */

@@ -741,47 +741,55 @@ export class SpreadsheetSkeleton extends Skeleton {
         let dataset_col_st = -1;
         let dataset_col_ed = -1;
 
-        dataset_row_st = searchArray(rowHeightAccumulation, bounds.tl.y - this.columnHeaderHeightAndMarginTop);
-        dataset_row_ed = searchArray(rowHeightAccumulation, bounds.bl.y - this.columnHeaderHeightAndMarginTop);
+        const row_st = searchArray(rowHeightAccumulation, bounds.tl.y - this.columnHeaderHeightAndMarginTop);
+        const row_ed = searchArray(rowHeightAccumulation, bounds.bl.y - this.columnHeaderHeightAndMarginTop);
 
-        if (dataset_row_st === -1 && dataset_row_ed === -1) {
-            dataset_row_st = 0;
-            dataset_row_ed = 0;
+        if (row_st === -1 && row_ed === -1) {
+            dataset_row_st = -1;
+            dataset_row_ed = -1;
         } else {
-            if (dataset_row_st === -1) {
+            if (row_st === -1) {
                 dataset_row_st = 0;
+            } else {
+                dataset_row_st = row_st;
             }
 
-            if (dataset_row_ed === Infinity) {
+            if (row_ed === Infinity) {
                 dataset_row_ed = rhaLength - 1;
-            } else if (dataset_row_ed >= rhaLength) {
+            } else if (row_ed >= rhaLength) {
                 dataset_row_ed = rhaLength - 1;
+            } else {
+                dataset_row_ed = row_ed;
             }
         }
 
-        dataset_col_st = searchArray(columnWidthAccumulation, bounds.tl.x - this.rowHeaderWidthAndMarginLeft);
-        dataset_col_ed = searchArray(columnWidthAccumulation, bounds.tr.x - this.rowHeaderWidthAndMarginLeft);
+        const col_st = searchArray(columnWidthAccumulation, bounds.tl.x - this.rowHeaderWidthAndMarginLeft);
+        const col_ed = searchArray(columnWidthAccumulation, bounds.tr.x - this.rowHeaderWidthAndMarginLeft);
 
-        if (dataset_col_st === -1 && dataset_col_ed === -1) {
-            dataset_col_st = 0;
-            dataset_col_ed = 0;
+        if (col_st === -1 && col_ed === -1) {
+            dataset_col_st = -1;
+            dataset_col_ed = -1;
         } else {
-            if (dataset_col_st === -1) {
+            if (col_st === -1) {
                 dataset_col_st = 0;
+            } else {
+                dataset_col_st = col_st;
             }
 
-            if (dataset_col_ed === Infinity) {
+            if (col_ed === Infinity) {
                 dataset_col_ed = cwaLength - 1;
-            } else if (dataset_col_ed >= cwaLength) {
+            } else if (col_ed >= cwaLength) {
                 dataset_col_ed = cwaLength - 1;
+            } else {
+                dataset_col_ed = col_ed;
             }
         }
 
         return {
-            startRow: dataset_row_st - 1,
-            endRow: dataset_row_ed + 1,
-            startColumn: dataset_col_st - 1,
-            endColumn: dataset_col_ed + 1,
+            startRow: dataset_row_st,
+            endRow: dataset_row_ed,
+            startColumn: dataset_col_st,
+            endColumn: dataset_col_ed,
         };
     }
 

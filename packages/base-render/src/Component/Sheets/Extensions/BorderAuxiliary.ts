@@ -70,12 +70,17 @@ export class BorderAuxiliary extends SheetExtension {
         ctx.stroke();
         ctx.closePath();
 
+        // merge cell
         this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 
+        // overflow cell
         this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
         ctx.restore();
     }
 
+    /**
+     * Clear the guide lines within a range in the table, to make room for merged cells and overflow.
+     */
     private _clearRectangle(
         ctx: CanvasRenderingContext2D,
         scale: number,

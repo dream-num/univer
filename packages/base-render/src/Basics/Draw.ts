@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import { BorderStyleTypes, IPosition } from '@univerjs/core';
 
 import { BORDER_TYPE, ORIENTATION_TYPE } from './Const';
@@ -230,4 +231,15 @@ export function getRotateOffsetAndFarthestHypotenuse(
         fixOffsetY,
         rotateTranslateY,
     };
+}
+
+/**
+ * Align the resolution, an alignment needs to be done in special cases where the resolution is 1.5, 1.25, etc.
+ * @param pixelRatio devicePixelRatio
+ * @returns
+ */
+export function getTranslateInSpreadContextWithPixelRatio(pixelRatio: number) {
+    const pixelRatioPlusFix = pixelRatio + 0.5;
+    const ceilPixelRatio = Math.ceil(pixelRatioPlusFix);
+    return ceilPixelRatio - pixelRatioPlusFix;
 }

@@ -45,7 +45,7 @@ export class SheetUIPlugin extends Plugin {
         ).forEach((d) => injector.add(d));
     }
 
-    override onRendered(): void {
+    override onReady(): void {
         this._markSheetAsFocused();
     }
 

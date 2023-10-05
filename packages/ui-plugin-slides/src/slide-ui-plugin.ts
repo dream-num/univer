@@ -1,5 +1,5 @@
 import { ComponentManager } from '@univerjs/base-ui';
-import { LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
+import { ICurrentUniverService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { DefaultSlideUIConfig, ISlideUIPluginConfig } from './Basics';
@@ -21,7 +21,8 @@ export class SlideUIPlugin extends Plugin {
     constructor(
         config: Partial<ISlideUIPluginConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         super(SLIDE_UI_PLUGIN_NAME);
         this._config = Tools.deepMerge({}, DefaultSlideUIConfig, config);
@@ -33,10 +34,14 @@ export class SlideUIPlugin extends Plugin {
         return this._config;
     }
 
-    override onStarting(_injector: Injector): void {
+    override onStarting(): void {
         this._localeService.getLocale().load({
             en,
         });
+    }
+
+    override onReady(): void {
+        this._markSlideAsFocused();
     }
 
     getAppUIController() {
@@ -61,5 +66,11 @@ export class SlideUIPlugin extends Plugin {
 
         this._componentManager = this._injector.get(ComponentManager);
         this._appUIController = this._injector.createInstance(AppUIController, this._config);
+    }
+
+    private _markSlideAsFocused() {
+        const currentService = this._currentUniverService;
+        const c = currentService.getCurrentUniverSlideInstance();
+        currentService.focusUniverInstance(c.getUnitId());
     }
 }

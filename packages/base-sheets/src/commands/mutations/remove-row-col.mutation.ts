@@ -129,9 +129,9 @@ export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
             const start = range.startColumn;
-            const end = range.endColumn - range.startColumn + 1;
+            const end = range.endColumn;
 
-            for (let j = start; j < end; j++) {
+            for (let j = start; j <= end; j++) {
                 columnWrapper.splice(j, 1);
             }
         }

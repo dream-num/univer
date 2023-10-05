@@ -1,4 +1,4 @@
-import { Disposable } from '@univerjs/core';
+import { Disposable, IUndoRedoCommandInfos } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { RowColMutatingService } from '../services/row-col-mutating/row-col-mutating.service';
@@ -18,6 +18,14 @@ export class BaseRowColMutatingController extends Disposable {
 }
 
 // when rows inserted
+function insertRowCopyCellsStyleRule(): IUndoRedoCommandInfos {
+    return {
+        undos: [],
+        redos: [],
+    };
+}
+
+function insertRowUpdateMergedCellsRule() {}
 
 // when rows removed
 

@@ -25,7 +25,13 @@ export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService } from './services/log/log.service';
 export { DesktopPermissionService, IPermissionService } from './services/permission/permission.service';
 export { ThemeService } from './services/theme/theme.service';
-export { IUndoRedoService, LocalUndoRedoService, RedoCommand, UndoCommand } from './services/undoredo/undoredo.service';
+export {
+    type IUndoRedoCommandInfos,
+    IUndoRedoService,
+    LocalUndoRedoService,
+    RedoCommand,
+    UndoCommand,
+} from './services/undoredo/undoredo.service';
 export * from './Shared';
 export { Disposable, DisposableCollection, fromObservable, RxDisposable, toDisposable } from './Shared/lifecycle';
 export { createRowColIter, type IRowColIter } from './Shared/RowColIter';

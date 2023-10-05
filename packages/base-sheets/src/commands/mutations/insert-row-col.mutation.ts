@@ -69,7 +69,7 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
     },
 };
 
-export const InsertColMutationFactory = (
+export const InsertColMutationUndoFactory = (
     accessor: IAccessor,
     params: IInsertColMutationParams
 ): IRemoveColMutationParams => {
@@ -83,7 +83,7 @@ export const InsertColMutationFactory = (
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
-        ranges: params.ranges,
+        ranges: params.ranges.map((r) => Rectangle.clone(r)),
     };
 };
 

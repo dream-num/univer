@@ -95,7 +95,7 @@ export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.
 export { SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 export {
     InsertColMutation,
-    InsertColMutationFactory,
+    InsertColMutationUndoFactory as InsertColMutationFactory,
     InsertRowMutation,
     InsertRowMutationUndoFactory as InsertRowMutationFactory,
 } from './commands/mutations/insert-row-col.mutation';

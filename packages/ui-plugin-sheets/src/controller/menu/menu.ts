@@ -1007,7 +1007,7 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
     return {
         id: InsertColAfterCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
+        positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.insertColumn',
         hidden$: new Observable((observer) => {
             // if there are multi selections this item should be hidden

@@ -1,4 +1,12 @@
-import { Direction, Disposable, ICommandInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
+import {
+    Direction,
+    Disposable,
+    ICommandInfo,
+    IRange,
+    IUndoRedoCommandInfos,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
 // TODO: these methods should be async
@@ -9,34 +17,28 @@ interface IRowColMutatingService {
         worksheet: Worksheet,
         ranges: IRange[],
         direction: Direction
-    ): {
-        redos: ICommandInfo[];
-        undos: ICommandInfo[];
-    };
+    ): IUndoRedoCommandInfos;
 
     onColsInserted(
         workbook: Workbook,
         worksheet: Worksheet,
         ranges: IRange[],
         direction: Direction
-    ): {
-        redos: ICommandInfo[];
-        undos: ICommandInfo[];
-    };
+    ): IUndoRedoCommandInfos;
 
-    onRowsDeleted(ranges: IRange[]): {
-        workbook: Workbook;
-        worksheet: Worksheet;
-        redos: ICommandInfo[];
-        undos: ICommandInfo[];
-    };
+    onRowsDeleted(
+        workbook: Workbook,
+        worksheet: Worksheet,
+        ranges: IRange[],
+        direction: Direction
+    ): IUndoRedoCommandInfos;
 
-    onColsDeleted(ranges: IRange[]): {
-        workbook: Workbook;
-        worksheet: Worksheet;
-        redos: ICommandInfo[];
-        undos: ICommandInfo[];
-    };
+    onColsDeleted(
+        workbook: Workbook,
+        worksheet: Worksheet,
+        ranges: IRange[],
+        direction: Direction
+    ): IUndoRedoCommandInfos;
 }
 
 export interface IRowColMutatingHook {}

@@ -1,4 +1,3 @@
-import { BorderInfo } from '@univerjs/base-slides';
 import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager } from '@univerjs/base-ui';
 import {
     BorderType,
@@ -34,6 +33,12 @@ export interface IToolbarItemProps extends BaseToolbarSelectProps {
     tooltip?: string; //tooltip文字
     border?: boolean;
     suffix?: React.ReactNode;
+}
+
+interface BorderInfo {
+    type: BorderType;
+    color: string;
+    style: number;
 }
 
 export class ToolbarUIController {

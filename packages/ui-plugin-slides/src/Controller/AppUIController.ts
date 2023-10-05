@@ -17,6 +17,8 @@ export class AppUIController {
         this._slideContainerUIController = this._injector.createInstance(SlideContainerUIController, config);
         this._injector.add([SlideContainerUIController, { useValue: this._slideContainerUIController }]);
         const UIConfig = this._slideContainerUIController.getUIConfig();
+
+        // TODO: put sidebar UI to the base-ui workbench container
     }
 
     /**

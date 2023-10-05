@@ -120,11 +120,10 @@ export class SheetUIController extends Disposable {
     ) {
         super();
 
-        this._initialize();
-        this._initUI();
+        this._init();
     }
 
-    private _initialize(): void {
+    private _init(): void {
         // init custom component
         const componentManager = this._componentManager;
 
@@ -246,11 +245,8 @@ export class SheetUIController extends Disposable {
         ].forEach((item) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(item));
         });
-    }
 
-    private _initUI(): void {
         this.disposeWithMe(
-            // WTF: redi type error
             this._uiController.registerFooterComponent(() => connectInjector(RenderSheetFooter, this._injector))
         );
     }

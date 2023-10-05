@@ -15,12 +15,21 @@ import { IUIController, IWorkbenchOptions } from './ui.controller';
 export interface IDesktopUIController extends IUIController {
     componentRegistered$: Observable<void>;
 
+    // provides multi methods for business to register workbench custom components
+    // TODO@wzhudev: in the future we may bind components to different business types
+
+    // footer bar
     registerFooterComponent(component: () => ComponentType): IDisposable;
     getFooterComponents(): Set<() => ComponentType>;
+
+    registerSidebarComponent(component: () => ComponentType): IDisposable;
+    getSidebarComponents(): Set<() => ComponentType>;
 }
 
 export class DesktopUIController extends Disposable implements IDesktopUIController {
     private _footerComponents: Set<() => ComponentType> = new Set();
+
+    private _sidebarComponents: Set<() => ComponentType> = new Set();
 
     private _componentRegistered$ = new Subject<void>();
 
@@ -52,6 +61,16 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     getFooterComponents(): Set<() => ComponentType> {
         return new Set([...this._footerComponents]);
     }
+
+    registerSidebarComponent(component: () => ComponentType): IDisposable {
+        this._sidebarComponents.add(component);
+        this._componentRegistered$.next();
+        return toDisposable(() => this._footerComponents.delete(component));
+    }
+
+    getSidebarComponents(): Set<() => React.ComponentType> {
+        return new Set([...this._sidebarComponents]);
+    }
 }
 
 function bootStrap(
@@ -82,7 +101,15 @@ function bootStrap(
     const desktopUIController = injector.get(IUIController) as IDesktopUIController;
     const updateSubscription = desktopUIController.componentRegistered$.subscribe(() => {
         const footerComponents = desktopUIController.getFooterComponents();
-        root.render(<ConnectedApp {...options} footerComponents={footerComponents} onRendered={callback} />);
+        const sidebarComponents = desktopUIController.getSidebarComponents();
+        root.render(
+            <ConnectedApp
+                {...options}
+                footerComponents={footerComponents}
+                sidebarComponents={sidebarComponents}
+                onRendered={callback}
+            />
+        );
     });
 
     return toDisposable(() => {

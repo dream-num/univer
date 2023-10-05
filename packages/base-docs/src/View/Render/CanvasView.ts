@@ -22,7 +22,6 @@ export class CanvasView {
         /** @deprecated This a temporary solution. CanvasView should not be a singleton. */
         private standalone = true,
         @IRenderManagerService private readonly _rms: RenderManagerService,
-        // @IRenderingEngine private readonly _engine: Engine,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._initialize();

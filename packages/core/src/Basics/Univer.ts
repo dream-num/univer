@@ -88,12 +88,10 @@ export class Univer {
 
     createUniverSlide(config: Partial<ISlideData>): UniverSlide {
         const slide = this._univerInjector.createInstance(UniverSlide, config);
-
         this._currentUniverService.addSlide(slide);
         this.initializePluginsForSlide(slide);
-
         this._tryProgressToReady();
-
+        slide.onReady();
         return slide;
     }
 

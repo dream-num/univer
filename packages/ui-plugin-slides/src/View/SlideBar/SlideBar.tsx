@@ -1,5 +1,5 @@
-import { AppContext, BaseComponentProps, Button } from '@univerjs/base-ui';
-import { ISlidePage } from '@univerjs/core';
+import { AppContext, BaseComponentProps } from '@univerjs/base-ui';
+import { ICurrentUniverService, ISlidePage } from '@univerjs/core';
 import { Component, createRef } from 'react';
 
 import styles from './index.module.less';
@@ -14,24 +14,23 @@ interface IProps extends BaseComponentProps {
     activeSlide: (pageId: string) => void;
 }
 
-export class SlideBar extends Component<IProps, SlideBarState> {
+export class SlideBar extends Component<{}, SlideBarState> {
     static override contextType = AppContext;
+
+    declare context: React.ContextType<typeof AppContext>;
 
     slideBarRef = createRef<HTMLDivElement>();
 
-    constructor(props: IProps) {
+    constructor(props: {}) {
         super(props);
-        this.initialize();
-    }
 
-    initialize() {
         this.state = {
             slideList: [],
         };
     }
 
     override componentDidMount() {
-        this.props.getComponent?.(this);
+        this._init();
     }
 
     isActive(pageId: string, index: number = 0) {
@@ -62,12 +61,33 @@ export class SlideBar extends Component<IProps, SlideBarState> {
             activePageId: pageId,
         });
 
-        this.props.activeSlide(pageId);
+        // this.props.activeSlide(pageId);
+    }
+
+    private _init(): void {
+        // TODO: should subscribe to active slide change event
+        const currentUniverService = this.context.injector.get(ICurrentUniverService);
+        const model = currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
+        const pages = model.getPages();
+        const pageOrder = model.getPageOrder();
+        if (!pages || !pageOrder) {
+            return;
+        }
+
+        const p: ISlidePage[] = [];
+        pageOrder.forEach((pageKey) => {
+            p.push(pages[pageKey]);
+        });
+
+        this.setState({
+            slideList: p,
+        });
     }
 
     override render() {
-        const { addSlide } = this.props;
+        // const { addSlide } = this.props;
         const { slideList } = this.state;
+        // TODO@wzhudev: manage slides in a SlideService
 
         return (
             <div className={styles.slideBar} ref={this.slideBarRef}>
@@ -83,9 +103,9 @@ export class SlideBar extends Component<IProps, SlideBarState> {
                         </div>
                     ))}
                 </div>
-                <div className={styles.slideAddButton}>
+                {/* <div className={styles.slideAddButton}>
                     <Button onClick={addSlide}>+</Button>
-                </div>
+                </div> */}
             </div>
         );
     }

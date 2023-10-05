@@ -2,8 +2,10 @@ import {
     Engine,
     EVENT_TYPE,
     IRenderingEngine,
+    IRenderManagerService,
     IWheelEvent,
     Rect,
+    RenderManagerService,
     Scene,
     ScrollBar,
     Slide,
@@ -34,7 +36,8 @@ export class CanvasView {
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @Inject(Injector) private readonly _injector: Injector,
-        @IRenderingEngine private readonly _engine: Engine
+        @IRenderingEngine private readonly _engine: Engine,
+        @IRenderManagerService private readonly _rms: RenderManagerService
     ) {
         this._initializeDependencies(this._injector);
         this._initialize();
@@ -129,7 +132,7 @@ export class CanvasView {
     }
 
     private _initialize() {
-        const engine = this._engine;
+        const engine = this._rms.defaultEngine;
 
         const scene = new Scene(SLIDE_KEY.SCENE, engine, {
             width: 2400,

@@ -6,6 +6,7 @@ import { DefaultSlideUIConfig, ISlideUIPluginConfig } from './Basics';
 import { SLIDE_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { IToolbarItemProps } from './Controller';
 import { AppUIController } from './Controller/AppUIController';
+import { SlideUIController } from './Controller/slide-ui.controller';
 import { en } from './Locale';
 
 export class SlideUIPlugin extends Plugin {
@@ -56,6 +57,7 @@ export class SlideUIPlugin extends Plugin {
 
     private initializeDependencies(): void {
         this._injector.add([ComponentManager]);
+        this._injector.add([SlideUIController]);
 
         this._componentManager = this._injector.get(ComponentManager);
         this._appUIController = this._injector.createInstance(AppUIController, this._config);

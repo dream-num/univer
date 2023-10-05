@@ -15,6 +15,7 @@ import { Toolbar } from './components/toolbar/toolbar';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     footerComponents?: Set<() => ComponentType>;
+    sidebarComponents?: Set<() => ComponentType>;
     onRendered?: (container: HTMLElement) => void;
 }
 
@@ -28,7 +29,9 @@ export function App(props: IUniverAppProps) {
 
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const { footerComponents, onRendered } = props;
+    const { footerComponents, sidebarComponents, onRendered } = props;
+
+    console.log('debug', sidebarComponents);
 
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
@@ -100,7 +103,16 @@ export function App(props: IUniverAppProps) {
                         </Header>
                         {/* content */}
                         <Layout>
-                            <Sider style={{ display: props.innerLeft ? 'block' : 'none' }}>{/* inner left */}</Sider>
+                            <Sider
+                                style={{ display: props.innerLeft ? 'block' : 'none' }}
+                                className={style.contentInnerLeftContainer}
+                            >
+                                {/* inner left */}
+                                {sidebarComponents &&
+                                    Array.from(sidebarComponents.values()).map((component, index) =>
+                                        React.createElement(component(), { key: `${index}` })
+                                    )}
+                            </Sider>
                             <Content className={style.contentContainerHorizontal}>
                                 {/* FIXME: context menu component shouldn't have to mount on this position */}
                                 <Container

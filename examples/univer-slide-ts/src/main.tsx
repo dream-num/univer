@@ -18,16 +18,10 @@ univer.registerPlugin(UIPlugin, {
     header: true,
     toolbar: true,
     footer: true,
+    innerLeft: true,
 });
 univer.registerPlugin(SlidePlugin);
-univer.registerPlugin(SlideUIPlugin, {
-    container: 'universlide',
-    layout: {
-        slideContainerConfig: {
-            innerLeft: true,
-        },
-    },
-});
+univer.registerPlugin(SlideUIPlugin);
 
 univer.createUniverSlide(DEFAULT_SLIDE_DATA);
 

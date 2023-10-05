@@ -1,4 +1,4 @@
-import { AppContext, BaseComponentProps, Button } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps } from '@univerjs/base-ui';
 import { ISlidePage } from '@univerjs/core';
 import { Component, createRef } from 'react';
 
@@ -14,13 +14,14 @@ interface IProps extends BaseComponentProps {
     activeSlide: (pageId: string) => void;
 }
 
-export class SlideBar extends Component<IProps, SlideBarState> {
+export class SlideBar extends Component<{}, SlideBarState> {
     static override contextType = AppContext;
 
     slideBarRef = createRef<HTMLDivElement>();
 
-    constructor(props: IProps) {
+    constructor(props: {}) {
         super(props);
+
         this.initialize();
     }
 
@@ -28,10 +29,6 @@ export class SlideBar extends Component<IProps, SlideBarState> {
         this.state = {
             slideList: [],
         };
-    }
-
-    override componentDidMount() {
-        this.props.getComponent?.(this);
     }
 
     isActive(pageId: string, index: number = 0) {
@@ -62,17 +59,18 @@ export class SlideBar extends Component<IProps, SlideBarState> {
             activePageId: pageId,
         });
 
-        this.props.activeSlide(pageId);
+        // this.props.activeSlide(pageId);
     }
 
     override render() {
-        const { addSlide } = this.props;
-        const { slideList } = this.state;
+        // const { addSlide } = this.props;
+        // const { slideList } = this.state;
+        // TODO@wzhudev: manage slides in a SlideService
 
         return (
             <div className={styles.slideBar} ref={this.slideBarRef}>
                 <div className={styles.slideBarContent}>
-                    {slideList.map((item, index) => (
+                    {/* {slideList.map((item, index) => (
                         <div
                             key={index}
                             className={`${styles.slideBarItem} ${this.isActive(item.id, index)}`}
@@ -81,11 +79,11 @@ export class SlideBar extends Component<IProps, SlideBarState> {
                             <span>{index + 1}</span>
                             <div className={styles.slideBarBox}></div>
                         </div>
-                    ))}
+                    ))} */}
                 </div>
-                <div className={styles.slideAddButton}>
+                {/* <div className={styles.slideAddButton}>
                     <Button onClick={addSlide}>+</Button>
-                </div>
+                </div> */}
             </div>
         );
     }

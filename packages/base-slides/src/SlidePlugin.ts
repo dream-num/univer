@@ -2,7 +2,6 @@ import { Engine, IRenderingEngine } from '@univerjs/base-render';
 import { ICurrentUniverService, ILanguagePack, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { ToolbarController } from './Controller';
 import { en } from './Locale';
 import { CanvasView } from './View/Render';
 
@@ -18,8 +17,6 @@ export class SlidePlugin extends Plugin {
     private _canvasEngine: Engine | null = null;
 
     private _canvasView: CanvasView | null = null;
-
-    private _toolbarController: ToolbarController | null = null;
 
     constructor(
         config: Partial<ISlidePluginConfig> = {},
@@ -37,16 +34,11 @@ export class SlidePlugin extends Plugin {
         this._localeService.getLocale().load({
             en: en as unknown as ILanguagePack,
         });
-        this.initController();
         this.initCanvasEngine();
     }
 
     getConfig() {
         return this._config;
-    }
-
-    initController() {
-        this._toolbarController = this._injector.get(ToolbarController);
     }
 
     initCanvasEngine() {
@@ -70,7 +62,7 @@ export class SlidePlugin extends Plugin {
     }
 
     private _initializeDependencies(slideInjector: Injector) {
-        const dependencies: Dependency[] = [[CanvasView], [ToolbarController]];
+        const dependencies: Dependency[] = [[CanvasView]];
 
         dependencies.forEach((d) => {
             slideInjector.add(d);

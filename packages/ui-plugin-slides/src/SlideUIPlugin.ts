@@ -1,5 +1,3 @@
-import { IRenderingEngine } from '@univerjs/base-render';
-import { CanvasView } from '@univerjs/base-slides';
 import { ComponentManager } from '@univerjs/base-ui';
 import { LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -22,8 +20,7 @@ export class SlideUIPlugin extends Plugin {
     constructor(
         config: Partial<ISlideUIPluginConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(CanvasView) private readonly _canvasView: CanvasView
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super(SLIDE_UI_PLUGIN_NAME);
         this._config = Tools.deepMerge({}, DefaultSlideUIConfig, config);
@@ -31,52 +28,15 @@ export class SlideUIPlugin extends Plugin {
         this.initializeDependencies();
     }
 
-    initialize(): void {
-        /**
-         * load more Locale object
-         */
-        this._localeService.getLocale().load({
-            en,
-        });
-
-        // AppUIController initializes the DOM as an asynchronous rendering process, and must wait for the UI rendering to complete before starting to render the canvas
-        this.UIDidMount(() => {
-            this.initRender();
-        });
-    }
-
     getConfig() {
         return this._config;
     }
 
-    initRender() {
-        const engine = this._injector.get(IRenderingEngine);
-        const container = this._appUIController!.getSlideContainerController().getContentRef().current;
-        if (!container) {
-            throw new Error('container is not ready');
-        }
-
-        // mount canvas to DOM container
-        engine.setContainer(container);
-
-        window.addEventListener('resize', () => {
-            engine.resize();
+    override onStarting(_injector: Injector): void {
+        this._localeService.getLocale().load({
+            en,
         });
-
-        // should be clear
-        setTimeout(() => {
-            engine.resize();
-            this._canvasView.scrollToCenter();
-        }, 0);
     }
-
-    initUI() {}
-
-    override onRendered(): void {
-        this.initialize();
-    }
-
-    override onDestroy(): void {}
 
     getAppUIController() {
         return this._appUIController;
@@ -84,15 +44,6 @@ export class SlideUIPlugin extends Plugin {
 
     getComponentManager() {
         return this._componentManager;
-    }
-
-    /**
-     * This API is used in plugins for initialization that depends on UI rendering
-     * @param cb
-     * @returns
-     */
-    UIDidMount(cb: Function) {
-        this._appUIController!.getSlideContainerController().UIDidMount(cb);
     }
 
     addToolButton(config: IToolbarItemProps) {

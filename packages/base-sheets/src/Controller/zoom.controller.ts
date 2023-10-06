@@ -65,7 +65,7 @@ export class ZoomController extends Disposable {
                 ratioDelta /= 2;
             }
 
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const sheet = workbook.getActiveSheet();
             const currentRatio = sheet.getZoomRatio();
             let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
@@ -87,7 +87,7 @@ export class ZoomController extends Disposable {
                 return;
             }
 
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
 
             const worksheet = workbook.getActiveSheet();
 
@@ -103,7 +103,7 @@ export class ZoomController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params;

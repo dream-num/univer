@@ -139,7 +139,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
                 let isBold = FontWeight.NORMAL;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -192,7 +192,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
                 let isItalic = FontItalic.NORMAL;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -245,7 +245,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
                 let isUnderline;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -298,7 +298,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
                 let st;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -504,7 +504,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
                 let ff;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -561,7 +561,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
                 let fs;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -699,7 +699,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
                 let ha;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -755,7 +755,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
                 let va;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -811,7 +811,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
                 let ws;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -882,7 +882,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
                 let tr;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -1074,7 +1074,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         value$: new Observable((subscriber) => {
             function update() {
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
                 let rowHeight;
                 if (primary != null) {
                     rowHeight = worksheet.getRowHeight(primary.startRow);
@@ -1117,7 +1117,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         value$: new Observable((subscriber) => {
             function update() {
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
 
                 let colWidth: number = 0;
                 if (primary != null) {

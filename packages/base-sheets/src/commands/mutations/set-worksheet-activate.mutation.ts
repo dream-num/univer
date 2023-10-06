@@ -16,7 +16,7 @@ export const SetWorksheetUnActivateMutationFactory = (
         throw new Error('universheet is null error!');
     }
 
-    const worksheets = universheet.getWorkBook().getWorksheets();
+    const worksheets = universheet.getWorksheets();
     let activate: Nullable<Worksheet> = null;
 
     for (const [, worksheet] of worksheets) {
@@ -44,7 +44,7 @@ export const SetWorksheetActivateMutation: IMutation<ISetWorksheetActivateMutati
 
         if (!universheet) return false;
 
-        const worksheets = universheet.getWorkBook().getWorksheets();
+        const worksheets = universheet.getWorksheets();
 
         for (const [, worksheet] of worksheets) {
             if (worksheet.getSheetId() === params.worksheetId) {

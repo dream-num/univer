@@ -24,15 +24,13 @@ export const CopySheetToCommand: ICommand = {
 
         const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId =
-            params.worksheetId ||
-            currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+            params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         const copyToWorkbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const copyToSheetId =
-            params.copyToSheetId ||
-            currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+            params.copyToSheetId || currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
-        const copyToWorkbook = currentUniverService.getUniverSheetInstance(copyToWorkbookId)?.getWorkBook();
+        const copyToWorkbook = currentUniverService.getUniverSheetInstance(copyToWorkbookId);
         if (!copyToWorkbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

@@ -67,8 +67,7 @@ describe('Test style commands', () => {
                 function getMerge(): IRange[] | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getConfig().mergeData;
                 }
 
@@ -110,8 +109,7 @@ describe('Test style commands', () => {
                 function getMerge(): IRange[] | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getConfig().mergeData;
                 }
 
@@ -150,7 +148,7 @@ describe('Test style commands', () => {
                 function getMerge(): IRange[] | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
+
                         .getSheetBySheetId('sheet1')
                         ?.getConfig().mergeData;
                 }
@@ -190,7 +188,7 @@ describe('Test style commands', () => {
                 function getMerge(): IRange[] | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
+
                         .getSheetBySheetId('sheet1')
                         ?.getConfig().mergeData;
                 }

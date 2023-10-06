@@ -166,7 +166,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // 3. calculate selection matrix, span cells would only - maybe warn uses that cells are too may in the future
         const { startColumn, startRow, endColumn, endRow } = selection.range;
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
 
@@ -364,7 +364,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     // NOTE: why there are some differences between internal and external pasting?
 
     private _getPastingTarget() {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const selection = this._selectionManagerService.getLast();
         return {

@@ -41,7 +41,7 @@ export class InfoBarUIController {
 
     private _refreshComponent(): void {
         const name = 'UniverSlide';
-        // const name = this._plugin.getUniver().getCurrentUniverSlideInstance().getWorkBook().getConfig().name;
+        // const name = this._plugin.getUniver().getCurrentUniverSlideInstance().getConfig().name;
         this._infoBarModel = new InfoBarModel(name);
         this._infoList = {
             back: {

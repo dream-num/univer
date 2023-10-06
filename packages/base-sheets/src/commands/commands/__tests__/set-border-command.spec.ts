@@ -72,7 +72,7 @@ describe('Test style commands', () => {
                 function getBorder({ startRow, startColumn }: IRange): IBorderData | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
+
                         .getSheetBySheetId('sheet1')
                         ?.getRange(startRow, startColumn)
                         .getBorder();

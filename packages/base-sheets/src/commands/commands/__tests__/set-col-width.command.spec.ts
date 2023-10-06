@@ -19,7 +19,7 @@ describe('Test set col width commands', () => {
     let commandService: ICommandService;
 
     function getColumnWidth(col: number): number {
-        const worksheet = get(ICurrentUniverService).getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        const worksheet = get(ICurrentUniverService).getCurrentUniverSheetInstance().getActiveSheet();
         return worksheet.getColumnWidth(col);
     }
 
@@ -33,7 +33,7 @@ describe('Test set col width commands', () => {
         commandService.registerCommand(SetColWidthCommand);
         commandService.registerCommand(SetWorksheetColWidthMutation);
 
-        const worksheet = get(ICurrentUniverService).getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        const worksheet = get(ICurrentUniverService).getCurrentUniverSheetInstance().getActiveSheet();
         const maxRow = worksheet.getMaxRows() - 1;
         const selectionManager = get(SelectionManagerService);
         selectionManager.setCurrentSelection({

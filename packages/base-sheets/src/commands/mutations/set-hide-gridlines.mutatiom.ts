@@ -11,7 +11,7 @@ export const SetHideGridlinesUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetHideGridlinesMutationParams
 ): ISetHideGridlinesMutationParams => {
-    const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
+    const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
     const worksheet = workbook!.getSheetBySheetId(params.worksheetId);
     const config = worksheet!.getConfig();
 
@@ -27,7 +27,7 @@ export const SetHideGridlinesMutation: IMutation<ISetHideGridlinesMutationParams
     id: 'sheet.mutation.set-hide-gridlines',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;

@@ -128,7 +128,7 @@ export class NumfmtController extends Disposable {
         // };
         // const command = new Command(
         //     {
-        //         WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
+        //         WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance(),
         //     },
         //     config
         // );
@@ -151,7 +151,7 @@ export class NumfmtController extends Disposable {
         // };
         // const command = new Command(
         //     {
-        //         WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook(),
+        //         WorkBookUnit: this._currentUniverService.getCurrentUniverSheetInstance(),
         //     },
         //     config
         // );

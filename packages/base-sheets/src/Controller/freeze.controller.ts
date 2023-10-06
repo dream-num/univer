@@ -449,7 +449,7 @@ export class FreezeController extends Disposable {
 
             xSplit = xSplit < 0 ? 0 : xSplit;
 
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const worksheet = workbook.getActiveSheet();
 
             this._commandService.executeCommand(SetFrozenCommand.id, {
@@ -874,7 +874,7 @@ export class FreezeController extends Disposable {
 
     private _scrollListener() {
         this._scrollManagerService.scrollInfo$.subscribe((param) => {
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const worksheet = workbook.getActiveSheet();
 
             const freeze = worksheet.getConfig().freeze;
@@ -891,7 +891,7 @@ export class FreezeController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params as ISetFrozenMutationParams;

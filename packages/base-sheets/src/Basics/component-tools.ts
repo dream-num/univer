@@ -26,7 +26,7 @@ export function getSheetObject(
     currentUniverService: ICurrentUniverService,
     renderManagerService: IRenderManagerService
 ): Nullable<ISheetObjectParam> {
-    const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+    const workbook = currentUniverService.getCurrentUniverSheetInstance();
 
     const unitId = workbook.getUnitId();
 

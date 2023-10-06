@@ -334,10 +334,7 @@ export class SheetClipboardController extends Disposable {
     }
 
     private _getWorksheet(workbookId: string, worksheetId: string): Worksheet {
-        const worksheet = this._currentUniverSheet
-            .getUniverSheetInstance(workbookId)
-            ?.getWorkBook()
-            .getSheetBySheetId(worksheetId);
+        const worksheet = this._currentUniverSheet.getUniverSheetInstance(workbookId)?.getSheetBySheetId(worksheetId);
 
         if (!worksheet) {
             throw new Error(

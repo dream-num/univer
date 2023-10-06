@@ -24,12 +24,12 @@
 
 //     redo(): ObjectMatrixPrimitiveType<string> {
 //         const { injector } = this._doActionData;
-//         return SetNumfmtRangeData(this.getWorkBook(), this._doActionData.sheetId, this._doActionData.numfmtMatrix, injector!.get(NumfmtController));
+//         return SetNumfmtRangeData(this, this._doActionData.sheetId, this._doActionData.numfmtMatrix, injector!.get(NumfmtController));
 //     }
 
 //     undo(): void {
 //         const { injector } = this._oldActionData;
-//         SetNumfmtRangeData(this.getWorkBook(), this._oldActionData.sheetId, this._oldActionData.numfmtMatrix, injector!.get(NumfmtController));
+//         SetNumfmtRangeData(this, this._oldActionData.sheetId, this._oldActionData.numfmtMatrix, injector!.get(NumfmtController));
 //     }
 
 //     validate(): boolean {

@@ -36,12 +36,8 @@ export const AddWorksheetMergeCommand: ICommand = {
         const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length) return false;
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
-            .getCurrentUniverSheetInstance()
-            .getWorkBook()
-            .getActiveSheet()
-            .getSheetId();
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

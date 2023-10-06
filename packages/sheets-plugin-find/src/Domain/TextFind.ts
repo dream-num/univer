@@ -129,12 +129,12 @@ export class TextFinder {
 
         let count = 0;
         const sheetId = this._range[0].sheetId;
-        let sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getSheetBySheetId(sheetId);
+        let sheet = this._currentUniverService.getCurrentUniverSheetInstance().getSheetBySheetId(sheetId);
         for (let i = 0; i < this._range.length; i++) {
             if (sheetId !== this._range[i].sheetId) {
                 sheet = this._currentUniverService
                     .getCurrentUniverSheetInstance()
-                    .getWorkBook()
+
                     .getSheetBySheetId(this._range[i].sheetId);
             }
             const range = this._range[i];
@@ -157,7 +157,7 @@ export class TextFinder {
         const range = this._range[this._index];
         const sheet = this._currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getSheetBySheetId(range.sheetId);
         if (!sheet) return 0;
 
@@ -207,7 +207,7 @@ export class TextFinder {
 
     private _getRange(searchRange: SelectSearch) {
         if (searchRange === SelectSearch.CurrentSheet) {
-            const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+            const sheet = this._currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
             const sheetId = sheet.getSheetId();
             const rangeList: IGridRange = {
                 sheetId,
@@ -263,7 +263,7 @@ export class TextFinder {
         for (let i = 0; i < this._rangeData.length; i++) {
             const sheet = this._currentUniverService
                 .getCurrentUniverSheetInstance()
-                .getWorkBook()
+
                 .getSheetBySheetId(this._rangeData[i].sheetId);
             if (!sheet) return [];
             let matrix: ObjectMatrix<ICellData> = new ObjectMatrix<ICellData>();
@@ -330,7 +330,7 @@ export class TextFinder {
     // 高亮匹配单元格
     private _highlightCell(range: IGridRange) {
         if (!range) return;
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const unitId = workbook.getUnitId();
         const sheetId = range.sheetId;
         const mergeData = workbook.getActiveSheet().getMergeData();

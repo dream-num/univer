@@ -14,14 +14,14 @@ export class UploadService {
     upload() {
         const { _selectionManagerService, _currentUniverService, _injector } = this;
         const selection = _selectionManagerService.getLast()?.range;
-        const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
         if (selection == null) {
             return;
         }
         const activeRange = worksheet.getRange(selection);
         const rowIndex = activeRange.getRowIndex();
         const columnIndex = activeRange.getColumn();
-        const workbook = _currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = _currentUniverService.getCurrentUniverSheetInstance();
         FileSelected.chooseImage().then((file) => {
             const reader = new FileReader();
             const img = new Image();

@@ -62,7 +62,7 @@ describe('Test clear selection content commands', () => {
                 function getValue(): Nullable<ICellData> {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
+
                         .getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getValue();
@@ -108,7 +108,7 @@ describe('Test clear selection content commands', () => {
                 function getValue(): Nullable<ICellData> {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
+
                         .getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getValue();
@@ -116,7 +116,7 @@ describe('Test clear selection content commands', () => {
 
                 function getStyle(): Nullable<IStyleData> {
                     const value = getValue();
-                    const styles = get(ICurrentUniverService).getUniverSheetInstance('test')?.getWorkBook().getStyles();
+                    const styles = get(ICurrentUniverService).getUniverSheetInstance('test')?.getStyles();
                     if (value && styles) {
                         return styles.getStyleByCell(value);
                     }
@@ -178,7 +178,7 @@ describe('Test clear selection content commands', () => {
                 function getValue(): Nullable<ICellData> {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
+
                         .getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getValue();
@@ -186,7 +186,7 @@ describe('Test clear selection content commands', () => {
 
                 function getStyle(): Nullable<IStyleData> {
                     const value = getValue();
-                    const styles = get(ICurrentUniverService).getUniverSheetInstance('test')?.getWorkBook().getStyles();
+                    const styles = get(ICurrentUniverService).getUniverSheetInstance('test')?.getStyles();
                     if (value && styles) {
                         return styles.getStyleByCell(value);
                     }

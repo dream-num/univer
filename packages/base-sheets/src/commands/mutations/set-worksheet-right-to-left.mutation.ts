@@ -11,7 +11,7 @@ export const SetWorksheetRightToLeftUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetRightToLeftMutationParams
 ): ISetWorksheetRightToLeftMutationParams => {
-    const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
+    const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
     const worksheet = workbook!.getSheetBySheetId(params.worksheetId);
     const config = worksheet!.getConfig();
 
@@ -27,7 +27,7 @@ export const SetWorksheetRightToLeftMutation: IMutation<ISetWorksheetRightToLeft
     id: 'sheet.mutation.set-worksheet-right-to-left',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;

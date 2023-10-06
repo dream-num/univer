@@ -24,7 +24,7 @@ export const SetWorksheetActivateCommand: ICommand = {
         let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         let worksheetId = currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getSheetId();
 

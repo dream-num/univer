@@ -42,7 +42,7 @@ export const InsertSheetCommand: ICommand = {
             workbookId = params.workbookId ?? workbookId;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
 
         let index = workbook.getSheets().length;

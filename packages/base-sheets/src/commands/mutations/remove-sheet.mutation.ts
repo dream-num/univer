@@ -15,7 +15,7 @@ export const RemoveSheetUndoMutationFactory = (
     params: IRemoveSheetMutationParams
 ): IInsertSheetMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
-    const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+    const workbook = currentUniverService.getCurrentUniverSheetInstance();
     const { worksheetId, workbookId } = params;
     const sheet = workbook.getSheetBySheetId(worksheetId)!.getConfig();
     const config = workbook!.getConfig();
@@ -34,7 +34,7 @@ export const RemoveSheetMutation: IMutation<IRemoveSheetMutationParams, boolean>
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
         const { worksheetId, workbookId } = params;
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
 
         if (!workbook) {
             return false;

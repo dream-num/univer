@@ -1,5 +1,5 @@
 import { Inject, Injector } from '@wendellhu/redi';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../Shared/lifecycle';
 import { ILogService } from '../log/log.service';
@@ -35,6 +35,26 @@ export class LifecycleService extends Disposable {
         // this._logService.log('[LifecycleService]', `lifecycle progressed to "${LifecycleNameMap[stage]}".`);
         this._lifecycle$.next(stage);
     }
+
+    subscribeWithPrevious(): Observable<LifecycleStages> {
+        return new Observable<LifecycleStages>((subscriber) => {
+            // before subscribe, emit the current stage and all previous stages
+            if (this.stage === LifecycleStages.Starting) {
+                // do nothing
+            } else if (this.stage === LifecycleStages.Ready) {
+                subscriber.next(LifecycleStages.Starting);
+            } else if (this.stage === LifecycleStages.Rendered) {
+                subscriber.next(LifecycleStages.Starting);
+                subscriber.next(LifecycleStages.Ready);
+            } else {
+                subscriber.next(LifecycleStages.Starting);
+                subscriber.next(LifecycleStages.Ready);
+                subscriber.next(LifecycleStages.Rendered);
+            }
+
+            return this._lifecycle$.subscribe(subscriber);
+        });
+    }
 }
 
 export class LifecycleInitializerService extends Disposable {
@@ -47,7 +67,9 @@ export class LifecycleInitializerService extends Disposable {
 
     start(): void {
         this.disposeWithMe(
-            toDisposable(this._lifecycleService.lifecycle$.subscribe((stage) => this._initModulesOnStage(stage)))
+            toDisposable(
+                this._lifecycleService.subscribeWithPrevious().subscribe((stage) => this._initModulesOnStage(stage))
+            )
         );
     }
 

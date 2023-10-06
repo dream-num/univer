@@ -1,56 +1,75 @@
-import { Ctor, Dependency, IDisposable, Injector, Optional } from '@wendellhu/redi';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Ctor, Dependency, IDisposable, Inject, Injector } from '@wendellhu/redi';
 
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
-import { LifecycleInitializerService } from '../services/lifecycle/lifecycle.service';
+import { LifecycleStages } from '../services/lifecycle/lifecycle';
+import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { GenName } from '../Shared/GenName';
-import { Logger } from '../Shared/Logger';
+import { Disposable, toDisposable } from '../Shared/lifecycle';
 import { Workbook } from '../Sheets/Domain';
-import { IWorkbookConfig } from '../Types/Interfaces';
-import { VersionCode, VersionEnv } from './Version';
+import { IWorkbookConfig } from '../Types/Interfaces/IWorkbookData';
 
 /**
  * Externally provided UniverSheet root instance
  */
-export class UniverSheet implements IDisposable {
-    univerSheetConfig: Partial<IWorkbookConfig>;
+export class UniverSheet extends Disposable implements IDisposable {
+    private readonly _injector: Injector;
 
-    private readonly _sheetInjector: Injector;
-
-    // TODO@wzhudev: maybe we should support multiple workbooks in the future?
-    private readonly _workbook: Workbook;
+    private readonly _workbooks: Workbook[] = [];
 
     private readonly _pluginStore = new PluginStore();
 
-    constructor(univerSheetData: Partial<IWorkbookConfig> = {}, @Optional(Injector) parentInjector?: Injector) {
-        this.univerSheetConfig = univerSheetData;
+    constructor(@Inject(Injector) parentInjector: Injector) {
+        super();
 
-        this._sheetInjector = this._initDependencies(parentInjector);
-        this._workbook = this._sheetInjector.createInstance(Workbook, univerSheetData);
-        this._sheetInjector.get(LifecycleInitializerService).start();
+        this._injector = this._initDependencies(parentInjector);
     }
 
-    static newInstance(univerSheetData: Partial<IWorkbookConfig> = {}): UniverSheet {
-        Logger.capsule(VersionEnv, VersionCode, 'powered by :: universheet :: ');
-        return new UniverSheet(univerSheetData);
+    init(): void {
+        this.disposeWithMe(
+            toDisposable(
+                this._injector
+                    .get(LifecycleService)
+                    .subscribeWithPrevious()
+                    .subscribe((stage) => {
+                        if (stage === LifecycleStages.Starting) {
+                            this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
+                            return;
+                        }
+
+                        if (stage === LifecycleStages.Ready) {
+                            this._pluginStore.forEachPlugin((p) => p.onReady());
+                            return;
+                        }
+
+                        if (stage === LifecycleStages.Rendered) {
+                            this._pluginStore.forEachPlugin((p) => p.onRendered());
+                            return;
+                        }
+
+                        if (stage === LifecycleStages.Steady) {
+                            this._pluginStore.forEachPlugin((p) => p.onSteady());
+                        }
+                    })
+            )
+        );
+
+        this._injector.get(LifecycleInitializerService).start();
     }
 
-    /**
-     * get unit id
-     */
-    getUnitId(): string {
-        return this.getWorkBook().getUnitId();
+    createSheet(workbookConfig: Partial<IWorkbookConfig>): Workbook {
+        const workbook = this._injector.createInstance(Workbook, workbookConfig);
+        this._workbooks.push(workbook);
+        return workbook;
     }
 
-    getWorkBook(): Workbook {
-        return this._workbook;
-    }
+    override dispose(): void {
+        super.dispose();
 
-    onReady(): void {
-        this._pluginStore.forEachPlugin((p) => p.onReady());
+        this._workbooks.length = 0;
+        this._pluginStore.removePlugins();
     }
-
-    dispose(): void {}
 
     /**
      * Add a plugin into UniverSheet. UniverSheet should add dependencies exposed from this plugin to its DI system.
@@ -61,9 +80,10 @@ export class UniverSheet implements IDisposable {
      * @internal
      */
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
-        const pluginInstance: Plugin = this._sheetInjector.createInstance(plugin as unknown as Ctor<any>, options);
-        pluginInstance.onStarting(this._sheetInjector);
+        const pluginInstance: Plugin = this._injector.createInstance(plugin as unknown as Ctor<any>, options);
         this._pluginStore.addPlugin(pluginInstance);
+
+        // TODO: should replay lifecycle staged to newly added plugins
     }
 
     private _initDependencies(parentInjector?: Injector): Injector {

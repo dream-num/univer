@@ -35,7 +35,7 @@ export const SetWorksheetHideCommand: ICommand = {
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         let worksheetId = currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getSheetId();
 
@@ -43,7 +43,7 @@ export const SetWorksheetHideCommand: ICommand = {
             worksheetId = params.worksheetId ?? worksheetId;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

@@ -35,7 +35,7 @@ export class FormulaController {
 
         this._activeSheetId = this._currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getSheetId();
 
@@ -107,11 +107,11 @@ export class FormulaController {
     }
 
     getWorkbook() {
-        return this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        return this._currentUniverService.getCurrentUniverSheetInstance();
     }
 
     getUnitId() {
-        return this.getWorkbook().getUnitId();
+        return this.getUnitId();
     }
 
     addArrayFormulaData(value: ArrayFormulaDataType) {
@@ -177,7 +177,7 @@ export class FormulaController {
     // }
 
     private _toInterpreterCalculateProps(): IInterpreterDatasetConfig {
-        const workbook = this.getWorkbook();
+        const workbook = this;
         const sheets = workbook.getSheets();
         const sheetData: SheetDataType = {};
         const unitData: UnitDataType = {};

@@ -38,7 +38,7 @@ export class SheetCanvasView {
     }
 
     private _initialize() {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
 
         const unitId = workbook.getUnitId();
 
@@ -72,7 +72,7 @@ export class SheetCanvasView {
 
     private _initialComponent(currentRender: IRender) {
         const scene = this._scene;
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
 
         const unitId = workbook.getUnitId();

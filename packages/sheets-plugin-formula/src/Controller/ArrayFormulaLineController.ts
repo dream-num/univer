@@ -34,7 +34,7 @@ export class ArrayFormulaLineControl {
      * @returns Workbook
      */
     getWorkBook(): Workbook {
-        return this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook();
+        return this._currentUniverSheet.getCurrentUniverSheetInstance();
     }
 
     dispose() {
@@ -45,7 +45,7 @@ export class ArrayFormulaLineControl {
         const { startRow, startColumn, endRow, endColumn } = this._range;
         const sheetId = this._sheetId;
 
-        const workbook = this.getWorkBook();
+        const workbook = this;
         const worksheet = workbook.getSheetBySheetId(sheetId);
 
         if (worksheet == null) {

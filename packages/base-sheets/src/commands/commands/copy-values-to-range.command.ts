@@ -39,10 +39,10 @@ export const CopyValuesToRangeCommand: ICommand = {
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getSheetId();
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const handleResult = handleCopyRange(accessor, workbookId, worksheetId, originRange, params.destinationRange);
         if (!handleResult) return false;
@@ -100,8 +100,7 @@ function handleCopyRange(
     const worksheet = accessor
         .get(ICurrentUniverService)
         .getUniverSheetInstance(workbookId)
-        ?.getWorkBook()
-        .getSheetBySheetId(worksheetId);
+        ?.getSheetBySheetId(worksheetId);
     if (!worksheet) return;
 
     const sheetMatrix = worksheet.getCellMatrix();

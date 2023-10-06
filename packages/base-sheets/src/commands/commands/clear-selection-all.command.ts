@@ -30,7 +30,7 @@ export const ClearSelectionAllCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
         const workbookId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const worksheetId = worksheet.getSheetId();

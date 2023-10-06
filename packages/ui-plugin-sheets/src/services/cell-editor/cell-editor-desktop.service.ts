@@ -136,7 +136,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
 
         this._commandService.executeCommand(SetRangeValuesCommand.id, <ISetRangeValuesCommandParams>{
             workbookId,
-            worksheetId: currentUniverSheet.getWorkBook().getActiveSheet().getSheetId(),
+            worksheetId: currentUniverSheet.getActiveSheet().getSheetId(),
             range: this._currentEditingCell,
             value: {
                 v: dataStream,
@@ -368,7 +368,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
 
         return this._currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getRange(actualRow, actualColumn);
     }

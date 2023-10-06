@@ -592,7 +592,7 @@ git rebase --continue
 比如，获取 workbook
 
 ```js
-context.getWorkBook();
+context;
 ```
 
 ### 挂载 meta data
@@ -602,9 +602,9 @@ context.getWorkBook();
 是否需要挂载 meta data,每个插件的情况不一样。插件的临时数据只需要插件自己存储，无需挂载到核心，只有需要存储的插件才需要挂载到核心上。如果一个插件的数据在每一个 sheet 页上都不一样,就要放在 worksheet 上,反之就挂载在 workbook 上
 
 ```js
-const activeSheetId = context.getWorkBook().getActiveSheet().getSheetId();
+const activeSheetId = context.getActiveSheet().getSheetId();
 // add new AlternatingColors meta data
-context.getWorkBook().setPluginMeta <
+context.setPluginMeta <
     IKeyType <
     IBandedRange >> (ALTERNATING_COLORS_PLUGIN_NAME, { [activeSheetId]: [] });
 ```
@@ -972,7 +972,7 @@ export class AlternatingColorsPlugin extends Plugin {
             actionName: ACTION_NAMES.SET_TAB_COLOR_ACTION,
             color: color,
         };
-        let command = new Command(_context.getWorkBook(), setTabColor);
+        let command = new Command(_context, setTabColor);
         _commandManager.invoke(command);
         return this;
     }

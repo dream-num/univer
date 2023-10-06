@@ -52,7 +52,7 @@ export class UploadService {
                 return console.error('No content');
             }
 
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook();
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             if (!workbook) {
                 return false;
             }

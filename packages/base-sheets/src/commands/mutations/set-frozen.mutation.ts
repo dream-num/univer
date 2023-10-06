@@ -20,7 +20,7 @@ export const SetFrozenMutationFactory = (
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
-    const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+    const worksheet = universheet.getSheetBySheetId(params.worksheetId);
 
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
@@ -46,7 +46,7 @@ export const SetFrozenMutation: IMutation<ISetFrozenMutationParams> = {
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;
         const config = worksheet.getConfig();
         const { startRow, startColumn, ySplit, xSplit } = params;

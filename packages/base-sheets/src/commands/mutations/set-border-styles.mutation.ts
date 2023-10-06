@@ -32,10 +32,10 @@ export const SetBorderStylesUndoMutationFactory = (
     params: ISetBorderStylesMutationParams
 ): ISetBorderStylesMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
-    const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+    const workbook = currentUniverService.getCurrentUniverSheetInstance();
     const worksheet = currentUniverService
         .getCurrentUniverSheetInstance()
-        .getWorkBook()
+
         .getSheetBySheetId(params.worksheetId);
     const cellMatrix = worksheet?.getCellMatrix();
     const styles = workbook.getStyles();
@@ -59,7 +59,7 @@ export const SetBorderStylesMutation: IMutation<ISetBorderStylesMutationParams, 
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;

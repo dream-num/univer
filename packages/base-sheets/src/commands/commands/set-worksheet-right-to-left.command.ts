@@ -32,7 +32,7 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
         let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         let worksheetId = currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getSheetId();
         let rightToLeft = BooleanNumber.FALSE;
@@ -43,7 +43,7 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
             rightToLeft = params.rightToLeft ?? BooleanNumber.FALSE;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

@@ -26,7 +26,7 @@ export const DeleteRangeUndoMutationFactory = (
     const currentUniverService = accessor.get(ICurrentUniverService);
     const worksheet = currentUniverService
         .getCurrentUniverSheetInstance()
-        .getWorkBook()
+
         .getSheetBySheetId(params.worksheetId);
     if (!worksheet) return null;
     const cellMatrix = worksheet.getCellMatrix();
@@ -79,7 +79,7 @@ export const DeleteRangeMutation: IMutation<IDeleteRangeMutationParams, boolean>
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;

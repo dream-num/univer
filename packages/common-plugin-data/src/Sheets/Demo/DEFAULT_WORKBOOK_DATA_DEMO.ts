@@ -13804,7 +13804,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             type: 0,
             tabColor: '',
             hidden: 0,
-            rowCount: 21,
+            rowCount: 40,
             columnCount: 12,
             freeze: {
                 xSplit: 0,

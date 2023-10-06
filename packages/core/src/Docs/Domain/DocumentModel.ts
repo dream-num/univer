@@ -121,7 +121,7 @@ export class DocumentModel extends DocumentModelSimple {
         super(snapshot);
 
         this._unitId = this.snapshot.id ?? Tools.generateRandomId(UNIT_ID_LENGTH);
-        this.initializeRowColTree();
+        this._initializeRowColTree();
     }
 
     reset(snapshot: Partial<IDocumentData>) {
@@ -130,7 +130,7 @@ export class DocumentModel extends DocumentModelSimple {
         }
 
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
-        this.initializeRowColTree();
+        this._initializeRowColTree();
         this.bodyModel.reset(snapshot.body ?? { dataStream: '\r\n\0' });
     }
 
@@ -138,7 +138,7 @@ export class DocumentModel extends DocumentModelSimple {
         return this._unitId;
     }
 
-    private initializeRowColTree() {
+    private _initializeRowColTree() {
         this.headerTreeMap = new Map();
         this.footerTreeMap = new Map();
 

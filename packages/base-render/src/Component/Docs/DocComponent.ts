@@ -45,6 +45,10 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
         });
     }
 
+    setAllowCache(state: boolean = false) {
+        this._allowCache = state;
+    }
+
     getSkeleton() {
         return this._skeleton;
     }

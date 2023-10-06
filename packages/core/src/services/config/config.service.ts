@@ -1,11 +1,13 @@
 import { createIdentifier } from '@wendellhu/redi';
 
-import { IKeyValue } from '../../Shared/Types';
+import { IKeyValue, Nullable } from '../../Shared/Types';
 
 export const IConfigService = createIdentifier<IConfigService>('univer.config-service');
 
 export interface IConfigService {
-    getConfig<T>(id: string): T | undefined;
+    getConfig<T>(unitId: string, id: string): Nullable<T>;
+    setConfig(unitId: string, id: string, value: any): void;
+    batchSettings(unitId: string, config: { [key: string]: any }): void;
 }
 
 const BUILT_IN_CONFIG: IKeyValue = {
@@ -14,14 +16,31 @@ const BUILT_IN_CONFIG: IKeyValue = {
 
 export class ConfigService implements IConfigService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private readonly _config = new Map<string, any>();
+    private readonly _config: Map<string, Map<string, any>> = new Map();
 
     constructor() {
         this._initBuiltInConfig();
     }
 
-    getConfig<T>(id: string): T | undefined {
-        return this._config.get(id) as T;
+    getConfig<T>(unitId: string, id: string): Nullable<T> {
+        return this._config.get(unitId)?.get(id) as T;
+    }
+
+    setConfig(unitId: string, id: string, value: any) {
+        let unit = this._config.get(unitId);
+        if (unit == null) {
+            this._config.set(unitId, new Map());
+            unit = this._config.get(unitId);
+        }
+
+        unit!.set(id, value);
+    }
+
+    batchSettings(unitId: string, config: { [key: string]: any }) {
+        const keys = Object.keys(config);
+        keys.forEach((key: string) => {
+            this.setConfig(unitId, key, config[key]);
+        });
     }
 
     private _initBuiltInConfig(): void {

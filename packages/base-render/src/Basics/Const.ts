@@ -289,3 +289,5 @@ export enum RENDER_CLASS_TYPE {
     LAYER = 'Layer',
     GROUP = 'Group',
 }
+
+export const DOCS_EDITOR_UNIT_ID_KEY = '__defaultDocumentEditorSpecialUnitId_20231006__';

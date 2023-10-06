@@ -80,6 +80,15 @@ export class Workbook {
         return this._unitId;
     }
 
+    getContainer() {
+        return this._config.container;
+    }
+
+    getShouldRenderLoopImmediately() {
+        const should = this._config.shouldRenderLoopImmediately;
+        return should !== false;
+    }
+
     getWorksheets(): Map<string, Worksheet> {
         return this._worksheets;
     }

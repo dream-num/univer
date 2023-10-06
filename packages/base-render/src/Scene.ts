@@ -1,4 +1,5 @@
 import { IKeyValue, Nullable, sortRules, sortRulesByDesc } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 
 import { BaseObject } from './BaseObject';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './Basics/Const';
@@ -30,6 +31,10 @@ export class Scene extends ThinScene {
     private _maxZIndex: number = 0;
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
+
+    private _addObject$ = new BehaviorSubject<Scene>(this);
+
+    readonly addObject$ = this._addObject$.asObservable();
 
     /**
      * Transformer constructor.  Transformer is a special type of group that allow you transform
@@ -308,6 +313,7 @@ export class Scene extends ThinScene {
 
     override addObject(o: BaseObject, zIndex: number = 1) {
         this.getLayer(zIndex)?.addObject(o);
+        this._addObject$.next(this);
         return this;
     }
 
@@ -335,6 +341,7 @@ export class Scene extends ThinScene {
 
     override addObjects(objects: BaseObject[], zIndex: number = 1) {
         this.getLayer(zIndex)?.addObjects(objects);
+        this._addObject$.next(this);
         return this;
     }
 

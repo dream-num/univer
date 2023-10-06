@@ -88,43 +88,6 @@ export class SheetRenderController extends Disposable {
                 width: rowHeaderWidth,
                 height: columnHeaderHeight,
             });
-
-            // scene?.transformByState({
-            //     width: columnWidthByHeader(worksheet) + columnTotalWidth,
-            //     height: rowHeightByHeader(worksheet) + rowTotalHeight,
-            //     // width: this._columnWidthByTitle(worksheet) + columnTotalWidth + 100,
-            //     // height: this._rowHeightByTitle(worksheet) + rowTotalHeight + 200,
-            // });
-
-            // const rowHeaderWidthScale = rowHeaderWidth * scene.scaleX;
-            // const columnHeaderHeightScale = columnHeaderHeight * scene.scaleY;
-
-            // const viewMain = scene.getViewport(CANVAS_VIEW_KEY.VIEW_MAIN);
-            // const viewTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_TOP);
-            // const viewLeft = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT);
-            // const viewLeftTop = scene.getViewport(CANVAS_VIEW_KEY.VIEW_LEFT_TOP);
-
-            // viewMain?.resize({
-            //     left: rowHeaderWidthScale,
-            //     top: columnHeaderHeightScale,
-            // });
-
-            // viewTop?.resize({
-            //     left: rowHeaderWidthScale,
-            //     height: columnHeaderHeightScale,
-            // });
-
-            // viewLeft?.resize({
-            //     top: columnHeaderHeightScale,
-            //     width: rowHeaderWidthScale,
-            // });
-
-            // viewLeftTop?.resize({
-            //     width: rowHeaderWidthScale,
-            //     height: columnHeaderHeightScale,
-            // });
-
-            // spreadsheet.makeDirty();
         });
     }
 

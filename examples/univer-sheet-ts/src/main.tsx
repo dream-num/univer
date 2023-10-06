@@ -1,5 +1,5 @@
 import { DocPlugin } from '@univerjs/base-docs';
-import { RenderEngine } from '@univerjs/base-render';
+import { DOCS_EDITOR_UNIT_ID_KEY, RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { greenTheme, UIPlugin } from '@univerjs/base-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
@@ -21,10 +21,13 @@ const univer = new Univer({
     locales,
 });
 
+const DOCS_EDITOR_SNAPSHOT = {
+    id: DOCS_EDITOR_UNIT_ID_KEY,
+    documentStyle: {},
+};
+
 // core plugins
-univer.registerPlugin(DocPlugin, {
-    standalone: false,
-});
+univer.registerPlugin(DocPlugin);
 univer.registerPlugin(DocUIPlugin);
 univer.registerPlugin(RenderEngine);
 univer.registerPlugin(UIPlugin, {
@@ -42,6 +45,9 @@ univer.registerPlugin(SheetUIPlugin);
 // univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
 // univer.registerPlugin(ImportXlsxPlugin);
 // univer.registerPlugin(ImagePlugin);
+
+// create univer doc editor instance
+univer.createUniverDoc(DOCS_EDITOR_SNAPSHOT);
 
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);

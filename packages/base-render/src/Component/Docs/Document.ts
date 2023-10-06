@@ -68,25 +68,11 @@ export class Documents extends DocComponent {
     constructor(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         super(oKey, documentSkeleton, config?.allowCache);
 
-        if (config?.pageMarginLeft === undefined) {
-            this.pageMarginLeft = 17;
-        } else {
-            this.pageMarginLeft = config?.pageMarginLeft;
-        }
-
-        if (config?.pageMarginTop === undefined) {
-            this.pageMarginTop = 14;
-        } else {
-            this.pageMarginTop = config?.pageMarginTop;
-        }
-
-        this.pageLayoutType = config?.pageLayoutType || PageLayoutType.VERTICAL;
+        this.setConfig(config);
 
         this._drawLiquid = new Liquid();
 
         this._findLiquid = new Liquid();
-
-        this._hasEditor = config?.hasEditor || false;
 
         this._initialDefaultExtension();
 
@@ -101,6 +87,26 @@ export class Documents extends DocComponent {
 
     static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         return new Documents(oKey, documentSkeleton, config);
+    }
+
+    setConfig(config?: IDocumentsConfig) {
+        if (config?.pageMarginLeft === undefined) {
+            this.pageMarginLeft = 17;
+        } else {
+            this.pageMarginLeft = config?.pageMarginLeft;
+        }
+
+        if (config?.pageMarginTop === undefined) {
+            this.pageMarginTop = 14;
+        } else {
+            this.pageMarginTop = config?.pageMarginTop;
+        }
+
+        this.pageLayoutType = config?.pageLayoutType || PageLayoutType.VERTICAL;
+
+        this._hasEditor = config?.hasEditor || false;
+
+        this.setAllowCache(config?.allowCache || false);
     }
 
     getEditor(): Nullable<DocsEditor> {

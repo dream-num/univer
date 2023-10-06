@@ -12,7 +12,7 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/base-render';
-import { ICurrentUniverService, LifecycleStages, Nullable, OnLifecycle, Worksheet } from '@univerjs/core';
+import { ICurrentUniverService, LifecycleStages, OnLifecycle, Workbook, Worksheet } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import {
@@ -25,7 +25,9 @@ import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.
 
 @OnLifecycle(LifecycleStages.Ready, SheetCanvasView)
 export class SheetCanvasView {
-    private _scene: Nullable<Scene>;
+    private _scene!: Scene;
+
+    private _currentWorkbook!: Workbook;
 
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
@@ -34,19 +36,29 @@ export class SheetCanvasView {
         private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
-        this._initialize();
+        this._currentUniverService.currentSheet$.subscribe((workbook) => {
+            if (workbook == null) {
+                throw new Error('workbook is null');
+            }
+            this._currentWorkbook = workbook;
+            this._addNewRender();
+        });
     }
 
-    private _initialize() {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+    private _addNewRender() {
+        const workbook = this._currentWorkbook;
 
         const unitId = workbook.getUnitId();
+        const container = workbook.getContainer();
 
-        const renderManager = this._renderManagerService.createRenderWithDefaultEngine(unitId);
+        if (container == null) {
+            this._renderManagerService.createRenderWithDefaultEngine(unitId);
+        } else {
+            this._renderManagerService.createRenderWithNewEngine(unitId);
+        }
+        this._renderManagerService.setCurrent(unitId);
 
-        renderManager.setCurrent(unitId);
-
-        const currentRender = renderManager.getCurrent();
+        const currentRender = this._renderManagerService.getRenderById(unitId);
 
         if (currentRender == null) {
             return;
@@ -61,18 +73,24 @@ export class SheetCanvasView {
         scene.addLayer(Layer.create(scene, [], 0), Layer.create(scene, [], 2));
 
         if (currentRender != null) {
-            this._initialComponent(currentRender);
+            this._addComponent(currentRender);
         }
 
-        engine.runRenderLoop(() => {
-            // document.getElementById('app')!.innerHTML = engine.getFps().toString();
-            scene.render();
-        });
+        const should = workbook.getShouldRenderLoopImmediately();
+
+        if (should) {
+            engine.runRenderLoop(() => {
+                // document.getElementById('app')!.innerHTML = engine.getFps().toString();
+                scene.render();
+            });
+        }
     }
 
-    private _initialComponent(currentRender: IRender) {
+    private _addComponent(currentRender: IRender) {
         const scene = this._scene;
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+
+        const workbook = this._currentWorkbook;
+
         const worksheet = workbook.getActiveSheet();
 
         const unitId = workbook.getUnitId();
@@ -102,8 +120,8 @@ export class SheetCanvasView {
         currentRender.components.set(SHEET_VIEW_KEY.COLUMN, spreadsheetColumnHeader);
         currentRender.components.set(SHEET_VIEW_KEY.LEFT_TOP, SpreadsheetLeftTopPlaceholder);
 
-        scene?.addObjects([spreadsheet], SHEET_COMPONENT_MAIN_LAYER_INDEX);
-        scene?.addObjects(
+        scene.addObjects([spreadsheet], SHEET_COMPONENT_MAIN_LAYER_INDEX);
+        scene.addObjects(
             [spreadsheetRowHeader, spreadsheetColumnHeader, SpreadsheetLeftTopPlaceholder],
             SHEET_COMPONENT_HEADER_LAYER_INDEX
         );

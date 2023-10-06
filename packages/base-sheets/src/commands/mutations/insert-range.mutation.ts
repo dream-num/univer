@@ -31,8 +31,8 @@ export const InsertRangeMutation: IMutation<IInsertRangeMutationParams, boolean>
         if (!worksheet) return false;
 
         const cellMatrix = worksheet.getCellMatrix();
-        const lastEndRow = worksheet.getLastRow();
-        const lastEndColumn = worksheet.getLastColumn();
+        const lastEndRow = worksheet.getLastRowWithContent();
+        const lastEndColumn = worksheet.getLastColumnWithContent();
 
         for (let i = 0; i < params.range.length; i++) {
             const { startRow, endRow, startColumn, endColumn } = params.range[i];

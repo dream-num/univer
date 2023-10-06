@@ -58,12 +58,16 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
 
             for (let j = rowIndex; j < rowIndex + rowCount; j++) {
                 if (rowInfo) {
-                    rowWrapper.insert(j, rowInfo.get(j) ?? defaultRowInfo);
+                    rowWrapper.insert(j, rowInfo.get(j - range.startRow) ?? defaultRowInfo);
                 } else {
                     rowWrapper.insert(j, defaultRowInfo);
                 }
             }
         }
+
+        worksheet.setRowCount(
+            worksheet.getRowCount() + ranges.reduce((acc, cur) => acc + cur.endRow - cur.startRow + 1, 0)
+        );
 
         return true;
     },
@@ -101,11 +105,12 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
         const worksheet = universheet.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;
         const manager = worksheet.getColumnManager();
+        const { ranges, colInfo } = params;
         const columnPrimitive = manager.getColumnData().toJSON();
         const columnWrapper = new ObjectArray(columnPrimitive);
 
-        for (let i = 0; i < params.ranges.length; i++) {
-            const range = params.ranges[i];
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
             const colIndex = range.startColumn;
             const colCount = range.endColumn - range.startColumn + 1;
             const defaultColWidth = worksheet.getConfig().defaultColumnWidth;
@@ -115,13 +120,17 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
                     w: defaultColWidth,
                     hd: 0,
                 };
-                if (params.colInfo) {
-                    columnWrapper.insert(j, params.colInfo.get(j) ?? defaultColInfo);
+                if (colInfo) {
+                    columnWrapper.insert(j, colInfo.get(j - range.startColumn) ?? defaultColInfo);
                 } else {
                     columnWrapper.insert(j, defaultColInfo);
                 }
             }
         }
+
+        worksheet.setColumnCount(
+            worksheet.getColumnCount() + ranges.reduce((acc, cur) => acc + cur.endColumn - cur.startColumn + 1, 0)
+        );
 
         return true;
     },

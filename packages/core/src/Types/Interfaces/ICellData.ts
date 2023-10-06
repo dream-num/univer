@@ -19,7 +19,7 @@ export interface ICellData {
     // The unique key, a random string, is used for the plug-in to associate the cell. When the cell information changes, the plug-in does not need to change the data, reducing the pressure on the back-end interface
     // id?: string;
     p?: Nullable<IDocumentData>; // univer docs, set null for cell clear all
-    s?: string | Nullable<IStyleData>; // style id
+    s?: Nullable<IStyleData | string>; // style id
     /**
      * Origin value
      */

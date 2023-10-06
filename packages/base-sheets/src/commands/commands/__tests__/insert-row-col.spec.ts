@@ -1,10 +1,17 @@
 /* eslint-disable no-magic-numbers */
 import {
+    ICellData,
     ICommandService,
     ICurrentUniverService,
+    IRange,
+    IStyleData,
     IWorkbookConfig,
     LocaleType,
+    Nullable,
     RANGE_TYPE,
+    RedoCommand,
+    Tools,
+    UndoCommand,
     Univer,
 } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
@@ -12,8 +19,10 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
+import { DeleteRangeMutation } from '../../mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import {
     InsertColAfterCommand,
@@ -51,6 +60,9 @@ describe('Test insert row col commands', () => {
             InsertRangeMutation,
             AddWorksheetMergeMutation,
             RemoveWorksheetMergeMutation,
+            RemoveRowMutation,
+            RemoveColMutation,
+            DeleteRangeMutation,
         ].forEach((c) => {
             commandService.registerCommand(c);
         });
@@ -115,16 +127,34 @@ describe('Test insert row col commands', () => {
 
     function getRowCount(): number {
         const currentService = get(ICurrentUniverService);
-        const univerSheet = currentService.getCurrentUniverSheetInstance();
-        const worksheet = univerSheet.getWorkBook().getActiveSheet();
-        return worksheet.getLastRow() + 1;
+        const workbook = currentService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        return worksheet.getRowCount();
     }
 
     function getColCount(): number {
         const currentService = get(ICurrentUniverService);
-        const univerSheet = currentService.getCurrentUniverSheetInstance();
-        const worksheet = univerSheet.getWorkBook().getActiveSheet();
-        return worksheet.getLastColumn() + 1;
+        const workbook = currentService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        return worksheet.getColumnCount();
+    }
+
+    function getCellStyle(row: number, col: number): Nullable<string | IStyleData> {
+        return getCellInfo(row, col)?.s;
+    }
+
+    function getCellInfo(row: number, col: number): Nullable<ICellData> {
+        const currentService = get(ICurrentUniverService);
+        const workbook = currentService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        return worksheet.getCellMatrix().getValue(row, col);
+    }
+
+    function getMergedInfo(row: number, col: number): Nullable<IRange> {
+        const currentService = get(ICurrentUniverService);
+        const workbook = currentService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        return worksheet.getMergedCells(row, col)?.[0];
     }
 
     describe('Insert rows', () => {
@@ -138,44 +168,104 @@ describe('Test insert row col commands', () => {
         it("Should 'insert before' work", async () => {
             selectRow(2, 2);
 
+            expect(getRowCount()).toBe(20);
+            expect(getCellStyle(2, 1)).toBe('s4');
             const result = await commandService.executeCommand(InsertRowBeforeCommand.id);
             expect(result).toBeTruthy();
-            expect(getRowCount()).toBe(20); // FIXME: the insert row mutation is executed before row count not changed!
+            expect(getRowCount()).toBe(21);
+            expect(getCellStyle(2, 1)).toBe(getCellStyle(3, 1)); // the style should be copied from the cell above
+            // the merged cell should be moved down
+            expect(getMergedInfo(3, 1)).toEqual({ startRow: 3, endRow: 4, startColumn: 1, endColumn: 1 });
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getRowCount()).toBe(20);
+
+            await commandService.executeCommand(RedoCommand.id);
+            expect(getRowCount()).toBe(21);
         });
 
-        // it("Should 'insert after' work", async () => {});
+        it("Should 'insert after' work", async () => {
+            selectRow(2, 2);
+
+            expect(getRowCount()).toBe(20);
+            expect(getCellStyle(2, 1)).toBe('s4');
+            expect(getMergedInfo(2, 1)).toEqual({ startRow: 2, endRow: 3, startColumn: 1, endColumn: 1 });
+            const result = await commandService.executeCommand(InsertRowBeforeCommand.id);
+            // TODO: expect row height
+            expect(result).toBeTruthy();
+            expect(getRowCount()).toBe(21);
+            // the merged cell should expand
+            expect(getMergedInfo(3, 1)).toEqual({ startRow: 3, endRow: 4, startColumn: 1, endColumn: 1 });
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getRowCount()).toBe(20);
+
+            await commandService.executeCommand(RedoCommand.id);
+            expect(getRowCount()).toBe(21);
+        });
     });
 
-    // describe('Insert columns', () => {
-    //     it("Should 'insert before' work", async () => {});
+    describe('Insert columns', () => {
+        it("Should 'insert before' work", async () => {
+            selectColumn(1, 1);
+            expect(getColCount()).toBe(20);
 
-    //     it("Should 'insert after' work", async () => {});
-    // });
+            const result = await commandService.executeCommand(InsertColBeforeCommand.id);
+            expect(result).toBeTruthy();
+            expect(getColCount()).toBe(21);
+
+            const undoResult = await commandService.executeCommand(UndoCommand.id);
+            expect(undoResult).toBeTruthy();
+            expect(getColCount()).toBe(20);
+
+            await commandService.executeCommand(RedoCommand.id);
+            expect(getColCount()).toBe(21);
+        });
+
+        it("Should 'insert after' work", async () => {
+            selectColumn(1, 1);
+
+            const result = await commandService.executeCommand(InsertColAfterCommand.id);
+            expect(result).toBeTruthy();
+            expect(getColCount()).toBe(21);
+            // expect a merged cell to expand and a merged cell to move
+            expect(getMergedInfo(1, 1)).toEqual({ startRow: 1, endRow: 1, startColumn: 1, endColumn: 3 });
+            expect(getMergedInfo(1, 4)).toEqual({ startRow: 1, endRow: 1, startColumn: 4, endColumn: 5 });
+        });
+    });
 });
 
 const TEST_ROW_COL_INSERTION_DEMO: IWorkbookConfig = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
+        // 1
+        //  2-3-
+        // 	4
+        //  |
         sheet1: {
             id: 'sheet1',
             cellData: {
                 '0': {
                     '0': {
                         v: 'A1',
+                        s: 's1',
                     },
                 },
                 '1': {
                     '1': {
                         v: 'B2',
+                        s: 's2',
                     },
                     '4': {
                         v: 'E2',
+                        s: 's3',
                     },
                 },
                 '2': {
                     '1': {
                         v: 'B3',
+                        s: 's4',
                     },
                 },
             },
@@ -212,5 +302,5 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookConfig = {
 };
 
 function createInsertRowColTestBed() {
-    return createCommandTestBed(TEST_ROW_COL_INSERTION_DEMO);
+    return createCommandTestBed(Tools.deepClone(TEST_ROW_COL_INSERTION_DEMO));
 }

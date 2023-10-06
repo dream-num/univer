@@ -67,6 +67,10 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
             }
         }
 
+        worksheet.setRowCount(
+            worksheet.getRowCount() - params.ranges.reduce((acc, range) => acc + range.endRow - range.startRow + 1, 0)
+        );
+
         return true;
     },
 };
@@ -135,6 +139,11 @@ export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
                 columnWrapper.splice(j, 1);
             }
         }
+
+        worksheet.setColumnCount(
+            worksheet.getColumnCount() -
+                params.ranges.reduce((acc, range) => acc + range.endColumn - range.startColumn + 1, 0)
+        );
 
         return true;
     },

@@ -32,7 +32,6 @@ export class LifecycleService extends Disposable {
             return;
         }
 
-        // this._logService.log('[LifecycleService]', `lifecycle progressed to "${LifecycleNameMap[stage]}".`);
         this._lifecycle$.next(stage);
     }
 

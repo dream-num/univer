@@ -26,6 +26,8 @@ export interface IDesktopUIController extends IUIController {
     getSidebarComponents(): Set<() => ComponentType>;
 }
 
+const STEADY_TIMEOUT = 3000;
+
 export class DesktopUIController extends Disposable implements IDesktopUIController {
     private _footerComponents: Set<() => ComponentType> = new Set();
 
@@ -48,6 +50,8 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
             bootStrap(this._injector, options, (element) => {
                 this._renderManagerService.defaultEngine.setContainer(element);
                 this._lifecycleService.stage = LifecycleStages.Rendered;
+
+                setTimeout(() => (this._lifecycleService.stage = LifecycleStages.Steady), STEADY_TIMEOUT);
             })
         );
     }

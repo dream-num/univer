@@ -31,8 +31,6 @@ export function App(props: IUniverAppProps) {
 
     const { footerComponents, sidebarComponents, onRendered } = props;
 
-    console.log('debug', sidebarComponents);
-
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
             themeService.setTheme(defaultTheme);
@@ -59,7 +57,6 @@ export function App(props: IUniverAppProps) {
 
     return (
         <AppContext.Provider value={{ injector, localeService, themeService, locale, componentManager, zIndexManager }}>
-            {/* TODO: UI here is not fine tuned */}
             <div
                 style={{
                     position: 'fixed',

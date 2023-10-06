@@ -89,6 +89,7 @@ export const InsertRowCommand: ICommand = {
             worksheetId,
             ranges: [range],
             rowInfo: new ObjectArray<IRowData>(
+                // row height should inherit from the anchor row
                 new Array(endRow - startRow + 1).fill(undefined).map(() => ({
                     h: height,
                     hd: BooleanNumber.FALSE,
@@ -246,7 +247,7 @@ export const InsertRowBeforeCommand: ICommand = {
                 startRow: range.startRow,
                 endRow: range.startRow + rowCount - 1,
                 startColumn: 0,
-                endColumn: worksheet.getLastColumn() - 1,
+                endColumn: worksheet.getColumnCount() - 1,
             },
         };
 
@@ -293,7 +294,7 @@ export const InsertRowAfterCommand: ICommand = {
                 startRow: range.endRow + 1,
                 endRow: range.endRow + count,
                 startColumn: 0,
-                endColumn: worksheet.getLastColumn(),
+                endColumn: worksheet.getColumnCount() - 1,
             },
         };
 
@@ -491,7 +492,7 @@ export const InsertColBeforeCommand: ICommand = {
                 startColumn: range.startColumn,
                 endColumn: range.startColumn + count - 1,
                 startRow: 0,
-                endRow: worksheet.getLastColumn(),
+                endRow: worksheet.getLastColumnWithContent(),
             },
         };
 
@@ -536,7 +537,7 @@ export const InsertColAfterCommand: ICommand = {
                 startColumn: range.endColumn + 1,
                 endColumn: range.endColumn + count,
                 startRow: 0,
-                endRow: worksheet.getLastRow(),
+                endRow: worksheet.getLastRowWithContent(),
             },
         };
 

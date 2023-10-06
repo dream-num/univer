@@ -1,4 +1,4 @@
-import { SlotManager, ZIndexManager } from '@univerjs/base-ui';
+import { ZIndexManager } from '@univerjs/base-ui';
 import { ICurrentUniverService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
@@ -31,7 +31,6 @@ export class SheetUIPlugin extends Plugin {
             [
                 // legacy managers
                 [ZIndexManager],
-                [SlotManager],
 
                 // services
                 [ICellEditorService, { useClass: DesktopCellEditorService }],

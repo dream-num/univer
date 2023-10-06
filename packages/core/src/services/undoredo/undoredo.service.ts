@@ -2,7 +2,7 @@ import { createIdentifier, IAccessor, IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../Shared/lifecycle';
-import { CommandService, CommandType, ICommand, ICommandService } from '../command/command.service';
+import { CommandService, CommandType, ICommand, ICommandInfo, ICommandService } from '../command/command.service';
 import { ICurrentUniverService } from '../current.service';
 
 // TODO:: an undo redo element may be mergeable to another undo redo element
@@ -244,3 +244,8 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
         return false;
     }
 })();
+
+export interface IUndoRedoCommandInfos {
+    redos: ICommandInfo[];
+    undos: ICommandInfo[];
+}

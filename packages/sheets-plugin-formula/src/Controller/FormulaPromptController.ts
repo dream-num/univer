@@ -1,7 +1,7 @@
-import { ComponentManager, SlotManager } from '@univerjs/base-ui';
+import { ComponentManager } from '@univerjs/base-ui';
 import { Inject } from '@wendellhu/redi';
 
-import { FORMULA_PLUGIN_NAME, FunList } from '../Basics';
+import { FunList } from '../Basics';
 import { HelpFunction, SearchFunction } from '../View/UI/FormulaPrompt';
 import { CellInputHandler } from './CellInputHandler';
 
@@ -21,10 +21,7 @@ export class FormulaPromptController {
     // FIXME: strict initialization
     private _helpFunction!: HelpFunction;
 
-    constructor(
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(SlotManager) private readonly _slotManager: SlotManager
-    ) {
+    constructor(@Inject(ComponentManager) private _componentManager: ComponentManager) {
         this._initialize();
     }
 
@@ -45,25 +42,7 @@ export class FormulaPromptController {
 
     private _initRegisterComponent() {
         this._componentManager.register(SearchFunction.name, SearchFunction);
-        this._slotManager.setSlotComponent('main', {
-            name: FORMULA_PLUGIN_NAME + SearchFunction.name,
-            component: {
-                name: SearchFunction.name,
-                props: {
-                    getComponent: this.getSearchComponent.bind(this),
-                },
-            },
-        });
         this._componentManager.register(HelpFunction.name, HelpFunction);
-        this._slotManager.setSlotComponent('main', {
-            name: FORMULA_PLUGIN_NAME + HelpFunction.name,
-            component: {
-                name: HelpFunction.name,
-                props: {
-                    getComponent: this.getHelpComponent.bind(this),
-                },
-            },
-        });
     }
 
     private _mount() {

@@ -1,19 +1,22 @@
 import {
+    BooleanNumber,
     CommandType,
     Dimension,
     Direction,
     ICellData,
+    IColumnData,
     ICommand,
-    ICommandInfo,
     ICommandService,
     ICurrentUniverService,
     IRange,
+    IRowData,
+    IStyleData,
     IUndoRedoService,
     Nullable,
+    ObjectArray,
     ObjectMatrix,
     sequenceExecute,
     Tools,
-    Worksheet,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -33,7 +36,7 @@ import { DeleteRangeMutation } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../mutations/insert-range.mutation';
 import {
     InsertColMutation,
-    InsertColMutationFactory,
+    InsertColMutationUndoFactory,
     InsertRowMutation,
     InsertRowMutationUndoFactory,
 } from '../mutations/insert-row-col.mutation';
@@ -46,7 +49,16 @@ import {
 export interface IInsertRowCommandParams {
     workbookId: string;
     worksheetId: string;
+
+    /**
+     * whether it is inserting row after (DOWN) or inserting before (UP)
+     *
+     * this determines styles of the cells in the inserted rows
+     */
     direction: Direction.UP | Direction.DOWN;
+    /**
+     * The range will the row be inserted.
+     */
     range: IRange;
 }
 
@@ -66,23 +78,40 @@ export const InsertRowCommand: ICommand = {
         const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)!!;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId)!;
 
+        const { range, direction, workbookId, worksheetId } = params;
+        const { startRow, endRow, startColumn, endColumn } = range;
+        const anchorRow = direction === Direction.UP ? startRow : startRow - 1;
+        const height = worksheet.getRowHeight(anchorRow);
+
         // insert rows & undos
-        const redoInsertMutationParams: IInsertRowMutationParams = {
-            workbookId: params.workbookId,
-            worksheetId: params.worksheetId,
-            ranges: [params.range],
+        const insertRowParams: IInsertRowMutationParams = {
+            workbookId,
+            worksheetId,
+            ranges: [range],
+            rowInfo: new ObjectArray<IRowData>(
+                // row height should inherit from the anchor row
+                new Array(endRow - startRow + 1).fill(undefined).map(() => ({
+                    h: height,
+                    hd: BooleanNumber.FALSE,
+                }))
+            ),
         };
-        const undoMutationParams: IRemoveRowsMutationParams = InsertRowMutationUndoFactory(
+        const undoRowInsertionParams: IRemoveRowsMutationParams = InsertRowMutationUndoFactory(
             accessor,
-            redoInsertMutationParams
+            insertRowParams
         );
 
-        // insert range values & undos
-        const { startRow, endRow, startColumn, endColumn } = params.range;
+        // insert range styles & undos
         const cellValue = new ObjectMatrix<ICellData>();
-        for (let i = startRow; i <= endRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                cellValue.setValue(i, j, { v: '', m: '' }); // FIXME@wzhudev: should copy styles
+        const worksheetMatrix = worksheet.getCellMatrix();
+        const cellStyleByColumn = new Map<number, string | Nullable<IStyleData>>();
+        for (let row = startRow; row <= endRow; row++) {
+            for (let column = startColumn; column <= endColumn; column++) {
+                if (!cellStyleByColumn.has(column)) {
+                    cellStyleByColumn.set(column, worksheetMatrix.getValue(anchorRow, column)?.s);
+                }
+                const s = cellStyleByColumn.get(column);
+                cellValue.setValue(row, column, { v: '', m: '', s });
             }
         }
         const insertRangeMutationParams: IInsertRangeMutationParams = {
@@ -98,13 +127,14 @@ export const InsertRowCommand: ICommand = {
         );
 
         // update merged cells & undos
+        // NOTE: the problem of our algorithm is that we created a lot of merging cells mutations and un-merging cell mutations
         const mergeData = Tools.deepClone(worksheet.getMergeData());
         for (let i = 0; i < mergeData.length; i++) {
             const merge = mergeData[i];
             const count = endRow - startRow + 1;
             if (startRow > merge.endRow) {
                 continue;
-            } else if (endRow < merge.startRow) {
+            } else if (startRow <= merge.startRow) {
                 merge.startRow += count;
                 merge.endRow += count;
             } else {
@@ -130,12 +160,15 @@ export const InsertRowCommand: ICommand = {
             addMergeMutationParams
         );
 
+        // there should be a hook to update ranges of various features
+        // TODO@wzhudev: create RowColMutationService
+
         const result = await sequenceExecute(
             [
-                { id: InsertRowMutation.id, params: redoInsertMutationParams },
+                { id: InsertRowMutation.id, params: insertRowParams },
                 { id: InsertRangeMutation.id, params: insertRangeMutationParams },
-                { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-                { id: AddWorksheetMergeMutation.id, params: addMergeMutationParams },
+                { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams }, // remove all merged cells
+                { id: AddWorksheetMergeMutation.id, params: addMergeMutationParams }, // add all merged cells, TODO: can this be optimized?
             ],
             commandService
         );
@@ -148,9 +181,9 @@ export const InsertRowCommand: ICommand = {
                         await sequenceExecute(
                             [
                                 { id: DeleteRangeMutation.id, params: undoInsertRangeMutationParams },
-                                { id: RemoveRowMutation.id, params: undoMutationParams },
-                                { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
+                                { id: RemoveRowMutation.id, params: undoRowInsertionParams },
                                 { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeMutationParams },
+                                { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
                             ],
                             commandService
                         )
@@ -159,7 +192,7 @@ export const InsertRowCommand: ICommand = {
                     (
                         await sequenceExecute(
                             [
-                                { id: InsertRowMutation.id, params: redoInsertMutationParams },
+                                { id: InsertRowMutation.id, params: insertRowParams },
                                 { id: InsertRangeMutation.id, params: insertRangeMutationParams },
                                 { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
                                 { id: AddWorksheetMergeMutation.id, params: addMergeMutationParams },
@@ -175,14 +208,10 @@ export const InsertRowCommand: ICommand = {
     },
 };
 
-export interface IInsertRowBeforeOrAfterCommandParams {
-    value: number;
-}
-
-export const InsertRowBeforeCommand: ICommand<IInsertRowBeforeOrAfterCommandParams> = {
+export const InsertRowBeforeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row-before',
-    handler: async (accessor: IAccessor, params?: IInsertRowBeforeOrAfterCommandParams) => {
+    handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections()?.map((s) => s.range);
         let range: IRange;
@@ -208,7 +237,7 @@ export const InsertRowBeforeCommand: ICommand<IInsertRowBeforeOrAfterCommandPara
 
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
-        const rowCount = params?.value || range.endRow - range.startRow + 1;
+        const rowCount = range.endRow - range.startRow + 1;
 
         const insertRowParams: IInsertRowCommandParams = {
             workbookId,
@@ -218,7 +247,7 @@ export const InsertRowBeforeCommand: ICommand<IInsertRowBeforeOrAfterCommandPara
                 startRow: range.startRow,
                 endRow: range.startRow + rowCount - 1,
                 startColumn: 0,
-                endColumn: 0,
+                endColumn: worksheet.getColumnCount() - 1,
             },
         };
 
@@ -226,10 +255,10 @@ export const InsertRowBeforeCommand: ICommand<IInsertRowBeforeOrAfterCommandPara
     },
 };
 
-export const InsertRowAfterCommand: ICommand<IInsertRowBeforeOrAfterCommandParams> = {
+export const InsertRowAfterCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-row-after',
-    handler: async (accessor: IAccessor, params: IInsertRowBeforeOrAfterCommandParams) => {
+    handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections()?.map((s) => s.range);
         let range: IRange;
@@ -255,7 +284,7 @@ export const InsertRowAfterCommand: ICommand<IInsertRowBeforeOrAfterCommandParam
 
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
-        const rowCount = params?.value || range.endRow - range.startRow + 1;
+        const count = range.endRow - range.startRow + 1;
 
         const insertRowParams: IInsertRowCommandParams = {
             workbookId,
@@ -263,9 +292,9 @@ export const InsertRowAfterCommand: ICommand<IInsertRowBeforeOrAfterCommandParam
             direction: Direction.DOWN,
             range: {
                 startRow: range.endRow + 1,
-                endRow: range.endRow + rowCount,
+                endRow: range.endRow + count,
                 startColumn: 0,
-                endColumn: 0,
+                endColumn: worksheet.getColumnCount() - 1,
             },
         };
 
@@ -273,46 +302,60 @@ export const InsertRowAfterCommand: ICommand<IInsertRowBeforeOrAfterCommandParam
     },
 };
 
-export interface InsertColCommandParams {
-    value: number;
-}
-
-export interface InsertColCommandBaseParams {
+export interface IInsertColCommandParams {
     workbookId: string;
     worksheetId: string;
     range: IRange;
+    direction: Direction.LEFT | Direction.RIGHT;
 }
 
-export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
+export const InsertColCommand: ICommand<IInsertColCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col',
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params: InsertColCommandBaseParams) => {
+    handler: async (accessor: IAccessor, params: IInsertColCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
-        if (!worksheet) return false;
-
-        const redoMutationParams: IInsertColMutationParams = {
-            workbookId: params.workbookId,
-            worksheetId: params.worksheetId,
-            ranges: [params.range],
-        };
-        const undoMutationParams: IRemoveColMutationParams = InsertColMutationFactory(accessor, redoMutationParams);
-        const result = commandService.executeCommand(InsertColMutation.id, redoMutationParams);
-
+        const { range, direction, worksheetId, workbookId } = params;
         const { startRow, endRow, startColumn, endColumn } = params.range;
+        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)!;
+        const worksheet = workbook.getSheetBySheetId(params.worksheetId)!;
+        const anchorCol = direction === Direction.LEFT ? startColumn : startColumn - 1;
+        const width = worksheet.getColumnWidth(anchorCol);
+
+        // insert cols & undos
+        const insertColParams: IInsertColMutationParams = {
+            workbookId,
+            worksheetId,
+            ranges: [range],
+            colInfo: new ObjectArray<IColumnData>(
+                new Array(endColumn - startColumn + 1).fill(undefined).map(() => ({
+                    w: width,
+                    hd: BooleanNumber.FALSE,
+                }))
+            ),
+        };
+        const undoColInsertionParams: IRemoveColMutationParams = InsertColMutationUndoFactory(
+            accessor,
+            insertColParams
+        );
+
+        // insert range styles & undos
         const cellValue = new ObjectMatrix<ICellData>();
-        for (let i = startRow; i <= endRow; i++) {
-            for (let j = startColumn; j <= endColumn; j++) {
-                cellValue.setValue(i, j, { v: '', m: '' });
+        const worksheetMatrix = worksheet.getCellMatrix();
+        const cellStyleByRow = new Map<number, string | Nullable<IStyleData>>();
+        for (let row = startRow; row <= endRow; row++) {
+            for (let column = startColumn; column <= endColumn; column++) {
+                if (!cellStyleByRow.has(row)) {
+                    cellStyleByRow.set(row, worksheetMatrix.getValue(row, anchorCol)?.s);
+                }
+
+                const s = cellStyleByRow.get(row);
+                cellValue.setValue(row, column, { v: '', m: '', s });
             }
         }
-
         const insertRangeMutationParams: IInsertRangeMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
@@ -320,247 +363,184 @@ export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
             shiftDimension: Dimension.COLUMNS,
             cellValue: cellValue.getData(),
         };
-
-        const deleteRangeMutationParams: Nullable<IDeleteRangeMutationParams> = InsertRangeUndoMutationFactory(
+        const undoInsertRangeParams: Nullable<IDeleteRangeMutationParams> = InsertRangeUndoMutationFactory(
             accessor,
             insertRangeMutationParams
         );
-        if (!deleteRangeMutationParams) return false;
-        const deleteResult = commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
 
+        // update merged cells & undos
         const mergeData = Tools.deepClone(worksheet.getMergeData());
         for (let i = 0; i < mergeData.length; i++) {
             const merge = mergeData[i];
             const count = endColumn - startColumn + 1;
             if (startColumn > merge.endColumn) {
                 continue;
-            } else if (endColumn < merge.startColumn) {
+            } else if (endColumn <= merge.startColumn) {
                 merge.startColumn += count;
                 merge.endColumn += count;
             } else {
                 merge.endColumn += count;
             }
         }
-
-        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+        const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
             ranges: Tools.deepClone(worksheet.getMergeData()),
         };
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(
+        const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(
             accessor,
-            removeMergeMutationParams
+            removeMergeParams
         );
-        const removeResult = commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
-
-        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
+        const addMergeParams: IAddWorksheetMergeMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
             ranges: mergeData,
         };
-        const deleteMergeMutationParams: IRemoveWorksheetMergeMutationParams = AddWorksheetMergeMutationFactory(
+        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddWorksheetMergeMutationFactory(
             accessor,
-            addMergeMutationParams
+            addMergeParams
         );
-        const mergeResult = commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
 
-        if (result && deleteResult && removeResult && mergeResult) {
+        const result = await sequenceExecute(
+            [
+                { id: InsertColMutation.id, params: insertColParams },
+                { id: InsertRangeMutation.id, params: insertRangeMutationParams },
+                { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
+                { id: AddWorksheetMergeMutation.id, params: addMergeParams },
+            ],
+            commandService
+        );
+
+        if (result.result) {
             undoRedoService.pushUndoRedo({
                 URI: params.workbookId,
-                undo() {
-                    return (
-                        commandService.executeCommand(
-                            DeleteRangeMutation.id,
-                            deleteRangeMutationParams
-                        ) as Promise<boolean>
-                    )
-                        .then((res) => {
-                            if (res) return commandService.executeCommand(RemoveColMutation.id, undoMutationParams);
-                            return false;
-                        })
-                        .then((res) => {
-                            if (res)
-                                return commandService.executeCommand(
-                                    RemoveWorksheetMergeMutation.id,
-                                    deleteMergeMutationParams
-                                );
-                            return false;
-                        })
-                        .then((res) => {
-                            if (res)
-                                return commandService.executeCommand(
-                                    AddWorksheetMergeMutation.id,
-                                    undoRemoveMergeMutationParams
-                                );
-                            return false;
-                        });
-                },
-                redo() {
-                    return (commandService.executeCommand(InsertColMutation.id, redoMutationParams) as Promise<boolean>)
-                        .then((res) => {
-                            if (res)
-                                return commandService.executeCommand(InsertRangeMutation.id, insertRangeMutationParams);
-                            return false;
-                        })
-                        .then((res) => {
-                            if (res)
-                                return commandService.executeCommand(
-                                    RemoveWorksheetMergeMutation.id,
-                                    removeMergeMutationParams
-                                );
-                            return false;
-                        })
-                        .then((res) => {
-                            if (res)
-                                return commandService.executeCommand(
-                                    AddWorksheetMergeMutation.id,
-                                    addMergeMutationParams
-                                );
-                            return false;
-                        });
-                },
+                undo: async () =>
+                    (
+                        await sequenceExecute(
+                            [
+                                { id: DeleteRangeMutation.id, params: undoInsertRangeParams },
+                                {
+                                    id: RemoveColMutation.id,
+                                    params: undoColInsertionParams,
+                                },
+                                {
+                                    id: RemoveWorksheetMergeMutation.id,
+                                    params: undoAddMergeParams,
+                                },
+                                {
+                                    id: AddWorksheetMergeMutation.id,
+                                    params: undoRemoveMergeParams,
+                                },
+                            ],
+                            commandService
+                        )
+                    ).result,
+                redo: async () =>
+                    (
+                        await sequenceExecute(
+                            [
+                                { id: InsertColMutation.id, params: insertColParams },
+                                { id: InsertRangeMutation.id, params: insertRangeMutationParams },
+                                { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
+                                { id: AddWorksheetMergeMutation.id, params: addMergeParams },
+                            ],
+                            commandService
+                        )
+                    ).result,
             });
-
             return true;
         }
+
         return false;
     },
 };
 
-export const InsertColBeforeCommand: ICommand<InsertColCommandParams> = {
+export const InsertColBeforeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col-before',
-    handler: async (accessor: IAccessor, params?: InsertColCommandParams) => {
-        const commandService = accessor.get(ICommandService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+    handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
+        const selections = selectionManagerService.getSelections();
         let range: IRange;
-        const selections = selectionManagerService.getRangeDatas();
-        if (selections && selections.length === 1) {
-            range = selections[0];
+
+        if (selections?.length === 1) {
+            range = selections[0].range;
         } else {
             return false;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
-        if (!worksheet) return false;
-
-        let count = range.endColumn - range.startColumn + 1;
-        if (params) {
-            count = params.value ?? 1;
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        if (!workbook) {
+            return false;
         }
 
-        const insertColParams: InsertColCommandBaseParams = {
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return false;
+        }
+
+        const workbookId = workbook.getUnitId();
+        const worksheetId = worksheet.getSheetId();
+        const count = range.endColumn - range.startColumn + 1;
+
+        const insertColParams: IInsertColCommandParams = {
             workbookId,
             worksheetId,
+            direction: Direction.LEFT,
             range: {
                 startColumn: range.startColumn,
                 endColumn: range.startColumn + count - 1,
                 startRow: 0,
-                endRow: worksheet.getLastColumn(),
+                endRow: worksheet.getLastColumnWithContent(),
             },
         };
 
-        return commandService.executeCommand(InsertColCommand.id, insertColParams);
+        return accessor.get(ICommandService).executeCommand(InsertColCommand.id, insertColParams);
     },
 };
 
-export const InsertColAfterCommand: ICommand<InsertColCommandParams> = {
+export const InsertColAfterCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-col-after',
-    handler: async (accessor: IAccessor, params?: InsertColCommandParams) => {
-        const commandService = accessor.get(ICommandService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+    handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
+        const selections = selectionManagerService.getSelections();
         let range: IRange;
-        const selections = selectionManagerService.getRangeDatas();
-        if (selections && selections.length === 1) {
-            range = selections[0];
+
+        if (selections?.length === 1) {
+            range = selections[0].range;
         } else {
             return false;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
-        if (!worksheet) return false;
-
-        let count = range.endColumn - range.startColumn + 1;
-        if (params) {
-            count = params.value ?? 1;
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        if (!workbook) {
+            return false;
         }
 
-        const insertColParams: InsertColCommandBaseParams = {
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return false;
+        }
+
+        const workbookId = workbook.getUnitId();
+        const worksheetId = worksheet.getSheetId();
+        const count = range.endColumn - range.startColumn + 1;
+
+        const insertColParams: IInsertColCommandParams = {
             workbookId,
             worksheetId,
+            direction: Direction.RIGHT,
             range: {
                 startColumn: range.endColumn + 1,
                 endColumn: range.endColumn + count,
                 startRow: 0,
-                endRow: worksheet.getLastColumn(),
+                endRow: worksheet.getLastRowWithContent(),
             },
         };
 
-        return commandService.executeCommand(InsertColCommand.id, insertColParams);
+        return accessor.get(ICommandService).executeCommand(InsertColCommand.id, insertColParams);
     },
 };
-
-/**
- * When inserting a row, the inserted row should copy cell styles from the anchor row.
- */
-export function InsertRowMutationFactory(
-    anchorRow: number,
-    rowCount: number,
-    workbookId: string,
-    worksheet: Worksheet
-): ICommandInfo[] {
-    const worksheetId = worksheet.getSheetId();
-    const redoMutations: ICommandInfo[] = [];
-
-    // TODO: insert before or insert after
-
-    redoMutations.push({
-        id: InsertRowMutation.id,
-        params: {
-            workbookId,
-            worksheetId,
-            ranges: [
-                {
-                    startRow: anchorRow,
-                    endRow: anchorRow + rowCount - 1,
-                    startColumn: 0,
-                    endColumn: worksheet.getColumnCount() - 1,
-                },
-            ],
-        },
-    });
-
-    // copy cell styles to previous rows
-
-    return redoMutations;
-}
-
-export function InsertColumnMutationFactory(
-    anchorColumn: number,
-    columnCount: number,
-    worksheetId: string,
-    worksheet: Worksheet
-): ICommandInfo[] {
-    return [];
-}

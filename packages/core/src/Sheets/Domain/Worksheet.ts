@@ -270,20 +270,20 @@ export class Worksheet {
         return type;
     }
 
-    /**
-     * Returns Row Count
-     * @returns Row Count
-     */
     getRowCount(): number {
         return this._snapshot.rowCount;
     }
 
-    /**
-     * Returns Column Count
-     * @returns Column Count
-     */
+    setRowCount(count: number): void {
+        this._snapshot.rowCount = count;
+    }
+
     getColumnCount(): number {
         return this._snapshot.columnCount;
+    }
+
+    setColumnCount(count: number): void {
+        this._snapshot.columnCount = count;
     }
 
     /**
@@ -368,7 +368,7 @@ export class Worksheet {
      * Returns the position of the last row that has content.
      * @returns the position of the last row that has content.
      */
-    getLastRow(): number {
+    getLastRowWithContent(): number {
         return this._cellData.getLength();
     }
 
@@ -376,7 +376,7 @@ export class Worksheet {
      * Returns the position of the last column that has content.
      * @returns the position of the last column that has content.
      */
-    getLastColumn(): number {
+    getLastColumnWithContent(): number {
         return this._cellData.getRange().endColumn;
     }
 }

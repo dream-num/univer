@@ -60,12 +60,16 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
             const start = range.startRow;
-            const end = range.endRow - range.startRow + 1;
+            const end = range.endRow;
 
-            for (let j = start; j < end; j++) {
+            for (let j = start; j <= end; j++) {
                 rowWrapper.splice(j, 1);
             }
         }
+
+        worksheet.setRowCount(
+            worksheet.getRowCount() - params.ranges.reduce((acc, range) => acc + range.endRow - range.startRow + 1, 0)
+        );
 
         return true;
     },
@@ -129,12 +133,17 @@ export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
             const start = range.startColumn;
-            const end = range.endColumn - range.startColumn + 1;
+            const end = range.endColumn;
 
-            for (let j = start; j < end; j++) {
+            for (let j = start; j <= end; j++) {
                 columnWrapper.splice(j, 1);
             }
         }
+
+        worksheet.setColumnCount(
+            worksheet.getColumnCount() -
+                params.ranges.reduce((acc, range) => acc + range.endColumn - range.startColumn + 1, 0)
+        );
 
         return true;
     },

@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, ObjectArray } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation, ObjectArray, Rectangle } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
@@ -22,7 +22,7 @@ export const InsertRowMutationUndoFactory = (
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
-        ranges: params.ranges,
+        ranges: params.ranges.map((r) => Rectangle.clone(r)),
     };
 };
 
@@ -46,7 +46,10 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
         const manager = worksheet.getRowManager();
         const rowPrimitive = manager.getRowData().toJSON();
         const rowWrapper = new ObjectArray(rowPrimitive);
-        const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
+        const defaultRowInfo = {
+            h: worksheet.getConfig().defaultRowHeight,
+            hd: 0,
+        };
 
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
@@ -54,24 +57,23 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
             const rowCount = range.endRow - range.startRow + 1;
 
             for (let j = rowIndex; j < rowIndex + rowCount; j++) {
-                const defaultRowInfo = {
-                    h: defaultRowHeight,
-                    hd: 0,
-                };
-
                 if (rowInfo) {
-                    rowWrapper.insert(j, rowInfo.get(j) ?? defaultRowInfo);
+                    rowWrapper.insert(j, rowInfo.get(j - range.startRow) ?? defaultRowInfo);
                 } else {
                     rowWrapper.insert(j, defaultRowInfo);
                 }
             }
         }
 
+        worksheet.setRowCount(
+            worksheet.getRowCount() + ranges.reduce((acc, cur) => acc + cur.endRow - cur.startRow + 1, 0)
+        );
+
         return true;
     },
 };
 
-export const InsertColMutationFactory = (
+export const InsertColMutationUndoFactory = (
     accessor: IAccessor,
     params: IInsertColMutationParams
 ): IRemoveColMutationParams => {
@@ -85,7 +87,7 @@ export const InsertColMutationFactory = (
     return {
         workbookId: params.workbookId,
         worksheetId: params.worksheetId,
-        ranges: params.ranges,
+        ranges: params.ranges.map((r) => Rectangle.clone(r)),
     };
 };
 
@@ -103,11 +105,12 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
         const worksheet = universheet.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;
         const manager = worksheet.getColumnManager();
+        const { ranges, colInfo } = params;
         const columnPrimitive = manager.getColumnData().toJSON();
         const columnWrapper = new ObjectArray(columnPrimitive);
 
-        for (let i = 0; i < params.ranges.length; i++) {
-            const range = params.ranges[i];
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
             const colIndex = range.startColumn;
             const colCount = range.endColumn - range.startColumn + 1;
             const defaultColWidth = worksheet.getConfig().defaultColumnWidth;
@@ -117,13 +120,17 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
                     w: defaultColWidth,
                     hd: 0,
                 };
-                if (params.colInfo) {
-                    columnWrapper.insert(j, params.colInfo.get(j) ?? defaultColInfo);
+                if (colInfo) {
+                    columnWrapper.insert(j, colInfo.get(j - range.startColumn) ?? defaultColInfo);
                 } else {
                     columnWrapper.insert(j, defaultColInfo);
                 }
             }
         }
+
+        worksheet.setColumnCount(
+            worksheet.getColumnCount() + ranges.reduce((acc, cur) => acc + cur.endColumn - cur.startColumn + 1, 0)
+        );
 
         return true;
     },

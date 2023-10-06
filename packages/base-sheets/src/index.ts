@@ -27,7 +27,7 @@ export { ClearSelectionContentCommand } from './commands/commands/clear-selectio
 export { CopySheetCommand } from './commands/commands/copy-worksheet.command';
 export { DeleteRangeMoveLeftCommand } from './commands/commands/delete-range-move-left.command';
 export { DeleteRangeMoveUpCommand } from './commands/commands/delete-range-move-up.command';
-export type { IInsertRowBeforeOrAfterCommandParams as InsertRowCommandParams } from './commands/commands/insert-row-col.command';
+export type { IInsertColCommandParams, IInsertRowCommandParams } from './commands/commands/insert-row-col.command';
 export {
     InsertColAfterCommand,
     InsertColBeforeCommand,

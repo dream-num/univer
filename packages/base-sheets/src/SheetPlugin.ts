@@ -15,7 +15,6 @@ import { SheetRenderController } from './Controller/sheet-render.controller';
 import { ZoomController } from './Controller/zoom.controller';
 import { en } from './Locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
-import { RowColMutatingService } from './services/row-col-mutating/row-col-mutating.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
 import { SelectionManagerService } from './services/selection-manager.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
@@ -91,7 +90,6 @@ export class SheetPlugin extends Plugin {
                     useClass: SelectionTransformerShapeManager,
                 },
             ],
-            [RowColMutatingService],
             [ScrollManagerService],
 
             // controllers

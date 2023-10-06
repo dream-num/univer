@@ -213,9 +213,9 @@ export class TextFinder {
                 sheetId,
                 range: {
                     startRow: 0,
-                    endRow: sheet.getLastRow(),
+                    endRow: sheet.getLastRowWithContent(),
                     startColumn: 0,
-                    endColumn: sheet.getLastColumn(),
+                    endColumn: sheet.getLastColumnWithContent(),
                 },
             };
             this._rangeData = [rangeList];

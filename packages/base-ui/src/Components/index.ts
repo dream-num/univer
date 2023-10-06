@@ -23,7 +23,6 @@ export * from './Select';
 export * from './Separator';
 export * from './SiderModal';
 export * from './Slider';
-export * from './Slot/Slot';
 export * from './Tabs';
 export * from './Tooltip';
 

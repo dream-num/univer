@@ -25,9 +25,9 @@ import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.
 
 @OnLifecycle(LifecycleStages.Ready, SheetCanvasView)
 export class SheetCanvasView {
-    private _scene: Scene;
+    private _scene!: Scene;
 
-    private _currentWorkbook: Workbook;
+    private _currentWorkbook!: Workbook;
 
     constructor(
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,

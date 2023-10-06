@@ -36,5 +36,5 @@ export interface IWorkbookConfig {
      * should start renderLoop Immediately
      * default is true
      */
-    shouldRenderLoopImmediately: boolean;
+    shouldRenderLoopImmediately?: boolean;
 }

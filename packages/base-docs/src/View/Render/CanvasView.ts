@@ -1,19 +1,26 @@
 import './Views';
 
 import {
+    Documents,
     EVENT_TYPE,
     IRenderManagerService,
     IWheelEvent,
     Layer,
     RenderManagerService,
-    Scene,
     ScrollBar,
     Viewport,
 } from '@univerjs/base-render';
-import { EventState, sortRules } from '@univerjs/core';
+import { EventState, IConfigService, ICurrentUniverService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { BaseView, CANVAS_VIEW_KEY, CanvasViewRegistry } from './BaseView';
+import {
+    DOCS_COMPONENT_DEFAULT_Z_INDEX,
+    DOCS_COMPONENT_HEADER_LAYER_INDEX,
+    DOCS_COMPONENT_MAIN_LAYER_INDEX,
+    DOCS_CONFIG_STANDALONE_KEY,
+    DOCS_VIEW_KEY,
+} from '../../Basics/docs-view-key';
+import { BaseView, CANVAS_VIEW_KEY } from './BaseView';
 
 export class CanvasView {
     private _views: BaseView[] = [];
@@ -21,31 +28,24 @@ export class CanvasView {
     constructor(
         /** @deprecated This a temporary solution. CanvasView should not be a singleton. */
         private standalone = true,
-        @IRenderManagerService private readonly _rms: RenderManagerService,
+        @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
+        @IConfigService private readonly _configService: IConfigService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        // @IRenderingEngine private readonly _engine: Engine,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._initialize();
     }
 
-    getView(key: string) {
-        for (const view of this._views) {
-            if (view.viewKey === key) {
-                return view;
-            }
-        }
-    }
-
-    getDocsView() {
-        return this.getView(CANVAS_VIEW_KEY.DOCS_VIEW);
-    }
+    getDocsView() {}
 
     private _initialize() {
-        const engine = this._rms.defaultEngine;
+        const { engine, scene } = this._getDocsObject()!;
 
-        const scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
-            width: 1024,
-            height: 2000,
-        });
+        // const scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
+        //     width: 1024,
+        //     height: 2000,
+        // });
 
         const viewMain = new Viewport(CANVAS_VIEW_KEY.DOCS_VIEW, scene, {
             left: 0,
@@ -81,13 +81,20 @@ export class CanvasView {
             }
         });
 
-        const scrollbar = new ScrollBar(viewMain);
+        new ScrollBar(viewMain);
 
-        scene.addLayer(Layer.create(scene, [], 0), Layer.create(scene, [], 2));
+        scene.addLayer(
+            Layer.create(scene, [], DOCS_COMPONENT_MAIN_LAYER_INDEX),
+            Layer.create(scene, [], DOCS_COMPONENT_HEADER_LAYER_INDEX)
+        );
 
-        this._viewLoader(scene);
+        // this._viewLoader(scene);
+        const documents = new Documents(DOCS_VIEW_KEY.MAIN);
+        documents.zIndex = DOCS_COMPONENT_DEFAULT_Z_INDEX;
 
-        if (this.standalone) {
+        scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
+
+        if (this._getStandalone()) {
             engine.runRenderLoop(() => {
                 scene.render();
                 const app = document.getElementById('app');
@@ -98,11 +105,20 @@ export class CanvasView {
         }
     }
 
-    private _viewLoader(scene: Scene) {
-        CanvasViewRegistry.getData()
-            .sort(sortRules)
-            .forEach((viewFactory) => {
-                this._views.push(viewFactory.create(scene, this._injector));
-            });
+    private _getStandalone() {
+        const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+        return this._configService.getConfig(unitId, DOCS_CONFIG_STANDALONE_KEY) as boolean;
+    }
+
+    private _getDocsObject() {
+        const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+        const standalone = this._configService.getConfig(unitId, DOCS_CONFIG_STANDALONE_KEY) as boolean;
+        if (standalone === true) {
+            this._renderManagerService.createRenderWithNewEngine(unitId);
+        } else {
+            this._renderManagerService.createRenderWithDefaultEngine(unitId);
+        }
+
+        return this._renderManagerService.getRenderById(unitId);
     }
 }

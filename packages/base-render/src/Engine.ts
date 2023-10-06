@@ -188,6 +188,27 @@ export class Engine extends ThinEngine<Scene> {
     }
 
     /**
+     * stop executing a render loop function and remove it from the execution array
+     * @param renderFunction defines the function to be removed. If not provided all functions will be removed.
+     */
+    stopRenderLoop(renderFunction?: () => void): void {
+        if (!renderFunction) {
+            this._activeRenderLoops.length = 0;
+            this._cancelFrame();
+            return;
+        }
+
+        const index = this._activeRenderLoops.indexOf(renderFunction);
+
+        if (index >= 0) {
+            this._activeRenderLoops.splice(index, 1);
+            if (this._activeRenderLoops.length === 0) {
+                this._cancelFrame();
+            }
+        }
+    }
+
+    /**
      * Begin a new frame
      */
     beginFrame(): void {
@@ -227,6 +248,35 @@ export class Engine extends ThinEngine<Scene> {
 
             renderFunction();
         }
+    }
+
+    private _cancelFrame() {
+        if (this._renderingQueueLaunched && this._requestNewFrameHandler) {
+            this._renderingQueueLaunched = false;
+            if (typeof window === 'undefined') {
+                if (typeof cancelAnimationFrame === 'function') {
+                    return cancelAnimationFrame(this._requestNewFrameHandler);
+                }
+            } else {
+                const { cancelAnimationFrame } = this._getHostWindow() || window;
+                if (typeof cancelAnimationFrame === 'function') {
+                    return cancelAnimationFrame(this._requestNewFrameHandler);
+                }
+            }
+            return clearTimeout(this._requestNewFrameHandler);
+        }
+    }
+
+    private _getHostWindow(): Nullable<Window> {
+        if (typeof window === 'undefined') {
+            return null;
+        }
+
+        if (this._canvasEle && this._canvasEle.ownerDocument && this._canvasEle.ownerDocument.defaultView) {
+            return this._canvasEle.ownerDocument.defaultView;
+        }
+
+        return window;
     }
 
     /** @hidden */

@@ -2,14 +2,17 @@ import { DesktopPlatformService, IPlatformService, IShortcutService } from '@uni
 import {
     ICommand,
     ICommandService,
+    IConfigService,
     ICurrentUniverService,
     LocaleService,
+    Nullable,
     Plugin,
     PLUGIN_NAMES,
     PluginType,
 } from '@univerjs/core';
 import { Dependency, Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
+import { DOCS_CONFIG_EDITOR_UNIT_ID_KEY, DOCS_CONFIG_STANDALONE_KEY } from './Basics/docs-view-key';
 import {
     BreakLineCommand,
     CoverCommand,
@@ -35,7 +38,8 @@ import { CanvasView } from './View/Render/CanvasView';
 import { DocsView } from './View/Render/Views';
 
 export interface IDocPluginConfig {
-    standalone?: boolean;
+    [DOCS_CONFIG_STANDALONE_KEY]?: boolean;
+    [DOCS_CONFIG_EDITOR_UNIT_ID_KEY]?: string;
 }
 
 const DEFAULT_DOCUMENT_PLUGIN_DATA = {};
@@ -52,12 +56,17 @@ export class DocPlugin extends Plugin {
         @SkipSelf() @Inject(Injector) _univerInjector: Injector,
         @Inject(Injector) override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IConfigService private readonly _configService: IConfigService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         super(PLUGIN_NAMES.DOCUMENT);
 
         this._config = Object.assign(DEFAULT_DOCUMENT_PLUGIN_DATA, config);
+
+        this.initialConfig(config);
+
         this._initializeDependencies(_injector, _univerInjector);
+
         this.initializeCommands();
     }
 
@@ -102,6 +111,11 @@ export class DocPlugin extends Plugin {
         });
     }
 
+    initialConfig(config: IDocPluginConfig) {
+        const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+        this._configService.batchSettings(unitId, config);
+    }
+
     initCanvasView() {
         this._canvasView = this._injector.get(CanvasView);
     }
@@ -131,7 +145,7 @@ export class DocPlugin extends Plugin {
      * @returns
      */
     getMainComponent() {
-        return (this.getDocsView() as DocsView).getDocs();
+        return (this.getDocsView() as Nullable<DocsView>)?.getDocs();
     }
 
     /**
@@ -139,7 +153,7 @@ export class DocPlugin extends Plugin {
      * @returns
      */
     getInputEvent() {
-        return this.getMainComponent().getEditorInputEvent();
+        return this.getMainComponent()?.getEditorInputEvent();
     }
 
     override onReady(): void {

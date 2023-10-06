@@ -19,7 +19,7 @@ export const SetWorksheetRowHeightMutationFactory = (
         throw new Error('universheet is null error!');
     }
 
-    const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+    const worksheet = universheet.getSheetBySheetId(params.worksheetId);
     if (worksheet == null) {
         throw new Error('universheet is null error!');
     }
@@ -53,7 +53,7 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;
         const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
         const manager = worksheet.getRowManager();

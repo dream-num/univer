@@ -27,8 +27,7 @@ export const SetWorksheetNameCommand: ICommand = {
 
         const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId =
-            params.worksheetId ||
-            currentUniverService.getCurrentUniverSheetInstance().getWorkBook().getActiveSheet().getSheetId();
+            params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
         const redoMutationParams: ISetWorksheetNameMutationParams = {
             worksheetId,

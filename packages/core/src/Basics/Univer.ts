@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Ctor, Injector } from '@wendellhu/redi';
 
+import { DocumentModel } from '../Docs/Domain/DocumentModel';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { ConfigService, IConfigService } from '../services/config/config.service';
@@ -12,7 +14,8 @@ import { DesktopLogService, ILogService } from '../services/log/log.service';
 import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
-import { Nullable } from '../Shared';
+import { Workbook } from '../Sheets/Domain/Workbook';
+import { SlideModel } from '../Slides/Domain/SlideModel';
 import { LocaleType } from '../Types/Enum/LocaleType';
 import { IDocumentData, ISlideData, IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverDoc } from './UniverDoc';
@@ -23,27 +26,34 @@ import { UniverSlide } from './UniverSlide';
  * Univer.
  */
 export class Univer {
-    private readonly _univerInjector: Injector;
+    private readonly _rootInjector: Injector;
 
     private readonly _univerPluginStore = new PluginStore();
 
     private readonly _univerPluginRegistry = new PluginRegistry();
 
+    private _univerSheet: UniverSheet | null = null;
+
+    private _univerDoc: UniverDoc | null = null;
+
+    private _univerSlide: UniverSlide | null = null;
+
     constructor(univerData: Partial<IUniverData> = {}) {
-        this._univerInjector = this._initDependencies();
+        this._rootInjector = this._initDependencies();
 
         const { theme, locale, locales } = univerData;
-        theme && this._univerInjector.get(ThemeService).setTheme(theme);
-        locales && this._univerInjector.get(LocaleService).load(locales);
-        locale && this._univerInjector.get(LocaleService).setLocale(locale);
+        theme && this._rootInjector.get(ThemeService).setTheme(theme);
+        locales && this._rootInjector.get(LocaleService).load(locales);
+        locale && this._rootInjector.get(LocaleService).setLocale(locale);
     }
 
     dispose(): void {
         // left empty for purpose
+        // TODO@wzhudev: dispose all the businesses
     }
 
     private get _currentUniverService(): ICurrentUniverService {
-        return this._univerInjector.get(ICurrentUniverService);
+        return this._rootInjector.get(ICurrentUniverService);
     }
 
     /** Register a plugin into univer. */
@@ -51,88 +61,95 @@ export class Univer {
         // TODO: type of `configs` could be optimized here using typescript infer
 
         if (plugin.type === PluginType.Univer) {
-            this.registerUniverPlugin(plugin, configs);
+            this._registerUniverPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Sheet) {
-            this.registerSheetPlugin(plugin, configs);
+            this._registerSheetPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Doc) {
-            this.registerDocPlugin(plugin, configs);
+            this._registerDocPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Slide) {
-            this.registerSlidePlugin(plugin, configs);
+            this._registerSlidePlugin(plugin, configs);
         } else {
             throw new Error(`Unimplemented plugin system for business: "${plugin.type}".`);
         }
     }
 
     setLocale(locale: LocaleType) {
-        this._univerInjector.get(LocaleService).setLocale(locale);
-    }
-
-    /** Create a univer sheet instance with internal dependency injection. */
-    createUniverSheet(config: Partial<IWorkbookConfig>): UniverSheet {
-        const sheet = this._univerInjector.createInstance(UniverSheet, config);
-        this._currentUniverService.addSheet(sheet);
-        this.initializePluginsForSheet(sheet);
-        this._tryProgressToReady();
-        sheet.onReady();
-        return sheet;
-    }
-
-    createUniverDoc(config: Partial<IDocumentData>): UniverDoc {
-        const doc = this._univerInjector.createInstance(UniverDoc, config);
-        this._currentUniverService.addDoc(doc);
-        this.initializePluginsForDoc(doc);
-        this._tryProgressToReady();
-        doc.onReady();
-        return doc;
-    }
-
-    createUniverSlide(config: Partial<ISlideData>): UniverSlide {
-        const slide = this._univerInjector.createInstance(UniverSlide, config);
-        this._currentUniverService.addSlide(slide);
-        this.initializePluginsForSlide(slide);
-        this._tryProgressToReady();
-        slide.onReady();
-        return slide;
-    }
-
-    getUniverSheetInstance(id: string): Nullable<UniverSheet> {
-        return this._currentUniverService.getUniverSheetInstance(id);
-    }
-
-    getUniverDocInstance(id: string): Nullable<UniverDoc> {
-        return this._currentUniverService.getUniverDocInstance(id);
-    }
-
-    getUniverSlideInstance(id: string): Nullable<UniverSheet> {
-        return null;
-    }
-
-    getAllUniverSheetsInstance() {
-        return this._currentUniverService.getAllUniverSheetsInstance();
-    }
-
-    getAllUniverDocsInstance() {
-        return this._currentUniverService.getAllUniverDocsInstance();
-    }
-
-    getAllUniverSlidesInstance() {
-        return this._currentUniverService.getAllUniverSlidesInstance();
+        this._rootInjector.get(LocaleService).setLocale(locale);
     }
 
     /**
-     * get active universheet
-     * @returns
+     * Create a univer sheet instance with internal dependency injection.
      */
-    getCurrentUniverSheetInstance() {
-        return this._currentUniverService.getCurrentUniverSheetInstance();
+    createUniverSheet(config: Partial<IWorkbookConfig>): Workbook {
+        let workbook: Workbook;
+        const addSheet = () => {
+            workbook = this._univerSheet!.createSheet(config);
+            this._currentUniverService.addSheet(workbook);
+        };
+
+        if (!this._univerSheet) {
+            this._univerSheet = this._rootInjector.createInstance(UniverSheet);
+            addSheet();
+
+            this._univerPluginRegistry
+                .getRegisterPlugins(PluginType.Sheet)
+                .forEach((p) => this._univerSheet!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
+            this._univerSheet.init();
+
+            this._tryProgressToReady();
+        } else {
+            addSheet();
+        }
+
+        return workbook!;
     }
 
-    getCurrentUniverDocInstance() {
-        return this._currentUniverService.getCurrentUniverDocInstance();
+    createUniverDoc(config: Partial<IDocumentData>): DocumentModel {
+        let doc: DocumentModel;
+        const addDoc = () => {
+            doc = this._univerDoc!.createDoc(config);
+            this._currentUniverService.addDoc(doc);
+        };
+
+        if (!this._univerDoc) {
+            this._univerDoc = this._rootInjector.createInstance(UniverDoc);
+            addDoc();
+
+            this._univerPluginRegistry
+                .getRegisterPlugins(PluginType.Doc)
+                .forEach((p) => this._univerDoc!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
+            this._univerDoc.init();
+
+            this._tryProgressToReady();
+        } else {
+            addDoc();
+        }
+
+        return doc!;
     }
 
-    getCurrentUniverSlideInstance() {
-        return this._currentUniverService.getCurrentUniverSlideInstance();
+    createUniverSlide(config: Partial<ISlideData>): SlideModel {
+        let slide: SlideModel;
+        const addSlide = () => {
+            slide = this._univerSlide!.createSlide(config);
+            this._currentUniverService.addSlide(slide);
+        };
+
+        if (!this._univerSlide) {
+            this._univerSlide = this._rootInjector.createInstance(UniverSlide);
+            addSlide();
+
+            this._univerPluginRegistry
+                .getRegisterPlugins(PluginType.Slide)
+                .forEach((p) => this._univerSlide!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
+            this._univerSlide.init();
+
+            this._tryProgressToReady();
+        } else {
+            addSlide();
+        }
+
+        return slide!;
     }
 
     private _initDependencies(): Injector {
@@ -163,67 +180,60 @@ export class Univer {
     }
 
     private _tryProgressToReady(): void {
-        const lifecycleService = this._univerInjector.get(LifecycleService);
+        const lifecycleService = this._rootInjector.get(LifecycleService);
         if (lifecycleService.stage < LifecycleStages.Ready) {
             this._univerPluginStore.forEachPlugin((p) => p.onReady());
-            // TODO: call UniverSheet etc on ready.
-            this._univerInjector.get(LifecycleService).stage = LifecycleStages.Ready;
+            this._rootInjector.get(LifecycleService).stage = LifecycleStages.Ready;
         }
     }
 
-    private registerUniverPlugin<T extends Plugin>(plugin: PluginCtor<T>, options?: any): void {
+    private _registerUniverPlugin<T extends Plugin>(plugin: PluginCtor<T>, options?: any): void {
         // For plugins at Univer level. Plugins would be initialized immediately so they can register dependencies.
-        const pluginInstance: Plugin = this._univerInjector.createInstance(plugin as unknown as Ctor<any>, options);
-        pluginInstance.onStarting(this._univerInjector);
+        const pluginInstance: Plugin = this._rootInjector.createInstance(plugin as unknown as Ctor<any>, options);
+        pluginInstance.onStarting(this._rootInjector);
         this._univerPluginStore.addPlugin(pluginInstance);
     }
 
-    private registerSheetPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+    private _registerSheetPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         this._univerPluginRegistry.registerPlugin(pluginCtor, options);
+        // TODO: implement add plugin when Univer business object is created
         // Add plugins to the plugin registration. And for each initialized UniverSheet, instantiate these dependencies immediately.
-        const sheets = this._currentUniverService.getAllUniverSheetsInstance();
-        if (sheets.length) {
-            sheets.forEach((sheet) => {
-                sheet.addPlugin(pluginCtor, options);
-            });
-        }
+        // const sheets = this._currentUniverService.getAllUniverSheetsInstance();
+        // if (sheets.length) {
+        //     sheets.forEach((sheet) => {
+        //         sheet.addPlugin(pluginCtor, options);
+        //     });
+        // }
     }
 
-    private registerDocPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+    private _registerDocPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         this._univerPluginRegistry.registerPlugin(pluginCtor, options);
-        const docs = this._currentUniverService.getAllUniverDocsInstance();
-        if (docs.length) {
-            docs.forEach((doc) => {
-                doc.addPlugin(pluginCtor, options);
-            });
-        }
+        // const docs = this._currentUniverService.getAllUniverDocsInstance();
+        // if (docs.length) {
+        //     docs.forEach((doc) => {
+        //         doc.addPlugin(pluginCtor, options);
+        //     });
+        // }
     }
 
-    private registerSlidePlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
+    private _registerSlidePlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options?: any) {
         this._univerPluginRegistry.registerPlugin(pluginCtor, options);
-        const slides = this._currentUniverService.getAllUniverSlidesInstance();
-        if (slides.length) {
-            slides.forEach((slide) => {
-                slide.addPlugin(pluginCtor, options);
-            });
-        }
+        // const slides = this._currentUniverService.getAllUniverSlidesInstance();
+        // if (slides.length) {
+        //     slides.forEach((slide) => {
+        //         slide.addPlugin(pluginCtor, options);
+        //     });
+        // }
     }
 
-    private initializePluginsForSheet(sheet: UniverSheet): void {
-        const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Sheet);
-        plugins.forEach((p) => {
-            sheet.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
-        });
-    }
-
-    private initializePluginsForDoc(doc: UniverDoc): void {
+    private _initializePluginsForDoc(doc: UniverDoc): void {
         const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Doc);
         plugins.forEach((p) => {
             doc.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);
         });
     }
 
-    private initializePluginsForSlide(slide: UniverSlide): void {
+    private _initializePluginsForSlide(slide: UniverSlide): void {
         const plugins = this._univerPluginRegistry.getRegisterPlugins(PluginType.Slide);
         plugins.forEach((p) => {
             slide.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options);

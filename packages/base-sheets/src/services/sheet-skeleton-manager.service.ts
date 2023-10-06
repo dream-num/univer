@@ -63,7 +63,7 @@ export class SheetSkeletonManagerService implements IDisposable {
         } else {
             const { unitId, sheetId } = searchParm;
 
-            const workbook = this._currentUniverService.getUniverSheetInstance(searchParm.unitId)?.getWorkBook();
+            const workbook = this._currentUniverService.getUniverSheetInstance(searchParm.unitId);
 
             const worksheet = workbook?.getSheetBySheetId(searchParm.sheetId);
 

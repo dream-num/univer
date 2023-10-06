@@ -58,7 +58,7 @@ export class SheetRenderController extends Disposable {
 
             const { skeleton: spreadsheetSkeleton, unitId, sheetId } = param;
 
-            const workbook = this._currentUniverService.getUniverSheetInstance(unitId)?.getWorkBook();
+            const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
 
             const worksheet = workbook?.getSheetBySheetId(sheetId);
 
@@ -138,7 +138,7 @@ export class SheetRenderController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
                     const unitId = workbook.getUnitId();
                     const worksheet = workbook.getActiveSheet();
                     const sheetId = worksheet.getSheetId();

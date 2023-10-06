@@ -43,7 +43,7 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             return false;
         }
 
-        const workbook = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const selection = accessor.get(SelectionManagerService).getLast();
         if (!selection) {
@@ -104,7 +104,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
             return false;
         }
 
-        const currentWorkbook = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance().getWorkBook();
+        const currentWorkbook = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance();
         const currentWorksheet = currentWorkbook.getActiveSheet();
 
         const selection = accessor.get(SelectionManagerService).getLast();
@@ -170,7 +170,7 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
     },
     handler: async (accessor, params = { expandToGapFirst: true, loop: false }) => {
         const selection = accessor.get(SelectionManagerService).getLast();
-        const workbook = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance()?.getWorkBook();
+        const workbook = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
 
         if (!selection || !worksheet) {

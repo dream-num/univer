@@ -11,7 +11,7 @@ export const SetZoomRatioUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetZoomRatioMutationParams
 ): ISetZoomRatioMutationParams => {
-    const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
+    const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
     const worksheet = workbook!.getSheetBySheetId(params.worksheetId);
     const old = worksheet!.getConfig().zoomRatio;
     return {
@@ -24,7 +24,7 @@ export const SetZoomRatioMutation: IMutation<ISetZoomRatioMutationParams> = {
     id: 'sheet.mutation.set-zoom-ratio',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;

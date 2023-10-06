@@ -67,7 +67,7 @@ export class SlideBar extends Component<{}, SlideBarState> {
     private _init(): void {
         // TODO: should subscribe to active slide change event
         const currentUniverService = this.context.injector.get(ICurrentUniverService);
-        const model = currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
+        const model = currentUniverService.getCurrentUniverSlideInstance();
         const pages = model.getPages();
         const pageOrder = model.getPageOrder();
         if (!pages || !pageOrder) {

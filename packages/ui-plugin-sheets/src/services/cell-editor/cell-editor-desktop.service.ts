@@ -130,13 +130,13 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
         this._currentUniverService.focusUniverInstance(workbookId);
         this._contextService.setContextValue(SHEET_EDITOR_ACTIVATED, false);
 
-        const model = this._currentUniverService.getUniverDocInstance(SHEET_CELL_EDITOR_MODEL_ID)!.getDocument();
+        const model = this._currentUniverService.getUniverDocInstance(SHEET_CELL_EDITOR_MODEL_ID)!;
         const dataStream = model.getBodyModel().getText();
         this._getCellEditor()?.deactivate(true);
 
         this._commandService.executeCommand(SetRangeValuesCommand.id, <ISetRangeValuesCommandParams>{
             workbookId,
-            worksheetId: currentUniverSheet.getWorkBook().getActiveSheet().getSheetId(),
+            worksheetId: currentUniverSheet.getActiveSheet().getSheetId(),
             range: this._currentEditingCell,
             value: {
                 v: dataStream,
@@ -179,7 +179,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
                 },
             },
         });
-        const docModel = cellEditorDoc.getDocument();
+        const docModel = cellEditorDoc;
 
         // rendering engine add document canvas
         const engine = (this._editorEngine = new Engine());
@@ -283,9 +283,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
     }
 
     private async _updateDocumentModelFromCellModel(position: Nullable<ICellPosition>): Promise<void> {
-        const cellEditorModel = this._currentUniverService
-            .getUniverDocInstance(SHEET_CELL_EDITOR_MODEL_ID)
-            ?.getDocument();
+        const cellEditorModel = this._currentUniverService.getUniverDocInstance(SHEET_CELL_EDITOR_MODEL_ID);
 
         if (!cellEditorModel) {
             throw new Error('Cell editor model not found!');
@@ -368,7 +366,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
 
         return this._currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getRange(actualRow, actualColumn);
     }

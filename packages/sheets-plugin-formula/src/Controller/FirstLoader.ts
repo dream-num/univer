@@ -17,7 +17,7 @@ export function firstLoader(formulaController: FormulaController) {
 
     // const commandManager = formulaController.getCommandManager();
 
-    // const workBook = formulaController.getWorkbook();
+    // const workBook = formulaController;
 
     // sheetDataPromise.then((data) => {
     //     if (!data) return;

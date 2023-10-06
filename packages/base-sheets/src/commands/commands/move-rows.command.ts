@@ -44,7 +44,7 @@ export const MoveRowsCommand: ICommand = {
 
         const movedRanges = findMoveRanges[0];
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook();
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
         if (!workbook) return false;
         const workbookId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();

@@ -57,12 +57,12 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getSheetId();
         const style = params.style;
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
@@ -134,7 +134,7 @@ export const SetBoldCommand: ICommand = {
         const worksheet = accessor
             .get(ICurrentUniverService)
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet();
         const currentlyBold =
             worksheet.getRange(selection.primary.actualRow, selection.primary.actualColumn).getFontWeight() ===
@@ -166,7 +166,7 @@ export const SetItalicCommand: ICommand = {
         const worksheet = accessor
             .get(ICurrentUniverService)
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet();
         let currentlyItalic = true;
         if (selection.primary) {
@@ -201,7 +201,7 @@ export const SetUnderlineCommand: ICommand = {
         const worksheet = accessor
             .get(ICurrentUniverService)
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet();
         let currentlyUnderline = true;
         if (selection.primary) {
@@ -238,7 +238,7 @@ export const SetStrikeThroughCommand: ICommand = {
         const worksheet = accessor
             .get(ICurrentUniverService)
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet();
         let currentlyStrokeThrough = true;
         if (selection.primary) {

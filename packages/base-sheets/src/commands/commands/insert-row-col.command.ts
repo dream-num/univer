@@ -63,7 +63,7 @@ export const InsertRowCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)!.getWorkBook()!;
+        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)!!;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId)!;
 
         // insert rows & undos
@@ -196,7 +196,7 @@ export const InsertRowBeforeCommand: ICommand<IInsertRowBeforeOrAfterCommandPara
         }
 
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook();
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
         if (!workbook) {
             return false;
         }
@@ -243,7 +243,7 @@ export const InsertRowAfterCommand: ICommand<IInsertRowBeforeOrAfterCommandParam
         }
 
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook();
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
         if (!workbook) {
             return false;
         }
@@ -292,7 +292,7 @@ export const InsertColCommand: ICommand<InsertColCommandBaseParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;
@@ -438,7 +438,7 @@ export const InsertColBeforeCommand: ICommand<InsertColCommandParams> = {
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getSheetId();
         let range: IRange;
@@ -449,7 +449,7 @@ export const InsertColBeforeCommand: ICommand<InsertColCommandParams> = {
             return false;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
@@ -485,7 +485,7 @@ export const InsertColAfterCommand: ICommand<InsertColCommandParams> = {
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getSheetId();
         let range: IRange;
@@ -496,7 +496,7 @@ export const InsertColAfterCommand: ICommand<InsertColCommandParams> = {
             return false;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

@@ -21,7 +21,7 @@ describe('Test set row height commands', () => {
     let commandService: ICommandService;
 
     function getRowHeight(row: number): number {
-        const worksheet = get(ICurrentUniverService).getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        const worksheet = get(ICurrentUniverService).getCurrentUniverSheetInstance().getActiveSheet();
         return worksheet.getRowHeight(row);
     }
 
@@ -35,7 +35,7 @@ describe('Test set row height commands', () => {
         commandService.registerCommand(SetRowHeightCommand);
         commandService.registerCommand(SetWorksheetRowHeightMutation);
 
-        const worksheet = get(ICurrentUniverService).getCurrentUniverSheetInstance().getWorkBook().getActiveSheet();
+        const worksheet = get(ICurrentUniverService).getCurrentUniverSheetInstance().getActiveSheet();
         const maxColumn = worksheet.getMaxColumns() - 1;
         const selectionManager = get(SelectionManagerService);
         selectionManager.setCurrentSelection({

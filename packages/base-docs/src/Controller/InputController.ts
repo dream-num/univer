@@ -175,7 +175,7 @@ export class InputController extends Disposable {
         }
 
         const skeleton = document.getSkeleton();
-        const docsModel = this._currentUniverService.getCurrentUniverDocInstance().getDocument();
+        const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
         const startNodePosition = activeSelection.getStart();
         const preSpan = document.findSpanByPosition(startNodePosition);
 
@@ -297,7 +297,7 @@ export class InputController extends Disposable {
         }
 
         const skeleton = document.getSkeleton();
-        const docsModel = this._currentUniverService.getCurrentUniverDocInstance().getDocument();
+        const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
         const startNodePosition = activeSelection.getStart();
 
         const activeRange = activeSelection.getRange();
@@ -745,7 +745,7 @@ export class InputController extends Disposable {
     private _initialize(docsView: DocsView): DisposableCollection {
         docsView.getDocs().enableEditor();
         const events = docsView.getDocs().getEditorInputEvent();
-        const docsModel = this._currentUniverService.getCurrentUniverDocInstance().getDocument();
+        const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
         const disposableCollection = new DisposableCollection();
 
         if (!events) {

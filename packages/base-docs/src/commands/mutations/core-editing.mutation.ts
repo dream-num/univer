@@ -52,7 +52,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const { unitId, mutations } = params;
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const document = currentUniverService.getUniverDocInstance(unitId)?.getDocument();
+        const document = currentUniverService.getUniverDocInstance(unitId);
         if (!document) {
             throw new Error(`Document not found for unitId: ${unitId}`);
         }

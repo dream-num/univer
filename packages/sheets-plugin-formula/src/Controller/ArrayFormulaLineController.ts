@@ -34,7 +34,7 @@ export class ArrayFormulaLineControl {
      * @returns Workbook
      */
     getWorkBook(): Workbook {
-        return this._currentUniverSheet.getCurrentUniverSheetInstance().getWorkBook();
+        return this._currentUniverSheet.getCurrentUniverSheetInstance();
     }
 
     dispose() {

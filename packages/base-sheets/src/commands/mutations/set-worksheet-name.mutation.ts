@@ -12,7 +12,7 @@ export const SetWorksheetNameMutationFactory = (
     params: ISetWorksheetNameMutationParams
 ): ISetWorksheetNameMutationParams => {
     const universheet = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance();
-    const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+    const worksheet = universheet.getSheetBySheetId(params.worksheetId);
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
     }
@@ -33,7 +33,7 @@ export const SetWorksheetNameMutation: IMutation<ISetWorksheetNameMutationParams
             return false;
         }
 
-        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
 
         if (!worksheet) {
             return false;

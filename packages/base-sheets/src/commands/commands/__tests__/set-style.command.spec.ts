@@ -108,8 +108,7 @@ describe("Test commands used for updating cells' styles", () => {
                 function getFontBold(): FontWeight | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getFontWeight();
                 }
@@ -181,8 +180,7 @@ describe("Test commands used for updating cells' styles", () => {
                     return (
                         get(ICurrentUniverService)
                             .getUniverSheetInstance('test')
-                            ?.getWorkBook()
-                            .getSheetBySheetId('sheet1')
+                            ?.getSheetBySheetId('sheet1')
                             ?.getRange(startRow, startColumn, endRow, endColumn)
                             .getFontStyle() === FontItalic.ITALIC
                     );
@@ -224,8 +222,7 @@ describe("Test commands used for updating cells' styles", () => {
                 function getFontUnderline(): ITextDecoration | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getUnderline();
                 }
@@ -274,8 +271,7 @@ describe("Test commands used for updating cells' styles", () => {
                 function getFontThroughLine(): ITextDecoration | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getStrikeThrough();
                 }
@@ -315,8 +311,7 @@ describe("Test commands used for updating cells' styles", () => {
                 function getFontSize(): number | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getFontSize();
                 }
@@ -354,8 +349,7 @@ describe("Test commands used for updating cells' styles", () => {
                 function getFontFamily(): string | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getFontFamily();
                 }
@@ -393,8 +387,7 @@ describe("Test commands used for updating cells' styles", () => {
                 function getFontColor(): Nullable<string> | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getTextStyle()?.cl?.rgb;
                 }
@@ -432,8 +425,7 @@ describe("Test commands used for updating cells' styles", () => {
                 function getBackgroundColor(): string | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getBackground();
                 }
@@ -473,8 +465,7 @@ describe("Test commands used for updating cells' styles", () => {
                 function getVerticalAlignment(): VerticalAlign | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getVerticalAlignment();
                 }
@@ -514,8 +505,7 @@ describe("Test commands used for updating cells' styles", () => {
                 function getHorizontalAlignment(): HorizontalAlign | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getHorizontalAlignment();
                 }
@@ -557,8 +547,7 @@ describe("Test commands used for updating cells' styles", () => {
                 function getTextWrap(): BooleanNumber | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getWrap();
                 }
@@ -600,8 +589,7 @@ describe("Test commands used for updating cells' styles", () => {
                 function getTextRotation(): ITextRotation | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-                        ?.getWorkBook()
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getTextRotation();
                 }

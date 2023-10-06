@@ -50,7 +50,7 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;
 
         const manager = worksheet.getRowManager();
@@ -82,7 +82,7 @@ export const IRemoveColMutationFactory = (
         throw new Error('universheet is null error!');
     }
 
-    const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+    const worksheet = universheet.getSheetBySheetId(params.worksheetId);
 
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
@@ -119,7 +119,7 @@ export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;
 
         const manager = worksheet.getColumnManager();

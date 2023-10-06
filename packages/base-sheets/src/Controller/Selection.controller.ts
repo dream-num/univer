@@ -40,7 +40,7 @@ export class SelectionController extends Disposable {
     }
 
     private _initialize() {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
 
         const sheetObject = this._getSheetObject();
@@ -147,7 +147,7 @@ export class SelectionController extends Disposable {
 
     private _userActionSyncListener() {
         this._selectionTransformerShapeManager.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const unitId = workbook.getUnitId();
             const sheetId = workbook.getActiveSheet().getSheetId();
 
@@ -172,7 +172,7 @@ export class SelectionController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params as ISetZoomRatioMutationParams;

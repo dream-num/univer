@@ -33,7 +33,7 @@ export const SetWorksheetRowHideMutation: IMutation<ISetWorksheetRowHideMutation
             throw new Error('universheet is null error!');
         }
 
-        const manager = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getRowManager();
+        const manager = universheet.getSheetBySheetId(params.worksheetId)!.getRowManager();
 
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];

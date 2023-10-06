@@ -35,14 +35,11 @@ export const TrimWhitespaceCommand: ICommand = {
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getSheetId();
 
-        const worksheet = currentUniverService
-            .getUniverSheetInstance(workbookId)
-            ?.getWorkBook()
-            .getSheetBySheetId(worksheetId);
+        const worksheet = currentUniverService.getUniverSheetInstance(workbookId)?.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
         const sheetMatrix = worksheet.getCellMatrix();
         const cellValue = new ObjectMatrix<ICellV>();

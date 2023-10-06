@@ -322,7 +322,7 @@ export const CoverCommand: ICommand<ICoverCommandParams> = {
             return false;
         }
 
-        doc.getDocument().reset(snapshot || createEmptyDocSnapshot());
+        doc.reset(snapshot || createEmptyDocSnapshot());
 
         if (clearUndoRedoStack) {
             const undoRedoService = accessor.get(IUndoRedoService);

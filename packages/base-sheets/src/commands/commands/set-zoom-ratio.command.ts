@@ -25,7 +25,7 @@ export const SetZoomRatioCommand: ICommand = {
         let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         let worksheetId = currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getSheetId();
         let zoomRatio = 1;
@@ -36,7 +36,7 @@ export const SetZoomRatioCommand: ICommand = {
             zoomRatio = params.zoomRatio ?? zoomRatio;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

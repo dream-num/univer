@@ -21,7 +21,7 @@ export class FormulaBarController {
     //                     endColumn: column,
     //                 };
     //             }
-    //             const cellData = this._plugin.getWorkbook().getActiveSheet().getRange(currentRangeData).getObjectValue({ isIncludeStyle: true });
+    //             const cellData = this._plugin.getActiveSheet().getRange(currentRangeData).getObjectValue({ isIncludeStyle: true });
     //             if (cellData) {
     //                 let cellValue = String(cellData.m || cellData.v || '');
     //                 // If the cell has a formula, it needs to be intercepted

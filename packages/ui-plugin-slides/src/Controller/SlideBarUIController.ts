@@ -45,7 +45,7 @@ export class SlideBarUIController {
      * Arrow functions must be used to bind `this`, otherwise `this` will be lost when the DOM component triggers the callback
      */
     addSlide = () => {
-        const model = this._currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
+        const model = this._currentUniverService.getCurrentUniverSlideInstance();
         const canvasView = this._getCanvasView();
         const newPage = model.addPage();
         this._pages.push(newPage);
@@ -71,7 +71,7 @@ export class SlideBarUIController {
     }
 
     private _generateModel() {
-        const model = this._currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
+        const model = this._currentUniverService.getCurrentUniverSlideInstance();
         const pages = model.getPages();
         const pageOrder = model.getPageOrder();
         if (!pages || !pageOrder) {

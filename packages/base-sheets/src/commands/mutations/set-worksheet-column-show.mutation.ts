@@ -36,7 +36,7 @@ export const SetWorksheetColumnShowMutation: IMutation<ISetWorksheetColumnShowMu
             return false;
         }
 
-        const manager = universheet.getWorkBook().getSheetBySheetId(params.worksheetId)!.getColumnManager();
+        const manager = universheet.getSheetBySheetId(params.worksheetId)!.getColumnManager();
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
             for (let j = range.startColumn; j < range.startColumn + range.endColumn; j++) {

@@ -16,7 +16,7 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
     handler: async (accessor, params = { sheetViewStartRow: 0, sheetViewStartColumn: 0 }) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const currentWorkbook = currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook();
+        const currentWorkbook = currentUniverService.getCurrentUniverSheetInstance();
         const currentWorksheet = currentWorkbook.getActiveSheet();
 
         if (!currentWorksheet) {
@@ -45,7 +45,7 @@ export const RestScrollCommand: ICommand<{}> = {
     handler: async (accessor) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const currentWorkbook = currentUniverService.getCurrentUniverSheetInstance()?.getWorkBook();
+        const currentWorkbook = currentUniverService.getCurrentUniverSheetInstance();
         const currentWorksheet = currentWorkbook.getActiveSheet();
 
         if (!currentWorksheet) {

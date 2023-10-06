@@ -35,7 +35,7 @@ export const AddWorksheetMergeMutation: IMutation<IAddWorksheetMergeMutationPara
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;
         const config = worksheet.getConfig()!;
         const mergeConfigData = config.mergeData;

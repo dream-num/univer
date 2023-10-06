@@ -249,7 +249,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         const injector = this.context.injector!;
         const currentUniverService = injector.get(ICurrentUniverService);
         const commandService = injector.get(ICommandService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
         const sheets = workbook.getSheets();
 
         const worksheetMenuItems = sheets.map((sheet, index) => ({

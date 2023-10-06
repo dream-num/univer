@@ -35,10 +35,10 @@ export const SetRangeStyleUndoMutationFactory = (
     params: ISetRangeStyleMutationParams
 ): ISetRangeStyleMutationParams => {
     const currentUniverService = accessor.get(ICurrentUniverService);
-    const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+    const workbook = currentUniverService.getCurrentUniverSheetInstance();
     const worksheet = currentUniverService
         .getCurrentUniverSheetInstance()
-        .getWorkBook()
+
         .getSheetBySheetId(params.worksheetId);
     if (worksheet == null) {
         throw new Error('error');
@@ -78,7 +78,7 @@ export const SetRangeStyleMutation: IMutation<ISetRangeStyleMutationParams, bool
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)?.getWorkBook();
+        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;

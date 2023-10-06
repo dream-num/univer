@@ -32,7 +32,7 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
         }
 
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
@@ -123,7 +123,7 @@ export const SetColWidthCommand: ICommand = {
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentUniverService
             .getCurrentUniverSheetInstance()
-            .getWorkBook()
+
             .getActiveSheet()
             .getSheetId();
 

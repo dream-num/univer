@@ -50,7 +50,7 @@ export const SetRangeValuesUndoMutationFactory = (
         throw new Error('universheet is null error!');
     }
 
-    const workbook = universheet.getWorkBook();
+    const workbook = universheet;
 
     const worksheet = workbook.getSheetBySheetId(worksheetId);
     if (worksheet == null) {
@@ -126,7 +126,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) {
             return false;

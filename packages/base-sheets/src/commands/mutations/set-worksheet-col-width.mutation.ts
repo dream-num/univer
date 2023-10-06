@@ -19,7 +19,7 @@ export const SetWorksheetColWidthMutationFactory = (
         throw new Error('universheet is null error!');
     }
 
-    const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+    const worksheet = universheet.getSheetBySheetId(params.worksheetId);
     if (worksheet == null) {
         throw new Error('universheet is null error!');
     }
@@ -53,7 +53,7 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
             throw new Error('universheet is null error!');
         }
 
-        const worksheet = universheet.getWorkBook().getSheetBySheetId(params.worksheetId);
+        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;
         const defaultColumnWidth = worksheet.getConfig().defaultColumnWidth;
         const manager = worksheet.getColumnManager();

@@ -51,7 +51,7 @@ export const SetRangeValuesCommand: ICommand = {
             workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId(),
             worksheetId = currentUniverService
                 .getCurrentUniverSheetInstance()
-                .getWorkBook()
+
                 .getActiveSheet()
                 .getSheetId(),
         } = params;

@@ -32,7 +32,7 @@ export const DeltaRowHeightCommand: ICommand = {
         }
 
         const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
@@ -117,7 +117,7 @@ export const SetRowHeightCommand: ICommand = {
         const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length) return false;
 
-        const workbook = currentUniverService.getCurrentUniverSheetInstance().getWorkBook();
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
         const workbookId = workbook.getUnitId();
         const worksheetId = workbook.getActiveSheet().getSheetId();
 

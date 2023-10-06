@@ -34,7 +34,7 @@ import {
     MoveCursorRightShortcut,
     MoveCursorUpShortcut,
 } from './shortcuts/cursor.shortcut';
-import { CanvasView } from './View/Render/CanvasView';
+import { CanvasView } from './View/CanvasView';
 import { DocsView } from './View/Render/Views';
 
 export interface IDocPluginConfig {

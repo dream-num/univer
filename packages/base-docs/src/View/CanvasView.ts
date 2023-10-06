@@ -1,5 +1,3 @@
-import './Views';
-
 import {
     Documents,
     EVENT_TYPE,
@@ -19,12 +17,10 @@ import {
     DOCS_COMPONENT_MAIN_LAYER_INDEX,
     DOCS_CONFIG_STANDALONE_KEY,
     DOCS_VIEW_KEY,
-} from '../../Basics/docs-view-key';
-import { BaseView, CANVAS_VIEW_KEY } from './BaseView';
+    VIEWPORT_KEY,
+} from '../Basics/docs-view-key';
 
 export class CanvasView {
-    private _views: BaseView[] = [];
-
     constructor(
         /** @deprecated This a temporary solution. CanvasView should not be a singleton. */
         private standalone = true,
@@ -42,12 +38,7 @@ export class CanvasView {
     private _initialize() {
         const { engine, scene } = this._getDocsObject()!;
 
-        // const scene = new Scene(CANVAS_VIEW_KEY.MAIN_SCENE, engine, {
-        //     width: 1024,
-        //     height: 2000,
-        // });
-
-        const viewMain = new Viewport(CANVAS_VIEW_KEY.DOCS_VIEW, scene, {
+        const viewMain = new Viewport(VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: 0,
             top: 0,
             bottom: 0,

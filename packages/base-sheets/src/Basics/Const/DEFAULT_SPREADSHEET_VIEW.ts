@@ -1,12 +1,3 @@
-export enum CANVAS_VIEW_KEY {
-    MAIN_SCENE = 'mainScene',
-    SHEET_VIEW = 'sheetView',
-    DRAG_LINE_VIEW = 'dragLineView',
-    CELL_EDITOR = 'cellEditor',
-    SELECTION_VIEW = 'selectionView',
-    HEADER_ACTION_VIEW = 'headerActionView',
-}
-
 export enum SHEET_VIEW_KEY {
     MAIN = '__SpreadsheetRender__',
     ROW = '__SpreadsheetRowHeader__',

@@ -21,6 +21,12 @@ export interface IUniverHandler {
 export interface ICurrentUniverService {
     focused$: Observable<Nullable<string>>;
 
+    currentSheet$: Observable<Nullable<Workbook>>;
+
+    currentDoc$: Observable<Nullable<DocumentModel>>;
+
+    currentSlide$: Observable<Nullable<SlideModel>>;
+
     // TODO: sheet doc slide added event
 
     createDoc(data: Partial<IDocumentData>): DocumentModel;

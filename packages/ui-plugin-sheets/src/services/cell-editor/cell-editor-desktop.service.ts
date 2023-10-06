@@ -12,12 +12,7 @@ import {
     Scene,
     Viewport,
 } from '@univerjs/base-render';
-import {
-    CANVAS_VIEW_KEY,
-    ISetRangeValuesCommandParams,
-    SelectionManagerService,
-    SetRangeValuesCommand,
-} from '@univerjs/base-sheets';
+import { ISetRangeValuesCommandParams, SelectionManagerService, SetRangeValuesCommand } from '@univerjs/base-sheets';
 import {
     createEmptyDocSnapshot,
     handleJsonToDom,
@@ -183,12 +178,12 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
 
         // rendering engine add document canvas
         const engine = (this._editorEngine = new Engine());
-        const scene = (this._editorScene = new Scene(CANVAS_VIEW_KEY.CELL_EDITOR, engine, {
+        const scene = (this._editorScene = new Scene('CELL_EDITOR', engine, {
             width: 200,
             height: 100,
         }));
         scene.openTransformer();
-        const viewMain = new Viewport(CANVAS_VIEW_KEY.CELL_EDITOR, scene, {
+        const viewMain = new Viewport('CELL_EDITOR', scene, {
             left: 0,
             top: 0,
             bottom: 0,
@@ -232,7 +227,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
             return;
         }
 
-        const position = getPositionOfCurrentCell(cellInfo, render.engine);
+        const position = getPositionOfCurrentCell(cellInfo, render.engine, render?.scene);
 
         this._containerElement!.style.display = 'block';
         this._containerElement!.style.left = `${position.left}px`;

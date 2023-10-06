@@ -170,7 +170,7 @@ export class SheetClipboardController extends Disposable {
 
                 // examine if pasting would cause number of cells to exceed the upper limit
                 // this is not implemented yet
-                const maxConfig = self._configService.getConfig<number>('maxCellsPerSheet');
+                const maxConfig = self._configService.getConfig<number>(workbookId_, 'maxCellsPerSheet');
                 const { endRow, endColumn } = range;
                 if (maxConfig && endRow * endColumn > maxConfig) {
                     self._messageService.show(); // TODO: show error info

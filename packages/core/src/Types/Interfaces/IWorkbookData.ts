@@ -25,4 +25,16 @@ export interface IWorkbookConfig {
     sheets: { [sheetId: string]: Partial<IWorksheetConfig> };
     styles: IKeyType<Nullable<IStyleData>>;
     timeZone: string;
+
+    /**
+     * HTML selector
+     * default is null
+     */
+    container?: string;
+
+    /**
+     * should start renderLoop Immediately
+     * default is true
+     */
+    shouldRenderLoopImmediately: boolean;
 }

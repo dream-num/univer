@@ -86,7 +86,7 @@ export class CanvasView {
     }
 
     activePage(pageId?: string) {
-        const model = this._currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
+        const model = this._currentUniverService.getCurrentUniverSlideInstance();
         let page: Nullable<ISlidePage>;
         if (pageId) {
             page = model.getPage(pageId);
@@ -199,7 +199,7 @@ export class CanvasView {
     }
 
     private _createSlide() {
-        const model = this._currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
+        const model = this._currentUniverService.getCurrentUniverSlideInstance();
         const mainScene = this._scene;
         if (!mainScene) return;
 
@@ -227,7 +227,7 @@ export class CanvasView {
     }
 
     private _addBackgroundRect(scene: Scene, fill: IColorStyle) {
-        const model = this._currentUniverService.getCurrentUniverSlideInstance().getSlideModel();
+        const model = this._currentUniverService.getCurrentUniverSlideInstance();
 
         const pageSize = model.getPageSize();
 

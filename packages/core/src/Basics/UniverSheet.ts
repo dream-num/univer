@@ -16,8 +16,6 @@ import { IWorkbookConfig } from '../Types/Interfaces/IWorkbookData';
 export class UniverSheet extends Disposable implements IDisposable {
     private readonly _injector: Injector;
 
-    private readonly _workbooks: Workbook[] = [];
-
     private readonly _pluginStore = new PluginStore();
 
     constructor(@Inject(Injector) parentInjector: Injector) {
@@ -60,14 +58,12 @@ export class UniverSheet extends Disposable implements IDisposable {
 
     createSheet(workbookConfig: Partial<IWorkbookConfig>): Workbook {
         const workbook = this._injector.createInstance(Workbook, workbookConfig);
-        this._workbooks.push(workbook);
         return workbook;
     }
 
     override dispose(): void {
         super.dispose();
 
-        this._workbooks.length = 0;
         this._pluginStore.removePlugins();
     }
 
@@ -82,8 +78,6 @@ export class UniverSheet extends Disposable implements IDisposable {
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._injector.createInstance(plugin as unknown as Ctor<any>, options);
         this._pluginStore.addPlugin(pluginInstance);
-
-        // TODO: should replay lifecycle staged to newly added plugins
     }
 
     private _initDependencies(parentInjector?: Injector): Injector {

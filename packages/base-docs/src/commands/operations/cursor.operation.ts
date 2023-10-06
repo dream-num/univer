@@ -22,7 +22,7 @@ export const MoveCursorOperation: IOperation<IMoveCursorOperationParams> = {
         const currentUniverService = accessor.get(ICurrentUniverService);
         const inputController = accessor.get(InputController);
 
-        inputController.moveCursor(currentUniverService.getCurrentUniverDocInstance().getDocument(), params.direction);
+        inputController.moveCursor(currentUniverService.getCurrentUniverDocInstance(), params.direction);
 
         return true;
     },

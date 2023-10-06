@@ -39,7 +39,7 @@ export class DocsView extends BaseView {
 
         const docsModel = this._useExternalModel
             ? externalModel
-            : this._currentUniverService.getCurrentUniverDocInstance()?.getDocument();
+            : this._currentUniverService.getCurrentUniverDocInstance();
         if (docsModel) {
             this._docsViewManagerService.registerCanvasViewForUniverInstance(docsModel!.getUnitId(), this);
         }
@@ -85,7 +85,7 @@ export class DocsView extends BaseView {
         const scene = this.getScene();
         const docsModel = this._useExternalModel
             ? this._model!
-            : this._currentUniverService.getCurrentUniverDocInstance()?.getDocument();
+            : this._currentUniverService.getCurrentUniverDocInstance();
 
         if (!docsModel) {
             return;

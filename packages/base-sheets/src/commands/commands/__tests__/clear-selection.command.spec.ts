@@ -62,8 +62,7 @@ describe('Test clear selection content commands', () => {
                 function getValue(): Nullable<ICellData> {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getValue();
                 }
@@ -108,8 +107,7 @@ describe('Test clear selection content commands', () => {
                 function getValue(): Nullable<ICellData> {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getValue();
                 }
@@ -178,8 +176,7 @@ describe('Test clear selection content commands', () => {
                 function getValue(): Nullable<ICellData> {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
-
-                        .getSheetBySheetId('sheet1')
+                        ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
                         .getValue();
                 }

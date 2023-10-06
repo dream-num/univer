@@ -45,7 +45,7 @@ export class ArrayFormulaLineControl {
         const { startRow, startColumn, endRow, endColumn } = this._range;
         const sheetId = this._sheetId;
 
-        const workbook = this;
+        const workbook = this.getWorkBook();
         const worksheet = workbook.getSheetBySheetId(sheetId);
 
         if (worksheet == null) {

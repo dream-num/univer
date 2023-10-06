@@ -1,45 +1,71 @@
-import { Ctor, Dependency, Inject, Injector, Optional } from '@wendellhu/redi';
+import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
 
+import { ISlideData, SlideModel } from '..';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { GenName } from '../Shared';
-import { SlideModel } from '../Slides/Domain';
-import { ISlideData } from '../Types/Interfaces';
+import { Disposable, toDisposable } from '../Shared/lifecycle';
 
 /**
  * Externally provided UniverSlide root instance
  */
-export class UniverSlide {
-    _univerSlideConfig: Partial<ISlideData>;
-
+export class UniverSlide extends Disposable {
     private readonly _injector: Injector;
-
-    private readonly _slideModel: SlideModel;
 
     private readonly _pluginStore = new PluginStore();
 
-    constructor(
-        UniverSlideData: Partial<ISlideData> = {},
-        @Optional(Injector) parentInjector: Injector,
-        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
-    ) {
-        this._univerSlideConfig = UniverSlideData;
-        this._injector = this._initializeDependencies(parentInjector);
-        this._slideModel = this._injector.createInstance(SlideModel, UniverSlideData);
+    constructor(@Optional(Injector) parentInjector: Injector) {
+        super();
 
-        this._lifecycleService.lifecycle$.subscribe((stage) => {
-            if (stage === LifecycleStages.Rendered) {
-                this._pluginStore.forEachPlugin((p) => p.onRendered());
-            }
-        });
+        this._injector = this._initDependencies(parentInjector);
+        // this._slideModel = this._injector.createInstance(SlideModel, UniverSlideData);
+
+        // this._lifecycleService.lifecycle$.subscribe((stage) => {
+        //     if (stage === LifecycleStages.Rendered) {
+        //         this._pluginStore.forEachPlugin((p) => p.onRendered());
+        //     }
+        // });
+
+        // this._injector.get(LifecycleInitializerService).start();
+    }
+
+    init(): void {
+        this.disposeWithMe(
+            toDisposable(
+                this._injector
+                    .get(LifecycleService)
+                    .subscribeWithPrevious()
+                    .subscribe((stage) => {
+                        if (stage === LifecycleStages.Starting) {
+                            this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
+                            return;
+                        }
+
+                        if (stage === LifecycleStages.Ready) {
+                            this._pluginStore.forEachPlugin((p) => p.onReady());
+                            return;
+                        }
+
+                        if (stage === LifecycleStages.Rendered) {
+                            this._pluginStore.forEachPlugin((p) => p.onRendered());
+                            return;
+                        }
+
+                        if (stage === LifecycleStages.Steady) {
+                            this._pluginStore.forEachPlugin((p) => p.onSteady());
+                        }
+                    })
+            )
+        );
 
         this._injector.get(LifecycleInitializerService).start();
     }
 
-    getUnitId(): string {
-        return this._slideModel.getUnitId();
+    createSlide(data: Partial<ISlideData>): SlideModel {
+        const slide = this._injector.createInstance(SlideModel, data);
+        return slide;
     }
 
     /**
@@ -52,20 +78,10 @@ export class UniverSlide {
      */
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._injector.createInstance(plugin as unknown as Ctor<any>, options);
-
-        pluginInstance.onRendered();
         this._pluginStore.addPlugin(pluginInstance);
     }
 
-    onReady(): void {
-        this._pluginStore.forEachPlugin((p) => p.onReady());
-    }
-
-    getSlideModel() {
-        return this._slideModel;
-    }
-
-    private _initializeDependencies(parentInjector?: Injector): Injector {
+    private _initDependencies(parentInjector?: Injector): Injector {
         const dependencies: Dependency[] = [
             [GenName],
             [LifecycleInitializerService],

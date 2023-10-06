@@ -111,7 +111,7 @@ export class FormulaController {
     }
 
     getUnitId() {
-        return this.getUnitId();
+        return this.getWorkbook().getUnitId();
     }
 
     addArrayFormulaData(value: ArrayFormulaDataType) {
@@ -178,7 +178,7 @@ export class FormulaController {
 
     private _toInterpreterCalculateProps(): IInterpreterDatasetConfig {
         const workbook = this;
-        const sheets = workbook.getSheets();
+        const sheets = workbook.getWorkbook().getSheets();
         const sheetData: SheetDataType = {};
         const unitData: UnitDataType = {};
         const sheetNameMap: SheetNameMapType = {};
@@ -194,7 +194,7 @@ export class FormulaController {
 
         const formulaData = this._formulaDataModel.getFormulaData();
 
-        const activeSheet = workbook.getActiveSheet();
+        const activeSheet = workbook.getWorkbook().getActiveSheet();
 
         const rowCount = activeSheet.getRowCount();
         const columnCount = activeSheet.getColumnCount();

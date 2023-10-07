@@ -117,7 +117,7 @@ export const InsertRowCommand: ICommand = {
         const insertRangeMutationParams: IInsertRangeMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
-            range: [params.range],
+            ranges: [params.range],
             shiftDimension: Dimension.ROWS,
             cellValue: cellValue.getData(),
         };
@@ -359,7 +359,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
         const insertRangeMutationParams: IInsertRangeMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
-            range: [params.range],
+            ranges: [params.range],
             shiftDimension: Dimension.COLUMNS,
             cellValue: cellValue.getData(),
         };

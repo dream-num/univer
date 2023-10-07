@@ -32,9 +32,10 @@ import {
     InsertRowBeforeCommand,
     InsertRowCommand,
 } from '../insert-row-col.command';
+import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
-describe('Test insert row col commands', () => {
+describe('Test insert and remove row col commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
@@ -50,19 +51,20 @@ describe('Test insert row col commands', () => {
             InsertRowCommand,
             InsertRowBeforeCommand,
             InsertRowAfterCommand,
-
             InsertColAfterCommand,
             InsertColBeforeCommand,
             InsertColCommand,
+            RemoveRowCommand,
+            RemoveColCommand,
 
             InsertColMutation,
             InsertRowMutation,
             InsertRangeMutation,
-            AddWorksheetMergeMutation,
-            RemoveWorksheetMergeMutation,
             RemoveRowMutation,
             RemoveColMutation,
             DeleteRangeMutation,
+            AddWorksheetMergeMutation,
+            RemoveWorksheetMergeMutation,
         ].forEach((c) => {
             commandService.registerCommand(c);
         });
@@ -231,6 +233,44 @@ describe('Test insert row col commands', () => {
             // expect a merged cell to expand and a merged cell to move
             expect(getMergedInfo(1, 1)).toEqual({ startRow: 1, endRow: 1, startColumn: 1, endColumn: 3 });
             expect(getMergedInfo(1, 4)).toEqual({ startRow: 1, endRow: 1, startColumn: 4, endColumn: 5 });
+        });
+    });
+
+    describe('Remove rows', () => {
+        it('Should removing selected rows works', async () => {
+            selectRow(2, 2);
+            expect(getRowCount()).toBe(20);
+
+            const result = await commandService.executeCommand(RemoveRowCommand.id);
+            expect(result).toBeTruthy();
+            expect(getRowCount()).toBe(19);
+            expect(getMergedInfo(2, 1)).toBeUndefined(); // expect the merged cell info to be deleted
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getRowCount()).toBe(20);
+            expect(getMergedInfo(2, 1)).toEqual({ startRow: 2, endRow: 3, startColumn: 1, endColumn: 1 }); // the merged cell should be restored
+
+            await commandService.executeCommand(RedoCommand.id);
+            expect(getRowCount()).toBe(19);
+        });
+    });
+
+    describe('Remove columns', () => {
+        it('Should removing selected rows works', async () => {
+            selectColumn(1, 1);
+            expect(getColCount()).toBe(20);
+
+            const result = await commandService.executeCommand(RemoveColCommand.id);
+            expect(result).toBeTruthy();
+            expect(getColCount()).toBe(19);
+            expect(getMergedInfo(1, 1)).toBeUndefined(); // expect the merged cell info to be deleted
+            expect(getMergedInfo(1, 2)).toEqual({ startRow: 1, endRow: 1, startColumn: 2, endColumn: 3 }); // expect the merged cell to be moved left
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getColCount()).toBe(20);
+
+            await commandService.executeCommand(RedoCommand.id);
+            expect(getColCount()).toBe(19);
         });
     });
 });

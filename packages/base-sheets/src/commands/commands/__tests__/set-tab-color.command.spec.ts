@@ -19,8 +19,6 @@ describe('Test tab color commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(SetTabColorCommand);
         commandService.registerCommand(SetTabColorMutation);
-        commandService.registerCommand(RedoCommand);
-        commandService.registerCommand(UndoCommand);
     });
 
     afterEach(() => {
@@ -43,11 +41,13 @@ describe('Test tab color commands', () => {
             });
             // undo
             it('will undo set tab color', async () => {
+                commandService.registerCommand(UndoCommand);
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getTabColor()).toBe('#cccccc');
             });
             // redo
             it('will redo set tab color', async () => {
+                commandService.registerCommand(RedoCommand);
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getTabColor()).toBe('red');
             });

@@ -1,3 +1,4 @@
+import { INotificationService } from '@univerjs/base-ui';
 import {
     CommandType,
     ICommand,
@@ -5,6 +6,7 @@ import {
     ICurrentUniverService,
     IUndoRedoService,
     RANGE_TYPE,
+    Rectangle,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -12,6 +14,7 @@ import { IInsertRowMutationParams, IRemoveRowsMutationParams } from '../../Basic
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import { InsertRowMutation, InsertRowMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveRowMutation, RemoveRowsMutationFactory } from '../mutations/remove-row-col.mutation';
+import { alignToMergedCellsBorders } from './utils/selection-util';
 
 export interface IMoveRowsCommandParams {
     fromRow: number;
@@ -26,35 +29,45 @@ export const MoveRowsCommand: ICommand = {
     id: 'sheet.command.move-rows',
     handler: async (accessor: IAccessor, params: IMoveRowsCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-
         const selections = selectionManagerService.getSelections();
-        if (!selections?.length) {
-            return false;
-        }
-
-        const findMoveRanges = selections.filter(
-            (s) =>
-                s.range.rangeType === RANGE_TYPE.ROW &&
-                s.range.startRow <= params.fromRow &&
-                params.fromRow <= s.range.endRow
+        const ranges = selections?.filter(
+            (selection) =>
+                selection.range.rangeType === RANGE_TYPE.ROW &&
+                selection.range.startRow <= params.fromRow &&
+                params.fromRow <= selection.range.endRow
         );
-        if (findMoveRanges.length !== 1) {
+        if (ranges?.length !== 1) {
             return false;
         }
 
-        const movedRanges = findMoveRanges[0];
         const currentUniverService = accessor.get(ICurrentUniverService);
         const workbook = currentUniverService.getCurrentUniverSheetInstance();
-        if (!workbook) return false;
-        const workbookId = workbook.getUnitId();
+        if (!workbook) {
+            return false;
+        }
         const worksheet = workbook.getActiveSheet();
-        if (!worksheet) return false;
+        if (!worksheet) {
+            return false;
+        }
+
+        const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
 
-        // TODO: we should add a move row mutation instead of using an insert mutation and a delete mutation
+        // Warn use if only some parts of a merged cell are selected.
+        const rangeToMove = ranges[0].range;
+        const alignedRange = alignToMergedCellsBorders(rangeToMove, worksheet, false);
+        if (!Rectangle.equals(rangeToMove, alignedRange)) {
+            const notificationService = accessor.get(INotificationService);
+            notificationService.show({
+                title: 'Only part of a merged cell is selected.',
+            });
+            return false;
+        }
+
+        // TODO@wzhudev: we should add a move row mutation instead of using an insert mutation and a delete mutation
         // they are not logically the same
 
-        const { startRow, endRow } = movedRanges.range;
+        const { startRow, endRow } = rangeToMove;
         const removeRowMutationParams: IRemoveRowsMutationParams = {
             workbookId,
             worksheetId,

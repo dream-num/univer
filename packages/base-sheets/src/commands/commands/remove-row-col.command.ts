@@ -45,7 +45,6 @@ import {
 export const RemoveRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-row',
-    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections();

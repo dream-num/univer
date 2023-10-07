@@ -31,23 +31,16 @@ describe('Test tab color commands', () => {
         }
 
         describe('correct situations', () => {
-            it('will set tab color to #cccccc', async () => {
+            it('will set tab color', async () => {
                 expect(await commandService.executeCommand(SetTabColorCommand.id, { value: '#cccccc' })).toBeTruthy();
                 expect(getTabColor()).toBe('#cccccc');
-            });
-            it('will set tab color to red', async () => {
+
                 expect(await commandService.executeCommand(SetTabColorCommand.id, { value: 'red' })).toBeTruthy();
                 expect(getTabColor()).toBe('red');
-            });
-            // undo
-            it('will undo set tab color', async () => {
-                commandService.registerCommand(UndoCommand);
+                // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getTabColor()).toBe('#cccccc');
-            });
-            // redo
-            it('will redo set tab color', async () => {
-                commandService.registerCommand(RedoCommand);
+                // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getTabColor()).toBe('red');
             });

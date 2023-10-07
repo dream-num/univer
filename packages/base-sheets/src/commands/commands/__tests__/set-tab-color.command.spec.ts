@@ -19,6 +19,8 @@ describe('Test tab color commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(SetTabColorCommand);
         commandService.registerCommand(SetTabColorMutation);
+        commandService.registerCommand(RedoCommand);
+        commandService.registerCommand(UndoCommand);
     });
 
     afterEach(() => {

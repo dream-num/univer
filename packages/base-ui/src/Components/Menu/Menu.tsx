@@ -597,12 +597,12 @@ export const Menu = (props: BaseMenuProps) => {
                                 option.disabled ? styles.colsMenuitemDisabled : ''
                             )}
                             onClick={() => {
-                                if (option.value) {
-                                    onOptionSelect?.({
-                                        ...option,
-                                        show: option.showAfterClick,
-                                    });
-                                }
+                                // if (option.value) {
+                                onOptionSelect?.({
+                                    ...option,
+                                    show: option.showAfterClick,
+                                });
+                                // }
                             }}
                         >
                             <CustomLabel

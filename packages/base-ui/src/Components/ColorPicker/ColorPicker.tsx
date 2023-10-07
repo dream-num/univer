@@ -274,6 +274,7 @@ export function ColorPicker(props: BaseColorPickerProps) {
 
     const onCancel = () => {
         props.onCancel && props.onCancel();
+        props.onValueChange?.('');
     };
 
     // const hideSelect = (e?: MouseEvent) => {

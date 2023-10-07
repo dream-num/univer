@@ -48,11 +48,6 @@ export interface BaseInputProps extends BaseComponentProps {
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 
     /**
-     * The callback function that is triggered when Enter key is pressed
-     */
-    onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-
-    /**
      * Whether has border style
      * @default true
      */
@@ -134,15 +129,8 @@ export function Input(props: BaseInputProps) {
     };
 
     const handlePressEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        const { onPressEnter, onValueChange } = props;
-
-        // No need to set it, set up when blur
-        // const v = getValue();
-        // setValue(v);
         if (e.key === 'Enter') {
-            onPressEnter?.(e);
             ref.current?.blur();
-            // v && onValueChange?.(v);
         }
     };
 

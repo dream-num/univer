@@ -42,7 +42,7 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
         if (!worksheet) return false;
 
         const deleteRangeMutationParams: IDeleteRangeMutationParams = {
-            range,
+            ranges: range,
             worksheetId,
             workbookId,
             shiftDimension: Dimension.COLUMNS,

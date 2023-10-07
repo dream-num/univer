@@ -16,7 +16,7 @@ export const InsertRangeUndoMutationFactory = (
 ): IDeleteRangeMutationParams => ({
     workbookId: params.workbookId,
     worksheetId: params.worksheetId,
-    range: params.range,
+    ranges: params.ranges,
     shiftDimension: params.shiftDimension,
 });
 
@@ -34,8 +34,8 @@ export const InsertRangeMutation: IMutation<IInsertRangeMutationParams, boolean>
         const lastEndRow = worksheet.getLastRowWithContent();
         const lastEndColumn = worksheet.getLastColumnWithContent();
 
-        for (let i = 0; i < params.range.length; i++) {
-            const { startRow, endRow, startColumn, endColumn } = params.range[i];
+        for (let i = 0; i < params.ranges.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = params.ranges[i];
             const rows = endRow - startRow + 1;
             const columns = endColumn - startColumn + 1;
 

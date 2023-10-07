@@ -54,7 +54,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
         }
 
         const insertRangeMutationParams: IInsertRangeMutationParams = {
-            range,
+            ranges: range,
             worksheetId,
             workbookId,
             shiftDimension: Dimension.ROWS,

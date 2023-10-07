@@ -35,8 +35,8 @@ export const DeleteRangeUndoMutationFactory = (
     const lastEndRow = worksheet.getConfig().rowCount;
     const lastEndColumn = worksheet.getConfig().columnCount;
 
-    for (let i = 0; i < params.range.length; i++) {
-        const { startRow, endRow, startColumn, endColumn } = params.range[i];
+    for (let i = 0; i < params.ranges.length; i++) {
+        const { startRow, endRow, startColumn, endColumn } = params.ranges[i];
 
         if (params.shiftDimension === Dimension.ROWS) {
             // build new data
@@ -88,8 +88,8 @@ export const DeleteRangeMutation: IMutation<IDeleteRangeMutationParams, boolean>
         const lastEndRow = worksheet.getConfig().rowCount;
         const lastEndColumn = worksheet.getConfig().columnCount;
 
-        for (let i = 0; i < params.range.length; i++) {
-            const { startRow, endRow, startColumn, endColumn } = params.range[i];
+        for (let i = 0; i < params.ranges.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = params.ranges[i];
 
             const rows = endRow - startRow + 1;
             const columns = endColumn - startColumn + 1;

@@ -3,7 +3,6 @@ import { Component } from 'react';
 import { Subscription } from 'rxjs';
 
 import { AppContext } from '../../../Common/AppContext';
-import { Button } from '../../../Components/Button/Button';
 import { CustomLabel } from '../../../Components/CustomLabel/CustomLabel';
 import { Select } from '../../../Components/Select/Select';
 import { Tooltip } from '../../../Components/Tooltip/Tooltip';
@@ -15,6 +14,7 @@ import {
     IValueOption,
     MenuItemType,
 } from '../../../services/menu/menu';
+import { ToolbarButton } from './button/toolbar-button';
 import styles from './index.module.less';
 
 export interface IToolbarItemStatus {
@@ -131,14 +131,14 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
 
         return (
             <Tooltip title={this.getTooltip()} placement="bottom">
-                <Button
+                <ToolbarButton
                     active={activated}
                     className={styles.textButton}
                     disabled={disabled}
                     onClick={() => commandService.executeCommand(props.id)}
                 >
                     <CustomLabel label={icon ? { name: icon } : title} />
-                </Button>
+                </ToolbarButton>
             </Tooltip>
         );
     }

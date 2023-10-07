@@ -20,7 +20,7 @@ import {
 } from '../mutations/set-worksheet-hide.mutation';
 
 export interface ISetWorksheetShowCommandParams {
-    worksheetId?: string;
+    value?: string;
 }
 
 export const SetWorksheetShowCommand: ICommand = {
@@ -40,7 +40,7 @@ export const SetWorksheetShowCommand: ICommand = {
             .getSheetId();
 
         if (params) {
-            worksheetId = params.worksheetId ?? worksheetId;
+            worksheetId = params.value ?? worksheetId;
         }
 
         const workbook = currentUniverService.getUniverSheetInstance(workbookId);

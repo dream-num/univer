@@ -15,7 +15,6 @@ import {
     BaseMenuItem,
     BaseSelectProps,
     Button,
-    CustomLabel,
     Icon,
     IDisplayMenuItem,
     IMenuItem,
@@ -29,6 +28,7 @@ import { Component, createRef } from 'react';
 
 import { SheetMenuPosition } from '../../controller/menu/menu';
 import styles from './index.module.less';
+import { InputEdit } from './input-edit';
 import { ISheetBarMenuItem, SheetBarMenu } from './SheetBarMenu';
 
 export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectProps, 'children'> {
@@ -217,7 +217,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                     <div className={`${styles.slideTabDivider}`}></div>
                     <div className={`${styles.slideTabTitle}`}>
                         <span className={`${styles.slideTabSpan}`} style={{ padding: '2px 5px 2px 5px' }}>
-                            <CustomLabel label={item.label} />
+                            <InputEdit sheetId={item.sheetId} sheetName={item.label as string} />
                         </span>
                     </div>
                     <div
@@ -327,7 +327,9 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         const { sheetList, menuList, sheetUl, showMenu, menuStyle, activeKey } = this.state;
 
         const { addSheet } = this.props;
-        const tabColorToken = sheetList.map((item) => item?.color?.toString()).join('-');
+        const reRenderString = sheetList
+            .map((item) => `${item?.color?.toString()}${item?.label?.toString()}`)
+            .join('-');
 
         return (
             <div className={styles.sheetBar}>
@@ -344,7 +346,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 </div>
 
                 {/* user s button */}
-                <Tabs draggable className={styles.slideTabBar} activeKey={activeKey} reRenderString={tabColorToken}>
+                <Tabs draggable className={styles.slideTabBar} activeKey={activeKey} reRenderString={reRenderString}>
                     {sheetList.map((item) => (
                         <TabPane
                             key={item.sheetId}
@@ -402,11 +404,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                         const commandService: ICommandService = (this.context as IKeyValue).injector.get(
                             ICommandService
                         );
-                        if (commandId === SetWorksheetShowCommand.id) {
-                            commandService.executeCommand(commandId as string, { worksheetId: value });
-                        } else {
-                            commandService.executeCommand(commandId as string, { value });
-                        }
+                        commandService.executeCommand(commandId as string, { value, worksheetId: activeKey });
                     }}
                 />
 

@@ -36,7 +36,7 @@ export function InputEdit(props: IBaseInputProps) {
         sheetbarService.setRenameId('');
     };
 
-    const keydown = (ev: KeyboardEvent) => {
+    const keydown = (ev: React.KeyboardEvent<HTMLInputElement>) => {
         if (ev.key !== undefined && ev.key === 'Enter') {
             return submit();
         }

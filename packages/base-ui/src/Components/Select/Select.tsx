@@ -614,7 +614,6 @@ export function Select(props: BaseSelectProps) {
             <div className={`${styles.selectInput} ${className}`}>
                 <Dropdown onMainClick={onMainClick} tooltip={tooltip} menu={{ menu, onClick }}>
                     <Input
-                        onPressEnter={(e) => handlePressEnter(e)}
                         onBlur={onPressEnter}
                         type="number"
                         value={`${props.label as number}` ?? (content as string)}

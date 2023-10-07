@@ -342,6 +342,7 @@
 //         }
 //     }
 // }
+import { isRealNum } from '@univerjs/core';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { of } from 'rxjs';
 
@@ -690,15 +691,6 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
         }
     };
 
-    /**
-     * user input change value from CustomLabel
-     * @param e
-     */
-    const onChange = (v: string | number) => {
-        // const newValue = isRealNum(v) && typeof v === 'string' ? parseInt(v) : v;
-        // setValue(newValue);
-    };
-
     useEffect(() => {
         getSubMenus();
 
@@ -708,6 +700,16 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     const disabled = useObservable<boolean>(menuItem.disabled$ || of(false), false, true);
     const hidden = useObservable(menuItem.hidden$ || of(false), false, true);
     const value = useObservable<MenuItemDefaultValueType>(menuItem.value$ || of(undefined), undefined, true);
+    const [inputValue, setInputValue] = useState(value);
+
+    /**
+     * user input change value from CustomLabel
+     * @param e
+     */
+    const onChange = (v: string | number) => {
+        const newValue = isRealNum(v) && typeof v === 'string' ? parseInt(v) : v;
+        setInputValue(newValue);
+    };
 
     const renderButtonType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
@@ -719,16 +721,18 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                 // disabled={disabled} // FIXME disabled is not working
                 onClick={() => {
                     // commandService.executeCommand(item.id, { value });// move to business components
-                    onClick({ value, id: item.id }); // merge cell
+                    onClick({ value: inputValue, id: item.id }); // merge cell
                 }}
             >
                 <NeoCustomLabel
                     display={display}
-                    value={value}
+                    value={inputValue}
                     title={title}
                     label={label}
-                    onChange={(v) => {
-                        onChange(v);
+                    onChange={onChange}
+                    onValueChange={() => {
+                        // Right-click the menu for the title bar, and the Enter key triggers after entering the row height
+                        onClick({ value: inputValue, id: item.id });
                     }}
                 ></NeoCustomLabel>
             </li>
@@ -747,7 +751,7 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
             >
                 <NeoCustomLabel
                     title={item.title}
-                    value={value}
+                    value={inputValue}
                     onChange={onChange}
                     icon={item.icon}
                     display={item.display}

@@ -24,7 +24,14 @@ function getLocale(context: Partial<AppContextValues>, name: string) {
 export interface INeoCustomLabelProps {
     value?: string | number | undefined;
     selected?: boolean;
+    /**
+     * Triggered after value change
+     */
     onChange?(v: string | number): void;
+    /**
+     * Triggered after input Enter or Blur
+     */
+    onValueChange?(v: string | number): void;
     onFocus?: (e: React.FocusEvent<HTMLInputElement, Element>) => void;
 }
 

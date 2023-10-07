@@ -4,10 +4,14 @@ import React, { useEffect, useState } from 'react';
 interface IProps extends ICustomComponentProps<string> {
     prefix: string;
     suffix: string;
-    onKeyUp?: (e: Event) => void;
+
+    /**
+     * After ENTER, execute Command, close the right-click menu
+     */
+    onValueChange?: (value: string) => void;
 }
 
-export const RightMenuInput: React.FC<IProps> = ({ prefix, suffix, value, onChange }) => {
+export const RightMenuInput: React.FC<IProps> = ({ prefix, suffix, value, onChange, onValueChange }) => {
     const [inputValue, setInputValue] = useState<string>(); // Initialized to an empty string
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,6 +33,7 @@ export const RightMenuInput: React.FC<IProps> = ({ prefix, suffix, value, onChan
                 value={inputValue}
                 onClick={(e) => e.stopPropagation()}
                 onChange={handleChange}
+                onValueChange={onValueChange}
             ></Input>
             <CustomLabel label={suffix} />
         </div>

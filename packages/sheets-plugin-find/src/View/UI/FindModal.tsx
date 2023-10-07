@@ -219,7 +219,7 @@ export class FindModal extends Component<IProps, IState> {
                             <CustomLabel label="find.find" />
                         </span>
                     )}
-                    <Input onPressEnter={this.findNext.bind(this)} onChange={(e) => this.onChange(e)}></Input>
+                    <Input onValueChange={this.findNext.bind(this)} onChange={(e) => this.onChange(e)}></Input>
                     {count ? (
                         <div className={styles.count}>
                             <span onClick={this.findPrevious.bind(this)}>

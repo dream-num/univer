@@ -393,6 +393,8 @@ export interface BaseSelectProps {
     options?: IValueOption[];
     title?: string;
     onClose?: () => void;
+    max?: number; // input maximum value
+    min?: number; // INPUT minimum value
 }
 
 export function Select(props: BaseSelectProps) {
@@ -433,7 +435,6 @@ export function Select(props: BaseSelectProps) {
                 list[i].children = resetMenu(children[i].children as BaseSelectChildrenProps[]);
             }
         }
-
         return list;
     };
 
@@ -666,7 +667,7 @@ export function Select(props: BaseSelectProps) {
     };
 
     const renderNeo = () => {
-        const { tooltip, onClick, display, value, icon, title, id, options, type, onClose } = props;
+        const { tooltip, onClick, display, value, icon, title, id, options, type, onClose, max, min } = props;
 
         const onClickInner = (...args: unknown[]) => {
             onClick?.(args[1] as number | string);
@@ -680,7 +681,7 @@ export function Select(props: BaseSelectProps) {
         const displayInSubMenu =
             display === DisplayTypes.ICON
                 ? DisplayTypes.LABEL
-                : display === DisplayTypes.INPUT
+                : display === DisplayTypes.INPUT || display === DisplayTypes.FONT
                 ? DisplayTypes.LABEL
                 : display;
 
@@ -706,6 +707,8 @@ export function Select(props: BaseSelectProps) {
                             display={display}
                             title={title!}
                             value={value}
+                            max={max}
+                            min={min}
                             onChange={(v) => onClick?.(v)}
                             onFocus={() => {
                                 console.info(

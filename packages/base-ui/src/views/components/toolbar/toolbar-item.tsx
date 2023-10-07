@@ -88,7 +88,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         const { disabled, value } = state;
 
         const props = this.props as IDisplayMenuItem<IMenuSelectorItem>;
-        const { icon, title, label, display, selectType, selections, id, onClose } = props;
+        const { icon, title, label, display, selectType, selections, id, onClose, max, min } = props;
 
         return (
             <Tooltip title={this.getTooltip()} placement="bottom">
@@ -101,6 +101,8 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                     icon={icon}
                     value={value}
                     label={value ?? label} // TODO: this line is strange
+                    max={max}
+                    min={min}
                     onClick={(value) => {
                         // commandService.executeCommand(id, { value })
                         // 子元素commandId会被现在的id覆盖，暂时这么写以区分

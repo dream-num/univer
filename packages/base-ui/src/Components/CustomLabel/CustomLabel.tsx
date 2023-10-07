@@ -34,10 +34,11 @@ export interface INeoCustomLabelProps {
  * @returns
  */
 export function NeoCustomLabel(
-    props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title'> & INeoCustomLabelProps
+    props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title' | 'max' | 'min'> &
+        INeoCustomLabelProps
 ): JSX.Element | null {
     const context = useContext(AppContext);
-    const { display, value, title, icon, label, onChange, selected, onFocus } = props;
+    const { display, value, title, icon, label, onChange, selected, onFocus, max, min } = props;
 
     if (display === DisplayTypes.COLOR) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,6 +68,8 @@ export function NeoCustomLabel(
                     textAlign: 'center',
                     background: 'transparent',
                 }}
+                max={max}
+                min={min}
             />
         );
     }

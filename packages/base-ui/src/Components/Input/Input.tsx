@@ -96,6 +96,16 @@ export interface BaseInputProps extends BaseComponentProps {
      * Input's id
      */
     id?: string;
+
+    /**
+     * When Type is Number, the maximum value
+     */
+    max?: number;
+
+    /**
+     * When Type is Number, the minimum value
+     */
+    min?: number;
 }
 
 /**
@@ -125,8 +135,10 @@ export function Input(props: BaseInputProps) {
 
     const handlePressEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
         const { onPressEnter, onValueChange } = props;
-        const v = getValue();
-        setValue(v);
+
+        // No need to set it, set up when blur
+        // const v = getValue();
+        // setValue(v);
         if (e.key === 'Enter') {
             onPressEnter?.(e);
             ref.current?.blur();
@@ -149,8 +161,26 @@ export function Input(props: BaseInputProps) {
     const onBlur = (e: React.FocusEvent<HTMLInputElement, Element>) => {
         const { onBlur, onValueChange } = props;
         onBlur?.(e);
-        const v = getValue();
-        setValue(v);
+        let v = getValue();
+
+        if (v == null) return;
+
+        // Limit the size according to MAX MIN
+        const { max, min } = props;
+        if (props.type === 'number') {
+            if (typeof max === 'number' && +v > max) {
+                setValue(max.toString());
+                v = max.toString();
+            } else if (typeof min === 'number' && +v < min) {
+                setValue(min.toString());
+                v = min.toString();
+            } else {
+                setValue(v);
+            }
+        } else {
+            setValue(v);
+        }
+
         v && onValueChange?.(v);
         setFocused(false);
     };
@@ -167,6 +197,8 @@ export function Input(props: BaseInputProps) {
         style = {},
         readonly,
         maxLength,
+        max,
+        min,
     } = props;
 
     const classes = joinClassNames(
@@ -195,6 +227,8 @@ export function Input(props: BaseInputProps) {
             readOnly={readonly}
             id={id}
             onKeyUp={handlePressEnter}
+            max={max}
+            min={min}
         />
     );
 }

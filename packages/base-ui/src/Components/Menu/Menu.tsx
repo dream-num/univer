@@ -359,7 +359,7 @@ import {
 } from '../../services/menu/menu';
 import { IMenuService } from '../../services/menu/menu.service';
 import { joinClassNames } from '../../Utils';
-import { CustomLabel, NeoCustomLabel } from '../CustomLabel/CustomLabel';
+import { NeoCustomLabel } from '../CustomLabel/CustomLabel';
 import { useObservable } from '../hooks/observable';
 import { BaseMenuItem } from '../Item/Item';
 import { DisplayTypes } from '../Select/Select';
@@ -470,6 +470,7 @@ export const Menu = (props: BaseMenuProps) => {
 
     useEffect(() => {
         const { show = false } = props;
+
         showMenu(show);
     }, [props.show]);
 
@@ -596,8 +597,10 @@ export const Menu = (props: BaseMenuProps) => {
                             className={joinClassNames(
                                 styles.colsMenuitem,
                                 option.disabled ? styles.colsMenuitemDisabled : ''
+                                // String(value) === String(option.value) ? styles.selectItemSelected : '' // Set the background color of Item
                             )}
                             onClick={() => {
+                                // Execute the callback function
                                 if (option.value) {
                                     onOptionSelect?.({
                                         ...option,
@@ -606,8 +609,8 @@ export const Menu = (props: BaseMenuProps) => {
                                 }
                             }}
                         >
-                            <CustomLabel
-                                selected={value === option.value}
+                            <NeoCustomLabel
+                                selected={String(value) === String(option.value)} // use √ for select
                                 value={String(option.value)}
                                 display={display}
                                 label={option.label}
@@ -749,6 +752,8 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                     icon={item.icon}
                     display={item.display}
                     label={item.label}
+                    max={item.max}
+                    min={item.min}
                 ></NeoCustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
                 {(menuItems.length > 0 || (item as IMenuSelectorItem).selections?.length) && (

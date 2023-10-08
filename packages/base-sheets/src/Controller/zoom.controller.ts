@@ -11,7 +11,7 @@ import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
-import { SetZoomRatioMutation } from '../commands/mutations/set-zoom-ratio.mutation';
+import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -71,7 +71,7 @@ export class ZoomController extends Disposable {
             let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
             nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
 
-            this._commandService.executeCommand(SetZoomRatioMutation.id, {
+            this._commandService.executeCommand(SetZoomRatioOperation.id, {
                 zoomRatio: nextRatio,
                 workbookId: workbook.getUnitId(),
                 worksheetId: sheet.getSheetId(),
@@ -98,7 +98,7 @@ export class ZoomController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = [SetZoomRatioMutation.id];
+        const updateCommandList = [SetZoomRatioOperation.id];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {

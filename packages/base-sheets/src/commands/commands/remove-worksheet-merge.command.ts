@@ -15,8 +15,8 @@ import {
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {
+    RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
-    RemoveWorksheetMergeMutationFactory,
 } from '../mutations/remove-worksheet-merge.mutation';
 
 export const RemoveWorksheetMergeCommand: ICommand = {
@@ -60,7 +60,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
         });
         if (!hasMerge) return false;
 
-        const undoMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(
+        const undoMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
             accessor,
             removeMergeMutationParams
         );

@@ -161,6 +161,14 @@ export class ObjectMatrix<T> {
         this._option.push(row.toJSON() as ObjectArrayPrimitiveType<T>);
     }
 
+    moveRows(start: number, count: number, target: number): void {
+        this._option.move(start, count, target);
+    }
+
+    moveColumns(start: number, count: number, target: number): void {
+        throw new Error('Not implemented.');
+    }
+
     insertRow(rowIndex: number, row: ObjectArray<T>): void {
         this._option.insert(rowIndex, row.toJSON() as ObjectArrayPrimitiveType<T>);
     }

@@ -4,7 +4,7 @@ import { IAccessor } from '@wendellhu/redi';
 import { IInsertColMutationParams, IRemoveColMutationParams } from '../../Basics/Interfaces/MutationInterface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
-import { IRemoveColMutationFactory, RemoveColMutation } from '../mutations/remove-row-col.mutation';
+import { RemoveColMutation, RemoveColMutationFactory } from '../mutations/remove-row-col.mutation';
 
 export interface IMoveColumnsCommandParams {
     fromColumn: number;
@@ -50,7 +50,7 @@ export const MoveColumnsCommand: ICommand = {
                 },
             ],
         };
-        const undoRemoveColumnMutationParams: IInsertColMutationParams = IRemoveColMutationFactory(
+        const undoRemoveColumnMutationParams: IInsertColMutationParams = RemoveColMutationFactory(
             accessor,
             removeColumnMutationParams
         );

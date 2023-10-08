@@ -14,10 +14,10 @@ import {
     IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
-import { AddWorksheetMergeMutation, AddWorksheetMergeMutationFactory } from '../mutations/add-worksheet-merge.mutation';
+import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {
+    RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
-    RemoveWorksheetMergeMutationFactory,
 } from '../mutations/remove-worksheet-merge.mutation';
 
 interface addMergeCommandParams {
@@ -77,7 +77,7 @@ export const AddWorksheetMergeCommand: ICommand = {
             worksheetId,
             ranges,
         };
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(
+        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
             accessor,
             removeMergeMutationParams
         );
@@ -88,7 +88,7 @@ export const AddWorksheetMergeCommand: ICommand = {
             worksheetId,
             ranges,
         };
-        const undoMutationParams: IRemoveWorksheetMergeMutationParams = AddWorksheetMergeMutationFactory(
+        const undoMutationParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
             accessor,
             addMergeMutationParams
         );

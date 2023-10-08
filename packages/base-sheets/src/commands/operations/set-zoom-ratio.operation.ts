@@ -1,7 +1,7 @@
-import { CommandType, ICurrentUniverService, IMutation, Tools } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IOperation, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-export interface ISetZoomRatioMutationParams {
+export interface ISetZoomRatioOperationParams {
     zoomRatio: number;
     workbookId: string;
     worksheetId: string;
@@ -9,8 +9,8 @@ export interface ISetZoomRatioMutationParams {
 
 export const SetZoomRatioUndoMutationFactory = (
     accessor: IAccessor,
-    params: ISetZoomRatioMutationParams
-): ISetZoomRatioMutationParams => {
+    params: ISetZoomRatioOperationParams
+): ISetZoomRatioOperationParams => {
     const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
     const worksheet = workbook!.getSheetBySheetId(params.worksheetId);
     const old = worksheet!.getConfig().zoomRatio;
@@ -20,14 +20,20 @@ export const SetZoomRatioUndoMutationFactory = (
     };
 };
 
-export const SetZoomRatioMutation: IMutation<ISetZoomRatioMutationParams> = {
-    id: 'sheet.mutation.set-zoom-ratio',
-    type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+export const SetZoomRatioOperation: IOperation<ISetZoomRatioOperationParams> = {
+    id: 'sheet.operation.set-zoom-ratio',
+    type: CommandType.OPERATION,
+    handler: async (accessor, params: ISetZoomRatioOperationParams) => {
         const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
-        if (!workbook) return false;
+        if (!workbook) {
+            return false;
+        }
+
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
-        if (!worksheet) return false;
+        if (!worksheet) {
+            return false;
+        }
+
         worksheet.getConfig().zoomRatio = params.zoomRatio;
 
         return true;

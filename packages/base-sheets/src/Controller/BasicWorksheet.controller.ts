@@ -1,7 +1,6 @@
 import { Disposable, ICommandService, IStyleData, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
-import { SetZoomRatioCommand, SetZoomRatioMutation } from '..';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -64,6 +63,7 @@ import { DeleteRangeMutation } from '../commands/mutations/delete-range.mutation
 import { InsertRangeMutation } from '../commands/mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
+import { MoveRowsMutation } from '../commands/mutations/move-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
@@ -81,6 +81,7 @@ import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-o
 import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { SetWorksheetRowHideMutation } from '../commands/mutations/set-worksheet-row-hide.mutation';
 import { SetWorksheetRowShowMutation } from '../commands/mutations/set-worksheet-row-show.mutation';
+import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -144,6 +145,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             DeltaRowHeightCommand,
             DeltaColumnWidthCommand,
 
+            MoveRowsMutation,
+
             // #endregion
 
             SetRangeValuesCommand,
@@ -181,8 +184,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetFrozenCommand,
             SetFrozenMutation,
             SetFrozenCancelCommand,
-            SetZoomRatioCommand,
-            SetZoomRatioMutation,
+            SetZoomRatioOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

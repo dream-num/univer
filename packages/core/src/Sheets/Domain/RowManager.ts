@@ -32,37 +32,19 @@ export class RowManager {
         return rowData;
     }
 
-    /**
-     * Get the height of given row
-     * @param rowPos row index
-     * @returns
-     */
     getRowHeight(rowPos: number): number;
-    /**
-     * Get the height of more rows
-     * @param rowPos row index
-     * @param numRows row count
-     * @returns
-     */
-    getRowHeight(rowPos: number, numRows: number): number;
-    getRowHeight(...argument: any): number {
+    getRowHeight(rowPos: number, count: number): number;
+    getRowHeight(rowPos: number, count: number = 1): number {
         const { _rowData } = this;
         const config = this._config;
         let height: number = 0;
-        if (argument.length === 1) {
-            const row = _rowData.obtain(argument[0], {
+
+        for (let i = 0; i < count; i++) {
+            const row = _rowData.obtain(i + rowPos, {
                 hd: BooleanNumber.FALSE,
                 h: config.defaultRowHeight,
             });
-            height = row.h;
-        } else if (argument.length === 2) {
-            for (let i = argument[0]; i < argument[0] + argument[1]; i++) {
-                const row = _rowData.obtain(i, {
-                    hd: BooleanNumber.FALSE,
-                    h: config.defaultRowHeight,
-                });
-                height += row.h;
-            }
+            height += row.h;
         }
 
         return height;

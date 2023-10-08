@@ -19,6 +19,7 @@ import { Inject } from '@wendellhu/redi';
 import { SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
+import { MoveRowsMutation } from '../commands/mutations/move-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { SetWorksheetActivateMutation } from '../commands/mutations/set-worksheet-activate.mutation';
@@ -106,6 +107,7 @@ export class SheetRenderController extends Disposable {
             RemoveColMutation.id,
             AddWorksheetMergeMutation.id,
             RemoveWorksheetMergeMutation.id,
+            MoveRowsMutation.id,
         ];
 
         this.disposeWithMe(

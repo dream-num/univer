@@ -92,7 +92,6 @@ export { SetRowHeightCommand as SetWorksheetRowHeightCommand } from './commands/
 export { SetWorksheetRowHideCommand } from './commands/commands/set-worksheet-row-hide.command';
 export { SetWorksheetRowShowCommand } from './commands/commands/set-worksheet-row-show.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
-export { SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 export {
     InsertColMutation,
     InsertColMutationUndoFactory as InsertColMutationFactory,
@@ -120,8 +119,8 @@ export {
     type ISetWorksheetRowHeightMutationParams,
     SetWorksheetRowHeightMutation,
 } from './commands/mutations/set-worksheet-row-height.mutation';
-export { SetZoomRatioMutation } from './commands/mutations/set-zoom-ratio.mutation';
 export { SetSelectionsOperation } from './commands/operations/selection.operation';
+export { SetZoomRatioOperation as SetZoomRatioMutation } from './commands/operations/set-zoom-ratio.operation';
 export * from './Locale';
 
 // #endregion

@@ -238,6 +238,7 @@ export default {
         borderVertical: '内侧竖线',
         borderColor: '边框颜色',
         borderSize: '边框粗细',
+        borderType: '边框线类型',
     },
     merge: {
         all: '全部合并',

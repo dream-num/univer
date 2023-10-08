@@ -602,12 +602,12 @@ export const Menu = (props: BaseMenuProps) => {
                             )}
                             onClick={() => {
                                 // Execute the callback function
-                                if (option.value) {
-                                    onOptionSelect?.({
-                                        ...option,
-                                        show: option.showAfterClick,
-                                    });
-                                }
+                                // if (option.value) { // color picker cancel use ''
+                                onOptionSelect?.({
+                                    ...option,
+                                    show: option.showAfterClick,
+                                });
+                                // }
                             }}
                         >
                             <NeoCustomLabel

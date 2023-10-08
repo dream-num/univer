@@ -80,6 +80,10 @@ export interface IBaseTabsProps {
      * @default false
      */
     draggable?: boolean;
+    /**
+     * Re-render when it changes
+     */
+    reRenderString?: string;
 }
 
 interface ITabInfo {
@@ -390,7 +394,10 @@ export const Tabs = React.memo(
             </div>
         );
     },
-    (prev, next) => prev.children.length === next.children.length && prev.activeKey === next.activeKey
+    (prev, next) =>
+        prev.children.length === next.children.length &&
+        prev.activeKey === next.activeKey &&
+        prev.reRenderString === next.reRenderString
 );
 
 // tab content

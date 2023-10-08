@@ -33,6 +33,7 @@ import {
     SetWorksheetRowHeightCommand,
     SetWorksheetRowHideCommand,
     SetWorksheetRowShowCommand,
+    SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
 import {
     ColorPicker,
@@ -65,7 +66,6 @@ import { map } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from '../../Basics/Const/PLUGIN_NAME';
 import { RenameSheetCommand } from '../../commands/commands/rename.command';
-import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
 
 export const CONTEXT_MENU_INPUT_LABEL = 'CONTEXT_MENU_INPUT';
 
@@ -76,6 +76,7 @@ export enum SheetMenuPosition {
     ROW_HEADER_CONTEXT_MENU = 'rowHeaderContextMenu',
     COL_HEADER_CONTEXT_MENU = 'colHeaderContextMenu',
     SHEET_BAR = 'sheetBar',
+    WORKSHEET_MANAGE_MENU = 'worksheetManageMenu',
 }
 
 export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -1223,11 +1224,47 @@ export function HideSheetMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function UnHideSheetMenuItemFactory(): IMenuButtonItem {
+export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<any> {
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const commandService = accessor.get(ICommandService);
+    const hiddenList = currentUniverService.getCurrentUniverHiddenWorksheets().map((s) => ({
+        label: s.name,
+        value: s.id,
+    }));
+
     return {
-        id: ShowMenuListCommand.id,
-        type: MenuItemType.BUTTON,
+        id: SetWorksheetShowCommand.id,
+        type: MenuItemType.SELECTOR,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',
+        selectType: SelectTypes.NEO,
+        disabled$: new Observable((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                if (c.id !== SetWorksheetHideCommand.id && c.id !== SetWorksheetShowCommand.id) {
+                    return;
+                }
+                const newList = currentUniverService.getCurrentUniverHiddenWorksheets().map((s) => ({
+                    label: s.name,
+                    value: s.id,
+                }));
+                subscriber.next(newList.length === 0);
+            });
+            subscriber.next(hiddenList.length === 0);
+            return disposable.dispose;
+        }),
+        selections: new Observable((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                if (c.id !== SetWorksheetHideCommand.id && c.id !== SetWorksheetShowCommand.id) {
+                    return;
+                }
+                const newList = currentUniverService.getCurrentUniverHiddenWorksheets().map((s) => ({
+                    label: s.name,
+                    value: s.id,
+                }));
+                subscriber.next(newList);
+            });
+            subscriber.next(hiddenList);
+            return disposable.dispose;
+        }),
     };
 }

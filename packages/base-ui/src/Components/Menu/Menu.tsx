@@ -344,7 +344,7 @@
 // }
 import { isRealNum } from '@univerjs/core';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { of } from 'rxjs';
+import { isObservable, of } from 'rxjs';
 
 import { AppContext } from '../../Common/AppContext';
 import {
@@ -711,6 +711,18 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
         setInputValue(newValue);
     };
 
+    let selections: Array<IValueOption | ICustomComponentOption>;
+    if (menuItem.type === MenuItemType.SELECTOR) {
+        if (isObservable(menuItem.selections)) {
+            selections = useObservable<Array<IValueOption | ICustomComponentOption>>(
+                menuItem.selections || of([]),
+                [],
+                true
+            );
+        } else {
+            selections = menuItem.selections || [];
+        }
+    }
     const renderButtonType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
         const { title, display, label } = item;
@@ -760,7 +772,7 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                     min={item.min}
                 ></NeoCustomLabel>
                 {item.shortcut && ` (${item.shortcut})`}
-                {(menuItems.length > 0 || (item as IMenuSelectorItem).selections?.length) && (
+                {(menuItems.length > 0 || selections?.length > 0) && (
                     <Menu
                         show={itemShow}
                         onOptionSelect={(v) => {
@@ -769,7 +781,7 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                             setItemShow(false); // hide current menu
                         }}
                         menuId={item.id}
-                        options={item.selections}
+                        options={selections}
                         display={item.display}
                         parent={true}
                     ></Menu>
@@ -795,7 +807,7 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
                     display={item.display}
                     label={item.label}
                 ></NeoCustomLabel>
-                {(menuItems.length > 0 || (item as IMenuSelectorItem<unknown>).selections?.length) && (
+                {(menuItems.length > 0 || selections?.length) && (
                     <Menu
                         show={itemShow}
                         menuId={item.id}

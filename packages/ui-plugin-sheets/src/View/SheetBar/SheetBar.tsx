@@ -1,4 +1,5 @@
 import {
+    InsertSheetCommand,
     InsertSheetMutation,
     RemoveSheetMutation,
     SetTabColorMutation,
@@ -15,11 +16,12 @@ import {
     BaseMenuItem,
     BaseSelectProps,
     Button,
-    CustomLabel,
     Icon,
     IDisplayMenuItem,
     IMenuItem,
     Menu,
+    TabPane,
+    Tabs,
 } from '@univerjs/base-ui';
 import { BooleanNumber, ICommandService, ICurrentUniverService, IKeyValue } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
@@ -27,6 +29,7 @@ import { Component, createRef } from 'react';
 
 import { SheetMenuPosition } from '../../controller/menu/menu';
 import styles from './index.module.less';
+import { InputEdit } from './input-edit';
 import { ISheetBarMenuItem, SheetBarMenu } from './SheetBarMenu';
 
 export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectProps, 'children'> {
@@ -50,6 +53,7 @@ type SheetState = {
     sheetUl: BaseMenuItem[];
     menuItems: Array<IDisplayMenuItem<IMenuItem>>;
     showMenu: boolean;
+    showManageMenu: boolean;
     menuStyle: React.CSSProperties;
     activeKey: string;
 };
@@ -92,6 +96,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             menuList: [],
             menuItems: [],
             showMenu: false,
+            showManageMenu: false,
             menuStyle: {},
             activeKey: '',
         };
@@ -202,43 +207,43 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         return currentSheet?.sheetId;
     }
 
-    // getSheetBarItem(item: BaseSheetBarProps) {
-    //     return (
-    //         <div
-    //             onMouseDown={item.onMouseDown}
-    //             onContextMenu={this.contextMenu}
-    //             key={item.sheetId}
-    //             data-id={item.sheetId}
-    //             className={`${styles.slideTabItem} ${item.selected ? styles.slideTabActive : ''}`}
-    //         >
-    //             <div className={`${styles.slideTabContent}`}>
-    //                 <div className={`${styles.slideTabDivider}`}></div>
-    //                 <div className={`${styles.slideTabTitle}`}>
-    //                     <span className={`${styles.slideTabSpan}`} style={{ padding: '2px 5px 2px 5px' }}>
-    //                         <CustomLabel label={item.label} />
-    //                     </span>
-    //                 </div>
-    //                 <div
-    //                     className={`${styles.slideTabIcon}`}
-    //                     data-slide-skip="true"
-    //                     style={{ lineHeight: 1 }}
-    //                     data-id={item.sheetId}
-    //                     onMouseDown={(e) => {
-    //                         this.onContextMenuClick(e);
-    //                     }}
-    //                 >
-    //                     <Icon.NextIcon />
-    //                 </div>
-    //             </div>
-    //             <div className={`${styles.slideTabFooter}`}>
-    //                 <div
-    //                     className={`${styles.slideTabActiveBar}`}
-    //                     style={item.color ? { background: item.color } : {}}
-    //                 ></div>
-    //             </div>
-    //         </div>
-    //     );
-    // }
+    getSheetBarItem(item: BaseSheetBarProps) {
+        return (
+            <div
+                onMouseDown={item.onMouseDown}
+                onContextMenu={this.onContextMenuClick}
+                key={item.sheetId}
+                data-id={item.sheetId}
+                className={`${styles.slideTabItem}`}
+            >
+                <div className={`${styles.slideTabContent}`}>
+                    <div className={`${styles.slideTabDivider}`}></div>
+                    <div className={`${styles.slideTabTitle}`}>
+                        <span className={`${styles.slideTabSpan}`} style={{ padding: '2px 5px 2px 5px' }}>
+                            <InputEdit sheetId={item.sheetId} sheetName={item.label as string} />
+                        </span>
+                    </div>
+                    <div
+                        className={`${styles.slideTabIcon}`}
+                        data-slide-skip="true"
+                        style={{ lineHeight: 1 }}
+                        data-id={item.sheetId}
+                        onMouseDown={(e) => {
+                            this.onContextMenuClick(e);
+                        }}
+                    >
+                        <Icon.NextIcon />
+                    </div>
+                </div>
+                <div className={`${styles.slideTabFooter}`}>
+                    <div
+                        className={`${styles.slideTabActiveBar}`}
+                        style={item.color ? { background: item.color } : {}}
+                    ></div>
+                </div>
+            </div>
+        );
+    }
 
     /**
      * Update worksheet info.
@@ -277,9 +282,9 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 color: (sheet.getTabColor() as string) ?? undefined,
                 onMouseDown: () => {
                     const worksheetId = sheet.getSheetId();
-                    // this.setState({
-                    //     activeKey: worksheetId,
-                    // });
+                    this.setState({
+                        activeKey: worksheetId,
+                    });
 
                     commandService.executeCommand(SetWorksheetActivateCommand.id, {
                         workbookId: workbook.getUnitId(),
@@ -287,12 +292,14 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                     });
                 },
             }));
+        const activeKey = sheetListItems.find((item) => item.selected)?.sheetId || '';
 
         // TODO: update state to the component, including active sheet index
 
         this.setState({
             menuList: worksheetMenuItems,
             sheetList: sheetListItems,
+            activeKey,
         });
     }
 
@@ -319,16 +326,28 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         });
     }
 
-    override render() {
-        const { sheetList, menuList, sheetUl, showMenu, menuStyle, activeKey } = this.state;
+    private _addSheet() {
+        const commandService = this.context.injector.get(ICommandService);
+        commandService.executeCommand(InsertSheetCommand.id, {});
+    }
 
-        const { addSheet } = this.props;
+    override render() {
+        const { sheetList, menuList, sheetUl, showMenu, showManageMenu, menuStyle, activeKey } = this.state;
+
+        const reRenderString = sheetList
+            .map((item) => `${item?.color?.toString()}${item?.label?.toString()}`)
+            .join('-');
 
         return (
             <div className={styles.sheetBar}>
                 <div className={styles.sheetBarOptions}>
                     {/* add sheet button */}
-                    <Button className={styles.sheetBarOptionsButton} onClick={addSheet}>
+                    <Button
+                        className={styles.sheetBarOptionsButton}
+                        onClick={() => {
+                            this._addSheet();
+                        }}
+                    >
                         <Icon.Math.AddIcon style={{ fontSize: '20px' }} />
                     </Button>
                     {/* all sheets button */}
@@ -339,7 +358,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 </div>
 
                 {/* user s button */}
-                {/* <Tabs draggable className={styles.slideTabBar} activeKey={activeKey}>
+                <Tabs draggable className={styles.slideTabBar} activeKey={activeKey} reRenderString={reRenderString}>
                     {sheetList.map((item) => (
                         <TabPane
                             key={item.sheetId}
@@ -348,8 +367,8 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                             className={styles.sheetBarTabPane}
                         ></TabPane>
                     ))}
-                </Tabs> */}
-                <div className={styles.slideTabBar}>
+                </Tabs>
+                {/* <div className={styles.slideTabBar}>
                     {sheetList.map((item) => (
                         <div
                             onMouseDown={item.onMouseDown}
@@ -383,7 +402,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                             </div>
                         </div>
                     ))}
-                </div>
+                </div> */}
 
                 {/* context menu */}
                 <Menu
@@ -397,7 +416,14 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                         const commandService: ICommandService = (this.context as IKeyValue).injector.get(
                             ICommandService
                         );
-                        commandService.executeCommand(commandId as string, { value });
+                        commandService.executeCommand(commandId as string, { value, worksheetId: activeKey });
+                    }}
+                />
+                <Menu
+                    menuId={SheetMenuPosition.WORKSHEET_MANAGE_MENU}
+                    show={showManageMenu}
+                    onOptionSelect={(params) => {
+                        // TODO: handle menu item click
                     }}
                 />
 

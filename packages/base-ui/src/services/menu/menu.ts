@@ -118,7 +118,9 @@ export interface IMenuSelectorItem<V = MenuItemDefaultValueType> extends IMenuIt
     // 一个是一个特殊组件，比如 color picker，选中后直接使用其 value 触发 command
     // 一个是其他 menu 的 id，直接渲染成其他的 menu
     /** Options or IDs of registered components. */
-    selections?: Array<IValueOption | ICustomComponentOption>;
+    selections?:
+        | Array<IValueOption | ICustomComponentOption>
+        | Observable<Array<IValueOption | ICustomComponentOption>>;
 }
 
 export function isMenuSelectorItem<T extends MenuItemDefaultValueType>(v: IMenuItem): v is IMenuSelectorItem<T> {

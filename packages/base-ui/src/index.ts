@@ -8,7 +8,6 @@ export { IUIController } from './controllers/ui/ui.controller';
 export { type IDesktopUIController } from './controllers/ui/ui-desktop.controller';
 export * from './Enum';
 export * from './Helpers';
-export * from './Locale';
 export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clipboard.command';
 export { CopyShortcutItem, CutShortcutItem, PasteShortcutItem } from './services/clipboard/clipboard.shortcut';
 export {

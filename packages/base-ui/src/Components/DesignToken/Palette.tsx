@@ -50,6 +50,18 @@ export function Palette(props: IProps) {
             colors: ['bgColor', 'bgColorHover', 'bgColorSecondary'],
         },
         {
+            title: 'Font Size',
+            colors: [
+                'fontSizeXs',
+                'fontSizeSm',
+                'fontSizeBase',
+                'fontSizeLg',
+                'fontSizeXl',
+                'fontSizeXxl',
+                'fontSizeXxxl',
+            ],
+        },
+        {
             title: 'Margin',
             colors: ['marginXs', 'marginSm', 'marginBase', 'marginLg', 'marginXl'],
         },

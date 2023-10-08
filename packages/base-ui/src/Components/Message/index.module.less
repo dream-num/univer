@@ -1,0 +1,54 @@
+@import '../../Basics/CSS/Skin/default.module.less';
+
+.message {
+    position: fixed;
+    top: @margin-sm;
+    left: 50%;
+    transform: translateX(-50%);
+    display: grid;
+    gap: @margin-sm;
+
+    &-item {
+        display: flex;
+        justify-content: center;
+        opacity: 0;
+        transition: all .2s cubic-bezier(0.1, 0.7, 1.0, 0.1);
+
+        &.enter-active {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        &.enter-done {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        &.exit {
+            margin-bottom: -40px;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        &.exit-active {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+    }
+
+    &-icon {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    &-content {
+        padding: @padding-sm;
+        font-size: @font-size-base;
+        background-color: @color-white;
+        border-radius: @border-radius-base;
+        box-shadow: @box-shadow-lg;
+        display: inline-flex;
+        align-items: center;
+        gap: @margin-xs;
+    }
+}

@@ -50,12 +50,20 @@ export function Palette(props: IProps) {
             colors: ['bgColor', 'bgColorHover', 'bgColorSecondary'],
         },
         {
+            title: 'Margin',
+            colors: ['marginXs', 'marginSm', 'marginBase', 'marginLg', 'marginXl'],
+        },
+        {
+            title: 'Padding',
+            colors: ['paddingXs', 'paddingSm', 'paddingBase', 'paddingLg', 'paddingXl', 'paddingXxl'],
+        },
+        {
             title: 'Border Color',
             colors: ['borderColor'],
         },
         {
             title: 'Border Radius',
-            colors: ['borderRadiusBase', 'borderRadiusLg'],
+            colors: ['borderRadiusBase', 'borderRadiusLg', 'borderRadiusXl'],
         },
         {
             title: 'Box Shadow',

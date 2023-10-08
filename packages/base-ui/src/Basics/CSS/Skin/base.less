@@ -171,6 +171,22 @@
 // Border Radius
 @border-radius-base: 4px;
 @border-radius-lg: 8px;
+@border-radius-xl: 12px;
+
+// Margin
+@margin-xl: 20px;
+@margin-lg: 16px;
+@margin-base: 12px;
+@margin-sm: 8px;
+@margin-xs: 4px;
+
+// Padding
+@padding-xxl: 28px;
+@padding-xl: 24px;
+@padding-lg: 20px;
+@padding-base: 16px;
+@padding-sm: 12px;
+@padding-xs: 8px;
 
 :export {
     // Ramu / 瑞木 / Red
@@ -343,22 +359,33 @@
     // Border Radius
     --border-radius-base: @border-radius-base;
     --border-radius-lg: @border-radius-lg;
+    --border-radius-xl: @border-radius-xl;
+
+    // Margin
+    --margin-xl: @margin-xl;
+    --margin-lg: @margin-lg;
+    --margin-base: @margin-base;
+    --margin-sm: @margin-sm;
+    --margin-xs: @margin-xs;
+
+    // Padding
+    --padding-xxl: @padding-xxl;
+    --padding-xl: @padding-xl;
+    --padding-lg: @padding-lg;
+    --padding-base: @padding-base;
+    --padding-sm: @padding-sm;
+    --padding-xs: @padding-xs;
 }
 
 // TODO: to be removed
 
 // base css variables
-@border-radius-base: 2px; // 组件/浮层圆角
 @border-width-base: 1px;
 @border-style-base: solid;
 @line-height-base: 1.5715;
-@font-weight: 400;
 @font-size-base: 14px; // 主字号
 @font-size-lg: @font-size-base + 2px;
 @font-size-sm: @font-size-base - 2px;
-
-@padding-base: 1em; // 主padding size
-@margin-base: 1em; // 主margin size
 
 @gray-3: #f5f5f5;
 @gray-4: #f0f0f0;
@@ -385,17 +412,12 @@
 @border-color-base-hover: @gray-6; // 边框 hover高亮色
 
 :export {
-    --border-radius-base: @border-radius-base;
     --border-width-base: @border-width-base;
     --border-style-base: @border-style-base;
     --line-height-base: @line-height-base;
-    --font-weight: @font-weight;
     --font-size-base: @font-size-base;
     --font-size-lg: @font-size-lg;
     --font-size-sm: @font-size-sm;
-
-    --padding-base: @padding-base;
-    --margin-base: @margin-base;
 
     --gray-3: @gray-3;
     --gray-4: @gray-4;

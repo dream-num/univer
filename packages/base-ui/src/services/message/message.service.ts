@@ -2,8 +2,14 @@ import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
 export const IMessageService = createIdentifier<IMessageService>('univer.message-service');
 
+export enum MessageType {
+    Success = 'success',
+    Warning = 'warning',
+    Error = 'error',
+}
+
 export interface IShowOptions {
-    type: 'success' | 'warning' | 'error';
+    type: MessageType;
     content: string;
     delay?: number;
 }

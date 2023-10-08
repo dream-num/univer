@@ -6,12 +6,10 @@ import { IMessageService, IShowOptions } from './message.service';
 
 export class DesktopMessageService implements IMessageService {
     show(options: IShowOptions): IDisposable {
-        const { type, content, delay } = options;
+        const { type, ...rest } = options;
 
-        message[type]({
-            content,
-            delay,
-        });
+        message[type](rest);
+
         return toDisposable(() => {});
     }
 }

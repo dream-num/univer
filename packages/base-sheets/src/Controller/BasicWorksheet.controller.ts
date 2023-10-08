@@ -63,7 +63,7 @@ import { DeleteRangeMutation } from '../commands/mutations/delete-range.mutation
 import { InsertRangeMutation } from '../commands/mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
-import { MoveColumnMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
+import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
@@ -132,7 +132,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             MoveRowsCommand,
             MoveColsCommand,
             MoveRowsMutation,
-            MoveColumnMutation,
+            MoveColsMutation,
 
             SetColWidthCommand,
             SetWorksheetColWidthMutation,

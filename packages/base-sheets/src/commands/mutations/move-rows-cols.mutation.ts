@@ -119,7 +119,7 @@ export function MoveColsMutationUndoFactory(
     };
 }
 
-export const MoveColumnMutation: IMutation<IMoveColumnsMutationParams> = {
+export const MoveColsMutation: IMutation<IMoveColumnsMutationParams> = {
     id: 'sheet.mutation.move-columns',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {

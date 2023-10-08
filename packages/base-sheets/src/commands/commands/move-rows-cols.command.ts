@@ -22,8 +22,8 @@ import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutat
 import {
     IMoveColumnsMutationParams,
     IMoveRowsMutationParams,
+    MoveColsMutation,
     MoveColsMutationUndoFactory,
-    MoveColumnMutation,
     MoveRowsMutation,
     MoveRowsMutationUndoFactory,
 } from '../mutations/move-rows-cols.mutation';
@@ -347,7 +347,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const result = await sequenceExecute(
             [
-                { id: MoveColumnMutation.id, params: moveColsParams },
+                { id: MoveColsMutation.id, params: moveColsParams },
                 { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
                 { id: AddWorksheetMergeMutation.id, params: addMergeParams },
                 { id: SetSelectionsOperation.id, params: setSelectionsParam },
@@ -363,7 +363,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
                     // NOTE: This may be affect by collaboration programming. But in google sheet, the merged cells are reverted as well :(
                     const undoResult = await sequenceExecute(
                         [
-                            { id: MoveColumnMutation.id, params: undoMoveColsParams },
+                            { id: MoveColsMutation.id, params: undoMoveColsParams },
                             { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
                             { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
                             { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
@@ -376,7 +376,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
                 async redo() {
                     const redoResult = await sequenceExecute(
                         [
-                            { id: MoveColumnMutation.id, params: moveColsParams },
+                            { id: MoveColsMutation.id, params: moveColsParams },
                             { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
                             { id: AddWorksheetMergeMutation.id, params: addMergeParams },
                             { id: SetSelectionsOperation.id, params: setSelectionsParam },

@@ -35,7 +35,7 @@ import {
 import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
-describe('Test insert and remove row col commands', () => {
+describe('Test insert and remove rows cols commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
@@ -65,9 +65,7 @@ describe('Test insert and remove row col commands', () => {
             DeleteRangeMutation,
             AddWorksheetMergeMutation,
             RemoveWorksheetMergeMutation,
-        ].forEach((c) => {
-            commandService.registerCommand(c);
-        });
+        ].forEach((c) => commandService.registerCommand(c));
 
         const selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
@@ -324,7 +322,6 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookConfig = {
                     endColumn: 1,
                 },
             ],
-            // mergeData:
             rowCount: 20,
             columnCount: 20,
         },

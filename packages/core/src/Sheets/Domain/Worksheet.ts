@@ -122,6 +122,12 @@ export class Worksheet {
         return this._snapshot.mergeData;
     }
 
+    /**
+     * @deprecated use `getMergedCell` instead
+     * @param row
+     * @param col
+     * @returns
+     */
     getMergedCells(row: number, col: number): Nullable<IRange[]> {
         const _rectangleList = this._snapshot.mergeData;
         const rectList = [];
@@ -133,6 +139,17 @@ export class Worksheet {
         }
 
         return rectList.length ? rectList : null;
+    }
+
+    getMergedCell(row: number, col: number): Nullable<IRange> {
+        const rectangleList = this._snapshot.mergeData;
+        for (let i = 0; i < rectangleList.length; i++) {
+            const range = rectangleList[i];
+            if (Rectangle.intersects({ startRow: row, startColumn: col, endRow: row, endColumn: col }, range)) {
+                return range;
+            }
+        }
+        return null;
     }
 
     /**

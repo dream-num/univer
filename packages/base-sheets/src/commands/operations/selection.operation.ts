@@ -6,8 +6,8 @@ import { CommandType, IOperation } from '@univerjs/core';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 
 export interface ISetSelectionsOperationParams {
-    unitId: string;
-    sheetId: string;
+    workbookId: string;
+    worksheetId: string;
     pluginName: string;
     selections: ISelectionWithStyle[];
 }
@@ -18,9 +18,6 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
     handler: async (accessor, params) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         selectionManagerService.replace(params!.selections);
-        // const models = selectionManager.getCurrentModels();
-        // models?.forEach((m) => m.setCurrentCell());
-        // selectionManager.renderCurrentControls(false);
         return true;
     },
 };

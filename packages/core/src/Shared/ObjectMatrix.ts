@@ -166,7 +166,11 @@ export class ObjectMatrix<T> {
     }
 
     moveColumns(start: number, count: number, target: number): void {
-        throw new Error('Not implemented.');
+        // loop all rows and move column one by one, because our matrix is row-first
+        this._option.forEach((row, value) => {
+            const array = new ObjectArray(value);
+            array.move(start, count, target);
+        });
     }
 
     insertRow(rowIndex: number, row: ObjectArray<T>): void {

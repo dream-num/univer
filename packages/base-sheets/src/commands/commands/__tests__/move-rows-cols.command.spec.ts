@@ -151,6 +151,15 @@ describe('Test move rows cols', () => {
         return worksheet.getColumnWidth(col);
     }
 
+    function getCurrentSelection(): IRange {
+        const selectionManagerService = get(SelectionManagerService);
+        const currentSelection = selectionManagerService.getSelections();
+        if (!currentSelection) {
+            throw new Error('No current selection');
+        }
+        return currentSelection[0].range;
+    }
+
     describe('Move rows', () => {
         it('Should move forward works', async () => {
             selectRow(18, 19);
@@ -166,6 +175,13 @@ describe('Test move rows cols', () => {
             expect(getMergedInfo(4, 1)).toEqual({ startRow: 4, endRow: 5, startColumn: 1, endColumn: 1 });
             expect(getRowHeight(1)).toBe(19);
             expect(getRowHeight(3)).toBe(30);
+            expect(getCurrentSelection()).toEqual({
+                startRow: 1,
+                endRow: 2,
+                startColumn: 0,
+                endColumn: 19,
+                rangeType: RANGE_TYPE.ROW,
+            });
 
             const undoResult = await commandService.executeCommand(UndoCommand.id);
             expect(undoResult).toEqual(true);
@@ -174,6 +190,13 @@ describe('Test move rows cols', () => {
             expect(getMergedInfo(1, 1)).toEqual({ startRow: 1, endRow: 1, startColumn: 1, endColumn: 2 });
             expect(getMergedInfo(2, 1)).toEqual({ startRow: 2, endRow: 3, startColumn: 1, endColumn: 1 });
             expect(getRowHeight(1)).toBe(30);
+            expect(getCurrentSelection()).toEqual({
+                startRow: 18,
+                endRow: 19,
+                startColumn: 0,
+                endColumn: 19,
+                rangeType: RANGE_TYPE.ROW,
+            });
 
             const redoResult = await commandService.executeCommand(RedoCommand.id);
             expect(redoResult).toEqual(true);
@@ -183,6 +206,13 @@ describe('Test move rows cols', () => {
             expect(getMergedInfo(4, 1)).toEqual({ startRow: 4, endRow: 5, startColumn: 1, endColumn: 1 });
             expect(getRowHeight(1)).toBe(19);
             expect(getRowHeight(3)).toBe(30);
+            expect(getCurrentSelection()).toEqual({
+                startRow: 1,
+                endRow: 2,
+                startColumn: 0,
+                endColumn: 19,
+                rangeType: RANGE_TYPE.ROW,
+            });
         });
 
         it('Should forbidding moving when parts of merged cells are selected', async () => {
@@ -227,6 +257,13 @@ describe('Test move rows cols', () => {
             expect(getMergedInfo(2, 3)).toEqual({ startRow: 2, endRow: 3, startColumn: 3, endColumn: 3 });
             expect(getColWidth(1)).toBe(73);
             expect(getColWidth(3)).toBe(30);
+            expect(getCurrentSelection()).toEqual({
+                startRow: 0,
+                endRow: 19,
+                startColumn: 1,
+                endColumn: 2,
+                rangeType: RANGE_TYPE.COLUMN,
+            });
 
             const undoResult = await commandService.executeCommand(UndoCommand.id);
             expect(undoResult).toEqual(true);
@@ -235,6 +272,13 @@ describe('Test move rows cols', () => {
             expect(getMergedInfo(1, 1)).toEqual({ startRow: 1, endRow: 1, startColumn: 1, endColumn: 2 });
             expect(getMergedInfo(2, 1)).toEqual({ startRow: 2, endRow: 3, startColumn: 1, endColumn: 1 });
             expect(getColWidth(1)).toBe(30);
+            expect(getCurrentSelection()).toEqual({
+                startRow: 0,
+                endRow: 19,
+                startColumn: 18,
+                endColumn: 19,
+                rangeType: RANGE_TYPE.COLUMN,
+            });
 
             const redoResult = await commandService.executeCommand(RedoCommand.id);
             expect(redoResult).toEqual(true);
@@ -244,6 +288,13 @@ describe('Test move rows cols', () => {
             expect(getMergedInfo(2, 3)).toEqual({ startRow: 2, endRow: 3, startColumn: 3, endColumn: 3 });
             expect(getColWidth(1)).toBe(73);
             expect(getColWidth(3)).toBe(30);
+            expect(getCurrentSelection()).toEqual({
+                startRow: 0,
+                endRow: 19,
+                startColumn: 1,
+                endColumn: 2,
+                rangeType: RANGE_TYPE.COLUMN,
+            });
         });
 
         it('Should forbidding moving when parts of merged cells are selected', async () => {

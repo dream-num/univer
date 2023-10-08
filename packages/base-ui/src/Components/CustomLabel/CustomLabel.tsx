@@ -24,7 +24,15 @@ function getLocale(context: Partial<AppContextValues>, name: string) {
 export interface INeoCustomLabelProps {
     value?: string | number | undefined;
     selected?: boolean;
+    /**
+     * Triggered after value change
+     */
     onChange?(v: string | number): void;
+    /**
+     * Triggered after input Enter or Blur
+     */
+    onValueChange?(v: string | number): void;
+    onFocus?: (e: React.FocusEvent<HTMLInputElement, Element>) => void;
 }
 
 /**
@@ -33,10 +41,11 @@ export interface INeoCustomLabelProps {
  * @returns
  */
 export function NeoCustomLabel(
-    props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title'> & INeoCustomLabelProps
+    props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title' | 'max' | 'min'> &
+        INeoCustomLabelProps
 ): JSX.Element | null {
     const context = useContext(AppContext);
-    const { display, value, title, icon, label, onChange, selected } = props;
+    const { display, value, title, icon, label, onChange, selected, onFocus, max, min } = props;
 
     if (display === DisplayTypes.COLOR) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,7 +61,24 @@ export function NeoCustomLabel(
     }
 
     if (display === DisplayTypes.INPUT) {
-        return <Input onValueChange={(v) => onChange?.(v as unknown as string)} type="number" value={`${value}`} />;
+        return (
+            <Input
+                onValueChange={(v) => onChange?.(v as unknown as string)}
+                onFocus={onFocus}
+                type="number"
+                value={`${value}`}
+                bordered={false}
+                style={{
+                    width: '32px',
+                    height: '24px',
+                    padding: '2px',
+                    textAlign: 'center',
+                    background: 'transparent',
+                }}
+                max={max}
+                min={min}
+            />
+        );
     }
 
     if (display === DisplayTypes.ICON && icon) {

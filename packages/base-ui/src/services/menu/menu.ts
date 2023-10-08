@@ -50,6 +50,16 @@ interface IMenuItemBase<V> {
     /** On observable value that should emit the value of the corresponding selection component. */
     value$?: Observable<V>;
     onClose?: () => void;
+
+    /**
+     * e.g. set cell text size, rotation angle of the text
+     */
+    max?: number;
+
+    /**
+     * Set the minimum value of the digital input box
+     */
+    min?: number;
 }
 
 export interface IMenuButtonItem<V = undefined> extends IMenuItemBase<V> {

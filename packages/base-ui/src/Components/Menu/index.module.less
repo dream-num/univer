@@ -22,13 +22,19 @@
         color: var(--text-color);
         cursor: pointer;
         list-style: none;
-        margin: 0;
+        // margin: 0;
         white-space: nowrap;
         vertical-align: middle;
         user-select: none;
-        padding: 3px 0;
 
-        &:hover {
+        // FIXME use token instead
+        padding: 4px;
+        margin: 4px 8px;
+        font-size: 14px;
+        
+        border-radius: var(--border-radius-base);
+
+        &:hover,&.select-item-selected {
             background-color: var(--bg-color-hover);
         }
     }

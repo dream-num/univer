@@ -7,6 +7,14 @@ import styles from './Style/index.module.less';
 // Component Interface
 export interface BaseInputProps extends BaseComponentProps {
     /**
+     * Input's class name
+     */
+    className?: string;
+
+    /** Semantic DOM style */
+    style?: React.CSSProperties;
+
+    /**
      * The type of input
      * @default 'text'
      */
@@ -38,11 +46,6 @@ export interface BaseInputProps extends BaseComponentProps {
      * Callback when user input
      */
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-
-    /**
-     * The callback function that is triggered when Enter key is pressed
-     */
-    onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 
     /**
      * Whether has border style
@@ -79,11 +82,6 @@ export interface BaseInputProps extends BaseComponentProps {
     onValueChange?: (value: string) => void;
 
     /**
-     * Input's class name
-     */
-    className?: string;
-
-    /**
      * Whether the input is read only
      * @default false
      */
@@ -93,6 +91,16 @@ export interface BaseInputProps extends BaseComponentProps {
      * Input's id
      */
     id?: string;
+
+    /**
+     * When Type is Number, the maximum value
+     */
+    max?: number;
+
+    /**
+     * When Type is Number, the minimum value
+     */
+    min?: number;
 }
 
 /**
@@ -121,13 +129,8 @@ export function Input(props: BaseInputProps) {
     };
 
     const handlePressEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        const { onPressEnter, onValueChange } = props;
-        const v = getValue();
-        setValue(v);
         if (e.key === 'Enter') {
-            onPressEnter?.(e);
             ref.current?.blur();
-            v && onValueChange?.(v);
         }
     };
 
@@ -146,14 +149,45 @@ export function Input(props: BaseInputProps) {
     const onBlur = (e: React.FocusEvent<HTMLInputElement, Element>) => {
         const { onBlur, onValueChange } = props;
         onBlur?.(e);
-        const v = getValue();
+        let v = getValue();
+
+        if (v == null) return;
+
+        // Limit the size according to MAX MIN
+        const { max, min } = props;
+        if (props.type === 'number') {
+            if (typeof max === 'number' && +v > max) {
+                setValue(max.toString());
+                v = max.toString();
+            } else if (typeof min === 'number' && +v < min) {
+                setValue(min.toString());
+                v = min.toString();
+            } else {
+                setValue(v);
+            }
+        } else {
+            setValue(v);
+        }
+
         v && onValueChange?.(v);
         setFocused(false);
     };
 
     const getValue = () => ref.current?.value;
 
-    const { id, disabled, type = 'text', placeholder, bordered = true, className = '', readonly, maxLength } = props;
+    const {
+        id,
+        disabled,
+        type = 'text',
+        placeholder,
+        bordered = true,
+        className = '',
+        style = {},
+        readonly,
+        maxLength,
+        max,
+        min,
+    } = props;
 
     const classes = joinClassNames(
         styles.input,
@@ -167,6 +201,7 @@ export function Input(props: BaseInputProps) {
     return (
         <input
             type={type}
+            style={style}
             onBlur={onBlur}
             onFocus={onFocus}
             className={classes}
@@ -180,6 +215,8 @@ export function Input(props: BaseInputProps) {
             readOnly={readonly}
             id={id}
             onKeyUp={handlePressEnter}
+            max={max}
+            min={min}
         />
     );
 }

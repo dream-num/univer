@@ -383,7 +383,6 @@ export const FONT_FAMILY_CHILDREN = [
         label: 'fontFamily.TimesNewRoman',
         style: { 'font-family': 'Times New Roman' },
         value: 'Times New Roman',
-        selected: true,
     },
     {
         label: 'fontFamily.Arial',
@@ -533,6 +532,8 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         type: MenuItemType.SELECTOR,
         selectType: SelectTypes.NEO,
         display: DisplayTypes.INPUT,
+        min: 1,
+        max: 400,
         positions: [MenuPosition.TOOLBAR],
         selections: FONT_SIZE_CHILDREN,
         disabled$: new Observable<boolean>((subscriber) => {

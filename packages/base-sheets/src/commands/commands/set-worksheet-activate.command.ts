@@ -4,7 +4,6 @@ import { IAccessor } from '@wendellhu/redi';
 import {
     ISetWorksheetActivateMutationParams,
     SetWorksheetActivateMutation,
-    SetWorksheetUnActivateMutationFactory,
 } from '../mutations/set-worksheet-activate.mutation';
 
 export interface ISetWorksheetActivateCommandParams {
@@ -37,7 +36,7 @@ export const SetWorksheetActivateCommand: ICommand = {
             workbookId,
             worksheetId,
         };
-        const undoMutationParams = SetWorksheetUnActivateMutationFactory(accessor, redoMutationParams);
+        // const undoMutationParams = SetWorksheetUnActivateMutationFactory(accessor, redoMutationParams);
         const result = commandService.executeCommand(SetWorksheetActivateMutation.id, redoMutationParams);
 
         // no need

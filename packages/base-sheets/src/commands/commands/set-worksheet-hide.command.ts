@@ -58,10 +58,13 @@ export const SetWorksheetHideCommand: ICommand = {
         };
 
         const undoMutationParams = SetWorksheetHideMutationFactory(accessor, redoMutationParams);
-        const result = commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
 
         const index = workbook.getSheetIndex(worksheet);
         const activateSheetId = workbook.getConfig().sheetOrder[index + 1];
+
+        if (!activateSheetId) return false;
+
+        const result = commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
 
         const activeSheetMutationParams: ISetWorksheetActivateMutationParams = {
             workbookId,

@@ -47,7 +47,21 @@ export function InputEdit(props: IBaseInputProps) {
 
     const isRenaming = renameId === props.sheetId;
     return isRenaming ? (
-        <input type="text" value={val} autoFocus onChange={changeValue} onBlur={blur} onKeyDown={keydown} />
+        <input
+            type="text"
+            draggable={false}
+            value={val}
+            onMouseDown={(e) => {
+                e.stopPropagation();
+            }}
+            autoFocus
+            onChange={changeValue}
+            onBlur={blur}
+            onKeyDown={keydown}
+            onClick={(e) => {
+                e.stopPropagation();
+            }}
+        />
     ) : (
         <span>{props.sheetName}</span>
     );

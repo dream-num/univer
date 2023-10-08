@@ -391,4 +391,9 @@ export default {
         // eslint-disable-next-line no-template-curly-in-string
         pageInfoFull: '共${total}条，${totalPage}页，已显示全部数据',
     },
+    clipboard: {
+        paste: {
+            exceedMaxCells: '粘贴区域超出最大单元格数',
+        },
+    },
 };

@@ -173,7 +173,10 @@ export class SheetClipboardController extends Disposable {
                 const maxConfig = self._configService.getConfig<number>(workbookId_, 'maxCellsPerSheet');
                 const { endRow, endColumn } = range;
                 if (maxConfig && endRow * endColumn > maxConfig) {
-                    self._messageService.show(); // TODO: show error info
+                    self._messageService.show({
+                        type: 'error',
+                        content: self._localService.get('clipboard.paste.exceedMaxCells'),
+                    }); // TODO: show error info
                     return false;
                 }
 

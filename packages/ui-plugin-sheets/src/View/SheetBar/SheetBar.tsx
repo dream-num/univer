@@ -1,4 +1,5 @@
 import {
+    InsertSheetCommand,
     InsertSheetMutation,
     RemoveSheetMutation,
     SetTabColorMutation,
@@ -52,6 +53,7 @@ type SheetState = {
     sheetUl: BaseMenuItem[];
     menuItems: Array<IDisplayMenuItem<IMenuItem>>;
     showMenu: boolean;
+    showManageMenu: boolean;
     menuStyle: React.CSSProperties;
     activeKey: string;
 };
@@ -94,6 +96,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             menuList: [],
             menuItems: [],
             showMenu: false,
+            showManageMenu: false,
             menuStyle: {},
             activeKey: '',
         };
@@ -208,7 +211,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         return (
             <div
                 onMouseDown={item.onMouseDown}
-                onContextMenu={this.contextMenu}
+                onContextMenu={this.onContextMenuClick}
                 key={item.sheetId}
                 data-id={item.sheetId}
                 className={`${styles.slideTabItem}`}
@@ -323,10 +326,14 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         });
     }
 
-    override render() {
-        const { sheetList, menuList, sheetUl, showMenu, menuStyle, activeKey } = this.state;
+    private _addSheet() {
+        const commandService = this.context.injector.get(ICommandService);
+        commandService.executeCommand(InsertSheetCommand.id, {});
+    }
 
-        const { addSheet } = this.props;
+    override render() {
+        const { sheetList, menuList, sheetUl, showMenu, showManageMenu, menuStyle, activeKey } = this.state;
+
         const reRenderString = sheetList
             .map((item) => `${item?.color?.toString()}${item?.label?.toString()}`)
             .join('-');
@@ -335,7 +342,12 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
             <div className={styles.sheetBar}>
                 <div className={styles.sheetBarOptions}>
                     {/* add sheet button */}
-                    <Button className={styles.sheetBarOptionsButton} onClick={addSheet}>
+                    <Button
+                        className={styles.sheetBarOptionsButton}
+                        onClick={() => {
+                            this._addSheet();
+                        }}
+                    >
                         <Icon.Math.AddIcon style={{ fontSize: '20px' }} />
                     </Button>
                     {/* all sheets button */}
@@ -405,6 +417,13 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                             ICommandService
                         );
                         commandService.executeCommand(commandId as string, { value, worksheetId: activeKey });
+                    }}
+                />
+                <Menu
+                    menuId={SheetMenuPosition.WORKSHEET_MANAGE_MENU}
+                    show={showManageMenu}
+                    onOptionSelect={(params) => {
+                        // TODO: handle menu item click
                     }}
                 />
 

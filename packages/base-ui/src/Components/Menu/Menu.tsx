@@ -344,7 +344,7 @@
 // }
 import { isRealNum } from '@univerjs/core';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { isObservable, of, Subscription } from 'rxjs';
+import { isObservable, of } from 'rxjs';
 
 import { AppContext } from '../../Common/AppContext';
 import {
@@ -674,9 +674,6 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     const [menuItems, setMenuItems] = useState<Array<IDisplayMenuItem<IMenuItem>>>([]);
     const [itemShow, setItemShow] = useState<boolean>(false);
 
-    const [selections, setSelections] = useState<Array<IValueOption | ICustomComponentOption>>([]);
-    const [selectionsSubscription, setSelectionsSubscription] = useState<Subscription | undefined>();
-
     const mouseEnter = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
         setItemShow(true);
     };
@@ -695,22 +692,9 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
     };
 
     useEffect(() => {
-        if (menuItem.type === MenuItemType.SELECTOR) {
-            if (isObservable(menuItem.selections)) {
-                setSelectionsSubscription(
-                    menuItem.selections.subscribe?.((selections) => {
-                        setSelections(selections);
-                    })
-                );
-            } else {
-                setSelections(menuItem.selections || []);
-            }
-        }
         getSubMenus();
 
-        return () => {
-            selectionsSubscription?.unsubscribe();
-        };
+        return () => {};
     }, [menuItem]);
 
     const disabled = useObservable<boolean>(menuItem.disabled$ || of(false), false, true);
@@ -727,6 +711,18 @@ export function MenuItem({ menuItem, index, onClick }: IMenuItemProps) {
         setInputValue(newValue);
     };
 
+    let selections: Array<IValueOption | ICustomComponentOption>;
+    if (menuItem.type === MenuItemType.SELECTOR) {
+        if (isObservable(menuItem.selections)) {
+            selections = useObservable<Array<IValueOption | ICustomComponentOption>>(
+                menuItem.selections || of([]),
+                [],
+                true
+            );
+        } else {
+            selections = menuItem.selections || [];
+        }
+    }
     const renderButtonType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
         const { title, display, label } = item;

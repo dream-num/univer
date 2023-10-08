@@ -76,6 +76,7 @@ export enum SheetMenuPosition {
     ROW_HEADER_CONTEXT_MENU = 'rowHeaderContextMenu',
     COL_HEADER_CONTEXT_MENU = 'colHeaderContextMenu',
     SHEET_BAR = 'sheetBar',
+    WORKSHEET_MANAGE_MENU = 'worksheetManageMenu',
 }
 
 export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {

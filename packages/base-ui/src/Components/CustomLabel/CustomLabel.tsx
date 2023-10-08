@@ -167,8 +167,8 @@ export interface IColorSelectProps {
 export function ColorSelect({ value, icon, title }: IColorSelectProps) {
     return (
         <div className={styles.colorSelect}>
-            <div>{icon ? <CustomLabel label={{ name: icon }} /> : title}</div>
-            <div className={styles.colorSelectLine} style={{ background: value }}></div>
+            {icon ? <CustomLabel label={{ name: icon, props: { color: value } }} /> : title}
+            {/* <div className={styles.colorSelectLine} style={{ background: value }}></div> */}
         </div>
     );
 }

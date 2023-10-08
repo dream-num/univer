@@ -63,6 +63,7 @@ export function App(props: IUniverAppProps) {
                     top: '14px',
                     fontSize: '14px',
                     zIndex: 100,
+                    display: 'none',
                 }}
                 className="univer-dev-operation"
             >

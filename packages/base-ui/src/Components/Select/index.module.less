@@ -2,8 +2,10 @@
 
 .select-component {
     position: relative;
-    margin: 0 3px;
-    height: 26px;
+    display: flex;
+    align-items: center;
+    // margin: 0 3px;
+    // height: 26px;
 
     &:hover {
         background-color: var(--gray-14);
@@ -61,12 +63,12 @@
     }
 
     .select-double {
-        &:hover {
-            background: @bg-color-hover;
-        }
+        // &:hover {
+        //     background: @bg-color-hover;
+        // }
 
         .dropdown {
-            padding-right: 0;
+            // padding-right: 0;
         }
 
         .drop-content {
@@ -96,6 +98,8 @@
     }
 
     .select-label {
+        display: flex;
+        font-size: 16px;//icon size
         span[role='img'] {
             font-size: 24px;
         }

@@ -37,7 +37,6 @@ export const DeleteRangeUndoMutationFactory = (
 
     for (let i = 0; i < params.ranges.length; i++) {
         const { startRow, endRow, startColumn, endColumn } = params.ranges[i];
-
         if (params.shiftDimension === Dimension.ROWS) {
             // build new data
             for (let r = startRow; r <= lastEndRow; r++) {

@@ -31,7 +31,7 @@ import {
     IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
-import { AddWorksheetMergeMutation, AddWorksheetMergeMutationFactory } from '../mutations/add-worksheet-merge.mutation';
+import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../mutations/insert-range.mutation';
 import {
@@ -42,8 +42,8 @@ import {
 } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../mutations/remove-row-col.mutation';
 import {
+    RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
-    RemoveWorksheetMergeMutationFactory,
 } from '../mutations/remove-worksheet-merge.mutation';
 
 export interface IInsertRowCommandParams {
@@ -83,7 +83,7 @@ export const InsertRowCommand: ICommand = {
         const anchorRow = direction === Direction.UP ? startRow : startRow - 1;
         const height = worksheet.getRowHeight(anchorRow);
 
-        // insert rows & undos
+        // insert row properties & undos
         const insertRowParams: IInsertRowMutationParams = {
             workbookId,
             worksheetId,
@@ -101,7 +101,7 @@ export const InsertRowCommand: ICommand = {
             insertRowParams
         );
 
-        // insert range styles & undos
+        // insert range contents & styles & undos
         const cellValue = new ObjectMatrix<ICellData>();
         const worksheetMatrix = worksheet.getCellMatrix();
         const cellStyleByColumn = new Map<number, string | Nullable<IStyleData>>();
@@ -128,36 +128,36 @@ export const InsertRowCommand: ICommand = {
 
         // update merged cells & undos
         // NOTE: the problem of our algorithm is that we created a lot of merging cells mutations and un-merging cell mutations
-        const mergeData = Tools.deepClone(worksheet.getMergeData());
-        for (let i = 0; i < mergeData.length; i++) {
-            const merge = mergeData[i];
+        const mergedCells: IRange[] = Tools.deepClone(worksheet.getMergeData());
+        for (let i = 0; i < mergedCells.length; i++) {
+            const mergedCell = mergedCells[i];
             const count = endRow - startRow + 1;
-            if (startRow > merge.endRow) {
+            if (startRow > mergedCell.endRow) {
                 continue;
-            } else if (startRow <= merge.startRow) {
-                merge.startRow += count;
-                merge.endRow += count;
+            } else if (startRow <= mergedCell.startRow) {
+                mergedCell.startRow += count;
+                mergedCell.endRow += count;
             } else {
-                merge.endRow += count;
+                mergedCell.endRow += count;
             }
         }
-        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+        const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
             ranges: Tools.deepClone(worksheet.getMergeData()),
         };
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(
+        const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
             accessor,
-            removeMergeMutationParams
+            removeMergeParams
         );
-        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
+        const addMergeParams: IAddWorksheetMergeMutationParams = {
             workbookId: params.workbookId,
             worksheetId: params.worksheetId,
-            ranges: mergeData,
+            ranges: mergedCells,
         };
-        const undoAddMergeMutationParams: IRemoveWorksheetMergeMutationParams = AddWorksheetMergeMutationFactory(
+        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
             accessor,
-            addMergeMutationParams
+            addMergeParams
         );
 
         // there should be a hook to update ranges of various features
@@ -167,8 +167,8 @@ export const InsertRowCommand: ICommand = {
             [
                 { id: InsertRowMutation.id, params: insertRowParams },
                 { id: InsertRangeMutation.id, params: insertRangeMutationParams },
-                { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams }, // remove all merged cells
-                { id: AddWorksheetMergeMutation.id, params: addMergeMutationParams }, // add all merged cells, TODO: can this be optimized?
+                { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams }, // remove all merged cells
+                { id: AddWorksheetMergeMutation.id, params: addMergeParams }, // add all merged cells, TODO: can this be optimized?
             ],
             commandService
         );
@@ -182,8 +182,8 @@ export const InsertRowCommand: ICommand = {
                             [
                                 { id: DeleteRangeMutation.id, params: undoInsertRangeMutationParams },
                                 { id: RemoveRowMutation.id, params: undoRowInsertionParams },
-                                { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeMutationParams },
-                                { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
+                                { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
+                                { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeParams },
                             ],
                             commandService
                         )
@@ -194,8 +194,8 @@ export const InsertRowCommand: ICommand = {
                             [
                                 { id: InsertRowMutation.id, params: insertRowParams },
                                 { id: InsertRangeMutation.id, params: insertRangeMutationParams },
-                                { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-                                { id: AddWorksheetMergeMutation.id, params: addMergeMutationParams },
+                                { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
+                                { id: AddWorksheetMergeMutation.id, params: addMergeParams },
                             ],
                             commandService
                         )
@@ -387,7 +387,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             worksheetId: params.worksheetId,
             ranges: Tools.deepClone(worksheet.getMergeData()),
         };
-        const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(
+        const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
             accessor,
             removeMergeParams
         );
@@ -396,7 +396,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             worksheetId: params.worksheetId,
             ranges: mergeData,
         };
-        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddWorksheetMergeMutationFactory(
+        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
             accessor,
             addMergeParams
         );

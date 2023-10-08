@@ -24,19 +24,19 @@ import {
     IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
-import { AddWorksheetMergeMutation, AddWorksheetMergeMutationFactory } from '../mutations/add-worksheet-merge.mutation';
+import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../mutations/insert-row-col.mutation';
 import {
-    IRemoveColMutationFactory,
     RemoveColMutation,
+    RemoveColMutationFactory,
     RemoveRowMutation,
-    RemoveRowsMutationFactory,
+    RemoveRowsUndoMutationFactory,
 } from '../mutations/remove-row-col.mutation';
 import {
+    RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
-    RemoveWorksheetMergeMutationFactory,
 } from '../mutations/remove-worksheet-merge.mutation';
 
 /**
@@ -45,7 +45,6 @@ import {
 export const RemoveRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-row',
-    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections();
@@ -72,7 +71,10 @@ export const RemoveRowCommand: ICommand = {
             worksheetId,
             ranges,
         };
-        const undoRemoveRowsParams: IInsertRowMutationParams = RemoveRowsMutationFactory(removeRowsParams, worksheet);
+        const undoRemoveRowsParams: IInsertRowMutationParams = RemoveRowsUndoMutationFactory(
+            removeRowsParams,
+            worksheet
+        );
 
         // cells' contents
         const deleteRangeValueParams: IDeleteRangeMutationParams = {
@@ -128,7 +130,7 @@ export const RemoveRowCommand: ICommand = {
             worksheetId,
             ranges: Tools.deepClone(worksheet.getMergeData()),
         };
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(
+        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
             accessor,
             removeMergeMutationParams
         );
@@ -137,7 +139,7 @@ export const RemoveRowCommand: ICommand = {
             worksheetId,
             ranges: mergeData,
         };
-        const deleteMergeMutationParams: IRemoveWorksheetMergeMutationParams = AddWorksheetMergeMutationFactory(
+        const deleteMergeMutationParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
             accessor,
             addMergeMutationParams
         );
@@ -221,7 +223,7 @@ export const RemoveColCommand: ICommand = {
             worksheetId,
             ranges,
         };
-        const undoRemoveColParams: IInsertColMutationParams = IRemoveColMutationFactory(accessor, removeColParams);
+        const undoRemoveColParams: IInsertColMutationParams = RemoveColMutationFactory(accessor, removeColParams);
 
         // cells' contents
         const removeRangeValuesParams: IDeleteRangeMutationParams = {
@@ -273,7 +275,7 @@ export const RemoveColCommand: ICommand = {
             worksheetId,
             ranges: Tools.deepClone(worksheet.getMergeData()),
         };
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveWorksheetMergeMutationFactory(
+        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
             accessor,
             removeMergeMutationParams
         );
@@ -282,7 +284,7 @@ export const RemoveColCommand: ICommand = {
             worksheetId,
             ranges: mergeData,
         };
-        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddWorksheetMergeMutationFactory(
+        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
             accessor,
             addMergeMutationParams
         );

@@ -52,7 +52,7 @@ const likeArr = (value: object): number => {
  * @beta
  */
 export class ObjectArray<T> {
-    private _array!: ObjectArrayPrimitiveType<T>;
+    private _objectArray!: ObjectArrayPrimitiveType<T>;
 
     private _length: number = 0;
 
@@ -64,19 +64,19 @@ export class ObjectArray<T> {
     constructor(...argument: any) {
         switch (argument.length) {
             case 0: {
-                this._array = {};
+                this._objectArray = {};
                 this._length = 0;
                 return;
             }
             case 1: {
                 if (typeof argument[0] === 'number') {
-                    this._array = {};
+                    this._objectArray = {};
                     this._length = argument[0];
                     return;
                 }
                 const length = likeArr(argument[0]);
                 if (length > -1) {
-                    this._array = argument[0];
+                    this._objectArray = argument[0];
                     this._length = length;
                     return;
                 }
@@ -84,7 +84,7 @@ export class ObjectArray<T> {
             }
             case 2: {
                 if (likeArr(argument[0]) > -1) {
-                    this._array = argument[0];
+                    this._objectArray = argument[0];
                     this._length = argument[1];
                     return;
                 }
@@ -119,22 +119,22 @@ export class ObjectArray<T> {
     }
 
     obtain(index: number, defaultValue: T): T {
-        return this._array[index] ?? defaultValue;
+        return this._objectArray[index] ?? defaultValue;
     }
 
     getKeys(): string[] {
-        return ObjectArray.objectKeys(this._array);
+        return ObjectArray.objectKeys(this._objectArray);
     }
 
     get(index: number): Nullable<T> {
-        return this._array[index];
+        return this._objectArray[index];
     }
 
     set(index: number, value: T): void {
         // Accept NULL, for cell clear all
         // if (define(value)) {
         const length = this._length;
-        this._array[index] = value;
+        this._objectArray[index] = value;
         if (index >= length) {
             this._length = index + 1;
         }
@@ -143,7 +143,7 @@ export class ObjectArray<T> {
 
     pop(): Nullable<T> {
         const length = this._length;
-        const array = this._array;
+        const array = this._objectArray;
         if (length > 0) {
             const lastIndex = length - 1;
             const lastValue = array[lastIndex];
@@ -159,35 +159,35 @@ export class ObjectArray<T> {
     push(value: T): void {
         if (define(value)) {
             let length = this._length;
-            const array = this._array;
+            const array = this._objectArray;
             array[length++] = value;
             this._length = length;
         }
     }
 
     first(): Nullable<T> {
-        return this._array[0];
+        return this._objectArray[0];
     }
 
     last(): Nullable<T> {
         const length = this._length - 1;
-        return this._array[length];
+        return this._objectArray[length];
     }
 
     shift(): Nullable<T> {
         const length = this._length;
         if (length > 0) {
-            const first = this._array[0];
+            const first = this._objectArray[0];
             const sizeOf = length - 1;
             let next: T;
             for (let i = 0; i < sizeOf; i++) {
-                next = this._array[i + 1];
+                next = this._objectArray[i + 1];
                 if (define(next)) {
-                    this._array[i] = next;
+                    this._objectArray[i] = next;
                 }
             }
             this._length--;
-            delete this._array[sizeOf];
+            delete this._objectArray[sizeOf];
             return first;
         }
         return null;
@@ -196,11 +196,11 @@ export class ObjectArray<T> {
     unshift(topValue: T): void {
         if (define(topValue)) {
             const length = this._length;
-            const array = this._array;
+            const array = this._objectArray;
             const sizeOf = length + 1;
             let last = array[0];
             for (let i = 1; i < sizeOf; i++) {
-                const temp = this._array[i];
+                const temp = this._objectArray[i];
                 if (define(last)) {
                     array[i] = last;
                 }
@@ -212,7 +212,7 @@ export class ObjectArray<T> {
     }
 
     clear(): void {
-        this._array = {};
+        this._objectArray = {};
         this._length = 0;
     }
 
@@ -221,18 +221,18 @@ export class ObjectArray<T> {
     }
 
     getSizeOf(): number {
-        const array = this._array;
+        const array = this._objectArray;
         const keys = Object.keys(array);
         return keys.length;
     }
 
     toJSON(): ObjectArrayPrimitiveType<T> {
-        return this._array;
+        return this._objectArray;
     }
 
     toArray(): T[] {
         const native = new Array<T>();
-        const array = this._array;
+        const array = this._objectArray;
         const keys = Object.keys(array);
         const length = keys.length;
         for (let i = 0; i < length; i++) {
@@ -243,7 +243,7 @@ export class ObjectArray<T> {
     }
 
     forEach(callback: PredicateFunction<T>): ObjectArray<T> {
-        const array = this._array;
+        const array = this._objectArray;
         const keys = Object.keys(array);
         const length = keys.length;
         for (let i = 0; i < length; i++) {
@@ -271,7 +271,7 @@ export class ObjectArray<T> {
     }
 
     isEmpty(): boolean {
-        const array = this._array;
+        const array = this._objectArray;
         const keys = Object.keys(array);
         return keys.length === 0;
     }
@@ -288,7 +288,7 @@ export class ObjectArray<T> {
         const length = this._length;
         if (length > 0) {
             const end = index + 1;
-            const array = this._array;
+            const array = this._objectArray;
             let effective = 0;
             const splice: ObjectArrayPrimitiveType<T> = {};
             for (let i = index; i < end; i++) {
@@ -303,7 +303,7 @@ export class ObjectArray<T> {
     }
 
     includes(target: T): boolean {
-        const array = this._array;
+        const array = this._objectArray;
         const keys = Object.keys(array);
         const length = keys.length;
         for (let i = 0; i < length; i++) {
@@ -317,7 +317,7 @@ export class ObjectArray<T> {
     }
 
     slice(start: number, end: number): ObjectArray<T> {
-        const array = this._array;
+        const array = this._objectArray;
         const length = this._length;
         if (length > 0) {
             const fragment: IKeyValue = {};
@@ -335,16 +335,16 @@ export class ObjectArray<T> {
     }
 
     concat(target: ObjectArray<T>): ObjectArray<T> {
-        const srcArray = this._array;
+        const srcArray = this._objectArray;
         const srcKeys = Object.keys(srcArray) as unknown as number[];
         const srcLength = srcKeys.length;
 
-        const targetArray = target._array;
+        const targetArray = target._objectArray;
         const targetKeys = Object.keys(targetArray) as unknown as number[];
         const targetLength = targetKeys.length;
 
         const container = new ObjectArray<T>(srcLength + targetLength);
-        const containerArray = container._array;
+        const containerArray = container._objectArray;
         let master = 0;
 
         for (let i = 0; i < srcLength; i++, master++) {
@@ -360,7 +360,7 @@ export class ObjectArray<T> {
     }
 
     find(callback: PredicateFunction<T>): Nullable<T> {
-        const array = this._array;
+        const array = this._objectArray;
         const keys = Object.keys(array);
         const length = keys.length;
         for (let i = 0; i < length; i++) {
@@ -378,7 +378,7 @@ export class ObjectArray<T> {
         const length = this._length;
         if (length > 0) {
             const end = start + count;
-            const array = this._array;
+            const array = this._objectArray;
             let effective = 0;
             const splice: ObjectArrayPrimitiveType<T> = {};
             for (let i = start; i < end; i++) {
@@ -395,7 +395,7 @@ export class ObjectArray<T> {
             this._length -= diff;
 
             if (this._length <= 0) {
-                this._array = {};
+                this._objectArray = {};
                 this._length = 0;
             } else {
                 for (let i = end; i < last; i++) {
@@ -412,7 +412,7 @@ export class ObjectArray<T> {
     }
 
     findIndex(callback: PredicateFunction<T>): number {
-        const array = this._array;
+        const array = this._objectArray;
         const keys = Object.keys(array);
         const length = keys.length;
         for (let i = 0; i < length; i++) {
@@ -426,7 +426,7 @@ export class ObjectArray<T> {
     }
 
     map<S>(callback: Function<T, S>): ObjectArray<S> {
-        const array = this._array;
+        const array = this._objectArray;
         const keys = Object.keys(array);
         const length = keys.length;
         const result: ObjectArrayPrimitiveType<S> = {};
@@ -439,7 +439,7 @@ export class ObjectArray<T> {
     }
 
     filter(callback: PredicateFunction<T>): ObjectArray<T> {
-        const array = this._array;
+        const array = this._objectArray;
         const keys = Object.keys(array);
         const length = keys.length;
         const filter: ObjectArrayPrimitiveType<T> = {};
@@ -455,22 +455,89 @@ export class ObjectArray<T> {
         return new ObjectArray(filter, master);
     }
 
-    insert(index: number, value: T): ObjectArray<T> {
+    // TODO: insert should support adding multi items at the same time for it
+    // could improve performance
+    insert(index: number, value: T): this {
         const length = this._length;
-        const array = this._array;
+        const array = this._objectArray;
+
+        // move all items after index in backward order
         for (let i = length - 1; i >= index; i--) {
             array[i + 1] = array[i];
         }
+
         array[index] = value;
         this._length = length + 1;
         return this;
     }
 
+    /**
+     * Move some items some to another position
+     * @param fromIndex index to move from, fromIndex is not necessary lesser than toIndex
+     * @param count numbers of items to move
+     * @param toIndex index moving to
+     * @returns this
+     */
+    move(fromIndex: number, count: number, toIndex: number): this {
+        const moveBackward = fromIndex > toIndex;
+        if (!moveBackward && fromIndex + count > toIndex) {
+            throw new Error('Invalid move operation');
+        }
+
+        if (moveBackward) {
+            this._moveBackward(fromIndex, count, toIndex);
+        } else {
+            this._moveForward(fromIndex, count, toIndex);
+        }
+
+        return this;
+    }
+
+    private _moveBackward(fromIndex: number, count: number, toIndex: number): void {
+        const array = this._objectArray;
+
+        // cache item should be removed
+        const toMove: T[] = [];
+        for (let i = fromIndex; i < fromIndex + count; i++) {
+            toMove.push(array[i]);
+        }
+
+        // move all items after toIndex in backward order
+        for (let i = fromIndex - 1; i >= toIndex; i--) {
+            array[i + count] = array[i];
+        }
+
+        // insert cached items to toIndex
+        toMove.forEach((item, index) => {
+            array[toIndex + index] = item;
+        });
+    }
+
+    private _moveForward(fromIndex: number, count: number, toIndex: number): void {
+        const array = this._objectArray;
+
+        // cache item should be removed
+        const toMove: T[] = [];
+        for (let i = fromIndex; i < fromIndex + count; i++) {
+            toMove.push(array[i]);
+        }
+
+        // move all items after toIndex in forward order
+        for (let i = fromIndex + count; i < toIndex; i++) {
+            array[i - count] = array[i];
+        }
+
+        // insert cached items to toIndex
+        toMove.forEach((item, index) => {
+            array[toIndex + index - count] = item;
+        });
+    }
+
     inserts(index: number, target: ObjectArray<T>): ObjectArray<T> {
-        const targetArray = target._array;
+        const targetArray = target._objectArray;
         const targetLength = target._length;
 
-        const srcArray = this._array;
+        const srcArray = this._objectArray;
         const srcLength = this._length;
 
         const lastIndex = srcLength - 1;

@@ -1,7 +1,6 @@
 import { Disposable, ICommandService, IStyleData, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
-import { SetZoomRatioCommand, SetZoomRatioMutation } from '..';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -23,7 +22,7 @@ import {
     InsertRowCommand,
 } from '../commands/commands/insert-row-col.command';
 import { InsertSheetCommand } from '../commands/commands/insert-sheet.command';
-import { MoveRowsCommand } from '../commands/commands/move-rows.command';
+import { MoveColsCommand, MoveRowsCommand } from '../commands/commands/move-rows-cols.command';
 import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
 import { RemoveSheetCommand } from '../commands/commands/remove-sheet.command';
 import { RemoveWorksheetMergeCommand } from '../commands/commands/remove-worksheet-merge.command';
@@ -64,6 +63,7 @@ import { DeleteRangeMutation } from '../commands/mutations/delete-range.mutation
 import { InsertRangeMutation } from '../commands/mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
+import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
@@ -81,6 +81,7 @@ import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-o
 import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { SetWorksheetRowHideMutation } from '../commands/mutations/set-worksheet-row-hide.mutation';
 import { SetWorksheetRowShowMutation } from '../commands/mutations/set-worksheet-row-show.mutation';
+import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -129,6 +130,9 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             RemoveColCommand,
             RemoveColMutation,
             MoveRowsCommand,
+            MoveColsCommand,
+            MoveRowsMutation,
+            MoveColsMutation,
 
             SetColWidthCommand,
             SetWorksheetColWidthMutation,
@@ -181,8 +185,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetFrozenCommand,
             SetFrozenMutation,
             SetFrozenCancelCommand,
-            SetZoomRatioCommand,
-            SetZoomRatioMutation,
+            SetZoomRatioOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

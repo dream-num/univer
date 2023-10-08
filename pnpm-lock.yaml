@@ -474,6 +474,9 @@ importers:
       '@univerjs/base-render':
         specifier: workspace:^0.0.1
         version: link:../base-render
+      '@univerjs/base-ui':
+        specifier: workspace:^0.0.1
+        version: link:../base-ui
       '@univerjs/core':
         specifier: workspace:^0.0.1
         version: link:../core

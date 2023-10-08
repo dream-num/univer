@@ -23,8 +23,12 @@ import { Inject } from '@wendellhu/redi';
 
 import { getCoordByOffset, getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
-import { IMoveColumnsCommandParams, MoveColumnsCommand } from '../commands/commands/move-columns-to.command';
-import { IMoveRowsCommandParams, MoveRowsCommand } from '../commands/commands/move-rows.command';
+import {
+    IMoveColsCommandParams,
+    IMoveRowsCommandParams,
+    MoveColsCommand,
+    MoveRowsCommand,
+} from '../commands/commands/move-rows-cols.command';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -266,9 +270,9 @@ export class HeaderMoveController extends Disposable {
                         this._changeToRow = this._changeFromRow = -1;
                     } else {
                         if (this._changeFromColumn !== this._changeToColumn && this._changeToColumn !== -1) {
-                            this._commandService.executeCommand<IMoveColumnsCommandParams>(MoveColumnsCommand.id, {
-                                fromColumn: this._changeFromColumn,
-                                toColumn: this._changeToColumn,
+                            this._commandService.executeCommand<IMoveColsCommandParams>(MoveColsCommand.id, {
+                                fromCol: this._changeFromColumn,
+                                toCol: this._changeToColumn,
                             });
                         }
 

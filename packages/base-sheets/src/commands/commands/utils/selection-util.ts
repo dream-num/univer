@@ -606,3 +606,31 @@ export function checkIfShrink(selection: ISelection, direction: Direction, works
             return anchorRange.startColumn > range.startColumn;
     }
 }
+
+/**
+ * Get the default primary cell (the most top-left cell) of a range.
+ * @param range
+ * @param worksheet
+ */
+export function getPrimaryForRange(range: IRange, worksheet: Worksheet): ISelectionCell {
+    const mergedRange = worksheet.getMergedCell(range.startRow, range.startColumn);
+    if (!mergedRange) {
+        return {
+            ...range,
+            actualRow: range.startRow,
+            actualColumn: range.startColumn,
+            rangeType: RANGE_TYPE.NORMAL,
+            isMerged: false,
+            isMergedMainCell: false,
+        };
+    }
+
+    return {
+        ...mergedRange,
+        actualRow: range.startRow,
+        actualColumn: range.startColumn,
+        rangeType: RANGE_TYPE.NORMAL,
+        isMerged: true,
+        isMergedMainCell: true,
+    };
+}

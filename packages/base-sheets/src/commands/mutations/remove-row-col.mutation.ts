@@ -16,7 +16,7 @@ import {
     IRemoveRowsMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 
-export const RemoveRowsMutationFactory = (
+export const RemoveRowsUndoMutationFactory = (
     params: IRemoveRowsMutationParams,
     worksheet: Worksheet
 ): IInsertRowMutationParams => {
@@ -40,7 +40,7 @@ export const RemoveRowsMutationFactory = (
 };
 
 export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
-    id: 'sheet.mutation.remove-row',
+    id: 'sheet.mutation.remove-rows',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const currentUniverService = accessor.get(ICurrentUniverService);
@@ -75,7 +75,7 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
     },
 };
 
-export const IRemoveColMutationFactory = (
+export const RemoveColMutationFactory = (
     accessor: IAccessor,
     params: IRemoveColMutationParams
 ): IInsertColMutationParams => {

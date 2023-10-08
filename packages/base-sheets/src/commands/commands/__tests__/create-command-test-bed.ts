@@ -7,7 +7,7 @@ import {
     PluginType,
     Univer,
 } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../../services/selection-manager.service';
@@ -42,7 +42,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     timeZone: '',
 };
 
-export function createCommandTestBed(workbookConfig?: IWorkbookConfig) {
+export function createCommandTestBed(workbookConfig?: IWorkbookConfig, dependencies?: Dependency[]) {
     const univer = new Univer();
 
     let get: Injector['get'] | undefined;
@@ -66,6 +66,8 @@ export function createCommandTestBed(workbookConfig?: IWorkbookConfig) {
         override onStarting(injector: Injector): void {
             injector.add([SelectionManagerService]);
             injector.add([BorderStyleManagerService]);
+
+            dependencies?.forEach((d) => injector.add(d));
         }
 
         override onDestroy(): void {

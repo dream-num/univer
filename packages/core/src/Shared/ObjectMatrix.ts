@@ -161,6 +161,18 @@ export class ObjectMatrix<T> {
         this._option.push(row.toJSON() as ObjectArrayPrimitiveType<T>);
     }
 
+    moveRows(start: number, count: number, target: number): void {
+        this._option.move(start, count, target);
+    }
+
+    moveColumns(start: number, count: number, target: number): void {
+        // loop all rows and move column one by one, because our matrix is row-first
+        this._option.forEach((row, value) => {
+            const array = new ObjectArray(value);
+            array.move(start, count, target);
+        });
+    }
+
     insertRow(rowIndex: number, row: ObjectArray<T>): void {
         this._option.insert(rowIndex, row.toJSON() as ObjectArrayPrimitiveType<T>);
     }

@@ -5,7 +5,7 @@ import { BooleanNumber } from '../Enum';
  */
 export interface IRowData {
     /**
-     * height
+     * height in pixel
      */
     h: number;
     /**

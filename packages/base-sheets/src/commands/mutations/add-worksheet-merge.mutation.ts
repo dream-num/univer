@@ -6,7 +6,7 @@ import {
     IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 
-export const AddWorksheetMergeMutationFactory = (
+export const AddMergeUndoMutationFactory = (
     accessor: IAccessor,
     params: IAddWorksheetMergeMutationParams
 ): IRemoveWorksheetMergeMutationParams => {

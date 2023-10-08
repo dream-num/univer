@@ -43,9 +43,9 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
             throw new Error('worksheet is null error!');
         }
 
-        const manager = worksheet.getRowManager();
-        const rowPrimitive = manager.getRowData().toJSON();
-        const rowWrapper = new ObjectArray(rowPrimitive);
+        // TODO@wzhudev: should not expose row data and let outside modules to modify it directly
+        // the correct way to do this is to provide a method from RowManager to modify row data
+        const rowWrapper = worksheet.getRowManager().getRowData();
         const defaultRowInfo = {
             h: worksheet.getConfig().defaultRowHeight,
             hd: 0,

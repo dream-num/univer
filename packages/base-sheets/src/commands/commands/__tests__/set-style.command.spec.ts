@@ -5,6 +5,7 @@ import {
     HorizontalAlign,
     ICommandService,
     ICurrentUniverService,
+    IStyleData,
     ITextDecoration,
     ITextRotation,
     Nullable,
@@ -19,7 +20,7 @@ import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
-import { SetRangeStyleMutation } from '../../mutations/set-range-styles.mutation';
+import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
 import {
     SetBackgroundColorCommand,
     SetBoldCommand,
@@ -27,6 +28,7 @@ import {
     SetFontSizeCommand,
     SetHorizontalTextAlignCommand,
     SetItalicCommand,
+    SetOverlineCommand,
     SetStrikeThroughCommand,
     SetStyleCommand,
     SetTextColorCommand,
@@ -41,6 +43,7 @@ describe("Test commands used for updating cells' styles", () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
+    let getTextStyle: () => Nullable<IStyleData>;
 
     beforeEach(() => {
         const testBed = createCommandTestBed();
@@ -52,6 +55,7 @@ describe("Test commands used for updating cells' styles", () => {
         commandService.registerCommand(SetItalicCommand);
         commandService.registerCommand(SetUnderlineCommand);
         commandService.registerCommand(SetStrikeThroughCommand);
+        commandService.registerCommand(SetOverlineCommand);
         commandService.registerCommand(SetFontSizeCommand);
         commandService.registerCommand(SetFontFamilyCommand);
         commandService.registerCommand(SetTextColorCommand);
@@ -61,7 +65,14 @@ describe("Test commands used for updating cells' styles", () => {
         commandService.registerCommand(SetTextWrapCommand);
         commandService.registerCommand(SetTextRotationCommand);
         commandService.registerCommand(SetStyleCommand);
-        commandService.registerCommand(SetRangeStyleMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
+
+        getTextStyle = (): Nullable<IStyleData> =>
+            get(ICurrentUniverService)
+                .getUniverSheetInstance('test')
+                ?.getSheetBySheetId('sheet1')
+                ?.getRange(0, 0, 0, 0)
+                .getTextStyle();
     });
 
     afterEach(() => {
@@ -69,17 +80,6 @@ describe("Test commands used for updating cells' styles", () => {
     });
 
     describe('bold', () => {
-        beforeEach(() => {
-            const testBed = createCommandTestBed();
-            univer = testBed.univer;
-            get = testBed.get;
-
-            commandService = get(ICommandService);
-            commandService.registerCommand(SetBoldCommand);
-            commandService.registerCommand(SetStyleCommand);
-            commandService.registerCommand(SetRangeStyleMutation);
-        });
-
         describe('correct situations', () => {
             it('will toggle bold style when there is a selected range', async () => {
                 const selectionManagerService = get(SelectionManagerService);
@@ -135,17 +135,6 @@ describe("Test commands used for updating cells' styles", () => {
     });
 
     describe('italic', () => {
-        beforeEach(() => {
-            const testBed = createCommandTestBed();
-            univer = testBed.univer;
-            get = testBed.get;
-
-            commandService = get(ICommandService);
-            commandService.registerCommand(SetItalicCommand);
-            commandService.registerCommand(SetStyleCommand);
-            commandService.registerCommand(SetRangeStyleMutation);
-        });
-
         describe('correct situations', () => {
             it('will toggle italic style when there is a selected range', async () => {
                 const selectionManager = get(SelectionManagerService);
@@ -379,7 +368,16 @@ describe("Test commands used for updating cells' styles", () => {
                 selectionManager.add([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
-                        primary: null,
+                        primary: {
+                            startRow: 0,
+                            startColumn: 0,
+                            endColumn: 0,
+                            endRow: 0,
+                            actualColumn: 0,
+                            actualRow: 0,
+                            isMerged: false,
+                            isMergedMainCell: false,
+                        },
                         style: null,
                     },
                 ]);
@@ -391,9 +389,44 @@ describe("Test commands used for updating cells' styles", () => {
                         ?.getRange(0, 0, 0, 0)
                         .getTextStyle()?.cl?.rgb;
                 }
+                function getFontThroughLine(): ITextDecoration | undefined {
+                    return get(ICurrentUniverService)
+                        .getUniverSheetInstance('test')
+                        ?.getSheetBySheetId('sheet1')
+                        ?.getRange(0, 0, 0, 0)
+                        .getStrikeThrough();
+                }
+                function getFontUnderline(): ITextDecoration | undefined {
+                    return get(ICurrentUniverService)
+                        .getUniverSheetInstance('test')
+                        ?.getSheetBySheetId('sheet1')
+                        ?.getRange(0, 0, 0, 0)
+                        .getUnderline();
+                }
+                function getFontOverline(): ITextDecoration | undefined {
+                    return get(ICurrentUniverService)
+                        .getUniverSheetInstance('test')
+                        ?.getSheetBySheetId('sheet1')
+                        ?.getRange(0, 0, 0, 0)
+                        .getOverline();
+                }
+
+                expect(await commandService.executeCommand(SetStrikeThroughCommand.id)).toBeTruthy();
+                expect(getFontThroughLine()?.s).toBe(BooleanNumber.TRUE);
+
+                expect(await commandService.executeCommand(SetUnderlineCommand.id)).toBeTruthy();
+                expect(getFontUnderline()?.s).toBe(BooleanNumber.TRUE);
+
+                expect(await commandService.executeCommand(SetOverlineCommand.id)).toBeTruthy();
+                expect(getFontOverline()?.s).toBe(BooleanNumber.TRUE);
 
                 expect(await commandService.executeCommand(SetTextColorCommand.id, { value: '#abcdef' })).toBeTruthy();
                 expect(getFontColor()).toBe('#abcdef');
+
+                // You need to ensure that the color of the strike through/underline/overline will also be changed
+                expect(getFontThroughLine()?.cl?.rgb).toBe('#abcdef');
+                expect(getFontUnderline()?.cl?.rgb).toBe('#abcdef');
+                expect(getFontOverline()?.cl?.rgb).toBe('#abcdef');
             });
         });
 

@@ -10,10 +10,24 @@
     }
 
     &-text {
-        .btn-text();
+        .button-color(var(--text-color), transparent, transparent);
+        box-shadow: none;
+    
+        &:hover {
+            color: var(--text-color);
+            background-color: var(--grey-100);
+            border-color: transparent;
+        }
+    
+        // &:active {
+        //     color: var(--text-color);
+        //     background: #eee;
+        //     border-color: transparent;
+        // }
+        .button-disabled(var(--disabled-color); transparent; transparent);
         &-active {
             color: var(--text-color);
-            background: #eee;
+            background-color: var(--grey-100);
             border-color: transparent;
         }
         height: 26px;

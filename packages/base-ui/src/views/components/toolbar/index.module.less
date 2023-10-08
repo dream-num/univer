@@ -36,7 +36,7 @@
         height: 26px;
         display: inline-block;
         vertical-align: middle;
-        // margin: 0 3px;
+        margin: 0 1px;
         cursor: pointer;
 
         &.select-button:hover {
@@ -111,9 +111,11 @@
     }
 
     button {
-        padding: 4px 8px;
+        padding: 0 4px; // FIXME Set the BIUS buttons, the target is 26 * 26, padding 4px, but only 27.6 * 26 can be obtained
+        display: flex;
+        align-items: center;
         // height: 26px;
-        font-size: 16px;
+        font-size: 18px;
         border-radius: var(--border-radius-base);
     }
 

@@ -64,20 +64,6 @@ export const SetRangeValuesCommand: ICommand = {
         const cellValue = new ObjectMatrix<ICellData>();
         let realCellValue: ObjectMatrixPrimitiveType<ICellData> | undefined;
 
-        // for (let i = 0; i < currentSelections.length; i++) {
-        //     const { startRow, startColumn, endRow, endColumn } = currentSelections[i];
-        //     if (Tools.isArray(value)) {
-        //         for (let r = 0; r <= endRow - startRow; r++) {
-        //             for (let c = 0; c <= endColumn - startColumn; c++) {
-        //                 cellValue.setValue(r + startRow, c + startColumn, value[r][c]);
-        //             }
-        //         }
-        //     } else if (isICellData(value)) {
-        //         cellValue.setValue(startRow, startColumn, value);
-        //     } else {
-        //         realCellValue = value as ObjectMatrixPrimitiveType<ICellData>;
-        //     }
-        // }
         if (Tools.isArray(value)) {
             for (let i = 0; i < currentSelections.length; i++) {
                 const { startRow, startColumn, endRow, endColumn } = currentSelections[i];

@@ -4,6 +4,7 @@ import {
     FontItalic,
     FontWeight,
     HorizontalAlign,
+    ICellData,
     IColorStyle,
     ICommand,
     ICommandService,
@@ -12,7 +13,6 @@ import {
     ITextRotation,
     IUndoRedoService,
     ObjectMatrix,
-    ObjectMatrixPrimitiveType,
     Tools,
     VerticalAlign,
     WrapStrategy,
@@ -21,10 +21,10 @@ import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import {
-    ISetRangeStyleMutationParams,
-    SetRangeStyleMutation,
-    SetRangeStyleUndoMutationFactory,
-} from '../mutations/set-range-styles.mutation';
+    ISetRangeValuesMutationParams,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+} from '../mutations/set-range-values.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -67,48 +67,64 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
-        let value: ObjectMatrixPrimitiveType<IStyleData>;
-        for (let i = 0; i < ranges.length; i++) {
-            const { startRow, endRow, startColumn, endColumn } = ranges[i];
-            if (Tools.isArray(style.value)) {
-                const matrix = new ObjectMatrix<IStyleData>();
-                for (let r = 0; r < endRow - startRow + 1; r++) {
-                    for (let c = 0; c < endColumn - startColumn + 1; c++) {
-                        matrix.setValue(r, c, {
-                            [style.type]: style.value[r][c],
+        const cellValue = new ObjectMatrix<ICellData>();
+        // let value: ObjectMatrixPrimitiveType<ICellData> | undefined;
+
+        if (Tools.isArray(style.value)) {
+            for (let i = 0; i < ranges.length; i++) {
+                const { startRow, endRow, startColumn, endColumn } = ranges[i];
+
+                for (let r = 0; r <= endRow - startRow; r++) {
+                    for (let c = 0; c <= endColumn - startColumn; c++) {
+                        cellValue.setValue(r + startRow, c + startColumn, {
+                            s: {
+                                [style.type]: style.value[r][c],
+                            },
                         });
                     }
                 }
-                value = matrix.getData();
-            } else {
-                const colorObj: IStyleData = {
-                    [style.type]: style.value,
+            }
+
+            // value = cellValue.getData();
+        } else {
+            for (let i = 0; i < ranges.length; i++) {
+                const { startRow, endRow, startColumn, endColumn } = ranges[i];
+
+                const colorObj: ICellData = {
+                    s: {
+                        [style.type]: style.value,
+                    },
                 };
-                value = Tools.fillObjectMatrix(endRow - startRow + 1, endColumn - startColumn + 1, colorObj);
+                // value = Tools.fillObjectMatrix(endRow - startRow + 1, endColumn - startColumn + 1, colorObj);
+                for (let r = startRow; r <= endRow; r++) {
+                    for (let c = startColumn; c <= endColumn; c++) {
+                        cellValue.setValue(r, c, colorObj);
+                    }
+                }
             }
         }
 
-        const setRangeStyleMutationParams: ISetRangeStyleMutationParams = {
+        const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             range: ranges,
             worksheetId,
             workbookId,
-            value: value!,
+            cellValue: cellValue.getMatrix(),
         };
 
-        const undoSetRangeStyleMutationParams: ISetRangeStyleMutationParams = SetRangeStyleUndoMutationFactory(
+        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,
-            setRangeStyleMutationParams
+            setRangeValuesMutationParams
         );
 
-        const result = commandService.executeCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
+        const result = commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetRangeStyleMutation.id, undoSetRangeStyleMutationParams);
+                    return commandService.executeCommand(SetRangeValuesMutation.id, undoSetRangeValuesMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
+                    return commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
                 },
             });
 
@@ -258,6 +274,43 @@ export const SetStrikeThroughCommand: ICommand = {
     },
 };
 
+/**
+ * Set overline font style to currently selected ranges. If the cell is already overline then it will cancel the overline style.
+ */
+export const SetOverlineCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-overline',
+    handler: async (accessor) => {
+        const selection = accessor.get(SelectionManagerService).getLast();
+        if (!selection) {
+            return false;
+        }
+
+        const worksheet = accessor
+            .get(ICurrentUniverService)
+            .getCurrentUniverSheetInstance()
+
+            .getActiveSheet();
+        let currentlyOverline = true;
+        if (selection.primary) {
+            currentlyOverline = !!worksheet
+                .getRange(selection.primary.startRow, selection.primary.startColumn)
+                .getOverline().s;
+        }
+
+        const setStyleParams: ISetStyleParams<{ s: number }> = {
+            style: {
+                type: 'ol',
+                value: {
+                    s: currentlyOverline ? BooleanNumber.FALSE : BooleanNumber.TRUE,
+                },
+            },
+        };
+
+        return accessor.get(ICommandService).executeCommand(SetStyleCommand.id, setStyleParams);
+    },
+};
+
 export interface ISetFontFamilyCommandParams {
     value: string;
 }
@@ -341,7 +394,7 @@ export const ResetTextColorCommand: ICommand = {
             style: {
                 type: 'cl',
                 value: {
-                    rgb: '#000',
+                    rgb: null, // use null to reset text color
                 },
             },
         };
@@ -381,7 +434,7 @@ export const ResetBackgroundColorCommand: ICommand = {
             style: {
                 type: 'bg',
                 value: {
-                    rgb: undefined,
+                    rgb: null, // use null to reset background color
                 },
             },
         };

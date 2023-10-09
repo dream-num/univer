@@ -158,7 +158,7 @@ describe('Test clear selection content commands', () => {
                     v: 'A1',
                 });
             });
-            it('clear formats with merge cell', async () => {
+            it('clear formats with merged cells', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
@@ -222,6 +222,19 @@ describe('Test clear selection content commands', () => {
                     v: 'A1',
                 });
                 // remove merge
+                expect(getMerge()).toStrictEqual([]);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getStyle()).toStrictEqual({
+                    ff: 'Arial',
+                });
+                expect(getMerge()).toStrictEqual([{ startRow: 0, startColumn: 0, endRow: 1, endColumn: 1 }]);
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual({
+                    v: 'A1',
+                });
                 expect(getMerge()).toStrictEqual([]);
             });
         });
@@ -291,7 +304,7 @@ describe('Test clear selection content commands', () => {
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual({});
             });
-            it('clear all with merge cell', async () => {
+            it('clear all with merged cells', async () => {
                 const selectionManager = get(SelectionManagerService);
                 selectionManager.setCurrentSelection({
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
@@ -355,14 +368,16 @@ describe('Test clear selection content commands', () => {
                 // remove merge
                 expect(getMerge()).toStrictEqual([]);
 
-                // // undo
-                // expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                // expect(getStyle()).toStrictEqual({
-                //     ff: 'Arial',
-                // });
-                // // redo
-                // expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                // expect(getValue()).toStrictEqual({});
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getStyle()).toStrictEqual({
+                    ff: 'Arial',
+                });
+                expect(getMerge()).toStrictEqual([{ startRow: 0, startColumn: 0, endRow: 1, endColumn: 1 }]);
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual({});
+                expect(getMerge()).toStrictEqual([]);
             });
         });
 

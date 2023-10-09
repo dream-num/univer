@@ -50,13 +50,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build
+      - name: 📦 Build
         run: pnpm run build
 
-      - name: Build demo
+      - name: 📦 Build demo
         run: pnpm run build:demo
 
-      - name: Deploy to Vercel
+      - name: 🚀 Deploy to Vercel
         uses: amondnet/vercel-action@v25
         id: vercel-action
         with:
@@ -64,7 +64,7 @@ jobs:
           vercel-org-id: ${{ secrets.ORG_ID}}
           vercel-project-id: ${{ secrets.PROJECT_ID}}
 
-      - name: Discord Notification
+      - name: 👾 Discord Notification
         uses: sarisia/actions-status-discord@v1
         if: ${{ success() }}
         with:
@@ -81,7 +81,7 @@ jobs:
           color: 0x00b894
           username: GitHub Actions
 
-      - name: Discord Notification
+      - name: 👾 Discord Notification
         uses: sarisia/actions-status-discord@v1
         if: ${{ failure() }}
         with:
@@ -96,7 +96,8 @@ jobs:
           color: 0xd63031
           username: GitHub Actions
 
-      - uses: actions/github-script@v6
+      - name: 📝 Comment PR
+        uses: actions/github-script@v6
         with:
           script: |
             github.rest.issues.createComment({
@@ -104,7 +105,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `**[View Deployment]**\n` +
-                `- [Doc](${{ steps.vercel-action.outputs.preview-url }}/doc/)\n` +
-                `- [Sheet](${{ steps.vercel-action.outputs.preview-url }}/sheet/)\n` +
-                `- [Slide](${{ steps.vercel-action.outputs.preview-url }}/slide/)`
+                `- [📝 Doc](${{ steps.vercel-action.outputs.preview-url }}/doc/)\n` +
+                `- [📊 Sheet](${{ steps.vercel-action.outputs.preview-url }}/sheet/)\n` +
+                `- [📽️ Slide](${{ steps.vercel-action.outputs.preview-url }}/slide/)`
             })

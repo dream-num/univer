@@ -528,4 +528,9 @@ export default {
         // eslint-disable-next-line no-template-curly-in-string
         pageInfoFull: 'Total ${total}，${totalPage} page，All data displayed',
     },
+    clipboard: {
+        paste: {
+            exceedMaxCells: 'The number of cells pasted exceeds the maximum number of cells',
+        },
+    },
 };

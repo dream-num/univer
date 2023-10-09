@@ -1,4 +1,4 @@
-import { LocaleService, ThemeService } from '@univerjs/core';
+import { LocaleService, LocaleType, ThemeService } from '@univerjs/core';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { ComponentType, useEffect, useRef, useState } from 'react';
 
@@ -8,7 +8,6 @@ import { AppContext } from '../Common/AppContext';
 import { Content, Footer, Header, Layout, Sider } from '../Components';
 import { Container } from '../Components/Container/Container';
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
-import { LocaleType } from '../Enum';
 import style from './app.module.less';
 import { ContextMenu } from './components/contextmenu/contextmenu';
 import { Toolbar } from './components/toolbar/toolbar';

@@ -10,7 +10,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/base-sheets';
-import { IMessageService } from '@univerjs/base-ui';
+import { IMessageService, MessageType } from '@univerjs/base-ui';
 import {
     BooleanNumber,
     Disposable,
@@ -173,7 +173,10 @@ export class SheetClipboardController extends Disposable {
                 const maxConfig = self._configService.getConfig<number>(workbookId_, 'maxCellsPerSheet');
                 const { endRow, endColumn } = range;
                 if (maxConfig && endRow * endColumn > maxConfig) {
-                    self._messageService.show(); // TODO: show error info
+                    self._messageService.show({
+                        type: MessageType.Error,
+                        content: self._localService.get('clipboard.paste.exceedMaxCells'),
+                    }); // TODO: show error info
                     return false;
                 }
 

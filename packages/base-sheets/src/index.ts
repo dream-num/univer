@@ -23,7 +23,9 @@ export {
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from './commands/commands/add-worksheet-merge.command';
+export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';
+export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
 export { CopySheetCommand } from './commands/commands/copy-worksheet.command';
 export { DeleteRangeMoveLeftCommand } from './commands/commands/delete-range-move-left.command';
 export { DeleteRangeMoveUpCommand } from './commands/commands/delete-range-move-up.command';

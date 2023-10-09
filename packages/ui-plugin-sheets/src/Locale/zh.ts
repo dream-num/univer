@@ -327,6 +327,8 @@ export default {
         orderAZ: 'A-Z顺序排列',
         orderZA: 'Z-A降序排列',
         clearContent: '清除内容',
+        clearFormat: '清除格式',
+        clearAll: '清除所有',
         matrix: '矩阵操作选区',
         sortSelection: '排序选区',
         filterSelection: '筛选选区',

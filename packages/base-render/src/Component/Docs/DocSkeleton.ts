@@ -57,7 +57,7 @@ export class DocumentSkeleton extends Skeleton {
         this._docModel = docModel;
         this.disposeWithMe(
             fromObservable(
-                this._docModel.bodyModel.modelChange$.subscribe(() => {
+                this._docModel.bodyModel?.modelChange$.subscribe(() => {
                     this.calculate();
                 })
             )
@@ -111,30 +111,30 @@ export class DocumentSkeleton extends Skeleton {
     // }
 
     /**
-     * \v COLUMN_BREAK 换列
-     * \f PAGE_BREAK 换页
-     * \0 DOCS_END 文档结尾
-     * \t TAB 制表符
+     * \v COLUMN_BREAK
+     * \f PAGE_BREAK
+     * \0 DOCS_END
+     * \t TAB
      *
      * Needs to be changed：
-     * \r PARAGRAPH 段落
-     * \n SECTION_BREAK 章节
+     * \r PARAGRAPH
+     * \n SECTION_BREAK
      *
-     * \b customBlock 图片 mention等不参与文档流的场景
+     * \b customBlock: Scenarios where customBlock, images, mentions, etc. do not participate in the document flow.
      *
-     * 表格
-     * \x1A table start 表格开始
-     * \x1B table row start 表格开始
-     * \x1C table cell start 表格开始
-     * \x1D table cell end 表格开始
-     * \x1E table row end 表格开始
-     * \x1F table end 表格结束
+     * Table
+     * \x1A table start
+     * \x1B table row start
+     * \x1C table cell start
+     * \x1D table cell end
+     * \x1E table row end
+     * \x1F table end
      *
-     * 文档流内的特殊范围：超链接，field，structured document tags， bookmark，comment
-     * \x1F customRange start 自定义范围开始
-     * \x1E customRange end 自定义范围结束
+     * Special ranges within the document flow:：hyperlinks，field，structured document tags， bookmark，comment
+     * \x1F customRange start
+     * \x1E customRange end
      *
-     * 按照SectionBreak分割文档，进行布局计算
+     * Split the document according to SectionBreak and perform layout calculations.
      * @returns view model: skeleton
      */
     // eslint-disable-next-line max-lines-per-function

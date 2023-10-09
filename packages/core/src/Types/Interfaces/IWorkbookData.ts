@@ -1,5 +1,6 @@
 import { IKeyType, Nullable } from '../../Shared/Types';
 import { LocaleType } from '../Enum';
+import { IExtraModelConfig } from './IExtraModelConfig';
 import { IStyleData } from './IStyleData';
 import { IWorksheetConfig } from './IWorksheetData';
 
@@ -8,7 +9,7 @@ import { IWorksheetConfig } from './IWorksheetData';
 /**
  * Properties of a workbook's configuration
  */
-export interface IWorkbookConfig {
+export interface IWorkbookConfig extends IExtraModelConfig {
     appVersion: string;
     createdTime: string;
     creator: string;
@@ -25,16 +26,4 @@ export interface IWorkbookConfig {
     sheets: { [sheetId: string]: Partial<IWorksheetConfig> };
     styles: IKeyType<Nullable<IStyleData>>;
     timeZone: string;
-
-    /**
-     * HTML selector
-     * default is null
-     */
-    container?: string;
-
-    /**
-     * should start renderLoop Immediately
-     * default is true
-     */
-    shouldRenderLoopImmediately?: boolean;
 }

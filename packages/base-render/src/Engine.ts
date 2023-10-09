@@ -272,7 +272,7 @@ export class Engine extends ThinEngine<Scene> {
             return null;
         }
 
-        if (this._canvasEle && this._canvasEle.ownerDocument && this._canvasEle.ownerDocument.defaultView) {
+        if (this._canvasEle?.ownerDocument?.defaultView) {
             return this._canvasEle.ownerDocument.defaultView;
         }
 

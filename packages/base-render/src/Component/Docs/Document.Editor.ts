@@ -534,6 +534,8 @@ export class DocsEditor extends RxDisposable {
 
         activeTextSelection.refresh(this._documents);
 
+        this.deactivate();
+
         this._interactTextSelection(activeTextSelection);
     }
 

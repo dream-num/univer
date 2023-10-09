@@ -5,7 +5,6 @@ import {
     IConfigService,
     ICurrentUniverService,
     LocaleService,
-    Nullable,
     Plugin,
     PLUGIN_NAMES,
     PluginType,
@@ -24,8 +23,11 @@ import {
 } from './commands/commands/core-editing.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { MoveCursorOperation } from './commands/operations/cursor.operation';
+import { DocRenderController } from './Controller/doc-render.controller';
 import { DocumentController } from './Controller/DocumentController';
+import { PageRenderController } from './Controller/page-render.controller';
 import { en } from './Locale';
+import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 import { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
 import {
@@ -34,8 +36,7 @@ import {
     MoveCursorRightShortcut,
     MoveCursorUpShortcut,
 } from './shortcuts/cursor.shortcut';
-import { CanvasView } from './View/CanvasView';
-import { DocsView } from './View/Render/Views';
+import { DocCanvasView } from './View/doc-canvas-view';
 
 export interface IDocPluginConfig {
     [DOCS_CONFIG_STANDALONE_KEY]?: boolean;
@@ -48,8 +49,6 @@ export class DocPlugin extends Plugin {
     static override type = PluginType.Doc;
 
     private _config: IDocPluginConfig;
-
-    private _canvasView!: CanvasView;
 
     constructor(
         config: Partial<IDocPluginConfig> = {},
@@ -75,11 +74,11 @@ export class DocPlugin extends Plugin {
             en,
         });
 
-        if (this._config.standalone) {
-            this.initCanvasView();
-        }
+        // if (this._config.standalone) {
+        //     this.initCanvasView();
+        // }
 
-        this._markDocAsFocused();
+        // this._markDocAsFocused();
     }
 
     initializeCommands(): void {
@@ -116,45 +115,9 @@ export class DocPlugin extends Plugin {
         this._configService.batchSettings(unitId, config);
     }
 
-    initCanvasView() {
-        this._canvasView = this._injector.get(CanvasView);
-    }
-
-    getConfig() {
-        return this._config;
-    }
-
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
-    getCanvasView() {
-        return this._canvasView;
-    }
-
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
-    getDocsView() {
-        return this.getCanvasView().getDocsView();
-    }
-
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
-    getMainComponent() {
-        return (this.getDocsView() as Nullable<DocsView>)?.getDocs();
-    }
-
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
-    getInputEvent() {
-        return this.getMainComponent()?.getEditorInputEvent();
-    }
+    // initCanvasView() {
+    //     this._canvasView = this._injector.get(CanvasView);
+    // }
 
     override onReady(): void {
         this.initialize();
@@ -169,12 +132,21 @@ export class DocPlugin extends Plugin {
     private _initializeDependencies(docInjector: Injector, univerInjector: Injector) {
         (
             [
-                [
-                    CanvasView,
-                    { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) },
-                ], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
+                // [
+                //     CanvasView,
+                //     { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) },
+                // ], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
+                //views
+                [DocCanvasView],
+
+                // services
                 [IPlatformService, { useClass: DesktopPlatformService }],
+                [DocSkeletonManagerService],
+
+                // controllers
                 [DocumentController],
+                [DocRenderController],
+                [PageRenderController],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
 

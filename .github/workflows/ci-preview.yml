@@ -1,8 +1,6 @@
 name: 📦 CI Preview
 
 on:
-  push:
-    branches: [main, dev]
   pull_request:
     branches: [main, dev]
 
@@ -96,16 +94,22 @@ jobs:
           color: 0xd63031
           username: GitHub Actions
 
-      - name: 📝 Comment PR
-        uses: actions/github-script@v6
+      - name: 🧽 Find And Delete Comment
+        uses: peter-evans/find-comment@v2
+        id: fc
         with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `**[View Deployment]**\n` +
-                `- [📝 Doc](${{ steps.vercel-action.outputs.preview-url }}/doc/)\n` +
-                `- [📊 Sheet](${{ steps.vercel-action.outputs.preview-url }}/sheet/)\n` +
-                `- [📽️ Slide](${{ steps.vercel-action.outputs.preview-url }}/slide/)`
-            })
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: View Deployment
+
+      - name: 📝 Create or update comment
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            **[View Deployment]**
+            - [📝 Doc](${{ steps.vercel-action.outputs.preview-url }}/doc/)
+            - [📊 Sheet](${{ steps.vercel-action.outputs.preview-url }}/sheet/)
+            - [📽️ Slide](${{ steps.vercel-action.outputs.preview-url }}/slide/)
+          edit-mode: replace

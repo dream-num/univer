@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   build:
@@ -94,3 +95,16 @@ jobs:
           nodetail: false
           color: 0xd63031
           username: GitHub Actions
+
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `**[View Deployment]**\n` +
+                `- [Doc](${{ steps.vercel-action.outputs.preview-url }}/doc/)\n` +
+                `- [Sheet](${{ steps.vercel-action.outputs.preview-url }}/sheet/)\n` +
+                `- [Slide](${{ steps.vercel-action.outputs.preview-url }}/slide/)`
+            })

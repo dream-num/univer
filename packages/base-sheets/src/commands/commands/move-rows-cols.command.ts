@@ -89,7 +89,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         if (rowAcrossMergedCell(toRow, worksheet)) {
             messageService.show({
                 type: MessageType.Error,
-                content: 'Across a merged cell',
+                content: 'Across a merged cell.',
             });
             return false;
         }

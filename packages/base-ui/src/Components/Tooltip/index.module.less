@@ -1,26 +1,42 @@
 @import '../../Basics/CSS/triangle.less';
 @import '../../Basics/CSS/Skin/default.module.less';
 
-@Tooltip-bg: #000000bf;
-
-.tooltip-Group {
-    // width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    position: relative;
-
+.tooltip-group {
     .tooltip-title {
-        display: none;
+        visibility: hidden;
         position: absolute;
         white-space: nowrap;
-        background-color: @Tooltip-bg;
-        color: #fff;
+        background-color: @color-black;
+        color: @color-white;
         padding: 5px 10px;
-        box-shadow: @box-shadow-base;
         border-radius: @border-radius-base;
         font-size: @font-size-base;
         line-height: 1.5;
+
+        & .tooltip-triangle {
+            left: calc(50% - 5px);
+            pointer-events: none;
+        }
+
+        &.tooltip-top {
+            left: 50%;
+            transform: translateX(-50%);
+
+            & .tooltip-triangle {
+                .triangleDown(@color-black, 5px);
+                bottom: -10px;
+            }
+        }
+
+        &.tooltip-bottom {
+            left: 50%;
+            transform: translateX(-50%);
+
+            & .tooltip-triangle {
+                .triangleUp(@color-black, 5px);
+                top: -10px;
+            }
+        }
     }
 
     .tooltip-body {
@@ -33,61 +49,5 @@
             display: inline-block;
             z-index: 4;
         }
-    }
-}
-
-.tooltip-ss {
-    color: red;
-}
-
-.top {
-    left: 50%;
-    transform: translateX(-50%);
-
-    & .tooltip-triangle {
-        .triangleDown(@Tooltip-bg, 5px);
-        bottom: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        pointer-events: none;
-    }
-}
-
-.right {
-    top: 50%;
-    transform: translatey(-50%);
-
-    & .tooltip-triangle {
-        .triangleRight(@Tooltip-bg, 5px);
-        right: -10px;
-        top: 50%;
-        transform: translateY(-50%);
-        pointer-events: none;
-    }
-}
-
-.bottom {
-    left: 50%;
-    transform: translateX(-50%);
-
-    & .tooltip-triangle {
-        .triangleUp(@Tooltip-bg, 5px);
-        top: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        pointer-events: none;
-    }
-}
-
-.left {
-    top: 50%;
-    transform: translatey(-50%);
-
-    & .tooltip-triangle {
-        .triangleLeft(@Tooltip-bg, 5px);
-        left: -10px;
-        top: 50%;
-        transform: translateY(-50%);
-        pointer-events: none;
     }
 }

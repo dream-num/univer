@@ -1,4 +1,4 @@
-import { INotificationService } from '@univerjs/base-ui';
+import { IMessageService, MessageType } from '@univerjs/base-ui';
 import {
     CommandType,
     ICommand,
@@ -73,23 +73,23 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
 
-        const notificationService = accessor.get(INotificationService);
+        const messageService = accessor.get(IMessageService);
         // Forbid action when some parts of a merged cell are selected.
         const rangeToMove = filteredSelections[0].range;
         const beforePrimary = filteredSelections[0].primary;
         const alignedRange = alignToMergedCellsBorders(rangeToMove, worksheet, false);
         if (!Rectangle.equals(rangeToMove, alignedRange)) {
-            // TODO@wzhudev: use rightfully implemented notification service when it's ready
-            notificationService.show({
-                title: 'Only part of a merged cell is selected.',
+            messageService.show({
+                type: MessageType.Error,
+                content: 'Only part of a merged cell is selected.',
             });
             return false;
         }
 
         if (rowAcrossMergedCell(toRow, worksheet)) {
-            // TODO@wzhudev: use rightfully implemented notification service when it's ready
-            notificationService.show({
-                title: 'Across a merged cell',
+            messageService.show({
+                type: MessageType.Error,
+                content: 'Across a merged cell.',
             });
             return false;
         }
@@ -250,23 +250,23 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
 
-        const notificationService = accessor.get(INotificationService);
+        const messageService = accessor.get(IMessageService);
         // Forbid action when some parts of a merged cell are selected.
         const rangeToMove = filteredSelections[0].range;
         const beforePrimary = filteredSelections[0].primary;
         const alignedRange = alignToMergedCellsBorders(rangeToMove, worksheet, false);
         if (!Rectangle.equals(rangeToMove, alignedRange)) {
-            // TODO@wzhudev: use rightfully implemented notification service when it's ready
-            notificationService.show({
-                title: 'Only part of a merged cell is selected.',
+            messageService.show({
+                type: MessageType.Error,
+                content: 'Only part of a merged cell is selected.',
             });
             return false;
         }
 
         if (columnAcrossMergedCell(toCol, worksheet)) {
-            // TODO@wzhudev: use rightfully implemented notification service when it's ready
-            notificationService.show({
-                title: 'Across a merged cell',
+            messageService.show({
+                type: MessageType.Error,
+                content: 'Across a merged cell.',
             });
             return false;
         }

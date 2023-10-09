@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { INotificationService } from '@univerjs/base-ui';
+import { IMessageService } from '@univerjs/base-ui';
 import {
     ICellData,
     ICommandService,
@@ -394,6 +394,6 @@ const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookConfig = {
 
 function createMoveRowsColsTestBed() {
     return createCommandTestBed(Tools.deepClone(TEST_ROWS_COLS_MOVE_DEMO), [
-        [INotificationService, { useValue: { show: () => toDisposable(() => {}) } as INotificationService }],
+        [IMessageService, { useValue: { show: () => toDisposable(() => {}) } as IMessageService }],
     ]);
 }

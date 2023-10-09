@@ -535,7 +535,7 @@ export class TextSelection {
             top: top + docsTop,
             height,
             strokeWidth: 1,
-            stroke: getColor(COLORS.black),
+            stroke: getColor(COLORS.black, 0),
             evented: false,
         });
 

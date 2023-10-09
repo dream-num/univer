@@ -46,7 +46,7 @@ export class ZoomController extends Disposable {
     }
 
     private _zoomEventBinding() {
-        const scene = this._renderManagerService.getCurrent()?.scene;
+        const scene = this._getSheetObject()?.scene;
         if (scene == null) {
             return;
         }

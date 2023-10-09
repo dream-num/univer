@@ -80,13 +80,17 @@ export class Workbook {
         return this._unitId;
     }
 
+    getShouldRenderLoopImmediately() {
+        const should = this._config.shouldStartRenderingImmediately;
+        return should !== false;
+    }
+
     getContainer() {
         return this._config.container;
     }
 
-    getShouldRenderLoopImmediately() {
-        const should = this._config.shouldRenderLoopImmediately;
-        return should !== false;
+    getParentRenderUnitId() {
+        return this._config.parentRenderUnitId;
     }
 
     getWorksheets(): Map<string, Worksheet> {

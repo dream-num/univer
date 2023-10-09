@@ -63,20 +63,27 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         mutations.forEach((mutation) => {
             if (mutation.t === 'r') {
                 const { coverType, body, len, segmentId } = mutation;
-                const documentBody = UpdateAttributeApply(
-                    document,
-                    body,
-                    len,
-                    commonParameter.cursor,
-                    coverType,
-                    segmentId
-                );
+                if (body != null) {
+                    const documentBody = UpdateAttributeApply(
+                        document,
+                        body,
+                        len,
+                        commonParameter.cursor,
+                        coverType,
+                        segmentId
+                    );
+                    undoMutations.push({
+                        ...mutation,
+                        t: 'r',
+                        coverType: UpdateDocsAttributeType.REPLACE,
+                        body: documentBody,
+                    });
+                }
+
                 commonParameter.moveCursor(len);
                 undoMutations.push({
                     ...mutation,
                     t: 'r',
-                    coverType: UpdateDocsAttributeType.REPLACE,
-                    body: documentBody,
                 });
             } else if (mutation.t === 'i') {
                 const { body, len, segmentId, line } = mutation;

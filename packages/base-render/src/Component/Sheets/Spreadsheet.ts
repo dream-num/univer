@@ -128,15 +128,13 @@ export class Spreadsheet extends SheetComponent {
 
         const scale = getScale(parentScale);
 
-        const engine = this.getScene().getEngine() as Engine;
-
-        const fixTranslate = getTranslateInSpreadContextWithPixelRatio(engine.getPixelRatio());
+        const { left: fixTranslateLeft, top: fixTranslateTop } = getTranslateInSpreadContextWithPixelRatio();
 
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
         ctx.translate(
-            fixLineWidthByScale(rowHeaderWidth, scale) - fixTranslate / scale,
-            fixLineWidthByScale(columnHeaderHeight, scale) - fixTranslate / scale
+            fixLineWidthByScale(rowHeaderWidth, scale) - fixTranslateLeft / scale,
+            fixLineWidthByScale(columnHeaderHeight, scale) - fixTranslateTop / scale
         );
 
         // insert overflow cache

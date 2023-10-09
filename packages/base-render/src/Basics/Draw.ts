@@ -3,7 +3,39 @@ import { BorderStyleTypes, IPosition } from '@univerjs/core';
 
 import { BORDER_TYPE, ORIENTATION_TYPE } from './Const';
 import { IDocumentSkeletonLine } from './IDocumentSkeletonCached';
+import { createCanvasElement } from './Tools';
 import { Vector2 } from './Vector2';
+
+export interface IContext2D extends CanvasRenderingContext2D {
+    webkitBackingStorePixelRatio: number;
+    mozBackingStorePixelRatio: number;
+    msBackingStorePixelRatio: number;
+    oBackingStorePixelRatio: number;
+    backingStorePixelRatio: number;
+}
+
+// calculate pixel ratio
+export function getDevicePixelRatio(): number {
+    let _pixelRatio: number = 1;
+    const canvas = createCanvasElement();
+    const context = canvas.getContext('2d') as IContext2D;
+    _pixelRatio = (() => {
+        const devicePixelRatio = window.devicePixelRatio || 1;
+        const backingStoreRatio =
+            context.webkitBackingStorePixelRatio ||
+            context.mozBackingStorePixelRatio ||
+            context.msBackingStorePixelRatio ||
+            context.oBackingStorePixelRatio ||
+            context.backingStorePixelRatio ||
+            1;
+        return devicePixelRatio / backingStoreRatio;
+    })();
+
+    if (_pixelRatio < 1) {
+        return 1;
+    }
+    return Math.ceil(_pixelRatio * 10) / 10;
+}
 
 export function drawLineByBorderType(ctx: CanvasRenderingContext2D, type: BORDER_TYPE, position: IPosition) {
     let drawStartX = 0;
@@ -58,17 +90,26 @@ export function setLineType(ctx: CanvasRenderingContext2D, style: BorderStyleTyp
     }
 }
 
+export function getLineOffset() {
+    const ratio = getLineWith(1);
+    return ratio - Math.floor(ratio);
+}
+
+export function getLineWith(width: number) {
+    return Math.ceil((width / getDevicePixelRatio()) * 10) / 10;
+}
+
 export function getLineWidth(style: BorderStyleTypes) {
-    let lineWidth = 1;
+    let lineWidth = getLineWith(1);
     if (
         style === BorderStyleTypes.MEDIUM ||
         style === BorderStyleTypes.MEDIUM_DASH_DOT ||
         style === BorderStyleTypes.MEDIUM_DASHED ||
         style === BorderStyleTypes.MEDIUM_DASH_DOT_DOT
     ) {
-        lineWidth = 2;
+        lineWidth = getLineWith(2);
     } else if (style === BorderStyleTypes.THICK) {
-        lineWidth = 3;
+        lineWidth = getLineWith(3);
     }
 
     return lineWidth;
@@ -238,8 +279,10 @@ export function getRotateOffsetAndFarthestHypotenuse(
  * @param pixelRatio devicePixelRatio
  * @returns
  */
-export function getTranslateInSpreadContextWithPixelRatio(pixelRatio: number) {
-    const pixelRatioPlusFix = pixelRatio + 0.5;
-    const ceilPixelRatio = Math.ceil(pixelRatioPlusFix);
-    return ceilPixelRatio - pixelRatioPlusFix;
+export function getTranslateInSpreadContextWithPixelRatio() {
+    const offset = 0.5 - getLineOffset();
+    return {
+        left: offset,
+        top: offset,
+    };
 }

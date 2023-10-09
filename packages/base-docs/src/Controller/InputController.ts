@@ -7,6 +7,7 @@ import {
     IEditorInputConfig,
     INodePosition,
     INodeSearch,
+    IRenderManagerService,
     isFirstSpan,
     isIndentBySpan,
     isPlaceholderOrSpace,
@@ -19,23 +20,24 @@ import {
     Disposable,
     DisposableCollection,
     DocumentModel,
+    getTextIndexByCursor,
     ICommandService,
     ICurrentUniverService,
     IParagraph,
+    ITextSelectionRange,
     Nullable,
     Observable,
     toDisposable,
 } from '@univerjs/core';
-import { IDisposable, Inject } from '@wendellhu/redi';
+import { IDisposable } from '@wendellhu/redi';
 
+import { getDocObject } from '../Basics/componet-tools';
 import {
     DeleteCommand,
     IMEInputCommand,
     InsertCommand,
     UpdateCommand,
 } from '../commands/commands/core-editing.command';
-import { DocsViewManagerService } from '../services/docs-view-manager/docs-view-manager.service';
-import { DocsView } from '../View/Render/Views';
 
 /**
  * InputController handles inputting events on the currently focused DocsView and apply edits to corresponding UniverDoc.
@@ -45,48 +47,60 @@ export class InputController extends Disposable {
 
     private _previousIMEStart: number = -1;
 
+    private _previousIMERange: Nullable<ITextSelectionRange>;
+
     private _currentNodePosition: Nullable<INodePosition>;
 
-    private _editorDisposables: DisposableCollection | null = null;
+    private _editorDisposables: Nullable<DisposableCollection> = null;
 
-    private _currentDocsView: DocsView | null = null;
+    private _currentDoc: Nullable<Documents> = null;
 
     constructor(
-        @Inject(DocsViewManagerService) private readonly _docsViewManager: DocsViewManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
-        this.disposeWithMe(
-            toDisposable(
-                this._docsViewManager.current$.subscribe((docsView) => {
-                    this._currentDocsView?.getDocs().disableEditor();
-                    this._editorDisposables?.dispose();
-                    this._editorDisposables = null;
+        const docObject = this._getDocObject();
 
-                    if (docsView) {
-                        this._currentDocsView = docsView;
-                        this._editorDisposables = this._initialize(docsView);
-                    }
-                })
-            )
-        );
+        if (docObject == null) {
+            return;
+        }
+
+        this._currentDoc = docObject.document;
+
+        this._editorDisposables = this._initialize();
+
+        // this.disposeWithMe(
+        //     toDisposable(
+        //         this._docsViewManager.current$.subscribe((docsView) => {
+        //             this._currentDoc?.disableEditor();
+        //             this._editorDisposables?.dispose();
+        //             this._editorDisposables = null;
+
+        //             if (docsView) {
+        //                 this._currentDoc = docsView;
+        //                 this._editorDisposables = this._initialize(docsView);
+        //             }
+        //         })
+        //     )
+        // );
     }
 
     override dispose(): void {
         super.dispose();
 
-        this._currentDocsView = null;
+        this._currentDoc = null;
         this._editorDisposables?.dispose();
     }
 
     moveCursor(_docModel: DocumentModel, direction: Direction) {
-        if (!this._currentDocsView) {
+        if (!this._currentDoc) {
             return;
         }
 
-        const documents = this._currentDocsView.getDocs();
+        const documents = this._currentDoc;
         const activeSelection = documents.getActiveSelection();
         if (!activeSelection) {
             return false;
@@ -164,11 +178,11 @@ export class InputController extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function
     deleteLeft() {
-        if (!this._currentDocsView) {
+        if (!this._currentDoc) {
             return;
         }
 
-        const document = this._currentDocsView.getDocs();
+        const document = this._currentDoc;
         const activeSelection = document.getActiveSelection();
         if (!activeSelection) {
             return;
@@ -286,11 +300,11 @@ export class InputController extends Disposable {
     }
 
     breakLine() {
-        if (!this._currentDocsView) {
+        if (!this._currentDoc) {
             return;
         }
 
-        const document = this._currentDocsView.getDocs();
+        const document = this._currentDoc;
         const activeSelection = document.getActiveSelection();
         if (!activeSelection) {
             return;
@@ -396,20 +410,26 @@ export class InputController extends Disposable {
                 return;
             }
 
-            const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack } = activeRange;
+            // const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack } = activeRange;
 
-            let cursor = cursorStart;
+            // let cursor = cursorStart;
 
-            if (isStartBack === true) {
-                cursor -= 1;
-            }
-            this._previousIMEStart = cursor;
+            // if (isStartBack === true) {
+            //     cursor -= 1;
+            // }
+            // this._previousIMEStart = cursor;
+
+            this._previousIMERange = activeRange;
         });
 
         const updateObserver = onCompositionupdateObservable.add(async (config) => {
             const { event, document, activeSelection } = config;
 
-            let cursor = this._previousIMEStart;
+            if (this._previousIMERange == null) {
+                return;
+            }
+
+            let cursor = getTextIndexByCursor(this._previousIMERange.cursorStart, this._previousIMERange.isStartBack);
 
             const skeleton = document.getSkeleton();
 
@@ -433,7 +453,7 @@ export class InputController extends Disposable {
                 unitId: docsModel.getUnitId(),
                 newText: content,
                 oldTextLen: this._previousIMEContent.length,
-                start: cursor,
+                range: this._previousIMERange,
                 segmentId,
             });
 
@@ -444,6 +464,10 @@ export class InputController extends Disposable {
             const span = document.findNodeByCharIndex(cursor);
 
             this._adjustSelection(document as Documents, selectionRemain, span);
+
+            if (!this._previousIMERange.isCollapse) {
+                this._previousIMERange.isCollapse = true;
+            }
 
             this._previousIMEContent = content;
         });
@@ -742,9 +766,13 @@ export class InputController extends Disposable {
         document.syncSelection();
     }
 
-    private _initialize(docsView: DocsView): DisposableCollection {
-        docsView.getDocs().enableEditor();
-        const events = docsView.getDocs().getEditorInputEvent();
+    private _initialize(): Nullable<DisposableCollection> {
+        const document = this._currentDoc;
+        if (document == null) {
+            return;
+        }
+        document.enableEditor();
+        const events = document.getEditorInputEvent();
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
         const disposableCollection = new DisposableCollection();
 
@@ -776,5 +804,9 @@ export class InputController extends Disposable {
         disposableCollection.add(toDisposable(() => onSelectionStartObservable.remove(observer)));
 
         return disposableCollection;
+    }
+
+    private _getDocObject() {
+        return getDocObject(this._currentUniverService, this._renderManagerService);
     }
 }

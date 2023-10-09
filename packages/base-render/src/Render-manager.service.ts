@@ -8,12 +8,13 @@ import { SheetComponent } from './Component/Sheets/SheetComponent';
 import { Slide } from './Component/Slides/Slide';
 import { Engine } from './Engine';
 import { Scene } from './Scene';
+import { SceneViewer } from './SceneViewer';
 
 export interface IRenderManagerService {
     dispose(): void;
-    createRenderWithNewEngine(unitId: string): IRenderManagerService;
-    createRenderWithDefaultEngine(unitId: string): IRenderManagerService;
-    createRender(unitId: string, engine: Engine): IRenderManagerService;
+    // createRenderWithNewEngine(unitId: string): IRenderManagerService;
+    createRenderWithParent(unitId: string, parentUnitId: string): IRender;
+    createRender(unitId: string): IRender;
     addItem(unitId: string, item: IRender): void;
     removeItem(unitId: string): void;
     setCurrent(unitId: string): void;
@@ -30,6 +31,7 @@ export interface IRender {
     scene: Scene;
     mainComponent: Nullable<RenderComponentType>;
     components: Map<string, RenderComponentType>;
+    isMainScene: boolean;
 }
 
 const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };
@@ -61,16 +63,32 @@ export class RenderManagerService implements IRenderManagerService {
         this._currentRender$.complete();
     }
 
-    createRenderWithNewEngine(unitId: string): RenderManagerService {
+    createRenderWithParent(unitId: string, parentUnitId: string): IRender {
+        const parent = this.getRenderById(parentUnitId);
+        if (parent == null) {
+            throw new Error('parent render is null');
+        }
+        const { scene, engine } = parent;
+
+        const current = this._createRender(unitId, engine, false);
+
+        const currentScene = current.scene;
+
+        const sv = new SceneViewer(unitId);
+
+        sv.addSubScene(currentScene);
+
+        scene.addObject(sv);
+
+        return current;
+    }
+
+    createRender(unitId: string): IRender {
         const engine = new Engine();
-        return this.createRender(unitId, engine);
+        return this._createRender(unitId, engine);
     }
 
-    createRenderWithDefaultEngine(unitId: string): RenderManagerService {
-        return this.createRender(unitId, this._defaultEngine);
-    }
-
-    createRender(unitId: string, engine: Engine): RenderManagerService {
+    private _createRender(unitId: string, engine: Engine, isMainScene: boolean = true): IRender {
         const existItem = this.getRenderById(unitId);
         let shouldDestroyEngine = true;
         if (existItem != null) {
@@ -94,11 +112,12 @@ export class RenderManagerService implements IRenderManagerService {
             scene,
             mainComponent: null,
             components: new Map(),
+            isMainScene,
         };
 
         this.addItem(unitId, item);
 
-        return this;
+        return item;
     }
 
     addItem(unitId: string, item: IRender) {

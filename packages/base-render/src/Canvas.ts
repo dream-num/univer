@@ -1,35 +1,5 @@
+import { getDevicePixelRatio } from './Basics/Draw';
 import { createCanvasElement } from './Basics/Tools';
-
-export interface IContext2D extends CanvasRenderingContext2D {
-    webkitBackingStorePixelRatio: number;
-    mozBackingStorePixelRatio: number;
-    msBackingStorePixelRatio: number;
-    oBackingStorePixelRatio: number;
-    backingStorePixelRatio: number;
-}
-
-// calculate pixel ratio
-export function getDevicePixelRatio(): number {
-    let _pixelRatio: number = 1;
-    const canvas = createCanvasElement();
-    const context = canvas.getContext('2d') as IContext2D;
-    _pixelRatio = (() => {
-        const devicePixelRatio = window.devicePixelRatio || 1;
-        const backingStoreRatio =
-            context.webkitBackingStorePixelRatio ||
-            context.mozBackingStorePixelRatio ||
-            context.msBackingStorePixelRatio ||
-            context.oBackingStorePixelRatio ||
-            context.backingStorePixelRatio ||
-            1;
-        return devicePixelRatio / backingStoreRatio;
-    })();
-
-    if (_pixelRatio < 1) {
-        return 1;
-    }
-    return Math.ceil(_pixelRatio * 10) / 10;
-}
 
 interface ICanvasProps {
     width?: number;
@@ -111,7 +81,7 @@ export class Canvas {
     setSize(width?: number, height?: number, pixelRatioParam?: number) {
         // this.setWidth(width || 0);
         // this.setHeight(height || 0);
-        this._pixelRatio = Math.ceil(pixelRatioParam || getDevicePixelRatio());
+        this._pixelRatio = pixelRatioParam || getDevicePixelRatio();
         if (width) {
             this._width = width;
             this._canvasEle.width = width * this._pixelRatio;

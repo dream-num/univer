@@ -1,5 +1,6 @@
 import { BooleanNumber, IRange, IScale } from '@univerjs/core';
 
+import { getLineWith } from '../../../Basics/Draw';
 import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
@@ -43,8 +44,8 @@ export class BorderAuxiliary extends SheetExtension {
         ctx.save();
         const scale = this._getScale(parentScale);
         ctx.beginPath();
-        ctx.lineWidth = 1 / scale;
-        ctx.strokeStyle = getColor([217, 217, 217])!;
+        ctx.lineWidth = getLineWith(1) / scale;
+        ctx.strokeStyle = getColor([212, 212, 212])!;
         const width = fixLineWidthByScale(columnTotalWidth, scale);
         const height = fixLineWidthByScale(rowTotalHeight, scale);
         const columnWidthAccumulationLength = columnWidthAccumulation.length;

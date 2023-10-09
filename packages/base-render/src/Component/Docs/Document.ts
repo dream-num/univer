@@ -90,17 +90,9 @@ export class Documents extends DocComponent {
     }
 
     setConfig(config?: IDocumentsConfig) {
-        if (config?.pageMarginLeft === undefined) {
-            this.pageMarginLeft = 17;
-        } else {
-            this.pageMarginLeft = config?.pageMarginLeft;
-        }
+        this.pageMarginLeft = config?.pageMarginLeft || 17;
 
-        if (config?.pageMarginTop === undefined) {
-            this.pageMarginTop = 14;
-        } else {
-            this.pageMarginTop = config?.pageMarginTop;
-        }
+        this.pageMarginTop = config?.pageMarginTop || 14;
 
         this.pageLayoutType = config?.pageLayoutType || PageLayoutType.VERTICAL;
 

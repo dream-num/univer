@@ -250,7 +250,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
 export interface IIMEInputCommandParams {
     newText: string;
     oldTextLen: number;
-    start: number;
+    range: ITextSelectionRange;
     segmentId?: string;
     unitId: string;
 }
@@ -261,7 +261,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
     handler: async (accessor, params: IIMEInputCommandParams) => {
         const commandService = accessor.get(ICommandService);
 
-        const { unitId, newText, oldTextLen, start, segmentId } = params;
+        const { unitId, newText, oldTextLen, range, segmentId } = params;
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
@@ -270,11 +270,17 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             },
         };
 
-        doMutation.params!.mutations.push({
-            t: 'r',
-            len: start + 1,
-            segmentId,
-        });
+        if (range.isCollapse) {
+            const start = getTextIndexByCursor(range.cursorStart, range.isStartBack);
+
+            doMutation.params!.mutations.push({
+                t: 'r',
+                len: start + 1,
+                segmentId,
+            });
+        } else {
+            doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
+        }
 
         if (oldTextLen > 0) {
             doMutation.params!.mutations.push({

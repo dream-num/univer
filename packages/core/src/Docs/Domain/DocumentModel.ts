@@ -49,6 +49,19 @@ export class DocumentModelSimple {
         return this.snapshot.body;
     }
 
+    getShouldRenderLoopImmediately() {
+        const should = this.snapshot.shouldStartRenderingImmediately;
+        return should !== false;
+    }
+
+    getContainer() {
+        return this.snapshot.container;
+    }
+
+    getParentRenderUnitId() {
+        return this.snapshot.parentRenderUnitId;
+    }
+
     getBodyModel(segmentId?: string) {
         if (segmentId == null) {
             return this.bodyModel;

@@ -84,6 +84,9 @@ describe('Test clear selection content commands', () => {
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual({});
+
+                // Restore the original data
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             });
         });
 

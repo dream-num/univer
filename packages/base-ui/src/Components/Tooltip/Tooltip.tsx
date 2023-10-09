@@ -1,116 +1,112 @@
 import { createRef, useState } from 'react';
 
-import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils';
 import style from './index.module.less';
 
-// interface TooltipProps {
-//     title: string;
-//     children: ComponentChildren;
-//     placement?: string;
-//     color?: string;
-//     styles?: {};
-//     [index: number]: string;
-// }
-
 interface TooltipState {
-    placement: string;
-    placementClassName: string | undefined;
     top: number | string;
     left: number | string;
-    show: boolean;
+    visible: boolean;
+    triangleTranslate?: number | string;
 }
 
 const placementClassNames: { [index: string]: string } = {
-    top: style.top,
-    bottom: style.bottom,
-    left: style.left,
-    right: style.right,
+    top: style.tooltipTop,
+    bottom: style.tooltipBottom,
 };
 
-export interface BaseTooltipProps extends BaseComponentProps {
-    [index: number]: string;
-
+export interface BaseTooltipProps {
     title?: string;
-    shortcut?: string;
     children: React.ReactNode;
-    placement?: string;
-    color?: string;
-    styles?: {};
+    placement?: 'top' | 'bottom';
+    styles?: React.CSSProperties;
 }
 
 export function Tooltip(props: BaseTooltipProps) {
-    const tooltip = createRef<HTMLDivElement>();
+    const { title, children, placement = 'top', styles } = props;
+
+    const tooltipRef = createRef<HTMLDivElement>();
+    const tooltipContentRef = createRef<HTMLSpanElement>();
     const [state, setState] = useState<TooltipState>({
-        placement: props.placement || 'top',
-        placementClassName: joinClassNames(style.tooltipTitle, placementClassNames[props.placement || 'top']),
         top: '',
         left: '',
-        show: false,
+        visible: false,
+        triangleTranslate: '',
     });
 
-    function handleMouseOver() {
-        if (tooltip?.current) {
-            const tooltipInfo = tooltip.current.getBoundingClientRect();
-            const top = tooltipInfo.height;
-            const left = tooltipInfo.width;
+    function handleMouseEnter() {
+        if (!tooltipRef?.current || !tooltipContentRef?.current) return;
 
-            if (state.placement === 'bottom') {
-                setState({
-                    ...state,
-                    top: top + 10,
-                    left: left / 2,
-                    show: true,
-                });
-            } else if (state.placement === 'left') {
-                setState({
-                    ...state,
-                    top: top / 2,
-                    left: left + 5,
-                    show: true,
-                });
-            } else if (state.placement === 'right') {
-                setState({
-                    ...state,
-                    top: top / 2,
-                    left: -left - 10,
-                    show: true,
-                });
-            } else {
-                setState({
-                    ...state,
-                    top: -top - 20,
-                    left: left / 2,
-                    show: true,
-                });
-            }
+        const { height, width, x, y } = tooltipRef.current.getBoundingClientRect();
+
+        let left = x;
+        let top = y;
+        switch (placement) {
+            case 'bottom':
+                top = y + height + 10;
+                left = x + width / 2;
+                break;
+            case 'top':
+            default:
+                top = y + -height - 20;
+                left = x + width / 2;
+                break;
         }
+
+        const { clientWidth } = tooltipContentRef.current;
+
+        let triangleTranslate = '';
+
+        if (left - clientWidth / 2 < 0) {
+            triangleTranslate = `${left - clientWidth / 2}px`;
+            left = clientWidth / 2;
+        }
+        if (left + clientWidth / 2 > document.body.clientWidth) {
+            triangleTranslate = `${left + clientWidth / 2 - document.body.clientWidth}px`;
+            left = document.body.clientWidth - clientWidth / 2;
+        }
+
+        setState({
+            top,
+            left,
+            visible: true,
+            triangleTranslate,
+        });
     }
 
     function handleMouseLeave() {
         setState({
             ...state,
-            show: false,
+            visible: false,
         });
     }
 
+    const placementClassName = joinClassNames(style.tooltipTitle, placementClassNames[placement]);
+
     return (
-        <div ref={tooltip} className={style.tooltipGroup} style={props.styles}>
-            <div className={style.tooltipBody} onMouseEnter={handleMouseOver} onMouseLeave={handleMouseLeave}>
-                {props.children}
+        <div ref={tooltipRef} className={style.tooltipGroup} style={styles}>
+            <div className={style.tooltipBody} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                {children}
             </div>
 
-            {props.title ? (
+            {title ? (
                 <span
-                    className={state.placementClassName}
+                    ref={tooltipContentRef}
+                    className={placementClassName}
                     style={{
                         top: `${state.top}px`,
                         left: `${state.left}px`,
-                        display: `${state.show ? 'block' : 'none'}`,
+                        visibility: `${state.visible ? 'visible' : 'hidden'}`,
+                        zIndex: 100,
                     }}
                 >
-                    {props.title}
-                    <span className={style.tooltipTriangle}></span>
+                    {title}
+                    <span
+                        className={style.tooltipTriangle}
+                        style={{
+                            transform: `translateX(${state.triangleTranslate})`,
+                        }}
+                    />
                 </span>
             ) : null}
         </div>

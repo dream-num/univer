@@ -55,8 +55,8 @@ export class SheetPlugin extends Plugin {
         this._injector.get(HeaderMenuController);
         this._injector.get(HeaderResizeController);
         this._injector.get(HeaderMoveController);
-        this._injector.get(ScrollController);
         this._injector.get(FreezeController);
+        this._injector.get(ScrollController);
         this._injector.get(ZoomController);
     }
 

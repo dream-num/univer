@@ -43,7 +43,7 @@ export class ScrollController extends Disposable {
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         viewportMain?.onScrollAfterObserver.add((param) => {
             const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-            if (skeleton == null) {
+            if (skeleton == null || param.isTrigger === false) {
                 return;
             }
             const scene = this._renderManagerService.getCurrent()?.scene;

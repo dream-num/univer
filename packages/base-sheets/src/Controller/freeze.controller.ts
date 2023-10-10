@@ -593,10 +593,13 @@ export class FreezeController extends Disposable {
                 right: 0,
             });
             viewMain.resetPadding();
-            viewMain.scrollTo({
-                x: 0,
-                y: 0,
-            });
+            viewMain.scrollTo(
+                {
+                    x: 0,
+                    y: 0,
+                },
+                false
+            );
         } else if (isTopView === true && isLeftView === false) {
             const topGap = endSheetView.startY - startSheetView.startY;
             viewMain.resize({
@@ -611,9 +614,12 @@ export class FreezeController extends Disposable {
                 startX: 0,
                 endX: 0,
             });
-            viewMain.scrollTo({
-                y: 0,
-            });
+            viewMain.scrollTo(
+                {
+                    y: 0,
+                },
+                false
+            );
             viewMainTop.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,
@@ -674,9 +680,12 @@ export class FreezeController extends Disposable {
                 startY: 0,
                 endY: 0,
             });
-            viewMain.scrollTo({
-                x: 0,
-            });
+            viewMain.scrollTo(
+                {
+                    x: 0,
+                },
+                false
+            );
             viewMainLeft.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,
@@ -739,10 +748,13 @@ export class FreezeController extends Disposable {
                 startX: startSheetView.startX,
                 endX: endSheetView.startX,
             });
-            viewMain.scrollTo({
-                x: 0,
-                y: 0,
-            });
+            viewMain.scrollTo(
+                {
+                    x: 0,
+                    y: 0,
+                },
+                false
+            );
             viewMainLeft.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop + topGap,
@@ -873,7 +885,7 @@ export class FreezeController extends Disposable {
     }
 
     private _scrollListener() {
-        this._scrollManagerService.scrollInfo$.subscribe((param) => {
+        this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const worksheet = workbook.getActiveSheet();
 

@@ -1,41 +1,119 @@
-import { DataStreamTreeTokenType, Nullable, Observable, Observer, RxDisposable } from '@univerjs/core';
-import { fromEvent, Observable as RxObservable, share, takeUntil } from 'rxjs';
+import { DataStreamTreeTokenType, Nullable, Observer, RxDisposable } from '@univerjs/core';
+import { createIdentifier } from '@wendellhu/redi';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../Basics/Const';
-import { IDocumentSkeletonCached } from '../../Basics/IDocumentSkeletonCached';
+import { IDocumentSkeletonCached, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
 import { IMouseEvent, IPointerEvent } from '../../Basics/IEvents';
 import { INodeInfo, INodePosition } from '../../Basics/Interfaces';
 import { getOffsetRectForDom, transformBoundingCoord } from '../../Basics/Position';
 import { getCurrentScrollXY } from '../../Basics/ScrollXY';
+import {
+    IDocumentOffsetConfig,
+    ITextSelectionStyle,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+} from '../../Basics/TextSelection';
 import { checkStyle, injectStyle } from '../../Basics/Tools';
+import { Transform } from '../../Basics/Transform';
 import { Vector2 } from '../../Basics/Vector2';
+import { Scene } from '../../Scene';
 import { ScrollTimer } from '../../ScrollTimer';
 import { IScrollObserverParam, Viewport } from '../../Viewport';
 import { TextSelection } from './Common/TextSelection';
-import { DocComponent } from './DocComponent';
+import { DocumentSkeleton } from './DocSkeleton';
+
+export interface ITextSelectionRenderManager {
+    readonly onKeydown$: Observable<Nullable<IEditorInputConfig>>;
+    readonly onInput$: Observable<Nullable<IEditorInputConfig>>;
+    readonly onCompositionstart$: Observable<Nullable<IEditorInputConfig>>;
+    readonly onCompositionupdate$: Observable<Nullable<IEditorInputConfig>>;
+    readonly onCompositionend$: Observable<Nullable<IEditorInputConfig>>;
+    readonly onSelectionStart$: Observable<Nullable<INodePosition>>;
+    readonly onPaste$: Observable<Nullable<IEditorInputConfig>>;
+
+    getActiveTextSelection(): Nullable<TextSelection>;
+
+    getTextSelectionList(): TextSelection[];
+
+    add(textSelection: TextSelection): void;
+
+    remain(): Nullable<TextSelection>;
+
+    sync(): void;
+
+    scroll(): void;
+
+    active(x: number, y: number): void;
+
+    focus(): void;
+
+    deactivate(withoutBlur: boolean): void;
+
+    changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene): void;
+
+    dispose(): void;
+
+    eventTrigger(
+        evt: IPointerEvent | IMouseEvent,
+        documentTransform: Transform,
+        pageLayoutType: PageLayoutType,
+        pageMarginLeft: number,
+        pageMarginTop: number,
+        docsLeft: number,
+        docsTop: number
+    ): void;
+}
 
 export interface IEditorInputConfig {
     event: Event | CompositionEvent | KeyboardEvent;
     content?: string;
-    document: DocComponent;
+    // document: DocComponent;
     activeSelection?: TextSelection;
     selectionList?: TextSelection[];
 }
 
-export class DocsEditor extends RxDisposable {
-    onKeydownObservable = new Observable<IEditorInputConfig>();
+export class TextSelectionRenderManager extends RxDisposable implements ITextSelectionRenderManager {
+    // onKeydownObservable = new Observable<IEditorInputConfig>();
 
-    onInputObservable = new Observable<IEditorInputConfig>();
+    // onInputObservable = new Observable<IEditorInputConfig>();
 
-    onCompositionstartObservable = new Observable<IEditorInputConfig>();
+    // onCompositionstartObservable = new Observable<IEditorInputConfig>();
 
-    onCompositionupdateObservable = new Observable<IEditorInputConfig>();
+    // onCompositionupdateObservable = new Observable<IEditorInputConfig>();
 
-    onCompositionendObservable = new Observable<IEditorInputConfig>();
+    // onCompositionendObservable = new Observable<IEditorInputConfig>();
 
-    onSelectionStartObservable = new Observable<Nullable<INodePosition>>();
+    // onSelectionStartObservable = new Observable<Nullable<INodePosition>>();
 
-    onPaste$!: RxObservable<ClipboardEvent>;
+    private readonly _onKeydown$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+
+    readonly onKeydown$ = this._onKeydown$.asObservable();
+
+    private readonly _onInput$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+
+    readonly onInput$ = this._onInput$.asObservable();
+
+    private readonly _onCompositionstart$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+
+    readonly onCompositionstart$ = this._onCompositionstart$.asObservable();
+
+    private readonly _onCompositionupdate$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+
+    readonly onCompositionupdate$ = this._onCompositionupdate$.asObservable();
+
+    private readonly _onCompositionend$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+
+    readonly onCompositionend$ = this._onCompositionend$.asObservable();
+
+    private readonly _onSelectionStart$ = new BehaviorSubject<Nullable<INodePosition>>(null);
+
+    readonly onSelectionStart$ = this._onSelectionStart$.asObservable();
+
+    private readonly _onPaste$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+
+    readonly onPaste$ = this._onPaste$.asObservable();
+
+    // onPaste$!: RxObservable<ClipboardEvent>;
 
     private _container!: HTMLDivElement;
 
@@ -65,6 +143,25 @@ export class DocsEditor extends RxDisposable {
 
     private _activeViewport: Nullable<Viewport>;
 
+    private _documentTransform: Transform;
+
+    private _documentOffsetConfig: IDocumentOffsetConfig = {
+        pageLayoutType: PageLayoutType.VERTICAL,
+        pageMarginLeft: 0,
+        pageMarginTop: 0,
+        docsLeft: 0,
+        docsTop: 0,
+    };
+
+    // private _pageLayoutType: PageLayoutType = PageLayoutType.VERTICAL;
+    // private _pageMarginLeft: number = 0;
+    // private _pageMarginTop: number = 0;
+    // private _docsLeft: number = 0;
+    // private _docsTop: number = 0;
+
+    private _selectionStyle: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE;
+
+    private _isSelectionEnabled: boolean = true;
     private _viewPortObserverMap = new Map<
         string,
         {
@@ -75,13 +172,16 @@ export class DocsEditor extends RxDisposable {
 
     private _isIMEInputApply = false;
 
-    constructor(private _documents?: DocComponent) {
+    constructor(
+        private _docSkeleton?: Nullable<DocumentSkeleton>,
+        private _scene?: Nullable<Scene>
+    ) {
         super();
 
         this._initDOM();
-        this.activeViewport = this._documents?.getFirstViewport();
-        if (this._documents) {
-            this.changeDocuments(this._documents);
+        // this.activeViewport = this._documents?.getFirstViewport();
+        if (this._docSkeleton && this._scene) {
+            this.changeRuntime(this._docSkeleton, this._scene);
         }
     }
 
@@ -90,8 +190,20 @@ export class DocsEditor extends RxDisposable {
         this._activeViewport = viewport;
     }
 
-    static create(documents?: DocComponent) {
-        return new DocsEditor(documents);
+    setStyle(style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE) {
+        this._selectionStyle = style;
+    }
+
+    resetStyle() {
+        this.setStyle();
+    }
+
+    enableSelection() {
+        this._isSelectionEnabled = true;
+    }
+
+    disableSelection() {
+        this._isSelectionEnabled = false;
     }
 
     getActiveTextSelection() {
@@ -188,7 +300,7 @@ export class DocsEditor extends RxDisposable {
     }
 
     // FIXME: for editor cell editor we don't need to blur the input element
-    deactivate(withoutBlur = true) {
+    deactivate(withoutBlur: boolean = true) {
         this._container.style.left = `0px`;
         this._container.style.top = `0px`;
 
@@ -200,26 +312,130 @@ export class DocsEditor extends RxDisposable {
         }
     }
 
-    changeDocuments(documents: DocComponent) {
-        if (this._documents) {
-            this._detachEvent(this._documents);
+    changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene) {
+        this._docSkeleton?.onRecalculateChangeObservable.remove(this._skeletonObserver);
+
+        this._docSkeleton = docSkeleton;
+
+        this._scene = scene;
+
+        this.activeViewport = scene.getViewports()[0];
+
+        // this._attachSelectionEvent(this._documents);
+    }
+
+    eventTrigger(
+        evt: IPointerEvent | IMouseEvent,
+        documentTransform: Transform,
+        pageLayoutType: PageLayoutType,
+        pageMarginLeft: number,
+        pageMarginTop: number,
+        docsLeft: number,
+        docsTop: number
+    ) {
+        // this._moveInObserver = documents.onPointerEnterObserver.add(() => {
+        //     documents.cursor = CURSOR_TYPE.TEXT;
+        // });
+
+        // this._moveOutObserver = documents.onPointerLeaveObserver.add(() => {
+        //     documents.cursor = CURSOR_TYPE.DEFAULT;
+        //     this._scene?.resetCursor();
+        // });
+
+        // this._downObserver = documents.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+
+        // });
+
+        if (!this._scene || !this._isSelectionEnabled) {
+            return;
         }
 
-        this._documents = documents;
-        this._skeletonObserver = documents
-            .getSkeleton()
-            ?.onRecalculateChangeObservable.add((data: IDocumentSkeletonCached) => {
-                this._deleteAllTextSelection();
+        const scene = this._scene;
+
+        const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+        this.activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+
+        this.setOffsetForDocumentOffset(
+            documentTransform,
+            pageLayoutType,
+            pageMarginLeft,
+            pageMarginTop,
+            docsLeft,
+            docsTop
+        );
+
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+
+        const position = this._getNodePosition(startNode);
+
+        console.log('startNode', startNode, position, evtOffsetX, evtOffsetY);
+
+        if (position == null) {
+            this._deleteAllTextSelection();
+            return;
+        }
+
+        if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
+            position.isBack = true;
+        }
+
+        if (evt.ctrlKey || this._isEmptyTextSelection()) {
+            const newTextSelection = new TextSelection(scene, position);
+            this._addTextSelection(newTextSelection);
+        } else {
+            this._updateTextSelection(position);
+        }
+
+        this._activeSelectionRefresh();
+
+        this._syncDomToSelection();
+
+        scene.disableEvent();
+
+        const scrollTimer = ScrollTimer.create(scene);
+        scrollTimer.startScroll(evtOffsetX, evtOffsetY);
+
+        const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
+
+        this._viewportScrollX = scrollX;
+        this._viewportScrollY = scrollY;
+
+        this._onSelectionStart$.next(this.getActiveTextSelection()?.getStart());
+
+        let preMoveOffsetX = evtOffsetX;
+
+        let preMoveOffsetY = evtOffsetY;
+
+        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+            const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+            scene.setCursor(CURSOR_TYPE.TEXT);
+            if (Math.sqrt((moveOffsetX - preMoveOffsetX) ** 2 + (moveOffsetY - preMoveOffsetY) ** 2) < 3) {
+                return;
+            }
+            this._moving(moveOffsetX, moveOffsetY, scrollTimer);
+            scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
+                this._moving(moveOffsetX, moveOffsetY, scrollTimer);
             });
-        this._attachSelectionEvent(this._documents);
+            preMoveOffsetX = moveOffsetX;
+            preMoveOffsetY = moveOffsetY;
+        });
+
+        this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+            scene.onPointerMoveObserver.remove(this._moveObserver);
+            scene.onPointerUpObserver.remove(this._upObserver);
+            scene.enableEvent();
+
+            scrollTimer.dispose();
+        });
+
+        // state.stopPropagation();
     }
 
     override dispose() {
         super.dispose();
 
-        if (this._documents) {
-            this._detachEvent(this._documents);
-        }
+        this._detachEvent();
+
         this._container.remove();
     }
 
@@ -341,10 +557,6 @@ export class DocsEditor extends RxDisposable {
         }
     }
 
-    private _getSkeletonData() {
-        return this._documents?.getSkeleton()?.getSkeletonData();
-    }
-
     private _getNodePosition(node: Nullable<INodeInfo>) {
         if (node == null) {
             return;
@@ -352,7 +564,7 @@ export class DocsEditor extends RxDisposable {
 
         const { node: span, ratioX, ratioY } = node;
 
-        const position = this._documents?.findPositionBySpan(span);
+        const position = this._docSkeleton?.findPositionBySpan(span);
 
         if (position == null) {
             return;
@@ -412,12 +624,12 @@ export class DocsEditor extends RxDisposable {
     }
 
     private _updateTextSelection(position: INodePosition) {
-        if (!this._documents) {
+        if (!this._scene) {
             return;
         }
         let lastTextSelection = this._textSelectionList.pop();
         if (!lastTextSelection) {
-            lastTextSelection = new TextSelection(this._documents.getScene(), position);
+            lastTextSelection = new TextSelection(this._scene, position);
         }
         this._deleteAllTextSelection();
         lastTextSelection.activate();
@@ -431,7 +643,7 @@ export class DocsEditor extends RxDisposable {
     }
 
     private _getCanvasOffset() {
-        const engine = this._documents?.getEngine();
+        const engine = this._scene?.getEngine();
         const canvas = engine?.getCanvasElement();
 
         if (!canvas) {
@@ -510,11 +722,11 @@ export class DocsEditor extends RxDisposable {
         // const endX = moveOffsetX - this._viewportScrollX + scrollX;
         // const endY = moveOffsetY - this._viewportScrollY + scrollY;
 
-        if (!this._documents) {
+        if (this._docSkeleton == null) {
             return;
         }
 
-        const endNode = this._documents.findNodeByCoord(moveOffsetX, moveOffsetY);
+        const endNode = this._findNodeByCoord(moveOffsetX, moveOffsetY);
 
         const endPosition = this._getNodePosition(endNode);
 
@@ -532,7 +744,7 @@ export class DocsEditor extends RxDisposable {
 
         activeTextSelection.endNodePosition = endPosition;
 
-        activeTextSelection.refresh(this._documents);
+        activeTextSelection.refresh(this._documentOffsetConfig, this._docSkeleton);
 
         this.deactivate();
 
@@ -606,19 +818,24 @@ export class DocsEditor extends RxDisposable {
             if (this._isIMEInputApply) {
                 return;
             }
-            const activeSelection = this.getActiveTextSelection();
-            const selectionList = this.getTextSelectionList();
-            if (this._documents == null) {
-                return;
-            }
-            this._input.innerHTML = '';
-            this.onKeydownObservable.notifyObservers({
-                event: e,
-                content: '',
-                document: this._documents,
-                activeSelection,
-                selectionList,
+
+            this._eventHandle(e, (config) => {
+                this._onKeydown$.next(config);
             });
+
+            // const activeSelection = this.getActiveTextSelection();
+            // const selectionList = this.getTextSelectionList();
+            // if (this._documents == null) {
+            //     return;
+            // }
+            // this._input.innerHTML = '';
+            // this._onKeydown$.next({
+            //     event: e,
+            //     content: '',
+            //     document: this._documents,
+            //     activeSelection,
+            //     selectionList,
+            // });
         });
 
         this._input.addEventListener('input', (e) => {
@@ -626,208 +843,234 @@ export class DocsEditor extends RxDisposable {
                 return;
             }
 
-            const content = this._input.textContent || '';
-
-            this._input.innerHTML = '';
-
-            const activeSelection = this.getActiveTextSelection();
-            const selectionList = this.getTextSelectionList();
-
-            if (this._documents == null) {
-                return;
-            }
-            this.onInputObservable.notifyObservers({
-                event: e,
-                content,
-                document: this._documents,
-                activeSelection,
-                selectionList,
+            this._eventHandle(e, (config) => {
+                this._onInput$.next(config);
             });
+
+            // const content = this._input.textContent || '';
+
+            // this._input.innerHTML = '';
+
+            // const activeSelection = this.getActiveTextSelection();
+            // const selectionList = this.getTextSelectionList();
+
+            // if (this._documents == null) {
+            //     return;
+            // }
+            // this._onInput$.next({
+            //     event: e,
+            //     content,
+            //     document: this._documents,
+            //     activeSelection,
+            //     selectionList,
+            // });
         });
 
         this._input.addEventListener('compositionstart', (e) => {
             this._isIMEInputApply = true;
 
-            const content = this._input.textContent || '';
-
-            this._input.innerHTML = '';
-
-            const activeSelection = this.getActiveTextSelection();
-            const selectionList = this.getTextSelectionList();
-
-            if (this._documents == null) {
-                return;
-            }
-
-            this.onCompositionstartObservable.notifyObservers({
-                event: e,
-                content,
-                document: this._documents,
-                activeSelection,
-                selectionList,
+            this._eventHandle(e, (config) => {
+                this._onCompositionstart$.next(config);
             });
+
+            // const content = this._input.textContent || '';
+
+            // this._input.innerHTML = '';
+
+            // const activeSelection = this.getActiveTextSelection();
+            // const selectionList = this.getTextSelectionList();
+
+            // if (this._documents == null) {
+            //     return;
+            // }
+
+            // this._onCompositionstart$.next({
+            //     event: e,
+            //     content,
+            //     document: this._documents,
+            //     activeSelection,
+            //     selectionList,
+            // });
         });
 
         this._input.addEventListener('compositionend', (e) => {
             this._isIMEInputApply = false;
-            const content = this._input.textContent || '';
 
-            this._input.innerHTML = '';
-
-            const activeSelection = this.getActiveTextSelection();
-            const selectionList = this.getTextSelectionList();
-
-            if (this._documents == null) {
-                return;
-            }
-
-            this.onCompositionendObservable.notifyObservers({
-                event: e,
-                content,
-                document: this._documents,
-                activeSelection,
-                selectionList,
+            this._eventHandle(e, (config) => {
+                this._onCompositionend$.next(config);
             });
+
+            // const content = this._input.textContent || '';
+
+            // this._input.innerHTML = '';
+
+            // const activeSelection = this.getActiveTextSelection();
+            // const selectionList = this.getTextSelectionList();
+
+            // if (this._documents == null) {
+            //     return;
+            // }
+
+            // this._onCompositionend$.next({
+            //     event: e,
+            //     content,
+            //     document: this._documents,
+            //     activeSelection,
+            //     selectionList,
+            // });
         });
 
         this._input.addEventListener('compositionupdate', (e) => {
-            const content = this._input.textContent || '';
-
-            this._input.innerHTML = '';
-
-            const activeSelection = this.getActiveTextSelection();
-            const selectionList = this.getTextSelectionList();
-
-            if (this._documents == null) {
-                return;
-            }
-
-            this.onCompositionupdateObservable.notifyObservers({
-                event: e,
-                content,
-                document: this._documents,
-                activeSelection,
-                selectionList,
+            this._eventHandle(e, (config) => {
+                this._onCompositionupdate$.next(config);
             });
+
+            // const content = this._input.textContent || '';
+
+            // this._input.innerHTML = '';
+
+            // const activeSelection = this.getActiveTextSelection();
+            // const selectionList = this.getTextSelectionList();
+
+            // if (this._documents == null) {
+            //     return;
+            // }
+
+            // this._onCompositionupdate$.next({
+            //     event: e,
+            //     content,
+            //     document: this._documents,
+            //     activeSelection,
+            //     selectionList,
+            // });
         });
 
-        this.onPaste$ = (fromEvent(this._input, 'paste') as RxObservable<ClipboardEvent>).pipe(
-            takeUntil(this.dispose$),
-            share()
-        );
+        this._input.addEventListener('paste', (e) => {
+            this._eventHandle(e, (config) => {
+                this._onPaste$.next(config);
+            });
+
+            // const content = this._input.textContent || '';
+
+            // this._input.innerHTML = '';
+
+            // const activeSelection = this.getActiveTextSelection();
+            // const selectionList = this.getTextSelectionList();
+
+            // if (this._documents == null) {
+            //     return;
+            // }
+
+            // this._onPaste$.next({
+            //     event: e,
+            //     content,
+            //     document: this._documents,
+            //     activeSelection,
+            //     selectionList,
+            // });
+        });
+
+        // this.onPaste$ = (fromEvent(this._input, 'paste') as RxObservable<ClipboardEvent>).pipe(
+        //     takeUntil(this.dispose$),
+        //     share()
+        // );
+    }
+
+    private _eventHandle(e: Event | CompositionEvent | KeyboardEvent, func: (config: IEditorInputConfig) => void) {
+        const content = this._input.textContent || '';
+
+        this._input.innerHTML = '';
+
+        const activeSelection = this.getActiveTextSelection();
+        const selectionList = this.getTextSelectionList();
+
+        // if (this._documents == null) {
+        //     return;
+        // }
+
+        func({
+            event: e,
+            content,
+            // document: this._documents,
+            activeSelection,
+            selectionList,
+        });
     }
 
     private _handlePaste(e: ClipboardEvent) {
         // TODO: emit the paste event to subscribers
     }
 
-    // eslint-disable-next-line max-lines-per-function
-    private _attachSelectionEvent(documents: DocComponent) {
-        this._moveInObserver = documents.onPointerEnterObserver.add(() => {
-            documents.cursor = CURSOR_TYPE.TEXT;
-        });
+    private _getTransformCoordForDocumentOffset(evtOffsetX: number, evtOffsetY: number) {
+        if (this._scene == null || this._documentTransform == null) {
+            return;
+        }
+        this.activeViewport = this._scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
-        this._moveOutObserver = documents.onPointerLeaveObserver.add(() => {
-            documents.cursor = CURSOR_TYPE.DEFAULT;
-            scene.resetCursor();
-        });
-        const scene = documents.getScene();
+        const originCoord = this._scene.transformToSceneCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
-        this._downObserver = documents.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            if (!this._documents) {
-                return;
-            }
+        if (!originCoord) {
+            return;
+        }
 
-            const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-            this.activeViewport = this._documents.getActiveViewportByCoord(evtOffsetX, evtOffsetY);
-
-            const startNode = this._documents.findNodeByCoord(evtOffsetX, evtOffsetY);
-
-            const position = this._getNodePosition(startNode);
-
-            console.log('startNode', startNode, position, evtOffsetX, evtOffsetY);
-
-            if (position == null) {
-                this._deleteAllTextSelection();
-                return;
-            }
-
-            if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
-                position.isBack = true;
-            }
-
-            if (evt.ctrlKey || this._isEmptyTextSelection()) {
-                const newTextSelection = new TextSelection(this._documents.getScene(), position);
-                this._addTextSelection(newTextSelection);
-            } else {
-                this._updateTextSelection(position);
-            }
-
-            this._activeSelectionRefresh();
-
-            this._syncDomToSelection();
-
-            scene.disableEvent();
-
-            const scrollTimer = ScrollTimer.create(scene);
-            scrollTimer.startScroll(evtOffsetX, evtOffsetY);
-
-            const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
-
-            this._viewportScrollX = scrollX;
-            this._viewportScrollY = scrollY;
-
-            this.onSelectionStartObservable.notifyObservers(this.getActiveTextSelection()?.getStart());
-
-            let preMoveOffsetX = evtOffsetX;
-
-            let preMoveOffsetY = evtOffsetY;
-
-            this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-                const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-                scene.setCursor(CURSOR_TYPE.TEXT);
-                if (Math.sqrt((moveOffsetX - preMoveOffsetX) ** 2 + (moveOffsetY - preMoveOffsetY) ** 2) < 3) {
-                    return;
-                }
-                this._moving(moveOffsetX, moveOffsetY, scrollTimer);
-                scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                    this._moving(moveOffsetX, moveOffsetY, scrollTimer);
-                });
-                preMoveOffsetX = moveOffsetX;
-                preMoveOffsetY = moveOffsetY;
-            });
-
-            this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-                scene.onPointerMoveObserver.remove(this._moveObserver);
-                scene.onPointerUpObserver.remove(this._upObserver);
-                scene.enableEvent();
-
-                scrollTimer.dispose();
-            });
-
-            // state.stopPropagation();
-        });
+        return this._documentTransform.clone().invert().applyPoint(originCoord);
     }
 
-    private _detachEvent(documents: DocComponent) {
-        documents.onPointerEnterObserver.remove(this._moveInObserver);
-        documents.onPointerLeaveObserver.remove(this._moveOutObserver);
-        documents.onPointerDownObserver.remove(this._downObserver);
-        documents.getSkeleton()?.onRecalculateChangeObservable.remove(this._skeletonObserver);
-        this.onKeydownObservable.clear();
-        this.onInputObservable.clear();
-        this.onCompositionstartObservable.clear();
-        this.onCompositionupdateObservable.clear();
-        this.onCompositionendObservable.clear();
-        this.onSelectionStartObservable.clear();
+    private setOffsetForDocumentOffset(
+        documentTransform: Transform,
+        pageLayoutType: PageLayoutType,
+        pageMarginLeft: number,
+        pageMarginTop: number,
+        docsLeft: number,
+        docsTop: number
+    ) {
+        this._documentTransform = documentTransform;
+        this._documentOffsetConfig = {
+            pageLayoutType,
+            pageMarginLeft,
+            pageMarginTop,
+            docsLeft,
+            docsTop,
+        };
+    }
+
+    private _findNodeByCoord(evtOffsetX: number, evtOffsetY: number) {
+        const coord = this._getTransformCoordForDocumentOffset(evtOffsetX, evtOffsetY);
+
+        if (coord == null) {
+            return;
+        }
+
+        const { pageLayoutType, pageMarginLeft, pageMarginTop } = this._documentOffsetConfig;
+
+        return this._docSkeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop);
+    }
+
+    private _detachEvent() {
+        // documents.onPointerEnterObserver.remove(this._moveInObserver);
+        // documents.onPointerLeaveObserver.remove(this._moveOutObserver);
+        // documents.onPointerDownObserver.remove(this._downObserver);
+        this._docSkeleton?.onRecalculateChangeObservable.remove(this._skeletonObserver);
+        this._onKeydown$.complete();
+        this._onInput$.complete();
+        this._onCompositionstart$.complete();
+        this._onCompositionupdate$.complete();
+        this._onCompositionend$.complete();
+        this._onSelectionStart$.complete();
     }
 
     private _activeSelectionRefresh() {
-        if (!this._documents) {
+        if (this._docSkeleton == null) {
             return;
         }
         const activeSelection = this.getActiveTextSelection();
 
-        activeSelection?.refresh(this._documents);
+        activeSelection?.refresh(this._documentOffsetConfig, this._docSkeleton);
+
+        // this._activeSelectionRefresh$.next(activeSelection);
     }
 }
+
+export const ITextSelectionRenderManager = createIdentifier<TextSelectionRenderManager>(
+    'deprecated.univer.doc.text-selection-render-manager'
+);

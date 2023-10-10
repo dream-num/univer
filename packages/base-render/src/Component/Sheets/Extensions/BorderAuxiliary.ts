@@ -1,8 +1,9 @@
 import { BooleanNumber, IRange, IScale } from '@univerjs/core';
 
-import { getLineWith } from '../../../Basics/Draw';
+import { clearLineByBorderType, getLineWith } from '../../../Basics/Draw';
 import { fixLineWidthByScale, getColor } from '../../../Basics/Tools';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
+import { BorderCacheItem } from '../Interfaces';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
 
@@ -23,7 +24,7 @@ export class BorderAuxiliary extends SheetExtension {
             stylesCache,
             showGridlines,
         } = spreadsheetSkeleton;
-
+        const { border } = stylesCache;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE) {
             return;
@@ -71,6 +72,52 @@ export class BorderAuxiliary extends SheetExtension {
         ctx.stroke();
         ctx.closePath();
 
+        const { scaleX = 1, scaleY = 1 } = parentScale;
+
+        // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
+        border?.forValue((rowIndex, columnIndex, borderCaches) => {
+            if (!borderCaches) {
+                return true;
+            }
+
+            const cellInfo = this.getCellIndex(
+                rowIndex,
+                columnIndex,
+                rowHeightAccumulation,
+                columnWidthAccumulation,
+                dataMergeCache
+            );
+
+            let { startY, endY, startX, endX } = cellInfo;
+            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+
+            if (isMerged) {
+                return true;
+            }
+
+            if (isMergedMainCell) {
+                startY = mergeInfo.startY;
+                endY = mergeInfo.endY;
+                startX = mergeInfo.startX;
+                endX = mergeInfo.endX;
+            }
+
+            startY = fixLineWidthByScale(startY, scaleY);
+            endY = fixLineWidthByScale(endY, scaleY);
+            startX = fixLineWidthByScale(startX, scaleX);
+            endX = fixLineWidthByScale(endX, scaleX);
+
+            for (const key in borderCaches) {
+                const { type, style, color } = borderCaches[key] as BorderCacheItem;
+
+                if (color.indexOf('255,255,255') === -1 || color.toLocaleLowerCase() !== '#ffffff') {
+                    continue;
+                }
+
+                clearLineByBorderType(ctx, type, { startX, startY, endX, endY }, scaleX, scaleY);
+            }
+        });
+        ctx.closePath();
         // merge cell
         this._clearRectangle(ctx, scale, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 

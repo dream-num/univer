@@ -1,3 +1,4 @@
+import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/base-render';
 import { DesktopPlatformService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
 import {
     ICommand,
@@ -142,6 +143,12 @@ export class DocPlugin extends Plugin {
                 // services
                 [IPlatformService, { useClass: DesktopPlatformService }],
                 [DocSkeletonManagerService],
+                [
+                    ITextSelectionRenderManager,
+                    {
+                        useClass: TextSelectionRenderManager,
+                    },
+                ],
 
                 // controllers
                 [DocumentController],

@@ -64,10 +64,62 @@ export function drawLineByBorderType(ctx: CanvasRenderingContext2D, type: BORDER
         drawEndX = endX;
         drawEndY = endY;
     }
+
+    // ctx.clearRect(drawStartX - 1, drawStartY - 1, drawEndX - drawStartX + 2, drawEndY - drawStartY + 2);
     ctx.beginPath();
     ctx.moveTo(drawStartX, drawStartY);
     ctx.lineTo(drawEndX, drawEndY);
     ctx.stroke();
+}
+
+export function clearLineByBorderType(
+    ctx: CanvasRenderingContext2D,
+    type: BORDER_TYPE,
+    position: IPosition,
+    scaleX: number,
+    scaleY: number
+) {
+    let drawStartX = 0;
+    let drawStartY = 0;
+    let drawEndX = 0;
+    let drawEndY = 0;
+    const { startX, startY, endX, endY } = position;
+    if (type === BORDER_TYPE.TOP) {
+        drawStartX = startX;
+        drawStartY = startY;
+        drawEndX = endX;
+        drawEndY = startY;
+    } else if (type === BORDER_TYPE.BOTTOM) {
+        drawStartX = startX;
+        drawStartY = endY;
+        drawEndX = endX;
+        drawEndY = endY;
+    } else if (type === BORDER_TYPE.LEFT) {
+        drawStartX = startX;
+        drawStartY = startY;
+        drawEndX = startX;
+        drawEndY = endY;
+    } else if (type === BORDER_TYPE.RIGHT) {
+        drawStartX = endX;
+        drawStartY = startY;
+        drawEndX = endX;
+        drawEndY = endY;
+    }
+
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgb(255,255,255)';
+    ctx.lineWidth = 1.5 / Math.max(scaleX, scaleY);
+    ctx.moveTo(drawStartX, drawStartY);
+    ctx.lineTo(drawEndX, drawEndY);
+    ctx.stroke();
+
+    // ctx.beginPath();
+    // ctx.clearRect(
+    //     drawStartX - 1 / scaleX,
+    //     drawStartY - 1 / scaleY,
+    //     drawEndX - drawStartX + 2 / scaleX,
+    //     drawEndY - drawStartY + 2 / scaleY
+    // );
 }
 
 export function setLineType(ctx: CanvasRenderingContext2D, style: BorderStyleTypes) {
@@ -96,7 +148,7 @@ export function getLineOffset() {
 }
 
 export function getLineWith(width: number) {
-    return Math.ceil((width / getDevicePixelRatio()) * 10) / 10;
+    return Math.ceil((width / getDevicePixelRatio()) * 100) / 100;
 }
 
 export function getLineWidth(style: BorderStyleTypes) {

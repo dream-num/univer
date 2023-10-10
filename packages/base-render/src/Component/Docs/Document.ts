@@ -17,17 +17,14 @@ import {
     LineType,
     PageLayoutType,
 } from '../../Basics/IDocumentSkeletonCached';
-import { INodeInfo } from '../../Basics/Interfaces';
 import { degToRad, fixLineWidthByScale, getScale } from '../../Basics/Tools';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { Scene } from '../../Scene';
 import { DocumentsSpanAndLineExtensionRegistry, IExtensionConfig } from '../Extension';
 import { Liquid } from './Common/Liquid';
-import { TextSelection } from './Common/TextSelection';
 import { DocComponent } from './DocComponent';
 import { DOCS_EXTENSION_TYPE } from './DocExtension';
 import { DocumentSkeleton } from './DocSkeleton';
-import { DocsEditor } from './Document.Editor';
 
 export interface IDocumentsConfig {
     pageMarginLeft?: number;
@@ -57,9 +54,9 @@ export class Documents extends DocComponent {
 
     private _findLiquid: Liquid;
 
-    private _hasEditor = false;
+    // private _hasEditor = false;
 
-    private _editor: Nullable<DocsEditor>;
+    // private _editor: Nullable<DocsEditor>;
 
     private _skeletonObserver: Nullable<Observer<IDocumentSkeletonCached>>;
 
@@ -81,9 +78,9 @@ export class Documents extends DocComponent {
         this.makeDirty(true);
     }
 
-    get hasEditor() {
-        return this._hasEditor;
-    }
+    // get hasEditor() {
+    //     return this._hasEditor;
+    // }
 
     static create(oKey: string, documentSkeleton?: DocumentSkeleton, config?: IDocumentsConfig) {
         return new Documents(oKey, documentSkeleton, config);
@@ -96,22 +93,22 @@ export class Documents extends DocComponent {
 
         this.pageLayoutType = config?.pageLayoutType || PageLayoutType.VERTICAL;
 
-        this._hasEditor = config?.hasEditor || false;
+        // this._hasEditor = config?.hasEditor || false;
 
         this.setAllowCache(config?.allowCache || false);
     }
 
-    getEditor(): Nullable<DocsEditor> {
-        return this._editor;
-    }
+    // getEditor(): Nullable<DocsEditor> {
+    //     return this._editor;
+    // }
 
-    getActiveSelection() {
-        return this._editor?.getActiveTextSelection();
-    }
+    // getActiveSelection() {
+    //     return this._editor?.getActiveTextSelection();
+    // }
 
-    getSelection() {
-        return this._editor?.getTextSelectionList();
-    }
+    // getSelection() {
+    //     return this._editor?.getTextSelectionList();
+    // }
 
     calculatePagePosition() {
         const scene = this.getScene() as Scene;
@@ -156,83 +153,75 @@ export class Documents extends DocComponent {
         return this;
     }
 
-    override getFirstViewport() {
-        return (this.getScene() as Scene).getViewports()[0];
-    }
-
-    override getActiveViewportByCoord(offsetX: number, offsetY: number) {
-        return (this.getScene() as Scene).getActiveViewportByCoord(Vector2.FromArray([offsetX, offsetY]));
-    }
-
     override getEngine() {
         return (this.getScene() as Scene).getEngine();
     }
 
-    enableEditor() {
-        if (this._hasEditor) {
-            return;
-        }
+    // enableEditor() {
+    //     if (this._hasEditor) {
+    //         return;
+    //     }
 
-        this._editor = DocsEditor.create(this);
-        this._hasEditor = true;
-    }
+    //     this._editor = DocsEditor.create(this);
+    //     this._hasEditor = true;
+    // }
 
-    disableEditor() {
-        this._editor?.dispose();
-        this._hasEditor = false;
-    }
+    // disableEditor() {
+    //     this._editor?.dispose();
+    //     this._hasEditor = false;
+    // }
 
-    getEditorInputEvent() {
-        if (!this._hasEditor || this._editor == null) {
-            return;
-        }
-        const {
-            onInputObservable,
-            onCompositionstartObservable,
-            onCompositionupdateObservable,
-            onCompositionendObservable,
-            onKeydownObservable,
-            onSelectionStartObservable,
-        } = this._editor;
-        return {
-            onInputObservable,
-            onCompositionstartObservable,
-            onCompositionupdateObservable,
-            onCompositionendObservable,
-            onKeydownObservable,
-            onSelectionStartObservable,
-        };
-    }
+    // getEditorInputEvent() {
+    //     if (!this._hasEditor || this._editor == null) {
+    //         return;
+    //     }
+    //     const {
+    //         onInputObservable,
+    //         onCompositionstartObservable,
+    //         onCompositionupdateObservable,
+    //         onCompositionendObservable,
+    //         onKeydownObservable,
+    //         onSelectionStartObservable,
+    //     } = this._editor;
+    //     return {
+    //         onInputObservable,
+    //         onCompositionstartObservable,
+    //         onCompositionupdateObservable,
+    //         onCompositionendObservable,
+    //         onKeydownObservable,
+    //         onSelectionStartObservable,
+    //     };
+    // }
 
-    override remainActiveSelection() {
-        if (!this._hasEditor) {
-            return;
-        }
-        return this._editor?.remain();
-    }
+    // override remainActiveSelection() {
+    //     if (!this._hasEditor) {
+    //         return;
+    //     }
+    //     return this._editor?.remain();
+    // }
 
-    addSelection(textSelection: TextSelection) {
-        if (!this._hasEditor) {
-            return;
-        }
-        return this._editor?.add(textSelection);
-    }
+    // addSelection(textSelection: TextSelection) {
+    //     if (!this._hasEditor) {
+    //         return;
+    //     }
+    //     return this._editor?.add(textSelection);
+    // }
 
-    override syncSelection() {
-        if (!this._hasEditor) {
-            return;
-        }
+    // override syncSelection() {
+    //     if (!this._hasEditor) {
+    //         return;
+    //     }
 
-        return this._editor?.sync();
-    }
+    //     return this._editor?.sync();
+    // }
 
-    override scrollBySelection() {
-        if (this._hasEditor == null) {
-            return;
-        }
+    // override scrollBySelection() {
+    //     if (this._hasEditor == null) {
+    //         return;
+    //     }
 
-        this._editor?.scroll();
-    }
+    //     this._editor?.scroll();
+    // }
 
     // eslint-disable-next-line max-lines-per-function
     override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
@@ -497,181 +486,181 @@ export class Documents extends DocComponent {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    override findNodeByCoord(offsetX: number, offsetY: number): Nullable<INodeInfo> {
-        const scene = this.getScene() as Scene;
-        const originCoord = scene.transformToSceneCoord(Vector2.FromArray([offsetX, offsetY]));
+    // override findNodeByCoord(offsetX: number, offsetY: number): Nullable<INodeInfo> {
+    //     const scene = this.getScene() as Scene;
+    //     const originCoord = scene.transformToSceneCoord(Vector2.FromArray([offsetX, offsetY]));
 
-        if (!originCoord) {
-            return;
-        }
+    //     if (!originCoord) {
+    //         return;
+    //     }
 
-        const coord = this._getInverseCoord(originCoord);
-        const { x, y } = coord;
-        const skeleton = this.getSkeleton();
+    //     const coord = this._getInverseCoord(originCoord);
+    //     const { x, y } = coord;
+    //     const skeleton = this.getSkeleton();
 
-        if (!skeleton) {
-            return;
-        }
+    //     if (!skeleton) {
+    //         return;
+    //     }
 
-        this._findLiquid.reset();
+    //     this._findLiquid.reset();
 
-        const skeletonData = skeleton.getSkeletonData();
+    //     const skeletonData = skeleton.getSkeletonData();
 
-        if (skeletonData == null) {
-            return;
-        }
+    //     if (skeletonData == null) {
+    //         return;
+    //     }
 
-        const pages = skeletonData.pages;
+    //     const pages = skeletonData.pages;
 
-        let nearestNodeList: INodeInfo[] = [];
+    //     let nearestNodeList: INodeInfo[] = [];
 
-        let nearestNodeDistanceList: number[] = [];
+    //     let nearestNodeDistanceList: number[] = [];
 
-        let nearestNodeDistanceY = Infinity;
+    //     let nearestNodeDistanceY = Infinity;
 
-        for (let i = 0, len = pages.length; i < len; i++) {
-            const page = pages[i];
+    //     for (let i = 0, len = pages.length; i < len; i++) {
+    //         const page = pages[i];
 
-            const { startX, startY, endX, endY } = this._getPageBoundingBox(page);
+    //         const { startX, startY, endX, endY } = this._getPageBoundingBox(page);
 
-            if (!(x >= startX && x <= endX && y >= startY && y <= endY)) {
-                this._translatePage(page);
-                continue;
-            }
+    //         if (!(x >= startX && x <= endX && y >= startY && y <= endY)) {
+    //             this._translatePage(page);
+    //             continue;
+    //         }
 
-            this._findLiquid.translatePagePadding(page);
+    //         this._findLiquid.translatePagePadding(page);
 
-            const sections = page.sections;
+    //         const sections = page.sections;
 
-            for (const section of sections) {
-                const { columns, height } = section;
+    //         for (const section of sections) {
+    //             const { columns, height } = section;
 
-                this._findLiquid.translateSection(section);
+    //             this._findLiquid.translateSection(section);
 
-                const { y: startY } = this._findLiquid;
+    //             const { y: startY } = this._findLiquid;
 
-                // if (!(y >= startY && y <= startY + height)) {
-                //     continue;
-                // }
+    //             // if (!(y >= startY && y <= startY + height)) {
+    //             //     continue;
+    //             // }
 
-                for (const column of columns) {
-                    const { lines, width: columnWidth } = column;
+    //             for (const column of columns) {
+    //                 const { lines, width: columnWidth } = column;
 
-                    this._findLiquid.translateColumn(column);
+    //                 this._findLiquid.translateColumn(column);
 
-                    const { x: startX } = this._findLiquid;
+    //                 const { x: startX } = this._findLiquid;
 
-                    // if (!(x >= startX && x <= startX + columnWidth)) {
-                    //     continue;
-                    // }
+    //                 // if (!(x >= startX && x <= startX + columnWidth)) {
+    //                 //     continue;
+    //                 // }
 
-                    const linesCount = lines.length;
+    //                 const linesCount = lines.length;
 
-                    for (let i = 0; i < linesCount; i++) {
-                        const line = lines[i];
-                        const { divides, type, lineHeight = 0 } = line;
+    //                 for (let i = 0; i < linesCount; i++) {
+    //                     const line = lines[i];
+    //                     const { divides, type, lineHeight = 0 } = line;
 
-                        if (type === LineType.BLOCK) {
-                            continue;
-                        } else {
-                            this._findLiquid.translateSave();
-                            this._findLiquid.translateLine(line);
+    //                     if (type === LineType.BLOCK) {
+    //                         continue;
+    //                     } else {
+    //                         this._findLiquid.translateSave();
+    //                         this._findLiquid.translateLine(line);
 
-                            const { y: startY } = this._findLiquid;
+    //                         const { y: startY } = this._findLiquid;
 
-                            const startY_fin = startY;
+    //                         const startY_fin = startY;
 
-                            const endY_fin = startY + lineHeight;
+    //                         const endY_fin = startY + lineHeight;
 
-                            const distanceY = Math.abs(y - endY_fin);
+    //                         const distanceY = Math.abs(y - endY_fin);
 
-                            // if (!(y >= startY_fin && y <= endY_fin)) {
-                            //     this._findLiquid.translateRestore();
-                            //     continue;
-                            // }
+    //                         // if (!(y >= startY_fin && y <= endY_fin)) {
+    //                         //     this._findLiquid.translateRestore();
+    //                         //     continue;
+    //                         // }
 
-                            const divideLength = divides.length;
-                            for (let i = 0; i < divideLength; i++) {
-                                const divide = divides[i];
-                                const { spanGroup, width: divideWidth } = divide;
+    //                         const divideLength = divides.length;
+    //                         for (let i = 0; i < divideLength; i++) {
+    //                             const divide = divides[i];
+    //                             const { spanGroup, width: divideWidth } = divide;
 
-                                this._findLiquid.translateSave();
-                                this._findLiquid.translateDivide(divide);
+    //                             this._findLiquid.translateSave();
+    //                             this._findLiquid.translateDivide(divide);
 
-                                const { x: startX } = this._findLiquid;
+    //                             const { x: startX } = this._findLiquid;
 
-                                // if (!(x >= startX && x <= startX + divideWidth)) {
-                                //     this._findLiquid.translateRestore();
-                                //     continue;
-                                // }
+    //                             // if (!(x >= startX && x <= startX + divideWidth)) {
+    //                             //     this._findLiquid.translateRestore();
+    //                             //     continue;
+    //                             // }
 
-                                for (const span of spanGroup) {
-                                    if (!span.content || span.content.length === 0) {
-                                        continue;
-                                    }
+    //                             for (const span of spanGroup) {
+    //                                 if (!span.content || span.content.length === 0) {
+    //                                     continue;
+    //                                 }
 
-                                    const { width: spanWidth, left: spanLeft } = span;
+    //                                 const { width: spanWidth, left: spanLeft } = span;
 
-                                    const startX_fin = startX + spanLeft;
+    //                                 const startX_fin = startX + spanLeft;
 
-                                    const endX_fin = startX + spanLeft + spanWidth;
+    //                                 const endX_fin = startX + spanLeft + spanWidth;
 
-                                    const distanceX = Math.abs(x - endX_fin);
+    //                                 const distanceX = Math.abs(x - endX_fin);
 
-                                    if (y >= startY_fin && y <= endY_fin) {
-                                        if (x >= startX_fin && x <= endX_fin) {
-                                            return {
-                                                node: span,
-                                                ratioX: x / (startX_fin + endX_fin),
-                                                ratioY: y / (startY_fin + endY_fin),
-                                            };
-                                        }
+    //                                 if (y >= startY_fin && y <= endY_fin) {
+    //                                     if (x >= startX_fin && x <= endX_fin) {
+    //                                         return {
+    //                                             node: span,
+    //                                             ratioX: x / (startX_fin + endX_fin),
+    //                                             ratioY: y / (startY_fin + endY_fin),
+    //                                         };
+    //                                     }
 
-                                        if (nearestNodeDistanceY !== -Infinity) {
-                                            nearestNodeList = [];
-                                            nearestNodeDistanceList = [];
-                                        }
-                                        nearestNodeList.push({
-                                            node: span,
-                                            ratioX: x / (startX_fin + endX_fin),
-                                            ratioY: y / (startY_fin + endY_fin),
-                                        });
+    //                                     if (nearestNodeDistanceY !== -Infinity) {
+    //                                         nearestNodeList = [];
+    //                                         nearestNodeDistanceList = [];
+    //                                     }
+    //                                     nearestNodeList.push({
+    //                                         node: span,
+    //                                         ratioX: x / (startX_fin + endX_fin),
+    //                                         ratioY: y / (startY_fin + endY_fin),
+    //                                     });
 
-                                        nearestNodeDistanceList.push(distanceX);
+    //                                     nearestNodeDistanceList.push(distanceX);
 
-                                        nearestNodeDistanceY = -Infinity;
-                                        continue;
-                                    }
+    //                                     nearestNodeDistanceY = -Infinity;
+    //                                     continue;
+    //                                 }
 
-                                    if (distanceY < nearestNodeDistanceY) {
-                                        nearestNodeDistanceY = distanceY;
-                                        nearestNodeList = [];
-                                        nearestNodeDistanceList = [];
-                                    }
+    //                                 if (distanceY < nearestNodeDistanceY) {
+    //                                     nearestNodeDistanceY = distanceY;
+    //                                     nearestNodeList = [];
+    //                                     nearestNodeDistanceList = [];
+    //                                 }
 
-                                    if (distanceY === nearestNodeDistanceY) {
-                                        nearestNodeList.push({
-                                            node: span,
-                                            ratioX: x / (startX_fin + endX_fin),
-                                            ratioY: y / (startY_fin + endY_fin),
-                                        });
+    //                                 if (distanceY === nearestNodeDistanceY) {
+    //                                     nearestNodeList.push({
+    //                                         node: span,
+    //                                         ratioX: x / (startX_fin + endX_fin),
+    //                                         ratioY: y / (startY_fin + endY_fin),
+    //                                     });
 
-                                        nearestNodeDistanceList.push(distanceX);
-                                    }
-                                }
-                                this._findLiquid.translateRestore();
-                            }
-                            this._findLiquid.translateRestore();
-                        }
-                    }
-                }
-            }
-            this._findLiquid.restorePagePadding(page);
-            this._translatePage(page);
-        }
+    //                                     nearestNodeDistanceList.push(distanceX);
+    //                                 }
+    //                             }
+    //                             this._findLiquid.translateRestore();
+    //                         }
+    //                         this._findLiquid.translateRestore();
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         this._findLiquid.restorePagePadding(page);
+    //         this._translatePage(page);
+    //     }
 
-        return this._getNearestNode(nearestNodeList, nearestNodeDistanceList);
-    }
+    //     return this._getNearestNode(nearestNodeList, nearestNodeDistanceList);
+    // }
 
     // override findCoordByNode(span: IDocumentSkeletonSpan) {
     //     const divide = span.parent;
@@ -710,12 +699,6 @@ export class Documents extends DocComponent {
 
     protected override _draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         this.draw(ctx, bounds);
-    }
-
-    private _getNearestNode(nearestNodeList: INodeInfo[], nearestNodeDistanceList: number[]) {
-        const miniValue = Math.min(...nearestNodeDistanceList);
-        const miniValueIndex = nearestNodeDistanceList.indexOf(miniValue);
-        return nearestNodeList[miniValueIndex];
     }
 
     private _horizontalHandler(
@@ -806,29 +789,29 @@ export class Documents extends DocComponent {
         skeleton.onRecalculateChangeObservable.remove(this._skeletonObserver);
     }
 
-    private _getPageBoundingBox(page: IDocumentSkeletonPage) {
-        const { pageWidth, pageHeight } = page;
-        const { x: startX, y: startY } = this._findLiquid;
+    // private _getPageBoundingBox(page: IDocumentSkeletonPage) {
+    //     const { pageWidth, pageHeight } = page;
+    //     const { x: startX, y: startY } = this._findLiquid;
 
-        let endX = -1;
-        let endY = -1;
-        if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-            endX = pageWidth;
-            endY = startY + pageHeight;
-        } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-            endX = startX + pageWidth;
-            endY = pageHeight;
-        }
+    //     let endX = -1;
+    //     let endY = -1;
+    //     if (this.pageLayoutType === PageLayoutType.VERTICAL) {
+    //         endX = pageWidth;
+    //         endY = startY + pageHeight;
+    //     } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
+    //         endX = startX + pageWidth;
+    //         endY = pageHeight;
+    //     }
 
-        return {
-            startX,
-            startY,
-            endX,
-            endY,
-        };
-    }
+    //     return {
+    //         startX,
+    //         startY,
+    //         endX,
+    //         endY,
+    //     };
+    // }
 
-    private _translatePage(page: IDocumentSkeletonPage) {
-        this._findLiquid.translatePage(page, this.pageLayoutType, this.pageMarginLeft, this.pageMarginTop);
-    }
+    // private _translatePage(page: IDocumentSkeletonPage) {
+    //     this._findLiquid.translatePage(page, this.pageLayoutType, this.pageMarginLeft, this.pageMarginTop);
+    // }
 }

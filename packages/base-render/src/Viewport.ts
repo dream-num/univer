@@ -36,6 +36,7 @@ export interface IScrollObserverParam {
     actualScrollY?: number;
     limitX?: number;
     limitY?: number;
+    isTrigger?: boolean;
 }
 
 interface IScrollBarPosition {
@@ -335,8 +336,8 @@ export class Viewport {
      * @param pos
      * @returns
      */
-    scrollTo(pos: IScrollBarPosition) {
-        return this._scroll(SCROLL_TYPE.scrollTo, pos);
+    scrollTo(pos: IScrollBarPosition, isTrigger = true) {
+        return this._scroll(SCROLL_TYPE.scrollTo, pos, isTrigger);
     }
 
     /**
@@ -344,8 +345,8 @@ export class Viewport {
      * @param pos
      * @returns
      */
-    scrollBy(pos: IScrollBarPosition) {
-        return this._scroll(SCROLL_TYPE.scrollBy, pos);
+    scrollBy(pos: IScrollBarPosition, isTrigger = true) {
+        return this._scroll(SCROLL_TYPE.scrollBy, pos, isTrigger);
     }
 
     getBarScroll(actualX: number, actualY: number) {
@@ -793,7 +794,8 @@ export class Viewport {
             y: number;
         },
         x?: number,
-        y?: number
+        y?: number,
+        isTrigger = true
     ) {
         window.clearTimeout(this._scrollStopNum);
         this._scrollStopNum = window.setTimeout(() => {
@@ -807,11 +809,12 @@ export class Viewport {
                 actualScrollY: scroll.y,
                 limitX: this._scrollBar?.limitX,
                 limitY: this._scrollBar?.limitY,
+                isTrigger,
             });
         }, 0);
     }
 
-    private _scroll(scrollType: SCROLL_TYPE, pos: IScrollBarPosition) {
+    private _scroll(scrollType: SCROLL_TYPE, pos: IScrollBarPosition, isTrigger = true) {
         const { x, y } = pos;
 
         if (this._scrollBar == null) {
@@ -852,6 +855,7 @@ export class Viewport {
             y,
             limitX: this._scrollBar?.limitX,
             limitY: this._scrollBar?.limitY,
+            isTrigger,
         });
 
         if (this._scrollBar) {
@@ -874,9 +878,10 @@ export class Viewport {
             actualScrollY: scroll.y,
             limitX: this._scrollBar?.limitX,
             limitY: this._scrollBar?.limitY,
+            isTrigger,
         });
 
-        this._triggerScrollStop(scroll, x, y);
+        this._triggerScrollStop(scroll, x, y, isTrigger);
 
         return limited;
     }

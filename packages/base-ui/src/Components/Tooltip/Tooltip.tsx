@@ -85,7 +85,7 @@ export function Tooltip(props: BaseTooltipProps) {
 
     return (
         <div ref={tooltipRef} className={style.tooltipGroup} style={styles}>
-            <div className={style.tooltipBody} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+            <div className={style.tooltipBody} onMouseMove={handleMouseEnter} onMouseOut={handleMouseLeave}>
                 {children}
             </div>
 

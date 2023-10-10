@@ -10,6 +10,5 @@
     "include": [
         "src/**/*",
         "test/**/*.test.(ts|tsx|js)"
-, "../ui-plugin-sheets/src/controller/contextmenu"
     ]
 }

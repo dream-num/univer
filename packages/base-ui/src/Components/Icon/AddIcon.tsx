@@ -11,6 +11,7 @@ export interface BaseIconProps extends BaseComponentProps {
     name?: string;
     width?: string;
     height?: string;
+    color?: string;
 }
 export const Icon = (props: BaseIconProps) => {
     const { spin, rotate, children, name, style, className } = props;

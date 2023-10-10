@@ -375,6 +375,7 @@ export default {
         borderVertical: 'borderVertical',
         borderColor: 'borderColor',
         borderSize: 'borderSize',
+        borderType: 'borderType',
     },
     merge: {
         all: 'Merge all',

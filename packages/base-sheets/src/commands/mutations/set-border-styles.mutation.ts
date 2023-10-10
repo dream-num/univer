@@ -193,11 +193,23 @@ export function mergeStyle(
     }
 
     // Overline/Strikethrough/Underline color follows text color
+    // if ('cl' in backupStyle) {
+    //     for (const k in newStyle) {
+    //         if (['ul', 'ol', 'st'].includes(k)) {
+    //             backupStyle[k].cl = backupStyle.cl;
+    //         }
+    //     }
+    // }
+
     if ('cl' in backupStyle) {
-        for (const k in newStyle) {
-            if (['ul', 'ol', 'st'].includes(k)) {
-                backupStyle[k].cl = backupStyle.cl;
-            }
+        if ('ul' in backupStyle) {
+            backupStyle.ul.cl = backupStyle.cl;
+        }
+        if ('ol' in backupStyle) {
+            backupStyle.ol.cl = backupStyle.cl;
+        }
+        if ('st' in backupStyle) {
+            backupStyle.st.cl = backupStyle.cl;
         }
     }
 

@@ -111,7 +111,7 @@ export const SetBorderCommand: ICommand = {
         const right = type === BorderType.RIGHT || type === BorderType.ALL || type === BorderType.OUTSIDE;
         const vertical = type === BorderType.VERTICAL || type === BorderType.ALL || type === BorderType.INSIDE;
         const horizontal = type === BorderType.HORIZONTAL || type === BorderType.ALL || type === BorderType.INSIDE;
-        const range = selections[0];
+        const range = selections[0]; // TODO support multiple ranges
 
         // Cells in the surrounding range may need to clear the border
         const topRangeOut = {
@@ -302,35 +302,61 @@ export const SetBorderCommand: ICommand = {
             forEach(range, (row, column) => {
                 const rectangle = hasMerge(row, column);
                 if (rectangle) {
+                    // Clear the right border of all columns except the last column
                     if (rectangle.endColumn !== range.endColumn) {
                         const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
                         mr.setValue(row, column, {
                             bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
                         });
                     }
-                } else {
-                    if (column !== range.endColumn) {
-                        const style = mr.getValue(row, column);
+                    // Clear the left border of all columns except the first column
+                    if (rectangle.startColumn !== range.startColumn) {
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
                         mr.setValue(row, column, {
-                            bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+                            bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
                         });
                     }
-                }
-            });
-            forEach(range, (row, column) => {
-                const rectangle = hasMerge(row, column);
-                if (rectangle) {
+                    // Clear all the bottom border except the last line
                     if (rectangle.endRow !== range.endRow) {
                         const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
                         mr.setValue(row, column, {
                             bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
                         });
                     }
+                    // Clear the top border of all lines except the first line
+                    if (rectangle.startRow !== range.startRow) {
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        mr.setValue(row, column, {
+                            bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
+                        });
+                    }
                 } else {
+                    // Clear the right border of all columns except the last column
+                    if (column !== range.endColumn) {
+                        const style = mr.getValue(row, column);
+                        mr.setValue(row, column, {
+                            bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+                        });
+                    }
+                    // Clear the left border of all columns except the first column
+                    if (column !== range.startColumn) {
+                        const style = mr.getValue(row, column);
+                        mr.setValue(row, column, {
+                            bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
+                        });
+                    }
+                    // Clear all the bottom border except the last line
                     if (row !== range.endRow) {
                         const style = mr.getValue(row, column);
                         mr.setValue(row, column, {
                             bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+                        });
+                    }
+                    // Clear the top border of all lines except the first line
+                    if (row !== range.startRow) {
+                        const style = mr.getValue(row, column);
+                        mr.setValue(row, column, {
+                            bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
                         });
                     }
                 }

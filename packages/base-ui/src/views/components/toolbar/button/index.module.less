@@ -1,0 +1,55 @@
+@import '../../../../Components/Button/Style/mixin.less';
+
+.btn {
+    line-height: @line-height-base;
+    .btn();
+    .btn-default();
+
+    >span {
+        display: inline-block;
+    }
+
+    &-text {
+        .button-color(var(--text-color), transparent, transparent);
+        box-shadow: none;
+    
+        &:hover {
+            color: var(--text-color);
+            background-color: var(--grey-100);
+            border-color: transparent;
+        }
+    
+        // &:active {
+        //     color: var(--text-color);
+        //     background: #eee;
+        //     border-color: transparent;
+        // }
+        .button-disabled(var(--disabled-color); transparent; transparent);
+        &-active {
+            color: var(--text-color);
+            background-color: var(--grey-100);
+            border-color: transparent;
+        }
+        height: 26px;
+    }
+
+    &::before {
+        position: absolute;
+        top: -@border-width-base;
+        right: -@border-width-base;
+        bottom: -@border-width-base;
+        left: -@border-width-base;
+        z-index: 1;
+        display: none;
+        background: @bg-color-secondary;
+        border-radius: inherit;
+        opacity: 0.35;
+        transition: opacity 0.2s;
+        content: '';
+        pointer-events: none;
+    }
+
+    &:active>span {
+        position: relative;
+    }
+}

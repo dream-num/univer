@@ -36,7 +36,7 @@
         height: 26px;
         display: inline-block;
         vertical-align: middle;
-        margin: 0 3px;
+        margin: 0 1px;
         cursor: pointer;
 
         &.select-button:hover {
@@ -96,23 +96,27 @@
     }
 
     .select-single {
-        height: 26px;
-        line-height: 26px;
+        // height: 26px;
+        // line-height: 26px;
     }
 
     .select-input {
-        height: 26px;
-        line-height: 26px;
+        // height: 26px;
+        // line-height: 26px;
     }
 
     .select-double {
-        height: 26px;
-        line-height: 26px;
+        // height: 26px;
+        // line-height: 26px;
     }
 
     button {
-        padding: 0;
-        height: 26px;
+        padding: 0 4px; // FIXME Set the BIUS buttons, the target is 26 * 26, padding 4px, but only 27.6 * 26 can be obtained
+        display: flex;
+        align-items: center;
+        // height: 26px;
+        font-size: 18px;
+        border-radius: var(--border-radius-base);
     }
 
     span[role='img'].univericon-nextIcon {

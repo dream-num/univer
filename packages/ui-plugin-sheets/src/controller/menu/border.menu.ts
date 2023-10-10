@@ -158,7 +158,7 @@ export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelecto
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
     return {
         id: SetBorderColorCommand.id,
-        title: 'border',
+        title: 'borderLine.borderColor',
         positions: SetBorderPositionCommand.id,
         display: DisplayTypes.COLOR,
         selectType: SelectTypes.NEO,
@@ -176,7 +176,7 @@ export function SetBorderStyleMenuItemFactory(accessor: IAccessor): IMenuSelecto
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
     return {
         id: SetBorderStyleCommand.id,
-        title: 'borderLine.borderSize',
+        title: 'borderLine.borderType',
         label: SHEET_UI_PLUGIN_NAME + LINE_BOLD_LABEL,
         positions: SetBorderPositionCommand.id,
         display: DisplayTypes.CUSTOM,

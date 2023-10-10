@@ -20,6 +20,7 @@ import {
     SetHorizontalTextAlignCommand,
     SetItalicCommand,
     SetRangeStyleMutation,
+    SetRangeValuesMutation,
     SetSelectionsOperation,
     SetStrikeThroughCommand,
     SetTabColorCommand,
@@ -135,7 +136,11 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                if (
+                    id !== SetRangeStyleMutation.id &&
+                    id !== SetRangeValuesMutation.id &&
+                    id !== SetSelectionsOperation.id
+                ) {
                     return;
                 }
 
@@ -188,7 +193,11 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                if (
+                    id !== SetRangeStyleMutation.id &&
+                    id !== SetRangeValuesMutation.id &&
+                    id !== SetSelectionsOperation.id
+                ) {
                     return;
                 }
 
@@ -241,7 +250,11 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                if (
+                    id !== SetRangeStyleMutation.id &&
+                    id !== SetRangeValuesMutation.id &&
+                    id !== SetSelectionsOperation.id
+                ) {
                     return;
                 }
 
@@ -294,7 +307,11 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                if (
+                    id !== SetRangeStyleMutation.id &&
+                    id !== SetRangeValuesMutation.id &&
+                    id !== SetSelectionsOperation.id
+                ) {
                     return;
                 }
 
@@ -445,21 +462,22 @@ export const FONT_FAMILY_CHILDREN = [
         style: { 'font-family': '华文隶书' },
         value: '华文隶书',
     },
-    {
-        label: 'fontFamily.HanaleiFill',
-        style: { 'font-family': 'HanaleiFill' },
-        value: 'HanaleiFill',
-    },
-    {
-        label: 'fontFamily.Anton',
-        style: { 'font-family': 'Anton' },
-        value: 'Anton',
-    },
-    {
-        label: 'fontFamily.Pacifico',
-        style: { 'font-family': 'Pacifico' },
-        value: 'Pacifico',
-    },
+    // The following 3 fonts do not work, temporarily delete
+    // {
+    //     label: 'fontFamily.HanaleiFill',
+    //     style: { 'font-family': 'HanaleiFill' },
+    //     value: 'HanaleiFill',
+    // },
+    // {
+    //     label: 'fontFamily.Anton',
+    //     style: { 'font-family': 'Anton' },
+    //     value: 'Anton',
+    // },
+    // {
+    //     label: 'fontFamily.Pacifico',
+    //     style: { 'font-family': 'Pacifico' },
+    //     value: 'Pacifico',
+    // },
 ];
 
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
@@ -499,7 +517,11 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                if (
+                    id !== SetRangeStyleMutation.id &&
+                    id !== SetRangeValuesMutation.id &&
+                    id !== SetSelectionsOperation.id
+                ) {
                     return;
                 }
 
@@ -558,7 +580,11 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
             const DEFAULT_SIZE = 14;
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeStyleMutation.id && id !== SetSelectionsOperation.id) {
+                if (
+                    id !== SetRangeStyleMutation.id &&
+                    id !== SetRangeValuesMutation.id &&
+                    id !== SetSelectionsOperation.id
+                ) {
                     return;
                 }
 
@@ -1087,7 +1113,11 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeStyleMutation.id || id === SetSelectionsOperation.id) {
+                if (
+                    id === SetRangeStyleMutation.id ||
+                    id === SetRangeValuesMutation.id ||
+                    id === SetSelectionsOperation.id
+                ) {
                     return update();
                 }
             });
@@ -1131,7 +1161,11 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeStyleMutation.id || id === SetSelectionsOperation.id) {
+                if (
+                    id === SetRangeStyleMutation.id ||
+                    id === SetRangeValuesMutation.id ||
+                    id === SetSelectionsOperation.id
+                ) {
                     return update();
                 }
             });

@@ -316,6 +316,7 @@
 //         return <div className={styles.selectComponent}>{this.getType(type)}</div>;
 //     }
 // }
+import { Dropdown12 } from '@univerjs/icons';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { ICustomComponent } from '../../Common';
@@ -698,7 +699,7 @@ export function Select(props: BaseSelectProps) {
                         display: displayInSubMenu,
                         onClose,
                     }}
-                    icon={<NextIcon />}
+                    icon={<Dropdown12 />}
                 >
                     <div className={styles.selectLabel}>
                         <NeoCustomLabel

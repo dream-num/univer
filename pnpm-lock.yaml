@@ -573,8 +573,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@univerjs/icons':
-        specifier: ^0.0.3
-        version: 0.0.3(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.0.5
+        version: 0.0.5(react-dom@18.2.0)(react@18.2.0)
       '@wendellhu/redi':
         specifier: ^0.12.8
         version: 0.12.8
@@ -5695,8 +5695,8 @@ packages:
       eslint-visitor-keys: 3.4.3
     dev: true
 
-  /@univerjs/icons@0.0.3(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-jHjA4L3/hhi9r04Cb2lpXMDnF99HZK/9MiK4QIEKjH6hQPtNljpQcufaDowfeG0UCqJ8A3WlE4cey6XBmjijWQ==}
+  /@univerjs/icons@0.0.5(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-/wJ8p8/ZNwXrlvDRz6rp0RvMlgMLSvL4MWTeuE/7dpE/zLtqsjY96huAwoIDMZkZcGOQn0VqBtUMyZskRlb5GQ==}
     peerDependencies:
       react: '*'
       react-dom: '*'

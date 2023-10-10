@@ -2,7 +2,7 @@ import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetBoldCommand,
-    SetRangeStyleMutation,
+    SetRangeValuesMutation,
     SetStyleCommand,
 } from '@univerjs/base-sheets';
 import {
@@ -34,7 +34,7 @@ describe('Test menu items', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(SetBoldCommand);
         commandService.registerCommand(SetStyleCommand);
-        commandService.registerCommand(SetRangeStyleMutation);
+        commandService.registerCommand(SetRangeValuesMutation);
 
         disposableCollection = new DisposableCollection();
     });
@@ -50,8 +50,8 @@ describe('Test menu items', () => {
         let disabled = false;
 
         const menuItem = get(Injector).invoke(BoldMenuItemFactory);
-        disposableCollection.add(toDisposable(menuItem.activated$!.subscribe((v) => (activated = v))));
-        disposableCollection.add(toDisposable(menuItem.disabled$!.subscribe((v) => (disabled = v))));
+        disposableCollection.add(toDisposable(menuItem.activated$!.subscribe((v: boolean) => (activated = v))));
+        disposableCollection.add(toDisposable(menuItem.disabled$!.subscribe((v: boolean) => (disabled = v))));
         expect(activated).toBe(false);
         expect(disabled).toBe(false);
 

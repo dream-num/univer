@@ -1,44 +1,10 @@
+import { Redo24, Undo24 } from '@univerjs/icons';
+
 import { BaseIconProps, Icon } from '../AddIcon';
 
-export const BackIcon = (props: BaseIconProps) => (
-    <Icon spin={props.spin} rotate={props.rotate} className={props.className} name="foward" style={props.style}>
-        <svg
-            className="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="5692"
-            width="1em"
-            height="1em"
-            fill="currentColor"
-        >
-            <path
-                d="M737.664 419.328H426.666667v42.666667h311.296l-84.48 84.437333a21.333333 21.333333 0 0 0 30.208 30.165333l120.746666-120.704a21.290667 21.290667 0 0 0 0-30.165333l-120.746666-120.661333a21.333333 21.333333 0 0 0-30.165334 30.165333l84.138667 84.096zM213.333333 632.661333a213.333333 213.333333 0 0 1 213.333334-213.333333v42.666667a170.666667 170.666667 0 0 0-170.666667 170.666666H213.333333z m0 0h42.666667v64a21.333333 21.333333 0 0 1-42.666667 0v-64z"
-                p-id="5693"
-            ></path>
-        </svg>
-    </Icon>
-);
+export const BackIcon = (props: BaseIconProps) => <Redo24 />;
 
-export const ForwardIcon = (props: BaseIconProps) => (
-    <Icon spin={props.spin} rotate={props.rotate} className={props.className} name="foward" style={props.style}>
-        <svg
-            className="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="5565"
-            width="1em"
-            height="1em"
-            fill="currentColor"
-        >
-            <path
-                d="M287.018667 419.328h310.997333v42.666667H286.72l84.48 84.437333a21.333333 21.333333 0 1 1-30.208 30.165333l-120.746667-120.704a21.248 21.248 0 0 1 0-30.165333l120.746667-120.661333a21.333333 21.333333 0 0 1 30.165333 30.165333L287.018667 419.328z m524.330666 213.333333a213.333333 213.333333 0 0 0-213.333333-213.333333v42.666667a170.666667 170.666667 0 0 1 170.666667 170.666666h42.666666z m0 0h-42.666666v64a21.333333 21.333333 0 1 0 42.666666 0v-64z"
-                p-id="5566"
-            ></path>
-        </svg>
-    </Icon>
-);
+export const ForwardIcon = (props: BaseIconProps) => <Undo24 />;
 
 export const FormatIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>

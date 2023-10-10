@@ -2,11 +2,14 @@
 
 .select-component {
     position: relative;
-    margin: 0 3px;
-    height: 26px;
+    display: flex;
+    align-items: center;
+    border-radius: var(--border-radius-base);
+    // margin: 0 3px;
+    // height: 26px;
 
     &:hover {
-        background-color: var(--gray-14);
+        background-color: var(--grey-100);
     }
 
     .select-button {
@@ -61,12 +64,12 @@
     }
 
     .select-double {
-        &:hover {
-            background: @bg-color-hover;
-        }
+        // &:hover {
+        //     background: @bg-color-hover;
+        // }
 
         .dropdown {
-            padding-right: 0;
+            // padding-right: 0;
         }
 
         .drop-content {
@@ -84,20 +87,30 @@
         }
 
         .drop-icon {
-            border-left: 1px solid transparent;
-        }
+            // border-left: 1px solid transparent;
+            height: 26px;
+            padding: 0 2px;
 
-        &:hover {
-            .drop-icon {
-                // TODO: Use different background color to distinguish the hover state
-                // border-left: 1px solid var(--gray-6);// new design, no border
+            &:hover{
+                background-color: var(--grey-300);
+                border-radius: 0 var(--border-radius-base) var(--border-radius-base) 0;
             }
         }
     }
 
     .select-label {
+        display: flex;
+        align-items: center;
+        height: 26px;
+        font-size: 18px;//icon size
+        padding: 0 4px;
         span[role='img'] {
             font-size: 24px;
+        }
+
+        &:hover{
+            background-color: var(--grey-300);
+            border-radius: var(--border-radius-base) 0 0 var(--border-radius-base);
         }
     }
 

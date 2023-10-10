@@ -1,4 +1,5 @@
 import { createRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { joinClassNames } from '../../Utils';
 import style from './index.module.less';
@@ -7,7 +8,7 @@ interface TooltipState {
     top: number | string;
     left: number | string;
     visible: boolean;
-    triangleTranslate?: number | string;
+    triangleLeft?: number | string;
 }
 
 const placementClassNames: { [index: string]: string } = {
@@ -31,7 +32,7 @@ export function Tooltip(props: BaseTooltipProps) {
         top: '',
         left: '',
         visible: false,
-        triangleTranslate: '',
+        triangleLeft: '',
     });
 
     function handleMouseEnter() {
@@ -39,38 +40,38 @@ export function Tooltip(props: BaseTooltipProps) {
 
         const { height, width, x, y } = tooltipRef.current.getBoundingClientRect();
 
+        const { clientWidth } = tooltipContentRef.current;
+
         let left = x;
         let top = y;
+        let triangleLeft = clientWidth / 2 - 5;
         switch (placement) {
             case 'bottom':
                 top = y + height + 10;
-                left = x + width / 2;
+                left = x + width / 2 - clientWidth / 2;
                 break;
             case 'top':
             default:
                 top = y + -height - 20;
-                left = x + width / 2;
+                left = x + width / 2 - clientWidth / 2;
                 break;
         }
 
-        const { clientWidth } = tooltipContentRef.current;
-
-        let triangleTranslate = '';
-
-        if (left - clientWidth / 2 < 0) {
-            triangleTranslate = `${left - clientWidth / 2}px`;
-            left = clientWidth / 2;
+        if (left < 0) {
+            left = 0;
+            triangleLeft = x + width / 2;
         }
-        if (left + clientWidth / 2 > document.body.clientWidth) {
-            triangleTranslate = `${left + clientWidth / 2 - document.body.clientWidth}px`;
-            left = document.body.clientWidth - clientWidth / 2;
+
+        if (x + width / 2 + clientWidth / 2 > document.body.clientWidth) {
+            left = document.body.clientWidth - clientWidth;
+            triangleLeft = x + width / 2 - left;
         }
 
         setState({
             top,
             left,
             visible: true,
-            triangleTranslate,
+            triangleLeft,
         });
     }
 
@@ -84,31 +85,39 @@ export function Tooltip(props: BaseTooltipProps) {
     const placementClassName = joinClassNames(style.tooltipTitle, placementClassNames[placement]);
 
     return (
-        <div ref={tooltipRef} className={style.tooltipGroup} style={styles}>
-            <div className={style.tooltipBody} onMouseMove={handleMouseEnter} onMouseOut={handleMouseLeave}>
+        <div className={style.tooltipGroup} style={styles}>
+            <span
+                ref={tooltipRef}
+                className={style.tooltipBody}
+                onMouseMove={handleMouseEnter}
+                onMouseOut={handleMouseLeave}
+            >
                 {children}
-            </div>
+            </span>
 
-            {title ? (
-                <span
-                    ref={tooltipContentRef}
-                    className={placementClassName}
-                    style={{
-                        top: `${state.top}px`,
-                        left: `${state.left}px`,
-                        visibility: `${state.visible ? 'visible' : 'hidden'}`,
-                        zIndex: 100,
-                    }}
-                >
-                    {title}
-                    <span
-                        className={style.tooltipTriangle}
-                        style={{
-                            transform: `translateX(${state.triangleTranslate})`,
-                        }}
-                    />
-                </span>
-            ) : null}
+            {title
+                ? createPortal(
+                      <span
+                          ref={tooltipContentRef}
+                          className={placementClassName}
+                          style={{
+                              top: `${state.top}px`,
+                              left: `${state.left}px`,
+                              visibility: `${state.visible ? 'visible' : 'hidden'}`,
+                              zIndex: 100,
+                          }}
+                      >
+                          {title}
+                          <span
+                              className={style.tooltipTriangle}
+                              style={{
+                                  left: `${state.triangleLeft}px`,
+                              }}
+                          />
+                      </span>,
+                      document.body
+                  )
+                : null}
         </div>
     );
 }

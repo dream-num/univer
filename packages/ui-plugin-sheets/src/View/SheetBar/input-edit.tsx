@@ -1,8 +1,8 @@
 import { SetWorksheetNameCommand } from '@univerjs/base-sheets';
-import { AppContext } from '@univerjs/base-ui';
 import { useObservable } from '@univerjs/base-ui/Components/hooks/observable.js';
 import { ICommandService, ICurrentUniverService } from '@univerjs/core';
-import { useContext, useState } from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useState } from 'react';
 
 import { ISheetBarService } from '../../services/sheetbar/sheetbar.service';
 
@@ -10,9 +10,10 @@ interface IBaseInputProps {
     sheetId: string | undefined;
     sheetName: string;
 }
-export function InputEdit(props: IBaseInputProps) {
-    const context = useContext(AppContext);
-    const sheetbarService = context.injector.get(ISheetBarService);
+export const InputEdit: React.FC<IBaseInputProps> = (props) => {
+    const sheetbarService = useDependency(ISheetBarService);
+    const commandService = useDependency(ICommandService);
+    const currentUniverService = useDependency(ICurrentUniverService);
     const renameId = useObservable(sheetbarService.renameId$, '');
     const oldValue = props.sheetName;
     const [val, setVal] = useState(props.sheetName || '');
@@ -25,8 +26,6 @@ export function InputEdit(props: IBaseInputProps) {
 
     const submit = () => {
         if (val !== oldValue) {
-            const commandService = context.injector.get(ICommandService);
-            const currentUniverService = context.injector.get(ICurrentUniverService);
             const workbookId = currentUniverService.getCurrentUniverSheetInstance()?.getUnitId();
             commandService.executeCommand(SetWorksheetNameCommand.id, {
                 worksheetId: props.sheetId,
@@ -67,4 +66,4 @@ export function InputEdit(props: IBaseInputProps) {
     ) : (
         <span>{props.sheetName}</span>
     );
-}
+};

@@ -1,8 +1,10 @@
 import { SetWorksheetNameCommand } from '@univerjs/base-sheets';
 import { AppContext } from '@univerjs/base-ui';
 import { useObservable } from '@univerjs/base-ui/Components/hooks/observable.js';
-import { ICommandService, ICurrentUniverService, ISheetBarService } from '@univerjs/core';
+import { ICommandService, ICurrentUniverService } from '@univerjs/core';
 import { useContext, useState } from 'react';
+
+import { ISheetBarService } from '../../services/sheetbar/sheetbar.service';
 
 interface IBaseInputProps {
     sheetId: string | undefined;

@@ -1,7 +1,6 @@
+import { Disposable } from '@univerjs/core/Shared/lifecycle.js';
 import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
-
-import { Disposable } from '../../Shared/lifecycle';
 
 export interface ISheetBarService {
     renameId$: Observable<string>;

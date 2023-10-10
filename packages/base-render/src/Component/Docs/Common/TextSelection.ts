@@ -10,12 +10,13 @@ import {
     SpanType,
 } from '../../../Basics/IDocumentSkeletonCached';
 import { INodePosition } from '../../../Basics/Interfaces';
+import { IDocumentOffsetConfig } from '../../../Basics/TextSelection';
 import { getColor } from '../../../Basics/Tools';
 import { IPoint } from '../../../Basics/Vector2';
 import { Rect } from '../../../Shape/Rect';
 import { RegularPolygon } from '../../../Shape/RegularPolygon';
 import { ThinScene } from '../../../ThinScene';
-import { DocComponent } from '../DocComponent';
+import { DocumentSkeleton } from '../DocSkeleton';
 import { Liquid } from './Liquid';
 
 enum NodePositionStateType {
@@ -65,6 +66,10 @@ export class TextSelection {
     private _anchorShape: Nullable<Rect>;
 
     private _rangeList: ITextSelectionRange[] = [];
+
+    private _documentOffsetConfig: Nullable<IDocumentOffsetConfig>;
+
+    private _docSkeleton: Nullable<DocumentSkeleton>;
 
     private _currentStartState: ICurrentNodePositionState = {
         page: NodePositionStateType.NORMAL,
@@ -200,7 +205,11 @@ export class TextSelection {
         return true;
     }
 
-    refresh(documents: DocComponent) {
+    refresh(documentOffsetConfig: IDocumentOffsetConfig, docSkeleton: DocumentSkeleton) {
+        this._documentOffsetConfig = documentOffsetConfig;
+
+        this._docSkeleton = docSkeleton;
+
         const start = this.startNodePosition;
 
         const end = this.endNodePosition;
@@ -212,18 +221,20 @@ export class TextSelection {
             return;
         }
 
+        const { docsLeft, docsTop } = documentOffsetConfig;
+
         if (this.isCollapsed()) {
-            const data = this._getRangePointData(start!, start!, documents);
+            const data = this._getRangePointData(start!, start!);
             const { pointGroup, cursorList } = data;
             this._setRangeList(cursorList);
-            pointGroup.length > 0 && this._createAndUpdateAnchor(pointGroup, documents.left, documents.top);
+            pointGroup.length > 0 && this._createAndUpdateAnchor(pointGroup, docsLeft, docsTop);
             return;
         }
 
-        const data = this._getRangePointData(start!, end!, documents);
+        const data = this._getRangePointData(start!, end!);
         const { pointGroup, cursorList } = data;
         this._setRangeList(cursorList);
-        pointGroup.length > 0 && this._createAndUpdateRange(pointGroup, documents.left, documents.top);
+        pointGroup.length > 0 && this._createAndUpdateRange(pointGroup, docsLeft, docsTop);
     }
 
     getStart() {
@@ -497,6 +508,7 @@ export class TextSelection {
             left,
             top,
             evented: false,
+            debounceParentDirty: false,
         });
 
         this._rangeShape = polygon;
@@ -545,7 +557,7 @@ export class TextSelection {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private _getRangePointData(startOrigin: INodePosition, endOrigin: INodePosition, documents: DocComponent) {
+    private _getRangePointData(startOrigin: INodePosition, endOrigin: INodePosition) {
         const pointGroup: IPoint[][] = [];
 
         const cursorList: ITextSelectionRange[] = [];
@@ -560,7 +572,7 @@ export class TextSelection {
         const { start, end } = this._compareNodePosition(startOrigin, endOrigin);
 
         // eslint-disable-next-line max-lines-per-function
-        this._selectionIterator(start!, end!, documents, (start_sp, end_sp, isFirst, isLast, divide, line) => {
+        this._selectionIterator(start!, end!, (start_sp, end_sp, isFirst, isLast, divide, line) => {
             const { lineHeight } = line;
 
             const { spanGroup, st } = divide;
@@ -667,7 +679,6 @@ export class TextSelection {
     private _selectionIterator(
         startPosition: INodePosition,
         endPosition: INodePosition,
-        documents: DocComponent,
         func: (
             startSpanIndex: number,
             endSpanIndex: number,
@@ -680,7 +691,7 @@ export class TextSelection {
             page: IDocumentSkeletonPage
         ) => void
     ) {
-        const skeleton = documents.getSkeleton();
+        const skeleton = this._docSkeleton;
         if (!skeleton) {
             return [];
         }
@@ -701,14 +712,15 @@ export class TextSelection {
 
         this._resetCurrentNodePositionState();
 
+        if (this._documentOffsetConfig == null) {
+            return [];
+        }
+
+        const { pageLayoutType, pageMarginLeft, pageMarginTop } = this._documentOffsetConfig;
+
         for (let p = 0; p <= pageIndex - 1; p++) {
             const page = pages[p];
-            this._Liquid.translatePage(
-                page,
-                documents.pageLayoutType,
-                documents.pageMarginLeft,
-                documents.pageMarginTop
-            );
+            this._Liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
         for (let p = pageIndex; p <= endPageIndex; p++) {
@@ -805,12 +817,7 @@ export class TextSelection {
             }
 
             this._Liquid.translateRestore();
-            this._Liquid.translatePage(
-                page,
-                documents.pageLayoutType,
-                documents.pageMarginLeft,
-                documents.pageMarginTop
-            );
+            this._Liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
     }
 

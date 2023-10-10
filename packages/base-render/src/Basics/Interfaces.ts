@@ -30,6 +30,7 @@ export interface IObjectFullState extends ITransformState {
     zIndex?: number;
     isTransformer?: boolean;
     forceRender?: boolean;
+    debounceParentDirty?: boolean;
 }
 
 export interface IRect extends ISize, IOffset {

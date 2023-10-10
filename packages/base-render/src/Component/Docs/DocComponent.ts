@@ -1,13 +1,8 @@
 import { Nullable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from '../../Basics/Const';
-import {
-    IDocumentSkeletonLine,
-    IDocumentSkeletonSpan,
-    PageLayoutType,
-    SpanType,
-} from '../../Basics/IDocumentSkeletonCached';
-import { INodeInfo, INodePosition, INodeSearch, ITransformChangeState } from '../../Basics/Interfaces';
+import { IDocumentSkeletonLine, IDocumentSkeletonSpan, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
+import { INodeInfo, ITransformChangeState } from '../../Basics/Interfaces';
 import { IBoundRect } from '../../Basics/Vector2';
 import { Canvas } from '../../Canvas';
 import { Scene } from '../../Scene';
@@ -100,155 +95,11 @@ export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocum
 
     syncSelection() {}
 
-    getFirstViewport() {}
-
     remainActiveSelection() {}
-
-    findSpanByPosition(position: Nullable<INodePosition>) {
-        const skeleton = this.getSkeleton();
-
-        if (!skeleton || position == null) {
-            return;
-        }
-
-        const skeletonData = skeleton.getSkeletonData();
-
-        if (skeletonData == null) {
-            return;
-        }
-
-        const { divide, line, column, section, page, isBack } = position;
-
-        let { span } = position;
-
-        if (isBack === true) {
-            span -= 1;
-        }
-
-        span = span < 0 ? 0 : span;
-
-        const spanGroup =
-            skeletonData.pages[page].sections[section].columns[column].lines[line].divides[divide].spanGroup;
-
-        if (spanGroup[span].spanType === SpanType.LIST) {
-            return spanGroup[span + 1];
-        }
-
-        return spanGroup[span];
-    }
-
-    findPositionBySpan(span: IDocumentSkeletonSpan): Nullable<INodeSearch> {
-        const divide = span.parent;
-
-        const line = divide?.parent;
-
-        const column = line?.parent;
-
-        const section = column?.parent;
-
-        const page = section?.parent;
-
-        const skeletonData = this.getSkeleton()?.getSkeletonData();
-
-        if (!divide || !column || !section || !page || !skeletonData) {
-            return;
-        }
-
-        const spanIndex = divide.spanGroup.indexOf(span);
-
-        const divideIndex = line.divides.indexOf(divide);
-
-        const lineIndex = column.lines.indexOf(line);
-
-        const columnIndex = section.columns.indexOf(column);
-
-        const sectionIndex = page.sections.indexOf(section);
-
-        const pageIndex = skeletonData.pages.indexOf(page);
-
-        return {
-            span: spanIndex,
-            divide: divideIndex,
-            line: lineIndex,
-            column: columnIndex,
-            section: sectionIndex,
-            page: pageIndex,
-        };
-    }
 
     findNodeByCoord(offsetX: number, offsetY: number): Nullable<INodeInfo> {}
 
     findCoordByNode(span: IDocumentSkeletonSpan) {}
-
-    findNodeByCharIndex(charIndex: number): Nullable<IDocumentSkeletonSpan> {
-        const skeleton = this.getSkeleton();
-
-        if (!skeleton) {
-            return;
-        }
-
-        const skeletonData = skeleton.getSkeletonData();
-
-        if (!skeletonData) {
-            return;
-        }
-
-        const pages = skeletonData.pages;
-
-        for (const page of pages) {
-            const { sections, st, ed } = page;
-
-            if (charIndex < st || charIndex > ed) {
-                continue;
-            }
-
-            for (const section of sections) {
-                const { columns, st, ed } = section;
-
-                if (charIndex < st || charIndex > ed) {
-                    continue;
-                }
-
-                for (const column of columns) {
-                    const { lines, st, ed } = column;
-
-                    if (charIndex < st || charIndex > ed) {
-                        continue;
-                    }
-
-                    for (const line of lines) {
-                        const { divides, lineHeight, st, ed } = line;
-                        const divideLength = divides.length;
-
-                        if (charIndex < st || charIndex > ed) {
-                            continue;
-                        }
-
-                        for (let i = 0; i < divideLength; i++) {
-                            const divide = divides[i];
-                            const { spanGroup, st, ed } = divide;
-
-                            if (charIndex < st || charIndex > ed) {
-                                continue;
-                            }
-
-                            if (spanGroup[0].spanType === SpanType.LIST) {
-                                charIndex++;
-                            }
-
-                            const span = spanGroup[charIndex - st];
-
-                            if (span) {
-                                return span;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    getActiveViewportByCoord(offsetX: number, offsetY: number) {}
 
     protected _getBounding(bounds?: IBoundRect) {}
 

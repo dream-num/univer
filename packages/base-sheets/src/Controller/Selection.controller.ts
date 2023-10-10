@@ -4,6 +4,7 @@ import {
     IPointerEvent,
     IRenderManagerService,
     ISelectionTransformerShapeManager,
+    ISelectionWithStyle,
 } from '@univerjs/base-render';
 import {
     Disposable,
@@ -16,6 +17,7 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
+import { ScrollCommand } from '..';
 import { getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
@@ -142,6 +144,77 @@ export class SelectionController extends Disposable {
                     this._selectionTransformerShapeManager.convertSelectionRangeToData(selectionWithStyle);
                 this._selectionTransformerShapeManager.addControlToCurrentByRangeData(selectionData);
             }
+            param.length && this._scrollToSelection(param[param.length - 1]);
+        });
+    }
+
+    private _scrollToSelection(selection: ISelectionWithStyle) {
+        let startSheetViewRow;
+        let startSheetViewColumn;
+        const {
+            startRow: selectionStartRow,
+            startColumn: selectionStartColumn,
+            endRow: selectionEndRow,
+            endColumn: selectionEndColumn,
+        } = selection.range;
+        const { rowHeightAccumulation, columnWidthAccumulation } =
+            this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
+        if (rowHeightAccumulation == null || columnWidthAccumulation == null) {
+            return;
+        }
+        const scene = this._getSheetObject()?.scene;
+        if (scene == null) {
+            return;
+        }
+        const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        if (viewport == null) {
+            return;
+        }
+        const bounds = viewport.getBounding();
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        if (skeleton == null) {
+            return;
+        }
+        const {
+            startRow: viewportStartRow,
+            startColumn: viewportStartColumn,
+            endRow: viewportEndRow,
+            endColumn: viewportEndColumn,
+        } = skeleton.getRowColumnSegment(bounds);
+        // top overflow
+        if (selectionStartRow <= viewportStartRow) {
+            startSheetViewRow = selectionStartRow;
+        }
+        // left overflow
+        if (selectionStartColumn <= viewportStartColumn) {
+            startSheetViewColumn = selectionStartColumn;
+        }
+        // bottom overflow
+        if (selectionEndRow >= viewportEndRow) {
+            const minRowAccumulation = rowHeightAccumulation[selectionEndRow] - viewport.height!;
+            for (let r = viewportStartRow; r <= selectionEndRow; r++) {
+                if (rowHeightAccumulation[r] >= minRowAccumulation) {
+                    startSheetViewRow = r + 1;
+                    break;
+                }
+            }
+        }
+        // right overflow
+        if (selectionEndColumn >= viewportEndColumn) {
+            const minColumnAccumulation = columnWidthAccumulation[selectionEndColumn] - viewport.width!;
+            for (let c = viewportStartColumn; c <= selectionEndColumn; c++) {
+                if (columnWidthAccumulation[c] >= minColumnAccumulation) {
+                    startSheetViewColumn = c + 1;
+                    break;
+                }
+            }
+        }
+        // sheetViewStartRow and sheetViewStartColumn maybe undefined
+        this._commandService.executeCommand(ScrollCommand.id, {
+            unitId: this._currentUniverService.getCurrentUniverSheetInstance().getUnitId(),
+            sheetId: this._currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
+            sheetViewStartRow: startSheetViewRow,
+            sheetViewStartColumn: startSheetViewColumn,
         });
     }
 

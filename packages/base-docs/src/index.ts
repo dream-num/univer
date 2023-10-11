@@ -1,3 +1,4 @@
+export * from './Basics/component-tools';
 export {
     CoverCommand,
     DeleteCommand,
@@ -12,5 +13,7 @@ export {
 } from './commands/commands/core-editing.command';
 export * from './DocPlugin';
 export * from './Locale';
+export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
+export { TextSelectionManagerService } from './services/text-selection-manager.service';
 export { DocsView, DocsViewFactory } from './View/Render/Views/DocsView';

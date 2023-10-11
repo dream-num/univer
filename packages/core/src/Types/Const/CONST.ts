@@ -68,6 +68,11 @@ export const DEFAULT_WORKBOOK: IWorkbookConfig = {
     modifiedTime: '',
 };
 
+export interface IWorksheetDiscriptor {
+    id: string;
+    name: string;
+}
+
 export const DEFAULT_WORKSHEET_ROW_COUNT = 1000;
 
 export const DEFAULT_WORKSHEET_COLUMN_COUNT = 20;

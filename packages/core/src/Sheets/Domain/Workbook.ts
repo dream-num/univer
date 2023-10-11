@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injector } from '@wendellhu/redi';
 
 import { GenName, Nullable, Tools } from '../../Shared';
-import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
+import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET, IWorksheetDiscriptor } from '../../Types/Const';
 import { BooleanNumber } from '../../Types/Enum';
 import {
     IColumnStartEndData,
@@ -182,6 +182,15 @@ export class Workbook {
 
     getSheetBySheetId(sheetId: string): Nullable<Worksheet> {
         return this._worksheets.get(sheetId);
+    }
+
+    getHiddenWorksheets(): IWorksheetDiscriptor[] {
+        return this.getSheets()
+            .filter((s) => s.getConfig().hidden === BooleanNumber.TRUE)
+            .map((s) => ({
+                id: s.getConfig().name,
+                name: s.getConfig().id,
+            }));
     }
 
     // getPluginMeta<T>(name: string): T {

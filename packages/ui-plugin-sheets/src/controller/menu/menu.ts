@@ -1261,10 +1261,13 @@ export function HideSheetMenuItemFactory(): IMenuButtonItem {
 export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<any> {
     const currentUniverService = accessor.get(ICurrentUniverService);
     const commandService = accessor.get(ICommandService);
-    const hiddenList = currentUniverService.getCurrentUniverHiddenWorksheets().map((s) => ({
-        label: s.name,
-        value: s.id,
-    }));
+    const hiddenList = currentUniverService
+        .getCurrentUniverSheetInstance()
+        .getHiddenWorksheets()
+        .map((s) => ({
+            label: s.name,
+            value: s.id,
+        }));
 
     return {
         id: SetWorksheetShowCommand.id,
@@ -1277,10 +1280,13 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
                 if (c.id !== SetWorksheetHideCommand.id && c.id !== SetWorksheetShowCommand.id) {
                     return;
                 }
-                const newList = currentUniverService.getCurrentUniverHiddenWorksheets().map((s) => ({
-                    label: s.name,
-                    value: s.id,
-                }));
+                const newList = currentUniverService
+                    .getCurrentUniverSheetInstance()
+                    .getHiddenWorksheets()
+                    .map((s) => ({
+                        label: s.name,
+                        value: s.id,
+                    }));
                 subscriber.next(newList.length === 0);
             });
             subscriber.next(hiddenList.length === 0);
@@ -1291,10 +1297,13 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
                 if (c.id !== SetWorksheetHideCommand.id && c.id !== SetWorksheetShowCommand.id) {
                     return;
                 }
-                const newList = currentUniverService.getCurrentUniverHiddenWorksheets().map((s) => ({
-                    label: s.name,
-                    value: s.id,
-                }));
+                const newList = currentUniverService
+                    .getCurrentUniverSheetInstance()
+                    .getHiddenWorksheets()
+                    .map((s) => ({
+                        label: s.name,
+                        value: s.id,
+                    }));
                 subscriber.next(newList);
             });
             subscriber.next(hiddenList);

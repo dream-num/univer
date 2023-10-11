@@ -93,8 +93,8 @@ export class DocsView extends BaseView {
 
         const documentSkeleton = this._buildSkeleton(docsModel);
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, documentSkeleton, {
-            pageMarginLeft: docsModel.documentStyle.marginLeft,
-            pageMarginTop: docsModel.documentStyle.marginTop,
+            pageMarginLeft: docsModel.documentStyle.marginLeft || 0,
+            pageMarginTop: docsModel.documentStyle.marginTop || 0,
         });
         documents.zIndex = 1000;
         this._documentSkeleton = documentSkeleton;

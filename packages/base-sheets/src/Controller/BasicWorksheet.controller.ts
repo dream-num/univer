@@ -82,7 +82,6 @@ import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-o
 import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { SetWorksheetRowHideMutation } from '../commands/mutations/set-worksheet-row-hide.mutation';
 import { SetWorksheetRowShowMutation } from '../commands/mutations/set-worksheet-row-show.mutation';
-import { SetScrollOperation } from '../commands/operations/scroll.operation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -186,7 +185,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetFrozenCommand,
             SetFrozenMutation,
             SetFrozenCancelCommand,
-            SetScrollOperation,
             ScrollCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }

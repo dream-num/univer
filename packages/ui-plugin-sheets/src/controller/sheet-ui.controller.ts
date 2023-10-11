@@ -1,7 +1,6 @@
 import {
     ExpandSelectionCommand,
     MoveSelectionCommand,
-    ScrollCommand,
     SelectAllCommand,
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -144,7 +143,6 @@ export class SheetUIController extends Disposable {
             SetUnderlineCommand,
             SetFontFamilyCommand,
             SetFontSizeCommand,
-            ScrollCommand,
 
             QuitCellEditorCommand,
 

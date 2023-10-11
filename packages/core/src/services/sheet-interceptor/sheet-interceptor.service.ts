@@ -10,6 +10,41 @@ import { IStyleData } from '../../Types/Interfaces/IStyleData';
 import { ICurrentUniverService } from '../current.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 
+// TODO: use generic types
+
+/**
+ * A helper to compose a certain type of interceptors.
+ */
+export function compose(interceptors: ICellInterceptor[]) {
+    // eslint-disable-next-line func-names
+    return function (location: ISheetLocation) {
+        let index = -1;
+        return passThrough(0, undefined);
+        function passThrough(i: number, v: Nullable<ICellData>): Nullable<ICellData> {
+            if (i <= index) {
+                throw new Error('next() called multiple times');
+            }
+
+            index = i;
+            if (i === interceptors.length) {
+                return v;
+            }
+
+            const interceptor = interceptors[i];
+            return interceptor.getCellContent(v, location, passThrough.bind(null, i + 1));
+        }
+    };
+}
+
+export interface ISheetLocation {
+    workbook: Workbook;
+    worksheet: Worksheet;
+    workbookId: string;
+    worksheetId: string;
+    row: number;
+    col: number;
+}
+
 /**
  * Sheet features can provide a `ICellContentInterceptor` to intercept cell content that would be perceived by
  * other features, such as copying, rendering, etc.
@@ -17,8 +52,12 @@ import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 export interface ICellInterceptor {
     priority?: number;
 
-    getCellContent(workbookId: string, worksheetId: string, row: number, col: number): Nullable<ICellData>;
-    getCellStyle(workbookId: string, worksheetId: string, row: number, col: number): Nullable<IStyleData>;
+    getCellContent(
+        cell: Nullable<ICellData>,
+        location: ISheetLocation,
+        next: (v: Nullable<ICellData>) => Nullable<ICellData>
+    ): Nullable<ICellData>;
+    getCellStyle(style: Nullable<IStyleData>, location: ISheetLocation, next: any): Nullable<IStyleData>;
 }
 
 /**
@@ -28,7 +67,7 @@ export interface ICellInterceptor {
  */
 @OnLifecycle(LifecycleStages.Starting, SheetInterceptorService)
 export class SheetInterceptorService extends Disposable {
-    private readonly _cellInterceptors: ICellInterceptor[] = [];
+    private _cellInterceptors: ICellInterceptor[] = [];
 
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
@@ -38,7 +77,6 @@ export class SheetInterceptorService extends Disposable {
 
         // When a workbook is created or a worksheet is added after when workbook is created,
         // `SheetInterceptorService` inject interceptors to worksheet instances to it.
-        console.log('SheetInterceptorService created!');
         this.disposeWithMe(
             toDisposable(
                 this._currentUniverService.sheetAdded$.subscribe((workbook) => {
@@ -53,6 +91,32 @@ export class SheetInterceptorService extends Disposable {
                 )
             )
         );
+
+        this.interceptCellContent({
+            priority: 100,
+            getCellContent(_, location, next): Nullable<ICellData> {
+                if (location.row === 0) {
+                    return next({ m: `I am intercepted value from row 0.` });
+                }
+
+                return next();
+            },
+            getCellStyle(style, location, next) {},
+        });
+
+        // register default viewModel interceptor
+        this.interceptCellContent({
+            priority: 0,
+            getCellContent(content, location): Nullable<ICellData> {
+                if (content) {
+                    return content;
+                }
+
+                const worksheet = location.worksheet;
+                return worksheet.getRawCellContent(location.row, location.col);
+            },
+            getCellStyle(style, location, next) {},
+        });
     }
 
     override dispose(): void {
@@ -69,6 +133,9 @@ export class SheetInterceptorService extends Disposable {
         }
 
         this._cellInterceptors.push(interceptor);
+        this._cellInterceptors = this._cellInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+        // NOTE: maybe split to different kinds of interceptors
+
         return this.disposeWithMe(
             toDisposable(() => {
                 const index = this._cellInterceptors.indexOf(interceptor);
@@ -81,23 +148,27 @@ export class SheetInterceptorService extends Disposable {
 
     private _interceptWorkbook(workbook: Workbook): void {
         const disposables = new DisposableCollection();
-        const workbookID = workbook.getUnitId();
+        const workbookId = workbook.getUnitId();
         const self = this;
 
         const interceptViewModel = (worksheet: Worksheet): void => {
-            const worksheetID = worksheet.getSheetId();
+            const worksheetId = worksheet.getSheetId();
             worksheet.__interceptViewModel((viewModel) => {
                 const sheetDisposables = new DisposableCollection();
                 const cellInterceptorDisposable = viewModel.registerCellContentInterceptor({
                     getCellContent(row: number, col: number): Nullable<ICellData> {
-                        // TODO: add a function to apply interceptors in middlewares' way
-                        return {
-                            m: '123',
-                        };
+                        return compose(self._cellInterceptors)({
+                            workbookId,
+                            worksheetId,
+                            row,
+                            col,
+                            worksheet,
+                            workbook,
+                        });
                     },
                 });
                 sheetDisposables.add(cellInterceptorDisposable);
-                self._worksheetDisposables.set(getWorksheetDisposableID(workbookID, worksheet), sheetDisposables);
+                self._worksheetDisposables.set(getWorksheetDisposableID(workbookId, worksheet), sheetDisposables);
             });
         };
 
@@ -107,13 +178,13 @@ export class SheetInterceptorService extends Disposable {
         disposables.add(toDisposable(workbook.sheetCreated$.subscribe((worksheet) => interceptViewModel(worksheet))));
         disposables.add(
             toDisposable(
-                workbook.sheetDisposed$.subscribe((worksheet) => this._disposeSheetInterceptor(workbookID, worksheet))
+                workbook.sheetDisposed$.subscribe((worksheet) => this._disposeSheetInterceptor(workbookId, worksheet))
             )
         );
         // Dispose all underlying interceptors when workbook is disposed.
         disposables.add(
             toDisposable(() =>
-                workbook.getSheets().forEach((worksheet) => this._disposeSheetInterceptor(workbookID, worksheet))
+                workbook.getSheets().forEach((worksheet) => this._disposeSheetInterceptor(workbookId, worksheet))
             )
         );
     }

@@ -6,18 +6,12 @@ import { Nullable } from '../Shared';
 import { Disposable } from '../Shared/lifecycle';
 import { Workbook } from '../Sheets/Domain/Workbook';
 import { SlideModel } from '../Slides/Domain/SlideModel';
-import { BooleanNumber } from '../Types/Enum';
 import { IDocumentData } from '../Types/Interfaces';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './context/context';
 import { IContextService } from './context/context.service';
 
 export interface IUniverHandler {
     createUniverDoc(data: Partial<IDocumentData>): DocumentModel;
-}
-
-export interface IWorksheetDiscriptor {
-    id: string;
-    name: string;
 }
 
 /**
@@ -60,7 +54,6 @@ export interface ICurrentUniverService {
 
     getFocusedUniverInstance(): Workbook | DocumentModel | SlideModel | null;
     focusUniverInstance(id: string | null): void;
-    getCurrentUniverHiddenWorksheets(): IWorksheetDiscriptor[];
 }
 
 export const ICurrentUniverService = createIdentifier<ICurrentUniverService>('univer.current');
@@ -202,15 +195,5 @@ export class CurrentUniverService extends Disposable implements ICurrentUniverSe
 
     getFocusedUniverInstance(): Workbook | DocumentModel | SlideModel | null {
         return this._focused;
-    }
-
-    getCurrentUniverHiddenWorksheets(): IWorksheetDiscriptor[] {
-        return this.getCurrentUniverSheetInstance()
-            .getSheets()
-            .filter((s) => s.getConfig().hidden === BooleanNumber.TRUE)
-            .map((s) => ({
-                id: s.getConfig().name,
-                name: s.getConfig().id,
-            }));
     }
 }

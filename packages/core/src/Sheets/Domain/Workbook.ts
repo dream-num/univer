@@ -184,6 +184,12 @@ export class Workbook {
         return this._worksheets.get(sheetId);
     }
 
+    getHiddenWorksheets(): string[] {
+        return this.getSheets()
+            .filter((s) => s.getConfig().hidden === BooleanNumber.TRUE)
+            .map((s) => s.getConfig().id);
+    }
+
     // getPluginMeta<T>(name: string): T {
     //     return this._config.pluginMeta[name];
     // }

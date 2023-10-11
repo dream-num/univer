@@ -19,6 +19,7 @@ import {
     Icon,
     IDisplayMenuItem,
     IMenuItem,
+    ITabRef,
     Menu,
     TabPane,
     Tabs,
@@ -58,6 +59,8 @@ type SheetState = {
     activeKey: string;
 };
 
+const SCROLL_WIDTH = 100;
+
 export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     static override contextType = AppContext;
 
@@ -68,8 +71,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
     sheetContainerRef = createRef<HTMLDivElement>();
 
     sheetContentRef = createRef();
-
-    sheetBarContentRef = createRef();
+    sheetBarContentRef = createRef<ITabRef>();
 
     // 先生成移动对象的副本,移动对象固定定位,达到边界的时候将副本移位
     time = 0;
@@ -331,6 +333,17 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
         commandService.executeCommand(InsertSheetCommand.id, {});
     }
 
+    private handleScrollLeft = () => {
+        if (this.sheetBarContentRef.current) {
+            this.sheetBarContentRef.current.scrollContent(-SCROLL_WIDTH);
+        }
+    };
+    private handleScrollRight = () => {
+        if (this.sheetBarContentRef.current) {
+            this.sheetBarContentRef.current.scrollContent(SCROLL_WIDTH);
+        }
+    };
+
     override render() {
         const { sheetList, menuList, sheetUl, showMenu, showManageMenu, menuStyle, activeKey } = this.state;
 
@@ -358,7 +371,13 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 </div>
 
                 {/* user s button */}
-                <Tabs draggable className={styles.slideTabBar} activeKey={activeKey} reRenderString={reRenderString}>
+                <Tabs
+                    draggable
+                    className={styles.slideTabBar}
+                    activeKey={activeKey}
+                    reRenderString={reRenderString}
+                    ref={this.sheetBarContentRef}
+                >
                     {sheetList.map((item) => (
                         <TabPane
                             key={item.sheetId}
@@ -429,10 +448,10 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
 
                 {/* prev next scroll button */}
                 <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>
-                    <Button className={styles.sheetBarOptionsButton}>
+                    <Button className={styles.sheetBarOptionsButton} onClick={this.handleScrollLeft.bind(this)}>
                         <Icon.NextIcon rotate={90} style={{ padding: '5px' }} />
                     </Button>
-                    <Button className={styles.sheetBarOptionsButton}>
+                    <Button className={styles.sheetBarOptionsButton} onClick={this.handleScrollRight.bind(this)}>
                         <Icon.NextIcon rotate={-90} style={{ padding: '5px' }} />
                     </Button>
                 </div>

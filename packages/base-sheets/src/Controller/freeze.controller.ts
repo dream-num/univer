@@ -440,6 +440,9 @@ export class FreezeController extends Disposable {
             //     this._changeToRow - sheetViewStartRow,
             //     this._changeToColumn - sheetViewStartColumn
             // );
+            if (sheetViewStartColumn == null || sheetViewStartRow == null) {
+                return;
+            }
 
             let ySplit = this._changeToRow - sheetViewStartRow;
 

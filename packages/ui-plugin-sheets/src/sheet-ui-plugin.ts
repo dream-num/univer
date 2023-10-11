@@ -3,6 +3,7 @@ import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univer
 import { ZIndexManager } from '@univerjs/base-ui';
 import { ICurrentUniverService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { filter } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from './Basics';
 import { SheetClipboardController } from './controller/clipboard/clipboard.controller';
@@ -20,7 +21,8 @@ export class SheetUIPlugin extends Plugin {
     constructor(
         config: undefined,
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
     ) {
         super(SHEET_UI_PLUGIN_NAME);
 
@@ -55,8 +57,9 @@ export class SheetUIPlugin extends Plugin {
     }
 
     private _markSheetAsFocused() {
-        const currentService = this._injector.get(ICurrentUniverService);
-        const c = currentService.getCurrentUniverSheetInstance();
-        currentService.focusUniverInstance(c.getUnitId());
+        const currentUniverService = this._currentUniverService;
+        currentUniverService.currentSheet$.pipe(filter((v) => !!v)).subscribe((workbook) => {
+            currentUniverService.focusUniverInstance(workbook!.getUnitId());
+        });
     }
 }

@@ -2,8 +2,9 @@ import { IDisposable } from '@wendellhu/redi';
 
 import { remove } from '../../common/array';
 import { Nullable } from '../../common/type-utils';
-import { Disposable, toDisposable } from '../../Shared/lifecycle';
+import { Disposable, DisposableCollection, toDisposable } from '../../Shared/lifecycle';
 import { Workbook } from '../../sheets/workbook';
+import { Worksheet } from '../../sheets/worksheet';
 import { ICellData } from '../../Types/Interfaces/ICellData';
 import { IStyleData } from '../../Types/Interfaces/IStyleData';
 import { ICurrentUniverService } from '../current.service';
@@ -29,8 +30,8 @@ export interface ICellInterceptor {
 export class SheetInterceptorService extends Disposable {
     private readonly _cellInterceptors: ICellInterceptor[] = [];
 
-    // TODO: change type `any` to interceptors' type
-    private readonly _viewModelInterceptors: Map<string, Map<string, any>> = new Map();
+    private readonly _workbookDisposables = new Map<string, IDisposable>();
+    private readonly _worksheetDisposables = new Map<string, IDisposable>();
 
     constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         super();
@@ -45,17 +46,21 @@ export class SheetInterceptorService extends Disposable {
                 })
             )
         );
+        // this.disposeWithMe(
+        //     toDisposable(
+        //         this._currentUniverService.sheetDisposed$.subscribe((workbook) =>
+        //             this._disposeWorkbookInterceptor(workbook)
+        //         )
+        //     )
+        // );
+    }
 
-        this.disposeWithMe(
-            toDisposable(
-                this._currentUniverService.sheetDisposed$.subscribe((workbook) => {
-                    // dispose interceptors
-                })
-            )
-        );
+    override dispose(): void {
+        super.dispose();
 
-        // There should be no workbook instantiated when this service is instantiated. Because this service is
-        // constructed on Staring lifecycle.
+        this._workbookDisposables.forEach((disposable) => disposable.dispose());
+        this._workbookDisposables.clear();
+        this._worksheetDisposables.clear();
     }
 
     interceptCellContent(interceptor: ICellInterceptor): IDisposable {
@@ -75,10 +80,64 @@ export class SheetInterceptorService extends Disposable {
     }
 
     private _interceptWorkbook(workbook: Workbook): void {
+        const disposables = new DisposableCollection();
+        const workbookID = workbook.getUnitId();
+        const self = this;
+
+        const interceptViewModel = (worksheet: Worksheet): void => {
+            const worksheetID = worksheet.getSheetId();
+            worksheet.__interceptViewModel((viewModel) => {
+                const sheetDisposables = new DisposableCollection();
+                const cellInterceptorDisposable = viewModel.registerCellContentInterceptor({
+                    getCellContent(row: number, col: number): Nullable<ICellData> {
+                        // TODO: add a function to apply interceptors in middlewares' way
+                        return {
+                            m: '123',
+                        };
+                        // self.
+                    },
+                });
+                sheetDisposables.add(cellInterceptorDisposable);
+                self._worksheetDisposables.set(getWorksheetDisposableID(workbookID, worksheet), sheetDisposables);
+            });
+        };
+
         // We should intercept all instantiated worksheet and should subscribe to
         // worksheet creation event to intercept newly created worksheet.
-        workbook.getSheets().forEach((worksheet) => {
-            const viewModel = worksheet.__interceptViewModel((viewModel) => {});
-        });
+        workbook.getSheets().forEach((worksheet) => interceptViewModel(worksheet));
+        disposables.add(toDisposable(workbook.sheetCreated$.subscribe((worksheet) => interceptViewModel(worksheet))));
+        disposables.add(
+            toDisposable(
+                workbook.sheetDisposed$.subscribe((worksheet) => this._disposeSheetInterceptor(workbookID, worksheet))
+            )
+        );
+        // Dispose all underlying interceptors when workbook is disposed.
+        disposables.add(
+            toDisposable(() =>
+                workbook.getSheets().forEach((worksheet) => this._disposeSheetInterceptor(workbookID, worksheet))
+            )
+        );
     }
+
+    private _disposeWorkbookInterceptor(workbook: Workbook): void {
+        const workbookId = workbook.getUnitId();
+        const disposable = this._workbookDisposables.get(workbookId);
+        if (disposable) {
+            disposable.dispose();
+            this._workbookDisposables.delete(workbookId);
+        }
+    }
+
+    private _disposeSheetInterceptor(workbookId: string, worksheet: Worksheet): void {
+        const disposableId = getWorksheetDisposableID(workbookId, worksheet);
+        const disposable = this._worksheetDisposables.get(disposableId);
+        if (disposable) {
+            disposable.dispose();
+            this._worksheetDisposables.delete(disposableId);
+        }
+    }
+}
+
+function getWorksheetDisposableID(workbookId: string, worksheet: Worksheet): string {
+    return `${workbookId}|${worksheet.getSheetId()}`;
 }

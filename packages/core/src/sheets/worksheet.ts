@@ -66,6 +66,10 @@ export class Worksheet {
         });
     }
 
+    /**
+     * @internal
+     * @param callback
+     */
     __interceptViewModel(callback: (viewModel: SheetViewModel) => void) {
         callback(this._viewModel);
     }

@@ -89,12 +89,12 @@ export class Univer {
 
         if (!this._univerSheet) {
             this._univerSheet = this._rootInjector.createInstance(UniverSheet);
-            addSheet();
 
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Sheet)
                 .forEach((p) => this._univerSheet!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
             this._univerSheet.init();
+            addSheet();
 
             this._tryProgressToReady();
         } else {
@@ -182,8 +182,8 @@ export class Univer {
     private _tryProgressToReady(): void {
         const lifecycleService = this._rootInjector.get(LifecycleService);
         if (lifecycleService.stage < LifecycleStages.Ready) {
-            this._univerPluginStore.forEachPlugin((p) => p.onReady());
             this._rootInjector.get(LifecycleService).stage = LifecycleStages.Ready;
+            this._univerPluginStore.forEachPlugin((p) => p.onReady());
         }
     }
 

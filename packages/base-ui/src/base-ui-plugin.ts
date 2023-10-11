@@ -76,6 +76,6 @@ export class UIPlugin extends Plugin {
     }
 
     private _initUI(): void {
-        this._injector.get(IUIController).bootstrapWorkbench(this._config);
+        Promise.resolve().then(() => this._injector.get(IUIController).bootstrapWorkbench(this._config));
     }
 }

@@ -107,7 +107,7 @@ class MessageInstance {
 
 type IMessageMethodOptions = { content: string; delay?: number };
 
-const instance = new MessageInstance();
+// const instance = new MessageInstance();
 
 const message = {
     success: (options: IMessageMethodOptions) => instance.append('success', options),

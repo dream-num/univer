@@ -67,7 +67,7 @@ import {
     TextRotateMenuItemFactory,
     UnderlineMenuItemFactory,
     UndoMenuItemFactory,
-    UnHideSheetMenuItemFactory,
+    // UnHideSheetMenuItemFactory,
     VerticalAlignMenuItemFactory,
     WrapTextMenuItemFactory,
 } from './menu/menu';
@@ -204,7 +204,7 @@ export class SheetUIController extends Disposable {
                 RenameSheetMenuItemFactory,
                 ChangeColorSheetMenuItemFactory,
                 HideSheetMenuItemFactory,
-                UnHideSheetMenuItemFactory,
+                // UnHideSheetMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));

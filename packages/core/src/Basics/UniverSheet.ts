@@ -5,9 +5,10 @@ import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
+import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import { GenName } from '../Shared/GenName';
 import { Disposable, toDisposable } from '../Shared/lifecycle';
-import { Workbook } from '../Sheets/Domain';
+import { Workbook } from '../sheets/workbook';
 import { IWorkbookConfig } from '../Types/Interfaces/IWorkbookData';
 
 /**
@@ -84,6 +85,7 @@ export class UniverSheet extends Disposable implements IDisposable {
         const dependencies: Dependency[] = [
             [GenName],
             [LifecycleInitializerService],
+            [SheetInterceptorService],
             [
                 ICommandService,
                 {

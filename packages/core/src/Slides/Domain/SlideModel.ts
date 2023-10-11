@@ -2,7 +2,7 @@ import { Tools } from '../../Shared';
 import { DEFAULT_SLIDE } from '../../Types/Const';
 import { ISlideData, ISlidePage, PageType } from '../../Types/Interfaces';
 
-export class SlideModel {
+export class Slide {
     private _snapshot: ISlideData;
 
     private _unitId: string;

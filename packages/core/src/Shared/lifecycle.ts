@@ -5,14 +5,30 @@ import { isSubscription } from 'rxjs/internal/Subscription';
 export function toDisposable(subscription: SubscriptionLike): IDisposable;
 export function toDisposable(callback: () => void): IDisposable;
 export function toDisposable(v: SubscriptionLike | (() => void)): IDisposable {
+    let disposed = false;
+
     if (isSubscription(v)) {
         return {
-            dispose: () => v.unsubscribe(),
+            dispose: () => {
+                if (disposed) {
+                    return;
+                }
+
+                disposed = true;
+                v.unsubscribe();
+            },
         };
     }
 
     return {
-        dispose: v as () => void,
+        dispose: () => {
+            if (disposed) {
+                return;
+            }
+
+            disposed = true;
+            (v as () => void)();
+        },
     };
 }
 

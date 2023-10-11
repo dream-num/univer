@@ -1,6 +1,6 @@
 import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
 
-import { ISlideData, SlideModel } from '..';
+import { ISlideData, Slide } from '..';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
@@ -63,8 +63,8 @@ export class UniverSlide extends Disposable {
         this._injector.get(LifecycleInitializerService).start();
     }
 
-    createSlide(data: Partial<ISlideData>): SlideModel {
-        const slide = this._injector.createInstance(SlideModel, data);
+    createSlide(data: Partial<ISlideData>): Slide {
+        const slide = this._injector.createInstance(Slide, data);
         return slide;
     }
 

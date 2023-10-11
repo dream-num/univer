@@ -1,8 +1,10 @@
 import { forwardRef, Inject, Injector } from '@wendellhu/redi';
+import { Subject } from 'rxjs';
 
-import { GenName, Nullable, Tools } from '../../Shared';
-import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../../Types/Const';
-import { BooleanNumber } from '../../Types/Enum';
+import { GenName, Nullable, Tools } from '../Shared';
+import { Disposable } from '../Shared/lifecycle';
+import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../Types/Const';
+import { BooleanNumber } from '../Types/Enum';
 import {
     IColumnStartEndData,
     IGridRange,
@@ -12,14 +14,21 @@ import {
     IRangeType,
     IRowStartEndData,
     IWorkbookConfig,
-} from '../../Types/Interfaces';
-import { Styles } from './Styles';
-import { Worksheet } from './Worksheet';
+    IWorksheetConfig,
+} from '../Types/Interfaces';
+import { Styles } from './styles';
+import { Worksheet } from './worksheet';
 
 /**
  * Access and create Univer Sheets files
  */
-export class Workbook {
+export class Workbook extends Disposable {
+    private readonly _sheetCreated$ = new Subject<Worksheet>();
+    readonly sheetCreated$ = this._sheetCreated$.asObservable();
+
+    private readonly _sheetDisposed$ = new Subject<Worksheet>();
+    readonly sheetDisposed$ = this._sheetDisposed$.asObservable();
+
     /**
      * sheets list
      * @private
@@ -38,7 +47,7 @@ export class Workbook {
      */
     // private _formatManage: FormatManager;
 
-    private _config: IWorkbookConfig;
+    private _snapshot: IWorkbookConfig;
 
     private _unitId: string;
 
@@ -47,18 +56,27 @@ export class Workbook {
         @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
         @Inject(Injector) readonly _injector: Injector
     ) {
-        this._config = Tools.commonExtend(DEFAULT_WORKBOOK, workbookData);
+        super();
 
-        const { styles } = this._config;
-        if (this._config.id == null || this._config.id.length === 0) {
-            this._config.id = Tools.generateRandomId(6);
+        this._snapshot = Tools.commonExtend(DEFAULT_WORKBOOK, workbookData);
+
+        const { styles } = this._snapshot;
+        if (this._snapshot.id == null || this._snapshot.id.length === 0) {
+            this._snapshot.id = Tools.generateRandomId(6);
         }
 
-        this._unitId = this._config.id;
+        this._unitId = this._snapshot.id;
         this._styles = new Styles(styles);
         this._worksheets = new Map<string, Worksheet>();
 
         this._getDefaultWorkSheet();
+    }
+
+    override dispose(): void {
+        super.dispose();
+
+        this._sheetCreated$.complete();
+        this._sheetDisposed$.complete();
     }
 
     /**
@@ -86,11 +104,28 @@ export class Workbook {
     }
 
     getContainer() {
-        return this._config.container;
+        return this._snapshot.container;
+    }
+
+    /**
+     * Add a Worksheet into Workbook.
+     */
+    addWorksheet(id: string, index: number, worksheetSnapshot: Partial<IWorksheetConfig>): boolean {
+        const { sheets, sheetOrder } = this._snapshot;
+        if (sheets[id]) {
+            return false;
+        }
+
+        sheets[id] = worksheetSnapshot;
+        sheetOrder.splice(index, 0, id);
+        const worksheet = new Worksheet(worksheetSnapshot, this._styles);
+        this._worksheets.set(id, worksheet);
+        this._sheetCreated$.next(worksheet);
+        return true;
     }
 
     getParentRenderUnitId() {
-        return this._config.parentRenderUnitId;
+        return this._snapshot.parentRenderUnitId;
     }
 
     getWorksheets(): Map<string, Worksheet> {
@@ -106,26 +141,16 @@ export class Workbook {
     }
 
     getConfig(): IWorkbookConfig {
-        // const { _config } = this;
-        // const sheets = {};
-        // config中的sheets数据传递到WorkSheet后就交由WorkSheet管理，此处的config不再更新
-        // sheetOrder.forEach((sheetId) => {
-        //     const sheet = this._worksheets.get(sheetId) as WorkSheet;
-        //     const config = sheet.getConfig();
-        //     sheets[config.id] = config;
-        // });
-        // this._config.sheets = sheets;
-        // this._config.styles = this._styles.toJSON();
-        return this._config;
+        return this._snapshot;
     }
 
     getIndexBySheetId(sheetId: string): number {
-        const { sheetOrder } = this._config;
+        const { sheetOrder } = this._snapshot;
         return sheetOrder.findIndex((id) => id === sheetId);
     }
 
     getActiveSheet(): Worksheet {
-        const { sheetOrder } = this._config;
+        const { sheetOrder } = this._snapshot;
         const activeSheetId = sheetOrder.find((sheetId) => {
             const worksheet = this._worksheets.get(sheetId) as Worksheet;
             return worksheet.getStatus() === BooleanNumber.TRUE;
@@ -137,7 +162,7 @@ export class Workbook {
     }
 
     getActiveSheetIndex(): number {
-        const { sheetOrder } = this._config;
+        const { sheetOrder } = this._snapshot;
         return sheetOrder.findIndex((sheetId) => {
             const worksheet = this._worksheets.get(sheetId) as Worksheet;
             if (worksheet.getStatus() === 1) {
@@ -148,7 +173,7 @@ export class Workbook {
     }
 
     getSheetSize(): number {
-        return this._config.sheetOrder.length;
+        return this._snapshot.sheetOrder.length;
     }
 
     /**
@@ -161,12 +186,12 @@ export class Workbook {
     }
 
     getSheets(): Worksheet[] {
-        const { sheetOrder } = this._config;
+        const { sheetOrder } = this._snapshot;
         return sheetOrder.map((sheetId) => this._worksheets.get(sheetId)) as Worksheet[];
     }
 
     getSheetIndex(sheet: Worksheet): number {
-        const { sheetOrder } = this._config;
+        const { sheetOrder } = this._snapshot;
         return sheetOrder.findIndex((sheetId) => {
             if (sheet.getSheetId() === sheetId) {
                 return true;
@@ -176,7 +201,7 @@ export class Workbook {
     }
 
     getSheetBySheetName(name: string): Nullable<Worksheet> {
-        const { sheetOrder } = this._config;
+        const { sheetOrder } = this._snapshot;
         const sheetId = sheetOrder.find((sheetId) => {
             const worksheet = this._worksheets.get(sheetId) as Worksheet;
             return worksheet.getName() === name;
@@ -280,12 +305,12 @@ export class Workbook {
 
     load(config: IWorkbookConfig) {
         // TODO: new Command
-        this._config = config;
+        this._snapshot = config;
     }
 
     save(): IWorkbookConfig {
         // TODO
-        return this._config;
+        return this._snapshot;
     }
 
     /**
@@ -382,7 +407,7 @@ export class Workbook {
      * @private
      */
     private _getDefaultWorkSheet(): void {
-        const { _config, _worksheets } = this;
+        const { _snapshot: _config, _worksheets } = this;
         const { sheets, sheetOrder } = _config;
 
         // One worksheet by default

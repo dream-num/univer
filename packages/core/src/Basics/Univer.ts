@@ -14,8 +14,8 @@ import { DesktopLogService, ILogService } from '../services/log/log.service';
 import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
-import { Workbook } from '../Sheets/Domain/Workbook';
-import { SlideModel } from '../Slides/Domain/SlideModel';
+import { Workbook } from '../sheets/workbook';
+import { Slide } from '../Slides/Domain/SlideModel';
 import { LocaleType } from '../Types/Enum/LocaleType';
 import { IDocumentData, ISlideData, IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverDoc } from './UniverDoc';
@@ -128,8 +128,8 @@ export class Univer {
         return doc!;
     }
 
-    createUniverSlide(config: Partial<ISlideData>): SlideModel {
-        let slide: SlideModel;
+    createUniverSlide(config: Partial<ISlideData>): Slide {
+        let slide: Slide;
         const addSlide = () => {
             slide = this._univerSlide!.createSlide(config);
             this._currentUniverService.addSlide(slide);

@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, Worksheet } from '@univerjs/core';
+import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
@@ -6,12 +6,12 @@ import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Ba
 /**
  * Generate undo mutation of a `InsertSheetMutation`
  *
- * @param {IAccessor} accessor - injector accessor
+ * @param {IAccessor} _accessor - injector accessor
  * @param {IInsertSheetMutationParams} params - do mutation params
  * @returns {IRemoveSheetMutationParams} undo mutation params
  */
 export const InsertSheetUndoMutationFactory = (
-    accessor: IAccessor,
+    _accessor: IAccessor,
     params: IInsertSheetMutationParams
 ): IRemoveSheetMutationParams => ({
     worksheetId: params.sheet.id,
@@ -25,22 +25,10 @@ export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean>
         const currentUniverService = accessor.get(ICurrentUniverService);
         const { sheet, index, workbookId } = params;
         const workbook = currentUniverService.getUniverSheetInstance(workbookId);
-
         if (!workbook) {
             return false;
         }
 
-        const { sheets, sheetOrder } = workbook.getConfig();
-
-        if (sheets[index]) {
-            throw new Error(`Insert sheet fail ${index} already exists.`);
-        }
-        sheets[sheet.id] = sheet;
-        sheetOrder.splice(index, 0, sheet.id);
-
-        const worksheets = workbook.getWorksheets();
-        worksheets.set(sheet.id, new Worksheet(sheet, workbook.getStyles()));
-
-        return true;
+        return workbook.addWorksheet(sheet.id, index, sheet);
     },
 };

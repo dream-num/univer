@@ -84,7 +84,7 @@ export class SheetClipboardController extends Disposable {
                 currentSheet = self._getWorksheet(workbookId, worksheetId);
             },
             onCopyCellContent(row: number, col: number): string {
-                const v = currentSheet!.getCellMatrix().getValue(row, col);
+                const v = currentSheet!.getCellContent(row, col);
                 return v?.m || '';
             },
             onCopyCellStyle: (row: number, col: number, rowSpan?: number, colSpan?: number) => {
@@ -95,6 +95,8 @@ export class SheetClipboardController extends Disposable {
                     properties.colspan = `${colSpan || 1}`;
                 }
 
+                // TODO@wzhudev: should deprecate Range and
+                // use worksheet.getStyle()
                 const range = currentSheet!.getRange(row, col);
                 const textStyle = range.getTextStyle();
                 const color = range.getFontColor();

@@ -1,9 +1,11 @@
-import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../../Shared';
-import { BooleanNumber } from '../../Types/Enum';
-import { IRowData, IWorksheetConfig } from '../../Types/Interfaces';
+import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../Shared';
+import { BooleanNumber } from '../Types/Enum';
+import { IRowData, IWorksheetConfig } from '../Types/Interfaces';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
+ *
+ * @deprecated This class is not necessary. It increases the complexity of the code and does not bring any benefits.
  */
 export class RowManager {
     private _rowData: ObjectArray<IRowData>;

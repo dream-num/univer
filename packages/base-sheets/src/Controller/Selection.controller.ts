@@ -17,9 +17,9 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { ScrollCommand } from '..';
 import { getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { ScrollCommand } from '../commands/commands/set-scroll.command';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { ISetZoomRatioOperationParams, SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
@@ -210,9 +210,10 @@ export class SelectionController extends Disposable {
             }
         }
         // sheetViewStartRow and sheetViewStartColumn maybe undefined
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         this._commandService.executeCommand(ScrollCommand.id, {
-            unitId: this._currentUniverService.getCurrentUniverSheetInstance().getUnitId(),
-            sheetId: this._currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
+            unitId: workbook.getUnitId(),
+            sheetId: workbook.getActiveSheet().getSheetId(),
             sheetViewStartRow: startSheetViewRow,
             sheetViewStartColumn: startSheetViewColumn,
         });

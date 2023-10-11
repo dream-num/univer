@@ -1,4 +1,4 @@
-import React, { createRef, ReactNode, useEffect, useState } from 'react';
+import React, { createRef, ReactNode, useEffect, useImperativeHandle, useState } from 'react';
 
 import { joinClassNames, randomId } from '../../Utils';
 import styles from './index.module.less';
@@ -91,11 +91,15 @@ interface ITabInfo {
     max: number;
 }
 
+export interface ITabRef {
+    scrollContent: (offset: number) => void;
+}
+
 /**
  * Tabs Component
  */
 export const Tabs = React.memo(
-    (props: IBaseTabsProps) => {
+    React.forwardRef<ITabRef, IBaseTabsProps>((props: IBaseTabsProps, ref) => {
         const { type = 'line', className = '', draggable = false } = props;
         const [active, setActive] = useState<string>(props.activeKey ?? ''); // Initialize active with the provided activeKey
 
@@ -203,6 +207,16 @@ export const Tabs = React.memo(
                 parent.current.scrollTo(wheelDistance, 0);
             }
         };
+
+        const scrollContent = (offset: number) => {
+            if (parent.current) {
+                parent.current.scrollLeft += offset;
+            }
+        };
+
+        useImperativeHandle(ref, () => ({
+            scrollContent,
+        }));
 
         // 动画函数
         const scrollToAnimation = (current: HTMLDivElement, direction: 'left' | 'right') => () => {
@@ -393,7 +407,7 @@ export const Tabs = React.memo(
                 </div>
             </div>
         );
-    },
+    }),
     (prev, next) =>
         prev.children.length === next.children.length &&
         prev.activeKey === next.activeKey &&

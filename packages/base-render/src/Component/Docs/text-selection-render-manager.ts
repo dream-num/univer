@@ -34,6 +34,16 @@ export interface ITextSelectionRenderManager {
 
     readonly textSelection$: Observable<TextSelection[]>;
 
+    enableSelection(): void;
+
+    disableSelection(): void;
+
+    setSegment(id: string): void;
+
+    setStyle(style: ITextSelectionStyle): void;
+
+    resetStyle(): void;
+
     getActiveTextSelection(): Nullable<TextSelection>;
 
     getTextSelectionList(): TextSelection[];
@@ -57,6 +67,8 @@ export interface ITextSelectionRenderManager {
     dispose(): void;
 
     reset(): void;
+
+    activate(toLastPosition: boolean): void;
 
     getRanges(): Array<Nullable<ITextSelectionRangeWithStyle>>;
 

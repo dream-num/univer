@@ -1,3 +1,5 @@
+import { TextSelectionManagerService } from '@univerjs/base-docs';
+import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/base-render';
 import { SlotManager, ZIndexManager } from '@univerjs/base-ui';
 import { ICurrentUniverService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
@@ -36,6 +38,8 @@ export class SheetUIPlugin extends Plugin {
                 // services
                 [ICellEditorService, { useClass: DesktopCellEditorService }],
                 [ISheetClipboardService, { useClass: SheetClipboardService }],
+                [ITextSelectionRenderManager, { useClass: TextSelectionRenderManager }],
+                [TextSelectionManagerService],
 
                 // controllers
                 [SheetClipboardController],

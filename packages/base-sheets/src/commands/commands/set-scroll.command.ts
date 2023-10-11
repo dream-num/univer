@@ -3,8 +3,8 @@ import { CommandType, ICommand, ICommandService, ICurrentUniverService } from '@
 import { SetScrollOperation } from '../operations/scroll.operation';
 
 export interface IScrollCommandParams {
-    sheetViewStartRow: number;
-    sheetViewStartColumn: number;
+    sheetViewStartRow?: number;
+    sheetViewStartColumn?: number;
 }
 
 /**

@@ -2,8 +2,8 @@ import { Nullable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export interface IScrollManagerParam {
-    sheetViewStartRow: number;
-    sheetViewStartColumn: number;
+    sheetViewStartRow?: number;
+    sheetViewStartColumn?: number;
 }
 
 export interface IScrollManagerSearchParam {

@@ -72,7 +72,7 @@ export class DocPlugin extends Plugin {
 
         this._config = Object.assign(DEFAULT_DOCUMENT_PLUGIN_DATA, config);
 
-        this.initialConfig(config);
+        // this.initialConfig(config);
 
         this._initializeDependencies(_injector, _univerInjector);
 

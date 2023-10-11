@@ -63,6 +63,7 @@ export const ICurrentUniverService = createIdentifier<ICurrentUniverService>('un
 
 export class CurrentUniverService extends Disposable implements ICurrentUniverService {
     private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);
+    private _focused: DocumentModel | Workbook | Slide | null = null;
     readonly focused$ = this._focused$.asObservable();
 
     private readonly _currentSheet$ = new BehaviorSubject<Nullable<Workbook>>(null);
@@ -83,7 +84,14 @@ export class CurrentUniverService extends Disposable implements ICurrentUniverSe
     private readonly _slideAdded$ = new Subject<Slide>();
     readonly slideAdded$ = this._slideAdded$.asObservable();
 
-    private _focused: DocumentModel | Workbook | Slide | null = null;
+    private readonly _sheetDisposed$ = new Subject<Workbook>();
+    readonly sheetDisposed$ = this._sheetDisposed$.asObservable();
+
+    private readonly _docDisposed$ = new Subject<DocumentModel>();
+    readonly docDisposed$ = this._docDisposed$.asObservable();
+
+    private readonly _slideDisposed$ = new Subject<Slide>();
+    readonly slideDisposed$ = this._slideDisposed$.asObservable();
 
     private readonly _sheets: Workbook[] = [];
 
@@ -110,6 +118,10 @@ export class CurrentUniverService extends Disposable implements ICurrentUniverSe
         this._sheetAdded$.complete();
         this._docAdded$.complete();
         this._slideAdded$.complete();
+
+        this._sheetDisposed$.complete();
+        this._docDisposed$.complete();
+        this._slideDisposed$.complete();
     }
 
     createDoc(data: Partial<IDocumentData>): DocumentModel {

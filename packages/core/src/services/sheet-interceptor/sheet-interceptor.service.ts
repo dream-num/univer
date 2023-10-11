@@ -46,13 +46,13 @@ export class SheetInterceptorService extends Disposable {
                 })
             )
         );
-        // this.disposeWithMe(
-        //     toDisposable(
-        //         this._currentUniverService.sheetDisposed$.subscribe((workbook) =>
-        //             this._disposeWorkbookInterceptor(workbook)
-        //         )
-        //     )
-        // );
+        this.disposeWithMe(
+            toDisposable(
+                this._currentUniverService.sheetDisposed$.subscribe((workbook) =>
+                    this._disposeWorkbookInterceptor(workbook)
+                )
+            )
+        );
     }
 
     override dispose(): void {
@@ -94,7 +94,6 @@ export class SheetInterceptorService extends Disposable {
                         return {
                             m: '123',
                         };
-                        // self.
                     },
                 });
                 sheetDisposables.add(cellInterceptorDisposable);

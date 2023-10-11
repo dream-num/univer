@@ -113,12 +113,12 @@ export class Univer {
 
         if (!this._univerDoc) {
             this._univerDoc = this._rootInjector.createInstance(UniverDoc);
-            addDoc();
 
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Doc)
                 .forEach((p) => this._univerDoc!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
             this._univerDoc.init();
+            addDoc();
 
             this._tryProgressToReady();
         } else {
@@ -137,12 +137,12 @@ export class Univer {
 
         if (!this._univerSlide) {
             this._univerSlide = this._rootInjector.createInstance(UniverSlide);
-            addSlide();
 
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Slide)
                 .forEach((p) => this._univerSlide!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
             this._univerSlide.init();
+            addSlide();
 
             this._tryProgressToReady();
         } else {

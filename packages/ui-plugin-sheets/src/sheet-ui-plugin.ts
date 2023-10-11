@@ -10,6 +10,7 @@ import { en } from './Locale';
 import { ICellEditorService } from './services/cell-editor/cell-editor.service';
 import { DesktopCellEditorService } from './services/cell-editor/cell-editor-desktop.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
+import { ISheetBarService, SheetBarService } from './services/sheetbar/sheetbar.service';
 
 export class SheetUIPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -35,6 +36,7 @@ export class SheetUIPlugin extends Plugin {
                 // services
                 [ICellEditorService, { useClass: DesktopCellEditorService }],
                 [ISheetClipboardService, { useClass: SheetClipboardService }],
+                [ISheetBarService, { useClass: SheetBarService }],
 
                 // controllers
                 [SheetClipboardController],

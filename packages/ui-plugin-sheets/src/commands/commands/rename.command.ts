@@ -1,5 +1,7 @@
-import { CommandType, ICommand, ISheetBarService } from '@univerjs/core';
+import { CommandType, ICommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
+import { ISheetBarService } from '../../services/sheetbar/sheetbar.service';
 
 interface IRenameCommandParams {
     worksheetId: string;

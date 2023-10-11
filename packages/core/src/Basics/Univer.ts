@@ -12,7 +12,6 @@ import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { LocaleService } from '../services/locale/locale.service';
 import { DesktopLogService, ILogService } from '../services/log/log.service';
 import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
-import { ISheetBarService, SheetBarService } from '../services/sheetbar/sheetbar.service';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
 import { Workbook } from '../Sheets/Domain/Workbook';
@@ -177,7 +176,6 @@ export class Univer {
             [IPermissionService, { useClass: DesktopPermissionService }],
             [IConfigService, { useClass: ConfigService }],
             [IContextService, { useClass: ContextService }],
-            [ISheetBarService, { useClass: SheetBarService }],
         ]);
     }
 

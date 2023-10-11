@@ -24,7 +24,6 @@ export { LifecycleService } from './services/lifecycle/lifecycle.service';
 export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService } from './services/log/log.service';
 export { DesktopPermissionService, IPermissionService } from './services/permission/permission.service';
-export { ISheetBarService, SheetBarService } from './services/sheetbar/sheetbar.service';
 export { ThemeService } from './services/theme/theme.service';
 export {
     type IUndoRedoCommandInfos,

@@ -110,9 +110,9 @@ export class BorderAuxiliary extends SheetExtension {
             for (const key in borderCaches) {
                 const { type, style, color } = borderCaches[key] as BorderCacheItem;
 
-                if (color.indexOf('255,255,255') === -1 || color.toLocaleLowerCase() !== '#ffffff') {
-                    continue;
-                }
+                // if (color.indexOf('255,255,255') === -1 || color.toLocaleLowerCase() !== '#ffffff') {
+                //     continue;
+                // }
 
                 clearLineByBorderType(ctx, type, { startX, startY, endX, endY }, scaleX, scaleY);
             }

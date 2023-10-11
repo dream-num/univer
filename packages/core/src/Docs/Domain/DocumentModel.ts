@@ -137,6 +137,10 @@ export class DocumentModel extends DocumentModelSimple {
         this._initializeRowColTree();
     }
 
+    getSettings() {
+        return this.snapshot.settings;
+    }
+
     reset(snapshot: Partial<IDocumentData>) {
         if (snapshot.id && snapshot.id !== this._unitId) {
             throw new Error('Cannot reset a document model with a different unit id!');

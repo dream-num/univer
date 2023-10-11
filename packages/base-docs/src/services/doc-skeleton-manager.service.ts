@@ -62,7 +62,7 @@ export class DocSkeletonManagerService implements IDisposable {
 
             const documentModel = this._currentUniverService.getUniverDocInstance(searchParm.unitId);
 
-            if (documentModel == null) {
+            if (documentModel == null || documentModel.bodyModel == null) {
                 return;
             }
 

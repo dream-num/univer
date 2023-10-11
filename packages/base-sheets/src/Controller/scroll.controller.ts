@@ -75,6 +75,11 @@ export class ScrollController extends Disposable {
                 sheetViewStartRow: row,
                 sheetViewStartColumn: column,
             });
+
+            // this._commandService.executeCommand(SetScrollOperation.id, {
+            //     sheetViewStartRow: row,
+            //     sheetViewStartColumn: column,
+            // });
         });
     }
 

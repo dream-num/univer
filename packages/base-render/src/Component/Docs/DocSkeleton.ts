@@ -56,7 +56,7 @@ export class DocumentSkeleton extends Skeleton {
 
     private _renderedBlockIdMap = new Map<string, boolean>();
 
-    private _findLiquid: Liquid;
+    private _findLiquid: Liquid = new Liquid();
 
     constructor(docModel: DocumentModelOrSimple, localeService: LocaleService) {
         super(localeService);
@@ -135,7 +135,13 @@ export class DocumentSkeleton extends Skeleton {
         };
     }
 
-    findNodeByCharIndex(charIndex: number): Nullable<IDocumentSkeletonSpan> {
+    findNodePositionByCharIndex(charIndex: number, isBack: boolean = false): Nullable<INodePosition> {
+        const nodes = this._findNodeIterator(charIndex);
+
+        if (nodes == null) {
+            return;
+        }
+
         const skeletonData = this.getSkeletonData();
 
         if (!skeletonData) {
@@ -144,57 +150,83 @@ export class DocumentSkeleton extends Skeleton {
 
         const pages = skeletonData.pages;
 
-        for (const page of pages) {
-            const { sections, st, ed } = page;
+        const { span, divide, line, column, section, page } = nodes;
 
-            if (charIndex < st || charIndex > ed) {
-                continue;
-            }
+        return {
+            span: divide.spanGroup.indexOf(span),
+            divide: line.divides.indexOf(divide),
+            line: column.lines.indexOf(line),
+            column: section.columns.indexOf(column),
+            section: page.sections.indexOf(section),
+            page: pages.indexOf(page),
+            isBack,
+        };
+    }
 
-            for (const section of sections) {
-                const { columns, st, ed } = section;
+    findNodeByCharIndex(charIndex: number): Nullable<IDocumentSkeletonSpan> {
+        const nodes = this._findNodeIterator(charIndex);
 
-                if (charIndex < st || charIndex > ed) {
-                    continue;
-                }
+        return nodes?.span;
 
-                for (const column of columns) {
-                    const { lines, st, ed } = column;
+        // const skeletonData = this.getSkeletonData();
 
-                    if (charIndex < st || charIndex > ed) {
-                        continue;
-                    }
+        // if (!skeletonData) {
+        //     return;
+        // }
 
-                    for (const line of lines) {
-                        const { divides, lineHeight, st, ed } = line;
-                        const divideLength = divides.length;
+        // const pages = skeletonData.pages;
 
-                        if (charIndex < st || charIndex > ed) {
-                            continue;
-                        }
+        // for (const page of pages) {
+        //     const { sections, st, ed } = page;
 
-                        for (let i = 0; i < divideLength; i++) {
-                            const divide = divides[i];
-                            const { spanGroup, st, ed } = divide;
+        //     if (charIndex < st || charIndex > ed) {
+        //         continue;
+        //     }
 
-                            if (charIndex < st || charIndex > ed) {
-                                continue;
-                            }
+        //     for (const section of sections) {
+        //         const { columns, st, ed } = section;
 
-                            if (spanGroup[0].spanType === SpanType.LIST) {
-                                charIndex++;
-                            }
+        //         if (charIndex < st || charIndex > ed) {
+        //             continue;
+        //         }
 
-                            const span = spanGroup[charIndex - st];
+        //         for (const column of columns) {
+        //             const { lines, st, ed } = column;
 
-                            if (span) {
-                                return span;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //             if (charIndex < st || charIndex > ed) {
+        //                 continue;
+        //             }
+
+        //             for (const line of lines) {
+        //                 const { divides, lineHeight, st, ed } = line;
+        //                 const divideLength = divides.length;
+
+        //                 if (charIndex < st || charIndex > ed) {
+        //                     continue;
+        //                 }
+
+        //                 for (let i = 0; i < divideLength; i++) {
+        //                     const divide = divides[i];
+        //                     const { spanGroup, st, ed } = divide;
+
+        //                     if (charIndex < st || charIndex > ed) {
+        //                         continue;
+        //                     }
+
+        //                     if (spanGroup[0].spanType === SpanType.LIST) {
+        //                         charIndex++;
+        //                     }
+
+        //                     const span = spanGroup[charIndex - st];
+
+        //                     if (span) {
+        //                         return span;
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     findSpanByPosition(position: Nullable<INodePosition>) {
@@ -727,5 +759,74 @@ export class DocumentSkeleton extends Skeleton {
             skeListLevel: new Map(),
             drawingAnchor: new Map(),
         };
+    }
+
+    private _findNodeIterator(charIndex: number) {
+        const skeletonData = this.getSkeletonData();
+
+        if (!skeletonData) {
+            return;
+        }
+
+        const pages = skeletonData.pages;
+
+        for (const page of pages) {
+            const { sections, st, ed } = page;
+
+            if (charIndex < st || charIndex > ed) {
+                continue;
+            }
+
+            for (const section of sections) {
+                const { columns, st, ed } = section;
+
+                if (charIndex < st || charIndex > ed) {
+                    continue;
+                }
+
+                for (const column of columns) {
+                    const { lines, st, ed } = column;
+
+                    if (charIndex < st || charIndex > ed) {
+                        continue;
+                    }
+
+                    for (const line of lines) {
+                        const { divides, lineHeight, st, ed } = line;
+                        const divideLength = divides.length;
+
+                        if (charIndex < st || charIndex > ed) {
+                            continue;
+                        }
+
+                        for (let i = 0; i < divideLength; i++) {
+                            const divide = divides[i];
+                            const { spanGroup, st, ed } = divide;
+
+                            if (charIndex < st || charIndex > ed) {
+                                continue;
+                            }
+
+                            if (spanGroup[0].spanType === SpanType.LIST) {
+                                charIndex++;
+                            }
+
+                            const span = spanGroup[charIndex - st];
+
+                            if (span) {
+                                return {
+                                    page,
+                                    section,
+                                    column,
+                                    line,
+                                    divide,
+                                    span,
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

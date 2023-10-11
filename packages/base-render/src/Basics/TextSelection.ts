@@ -1,21 +1,19 @@
-import { PageLayoutType } from './IDocumentSkeletonCached';
+import { ITextSelectionRangeParam } from '@univerjs/core';
 
 export interface ITextSelectionStyle {
     strokeWidth: number;
     stroke: string;
+    strokeActive: string;
     fill: string;
 }
 
 export const NORMAL_TEXT_SELECTION_PLUGIN_STYLE: ITextSelectionStyle = {
-    strokeWidth: 2,
-    stroke: 'rgb(1,136,251)',
-    fill: 'rgba(0, 0, 0, 0.1)',
+    strokeWidth: 1,
+    stroke: 'rgba(0,0,0, 0)',
+    strokeActive: 'rgba(0,0,0, 1)',
+    fill: 'rgba(0, 0, 0, 0.2)',
 };
 
-export interface IDocumentOffsetConfig {
-    pageLayoutType: PageLayoutType;
-    pageMarginLeft: number;
-    pageMarginTop: number;
-    docsLeft: number;
-    docsTop: number;
+export interface ITextSelectionRangeWithStyle extends ITextSelectionRangeParam {
+    style: ITextSelectionStyle;
 }

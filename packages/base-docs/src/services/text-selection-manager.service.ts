@@ -1,5 +1,5 @@
-import { ISelectionStyle } from '@univerjs/base-render';
-import { ISelectionCell, ITextSelectionRangeParam, Nullable } from '@univerjs/core';
+import { ISelectionStyle, ITextSelectionRangeWithStyle } from '@univerjs/base-render';
+import { ISelectionCell, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -11,11 +11,11 @@ export interface ITextSelectionManagerSearchParam {
 }
 
 export interface ITextSelectionManagerInsertParam extends ITextSelectionManagerSearchParam {
-    textRanges: ITextSelectionRangeParam[];
+    textRanges: ITextSelectionRangeWithStyle[];
 }
 
-//{ [pluginName: string]: { [unitId: string]: ITextSelectionRangeParam[] } }
-export type ITextSelectionInfo = Map<string, Map<string, ITextSelectionRangeParam[]>>;
+//{ [pluginName: string]: { [unitId: string]: ITextSelectionRangeWithStyle[] } }
+export type ITextSelectionInfo = Map<string, Map<string, ITextSelectionRangeWithStyle[]>>;
 
 /**
  * This service is for selection.
@@ -25,7 +25,7 @@ export class TextSelectionManagerService implements IDisposable {
 
     private _currentSelection: Nullable<ITextSelectionManagerSearchParam> = null;
 
-    private readonly _textSelectionInfo$ = new BehaviorSubject<Nullable<ITextSelectionRangeParam[]>>(null);
+    private readonly _textSelectionInfo$ = new BehaviorSubject<Nullable<ITextSelectionRangeWithStyle[]>>(null);
 
     readonly textSelectionInfo$ = this._textSelectionInfo$.asObservable();
 
@@ -78,26 +78,26 @@ export class TextSelectionManagerService implements IDisposable {
 
     getTextRangesByParam(
         param: Nullable<ITextSelectionManagerSearchParam>
-    ): Readonly<Nullable<ITextSelectionRangeParam[]>> {
+    ): Readonly<Nullable<ITextSelectionRangeWithStyle[]>> {
         return this._getTextRanges(param);
     }
 
-    getSelections(): Readonly<Nullable<ITextSelectionRangeParam[]>> {
+    getSelections(): Readonly<Nullable<ITextSelectionRangeWithStyle[]>> {
         return this._getTextRanges(this._currentSelection);
     }
 
-    getFirst(): Readonly<Nullable<ITextSelectionRangeParam>> {
+    getFirst(): Readonly<Nullable<ITextSelectionRangeWithStyle>> {
         return this._getFirstByParam(this._currentSelection);
     }
 
-    getLast(): Readonly<Nullable<ITextSelectionRangeParam & { primary: ISelectionCell }>> {
+    getLast(): Readonly<Nullable<ITextSelectionRangeWithStyle & { primary: ISelectionCell }>> {
         // The last selection position must have a primary.
         return this._getLastByParam(this._currentSelection) as Readonly<
-            Nullable<ITextSelectionRangeParam & { primary: ISelectionCell }>
+            Nullable<ITextSelectionRangeWithStyle & { primary: ISelectionCell }>
         >;
     }
 
-    add(textRanges: ITextSelectionRangeParam[]) {
+    add(textRanges: ITextSelectionRangeWithStyle[]) {
         if (this._currentSelection == null) {
             return;
         }
@@ -107,7 +107,7 @@ export class TextSelectionManagerService implements IDisposable {
         });
     }
 
-    replace(textRanges: ITextSelectionRangeParam[]) {
+    replace(textRanges: ITextSelectionRangeWithStyle[]) {
         if (this._currentSelection == null) {
             return;
         }
@@ -118,7 +118,7 @@ export class TextSelectionManagerService implements IDisposable {
         this.refresh(this._currentSelection);
     }
 
-    replaceWithNoRefresh(textRanges: ITextSelectionRangeParam[]) {
+    replaceWithNoRefresh(textRanges: ITextSelectionRangeWithStyle[]) {
         if (this._currentSelection == null) {
             return;
         }
@@ -187,7 +187,7 @@ export class TextSelectionManagerService implements IDisposable {
 
     private _getFirstByParam(
         param: Nullable<ITextSelectionManagerSearchParam>
-    ): Readonly<Nullable<ITextSelectionRangeParam>> {
+    ): Readonly<Nullable<ITextSelectionRangeWithStyle>> {
         const textRange = this._getTextRanges(param);
 
         return textRange?.[0];
@@ -195,7 +195,7 @@ export class TextSelectionManagerService implements IDisposable {
 
     private _getLastByParam(
         param: Nullable<ITextSelectionManagerSearchParam>
-    ): Readonly<Nullable<ITextSelectionRangeParam>> {
+    ): Readonly<Nullable<ITextSelectionRangeWithStyle>> {
         const textRange = this._getTextRanges(param);
 
         return textRange?.[textRange.length - 1];

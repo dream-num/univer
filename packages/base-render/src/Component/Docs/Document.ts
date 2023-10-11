@@ -18,6 +18,7 @@ import {
     PageLayoutType,
 } from '../../Basics/IDocumentSkeletonCached';
 import { degToRad, fixLineWidthByScale, getScale } from '../../Basics/Tools';
+import { Transform } from '../../Basics/Transform';
 import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { Scene } from '../../Scene';
 import { DocumentsSpanAndLineExtensionRegistry, IExtensionConfig } from '../Extension';
@@ -26,10 +27,13 @@ import { DocComponent } from './DocComponent';
 import { DOCS_EXTENSION_TYPE } from './DocExtension';
 import { DocumentSkeleton } from './DocSkeleton';
 
-export interface IDocumentsConfig {
-    pageMarginLeft?: number;
-    pageMarginTop?: number;
+interface PageMarginLayout {
+    pageMarginLeft: number;
+    pageMarginTop: number;
     pageLayoutType?: PageLayoutType;
+}
+
+export interface IDocumentsConfig extends PageMarginLayout {
     allowCache?: boolean;
     hasEditor?: boolean;
 }
@@ -39,6 +43,12 @@ export interface IPageRenderConfig {
     pageLeft: number;
     pageTop: number;
     ctx: CanvasRenderingContext2D;
+}
+
+export interface IDocumentOffsetConfig extends PageMarginLayout {
+    docsLeft: number;
+    docsTop: number;
+    documentTransform: Transform;
 }
 
 export class Documents extends DocComponent {
@@ -96,6 +106,17 @@ export class Documents extends DocComponent {
         // this._hasEditor = config?.hasEditor || false;
 
         this.setAllowCache(config?.allowCache || false);
+    }
+
+    getOffsetConfig(): IDocumentOffsetConfig {
+        return {
+            documentTransform: this.transform,
+            pageLayoutType: this.pageLayoutType,
+            pageMarginLeft: this.pageMarginLeft,
+            pageMarginTop: this.pageMarginTop,
+            docsLeft: this.left,
+            docsTop: this.top,
+        };
     }
 
     // getEditor(): Nullable<DocsEditor> {

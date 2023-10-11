@@ -133,10 +133,10 @@ export class DocCanvasView {
         if (should) {
             engine.runRenderLoop(() => {
                 scene.render();
-                const app = document.getElementById('app');
-                if (app) {
-                    app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
-                }
+                // const app = document.getElementById('app');
+                // if (app) {
+                //     app.innerText = `fps:${Math.round(engine.getFps()).toString()}`;
+                // }
             });
         }
     }
@@ -147,8 +147,8 @@ export class DocCanvasView {
 
         const unitId = documentModel.getUnitId();
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, undefined, {
-            pageMarginLeft: documentModel.documentStyle.marginLeft,
-            pageMarginTop: documentModel.documentStyle.marginTop,
+            pageMarginLeft: documentModel.documentStyle.marginLeft || 0,
+            pageMarginTop: documentModel.documentStyle.marginTop || 0,
         });
         documents.zIndex = DOCS_COMPONENT_DEFAULT_Z_INDEX;
 

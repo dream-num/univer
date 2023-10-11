@@ -1,7 +1,7 @@
 import { Disposable, ICommandService, IStyleData, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
-import { SetZoomRatioCommand, SetZoomRatioMutation } from '..';
+import { ScrollCommand, SetScrollOperation } from '..';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -58,6 +58,7 @@ import { DeltaRowHeightCommand, SetRowHeightCommand } from '../commands/commands
 import { SetWorksheetRowHideCommand } from '../commands/commands/set-worksheet-row-hide.command';
 import { SetWorksheetRowShowCommand } from '../commands/commands/set-worksheet-row-show.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
+import { SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { TrimWhitespaceCommand } from '../commands/commands/trim-whitespace.command';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation } from '../commands/mutations/delete-range.mutation';
@@ -81,6 +82,7 @@ import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-o
 import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { SetWorksheetRowHideMutation } from '../commands/mutations/set-worksheet-row-hide.mutation';
 import { SetWorksheetRowShowMutation } from '../commands/mutations/set-worksheet-row-show.mutation';
+import { SetZoomRatioMutation } from '../commands/mutations/set-zoom-ratio.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -183,6 +185,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetFrozenCancelCommand,
             SetZoomRatioCommand,
             SetZoomRatioMutation,
+            SetScrollOperation,
+            ScrollCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

@@ -14,6 +14,7 @@ export interface IDocumentData extends IReferenceSource, IExtraModelConfig {
     title?: string;
     body?: IDocumentBody;
     documentStyle: IDocumentStyle;
+    settings?: IDocumentSettings;
 }
 
 export interface IReferenceSource {
@@ -21,6 +22,10 @@ export interface IReferenceSource {
     headers?: IHeaders;
     lists?: ILists;
     drawings?: IDrawings;
+}
+
+export interface IDocumentSettings {
+    zoomRatio?: number;
 }
 
 /**

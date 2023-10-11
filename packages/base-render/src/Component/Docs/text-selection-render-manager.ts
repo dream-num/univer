@@ -9,7 +9,7 @@ import { INodeInfo, INodePosition } from '../../Basics/Interfaces';
 import { getOffsetRectForDom, transformBoundingCoord } from '../../Basics/Position';
 import { getCurrentScrollXY } from '../../Basics/ScrollXY';
 import {
-    IDocumentOffsetConfig,
+    ITextSelectionRangeWithStyle,
     ITextSelectionStyle,
     NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
 } from '../../Basics/TextSelection';
@@ -21,6 +21,7 @@ import { ScrollTimer } from '../../ScrollTimer';
 import { IScrollObserverParam, Viewport } from '../../Viewport';
 import { TextSelection } from './Common/TextSelection';
 import { DocumentSkeleton } from './DocSkeleton';
+import { IDocumentOffsetConfig } from './Document';
 
 export interface ITextSelectionRenderManager {
     readonly onKeydown$: Observable<Nullable<IEditorInputConfig>>;
@@ -31,11 +32,13 @@ export interface ITextSelectionRenderManager {
     readonly onSelectionStart$: Observable<Nullable<INodePosition>>;
     readonly onPaste$: Observable<Nullable<IEditorInputConfig>>;
 
+    readonly textSelection$: Observable<TextSelection[]>;
+
     getActiveTextSelection(): Nullable<TextSelection>;
 
     getTextSelectionList(): TextSelection[];
 
-    add(textSelection: TextSelection): void;
+    add(textSelection: Nullable<TextSelection>): void;
 
     remain(): Nullable<TextSelection>;
 
@@ -53,22 +56,19 @@ export interface ITextSelectionRenderManager {
 
     dispose(): void;
 
-    eventTrigger(
-        evt: IPointerEvent | IMouseEvent,
-        documentTransform: Transform,
-        pageLayoutType: PageLayoutType,
-        pageMarginLeft: number,
-        pageMarginTop: number,
-        docsLeft: number,
-        docsTop: number
-    ): void;
+    reset(): void;
+
+    getRanges(): Array<Nullable<ITextSelectionRangeWithStyle>>;
+
+    getActiveRange(): Nullable<ITextSelectionRangeWithStyle>;
+
+    eventTrigger(evt: IPointerEvent | IMouseEvent, documentOffsetConfig: IDocumentOffsetConfig): void;
 }
 
 export interface IEditorInputConfig {
     event: Event | CompositionEvent | KeyboardEvent;
     content?: string;
-    // document: DocComponent;
-    activeSelection?: TextSelection;
+    activeRange?: Nullable<ITextSelectionRangeWithStyle>;
     selectionList?: TextSelection[];
 }
 
@@ -113,6 +113,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     readonly onPaste$ = this._onPaste$.asObservable();
 
+    private readonly _textSelection$ = new BehaviorSubject<TextSelection[]>([]);
+
+    readonly textSelection$ = this._textSelection$.asObservable();
+
     // onPaste$!: RxObservable<ClipboardEvent>;
 
     private _container!: HTMLDivElement;
@@ -123,15 +127,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _cursor!: HTMLDivElement;
 
-    private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
     private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _moveInObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _moveOutObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _skeletonObserver: Nullable<Observer<IDocumentSkeletonCached>>;
 
@@ -143,21 +141,16 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _activeViewport: Nullable<Viewport>;
 
-    private _documentTransform: Transform;
+    private _currentSegmentId: string = '';
 
     private _documentOffsetConfig: IDocumentOffsetConfig = {
+        documentTransform: new Transform(),
         pageLayoutType: PageLayoutType.VERTICAL,
         pageMarginLeft: 0,
         pageMarginTop: 0,
         docsLeft: 0,
         docsTop: 0,
     };
-
-    // private _pageLayoutType: PageLayoutType = PageLayoutType.VERTICAL;
-    // private _pageMarginLeft: number = 0;
-    // private _pageMarginTop: number = 0;
-    // private _docsLeft: number = 0;
-    // private _docsTop: number = 0;
 
     private _selectionStyle: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE;
 
@@ -190,6 +183,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._activeViewport = viewport;
     }
 
+    setSegment(id: string) {
+        this._currentSegmentId = id;
+    }
+
     setStyle(style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE) {
         this._selectionStyle = style;
     }
@@ -219,7 +216,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         return this._textSelectionList;
     }
 
-    add(textSelection: TextSelection) {
+    add(textSelection: Nullable<TextSelection>) {
+        if (textSelection == null) {
+            return;
+        }
         this._addTextSelection(textSelection);
     }
 
@@ -239,6 +239,35 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     scroll() {
         this._scrollToSelection();
+    }
+
+    getRanges(): Array<Nullable<ITextSelectionRangeWithStyle>> {
+        return this.getTextSelectionList()
+            .map((textSelection) => {
+                const range = textSelection.getRange();
+                if (range == null) {
+                    return;
+                }
+                return {
+                    ...range,
+                    segmentId: this._currentSegmentId,
+                    style: this._selectionStyle,
+                };
+            })
+            .filter((x) => x != null);
+    }
+
+    getActiveRange(): Nullable<ITextSelectionRangeWithStyle> {
+        const range = this.getActiveTextSelection()?.getRange();
+        if (range == null) {
+            return;
+        }
+
+        return {
+            ...range,
+            segmentId: this._currentSegmentId,
+            style: this._selectionStyle,
+        };
     }
 
     activate(toLastPosition = false): void {
@@ -324,15 +353,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         // this._attachSelectionEvent(this._documents);
     }
 
-    eventTrigger(
-        evt: IPointerEvent | IMouseEvent,
-        documentTransform: Transform,
-        pageLayoutType: PageLayoutType,
-        pageMarginLeft: number,
-        pageMarginTop: number,
-        docsLeft: number,
-        docsTop: number
-    ) {
+    eventTrigger(evt: IPointerEvent | IMouseEvent, documentOffsetConfig: IDocumentOffsetConfig) {
         // this._moveInObserver = documents.onPointerEnterObserver.add(() => {
         //     documents.cursor = CURSOR_TYPE.TEXT;
         // });
@@ -355,14 +376,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
         this.activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
-        this.setOffsetForDocumentOffset(
-            documentTransform,
-            pageLayoutType,
-            pageMarginLeft,
-            pageMarginTop,
-            docsLeft,
-            docsTop
-        );
+        this._documentOffsetConfig = documentOffsetConfig;
 
         const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
 
@@ -425,10 +439,17 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             scene.onPointerUpObserver.remove(this._upObserver);
             scene.enableEvent();
 
+            this._textSelection$.next(this.getTextSelectionList());
+
             scrollTimer.dispose();
         });
 
         // state.stopPropagation();
+    }
+
+    reset() {
+        this._deleteAllTextSelection();
+        this.deactivate();
     }
 
     override dispose() {
@@ -822,20 +843,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             this._eventHandle(e, (config) => {
                 this._onKeydown$.next(config);
             });
-
-            // const activeSelection = this.getActiveTextSelection();
-            // const selectionList = this.getTextSelectionList();
-            // if (this._documents == null) {
-            //     return;
-            // }
-            // this._input.innerHTML = '';
-            // this._onKeydown$.next({
-            //     event: e,
-            //     content: '',
-            //     document: this._documents,
-            //     activeSelection,
-            //     selectionList,
-            // });
         });
 
         this._input.addEventListener('input', (e) => {
@@ -846,24 +853,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             this._eventHandle(e, (config) => {
                 this._onInput$.next(config);
             });
-
-            // const content = this._input.textContent || '';
-
-            // this._input.innerHTML = '';
-
-            // const activeSelection = this.getActiveTextSelection();
-            // const selectionList = this.getTextSelectionList();
-
-            // if (this._documents == null) {
-            //     return;
-            // }
-            // this._onInput$.next({
-            //     event: e,
-            //     content,
-            //     document: this._documents,
-            //     activeSelection,
-            //     selectionList,
-            // });
         });
 
         this._input.addEventListener('compositionstart', (e) => {
@@ -872,25 +861,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             this._eventHandle(e, (config) => {
                 this._onCompositionstart$.next(config);
             });
-
-            // const content = this._input.textContent || '';
-
-            // this._input.innerHTML = '';
-
-            // const activeSelection = this.getActiveTextSelection();
-            // const selectionList = this.getTextSelectionList();
-
-            // if (this._documents == null) {
-            //     return;
-            // }
-
-            // this._onCompositionstart$.next({
-            //     event: e,
-            //     content,
-            //     document: this._documents,
-            //     activeSelection,
-            //     selectionList,
-            // });
         });
 
         this._input.addEventListener('compositionend', (e) => {
@@ -899,81 +869,19 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             this._eventHandle(e, (config) => {
                 this._onCompositionend$.next(config);
             });
-
-            // const content = this._input.textContent || '';
-
-            // this._input.innerHTML = '';
-
-            // const activeSelection = this.getActiveTextSelection();
-            // const selectionList = this.getTextSelectionList();
-
-            // if (this._documents == null) {
-            //     return;
-            // }
-
-            // this._onCompositionend$.next({
-            //     event: e,
-            //     content,
-            //     document: this._documents,
-            //     activeSelection,
-            //     selectionList,
-            // });
         });
 
         this._input.addEventListener('compositionupdate', (e) => {
             this._eventHandle(e, (config) => {
                 this._onCompositionupdate$.next(config);
             });
-
-            // const content = this._input.textContent || '';
-
-            // this._input.innerHTML = '';
-
-            // const activeSelection = this.getActiveTextSelection();
-            // const selectionList = this.getTextSelectionList();
-
-            // if (this._documents == null) {
-            //     return;
-            // }
-
-            // this._onCompositionupdate$.next({
-            //     event: e,
-            //     content,
-            //     document: this._documents,
-            //     activeSelection,
-            //     selectionList,
-            // });
         });
 
         this._input.addEventListener('paste', (e) => {
             this._eventHandle(e, (config) => {
                 this._onPaste$.next(config);
             });
-
-            // const content = this._input.textContent || '';
-
-            // this._input.innerHTML = '';
-
-            // const activeSelection = this.getActiveTextSelection();
-            // const selectionList = this.getTextSelectionList();
-
-            // if (this._documents == null) {
-            //     return;
-            // }
-
-            // this._onPaste$.next({
-            //     event: e,
-            //     content,
-            //     document: this._documents,
-            //     activeSelection,
-            //     selectionList,
-            // });
         });
-
-        // this.onPaste$ = (fromEvent(this._input, 'paste') as RxObservable<ClipboardEvent>).pipe(
-        //     takeUntil(this.dispose$),
-        //     share()
-        // );
     }
 
     private _eventHandle(e: Event | CompositionEvent | KeyboardEvent, func: (config: IEditorInputConfig) => void) {
@@ -981,18 +889,13 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._input.innerHTML = '';
 
-        const activeSelection = this.getActiveTextSelection();
+        const activeRange = this.getActiveRange();
         const selectionList = this.getTextSelectionList();
-
-        // if (this._documents == null) {
-        //     return;
-        // }
 
         func({
             event: e,
             content,
-            // document: this._documents,
-            activeSelection,
+            activeRange,
             selectionList,
         });
     }
@@ -1002,7 +905,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     private _getTransformCoordForDocumentOffset(evtOffsetX: number, evtOffsetY: number) {
-        if (this._scene == null || this._documentTransform == null) {
+        const { documentTransform } = this._documentOffsetConfig;
+        if (this._scene == null || documentTransform == null) {
             return;
         }
         this.activeViewport = this._scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
@@ -1013,25 +917,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        return this._documentTransform.clone().invert().applyPoint(originCoord);
-    }
-
-    private setOffsetForDocumentOffset(
-        documentTransform: Transform,
-        pageLayoutType: PageLayoutType,
-        pageMarginLeft: number,
-        pageMarginTop: number,
-        docsLeft: number,
-        docsTop: number
-    ) {
-        this._documentTransform = documentTransform;
-        this._documentOffsetConfig = {
-            pageLayoutType,
-            pageMarginLeft,
-            pageMarginTop,
-            docsLeft,
-            docsTop,
-        };
+        return documentTransform.clone().invert().applyPoint(originCoord);
     }
 
     private _findNodeByCoord(evtOffsetX: number, evtOffsetY: number) {
@@ -1041,7 +927,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const { pageLayoutType, pageMarginLeft, pageMarginTop } = this._documentOffsetConfig;
+        const { pageLayoutType = PageLayoutType.VERTICAL, pageMarginLeft, pageMarginTop } = this._documentOffsetConfig;
 
         return this._docSkeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop);
     }

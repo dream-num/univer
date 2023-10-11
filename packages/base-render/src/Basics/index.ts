@@ -9,6 +9,7 @@ export * from './Path2';
 export * from './PerformanceMonitor';
 export * from './ScrollXY';
 export * from './Selection';
+export * from './TextSelection';
 export * from './Tools';
 export * from './Transform';
 export * from './Vector2';

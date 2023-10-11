@@ -22,14 +22,23 @@ import {
     InsertCommand,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
+import { SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
+import { SetZoomRatioMutation } from './commands/mutations/set-zoom-ratio.mutation';
 import { MoveCursorOperation } from './commands/operations/cursor.operation';
+import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
+import { DeleteLeftInputController } from './Controller/delete-left-input.controller';
 import { DocRenderController } from './Controller/doc-render.controller';
-import { DocumentController } from './Controller/DocumentController';
+import { IMEInputController } from './Controller/ime-input.controller';
+import { LineBreakInputController } from './Controller/line-break-input.controller';
+import { MoveCursorController } from './Controller/move-cursor.controller';
+import { NormalInputController } from './Controller/normal-input.controller';
 import { PageRenderController } from './Controller/page-render.controller';
+import { TextSelectionController } from './Controller/text-selection.controller';
 import { en } from './Locale';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 import { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
+import { TextSelectionManagerService } from './services/text-selection-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
 import {
     MoveCursorDownShortcut,
@@ -94,6 +103,9 @@ export class DocPlugin extends Plugin {
                 IMEInputCommand,
                 RichTextEditingMutation,
                 CoverCommand,
+                SetZoomRatioCommand,
+                SetZoomRatioMutation,
+                SetTextSelectionsOperation,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
@@ -149,11 +161,17 @@ export class DocPlugin extends Plugin {
                         useClass: TextSelectionRenderManager,
                     },
                 ],
+                [TextSelectionManagerService],
 
                 // controllers
-                [DocumentController],
                 [DocRenderController],
                 [PageRenderController],
+                [TextSelectionController],
+                [NormalInputController],
+                [IMEInputController],
+                [DeleteLeftInputController],
+                [LineBreakInputController],
+                [MoveCursorController],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
 

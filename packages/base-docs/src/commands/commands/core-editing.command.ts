@@ -13,7 +13,6 @@ import {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
-import { InputController } from '../../Controller/InputController';
 import {
     IDeleteMutationParams,
     IRetainMutationParams,
@@ -24,21 +23,19 @@ import {
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
     type: CommandType.COMMAND,
-    handler: async (accessor) => {
-        const inputController = accessor.get(InputController);
-        inputController.deleteLeft();
-        return true;
-    },
+    handler: async (accessor) =>
+        // const inputController = accessor.get(InputController);
+        // inputController.deleteLeft();
+        true,
 };
 
 export const BreakLineCommand: ICommand = {
     id: 'doc.command.break-line',
     type: CommandType.COMMAND,
-    handler: async (accessor) => {
-        const inputController = accessor.get(InputController);
-        inputController.breakLine();
-        return true;
-    },
+    handler: async (accessor) =>
+        // const inputController = accessor.get(InputController);
+        // inputController.breakLine();
+        true,
 };
 
 export interface IInsertCommandParams {

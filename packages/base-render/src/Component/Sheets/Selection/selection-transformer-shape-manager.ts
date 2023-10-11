@@ -117,7 +117,6 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
     private readonly _selectionRangeWithStyle$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
 
-    // eslint-disable-next-line @typescript-eslint/member-ordering
     readonly selectionRangeWithStyle$ = this._selectionRangeWithStyle$.asObservable();
 
     static create() {

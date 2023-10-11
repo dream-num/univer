@@ -58,6 +58,7 @@ export { SetFrozenCommand } from './commands/commands/set-frozen.command';
 export { SetFrozenCancelCommand } from './commands/commands/set-frozen-cancel.command';
 export type { ISetRangeValuesCommandParams } from './commands/commands/set-range-values.command';
 export { SetRangeValuesCommand } from './commands/commands/set-range-values.command';
+export { ScrollCommand } from './commands/commands/set-scroll.command';
 export type {
     IExpandSelectionCommandParams,
     IMoveSelectionCommandParams,
@@ -124,6 +125,7 @@ export {
     SetWorksheetRowHeightMutation,
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { SetZoomRatioMutation } from './commands/mutations/set-zoom-ratio.mutation';
+export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SetSelectionsOperation } from './commands/operations/selection.operation';
 export * from './Locale';
 

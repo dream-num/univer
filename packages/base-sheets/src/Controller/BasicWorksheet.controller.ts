@@ -36,6 +36,7 @@ import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
 import { SetRangeFormattedValueCommand } from '../commands/commands/set-range-formatted-value.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
+import { ScrollCommand } from '../commands/commands/set-scroll.command';
 import {
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
@@ -81,7 +82,6 @@ import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-o
 import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { SetWorksheetRowHideMutation } from '../commands/mutations/set-worksheet-row-hide.mutation';
 import { SetWorksheetRowShowMutation } from '../commands/mutations/set-worksheet-row-show.mutation';
-import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -185,7 +185,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetFrozenCommand,
             SetFrozenMutation,
             SetFrozenCancelCommand,
-            SetZoomRatioOperation,
+            ScrollCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

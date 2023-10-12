@@ -51,10 +51,18 @@ export class SheetCanvasView {
         const unitId = workbook.getUnitId();
         const container = workbook.getContainer();
 
-        if (container == null) {
-            this._renderManagerService.createRenderWithDefaultEngine(unitId);
+        const parentRenderUnitId = workbook.getParentRenderUnitId();
+
+        if (container != null && parentRenderUnitId != null) {
+            throw new Error('container or parentRenderUnitId can only exist one');
+        }
+
+        const isAddedToExistedScene = container == null && parentRenderUnitId != null;
+
+        if (isAddedToExistedScene) {
+            this._renderManagerService.createRenderWithParent(unitId, parentRenderUnitId);
         } else {
-            this._renderManagerService.createRenderWithNewEngine(unitId);
+            this._renderManagerService.createRender(unitId);
         }
         this._renderManagerService.setCurrent(unitId);
 
@@ -78,7 +86,7 @@ export class SheetCanvasView {
 
         const should = workbook.getShouldRenderLoopImmediately();
 
-        if (should) {
+        if (should && !isAddedToExistedScene) {
             engine.runRenderLoop(() => {
                 // document.getElementById('app')!.innerHTML = engine.getFps().toString();
                 scene.render();

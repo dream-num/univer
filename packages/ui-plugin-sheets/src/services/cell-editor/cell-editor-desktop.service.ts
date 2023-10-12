@@ -1,13 +1,20 @@
 import './desktop.module.less';
 
-import { CoverCommand, DocsView, DocsViewManagerService, ICoverCommandParams } from '@univerjs/base-docs';
 import {
-    DocsEditor,
+    CoverCommand,
+    DocsView,
+    getDocObject,
+    ICoverCommandParams,
+    TextSelectionManagerService,
+} from '@univerjs/base-docs';
+import {
     Engine,
+    IEditorInputConfig,
     IMouseEvent,
     IPointerEvent,
     IRenderManagerService,
     ISelectionTransformerShapeManager,
+    ITextSelectionRenderManager,
     Layer,
     Scene,
     Viewport,
@@ -67,7 +74,9 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
         @ICommandService private readonly _commandService: ICommandService,
         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
         @IContextService private readonly _contextService: IContextService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -109,7 +118,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
         this._contextService.setContextValue(SHEET_EDITOR_ACTIVATED, true);
 
         this._currentUniverService.focusUniverInstance(SHEET_CELL_EDITOR_MODEL_ID); // focus the UniverDoc instance to enable rich text editing
-        this._getCellEditor()?.activate();
+        this._textSelectionRenderManager.activate(true);
     }
 
     quitEditing(): void {
@@ -127,7 +136,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
 
         const model = this._currentUniverService.getUniverDocInstance(SHEET_CELL_EDITOR_MODEL_ID)!;
         const dataStream = model.getBodyModel().getText();
-        this._getCellEditor()?.deactivate(true);
+        this._textSelectionRenderManager.deactivate(true);
 
         this._commandService.executeCommand(SetRangeValuesCommand.id, <ISetRangeValuesCommandParams>{
             workbookId,
@@ -194,7 +203,7 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
         scene.addLayer(Layer.create(scene, [], 0), Layer.create(scene, [], 2));
         const docsView = this._injector.createInstance(DocsView, docModel);
         docsView.initialize(scene);
-        docsView.getDocs().enableEditor();
+        // docsView.getDocs().enableEditor();
 
         engine.runRenderLoop(() => {
             scene.render();
@@ -205,17 +214,19 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
     }
 
     private _initPasteHandler(): void {
-        this._enableEditor();
+        this._textSelectionRenderManager.enableSelection();
 
-        const editor = this._getCellEditor();
-        if (!editor) {
-            throw new Error('[DesktopCellEditorService]: Could not init paste handler, cell editor not found!');
-        }
+        // const editor = this._getCellEditor();
+        // if (!editor) {
+        //     throw new Error('[DesktopCellEditorService]: Could not init paste handler, cell editor not found!');
+        // }
 
-        editor.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((e: ClipboardEvent) => {
-            console.log('paste event', e);
-            // TODO: handle paste event from the editor input element
-        });
+        this._textSelectionRenderManager.onPaste$
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((config: Nullable<IEditorInputConfig>) => {
+                console.log('paste event', config?.event);
+                // TODO: handle paste event from the editor input element
+            });
     }
 
     private _positionCellEditor(currentCell: ISelectionCell) {
@@ -333,21 +344,18 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
         return this._getActiveRange()?.getTextStyle();
     }
 
-    private _enableEditor(): void {
-        return this._injector
-            .get(DocsViewManagerService)
-            .getDocsView(SHEET_CELL_EDITOR_MODEL_ID)
-            ?.getDocs()
-            .enableEditor();
-    }
+    // private _enableEditor(): void {
+    //     return this._getDocObject()?.document
+    //         .enableEditor();
+    // }
 
-    private _getCellEditor(): Nullable<DocsEditor> {
-        return this._injector
-            .get(DocsViewManagerService)
-            .getDocsView(SHEET_CELL_EDITOR_MODEL_ID)
-            ?.getDocs()
-            .getEditor();
-    }
+    // private _getCellEditor(): Nullable<DocsEditor> {
+    //     return this._injector
+    //         .get(DocsViewManagerService)
+    //         .getDocsView(SHEET_CELL_EDITOR_MODEL_ID)
+    //         ?.getDocs()
+    //         .getEditor();
+    // }
 
     private _getActiveRange() {
         const primary = this._selectionManagerService.getLast()?.primary;
@@ -364,6 +372,10 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
 
             .getActiveSheet()
             .getRange(actualRow, actualColumn);
+    }
+
+    private _getDocObject() {
+        return getDocObject(this._currentUniverService, this._renderManagerService);
     }
 }
 

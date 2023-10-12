@@ -49,6 +49,19 @@ export class DocumentModelSimple {
         return this.snapshot.body;
     }
 
+    getShouldRenderLoopImmediately() {
+        const should = this.snapshot.shouldStartRenderingImmediately;
+        return should !== false;
+    }
+
+    getContainer() {
+        return this.snapshot.container;
+    }
+
+    getParentRenderUnitId() {
+        return this.snapshot.parentRenderUnitId;
+    }
+
     getBodyModel(segmentId?: string) {
         if (segmentId == null) {
             return this.bodyModel;
@@ -122,6 +135,10 @@ export class DocumentModel extends DocumentModelSimple {
 
         this._unitId = this.snapshot.id ?? Tools.generateRandomId(UNIT_ID_LENGTH);
         this._initializeRowColTree();
+    }
+
+    getSettings() {
+        return this.snapshot.settings;
     }
 
     reset(snapshot: Partial<IDocumentData>) {

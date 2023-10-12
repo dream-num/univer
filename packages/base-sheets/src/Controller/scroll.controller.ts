@@ -35,7 +35,7 @@ export class ScrollController extends Disposable {
     }
 
     private _scrollEventBinding() {
-        const scene = this._renderManagerService.getCurrent()?.scene;
+        const scene = this._getSheetObject()?.scene;
         if (scene == null) {
             return;
         }
@@ -46,10 +46,13 @@ export class ScrollController extends Disposable {
             if (skeleton == null || param.isTrigger === false) {
                 return;
             }
-            const scene = this._renderManagerService.getCurrent()?.scene;
-            if (scene == null) {
+
+            const sheetObject = this._getSheetObject();
+            if (skeleton == null || sheetObject == null) {
                 return;
             }
+
+            const scene = sheetObject.scene;
 
             const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
 
@@ -72,21 +75,23 @@ export class ScrollController extends Disposable {
                 sheetViewStartRow: row,
                 sheetViewStartColumn: column,
             });
+
+            // this._commandService.executeCommand(SetScrollOperation.id, {
+            //     sheetViewStartRow: row,
+            //     sheetViewStartColumn: column,
+            // });
         });
     }
 
     private _scrollSubscribeBinding() {
         this._scrollManagerService.scrollInfo$.subscribe((param) => {
             const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-            const scene = this._renderManagerService.getCurrent()?.scene;
-            if (skeleton == null || scene == null) {
+            const sheetObject = this._getSheetObject();
+            if (skeleton == null || sheetObject == null) {
                 return;
             }
 
-            const sheetObject = this._getSheetObject();
-            if (sheetObject == null) {
-                return;
-            }
+            const scene = sheetObject.scene;
 
             const { scaleX, scaleY } = sheetObject.scene.getAncestorScale();
 
@@ -160,9 +165,9 @@ export class ScrollController extends Disposable {
         if (param == null) {
             return;
         }
-        const { skeleton } = param;
+        const { skeleton, unitId } = param;
 
-        const scene = this._renderManagerService.getCurrent()?.scene;
+        const scene = this._renderManagerService.getRenderById(unitId)?.scene;
 
         if (skeleton == null || scene == null) {
             return;

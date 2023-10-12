@@ -367,7 +367,7 @@ export class SelectionTransformerShape {
 
         this._columnHeaderHeight = columnHeaderHeight || 0;
 
-        this.selectionShape.makeDirty(true);
+        this.selectionShape.makeDirtyNoDebounce(true);
     }
 
     update(

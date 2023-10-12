@@ -1,6 +1,4 @@
-import { CommandType, Direction, ICurrentUniverService, IOperation } from '@univerjs/core';
-
-import { InputController } from '../../Controller/InputController';
+import { CommandType, Direction, IOperation } from '@univerjs/core';
 
 export interface IMoveCursorOperationParams {
     direction: Direction;
@@ -19,10 +17,10 @@ export const MoveCursorOperation: IOperation<IMoveCursorOperationParams> = {
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const inputController = accessor.get(InputController);
+        // const currentUniverService = accessor.get(ICurrentUniverService);
+        // const inputController = accessor.get(InputController);
 
-        inputController.moveCursor(currentUniverService.getCurrentUniverDocInstance(), params.direction);
+        // inputController.moveCursor(currentUniverService.getCurrentUniverDocInstance(), params.direction);
 
         return true;
     },

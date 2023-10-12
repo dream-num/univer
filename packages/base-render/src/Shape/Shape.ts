@@ -2,10 +2,11 @@ import { IKeyValue, IScale, Nullable } from '@univerjs/core';
 
 import { BASE_OBJECT_ARRAY, BaseObject } from '../BaseObject';
 import { SHAPE_TYPE } from '../Basics/Const';
+import { getDevicePixelRatio } from '../Basics/Draw';
 import { IObjectFullState } from '../Basics/Interfaces';
 import { transformBoundingCoord } from '../Basics/Position';
 import { IBoundRect, Vector2 } from '../Basics/Vector2';
-import { Canvas, getDevicePixelRatio } from '../Canvas';
+import { Canvas } from '../Canvas';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';

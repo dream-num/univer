@@ -1,4 +1,5 @@
 import { BooleanNumber, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../Enum';
+import { IExtraModelConfig } from './IExtraModelConfig';
 import { IImageProperties } from './IImageProperties';
 import { IShapeProperties } from './IShapeProperties';
 import { IColorStyle, IStyleBase } from './IStyleData';
@@ -7,12 +8,13 @@ import { IColorStyle, IStyleBase } from './IStyleData';
 /**
  * Properties of document
  */
-export interface IDocumentData extends IReferenceSource {
+export interface IDocumentData extends IReferenceSource, IExtraModelConfig {
     id: string; // unit id
     locale?: LocaleType;
     title?: string;
     body?: IDocumentBody;
     documentStyle: IDocumentStyle;
+    settings?: IDocumentSettings;
 }
 
 export interface IReferenceSource {
@@ -20,6 +22,10 @@ export interface IReferenceSource {
     headers?: IHeaders;
     lists?: ILists;
     drawings?: IDrawings;
+}
+
+export interface IDocumentSettings {
+    zoomRatio?: number;
 }
 
 /**

@@ -1,3 +1,4 @@
+import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/base-render';
 import { DesktopPlatformService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
 import {
     ICommand,
@@ -5,7 +6,6 @@ import {
     IConfigService,
     ICurrentUniverService,
     LocaleService,
-    Nullable,
     Plugin,
     PLUGIN_NAMES,
     PluginType,
@@ -22,11 +22,23 @@ import {
     InsertCommand,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
+import { SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
+import { SetZoomRatioMutation } from './commands/mutations/set-zoom-ratio.mutation';
 import { MoveCursorOperation } from './commands/operations/cursor.operation';
-import { DocumentController } from './Controller/DocumentController';
+import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
+import { DeleteLeftInputController } from './Controller/delete-left-input.controller';
+import { DocRenderController } from './Controller/doc-render.controller';
+import { IMEInputController } from './Controller/ime-input.controller';
+import { LineBreakInputController } from './Controller/line-break-input.controller';
+import { MoveCursorController } from './Controller/move-cursor.controller';
+import { NormalInputController } from './Controller/normal-input.controller';
+import { PageRenderController } from './Controller/page-render.controller';
+import { TextSelectionController } from './Controller/text-selection.controller';
 import { en } from './Locale';
+import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 import { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
+import { TextSelectionManagerService } from './services/text-selection-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
 import {
     MoveCursorDownShortcut,
@@ -34,8 +46,7 @@ import {
     MoveCursorRightShortcut,
     MoveCursorUpShortcut,
 } from './shortcuts/cursor.shortcut';
-import { CanvasView } from './View/CanvasView';
-import { DocsView } from './View/Render/Views';
+import { DocCanvasView } from './View/doc-canvas-view';
 
 export interface IDocPluginConfig {
     [DOCS_CONFIG_STANDALONE_KEY]?: boolean;
@@ -48,8 +59,6 @@ export class DocPlugin extends Plugin {
     static override type = PluginType.Doc;
 
     private _config: IDocPluginConfig;
-
-    private _canvasView!: CanvasView;
 
     constructor(
         config: Partial<IDocPluginConfig> = {},
@@ -75,11 +84,11 @@ export class DocPlugin extends Plugin {
             en,
         });
 
-        if (this._config.standalone) {
-            this.initCanvasView();
-        }
+        // if (this._config.standalone) {
+        //     this.initCanvasView();
+        // }
 
-        this._markDocAsFocused();
+        // this._markDocAsFocused();
     }
 
     initializeCommands(): void {
@@ -94,6 +103,9 @@ export class DocPlugin extends Plugin {
                 IMEInputCommand,
                 RichTextEditingMutation,
                 CoverCommand,
+                SetZoomRatioCommand,
+                SetZoomRatioMutation,
+                SetTextSelectionsOperation,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
@@ -116,45 +128,9 @@ export class DocPlugin extends Plugin {
         this._configService.batchSettings(unitId, config);
     }
 
-    initCanvasView() {
-        this._canvasView = this._injector.get(CanvasView);
-    }
-
-    getConfig() {
-        return this._config;
-    }
-
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
-    getCanvasView() {
-        return this._canvasView;
-    }
-
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
-    getDocsView() {
-        return this.getCanvasView().getDocsView();
-    }
-
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
-    getMainComponent() {
-        return (this.getDocsView() as Nullable<DocsView>)?.getDocs();
-    }
-
-    /**
-     * @deprecated use DI to get underlying dependencies
-     * @returns
-     */
-    getInputEvent() {
-        return this.getMainComponent()?.getEditorInputEvent();
-    }
+    // initCanvasView() {
+    //     this._canvasView = this._injector.get(CanvasView);
+    // }
 
     override onReady(): void {
         this.initialize();
@@ -169,12 +145,33 @@ export class DocPlugin extends Plugin {
     private _initializeDependencies(docInjector: Injector, univerInjector: Injector) {
         (
             [
-                [
-                    CanvasView,
-                    { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) },
-                ], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
+                // [
+                //     CanvasView,
+                //     { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) },
+                // ], // FIXME: CanvasView shouldn't be a dependency of DocPlugin. Because it maybe created dynamically.
+                //views
+                [DocCanvasView],
+
+                // services
                 [IPlatformService, { useClass: DesktopPlatformService }],
-                [DocumentController],
+                [DocSkeletonManagerService],
+                [
+                    ITextSelectionRenderManager,
+                    {
+                        useClass: TextSelectionRenderManager,
+                    },
+                ],
+                [TextSelectionManagerService],
+
+                // controllers
+                [DocRenderController],
+                [PageRenderController],
+                [TextSelectionController],
+                [NormalInputController],
+                [IMEInputController],
+                [DeleteLeftInputController],
+                [LineBreakInputController],
+                [MoveCursorController],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
 

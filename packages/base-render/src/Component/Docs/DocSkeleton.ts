@@ -18,12 +18,17 @@ import {
 import {
     IDocumentSkeletonCached,
     IDocumentSkeletonPage,
+    IDocumentSkeletonSpan,
     ISkeletonResourceReference,
+    LineType,
+    PageLayoutType,
+    SpanType,
 } from '../../Basics/IDocumentSkeletonCached';
-import { IDocsConfig, ISectionBreakConfig } from '../../Basics/Interfaces';
-import { IBoundRect } from '../../Basics/Vector2';
+import { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../Basics/Interfaces';
+import { IBoundRect, Vector2 } from '../../Basics/Vector2';
 import { Skeleton } from '../Skeleton';
 import { dealWithSections } from './Block/Section';
+import { Liquid } from './Common/Liquid';
 import { createSkeletonPage } from './Common/Page';
 import { createSkeletonSection } from './Common/Section';
 import { getLastPage, updateBlockIndex } from './Common/Tools';
@@ -51,13 +56,15 @@ export class DocumentSkeleton extends Skeleton {
 
     private _renderedBlockIdMap = new Map<string, boolean>();
 
+    private _findLiquid: Liquid = new Liquid();
+
     constructor(docModel: DocumentModelOrSimple, localeService: LocaleService) {
         super(localeService);
 
         this._docModel = docModel;
         this.disposeWithMe(
             fromObservable(
-                this._docModel.bodyModel.modelChange$.subscribe(() => {
+                this._docModel.bodyModel?.modelChange$.subscribe(() => {
                     this.calculate();
                 })
             )
@@ -89,6 +96,375 @@ export class DocumentSkeleton extends Skeleton {
         return this._docModel.documentStyle.pageSize;
     }
 
+    findPositionBySpan(span: IDocumentSkeletonSpan): Nullable<INodeSearch> {
+        const divide = span.parent;
+
+        const line = divide?.parent;
+
+        const column = line?.parent;
+
+        const section = column?.parent;
+
+        const page = section?.parent;
+
+        const skeletonData = this.getSkeletonData();
+
+        if (!divide || !column || !section || !page || !skeletonData) {
+            return;
+        }
+
+        const spanIndex = divide.spanGroup.indexOf(span);
+
+        const divideIndex = line.divides.indexOf(divide);
+
+        const lineIndex = column.lines.indexOf(line);
+
+        const columnIndex = section.columns.indexOf(column);
+
+        const sectionIndex = page.sections.indexOf(section);
+
+        const pageIndex = skeletonData.pages.indexOf(page);
+
+        return {
+            span: spanIndex,
+            divide: divideIndex,
+            line: lineIndex,
+            column: columnIndex,
+            section: sectionIndex,
+            page: pageIndex,
+        };
+    }
+
+    findNodePositionByCharIndex(charIndex: number, isBack: boolean = false): Nullable<INodePosition> {
+        const nodes = this._findNodeIterator(charIndex);
+
+        if (nodes == null) {
+            return;
+        }
+
+        const skeletonData = this.getSkeletonData();
+
+        if (!skeletonData) {
+            return;
+        }
+
+        const pages = skeletonData.pages;
+
+        const { span, divide, line, column, section, page } = nodes;
+
+        return {
+            span: divide.spanGroup.indexOf(span),
+            divide: line.divides.indexOf(divide),
+            line: column.lines.indexOf(line),
+            column: section.columns.indexOf(column),
+            section: page.sections.indexOf(section),
+            page: pages.indexOf(page),
+            isBack,
+        };
+    }
+
+    findNodeByCharIndex(charIndex: number): Nullable<IDocumentSkeletonSpan> {
+        const nodes = this._findNodeIterator(charIndex);
+
+        return nodes?.span;
+
+        // const skeletonData = this.getSkeletonData();
+
+        // if (!skeletonData) {
+        //     return;
+        // }
+
+        // const pages = skeletonData.pages;
+
+        // for (const page of pages) {
+        //     const { sections, st, ed } = page;
+
+        //     if (charIndex < st || charIndex > ed) {
+        //         continue;
+        //     }
+
+        //     for (const section of sections) {
+        //         const { columns, st, ed } = section;
+
+        //         if (charIndex < st || charIndex > ed) {
+        //             continue;
+        //         }
+
+        //         for (const column of columns) {
+        //             const { lines, st, ed } = column;
+
+        //             if (charIndex < st || charIndex > ed) {
+        //                 continue;
+        //             }
+
+        //             for (const line of lines) {
+        //                 const { divides, lineHeight, st, ed } = line;
+        //                 const divideLength = divides.length;
+
+        //                 if (charIndex < st || charIndex > ed) {
+        //                     continue;
+        //                 }
+
+        //                 for (let i = 0; i < divideLength; i++) {
+        //                     const divide = divides[i];
+        //                     const { spanGroup, st, ed } = divide;
+
+        //                     if (charIndex < st || charIndex > ed) {
+        //                         continue;
+        //                     }
+
+        //                     if (spanGroup[0].spanType === SpanType.LIST) {
+        //                         charIndex++;
+        //                     }
+
+        //                     const span = spanGroup[charIndex - st];
+
+        //                     if (span) {
+        //                         return span;
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+    }
+
+    findSpanByPosition(position: Nullable<INodePosition>) {
+        if (position == null) {
+            return;
+        }
+
+        const skeletonData = this.getSkeletonData();
+
+        if (skeletonData == null) {
+            return;
+        }
+
+        const { divide, line, column, section, page, isBack } = position;
+
+        let { span } = position;
+
+        if (isBack === true) {
+            span -= 1;
+        }
+
+        span = span < 0 ? 0 : span;
+
+        const spanGroup =
+            skeletonData.pages[page].sections[section].columns[column].lines[line].divides[divide].spanGroup;
+
+        if (spanGroup[span].spanType === SpanType.LIST) {
+            return spanGroup[span + 1];
+        }
+
+        return spanGroup[span];
+    }
+
+    findNodeByCoord(
+        coord: Vector2,
+        pageLayoutType: PageLayoutType,
+        pageMarginLeft: number,
+        pageMarginTop: number
+    ): Nullable<INodeInfo> {
+        const { x, y } = coord;
+
+        this._findLiquid.reset();
+
+        const skeletonData = this.getSkeletonData();
+
+        if (skeletonData == null) {
+            return;
+        }
+
+        const pages = skeletonData.pages;
+
+        let nearestNodeList: INodeInfo[] = [];
+
+        let nearestNodeDistanceList: number[] = [];
+
+        let nearestNodeDistanceY = Infinity;
+
+        for (let i = 0, len = pages.length; i < len; i++) {
+            const page = pages[i];
+
+            const { startX, startY, endX, endY } = this._getPageBoundingBox(page, pageLayoutType);
+
+            if (!(x >= startX && x <= endX && y >= startY && y <= endY)) {
+                this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+                continue;
+            }
+
+            this._findLiquid.translatePagePadding(page);
+
+            const sections = page.sections;
+
+            for (const section of sections) {
+                const { columns, height } = section;
+
+                this._findLiquid.translateSection(section);
+
+                const { y: startY } = this._findLiquid;
+
+                // if (!(y >= startY && y <= startY + height)) {
+                //     continue;
+                // }
+
+                for (const column of columns) {
+                    const { lines, width: columnWidth } = column;
+
+                    this._findLiquid.translateColumn(column);
+
+                    const { x: startX } = this._findLiquid;
+
+                    // if (!(x >= startX && x <= startX + columnWidth)) {
+                    //     continue;
+                    // }
+
+                    const linesCount = lines.length;
+
+                    for (let i = 0; i < linesCount; i++) {
+                        const line = lines[i];
+                        const { divides, type, lineHeight = 0 } = line;
+
+                        if (type === LineType.BLOCK) {
+                            continue;
+                        } else {
+                            this._findLiquid.translateSave();
+                            this._findLiquid.translateLine(line);
+
+                            const { y: startY } = this._findLiquid;
+
+                            const startY_fin = startY;
+
+                            const endY_fin = startY + lineHeight;
+
+                            const distanceY = Math.abs(y - endY_fin);
+
+                            // if (!(y >= startY_fin && y <= endY_fin)) {
+                            //     this._findLiquid.translateRestore();
+                            //     continue;
+                            // }
+
+                            const divideLength = divides.length;
+                            for (let i = 0; i < divideLength; i++) {
+                                const divide = divides[i];
+                                const { spanGroup, width: divideWidth } = divide;
+
+                                this._findLiquid.translateSave();
+                                this._findLiquid.translateDivide(divide);
+
+                                const { x: startX } = this._findLiquid;
+
+                                // if (!(x >= startX && x <= startX + divideWidth)) {
+                                //     this._findLiquid.translateRestore();
+                                //     continue;
+                                // }
+
+                                for (const span of spanGroup) {
+                                    if (!span.content || span.content.length === 0) {
+                                        continue;
+                                    }
+
+                                    const { width: spanWidth, left: spanLeft } = span;
+
+                                    const startX_fin = startX + spanLeft;
+
+                                    const endX_fin = startX + spanLeft + spanWidth;
+
+                                    const distanceX = Math.abs(x - endX_fin);
+
+                                    if (y >= startY_fin && y <= endY_fin) {
+                                        if (x >= startX_fin && x <= endX_fin) {
+                                            return {
+                                                node: span,
+                                                ratioX: x / (startX_fin + endX_fin),
+                                                ratioY: y / (startY_fin + endY_fin),
+                                            };
+                                        }
+
+                                        if (nearestNodeDistanceY !== -Infinity) {
+                                            nearestNodeList = [];
+                                            nearestNodeDistanceList = [];
+                                        }
+                                        nearestNodeList.push({
+                                            node: span,
+                                            ratioX: x / (startX_fin + endX_fin),
+                                            ratioY: y / (startY_fin + endY_fin),
+                                        });
+
+                                        nearestNodeDistanceList.push(distanceX);
+
+                                        nearestNodeDistanceY = -Infinity;
+                                        continue;
+                                    }
+
+                                    if (distanceY < nearestNodeDistanceY) {
+                                        nearestNodeDistanceY = distanceY;
+                                        nearestNodeList = [];
+                                        nearestNodeDistanceList = [];
+                                    }
+
+                                    if (distanceY === nearestNodeDistanceY) {
+                                        nearestNodeList.push({
+                                            node: span,
+                                            ratioX: x / (startX_fin + endX_fin),
+                                            ratioY: y / (startY_fin + endY_fin),
+                                        });
+
+                                        nearestNodeDistanceList.push(distanceX);
+                                    }
+                                }
+                                this._findLiquid.translateRestore();
+                            }
+                            this._findLiquid.translateRestore();
+                        }
+                    }
+                }
+            }
+            this._findLiquid.restorePagePadding(page);
+            this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+        }
+
+        return this._getNearestNode(nearestNodeList, nearestNodeDistanceList);
+    }
+
+    private _getNearestNode(nearestNodeList: INodeInfo[], nearestNodeDistanceList: number[]) {
+        const miniValue = Math.min(...nearestNodeDistanceList);
+        const miniValueIndex = nearestNodeDistanceList.indexOf(miniValue);
+        return nearestNodeList[miniValueIndex];
+    }
+
+    private _getPageBoundingBox(page: IDocumentSkeletonPage, pageLayoutType: PageLayoutType) {
+        const { pageWidth, pageHeight } = page;
+        const { x: startX, y: startY } = this._findLiquid;
+
+        let endX = -1;
+        let endY = -1;
+        if (pageLayoutType === PageLayoutType.VERTICAL) {
+            endX = pageWidth;
+            endY = startY + pageHeight;
+        } else if (pageLayoutType === PageLayoutType.HORIZONTAL) {
+            endX = startX + pageWidth;
+            endY = pageHeight;
+        }
+
+        return {
+            startX,
+            startY,
+            endX,
+            endY,
+        };
+    }
+
+    private _translatePage(
+        page: IDocumentSkeletonPage,
+        pageLayoutType: PageLayoutType,
+        pageMarginLeft: number,
+        pageMarginTop: number
+    ) {
+        this._findLiquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+    }
+
     // updateDocumentDataPageSize(width?: number, height?: number) {
     //     const documentStyle = this._docModel.documentStyle;
     //     if (!documentStyle.pageSize) {
@@ -111,30 +487,30 @@ export class DocumentSkeleton extends Skeleton {
     // }
 
     /**
-     * \v COLUMN_BREAK 换列
-     * \f PAGE_BREAK 换页
-     * \0 DOCS_END 文档结尾
-     * \t TAB 制表符
+     * \v COLUMN_BREAK
+     * \f PAGE_BREAK
+     * \0 DOCS_END
+     * \t TAB
      *
      * Needs to be changed：
-     * \r PARAGRAPH 段落
-     * \n SECTION_BREAK 章节
+     * \r PARAGRAPH
+     * \n SECTION_BREAK
      *
-     * \b customBlock 图片 mention等不参与文档流的场景
+     * \b customBlock: Scenarios where customBlock, images, mentions, etc. do not participate in the document flow.
      *
-     * 表格
-     * \x1A table start 表格开始
-     * \x1B table row start 表格开始
-     * \x1C table cell start 表格开始
-     * \x1D table cell end 表格开始
-     * \x1E table row end 表格开始
-     * \x1F table end 表格结束
+     * Table
+     * \x1A table start
+     * \x1B table row start
+     * \x1C table cell start
+     * \x1D table cell end
+     * \x1E table row end
+     * \x1F table end
      *
-     * 文档流内的特殊范围：超链接，field，structured document tags， bookmark，comment
-     * \x1F customRange start 自定义范围开始
-     * \x1E customRange end 自定义范围结束
+     * Special ranges within the document flow:：hyperlinks，field，structured document tags， bookmark，comment
+     * \x1F customRange start
+     * \x1E customRange end
      *
-     * 按照SectionBreak分割文档，进行布局计算
+     * Split the document according to SectionBreak and perform layout calculations.
      * @returns view model: skeleton
      */
     // eslint-disable-next-line max-lines-per-function
@@ -383,5 +759,74 @@ export class DocumentSkeleton extends Skeleton {
             skeListLevel: new Map(),
             drawingAnchor: new Map(),
         };
+    }
+
+    private _findNodeIterator(charIndex: number) {
+        const skeletonData = this.getSkeletonData();
+
+        if (!skeletonData) {
+            return;
+        }
+
+        const pages = skeletonData.pages;
+
+        for (const page of pages) {
+            const { sections, st, ed } = page;
+
+            if (charIndex < st || charIndex > ed) {
+                continue;
+            }
+
+            for (const section of sections) {
+                const { columns, st, ed } = section;
+
+                if (charIndex < st || charIndex > ed) {
+                    continue;
+                }
+
+                for (const column of columns) {
+                    const { lines, st, ed } = column;
+
+                    if (charIndex < st || charIndex > ed) {
+                        continue;
+                    }
+
+                    for (const line of lines) {
+                        const { divides, lineHeight, st, ed } = line;
+                        const divideLength = divides.length;
+
+                        if (charIndex < st || charIndex > ed) {
+                            continue;
+                        }
+
+                        for (let i = 0; i < divideLength; i++) {
+                            const divide = divides[i];
+                            const { spanGroup, st, ed } = divide;
+
+                            if (charIndex < st || charIndex > ed) {
+                                continue;
+                            }
+
+                            if (spanGroup[0].spanType === SpanType.LIST) {
+                                charIndex++;
+                            }
+
+                            const span = spanGroup[charIndex - st];
+
+                            if (span) {
+                                return {
+                                    page,
+                                    section,
+                                    column,
+                                    line,
+                                    divide,
+                                    span,
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

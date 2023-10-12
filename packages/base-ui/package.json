@@ -44,6 +44,7 @@
         "build:doc": "storybook build"
     },
     "dependencies": {
+        "@rc-component/trigger": "^1.17.0",
         "@univerjs/base-render": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
         "@univerjs/icons": "^0.0.5",

@@ -99,7 +99,7 @@ export class Workbook extends Disposable {
     }
 
     getShouldRenderLoopImmediately() {
-        const should = this._config.shouldStartRenderingImmediately;
+        const should = this._snapshot.shouldStartRenderingImmediately;
         return should !== false;
     }
 

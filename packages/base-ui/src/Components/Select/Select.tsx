@@ -4,10 +4,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ICustomComponent } from '../../Common';
 import { IValueOption } from '../../services/menu/menu';
 import { CustomLabel, NeoCustomLabel } from '../CustomLabel';
-import { Dropdown } from '../Dropdown';
+import { Dropdown, Dropwdown2 } from '../Dropdown';
 import { NextIcon } from '../Icon/Format';
 import { Input } from '../Input';
 import { BaseItemProps, BaseMenuItem, Item } from '../Item/Item';
+import { Menu } from '../Menu/Menu';
 import styles from './index.module.less';
 
 // TODO: these type definitions should be moved out of components to menu service
@@ -78,6 +79,8 @@ export interface BaseSelectProps {
     onClose?: () => void;
     max?: number; // input maximum value
     min?: number; // INPUT minimum value
+
+    onMouseLeave?: React.MouseEventHandler;
 }
 
 export function Select(props: BaseSelectProps) {
@@ -369,19 +372,20 @@ export function Select(props: BaseSelectProps) {
 
         return (
             <div className={`${styles.selectDouble}`}>
-                <Dropdown
-                    tooltip={tooltip}
-                    onClick={type === SelectTypes.NEO ? () => onClick?.({ value }) : onClick}
-                    menu={{
-                        menuId: id,
-                        options,
-                        onClick: onClickInner,
-                        onOptionSelect,
-                        value,
-                        display: displayInSubMenu,
-                        onClose,
-                    }}
-                    icon={<Dropdown12 />}
+                <Dropwdown2
+                    {...props}
+                    overlay={
+                        <Menu
+                            menuId={id}
+                            options={options}
+                            onClick={onClickInner}
+                            onOptionSelect={onOptionSelect}
+                            value={value}
+                            display={displayInSubMenu}
+                            onClose={onClose}
+                            show
+                        />
+                    }
                 >
                     <div className={styles.selectLabel}>
                         <NeoCustomLabel
@@ -398,8 +402,12 @@ export function Select(props: BaseSelectProps) {
                                 );
                             }}
                         />
+
+                        <div className={styles.selectDropIcon}>
+                            <Dropdown12 />
+                        </div>
                     </div>
-                </Dropdown>
+                </Dropwdown2>
             </div>
         );
     };

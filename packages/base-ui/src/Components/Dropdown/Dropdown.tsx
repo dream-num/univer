@@ -19,6 +19,7 @@ export interface BaseDropdownProps {
     content?: React.ReactNode;
 }
 
+/** @deprecated */
 export const Dropdown = (props: BaseDropdownProps) => {
     const DropRef = useRef<HTMLDivElement>(null);
     const IconRef = useRef<HTMLDivElement>(null);
@@ -82,7 +83,7 @@ export const Dropdown = (props: BaseDropdownProps) => {
                     </div>
                 )}
                 {props.content}
-                <div onMouseMove={(e) => e.stopPropagation()} onMouseOver={(e) => e.stopPropagation()}>
+                <div>
                     <Menu
                         menuId={props.menu.menuId}
                         options={props.menu.options}

@@ -24,13 +24,16 @@ export interface IBaseToolbarButtonProps {
      * @default false
      */
     active?: boolean;
+
+    onMouseEnter?: React.MouseEventHandler;
+    onMouseLeave?: React.MouseEventHandler;
 }
 
 /**
  * Button Component
  */
 export function ToolbarButton(props: IBaseToolbarButtonProps) {
-    const { children, className, style, disabled = false, active = false, onClick } = props;
+    const { children, className, style, disabled = false, active = false, onClick, ...restProps } = props;
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         if (disabled) {
@@ -51,7 +54,7 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
     );
 
     return (
-        <button className={_className} style={style} disabled={disabled} onClick={handleClick}>
+        <button className={_className} style={style} disabled={disabled} onClick={handleClick} {...restProps}>
             {children}
         </button>
     );

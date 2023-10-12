@@ -1,35 +1,28 @@
-import { Nullable, ObjectMatrix, Rectangle, Tools } from '../../Shared';
-import { createRowColIter } from '../../Shared/RowColIter';
-import { DEFAULT_WORKSHEET } from '../../Types/Const';
-import { BooleanNumber, SheetTypes } from '../../Types/Enum';
-import { ICellData, IFreeze, IRange, IWorksheetConfig } from '../../Types/Interfaces';
-import { ColumnManager } from './ColumnManager';
-import { Range } from './Range';
-import { RowManager } from './RowManager';
-import { Styles } from './Styles';
+import { Nullable, ObjectMatrix, Rectangle, Tools } from '../Shared';
+import { createRowColIter } from '../Shared/RowColIter';
+import { DEFAULT_WORKSHEET } from '../Types/Const';
+import { BooleanNumber, SheetTypes } from '../Types/Enum';
+import { ICellData, IFreeze, IRange, IWorksheetConfig } from '../Types/Interfaces';
+import { ColumnManager } from './column-manager';
+import { Range } from './range';
+import { RowManager } from './row-manager';
+import { Styles } from './styles';
+import { SheetViewModel } from './view-model';
 
 /**
- * Access and modify spreadsheet sheets.
- *
- * @remarks
- * Common operations are renaming a sheet and accessing range objects from the sheet.
- *
- * Reference from: https://developers.google.com/apps-script/reference/spreadsheet/sheet
- *
- * @beta
+ * Worksheet instance represents a single sheet in a workbook.
  */
 export class Worksheet {
-    protected _snapshot: IWorksheetConfig;
-
     protected _initialized: boolean;
 
     protected _sheetId: string;
-
+    protected _snapshot: IWorksheetConfig;
     protected _cellData: ObjectMatrix<ICellData>;
 
     protected _rowManager: RowManager;
-
     protected _columnManager: ColumnManager;
+
+    protected readonly _viewModel: SheetViewModel;
 
     constructor(
         snapshot: Partial<IWorksheetConfig>,
@@ -65,6 +58,18 @@ export class Worksheet {
         this._cellData = new ObjectMatrix<ICellData>(cellData);
         this._rowManager = new RowManager(this._snapshot, rowData);
         this._columnManager = new ColumnManager(this._snapshot, columnData);
+
+        // This view model will immediately injected with hooks from SheetViewModel service as Worksheet
+        // is constructed.
+        this._viewModel = new SheetViewModel();
+    }
+
+    /**
+     * @internal
+     * @param callback
+     */
+    __interceptViewModel(callback: (viewModel: SheetViewModel) => void) {
+        callback(this._viewModel);
     }
 
     /**
@@ -150,6 +155,18 @@ export class Worksheet {
             }
         }
         return null;
+    }
+
+    getCell(row: number, col: number): Nullable<ICellData> {
+        if (row < 0 || col < 0) {
+            return null;
+        }
+
+        return this._viewModel.getCell(row, col);
+    }
+
+    getCellRaw(row: number, col: number): Nullable<ICellData> {
+        return this.getCellMatrix().getValue(row, col);
     }
 
     /**

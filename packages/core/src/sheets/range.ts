@@ -1,6 +1,6 @@
-import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../../Shared';
-import { DEFAULT_STYLES } from '../../Types/Const';
-import { BooleanNumber, FontItalic, FontWeight, HorizontalAlign, VerticalAlign, WrapStrategy } from '../../Types/Enum';
+import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../Shared';
+import { DEFAULT_STYLES } from '../Types/Const';
+import { BooleanNumber, FontItalic, FontWeight, HorizontalAlign, VerticalAlign, WrapStrategy } from '../Types/Enum';
 import {
     IBorderData,
     ICellData,
@@ -9,9 +9,9 @@ import {
     IStyleData,
     ITextDecoration,
     ITextRotation,
-} from '../../Types/Interfaces';
-import { Styles } from './Styles';
-import type { Worksheet } from './Worksheet';
+} from '../Types/Interfaces';
+import { Styles } from './styles';
+import type { Worksheet } from './worksheet';
 
 /**
  * getObjectValues options type

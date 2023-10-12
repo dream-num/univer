@@ -14,8 +14,8 @@ import { DesktopLogService, ILogService } from '../services/log/log.service';
 import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
-import { Workbook } from '../Sheets/Domain/Workbook';
-import { SlideModel } from '../Slides/Domain/SlideModel';
+import { Workbook } from '../sheets/workbook';
+import { Slide } from '../Slides/Domain/SlideModel';
 import { LocaleType } from '../Types/Enum/LocaleType';
 import { IDocumentData, ISlideData, IUniverData, IWorkbookConfig } from '../Types/Interfaces';
 import { UniverDoc } from './UniverDoc';
@@ -89,12 +89,12 @@ export class Univer {
 
         if (!this._univerSheet) {
             this._univerSheet = this._rootInjector.createInstance(UniverSheet);
-            addSheet();
 
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Sheet)
                 .forEach((p) => this._univerSheet!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
             this._univerSheet.init();
+            addSheet();
 
             this._tryProgressToReady();
         } else {
@@ -113,12 +113,12 @@ export class Univer {
 
         if (!this._univerDoc) {
             this._univerDoc = this._rootInjector.createInstance(UniverDoc);
-            addDoc();
 
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Doc)
                 .forEach((p) => this._univerDoc!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
             this._univerDoc.init();
+            addDoc();
 
             this._tryProgressToReady();
         } else {
@@ -128,8 +128,8 @@ export class Univer {
         return doc!;
     }
 
-    createUniverSlide(config: Partial<ISlideData>): SlideModel {
-        let slide: SlideModel;
+    createUniverSlide(config: Partial<ISlideData>): Slide {
+        let slide: Slide;
         const addSlide = () => {
             slide = this._univerSlide!.createSlide(config);
             this._currentUniverService.addSlide(slide);
@@ -137,12 +137,12 @@ export class Univer {
 
         if (!this._univerSlide) {
             this._univerSlide = this._rootInjector.createInstance(UniverSlide);
-            addSlide();
 
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Slide)
                 .forEach((p) => this._univerSlide!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
             this._univerSlide.init();
+            addSlide();
 
             this._tryProgressToReady();
         } else {
@@ -161,6 +161,7 @@ export class Univer {
                         new CurrentUniverService(
                             {
                                 createUniverDoc: (data) => this.createUniverDoc(data),
+                                createUniverSheet: (data) => this.createUniverSheet(data),
                             },
                             contextService
                         ),
@@ -182,8 +183,8 @@ export class Univer {
     private _tryProgressToReady(): void {
         const lifecycleService = this._rootInjector.get(LifecycleService);
         if (lifecycleService.stage < LifecycleStages.Ready) {
-            this._univerPluginStore.forEachPlugin((p) => p.onReady());
             this._rootInjector.get(LifecycleService).stage = LifecycleStages.Ready;
+            this._univerPluginStore.forEachPlugin((p) => p.onReady());
         }
     }
 

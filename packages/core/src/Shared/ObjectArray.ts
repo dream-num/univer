@@ -80,7 +80,7 @@ export class ObjectArray<T> {
                     this._length = length;
                     return;
                 }
-                throw new Error(`create object array error ${JSON.stringify(argument[0])}`);
+                throw new Error(`create object array error ${argument[0]}`, argument[0]);
             }
             case 2: {
                 if (likeArr(argument[0]) > -1) {
@@ -131,6 +131,9 @@ export class ObjectArray<T> {
     }
 
     set(index: number, value: T): void {
+        if (index < 0) {
+            throw new Error(`[ObjectArray]: index ${index} is invalid!`);
+        }
         // Accept NULL, for cell clear all
         // if (define(value)) {
         const length = this._length;

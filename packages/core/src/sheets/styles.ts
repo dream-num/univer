@@ -1,5 +1,5 @@
-import { IKeyType, Nullable, Tools } from '../../Shared';
-import { ICellData, IStyleData } from '../../Types/Interfaces';
+import { IKeyType, Nullable, Tools } from '../Shared';
+import { ICellData, IStyleData } from '../Types/Interfaces';
 
 /**
  * Styles in a workbook, cells locate styles based on style IDs

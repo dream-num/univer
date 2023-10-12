@@ -28,6 +28,7 @@ import {
     TextDirectionType,
     Tools,
     VerticalAlign,
+    Worksheet,
     WrapStrategy,
 } from '@univerjs/core';
 
@@ -128,6 +129,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _marginLeft: number = 0;
 
     constructor(
+        private _worksheet: Worksheet | undefined,
         private _config: IWorksheetConfig,
         private _cellData: ObjectMatrix<ICellData>,
         private _styles: Styles,
@@ -199,23 +201,44 @@ export class SpreadsheetSkeleton extends Skeleton {
     //     return this._dataMergeCacheAll;
     // }
 
+    /**
+     * @deprecated
+     * @param config
+     * @param cellData
+     * @param styles
+     * @param LocaleService
+     * @returns
+     */
     static create(
+        worksheet: Worksheet | undefined,
         config: IWorksheetConfig,
         cellData: ObjectMatrix<ICellData>,
         styles: Styles,
         LocaleService: LocaleService
     ) {
-        return new SpreadsheetSkeleton(config, cellData, styles, LocaleService);
+        return new SpreadsheetSkeleton(worksheet, config, cellData, styles, LocaleService);
     }
 
+    /**
+     * @deprecated should never expose a property that is provided by another module!
+     * @returns
+     */
     getWorksheetConfig() {
         return this._config;
     }
 
+    /**
+     * @deprecated should never expose a property that is provided by another module!
+     * @returns
+     */
     getCellData() {
         return this._cellData;
     }
 
+    /**
+     * @deprecated should never expose a property that is provided by another module!
+     * @returns
+     */
     getsStyles() {
         return this._styles;
     }
@@ -716,6 +739,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
+    // TODO@wzhudev: rename to _getViewPort
+
     /**
      *
      * @param rowHeightAccumulation Row layout information
@@ -1037,7 +1062,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                this.__setCellCache(
+                this._setCellCache(
                     r,
                     c,
                     {
@@ -1052,7 +1077,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             // 针对溢出的情况计算文本长度，可视范围左侧列
             for (let c = 0; c < startColumn; c++) {
-                this.__setCellCache(
+                this._setCellCache(
                     r,
                     c,
                     {
@@ -1067,7 +1092,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             // 针对溢出的情况计算文本长度，可视范围右侧列
             for (let c = endColumn + 1; c < columnWidthAccumulation.length; c++) {
-                this.__setCellCache(
+                this._setCellCache(
                     r,
                     c,
                     {
@@ -1082,7 +1107,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         for (const data of dataMergeCache) {
-            this.__setCellCache(
+            this._setCellCache(
                 data.startRow,
                 data.startColumn,
                 {
@@ -1119,12 +1144,13 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     // eslint-disable-next-line max-lines-per-function
-    private __setCellCache(r: number, c: number, props: ISetCellCache, fontLocale?: IFontLocale) {
+    private _setCellCache(r: number, c: number, props: ISetCellCache, fontLocale?: IFontLocale) {
         const { cache, skipBackgroundAndBorder = false, styles, cellData } = props;
         if (!cellData) {
             return true;
         }
-        const cell = cellData.getValue(r, c);
+
+        const cell = this._worksheet?.getCell(r, c) || cellData.getValue(r, c);
         if (!cell) {
             return true;
         }
@@ -1151,6 +1177,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             this.___setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
         }
 
+        // read cell content to be rendered
         const content = cell.m || cell.v;
 
         let documentModel: Nullable<DocumentModelSimple>;

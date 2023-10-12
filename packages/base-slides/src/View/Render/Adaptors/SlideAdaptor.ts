@@ -1,5 +1,5 @@
 import { Engine, Rect, Scene, Slide, Viewport } from '@univerjs/base-render';
-import { getColorStyle, IColorStyle, IPageElement, ISlidePage, PageElementType, SlideModel } from '@univerjs/core';
+import { getColorStyle, IColorStyle, IPageElement, ISlidePage, PageElementType, Slide as SlideM } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../Adaptor';
@@ -54,7 +54,7 @@ export class SlideAdaptor extends ObjectAdaptor {
             return;
         }
 
-        const model = new SlideModel(slideData);
+        const model = new SlideM(slideData);
 
         const slideComponent = new Slide(SLIDE_VIEW_KEY.MAIN + id, {
             top,
@@ -98,13 +98,7 @@ export class SlideAdaptor extends ObjectAdaptor {
         return slideComponent;
     }
 
-    private _createScene(
-        pageId: string,
-        parent: Engine | Slide,
-        page: ISlidePage,
-        mainScene: Scene,
-        model: SlideModel
-    ) {
+    private _createScene(pageId: string, parent: Engine | Slide, page: ISlidePage, mainScene: Scene, model: SlideM) {
         const { width, height } = parent;
 
         const scene = new Scene(pageId, parent, {
@@ -136,7 +130,7 @@ export class SlideAdaptor extends ObjectAdaptor {
         return scene;
     }
 
-    private _addBackgroundRect(scene: Scene, fill: IColorStyle, model: SlideModel) {
+    private _addBackgroundRect(scene: Scene, fill: IColorStyle, model: SlideM) {
         const pageSize = model.getPageSize();
 
         const { width: pageWidth = 0, height: pageHeight = 0 } = pageSize;

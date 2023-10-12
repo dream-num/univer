@@ -111,6 +111,7 @@ export class SheetSkeletonManagerService implements IDisposable {
     private _buildSkeleton(worksheet: Worksheet, workbook: Workbook) {
         const config = worksheet.getConfig();
         const spreadsheetSkeleton = SpreadsheetSkeleton.create(
+            worksheet,
             config,
             worksheet.getCellMatrix(),
             workbook.getStyles(),

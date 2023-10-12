@@ -1,5 +1,5 @@
 import { Injector } from '@wendellhu/redi';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { Univer } from '../../../Basics/Univer';
 import { Nullable } from '../../../common/type-utils';
@@ -17,6 +17,8 @@ describe('Test SheetInterceptorService', () => {
         univer = testBed.univer;
         get = testBed.get;
     });
+
+    afterEach(() => univer.dispose());
 
     function getCell(row: number, col: number): Nullable<ICellData> {
         const cus = get(ICurrentUniverService);

@@ -1,4 +1,4 @@
-import { Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { ILocalStorageService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { ComponentManager } from './Common/ComponentManager';
@@ -8,6 +8,7 @@ import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
+import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 import { DesktopMenuService, IMenuService } from './services/menu/menu.service';
 import { DesktopMessageService } from './services/message/desktop-message.service';
 import { IMessageService } from './services/message/message.service';
@@ -57,9 +58,10 @@ export class UIPlugin extends Plugin {
             [IPlatformService, { useClass: DesktopPlatformService }],
             [IMenuService, { useClass: DesktopMenuService }],
             [IContextMenuService, { useClass: DesktopContextMenuService }],
-            [IClipboardInterfaceService, { useClass: BrowserClipboardService }],
-            [INotificationService, { useClass: DesktopNotificationService }],
-            [IMessageService, { useClass: DesktopMessageService }],
+            [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
+            [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
+            [IMessageService, { useClass: DesktopMessageService, lazy: true }],
+            [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
 
             // controllers
             [SharedController],

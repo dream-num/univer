@@ -110,7 +110,7 @@
 
         &:hover{
             background-color: var(--grey-300);
-            border-radius: var(--border-radius-base) 0 0 var(--border-radius-base);
+            border-radius: @border-radius-base;
         }
     }
 
@@ -124,4 +124,14 @@
 .button() {
     padding: 0px;
     box-sizing: border-box;
+}
+
+.select-drop-icon {
+    height: 100%;
+    // margin-left: 5px;
+    // border-left: 1px solid @gray-14;
+    display: flex;
+    align-items: center;
+    color: var(--grey-400);
+    font-size: 10px;
 }

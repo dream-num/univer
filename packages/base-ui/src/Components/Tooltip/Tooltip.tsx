@@ -1,114 +1,29 @@
-import { createRef, useState } from 'react';
+import RcTooltip from 'rc-tooltip';
 
-import { joinClassNames } from '../../Utils';
-import style from './index.module.less';
+import styles from './index.module.less';
+import { placements } from './placements';
 
-interface TooltipState {
-    top: number | string;
-    left: number | string;
-    visible: boolean;
-    triangleTranslate?: number | string;
-}
-
-const placementClassNames: { [index: string]: string } = {
-    top: style.tooltipTop,
-    bottom: style.tooltipBottom,
-};
-
-export interface BaseTooltipProps {
-    title?: string;
-    children: React.ReactNode;
+export interface ITooltipProps {
     placement?: 'top' | 'bottom';
-    styles?: React.CSSProperties;
+    title: (() => React.ReactNode) | React.ReactNode;
+    children: React.ReactElement;
 }
 
-export function Tooltip(props: BaseTooltipProps) {
-    const { title, children, placement = 'top', styles } = props;
-
-    const tooltipRef = createRef<HTMLDivElement>();
-    const tooltipContentRef = createRef<HTMLSpanElement>();
-    const [state, setState] = useState<TooltipState>({
-        top: '',
-        left: '',
-        visible: false,
-        triangleTranslate: '',
-    });
-
-    function handleMouseEnter() {
-        if (!tooltipRef?.current || !tooltipContentRef?.current) return;
-
-        const { height, width, x, y } = tooltipRef.current.getBoundingClientRect();
-
-        let left = x;
-        let top = y;
-        switch (placement) {
-            case 'bottom':
-                top = y + height + 10;
-                left = x + width / 2;
-                break;
-            case 'top':
-            default:
-                top = y + -height - 20;
-                left = x + width / 2;
-                break;
-        }
-
-        const { clientWidth } = tooltipContentRef.current;
-
-        let triangleTranslate = '';
-
-        if (left - clientWidth / 2 < 0) {
-            triangleTranslate = `${left - clientWidth / 2}px`;
-            left = clientWidth / 2;
-        }
-        if (left + clientWidth / 2 > document.body.clientWidth) {
-            triangleTranslate = `${left + clientWidth / 2 - document.body.clientWidth}px`;
-            left = document.body.clientWidth - clientWidth / 2;
-        }
-
-        setState({
-            top,
-            left,
-            visible: true,
-            triangleTranslate,
-        });
-    }
-
-    function handleMouseLeave() {
-        setState({
-            ...state,
-            visible: false,
-        });
-    }
-
-    const placementClassName = joinClassNames(style.tooltipTitle, placementClassNames[placement]);
+export const Tooltip = (props: ITooltipProps) => {
+    const { children, placement = 'top', title } = props;
 
     return (
-        <div ref={tooltipRef} className={style.tooltipGroup} style={styles}>
-            <div className={style.tooltipBody} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                {children}
-            </div>
-
-            {title ? (
-                <span
-                    ref={tooltipContentRef}
-                    className={placementClassName}
-                    style={{
-                        top: `${state.top}px`,
-                        left: `${state.left}px`,
-                        visibility: `${state.visible ? 'visible' : 'hidden'}`,
-                        zIndex: 100,
-                    }}
-                >
-                    {title}
-                    <span
-                        className={style.tooltipTriangle}
-                        style={{
-                            transform: `translateX(${state.triangleTranslate})`,
-                        }}
-                    />
-                </span>
-            ) : null}
-        </div>
+        <RcTooltip
+            prefixCls={styles.tooltip}
+            overlay={<div className={styles.tooltipContent}>{typeof title === 'function' ? title() : title}</div>}
+            builtinPlacements={placements}
+            placement={placement}
+            mouseLeaveDelay={0.1}
+            mouseEnterDelay={0.2}
+            showArrow
+            destroyTooltipOnHide
+        >
+            {children}
+        </RcTooltip>
     );
-}
+};

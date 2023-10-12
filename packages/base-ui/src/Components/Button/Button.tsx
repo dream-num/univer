@@ -68,6 +68,9 @@ export interface IBaseButtonProps extends BaseComponentProps {
      * @default false
      */
     active?: boolean;
+
+    onMouseEnter?: React.MouseEventHandler;
+    onMouseLeave?: React.MouseEventHandler;
 }
 
 const getSizeClass = (size?: SizeType) => {
@@ -99,6 +102,7 @@ export function Button(props: IBaseButtonProps) {
         loading = false,
         active = false,
         onClick,
+        ...restProps
     } = props;
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -125,7 +129,14 @@ export function Button(props: IBaseButtonProps) {
     );
 
     return (
-        <button className={_className} style={style} disabled={disabled} type={htmlType} onClick={handleClick}>
+        <button
+            className={_className}
+            style={style}
+            disabled={disabled}
+            type={htmlType}
+            onClick={handleClick}
+            {...restProps}
+        >
             {loading ? <LoadingIcon /> : ''}
             {children}
         </button>

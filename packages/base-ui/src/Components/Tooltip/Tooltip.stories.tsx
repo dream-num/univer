@@ -1,5 +1,6 @@
 import type { Meta } from '@storybook/react';
 
+import { Button } from '../Button/Button';
 import { Tooltip } from './Tooltip';
 
 const meta: Meta<typeof Tooltip> = {
@@ -18,5 +19,20 @@ const meta: Meta<typeof Tooltip> = {
 export default meta;
 
 export const Playground = {
-    args: {},
+    render() {
+        return (
+            <>
+                <div>
+                    <Tooltip title="hello world" placement="top">
+                        <Button>top</Button>
+                    </Tooltip>
+                </div>
+                <div>
+                    <Tooltip title="hello world" placement="bottom">
+                        <Button>bottom</Button>
+                    </Tooltip>
+                </div>
+            </>
+        );
+    },
 };

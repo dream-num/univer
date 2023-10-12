@@ -8,13 +8,15 @@ import { ICellData } from '../Types/Interfaces/ICellData';
 /**
  * Worksheet should provide `SheetViewModel` a `ISheetModelInterface` for it to
  * get or update raw values.
+ *
+ * @deprecated this may be redundant since we treat default value fetcher as an interceptor as well
  */
 export interface ISheetModelInterface {
-    getCellContent(row: number, col: number): Nullable<ICellData>;
+    getCell(row: number, col: number): Nullable<ICellData>;
 }
 
 export interface ICellContentInterceptor {
-    getCellContent(row: number, col: number): Nullable<ICellData>;
+    getCell(row: number, col: number): Nullable<ICellData>;
 }
 
 export interface IRowFilteredInterceptor {}
@@ -29,7 +31,7 @@ export interface ISheetViewModel {
     registerRowVisibleInterceptor(interceptor: IRowVisibleInterceptor): IDisposable;
     registerColVisibleInterceptor(interceptor: IColVisibleInterceptor): IDisposable;
 
-    getCellContent(row: number, col: number): Nullable<ICellData>;
+    getCell(row: number, col: number): Nullable<ICellData>;
 }
 
 /**
@@ -54,11 +56,9 @@ export class SheetViewModel extends Disposable implements ISheetViewModel {
         this._colVisibleInterceptors.length = 0;
     }
 
-    getCellContent(row: number, col: number): Nullable<ICellData> {
-        // TODO@wzhudev: we may need to merge cell values and styles can cache results
-        // For examples styles cannot be a single string but a style object!
+    getCell(row: number, col: number): Nullable<ICellData> {
         for (const interceptor of this._cellContentInterceptors) {
-            const result = interceptor.getCellContent(row, col);
+            const result = interceptor.getCell(row, col);
             if (typeof result !== 'undefined') {
                 return result;
             }
@@ -68,7 +68,7 @@ export class SheetViewModel extends Disposable implements ISheetViewModel {
         // If there is no interceptor nor interceptors return undefined, then
         // it will call the model interface to get the cell content.
         // NOTE: will performance be an issue?
-        return this._modelInterface.getCellContent(row, col);
+        return this._modelInterface.getCell(row, col);
     }
 
     registerCellContentInterceptor(interceptor: ICellContentInterceptor): IDisposable {

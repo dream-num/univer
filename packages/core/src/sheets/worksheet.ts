@@ -62,7 +62,7 @@ export class Worksheet {
         // This view model will immediately injected with hooks from SheetViewModel service as Worksheet
         // is constructed.
         this._viewModel = new SheetViewModel({
-            getCellContent: this.getRawCellContent.bind(this),
+            getCell: this.getCellRaw.bind(this),
         });
     }
 
@@ -159,11 +159,15 @@ export class Worksheet {
         return null;
     }
 
-    getCellContent(row: number, col: number): Nullable<ICellData> {
-        return this._viewModel.getCellContent(row, col);
+    getCell(row: number, col: number): Nullable<ICellData> {
+        if (row < 0 || col < 0) {
+            return null;
+        }
+
+        return this._viewModel.getCell(row, col);
     }
 
-    getRawCellContent(row: number, col: number): Nullable<ICellData> {
+    getCellRaw(row: number, col: number): Nullable<ICellData> {
         return this.getCellMatrix().getValue(row, col);
     }
 

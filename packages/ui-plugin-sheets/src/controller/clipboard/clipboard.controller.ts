@@ -84,7 +84,7 @@ export class SheetClipboardController extends Disposable {
                 currentSheet = self._getWorksheet(workbookId, worksheetId);
             },
             onCopyCellContent(row: number, col: number): string {
-                const v = currentSheet!.getCellContent(row, col);
+                const v = currentSheet!.getCell(row, col);
                 return v?.m || '';
             },
             onCopyCellStyle: (row: number, col: number, rowSpan?: number, colSpan?: number) => {

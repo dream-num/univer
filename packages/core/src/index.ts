@@ -25,6 +25,11 @@ export { ILocalStorageService } from './services/local-storage/local-storage.ser
 export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService } from './services/log/log.service';
 export { DesktopPermissionService, IPermissionService } from './services/permission/permission.service';
+export {
+    type ICellInterceptor,
+    type ISheetLocation,
+    SheetInterceptorService,
+} from './services/sheet-interceptor/sheet-interceptor.service';
 export { ThemeService } from './services/theme/theme.service';
 export {
     type IUndoRedoCommandInfos,

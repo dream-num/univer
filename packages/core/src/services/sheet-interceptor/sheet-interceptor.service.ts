@@ -6,7 +6,6 @@ import { Disposable, DisposableCollection, toDisposable } from '../../Shared/lif
 import { Workbook } from '../../sheets/workbook';
 import { Worksheet } from '../../sheets/worksheet';
 import { ICellData } from '../../Types/Interfaces/ICellData';
-import { IStyleData } from '../../Types/Interfaces/IStyleData';
 import { ICurrentUniverService } from '../current.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 
@@ -31,7 +30,7 @@ export function compose(interceptors: ICellInterceptor[]) {
             }
 
             const interceptor = interceptors[i];
-            return interceptor.getCellContent(v, location, passThrough.bind(null, i + 1));
+            return interceptor.getCell(v, location, passThrough.bind(null, i + 1));
         }
     };
 }
@@ -52,12 +51,11 @@ export interface ISheetLocation {
 export interface ICellInterceptor {
     priority?: number;
 
-    getCellContent(
+    getCell(
         cell: Nullable<ICellData>,
         location: ISheetLocation,
         next: (v: Nullable<ICellData>) => Nullable<ICellData>
     ): Nullable<ICellData>;
-    getCellStyle(style: Nullable<IStyleData>, location: ISheetLocation, next: any): Nullable<IStyleData>;
 }
 
 /**
@@ -94,28 +92,26 @@ export class SheetInterceptorService extends Disposable {
 
         this.interceptCellContent({
             priority: 100,
-            getCellContent(_, location, next): Nullable<ICellData> {
+            getCell(_, location, next): Nullable<ICellData> {
                 if (location.row === 0) {
                     return next({ m: `I am intercepted value from row 0.` });
                 }
 
                 return next();
             },
-            getCellStyle(style, location, next) {},
         });
 
         // register default viewModel interceptor
         this.interceptCellContent({
             priority: 0,
-            getCellContent(content, location): Nullable<ICellData> {
+            getCell(content, location): Nullable<ICellData> {
+                const rawData = location.worksheet.getCellRaw(location.row, location.col);
                 if (content) {
-                    return content;
+                    return { ...rawData, ...content };
                 }
 
-                const worksheet = location.worksheet;
-                return worksheet.getRawCellContent(location.row, location.col);
+                return rawData;
             },
-            getCellStyle(style, location, next) {},
         });
     }
 
@@ -156,7 +152,7 @@ export class SheetInterceptorService extends Disposable {
             worksheet.__interceptViewModel((viewModel) => {
                 const sheetDisposables = new DisposableCollection();
                 const cellInterceptorDisposable = viewModel.registerCellContentInterceptor({
-                    getCellContent(row: number, col: number): Nullable<ICellData> {
+                    getCell(row: number, col: number): Nullable<ICellData> {
                         return compose(self._cellInterceptors)({
                             workbookId,
                             worksheetId,

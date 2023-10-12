@@ -1,5 +1,6 @@
 import { IRenderManagerService, ISelectionTransformerShapeManager } from '@univerjs/base-render';
 import {
+    Direction,
     Disposable,
     ICommandInfo,
     ICommandService,
@@ -12,7 +13,7 @@ import { Inject } from '@wendellhu/redi';
 import { getSheetObject } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { ScrollCommand } from '../commands/commands/set-scroll.command';
-import { MoveSelectionCommand } from '../commands/commands/set-selections.command';
+import { IMoveSelectionCommandParams, MoveSelectionCommand } from '../commands/commands/set-selections.command';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { ISheetSkeletonManagerParam, SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -99,25 +100,21 @@ export class ScrollController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    this.scrollToVisible();
+                    const params = command.params as IMoveSelectionCommandParams;
+                    this.scrollToVisible(params.direction);
                 }
             })
         );
     }
 
-    private scrollToVisible() {
+    private scrollToVisible(direction: Direction) {
         let startSheetViewRow;
         let startSheetViewColumn;
         const selection = this._selectionManagerService.getLast();
         if (selection == null) {
             return;
         }
-        const {
-            startRow: selectionStartRow,
-            startColumn: selectionStartColumn,
-            endRow: selectionEndRow,
-            endColumn: selectionEndColumn,
-        } = selection.range;
+        const { startRow: selectionStartRow, startColumn: selectionStartColumn } = selection.range;
         const { rowHeightAccumulation, columnWidthAccumulation } =
             this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) {
@@ -131,6 +128,15 @@ export class ScrollController extends Disposable {
         if (viewport == null) {
             return;
         }
+
+        const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+        const {
+            startColumn: freezeStartColumn,
+            startRow: freezeStartRow,
+            ySplit: freezeYSplit,
+            xSplit: freezeXSplit,
+        } = worksheet.getFreeze();
+
         const bounds = viewport.getBounding();
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
         if (skeleton == null) {
@@ -142,43 +148,62 @@ export class ScrollController extends Disposable {
             endRow: viewportEndRow,
             endColumn: viewportEndColumn,
         } = skeleton.getRowColumnSegment(bounds);
+
         let isOverflow = false;
-        // top overflow
-        if (selectionStartRow <= viewportStartRow) {
-            isOverflow = true;
-            startSheetViewRow = selectionStartRow;
-        }
-        // left overflow
-        if (selectionStartColumn <= viewportStartColumn) {
-            isOverflow = true;
-            startSheetViewColumn = selectionStartColumn;
-        }
-        // bottom overflow
-        if (selectionEndRow >= viewportEndRow) {
-            isOverflow = true;
-            const minRowAccumulation = rowHeightAccumulation[selectionEndRow] - viewport.height!;
-            for (let r = viewportStartRow; r <= selectionEndRow; r++) {
-                if (rowHeightAccumulation[r] >= minRowAccumulation) {
-                    startSheetViewRow = r + 1;
-                    break;
+        // vertical overflow only happens when the selection's row is in not the freeze area
+        if (
+            (direction === Direction.UP || direction === Direction.DOWN) &&
+            selectionStartRow >= freezeStartRow &&
+            selectionStartColumn >= freezeStartColumn - freezeXSplit
+        ) {
+            // top overflow
+            if (selectionStartRow <= viewportStartRow) {
+                isOverflow = true;
+                startSheetViewRow = selectionStartRow;
+            }
+
+            // bottom overflow
+            if (selectionStartRow >= viewportEndRow) {
+                isOverflow = true;
+                const minRowAccumulation = rowHeightAccumulation[selectionStartRow] - viewport.height!;
+                for (let r = viewportStartRow; r <= selectionStartRow; r++) {
+                    if (rowHeightAccumulation[r] >= minRowAccumulation) {
+                        startSheetViewRow = r + 1;
+                        break;
+                    }
                 }
             }
         }
-        // right overflow
-        if (selectionEndColumn >= viewportEndColumn) {
-            isOverflow = true;
-            const minColumnAccumulation = columnWidthAccumulation[selectionEndColumn] - viewport.width!;
-            for (let c = viewportStartColumn; c <= selectionEndColumn; c++) {
-                if (columnWidthAccumulation[c] >= minColumnAccumulation) {
-                    startSheetViewColumn = c + 1;
-                    break;
+        // horizontal overflow only happens when the selection's column is in not the freeze area
+        if (
+            (direction === Direction.LEFT || direction === Direction.RIGHT) &&
+            selectionStartColumn >= freezeStartColumn &&
+            selectionStartRow >= freezeStartRow - freezeYSplit
+        ) {
+            // left overflow
+            if (selectionStartColumn <= viewportStartColumn) {
+                isOverflow = true;
+                startSheetViewColumn = selectionStartColumn;
+            }
+
+            // right overflow
+            if (selectionStartColumn >= viewportEndColumn) {
+                isOverflow = true;
+                const minColumnAccumulation = columnWidthAccumulation[selectionStartColumn] - viewport.width!;
+                for (let c = viewportStartColumn; c <= selectionStartColumn; c++) {
+                    if (columnWidthAccumulation[c] >= minColumnAccumulation) {
+                        startSheetViewColumn = c + 1;
+                        break;
+                    }
                 }
             }
         }
+
         if (!isOverflow) {
             return;
         }
-        // sheetViewStartRow and sheetViewStartColumn maybe undefined
+        // sheetViewStartRow and sheetViewStartColumn maybe undefined, which means should not make scroll at its direction
+        console.log('scroll to', startSheetViewRow, startSheetViewColumn);
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         this._commandService.executeCommand(ScrollCommand.id, {
             unitId: workbook.getUnitId(),

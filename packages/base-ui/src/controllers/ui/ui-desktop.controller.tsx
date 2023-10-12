@@ -34,7 +34,6 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     private _sidebarComponents: Set<() => ComponentType> = new Set();
 
     private _componentRegistered$ = new Subject<void>();
-
     componentRegistered$ = this._componentRegistered$.asObservable();
 
     constructor(
@@ -107,9 +106,18 @@ function bootStrap(
 
     const root = createRoot(mountContainer);
     const ConnectedApp = connectInjector(App, injector);
-    root.render(<ConnectedApp {...options} onRendered={callback} />);
-
     const desktopUIController = injector.get(IUIController) as IDesktopUIController;
+    const footerComponents = desktopUIController.getFooterComponents();
+    const sidebarComponents = desktopUIController.getSidebarComponents();
+    root.render(
+        <ConnectedApp
+            {...options}
+            onRendered={callback}
+            footerComponents={footerComponents}
+            sidebarComponents={sidebarComponents}
+        />
+    );
+
     const updateSubscription = desktopUIController.componentRegistered$.subscribe(() => {
         const footerComponents = desktopUIController.getFooterComponents();
         const sidebarComponents = desktopUIController.getSidebarComponents();

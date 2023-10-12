@@ -1,4 +1,5 @@
 import type { Meta } from '@storybook/react';
+import { useState } from 'react';
 
 import { Slider } from './Slider';
 
@@ -9,16 +10,18 @@ const meta: Meta<typeof Slider> = {
         layout: 'centered',
     },
     tags: ['autodocs'],
-    args: {
-        min: 0,
-        max: 100,
-        step: 1,
-        range: false,
-    },
 };
 
 export default meta;
 
 export const Playground = {
-    args: {},
+    render() {
+        const [value, setValue] = useState(0);
+
+        function handleChange(changedValue: number) {
+            setValue(changedValue);
+        }
+
+        return <Slider value={value} shortcuts={[50, 75, 100, 125, 150, 175, 200, 400]} onChange={handleChange} />;
+    },
 };

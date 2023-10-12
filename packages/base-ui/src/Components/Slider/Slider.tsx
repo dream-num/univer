@@ -1,13 +1,22 @@
-import React, { CSSProperties, useEffect, useRef, useState } from 'react';
+/* eslint-disable no-magic-numbers */
+import { useMemo, useRef } from 'react';
 
-import { randomId } from '../../Utils';
+import { joinClassNames } from '../../Utils';
+import { Button } from '../Button/Button';
+import { Dropwdown2 } from '../Dropdown/Dropdown2';
+import { Tooltip } from '../Tooltip/Tooltip';
 import styles from './index.module.less';
 
-// Component Interface
+/**
+ * TODO:
+ * 1. Replace icons
+ * 2. Localization '恢复至 100%'
+ */
 
-// Base Slider Props
-interface BaseSliderProps {
-    id?: string;
+interface IBaseSliderProps {
+    /** The value of slider. When range is false, use number, otherwise, use [number, number] */
+    value: number;
+
     /**
      * The minimum value the slider can slide to
      *  @default 0
@@ -15,194 +24,144 @@ interface BaseSliderProps {
     min?: number;
 
     /** The maximum value the slider can slide to
-     *  @default 100
+     *  @default 400
      */
     max?: number;
 
-    /**
-     * The granularity the slider can step through values. Must greater than 0, and be divided by (max - min) . When marks no null, step can be null
-     * @default 1
+    /** The maximum value the slider can slide to
+     *  @default 100
      */
-    step?: number;
+    resetPoint?: number;
 
-    /** slider class name */
-    className?: string;
-
-    /** slider style */
-    style?: React.CSSProperties;
-
-    /**
-     * Dual thumb mode
-     * @default false
-     * */
-    range?: boolean;
-
-    /** The value of slider. When range is false, use number, otherwise, use [number, number] */
-    value?: number | [number, number];
+    /** Shortcuts of slider */
+    shortcuts?: number[];
 
     /** (value) => void */
-    onChange?: (e: Event) => void;
-
-    /** (value) => void */
-    onClick?: (e: Event, value: number | string) => void;
+    onChange?: (value: number) => void;
 }
 
 /**
  * Slider Component
  */
-export function Slider(props: BaseSliderProps) {
-    const [valuePrev, setValuePrev] = useState<number>(0);
-    const [valueNext, setValueNext] = useState<number>(0);
-    const idPrevRef = useRef<string>(randomId('slider'));
-    const idNextRef = useRef<string>(randomId('slider'));
-    const sliderRef = useRef<HTMLDivElement | null>(null);
+export function Slider(props: IBaseSliderProps) {
+    const { value, min = 0, max = 400, resetPoint = 100, shortcuts, onChange } = props;
 
-    const { min = 0, max = 100, step = 1, range = false, value, className = '' } = props;
+    const sliderInnerRailRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const diff = max - min;
-        const slider = sliderRef.current;
+    function handleReset() {
+        onChange && onChange(resetPoint);
+    }
 
-        if (slider) {
-            slider.style.cssText += `--${idPrevRef.current}: ${valuePrev}; --${idNextRef.current}: ${valueNext}`;
-            const styleSheet = document.styleSheets[0];
+    function handleStep(offset: number) {
+        onChange && onChange(value + offset);
+    }
 
-            if (styleSheet) {
-                styleSheet.insertRule(
-                    `.${styles.slider}::after {margin-left: calc((var(--${idNextRef.current}) - ${min})/${diff}*100%); width: calc((var(--${idPrevRef.current}) - var(--${idNextRef.current}))/${diff}*100%);}`,
-                    0
-                );
-                styleSheet.insertRule(
-                    `.${styles.slider}::before {margin-left: calc((var(--${idPrevRef.current}) - ${min})/${diff}*100%);width: calc((var(--${idNextRef.current}) - var(--${idPrevRef.current}))/${diff}*100%);}`,
-                    0
-                );
-            }
+    const offset = useMemo(() => {
+        const breakpoint = [resetPoint, (max - resetPoint) / 2 + resetPoint, max];
+        if (value <= breakpoint[0]) {
+            return value * 0.5;
         }
 
-        // 初始化input值和样式
-        if (range) {
-            const { value = [0, 0] } = props;
-            if (!Array.isArray(value)) {
-                throw Error('Type of value must be array');
-            }
-            const realValue = value;
-            changeInputValue(0, realValue[0]);
-            changeInputValue(1, realValue[1]);
-        } else {
-            const { value = 0 } = props;
-            if (Array.isArray(value)) {
-                throw Error('Type of value must be string');
-            }
-            changeInputValue(0, value);
+        if (value <= max) {
+            return resetPoint * 0.5 + ((value - resetPoint) / (max - resetPoint)) * 50;
         }
-    }, []);
+    }, [min, max, resetPoint, value]);
 
-    // 组件卸载时删除stylesheet
-    useEffect(
-        () => () => {
-            const styleSheet = document.styleSheets[0];
-            if (!styleSheet) return;
-            const beforeIndex = Array.from(styleSheet.rules).findIndex((item) => {
-                if ('selectorText' in item) {
-                    return item.selectorText === `.${styles.slider}::before`;
+    function handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+        e.preventDefault();
+        const rail = sliderInnerRailRef.current!;
+        let isDragging = true;
+
+        function onMouseMove(e: MouseEvent) {
+            if (isDragging) {
+                const pureOffsetX = e.clientX - rail.getBoundingClientRect().x;
+
+                let offsetX = pureOffsetX;
+                if (offsetX <= 0) {
+                    offsetX = 0;
+                } else if (offsetX >= styles.sliderWidth) {
+                    offsetX = styles.sliderWidth;
                 }
-                return false;
-            });
-            if (beforeIndex > -1) styleSheet.deleteRule(beforeIndex);
 
-            const afterIndex = Array.from(styleSheet.rules).findIndex((item) => {
-                if ('selectorText' in item) {
-                    return item.selectorText === `.${styles.slider}::after`;
+                const ratio = offsetX / styles.sliderWidth;
+
+                let value = 0;
+                if (ratio <= 0.5) {
+                    value = (ratio * max) / 2;
+                } else {
+                    value = resetPoint + (ratio - 0.5) * (max - resetPoint) * 2;
                 }
-                return false;
-            });
-            if (afterIndex > -1) styleSheet.deleteRule(afterIndex);
-        },
-        []
-    );
 
-    const onInput = (e: React.FormEvent<HTMLInputElement>) => {
-        const value = Number((e.target as HTMLInputElement).value);
-        let index = 0;
-        if (Array.isArray(props.value)) {
-            if (value >= (valueNext - valuePrev) / 2 + valuePrev) {
-                index = 1;
+                onChange && onChange(Math.ceil(value));
             }
         }
-        props.onChange?.(e.nativeEvent);
 
-        changeInputValue(index, value);
-    };
-
-    const onClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        const { min = 0, max = 100, step = 1 } = props;
-        const target = e.currentTarget;
-        const track = e.nativeEvent.offsetX;
-        const width = target.offsetWidth;
-        if (track < 0 || track > width) return;
-        let value = (track / width) * (max - min);
-        if (value % step) {
-            value += step - (value % step);
+        function onMouseUp() {
+            isDragging = false;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
         }
-        let index = 0;
-        if (Array.isArray(props.value)) {
-            // Todo: 为何onInput触发的onClick值会有几px误差？
-            if (value >= (valueNext - valuePrev) / 2 + valuePrev) {
-                index = 1;
-            }
+
+        function onMouseOut(e: MouseEvent) {
+            e.relatedTarget === null && onMouseUp();
         }
-        props.onClick?.(e.nativeEvent, value);
-        changeInputValue(index, value);
-    };
 
-    const changeInputValue = (index: number, value: number) => {
-        const parentNode = sliderRef.current;
-        if (!parentNode) return;
-        const input = parentNode.getElementsByTagName('input')[index];
-        const id = input.id;
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        window.addEventListener('mouseout', onMouseOut);
+    }
 
-        parentNode.style.setProperty(`--${id}`, String(value));
-
-        if (!index) {
-            setValuePrev(value);
-        } else {
-            setValueNext(value);
-        }
-    };
+    console.log(shortcuts);
 
     return (
-        <div
-            className={`${styles.slider} ${className}`}
-            role="slider-group"
-            aria-labelledby="multi-lbl"
-            style={{ '--min': min, '--max': max } as CSSProperties}
-            ref={sliderRef}
-            onClick={(e) => onClick(e)}
-        >
-            <label className="sr-only" htmlFor={idPrevRef.current}></label>
-            <input
-                id={idPrevRef.current}
-                type="range"
-                min={min}
-                value={valuePrev}
-                max={max}
-                step={step}
-                onInput={(e) => onInput(e)}
-            />
-            {range && (
-                <>
-                    <label className="sr-only" htmlFor={idNextRef.current}></label>
-                    <input
-                        id={idNextRef.current}
-                        type="range"
-                        min={min}
-                        value={valueNext}
-                        max={max}
-                        step={step}
-                        onInput={(e) => onInput(e)}
+        <div className={styles.slider}>
+            <Button type="text" disabled={value <= 0} onClick={() => handleStep(-10)}>
+                -
+            </Button>
+
+            <div className={styles.sliderRail}>
+                <div ref={sliderInnerRailRef} className={styles.sliderInnerRail}>
+                    <Tooltip title={'恢复至 100%'}>
+                        <a className={styles.sliderResetPoint} onClick={handleReset} />
+                    </Tooltip>
+
+                    <div
+                        className={styles.sliderHandle}
+                        role="slider"
+                        style={{
+                            left: `${offset}%`,
+                        }}
+                        onMouseDown={handleMouseDown}
                     />
-                </>
-            )}
+                </div>
+            </div>
+
+            <Button type="text" disabled={value >= max} onClick={() => handleStep(10)}>
+                +
+            </Button>
+
+            <Dropwdown2
+                placement="topRight"
+                overlay={
+                    <div className={styles.sliderShortcuts}>
+                        {shortcuts?.map((item) => (
+                            <a
+                                key={item}
+                                className={joinClassNames(
+                                    styles.sliderShortcut,
+                                    item === value ? styles.sliderShortcutActive : ''
+                                )}
+                                onClick={() => onChange && onChange(item)}
+                            >
+                                {item === value && <span className={styles.sliderShortcutIcon}>✔</span>}
+                                <span>{item}%</span>
+                            </a>
+                        ))}
+                    </div>
+                }
+            >
+                <a className={styles.sliderValue}>{value}%</a>
+            </Dropwdown2>
         </div>
     );
 }

@@ -149,7 +149,6 @@ export class ScrollController extends Disposable {
             endColumn: viewportEndColumn,
         } = skeleton.getRowColumnSegment(bounds);
 
-        let isOverflow = false;
         // vertical overflow only happens when the selection's row is in not the freeze area
         if (
             (direction === Direction.UP || direction === Direction.DOWN) &&
@@ -158,13 +157,11 @@ export class ScrollController extends Disposable {
         ) {
             // top overflow
             if (selectionStartRow <= viewportStartRow) {
-                isOverflow = true;
                 startSheetViewRow = selectionStartRow;
             }
 
             // bottom overflow
             if (selectionStartRow >= viewportEndRow) {
-                isOverflow = true;
                 const minRowAccumulation = rowHeightAccumulation[selectionStartRow] - viewport.height!;
                 for (let r = viewportStartRow; r <= selectionStartRow; r++) {
                     if (rowHeightAccumulation[r] >= minRowAccumulation) {
@@ -182,13 +179,11 @@ export class ScrollController extends Disposable {
         ) {
             // left overflow
             if (selectionStartColumn <= viewportStartColumn) {
-                isOverflow = true;
                 startSheetViewColumn = selectionStartColumn;
             }
 
             // right overflow
             if (selectionStartColumn >= viewportEndColumn) {
-                isOverflow = true;
                 const minColumnAccumulation = columnWidthAccumulation[selectionStartColumn] - viewport.width!;
                 for (let c = viewportStartColumn; c <= selectionStartColumn; c++) {
                     if (columnWidthAccumulation[c] >= minColumnAccumulation) {
@@ -199,7 +194,7 @@ export class ScrollController extends Disposable {
             }
         }
 
-        if (!isOverflow) {
+        if (startSheetViewRow === undefined && startSheetViewColumn === undefined) {
             return;
         }
         // sheetViewStartRow and sheetViewStartColumn maybe undefined, which means should not make scroll at its direction

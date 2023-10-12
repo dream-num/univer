@@ -86,6 +86,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         const cellDataMatrix = new ObjectMatrix<ICellData>(cellData);
 
         const spreadsheetSkeleton = SpreadsheetSkeleton.create(
+            undefined, // FIXME: worksheet in slide doesn't has a Worksheet object
             worksheet,
             cellDataMatrix,
             new Styles(styles),

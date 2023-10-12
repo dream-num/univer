@@ -161,6 +161,7 @@ export class Univer {
                         new CurrentUniverService(
                             {
                                 createUniverDoc: (data) => this.createUniverDoc(data),
+                                createUniverSheet: (data) => this.createUniverSheet(data),
                             },
                             contextService
                         ),

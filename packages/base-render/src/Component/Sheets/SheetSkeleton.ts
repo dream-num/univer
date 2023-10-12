@@ -129,7 +129,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _marginLeft: number = 0;
 
     constructor(
-        private _worksheet: Worksheet,
+        private _worksheet: Worksheet | undefined,
         private _config: IWorksheetConfig,
         private _cellData: ObjectMatrix<ICellData>,
         private _styles: Styles,
@@ -210,7 +210,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @returns
      */
     static create(
-        worksheet: Worksheet,
+        worksheet: Worksheet | undefined,
         config: IWorksheetConfig,
         cellData: ObjectMatrix<ICellData>,
         styles: Styles,
@@ -1150,7 +1150,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             return true;
         }
 
-        const cell = this._worksheet.getCell(r, c);
+        const cell = this._worksheet?.getCell(r, c) || cellData.getValue(r, c);
         if (!cell) {
             return true;
         }

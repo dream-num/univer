@@ -181,16 +181,20 @@ export class SelectionController extends Disposable {
             endRow: viewportEndRow,
             endColumn: viewportEndColumn,
         } = skeleton.getRowColumnSegment(bounds);
+        let isOverflow = false;
         // top overflow
         if (selectionStartRow <= viewportStartRow) {
+            isOverflow = true;
             startSheetViewRow = selectionStartRow;
         }
         // left overflow
         if (selectionStartColumn <= viewportStartColumn) {
+            isOverflow = true;
             startSheetViewColumn = selectionStartColumn;
         }
         // bottom overflow
         if (selectionEndRow >= viewportEndRow) {
+            isOverflow = true;
             const minRowAccumulation = rowHeightAccumulation[selectionEndRow] - viewport.height!;
             for (let r = viewportStartRow; r <= selectionEndRow; r++) {
                 if (rowHeightAccumulation[r] >= minRowAccumulation) {
@@ -201,6 +205,7 @@ export class SelectionController extends Disposable {
         }
         // right overflow
         if (selectionEndColumn >= viewportEndColumn) {
+            isOverflow = true;
             const minColumnAccumulation = columnWidthAccumulation[selectionEndColumn] - viewport.width!;
             for (let c = viewportStartColumn; c <= selectionEndColumn; c++) {
                 if (columnWidthAccumulation[c] >= minColumnAccumulation) {
@@ -208,6 +213,9 @@ export class SelectionController extends Disposable {
                     break;
                 }
             }
+        }
+        if (!isOverflow) {
+            return;
         }
         // sheetViewStartRow and sheetViewStartColumn maybe undefined
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();

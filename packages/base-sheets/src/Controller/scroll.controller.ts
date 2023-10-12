@@ -110,31 +110,40 @@ export class ScrollController extends Disposable {
             }
 
             const { sheetViewStartRow, sheetViewStartColumn } = param;
-            const { startX, startY } = skeleton.getCellByIndex(
-                sheetViewStartRow || 0,
-                sheetViewStartColumn || 0,
-                scaleX,
-                scaleY
-            );
+
             const { tl } = viewportMain.getBounding();
 
             // if both row and column are defined, we should scroll this cell to the top left corner
             // the scroll position is absolute position
             if (sheetViewStartRow !== undefined && sheetViewStartColumn !== undefined) {
+                const { startX, startY } = skeleton.getCellByIndexWithNoHeader(
+                    sheetViewStartRow,
+                    sheetViewStartColumn,
+                    scaleX,
+                    scaleY
+                );
                 const config = viewportMain.getBarScroll(startX, startY);
                 viewportMain.scrollTo(config);
+            } else {
+                const { startX, startY } = skeleton.getCellByIndex(
+                    sheetViewStartRow || 0,
+                    sheetViewStartColumn || 0,
+                    scaleX,
+                    scaleY
+                );
                 // if only column is undefined, we should scroll vertically to the cell
                 // the scroll position is relative position
-            } else if (sheetViewStartRow !== undefined) {
-                const offsetY = startY - tl.y;
-                const config = viewportMain.getBarScroll(0, offsetY);
-                viewportMain.scrollBy(config);
-                // if only row is undefined, we should scroll horizontally to the cell
-                // the scroll position is relative position
-            } else if (sheetViewStartColumn !== undefined) {
-                const offsetX = startX - tl.x;
-                const config = viewportMain.getBarScroll(offsetX, 0);
-                viewportMain.scrollBy(config);
+                if (sheetViewStartRow !== undefined) {
+                    const offsetY = startY - tl.y;
+                    const config = viewportMain.getBarScroll(0, offsetY);
+                    viewportMain.scrollBy(config);
+                    // if only row is undefined, we should scroll horizontally to the cell
+                    // the scroll position is relative position
+                } else if (sheetViewStartColumn !== undefined) {
+                    const offsetX = startX - tl.x;
+                    const config = viewportMain.getBarScroll(offsetX, 0);
+                    viewportMain.scrollBy(config);
+                }
             }
         });
     }

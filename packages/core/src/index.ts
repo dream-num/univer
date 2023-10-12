@@ -1,6 +1,3 @@
-// Copyright (c) DreamNum Company. All rights reserved. Licensed under the MIT license.
-// See LICENSE in the project root for license information.
-
 export * from './Basics';
 export * from './Docs/Domain';
 export * from './Observer';
@@ -21,6 +18,7 @@ export { IContextService } from './services/context/context.service';
 export { ICurrentUniverService } from './services/current.service';
 export { LifecycleStages, OnLifecycle } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';
+export { ILocalStorageService } from './services/local-storage/local-storage.service';
 export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService } from './services/log/log.service';
 export { DesktopPermissionService, IPermissionService } from './services/permission/permission.service';

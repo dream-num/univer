@@ -5,16 +5,6 @@ import { Nullable } from '../common/type-utils';
 import { Disposable, toDisposable } from '../Shared/lifecycle';
 import { ICellData } from '../Types/Interfaces/ICellData';
 
-/**
- * Worksheet should provide `SheetViewModel` a `ISheetModelInterface` for it to
- * get or update raw values.
- *
- * @deprecated this may be redundant since we treat default value fetcher as an interceptor as well
- */
-export interface ISheetModelInterface {
-    getCell(row: number, col: number): Nullable<ICellData>;
-}
-
 export interface ICellContentInterceptor {
     getCell(row: number, col: number): Nullable<ICellData>;
 }
@@ -43,10 +33,6 @@ export class SheetViewModel extends Disposable implements ISheetViewModel {
     private readonly _rowVisibleInterceptors: IRowVisibleInterceptor[] = [];
     private readonly _colVisibleInterceptors: IColVisibleInterceptor[] = [];
 
-    constructor(private readonly _modelInterface: ISheetModelInterface) {
-        super();
-    }
-
     override dispose(): void {
         super.dispose();
 
@@ -64,11 +50,7 @@ export class SheetViewModel extends Disposable implements ISheetViewModel {
             }
         }
 
-        // First it could call each interceptor to get the cell content
-        // If there is no interceptor nor interceptors return undefined, then
-        // it will call the model interface to get the cell content.
-        // NOTE: will performance be an issue?
-        return this._modelInterface.getCell(row, col);
+        return null;
     }
 
     registerCellContentInterceptor(interceptor: ICellContentInterceptor): IDisposable {

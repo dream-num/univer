@@ -61,9 +61,7 @@ export class Worksheet {
 
         // This view model will immediately injected with hooks from SheetViewModel service as Worksheet
         // is constructed.
-        this._viewModel = new SheetViewModel({
-            getCell: this.getCellRaw.bind(this),
-        });
+        this._viewModel = new SheetViewModel();
     }
 
     /**

@@ -9,8 +9,6 @@ import { ICellData } from '../../Types/Interfaces/ICellData';
 import { ICurrentUniverService } from '../current.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 
-// TODO: use generic types
-
 /**
  * A helper to compose a certain type of interceptors.
  */
@@ -21,7 +19,7 @@ export function compose(interceptors: ICellInterceptor[]) {
         return passThrough(0, undefined);
         function passThrough(i: number, v: Nullable<ICellData>): Nullable<ICellData> {
             if (i <= index) {
-                throw new Error('next() called multiple times');
+                throw new Error('[SheetInterceptorService]: next() called multiple times!');
             }
 
             index = i;
@@ -130,7 +128,6 @@ export class SheetInterceptorService extends Disposable {
 
         this._cellInterceptors.push(interceptor);
         this._cellInterceptors = this._cellInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-        // NOTE: maybe split to different kinds of interceptors
 
         return this.disposeWithMe(
             toDisposable(() => {

@@ -39,7 +39,8 @@ export const LifecycleToModules = new Map<LifecycleStages, Array<DependencyIdent
  * Register some modules here that will automatically run when Univer progressed to a certain lifecycle stage
  */
 export function OnLifecycle(lifecycleStage: LifecycleStages, identifier: DependencyIdentifier<unknown>) {
-    const decorator = function decorator(_registerTarget: Ctor<unknown>) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const decorator = function decorator(_: Ctor<unknown>) {
         runOnLifecycle(lifecycleStage, identifier);
     };
 

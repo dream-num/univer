@@ -55,6 +55,8 @@ export interface ISheetClipboardHook {
     onCopyCellContent?(row: number, col: number): string;
     /**
      * Properties that would be appended to the td element.
+     *
+     * @deprecated should be merged with `onCopyCellContent` to `onCopyCell`
      * @param row row of the the copied cell
      * @param col col of the the copied cell
      */

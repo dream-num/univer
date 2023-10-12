@@ -7,7 +7,9 @@ import {
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from '../commands/commands/add-worksheet-merge.command';
+import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../commands/commands/clear-selection-content.command';
+import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
 import { CopySheetCommand } from '../commands/commands/copy-worksheet.command';
 import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../commands/commands/delete-range-move-up.command';
@@ -105,6 +107,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             RemoveWorksheetMergeCommand,
             RemoveWorksheetMergeMutation,
             ClearSelectionContentCommand,
+            ClearSelectionFormatCommand,
+            ClearSelectionAllCommand,
             SetRangeValuesMutation,
             SetWorksheetNameCommand,
             SetWorksheetNameMutation,

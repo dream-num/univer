@@ -20,7 +20,7 @@ import {
     RemoveWorksheetMergeMutation,
 } from '../mutations/remove-worksheet-merge.mutation';
 
-interface addMergeCommandParams {
+interface IAddMergeCommandParams {
     value: Dimension.ROWS | Dimension.COLUMNS;
 }
 
@@ -28,7 +28,7 @@ export const AddWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-worksheet-merge',
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor, params?: addMergeCommandParams) => {
+    handler: async (accessor: IAccessor, params?: IAddMergeCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

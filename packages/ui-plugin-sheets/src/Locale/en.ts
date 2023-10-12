@@ -464,6 +464,8 @@ export default {
         orderAZ: 'A-Z order',
         orderZA: 'Z-A order',
         clearContent: 'Clear Contents',
+        clearFormat: 'Clear Formats',
+        clearAll: 'Clear All',
         matrix: 'Matrix operation',
         sortSelection: 'Sort',
         filterSelection: 'Filter',

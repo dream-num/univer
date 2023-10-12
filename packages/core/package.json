@@ -68,6 +68,7 @@
         "@types/numeral": "^2.0.3",
         "@vitest/coverage-v8": "^0.34.5",
         "esbuild": "^0.19.3",
+        "happy-dom": "^12.2.0",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
         "vitest": "^0.34.5"

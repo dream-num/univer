@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import {
     BooleanNumber,
     FontItalic,
@@ -5,7 +6,6 @@ import {
     HorizontalAlign,
     ICommandService,
     ICurrentUniverService,
-    IStyleData,
     ITextDecoration,
     ITextRotation,
     Nullable,
@@ -43,7 +43,6 @@ describe("Test commands used for updating cells' styles", () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let getTextStyle: () => Nullable<IStyleData>;
 
     beforeEach(() => {
         const testBed = createCommandTestBed();
@@ -66,18 +65,9 @@ describe("Test commands used for updating cells' styles", () => {
         commandService.registerCommand(SetTextRotationCommand);
         commandService.registerCommand(SetStyleCommand);
         commandService.registerCommand(SetRangeValuesMutation);
-
-        getTextStyle = (): Nullable<IStyleData> =>
-            get(ICurrentUniverService)
-                .getUniverSheetInstance('test')
-                ?.getSheetBySheetId('sheet1')
-                ?.getRange(0, 0, 0, 0)
-                .getTextStyle();
     });
 
-    afterEach(() => {
-        univer.dispose();
-    });
+    afterEach(() => univer.dispose());
 
     describe('bold', () => {
         describe('correct situations', () => {

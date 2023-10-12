@@ -143,7 +143,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   examples/univer-sheet-ts:
     dependencies:
@@ -228,7 +228,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   examples/univer-slide-ts:
     dependencies:
@@ -292,7 +292,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/base-docs:
     dependencies:
@@ -344,7 +344,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/base-formula-engine:
     dependencies:
@@ -384,7 +384,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/base-numfmt-engine:
     dependencies:
@@ -421,7 +421,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/base-render:
     dependencies:
@@ -467,7 +467,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/base-sheets:
     dependencies:
@@ -562,7 +562,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/base-ui:
     dependencies:
@@ -687,7 +687,7 @@ importers:
         version: 0.19.3
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/core:
     dependencies:
@@ -722,6 +722,9 @@ importers:
       esbuild:
         specifier: ^0.19.3
         version: 0.19.3
+      happy-dom:
+        specifier: ^12.2.0
+        version: 12.2.0
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -730,7 +733,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/sheets-plugin-find:
     dependencies:
@@ -785,7 +788,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/sheets-plugin-formula:
     dependencies:
@@ -840,7 +843,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/sheets-plugin-image:
     dependencies:
@@ -895,7 +898,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/sheets-plugin-import-xlsx:
     dependencies:
@@ -953,7 +956,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/sheets-plugin-numfmt:
     dependencies:
@@ -1008,7 +1011,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/ui-plugin-docs:
     dependencies:
@@ -1054,7 +1057,7 @@ importers:
         version: 10.9.1(@types/node@16.4.6)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/ui-plugin-sheets:
     dependencies:
@@ -1158,7 +1161,7 @@ importers:
         version: 10.9.1(@types/node@16.4.6)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
 packages:
 

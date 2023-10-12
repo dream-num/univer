@@ -1,9 +1,18 @@
 import { IRenderManagerService, ISelectionTransformerShapeManager } from '@univerjs/base-render';
-import { Disposable, ICommandService, ICurrentUniverService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandInfo,
+    ICommandService,
+    ICurrentUniverService,
+    LifecycleStages,
+    OnLifecycle,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { ScrollCommand } from '../commands/commands/set-scroll.command';
+import { MoveSelectionCommand } from '../commands/commands/set-selections.command';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { ISheetSkeletonManagerParam, SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -32,6 +41,7 @@ export class ScrollController extends Disposable {
         this._scrollSubscribeBinding();
 
         this._skeletonListener();
+        this._commandExecutedListener();
     }
 
     private _scrollEventBinding() {
@@ -80,6 +90,101 @@ export class ScrollController extends Disposable {
             //     sheetViewStartRow: row,
             //     sheetViewStartColumn: column,
             // });
+        });
+    }
+
+    private _commandExecutedListener() {
+        const updateCommandList = [MoveSelectionCommand.id];
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (updateCommandList.includes(command.id)) {
+                    this.scrollToVisible();
+                }
+            })
+        );
+    }
+
+    private scrollToVisible() {
+        let startSheetViewRow;
+        let startSheetViewColumn;
+        const selection = this._selectionManagerService.getLast();
+        if (selection == null) {
+            return;
+        }
+        const {
+            startRow: selectionStartRow,
+            startColumn: selectionStartColumn,
+            endRow: selectionEndRow,
+            endColumn: selectionEndColumn,
+        } = selection.range;
+        const { rowHeightAccumulation, columnWidthAccumulation } =
+            this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
+        if (rowHeightAccumulation == null || columnWidthAccumulation == null) {
+            return;
+        }
+        const scene = this._getSheetObject()?.scene;
+        if (scene == null) {
+            return;
+        }
+        const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        if (viewport == null) {
+            return;
+        }
+        const bounds = viewport.getBounding();
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        if (skeleton == null) {
+            return;
+        }
+        const {
+            startRow: viewportStartRow,
+            startColumn: viewportStartColumn,
+            endRow: viewportEndRow,
+            endColumn: viewportEndColumn,
+        } = skeleton.getRowColumnSegment(bounds);
+        let isOverflow = false;
+        // top overflow
+        if (selectionStartRow <= viewportStartRow) {
+            isOverflow = true;
+            startSheetViewRow = selectionStartRow;
+        }
+        // left overflow
+        if (selectionStartColumn <= viewportStartColumn) {
+            isOverflow = true;
+            startSheetViewColumn = selectionStartColumn;
+        }
+        // bottom overflow
+        if (selectionEndRow >= viewportEndRow) {
+            isOverflow = true;
+            const minRowAccumulation = rowHeightAccumulation[selectionEndRow] - viewport.height!;
+            for (let r = viewportStartRow; r <= selectionEndRow; r++) {
+                if (rowHeightAccumulation[r] >= minRowAccumulation) {
+                    startSheetViewRow = r + 1;
+                    break;
+                }
+            }
+        }
+        // right overflow
+        if (selectionEndColumn >= viewportEndColumn) {
+            isOverflow = true;
+            const minColumnAccumulation = columnWidthAccumulation[selectionEndColumn] - viewport.width!;
+            for (let c = viewportStartColumn; c <= selectionEndColumn; c++) {
+                if (columnWidthAccumulation[c] >= minColumnAccumulation) {
+                    startSheetViewColumn = c + 1;
+                    break;
+                }
+            }
+        }
+        if (!isOverflow) {
+            return;
+        }
+        // sheetViewStartRow and sheetViewStartColumn maybe undefined
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        this._commandService.executeCommand(ScrollCommand.id, {
+            unitId: workbook.getUnitId(),
+            sheetId: workbook.getActiveSheet().getSheetId(),
+            sheetViewStartRow: startSheetViewRow,
+            sheetViewStartColumn: startSheetViewColumn,
         });
     }
 

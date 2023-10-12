@@ -1,18 +1,13 @@
-import {
-    ICurrentUniverService,
-    ILogService,
-    IWorkbookConfig,
-    LocaleType,
-    Plugin,
-    PluginType,
-    Univer,
-} from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
-import { SelectionManagerService } from '../../../services/selection-manager.service';
+import { Univer } from '../../../Basics/Univer';
+import { Plugin, PluginType } from '../../../plugin/plugin';
+import { LocaleType } from '../../../Types/Enum/LocaleType';
+import { IWorkbookConfig } from '../../../Types/Interfaces/IWorkbookData';
+import { ICurrentUniverService } from '../../current.service';
+import { ILogService } from '../../log/log.service';
 
-const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
+const TEST_WORKBOOK_DATA: IWorkbookConfig = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -42,14 +37,11 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     timeZone: '',
 };
 
-export function createCommandTestBed(workbookConfig?: IWorkbookConfig, dependencies?: Dependency[]) {
+export function createCoreTestBed(workbookConfig?: IWorkbookConfig, dependencies?: Dependency[]) {
     const univer = new Univer();
 
     let get: Injector['get'] | undefined;
 
-    /**
-     * This plugin hooks into Sheet's DI system to expose API to test scripts
-     */
     class TestSpyPlugin extends Plugin {
         static override type = PluginType.Sheet;
 
@@ -57,18 +49,13 @@ export function createCommandTestBed(workbookConfig?: IWorkbookConfig, dependenc
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super('test-spy-plugin');
 
             this._injector = _injector;
-            get = this._injector.get.bind(this._injector);
+            get = this._injector.get.bind(_injector);
         }
 
-        override onStarting(injector: Injector): void {
-            injector.add([SelectionManagerService]);
-            injector.add([BorderStyleManagerService]);
-
-            dependencies?.forEach((d) => injector.add(d));
-        }
+        override onStarting(_injector: Injector): void {}
 
         override onDestroy(): void {
             get = undefined;
@@ -76,7 +63,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookConfig, dependenc
     }
 
     univer.registerPlugin(TestSpyPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
 
     if (get === undefined) {
         throw new Error('[TestPlugin]: not hooked on!');
@@ -86,7 +73,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookConfig, dependenc
     currentUniverService.focusUniverInstance('test');
 
     const logService = get(ILogService);
-    logService.toggleLogEnabled(false); // change this to `true` to debug tests via logs
+    logService.toggleLogEnabled(false);
 
     return {
         univer,

@@ -38,7 +38,8 @@ export class SheetCanvasView {
     ) {
         this._currentUniverService.currentSheet$.subscribe((workbook) => {
             if (workbook == null) {
-                throw new Error('workbook is null');
+                return;
+                // throw new Error('workbook is null');
             }
             this._currentWorkbook = workbook;
             this._addNewRender();

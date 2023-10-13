@@ -143,7 +143,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   examples/univer-sheet-ts:
     dependencies:
@@ -228,7 +228,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   examples/univer-slide-ts:
     dependencies:
@@ -292,7 +292,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/base-docs:
     dependencies:
@@ -344,7 +344,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/base-formula-engine:
     dependencies:
@@ -384,7 +384,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/base-numfmt-engine:
     dependencies:
@@ -421,7 +421,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/base-render:
     dependencies:
@@ -467,7 +467,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/base-sheets:
     dependencies:
@@ -562,7 +562,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/base-ui:
     dependencies:
@@ -576,8 +576,8 @@ importers:
         specifier: workspace:^0.0.1
         version: link:../core
       '@univerjs/icons':
-        specifier: ^0.0.5
-        version: 0.0.5(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.0.6
+        version: 0.0.6(react-dom@18.2.0)(react@18.2.0)
       '@wendellhu/redi':
         specifier: ^0.12.8
         version: 0.12.8
@@ -687,7 +687,7 @@ importers:
         version: 0.19.3
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/core:
     dependencies:
@@ -788,7 +788,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/sheets-plugin-formula:
     dependencies:
@@ -843,7 +843,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/sheets-plugin-image:
     dependencies:
@@ -898,7 +898,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/sheets-plugin-import-xlsx:
     dependencies:
@@ -956,7 +956,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/sheets-plugin-numfmt:
     dependencies:
@@ -1011,7 +1011,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/ui-plugin-docs:
     dependencies:
@@ -1057,7 +1057,7 @@ importers:
         version: 10.9.1(@types/node@16.4.6)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/ui-plugin-sheets:
     dependencies:
@@ -1161,7 +1161,7 @@ importers:
         version: 10.9.1(@types/node@16.4.6)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
 packages:
 
@@ -5865,8 +5865,8 @@ packages:
       eslint-visitor-keys: 3.4.3
     dev: true
 
-  /@univerjs/icons@0.0.5(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-/wJ8p8/ZNwXrlvDRz6rp0RvMlgMLSvL4MWTeuE/7dpE/zLtqsjY96huAwoIDMZkZcGOQn0VqBtUMyZskRlb5GQ==}
+  /@univerjs/icons@0.0.6(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-gF8QMDk9QVP9Rg4zDEsDGtG00jhTk2v3VStH9C922+3AazZaeSIE4FD34V9hUEWJXz62Nvg8K0657g458yJwTQ==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -5923,7 +5923,7 @@ packages:
       std-env: 3.4.3
       test-exclude: 6.0.0
       v8-to-istanbul: 9.1.0
-      vitest: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+      vitest: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
     transitivePeerDependencies:
       - supports-color
     dev: true

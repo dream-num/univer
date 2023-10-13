@@ -1,26 +1,24 @@
 @import '../../../Basics/CSS/Skin/default.module.less';
 
 .active() {
-    // border-right-width: @border-width-base !important;
     outline: 0;
-    box-shadow: @box-shadow-base;
+    box-shadow: var(--box-shadow-base);
 }
 
 .hover(@color: var(--primary-color-hover)) {
     border-color: @color;
-    // border-right-width: @border-width-base !important;
 }
 
 .disabled() {
-    color: var(--disabled-color);
-    background-color: var(--disabled-bg);
-    border-color: var(--border-color-base);
+    color: var(--grey-200);
+    background-color: var(--bg-color-secondary);
+    border-color: var(--grey-200);
     box-shadow: none;
     cursor: not-allowed;
     opacity: 1;
 
     &:hover {
-        .hover(var(--border-color-base));
+        .hover(var(--grey-200));
     }
 }
 
@@ -28,16 +26,14 @@
     position: relative;
     display: inline-block;
     width: 100%;
-    min-width: 0;
+    height: 100%;
     box-sizing: border-box;
-    padding: 2px 7px;
+    padding: 10px 20px;
     color: var(--text-color);
-    font-size: @font-size-base;
-    line-height: @line-height-base;
-    background-color: @bg-color-secondary;
-    background-image: none;
-    border: @border-width-base @border-style-base var(--border-color-base);
-    border-radius: @border-radius-base;
+    font-size: var(--font-size-base);
+    background-color: var(--bg-color-secondary);
+    border: 1px solid var(--grey-200);
+    border-radius: var(--border-radius-base);
     transition: all 0.3s;
 
     &:hover {
@@ -58,16 +54,16 @@
     }
 
     &-borderless {
-        border: @border-width-base @border-style-base transparent;
+        border: 1px solid transparent;
         box-shadow: none;
 
         &:hover {
-            border: @border-width-base @border-style-base transparent;
+            border-color: transparent;
         }
 
         &:focus,
         &-focused {
-            border: @border-width-base @border-style-base var(--primary-color-hover);
+            border-color: var(--primary-color-hover);
             .active();
         }
     }

@@ -1,5 +1,5 @@
 import {
-    BinaryColorExample24,
+    BorderColor24,
     DownBorde24,
     InnerBorde24,
     LeftBorde24,
@@ -14,7 +14,7 @@ import {
 import { BaseIconProps } from '../AddIcon';
 
 export const FillColorIcon = (props: BaseIconProps) => (
-    <BinaryColorExample24 extend={{ colorChannel1: props.color || 'white' }} />
+    <BorderColor24 extend={{ colorChannel1: props.color || 'white' }} />
 );
 
 export const FullBorderIcon = (props: BaseIconProps) => <TableStyle24 />;

@@ -4,7 +4,7 @@ import { LoadingIcon } from '../Icon';
 import styles from './Style/index.module.less';
 
 // Components interface
-export type ButtonType = 'default' | 'primary';
+export type ButtonType = 'default' | 'primary' | 'text';
 export type ButtonShape = 'circle' | 'round';
 export type SizeType = 'small' | 'middle' | 'large';
 export type ButtonHTMLType = 'submit' | 'reset' | 'button';

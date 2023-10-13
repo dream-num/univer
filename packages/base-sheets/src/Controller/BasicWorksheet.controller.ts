@@ -60,6 +60,7 @@ import { DeltaRowHeightCommand, SetRowHeightCommand } from '../commands/commands
 import { SetWorksheetRowHideCommand } from '../commands/commands/set-worksheet-row-hide.command';
 import { SetWorksheetRowShowCommand } from '../commands/commands/set-worksheet-row-show.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
+import { SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { TrimWhitespaceCommand } from '../commands/commands/trim-whitespace.command';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation } from '../commands/mutations/delete-range.mutation';
@@ -190,6 +191,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetFrozenMutation,
             SetFrozenCancelCommand,
             ScrollCommand,
+            SetZoomRatioCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

@@ -96,6 +96,7 @@ export { SetRowHeightCommand as SetWorksheetRowHeightCommand } from './commands/
 export { SetWorksheetRowHideCommand } from './commands/commands/set-worksheet-row-hide.command';
 export { SetWorksheetRowShowCommand } from './commands/commands/set-worksheet-row-show.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
+export { SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 export {
     InsertColMutation,
     InsertColMutationUndoFactory as InsertColMutationFactory,

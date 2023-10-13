@@ -4,6 +4,7 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { SetScrollOperation } from './commands/operations/scroll.operation';
 import { SetSelectionsOperation } from './commands/operations/selection.operation';
+import { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { FreezeController } from './Controller/freeze.controller';
@@ -114,5 +115,6 @@ export class SheetPlugin extends Plugin {
     private _initializeCommands(): void {
         this._commandService.registerCommand(SetSelectionsOperation);
         this._commandService.registerCommand(SetScrollOperation);
+        this._commandService.registerCommand(SetZoomRatioOperation);
     }
 }

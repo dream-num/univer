@@ -30,7 +30,7 @@ describe('Test commands used for change selections', () => {
     let selectionManagerService: SelectionManagerService;
 
     function select00() {
-        selectionManagerService.add([
+        selectionManagerService.replace([
             {
                 range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
                 primary: {
@@ -331,12 +331,43 @@ describe('Test commands used for change selections', () => {
             });
             expectSelectionToBe(0, 19, 0, 19);
         });
+
+        it('Should jump over cells in hidden rows / cols no matter if there are empty', async () => {
+            [
+                SetRowHiddenCommand,
+                SetRowHiddenMutation,
+                SetColHiddenCommand,
+                SetColHiddenMutation,
+                SetRowVisibleCommand,
+                SetColVisibleCommand,
+                SetRowVisibleMutation,
+                SetColVisibleMutation,
+            ].forEach((command) => {
+                commandService.registerCommand(command);
+            });
+
+            selectColumn(3, 10);
+            await commandService.executeCommand(SetColHiddenCommand.id);
+
+            select00();
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                jumpOver: true,
+            });
+            expectSelectionToBe(0, 2, 0, 2);
+
+            // skip over hidden columns and jump to the last column
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+                jumpOver: true,
+            });
+            expectSelectionToBe(0, 19, 0, 19);
+        });
     });
 
     describe('Expand to next selection or shrink to previous selection', () => {
         beforeEach(() => prepareTestBed(SELECTION_WITH_EMPTY_CELLS_DATA));
-
-        // it('Should not expand when hitting worksheet boundary', () => {})
 
         it('Works on expand', async () => {
             select00();

@@ -8,7 +8,6 @@ import {
     ICurrentUniverService,
     ITextDecoration,
     ITextRotation,
-    Nullable,
     RANGE_TYPE,
     RedoCommand,
     UndoCommand,
@@ -110,7 +109,7 @@ describe("Test commands used for updating cells' styles", () => {
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getFontBold()).toBe(FontWeight.BOLD);
-                // undo
+                // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getFontBold()).toBe(FontWeight.NORMAL);
             });
@@ -155,19 +154,26 @@ describe("Test commands used for updating cells' styles", () => {
                     startColumn: number,
                     endRow: number,
                     endColumn: number
-                ): boolean | undefined {
-                    return (
-                        get(ICurrentUniverService)
-                            .getUniverSheetInstance('test')
-                            ?.getSheetBySheetId('sheet1')
-                            ?.getRange(startRow, startColumn, endRow, endColumn)
-                            .getFontStyle() === FontItalic.ITALIC
-                    );
+                ): FontItalic | undefined {
+                    return get(ICurrentUniverService)
+                        .getUniverSheetInstance('test')
+                        ?.getSheetBySheetId('sheet1')
+                        ?.getRange(startRow, startColumn, endRow, endColumn)
+                        .getFontStyle();
                 }
 
                 expect(await commandService.executeCommand(SetItalicCommand.id)).toBeTruthy();
-                expect(getFontItalic(0, 0, 0, 0)).toBeTruthy(); // it should work for every cell in selection
-                expect(getFontItalic(0, 0, 0, 1)).toBeTruthy();
+                expect(getFontItalic(0, 0, 0, 0)).toBe(FontItalic.ITALIC); // it should work for every cell in selection
+                expect(getFontItalic(0, 0, 0, 1)).toBe(FontItalic.ITALIC);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getFontItalic(0, 0, 0, 0)).toBe(FontItalic.NORMAL);
+                expect(getFontItalic(0, 0, 0, 1)).toBe(FontItalic.NORMAL);
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getFontItalic(0, 0, 0, 0)).toBe(FontItalic.ITALIC);
+                expect(getFontItalic(0, 0, 0, 1)).toBe(FontItalic.ITALIC);
             });
         });
     });
@@ -209,6 +215,14 @@ describe("Test commands used for updating cells' styles", () => {
                 expect(await commandService.executeCommand(SetUnderlineCommand.id)).toBeTruthy();
                 expect(getFontUnderline()?.s).toBe(BooleanNumber.TRUE);
                 expect(await commandService.executeCommand(SetUnderlineCommand.id)).toBeTruthy();
+                expect(getFontUnderline()?.s).toBe(BooleanNumber.FALSE);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getFontUnderline()?.s).toBe(BooleanNumber.TRUE);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getFontUnderline()?.s).toBe(BooleanNumber.FALSE);
             });
         });
@@ -259,6 +273,14 @@ describe("Test commands used for updating cells' styles", () => {
                 expect(getFontThroughLine()?.s).toBe(BooleanNumber.TRUE);
                 expect(await commandService.executeCommand(SetStrikeThroughCommand.id)).toBeTruthy();
                 expect(getFontThroughLine()?.s).toBe(BooleanNumber.FALSE);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getFontThroughLine()?.s).toBe(BooleanNumber.TRUE);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getFontThroughLine()?.s).toBe(BooleanNumber.FALSE);
             });
         });
 
@@ -296,6 +318,14 @@ describe("Test commands used for updating cells' styles", () => {
                 }
 
                 expect(await commandService.executeCommand(SetFontSizeCommand.id, { value: 18 })).toBeTruthy();
+                expect(getFontSize()).toBe(18);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getFontSize()).toBe(14);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getFontSize()).toBe(18);
             });
         });
@@ -335,6 +365,14 @@ describe("Test commands used for updating cells' styles", () => {
 
                 expect(await commandService.executeCommand(SetFontFamilyCommand.id, { value: 'Arial' })).toBeTruthy();
                 expect(getFontFamily()).toBe('Arial');
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getFontFamily()).toBe('Times New Roman');
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getFontFamily()).toBe('Arial');
             });
         });
 
@@ -372,12 +410,12 @@ describe("Test commands used for updating cells' styles", () => {
                     },
                 ]);
 
-                function getFontColor(): Nullable<string> | undefined {
+                function getFontColor(): string | undefined {
                     return get(ICurrentUniverService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
-                        .getTextStyle()?.cl?.rgb;
+                        .getFontColor();
                 }
                 function getFontThroughLine(): ITextDecoration | undefined {
                     return get(ICurrentUniverService)
@@ -414,6 +452,26 @@ describe("Test commands used for updating cells' styles", () => {
                 expect(getFontColor()).toBe('#abcdef');
 
                 // You need to ensure that the color of the strike through/underline/overline will also be changed
+                expect(getFontThroughLine()?.cl?.rgb).toBe('#abcdef');
+                expect(getFontUnderline()?.cl?.rgb).toBe('#abcdef');
+                expect(getFontOverline()?.cl?.rgb).toBe('#abcdef');
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getFontColor()).toBe('#000');
+                expect(getFontThroughLine()).toStrictEqual({
+                    s: BooleanNumber.TRUE,
+                }); // no color
+                expect(getFontUnderline()).toStrictEqual({
+                    s: BooleanNumber.TRUE,
+                });
+                expect(getFontOverline()).toStrictEqual({
+                    s: BooleanNumber.TRUE,
+                });
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getFontColor()).toBe('#abcdef');
                 expect(getFontThroughLine()?.cl?.rgb).toBe('#abcdef');
                 expect(getFontUnderline()?.cl?.rgb).toBe('#abcdef');
                 expect(getFontOverline()?.cl?.rgb).toBe('#abcdef');
@@ -457,6 +515,14 @@ describe("Test commands used for updating cells' styles", () => {
                     await commandService.executeCommand(SetBackgroundColorCommand.id, { value: '#abcdef' })
                 ).toBeTruthy();
                 expect(getBackgroundColor()).toBe('#abcdef');
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getBackgroundColor()).toBe('#fff');
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getBackgroundColor()).toBe('#abcdef');
             });
         });
 
@@ -496,6 +562,14 @@ describe("Test commands used for updating cells' styles", () => {
                 expect(
                     await commandService.executeCommand(SetVerticalTextAlignCommand.id, { value: VerticalAlign.TOP })
                 ).toBeTruthy();
+                expect(getVerticalAlignment()).toBe(VerticalAlign.TOP);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getVerticalAlignment()).toBe(VerticalAlign.UNSPECIFIED);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getVerticalAlignment()).toBe(VerticalAlign.TOP);
             });
         });
@@ -539,6 +613,14 @@ describe("Test commands used for updating cells' styles", () => {
                     })
                 ).toBeTruthy();
                 expect(getHorizontalAlignment()).toBe(HorizontalAlign.RIGHT);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getHorizontalAlignment()).toBe(HorizontalAlign.UNSPECIFIED);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getHorizontalAlignment()).toBe(HorizontalAlign.RIGHT);
             });
         });
 
@@ -581,6 +663,14 @@ describe("Test commands used for updating cells' styles", () => {
                     })
                 ).toBeTruthy();
                 expect(getTextWrap()).toBe(WrapStrategy.WRAP);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getTextWrap()).toBe(WrapStrategy.UNSPECIFIED);
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getTextWrap()).toBe(WrapStrategy.WRAP);
             });
         });
 
@@ -622,13 +712,42 @@ describe("Test commands used for updating cells' styles", () => {
                         value: 90,
                     })
                 ).toBeTruthy();
-                expect(getTextRotation()?.a).toBe(90);
+
+                expect(getTextRotation()).toStrictEqual({
+                    a: 90,
+                });
                 expect(
                     await commandService.executeCommand(SetTextRotationCommand.id, {
                         value: 'v',
                     })
                 ).toBeTruthy();
-                expect(getTextRotation()?.v).toBe(BooleanNumber.TRUE);
+                expect(getTextRotation()).toStrictEqual({
+                    a: 0,
+                    v: BooleanNumber.TRUE,
+                });
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getTextRotation()).toStrictEqual({
+                    a: 90,
+                });
+
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getTextRotation()).toStrictEqual({
+                    a: 0,
+                    v: BooleanNumber.FALSE,
+                }); // default value
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getTextRotation()).toStrictEqual({
+                    a: 90,
+                });
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getTextRotation()).toStrictEqual({
+                    a: 0,
+                    v: BooleanNumber.TRUE,
+                });
             });
         });
 

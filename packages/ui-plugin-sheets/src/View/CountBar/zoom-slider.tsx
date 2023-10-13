@@ -23,7 +23,7 @@ export function ZoomSlider() {
     });
 
     function getCurrentZoom() {
-        return (currentUniverService.getCurrentUniverSheetInstance()?.getActiveSheet().getZoomRatio() * 100) | 100;
+        return currentUniverService.getCurrentUniverSheetInstance()?.getActiveSheet().getZoomRatio() * 100 || 100;
     }
 
     function handleChange(value: number) {

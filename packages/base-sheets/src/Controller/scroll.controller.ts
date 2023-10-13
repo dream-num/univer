@@ -198,7 +198,6 @@ export class ScrollController extends Disposable {
             return;
         }
         // sheetViewStartRow and sheetViewStartColumn maybe undefined, which means should not make scroll at its direction
-        console.log('scroll to', startSheetViewRow, startSheetViewColumn);
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         this._commandService.executeCommand(ScrollCommand.id, {
             unitId: workbook.getUnitId(),

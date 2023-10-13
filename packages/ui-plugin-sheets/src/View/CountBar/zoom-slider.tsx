@@ -24,11 +24,13 @@ export function ZoomSlider() {
     }, [commandService]);
 
     function getCurrentZoom() {
-        return currentUniverService.getCurrentUniverSheetInstance()?.getActiveSheet().getZoomRatio() * 100 || 100;
+        const currentZoom =
+            currentUniverService.getCurrentUniverSheetInstance()?.getActiveSheet().getZoomRatio() * 100 ?? 100;
+
+        return Math.ceil(currentZoom);
     }
 
     function handleChange(value: number) {
-        if (value > ZOOM_RANGE[1] || value < ZOOM_RANGE[0]) return;
         setZoom(value);
         const workbook = currentUniverService.getCurrentUniverSheetInstance();
         if (!workbook) return;
@@ -43,5 +45,5 @@ export function ZoomSlider() {
         });
     }
 
-    return <Slider value={zoom} shortcuts={ZOOM_MAP} onChange={handleChange} />;
+    return <Slider min={ZOOM_RANGE[0]} value={zoom} shortcuts={ZOOM_MAP} onChange={handleChange} />;
 }

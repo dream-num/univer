@@ -16,12 +16,27 @@ export default meta;
 
 export const Playground = {
     render() {
-        const [value, setValue] = useState(0);
+        const [value, setValue] = useState(100);
 
         function handleChange(changedValue: number) {
             setValue(changedValue);
         }
 
-        return <Slider value={value} shortcuts={[50, 75, 100, 125, 150, 175, 200, 400]} onChange={handleChange} />;
+        return (
+            <>
+                <Slider
+                    min={0}
+                    value={value}
+                    shortcuts={[50, 75, 100, 125, 150, 175, 200, 400]}
+                    onChange={handleChange}
+                />
+                <Slider
+                    min={20}
+                    value={value}
+                    shortcuts={[50, 75, 100, 125, 150, 175, 200, 400]}
+                    onChange={handleChange}
+                />
+            </>
+        );
     },
 };

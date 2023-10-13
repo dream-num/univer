@@ -7,7 +7,8 @@
 
 @slider-handle-size: 20px;
 
-@slider-value-width: 76px;
+@slider-value-width: 55px;
+@slider-value-height: 28px;
 
 @slider-parts-hover-color: @border-color;
 
@@ -30,7 +31,6 @@
         padding: 0 @padding;
         background-color: @slider-bg;
         border-radius: @slider-radius;
-        cursor: pointer;
     }
 
     &-inner-rail {
@@ -61,17 +61,21 @@
         height: @slider-height;
         background-color: @color-white;
         border-radius: 50%;
-        left: calc(50% - @slider-height / 2);
+        top: 50%;
+        left: 50%;
+        box-sizing: border-box;
+        transform: translate(-50%, -50%);
         cursor: pointer;
     }
 
     &-value {
         width: @slider-value-width;
-        padding: @padding-xs 0;
+        height: @slider-value-height;
         text-align: center;
         color: @text-color-secondary;
-        font-size: @font-size-lg;
+        font-size: 14px; // TODO: replace to token
         font-weight: 700;
+        line-height: 2;
         border-radius: @border-radius-base;
         cursor: pointer;
         transition: all .2s;

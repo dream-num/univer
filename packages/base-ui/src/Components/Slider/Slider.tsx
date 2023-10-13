@@ -141,7 +141,7 @@ export function Slider(props: IBaseSliderProps) {
             </Button>
 
             <Dropwdown2
-                placement="topRight"
+                placement="topLeft"
                 overlay={
                     <div className={styles.sliderShortcuts}>
                         {shortcuts?.map((item) => (

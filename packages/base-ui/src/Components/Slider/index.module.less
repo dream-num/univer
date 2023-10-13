@@ -7,6 +7,8 @@
 
 @slider-handle-size: 20px;
 
+@slider-value-width: 76px;
+
 @slider-parts-hover-color: @border-color;
 
 :export {
@@ -64,7 +66,7 @@
     }
 
     &-value {
-        width: 76px;
+        width: @slider-value-width;
         padding: @padding-xs 0;
         text-align: center;
         color: @text-color-secondary;
@@ -74,6 +76,10 @@
         cursor: pointer;
         transition: all .2s;
         &:hover {
+            background-color: @slider-parts-hover-color;
+        }
+
+        &.dropdown2-open {
             background-color: @slider-parts-hover-color;
         }
     }
@@ -90,6 +96,7 @@
         display: grid;
         align-items: center;
         gap: @margin-xs;
+        transform: translateX(-(@slider-value-width / 2));
     }
 
     &-shortcut {

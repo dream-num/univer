@@ -123,7 +123,7 @@ export function App(props: IUniverAppProps) {
                             </Content>
                         </Layout>
                         {/* footer */}
-                        <Footer style={{ display: props.footer ? 'block' : 'none' }}>
+                        <Footer style={{ display: props.footer ? 'flex' : 'none' }}>
                             {footerComponents &&
                                 Array.from(footerComponents.values()).map((component, index) =>
                                     React.createElement(component(), { key: `${index}` })

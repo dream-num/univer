@@ -16,5 +16,7 @@ export type AppContextValues = {
     componentManager: ComponentManager;
     zIndexManager: ZIndexManager;
 };
-
+/**
+ * @deprecated
+ */
 export const AppContext = createContext<AppContextValues>({} as unknown as AppContextValues);

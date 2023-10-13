@@ -18,8 +18,8 @@ import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { ISetZoomRatioCommandParams, SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
-import { ISetZoomRatioOperationParams, SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -167,7 +167,7 @@ export class SelectionController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = [SetZoomRatioOperation.id];
+        const updateCommandList = [SetZoomRatioCommand.id];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -175,7 +175,7 @@ export class SelectionController extends Disposable {
                     const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
                     const worksheet = workbook.getActiveSheet();
 
-                    const params = command.params as ISetZoomRatioOperationParams;
+                    const params = command.params as ISetZoomRatioCommandParams;
                     const { workbookId, worksheetId } = params;
                     if (!(workbookId === workbook.getUnitId() && worksheetId === worksheet.getSheetId())) {
                         return;

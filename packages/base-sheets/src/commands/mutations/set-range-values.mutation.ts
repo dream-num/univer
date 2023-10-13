@@ -70,7 +70,7 @@ export const SetRangeValuesUndoMutationFactory = (
         const newStyle = transformStyle(oldStyle, newVal && newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
         cell.s = newStyle;
 
-        undoData.setValue(row, col, Tools.deepClone(setNull(cell)));
+        undoData.setValue(row, col, setNull(cell));
     });
     // for (let i = 0; i < params.range.length; i++) {
     //     const { startRow, endRow, startColumn, endColumn } = params.range[i];

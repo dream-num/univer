@@ -7,8 +7,11 @@ import { ICellData, IStyleData } from '../Types/Interfaces';
 export class Styles {
     private _styles: IKeyType<Nullable<IStyleData>>;
 
+    private _cacheMap = new Map<string, string>();
+
     constructor(styles: IKeyType<Nullable<IStyleData>> = {}) {
         this._styles = styles;
+        this._generateCacheMap();
     }
 
     each(
@@ -25,10 +28,16 @@ export class Styles {
     search(data: IStyleData): string {
         const { _styles } = this;
 
-        for (const id in _styles) {
-            if (Tools.diffValue(_styles[id], data)) {
-                return id;
-            }
+        // for (const id in _styles) {
+        //     if (Tools.diffValue(_styles[id], data)) {
+        //         return id;
+        //     }
+        // }
+
+        // Take from cache
+        const styleObject = JSON.stringify(data);
+        if (this._cacheMap.has(styleObject)) {
+            return this._cacheMap.get(styleObject) as string;
         }
         return '-1';
     }
@@ -42,6 +51,10 @@ export class Styles {
     add(data: IStyleData): string {
         const id = Tools.generateRandomId(6);
         this._styles[id] = data;
+        // update cache
+        const styleObject = JSON.stringify(data);
+        this._cacheMap.set(styleObject, id);
+
         return id;
     }
 
@@ -67,5 +80,13 @@ export class Styles {
         }
 
         return style as IStyleData;
+    }
+
+    private _generateCacheMap(): void {
+        const { _styles } = this;
+        for (const id in _styles) {
+            const styleObject = JSON.stringify(_styles[id]);
+            this._cacheMap.set(styleObject, id);
+        }
     }
 }

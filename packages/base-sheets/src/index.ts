@@ -53,10 +53,12 @@ export {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from './commands/commands/set-border-command';
+export { SetColHiddenCommand, SetColVisibleCommand } from './commands/commands/set-col-visible.command';
 export { SetFrozenCommand } from './commands/commands/set-frozen.command';
 export { SetFrozenCancelCommand } from './commands/commands/set-frozen-cancel.command';
 export type { ISetRangeValuesCommandParams } from './commands/commands/set-range-values.command';
 export { SetRangeValuesCommand } from './commands/commands/set-range-values.command';
+export { SetRowHiddenCommand, SetRowVisibleCommand } from './commands/commands/set-row-visible.command';
 export type { IScrollCommandParams } from './commands/commands/set-scroll.command';
 export { RestScrollCommand, ScrollCommand } from './commands/commands/set-scroll.command';
 export type {
@@ -93,8 +95,6 @@ export { SetWorksheetHideCommand } from './commands/commands/set-worksheet-hide.
 export { SetWorksheetNameCommand } from './commands/commands/set-worksheet-name.command';
 export { SetWorksheetOrderCommand } from './commands/commands/set-worksheet-order.command';
 export { SetRowHeightCommand as SetWorksheetRowHeightCommand } from './commands/commands/set-worksheet-row-height.command';
-export { SetWorksheetRowHideCommand } from './commands/commands/set-worksheet-row-hide.command';
-export { SetWorksheetRowShowCommand } from './commands/commands/set-worksheet-row-show.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
 export {
     InsertColMutation,
@@ -104,6 +104,7 @@ export {
 } from './commands/mutations/insert-row-col.mutation';
 export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './commands/mutations/insert-sheet.mutation';
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
+export { SetColHiddenMutation, SetColVisibleMutation } from './commands/mutations/set-col-visible.mutation';
 export { SetFrozenMutation } from './commands/mutations/set-frozen.mutation';
 export type { ISetRangeStyleMutationParams } from './commands/mutations/set-range-styles.mutation';
 export { SetRangeStyleMutation } from './commands/mutations/set-range-styles.mutation';
@@ -116,7 +117,10 @@ export {
     SetWorksheetColWidthMutation,
     SetWorksheetColWidthMutationFactory,
 } from './commands/mutations/set-worksheet-col-width.mutation';
-export { SetWorksheetHideMutation } from './commands/mutations/set-worksheet-hide.mutation';
+export {
+    type ISetWorksheetHideMutationParams,
+    SetWorksheetHideMutation,
+} from './commands/mutations/set-worksheet-hide.mutation';
 export { SetWorksheetNameMutation } from './commands/mutations/set-worksheet-name.mutation';
 export { SetWorksheetOrderMutation } from './commands/mutations/set-worksheet-order.mutation';
 export {

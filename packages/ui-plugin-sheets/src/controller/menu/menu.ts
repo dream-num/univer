@@ -17,12 +17,16 @@ import {
     SelectionManagerService,
     SetBackgroundColorCommand,
     SetBoldCommand,
+    SetColHiddenCommand,
+    SetColVisibleCommand,
     SetFontFamilyCommand,
     SetFontSizeCommand,
     SetHorizontalTextAlignCommand,
     SetItalicCommand,
     SetRangeStyleMutation,
     SetRangeValuesMutation,
+    SetRowHiddenCommand,
+    SetRowVisibleCommand,
     SetSelectionsOperation,
     SetStrikeThroughCommand,
     SetTabColorCommand,
@@ -34,8 +38,6 @@ import {
     SetWorksheetColWidthCommand,
     SetWorksheetHideCommand,
     SetWorksheetRowHeightCommand,
-    SetWorksheetRowHideCommand,
-    SetWorksheetRowShowCommand,
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
 import {
@@ -1082,19 +1084,39 @@ export function RemoveRowMenuItemFactory(): IMenuButtonItem {
 
 export function HideRowMenuItemFactory(): IMenuButtonItem {
     return {
-        id: SetWorksheetRowHideCommand.id,
+        id: SetRowHiddenCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
+        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.hideSelectedRow',
     };
 }
 
-export function ShowRowMenuItemFactory(): IMenuButtonItem {
+export function HideColMenuItemFactory(): IMenuButtonItem {
     return {
-        id: SetWorksheetRowShowCommand.id,
+        id: SetColHiddenCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
+        title: 'rightClick.hideSelectedColumn',
+    };
+}
+
+export function ShowRowMenuItemFactory(): IMenuButtonItem {
+    // it only shows when selected area has hidden rows
+    return {
+        id: SetRowVisibleCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.showHideRow',
+    };
+}
+
+export function ShowColMenuItemFactory(): IMenuButtonItem {
+    // it only shows when selected area has hidden rows
+    return {
+        id: SetColVisibleCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
+        title: 'rightClick.showHideColumn',
     };
 }
 

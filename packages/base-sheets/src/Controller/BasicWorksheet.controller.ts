@@ -34,10 +34,12 @@ import {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from '../commands/commands/set-border-command';
+import { SetColHiddenCommand } from '../commands/commands/set-col-visible.command';
 import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
 import { SetRangeFormattedValueCommand } from '../commands/commands/set-range-formatted-value.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
+import { SetRowHiddenCommand, SetRowVisibleCommand } from '../commands/commands/set-row-visible.command';
 import { ScrollCommand } from '../commands/commands/set-scroll.command';
 import {
     ResetBackgroundColorCommand,
@@ -57,8 +59,6 @@ import { SetWorksheetHideCommand } from '../commands/commands/set-worksheet-hide
 import { SetWorksheetNameCommand } from '../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-order.command';
 import { DeltaRowHeightCommand, SetRowHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
-import { SetWorksheetRowHideCommand } from '../commands/commands/set-worksheet-row-hide.command';
-import { SetWorksheetRowShowCommand } from '../commands/commands/set-worksheet-row-show.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
 import { TrimWhitespaceCommand } from '../commands/commands/trim-whitespace.command';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
@@ -71,10 +71,12 @@ import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remo
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { SetBorderStylesMutation } from '../commands/mutations/set-border-styles.mutation';
+import { SetColHiddenMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetRangeFormattedValueMutation } from '../commands/mutations/set-range-formatted-value.mutation';
 import { SetRangeStyleMutation } from '../commands/mutations/set-range-styles.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
+import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
 import { SetWorksheetActivateMutation } from '../commands/mutations/set-worksheet-activate.mutation';
 import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
@@ -82,8 +84,6 @@ import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hi
 import { SetWorksheetNameMutation } from '../commands/mutations/set-worksheet-name.mutation';
 import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-order.mutation';
 import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
-import { SetWorksheetRowHideMutation } from '../commands/mutations/set-worksheet-row-hide.mutation';
-import { SetWorksheetRowShowMutation } from '../commands/mutations/set-worksheet-row-show.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -142,10 +142,12 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetColWidthMutation,
             SetRowHeightCommand,
             SetWorksheetRowHeightMutation,
-            SetWorksheetRowHideCommand,
-            SetWorksheetRowHideMutation,
-            SetWorksheetRowShowCommand,
-            SetWorksheetRowShowMutation,
+            SetRowHiddenCommand,
+            SetRowHiddenMutation,
+            SetColHiddenCommand,
+            SetColHiddenMutation,
+            SetRowVisibleCommand,
+            SetRowVisibleMutation,
             SetWorksheetOrderCommand,
             SetWorksheetOrderMutation,
 

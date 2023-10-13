@@ -110,6 +110,7 @@ export type { ISetRangeStyleMutationParams } from './commands/mutations/set-rang
 export { SetRangeStyleMutation } from './commands/mutations/set-range-styles.mutation';
 export type { ISetRangeValuesMutationParams } from './commands/mutations/set-range-values.mutation';
 export { SetRangeValuesMutation } from './commands/mutations/set-range-values.mutation';
+export { SetRowHiddenMutation, SetRowVisibleMutation } from './commands/mutations/set-row-visible.mutation';
 export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
 export { SetWorksheetActivateMutation } from './commands/mutations/set-worksheet-activate.mutation';
 export {

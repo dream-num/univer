@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, IRange } from '@univerjs/core';
+import { BooleanNumber, CommandType, ICurrentUniverService, IMutation, IRange } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetColHiddenMutationParams {
@@ -36,10 +36,10 @@ export const SetColHiddenMutation: IMutation<ISetColHiddenMutationParams> = {
         const manager = universheet.getSheetBySheetId(params.worksheetId)!.getColumnManager();
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
-            for (let j = range.startColumn; j < range.startColumn + range.endColumn; j++) {
+            for (let j = range.startColumn; j < range.endColumn + 1; j++) {
                 const column = manager.getColumnOrCreate(j);
                 if (column != null) {
-                    column.hd = 1;
+                    column.hd = BooleanNumber.TRUE;
                 }
             }
         }
@@ -83,10 +83,10 @@ export const SetColVisibleMutation: IMutation<ISetColVisibleMutationParams> = {
         const manager = universheet.getSheetBySheetId(params.worksheetId)!.getColumnManager();
         for (let i = 0; i < params.ranges.length; i++) {
             const range = params.ranges[i];
-            for (let j = range.startColumn; j < range.startColumn + range.endColumn; j++) {
+            for (let j = range.startColumn; j < range.endColumn + 1; j++) {
                 const column = manager.getColumnOrCreate(j);
                 if (column != null) {
-                    column.hd = 0;
+                    column.hd = BooleanNumber.FALSE;
                 }
             }
         }

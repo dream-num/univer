@@ -11,41 +11,46 @@ import {
     SetColVisibleUndoMutationFactory,
 } from '../mutations/set-col-visible.mutation';
 
+export interface ISetColVisibleOnColsParams {
+    col: number;
+}
+
+export const SetColVisibleOnCols: ICommand<ISetColVisibleOnColsParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-col-visible-on-cols',
+    handler: async (accessor: IAccessor, params) => true,
+};
+
 export const SetColVisibleCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-col-visible',
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
-
-        const selections = selectionManagerService.getRangeDatas();
-        if (!selections?.length) {
+        const ranges = selectionManagerService.getSelections()?.map((s) => s.range);
+        if (!ranges?.length) {
             return false;
         }
 
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;
 
+        const workbookId = workbook.getUnitId();
+        const worksheetId = worksheet.getSheetId();
         const redoMutationParams: ISetColVisibleMutationParams = {
             workbookId,
             worksheetId,
-            ranges: selections,
+            ranges, // TODO@wzhudev: only cols those are already hidden should be set to visible
         };
 
-        const undoMutationParams = SetColVisibleUndoMutationFactory(accessor, redoMutationParams);
-        const result = commandService.executeCommand(SetColVisibleMutation.id, redoMutationParams);
+        const commandService = accessor.get(ICommandService);
+        const result = await commandService.executeCommand(SetColVisibleMutation.id, redoMutationParams);
 
         if (result) {
+            const undoRedoService = accessor.get(IUndoRedoService);
+            const undoMutationParams = SetColVisibleUndoMutationFactory(accessor, redoMutationParams);
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
@@ -67,35 +72,30 @@ export const SetColHiddenCommand: ICommand = {
     id: 'sheet.command.set-col-hidden',
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
-
-        const selections = selectionManagerService.getRangeDatas();
-        if (!selections?.length) {
+        const ranges = selectionManagerService.getSelections()?.map((s) => s.range);
+        if (!ranges?.length) {
             return false;
         }
 
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const currentUniverService = accessor.get(ICurrentUniverService);
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
         if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
+        const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;
 
+        const workbookId = workbook.getUnitId();
+        const worksheetId = worksheet.getSheetId();
         const redoMutationParams: ISetColHiddenMutationParams = {
             workbookId,
             worksheetId,
-            ranges: selections,
+            ranges,
         };
 
-        const undoMutationParams = SetColHiddenUndoMutationFactory(accessor, redoMutationParams);
-        const result = commandService.executeCommand(SetColHiddenMutation.id, redoMutationParams);
+        const commandService = accessor.get(ICommandService);
+        const result = await commandService.executeCommand(SetColHiddenMutation.id, redoMutationParams);
         if (result) {
+            const undoRedoService = accessor.get(IUndoRedoService);
+            const undoMutationParams = SetColHiddenUndoMutationFactory(accessor, redoMutationParams);
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {

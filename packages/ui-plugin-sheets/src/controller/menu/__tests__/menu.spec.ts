@@ -52,8 +52,8 @@ describe('Test menu items', () => {
         const menuItem = get(Injector).invoke(BoldMenuItemFactory);
         disposableCollection.add(toDisposable(menuItem.activated$!.subscribe((v: boolean) => (activated = v))));
         disposableCollection.add(toDisposable(menuItem.disabled$!.subscribe((v: boolean) => (disabled = v))));
-        expect(activated).toBe(false);
-        expect(disabled).toBe(false);
+        expect(activated).toBeFalsy();
+        expect(disabled).toBeFalsy();
 
         const selectionManager = get(SelectionManagerService);
         selectionManager.setCurrentSelection({

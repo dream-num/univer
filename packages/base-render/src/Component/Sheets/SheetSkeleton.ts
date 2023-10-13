@@ -1155,6 +1155,12 @@ export class SpreadsheetSkeleton extends Skeleton {
             return true;
         }
 
+        // It is not necessary to render hidden cells.
+        const hidden = this._worksheet?.getColVisible(c) === false || this._worksheet?.getRowVisible(r) === false;
+        if (hidden) {
+            return true;
+        }
+
         // style supports inline styles
         // const style = styles && styles.get(cell.s);
         // const style = getStyle(styles, cell);

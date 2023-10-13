@@ -43,7 +43,7 @@ export const SetRowVisibleCommand: ICommand = {
         };
 
         const undoMutationParams = SetRowVisibleUndoMutationFactory(accessor, redoMutationParams);
-        const result = commandService.executeCommand(SetRowVisibleMutation.id, redoMutationParams);
+        const result = await commandService.executeCommand(SetRowVisibleMutation.id, redoMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
@@ -89,7 +89,7 @@ export const SetRowHiddenCommand: ICommand = {
         };
 
         const undoMutationParams = SetRowHiddenUndoMutationFactory(accessor, redoMutationParams);
-        const result = commandService.executeCommand(SetRowHiddenMutation.id, redoMutationParams);
+        const result = await commandService.executeCommand(SetRowHiddenMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,

@@ -34,7 +34,7 @@ import {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from '../commands/commands/set-border-command';
-import { SetColHiddenCommand } from '../commands/commands/set-col-visible.command';
+import { SetColHiddenCommand, SetColVisibleCommand } from '../commands/commands/set-col-visible.command';
 import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
 import { SetRangeFormattedValueCommand } from '../commands/commands/set-range-formatted-value.command';
@@ -71,7 +71,7 @@ import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remo
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { SetBorderStylesMutation } from '../commands/mutations/set-border-styles.mutation';
-import { SetColHiddenMutation } from '../commands/mutations/set-col-visible.mutation';
+import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetRangeFormattedValueMutation } from '../commands/mutations/set-range-formatted-value.mutation';
 import { SetRangeStyleMutation } from '../commands/mutations/set-range-styles.mutation';
@@ -146,6 +146,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetRowHiddenMutation,
             SetColHiddenCommand,
             SetColHiddenMutation,
+            SetColVisibleCommand,
+            SetColVisibleMutation,
             SetRowVisibleCommand,
             SetRowVisibleMutation,
             SetWorksheetOrderCommand,

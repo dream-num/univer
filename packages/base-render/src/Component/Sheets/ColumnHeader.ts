@@ -11,7 +11,6 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
 
     constructor(oKey: string, spreadsheetSkeleton?: SpreadsheetSkeleton) {
         super(oKey, spreadsheetSkeleton);
-        // this._initialProps(props);
 
         this._initialDefaultExtension();
 
@@ -51,7 +50,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
         }
     }
 
-    override isHit(coord: Vector2) {
+    override isHit(coord: Vector2): boolean {
         const oCoord = this._getInverseCoord(coord);
         const skeleton = this.getSkeleton();
         if (!skeleton) {

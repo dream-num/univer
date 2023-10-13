@@ -19,7 +19,7 @@ import {
     Univer,
 } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ShowColMenuItemFactory, ShowRowMenuItemFactory } from '../menu';
 import { createMenuTestBed } from './create-menu-test-bed';
@@ -59,6 +59,8 @@ describe('Test row col menu items', () => {
             sheetId: 'sheet1',
         });
     });
+
+    afterEach(() => univer.dispose());
 
     function getRowCount(): number {
         const currentService = get(ICurrentUniverService);

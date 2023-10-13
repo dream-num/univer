@@ -1,10 +1,14 @@
 /* eslint-disable no-magic-numbers */
 
-import { Direction, ICommandService, IWorkbookConfig, RANGE_TYPE, Univer } from '@univerjs/core';
+import { Direction, ICommandService, ICurrentUniverService, IWorkbookConfig, RANGE_TYPE, Univer } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import { SetColHiddenMutation, SetColVisibleMutation } from '../../mutations/set-col-visible.mutation';
+import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../mutations/set-row-visible.mutation';
+import { SetColHiddenCommand, SetColVisibleCommand } from '../set-col-visible.command';
+import { SetRowHiddenCommand, SetRowVisibleCommand } from '../set-row-visible.command';
 import {
     ExpandSelectionCommand,
     IExpandSelectionCommandParams,
@@ -26,12 +30,6 @@ describe('Test commands used for change selections', () => {
     let selectionManagerService: SelectionManagerService;
 
     function select00() {
-        selectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
-
         selectionManagerService.add([
             {
                 range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.NORMAL },
@@ -94,6 +92,80 @@ describe('Test commands used for change selections', () => {
         });
     }
 
+    function getRowCount(): number {
+        const currentService = get(ICurrentUniverService);
+        const workbook = currentService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        return worksheet.getRowCount();
+    }
+
+    function getColCount(): number {
+        const currentService = get(ICurrentUniverService);
+        const workbook = currentService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        return worksheet.getColumnCount();
+    }
+
+    function getRowVisible(row: number): boolean {
+        const workbook = get(ICurrentUniverService).getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        return worksheet.getRowVisible(row);
+    }
+
+    function getColVisible(col: number): boolean {
+        const workbook = get(ICurrentUniverService).getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        return worksheet.getColVisible(col);
+    }
+
+    function selectRow(rowStart: number, rowEnd: number): void {
+        const selectionManagerService = get(SelectionManagerService);
+        const endColumn = getColCount() - 1;
+        selectionManagerService.add([
+            {
+                range: { startRow: rowStart, startColumn: 0, endColumn, endRow: rowEnd, rangeType: RANGE_TYPE.ROW },
+                primary: {
+                    startRow: rowStart,
+                    endRow: rowEnd,
+                    startColumn: 0,
+                    endColumn,
+                    actualColumn: 0,
+                    actualRow: rowStart,
+                    isMerged: false,
+                    isMergedMainCell: false,
+                },
+                style: null,
+            },
+        ]);
+    }
+
+    function selectColumn(columnStart: number, columnEnd: number): void {
+        const selectionManagerService = get(SelectionManagerService);
+        const endRow = getRowCount() - 1;
+        selectionManagerService.add([
+            {
+                range: {
+                    startRow: 0,
+                    startColumn: columnStart,
+                    endColumn: columnEnd,
+                    endRow,
+                    rangeType: RANGE_TYPE.COLUMN,
+                },
+                primary: {
+                    startRow: 0,
+                    endRow,
+                    startColumn: columnStart,
+                    endColumn: columnEnd,
+                    actualColumn: columnStart,
+                    actualRow: 0,
+                    isMerged: false,
+                    isMergedMainCell: false,
+                },
+                style: null,
+            },
+        ]);
+    }
+
     function disposeTestBed() {
         univer?.dispose();
         univer = null;
@@ -106,6 +178,11 @@ describe('Test commands used for change selections', () => {
 
         commandService = get(ICommandService);
         selectionManagerService = get(SelectionManagerService);
+        selectionManagerService.setCurrentSelection({
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId: 'test',
+            sheetId: 'sheet1',
+        });
     }
 
     afterEach(disposeTestBed);
@@ -135,6 +212,48 @@ describe('Test commands used for change selections', () => {
                 direction: Direction.LEFT,
             });
             expectSelectionToBe(1, 0, 1, 0);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.UP,
+            });
+            expectSelectionToBe(0, 0, 0, 0);
+        });
+
+        it('Should skip cells in hidden rows / cols', async () => {
+            [
+                SetRowHiddenCommand,
+                SetRowHiddenMutation,
+                SetColHiddenCommand,
+                SetColHiddenMutation,
+                SetRowVisibleCommand,
+                SetColVisibleCommand,
+                SetRowVisibleMutation,
+                SetColVisibleMutation,
+            ].forEach((command) => {
+                commandService.registerCommand(command);
+            });
+
+            selectRow(1, 1);
+            await commandService.executeCommand(SetRowHiddenCommand.id);
+            selectColumn(1, 1);
+            await commandService.executeCommand(SetColHiddenCommand.id);
+
+            select00();
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            });
+            expectSelectionToBe(0, 2, 0, 2);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.DOWN,
+            });
+            expectSelectionToBe(2, 2, 2, 2);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.LEFT,
+            });
+            expectSelectionToBe(2, 0, 2, 0);
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.UP,

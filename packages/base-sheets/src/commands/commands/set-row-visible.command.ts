@@ -1,4 +1,11 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import {
+    CommandType,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    IUndoRedoService,
+    RANGE_TYPE,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
@@ -20,17 +27,16 @@ export const SetRowVisibleCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManagerService.getRangeDatas();
+        const selections = selectionManagerService
+            .getSelections()
+            ?.map((s) => s.range)
+            .filter((r) => r.rangeType === RANGE_TYPE.ROW);
         if (!selections?.length) {
             return false;
         }
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
+        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         const workbook = currentUniverService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
@@ -70,7 +76,10 @@ export const SetRowHiddenCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const currentUniverService = accessor.get(ICurrentUniverService);
 
-        const selections = selectionManagerService.getRangeDatas();
+        const selections = selectionManagerService
+            .getSelections()
+            ?.map((s) => s.range)
+            .filter((r) => r.rangeType === RANGE_TYPE.ROW);
         if (!selections?.length) {
             return false;
         }

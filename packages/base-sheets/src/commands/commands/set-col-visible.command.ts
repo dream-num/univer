@@ -1,4 +1,11 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import {
+    CommandType,
+    ICommand,
+    ICommandService,
+    ICurrentUniverService,
+    IUndoRedoService,
+    RANGE_TYPE,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
@@ -26,7 +33,10 @@ export const SetColVisibleCommand: ICommand = {
     id: 'sheet.command.set-col-visible',
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const ranges = selectionManagerService.getSelections()?.map((s) => s.range);
+        const ranges = selectionManagerService
+            .getSelections()
+            ?.map((s) => s.range)
+            .filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
         if (!ranges?.length) {
             return false;
         }
@@ -72,7 +82,10 @@ export const SetColHiddenCommand: ICommand = {
     id: 'sheet.command.set-col-hidden',
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const ranges = selectionManagerService.getSelections()?.map((s) => s.range);
+        const ranges = selectionManagerService
+            .getSelections()
+            ?.map((s) => s.range)
+            .filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
         if (!ranges?.length) {
             return false;
         }

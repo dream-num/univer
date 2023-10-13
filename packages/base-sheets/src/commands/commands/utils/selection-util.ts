@@ -58,22 +58,47 @@ export function getCellAtRowCol(row: number, col: number, worksheet: Worksheet):
 
 export function findNextRange(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
     const destRange: IRange = { ...startRange };
+    let next: number;
     switch (direction) {
         case Direction.UP:
-            destRange.startRow = Math.max(0, startRange.startRow - 1);
-            destRange.endRow = destRange.startRow;
+            next = startRange.startRow - 1;
+            while (next > -1 && !worksheet.getRowVisible(next)) {
+                next -= 1;
+            }
+            if (next > -1) {
+                destRange.startRow = next;
+                destRange.endRow = destRange.startRow;
+            }
             break;
         case Direction.DOWN:
-            destRange.startRow = Math.min(startRange.endRow + 1, worksheet.getRowCount() - 1);
-            destRange.endRow = destRange.startRow;
+            next = startRange.endRow + 1;
+            while (next < worksheet.getRowCount() && !worksheet.getRowVisible(next)) {
+                next += 1;
+            }
+            if (next < worksheet.getRowCount()) {
+                destRange.startRow = next;
+                destRange.endRow = destRange.startRow;
+            }
             break;
         case Direction.LEFT:
-            destRange.startColumn = Math.max(0, startRange.startColumn - 1);
-            destRange.endColumn = destRange.startColumn;
+            next = startRange.startColumn - 1;
+            while (next > -1 && !worksheet.getColVisible(next)) {
+                next -= 1;
+            }
+            if (next > -1) {
+                destRange.startColumn = next;
+                destRange.endColumn = destRange.startColumn;
+            }
             break;
         case Direction.RIGHT:
-            destRange.startColumn = Math.min(startRange.endColumn + 1, worksheet.getColumnCount() - 1);
-            destRange.endColumn = destRange.startColumn;
+            next = startRange.endColumn + 1;
+            while (next < worksheet.getColumnCount() && !worksheet.getColVisible(next)) {
+                next += 1;
+            }
+            if (next < worksheet.getColumnCount()) {
+                destRange.startColumn = next;
+                destRange.endColumn = destRange.startColumn;
+            }
             break;
         default:
             break;

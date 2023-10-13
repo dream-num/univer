@@ -7229,7 +7229,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             bl: 0,
             cl: {
                 rgb: 'rgb(67, 67, 67)',
@@ -7240,7 +7240,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             bl: 1,
             cl: {
                 rgb: 'rgb(102, 102, 102)',
@@ -7257,7 +7257,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             bl: 0,
             cl: {
                 rgb: 'rgb(102, 102, 102)',
@@ -7265,7 +7265,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
         },
         MXIg60: {
             vt: 1,
-            ff: 'lato',
+            ff: 'Arial',
             bl: 0,
             it: 1,
             st: {
@@ -7302,7 +7302,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             fs: 11,
             bl: 1,
             cl: {
@@ -7562,7 +7562,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             bl: 0,
             cl: {
                 rgb: 'rgb(67, 67, 67)',
@@ -7587,7 +7587,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             bl: 1,
             cl: {
                 rgb: 'rgb(102, 102, 102)',
@@ -7649,7 +7649,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             bl: 0,
             cl: {
                 rgb: 'rgb(102, 102, 102)',
@@ -7671,7 +7671,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
         },
         WoeEm3: {
             vt: 1,
-            ff: 'lato',
+            ff: 'Arial',
             bl: 0,
             it: 1,
             st: {
@@ -7700,7 +7700,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             fs: 11,
             bl: 1,
             cl: {
@@ -7769,7 +7769,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             bl: 0,
             cl: {
                 rgb: 'rgb(67, 67, 67)',
@@ -7794,7 +7794,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             bl: 0,
             cl: {
                 rgb: 'rgb(67, 67, 67)',
@@ -7838,7 +7838,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             bl: 0,
             cl: {
                 rgb: 'rgb(67, 67, 67)',
@@ -7897,7 +7897,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
         },
         jfDVFZ: {
             vt: 1,
-            ff: 'lato',
+            ff: 'Arial',
             bl: 0,
             it: 1,
             st: {
@@ -7926,7 +7926,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
         },
         ky5JHZ: {
             vt: 1,
-            ff: 'lato',
+            ff: 'Arial',
             bl: 0,
             it: 1,
             st: {
@@ -8003,7 +8003,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             fs: 11,
             bl: 1,
             cl: {
@@ -8089,7 +8089,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             fs: 16,
             bl: 1,
             cl: {
@@ -8127,7 +8127,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             fs: 18,
             bl: 1,
             cl: {
@@ -8266,7 +8266,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             fs: 18,
             bl: 1,
             cl: {
@@ -8279,7 +8279,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             fs: 18,
             bl: 1,
             cl: {
@@ -8299,7 +8299,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             fs: 18,
             bl: 1,
             cl: {
@@ -8325,7 +8325,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             bg: {
                 rgb: 'rgb(255, 255, 255)',
             },
-            ff: 'lato',
+            ff: 'Arial',
             fs: 18,
             bl: 1,
             cl: {

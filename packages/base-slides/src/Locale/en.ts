@@ -168,7 +168,7 @@ export default {
         Arial: 'Arial',
         Tahoma: 'Tahoma',
         Verdana: 'Verdana',
-        MicrosoftAccorblack: 'Microsoft Accor black ',
+        MicrosoftYaHei: 'Microsoft YaHei',
         SimSun: 'SimSun',
         SimHei: 'SimHei',
         Kaiti: 'Kaiti',

@@ -1,9 +1,19 @@
 import { IRenderManagerService, ISelectionTransformerShapeManager } from '@univerjs/base-render';
-import { Disposable, ICommandService, ICurrentUniverService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import {
+    Direction,
+    Disposable,
+    ICommandInfo,
+    ICommandService,
+    ICurrentUniverService,
+    LifecycleStages,
+    OnLifecycle,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { ScrollCommand } from '../commands/commands/set-scroll.command';
+import { IMoveSelectionCommandParams, MoveSelectionCommand } from '../commands/commands/set-selections.command';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { ISheetSkeletonManagerParam, SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -32,6 +42,7 @@ export class ScrollController extends Disposable {
         this._scrollSubscribeBinding();
 
         this._skeletonListener();
+        this._commandExecutedListener();
     }
 
     private _scrollEventBinding() {
@@ -80,6 +91,119 @@ export class ScrollController extends Disposable {
             //     sheetViewStartRow: row,
             //     sheetViewStartColumn: column,
             // });
+        });
+    }
+
+    private _commandExecutedListener() {
+        const updateCommandList = [MoveSelectionCommand.id];
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (updateCommandList.includes(command.id)) {
+                    const params = command.params as IMoveSelectionCommandParams;
+                    this.scrollToVisible(params.direction);
+                }
+            })
+        );
+    }
+
+    private scrollToVisible(direction: Direction) {
+        let startSheetViewRow;
+        let startSheetViewColumn;
+        const selection = this._selectionManagerService.getLast();
+        if (selection == null) {
+            return;
+        }
+        const { startRow: selectionStartRow, startColumn: selectionStartColumn } = selection.range;
+        const { rowHeightAccumulation, columnWidthAccumulation } =
+            this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
+        if (rowHeightAccumulation == null || columnWidthAccumulation == null) {
+            return;
+        }
+        const scene = this._getSheetObject()?.scene;
+        if (scene == null) {
+            return;
+        }
+        const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        if (viewport == null) {
+            return;
+        }
+
+        const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+        const {
+            startColumn: freezeStartColumn,
+            startRow: freezeStartRow,
+            ySplit: freezeYSplit,
+            xSplit: freezeXSplit,
+        } = worksheet.getFreeze();
+
+        const bounds = viewport.getBounding();
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        if (skeleton == null) {
+            return;
+        }
+        const {
+            startRow: viewportStartRow,
+            startColumn: viewportStartColumn,
+            endRow: viewportEndRow,
+            endColumn: viewportEndColumn,
+        } = skeleton.getRowColumnSegment(bounds);
+
+        // vertical overflow only happens when the selection's row is in not the freeze area
+        if (
+            (direction === Direction.UP || direction === Direction.DOWN) &&
+            selectionStartRow >= freezeStartRow &&
+            selectionStartColumn >= freezeStartColumn - freezeXSplit
+        ) {
+            // top overflow
+            if (selectionStartRow <= viewportStartRow) {
+                startSheetViewRow = selectionStartRow;
+            }
+
+            // bottom overflow
+            if (selectionStartRow >= viewportEndRow) {
+                const minRowAccumulation = rowHeightAccumulation[selectionStartRow] - viewport.height!;
+                for (let r = viewportStartRow; r <= selectionStartRow; r++) {
+                    if (rowHeightAccumulation[r] >= minRowAccumulation) {
+                        startSheetViewRow = r + 1;
+                        break;
+                    }
+                }
+            }
+        }
+        // horizontal overflow only happens when the selection's column is in not the freeze area
+        if (
+            (direction === Direction.LEFT || direction === Direction.RIGHT) &&
+            selectionStartColumn >= freezeStartColumn &&
+            selectionStartRow >= freezeStartRow - freezeYSplit
+        ) {
+            // left overflow
+            if (selectionStartColumn <= viewportStartColumn) {
+                startSheetViewColumn = selectionStartColumn;
+            }
+
+            // right overflow
+            if (selectionStartColumn >= viewportEndColumn) {
+                const minColumnAccumulation = columnWidthAccumulation[selectionStartColumn] - viewport.width!;
+                for (let c = viewportStartColumn; c <= selectionStartColumn; c++) {
+                    if (columnWidthAccumulation[c] >= minColumnAccumulation) {
+                        startSheetViewColumn = c + 1;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (startSheetViewRow === undefined && startSheetViewColumn === undefined) {
+            return;
+        }
+        // sheetViewStartRow and sheetViewStartColumn maybe undefined, which means should not make scroll at its direction
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        this._commandService.executeCommand(ScrollCommand.id, {
+            unitId: workbook.getUnitId(),
+            sheetId: workbook.getActiveSheet().getSheetId(),
+            sheetViewStartRow: startSheetViewRow,
+            sheetViewStartColumn: startSheetViewColumn,
         });
     }
 

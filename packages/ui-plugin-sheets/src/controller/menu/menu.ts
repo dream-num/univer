@@ -17,12 +17,20 @@ import {
     SelectionManagerService,
     SetBackgroundColorCommand,
     SetBoldCommand,
+    SetColHiddenCommand,
+    SetColHiddenMutation,
+    SetColVisibleCommand,
+    SetColVisibleMutation,
     SetFontFamilyCommand,
     SetFontSizeCommand,
     SetHorizontalTextAlignCommand,
     SetItalicCommand,
     SetRangeStyleMutation,
     SetRangeValuesMutation,
+    SetRowHiddenCommand,
+    SetRowHiddenMutation,
+    SetRowVisibleCommand,
+    SetRowVisibleMutation,
     SetSelectionsOperation,
     SetStrikeThroughCommand,
     SetTabColorCommand,
@@ -34,8 +42,6 @@ import {
     SetWorksheetColWidthCommand,
     SetWorksheetHideCommand,
     SetWorksheetRowHeightCommand,
-    SetWorksheetRowHideCommand,
-    SetWorksheetRowShowCommand,
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
 import {
@@ -58,6 +64,7 @@ import {
     ICurrentUniverService,
     IPermissionService,
     IUndoRedoService,
+    RANGE_TYPE,
     RedoCommand,
     UndoCommand,
     VerticalAlign,
@@ -1082,19 +1089,112 @@ export function RemoveRowMenuItemFactory(): IMenuButtonItem {
 
 export function HideRowMenuItemFactory(): IMenuButtonItem {
     return {
-        id: SetWorksheetRowHideCommand.id,
+        id: SetRowHiddenCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
+        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.hideSelectedRow',
     };
 }
 
-export function ShowRowMenuItemFactory(): IMenuButtonItem {
+export function HideColMenuItemFactory(): IMenuButtonItem {
     return {
-        id: SetWorksheetRowShowCommand.id,
+        id: SetColHiddenCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU],
+        positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
+        title: 'rightClick.hideSelectedColumn',
+    };
+}
+
+export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
+
+    function hasHiddenRowsInSelections(): boolean {
+        const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+        const rowRanges = selectionManagerService
+            .getSelections()
+            ?.map((s) => s.range)
+            .filter((r) => r.rangeType === RANGE_TYPE.ROW);
+
+        return !!rowRanges?.some((range) => {
+            for (let r = range.startRow; r <= range.endRow; r++) {
+                if (!worksheet.getRowVisible(r)) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+    }
+
+    const commandService = accessor.get(ICommandService);
+
+    return {
+        id: SetRowVisibleCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.showHideRow',
+        hidden$: new Observable((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                if (
+                    c.id === SetSelectionsOperation.id ||
+                    c.id === SetRowHiddenMutation.id ||
+                    c.id === SetRowVisibleMutation.id
+                ) {
+                    subscriber.next(!hasHiddenRowsInSelections());
+                }
+            });
+
+            // it only shows when selected area has hidden rows
+            subscriber.next(!hasHiddenRowsInSelections());
+            return () => disposable.dispose();
+        }),
+    };
+}
+
+export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const currentUniverService = accessor.get(ICurrentUniverService);
+    const selectionManagerService = accessor.get(SelectionManagerService);
+
+    function hasHiddenColsInSelections(): boolean {
+        const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+        const colRanges = selectionManagerService
+            .getSelections()
+            ?.map((s) => s.range)
+            .filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
+
+        return !!colRanges?.some((range) => {
+            for (let r = range.startRow; r <= range.endRow; r++) {
+                if (!worksheet.getColVisible(r)) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+    }
+
+    const commandService = accessor.get(ICommandService);
+
+    return {
+        id: SetColVisibleCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
+        title: 'rightClick.showHideColumn',
+        hidden$: new Observable((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                if (
+                    c.id === SetSelectionsOperation.id ||
+                    c.id === SetColHiddenMutation.id ||
+                    c.id === SetColVisibleMutation.id
+                ) {
+                    subscriber.next(!hasHiddenColsInSelections());
+                }
+            });
+
+            subscriber.next(!hasHiddenColsInSelections());
+            return () => disposable.dispose();
+        }),
     };
 }
 

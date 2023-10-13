@@ -62,6 +62,15 @@ export class RowManager {
         return _rowData.get(rowPos);
     }
 
+    getRowVisible(rowPos: number): boolean {
+        const { _rowData } = this;
+        const row = _rowData.get(rowPos);
+        if (!row) {
+            return true;
+        }
+        return row.hd !== BooleanNumber.TRUE;
+    }
+
     /**
      * Get count of column in the sheet
      * @returns

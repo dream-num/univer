@@ -23,7 +23,9 @@ import { MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation'
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { SetBorderStylesMutation } from '../commands/mutations/set-border-styles.mutation';
+import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
+import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetWorksheetActivateMutation } from '../commands/mutations/set-worksheet-activate.mutation';
 import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
 import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
@@ -112,6 +114,10 @@ export class SheetRenderController extends Disposable {
             MoveRowsMutation.id,
             SetRangeValuesMutation.id,
             SetBorderStylesMutation.id,
+            SetColHiddenMutation.id,
+            SetColVisibleMutation.id,
+            SetRowHiddenMutation.id,
+            SetRowVisibleMutation.id,
         ];
 
         this.disposeWithMe(

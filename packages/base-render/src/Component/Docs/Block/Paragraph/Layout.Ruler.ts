@@ -369,7 +369,6 @@ function _lineOperator(
         // 为了保持__getIndentPadding的纯函数特性，把修改首行列表宽度的逻辑外置到这里
         spanGroup[0].width = changeBulletWidth.hangingNumber;
     }
-    // console.log(spanGroup[0].content, isParagraphStart(elementIndex, isFirstSpan), elementIndex, isFirstSpan);
     const newLine = createSkeletonLine(
         paragraphIndex,
         LineType.PARAGRAPH,

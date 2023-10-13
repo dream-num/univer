@@ -36,21 +36,21 @@ describe('Test style commands', () => {
         get = testBed.get;
 
         commandService = get(ICommandService);
-        commandService.registerCommand(SetBorderColorCommand);
-        commandService.registerCommand(SetBorderStyleCommand);
-        commandService.registerCommand(SetBorderCommand);
-        commandService.registerCommand(SetBorderPositionCommand);
-        commandService.registerCommand(AddWorksheetMergeCommand);
-        commandService.registerCommand(AddWorksheetMergeAllCommand);
-        commandService.registerCommand(RemoveWorksheetMergeCommand);
-        commandService.registerCommand(AddWorksheetMergeMutation);
-        commandService.registerCommand(RemoveWorksheetMergeMutation);
-        commandService.registerCommand(SetBorderStylesMutation);
+        [
+            SetBorderColorCommand,
+            SetBorderStyleCommand,
+            SetBorderCommand,
+            SetBorderPositionCommand,
+            AddWorksheetMergeCommand,
+            AddWorksheetMergeAllCommand,
+            RemoveWorksheetMergeCommand,
+            AddWorksheetMergeMutation,
+            RemoveWorksheetMergeMutation,
+            SetBorderStylesMutation,
+        ].forEach((c) => commandService.registerCommand(c));
     });
 
-    afterEach(() => {
-        univer.dispose();
-    });
+    afterEach(() => univer.dispose());
 
     describe('set border style', () => {
         describe('correct situations', () => {

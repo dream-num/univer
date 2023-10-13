@@ -24,6 +24,15 @@ export class ColumnManager {
         return this._columnData;
     }
 
+    getColVisible(colPos: number): boolean {
+        const { _columnData } = this;
+        const col = _columnData.get(colPos);
+        if (!col) {
+            return true;
+        }
+        return col.hd !== BooleanNumber.TRUE;
+    }
+
     getColumnDatas(columnPos: number, numColumns: number): ObjectArray<IColumnData> {
         const columnData = new ObjectArray<IColumnData>();
         for (let i = columnPos; i < columnPos + numColumns; i++) {

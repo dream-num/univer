@@ -38,7 +38,7 @@ export class HeaderMenuController extends Disposable {
 
     private _currentColumn: number = Infinity;
 
-    private _Observers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
+    private _observers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -64,7 +64,7 @@ export class HeaderMenuController extends Disposable {
 
         const { spreadsheetRowHeader, spreadsheetColumnHeader } = sheetObject;
 
-        this._Observers.forEach((observer) => {
+        this._observers.forEach((observer) => {
             spreadsheetRowHeader.onPointerEnterObserver.remove(observer);
             spreadsheetRowHeader.onPointerMoveObserver.remove(observer);
             spreadsheetRowHeader.onPointerLeaveObserver.remove(observer);
@@ -109,13 +109,13 @@ export class HeaderMenuController extends Disposable {
         const eventBindingObject =
             initialType === HEADER_HOVER_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
-        this._Observers.push(
+        this._observers.push(
             eventBindingObject?.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 this._hoverRect?.show();
             })
         );
 
-        this._Observers.push(
+        this._observers.push(
             eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                 if (skeleton == null) {
@@ -176,7 +176,7 @@ export class HeaderMenuController extends Disposable {
             })
         );
 
-        this._Observers.push(
+        this._observers.push(
             eventBindingObject?.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 this._hoverRect?.hide();
                 this._hoverMenu?.hide();

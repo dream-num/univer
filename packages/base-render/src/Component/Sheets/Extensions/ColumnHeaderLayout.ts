@@ -14,8 +14,9 @@ export class ColumnHeaderLayout extends SheetExtension {
     override zIndex = 10;
 
     override draw(ctx: CanvasRenderingContext2D, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowColumnSegment, rowHeaderWidth = 0, columnHeaderHeight = 0 } = spreadsheetSkeleton;
-        const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
+        const { rowColumnSegment, columnHeaderHeight = 0 } = spreadsheetSkeleton;
+        const { startColumn, endColumn } = rowColumnSegment;
+
         if (!spreadsheetSkeleton) {
             return;
         }
@@ -33,11 +34,14 @@ export class ColumnHeaderLayout extends SheetExtension {
         }
 
         const scale = this._getScale(parentScale);
+
+        // painting background
         ctx.fillStyle = getColor([248, 249, 250])!;
         ctx.fillRect(0, 0, columnTotalWidth, columnHeaderHeight);
-        ctx.textAlign = 'center'; // 文字水平居中
-        ctx.textBaseline = 'middle'; // 文字垂直居中
-        ctx.fillStyle = getColor([0, 0, 0])!; // 文字颜色
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = getColor([0, 0, 0])!;
         ctx.beginPath();
         ctx.lineWidth = 1 / scale;
         ctx.strokeStyle = getColor([217, 217, 217])!;
@@ -47,19 +51,24 @@ export class ColumnHeaderLayout extends SheetExtension {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;
             }
+
             const columnEndPosition = fixLineWidthByScale(columnWidthAccumulation[c], scale);
             if (preColumnPosition === columnEndPosition) {
                 // 跳过隐藏行
                 continue;
             }
+
+            // painting line border
             ctx.moveTo(columnEndPosition, 0);
             ctx.lineTo(columnEndPosition, columnHeaderHeight);
 
+            // painting column header text
             const middleCellPos = preColumnPosition + (columnEndPosition - preColumnPosition) / 2;
             ctx.fillText(numberToABC(c), middleCellPos, columnHeaderHeight / 2 + MIDDLE_CELL_POS_MAGIC_NUMBER); // 魔法数字1，因为垂直对齐看起来差1像素
             preColumnPosition = columnEndPosition;
         }
 
+        // painting line bottom border
         const columnHeaderHeightFix = fixLineWidthByScale(columnHeaderHeight, scale);
         ctx.moveTo(0, columnHeaderHeightFix);
         ctx.lineTo(columnTotalWidth, columnHeaderHeightFix);

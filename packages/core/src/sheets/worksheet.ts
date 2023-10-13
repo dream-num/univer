@@ -369,6 +369,14 @@ export class Worksheet {
         return this.getRowManager().getRowHeight(rowPosition);
     }
 
+    getRowVisible(row: number): boolean {
+        return this.getRowManager().getRowVisible(row);
+    }
+
+    getColVisible(col: number): boolean {
+        return this.getColumnManager().getColVisible(col);
+    }
+
     /**
      * Returns true if this sheet layout is right-to-left. Returns false if the sheet uses the default left-to-right layout.
      * @returns true if this sheet layout is right-to-left. Returns false if the sheet uses the default left-to-right layout.

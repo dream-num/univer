@@ -58,22 +58,47 @@ export function getCellAtRowCol(row: number, col: number, worksheet: Worksheet):
 
 export function findNextRange(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
     const destRange: IRange = { ...startRange };
+    let next: number;
     switch (direction) {
         case Direction.UP:
-            destRange.startRow = Math.max(0, startRange.startRow - 1);
-            destRange.endRow = destRange.startRow;
+            next = startRange.startRow - 1;
+            while (next > -1 && !worksheet.getRowVisible(next)) {
+                next -= 1;
+            }
+            if (next > -1) {
+                destRange.startRow = next;
+                destRange.endRow = destRange.startRow;
+            }
             break;
         case Direction.DOWN:
-            destRange.startRow = Math.min(startRange.endRow + 1, worksheet.getRowCount() - 1);
-            destRange.endRow = destRange.startRow;
+            next = startRange.endRow + 1;
+            while (next < worksheet.getRowCount() && !worksheet.getRowVisible(next)) {
+                next += 1;
+            }
+            if (next < worksheet.getRowCount()) {
+                destRange.startRow = next;
+                destRange.endRow = destRange.startRow;
+            }
             break;
         case Direction.LEFT:
-            destRange.startColumn = Math.max(0, startRange.startColumn - 1);
-            destRange.endColumn = destRange.startColumn;
+            next = startRange.startColumn - 1;
+            while (next > -1 && !worksheet.getColVisible(next)) {
+                next -= 1;
+            }
+            if (next > -1) {
+                destRange.startColumn = next;
+                destRange.endColumn = destRange.startColumn;
+            }
             break;
         case Direction.RIGHT:
-            destRange.startColumn = Math.min(startRange.endColumn + 1, worksheet.getColumnCount() - 1);
-            destRange.endColumn = destRange.startColumn;
+            next = startRange.endColumn + 1;
+            while (next < worksheet.getColumnCount() && !worksheet.getColVisible(next)) {
+                next += 1;
+            }
+            if (next < worksheet.getColumnCount()) {
+                destRange.startColumn = next;
+                destRange.endColumn = destRange.startColumn;
+            }
             break;
         default:
             break;
@@ -84,10 +109,6 @@ export function findNextRange(startRange: IRange, direction: Direction, workshee
 
 export function findNextGapRange(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
     const destRange = { ...startRange };
-
-    const lastRow = worksheet.getMaxRows() - 1;
-    const lastColumn = worksheet.getMaxColumns() - 1;
-
     const { startRow, startColumn, endRow, endColumn } = getEdgeOfRange(startRange, direction, worksheet);
 
     let currentPositionHasValue = rangeHasValue(worksheet, startRow, startColumn, endRow, endColumn).hasValue;
@@ -96,17 +117,20 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
 
     while (shouldContinue) {
         if (Direction.UP === direction) {
-            if (destRange.startRow === 0) {
+            let next = destRange.startRow - 1;
+            while (next > -1 && !worksheet.getRowVisible(next)) {
+                next -= 1;
+            }
+            if (next === -1) {
                 shouldContinue = false;
                 break;
             }
 
-            const nextRow = destRange.startRow - 1; // it may decrease if there are merged cell
             const { hasValue: nextRangeHasValue, matrix } = rangeHasValue(
                 worksheet,
-                nextRow,
+                next,
                 destRange.startColumn,
-                nextRow,
+                next,
                 destRange.endColumn
             );
 
@@ -116,13 +140,13 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
             } else {
                 if (matrix.getLength() !== 0) {
                     // update searching ranges
-                    let min = nextRow;
+                    let min = next;
                     matrix.forValue((row) => {
                         min = Math.min(row, min);
                     });
                     destRange.startRow = min;
                 } else {
-                    destRange.startRow = nextRow;
+                    destRange.startRow = next;
                 }
 
                 destRange.endRow = destRange.startRow;
@@ -138,17 +162,20 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
         }
 
         if (Direction.DOWN === direction) {
-            if (destRange.endRow === lastRow) {
+            let next = destRange.endRow + 1;
+            while (next < worksheet.getRowCount() && !worksheet.getRowVisible(next)) {
+                next += 1;
+            }
+            if (next === worksheet.getRowCount()) {
                 shouldContinue = false;
                 break;
             }
 
-            const nextRow = destRange.endRow + 1;
             const { hasValue: nextRangeHasValue, matrix } = rangeHasValue(
                 worksheet,
-                nextRow,
+                next,
                 destRange.startColumn,
-                nextRow,
+                next,
                 destRange.endColumn
             );
 
@@ -157,13 +184,13 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
                 break;
             } else {
                 if (matrix.getLength() !== 0) {
-                    let max = nextRow;
+                    let max = next;
                     matrix.forValue((row, _, value) => {
                         max = Math.max(row + (value.rowSpan || 1) - 1, max);
                     });
                     destRange.endRow = max;
                 } else {
-                    destRange.endRow = nextRow;
+                    destRange.endRow = next;
                 }
 
                 destRange.startRow = destRange.endRow;
@@ -179,18 +206,21 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
         }
 
         if (Direction.LEFT === direction) {
-            if (destRange.startColumn === 0) {
+            let next = destRange.startColumn - 1;
+            while (next > -1 && !worksheet.getColVisible(next)) {
+                next -= 1;
+            }
+            if (next === -1) {
                 shouldContinue = false;
                 break;
             }
 
-            const nextCol = destRange.startColumn - 1;
             const { hasValue: nextRangeHasValue, matrix } = rangeHasValue(
                 worksheet,
                 destRange.startRow,
-                nextCol,
+                next,
                 destRange.endRow,
-                nextCol
+                next
             );
 
             if (currentPositionHasValue && !nextRangeHasValue && !firstMove) {
@@ -198,13 +228,13 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
                 break;
             } else {
                 if (matrix.getLength() !== 0) {
-                    let min = nextCol;
+                    let min = next;
                     matrix.forValue((_, col) => {
                         min = Math.min(col, min);
                     });
                     destRange.startColumn = min;
                 } else {
-                    destRange.startColumn = nextCol;
+                    destRange.startColumn = next;
                 }
 
                 destRange.endColumn = destRange.startColumn;
@@ -220,18 +250,22 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
         }
 
         if (Direction.RIGHT === direction) {
-            if (destRange.endColumn === lastColumn) {
+            let next = destRange.endColumn + 1;
+            while (next < worksheet.getColumnCount() && !worksheet.getColVisible(next)) {
+                next += 1;
+            }
+
+            if (next === worksheet.getColumnCount()) {
                 shouldContinue = false;
                 break;
             }
 
-            const nextCol = destRange.endColumn + 1;
             const { hasValue: nextRangeHasValue, matrix } = rangeHasValue(
                 worksheet,
                 destRange.startRow,
-                nextCol,
+                next,
                 destRange.endRow,
-                nextCol
+                next
             );
 
             if (currentPositionHasValue && !nextRangeHasValue && !firstMove) {
@@ -239,13 +273,13 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
                 break;
             } else {
                 if (matrix.getLength() !== 0) {
-                    let max = nextCol;
+                    let max = next;
                     matrix.forValue((_, col, value) => {
                         max = Math.max(col + (value.colSpan || 1) - 1, max);
                     });
                     destRange.endColumn = max;
                 } else {
-                    destRange.endColumn = nextCol;
+                    destRange.endColumn = next;
                 }
 
                 destRange.startColumn = destRange.endColumn;

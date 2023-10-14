@@ -1,4 +1,5 @@
 /* eslint-disable no-magic-numbers */
+import { AddWorksheet28, ReduceProportion24 } from '@univerjs/icons';
 import { useMemo, useRef } from 'react';
 
 import { joinClassNames } from '../../Utils';
@@ -53,13 +54,19 @@ export function Slider(props: IBaseSliderProps) {
     }
 
     function handleStep(offset: number) {
-        onChange && onChange(value + offset);
+        let result = value + offset;
+        if (value + offset <= min) {
+            result = min;
+        } else if (value + offset >= max) {
+            result = max;
+        }
+        onChange && onChange(result);
     }
 
     const offset = useMemo(() => {
-        const breakpoint = [resetPoint, (max - resetPoint) / 2 + resetPoint, max];
-        if (value <= breakpoint[0]) {
-            return value * 0.5;
+        if (value <= resetPoint) {
+            const ratio = 50 / (resetPoint - min);
+            return (value - min) * ratio;
         }
 
         if (value <= max) {
@@ -77,6 +84,7 @@ export function Slider(props: IBaseSliderProps) {
                 const pureOffsetX = e.clientX - rail.getBoundingClientRect().x;
 
                 let offsetX = pureOffsetX;
+
                 if (offsetX <= 0) {
                     offsetX = 0;
                 } else if (offsetX >= styles.sliderWidth) {
@@ -85,14 +93,14 @@ export function Slider(props: IBaseSliderProps) {
 
                 const ratio = offsetX / styles.sliderWidth;
 
-                let value = 0;
+                let result = 0;
                 if (ratio <= 0.5) {
-                    value = (ratio * max) / 2;
+                    result = min + ratio * (resetPoint - min) * 2;
                 } else {
-                    value = resetPoint + (ratio - 0.5) * (max - resetPoint) * 2;
+                    result = resetPoint + (ratio - 0.5) * (max - resetPoint) * 2;
                 }
 
-                onChange && onChange(Math.ceil(value));
+                onChange && onChange(Math.ceil(result));
             }
         }
 
@@ -111,12 +119,10 @@ export function Slider(props: IBaseSliderProps) {
         window.addEventListener('mouseout', onMouseOut);
     }
 
-    console.log(shortcuts);
-
     return (
         <div className={styles.slider}>
-            <Button type="text" disabled={value <= 0} onClick={() => handleStep(-10)}>
-                -
+            <Button type="text" size="small" disabled={value <= min} onClick={() => handleStep(-10)}>
+                <ReduceProportion24 />
             </Button>
 
             <div className={styles.sliderRail}>
@@ -136,8 +142,8 @@ export function Slider(props: IBaseSliderProps) {
                 </div>
             </div>
 
-            <Button type="text" disabled={value >= max} onClick={() => handleStep(10)}>
-                +
+            <Button type="text" size="small" disabled={value >= max} onClick={() => handleStep(10)}>
+                <AddWorksheet28 />
             </Button>
 
             <Dropwdown2

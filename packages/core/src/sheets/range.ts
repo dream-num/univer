@@ -220,9 +220,8 @@ export class Range {
         const styles = this._deps.getStyles();
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
-                let rgbColor: string = DEFAULT_STYLES.bg?.rgb!;
-                rgbColor = styles.getStyleByCell(cell)?.bg?.rgb!;
-                return rgbColor;
+                const rgbColor = styles.getStyleByCell(cell);
+                return rgbColor?.bg?.rgb || DEFAULT_STYLES.bg.rgb;
             })
         );
     }
@@ -297,19 +296,19 @@ export class Range {
     /**
      * Returns the font color of the cell in the top-left corner of the range, in CSS notation
      */
-    getFontColor(): Nullable<string> {
+    getFontColor(): string {
         return this.getFontColors()[0][0];
     }
 
     /**
      * Returns the font colors of the cells in the range in CSS notation (such as '#ffffff' or 'white').
      */
-    getFontColors(): Array<Array<Nullable<string>>> {
+    getFontColors(): string[][] {
         const styles = this._deps.getStyles();
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 const cellStyle = styles.getStyleByCell(cell);
-                return cellStyle?.cl?.rgb || DEFAULT_STYLES.cl?.rgb;
+                return cellStyle?.cl?.rgb || DEFAULT_STYLES.cl.rgb;
             })
         );
     }
@@ -631,7 +630,7 @@ export class Range {
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 const style = styles && styles.getStyleByCell(cell);
-                return (style && style[arg]) || DEFAULT_STYLES[arg];
+                return (style && style[arg]) || (DEFAULT_STYLES as IStyleData)[arg];
             })
         );
     }

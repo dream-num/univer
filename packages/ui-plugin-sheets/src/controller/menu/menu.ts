@@ -427,49 +427,49 @@ export const FONT_FAMILY_CHILDREN = [
         value: 'Verdana',
     },
     {
-        label: 'fontFamily.MicrosoftAccorblack',
+        label: 'fontFamily.MicrosoftYaHei',
         style: { 'font-family': '微软雅黑' },
-        value: '微软雅黑',
+        value: 'Microsoft YaHei',
     },
     {
         label: 'fontFamily.SimSun',
         style: { 'font-family': '宋体' },
-        value: '宋体',
+        value: 'SimSun',
     },
     {
         label: 'fontFamily.SimHei',
         style: { 'font-family': '黑体' },
-        value: '黑体',
+        value: 'SimHei',
     },
     {
         label: 'fontFamily.Kaiti',
         style: { 'font-family': '楷体' },
-        value: '楷体',
+        value: 'Kaiti',
     },
     {
         label: 'fontFamily.FangSong',
         style: { 'font-family': '仿宋' },
-        value: '仿宋',
+        value: 'FangSong',
     },
     {
         label: 'fontFamily.NSimSun',
         style: { 'font-family': '新宋体' },
-        value: '新宋体',
+        value: 'NSimSun',
     },
     {
         label: 'fontFamily.STXinwei',
         style: { 'font-family': '华文新魏' },
-        value: '华文新魏',
+        value: 'STXinwei',
     },
     {
         label: 'fontFamily.STXingkai',
         style: { 'font-family': '华文行楷' },
-        value: '华文行楷',
+        value: 'STXingkai',
     },
     {
         label: 'fontFamily.STLiti',
         style: { 'font-family': '华文隶书' },
-        value: '华文隶书',
+        value: 'STLiti',
     },
     // The following 3 fonts do not work, temporarily delete
     // {

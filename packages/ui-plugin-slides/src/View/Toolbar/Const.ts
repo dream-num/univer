@@ -87,7 +87,7 @@ export const FONT_FAMILY_CHILDREN = [
         value: 'Verdana',
     },
     {
-        label: 'fontFamily.MicrosoftAccorblack',
+        label: 'fontFamily.MicrosoftYaHei',
         style: { 'font-family': '微软雅黑' },
         value: '微软雅黑',
     },

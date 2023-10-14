@@ -53,9 +53,10 @@ export function NeoCustomLabel(
     }
 
     if (display === DisplayTypes.FONT) {
+        // According to the value, translate toolbar font
         return (
             <div className={styles.fontSelect} style={{ fontFamily: value as string }}>
-                {getLocale(context, value as string)}
+                {getLocale(context, `fontFamily.${(`${value}` || '').replace(/\s/g, '')}`)}
             </div>
         );
     }
@@ -101,6 +102,8 @@ export function NeoCustomLabel(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const LabelComponent = icon ? (context.componentManager?.get(icon) as any) : null;
+
+    // Process Font Family drop-down list font
     return (
         <Item
             selected={selected}
@@ -108,6 +111,7 @@ export function NeoCustomLabel(
             value={value}
             suffix={LabelComponent ? <LabelComponent /> : null}
             disabled={false}
+            style={{ fontFamily: title.indexOf('fontFamily.') === 0 ? `${value}` : 'inherit' }}
         ></Item>
     );
 }

@@ -7,7 +7,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../Enum';
-import { IStyleData, IWorkbookConfig, IWorksheetConfig } from '../Interfaces';
+import { IWorkbookConfig, IWorksheetConfig } from '../Interfaces';
 
 /**
  * Used as an illegal range array return value
@@ -125,7 +125,7 @@ export const DEFAULT_WORKSHEET: IWorksheetConfig = {
 /**
  * Default styles
  */
-export const DEFAULT_STYLES: IStyleData = {
+export const DEFAULT_STYLES = {
     /**
      * fontFamily
      */

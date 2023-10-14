@@ -283,7 +283,6 @@ export const Menu = (props: BaseMenuProps) => {
                     >
                         <CustomComponent
                             onValueChange={(v: string | number) => {
-                                console.info('v=====', v);
                                 onOptionSelect?.({
                                     value: v,
                                     label: option.id,

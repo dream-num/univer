@@ -1,4 +1,4 @@
-import { SetWorksheetActivateCommand, SetZoomRatioCommand } from '@univerjs/base-sheets';
+import { SetWorksheetActivateCommand, SetZoomRatioCommand, SHEET_ZOOM_RANGE } from '@univerjs/base-sheets';
 import { SetZoomRatioOperation } from '@univerjs/base-sheets/commands/operations/set-zoom-ratio.operation.js';
 import { Slider } from '@univerjs/base-ui';
 import { ICommandService, ICurrentUniverService } from '@univerjs/core';
@@ -6,7 +6,6 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useEffect, useState } from 'react';
 
 const ZOOM_MAP = [50, 75, 100, 125, 150, 175, 200, 400];
-const ZOOM_RANGE = [10, 400];
 
 export function ZoomSlider() {
     const commandService = useDependency(ICommandService);
@@ -28,7 +27,7 @@ export function ZoomSlider() {
         const currentZoom =
             currentUniverService.getCurrentUniverSheetInstance()?.getActiveSheet().getZoomRatio() * 100 ?? 100;
 
-        return Math.ceil(currentZoom);
+        return Math.round(currentZoom);
     }
 
     function handleChange(value: number) {
@@ -46,5 +45,5 @@ export function ZoomSlider() {
         });
     }
 
-    return <Slider min={ZOOM_RANGE[0]} value={zoom} shortcuts={ZOOM_MAP} onChange={handleChange} />;
+    return <Slider min={SHEET_ZOOM_RANGE[0]} value={zoom} shortcuts={ZOOM_MAP} onChange={handleChange} />;
 }

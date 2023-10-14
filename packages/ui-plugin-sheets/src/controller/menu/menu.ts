@@ -31,6 +31,7 @@ import {
     SetRowHiddenMutation,
     SetRowVisibleCommand,
     SetRowVisibleMutation,
+    SetSelectionFrozenCommand,
     SetSelectionsOperation,
     SetStrikeThroughCommand,
     SetTabColorCommand,
@@ -1075,6 +1076,19 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
             const selections = selectionManager.getSelections();
             observer.next(selections?.length !== 1);
         }),
+    };
+}
+
+export function FrozenMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: SetSelectionFrozenCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [
+            MenuPosition.CONTEXT_MENU,
+            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
+            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
+        ],
+        title: 'rightClick.freeze',
     };
 }
 

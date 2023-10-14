@@ -54,7 +54,7 @@ export {
     SetBorderStyleCommand,
 } from './commands/commands/set-border-command';
 export { SetColHiddenCommand, SetColVisibleCommand } from './commands/commands/set-col-visible.command';
-export { SetFrozenCommand } from './commands/commands/set-frozen.command';
+export { SetFrozenCommand, SetSelectionFrozenCommand } from './commands/commands/set-frozen.command';
 export { SetFrozenCancelCommand } from './commands/commands/set-frozen-cancel.command';
 export type { ISetRangeValuesCommandParams } from './commands/commands/set-range-values.command';
 export { SetRangeValuesCommand } from './commands/commands/set-range-values.command';

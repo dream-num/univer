@@ -362,6 +362,7 @@ export default {
         byRow: '按行',
         byCol: '按列',
         generateNewMatrix: '生成新矩阵',
+        freeze: '冻结',
     },
     info: {
         tooltip: '提示',

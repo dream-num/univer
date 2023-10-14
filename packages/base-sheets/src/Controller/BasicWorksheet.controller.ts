@@ -35,7 +35,7 @@ import {
     SetBorderStyleCommand,
 } from '../commands/commands/set-border-command';
 import { SetColHiddenCommand, SetColVisibleCommand } from '../commands/commands/set-col-visible.command';
-import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
 import { SetRangeFormattedValueCommand } from '../commands/commands/set-range-formatted-value.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
@@ -192,6 +192,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             InsertSheetCommand,
             InsertSheetMutation,
             SetFrozenCommand,
+            SetSelectionFrozenCommand,
             SetFrozenMutation,
             SetFrozenCancelCommand,
             ScrollCommand,

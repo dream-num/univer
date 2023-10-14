@@ -46,6 +46,7 @@ import {
     DeleteSheetMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
+    FrozenMenuItemFactory,
     HideColMenuItemFactory,
     HideRowMenuItemFactory,
     HideSheetMenuItemFactory,
@@ -183,6 +184,7 @@ export class SheetUIController extends Disposable {
                 DeleteRangeMenuItemFactory,
                 DeleteRangeMoveLeftMenuItemFactory,
                 DeleteRangeMoveUpMenuItemFactory,
+                FrozenMenuItemFactory,
 
                 // toolbar
                 UndoMenuItemFactory,

@@ -2,14 +2,14 @@
 
 .layout-container {
     // theme
-    background-color: var(--bg);
-    color: var(--text-color);
+    background-color: @bg-color;
+    color: @text-color;
     height: 100%;
 
     .content-container-horizontal {
-        display: flex;
-        min-height: 14em;
         position: relative;
+        min-height: 14em;
+        display: flex;
 
         .content-inner-left-container {
             // position: relative;
@@ -30,6 +30,7 @@
 
         .content-inner-right-container {
             width: 50%;
+            background-color: @bg-color-secondary;
             flex: 1;
             // position: relative;
         }

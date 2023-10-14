@@ -10,7 +10,7 @@ import { Container } from '../Components/Container/Container';
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import style from './app.module.less';
 import { ContextMenu } from './components/contextmenu/contextmenu';
-import { Toolbar } from './components/toolbar/toolbar';
+import { DocBars } from './components/DocBars';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     footerComponents?: Set<() => ComponentType>;
@@ -95,7 +95,7 @@ export function App(props: IUniverAppProps) {
                     <Layout className={style.mainContent} style={{ position: 'relative' }}>
                         {/* header */}
                         <Header style={{ display: props.header ? 'block' : 'none' }}>
-                            {props.toolbar && <Toolbar></Toolbar>}
+                            {props.toolbar && <DocBars />}
                         </Header>
                         {/* content */}
                         <Layout>
@@ -123,7 +123,7 @@ export function App(props: IUniverAppProps) {
                             </Content>
                         </Layout>
                         {/* footer */}
-                        <Footer style={{ display: props.footer ? 'flex' : 'none' }}>
+                        <Footer style={{ display: props.footer ? 'block' : 'none' }}>
                             {footerComponents &&
                                 Array.from(footerComponents.values()).map((component, index) =>
                                     React.createElement(component(), { key: `${index}` })

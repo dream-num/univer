@@ -18,7 +18,6 @@ export const Tooltip = (props: ITooltipProps) => {
             overlay={<div className={styles.tooltipContent}>{typeof title === 'function' ? title() : title}</div>}
             builtinPlacements={placements}
             placement={placement}
-            mouseLeaveDelay={0.1}
             mouseEnterDelay={0.2}
             showArrow
             destroyTooltipOnHide

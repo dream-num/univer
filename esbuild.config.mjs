@@ -1,5 +1,9 @@
+import path from 'node:path';
+
 import cleanPlugin from 'esbuild-plugin-clean';
 import stylePlugin from 'esbuild-style-plugin';
+
+const nodeModules = path.resolve(process.cwd(), './node_modules');
 
 /** @type {import('esbuild').BuildOptions} */
 export default {
@@ -17,7 +21,10 @@ export default {
                 generateScopedName: 'univer-[local]',
             },
             renderOptions: {
-                lessOptions: { rewriteUrls: 'all' },
+                lessOptions: {
+                    rewriteUrls: 'all',
+                    paths: [nodeModules],
+                },
             },
         }),
     ],

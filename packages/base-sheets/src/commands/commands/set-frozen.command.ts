@@ -8,6 +8,7 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
+import { ScrollManagerService } from '../../services/scroll-manager.service';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import {
     ISetFrozenMutationParams,
@@ -42,6 +43,8 @@ export const SetSelectionFrozenCommand: ICommand = {
         }
         const currentSelection = selections[selections?.length - 1];
         const { range } = currentSelection;
+        const scrollManagerService = accessor.get(ScrollManagerService);
+        const { sheetViewStartRow = 0, sheetViewStartColumn = 0 } = scrollManagerService.getCurrentScroll() || {};
         let startRow;
         let startColumn;
         let ySplit;
@@ -50,7 +53,7 @@ export const SetSelectionFrozenCommand: ICommand = {
         // Frozen to Row
         if (rangeType === RANGE_TYPE.ROW) {
             startRow = selectRow;
-            ySplit = selectRow;
+            ySplit = selectRow - sheetViewStartRow;
             startColumn = -1;
             xSplit = 0;
             // Frozen to Column
@@ -58,13 +61,13 @@ export const SetSelectionFrozenCommand: ICommand = {
             startRow = -1;
             ySplit = 0;
             startColumn = selectColumn;
-            xSplit = selectColumn;
+            xSplit = selectColumn - sheetViewStartColumn;
             // Frozen to Range
         } else if (rangeType === RANGE_TYPE.NORMAL) {
             startRow = selectRow;
-            ySplit = selectRow;
+            ySplit = selectRow - sheetViewStartRow;
             startColumn = selectColumn;
-            xSplit = selectColumn;
+            xSplit = selectColumn - sheetViewStartColumn;
             // Unexpected value
         } else {
             return false;

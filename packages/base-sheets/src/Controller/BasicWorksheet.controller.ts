@@ -60,7 +60,7 @@ import { SetWorksheetNameCommand } from '../commands/commands/set-worksheet-name
 import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-order.command';
 import { DeltaRowHeightCommand, SetRowHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
-import { SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
+import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { TrimWhitespaceCommand } from '../commands/commands/trim-whitespace.command';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation } from '../commands/mutations/delete-range.mutation';
@@ -197,6 +197,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetFrozenCancelCommand,
             ScrollCommand,
             SetZoomRatioCommand,
+            ChangeZoomRatioCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

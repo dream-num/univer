@@ -14,7 +14,7 @@ import {
     IValueOption,
     MenuItemType,
 } from '../../../services/menu/menu';
-import { ToolbarButton } from './button/toolbar-button';
+import { ToolbarButton } from './Button/ToolbarButton';
 import styles from './index.module.less';
 
 export interface IToolbarItemStatus {

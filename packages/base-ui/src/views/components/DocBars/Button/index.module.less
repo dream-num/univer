@@ -1,6 +1,6 @@
 @import '../../../../Components/Button/Style/mixin.less';
 
-.btn {
+.toolbar-btn {
     line-height: @line-height-base;
     .btn();
     .btn-default();
@@ -12,13 +12,13 @@
     &-text {
         .button-color(var(--text-color), transparent, transparent);
         box-shadow: none;
-    
+
         &:hover {
             color: var(--text-color);
             background-color: var(--grey-100);
             border-color: transparent;
         }
-    
+
         // &:active {
         //     color: var(--text-color);
         //     background: #eee;

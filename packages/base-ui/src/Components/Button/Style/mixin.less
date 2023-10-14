@@ -54,21 +54,15 @@
 }
 
 .btn-text() {
-    .button-color(var(--text-color), transparent, transparent);
-    line-height: 2;
+    .button-color(@text-color, transparent, transparent);
 
     border-radius: @border-radius-base;
     box-shadow: none;
 
-    &:hover {
-        color: var(--text-color);
-        background: #eee;
-        border-color: transparent;
-    }
-
+    &:hover,
     &:active {
-        color: var(--text-color);
-        background: #eee;
+        color: @text-color;
+        background: @border-color;
         border-color: transparent;
     }
     .button-disabled(var(--disabled-color); transparent; transparent);
@@ -105,7 +99,7 @@
     }
 
     &-sm {
-        .button-size(24px, 7px, @font-size-sm, @border-radius-base)
+        .button-size(28px, 7px, @font-size-sm, @border-radius-base)
     }
 }
 
@@ -135,7 +129,7 @@
     }
 
     &.btn-sm {
-        .button-size(24px, (30px / 2), @font-size-sm, 24px);
+        .button-size(28px, (30px / 2), @font-size-sm, 28px);
     }
 }
 
@@ -152,7 +146,7 @@
     }
 
     &.btn-sm {
-        min-width: 24px;
+        min-width: 28px;
         border-radius: 50%;
     }
 }

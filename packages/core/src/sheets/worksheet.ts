@@ -373,8 +373,16 @@ export class Worksheet {
         return this.getRowManager().getRowVisible(row);
     }
 
+    getHiddenRows(): IRange[] {
+        return this._rowManager.getHiddenRows();
+    }
+
     getColVisible(col: number): boolean {
-        return this.getColumnManager().getColVisible(col);
+        return this._columnManager.getColVisible(col);
+    }
+
+    getHiddenCols(): IRange[] {
+        return this._columnManager.getHiddenCols();
     }
 
     /**

@@ -1,6 +1,6 @@
 import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../Shared';
 import { BooleanNumber } from '../Types/Enum';
-import { IRowData, IWorksheetConfig } from '../Types/Interfaces';
+import { IRange, IRowData, IWorksheetConfig, RANGE_TYPE } from '../Types/Interfaces';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
@@ -62,23 +62,6 @@ export class RowManager {
         return _rowData.get(rowPos);
     }
 
-    getRowVisible(rowPos: number): boolean {
-        const { _rowData } = this;
-        const row = _rowData.get(rowPos);
-        if (!row) {
-            return true;
-        }
-        return row.hd !== BooleanNumber.TRUE;
-    }
-
-    /**
-     * Get count of column in the sheet
-     * @returns
-     */
-    getSize(): number {
-        return this._rowData.getLength();
-    }
-
     /**
      * Get given row data or create a row data when it's null
      * @param rowPos row index
@@ -94,5 +77,52 @@ export class RowManager {
         const create = { hd: BooleanNumber.FALSE, h: config.defaultRowHeight };
         _rowData.set(rowPos, create);
         return create;
+    }
+
+    getHiddenRows(): IRange[] {
+        const len = this._rowData.getLength();
+        const hiddenRows: IRange[] = [];
+
+        let inHiddenRange = false;
+        let startRow = -1;
+
+        for (let i = 0; i < len; i++) {
+            const visible = this.getRowVisible(i);
+            if (inHiddenRange && visible) {
+                inHiddenRange = false;
+                hiddenRows.push({
+                    startRow,
+                    endRow: i - 1,
+                    startColumn: 0,
+                    endColumn: 0,
+                    rangeType: RANGE_TYPE.ROW,
+                });
+            } else if (!inHiddenRange && !visible) {
+                inHiddenRange = true;
+                startRow = i;
+            }
+        }
+
+        if (inHiddenRange) {
+            hiddenRows.push({ startRow, endRow: len - 1, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.ROW });
+        }
+
+        return hiddenRows;
+    }
+
+    getRowVisible(rowPos: number): boolean {
+        const row = this.getRow(rowPos);
+        if (!row) {
+            return true;
+        }
+        return row.hd !== BooleanNumber.TRUE;
+    }
+
+    /**
+     * Get count of column in the sheet
+     * @returns
+     */
+    getSize(): number {
+        return this._rowData.getLength();
     }
 }

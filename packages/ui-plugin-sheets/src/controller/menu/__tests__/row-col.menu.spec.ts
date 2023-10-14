@@ -3,12 +3,12 @@ import {
     SelectionManagerService,
     SetColHiddenCommand,
     SetColHiddenMutation,
-    SetColVisibleCommand,
     SetColVisibleMutation,
     SetRowHiddenCommand,
     SetRowHiddenMutation,
-    SetRowVisibleCommand,
     SetRowVisibleMutation,
+    SetSelectedColsVisibleCommand,
+    SetSelectedRowsVisibleCommand,
 } from '@univerjs/base-sheets';
 import {
     DisposableCollection,
@@ -42,8 +42,8 @@ describe('Test row col menu items', () => {
             SetRowHiddenMutation,
             SetColHiddenCommand,
             SetColHiddenMutation,
-            SetRowVisibleCommand,
-            SetColVisibleCommand,
+            SetSelectedRowsVisibleCommand,
+            SetSelectedColsVisibleCommand,
             SetRowVisibleMutation,
             SetColVisibleMutation,
         ].forEach((command) => {
@@ -137,7 +137,7 @@ describe('Test row col menu items', () => {
             selectRow(0, 2);
             expect(hidden).toBeFalsy();
 
-            await commandService.executeCommand(SetRowVisibleCommand.id);
+            await commandService.executeCommand(SetSelectedRowsVisibleCommand.id);
             expect(hidden).toBeTruthy();
         });
 
@@ -153,7 +153,7 @@ describe('Test row col menu items', () => {
             selectRow(0, 2);
             expect(hidden).toBeFalsy();
 
-            await commandService.executeCommand(SetColVisibleCommand.id);
+            await commandService.executeCommand(SetSelectedColsVisibleCommand.id);
             expect(hidden).toBeTruthy();
         });
     });

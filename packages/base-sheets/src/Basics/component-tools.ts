@@ -53,6 +53,12 @@ export function getSheetObject(
     };
 }
 
+export function getCoordByCell(row: number, col: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
+    const { scaleX, scaleY } = scene.getAncestorScale();
+    const { startX, startY, endX, endY } = skeleton.getCellByIndex(row, col, scaleX, scaleY);
+    return { startX, startY, endX, endY };
+}
+
 export function getCoordByOffset(evtOffsetX: number, evtOffsetY: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
     const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 

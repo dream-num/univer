@@ -6,8 +6,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../mutations/set-col-visible.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../mutations/set-row-visible.mutation';
-import { SetColHiddenCommand, SetColVisibleCommand } from '../set-col-visible.command';
-import { SetRowHiddenCommand, SetRowVisibleCommand } from '../set-row-visible.command';
+import { SetColHiddenCommand, SetSelectedColsVisibleCommand } from '../set-col-visible.command';
+import { SetRowHiddenCommand, SetSelectedRowsVisibleCommand } from '../set-row-visible.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test row col hide/unhine commands', () => {
@@ -27,8 +27,8 @@ describe('Test row col hide/unhine commands', () => {
             SetRowHiddenMutation,
             SetColHiddenCommand,
             SetColHiddenMutation,
-            SetRowVisibleCommand,
-            SetColVisibleCommand,
+            SetSelectedRowsVisibleCommand,
+            SetSelectedColsVisibleCommand,
             SetRowVisibleMutation,
             SetColVisibleMutation,
         ].forEach((command) => {
@@ -140,7 +140,7 @@ describe('Test row col hide/unhine commands', () => {
             // select a range and invoke unhide command will unhide all
             // hidden rows in the selected range
             selectRow(0, 7);
-            await commandService.executeCommand(SetRowVisibleCommand.id);
+            await commandService.executeCommand(SetSelectedRowsVisibleCommand.id);
             expect(getRowVisible(0)).toBeTruthy();
             expect(getRowVisible(2)).toBeTruthy();
 
@@ -171,7 +171,7 @@ describe('Test row col hide/unhine commands', () => {
             // select a range and invoke unhide command will unhide all
             // hidden cols in the selected range
             selectColumn(0, 7);
-            await commandService.executeCommand(SetColVisibleCommand.id);
+            await commandService.executeCommand(SetSelectedColsVisibleCommand.id);
             expect(getColVisible(0)).toBeTruthy();
             expect(getColVisible(2)).toBeTruthy();
 

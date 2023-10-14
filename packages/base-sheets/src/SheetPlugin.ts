@@ -41,42 +41,11 @@ export class SheetPlugin extends Plugin {
         this._initializeCommands();
     }
 
-    initialize(): void {
+    override onRendered(): void {
         this._localeService.getLocale().load({
             en,
         });
-
-        this.initController();
     }
-
-    initController() {
-        this._injector.get(SheetCanvasView);
-        this._injector.get(FormulaBarController);
-        this._injector.get(BasicWorksheetController);
-        this._injector.get(SelectionController);
-        this._injector.get(SheetRenderController);
-        this._injector.get(HeaderMenuController);
-        this._injector.get(HeaderResizeController);
-        this._injector.get(HeaderMoveController);
-        this._injector.get(FreezeController);
-        this._injector.get(ScrollController);
-        this._injector.get(ZoomController);
-    }
-
-    override onStarting(): void {}
-
-    override onRendered(): void {
-        this.initialize();
-    }
-
-    override onDestroy(): void {
-        super.onDestroy();
-    }
-
-    // listenEventManager() {
-    //     // TODO: move these init to controllers not here
-    //     this._countBarController?.listenEventManager();
-    // }
 
     private _initializeDependencies(sheetInjector: Injector) {
         const dependencies: Dependency[] = [

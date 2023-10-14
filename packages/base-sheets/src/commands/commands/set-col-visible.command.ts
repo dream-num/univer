@@ -3,6 +3,7 @@ import {
     ICommand,
     ICommandService,
     ICurrentUniverService,
+    IRange,
     IUndoRedoService,
     RANGE_TYPE,
 } from '@univerjs/core';
@@ -17,20 +18,50 @@ import {
     SetColVisibleMutation,
     SetColVisibleUndoMutationFactory,
 } from '../mutations/set-col-visible.mutation';
+import { ISetSpecificRowsVisibleCommandParams, SetSpecificRowsVisibleCommand } from './set-row-visible.command';
 
-export interface ISetColVisibleOnColsParams {
-    col: number;
+export interface ISetSpecificColsVisibleCommandParams {
+    workbookId: string;
+    worksheetId: string;
+    ranges: IRange[];
 }
 
-export const SetColVisibleOnCols: ICommand<ISetColVisibleOnColsParams> = {
+export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-col-visible-on-cols',
-    handler: async (accessor: IAccessor, params) => true,
+    handler: async (accessor, params: ISetSpecificColsVisibleCommandParams) => {
+        const { workbookId, worksheetId, ranges } = params;
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const redoMutationParams: ISetColVisibleMutationParams = {
+            workbookId,
+            worksheetId,
+            ranges,
+        };
+
+        const undoMutationParams = SetColVisibleUndoMutationFactory(accessor, redoMutationParams);
+        const result = await commandService.executeCommand(SetColVisibleMutation.id, redoMutationParams);
+
+        if (result) {
+            undoRedoService.pushUndoRedo({
+                URI: workbookId,
+                undo() {
+                    return commandService.executeCommand(SetColHiddenMutation.id, undoMutationParams);
+                },
+                redo() {
+                    return commandService.executeCommand(SetColVisibleMutation.id, redoMutationParams);
+                },
+            });
+
+            return true;
+        }
+        return true;
+    },
 };
 
-export const SetColVisibleCommand: ICommand = {
+export const SetSelectedColsVisibleCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-col-visible',
+    id: 'sheet.command.set-selected-cols-visible',
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const ranges = selectionManagerService
@@ -49,31 +80,13 @@ export const SetColVisibleCommand: ICommand = {
 
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
-        const redoMutationParams: ISetColVisibleMutationParams = {
-            workbookId,
-            worksheetId,
-            ranges, // TODO@wzhudev: only cols those are already hidden should be set to visible
-        };
 
         const commandService = accessor.get(ICommandService);
-        const result = await commandService.executeCommand(SetColVisibleMutation.id, redoMutationParams);
-
-        if (result) {
-            const undoRedoService = accessor.get(IUndoRedoService);
-            const undoMutationParams = SetColVisibleUndoMutationFactory(accessor, redoMutationParams);
-            undoRedoService.pushUndoRedo({
-                URI: workbookId,
-                undo() {
-                    return commandService.executeCommand(SetColHiddenMutation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.executeCommand(SetColVisibleMutation.id, redoMutationParams);
-                },
-            });
-            return true;
-        }
-
-        return false;
+        return commandService.executeCommand<ISetSpecificRowsVisibleCommandParams>(SetSpecificRowsVisibleCommand.id, {
+            workbookId,
+            worksheetId,
+            ranges,
+        });
     },
 };
 

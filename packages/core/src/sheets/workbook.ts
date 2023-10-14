@@ -19,6 +19,10 @@ import {
 import { Styles } from './styles';
 import { Worksheet } from './worksheet';
 
+export function getWorksheetUID(workbook: Workbook, worksheet: Worksheet): string {
+    return `${workbook.getUnitId()}|${worksheet.getSheetId()}`;
+}
+
 /**
  * Access and create Univer Sheets files
  */

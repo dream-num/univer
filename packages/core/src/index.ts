@@ -50,7 +50,7 @@ export { createRowColIter, type IRowColIter } from './Shared/RowColIter';
 export { Range } from './sheets/range';
 export { Styles } from './sheets/styles';
 export { SheetViewModel } from './sheets/view-model';
-export { Workbook } from './sheets/workbook';
+export { getWorksheetUID, Workbook } from './sheets/workbook';
 export { Worksheet } from './sheets/worksheet';
 
 // #endregion

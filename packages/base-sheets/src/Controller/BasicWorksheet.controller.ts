@@ -34,12 +34,20 @@ import {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from '../commands/commands/set-border-command';
-import { SetColHiddenCommand, SetColVisibleCommand } from '../commands/commands/set-col-visible.command';
+import {
+    SetColHiddenCommand,
+    SetSelectedColsVisibleCommand,
+    SetSpecificColsVisibleCommand,
+} from '../commands/commands/set-col-visible.command';
 import { SetFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
 import { SetRangeFormattedValueCommand } from '../commands/commands/set-range-formatted-value.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
-import { SetRowHiddenCommand, SetRowVisibleCommand } from '../commands/commands/set-row-visible.command';
+import {
+    SetRowHiddenCommand,
+    SetSelectedRowsVisibleCommand,
+    SetSpecificRowsVisibleCommand,
+} from '../commands/commands/set-row-visible.command';
 import { ScrollCommand } from '../commands/commands/set-scroll.command';
 import {
     ResetBackgroundColorCommand,
@@ -147,9 +155,11 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetRowHiddenMutation,
             SetColHiddenCommand,
             SetColHiddenMutation,
-            SetColVisibleCommand,
+            SetSelectedColsVisibleCommand,
             SetColVisibleMutation,
-            SetRowVisibleCommand,
+            SetSelectedRowsVisibleCommand,
+            SetSpecificRowsVisibleCommand,
+            SetSpecificColsVisibleCommand,
             SetRowVisibleMutation,
             SetWorksheetOrderCommand,
             SetWorksheetOrderMutation,

@@ -12,6 +12,7 @@ import { Inject } from '@wendellhu/redi';
 import { getSheetObject } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
+import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -98,7 +99,7 @@ export class ZoomController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = [SetZoomRatioCommand.id];
+        const updateCommandList = [SetZoomRatioOperation.id];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {

@@ -1,4 +1,5 @@
 import { SetWorksheetActivateCommand, SetZoomRatioCommand } from '@univerjs/base-sheets';
+import { SetZoomRatioOperation } from '@univerjs/base-sheets/commands/operations/set-zoom-ratio.operation.js';
 import { Slider } from '@univerjs/base-ui';
 import { ICommandService, ICurrentUniverService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -15,7 +16,7 @@ export function ZoomSlider() {
 
     useEffect(() => {
         const disposable = commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetZoomRatioCommand.id || commandInfo.id === SetWorksheetActivateCommand.id) {
+            if (commandInfo.id === SetZoomRatioOperation.id || commandInfo.id === SetWorksheetActivateCommand.id) {
                 const currentZoom = getCurrentZoom();
                 setZoom(currentZoom);
             }
@@ -36,7 +37,7 @@ export function ZoomSlider() {
         if (!workbook) return;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return;
-        const zoomRatio = (value / 100).toFixed(2);
+        const zoomRatio = value / 100;
 
         commandService.executeCommand(SetZoomRatioCommand.id, {
             workbookId: workbook.getUnitId(),

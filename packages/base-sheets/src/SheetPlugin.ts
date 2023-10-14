@@ -11,6 +11,7 @@ import { FreezeController } from './Controller/freeze.controller';
 import { HeaderMenuController } from './Controller/header-menu.controller';
 import { HeaderMoveController } from './Controller/header-move.controller';
 import { HeaderResizeController } from './Controller/header-resize.controller';
+import { HeaderUnhideController } from './Controller/header-unhide.controller';
 import { ScrollController } from './Controller/scroll.controller';
 import { SelectionController } from './Controller/Selection.controller';
 import { SheetRenderController } from './Controller/sheet-render.controller';
@@ -99,6 +100,7 @@ export class SheetPlugin extends Plugin {
             [BasicWorksheetController],
             [SelectionController],
             [SheetRenderController],
+            [HeaderUnhideController],
             [HeaderMenuController],
             [HeaderResizeController],
             [HeaderMoveController],

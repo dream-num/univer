@@ -22,4 +22,7 @@ export const SHEET_COMPONENT_MAIN_LAYER_INDEX = 0;
 
 export const SHEET_COMPONENT_HEADER_LAYER_INDEX = 2;
 
+// eslint-disable-next-line no-magic-numbers
 export const SHEET_ZOOM_RANGE = [10, 400];
+
+export const SHEET_COMPONENT_UNHIDE_LAYER_INDEX = 4;

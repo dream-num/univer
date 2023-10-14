@@ -19,7 +19,7 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { SetZoomRatioMutation } from '..';
+import { SetZoomRatioOperation } from '..';
 import { getCoordByOffset, getSheetObject } from '../Basics/component-tools';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
@@ -901,7 +901,7 @@ export class FreezeController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = [SetFrozenMutation.id, SetZoomRatioMutation.id];
+        const updateCommandList = [SetFrozenMutation.id, SetZoomRatioOperation.id];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {

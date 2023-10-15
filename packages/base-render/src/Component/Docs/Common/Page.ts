@@ -169,7 +169,7 @@ function _createSkeletonHeader(
         lists,
         footerTreeMap,
         headerTreeMap,
-        fontLocale,
+        localeService,
         pageSize,
         marginLeft = 0,
         marginRight = 0,
@@ -188,7 +188,7 @@ function _createSkeletonHeader(
             width: pageWidth - marginLeft - marginRight,
             height: Infinity,
         },
-        fontLocale,
+        localeService,
         drawings,
     };
 

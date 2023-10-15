@@ -29,7 +29,8 @@ export class SheetContextMenuController extends Disposable {
     private _addListeners(): void {
         const objects = getSheetObject(this._currentUniverService, this._renderManagerService);
         if (!objects) {
-            throw new Error('Rendering should be done when SheetContextMenuController initialized.');
+            return;
+            // throw new Error('Rendering should be done when SheetContextMenuController initialized.');
         }
 
         // const scene = objects.scene;

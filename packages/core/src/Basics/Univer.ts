@@ -94,6 +94,7 @@ export class Univer {
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Sheet)
                 .forEach((p) => this._univerSheet!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
+            this._tryStart();
             this._univerSheet.init();
             addSheet();
 
@@ -118,6 +119,7 @@ export class Univer {
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Doc)
                 .forEach((p) => this._univerDoc!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
+            this._tryStart();
             this._univerDoc.init();
             addDoc();
 
@@ -142,6 +144,7 @@ export class Univer {
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Slide)
                 .forEach((p) => this._univerSlide!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
+            this._tryStart();
             this._univerSlide.init();
             addSlide();
 
@@ -183,9 +186,11 @@ export class Univer {
         ]);
     }
 
-    private _tryProgressToReady(): void {
+    private _tryStart(): void {
         this._rootInjector.get(LifecycleInitializerService).start();
+    }
 
+    private _tryProgressToReady(): void {
         const lifecycleService = this._rootInjector.get(LifecycleService);
         if (lifecycleService.stage < LifecycleStages.Ready) {
             this._rootInjector.get(LifecycleService).stage = LifecycleStages.Ready;

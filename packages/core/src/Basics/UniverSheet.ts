@@ -3,7 +3,7 @@ import { Ctor, Dependency, IDisposable, Inject, Injector } from '@wendellhu/redi
 
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleService } from '../services/lifecycle/lifecycle.service';
+import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import { Disposable, toDisposable } from '../Shared/lifecycle';
 import { Workbook } from '../sheets/workbook';
@@ -15,7 +15,10 @@ import { IWorkbookConfig } from '../Types/Interfaces/IWorkbookData';
 export class UniverSheet extends Disposable implements IDisposable {
     private readonly _pluginStore = new PluginStore();
 
-    constructor(@Inject(Injector) private readonly _injector: Injector) {
+    constructor(
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(LifecycleInitializerService) private readonly _initService: LifecycleInitializerService
+    ) {
         super();
 
         this._initDependencies(_injector);
@@ -30,21 +33,25 @@ export class UniverSheet extends Disposable implements IDisposable {
                     .subscribe((stage) => {
                         if (stage === LifecycleStages.Starting) {
                             this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
+                            this._initService.initModulesOnStage(LifecycleStages.Starting);
                             return;
                         }
 
                         if (stage === LifecycleStages.Ready) {
                             this._pluginStore.forEachPlugin((p) => p.onReady());
+                            this._initService.initModulesOnStage(LifecycleStages.Ready);
                             return;
                         }
 
                         if (stage === LifecycleStages.Rendered) {
                             this._pluginStore.forEachPlugin((p) => p.onRendered());
+                            this._initService.initModulesOnStage(LifecycleStages.Rendered);
                             return;
                         }
 
                         if (stage === LifecycleStages.Steady) {
                             this._pluginStore.forEachPlugin((p) => p.onSteady());
+                            this._initService.initModulesOnStage(LifecycleStages.Steady);
                         }
                     })
             )

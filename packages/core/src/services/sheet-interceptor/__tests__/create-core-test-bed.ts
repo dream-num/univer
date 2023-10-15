@@ -55,8 +55,6 @@ export function createCoreTestBed(workbookConfig?: IWorkbookConfig, dependencies
             get = this._injector.get.bind(_injector);
         }
 
-        override onStarting(_injector: Injector): void {}
-
         override onDestroy(): void {
             get = undefined;
         }

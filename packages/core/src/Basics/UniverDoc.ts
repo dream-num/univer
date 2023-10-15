@@ -3,7 +3,7 @@ import { Ctor, Inject, Injector } from '@wendellhu/redi';
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleService } from '../services/lifecycle/lifecycle.service';
+import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { Disposable, toDisposable } from '../Shared/lifecycle';
 import { IDocumentData } from '../Types/Interfaces/IDocumentData';
 
@@ -13,12 +13,14 @@ import { IDocumentData } from '../Types/Interfaces/IDocumentData';
 export class UniverDoc extends Disposable {
     private readonly _pluginStore = new PluginStore();
 
-    constructor(@Inject(Injector) private readonly _injector: Injector) {
+    constructor(
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(LifecycleInitializerService) private readonly _initService: LifecycleInitializerService
+    ) {
         super();
     }
 
     init(): void {
-        // TODO@wzhudev: this life cycle service should be deprecated and moved to Univer class
         this.disposeWithMe(
             toDisposable(
                 this._injector
@@ -27,21 +29,24 @@ export class UniverDoc extends Disposable {
                     .subscribe((stage) => {
                         if (stage === LifecycleStages.Starting) {
                             this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
-                            return;
+                            this._initService.initModulesOnStage(LifecycleStages.Starting);
                         }
 
                         if (stage === LifecycleStages.Ready) {
                             this._pluginStore.forEachPlugin((p) => p.onReady());
+                            this._initService.initModulesOnStage(LifecycleStages.Ready);
                             return;
                         }
 
                         if (stage === LifecycleStages.Rendered) {
                             this._pluginStore.forEachPlugin((p) => p.onRendered());
+                            this._initService.initModulesOnStage(LifecycleStages.Rendered);
                             return;
                         }
 
                         if (stage === LifecycleStages.Steady) {
                             this._pluginStore.forEachPlugin((p) => p.onSteady());
+                            this._initService.initModulesOnStage(LifecycleStages.Steady);
                         }
                     })
             )

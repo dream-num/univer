@@ -1,4 +1,4 @@
-import { Ctor, Injector, Optional } from '@wendellhu/redi';
+import { Ctor, Injector } from '@wendellhu/redi';
 
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
@@ -13,12 +13,6 @@ export class UniverSlide extends Disposable {
     private readonly _injector: Injector;
 
     private readonly _pluginStore = new PluginStore();
-
-    constructor(@Optional(Injector) parentInjector: Injector) {
-        super();
-
-        this._injector = this._initDependencies(parentInjector);
-    }
 
     init(): void {
         this.disposeWithMe(

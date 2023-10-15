@@ -111,7 +111,7 @@ describe('Test row col menu items', () => {
         });
     }
 
-    async function selectColumn(columnStart: number, columnEnd: number): Prmoise<boolean> {
+    async function selectColumn(columnStart: number, columnEnd: number): Promise<boolean> {
         const currentService = get(ICurrentUniverService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();

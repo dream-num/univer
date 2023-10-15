@@ -6,8 +6,17 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../mutations/set-col-visible.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../mutations/set-row-visible.mutation';
-import { SetColHiddenCommand, SetSelectedColsVisibleCommand } from '../set-col-visible.command';
-import { SetRowHiddenCommand, SetSelectedRowsVisibleCommand } from '../set-row-visible.command';
+import { SetSelectionsOperation } from '../../operations/selection.operation';
+import {
+    SetColHiddenCommand,
+    SetSelectedColsVisibleCommand,
+    SetSpecificColsVisibleCommand,
+} from '../set-col-visible.command';
+import {
+    SetRowHiddenCommand,
+    SetSelectedRowsVisibleCommand,
+    SetSpecificRowsVisibleCommand,
+} from '../set-row-visible.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test row col hide/unhine commands', () => {
@@ -31,6 +40,9 @@ describe('Test row col hide/unhine commands', () => {
             SetSelectedColsVisibleCommand,
             SetRowVisibleMutation,
             SetColVisibleMutation,
+            SetSpecificColsVisibleCommand,
+            SetSpecificRowsVisibleCommand,
+            SetSelectionsOperation,
         ].forEach((command) => {
             commandService.registerCommand(command);
         });

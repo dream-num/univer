@@ -311,7 +311,7 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
         fontSize *= baselineOffset === BaselineOffset.SUBSCRIPT ? sbr : spr;
     }
 
-    const fontStringPure = `${italic} ${bold} ${fontSize}px ${fontFamilyResult}, ${DEFAULT_FONTFACE_PLANE} `;
+    const fontStringPure = `${italic} ${bold} ${fontSize}px ${fontFamilyResult}`;
 
     const fontString = `${fontStringPure}, ${DEFAULT_FONTFACE_PLANE} `;
 

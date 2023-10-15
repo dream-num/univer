@@ -12,7 +12,7 @@ export interface IEditorBridgeServiceParam {
     unitId?: string;
     sheetId?: string;
     primaryWithCoord: Nullable<ISelectionCellWithCoord>;
-    docSkeleton: DocumentSkeleton;
+    docSkeleton: Nullable<DocumentSkeleton>;
 }
 
 export interface IEditorBridgeService {

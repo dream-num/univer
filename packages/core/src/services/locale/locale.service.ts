@@ -47,7 +47,7 @@ export class LocaleService extends Disposable {
         this.disposeWithMe(toDisposable(() => this._locale$.complete()));
     }
 
-    t(key?: string): string | number {
+    t(key?: string): Nullable<string | number> {
         return this.get(key);
     }
 
@@ -75,16 +75,15 @@ export class LocaleService extends Disposable {
      * @param key - The string representing key in Locale data file
      * @returns Get the translation corresponding to the Key
      */
-    get(key: string | undefined): string | number {
+    get(key: string | undefined): Nullable<string | number> {
         const { locales, currentLocale } = this;
         if (!locales) {
             throw new Error();
         }
 
         if (key) {
-            return (getValue(locales[currentLocale], key) as string) || key;
+            return getValue(locales[currentLocale], key) as string;
         }
-        return String();
     }
 
     getObject<T>(key: string): T {

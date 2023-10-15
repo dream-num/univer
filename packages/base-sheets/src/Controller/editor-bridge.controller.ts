@@ -15,6 +15,7 @@ import {
     OnLifecycle,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
+import { Nullable } from 'vitest';
 
 import { getSheetObject } from '../Basics/component-tools';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
@@ -71,21 +72,19 @@ export class EditorBridgeController extends Disposable {
 
             const { startRow, startColumn } = primary;
 
-            const cell = skeleton.getCellData().getValue(startRow, startColumn);
-
             const primaryWithCoord = this._selectionTransformerShapeManager.convertCellRangeToInfo(primary);
 
-            if (cell == null || primaryWithCoord == null) {
+            if (primaryWithCoord == null) {
                 return;
             }
+
+            let documentSkeleton: Nullable<DocumentSkeleton> = null;
 
             const documentModel = skeleton.getCellModel(startRow, startColumn)?.documentModel;
 
-            if (documentModel == null) {
-                return;
+            if (documentModel != null) {
+                documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
             }
-
-            const documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
 
             this._editorBridgeService.setState({
                 primaryWithCoord,

@@ -139,12 +139,16 @@ function bootStrap(
     const root = createRoot(mountContainer);
     const ConnectedApp = connectInjector(App, injector);
     const desktopUIController = injector.get(IUIController) as IDesktopUIController;
+    const headerComponents = desktopUIController.getHeaderComponents();
+    const contentComponents = desktopUIController.getContentComponents();
     const footerComponents = desktopUIController.getFooterComponents();
     const sidebarComponents = desktopUIController.getSidebarComponents();
     root.render(
         <ConnectedApp
             {...options}
             onRendered={callback}
+            headerComponents={headerComponents}
+            contentComponents={contentComponents}
             footerComponents={footerComponents}
             sidebarComponents={sidebarComponents}
         />

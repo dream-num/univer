@@ -7,7 +7,7 @@ import styles from './index.module.less';
 
 interface ICellIEditorProps {}
 
-const HIDDEN_EDITOR_POSITION = -100;
+const HIDDEN_EDITOR_POSITION = -1000;
 
 const EDITOR_DEFAULT_POSITION = {
     width: 0,

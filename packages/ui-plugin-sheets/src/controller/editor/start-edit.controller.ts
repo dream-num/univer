@@ -70,14 +70,20 @@ export class StartEditController extends Disposable {
 
             const { document, scene, engine } = editorObject;
 
-            this._textSelectionRenderManager.changeRuntime(docSkeleton, scene);
+            // this._textSelectionRenderManager.changeRuntime(docSkeleton, scene);
 
-            this._textSelectionRenderManager.active(100, 100);
+            this._textSelectionRenderManager.active(-1000, -1000);
         });
     }
 
     private _initialStartEdit() {
         this._editorBridgeService.visible$.subscribe((state) => {
+            if (state.visible === false) {
+                this._cellEditorManagerService.setState({
+                    show: state.visible,
+                });
+                return;
+            }
             const param = this._editorBridgeService.getState();
             if (param == null) {
                 return;

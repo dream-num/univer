@@ -5,11 +5,11 @@ import { filter } from 'rxjs/operators';
 import { SHEET_UI_PLUGIN_NAME } from './Basics';
 import { SheetClipboardController } from './controller/clipboard/clipboard.controller';
 import { SheetContextMenuController } from './controller/contextmenu/contextmenu.controller';
+import { StartEditController } from './controller/editor/start-edit.controller';
 import { SheetUIController } from './controller/sheet-ui.controller';
 import { en } from './Locale';
-import { ICellEditorService } from './services/cell-editor/cell-editor.service';
-import { DesktopCellEditorService } from './services/cell-editor/cell-editor-desktop.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
+import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 import { ISheetBarService, SheetBarService } from './services/sheetbar/sheetbar.service';
 
 export class SheetUIPlugin extends Plugin {
@@ -32,14 +32,18 @@ export class SheetUIPlugin extends Plugin {
         (
             [
                 // services
-                [ICellEditorService, { useClass: DesktopCellEditorService }],
+                // [ICellEditorService, { useClass: DesktopCellEditorService }],
                 [ISheetClipboardService, { useClass: SheetClipboardService }],
                 [ISheetBarService, { useClass: SheetBarService }],
+                // [ITextSelectionRenderManager, { useClass: TextSelectionRenderManager }],
+                // [TextSelectionManagerService],
+                [ICellEditorManagerService, { useClass: CellEditorManagerService }],
 
                 // controllers
                 [SheetClipboardController],
                 [SheetContextMenuController],
                 [SheetUIController],
+                [StartEditController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

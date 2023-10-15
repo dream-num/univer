@@ -699,12 +699,12 @@ export function getFontCreateConfig(
 
         marginRight = 0,
         marginLeft = 0,
-        fontLocale,
+        localeService,
     } = sectionBreakConfig;
 
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
-    const fontStyle = getFontStyleString(textStyle, fontLocale);
+    const fontStyle = getFontStyleString(textStyle, localeService);
 
     const mixTextStyle: ITextStyle = {
         ...documentTextStyle,

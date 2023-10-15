@@ -12,6 +12,7 @@ import {
     ISize,
     ITextStyle,
     ITransformState,
+    LocaleService,
 } from '@univerjs/core';
 
 import {
@@ -80,7 +81,7 @@ export interface IMeasureTextCache {
 }
 
 export interface IDocsConfig extends IReferenceSource, IDocumentLayout {
-    fontLocale: IFontLocale;
+    localeService: LocaleService;
     documentTextStyle?: ITextStyle;
     headerTreeMap: Map<string, DocumentBodyModel>;
     footerTreeMap: Map<string, DocumentBodyModel>;

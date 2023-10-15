@@ -1,4 +1,4 @@
-import { createIdentifier, IAccessor, IDisposable, Inject, Injector, Optional, SkipSelf } from '@wendellhu/redi';
+import { createIdentifier, IAccessor, IDisposable, Inject, Injector } from '@wendellhu/redi';
 
 import { sequence } from '../../common/promise/sequence';
 import { toDisposable } from '../../Shared/lifecycle';
@@ -158,7 +158,6 @@ export class CommandService implements ICommandService {
     private _commandExecutingLevel = 0;
 
     constructor(
-        @SkipSelf() @Optional(ICommandService) private readonly _parentCommandService: CommandService,
         @Inject(Injector) private readonly _injector: Injector,
         @ILogService private readonly _log: ILogService
     ) {
@@ -178,10 +177,6 @@ export class CommandService implements ICommandService {
         id: string,
         callback: (params?: P) => ICommandInfo[][]
     ): IDisposable {
-        if (this._parentCommandService) {
-            return this._parentCommandService.onCommandWillExecute(id, callback);
-        }
-
         const set = !this._commandWillExecuteRegistry.has(id)
             ? (() => {
                   const newSet = new Set<(params?: P) => ICommandInfo[][]>();
@@ -201,10 +196,6 @@ export class CommandService implements ICommandService {
     }
 
     triggerCommandWillFire<P extends object = object>(id: string, params: P): ICommandInfo[][] {
-        if (this._parentCommandService) {
-            return this._parentCommandService.triggerCommandWillFire(id, params);
-        }
-
         if (!this._commandWillExecuteRegistry.has(id)) {
             return [];
         }
@@ -216,10 +207,6 @@ export class CommandService implements ICommandService {
     }
 
     onCommandExecuted(listener: (commandInfo: ICommandInfo) => void): IDisposable {
-        if (this._parentCommandService) {
-            return this._parentCommandService.onCommandExecuted(listener);
-        }
-
         if (this._commandExecutedListeners.indexOf(listener) === -1) {
             this._commandExecutedListeners.push(listener);
             return toDisposable(() => {
@@ -232,10 +219,6 @@ export class CommandService implements ICommandService {
     }
 
     async executeCommand<P extends object = object, R = boolean>(id: string, params?: P): Promise<R> {
-        if (this._parentCommandService) {
-            return this._parentCommandService.executeCommand(id, params);
-        }
-
         const item = this._commandRegistry.getCommand(id);
         if (item) {
             const command = item[0];
@@ -258,18 +241,10 @@ export class CommandService implements ICommandService {
     }
 
     private _registerCommand(command: ICommand, injector: Injector): IDisposable {
-        if (this._parentCommandService) {
-            return this._parentCommandService._registerCommand(command, injector);
-        }
-
         return this._commandRegistry.registerCommand(command, injector);
     }
 
     private _registerMultiCommand(command: ICommand, injector: Injector): IDisposable {
-        if (this._parentCommandService) {
-            return this._parentCommandService._registerMultiCommand(command, injector);
-        }
-
         // compose a multi command and register it
         const registry = this._commandRegistry.getCommand(command.id);
         let multiCommand: MultiCommand;

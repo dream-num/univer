@@ -14,6 +14,7 @@ import { DesktopLogService, ILogService } from '../services/log/log.service';
 import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
+import { GenName } from '../Shared/GenName';
 import { Workbook } from '../sheets/workbook';
 import { Slide } from '../Slides/Domain/SlideModel';
 import { LocaleType } from '../Types/Enum/LocaleType';
@@ -170,6 +171,7 @@ export class Univer {
             ],
             [LocaleService],
             [ThemeService],
+            [GenName],
             [LifecycleService],
             [LifecycleInitializerService],
             [ILogService, { useClass: DesktopLogService, lazy: true }],

@@ -1,9 +1,8 @@
-import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
+import { Ctor, Injector, Optional } from '@wendellhu/redi';
 
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
-import { GenName } from '../Shared';
 import { Disposable, toDisposable } from '../Shared/lifecycle';
 import { Slide } from '../Slides/Domain/SlideModel';
 
@@ -67,10 +66,5 @@ export class UniverSlide extends Disposable {
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
         const pluginInstance: Plugin = this._injector.createInstance(plugin as unknown as Ctor<any>, options);
         this._pluginStore.addPlugin(pluginInstance);
-    }
-
-    private _initDependencies(parentInjector?: Injector): Injector {
-        const dependencies: Dependency[] = [[GenName]];
-        return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 }

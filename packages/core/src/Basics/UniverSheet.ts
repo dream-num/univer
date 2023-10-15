@@ -5,7 +5,6 @@ import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
-import { GenName } from '../Shared/GenName';
 import { Disposable, toDisposable } from '../Shared/lifecycle';
 import { Workbook } from '../sheets/workbook';
 import { IWorkbookConfig } from '../Types/Interfaces/IWorkbookData';
@@ -77,7 +76,7 @@ export class UniverSheet extends Disposable implements IDisposable {
     }
 
     private _initDependencies(injector: Injector): void {
-        const dependencies: Dependency[] = [[GenName], [SheetInterceptorService]];
+        const dependencies: Dependency[] = [[SheetInterceptorService]];
 
         dependencies.forEach((d) => injector.add(d));
     }

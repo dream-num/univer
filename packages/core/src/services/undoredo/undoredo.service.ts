@@ -30,6 +30,11 @@ export interface IUndoRedoService {
     clearUndoRedo(URI: string): void;
 }
 
+export interface IUndoRedoCommandInfos {
+    undos: ICommandInfo[];
+    redos: ICommandInfo[];
+}
+
 export const IUndoRedoService = createIdentifier<IUndoRedoService>('univer.undo-redo.service');
 
 export interface IUndoRedoStatus {
@@ -244,8 +249,3 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
         return false;
     }
 })();
-
-export interface IUndoRedoCommandInfos {
-    redos: ICommandInfo[];
-    undos: ICommandInfo[];
-}

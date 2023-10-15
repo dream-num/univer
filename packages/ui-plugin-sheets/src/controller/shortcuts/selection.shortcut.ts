@@ -14,6 +14,7 @@ import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
 export const MoveSelectionDownShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
     id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN,
+    priority: 100,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.DOWN,
@@ -23,6 +24,7 @@ export const MoveSelectionDownShortcutItem: IShortcutItem<IMoveSelectionCommandP
 export const MoveSelectionUpShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
     id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_UP,
+    priority: 100,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.UP,
@@ -32,6 +34,7 @@ export const MoveSelectionUpShortcutItem: IShortcutItem<IMoveSelectionCommandPar
 export const MoveSelectionLeftShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
     id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT,
+    priority: 100,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.LEFT,
@@ -41,6 +44,7 @@ export const MoveSelectionLeftShortcutItem: IShortcutItem<IMoveSelectionCommandP
 export const MoveSelectionRightShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
     id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT,
+    priority: 100,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.RIGHT,
@@ -50,6 +54,7 @@ export const MoveSelectionRightShortcutItem: IShortcutItem<IMoveSelectionCommand
 export const MoveSelectionTabShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
     id: MoveSelectionCommand.id,
     binding: KeyCode.TAB,
+    priority: 100,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.RIGHT,
@@ -59,6 +64,7 @@ export const MoveSelectionTabShortcutItem: IShortcutItem<IMoveSelectionCommandPa
 export const MoveBackSelectionShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
     id: MoveSelectionCommand.id,
     binding: KeyCode.TAB | MetaKeys.SHIFT,
+    priority: 100,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
     staticParameters: {
         direction: Direction.LEFT,

@@ -16,6 +16,7 @@ import {
     ObjectArray,
     ObjectMatrix,
     sequenceExecute,
+    SheetInterceptorService,
     Tools,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
@@ -160,8 +161,10 @@ export const InsertRowCommand: ICommand = {
             addMergeParams
         );
 
-        // there should be a hook to update ranges of various features
-        // TODO@wzhudev: create RowColMutationService
+        // intercept the command execution to gether undo redo commands
+        const intercepted = accessor
+            .get(SheetInterceptorService)
+            .onCommandExecute({ id: InsertRowCommand.id, params: insertRowParams });
 
         const result = await sequenceExecute(
             [
@@ -169,6 +172,7 @@ export const InsertRowCommand: ICommand = {
                 { id: InsertRangeMutation.id, params: insertRangeMutationParams },
                 { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams }, // remove all merged cells
                 { id: AddWorksheetMergeMutation.id, params: addMergeParams }, // add all merged cells, TODO: can this be optimized?
+                ...intercepted.redos,
             ],
             commandService
         );
@@ -184,6 +188,7 @@ export const InsertRowCommand: ICommand = {
                                 { id: RemoveRowMutation.id, params: undoRowInsertionParams },
                                 { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
                                 { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeParams },
+                                ...intercepted.undos,
                             ],
                             commandService
                         )
@@ -196,6 +201,7 @@ export const InsertRowCommand: ICommand = {
                                 { id: InsertRangeMutation.id, params: insertRangeMutationParams },
                                 { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
                                 { id: AddWorksheetMergeMutation.id, params: addMergeParams },
+                                ...intercepted.redos,
                             ],
                             commandService
                         )

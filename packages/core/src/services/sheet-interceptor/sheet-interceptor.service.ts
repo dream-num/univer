@@ -6,8 +6,10 @@ import { Disposable, DisposableCollection, toDisposable } from '../../Shared/lif
 import { Workbook } from '../../sheets/workbook';
 import { Worksheet } from '../../sheets/worksheet';
 import { ICellData } from '../../Types/Interfaces/ICellData';
+import { ICommandInfo } from '../command/command.service';
 import { ICurrentUniverService } from '../current.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
+import { IUndoRedoCommandInfos } from '../undoredo/undoredo.service';
 
 /**
  * A helper to compose a certain type of interceptors.
@@ -28,7 +30,7 @@ export function compose(interceptors: ICellInterceptor[]) {
             }
 
             const interceptor = interceptors[i];
-            return interceptor.getCell(v, location, passThrough.bind(null, i + 1));
+            return interceptor.getCell!(v, location, passThrough.bind(null, i + 1));
         }
     };
 }
@@ -48,12 +50,16 @@ export interface ISheetLocation {
  */
 export interface ICellInterceptor {
     priority?: number;
-
     getCell(
         cell: Nullable<ICellData>,
         location: ISheetLocation,
         next: (v: Nullable<ICellData>) => Nullable<ICellData>
     ): Nullable<ICellData>;
+}
+
+export interface ICommandInterceptor {
+    priority?: number;
+    getMutations(command: ICommandInfo): IUndoRedoCommandInfos;
 }
 
 /**
@@ -64,6 +70,7 @@ export interface ICellInterceptor {
 @OnLifecycle(LifecycleStages.Starting, SheetInterceptorService)
 export class SheetInterceptorService extends Disposable {
     private _cellInterceptors: ICellInterceptor[] = [];
+    private _commandInterceptors: ICommandInterceptor[] = [];
 
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
@@ -87,17 +94,6 @@ export class SheetInterceptorService extends Disposable {
                 )
             )
         );
-
-        this.interceptCellContent({
-            priority: 100,
-            getCell(_, location, next): Nullable<ICellData> {
-                if (location.row === 0) {
-                    return next({ m: `I am intercepted value from row 0.` });
-                }
-
-                return next();
-            },
-        });
 
         // register default viewModel interceptor
         this.interceptCellContent({
@@ -129,14 +125,32 @@ export class SheetInterceptorService extends Disposable {
         this._cellInterceptors.push(interceptor);
         this._cellInterceptors = this._cellInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
-        return this.disposeWithMe(
-            toDisposable(() => {
-                const index = this._cellInterceptors.indexOf(interceptor);
-                if (index >= 0) {
-                    remove(this._cellInterceptors, interceptor);
-                }
-            })
-        );
+        return this.disposeWithMe(toDisposable(() => remove(this._cellInterceptors, interceptor)));
+    }
+
+    interceptCommand(interceptor: ICommandInterceptor): IDisposable {
+        if (this._commandInterceptors.includes(interceptor)) {
+            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
+        }
+
+        this._commandInterceptors.push(interceptor);
+        this._commandInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+        return this.disposeWithMe(toDisposable(() => remove(this._commandInterceptors, interceptor)));
+    }
+
+    /**
+     * When command is executing, call this method to gether undo redo mutations from upper features.
+     * @param command
+     * @returns
+     */
+    onCommandExecute(command: ICommandInfo): IUndoRedoCommandInfos {
+        const infos = this._commandInterceptors.map((i) => i.getMutations(command));
+
+        return {
+            undos: infos.map((i) => i.undos).flat(),
+            redos: infos.map((i) => i.redos).flat(),
+        };
     }
 
     private _interceptWorkbook(workbook: Workbook): void {
@@ -150,7 +164,7 @@ export class SheetInterceptorService extends Disposable {
                 const sheetDisposables = new DisposableCollection();
                 const cellInterceptorDisposable = viewModel.registerCellContentInterceptor({
                     getCell(row: number, col: number): Nullable<ICellData> {
-                        return compose(self._cellInterceptors)({
+                        return compose(self._cellInterceptors.filter((i) => !!i.getCell))({
                             workbookId,
                             worksheetId,
                             row,

@@ -110,7 +110,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         }
 
         const shouldTrigger = Array.from(shortcuts)
-            .sort((s1, s2) => (s1.priority ?? 0) - (s2.priority ?? 0))
+            .sort((s1, s2) => (s2.priority ?? 0) - (s1.priority ?? 0))
             .find(
                 (s) =>
                     s.preconditions?.({

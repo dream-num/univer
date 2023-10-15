@@ -32,7 +32,6 @@ import {
 } from '@univerjs/core';
 
 import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
-import { IFontLocale } from '../../Basics/Interfaces';
 import {
     fixLineWidthByScale,
     getCellByIndex,
@@ -247,7 +246,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         this._rowColumnSegment = this.getRowColumnSegment(bounds);
         this._dataMergeCache = mergeData && this._getMergeCells(mergeData, this._rowColumnSegment);
-        this._stylesCache = this._calculateStylesCache();
+        this._calculateStylesCache();
         // this._overflowCache = this._calculateOverflowCache();
         return this;
     }
@@ -716,6 +715,59 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
+    getCellModel(row: number, column: number) {
+        const cell = this._cellData.getValue(row, column);
+        const style = this._styles.getStyleByCell(cell);
+        if (!cell) {
+            return;
+        }
+        const content = cell.m || cell.v;
+
+        let documentModel: Nullable<DocumentModelSimple>;
+        let fontString = 'document';
+        const cellOtherConfig = this._getOtherStyle(style) as CellOtherConfig;
+        // const {
+        //     textRotation = { a: 0, v: BooleanNumber.FALSE },
+        //     horizontalAlign = HorizontalAlign.UNSPECIFIED,
+        //     verticalAlign = VerticalAlign.UNSPECIFIED,
+        //     wrapStrategy = WrapStrategy.UNSPECIFIED,
+        // }= CellOtherConfig;
+        const textRotation: ITextRotation = cellOtherConfig.textRotation || { a: 0, v: BooleanNumber.FALSE };
+        const horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || HorizontalAlign.UNSPECIFIED;
+        const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || VerticalAlign.UNSPECIFIED;
+        const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || WrapStrategy.UNSPECIFIED;
+        if (cell.p) {
+            const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
+            let centerAngle = 0;
+            let vertexAngle = angle;
+            if (isVertical === BooleanNumber.TRUE) {
+                centerAngle = DEFAULT_ROTATE_ANGLE;
+                vertexAngle = DEFAULT_ROTATE_ANGLE;
+            }
+            documentModel = this._updateRenderConfigAndHorizon(cell.p, horizontalAlign, {
+                horizontalAlign,
+                verticalAlign,
+                centerAngle,
+                vertexAngle,
+                wrapStrategy,
+            });
+        } else if (content) {
+            const textStyle = this._getFontFormat(style);
+            fontString = getFontStyleString(textStyle, this._localService).fontCache;
+
+            documentModel = this._getDocumentDataByStyle(content.toString(), textStyle, cellOtherConfig);
+        }
+
+        return {
+            documentModel,
+            fontString,
+            textRotation,
+            wrapStrategy,
+            verticalAlign,
+            horizontalAlign,
+        };
+    }
+
     /**
      *
      * @param rowHeightAccumulation Row layout information
@@ -1019,80 +1071,31 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     // eslint-disable-next-line max-lines-per-function
     private _calculateStylesCache() {
-        const cache: IStylesCache = {
-            background: {},
-            font: {},
-            border: new ObjectMatrix<BorderCache>(),
-        };
-
-        const fontLocale = this.getFontLocale();
+        this._resetCache();
 
         const dataMergeCache = this._dataMergeCache;
         const rowColumnSegment = this._rowColumnSegment;
         const columnWidthAccumulation = this.columnWidthAccumulation;
-        const styles = this._styles;
-        const cellData = this._cellData;
-
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
 
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                this.__setCellCache(
-                    r,
-                    c,
-                    {
-                        cache,
-                        styles,
-                        cellData,
-                        skipBackgroundAndBorder: false,
-                    },
-                    fontLocale
-                );
+                this._setCellCache(r, c, false);
             }
 
             // 针对溢出的情况计算文本长度，可视范围左侧列
             for (let c = 0; c < startColumn; c++) {
-                this.__setCellCache(
-                    r,
-                    c,
-                    {
-                        cache,
-                        styles,
-                        cellData,
-                        skipBackgroundAndBorder: true,
-                    },
-                    fontLocale
-                );
+                this._setCellCache(r, c, true);
             }
 
             // 针对溢出的情况计算文本长度，可视范围右侧列
             for (let c = endColumn + 1; c < columnWidthAccumulation.length; c++) {
-                this.__setCellCache(
-                    r,
-                    c,
-                    {
-                        cache,
-                        styles,
-                        cellData,
-                        skipBackgroundAndBorder: true,
-                    },
-                    fontLocale
-                );
+                this._setCellCache(r, c, true);
             }
         }
 
         for (const data of dataMergeCache) {
-            this.__setCellCache(
-                data.startRow,
-                data.startColumn,
-                {
-                    cache,
-                    styles,
-                    cellData,
-                    skipBackgroundAndBorder: false,
-                },
-                fontLocale
-            );
+            this._setCellCache(data.startRow, data.startColumn, false);
         }
 
         // dataMergeCache &&
@@ -1102,37 +1105,38 @@ export class SpreadsheetSkeleton extends Skeleton {
         //                 return true;
         //             }
 
-        //             this.__setCellCache(
+        //             this._setCellCache(
         //                 rowIndex,
         //                 columnIndex,
-        //                 {
-        //                     cache,
-        //                     styles,
-        //                     cellData,
-        //                     skipBackgroundAndBorder: false,
-        //                 },
-        //                 fontLocale
+        //                 false,
         //             );
         //         });
         //     });
-        return cache;
     }
 
-    // eslint-disable-next-line max-lines-per-function
-    private __setCellCache(r: number, c: number, props: ISetCellCache, fontLocale?: IFontLocale) {
-        const { cache, skipBackgroundAndBorder = false, styles, cellData } = props;
-        if (!cellData) {
+    private _resetCache() {
+        this._stylesCache = {
+            background: {},
+            font: {},
+            border: new ObjectMatrix<BorderCache>(),
+        };
+    }
+
+    private _setCellCache(r: number, c: number, skipBackgroundAndBorder: boolean) {
+        if (!this._cellData) {
             return true;
         }
-        const cell = cellData.getValue(r, c);
+        const cell = this._cellData.getValue(r, c);
         if (!cell) {
             return true;
         }
 
+        const cache = this._stylesCache;
+
         // style supports inline styles
         // const style = styles && styles.get(cell.s);
         // const style = getStyle(styles, cell);
-        const style = styles && styles.getStyleByCell(cell);
+        const style = this._styles.getStyleByCell(cell);
 
         if (!skipBackgroundAndBorder && style && style.bg && style.bg.rgb) {
             const rgb = style.bg.rgb;
@@ -1145,62 +1149,33 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         if (!skipBackgroundAndBorder && style && style.bd) {
-            this.___setBorderProps(r, c, BORDER_TYPE.TOP, style, cache);
-            this.___setBorderProps(r, c, BORDER_TYPE.BOTTOM, style, cache);
-            this.___setBorderProps(r, c, BORDER_TYPE.LEFT, style, cache);
-            this.___setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
+            this._setBorderProps(r, c, BORDER_TYPE.TOP, style, cache);
+            this._setBorderProps(r, c, BORDER_TYPE.BOTTOM, style, cache);
+            this._setBorderProps(r, c, BORDER_TYPE.LEFT, style, cache);
+            this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
         }
 
-        const content = cell.m || cell.v;
+        const modelObject = this.getCellModel(r, c);
 
-        let documentModel: Nullable<DocumentModelSimple>;
-        let fontString = 'document';
-        const cellOtherConfig = this._getOtherStyle(style) as CellOtherConfig;
-        // const {
-        //     textRotation = { a: 0, v: BooleanNumber.FALSE },
-        //     horizontalAlign = HorizontalAlign.UNSPECIFIED,
-        //     verticalAlign = VerticalAlign.UNSPECIFIED,
-        //     wrapStrategy = WrapStrategy.UNSPECIFIED,
-        // }= CellOtherConfig;
-        const textRotation: ITextRotation = cellOtherConfig.textRotation || { a: 0, v: BooleanNumber.FALSE };
-        const horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || HorizontalAlign.UNSPECIFIED;
-        const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || VerticalAlign.UNSPECIFIED;
-        const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || WrapStrategy.UNSPECIFIED;
-        if (cell.p) {
-            if (!cache.font![fontString]) {
-                cache.font![fontString] = new ObjectMatrix();
-            }
-            const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
-            let centerAngle = 0;
-            let vertexAngle = angle;
-            if (isVertical === BooleanNumber.TRUE) {
-                centerAngle = DEFAULT_ROTATE_ANGLE;
-                vertexAngle = DEFAULT_ROTATE_ANGLE;
-            }
-            documentModel = this._updateRenderConfigAndHorizon(cell.p, horizontalAlign, {
-                horizontalAlign,
-                verticalAlign,
-                centerAngle,
-                vertexAngle,
-                wrapStrategy,
-            });
-        } else if (content) {
-            const textStyle = this._getFontFormat(style);
-            fontString = getFontStyleString(textStyle, fontLocale).fontString;
-            if (!cache.font![fontString]) {
-                cache.font![fontString] = new ObjectMatrix();
-            }
+        if (modelObject == null) {
+            return;
+        }
 
-            documentModel = this._getDocumentDataByStyle(content.toString(), textStyle, cellOtherConfig);
+        const { documentModel, fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
+
+        if (!cache.font![fontString]) {
+            cache.font![fontString] = new ObjectMatrix();
         }
 
         const fontCache = cache.font![fontString];
 
         let { a: angle } = textRotation as ITextRotation;
+
         const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
         if (isVertical === BooleanNumber.TRUE) {
             angle = DEFAULT_ROTATE_ANGLE;
         }
+
         if (documentModel) {
             const documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
             if (angle === 0 || wrapStrategy !== WrapStrategy.WRAP) {
@@ -1213,7 +1188,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 verticalAlign,
                 horizontalAlign,
                 wrapStrategy,
-                content: content?.toString(),
+                // content: content?.toString(),
             });
         }
     }
@@ -1317,7 +1292,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return new DocumentModelSimple(documentData);
     }
 
-    private ___setBorderProps(r: number, c: number, type: BORDER_TYPE, style: IStyleData, cache: IStylesCache) {
+    private _setBorderProps(r: number, c: number, type: BORDER_TYPE, style: IStyleData, cache: IStylesCache) {
         const props: Nullable<IBorderStyleData> = style.bd?.[type];
         if (!props || !cache.border) {
             return true;

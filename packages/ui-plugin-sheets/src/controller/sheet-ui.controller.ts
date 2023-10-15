@@ -28,7 +28,7 @@ import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import { QuitCellEditorCommand } from '../services/cell-editor/cell-editor.command';
 import { RightMenuInput } from '../View/RightMenu/RightMenuInput';
 import { RightMenuItem } from '../View/RightMenu/RightMenuItem';
-import { RenderSheetFooter } from '../View/SheetContainer/SheetContainer';
+import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../View/SheetContainer/SheetContainer';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import {
     BackgroundColorSelectorMenuItemFactory,
@@ -247,7 +247,15 @@ export class SheetUIController extends Disposable {
         });
 
         this.disposeWithMe(
+            this._uiController.registerHeaderComponent(() => connectInjector(RenderSheetHeader, this._injector))
+        );
+
+        this.disposeWithMe(
             this._uiController.registerFooterComponent(() => connectInjector(RenderSheetFooter, this._injector))
+        );
+
+        this.disposeWithMe(
+            this._uiController.registerContentComponent(() => connectInjector(RenderSheetContent, this._injector))
         );
     }
 }

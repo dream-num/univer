@@ -12,7 +12,6 @@ import {
 } from '@univerjs/core';
 import { Dependency, Inject, Injector, SkipSelf } from '@wendellhu/redi';
 
-import { DOCS_CONFIG_EDITOR_UNIT_ID_KEY, DOCS_CONFIG_STANDALONE_KEY } from './Basics/docs-view-key';
 import {
     BreakLineCommand,
     CoverCommand,
@@ -49,11 +48,12 @@ import {
 import { DocCanvasView } from './View/doc-canvas-view';
 
 export interface IDocPluginConfig {
-    [DOCS_CONFIG_STANDALONE_KEY]?: boolean;
-    [DOCS_CONFIG_EDITOR_UNIT_ID_KEY]?: string;
+    hasScroll?: boolean;
 }
 
-const DEFAULT_DOCUMENT_PLUGIN_DATA = {};
+const DEFAULT_DOCUMENT_PLUGIN_DATA = {
+    hasScroll: true,
+};
 
 export class DocPlugin extends Plugin {
     static override type = PluginType.Doc;
@@ -179,10 +179,10 @@ export class DocPlugin extends Plugin {
         univerInjector.add([DocsViewManagerService]);
     }
 
-    private _markDocAsFocused() {
-        if (this._config.standalone) {
-            const c = this._currentUniverService.getCurrentUniverDocInstance();
-            this._currentUniverService.focusUniverInstance(c.getUnitId());
-        }
-    }
+    // private _markDocAsFocused() {
+    //     if (this._config.standalone) {
+    //         const c = this._currentUniverService.getCurrentUniverDocInstance();
+    //         this._currentUniverService.focusUniverInstance(c.getUnitId());
+    //     }
+    // }
 }

@@ -1,5 +1,9 @@
 import { DocPlugin } from '@univerjs/base-docs';
-import { DOCS_EDITOR_UNIT_ID_KEY, RenderEngine } from '@univerjs/base-render';
+import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    RenderEngine,
+} from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { greenTheme, UIPlugin } from '@univerjs/base-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
@@ -21,13 +25,10 @@ const univer = new Univer({
     locales,
 });
 
-const DOCS_EDITOR_SNAPSHOT = {
-    id: DOCS_EDITOR_UNIT_ID_KEY,
-    documentStyle: {},
-};
-
 // core plugins
-univer.registerPlugin(DocPlugin);
+univer.registerPlugin(DocPlugin, {
+    hasScroll: false,
+});
 univer.registerPlugin(DocUIPlugin);
 univer.registerPlugin(RenderEngine);
 univer.registerPlugin(UIPlugin, {
@@ -46,8 +47,17 @@ univer.registerPlugin(SheetUIPlugin);
 // univer.registerPlugin(ImportXlsxPlugin);
 // univer.registerPlugin(ImagePlugin);
 
-// create univer doc editor instance
-univer.createUniverDoc(DOCS_EDITOR_SNAPSHOT);
+// create univer doc normal editor instance
+univer.createUniverDoc({
+    id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    documentStyle: {},
+});
+
+// create univer doc formula bar editor instance
+univer.createUniverDoc({
+    id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    documentStyle: {},
+});
 
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);

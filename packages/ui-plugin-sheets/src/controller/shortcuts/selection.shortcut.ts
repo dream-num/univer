@@ -189,7 +189,7 @@ export const SelectAllShortcutItem: IShortcutItem<ISelectAllCommandParams> = {
     id: SelectAllCommand.id,
     binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) =>
-        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(SHEET_EDITOR_ACTIVATED),
+        contextService.getContextValue(FOCUSING_SHEET) && !contextService.matchContextValue(SHEET_EDITOR_ACTIVATED),
     staticParameters: {
         expandToGapFirst: true,
         loop: true,

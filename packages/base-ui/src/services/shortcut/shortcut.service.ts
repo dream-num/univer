@@ -12,7 +12,7 @@ export interface IShortcutItem<P extends object = object> {
 
     priority?: number;
     /** A callback that will be triggered to examine if the shortcut should be invoked. */
-    preconditions?: (contextService: Pick<IContextService, 'getContextValue'>) => boolean;
+    preconditions?: (contextService: Pick<IContextService, 'getContextValue' | 'matchContextValue'>) => boolean;
 
     /** A command can be bound to several bindings, with different static parameters perhaps. */
     binding: number;
@@ -115,6 +115,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
                 (s) =>
                     s.preconditions?.({
                         getContextValue: this._contextService.getContextValue.bind(this._contextService),
+                        matchContextValue: this._contextService.matchContextValue.bind(this._contextService),
                     }) ?? true
             );
         if (shouldTrigger) {

@@ -125,5 +125,10 @@ export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SetSelectionsOperation } from './commands/operations/selection.operation';
 export { SetZoomRatioOperation as SetZoomRatioMutation } from './commands/operations/set-zoom-ratio.operation';
 export * from './Locale';
+export {
+    EditorBridgeService,
+    IEditorBridgeService,
+    type IEditorBridgeServiceVisibleParam,
+} from './services/editor-bridge.service';
 
 // #endregion

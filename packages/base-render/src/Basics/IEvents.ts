@@ -81,6 +81,10 @@ export enum DeviceInputEventType {
     PointerDown,
     /** PointerUp */
     PointerUp,
+
+    Dblclick,
+
+    Keyboard,
 }
 
 /**

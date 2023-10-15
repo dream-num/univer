@@ -62,7 +62,7 @@ export function dealWidthParagraph(
 
         lists,
         drawings = {},
-        fontLocale,
+        localeService,
     } = sectionBreakConfig;
 
     const { endIndex, startIndex, content = '', blocks = [] } = paragraphNode;
@@ -114,7 +114,7 @@ export function dealWidthParagraph(
     };
 
     const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有level的缓存
-    const bulletSkeleton = dealWidthBullet(bullet, lists, listLevelAncestors, fontLocale); // 生成bullet
+    const bulletSkeleton = dealWidthBullet(bullet, lists, listLevelAncestors, localeService); // 生成bullet
     _updateListLevelAncestors(bullet, bulletSkeleton, skeListLevel); // 更新最新的level缓存列表
     paragraphConfig.bulletSkeleton = bulletSkeleton;
 
@@ -164,7 +164,7 @@ export function dealWidthParagraph(
                         sectionBreakConfig,
                         allPages,
                         paragraphConfig,
-                        fontLocale
+                        localeService
                     );
                 }
             }

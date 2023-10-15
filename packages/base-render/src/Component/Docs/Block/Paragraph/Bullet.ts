@@ -1,8 +1,7 @@
-import { IBullet, ILists, INestingLevel, ITextStyle, Nullable } from '@univerjs/core';
+import { IBullet, ILists, INestingLevel, ITextStyle, LocaleService, Nullable } from '@univerjs/core';
 
 import { FontCache } from '../../../../Basics/FontCache';
 import { IDocumentSkeletonBullet } from '../../../../Basics/IDocumentSkeletonCached';
-import { IFontLocale } from '../../../../Basics/Interfaces';
 import { getFontStyleString } from '../../../../Basics/Tools';
 import { getBulletOrderedSymbol } from './Bullet.Ruler';
 
@@ -10,7 +9,7 @@ export function dealWidthBullet(
     bullet?: IBullet,
     lists?: ILists,
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
-    fontLocale?: IFontLocale
+    localeService?: LocaleService
 ): IDocumentSkeletonBullet | undefined {
     if (!bullet || !lists) {
         return;
@@ -21,30 +20,37 @@ export function dealWidthBullet(
     const list = lists[listId];
 
     if (!list || !list.nestingLevel) {
-        return getDefaultBulletSke(listId, listLevelAncestors?.[nestingLevel]?.startIndexItem, fontLocale);
+        return getDefaultBulletSke(listId, listLevelAncestors?.[nestingLevel]?.startIndexItem, localeService);
     }
 
     const nesting = list.nestingLevel[nestingLevel];
 
     if (!nesting) {
-        return getDefaultBulletSke(listId, listLevelAncestors?.[nestingLevel]?.startIndexItem, fontLocale);
+        return getDefaultBulletSke(listId, listLevelAncestors?.[nestingLevel]?.startIndexItem, localeService);
     }
 
-    const bulletSke = _getBulletSke(listId, nestingLevel, list.nestingLevel, listLevelAncestors, textStyle, fontLocale);
+    const bulletSke = _getBulletSke(
+        listId,
+        nestingLevel,
+        list.nestingLevel,
+        listLevelAncestors,
+        textStyle,
+        localeService
+    );
     return bulletSke;
 }
 
 export function getDefaultBulletSke(
     listId: string,
     startIndex: number = 1,
-    fontLocale?: IFontLocale
+    localeService?: LocaleService
 ): IDocumentSkeletonBullet {
     return {
         listId,
         symbol: '\u25CF', // symbol 列表的内容
         ts: {
-            ff: fontLocale?.fontList[0] || 'Arial',
-            fs: fontLocale?.defaultFontSize || 9,
+            ff: (localeService?.get('defaultFont') || 'Arial') as string,
+            fs: (localeService?.get('defaultFontSize') || 9) as number,
         }, // 文字样式
         startIndexItem: startIndex,
         bBox: {
@@ -71,7 +77,7 @@ function _getBulletSke(
     nestings: INestingLevel[],
     listLevelAncestors?: Array<Nullable<IDocumentSkeletonBullet>>,
     textStyleConfig?: ITextStyle,
-    fontLocale?: IFontLocale
+    localeService?: LocaleService
 ): IDocumentSkeletonBullet {
     const nesting = nestings[nestingLevel];
     const {
@@ -88,7 +94,7 @@ function _getBulletSke(
 
     const textStyle = { ...textStyleConfig, ...textStyleFirst };
 
-    const fontStyle = getFontStyleString(textStyle, fontLocale); // 获得canvas.font格式的字体样式
+    const fontStyle = getFontStyleString(textStyle, localeService); // 获得canvas.font格式的字体样式
 
     let symbolContent: string;
     if (glyphSymbol) {

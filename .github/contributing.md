@@ -4,7 +4,7 @@
 
 ### Install dependencies
 
-Univer requires Node.js >= 16.20.0. We recommend using nvm or fnm to switch between different versions of Node.js.
+Univer requires Node.js >= 18.17.0. We recommend using nvm or fnm to switch between different versions of Node.js.
 
 ```shell
 git clone http://github.com/dream-num/univer
@@ -17,30 +17,7 @@ npm i -g pnpm
 pnmp install
 
 # start Univer sheet
-npm run start:sheet
-```
-
-### Command
-
-Execute a command in a subpackage
-
-```shell
-pnpm run --filter  [package name] [command]
-```
-
-For example, start the `dev` development mode of the `packages/sheets-plugin-sort` project
-
-```shell
-pnpm run --filter @univerjs/sheets-plugin-sort dev
-
-```
-
-### Clean
-
-If you encounter any npm installation problems, please try one-click reinstallation of dependencies first
-
-```shell
-npm run clean
+npm run dev:sheet
 ```
 
 ### Plugin development

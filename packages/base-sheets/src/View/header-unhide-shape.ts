@@ -24,7 +24,7 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
     private _hovered = true;
     private _hasPrevious = true;
     private _hasNext = true;
-    private _unhideType: HeaderUnhideShapeType;
+    private _unhideType!: HeaderUnhideShapeType;
 
     constructor(key?: string, props?: T, onClick?: () => void) {
         super(key, props);

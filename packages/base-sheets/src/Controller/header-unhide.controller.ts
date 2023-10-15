@@ -42,8 +42,6 @@ const RENDER_COMMANDS: string[] = [
  */
 @OnLifecycle(LifecycleStages.Rendered, HeaderUnhideController)
 export class HeaderUnhideController extends RxDisposable {
-    private _unhideShape: HeaderUnhideShape;
-
     private _shapes = new Map<string, { cols: HeaderUnhideShape[]; rows: HeaderUnhideShape[] }>();
 
     // It should support several workbooks & worksheet.

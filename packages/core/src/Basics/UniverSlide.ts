@@ -1,12 +1,11 @@
 import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
 
-import { ISlideData, Slide } from '..';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
-import { CommandService, ICommandService } from '../services/command/command.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
+import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { GenName } from '../Shared';
 import { Disposable, toDisposable } from '../Shared/lifecycle';
+import { Slide } from '../Slides/Domain/SlideModel';
 
 /**
  * Externally provided UniverSlide root instance
@@ -20,15 +19,6 @@ export class UniverSlide extends Disposable {
         super();
 
         this._injector = this._initDependencies(parentInjector);
-        // this._slideModel = this._injector.createInstance(SlideModel, UniverSlideData);
-
-        // this._lifecycleService.lifecycle$.subscribe((stage) => {
-        //     if (stage === LifecycleStages.Rendered) {
-        //         this._pluginStore.forEachPlugin((p) => p.onRendered());
-        //     }
-        // });
-
-        // this._injector.get(LifecycleInitializerService).start();
     }
 
     init(): void {
@@ -59,8 +49,6 @@ export class UniverSlide extends Disposable {
                     })
             )
         );
-
-        this._injector.get(LifecycleInitializerService).start();
     }
 
     createSlide(data: Partial<ISlideData>): Slide {
@@ -82,11 +70,7 @@ export class UniverSlide extends Disposable {
     }
 
     private _initDependencies(parentInjector?: Injector): Injector {
-        const dependencies: Dependency[] = [
-            [GenName],
-            [LifecycleInitializerService],
-            [ICommandService, { useClass: CommandService }],
-        ];
+        const dependencies: Dependency[] = [[GenName]];
         return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 }

@@ -8,7 +8,7 @@ import { ConfigService, IConfigService } from '../services/config/config.service
 import { ContextService, IContextService } from '../services/context/context.service';
 import { CurrentUniverService, ICurrentUniverService } from '../services/current.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleService } from '../services/lifecycle/lifecycle.service';
+import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { LocaleService } from '../services/locale/locale.service';
 import { DesktopLogService, ILogService } from '../services/log/log.service';
 import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
@@ -171,6 +171,7 @@ export class Univer {
             [LocaleService],
             [ThemeService],
             [LifecycleService],
+            [LifecycleInitializerService],
             [ILogService, { useClass: DesktopLogService, lazy: true }],
             [ICommandService, { useClass: CommandService, lazy: true }],
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
@@ -181,6 +182,8 @@ export class Univer {
     }
 
     private _tryProgressToReady(): void {
+        this._rootInjector.get(LifecycleInitializerService).start();
+
         const lifecycleService = this._rootInjector.get(LifecycleService);
         if (lifecycleService.stage < LifecycleStages.Ready) {
             this._rootInjector.get(LifecycleService).stage = LifecycleStages.Ready;

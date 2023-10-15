@@ -1,27 +1,24 @@
-import { Ctor, Dependency, Injector, Optional } from '@wendellhu/redi';
+import { Ctor, Inject, Injector } from '@wendellhu/redi';
 
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
-import { CommandService, ICommandService } from '../services/command/command.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
+import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { Disposable, toDisposable } from '../Shared/lifecycle';
 import { IDocumentData } from '../Types/Interfaces/IDocumentData';
+
 /**
  * Externally provided UniverDoc root instance
  */
 export class UniverDoc extends Disposable {
     private readonly _pluginStore = new PluginStore();
 
-    private readonly _injector: Injector;
-
-    constructor(@Optional(Injector) _injector: Injector) {
+    constructor(@Inject(Injector) private readonly _injector: Injector) {
         super();
-
-        this._injector = this._initDependencies(_injector);
     }
 
     init(): void {
+        // TODO@wzhudev: this life cycle service should be deprecated and moved to Univer class
         this.disposeWithMe(
             toDisposable(
                 this._injector
@@ -49,8 +46,6 @@ export class UniverDoc extends Disposable {
                     })
             )
         );
-
-        this._injector.get(LifecycleInitializerService).start();
     }
 
     createDoc(docData: Partial<IDocumentData>): DocumentModel {
@@ -61,13 +56,5 @@ export class UniverDoc extends Disposable {
         const pluginInstance: Plugin = this._injector.createInstance(pluginCtor as unknown as Ctor<any>, options);
         pluginInstance.onStarting(this._injector);
         this._pluginStore.addPlugin(pluginInstance);
-    }
-
-    private _initDependencies(parentInjector?: Injector): Injector {
-        const dependencies: Dependency[] = [
-            [ICommandService, { useClass: CommandService }],
-            [LifecycleInitializerService],
-        ];
-        return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
     }
 }

@@ -1,5 +1,5 @@
 import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/base-render';
-import { DesktopPlatformService, IPlatformService, IShortcutService } from '@univerjs/base-ui';
+import { IShortcutService } from '@univerjs/base-ui';
 import {
     ICommand,
     ICommandService,
@@ -10,7 +10,7 @@ import {
     PLUGIN_NAMES,
     PluginType,
 } from '@univerjs/core';
-import { Dependency, Inject, Injector, SkipSelf } from '@wendellhu/redi';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { DOCS_CONFIG_EDITOR_UNIT_ID_KEY, DOCS_CONFIG_STANDALONE_KEY } from './Basics/docs-view-key';
 import {
@@ -62,7 +62,6 @@ export class DocPlugin extends Plugin {
 
     constructor(
         config: Partial<IDocPluginConfig> = {},
-        @SkipSelf() @Inject(Injector) _univerInjector: Injector,
         @Inject(Injector) override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IConfigService private readonly _configService: IConfigService,
@@ -74,7 +73,7 @@ export class DocPlugin extends Plugin {
 
         // this.initialConfig(config);
 
-        this._initializeDependencies(_injector, _univerInjector);
+        this._initializeDependencies(_injector);
 
         this.initializeCommands();
     }
@@ -142,7 +141,7 @@ export class DocPlugin extends Plugin {
 
     override onDestroy(): void {}
 
-    private _initializeDependencies(docInjector: Injector, univerInjector: Injector) {
+    private _initializeDependencies(docInjector: Injector) {
         (
             [
                 // [
@@ -153,7 +152,6 @@ export class DocPlugin extends Plugin {
                 [DocCanvasView],
 
                 // services
-                [IPlatformService, { useClass: DesktopPlatformService }],
                 [DocSkeletonManagerService],
                 [
                     ITextSelectionRenderManager,
@@ -162,6 +160,7 @@ export class DocPlugin extends Plugin {
                     },
                 ],
                 [TextSelectionManagerService],
+                [DocsViewManagerService],
 
                 // controllers
                 [DocRenderController],
@@ -174,9 +173,6 @@ export class DocPlugin extends Plugin {
                 [MoveCursorController],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
-
-        // add docs view manager to univer-level injector
-        univerInjector.add([DocsViewManagerService]);
     }
 
     private _markDocAsFocused() {

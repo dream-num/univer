@@ -8,12 +8,13 @@ import { ConfigService, IConfigService } from '../services/config/config.service
 import { ContextService, IContextService } from '../services/context/context.service';
 import { CurrentUniverService, ICurrentUniverService } from '../services/current.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleService } from '../services/lifecycle/lifecycle.service';
+import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { LocaleService } from '../services/locale/locale.service';
 import { DesktopLogService, ILogService } from '../services/log/log.service';
 import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
+import { GenName } from '../Shared/GenName';
 import { Workbook } from '../sheets/workbook';
 import { Slide } from '../Slides/Domain/SlideModel';
 import { LocaleType } from '../Types/Enum/LocaleType';
@@ -93,6 +94,7 @@ export class Univer {
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Sheet)
                 .forEach((p) => this._univerSheet!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
+            this._tryStart();
             this._univerSheet.init();
             addSheet();
 
@@ -117,6 +119,7 @@ export class Univer {
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Doc)
                 .forEach((p) => this._univerDoc!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
+            this._tryStart();
             this._univerDoc.init();
             addDoc();
 
@@ -141,6 +144,7 @@ export class Univer {
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Slide)
                 .forEach((p) => this._univerSlide!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
+            this._tryStart();
             this._univerSlide.init();
             addSlide();
 
@@ -170,7 +174,9 @@ export class Univer {
             ],
             [LocaleService],
             [ThemeService],
+            [GenName],
             [LifecycleService],
+            [LifecycleInitializerService],
             [ILogService, { useClass: DesktopLogService, lazy: true }],
             [ICommandService, { useClass: CommandService, lazy: true }],
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
@@ -178,6 +184,10 @@ export class Univer {
             [IConfigService, { useClass: ConfigService }],
             [IContextService, { useClass: ContextService }],
         ]);
+    }
+
+    private _tryStart(): void {
+        this._rootInjector.get(LifecycleInitializerService).start();
     }
 
     private _tryProgressToReady(): void {

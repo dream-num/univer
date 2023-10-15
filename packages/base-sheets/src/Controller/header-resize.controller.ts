@@ -100,7 +100,7 @@ export class HeaderResizeController extends Disposable {
     private _initialize() {
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
-            throw new Error('sheetObject is null');
+            return;
         }
 
         const { scene } = sheetObject;

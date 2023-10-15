@@ -2,11 +2,9 @@
 import { Ctor, Dependency, IDisposable, Inject, Injector } from '@wendellhu/redi';
 
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
-import { CommandService, ICommandService } from '../services/command/command.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
-import { GenName } from '../Shared/GenName';
 import { Disposable, toDisposable } from '../Shared/lifecycle';
 import { Workbook } from '../sheets/workbook';
 import { IWorkbookConfig } from '../Types/Interfaces/IWorkbookData';
@@ -15,14 +13,15 @@ import { IWorkbookConfig } from '../Types/Interfaces/IWorkbookData';
  * Externally provided UniverSheet root instance
  */
 export class UniverSheet extends Disposable implements IDisposable {
-    private readonly _injector: Injector;
-
     private readonly _pluginStore = new PluginStore();
 
-    constructor(@Inject(Injector) parentInjector: Injector) {
+    constructor(
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(LifecycleInitializerService) private readonly _initService: LifecycleInitializerService
+    ) {
         super();
 
-        this._injector = this._initDependencies(parentInjector);
+        this._initDependencies(_injector);
     }
 
     init(): void {
@@ -34,27 +33,29 @@ export class UniverSheet extends Disposable implements IDisposable {
                     .subscribe((stage) => {
                         if (stage === LifecycleStages.Starting) {
                             this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
+                            this._initService.initModulesOnStage(LifecycleStages.Starting);
                             return;
                         }
 
                         if (stage === LifecycleStages.Ready) {
                             this._pluginStore.forEachPlugin((p) => p.onReady());
+                            this._initService.initModulesOnStage(LifecycleStages.Ready);
                             return;
                         }
 
                         if (stage === LifecycleStages.Rendered) {
                             this._pluginStore.forEachPlugin((p) => p.onRendered());
+                            this._initService.initModulesOnStage(LifecycleStages.Rendered);
                             return;
                         }
 
                         if (stage === LifecycleStages.Steady) {
                             this._pluginStore.forEachPlugin((p) => p.onSteady());
+                            this._initService.initModulesOnStage(LifecycleStages.Steady);
                         }
                     })
             )
         );
-
-        this._injector.get(LifecycleInitializerService).start();
     }
 
     createSheet(workbookConfig: Partial<IWorkbookConfig>): Workbook {
@@ -81,19 +82,9 @@ export class UniverSheet extends Disposable implements IDisposable {
         this._pluginStore.addPlugin(pluginInstance);
     }
 
-    private _initDependencies(parentInjector?: Injector): Injector {
-        const dependencies: Dependency[] = [
-            [GenName],
-            [LifecycleInitializerService],
-            [SheetInterceptorService],
-            [
-                ICommandService,
-                {
-                    useClass: CommandService,
-                },
-            ],
-        ];
+    private _initDependencies(injector: Injector): void {
+        const dependencies: Dependency[] = [[SheetInterceptorService]];
 
-        return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
+        dependencies.forEach((d) => injector.add(d));
     }
 }

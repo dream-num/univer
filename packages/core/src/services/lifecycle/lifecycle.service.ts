@@ -58,6 +58,8 @@ export class LifecycleService extends Disposable {
 }
 
 export class LifecycleInitializerService extends Disposable {
+    private _started = false;
+
     constructor(
         @Inject(LifecycleService) private _lifecycleService: LifecycleService,
         @Inject(Injector) private readonly _injector: Injector
@@ -66,14 +68,19 @@ export class LifecycleInitializerService extends Disposable {
     }
 
     start(): void {
+        if (this._started) {
+            return;
+        }
+
+        this._started = true;
         this.disposeWithMe(
             toDisposable(
-                this._lifecycleService.subscribeWithPrevious().subscribe((stage) => this._initModulesOnStage(stage))
+                this._lifecycleService.subscribeWithPrevious().subscribe((stage) => this.initModulesOnStage(stage))
             )
         );
     }
 
-    private _initModulesOnStage(stage: LifecycleStages): void {
+    initModulesOnStage(stage: LifecycleStages): void {
         const modules = LifecycleToModules.get(stage);
         modules?.forEach((m) => {
             if (this._injector.has(m)) {

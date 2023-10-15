@@ -33,14 +33,13 @@ export class ColumnManager {
         return col.hd !== BooleanNumber.TRUE;
     }
 
-    getHiddenCols(): IRange[] {
-        const len = this._columnData.getLength();
+    getHiddenCols(start: number = 0, end: number = this._columnData.getLength() - 1): IRange[] {
         const hiddenCols: IRange[] = [];
 
         let inHiddenRange = false;
         let startColumn = -1;
 
-        for (let i = 0; i < len; i++) {
+        for (let i = start; i <= end; i++) {
             const visible = this.getColVisible(i);
             if (inHiddenRange && visible) {
                 inHiddenRange = false;
@@ -62,7 +61,7 @@ export class ColumnManager {
                 startRow: 0,
                 endRow: 0,
                 startColumn,
-                endColumn: len - 1,
+                endColumn: end,
                 rangeType: RANGE_TYPE.COLUMN,
             });
         }

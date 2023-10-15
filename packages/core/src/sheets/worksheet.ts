@@ -373,16 +373,22 @@ export class Worksheet {
         return this.getRowManager().getRowVisible(row);
     }
 
-    getHiddenRows(): IRange[] {
-        return this._rowManager.getHiddenRows();
+    getHiddenRows(start?: number, end?: number): IRange[] {
+        const lastColumn = this.getMaxColumns() - 1;
+        const ranges = this._rowManager.getHiddenRows(start, end);
+        ranges.forEach((range) => (range.endColumn = lastColumn));
+        return ranges;
     }
 
     getColVisible(col: number): boolean {
         return this._columnManager.getColVisible(col);
     }
 
-    getHiddenCols(): IRange[] {
-        return this._columnManager.getHiddenCols();
+    getHiddenCols(start?: number, end?: number): IRange[] {
+        const lastRow = this.getMaxRows() - 1;
+        const ranges = this._columnManager.getHiddenCols(start, end);
+        ranges.forEach((range) => (range.endRow = lastRow));
+        return ranges;
     }
 
     /**

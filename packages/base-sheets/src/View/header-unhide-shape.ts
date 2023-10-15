@@ -66,21 +66,22 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
     }
 
     private _drawOnRow(ctx: CanvasRenderingContext2D): void {
-        // TODO: draw with a polygon
         if (this._hovered) {
-            // should draw a bordered background
-            Rect.drawWith(ctx, {
-                width: this._size,
-                height: this._size,
-                stroke: HEADER_MENU_SHAPE_TRIANGLE_FILL,
-                fill: HEADER_MENU_BACKGROUND_COLOR,
-            });
-            Rect.drawWith(ctx, {
-                width: this._size,
-                height: 2 * this._size,
-                stroke: HEADER_MENU_SHAPE_TRIANGLE_FILL,
-                fill: HEADER_MENU_BACKGROUND_COLOR,
-            });
+            if (!this._hasNext || !this._hasPrevious) {
+                Rect.drawWith(ctx, {
+                    width: this._size,
+                    height: this._size,
+                    stroke: HEADER_MENU_SHAPE_TRIANGLE_FILL,
+                    fill: HEADER_MENU_BACKGROUND_COLOR,
+                });
+            } else {
+                Rect.drawWith(ctx, {
+                    width: this._size,
+                    height: 2 * this._size,
+                    stroke: HEADER_MENU_SHAPE_TRIANGLE_FILL,
+                    fill: HEADER_MENU_BACKGROUND_COLOR,
+                });
+            }
         }
 
         const iconSize = this._size * 0.5 * this._iconRatio;
@@ -102,12 +103,13 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
         }
 
         if (this._hasNext) {
+            const offset = this._hasPrevious ? 3 : 1;
             RegularPolygon.drawWith(ctx, {
                 pointsGroup: [
                     [
-                        { x: this._size / 2, y: (this._size * 3) / 2 + left },
-                        { x: this._size / 2 - left, y: (this._size * 3) / 2 - top },
-                        { x: this._size / 2 + left, y: (this._size * 3) / 2 - top },
+                        { x: this._size / 2, y: (this._size * offset) / 2 + left },
+                        { x: this._size / 2 - left, y: (this._size * offset) / 2 - top },
+                        { x: this._size / 2 + left, y: (this._size * offset) / 2 - top },
                     ],
                 ],
                 fill: HEADER_MENU_SHAPE_TRIANGLE_FILL,
@@ -121,18 +123,21 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
      */
     private _drawOnCol(ctx: CanvasRenderingContext2D): void {
         if (this._hovered) {
-            // should draw a bordered background
-            Rect.drawWith(ctx, {
-                left: -this._size,
-                width: this._size,
-                height: this._size,
-                stroke: HEADER_MENU_SHAPE_TRIANGLE_FILL,
-            });
-            Rect.drawWith(ctx, {
-                width: 2 * this._size,
-                height: this._size,
-                stroke: HEADER_MENU_SHAPE_TRIANGLE_FILL,
-            });
+            if (!this._hasNext || !this._hasPrevious) {
+                Rect.drawWith(ctx, {
+                    width: this._size,
+                    height: this._size,
+                    stroke: HEADER_MENU_SHAPE_TRIANGLE_FILL,
+                    fill: HEADER_MENU_BACKGROUND_COLOR,
+                });
+            } else {
+                Rect.drawWith(ctx, {
+                    width: 2 * this._size,
+                    height: this._size,
+                    stroke: HEADER_MENU_SHAPE_TRIANGLE_FILL,
+                    fill: HEADER_MENU_BACKGROUND_COLOR,
+                });
+            }
         }
 
         const iconSize = this._size * 0.5 * this._iconRatio;
@@ -144,9 +149,9 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
             RegularPolygon.drawWith(ctx, {
                 pointsGroup: [
                     [
-                        { x: -top - this._size / 2, y: this._size / 2 },
-                        { x: -this._size / 2 + left, y: this._size / 2 - left },
-                        { x: -this._size / 2 + left, y: this._size / 2 + left },
+                        { x: -top + this._size / 2, y: this._size / 2 },
+                        { x: this._size / 2 + left, y: this._size / 2 - left },
+                        { x: this._size / 2 + left, y: this._size / 2 + left },
                     ],
                 ],
                 fill: HEADER_MENU_SHAPE_TRIANGLE_FILL,
@@ -154,12 +159,13 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
         }
 
         if (this._hasNext) {
+            const offset = this._hasPrevious ? 3 : 1;
             RegularPolygon.drawWith(ctx, {
                 pointsGroup: [
                     [
-                        { x: top + this._size / 2, y: this._size / 2 },
-                        { x: -left + this._size / 2, y: this._size / 2 - left },
-                        { x: -left + this._size / 2, y: this._size / 2 + left },
+                        { x: top + (this._size * offset) / 2, y: this._size / 2 },
+                        { x: -left + (this._size * offset) / 2, y: this._size / 2 - left },
+                        { x: -left + (this._size * offset) / 2, y: this._size / 2 + left },
                     ],
                 ],
                 fill: HEADER_MENU_SHAPE_TRIANGLE_FILL,

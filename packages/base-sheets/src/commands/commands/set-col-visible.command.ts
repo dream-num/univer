@@ -5,11 +5,13 @@ import {
     ICurrentUniverService,
     IRange,
     IUndoRedoService,
+    Nullable,
     RANGE_TYPE,
+    sequenceExecute,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
 import {
     ISetColHiddenMutationParams,
     ISetColVisibleMutationParams,
@@ -18,7 +20,8 @@ import {
     SetColVisibleMutation,
     SetColVisibleUndoMutationFactory,
 } from '../mutations/set-col-visible.mutation';
-import { ISetSpecificRowsVisibleCommandParams, SetSpecificRowsVisibleCommand } from './set-row-visible.command';
+import { ISetSelectionsOperationParams, SetSelectionsOperation } from '../operations/selection.operation';
+import { getPrimaryForRange } from './utils/selection-util';
 
 export interface ISetSpecificColsVisibleCommandParams {
     workbookId: string;
@@ -31,25 +34,70 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
     id: 'sheet.command.set-col-visible-on-cols',
     handler: async (accessor, params: ISetSpecificColsVisibleCommandParams) => {
         const { workbookId, worksheetId, ranges } = params;
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
+
+        const worksheet = accessor
+            .get(ICurrentUniverService)
+            .getUniverSheetInstance(workbookId)!
+            .getSheetBySheetId(worksheetId)!;
+
         const redoMutationParams: ISetColVisibleMutationParams = {
             workbookId,
             worksheetId,
             ranges,
         };
-
         const undoMutationParams = SetColVisibleUndoMutationFactory(accessor, redoMutationParams);
-        const result = await commandService.executeCommand(SetColVisibleMutation.id, redoMutationParams);
+        const setSelectionOperationParams: ISetSelectionsOperationParams = {
+            workbookId,
+            worksheetId,
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            selections: ranges.map((r) => ({ range: r, primary: getPrimaryForRange(r, worksheet), style: null })),
+        };
+        const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
+            workbookId,
+            worksheetId,
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            selections: getSelectionsAfterHiding(ranges).map((range) => ({
+                range,
+                primary: getPrimaryForRange(range, worksheet),
+                style: null,
+            })),
+        };
 
-        if (result) {
+        const commandService = accessor.get(ICommandService);
+        const result = await sequenceExecute(
+            [
+                { id: SetColVisibleMutation.id, params: redoMutationParams },
+                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+            ],
+            commandService
+        );
+
+        if (result.result) {
+            const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
-                undo() {
-                    return commandService.executeCommand(SetColHiddenMutation.id, undoMutationParams);
+                async undo() {
+                    return (
+                        await sequenceExecute(
+                            [
+                                { id: SetColHiddenMutation.id, params: undoMutationParams },
+                                { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
+                            ],
+                            commandService
+                        )
+                    ).result;
                 },
-                redo() {
-                    return commandService.executeCommand(SetColVisibleMutation.id, redoMutationParams);
+
+                async redo() {
+                    return (
+                        await sequenceExecute(
+                            [
+                                { id: SetColVisibleMutation.id, params: redoMutationParams },
+                                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+                            ],
+                            commandService
+                        )
+                    ).result;
                 },
             });
 
@@ -80,13 +128,16 @@ export const SetSelectedColsVisibleCommand: ICommand = {
 
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
+        // `ranges` would not overlap each other, so `hiddenRanges` would not overlap each other either
+        const hiddenRanges = ranges.map((r) => worksheet.getHiddenCols(r.startColumn, r.endColumn)).flat();
 
-        const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand<ISetSpecificRowsVisibleCommandParams>(SetSpecificRowsVisibleCommand.id, {
-            workbookId,
-            worksheetId,
-            ranges,
-        });
+        return accessor
+            .get(ICommandService)
+            .executeCommand<ISetSpecificColsVisibleCommandParams>(SetSpecificColsVisibleCommand.id, {
+                workbookId,
+                worksheetId,
+                ranges: hiddenRanges,
+            });
     },
 };
 
@@ -116,19 +167,61 @@ export const SetColHiddenCommand: ICommand = {
             worksheetId,
             ranges,
         };
+        const setSelectionOperationParams: ISetSelectionsOperationParams = {
+            workbookId,
+            worksheetId,
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            selections: getSelectionsAfterHiding(ranges).map((range) => ({
+                range,
+                primary: getPrimaryForRange(range, worksheet),
+                style: null,
+            })),
+        };
+        const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
+            workbookId,
+            worksheetId,
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            selections: ranges.map((range) => ({
+                range,
+                primary: getPrimaryForRange(range, worksheet),
+                style: null,
+            })),
+        };
 
         const commandService = accessor.get(ICommandService);
-        const result = await commandService.executeCommand(SetColHiddenMutation.id, redoMutationParams);
-        if (result) {
+        const result = await sequenceExecute(
+            [
+                { id: SetColHiddenMutation.id, params: redoMutationParams },
+                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+            ],
+            commandService
+        );
+        if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             const undoMutationParams = SetColHiddenUndoMutationFactory(accessor, redoMutationParams);
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
-                undo() {
-                    return commandService.executeCommand(SetColVisibleMutation.id, undoMutationParams);
+                async undo() {
+                    return (
+                        await sequenceExecute(
+                            [
+                                { id: SetColVisibleMutation.id, params: undoMutationParams },
+                                { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
+                            ],
+                            commandService
+                        )
+                    ).result;
                 },
-                redo() {
-                    return commandService.executeCommand(SetColHiddenMutation.id, redoMutationParams);
+                async redo() {
+                    return (
+                        await sequenceExecute(
+                            [
+                                { id: SetColHiddenMutation.id, params: redoMutationParams },
+                                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+                            ],
+                            commandService
+                        )
+                    ).result;
                 },
             });
             return true;
@@ -137,3 +230,47 @@ export const SetColHiddenCommand: ICommand = {
         return false;
     },
 };
+
+/**
+ * Get the selections after hiding cols.
+ *
+ * @param worksheet the worksheet the command invoked on
+ * @param ranges cols to be hidden
+ */
+function getSelectionsAfterHiding(ranges: IRange[]): IRange[] {
+    const merged = mergeSelections(ranges);
+    // TODO@wzhudev: actually we should dedupe selections here
+    return merged.map((range) => {
+        // prefer the left selection
+        // we don't have to check if range.endColumn === lastColumn because this would be
+        // forbidden in handler of SetColHiddenCommand
+        const column = range.startColumn === 0 ? range.endColumn + 1 : range.startColumn - 1;
+        return {
+            ...range,
+            startColumn: column,
+            endColumn: column,
+        };
+    });
+}
+
+function mergeSelections(ranges: IRange[]): IRange[] {
+    const merged: IRange[] = [];
+    let current: Nullable<IRange>;
+    ranges
+        .sort((a, b) => a.startColumn - b.startColumn)
+        .forEach((range) => {
+            if (!current) {
+                current = range;
+                return;
+            }
+
+            if (current.endColumn === range.startColumn - 1) {
+                current.endColumn = range.endColumn;
+            } else {
+                merged.push(current);
+                current = range;
+            }
+        });
+    merged.push(current!);
+    return merged;
+}

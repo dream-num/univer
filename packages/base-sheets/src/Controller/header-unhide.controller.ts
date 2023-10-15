@@ -1,16 +1,17 @@
 import { IRenderManagerService } from '@univerjs/base-render';
 import {
-    Disposable,
     getWorksheetUID,
     ICommandService,
     ICurrentUniverService,
     IKeyValue,
     LifecycleStages,
     OnLifecycle,
+    RxDisposable,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
+import { takeUntil } from 'rxjs';
 
 import { getCoordByCell, getSheetObject } from '../Basics/component-tools';
 import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
@@ -22,12 +23,8 @@ import {
     ISetSpecificRowsVisibleCommandParams,
     SetSpecificRowsVisibleCommand,
 } from '../commands/commands/set-row-visible.command';
-import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
-import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
-import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
-import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { HeaderUnhideShape, HeaderUnhideShapeType } from '../View/header-unhide-shape';
 
@@ -38,19 +35,13 @@ const RENDER_COMMANDS: string[] = [
     SetRowVisibleMutation.id,
     SetColHiddenMutation.id,
     SetColVisibleMutation.id,
-    InsertRowMutation.id,
-    InsertColMutation.id,
-    RemoveRowMutation.id,
-    RemoveColMutation.id,
-    SetWorksheetRowHeightMutation.id,
-    SetWorksheetColWidthMutation.id,
 ];
 
 /**
  * This controller controls rendering of the buttons to unhide hidden rows and columns.
  */
 @OnLifecycle(LifecycleStages.Rendered, HeaderUnhideController)
-export class HeaderUnhideController extends Disposable {
+export class HeaderUnhideController extends RxDisposable {
     private _unhideShape: HeaderUnhideShape;
 
     private _shapes = new Map<string, { cols: HeaderUnhideShape[]; rows: HeaderUnhideShape[] }>();
@@ -85,24 +76,34 @@ export class HeaderUnhideController extends Disposable {
             this._initForWorksheet(workbook, worksheet);
         }
 
-        // re-render hidden rows / cols when specific commands are executed
-        this._cmdSrv.onCommandExecuted((command) => {
-            // TODO: subscribe skeleton change event instead of some commands here
-            if (
-                !RENDER_COMMANDS.includes(command.id) ||
-                !command.params ||
-                !(command.params as IKeyValue).workbookId ||
-                !(command.params as IKeyValue).worksheetId
-            ) {
-                return;
-            }
-
-            const workbook = this._cuSrv.getUniverSheetInstance((command.params as IKeyValue).workbookId);
-            const worksheet = workbook?.getSheetBySheetId((command.params as IKeyValue).worksheetId);
-            if (worksheet) {
+        // re-render when sheet skeleton is changed
+        this._sheetSkeletonManagerService.currentSkeleton$.pipe(takeUntil(this.dispose$)).subscribe((skeleton) => {
+            if (skeleton) {
+                const workbook = this._cuSrv.getUniverSheetInstance(skeleton.unitId)!;
+                const worksheet = workbook.getSheetBySheetId(skeleton.sheetId)!;
                 this._updateWorksheet(workbook!, worksheet);
             }
         });
+
+        // re-render hidden rows / cols when specific commands are executed
+        this.disposeWithMe(
+            this._cmdSrv.onCommandExecuted((command) => {
+                if (
+                    !RENDER_COMMANDS.includes(command.id) ||
+                    !command.params ||
+                    !(command.params as IKeyValue).workbookId ||
+                    !(command.params as IKeyValue).worksheetId
+                ) {
+                    return;
+                }
+
+                const workbook = this._cuSrv.getUniverSheetInstance((command.params as IKeyValue).workbookId);
+                const worksheet = workbook?.getSheetBySheetId((command.params as IKeyValue).worksheetId);
+                if (worksheet) {
+                    this._updateWorksheet(workbook!, worksheet);
+                }
+            })
+        );
     }
 
     /** Initialize header unhide render shapes for a specific worksheet.  */
@@ -127,18 +128,20 @@ export class HeaderUnhideController extends Disposable {
         // 2. create shapes and add them to the scene, the position should be calculated from SheetSkeleton
         const { scene } = sheetObject;
         const rowCount = worksheet.getRowCount();
-        const rowShapes = hiddenRowRanges.map((r) => {
-            const { startRow, endRow } = r;
+        const rowShapes = hiddenRowRanges.map((range) => {
+            const { startRow, endRow } = range;
             const position = getCoordByCell(startRow, 0, scene, skeleton);
+            const hasPrevious = startRow !== 0;
+            const hasNext = endRow !== rowCount - 1;
             return new HeaderUnhideShape(
                 HEADER_UNHIDE_CONTROLLER_SHAPE,
                 {
                     type: HeaderUnhideShapeType.ROW,
                     hovered: false,
-                    hasPrevious: startRow !== 0,
-                    hasNext: endRow !== rowCount - 1,
-                    top: position.startY - 12,
-                    left: position.startX - 29,
+                    hasPrevious,
+                    hasNext,
+                    top: position.startY - (hasPrevious ? 12 : 0),
+                    left: position.startX - 12,
                 },
                 () =>
                     this._cmdSrv.executeCommand<ISetSpecificRowsVisibleCommandParams>(
@@ -146,23 +149,26 @@ export class HeaderUnhideController extends Disposable {
                         {
                             workbookId: workbook.getUnitId(),
                             worksheetId: worksheet.getSheetId(),
-                            ranges: [r],
+                            ranges: [range],
                         }
                     )
             );
         });
         const colCount = worksheet.getColumnCount();
-        const colShapes = hiddenColRanges.map((r) => {
-            const { startColumn, endColumn } = r;
+        const colShapes = hiddenColRanges.map((range) => {
+            const { startColumn, endColumn } = range;
             const position = getCoordByCell(0, startColumn, scene, skeleton);
+            const hasPrevious = startColumn !== 0;
+            const hasNext = endColumn !== colCount - 1;
             return new HeaderUnhideShape(
                 HEADER_UNHIDE_CONTROLLER_SHAPE,
                 {
                     type: HeaderUnhideShapeType.COLUMN,
                     hovered: false,
-                    hasPrevious: startColumn !== 0,
-                    hasNext: endColumn !== colCount - 1,
-                    left: position.startX - 28,
+                    hasPrevious,
+                    hasNext,
+                    left: position.startX - (hasPrevious ? 12 : 0),
+                    top: 20 - 12,
                 },
                 () =>
                     this._cmdSrv.executeCommand<ISetSpecificColsVisibleCommandParams>(
@@ -170,7 +176,7 @@ export class HeaderUnhideController extends Disposable {
                         {
                             workbookId: workbook.getUnitId(),
                             worksheetId: worksheet.getSheetId(),
-                            ranges: [r],
+                            ranges: [range],
                         }
                     )
             );
@@ -192,5 +198,3 @@ export class HeaderUnhideController extends Disposable {
         return getSheetObject(this._cuSrv, this._rendererManagerService);
     }
 }
-
-// class WorksheetUnhide extends Disposable {}

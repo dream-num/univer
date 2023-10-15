@@ -79,14 +79,13 @@ export class RowManager {
         return create;
     }
 
-    getHiddenRows(): IRange[] {
-        const len = this._rowData.getLength();
+    getHiddenRows(start: number = 0, end: number = this._rowData.getLength() - 1): IRange[] {
         const hiddenRows: IRange[] = [];
 
         let inHiddenRange = false;
         let startRow = -1;
 
-        for (let i = 0; i < len; i++) {
+        for (let i = start; i <= end; i++) {
             const visible = this.getRowVisible(i);
             if (inHiddenRange && visible) {
                 inHiddenRange = false;
@@ -104,7 +103,7 @@ export class RowManager {
         }
 
         if (inHiddenRange) {
-            hiddenRows.push({ startRow, endRow: len - 1, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.ROW });
+            hiddenRows.push({ startRow, endRow: end, startColumn: 0, endColumn: 0, rangeType: RANGE_TYPE.ROW });
         }
 
         return hiddenRows;

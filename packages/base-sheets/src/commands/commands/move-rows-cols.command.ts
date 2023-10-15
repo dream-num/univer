@@ -109,9 +109,9 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
 
         // we could just move the merged cells because other situations are not allowed
         // we should only deal with merged cell that is between the range of the rows to move
-        const count = rangeToMove.endRow - rangeToMove.startRow + 1;
         const movedLength = toRow - fromRow;
         const moveBackward = movedLength < 0;
+        const count = rangeToMove.endRow - rangeToMove.startRow + 1;
         const mergedCells: IRange[] = Tools.deepClone(worksheet.getMergeData());
         for (let i = 0; i < mergedCells.length; i++) {
             const mergedCell = mergedCells[i];
@@ -151,13 +151,18 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const undoAddMergeParams = AddMergeUndoMutationFactory(accessor, addMergeParams);
 
         // deal with selections
+        const destSelection: IRange = moveBackward
+            ? destinationRange
+            : {
+                  ...destinationRange,
+                  startRow: destinationRange.startRow - count,
+                  endRow: destinationRange.endRow - count,
+              };
         const setSelectionsParam: ISetSelectionsOperationParams = {
             workbookId,
             worksheetId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            selections: [
-                { range: destinationRange, primary: getPrimaryForRange(destinationRange, worksheet), style: null },
-            ],
+            selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
         };
         const undoSetSelectionsParam: ISetSelectionsOperationParams = {
             workbookId,
@@ -289,6 +294,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const count = rangeToMove.endColumn - rangeToMove.startColumn + 1;
         const movedLength = toCol - fromCol;
         const moveBackward = movedLength < 0;
+
         const mergedCells: IRange[] = Tools.deepClone(worksheet.getMergeData());
         for (let i = 0; i < mergedCells.length; i++) {
             const mergedCell = mergedCells[i];
@@ -329,13 +335,18 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const undoAddMergeParams = AddMergeUndoMutationFactory(accessor, addMergeParams);
 
         // deal with selections
+        const destSelection: IRange = moveBackward
+            ? destinationRange
+            : {
+                  ...destinationRange,
+                  startColumn: destinationRange.startColumn - count,
+                  endColumn: destinationRange.endColumn - count,
+              };
         const setSelectionsParam: ISetSelectionsOperationParams = {
             workbookId,
             worksheetId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            selections: [
-                { range: destinationRange, primary: getPrimaryForRange(destinationRange, worksheet), style: null },
-            ],
+            selections: [{ range: destSelection, primary: getPrimaryForRange(destSelection, worksheet), style: null }],
         };
         const undoSetSelectionsParam: ISetSelectionsOperationParams = {
             workbookId,

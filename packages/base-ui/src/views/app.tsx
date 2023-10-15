@@ -13,6 +13,8 @@ import { ContextMenu } from './components/contextmenu/contextmenu';
 import { DocBars } from './components/DocBars';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
+    headerComponents?: Set<() => ComponentType>;
+    contentComponents?: Set<() => ComponentType>;
     footerComponents?: Set<() => ComponentType>;
     sidebarComponents?: Set<() => ComponentType>;
     onRendered?: (container: HTMLElement) => void;
@@ -28,7 +30,7 @@ export function App(props: IUniverAppProps) {
 
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const { footerComponents, sidebarComponents, onRendered } = props;
+    const { headerComponents, contentComponents, footerComponents, sidebarComponents, onRendered } = props;
 
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
@@ -96,6 +98,10 @@ export function App(props: IUniverAppProps) {
                         {/* header */}
                         <Header style={{ display: props.header ? 'block' : 'none' }}>
                             {props.toolbar && <DocBars />}
+                            {headerComponents &&
+                                Array.from(headerComponents.values()).map((component, index) =>
+                                    React.createElement(component(), { key: `${index}` })
+                                )}
                         </Header>
                         {/* content */}
                         <Layout>
@@ -117,6 +123,10 @@ export function App(props: IUniverAppProps) {
                                     ref={containerRef}
                                 >
                                     <ContextMenu />
+                                    {contentComponents &&
+                                        Array.from(contentComponents.values()).map((component, index) =>
+                                            React.createElement(component(), { key: `${index}` })
+                                        )}
                                     {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>} */}
                                     {/* {<RichText {...methods.cellEditor}></RichText>} */}
                                 </Container>

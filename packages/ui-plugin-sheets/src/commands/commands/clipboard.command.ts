@@ -11,7 +11,7 @@ export const SheetCopyCommand: IMultiCommand = {
     multi: true,
     priority: 1000,
     preconditions: (contextService: IContextService) =>
-        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(SHEET_EDITOR_ACTIVATED),
+        contextService.getContextValue(FOCUSING_SHEET) && !contextService.matchContextValue(SHEET_EDITOR_ACTIVATED),
     handler: async (accessor) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.copy();
@@ -25,7 +25,7 @@ export const SheetCutCommand: IMultiCommand = {
     multi: true,
     priority: 1000,
     preconditions: (contextService: IContextService) =>
-        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(SHEET_EDITOR_ACTIVATED),
+        contextService.getContextValue(FOCUSING_SHEET) && !contextService.matchContextValue(SHEET_EDITOR_ACTIVATED),
     handler: async (accessor, params) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.cut();
@@ -39,7 +39,7 @@ export const SheetPasteCommand: IMultiCommand = {
     name: 'sheet.command.paste',
     priority: 1000,
     preconditions: (contextService: IContextService) =>
-        contextService.getContextValue(FOCUSING_SHEET) && !contextService.getContextValue(SHEET_EDITOR_ACTIVATED),
+        contextService.getContextValue(FOCUSING_SHEET) && !contextService.matchContextValue(SHEET_EDITOR_ACTIVATED),
     handler: async (accessor) => {
         const logService = accessor.get(ILogService);
 

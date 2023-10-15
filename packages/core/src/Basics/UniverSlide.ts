@@ -1,45 +1,53 @@
-import { Ctor, Injector } from '@wendellhu/redi';
+import { Ctor, Inject, Injector } from '@wendellhu/redi';
 
 import { Plugin, PluginCtor, PluginStore } from '../plugin/plugin';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleService } from '../services/lifecycle/lifecycle.service';
+import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { Disposable, toDisposable } from '../Shared/lifecycle';
 import { Slide } from '../Slides/Domain/SlideModel';
+import { ISlideData } from '../Types/Interfaces/ISlideData';
 
 /**
  * Externally provided UniverSlide root instance
  */
 export class UniverSlide extends Disposable {
-    private readonly _injector: Injector;
-
     private readonly _pluginStore = new PluginStore();
+
+    constructor(
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
+        @Inject(LifecycleInitializerService) private readonly _initializerService: LifecycleInitializerService
+    ) {
+        super();
+    }
 
     init(): void {
         this.disposeWithMe(
             toDisposable(
-                this._injector
-                    .get(LifecycleService)
-                    .subscribeWithPrevious()
-                    .subscribe((stage) => {
-                        if (stage === LifecycleStages.Starting) {
-                            this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
-                            return;
-                        }
+                this._lifecycleService.subscribeWithPrevious().subscribe((stage) => {
+                    if (stage === LifecycleStages.Starting) {
+                        this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
+                        this._initializerService.initModulesOnStage(LifecycleStages.Starting);
+                        return;
+                    }
 
-                        if (stage === LifecycleStages.Ready) {
-                            this._pluginStore.forEachPlugin((p) => p.onReady());
-                            return;
-                        }
+                    if (stage === LifecycleStages.Ready) {
+                        this._pluginStore.forEachPlugin((p) => p.onReady());
+                        this._initializerService.initModulesOnStage(LifecycleStages.Ready);
+                        return;
+                    }
 
-                        if (stage === LifecycleStages.Rendered) {
-                            this._pluginStore.forEachPlugin((p) => p.onRendered());
-                            return;
-                        }
+                    if (stage === LifecycleStages.Rendered) {
+                        this._pluginStore.forEachPlugin((p) => p.onRendered());
+                        this._initializerService.initModulesOnStage(LifecycleStages.Rendered);
+                        return;
+                    }
 
-                        if (stage === LifecycleStages.Steady) {
-                            this._pluginStore.forEachPlugin((p) => p.onSteady());
-                        }
-                    })
+                    if (stage === LifecycleStages.Steady) {
+                        this._pluginStore.forEachPlugin((p) => p.onSteady());
+                        this._initializerService.initModulesOnStage(LifecycleStages.Steady);
+                    }
+                })
             )
         );
     }

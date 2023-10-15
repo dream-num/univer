@@ -19,7 +19,6 @@ import {
     SetBoldCommand,
     SetColHiddenCommand,
     SetColHiddenMutation,
-    SetColVisibleCommand,
     SetColVisibleMutation,
     SetFontFamilyCommand,
     SetFontSizeCommand,
@@ -29,8 +28,9 @@ import {
     SetRangeValuesMutation,
     SetRowHiddenCommand,
     SetRowHiddenMutation,
-    SetRowVisibleCommand,
     SetRowVisibleMutation,
+    SetSelectedColsVisibleCommand,
+    SetSelectedRowsVisibleCommand,
     SetSelectionFrozenCommand,
     SetSelectionsOperation,
     SetStrikeThroughCommand,
@@ -1144,7 +1144,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
 
     return {
-        id: SetRowVisibleCommand.id,
+        id: SetSelectedRowsVisibleCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.showHideRow',
@@ -1191,7 +1191,7 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
 
     return {
-        id: SetColVisibleCommand.id,
+        id: SetSelectedColsVisibleCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.showHideColumn',

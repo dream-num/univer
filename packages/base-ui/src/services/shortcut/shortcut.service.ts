@@ -117,6 +117,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
                         getContextValue: this._contextService.getContextValue.bind(this._contextService),
                     }) ?? true
             );
+
         if (shouldTrigger) {
             this._commandService.executeCommand(shouldTrigger.id, shouldTrigger.staticParameters);
             return true;

@@ -53,12 +53,19 @@ export {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from './commands/commands/set-border-command';
-export { SetColHiddenCommand, SetColVisibleCommand } from './commands/commands/set-col-visible.command';
+export {
+    SetColHiddenCommand,
+    SetSelectedColsVisibleCommand,
+    SetSpecificColsVisibleCommand,
+} from './commands/commands/set-col-visible.command';
 export { SetFrozenCommand, SetSelectionFrozenCommand } from './commands/commands/set-frozen.command';
-export { SetFrozenCancelCommand } from './commands/commands/set-frozen-cancel.command';
 export type { ISetRangeValuesCommandParams } from './commands/commands/set-range-values.command';
 export { SetRangeValuesCommand } from './commands/commands/set-range-values.command';
-export { SetRowHiddenCommand, SetRowVisibleCommand } from './commands/commands/set-row-visible.command';
+export {
+    SetRowHiddenCommand,
+    SetSelectedRowsVisibleCommand,
+    SetSpecificRowsVisibleCommand,
+} from './commands/commands/set-row-visible.command';
 export type { IScrollCommandParams } from './commands/commands/set-scroll.command';
 export { RestScrollCommand, ScrollCommand } from './commands/commands/set-scroll.command';
 export type {
@@ -131,7 +138,7 @@ export {
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SetSelectionsOperation } from './commands/operations/selection.operation';
-export { SetZoomRatioOperation as SetZoomRatioMutation } from './commands/operations/set-zoom-ratio.operation';
+export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export * from './Locale';
 
 // #endregion

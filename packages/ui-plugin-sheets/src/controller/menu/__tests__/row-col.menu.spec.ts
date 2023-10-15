@@ -3,13 +3,17 @@ import {
     SelectionManagerService,
     SetColHiddenCommand,
     SetColHiddenMutation,
-    SetColVisibleCommand,
     SetColVisibleMutation,
     SetRowHiddenCommand,
     SetRowHiddenMutation,
-    SetRowVisibleCommand,
     SetRowVisibleMutation,
+    SetSelectedColsVisibleCommand,
+    SetSelectedRowsVisibleCommand,
+    SetSelectionsOperation,
+    SetSpecificColsVisibleCommand,
+    SetSpecificRowsVisibleCommand,
 } from '@univerjs/base-sheets';
+import { ISetSelectionsOperationParams } from '@univerjs/base-sheets/commands/operations/selection.operation.js';
 import {
     DisposableCollection,
     ICommandService,
@@ -42,10 +46,13 @@ describe('Test row col menu items', () => {
             SetRowHiddenMutation,
             SetColHiddenCommand,
             SetColHiddenMutation,
-            SetRowVisibleCommand,
-            SetColVisibleCommand,
+            SetSelectedRowsVisibleCommand,
+            SetSelectedColsVisibleCommand,
             SetRowVisibleMutation,
             SetColVisibleMutation,
+            SetSelectionsOperation,
+            SetSpecificColsVisibleCommand,
+            SetSpecificRowsVisibleCommand,
         ].forEach((command) => {
             commandService.registerCommand(command);
         });
@@ -76,52 +83,66 @@ describe('Test row col menu items', () => {
         return worksheet.getColumnCount();
     }
 
-    function selectRow(rowStart: number, rowEnd: number): void {
-        const selectionManagerService = get(SelectionManagerService);
+    async function selectRow(rowStart: number, rowEnd: number): Promise<boolean> {
+        const currentService = get(ICurrentUniverService);
+        const workbook = currentService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
         const endColumn = getColCount() - 1;
-        selectionManagerService.add([
-            {
-                range: { startRow: rowStart, startColumn: 0, endColumn, endRow: rowEnd, rangeType: RANGE_TYPE.ROW },
-                primary: {
-                    startRow: rowStart,
-                    endRow: rowEnd,
-                    startColumn: 0,
-                    endColumn,
-                    actualColumn: 0,
-                    actualRow: rowStart,
-                    isMerged: false,
-                    isMergedMainCell: false,
+        return commandService.executeCommand<ISetSelectionsOperationParams, boolean>(SetSelectionsOperation.id, {
+            workbookId: workbook.getUnitId(),
+            worksheetId: worksheet.getSheetId(),
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            selections: [
+                {
+                    range: { startRow: rowStart, startColumn: 0, endColumn, endRow: rowEnd, rangeType: RANGE_TYPE.ROW },
+                    primary: {
+                        startRow: rowStart,
+                        endRow: rowEnd,
+                        startColumn: 0,
+                        endColumn,
+                        actualColumn: 0,
+                        actualRow: rowStart,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                    },
+                    style: null,
                 },
-                style: null,
-            },
-        ]);
+            ],
+        });
     }
 
-    function selectColumn(columnStart: number, columnEnd: number): void {
-        const selectionManagerService = get(SelectionManagerService);
+    async function selectColumn(columnStart: number, columnEnd: number): Promise<boolean> {
+        const currentService = get(ICurrentUniverService);
+        const workbook = currentService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
         const endRow = getRowCount() - 1;
-        selectionManagerService.add([
-            {
-                range: {
-                    startRow: 0,
-                    startColumn: columnStart,
-                    endColumn: columnEnd,
-                    endRow,
-                    rangeType: RANGE_TYPE.COLUMN,
+        return commandService.executeCommand<ISetSelectionsOperationParams, boolean>(SetSelectionsOperation.id, {
+            workbookId: workbook.getUnitId(),
+            worksheetId: worksheet.getSheetId(),
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            selections: [
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: columnStart,
+                        endColumn: columnEnd,
+                        endRow,
+                        rangeType: RANGE_TYPE.COLUMN,
+                    },
+                    primary: {
+                        startRow: 0,
+                        endRow,
+                        startColumn: columnStart,
+                        endColumn: columnEnd,
+                        actualColumn: columnStart,
+                        actualRow: 0,
+                        isMerged: false,
+                        isMergedMainCell: false,
+                    },
+                    style: null,
                 },
-                primary: {
-                    startRow: 0,
-                    endRow,
-                    startColumn: columnStart,
-                    endColumn: columnEnd,
-                    actualColumn: columnStart,
-                    actualRow: 0,
-                    isMerged: false,
-                    isMergedMainCell: false,
-                },
-                style: null,
-            },
-        ]);
+            ],
+        });
     }
 
     describe('Test row col hide/unhide menu items', () => {
@@ -132,12 +153,12 @@ describe('Test row col menu items', () => {
             disposableCollection.add(toDisposable(menuItem.hidden$!.subscribe((v: boolean) => (hidden = v))));
             expect(hidden).toBeTruthy();
 
-            selectRow(1, 1);
+            await selectRow(1, 1);
             await commandService.executeCommand(SetRowHiddenCommand.id);
-            selectRow(0, 2);
+            await selectRow(0, 2);
             expect(hidden).toBeFalsy();
 
-            await commandService.executeCommand(SetRowVisibleCommand.id);
+            await commandService.executeCommand(SetSelectedRowsVisibleCommand.id);
             expect(hidden).toBeTruthy();
         });
 
@@ -148,12 +169,12 @@ describe('Test row col menu items', () => {
             disposableCollection.add(toDisposable(menuItem.hidden$!.subscribe((v: boolean) => (hidden = v))));
             expect(hidden).toBeTruthy();
 
-            selectColumn(1, 1);
+            await selectColumn(1, 1);
             await commandService.executeCommand(SetColHiddenCommand.id);
-            selectRow(0, 2);
+            await selectColumn(0, 2);
             expect(hidden).toBeFalsy();
 
-            await commandService.executeCommand(SetColVisibleCommand.id);
+            await commandService.executeCommand(SetSelectedColsVisibleCommand.id);
             expect(hidden).toBeTruthy();
         });
     });

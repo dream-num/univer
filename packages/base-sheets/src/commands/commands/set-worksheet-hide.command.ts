@@ -33,11 +33,7 @@ export const SetWorksheetHideCommand: ICommand = {
         const currentUniverService = accessor.get(ICurrentUniverService);
 
         const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
+        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
         if (params) {
             worksheetId = params.worksheetId ?? worksheetId;

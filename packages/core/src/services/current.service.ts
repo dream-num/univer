@@ -16,10 +16,10 @@ export interface IUniverHandler {
 }
 
 /**
- * ICurrentUniverService holds all the current univer instances. And it also manages
+ * IUniverInstanceService holds all the current univer instances. And it also manages
  * the focused univer instance.
  */
-export interface ICurrentUniverService {
+export interface IUniverInstanceService {
     focused$: Observable<Nullable<string>>;
 
     currentSheet$: Observable<Nullable<Workbook>>;
@@ -59,9 +59,9 @@ export interface ICurrentUniverService {
     getAllUniverSlidesInstance(): Slide[];
 }
 
-export const ICurrentUniverService = createIdentifier<ICurrentUniverService>('univer.current');
+export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
 
-export class CurrentUniverService extends Disposable implements ICurrentUniverService {
+export class UniverInstanceService extends Disposable implements IUniverInstanceService {
     private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);
     private _focused: DocumentModel | Workbook | Slide | null = null;
     readonly focused$ = this._focused$.asObservable();

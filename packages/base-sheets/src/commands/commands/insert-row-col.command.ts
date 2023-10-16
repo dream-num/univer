@@ -7,11 +7,11 @@ import {
     IColumnData,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     IRowData,
     IStyleData,
     IUndoRedoService,
+    IUniverInstanceService,
     Nullable,
     ObjectArray,
     ObjectMatrix,
@@ -74,9 +74,9 @@ export const InsertRowCommand: ICommand = {
     handler: async (accessor: IAccessor, params: IInsertRowCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)!!;
+        const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId)!!;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId)!;
 
         const { range, direction, workbookId, worksheetId } = params;
@@ -230,8 +230,8 @@ export const InsertRowBeforeCommand: ICommand = {
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) {
             return false;
         }
@@ -277,8 +277,8 @@ export const InsertRowAfterCommand: ICommand = {
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) {
             return false;
         }
@@ -322,11 +322,11 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
     handler: async (accessor: IAccessor, params: IInsertColCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const { range, direction, worksheetId, workbookId } = params;
         const { startRow, endRow, startColumn, endColumn } = params.range;
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId)!;
+        const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId)!;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId)!;
         const anchorCol = direction === Direction.LEFT ? startColumn : startColumn - 1;
         const width = worksheet.getColumnWidth(anchorCol);
@@ -475,8 +475,8 @@ export const InsertColBeforeCommand: ICommand = {
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) {
             return false;
         }
@@ -520,8 +520,8 @@ export const InsertColAfterCommand: ICommand = {
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) {
             return false;
         }

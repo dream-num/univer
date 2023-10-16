@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
+import { CommandType, IMutation, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
@@ -14,8 +14,8 @@ export const RemoveSheetUndoMutationFactory = (
     accessor: IAccessor,
     params: IRemoveSheetMutationParams
 ): IInsertSheetMutationParams => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const workbook = currentUniverService.getCurrentUniverSheetInstance();
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
     const { worksheetId, workbookId } = params;
     const sheet = workbook.getSheetBySheetId(worksheetId)!.getConfig();
     const config = workbook!.getConfig();
@@ -32,9 +32,9 @@ export const RemoveSheetMutation: IMutation<IRemoveSheetMutationParams, boolean>
     id: 'sheet.mutation.remove-sheet',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const { worksheetId, workbookId } = params;
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
 
         if (!workbook) {
             return false;

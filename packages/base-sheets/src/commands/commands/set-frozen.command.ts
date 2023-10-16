@@ -2,8 +2,8 @@ import {
     CommandType,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IUndoRedoService,
+    IUniverInstanceService,
     RANGE_TYPE,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
@@ -27,10 +27,10 @@ export const SetSelectionFrozenCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-selection-frozen',
     handler: async (accessor: IAccessor) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
@@ -105,16 +105,16 @@ export const SetFrozenCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ISetFrozenCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
             .getSheetId();
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

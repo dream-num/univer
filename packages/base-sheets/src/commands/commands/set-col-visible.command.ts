@@ -2,9 +2,9 @@ import {
     CommandType,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     IUndoRedoService,
+    IUniverInstanceService,
     Nullable,
     RANGE_TYPE,
     sequenceExecute,
@@ -36,7 +36,7 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
         const { workbookId, worksheetId, ranges } = params;
 
         const worksheet = accessor
-            .get(ICurrentUniverService)
+            .get(IUniverInstanceService)
             .getUniverSheetInstance(workbookId)!
             .getSheetBySheetId(worksheetId)!;
 
@@ -120,8 +120,8 @@ export const SetSelectedColsVisibleCommand: ICommand = {
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) return false;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;
@@ -154,8 +154,8 @@ export const SetColHiddenCommand: ICommand = {
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) return false;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;

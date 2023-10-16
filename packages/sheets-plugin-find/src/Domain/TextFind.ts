@@ -3,8 +3,8 @@ import { SelectionManagerService } from '@univerjs/base-sheets';
 import {
     FormatType,
     ICellData,
-    ICurrentUniverService,
     IGridRange,
+    IUniverInstanceService,
     Nullable,
     ObjectMatrix,
     Range,
@@ -40,7 +40,7 @@ export class TextFinder {
     private _startRange: Nullable<Range>; // 从这个位置后开始找
 
     constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ISelectionTransformerShapeManager
         private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager

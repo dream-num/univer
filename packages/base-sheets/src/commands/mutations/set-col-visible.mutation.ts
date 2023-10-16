@@ -1,4 +1,4 @@
-import { BooleanNumber, CommandType, ICurrentUniverService, IMutation, IRange } from '@univerjs/core';
+import { BooleanNumber, CommandType, IMutation, IRange, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetColHiddenMutationParams {
@@ -8,8 +8,8 @@ export interface ISetColHiddenMutationParams {
 }
 
 export const SetColHiddenUndoMutationFactory = (accessor: IAccessor, params: ISetColHiddenMutationParams) => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -26,8 +26,8 @@ export const SetColHiddenMutation: IMutation<ISetColHiddenMutationParams> = {
     id: 'sheet.mutation.set-col-hidden',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
         if (!universheet) {
             return false;
@@ -55,8 +55,8 @@ export interface ISetColVisibleMutationParams {
 }
 
 export const SetColVisibleUndoMutationFactory = (accessor: IAccessor, params: ISetColVisibleMutationParams) => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -73,8 +73,8 @@ export const SetColVisibleMutation: IMutation<ISetColVisibleMutationParams> = {
     id: 'sheet.mutation.set-col-visible',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
         if (!universheet) {
             return false;

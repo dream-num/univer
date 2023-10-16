@@ -2,9 +2,9 @@ import {
     CommandType,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     IUndoRedoService,
+    IUniverInstanceService,
     RANGE_TYPE,
     sequenceExecute,
 } from '@univerjs/core';
@@ -38,7 +38,7 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const worksheet = accessor
-            .get(ICurrentUniverService)
+            .get(IUniverInstanceService)
             .getUniverSheetInstance(workbookId)!
             .getSheetBySheetId(worksheetId)!;
 
@@ -116,7 +116,7 @@ export const SetSelectedRowsVisibleCommand: ICommand = {
     id: 'sheet.command.set-selected-rows-visible',
     handler: async (accessor: IAccessor) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const ranges = selectionManagerService
             .getSelections()
@@ -126,7 +126,7 @@ export const SetSelectedRowsVisibleCommand: ICommand = {
             return false;
         }
 
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) return false;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;
@@ -151,7 +151,7 @@ export const SetRowHiddenCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const ranges = selectionManagerService
             .getSelections()
@@ -161,9 +161,9 @@ export const SetRowHiddenCommand: ICommand = {
             return false;
         }
 
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

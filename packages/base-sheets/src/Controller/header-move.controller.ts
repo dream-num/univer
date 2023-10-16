@@ -12,7 +12,7 @@ import {
 import {
     Disposable,
     ICommandService,
-    ICurrentUniverService,
+    IUniverInstanceService,
     LifecycleStages,
     Nullable,
     Observer,
@@ -108,7 +108,7 @@ export class HeaderMoveController extends Disposable {
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @ISelectionTransformerShapeManager

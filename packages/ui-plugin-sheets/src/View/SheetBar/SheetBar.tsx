@@ -24,7 +24,7 @@ import {
     TabPane,
     Tabs,
 } from '@univerjs/base-ui';
-import { BooleanNumber, ICommandService, ICurrentUniverService, IKeyValue } from '@univerjs/core';
+import { BooleanNumber, ICommandService, IKeyValue, IUniverInstanceService } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { Component, createRef } from 'react';
 
@@ -254,9 +254,9 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
      */
     private _updateSheetBarStatus(): void {
         const injector = this.context.injector!;
-        const currentUniverService = injector.get(ICurrentUniverService);
+        const univerInstanceService = injector.get(IUniverInstanceService);
         const commandService = injector.get(ICommandService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const sheets = workbook.getSheets();
 
         const worksheetMenuItems = sheets.map((sheet, index) => ({

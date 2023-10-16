@@ -1,5 +1,5 @@
 import { SpreadsheetSkeleton } from '@univerjs/base-render';
-import { ICurrentUniverService, LocaleService, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { IDisposable, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -38,7 +38,7 @@ export class SheetSkeletonManagerService implements IDisposable {
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 
     constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {}
 

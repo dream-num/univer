@@ -1,7 +1,7 @@
 import {
     ICommandService,
-    ICurrentUniverService,
     IRange,
+    IUniverInstanceService,
     RANGE_TYPE,
     RedoCommand,
     UndoCommand,
@@ -65,7 +65,7 @@ describe('Test style commands', () => {
                 ]);
 
                 function getMerge(): IRange[] | undefined {
-                    return get(ICurrentUniverService)
+                    return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig().mergeData;
@@ -107,7 +107,7 @@ describe('Test style commands', () => {
                 ]);
 
                 function getMerge(): IRange[] | undefined {
-                    return get(ICurrentUniverService)
+                    return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig().mergeData;
@@ -146,7 +146,7 @@ describe('Test style commands', () => {
                 ]);
 
                 function getMerge(): IRange[] | undefined {
-                    return get(ICurrentUniverService)
+                    return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig().mergeData;
@@ -185,7 +185,7 @@ describe('Test style commands', () => {
                 ]);
 
                 function getMerge(): IRange[] | undefined {
-                    return get(ICurrentUniverService)
+                    return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig().mergeData;

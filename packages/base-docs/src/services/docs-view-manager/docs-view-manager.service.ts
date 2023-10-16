@@ -1,4 +1,4 @@
-import { Disposable, ICurrentUniverService, toDisposable } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
@@ -15,7 +15,7 @@ export class DocsViewManagerService extends Disposable {
 
     private readonly _viewsMap = new Map<string, DocsView>();
 
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
         super();
 
         this.disposeWithMe(

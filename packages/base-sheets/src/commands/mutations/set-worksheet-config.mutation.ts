@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, IWorksheetConfig, Tools } from '@univerjs/core';
+import { CommandType, IMutation, IUniverInstanceService, IWorksheetConfig, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 /** @deprecated */
@@ -13,7 +13,7 @@ export const SetWorksheetConfigUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetConfigMutationParams
 ): ISetWorksheetConfigMutationParams => {
-    const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
+    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
     const worksheet = workbook!.getSheetBySheetId(params.worksheetId)!;
     const config = Tools.deepClone(worksheet.getConfig());
 
@@ -29,7 +29,7 @@ export const SetWorksheetConfigMutation: IMutation<ISetWorksheetConfigMutationPa
     id: 'sheet.mutation.set-worksheet-config',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
+        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;

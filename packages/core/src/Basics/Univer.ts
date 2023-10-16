@@ -6,7 +6,7 @@ import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { ConfigService, IConfigService } from '../services/config/config.service';
 import { ContextService, IContextService } from '../services/context/context.service';
-import { CurrentUniverService, ICurrentUniverService } from '../services/current.service';
+import { IUniverInstanceService, UniverInstanceService } from '../services/current.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { LocaleService } from '../services/locale/locale.service';
@@ -53,8 +53,8 @@ export class Univer {
         // TODO@wzhudev: dispose all the businesses
     }
 
-    private get _currentUniverService(): ICurrentUniverService {
-        return this._rootInjector.get(ICurrentUniverService);
+    private get _currentUniverService(): IUniverInstanceService {
+        return this._rootInjector.get(IUniverInstanceService);
     }
 
     /** Register a plugin into univer. */
@@ -159,10 +159,10 @@ export class Univer {
     private _initDependencies(): Injector {
         return new Injector([
             [
-                ICurrentUniverService,
+                IUniverInstanceService,
                 {
                     useFactory: (contextService: IContextService) =>
-                        new CurrentUniverService(
+                        new UniverInstanceService(
                             {
                                 createUniverDoc: (data) => this.createUniverDoc(data),
                                 createUniverSheet: (data) => this.createUniverSheet(data),

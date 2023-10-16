@@ -14,7 +14,7 @@ import {
     DocumentModel,
     EventState,
     IConfigService,
-    ICurrentUniverService,
+    IUniverInstanceService,
     LifecycleStages,
     Nullable,
     OnLifecycle,
@@ -38,7 +38,7 @@ export class DocCanvasView {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         // @IRenderingEngine private readonly _engine: Engine,
         @Inject(Injector) private readonly _injector: Injector

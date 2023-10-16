@@ -8,10 +8,10 @@ import {
     IColorStyle,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IStyleData,
     ITextRotation,
     IUndoRedoService,
+    IUniverInstanceService,
     ObjectMatrix,
     Tools,
     VerticalAlign,
@@ -47,22 +47,22 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const ranges = selectionManagerService.getRangeDatas();
         if (!ranges?.length) {
             return false;
         }
 
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
             .getSheetId();
         const style = params.style;
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
@@ -148,7 +148,7 @@ export const SetBoldCommand: ICommand = {
         }
 
         const worksheet = accessor
-            .get(ICurrentUniverService)
+            .get(IUniverInstanceService)
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet();
@@ -180,7 +180,7 @@ export const SetItalicCommand: ICommand = {
         }
 
         const worksheet = accessor
-            .get(ICurrentUniverService)
+            .get(IUniverInstanceService)
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet();
@@ -215,7 +215,7 @@ export const SetUnderlineCommand: ICommand = {
         }
 
         const worksheet = accessor
-            .get(ICurrentUniverService)
+            .get(IUniverInstanceService)
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet();
@@ -252,7 +252,7 @@ export const SetStrikeThroughCommand: ICommand = {
         }
 
         const worksheet = accessor
-            .get(ICurrentUniverService)
+            .get(IUniverInstanceService)
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet();
@@ -287,7 +287,7 @@ export const SetOverlineCommand: ICommand = {
         }
 
         const worksheet = accessor
-            .get(ICurrentUniverService)
+            .get(IUniverInstanceService)
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet();

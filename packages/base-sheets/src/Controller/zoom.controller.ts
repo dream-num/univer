@@ -3,7 +3,7 @@ import {
     Disposable,
     ICommandInfo,
     ICommandService,
-    ICurrentUniverService,
+    IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
@@ -26,7 +26,7 @@ interface ISetWorksheetMutationParams {
 export class ZoomController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionTransformerShapeManager

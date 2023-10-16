@@ -12,7 +12,7 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/base-render';
-import { ICurrentUniverService, LifecycleStages, OnLifecycle, Workbook, Worksheet } from '@univerjs/core';
+import { IUniverInstanceService, LifecycleStages, OnLifecycle, Workbook, Worksheet } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import {
@@ -30,7 +30,7 @@ export class SheetCanvasView {
     private _currentWorkbook!: Workbook;
 
     constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionTransformerShapeManager
         private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,

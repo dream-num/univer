@@ -2,8 +2,8 @@ import {
     CommandType,
     Dimension,
     ICellData,
-    ICurrentUniverService,
     IMutation,
+    IUniverInstanceService,
     Nullable,
     ObjectMatrix,
     Tools,
@@ -23,8 +23,8 @@ export const DeleteRangeUndoMutationFactory = (
     accessor: IAccessor,
     params: IDeleteRangeMutationParams
 ): Nullable<IInsertRangeMutationParams> => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const worksheet = currentUniverService
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const worksheet = univerInstanceService
         .getCurrentUniverSheetInstance()
 
         .getSheetBySheetId(params.worksheetId);
@@ -77,8 +77,8 @@ export const DeleteRangeMutation: IMutation<IDeleteRangeMutationParams, boolean>
     id: 'sheet.mutation.delete-range',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;

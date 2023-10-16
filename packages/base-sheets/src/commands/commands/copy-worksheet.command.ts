@@ -1,4 +1,11 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, Tools } from '@univerjs/core';
+import {
+    CommandType,
+    ICommand,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    Tools,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
@@ -21,10 +28,10 @@ export const CopySheetCommand: ICommand = {
     handler: async (accessor: IAccessor, params?: ICopySheetCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService
+        let workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        let worksheetId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
@@ -33,7 +40,7 @@ export const CopySheetCommand: ICommand = {
             workbookId = params.workbookId ?? workbookId;
             worksheetId = params.worksheetId ?? worksheetId;
         }
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

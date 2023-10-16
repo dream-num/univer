@@ -1,5 +1,5 @@
 import { ComponentManager } from '@univerjs/base-ui';
-import { ICurrentUniverService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { DefaultSlideUIConfig, ISlideUIPluginConfig } from './Basics';
@@ -22,7 +22,7 @@ export class SlideUIPlugin extends Plugin {
         config: Partial<ISlideUIPluginConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super(SLIDE_UI_PLUGIN_NAME);
         this._config = Tools.deepMerge({}, DefaultSlideUIConfig, config);

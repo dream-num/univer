@@ -2,8 +2,8 @@ import {
     CommandType,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IUndoRedoService,
+    IUniverInstanceService,
     RANGE_TYPE,
     Rectangle,
 } from '@univerjs/core';
@@ -31,8 +31,8 @@ export const DeltaRowHeightCommand: ICommand = {
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
@@ -112,12 +112,12 @@ export const SetRowHeightCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length) return false;
 
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const workbookId = workbook.getUnitId();
         const worksheetId = workbook.getActiveSheet().getSheetId();
 

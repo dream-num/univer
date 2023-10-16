@@ -5,10 +5,10 @@ import {
     IBorderStyleData,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     IStyleData,
     IUndoRedoService,
+    IUniverInstanceService,
     Nullable,
     ObjectMatrix,
     Tools,
@@ -56,7 +56,7 @@ export const SetBorderCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ISetBorderCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
 
         const range = params.range || selectionManagerService.getRangeDatas()?.[0];
@@ -75,11 +75,11 @@ export const SetBorderCommand: ICommand = {
             style = BorderStyleTypes.DASH_DOT,
         } = params;
 
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const workbookId = params.workbookId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId =
-            params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+            params.worksheetId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

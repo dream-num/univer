@@ -3,8 +3,8 @@ import {
     ICellV,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IUndoRedoService,
+    IUniverInstanceService,
     ObjectMatrix,
     Tools,
 } from '@univerjs/core';
@@ -31,7 +31,7 @@ export const SetRangeFormattedValueCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ISetRangeFormattedValueParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
 
         const ranges = selectionManagerService.getRangeDatas();
@@ -39,14 +39,14 @@ export const SetRangeFormattedValueCommand: ICommand = {
             return false;
         }
 
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
             .getSheetId();
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

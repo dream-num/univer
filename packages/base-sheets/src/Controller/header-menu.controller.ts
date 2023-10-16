@@ -6,7 +6,7 @@ import {
     ISelectionTransformerShapeManager,
     Rect,
 } from '@univerjs/base-render';
-import { Disposable, ICurrentUniverService, LifecycleStages, Nullable, Observer, OnLifecycle } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, Nullable, Observer, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { getCoordByOffset, getSheetObject } from '../Basics/component-tools';
@@ -42,7 +42,7 @@ export class HeaderMenuController extends Disposable {
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionTransformerShapeManager
         @Inject(SelectionManagerService)

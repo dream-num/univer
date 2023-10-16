@@ -3,8 +3,8 @@ import { IMessageService } from '@univerjs/base-ui';
 import {
     ICellData,
     ICommandService,
-    ICurrentUniverService,
     IRange,
+    IUniverInstanceService,
     IWorkbookConfig,
     LocaleType,
     Nullable,
@@ -110,42 +110,42 @@ describe('Test move rows cols', () => {
     }
 
     function getRowCount(): number {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getRowCount();
     }
 
     function getColCount(): number {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getColumnCount();
     }
 
     function getCellInfo(row: number, col: number): Nullable<ICellData> {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getCellMatrix().getValue(row, col);
     }
 
     function getMergedInfo(row: number, col: number): Nullable<IRange> {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getMergedCells(row, col)?.[0];
     }
 
     function getRowHeight(row: number): number {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getRowHeight(row);
     }
 
     function getColWidth(col: number): number {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getColumnWidth(col);

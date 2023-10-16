@@ -1,9 +1,9 @@
 import {
     CommandType,
     IColumnData,
-    ICurrentUniverService,
     IMutation,
     IRowData,
+    IUniverInstanceService,
     ObjectArray,
     Worksheet,
 } from '@univerjs/core';
@@ -43,8 +43,8 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
     id: 'sheet.mutation.remove-rows',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');
@@ -79,8 +79,8 @@ export const RemoveColMutationFactory = (
     accessor: IAccessor,
     params: IRemoveColMutationParams
 ): IInsertColMutationParams => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -116,8 +116,8 @@ export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
     id: 'sheet.mutation.remove-col',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');

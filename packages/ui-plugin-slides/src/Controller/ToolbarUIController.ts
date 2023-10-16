@@ -2,8 +2,8 @@ import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager
 import {
     BorderType,
     HorizontalAlign,
-    ICurrentUniverService,
     IKeyValue,
+    IUniverInstanceService,
     Tools,
     UIObserver,
     VerticalAlign,
@@ -60,7 +60,7 @@ export class ToolbarUIController {
 
     constructor(
         config: SlideToolbarConfig | undefined,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         this._config = Tools.deepMerge({}, DefaultToolbarConfig, config);

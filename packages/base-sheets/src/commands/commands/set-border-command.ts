@@ -6,10 +6,10 @@ import {
     IBorderStyleData,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     IStyleData,
     IUndoRedoService,
+    IUniverInstanceService,
     ObjectMatrix,
     Rectangle,
     Tools,
@@ -89,12 +89,12 @@ export const SetBorderCommand: ICommand = {
     handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const borderStyleManagerService = accessor.get(BorderStyleManagerService);
 
         const selections = selectionManagerService.getRangeDatas();
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const workbookId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const worksheetId = worksheet.getSheetId();

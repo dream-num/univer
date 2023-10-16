@@ -3,9 +3,9 @@ import {
     Dimension,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     IUndoRedoService,
+    IUniverInstanceService,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -32,12 +32,12 @@ export const AddWorksheetMergeCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length) return false;
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

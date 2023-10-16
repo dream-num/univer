@@ -2,9 +2,9 @@ import {
     CommandType,
     ICellData,
     ICellV,
-    ICurrentUniverService,
     IMutation,
     IRange,
+    IUniverInstanceService,
     Nullable,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
@@ -30,8 +30,8 @@ export const SetRangeFormattedValueUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetRangeFormattedValueMutationParams
 ): ISetRangeFormattedValueMutationParams => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const worksheet = currentUniverService
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const worksheet = univerInstanceService
         .getCurrentUniverSheetInstance()
 
         .getSheetBySheetId(params.worksheetId);
@@ -58,8 +58,8 @@ export const SetRangeFormattedValueMutation: IMutation<ISetRangeFormattedValueMu
     id: 'sheet.mutation.set-range-formatted-value',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;

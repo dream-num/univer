@@ -3,9 +3,9 @@ import {
     CommandType,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     IUndoRedoService,
+    IUniverInstanceService,
     RANGE_TYPE,
     Rectangle,
     sequenceExecute,
@@ -60,8 +60,8 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) {
             return false;
         }
@@ -242,8 +242,8 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         if (!workbook) {
             return false;
         }

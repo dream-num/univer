@@ -4,7 +4,7 @@ import {
     ICommand,
     ICommandService,
     IConfigService,
-    ICurrentUniverService,
+    IUniverInstanceService,
     LocaleService,
     Plugin,
     PLUGIN_NAMES,
@@ -65,7 +65,7 @@ export class DocPlugin extends Plugin {
         @Inject(Injector) override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IConfigService private readonly _configService: IConfigService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super(PLUGIN_NAMES.DOCUMENT);
 

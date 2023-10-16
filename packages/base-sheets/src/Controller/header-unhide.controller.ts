@@ -2,8 +2,8 @@ import { IRenderManagerService } from '@univerjs/base-render';
 import {
     getWorksheetUID,
     ICommandService,
-    ICurrentUniverService,
     IKeyValue,
+    IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     RxDisposable,
@@ -48,7 +48,7 @@ export class HeaderUnhideController extends RxDisposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _cmdSrv: ICommandService,
-        @ICurrentUniverService private readonly _cuSrv: ICurrentUniverService,
+        @IUniverInstanceService private readonly _cuSrv: IUniverInstanceService,
         @IRenderManagerService private readonly _rendererManagerService: IRenderManagerService
     ) {
         super();

@@ -1,4 +1,4 @@
-import { Disposable, ICommandService, ICurrentUniverService } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
 
 import { DocCopyCommand } from '../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
@@ -6,7 +6,7 @@ import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 export class DocClipboardController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IDocClipboardService private readonly _docClipboardService: IDocClipboardService
     ) {
         super();

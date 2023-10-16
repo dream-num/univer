@@ -1,5 +1,5 @@
 import { CanvasView } from '@univerjs/base-slides';
-import { ICurrentUniverService, ISlidePage } from '@univerjs/core';
+import { ISlidePage, IUniverInstanceService } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { SlideBar } from '../View/SlideBar/SlideBar';
@@ -11,7 +11,7 @@ export class SlideBarUIController {
 
     constructor(
         @Inject(CanvasView) private readonly _canvasView: CanvasView,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         this._initialize();
     }

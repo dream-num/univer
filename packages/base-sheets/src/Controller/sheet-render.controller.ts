@@ -10,7 +10,7 @@ import {
     Disposable,
     ICommandInfo,
     ICommandService,
-    ICurrentUniverService,
+    IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
@@ -41,7 +41,7 @@ interface ISetWorksheetMutationParams {
 export class SheetRenderController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @ISelectionTransformerShapeManager

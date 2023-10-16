@@ -1,4 +1,11 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService, Tools } from '@univerjs/core';
+import {
+    CommandType,
+    ICommand,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    Tools,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
@@ -20,17 +27,17 @@ export const CopySheetToCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ICopySheetToCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const workbookId = params.workbookId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId =
-            params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        const copyToWorkbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+            params.worksheetId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const copyToWorkbookId = params.workbookId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         const copyToSheetId =
-            params.copyToSheetId || currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+            params.copyToSheetId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
-        const copyToWorkbook = currentUniverService.getUniverSheetInstance(copyToWorkbookId);
+        const copyToWorkbook = univerInstanceService.getUniverSheetInstance(copyToWorkbookId);
         if (!copyToWorkbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

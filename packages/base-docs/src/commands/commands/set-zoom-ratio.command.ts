@@ -1,4 +1,4 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
@@ -19,9 +19,9 @@ export const SetZoomRatioCommand: ICommand = {
     handler: async (accessor: IAccessor, params?: ISetZoomRatioCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let documentId = currentUniverService.getCurrentUniverDocInstance().getUnitId();
+        let documentId = univerInstanceService.getCurrentUniverDocInstance().getUnitId();
         let zoomRatio = 1;
 
         if (params) {
@@ -29,7 +29,7 @@ export const SetZoomRatioCommand: ICommand = {
             zoomRatio = params.zoomRatio ?? zoomRatio;
         }
 
-        const workbook = currentUniverService.getUniverDocInstance(documentId);
+        const workbook = univerInstanceService.getUniverDocInstance(documentId);
         if (!workbook) return false;
 
         const setZoomRatioMutationParams: ISetZoomRatioMutationParams = {

@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IDocumentBody, IMutation, UpdateDocsAttributeType } from '@univerjs/core';
+import { CommandType, IDocumentBody, IMutation, IUniverInstanceService, UpdateDocsAttributeType } from '@univerjs/core';
 
 import { DeleteApply } from './functions/delete-apply';
 import { InsertApply } from './functions/insert';
@@ -50,9 +50,9 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const { unitId, mutations } = params;
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const document = currentUniverService.getUniverDocInstance(unitId);
+        const document = univerInstanceService.getUniverDocInstance(unitId);
         if (!document) {
             throw new Error(`Document not found for unitId: ${unitId}`);
         }

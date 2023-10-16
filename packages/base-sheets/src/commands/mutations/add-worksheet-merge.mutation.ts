@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
+import { CommandType, IMutation, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
@@ -10,8 +10,8 @@ export const AddMergeUndoMutationFactory = (
     accessor: IAccessor,
     params: IAddWorksheetMergeMutationParams
 ): IRemoveWorksheetMergeMutationParams => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -28,8 +28,8 @@ export const AddWorksheetMergeMutation: IMutation<IAddWorksheetMergeMutationPara
     id: 'sheet.mutation.add-worksheet-merge',
     type: CommandType.MUTATION,
     handler: async (accessor: IAccessor, params: IAddWorksheetMergeMutationParams) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');

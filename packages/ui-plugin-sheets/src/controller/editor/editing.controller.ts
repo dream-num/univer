@@ -3,7 +3,7 @@ import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/ba
 import {
     Disposable,
     ICommandService,
-    ICurrentUniverService,
+    IUniverInstanceService,
     LifecycleStages,
     Nullable,
     OnLifecycle,
@@ -17,7 +17,7 @@ export class NormalInputController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,

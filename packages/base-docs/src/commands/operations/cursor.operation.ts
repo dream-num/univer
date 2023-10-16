@@ -17,10 +17,10 @@ export const MoveCursorOperation: IOperation<IMoveCursorOperationParams> = {
             return false;
         }
 
-        // const currentUniverService = accessor.get(ICurrentUniverService);
+        // const univerInstanceService = accessor.get(IUniverInstanceService);
         // const inputController = accessor.get(InputController);
 
-        // inputController.moveCursor(currentUniverService.getCurrentUniverDocInstance(), params.direction);
+        // inputController.moveCursor(univerInstanceService.getCurrentUniverDocInstance(), params.direction);
 
         return true;
     },

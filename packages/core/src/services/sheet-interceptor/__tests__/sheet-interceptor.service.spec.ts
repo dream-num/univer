@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Univer } from '../../../Basics/Univer';
 import { Nullable } from '../../../common/type-utils';
 import { ICellData } from '../../../Types/Interfaces/ICellData';
-import { ICurrentUniverService } from '../../current.service';
+import { IUniverInstanceService } from '../../current.service';
 import { SheetInterceptorService } from '../sheet-interceptor.service';
 import { createCoreTestBed } from './create-core-test-bed';
 
@@ -21,7 +21,7 @@ describe('Test SheetInterceptorService', () => {
     afterEach(() => univer.dispose());
 
     function getCell(row: number, col: number): Nullable<ICellData> {
-        const cus = get(ICurrentUniverService);
+        const cus = get(IUniverInstanceService);
         const sheet = cus.getCurrentUniverSheetInstance().getActiveSheet()!;
         return sheet.getCell(row, col);
     }

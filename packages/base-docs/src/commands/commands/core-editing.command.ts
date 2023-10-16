@@ -5,11 +5,11 @@ import {
     ICommand,
     ICommandInfo,
     ICommandService,
-    ICurrentUniverService,
     IDocumentBody,
     IDocumentData,
     ITextSelectionRange,
     IUndoRedoService,
+    IUniverInstanceService,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
@@ -318,9 +318,9 @@ export const CoverCommand: ICommand<ICoverCommandParams> = {
     id: 'doc.command-cover-content',
     type: CommandType.COMMAND,
     handler: async (accessor, params: ICoverCommandParams) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const { unitId, snapshot, clearUndoRedoStack } = params;
-        const doc = currentUniverService.getUniverDocInstance(unitId);
+        const doc = univerInstanceService.getUniverDocInstance(unitId);
         if (!doc) {
             return false;
         }

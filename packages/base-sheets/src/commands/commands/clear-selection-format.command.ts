@@ -4,9 +4,9 @@ import {
     ICommand,
     ICommandInfo,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     IUndoRedoService,
+    IUniverInstanceService,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     Rectangle,
@@ -37,12 +37,12 @@ export const ClearSelectionFormatCommand: ICommand = {
     id: 'sheet.command.clear-selection-format',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const workbookId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const worksheetId = worksheet.getSheetId();

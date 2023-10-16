@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { ICommandService, ICurrentUniverService, RANGE_TYPE, RedoCommand, UndoCommand, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand, Univer } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -21,7 +21,7 @@ describe('Test set row height commands', () => {
     let commandService: ICommandService;
 
     function getRowHeight(row: number): number {
-        const worksheet = get(ICurrentUniverService).getCurrentUniverSheetInstance().getActiveSheet();
+        const worksheet = get(IUniverInstanceService).getCurrentUniverSheetInstance().getActiveSheet();
         return worksheet.getRowHeight(row);
     }
 
@@ -35,7 +35,7 @@ describe('Test set row height commands', () => {
         commandService.registerCommand(SetRowHeightCommand);
         commandService.registerCommand(SetWorksheetRowHeightMutation);
 
-        const worksheet = get(ICurrentUniverService).getCurrentUniverSheetInstance().getActiveSheet();
+        const worksheet = get(IUniverInstanceService).getCurrentUniverSheetInstance().getActiveSheet();
         const maxColumn = worksheet.getMaxColumns() - 1;
         const selectionManager = get(SelectionManagerService);
         selectionManager.setCurrentSelection({

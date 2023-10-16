@@ -1,4 +1,4 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
@@ -23,11 +23,11 @@ export const SetWorksheetNameCommand: ICommand = {
     handler: async (accessor: IAccessor, params: SetWorksheetNameCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbookId = params.workbookId || currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const workbookId = params.workbookId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId =
-            params.worksheetId || currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+            params.worksheetId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
         const redoMutationParams: ISetWorksheetNameMutationParams = {
             worksheetId,

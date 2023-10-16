@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, IRange, Rectangle } from '@univerjs/core';
+import { CommandType, IMutation, IRange, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 // TODO@wzhudev: maybe we should do some error handling in these mutators
@@ -50,9 +50,9 @@ export const MoveRowsMutation: IMutation<IMoveRowsMutationParams> = {
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const { workbookId, worksheetId, sourceRange, targetRange } = params;
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const univerSheet = currentUniverService.getUniverSheetInstance(workbookId);
+        const univerSheet = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!univerSheet) {
             throw new Error('[MoveRowMutation] univerSheet is null!');
         }
@@ -124,9 +124,9 @@ export const MoveColsMutation: IMutation<IMoveColumnsMutationParams> = {
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const { workbookId, worksheetId, sourceRange, targetRange } = params;
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const univerSheet = currentUniverService.getUniverSheetInstance(workbookId);
+        const univerSheet = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!univerSheet) {
             throw new Error('[MoveColumnMutation] univerSheet is null!');
         }

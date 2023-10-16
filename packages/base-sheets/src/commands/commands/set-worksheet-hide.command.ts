@@ -3,8 +3,8 @@ import {
     CommandType,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IUndoRedoService,
+    IUniverInstanceService,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -30,16 +30,16 @@ export const SetWorksheetHideCommand: ICommand = {
     handler: async (accessor: IAccessor, params?: ISetWorksheetHiddenCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        let worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
         if (params) {
             worksheetId = params.worksheetId ?? worksheetId;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

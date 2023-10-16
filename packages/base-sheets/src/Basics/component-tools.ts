@@ -9,7 +9,7 @@ import {
     SpreadsheetSkeleton,
     Vector2,
 } from '@univerjs/base-render';
-import { ICurrentUniverService, Nullable } from '@univerjs/core';
+import { IUniverInstanceService, Nullable } from '@univerjs/core';
 
 import { SHEET_VIEW_KEY, VIEWPORT_KEY } from './Const/DEFAULT_SPREADSHEET_VIEW';
 
@@ -23,10 +23,10 @@ export interface ISheetObjectParam {
 }
 
 export function getSheetObject(
-    currentUniverService: ICurrentUniverService,
+    univerInstanceService: IUniverInstanceService,
     renderManagerService: IRenderManagerService
 ): Nullable<ISheetObjectParam> {
-    const workbook = currentUniverService.getCurrentUniverSheetInstance();
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
 
     const unitId = workbook.getUnitId();
 

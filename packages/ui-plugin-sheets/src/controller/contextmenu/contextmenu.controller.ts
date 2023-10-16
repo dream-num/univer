@@ -1,7 +1,7 @@
 import { IRenderManagerService } from '@univerjs/base-render';
 import { getSheetObject } from '@univerjs/base-sheets';
 import { IContextMenuService, MenuPosition } from '@univerjs/base-ui';
-import { Disposable, ICurrentUniverService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 
 import { SheetMenuPosition } from '../menu/menu';
 
@@ -13,7 +13,7 @@ import { SheetMenuPosition } from '../menu/menu';
 @OnLifecycle(LifecycleStages.Rendered, SheetContextMenuController)
 export class SheetContextMenuController extends Disposable {
     constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {

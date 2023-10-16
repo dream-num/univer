@@ -3,8 +3,8 @@ import {
     DEFAULT_WORKSHEET,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IUndoRedoService,
+    IUniverInstanceService,
     IWorksheetConfig,
     Tools,
 } from '@univerjs/core';
@@ -34,15 +34,15 @@ export const InsertSheetCommand: ICommand = {
     handler: async (accessor: IAccessor, params?: InsertSheetCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        let workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
 
         if (params) {
             workbookId = params.workbookId ?? workbookId;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
 
         let index = workbook.getSheets().length;

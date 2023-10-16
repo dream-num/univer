@@ -5,7 +5,7 @@
 //     BaseActionExtension,
 //     BaseActionExtensionFactory,
 //     IActionData,
-//     ICurrentUniverService,
+//     IUniverInstanceService,
 //     ISetRangeDataActionData,
 //     ISheetActionData,
 //     ObjectMatrix,
@@ -20,7 +20,7 @@
 // export class NumfmtActionExtension extends BaseActionExtension {
 //     constructor(
 //         actionDataList: IActionData[],
-//         @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+//         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
 //         @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
 //         @Inject(Injector) private readonly _sheetInjector: Injector
 //     ) {

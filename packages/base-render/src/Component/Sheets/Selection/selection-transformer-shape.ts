@@ -2,6 +2,7 @@ import { TinyColor } from '@ctrl/tinycolor';
 import { IRangeWithCoord, ISelectionCellWithCoord, Nullable, RANGE_TYPE } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
+import { DEFAULT_SELECTION_LAYER_INDEX } from '../../../Basics/Const';
 import {
     ISelectionStyle,
     ISelectionWidgetConfig,
@@ -604,8 +605,7 @@ export class SelectionTransformerShape {
         this._columnHeaderGroup.zIndex = zIndex;
 
         const scene = this.getScene();
-        const maxLayerIndex = scene.getLayerMaxZIndex();
-        scene.addObjects([this._rowHeaderGroup, this._columnHeaderGroup], maxLayerIndex);
+        scene.addObjects([this._rowHeaderGroup, this._columnHeaderGroup], DEFAULT_SELECTION_LAYER_INDEX);
     }
 
     private _initialWidget() {

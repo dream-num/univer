@@ -7,7 +7,7 @@ import { Workbook } from '../../sheets/workbook';
 import { Worksheet } from '../../sheets/worksheet';
 import { ICellData } from '../../Types/Interfaces/ICellData';
 import { ICommandInfo } from '../command/command.service';
-import { IUniverInstanceService } from '../current.service';
+import { IUniverInstanceService } from '../instance/instance.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 import { IUndoRedoCommandInfos } from '../undoredo/undoredo.service';
 

@@ -80,13 +80,13 @@ export class DesktopCellEditorService extends RxDisposable implements ICellEdito
     ) {
         super();
 
-        this._mountCellEditor();
+        // this._mountCellEditor();
 
         // since paste event could only be triggered on an editable element such as textarea / input / contenteditable,
         // we should bind related event handler to cell editor element
-        this._initPasteHandler();
-        this._initListeners();
-        this._focusCurrentSheet();
+        // this._initPasteHandler();
+        // this._initListeners();
+        // this._focusCurrentSheet();
     }
 
     override dispose(): void {

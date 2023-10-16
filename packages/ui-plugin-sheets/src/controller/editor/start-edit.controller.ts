@@ -11,6 +11,7 @@ import { IEditorBridgeService } from '@univerjs/base-sheets';
 import {
     Disposable,
     ICommandService,
+    IContextService,
     IUniverInstanceService,
     LifecycleStages,
     makeCellToSelection,
@@ -21,6 +22,7 @@ import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../Basics/editor/get-editor-object';
+import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 
 @OnLifecycle(LifecycleStages.Steady, StartEditController)
@@ -29,6 +31,7 @@ export class StartEditController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
+        @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
@@ -79,11 +82,13 @@ export class StartEditController extends Disposable {
     private _initialStartEdit() {
         this._editorBridgeService.visible$.subscribe((state) => {
             if (state.visible === false) {
+                this._contextService.setContextValue(SHEET_EDITOR_ACTIVATED, false);
                 this._cellEditorManagerService.setState({
                     show: state.visible,
                 });
                 return;
             }
+
             const param = this._editorBridgeService.getState();
             if (param == null) {
                 return;
@@ -103,6 +108,7 @@ export class StartEditController extends Disposable {
 
             const { startX, startY, endX, endY } = actualRangeWithCoord;
 
+            this._contextService.setContextValue(SHEET_EDITOR_ACTIVATED, true);
             this._cellEditorManagerService.setState({
                 startX,
                 startY,

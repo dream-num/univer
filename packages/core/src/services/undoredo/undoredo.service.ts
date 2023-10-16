@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../Shared/lifecycle';
 import { CommandService, CommandType, ICommand, ICommandInfo, ICommandService } from '../command/command.service';
-import { IUniverInstanceService } from '../current.service';
+import { IUniverInstanceService } from '../instance/instance.service';
 
 // TODO:: an undo redo element may be mergeable to another undo redo element
 

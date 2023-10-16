@@ -4,7 +4,7 @@ import { Univer } from '../../../Basics/Univer';
 import { Plugin, PluginType } from '../../../plugin/plugin';
 import { LocaleType } from '../../../Types/Enum/LocaleType';
 import { IWorkbookConfig } from '../../../Types/Interfaces/IWorkbookData';
-import { IUniverInstanceService } from '../../current.service';
+import { IUniverInstanceService } from '../../instance/instance.service';
 import { ILogService } from '../../log/log.service';
 
 const TEST_WORKBOOK_DATA: IWorkbookConfig = {

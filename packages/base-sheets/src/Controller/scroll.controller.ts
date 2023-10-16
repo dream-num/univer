@@ -12,7 +12,7 @@ import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
-import { ScrollCommand } from '../commands/commands/set-scroll.command';
+import { SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
 import { IMoveSelectionCommandParams, MoveSelectionCommand } from '../commands/commands/set-selections.command';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 import { SelectionManagerService } from '../services/selection-manager.service';
@@ -128,6 +128,12 @@ export class ScrollController extends Disposable {
         if (viewport == null) {
             return;
         }
+        const { tl } = viewport.getBounding();
+
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
+            return;
+        }
 
         const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
         const {
@@ -197,14 +203,22 @@ export class ScrollController extends Disposable {
         if (startSheetViewRow === undefined && startSheetViewColumn === undefined) {
             return;
         }
-        // sheetViewStartRow and sheetViewStartColumn maybe undefined, which means should not make scroll at its direction
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-        this._commandService.executeCommand(ScrollCommand.id, {
-            unitId: workbook.getUnitId(),
-            sheetId: workbook.getActiveSheet().getSheetId(),
-            sheetViewStartRow: startSheetViewRow,
-            sheetViewStartColumn: startSheetViewColumn,
-        });
+
+        const { scaleX, scaleY } = sheetObject.scene.getAncestorScale();
+        const { startX, startY } = skeleton.getCellByIndex(
+            startSheetViewRow || 0,
+            startSheetViewColumn || 0,
+            scaleX,
+            scaleY
+        );
+
+        if (startSheetViewRow !== undefined) {
+            const offsetY = startY - tl.y;
+            this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
+        } else if (startSheetViewColumn !== undefined) {
+            const offsetX = startX - tl.x;
+            this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
+        }
     }
 
     private _scrollSubscribeBinding() {

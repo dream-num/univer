@@ -2,7 +2,7 @@ import { ISelectionTransformerShapeManager, SelectionTransformerShapeManager } f
 import { ICommandService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { SetScrollOperation } from './commands/operations/scroll.operation';
+import { SetScrollOperation, SetScrollRelativeOperation } from './commands/operations/scroll.operation';
 import { SetSelectionsOperation } from './commands/operations/selection.operation';
 import { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
@@ -90,6 +90,7 @@ export class SheetPlugin extends Plugin {
     private _initializeCommands(): void {
         this._commandService.registerCommand(SetSelectionsOperation);
         this._commandService.registerCommand(SetScrollOperation);
+        this._commandService.registerCommand(SetScrollRelativeOperation);
         this._commandService.registerCommand(SetZoomRatioOperation);
     }
 }

@@ -67,7 +67,7 @@ export {
     SetSpecificRowsVisibleCommand,
 } from './commands/commands/set-row-visible.command';
 export type { IScrollCommandParams } from './commands/commands/set-scroll.command';
-export { RestScrollCommand, ScrollCommand } from './commands/commands/set-scroll.command';
+export { RestScrollCommand, ScrollCommand, SetScrollRelativeCommand } from './commands/commands/set-scroll.command';
 export type {
     IExpandSelectionCommandParams,
     IMoveSelectionCommandParams,
@@ -136,7 +136,7 @@ export {
     type ISetWorksheetRowHeightMutationParams,
     SetWorksheetRowHeightMutation,
 } from './commands/mutations/set-worksheet-row-height.mutation';
-export { SetScrollOperation } from './commands/operations/scroll.operation';
+export { SetScrollOperation, SetScrollRelativeOperation } from './commands/operations/scroll.operation';
 export { SetSelectionsOperation } from './commands/operations/selection.operation';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export * from './Locale';

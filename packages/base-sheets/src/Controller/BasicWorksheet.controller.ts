@@ -48,7 +48,7 @@ import {
     SetSelectedRowsVisibleCommand,
     SetSpecificRowsVisibleCommand,
 } from '../commands/commands/set-row-visible.command';
-import { ScrollCommand } from '../commands/commands/set-scroll.command';
+import { ScrollCommand, SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
 import {
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
@@ -206,6 +206,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetFrozenMutation,
             SetFrozenCancelCommand,
             ScrollCommand,
+            SetScrollRelativeCommand,
             SetZoomRatioCommand,
             ChangeZoomRatioCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));

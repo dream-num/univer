@@ -115,13 +115,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
 
         const shouldTrigger = Array.from(shortcuts)
             .sort((s1, s2) => (s2.priority ?? 0) - (s1.priority ?? 0))
-            .find(
-                (s) =>
-                    s.preconditions?.({
-                        getContextValue: this._contextService.getContextValue.bind(this._contextService),
-                        matchContextValue: this._contextService.matchContextValue.bind(this._contextService),
-                    }) ?? true
-            );
+            .find((s) => s.preconditions?.(this._contextService) ?? true);
 
         if (shouldTrigger) {
             this._commandService.executeCommand(shouldTrigger.id, shouldTrigger.staticParameters);

@@ -65,7 +65,7 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
                 if (typeof params.colWidth === 'number') {
                     column.w = params.colWidth;
                 } else {
-                    column.w = params.colWidth.get(j) ?? defaultColumnWidth;
+                    column.w = params.colWidth.get(j - range.startColumn) ?? defaultColumnWidth;
                 }
             }
         }

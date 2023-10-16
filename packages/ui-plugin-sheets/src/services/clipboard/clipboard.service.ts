@@ -188,9 +188,13 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             rowContents.push(getRowContent(row, cols, hooks, matrix));
         });
 
-        const html = `<google-sheets-html-origin><style type="text/css"><!--td {border: 1px solid #cccccc;}br {mso-data-placement:same-cell;}--></style>
-<table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}
+        const html = `<google-sheets-html-origin><table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}
 <tbody>${rowContents.join('')}</tbody></table>`;
+
+        // <style> </style> will remove td
+        //         const html = `<google-sheets-html-origin><style type="text/css"><!--td {border: 1px solid #cccccc;}br {mso-data-placement:same-cell;}--></style>
+        // <table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}
+        // <tbody>${rowContents.join('')}</tbody></table>`;
 
         // TODO: plain text copying is not implemented yet
         // 6. write html and get plain text info the clipboard interface
@@ -457,7 +461,7 @@ function parseTableCells(tdStrings: string[]) {
 
         Array.from(cellMatches).forEach((cellMatch) => {
             const cellProperties = parseProperties(cellMatch[1]);
-            const content = cellMatch[2];
+            const content = cellMatch[2].replace(/&nbsp;/g, ' '); // paste from excel
             const rowSpan = cellProperties.rowspan ? +cellProperties.rowspan : 1;
             const colSpan = cellProperties.colspan ? +cellProperties.colspan : 1;
 

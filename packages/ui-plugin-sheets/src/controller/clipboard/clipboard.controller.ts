@@ -1,24 +1,34 @@
 import {
+    AddWorksheetMergeMutation,
+    getPrimaryForRange,
+    IAddWorksheetMergeMutationParams,
     IInsertColMutationParams,
     IInsertRowMutationParams,
     InsertColMutation,
     InsertRowMutation,
     ISetRangeValuesMutationParams,
+    ISetSelectionsOperationParams,
     ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowHeightMutationParams,
+    NORMAL_SELECTION_PLUGIN_NAME,
     SetRangeValuesMutation,
+    SetSelectionsOperation,
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/base-sheets';
-import { IMessageService, MessageType } from '@univerjs/base-ui';
+import { handleStringToStyle, IMessageService, MessageType, textTrim } from '@univerjs/base-ui';
 import {
     BooleanNumber,
+    DEFAULT_WORKSHEET_COLUMN_WIDTH,
+    DEFAULT_WORKSHEET_ROW_HEIGHT,
     Disposable,
+    handleStyleToString,
     ICellData,
     ICommandInfo,
     ICommandService,
     IConfigService,
     IRange,
+    IRowData,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -26,7 +36,6 @@ import {
     ObjectMatrix,
     OnLifecycle,
     Worksheet,
-    WrapStrategy,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -37,9 +46,6 @@ import {
     ISheetClipboardHook,
     ISheetClipboardService,
 } from '../../services/clipboard/clipboard.service';
-
-// TODO: default row height from config?
-const DEFAULT_HEIGHT = 20;
 
 /**
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
@@ -99,36 +105,40 @@ export class SheetClipboardController extends Disposable {
                 // use worksheet.getStyle()
                 const range = currentSheet!.getRange(row, col);
                 const textStyle = range.getTextStyle();
-                const color = range.getFontColor();
-                const backgroundColor = range.getBackground();
+                // const color = range.getFontColor();
+                // const backgroundColor = range.getBackground();
 
                 let style = '';
-                if (color) {
-                    style += `color: ${color};`;
-                }
-                if (backgroundColor) {
-                    style += `background-color: ${backgroundColor};`;
-                }
-                if (textStyle?.bl) {
-                    style += 'font-weight: bold;';
-                }
-                if (textStyle?.fs) {
-                    style += `font-size: ${textStyle.fs}px;`;
-                }
-                if (textStyle?.tb === WrapStrategy.WRAP) {
-                    style += 'word-wrap: break-word;';
-                }
-                if (textStyle?.it) {
-                    style += 'font-style: italic;';
-                }
-                if (textStyle?.ff) {
-                    style += `font-family: ${textStyle.ff};`;
-                }
-                if (textStyle?.st) {
-                    style += 'text-decoration: line-through;';
-                }
-                if (textStyle?.ul) {
-                    style += 'text-decoration: underline';
+                // if (color) {
+                //     style += `color: ${color};`;
+                // }
+                // if (backgroundColor) {
+                //     style += `background-color: ${backgroundColor};`;
+                // }
+                // if (textStyle?.bl) {
+                //     style += 'font-weight: bold;';
+                // }
+                // if (textStyle?.fs) {
+                //     style += `font-size: ${textStyle.fs}px;`;
+                // }
+                // if (textStyle?.tb === WrapStrategy.WRAP) {
+                //     style += 'word-wrap: break-word;';
+                // }
+                // if (textStyle?.it) {
+                //     style += 'font-style: italic;';
+                // }
+                // if (textStyle?.ff) {
+                //     style += `font-family: ${textStyle.ff};`;
+                // }
+                // if (textStyle?.st) {
+                //     style += 'text-decoration: line-through;';
+                // }
+                // if (textStyle?.ul) {
+                //     style += 'text-decoration: underline';
+                // }
+
+                if (textStyle) {
+                    style = handleStyleToString(textStyle);
                 }
 
                 if (style) {
@@ -194,16 +204,34 @@ export class SheetClipboardController extends Disposable {
                 const addingRowsCount = range.endRow - maxRow;
                 const existingRowsCount = rowProperties.length - addingRowsCount;
                 if (addingRowsCount > 0) {
+                    const rowInfo = new ObjectArray<IRowData>();
+                    rowProperties.slice(existingRowsCount).forEach((property, index) => {
+                        const style = property.style;
+                        const cssTextArray = style.split(';');
+                        let height = DEFAULT_WORKSHEET_ROW_HEIGHT;
+
+                        cssTextArray.find((css) => {
+                            css = css.toLowerCase();
+                            const key = textTrim(css.substr(0, css.indexOf(':')));
+                            const value = textTrim(css.substr(css.indexOf(':') + 1));
+                            if (key === 'height') {
+                                height = parseFloat(value);
+                                return true;
+                            }
+                            return false;
+                        });
+
+                        rowInfo.set(index, {
+                            h: height,
+                            hd: BooleanNumber.FALSE,
+                        });
+                    });
+
                     const addRowMutation: IInsertRowMutationParams = {
                         workbookId: workbookId!,
                         worksheetId: worksheetId!,
                         ranges: [{ ...range, startRow: maxRow }],
-                        rowInfo: new ObjectArray(
-                            rowProperties.slice(existingRowsCount).map((property) => ({
-                                h: property.height ? +property.height : DEFAULT_HEIGHT,
-                                hd: BooleanNumber.FALSE,
-                            }))
-                        ),
+                        rowInfo,
                     };
                     redoMutations.push({
                         id: InsertRowMutation.id,
@@ -211,16 +239,33 @@ export class SheetClipboardController extends Disposable {
                     });
                 }
 
+                // get row height of existing rows
+                const rowHeight = new ObjectArray<number>();
+                rowProperties.slice(0, existingRowsCount).forEach((property, index) => {
+                    const style = property.style;
+                    const cssTextArray = style.split(';');
+                    let height = DEFAULT_WORKSHEET_ROW_HEIGHT;
+
+                    cssTextArray.find((css) => {
+                        css = css.toLowerCase();
+                        const key = textTrim(css.substr(0, css.indexOf(':')));
+                        const value = textTrim(css.substr(css.indexOf(':') + 1));
+                        if (key === 'height') {
+                            height = parseFloat(value);
+                            return true;
+                        }
+                        return false;
+                    });
+
+                    rowHeight.set(index, height);
+                });
+
                 // apply row properties to the existing rows
                 const setRowPropertyMutation: ISetWorksheetRowHeightMutationParams = {
                     workbookId: workbookId!,
                     worksheetId: worksheetId!,
                     ranges: [{ ...range, endRow: Math.min(range.endRow, maxRow) }],
-                    rowHeight: new ObjectArray(
-                        rowProperties
-                            .slice(0, existingRowsCount)
-                            .map((property) => (property.height ? +property.height : DEFAULT_HEIGHT))
-                    ),
+                    rowHeight,
                 };
                 redoMutations.push({
                     id: SetWorksheetRowHeightMutation.id,
@@ -230,7 +275,7 @@ export class SheetClipboardController extends Disposable {
                 // TODO: add undo mutations but we cannot do it now because underlying mechanism is not ready
 
                 return {
-                    redos: [] || redoMutations,
+                    redos: redoMutations,
                     undos: [] || undoMutations,
                 };
             },
@@ -250,7 +295,7 @@ export class SheetClipboardController extends Disposable {
                         ranges: [{ ...range, startColumn: maxColumn }],
                         colInfo: new ObjectArray(
                             colProperties.slice(existingColsCount).map((property) => ({
-                                w: property.width ? +property.width : DEFAULT_HEIGHT,
+                                w: property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH,
                                 hd: BooleanNumber.FALSE,
                             }))
                         ),
@@ -260,7 +305,6 @@ export class SheetClipboardController extends Disposable {
                         params: addColMutation,
                     });
                 }
-
                 // apply row properties to the existing rows
                 const setRowPropertyMutation: ISetWorksheetColWidthMutationParams = {
                     workbookId: workbookId!,
@@ -269,7 +313,7 @@ export class SheetClipboardController extends Disposable {
                     colWidth: new ObjectArray(
                         colProperties
                             .slice(0, existingColsCount)
-                            .map((property) => (property.width ? +property.width : DEFAULT_HEIGHT))
+                            .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH))
                     ),
                 };
                 redoMutations.push({
@@ -280,7 +324,7 @@ export class SheetClipboardController extends Disposable {
                 // TODO: add undo mutations but we cannot do it now because underlying mechanism is not ready
 
                 return {
-                    redos: [] || redoMutations,
+                    redos: redoMutations,
                     undos: [] || undoMutations,
                 };
             },
@@ -307,19 +351,45 @@ export class SheetClipboardController extends Disposable {
         // insert cell style, insert cell content and insert merged cell info
         // 1. merged cell (TODO)
         // 2. raw content
-        // 3. cell style (TODO)
+        // 3. cell style
 
         const { startColumn, startRow } = range;
         const valueMatrix = new ObjectMatrix<ICellData>();
+        const mergeRangeData: IRange[] = [];
         const redoMutationsInfo: ICommandInfo[] = [];
         const undoMutationsInfo: ICommandInfo[] = [];
 
         matrix.forValue((row, col, value) => {
+            // TODO@Dushusir Temporarily use handlestringostyle. After all replication and paste function is completed, fix the handlestringostyle method
+            const style = handleStringToStyle(undefined, value.properties.style);
             valueMatrix.setValue(row + startRow, col + startColumn, {
                 v: value.content,
+                s: style,
             });
+
+            // rowspan and colspan to merge data
+            if (value.rowSpan) {
+                const colSpan = value.colSpan || 1;
+                const mergeRange = {
+                    startRow: startRow + row,
+                    endRow: startRow + row + value.rowSpan - 1,
+                    startColumn: startColumn + col,
+                    endColumn: startColumn + col + colSpan - 1,
+                };
+                mergeRangeData.push(mergeRange);
+            } else if (value.colSpan) {
+                const rowSpan = value.rowSpan || 1;
+                const mergeRange = {
+                    startRow: startRow + row,
+                    endRow: startRow + row + rowSpan - 1,
+                    startColumn: startColumn + col,
+                    endColumn: startColumn + col + value.colSpan - 1,
+                };
+                mergeRangeData.push(mergeRange);
+            }
         });
 
+        // set cell value and style
         const setContentMutation: ISetRangeValuesMutationParams = {
             workbookId,
             worksheetId,
@@ -331,6 +401,83 @@ export class SheetClipboardController extends Disposable {
             id: SetRangeValuesMutation.id,
             params: setContentMutation,
         });
+
+        // set merged cell info
+        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
+            workbookId,
+            worksheetId,
+            ranges: mergeRangeData,
+        };
+        redoMutationsInfo.push({
+            id: AddWorksheetMergeMutation.id,
+            params: addMergeMutationParams,
+        });
+
+        // set selection
+        const worksheet = this._getWorksheet(workbookId, worksheetId);
+        const destinationRange = {
+            startRow,
+            endRow: range.endRow - 1,
+            startColumn,
+            endColumn: range.endColumn - 1,
+        };
+        const primaryCell = {
+            startRow,
+            endRow: startRow,
+            startColumn,
+            endColumn: startColumn,
+        };
+
+        const primary = getPrimaryForRange(primaryCell, worksheet);
+
+        const mainCell = matrix.getValue(0, 0);
+        const rowSpan = mainCell?.rowSpan || 1;
+        const colSpan = mainCell?.colSpan || 1;
+
+        if (rowSpan > 1 || colSpan > 1) {
+            const mergeRange = {
+                startRow,
+                endRow: startRow + rowSpan - 1,
+                startColumn,
+                endColumn: startColumn + colSpan - 1,
+            };
+
+            primary.startRow = mergeRange.startRow;
+            primary.endRow = mergeRange.endRow;
+            primary.startColumn = mergeRange.startColumn;
+            primary.endColumn = mergeRange.endColumn;
+
+            primary.isMerged = true;
+            primary.isMergedMainCell = true;
+        }
+
+        const setSelectionsParam: ISetSelectionsOperationParams = {
+            workbookId,
+            worksheetId,
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            selections: [{ range: destinationRange, primary, style: null }],
+        };
+        redoMutationsInfo.push({
+            id: SetSelectionsOperation.id,
+            params: setSelectionsParam,
+        });
+
+        // TODO@Dushusir: undo
+        // const accessor = {
+        //     get: this._injector.get.bind(this._injector),
+        // };
+
+        // const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+        //     accessor,
+        //     setContentMutation
+        // );
+
+        // undoMutationsInfo.push({
+        //     id: SetRangeValuesMutation.id,
+        //     params: undoSetRangeValuesMutationParams,
+        // });
+
+        //
 
         return {
             redos: redoMutationsInfo,

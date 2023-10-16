@@ -117,13 +117,12 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
  * @param $dom
  * @returns
  */
-export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
-    let cssText = $dom.style.cssText ?? '';
+export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
+    let cssText = $dom?.style?.cssText ?? '';
     cssText += cssStyle;
-    if (cssText == null || cssText.length === 0) {
+    if (cssText.length === 0) {
         return {};
     }
-    cssText += cssStyle;
     const cssTextArray = cssText.split(';');
     const styleList: IStyleData = {};
 
@@ -171,7 +170,7 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
                 fs *= 2;
             }
 
-            // px to pt
+            // px to pt TODO@Dushusir: px or pt?
             if (value.indexOf('px') !== -1) {
                 fs = pxToPt(parseInt(value));
             }
@@ -307,7 +306,7 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
                     angle = +match[0];
                 }
                 // 竖排文字
-                if ($dom.dataset.vertical) {
+                if ($dom?.dataset.vertical) {
                     ver = +$dom.dataset.vertical;
                 }
                 styleList.tr = {
@@ -331,9 +330,18 @@ export function handleStringToStyle($dom: HTMLElement, cssStyle: string = '') {
             }
         }
 
-        if (key === 'overflow-wrap' || key === 'overflowWrap') {
+        // wrap text
+        if (key === 'overflow-wrap' || key === 'word-wrap') {
             if (value === 'break-word') {
                 styleList.tb = 3;
+            }
+        } else if (key === 'text-overflow') {
+            if (value === 'clip') {
+                styleList.tb = 2;
+            }
+        } else if (key === 'text-break') {
+            if (value === 'overflow') {
+                styleList.tb = 1;
             }
         }
 

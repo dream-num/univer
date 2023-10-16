@@ -228,8 +228,6 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             () => {
                 if (style.it) {
                     str += `font-style: italic; `;
-                } else {
-                    str += `font-style: normal; `;
                 }
             },
         ],
@@ -238,8 +236,6 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             () => {
                 if (style.bl) {
                     str += `font-weight: bold; `;
-                } else {
-                    str += `font-weight: normal; `;
                 }
             },
         ],
@@ -301,7 +297,9 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
         [
             'bg',
             () => {
-                str += `background: ${getColorStyle(style.bg)}; `;
+                if (style.bg) {
+                    str += `background: ${getColorStyle(style.bg)}; `;
+                }
             },
         ],
         [
@@ -324,17 +322,17 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
         [
             'cl',
             () => {
-                str += `color: ${getColorStyle(style.cl)}; `;
+                if (style.cl) {
+                    str += `color: ${getColorStyle(style.cl)}; `;
+                }
             },
         ],
         [
             'va',
             () => {
-                if (style.va === BaselineOffset.NORMAL) {
-                    str += `vertical-align: baseline; `;
-                } else if (style.va === BaselineOffset.SUBSCRIPT) {
+                if (style.va === BaselineOffset.SUBSCRIPT) {
                     str += `vertical-align: sub; `;
-                } else {
+                } else if (style.va === BaselineOffset.SUPERSCRIPT) {
                     str += `vertical-align: super; `;
                 }
             },
@@ -342,11 +340,9 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
         [
             'td',
             () => {
-                if (style.td === TextDirection.UNSPECIFIED) {
-                    str += `direction: inherit; `;
-                } else if (style.td === TextDirection.LEFT_TO_RIGHT) {
+                if (style.td === TextDirection.LEFT_TO_RIGHT) {
                     str += `direction: ltr; `;
-                } else {
+                } else if (style.td === TextDirection.RIGHT_TO_LEFT) {
                     str += `direction: rtl; `;
                 }
             },
@@ -354,21 +350,21 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
         [
             'tr',
             () => {
-                str += `data-rotate: (${style.tr?.a}deg${style.tr?.v ? ` ,${style.tr?.v}` : ''});`;
+                if (style.tr) {
+                    str += `data-rotate: (${style.tr?.a}deg${style.tr?.v ? ` ,${style.tr?.v}` : ''});`;
+                }
             },
         ],
         [
             'ht',
             () => {
-                if (style.ht === HorizontalAlign.UNSPECIFIED) {
-                    str += `text-align: inherit; `;
-                } else if (style.ht === HorizontalAlign.LEFT) {
+                if (style.ht === HorizontalAlign.LEFT) {
                     str += `text-align: left; `;
                 } else if (style.ht === HorizontalAlign.RIGHT) {
                     str += `text-align: right; `;
                 } else if (style.ht === HorizontalAlign.CENTER) {
                     str += `text-align: center; `;
-                } else {
+                } else if (style.ht === HorizontalAlign.JUSTIFIED) {
                     str += `text-align: justify; `;
                 }
             },
@@ -376,13 +372,11 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
         [
             'vt',
             () => {
-                if (style.vt === VerticalAlign.UNSPECIFIED) {
-                    str += `vertical-align: inherit; `;
-                } else if (style.vt === VerticalAlign.BOTTOM) {
+                if (style.vt === VerticalAlign.BOTTOM) {
                     str += `vertical-align: bottom; `;
                 } else if (style.vt === VerticalAlign.TOP) {
                     str += `vertical-align: top; `;
-                } else {
+                } else if (style.vt === VerticalAlign.MIDDLE) {
                     str += `vertical-align: middle; `;
                 }
             },
@@ -395,7 +389,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                 } else if (style.tb === WrapStrategy.OVERFLOW) {
                     str += `text-break: overflow; `;
                 } else if (style.tb === WrapStrategy.WRAP) {
-                    str += `word-wrap: break-word; word-break: normal; `;
+                    str += `word-wrap: break-word;`;
                 }
             },
         ],

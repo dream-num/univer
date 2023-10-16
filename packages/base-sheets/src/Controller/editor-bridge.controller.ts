@@ -9,13 +9,15 @@ import {
 import {
     Disposable,
     ICommandService,
+    ITextRotation,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
+    makeCellToSelection,
     OnLifecycle,
+    WrapStrategy,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { Nullable } from 'vitest';
 
 import { getSheetObject } from '../Basics/component-tools';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
@@ -78,13 +80,33 @@ export class EditorBridgeController extends Disposable {
                 return;
             }
 
-            let documentSkeleton: Nullable<DocumentSkeleton> = null;
+            const documentModelObject = skeleton.getCellDocumentModel(startRow, startColumn);
 
-            const documentModel = skeleton.getCellModel(startRow, startColumn)?.documentModel;
+            const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
 
-            if (documentModel != null) {
-                documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
+            if (actualRangeWithCoord == null || documentModelObject == null) {
+                return;
             }
+
+            let documentModel = documentModelObject?.documentModel;
+
+            const { startX, endX } = actualRangeWithCoord;
+
+            const { textRotation, verticalAlign, horizontalAlign, wrapStrategy } = documentModelObject;
+
+            const { a: angle } = textRotation as ITextRotation;
+
+            if (documentModel == null) {
+                documentModel = skeleton.getBlankCellDocumentModel(startRow, startColumn).documentModel;
+            }
+
+            const documentSkeleton = DocumentSkeleton.create(documentModel!, this._localService);
+
+            if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
+                documentSkeleton.getModel().updateDocumentDataPageSize(endX - startX);
+            }
+
+            documentSkeleton.calculate();
 
             this._editorBridgeService.setState({
                 primaryWithCoord,

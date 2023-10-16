@@ -13,7 +13,7 @@ export interface BorderCacheItem {
     color: string;
 }
 
-export interface fontCacheItem {
+export interface IFontCacheItem {
     documentSkeleton: DocumentSkeleton;
     // marginTop?: number;
     // marginBottom?: number;
@@ -31,7 +31,7 @@ interface backgroundCache {
 }
 
 interface fontCache {
-    [key: string]: ObjectMatrix<fontCacheItem>;
+    [key: string]: ObjectMatrix<IFontCacheItem>;
 }
 
 export interface IStylesCache {

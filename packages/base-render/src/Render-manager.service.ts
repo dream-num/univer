@@ -21,6 +21,7 @@ export interface IRenderManagerService {
     setCurrent(unitId: string): void;
     getCurrent(): Nullable<IRender>;
     getRenderById(unitId: string): Nullable<IRender>;
+    getRenderAll(): Map<string, IRender>;
     defaultEngine: Engine;
 }
 
@@ -145,6 +146,10 @@ export class RenderManagerService implements IRenderManagerService {
 
     getRenderById(unitId: string): Nullable<IRender> {
         return this._renderMap.get(unitId);
+    }
+
+    getRenderAll() {
+        return this._renderMap;
     }
 
     private _disposeItem(item: Nullable<IRender>, shouldDestroyEngine: boolean = true) {

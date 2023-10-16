@@ -10,7 +10,6 @@ import { DebuggerPlugin } from '@univerjs/sheets-plugin-debugger';
 // import { ImagePlugin } from '@univerjs/sheets-plugin-image';
 // import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 // import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
-import { DocUIPlugin } from '@univerjs/ui-plugin-docs';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 
 import { locales } from './locales';
@@ -26,7 +25,7 @@ const univer = new Univer({
 univer.registerPlugin(DocPlugin, {
     hasScroll: false,
 });
-univer.registerPlugin(DocUIPlugin);
+// univer.registerPlugin(DocUIPlugin);
 univer.registerPlugin(RenderEngine);
 univer.registerPlugin(UIPlugin, {
     container: 'univer-container',

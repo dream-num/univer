@@ -92,6 +92,33 @@ export class DocumentSkeleton extends Skeleton {
         return this._skeletonData;
     }
 
+    getActualSize() {
+        const skeletonData = this.getSkeletonData();
+        const pageSize = this.getPageSize();
+        let actualWidth = 0;
+        let actualHeight = 0;
+
+        skeletonData?.pages.forEach((page) => {
+            const { width, height } = page;
+            if (pageSize == null || pageSize.width === Infinity) {
+                actualWidth += width;
+            } else {
+                actualWidth += pageSize.width || 0;
+            }
+
+            if (pageSize == null || pageSize.height === Infinity) {
+                actualHeight += height;
+            } else {
+                actualHeight += pageSize.height || 0;
+            }
+        });
+
+        return {
+            actualWidth,
+            actualHeight,
+        };
+    }
+
     getPageSize() {
         return this._docModel.documentStyle.pageSize;
     }

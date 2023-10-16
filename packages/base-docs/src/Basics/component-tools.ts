@@ -31,3 +31,24 @@ export function getDocObject(
         engine,
     };
 }
+
+export function getDocObjectById(
+    unitId: string,
+    renderManagerService: IRenderManagerService
+): Nullable<IDocObjectParam> {
+    const currentRender = renderManagerService.getRenderById(unitId);
+
+    if (currentRender == null) {
+        return;
+    }
+
+    const { components, mainComponent, scene, engine } = currentRender;
+
+    const document = mainComponent as Documents;
+
+    return {
+        document,
+        scene,
+        engine,
+    };
+}

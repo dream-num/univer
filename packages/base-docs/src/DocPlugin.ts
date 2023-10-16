@@ -71,7 +71,7 @@ export class DocPlugin extends Plugin {
 
         this._config = Object.assign(DEFAULT_DOCUMENT_PLUGIN_DATA, config);
 
-        // this.initialConfig(config);
+        this.initialConfig(config);
 
         this._initializeDependencies(_injector);
 
@@ -123,8 +123,12 @@ export class DocPlugin extends Plugin {
     }
 
     initialConfig(config: IDocPluginConfig) {
-        const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
-        this._configService.batchSettings(unitId, config);
+        this._currentUniverService.docAdded$.subscribe((documentModel) => {
+            if (documentModel == null) {
+                throw new Error('documentModel is null');
+            }
+            this._configService.batchSettings(documentModel.getUnitId(), config);
+        });
     }
 
     // initCanvasView() {

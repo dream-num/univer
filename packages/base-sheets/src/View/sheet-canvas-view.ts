@@ -1,4 +1,6 @@
 import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IRender,
     IRenderManagerService,
     ISelectionTransformerShapeManager,
@@ -29,6 +31,10 @@ export class SheetCanvasView {
 
     private _currentWorkbook!: Workbook;
 
+    private _loadedMap = new Set();
+
+    private _isLoadedEditor = false;
+
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -41,8 +47,31 @@ export class SheetCanvasView {
                 return;
                 // throw new Error('workbook is null');
             }
-            this._currentWorkbook = workbook;
-            this._addNewRender();
+
+            const unitId = workbook.getUnitId();
+            if (!this._loadedMap.has(unitId)) {
+                this._currentWorkbook = workbook;
+                this._addNewRender();
+                this._loadedMap.add(unitId);
+            }
+
+            if (!this._isLoadedEditor) {
+                // create univer doc normal editor instance
+
+                this._currentUniverService.createDoc({
+                    id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    documentStyle: {},
+                });
+
+                // create univer doc formula bar editor instance
+
+                this._currentUniverService.createDoc({
+                    id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+                    documentStyle: {},
+                });
+
+                this._isLoadedEditor = true;
+            }
         });
     }
 

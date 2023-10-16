@@ -1,9 +1,4 @@
-import { getDocObject } from '@univerjs/base-docs';
-import {
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    IRenderManagerService,
-} from '@univerjs/base-render';
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/base-render';
 import { Disposable, ICurrentUniverService, LifecycleStages, Nullable, OnLifecycle } from '@univerjs/core';
 import { Subscription } from 'rxjs';
 
@@ -11,15 +6,10 @@ import { Subscription } from 'rxjs';
 export class InitializeEditorController extends Disposable {
     private _onInputSubscription: Nullable<Subscription>;
 
-    constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
-    ) {
+    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
         super();
 
-        setTimeout(() => {
-            this._initialize();
-        }, 0);
+        this._initialize();
 
         this._commandExecutedListener();
     }
@@ -34,21 +24,13 @@ export class InitializeEditorController extends Disposable {
             documentStyle: {},
         });
 
-        this._currentUniverService.focusUniverInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-
         // create univer doc formula bar editor instance
 
         this._currentUniverService.createDoc({
             id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
             documentStyle: {},
         });
-
-        this._currentUniverService.focusUniverInstance(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     }
 
     private _commandExecutedListener() {}
-
-    private _getDocObject() {
-        return getDocObject(this._currentUniverService, this._renderManagerService);
-    }
 }

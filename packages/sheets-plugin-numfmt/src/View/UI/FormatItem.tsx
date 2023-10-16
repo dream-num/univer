@@ -28,8 +28,10 @@ export function FormatItem(props: BaseFormatItemProps): JSX.Element {
                     <Icon.CorrectIcon />
                 </span>
             )}
-            <span className={styles.formatItemContent}>{getLocale(context, labelText as string)}</span>
-            {suffix && <span className={styles.formatItemSuffix}>{getLocale(context, suffix as string)}</span>}
+            <span className={styles.formatItemContent}>{getLocale(context, labelText as string) || labelText}</span>
+            {suffix && (
+                <span className={styles.formatItemSuffix}>{getLocale(context, suffix as string) || suffix}</span>
+            )}
         </div>
     );
 }

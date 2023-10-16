@@ -157,7 +157,7 @@ export class Font extends SheetExtension {
             throw new Error('documents is null');
         }
 
-        const { documentSkeleton, angle, verticalAlign, horizontalAlign, wrapStrategy, content } = docsConfig;
+        const { documentSkeleton, angle, verticalAlign, horizontalAlign, wrapStrategy } = docsConfig;
         const cellWidth = endX - startX;
         const cellHeight = endY - startY;
 

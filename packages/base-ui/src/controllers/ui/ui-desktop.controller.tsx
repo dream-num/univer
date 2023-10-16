@@ -18,6 +18,14 @@ export interface IDesktopUIController extends IUIController {
     // provides multi methods for business to register workbench custom components
     // TODO@wzhudev: in the future we may bind components to different business types
 
+    // header bar
+    registerHeaderComponent(component: () => ComponentType): IDisposable;
+    getHeaderComponents(): Set<() => ComponentType>;
+
+    // content
+    registerContentComponent(component: () => ComponentType): IDisposable;
+    getContentComponents(): Set<() => ComponentType>;
+
     // footer bar
     registerFooterComponent(component: () => ComponentType): IDisposable;
     getFooterComponents(): Set<() => ComponentType>;
@@ -29,6 +37,10 @@ export interface IDesktopUIController extends IUIController {
 const STEADY_TIMEOUT = 3000;
 
 export class DesktopUIController extends Disposable implements IDesktopUIController {
+    private _headerComponents: Set<() => ComponentType> = new Set();
+
+    private _contentComponents: Set<() => ComponentType> = new Set();
+
     private _footerComponents: Set<() => ComponentType> = new Set();
 
     private _sidebarComponents: Set<() => ComponentType> = new Set();
@@ -60,6 +72,26 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     private _initializeEngine(element: HTMLElement) {
         const engine = this._renderManagerService.getCurrent()!.engine;
         engine.setContainer(element);
+    }
+
+    registerHeaderComponent(component: () => ComponentType): IDisposable {
+        this._headerComponents.add(component);
+        this._componentRegistered$.next();
+        return toDisposable(() => this._headerComponents.delete(component));
+    }
+
+    getHeaderComponents(): Set<() => ComponentType> {
+        return new Set([...this._headerComponents]);
+    }
+
+    registerContentComponent(component: () => ComponentType): IDisposable {
+        this._contentComponents.add(component);
+        this._componentRegistered$.next();
+        return toDisposable(() => this._contentComponents.delete(component));
+    }
+
+    getContentComponents(): Set<() => ComponentType> {
+        return new Set([...this._contentComponents]);
     }
 
     registerFooterComponent(component: () => ComponentType): IDisposable {
@@ -107,23 +139,31 @@ function bootStrap(
     const root = createRoot(mountContainer);
     const ConnectedApp = connectInjector(App, injector);
     const desktopUIController = injector.get(IUIController) as IDesktopUIController;
+    const headerComponents = desktopUIController.getHeaderComponents();
+    const contentComponents = desktopUIController.getContentComponents();
     const footerComponents = desktopUIController.getFooterComponents();
     const sidebarComponents = desktopUIController.getSidebarComponents();
     root.render(
         <ConnectedApp
             {...options}
             onRendered={callback}
+            headerComponents={headerComponents}
+            contentComponents={contentComponents}
             footerComponents={footerComponents}
             sidebarComponents={sidebarComponents}
         />
     );
 
     const updateSubscription = desktopUIController.componentRegistered$.subscribe(() => {
+        const headerComponents = desktopUIController.getHeaderComponents();
+        const contentComponents = desktopUIController.getContentComponents();
         const footerComponents = desktopUIController.getFooterComponents();
         const sidebarComponents = desktopUIController.getSidebarComponents();
         root.render(
             <ConnectedApp
                 {...options}
+                headerComponents={headerComponents}
+                contentComponents={contentComponents}
                 footerComponents={footerComponents}
                 sidebarComponents={sidebarComponents}
                 onRendered={callback}

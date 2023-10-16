@@ -18,7 +18,7 @@ export interface IBaseCustomLabelProps {
 }
 
 function getLocale(context: Partial<AppContextValues>, name: string) {
-    return context.localeService?.t(name);
+    return context.localeService?.t(name) || name;
 }
 
 export interface INeoCustomLabelProps {

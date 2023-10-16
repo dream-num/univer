@@ -7,13 +7,13 @@ import {
     ISelectionCell,
     ISelectionCellWithCoord,
     IStyleBase,
+    LocaleService,
     Nullable,
     Tools,
 } from '@univerjs/core';
 
 import { DEFAULT_FONTFACE_PLANE } from './Const';
 import { FontCache } from './FontCache';
-import { IFontLocale } from './Interfaces';
 import { IBoundRectNoAngle } from './Vector2';
 
 const DEG180 = 180;
@@ -235,23 +235,29 @@ export function fixLineWidthByScale(num: number, scale: number) {
     return Math.round(num * scale) / scale;
 }
 
-export function getFontStyleString(textStyle?: IStyleBase, fontLocale?: IFontLocale) {
+export function getFontStyleString(textStyle?: IStyleBase, localeService?: LocaleService) {
     // 获取字体配置
 
-    if (!fontLocale) {
-        fontLocale = {
-            fontList: ['Arial'],
-            defaultFontSize: 14,
-        };
-    }
+    // if (!fontLocale) {
+    //     fontLocale = {
+    //         fontList: ['Arial'],
+    //         defaultFontSize: 14,
+    //     };
+    // }
 
-    const { fontList, defaultFontSize } = fontLocale;
+    const defaultFont = (localeService?.get('defaultFont') || 'Arial') as string;
+
+    const defaultFontSize = (localeService?.get('defaultFontSize') || 14) as number;
+
+    // const { fontList, defaultFontSize } = fontLocale;
 
     if (!textStyle) {
+        const fontString = `${defaultFontSize}px  ${defaultFont}`;
         return {
-            fontString: `${defaultFontSize}px  ${fontList[0]}`,
+            fontCache: fontString,
+            fontString,
             fontSize: defaultFontSize,
-            fontFamily: fontList[0],
+            fontFamily: defaultFont,
         };
     }
 
@@ -276,7 +282,7 @@ export function getFontStyleString(textStyle?: IStyleBase, fontLocale?: IFontLoc
         fontSize = Math.ceil(textStyle.fs);
     }
 
-    let fontFamilyResult = fontList[0];
+    let fontFamilyResult = defaultFont;
     if (textStyle.ff) {
         let fontFamily = textStyle.ff;
 
@@ -291,7 +297,7 @@ export function getFontStyleString(textStyle?: IStyleBase, fontLocale?: IFontLoc
         // }
 
         if (fontFamily == null) {
-            fontFamily = fontList[0];
+            fontFamily = defaultFont;
         }
 
         fontFamilyResult = fontFamily;
@@ -305,9 +311,12 @@ export function getFontStyleString(textStyle?: IStyleBase, fontLocale?: IFontLoc
         fontSize *= baselineOffset === BaselineOffset.SUBSCRIPT ? sbr : spr;
     }
 
-    const fontString = `${italic} ${bold} ${fontSize}px ${fontFamilyResult}, ${DEFAULT_FONTFACE_PLANE} `;
+    const fontStringPure = `${italic} ${bold} ${fontSize}px ${fontFamilyResult}`;
+
+    const fontString = `${fontStringPure}, ${DEFAULT_FONTFACE_PLANE} `;
 
     return {
+        fontCache: fontStringPure,
         fontString,
         fontSize,
         fontFamily: fontFamilyResult,

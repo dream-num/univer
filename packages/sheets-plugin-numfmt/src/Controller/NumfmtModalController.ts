@@ -134,10 +134,10 @@ export class NumfmtModalController {
     resetModalData(): void {
         const locale = this._localeService.getLocale();
         this._modalData.forEach((item) => {
-            item.title = locale.get(item.locale);
+            item.title = locale.get(item.locale) as string;
             if (item.group && item.group.length) {
                 item.group.forEach((ele) => {
-                    ele.label = locale.get(ele.locale);
+                    ele.label = locale.get(ele.locale) as string;
                 });
             }
         });

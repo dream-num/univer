@@ -16,6 +16,7 @@ import {
     IConfigService,
     ICurrentUniverService,
     LifecycleStages,
+    Nullable,
     OnLifecycle,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -118,7 +119,11 @@ export class DocCanvasView {
             }
         });
 
-        new ScrollBar(viewMain);
+        const hasScroll = this._configService.getConfig(unitId, 'hasScroll') as Nullable<boolean>;
+
+        if (hasScroll !== false) {
+            new ScrollBar(viewMain);
+        }
 
         scene.addLayer(
             Layer.create(scene, [], DOCS_COMPONENT_MAIN_LAYER_INDEX),

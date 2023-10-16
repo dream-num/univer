@@ -556,8 +556,6 @@ export class DocumentSkeleton extends Skeleton {
         } = documentStyle;
         const skeleton = this.__getNullSke();
 
-        const fontLocale = this.getFontLocale();
-
         const docsConfig: IDocsConfig = {
             headerTreeMap,
             footerTreeMap,
@@ -567,7 +565,7 @@ export class DocumentSkeleton extends Skeleton {
             charSpace,
             linePitch,
             gridType,
-            fontLocale,
+            localeService: this._localService,
             paragraphLineGapDefault,
             defaultTabStop,
             documentTextStyle: textStyle,

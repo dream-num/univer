@@ -23,7 +23,7 @@ export interface fontCacheItem {
     verticalAlign: VerticalAlign;
     horizontalAlign: HorizontalAlign;
     wrapStrategy: WrapStrategy;
-    content?: string;
+    // content?: string;
 }
 
 interface backgroundCache {

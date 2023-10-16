@@ -1,6 +1,6 @@
 import { Nullable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import { BaseObject } from './BaseObject';
 import { DocComponent } from './Component/Docs/DocComponent';
@@ -11,6 +11,7 @@ import { Scene } from './Scene';
 import { SceneViewer } from './SceneViewer';
 
 export interface IRenderManagerService {
+    currentRender$: Observable<Nullable<string>>;
     dispose(): void;
     // createRenderWithNewEngine(unitId: string): IRenderManagerService;
     createRenderWithParent(unitId: string, parentUnitId: string): IRender;

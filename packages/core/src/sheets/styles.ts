@@ -3,14 +3,19 @@ import { ICellData, IStyleData } from '../Types/Interfaces';
 
 /**
  * Styles in a workbook, cells locate styles based on style IDs
+ *
+ * TODO@Dushusir: Cachemap needs to follow style to clear cleared following styles
  */
 export class Styles {
     private _styles: IKeyType<Nullable<IStyleData>>;
 
     private _cacheMap = new Map<string, string>();
 
-    constructor(styles: IKeyType<Nullable<IStyleData>> = {}) {
+    private _maxCacheSize: number;
+
+    constructor(styles: IKeyType<Nullable<IStyleData>> = {}, maxCacheSize = 100) {
         this._styles = styles;
+        this._maxCacheSize = maxCacheSize;
         this._generateCacheMap();
     }
 
@@ -26,25 +31,27 @@ export class Styles {
     }
 
     search(data: IStyleData): string {
-        const { _styles } = this;
-
-        // for (const id in _styles) {
-        //     if (Tools.diffValue(_styles[id], data)) {
-        //         return id;
-        //     }
-        // }
-
         // Take from cache
         const styleObject = JSON.stringify(data);
         if (this._cacheMap.has(styleObject)) {
-            return this._cacheMap.get(styleObject) as string;
+            const id = this._cacheMap.get(styleObject) as string;
+            // Move the accessed entry to the end of the Map to represent its recent usage
+            this._cacheMap.delete(styleObject);
+            this._cacheMap.set(styleObject, id);
+            return id;
+        }
+
+        // Check if the data exists in _styles and not in _cacheMap
+        const existingId = this.getExistingStyleId(data);
+        if (existingId) {
+            return existingId;
         }
         return '-1';
     }
 
     get(id: string | Nullable<IStyleData>): Nullable<IStyleData> {
-        id = String(id);
         if (typeof id !== 'string') return id;
+        id = String(id);
         return this._styles[id];
     }
 
@@ -54,6 +61,13 @@ export class Styles {
         // update cache
         const styleObject = JSON.stringify(data);
         this._cacheMap.set(styleObject, id);
+
+        // Check if cache size exceeds the maximum limit
+        if (this._cacheMap.size > this._maxCacheSize) {
+            // Remove the least recently used entry (the first entry in the Map)
+            const firstEntry = this._cacheMap.entries().next().value;
+            this._cacheMap.delete(firstEntry[0]);
+        }
 
         return id;
     }
@@ -83,10 +97,25 @@ export class Styles {
     }
 
     private _generateCacheMap(): void {
-        const { _styles } = this;
+        const { _styles, _cacheMap } = this;
+        let count = 0;
         for (const id in _styles) {
             const styleObject = JSON.stringify(_styles[id]);
-            this._cacheMap.set(styleObject, id);
+            _cacheMap.set(styleObject, id);
+            count++;
+            if (count >= this._maxCacheSize) {
+                break;
+            }
         }
+    }
+
+    private getExistingStyleId(data: IStyleData): Nullable<string> {
+        const { _styles } = this;
+        for (const id in _styles) {
+            if (Tools.diffValue(_styles[id], data)) {
+                return id;
+            }
+        }
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
@@ -24,9 +24,9 @@ export const RemoveSheetCommand: ICommand = {
     handler: async (accessor: IAccessor, params?: RemoveSheetCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        let workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        let worksheetId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
@@ -37,7 +37,7 @@ export const RemoveSheetCommand: ICommand = {
             worksheetId = params.worksheetId ?? worksheetId;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

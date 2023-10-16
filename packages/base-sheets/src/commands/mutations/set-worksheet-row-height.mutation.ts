@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, IRange, ObjectArray } from '@univerjs/core';
+import { CommandType, IMutation, IRange, IUniverInstanceService, ObjectArray } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetRowHeightMutationParams {
@@ -12,8 +12,8 @@ export const SetWorksheetRowHeightMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetRowHeightMutationParams
 ): ISetWorksheetRowHeightMutationParams => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -46,8 +46,8 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
     id: 'sheet.mutation.set-worksheet-row-height',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');

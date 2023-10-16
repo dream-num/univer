@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, Tools } from '@univerjs/core';
+import { CommandType, IMutation, IUniverInstanceService, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetZoomRatioMutationParams {
@@ -10,7 +10,7 @@ export const SetZoomRatioUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetZoomRatioMutationParams
 ): ISetZoomRatioMutationParams => {
-    const documentModel = accessor.get(ICurrentUniverService).getUniverDocInstance(params.documentId);
+    const documentModel = accessor.get(IUniverInstanceService).getUniverDocInstance(params.documentId);
     const old = documentModel?.getSettings()?.zoomRatio || 1;
     return {
         ...Tools.deepClone(params),
@@ -22,7 +22,7 @@ export const SetZoomRatioMutation: IMutation<ISetZoomRatioMutationParams> = {
     id: 'doc.mutation.set-zoom-ratio',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const documentModel = accessor.get(ICurrentUniverService).getUniverDocInstance(params.documentId);
+        const documentModel = accessor.get(IUniverInstanceService).getUniverDocInstance(params.documentId);
         if (!documentModel) return false;
         const documentData = documentModel.getSnapshot();
         if (documentData.settings == null) {

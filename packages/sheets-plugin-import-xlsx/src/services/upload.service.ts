@@ -1,9 +1,9 @@
-import { ICurrentUniverService, IKeyValue, migrate, Tools } from '@univerjs/core';
+import { IKeyValue, IUniverInstanceService, migrate, Tools } from '@univerjs/core';
 // @ts-ignore
 import * as LuckyExcel from 'luckyexcel'; // no type definition for package luckyexcel
 
 export class UploadService {
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {}
+    constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {}
 
     upload() {
         const input = document.createElement('input');

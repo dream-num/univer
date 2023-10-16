@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { ICommandService, ICurrentUniverService, RANGE_TYPE, RedoCommand, UndoCommand, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand, Univer } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -58,27 +58,27 @@ describe('Test row col hide/unhine commands', () => {
     afterEach(() => univer.dispose());
 
     function getRowCount(): number {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getRowCount();
     }
 
     function getColCount(): number {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getColumnCount();
     }
 
     function getRowVisible(row: number): boolean {
-        const workbook = get(ICurrentUniverService).getCurrentUniverSheetInstance();
+        const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getRowVisible(row);
     }
 
     function getColVisible(col: number): boolean {
-        const workbook = get(ICurrentUniverService).getCurrentUniverSheetInstance();
+        const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getColVisible(col);
     }

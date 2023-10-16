@@ -7,7 +7,7 @@ import { Workbook } from '../../sheets/workbook';
 import { Worksheet } from '../../sheets/worksheet';
 import { ICellData } from '../../Types/Interfaces/ICellData';
 import { ICommandInfo } from '../command/command.service';
-import { ICurrentUniverService } from '../current.service';
+import { IUniverInstanceService } from '../current.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 import { IUndoRedoCommandInfos } from '../undoredo/undoredo.service';
 
@@ -75,7 +75,7 @@ export class SheetInterceptorService extends Disposable {
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
 
-    constructor(@ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService) {
+    constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
         super();
 
         // When a workbook is created or a worksheet is added after when workbook is created,

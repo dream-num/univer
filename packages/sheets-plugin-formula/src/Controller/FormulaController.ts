@@ -7,7 +7,7 @@ import {
     UnitDataType,
 } from '@univerjs/base-formula-engine';
 import { SelectionManagerService } from '@univerjs/base-sheets';
-import { ICurrentUniverService } from '@univerjs/core';
+import { IUniverInstanceService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { IFormulaConfig } from '../Basics/Interfaces/IFormula';
@@ -28,7 +28,7 @@ export class FormulaController {
     constructor(
         config: IFormulaConfig,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(Injector) private readonly _sheetInjector: Injector
     ) {
         this._formulaDataModel = new FormulaDataModel(config);

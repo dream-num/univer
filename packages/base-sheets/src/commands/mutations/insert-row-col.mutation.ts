@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, ObjectArray, Rectangle } from '@univerjs/core';
+import { CommandType, IMutation, IUniverInstanceService, ObjectArray, Rectangle } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
@@ -12,8 +12,8 @@ export const InsertRowMutationUndoFactory = (
     accessor: IAccessor,
     params: IInsertRowMutationParams
 ): IRemoveRowsMutationParams => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -31,9 +31,9 @@ export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
         const { workbookId, worksheetId, ranges, rowInfo } = params;
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const universheet = currentUniverService.getUniverSheetInstance(workbookId);
+        const universheet = univerInstanceService.getUniverSheetInstance(workbookId);
         if (universheet == null) {
             throw new Error('universheet is null error!');
         }
@@ -77,8 +77,8 @@ export const InsertColMutationUndoFactory = (
     accessor: IAccessor,
     params: IInsertColMutationParams
 ): IRemoveColMutationParams => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -95,8 +95,8 @@ export const InsertColMutation: IMutation<IInsertColMutationParams> = {
     id: 'sheet.mutation.insert-col',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');

@@ -1,9 +1,9 @@
 import {
     ICellData,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     IStyleData,
+    IUniverInstanceService,
     Nullable,
     RANGE_TYPE,
     RedoCommand,
@@ -67,7 +67,7 @@ describe('Test clear selection content commands', () => {
                 ]);
 
                 function getValue(): Nullable<ICellData> {
-                    return get(ICurrentUniverService)
+                    return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
@@ -115,7 +115,7 @@ describe('Test clear selection content commands', () => {
                 ]);
 
                 function getValue(): Nullable<ICellData> {
-                    return get(ICurrentUniverService)
+                    return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
@@ -124,7 +124,7 @@ describe('Test clear selection content commands', () => {
 
                 function getStyle(): Nullable<IStyleData> {
                     const value = getValue();
-                    const styles = get(ICurrentUniverService).getUniverSheetInstance('test')?.getStyles();
+                    const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
                     if (value && styles) {
                         return styles.getStyleByCell(value);
                     }
@@ -177,7 +177,7 @@ describe('Test clear selection content commands', () => {
                 ]);
 
                 function getValue(): Nullable<ICellData> {
-                    return get(ICurrentUniverService)
+                    return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
@@ -186,14 +186,14 @@ describe('Test clear selection content commands', () => {
 
                 function getStyle(): Nullable<IStyleData> {
                     const value = getValue();
-                    const styles = get(ICurrentUniverService).getUniverSheetInstance('test')?.getStyles();
+                    const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
                     if (value && styles) {
                         return styles.getStyleByCell(value);
                     }
                 }
 
                 function getMerge(): IRange[] | undefined {
-                    return get(ICurrentUniverService)
+                    return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig().mergeData;
@@ -267,7 +267,7 @@ describe('Test clear selection content commands', () => {
                 ]);
 
                 function getValue(): Nullable<ICellData> {
-                    return get(ICurrentUniverService)
+                    return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
@@ -276,7 +276,7 @@ describe('Test clear selection content commands', () => {
 
                 function getStyle(): Nullable<IStyleData> {
                     const value = getValue();
-                    const styles = get(ICurrentUniverService).getUniverSheetInstance('test')?.getStyles();
+                    const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
                     if (value && styles) {
                         return styles.getStyleByCell(value);
                     }
@@ -323,7 +323,7 @@ describe('Test clear selection content commands', () => {
                 ]);
 
                 function getValue(): Nullable<ICellData> {
-                    return get(ICurrentUniverService)
+                    return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(0, 0, 0, 0)
@@ -332,14 +332,14 @@ describe('Test clear selection content commands', () => {
 
                 function getStyle(): Nullable<IStyleData> {
                     const value = getValue();
-                    const styles = get(ICurrentUniverService).getUniverSheetInstance('test')?.getStyles();
+                    const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
                     if (value && styles) {
                         return styles.getStyleByCell(value);
                     }
                 }
 
                 function getMerge(): IRange[] | undefined {
-                    return get(ICurrentUniverService)
+                    return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getConfig().mergeData;

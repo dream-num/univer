@@ -1,5 +1,5 @@
 import { DocumentSkeleton } from '@univerjs/base-render';
-import { DocumentModel, ICurrentUniverService, LocaleService, Nullable } from '@univerjs/core';
+import { DocumentModel, IUniverInstanceService, LocaleService, Nullable } from '@univerjs/core';
 import { IDisposable, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
@@ -35,7 +35,7 @@ export class DocSkeletonManagerService implements IDisposable {
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 
     constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {}
 

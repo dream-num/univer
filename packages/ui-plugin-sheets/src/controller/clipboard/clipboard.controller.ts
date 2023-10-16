@@ -18,8 +18,8 @@ import {
     ICommandInfo,
     ICommandService,
     IConfigService,
-    ICurrentUniverService,
     IRange,
+    IUniverInstanceService,
     LifecycleStages,
     LocaleService,
     ObjectArray,
@@ -48,7 +48,7 @@ const DEFAULT_HEIGHT = 20;
 @OnLifecycle(LifecycleStages.Rendered, SheetClipboardController)
 export class SheetClipboardController extends Disposable {
     constructor(
-        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverSheet: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IConfigService private readonly _configService: IConfigService,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,

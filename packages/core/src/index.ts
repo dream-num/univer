@@ -18,7 +18,7 @@ export {
 export { IConfigService } from './services/config/config.service';
 export { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './services/context/context';
 export { IContextService } from './services/context/context.service';
-export { ICurrentUniverService } from './services/current.service';
+export { IUniverInstanceService } from './services/current.service';
 export { LifecycleStages, OnLifecycle } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';

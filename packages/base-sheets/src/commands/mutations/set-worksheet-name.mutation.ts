@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
+import { CommandType, IMutation, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetNameMutationParams {
@@ -11,7 +11,7 @@ export const SetWorksheetNameMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetNameMutationParams
 ): ISetWorksheetNameMutationParams => {
-    const universheet = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance();
+    const universheet = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
     const worksheet = universheet.getSheetBySheetId(params.worksheetId);
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
@@ -27,7 +27,7 @@ export const SetWorksheetNameMutation: IMutation<ISetWorksheetNameMutationParams
     id: 'sheet.mutation.set-worksheet-name',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const universheet = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
+        const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
 
         if (universheet == null) {
             return false;

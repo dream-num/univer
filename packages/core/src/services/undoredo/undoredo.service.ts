@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../Shared/lifecycle';
 import { CommandService, CommandType, ICommand, ICommandInfo, ICommandService } from '../command/command.service';
-import { ICurrentUniverService } from '../current.service';
+import { IUniverInstanceService } from '../current.service';
 
 // TODO:: an undo redo element may be mergeable to another undo redo element
 
@@ -57,7 +57,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     private readonly _redoStacks = new Map<string, IUndoRedoItem[]>();
 
     constructor(
-        @ICurrentUniverService private readonly _currentUniverSheet: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverSheet: IUniverInstanceService,
         @ICommandService private readonly _commandService: CommandService
     ) {
         super();

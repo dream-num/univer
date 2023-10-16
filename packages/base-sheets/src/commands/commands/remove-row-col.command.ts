@@ -3,9 +3,9 @@ import {
     Dimension,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     IUndoRedoService,
+    IUniverInstanceService,
     Nullable,
     Rectangle,
     sequenceExecute,
@@ -52,8 +52,8 @@ export const RemoveRowCommand: ICommand = {
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
 
         const workbookId = workbook.getUnitId();
@@ -204,8 +204,8 @@ export const RemoveColCommand: ICommand = {
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
 
         const workbookId = workbook.getUnitId();

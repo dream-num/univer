@@ -3,10 +3,10 @@ import {
     ICellData,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     isICellData,
     IUndoRedoService,
+    IUniverInstanceService,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     Tools,
@@ -42,14 +42,14 @@ export const SetRangeValuesCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
 
         const {
             value,
             range,
-            workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId(),
-            worksheetId = currentUniverService
+            workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
+            worksheetId = univerInstanceService
                 .getCurrentUniverSheetInstance()
 
                 .getActiveSheet()

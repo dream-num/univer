@@ -3,8 +3,8 @@ import {
     CommandType,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IUndoRedoService,
+    IUniverInstanceService,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -27,10 +27,10 @@ export const SetHideGridlinesCommand: ICommand = {
     handler: async (accessor: IAccessor, params?: ISetHideGridlinesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService
+        let workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        let worksheetId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
@@ -43,7 +43,7 @@ export const SetHideGridlinesCommand: ICommand = {
             hideGridlines = params.hideGridlines ?? BooleanNumber.FALSE;
         }
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

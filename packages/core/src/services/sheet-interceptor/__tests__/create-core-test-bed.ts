@@ -4,7 +4,7 @@ import { Univer } from '../../../Basics/Univer';
 import { Plugin, PluginType } from '../../../plugin/plugin';
 import { LocaleType } from '../../../Types/Enum/LocaleType';
 import { IWorkbookConfig } from '../../../Types/Interfaces/IWorkbookData';
-import { ICurrentUniverService } from '../../current.service';
+import { IUniverInstanceService } from '../../current.service';
 import { ILogService } from '../../log/log.service';
 
 const TEST_WORKBOOK_DATA: IWorkbookConfig = {
@@ -67,8 +67,8 @@ export function createCoreTestBed(workbookConfig?: IWorkbookConfig, dependencies
         throw new Error('[TestPlugin]: not hooked on!');
     }
 
-    const currentUniverService = get(ICurrentUniverService);
-    currentUniverService.focusUniverInstance('test');
+    const univerInstanceService = get(IUniverInstanceService);
+    univerInstanceService.focusUniverInstance('test');
 
     const logService = get(ILogService);
     logService.toggleLogEnabled(false);

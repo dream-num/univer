@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { ICommandService, ICurrentUniverService, RANGE_TYPE, RedoCommand, UndoCommand, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand, Univer } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -19,7 +19,7 @@ describe('Test set col width commands', () => {
     let commandService: ICommandService;
 
     function getColumnWidth(col: number): number {
-        const worksheet = get(ICurrentUniverService).getCurrentUniverSheetInstance().getActiveSheet();
+        const worksheet = get(IUniverInstanceService).getCurrentUniverSheetInstance().getActiveSheet();
         return worksheet.getColumnWidth(col);
     }
 
@@ -33,7 +33,7 @@ describe('Test set col width commands', () => {
         commandService.registerCommand(SetColWidthCommand);
         commandService.registerCommand(SetWorksheetColWidthMutation);
 
-        const worksheet = get(ICurrentUniverService).getCurrentUniverSheetInstance().getActiveSheet();
+        const worksheet = get(IUniverInstanceService).getCurrentUniverSheetInstance().getActiveSheet();
         const maxRow = worksheet.getMaxRows() - 1;
         const selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({

@@ -1,11 +1,12 @@
 import { IRenderManagerService } from '@univerjs/base-render';
-import { Disposable, ICurrentUniverService, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
+import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import { IDisposable, Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import React, { ComponentType } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Observable, Subject } from 'rxjs';
 
+import { IFocusService } from '../../services/focus/focus.service';
 import { App } from '../../views/app';
 import { IUIController, IWorkbenchOptions } from './ui.controller';
 
@@ -51,18 +52,18 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IFocusService private readonly _focusService: IFocusService
     ) {
         super();
     }
 
     bootstrapWorkbench(options: IWorkbenchOptions): void {
         this.disposeWithMe(
-            bootStrap(this._injector, options, (element) => {
-                // this._renderManagerService.defaultEngine.setContainer(element);
-                this._initializeEngine(element);
+            bootStrap(this._injector, options, (canvasElement, containerElement) => {
+                this._initializeEngine(canvasElement);
                 this._lifecycleService.stage = LifecycleStages.Rendered;
+                this._focusService.setContainerElement(containerElement);
 
                 setTimeout(() => (this._lifecycleService.stage = LifecycleStages.Steady), STEADY_TIMEOUT);
             })
@@ -118,7 +119,7 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
 function bootStrap(
     injector: Injector,
     options: IWorkbenchOptions,
-    callback: (containerEl: HTMLElement) => void
+    callback: (canvasEl: HTMLElement, containerElement: HTMLElement) => void
 ): IDisposable {
     let mountContainer: HTMLElement;
 
@@ -143,12 +144,13 @@ function bootStrap(
     const contentComponents = desktopUIController.getContentComponents();
     const footerComponents = desktopUIController.getFooterComponents();
     const sidebarComponents = desktopUIController.getSidebarComponents();
+    const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
     root.render(
         <ConnectedApp
             {...options}
-            onRendered={callback}
             headerComponents={headerComponents}
             contentComponents={contentComponents}
+            onRendered={onRendered}
             footerComponents={footerComponents}
             sidebarComponents={sidebarComponents}
         />
@@ -166,7 +168,7 @@ function bootStrap(
                 contentComponents={contentComponents}
                 footerComponents={footerComponents}
                 sidebarComponents={sidebarComponents}
-                onRendered={callback}
+                onRendered={onRendered}
             />
         );
     });

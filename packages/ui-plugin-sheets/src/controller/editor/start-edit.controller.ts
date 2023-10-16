@@ -11,7 +11,7 @@ import { IEditorBridgeService } from '@univerjs/base-sheets';
 import {
     Disposable,
     ICommandService,
-    ICurrentUniverService,
+    IUniverInstanceService,
     LifecycleStages,
     makeCellToSelection,
     Nullable,
@@ -29,7 +29,7 @@ export class StartEditController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,

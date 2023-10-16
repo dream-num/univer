@@ -1,4 +1,4 @@
-import { BooleanNumber, CommandType, ICurrentUniverService, IMutation, Nullable, Worksheet } from '@univerjs/core';
+import { BooleanNumber, CommandType, IMutation, IUniverInstanceService, Nullable, Worksheet } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetActivateMutationParams {
@@ -10,7 +10,7 @@ export const SetWorksheetUnActivateMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetActivateMutationParams
 ): ISetWorksheetActivateMutationParams => {
-    const universheet = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
+    const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -40,7 +40,7 @@ export const SetWorksheetActivateMutation: IMutation<ISetWorksheetActivateMutati
     id: 'sheet.mutation.set-worksheet-activate',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const universheet = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
+        const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
 
         if (!universheet) return false;
 

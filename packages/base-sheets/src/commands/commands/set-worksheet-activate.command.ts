@@ -1,4 +1,4 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
@@ -18,10 +18,10 @@ export const SetWorksheetActivateCommand: ICommand = {
     handler: async (accessor: IAccessor, params?: ISetWorksheetActivateCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        let worksheetId = currentUniverService
+        let workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        let worksheetId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()

@@ -11,7 +11,7 @@ import {
     Slide,
     Viewport,
 } from '@univerjs/base-render';
-import { EventState, getColorStyle, IColorStyle, ICurrentUniverService, ISlidePage, Nullable } from '@univerjs/core';
+import { EventState, getColorStyle, IColorStyle, ISlidePage, IUniverInstanceService, Nullable } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ObjectProvider } from './ObjectProvider';
@@ -34,7 +34,7 @@ export class CanvasView {
     private _activePageId: string = '';
 
     constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector,
         @IRenderingEngine private readonly _engine: Engine,
         @IRenderManagerService private readonly _rms: RenderManagerService

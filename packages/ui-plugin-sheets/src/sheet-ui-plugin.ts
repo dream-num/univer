@@ -1,4 +1,4 @@
-import { ICurrentUniverService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
 
@@ -19,7 +19,7 @@ export class SheetUIPlugin extends Plugin {
         config: undefined,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super(SHEET_UI_PLUGIN_NAME);
 
@@ -53,9 +53,9 @@ export class SheetUIPlugin extends Plugin {
     }
 
     private _markSheetAsFocused() {
-        const currentUniverService = this._currentUniverService;
-        currentUniverService.currentSheet$.pipe(filter((v) => !!v)).subscribe((workbook) => {
-            currentUniverService.focusUniverInstance(workbook!.getUnitId());
+        const univerInstanceService = this._currentUniverService;
+        univerInstanceService.currentSheet$.pipe(filter((v) => !!v)).subscribe((workbook) => {
+            univerInstanceService.focusUniverInstance(workbook!.getUnitId());
         });
     }
 }

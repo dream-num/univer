@@ -2,9 +2,9 @@
 import {
     ICellData,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     IStyleData,
+    IUniverInstanceService,
     IWorkbookConfig,
     LocaleType,
     Nullable,
@@ -126,14 +126,14 @@ describe('Test insert and remove rows cols commands', () => {
     }
 
     function getRowCount(): number {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getRowCount();
     }
 
     function getColCount(): number {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getColumnCount();
@@ -144,14 +144,14 @@ describe('Test insert and remove rows cols commands', () => {
     }
 
     function getCellInfo(row: number, col: number): Nullable<ICellData> {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getCellMatrix().getValue(row, col);
     }
 
     function getMergedInfo(row: number, col: number): Nullable<IRange> {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getMergedCells(row, col)?.[0];

@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, IRange } from '@univerjs/core';
+import { CommandType, IMutation, IRange, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetRowVisibleMutationParams {
@@ -8,8 +8,8 @@ export interface ISetRowVisibleMutationParams {
 }
 
 export const SetRowVisibleUndoMutationFactory = (accessor: IAccessor, params: ISetRowVisibleMutationParams) => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -26,8 +26,8 @@ export const SetRowVisibleMutation: IMutation<ISetRowVisibleMutationParams> = {
     id: 'sheet.mutation.set-row-visible',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');
@@ -55,8 +55,8 @@ export interface ISetRowHiddenMutationParams {
 }
 
 export const SetRowHiddenUndoMutationFactory = (accessor: IAccessor, params: ISetRowHiddenMutationParams) => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
     if (universheet == null) {
         throw new Error('universheet is null error!');
@@ -73,8 +73,8 @@ export const SetRowHiddenMutation: IMutation<ISetRowHiddenMutationParams> = {
     id: 'sheet.mutation.set-row-hidden',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const universheet = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
         if (universheet == null) {
             throw new Error('universheet is null error!');

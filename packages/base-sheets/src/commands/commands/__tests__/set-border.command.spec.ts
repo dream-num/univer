@@ -3,8 +3,8 @@ import {
     BorderType,
     IBorderData,
     ICommandService,
-    ICurrentUniverService,
     IRange,
+    IUniverInstanceService,
     RANGE_TYPE,
     Univer,
 } from '@univerjs/core';
@@ -70,7 +70,7 @@ describe('Test style commands', () => {
                 ]);
 
                 function getBorder({ startRow, startColumn }: IRange): IBorderData | undefined {
-                    return get(ICurrentUniverService)
+                    return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
                         ?.getRange(startRow, startColumn)

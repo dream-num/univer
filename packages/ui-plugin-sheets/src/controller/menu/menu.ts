@@ -62,9 +62,9 @@ import {
     FontWeight,
     HorizontalAlign,
     ICommandService,
-    ICurrentUniverService,
     IPermissionService,
     IUndoRedoService,
+    IUniverInstanceService,
     RANGE_TYPE,
     RedoCommand,
     UndoCommand,
@@ -119,7 +119,7 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
     const permissionService = accessor.get(IPermissionService);
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
@@ -155,7 +155,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let isBold = FontWeight.NORMAL;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -174,7 +174,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
@@ -212,7 +212,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let isItalic = FontItalic.NORMAL;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -231,7 +231,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
@@ -269,7 +269,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let isUnderline;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -288,7 +288,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
@@ -326,7 +326,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let st;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -493,7 +493,7 @@ export const FONT_FAMILY_CHILDREN = [
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
@@ -536,7 +536,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let ff;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -555,7 +555,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
     const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
@@ -599,7 +599,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let fs;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -717,7 +717,7 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
 ];
 
 export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<HorizontalAlign> {
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetHorizontalTextAlignCommand.id,
@@ -737,7 +737,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let ha;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -773,7 +773,7 @@ export const VERTICAL_ALIGN_CHILDREN = [
 ];
 
 export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<VerticalAlign> {
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetVerticalTextAlignCommand.id,
@@ -793,7 +793,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let va;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -829,7 +829,7 @@ export const TEXT_WRAP_CHILDREN = [
 ];
 
 export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<WrapStrategy> {
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetTextWrapCommand.id,
@@ -849,7 +849,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let ws;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -900,7 +900,7 @@ export const TEXT_ROTATE_CHILDREN = [
 ];
 
 export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number | string> {
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetTextRotationCommand.id,
@@ -920,7 +920,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let tr;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -1120,11 +1120,11 @@ export function HideColMenuItemFactory(): IMenuButtonItem {
 }
 
 export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     function hasHiddenRowsInSelections(): boolean {
-        const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+        const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
         const rowRanges = selectionManagerService
             .getSelections()
             ?.map((s) => s.range)
@@ -1167,11 +1167,11 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 }
 
 export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     function hasHiddenColsInSelections(): boolean {
-        const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+        const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
         const colRanges = selectionManagerService
             .getSelections()
             ?.map((s) => s.range)
@@ -1223,7 +1223,7 @@ export function RemoveColMenuItemFactory(): IMenuButtonItem {
 
 export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const commandService = accessor.get(ICommandService);
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
@@ -1242,7 +1242,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         value$: new Observable((subscriber) => {
             function update() {
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let rowHeight;
                 if (primary != null) {
                     rowHeight = worksheet.getRowHeight(primary.startRow);
@@ -1270,7 +1270,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
 export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const commandService = accessor.get(ICommandService);
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
@@ -1289,7 +1289,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         value$: new Observable((subscriber) => {
             function update() {
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
 
                 let colWidth: number = 0;
                 if (primary != null) {
@@ -1399,9 +1399,9 @@ export function HideSheetMenuItemFactory(): IMenuButtonItem {
 }
 
 export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<any> {
-    const currentUniverService = accessor.get(ICurrentUniverService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
-    const workbook = currentUniverService.getCurrentUniverSheetInstance();
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
     const hiddenList = workbook.getHiddenWorksheets().map((s) => ({
         label: workbook.getSheetBySheetId(s)?.getName() || '',
         value: s,

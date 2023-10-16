@@ -1,5 +1,5 @@
 import { AppContext, BaseComponentProps } from '@univerjs/base-ui';
-import { ICurrentUniverService, ISlidePage } from '@univerjs/core';
+import { ISlidePage, IUniverInstanceService } from '@univerjs/core';
 import { Component, createRef } from 'react';
 
 import styles from './index.module.less';
@@ -66,8 +66,8 @@ export class SlideBar extends Component<{}, SlideBarState> {
 
     private _init(): void {
         // TODO: should subscribe to active slide change event
-        const currentUniverService = this.context.injector.get(ICurrentUniverService);
-        const model = currentUniverService.getCurrentUniverSlideInstance();
+        const univerInstanceService = this.context.injector.get(IUniverInstanceService);
+        const model = univerInstanceService.getCurrentUniverSlideInstance();
         const pages = model.getPages();
         const pageOrder = model.getPageOrder();
         if (!pages || !pageOrder) {

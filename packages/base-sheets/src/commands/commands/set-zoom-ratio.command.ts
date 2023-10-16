@@ -1,4 +1,4 @@
-import { CommandType, ICommand, ICommandService, ICurrentUniverService } from '@univerjs/core';
+import { CommandType, ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 
 import { SHEET_ZOOM_RANGE } from '../../Basics/Const';
 import { SetZoomRatioOperation } from '../operations/set-zoom-ratio.operation';
@@ -25,7 +25,7 @@ export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
             return false;
         }
         const { delta, reset } = params;
-        const workbook = accessor.get(ICurrentUniverService).getCurrentUniverSheetInstance();
+        const workbook = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();

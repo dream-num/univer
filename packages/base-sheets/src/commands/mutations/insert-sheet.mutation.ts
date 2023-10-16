@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation } from '@univerjs/core';
+import { CommandType, IMutation, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
@@ -22,9 +22,9 @@ export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean>
     id: 'sheet.mutation.insert-sheet',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const { sheet, index, workbookId } = params;
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) {
             return false;
         }

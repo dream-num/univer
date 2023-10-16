@@ -1,4 +1,4 @@
-import { CommandType, Dimension, ICellData, ICurrentUniverService, IMutation } from '@univerjs/core';
+import { CommandType, Dimension, ICellData, IMutation, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
@@ -24,8 +24,8 @@ export const InsertRangeMutation: IMutation<IInsertRangeMutationParams, boolean>
     id: 'sheet.mutation.insert-range',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;

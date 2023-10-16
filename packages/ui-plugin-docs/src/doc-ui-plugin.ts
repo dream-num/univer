@@ -1,4 +1,4 @@
-import { ICurrentUniverService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { DefaultDocUiConfig, IDocUIPluginConfig } from './Basics';
@@ -52,7 +52,7 @@ export class DocUIPlugin extends Plugin {
     }
 
     private _markDocAsFocused() {
-        const currentService = this._injector.get(ICurrentUniverService);
+        const currentService = this._injector.get(IUniverInstanceService);
         const c = currentService.getCurrentUniverDocInstance();
         currentService.focusUniverInstance(c.getUnitId());
     }

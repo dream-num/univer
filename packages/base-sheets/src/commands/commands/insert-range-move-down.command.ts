@@ -4,8 +4,8 @@ import {
     ICellData,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IUndoRedoService,
+    IUniverInstanceService,
     ObjectMatrix,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
@@ -25,11 +25,11 @@ export const InsertRangeMoveDownCommand: ICommand = {
     handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
@@ -37,7 +37,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
         const range = selectionManagerService.getRangeDatas();
         if (!range?.length) return false;
 
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;

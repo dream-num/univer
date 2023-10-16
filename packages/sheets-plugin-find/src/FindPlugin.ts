@@ -1,4 +1,4 @@
-import { ICurrentUniverService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 // import { TextFinder } from './Domain/TextFind';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
@@ -25,7 +25,7 @@ export class FindPlugin extends Plugin {
 
     constructor(
         config: Partial<IFindPluginConfig>,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) protected readonly _injector: Injector
     ) {

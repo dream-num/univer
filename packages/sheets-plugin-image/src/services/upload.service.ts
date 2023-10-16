@@ -1,5 +1,5 @@
 import { SelectionManagerService } from '@univerjs/base-sheets';
-import { ICurrentUniverService } from '@univerjs/core';
+import { IUniverInstanceService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { FileSelected } from '../Basics';
@@ -7,7 +7,7 @@ import { FileSelected } from '../Basics';
 export class UploadService {
     constructor(
         @Inject(Injector) readonly _injector: Injector,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {}
 

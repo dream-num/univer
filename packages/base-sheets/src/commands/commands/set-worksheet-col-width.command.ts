@@ -2,8 +2,8 @@ import {
     CommandType,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IUndoRedoService,
+    IUniverInstanceService,
     RANGE_TYPE,
     Rectangle,
 } from '@univerjs/core';
@@ -31,8 +31,8 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
             return false;
         }
 
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
@@ -113,15 +113,15 @@ export const SetColWidthCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length) {
             return false;
         }
 
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()

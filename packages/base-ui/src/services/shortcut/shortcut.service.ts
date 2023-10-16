@@ -2,6 +2,7 @@ import { Disposable, ICommandService, IContextService, toDisposable } from '@uni
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
 import { fromDocumentEvent } from '../../Common/lifecycle';
+import { IFocusService } from '../focus/focus.service';
 import { IPlatformService } from '../platform/platform.service';
 import { MetaKeys } from './keycode';
 
@@ -41,13 +42,16 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IPlatformService private readonly _platformService: IPlatformService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @IFocusService private readonly _focusService: IFocusService
     ) {
         super();
 
         this.disposeWithMe(
             fromDocumentEvent('keydown', (e: KeyboardEvent) => {
-                this.resolveMouseEvent(e);
+                if (this._focusService.isFocused) {
+                    this.resolveMouseEvent(e);
+                }
             })
         );
     }

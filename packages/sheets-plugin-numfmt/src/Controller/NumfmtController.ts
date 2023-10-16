@@ -2,8 +2,8 @@ import { ComponentManager, IMenuService } from '@univerjs/base-ui';
 import {
     Disposable,
     ICommandService,
-    ICurrentUniverService,
     IRange,
+    IUniverInstanceService,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     Range,
@@ -91,7 +91,7 @@ export class NumfmtController extends Disposable {
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(INumfmtPluginData) private _numfmtPluginData: NumfmtModel,
-        @Inject(ICurrentUniverService) private readonly _currentUniverService: ICurrentUniverService,
+        @Inject(IUniverInstanceService) private readonly _currentUniverService: IUniverInstanceService,
         @Inject(NumfmtModalController) private readonly _numfmtModalController: NumfmtModalController,
         @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService

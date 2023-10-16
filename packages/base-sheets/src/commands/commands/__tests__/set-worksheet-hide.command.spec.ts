@@ -1,7 +1,7 @@
 import {
     BooleanNumber,
     ICommandService,
-    ICurrentUniverService,
+    IUniverInstanceService,
     RedoCommand,
     UndoCommand,
     Univer,
@@ -44,7 +44,7 @@ describe('Test set worksheet hide commands', () => {
 
     describe('Set worksheet hide', () => {
         it('will set current acitve worksheet hidden', async () => {
-            const workbook = get(ICurrentUniverService).getCurrentUniverSheetInstance();
+            const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
             if (!workbook) throw new Error('This is an error');
 
             const targetActiveSheet = workbook.getActiveSheet();

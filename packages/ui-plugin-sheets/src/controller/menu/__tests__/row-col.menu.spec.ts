@@ -17,7 +17,7 @@ import { ISetSelectionsOperationParams } from '@univerjs/base-sheets/commands/op
 import {
     DisposableCollection,
     ICommandService,
-    ICurrentUniverService,
+    IUniverInstanceService,
     RANGE_TYPE,
     toDisposable,
     Univer,
@@ -70,21 +70,21 @@ describe('Test row col menu items', () => {
     afterEach(() => univer.dispose());
 
     function getRowCount(): number {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getRowCount();
     }
 
     function getColCount(): number {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         return worksheet.getColumnCount();
     }
 
     async function selectRow(rowStart: number, rowEnd: number): Promise<boolean> {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const endColumn = getColCount() - 1;
@@ -112,7 +112,7 @@ describe('Test row col menu items', () => {
     }
 
     async function selectColumn(columnStart: number, columnEnd: number): Promise<boolean> {
-        const currentService = get(ICurrentUniverService);
+        const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const endRow = getRowCount() - 1;

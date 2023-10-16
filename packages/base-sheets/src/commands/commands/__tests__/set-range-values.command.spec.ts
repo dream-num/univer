@@ -2,9 +2,9 @@ import {
     CellValueType,
     ICellData,
     ICommandService,
-    ICurrentUniverService,
     IDocumentData,
     IStyleData,
+    IUniverInstanceService,
     Nullable,
     RANGE_TYPE,
     RedoCommand,
@@ -52,7 +52,7 @@ describe('Test set range values commands', () => {
         ]);
 
         getValue = (): Nullable<ICellData> =>
-            get(ICurrentUniverService)
+            get(IUniverInstanceService)
                 .getUniverSheetInstance('test')
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(0, 0, 0, 0)
@@ -60,7 +60,7 @@ describe('Test set range values commands', () => {
 
         getStyle = (): Nullable<IStyleData> => {
             const value = getValue();
-            const styles = get(ICurrentUniverService).getUniverSheetInstance('test')?.getStyles();
+            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
             if (value && styles) {
                 return styles.getStyleByCell(value);
             }

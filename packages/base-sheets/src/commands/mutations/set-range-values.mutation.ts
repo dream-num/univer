@@ -2,10 +2,10 @@ import {
     CommandType,
     ICellData,
     ICopyToOptionsData,
-    ICurrentUniverService,
     IMutation,
     IRange,
     IStyleData,
+    IUniverInstanceService,
     Nullable,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
@@ -44,8 +44,8 @@ export const SetRangeValuesUndoMutationFactory = (
     params: ISetRangeValuesMutationParams
 ): ISetRangeValuesMutationParams => {
     const { workbookId, worksheetId, cellValue } = params;
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const universheet = currentUniverService.getUniverSheetInstance(workbookId);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const universheet = univerInstanceService.getUniverSheetInstance(workbookId);
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }
@@ -125,8 +125,8 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     id: 'sheet.mutation.set-range-values',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) {
             return false;

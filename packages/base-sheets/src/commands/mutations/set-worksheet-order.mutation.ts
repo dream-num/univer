@@ -1,4 +1,4 @@
-import { CommandType, ICurrentUniverService, IMutation, Tools } from '@univerjs/core';
+import { CommandType, IMutation, IUniverInstanceService, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetOrderMutationParams {
@@ -11,7 +11,7 @@ export const SetWorksheetOrderUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetOrderMutationParams
 ): ISetWorksheetOrderMutationParams => {
-    const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
+    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
     const config = workbook!.getConfig();
     const oldIndex = config.sheetOrder.findIndex((current: string) => current === params.worksheetId);
     return {
@@ -24,7 +24,7 @@ export const SetWorksheetOrderMutation: IMutation<ISetWorksheetOrderMutationPara
     id: 'sheet.mutation.set-worksheet-order',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const workbook = accessor.get(ICurrentUniverService).getUniverSheetInstance(params.workbookId);
+        const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const config = workbook.getConfig();
         const exclude = config.sheetOrder.filter((currentId: string) => currentId !== params.worksheetId);

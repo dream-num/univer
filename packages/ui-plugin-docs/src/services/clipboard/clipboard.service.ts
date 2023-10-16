@@ -1,5 +1,5 @@
 import { IClipboardInterfaceService } from '@univerjs/base-ui';
-import { Disposable, ICurrentUniverService, toDisposable } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
 export interface IClipboardPropertyItem {}
@@ -23,7 +23,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     private _clipboardHooks: IDocClipboardHook[] = [];
 
     constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService
     ) {
         super();

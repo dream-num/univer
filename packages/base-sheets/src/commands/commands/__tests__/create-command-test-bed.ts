@@ -1,6 +1,6 @@
 import {
-    ICurrentUniverService,
     ILogService,
+    IUniverInstanceService,
     IWorkbookConfig,
     LocaleType,
     Plugin,
@@ -82,8 +82,8 @@ export function createCommandTestBed(workbookConfig?: IWorkbookConfig, dependenc
         throw new Error('[TestPlugin]: not hooked on!');
     }
 
-    const currentUniverService = get(ICurrentUniverService);
-    currentUniverService.focusUniverInstance('test');
+    const univerInstanceService = get(IUniverInstanceService);
+    univerInstanceService.focusUniverInstance('test');
 
     const logService = get(ILogService);
     logService.toggleLogEnabled(false); // change this to `true` to debug tests via logs

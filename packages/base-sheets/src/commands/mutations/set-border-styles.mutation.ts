@@ -1,12 +1,12 @@
 import {
     CommandType,
     IBorderData,
-    ICurrentUniverService,
     IDocumentData,
     IKeyValue,
     IMutation,
     IStyleData,
     ITextStyle,
+    IUniverInstanceService,
     Nullable,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
@@ -31,9 +31,9 @@ export const SetBorderStylesUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetBorderStylesMutationParams
 ): ISetBorderStylesMutationParams => {
-    const currentUniverService = accessor.get(ICurrentUniverService);
-    const workbook = currentUniverService.getCurrentUniverSheetInstance();
-    const worksheet = currentUniverService
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const worksheet = univerInstanceService
         .getCurrentUniverSheetInstance()
 
         .getSheetBySheetId(params.worksheetId);
@@ -58,8 +58,8 @@ export const SetBorderStylesMutation: IMutation<ISetBorderStylesMutationParams, 
     id: 'sheet.mutation.set-border-styles',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
-        const currentUniverService = accessor.get(ICurrentUniverService);
-        const workbook = currentUniverService.getUniverSheetInstance(params.workbookId);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);
         if (!worksheet) return false;

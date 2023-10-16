@@ -1,4 +1,4 @@
-import { ICommandService, ICurrentUniverService, RedoCommand, UndoCommand, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, Univer } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -27,7 +27,7 @@ describe('Test tab color commands', () => {
 
     describe('Set several specific colors', () => {
         function getTabColor() {
-            return get(ICurrentUniverService).getUniverSheetInstance('test')?.getActiveSheet()?.getTabColor();
+            return get(IUniverInstanceService).getUniverSheetInstance('test')?.getActiveSheet()?.getTabColor();
         }
 
         describe('correct situations', () => {

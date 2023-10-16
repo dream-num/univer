@@ -5,9 +5,9 @@ import {
     ICellV,
     ICommand,
     ICommandService,
-    ICurrentUniverService,
     IRange,
     IUndoRedoService,
+    IUniverInstanceService,
     Nullable,
     ObjectMatrix,
 } from '@univerjs/core';
@@ -31,18 +31,18 @@ export const CopyValuesToRangeCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const currentUniverService = accessor.get(ICurrentUniverService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selections = selectionManagerService.getRangeDatas();
         if (!selections?.length) return false;
         const originRange = selections[0];
-        const workbookId = currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = currentUniverService
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = univerInstanceService
             .getCurrentUniverSheetInstance()
 
             .getActiveSheet()
             .getSheetId();
-        const workbook = currentUniverService.getUniverSheetInstance(workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
         const handleResult = handleCopyRange(accessor, workbookId, worksheetId, originRange, params.destinationRange);
         if (!handleResult) return false;
@@ -98,7 +98,7 @@ function handleCopyRange(
     destinationRange: IRange
 ): Nullable<[ICellDataMatrix, IRange]> {
     const worksheet = accessor
-        .get(ICurrentUniverService)
+        .get(IUniverInstanceService)
         .getUniverSheetInstance(workbookId)
         ?.getSheetBySheetId(worksheetId);
     if (!worksheet) return;

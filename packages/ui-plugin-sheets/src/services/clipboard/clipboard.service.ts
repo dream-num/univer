@@ -9,10 +9,10 @@ import {
     ICellData,
     ICommandInfo,
     ICommandService,
-    ICurrentUniverService,
     ILogService,
     IRange,
     IUndoRedoService,
+    IUniverInstanceService,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
     toDisposable,
@@ -142,7 +142,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     constructor(
         @ILogService private readonly _logService: ILogService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,

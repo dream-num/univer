@@ -8,6 +8,7 @@ import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
+import { DesktopFocusService, IFocusService } from './services/focus/focus.service';
 import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 import { DesktopMenuService, IMenuService } from './services/menu/menu.service';
 import { DesktopMessageService } from './services/message/desktop-message.service';
@@ -52,7 +53,6 @@ export class UIPlugin extends Plugin {
             // legacy managers - deprecated
             [ComponentManager],
             [ZIndexManager],
-
             // services
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
@@ -62,8 +62,8 @@ export class UIPlugin extends Plugin {
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
-
             // controllers
+            [IFocusService, { useClass: DesktopFocusService }],
             [SharedController],
             [IUIController, { useClass: DesktopUIController }],
         ];

@@ -1,5 +1,5 @@
 import { Documents, IPageRenderConfig, IRenderManagerService, Rect } from '@univerjs/base-render';
-import { Disposable, ICommandService, ICurrentUniverService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
@@ -12,7 +12,7 @@ const PAGE_FILL_COLOR = 'rgba(255,255,255, 1)';
 export class PageRenderController extends Disposable {
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {

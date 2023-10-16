@@ -1,5 +1,5 @@
 import { Documents, Engine, IRenderManagerService, Scene } from '@univerjs/base-render';
-import { ICurrentUniverService, Nullable } from '@univerjs/core';
+import { IUniverInstanceService, Nullable } from '@univerjs/core';
 
 export interface IDocObjectParam {
     document: Documents;
@@ -8,10 +8,10 @@ export interface IDocObjectParam {
 }
 
 export function getDocObject(
-    currentUniverService: ICurrentUniverService,
+    univerInstanceService: IUniverInstanceService,
     renderManagerService: IRenderManagerService
 ): Nullable<IDocObjectParam> {
-    const documentModel = currentUniverService.getCurrentUniverDocInstance();
+    const documentModel = univerInstanceService.getCurrentUniverDocInstance();
 
     const unitId = documentModel.getUnitId();
 

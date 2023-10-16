@@ -1,5 +1,5 @@
 import { Engine, IRenderingEngine } from '@univerjs/base-render';
-import { ICurrentUniverService, ILanguagePack, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { ILanguagePack, IUniverInstanceService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { en } from './Locale';
@@ -20,7 +20,7 @@ export class SlidePlugin extends Plugin {
 
     constructor(
         config: Partial<ISlidePluginConfig> = {},
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector
     ) {

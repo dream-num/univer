@@ -10,12 +10,13 @@ import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
 import { Direction, FOCUSING_SHEET } from '@univerjs/core';
 
 import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
+import { whenEditorNotActivated } from './utils';
 
 export const MoveSelectionDownShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
     id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN,
     priority: 100,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.DOWN,
     },
@@ -25,7 +26,7 @@ export const MoveSelectionUpShortcutItem: IShortcutItem<IMoveSelectionCommandPar
     id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_UP,
     priority: 100,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.UP,
     },
@@ -35,7 +36,7 @@ export const MoveSelectionLeftShortcutItem: IShortcutItem<IMoveSelectionCommandP
     id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT,
     priority: 100,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.LEFT,
     },
@@ -45,7 +46,7 @@ export const MoveSelectionRightShortcutItem: IShortcutItem<IMoveSelectionCommand
     id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT,
     priority: 100,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.RIGHT,
     },
@@ -55,7 +56,7 @@ export const MoveSelectionTabShortcutItem: IShortcutItem<IMoveSelectionCommandPa
     id: MoveSelectionCommand.id,
     binding: KeyCode.TAB,
     priority: 100,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.RIGHT,
     },
@@ -65,7 +66,7 @@ export const MoveBackSelectionShortcutItem: IShortcutItem<IMoveSelectionCommandP
     id: MoveSelectionCommand.id,
     binding: KeyCode.TAB | MetaKeys.SHIFT,
     priority: 100,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.LEFT,
     },
@@ -76,7 +77,7 @@ export const MoveBackSelectionShortcutItem: IShortcutItem<IMoveSelectionCommandP
 export const MoveSelectionEndDownShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
     id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN | MetaKeys.CTRL_COMMAND,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.DOWN,
         jumpOver: true,
@@ -86,7 +87,7 @@ export const MoveSelectionEndDownShortcutItem: IShortcutItem<IMoveSelectionComma
 export const MoveSelectionEndUpShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
     id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_UP | MetaKeys.CTRL_COMMAND,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.UP,
         jumpOver: true,
@@ -96,7 +97,7 @@ export const MoveSelectionEndUpShortcutItem: IShortcutItem<IMoveSelectionCommand
 export const MoveSelectionEndLeftShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
     id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT | MetaKeys.CTRL_COMMAND,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.LEFT,
         jumpOver: true,
@@ -106,7 +107,7 @@ export const MoveSelectionEndLeftShortcutItem: IShortcutItem<IMoveSelectionComma
 export const MoveSelectionEndRightShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
     id: MoveSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT | MetaKeys.CTRL_COMMAND,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.RIGHT,
         jumpOver: true,
@@ -116,7 +117,7 @@ export const MoveSelectionEndRightShortcutItem: IShortcutItem<IMoveSelectionComm
 export const ExpandSelectionDownShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN | MetaKeys.SHIFT,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.DOWN,
     },
@@ -125,7 +126,7 @@ export const ExpandSelectionDownShortcutItem: IShortcutItem<IExpandSelectionComm
 export const ExpandSelectionUpShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_UP | MetaKeys.SHIFT,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.UP,
     },
@@ -134,7 +135,7 @@ export const ExpandSelectionUpShortcutItem: IShortcutItem<IExpandSelectionComman
 export const ExpandSelectionLeftShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT | MetaKeys.SHIFT,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.LEFT,
     },
@@ -143,7 +144,7 @@ export const ExpandSelectionLeftShortcutItem: IShortcutItem<IExpandSelectionComm
 export const ExpandSelectionRightShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT | MetaKeys.SHIFT,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.RIGHT,
     },
@@ -154,7 +155,7 @@ export const ExpandSelectionRightShortcutItem: IShortcutItem<IExpandSelectionCom
 export const ExpandSelectionEndDownShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_DOWN | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.DOWN,
         jumpOver: true,
@@ -164,7 +165,7 @@ export const ExpandSelectionEndDownShortcutItem: IShortcutItem<IExpandSelectionC
 export const ExpandSelectionEndUpShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_UP | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.UP,
         jumpOver: true,
@@ -174,7 +175,7 @@ export const ExpandSelectionEndUpShortcutItem: IShortcutItem<IExpandSelectionCom
 export const ExpandSelectionEndLeftShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_LEFT | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.LEFT,
         jumpOver: true,
@@ -184,7 +185,7 @@ export const ExpandSelectionEndLeftShortcutItem: IShortcutItem<IExpandSelectionC
 export const ExpandSelectionEndRightShortcutItem: IShortcutItem<IExpandSelectionCommandParams> = {
     id: ExpandSelectionCommand.id,
     binding: KeyCode.ARROW_RIGHT | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_SHEET),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.RIGHT,
         jumpOver: true,

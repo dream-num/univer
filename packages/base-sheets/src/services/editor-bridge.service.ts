@@ -35,11 +35,9 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
     };
 
     private readonly _state$ = new BehaviorSubject<Nullable<IEditorBridgeServiceParam>>(null);
-
     readonly state$ = this._state$.asObservable();
 
     private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
-
     readonly visible$ = this._visible$.asObservable();
 
     dispose(): void {

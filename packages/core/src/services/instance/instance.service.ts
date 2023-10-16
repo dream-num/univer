@@ -1,14 +1,14 @@
 import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
-import { DocumentModel } from '../Docs/Domain/DocumentModel';
-import { Nullable } from '../Shared';
-import { Disposable } from '../Shared/lifecycle';
-import { Workbook } from '../sheets/workbook';
-import { Slide } from '../Slides/Domain/SlideModel';
-import { IDocumentData, IWorkbookConfig } from '../Types/Interfaces';
-import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './context/context';
-import { IContextService } from './context/context.service';
+import { DocumentModel } from '../../Docs/Domain/DocumentModel';
+import { Nullable } from '../../Shared';
+import { Disposable } from '../../Shared/lifecycle';
+import { Workbook } from '../../sheets/workbook';
+import { Slide } from '../../Slides/Domain/SlideModel';
+import { IDocumentData, IWorkbookConfig } from '../../Types/Interfaces';
+import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context';
+import { IContextService } from '../context/context.service';
 
 export interface IUniverHandler {
     createUniverDoc(data: Partial<IDocumentData>): DocumentModel;

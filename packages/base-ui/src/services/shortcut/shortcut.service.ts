@@ -13,7 +13,7 @@ export interface IShortcutItem<P extends object = object> {
 
     priority?: number;
     /** A callback that will be triggered to examine if the shortcut should be invoked. */
-    preconditions?: (contextService: Pick<IContextService, 'getContextValue' | 'matchContextValue'>) => boolean;
+    preconditions?: (contextService: IContextService) => boolean;
 
     /** A command can be bound to several bindings, with different static parameters perhaps. */
     binding: number;
@@ -49,9 +49,9 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
 
         this.disposeWithMe(
             fromDocumentEvent('keydown', (e: KeyboardEvent) => {
-                if (this._focusService.isFocused) {
-                    this.resolveMouseEvent(e);
-                }
+                // if (this._focusService.isFocused) {
+                this.resolveMouseEvent(e);
+                // }
             })
         );
     }

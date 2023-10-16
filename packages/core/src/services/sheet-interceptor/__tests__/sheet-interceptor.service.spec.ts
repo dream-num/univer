@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Univer } from '../../../Basics/Univer';
 import { Nullable } from '../../../common/type-utils';
 import { ICellData } from '../../../Types/Interfaces/ICellData';
-import { IUniverInstanceService } from '../../current.service';
+import { IUniverInstanceService } from '../../instance/instance.service';
 import { SheetInterceptorService } from '../sheet-interceptor.service';
 import { createCoreTestBed } from './create-core-test-bed';
 

@@ -738,7 +738,40 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
-    getCellModel(row: number, column: number) {
+    getBlankCellDocumentModel(row: number, column: number) {
+        const documentModelObject = this.getCellDocumentModel(row, column);
+
+        if (documentModelObject != null) {
+            if (documentModelObject.documentModel == null) {
+                documentModelObject.documentModel = this._getDocumentDataByStyle('', {}, {});
+            }
+            return documentModelObject;
+        }
+
+        const content = '';
+
+        let fontString = 'document';
+
+        const textRotation: ITextRotation = { a: 0, v: BooleanNumber.FALSE };
+        const horizontalAlign: HorizontalAlign = HorizontalAlign.UNSPECIFIED;
+        const verticalAlign: VerticalAlign = VerticalAlign.UNSPECIFIED;
+        const wrapStrategy: WrapStrategy = WrapStrategy.UNSPECIFIED;
+
+        fontString = getFontStyleString({}, this._localService).fontCache;
+
+        const documentModel = this._getDocumentDataByStyle(content, {}, {});
+
+        return {
+            documentModel,
+            fontString,
+            textRotation,
+            wrapStrategy,
+            verticalAlign,
+            horizontalAlign,
+        };
+    }
+
+    getCellDocumentModel(row: number, column: number) {
         const cell = this._cellData.getValue(row, column);
         const style = this._styles.getStyleByCell(cell);
         if (!cell) {
@@ -1178,7 +1211,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
         }
 
-        const modelObject = this.getCellModel(r, c);
+        const modelObject = this.getCellDocumentModel(r, c);
 
         if (modelObject == null) {
             return;
@@ -1217,7 +1250,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     private _updateRenderConfigAndHorizon(
-        document: IDocumentData,
+        documentData: IDocumentData,
         horizontalAlign: HorizontalAlign,
         renderConfig?: IDocumentRenderConfig
     ) {
@@ -1225,16 +1258,16 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        if (!document.body?.dataStream) {
+        if (!documentData.body?.dataStream) {
             return;
         }
 
-        if (!document.documentStyle) {
-            document.documentStyle = {};
+        if (!documentData.documentStyle) {
+            documentData.documentStyle = {};
         }
-        document.documentStyle.renderConfig = renderConfig;
+        documentData.documentStyle.renderConfig = renderConfig;
 
-        const paragraphs = document.body.paragraphs || [];
+        const paragraphs = documentData.body.paragraphs || [];
 
         for (const paragraph of paragraphs) {
             if (!paragraph.paragraphStyle) {
@@ -1244,7 +1277,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
         }
 
-        return new DocumentModelSimple(document);
+        return new DocumentModelSimple(documentData);
     }
 
     private _getDocumentDataByStyle(content: string, textStyle: ITextStyle, config: CellOtherConfig) {

@@ -70,7 +70,39 @@ export class StartEditController extends Disposable {
 
             const { document, scene, engine } = editorObject;
 
-            // this._textSelectionRenderManager.changeRuntime(docSkeleton, scene);
+            const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
+
+            if (actualRangeWithCoord == null) {
+                return;
+            }
+
+            const { startX, startY, endX, endY } = actualRangeWithCoord;
+
+            const { actualWidth, actualHeight } = docSkeleton.getActualSize();
+
+            let editorWidth = endX - startX;
+            let editorHeight = endY - startY;
+
+            if (editorWidth < actualWidth) {
+                editorWidth = actualWidth;
+            }
+
+            if (editorHeight < actualHeight) {
+                editorHeight = actualHeight;
+            }
+
+            engine.resizeBySize(editorWidth, editorHeight);
+
+            scene.transformByState({
+                width: editorWidth,
+                height: editorHeight,
+            });
+
+            document.changeSkeleton(docSkeleton);
+
+            document.resize(editorWidth, editorHeight);
+
+            this._textSelectionRenderManager.changeRuntime(docSkeleton, scene);
 
             this._textSelectionRenderManager.active(-1000, -1000);
         });

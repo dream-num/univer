@@ -5,6 +5,7 @@ import { filter } from 'rxjs/operators';
 import { SHEET_UI_PLUGIN_NAME } from './Basics';
 import { SheetClipboardController } from './controller/clipboard/clipboard.controller';
 import { SheetContextMenuController } from './controller/contextmenu/contextmenu.controller';
+import { InitializeEditorController } from './controller/editor/initialize-editor.controller';
 import { StartEditController } from './controller/editor/start-edit.controller';
 import { SheetUIController } from './controller/sheet-ui.controller';
 import { en } from './Locale';
@@ -43,6 +44,7 @@ export class SheetUIPlugin extends Plugin {
                 [SheetClipboardController],
                 [SheetContextMenuController],
                 [SheetUIController],
+                [InitializeEditorController],
                 [StartEditController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));

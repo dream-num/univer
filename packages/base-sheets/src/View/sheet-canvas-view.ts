@@ -1,6 +1,4 @@
 import {
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IRender,
     IRenderManagerService,
     ISelectionTransformerShapeManager,
@@ -55,23 +53,23 @@ export class SheetCanvasView {
                 this._loadedMap.add(unitId);
             }
 
-            if (!this._isLoadedEditor) {
-                // create univer doc normal editor instance
+            // if (!this._isLoadedEditor) {
+            //     // create univer doc normal editor instance
 
-                this._currentUniverService.createDoc({
-                    id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-                    documentStyle: {},
-                });
+            //     this._currentUniverService.createDoc({
+            //         id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+            //         documentStyle: {},
+            //     });
 
-                // create univer doc formula bar editor instance
+            //     // create univer doc formula bar editor instance
 
-                this._currentUniverService.createDoc({
-                    id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-                    documentStyle: {},
-                });
+            //     this._currentUniverService.createDoc({
+            //         id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+            //         documentStyle: {},
+            //     });
 
-                this._isLoadedEditor = true;
-            }
+            //     this._isLoadedEditor = true;
+            // }
         });
     }
 
@@ -94,7 +92,6 @@ export class SheetCanvasView {
         } else {
             this._renderManagerService.createRender(unitId);
         }
-        this._renderManagerService.setCurrent(unitId);
 
         const currentRender = this._renderManagerService.getRenderById(unitId);
 
@@ -122,6 +119,8 @@ export class SheetCanvasView {
                 scene.render();
             });
         }
+
+        this._renderManagerService.setCurrent(unitId);
     }
 
     private _addComponent(currentRender: IRender) {

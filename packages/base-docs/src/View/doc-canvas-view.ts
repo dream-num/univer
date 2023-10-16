@@ -79,8 +79,6 @@ export class DocCanvasView {
             this._renderManagerService.createRender(unitId);
         }
 
-        this._renderManagerService.setCurrent(unitId);
-
         const currentRender = this._renderManagerService.getRenderById(unitId);
 
         if (currentRender == null) {
@@ -152,6 +150,8 @@ export class DocCanvasView {
                 // }
             });
         }
+
+        this._renderManagerService.setCurrent(unitId);
     }
 
     private _addComponent(currentRender: IRender) {

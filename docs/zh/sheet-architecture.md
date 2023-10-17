@@ -8,7 +8,9 @@
 
 Univer Sheet 的插件架构如下图所示：
 
-![Univer Sheet 插件架构](./images/univer-sheet-plugin-architecture.png)
+![Univer Sheet 插件架构](../img/sheet-architecture.png)
+
+*并未绘制出全部的模块，仅做示意*。
 
 Univer Sheet 的架构主要由以下几个部分组成：
 

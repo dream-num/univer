@@ -1,10 +1,13 @@
 import { CommandType, ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 
-import { SetScrollOperation, SetScrollRelativeOperation } from '../operations/scroll.operation';
+import { ScrollManagerService } from '../../services/scroll-manager.service';
+import { SetScrollOperation } from '../operations/scroll.operation';
 
 export interface IScrollCommandParams {
-    sheetViewStartRow?: number;
-    sheetViewStartColumn?: number;
+    offsetX: number;
+    offsetY: number;
+    sheetViewStartRow: number;
+    sheetViewStartColumn: number;
 }
 
 export interface ISetScrollRelativeCommandParams {
@@ -19,7 +22,28 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
     type: CommandType.COMMAND,
     handler: async (accessor, params = { offsetX: 0, offsetY: 0 }) => {
         const commandService = accessor.get(ICommandService);
-        return commandService.executeCommand(SetScrollRelativeOperation.id, params);
+        const scrollManagerService = accessor.get(ScrollManagerService);
+        const currentUniverService = accessor.get(IUniverInstanceService);
+        const workbook = currentUniverService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        const { xSplit, ySplit } = worksheet.getConfig().freeze;
+        const currentScroll = scrollManagerService.getCurrentScroll();
+        const { offsetX = 0, offsetY = 0 } = params || {};
+        const {
+            sheetViewStartRow = 0,
+            sheetViewStartColumn = 0,
+            offsetX: currentOffsetX = 0,
+            offsetY: currentOffsetY = 0,
+        } = currentScroll || {};
+
+        return commandService.executeCommand(SetScrollOperation.id, {
+            unitId: workbook.getUnitId(),
+            sheetId: worksheet.getSheetId(),
+            sheetViewStartRow: sheetViewStartRow + ySplit,
+            sheetViewStartColumn: sheetViewStartColumn + xSplit,
+            offsetX: currentOffsetX + offsetX,
+            offsetY: currentOffsetY + offsetY,
+        });
     },
 };
 
@@ -29,7 +53,7 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
 export const ScrollCommand: ICommand<IScrollCommandParams> = {
     id: 'sheet.command.scroll-view',
     type: CommandType.COMMAND,
-    handler: async (accessor, params = { sheetViewStartRow: 0, sheetViewStartColumn: 0 }) => {
+    handler: async (accessor, params = { sheetViewStartRow: 0, sheetViewStartColumn: 0, offsetX: 0, offsetY: 0 }) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const currentWorkbook = univerInstanceService.getCurrentUniverSheetInstance();
@@ -41,13 +65,15 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
 
         const commandService = accessor.get(ICommandService);
 
-        const { sheetViewStartRow, sheetViewStartColumn } = params;
+        const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = params;
 
         return commandService.executeCommand(SetScrollOperation.id, {
             unitId: currentWorkbook.getUnitId(),
             sheetId: currentWorksheet.getSheetId(),
             sheetViewStartRow,
             sheetViewStartColumn,
+            offsetX,
+            offsetY,
         });
     },
 };

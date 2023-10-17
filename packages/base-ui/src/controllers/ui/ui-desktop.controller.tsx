@@ -140,23 +140,9 @@ function bootStrap(
     const root = createRoot(mountContainer);
     const ConnectedApp = connectInjector(App, injector);
     const desktopUIController = injector.get(IUIController) as IDesktopUIController;
-    const headerComponents = desktopUIController.getHeaderComponents();
-    const contentComponents = desktopUIController.getContentComponents();
-    const footerComponents = desktopUIController.getFooterComponents();
-    const sidebarComponents = desktopUIController.getSidebarComponents();
     const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
-    root.render(
-        <ConnectedApp
-            {...options}
-            headerComponents={headerComponents}
-            contentComponents={contentComponents}
-            onRendered={onRendered}
-            footerComponents={footerComponents}
-            sidebarComponents={sidebarComponents}
-        />
-    );
 
-    const updateSubscription = desktopUIController.componentRegistered$.subscribe(() => {
+    function render() {
         const headerComponents = desktopUIController.getHeaderComponents();
         const contentComponents = desktopUIController.getContentComponents();
         const footerComponents = desktopUIController.getFooterComponents();
@@ -166,12 +152,15 @@ function bootStrap(
                 {...options}
                 headerComponents={headerComponents}
                 contentComponents={contentComponents}
+                onRendered={onRendered}
                 footerComponents={footerComponents}
                 sidebarComponents={sidebarComponents}
-                onRendered={onRendered}
             />
         );
-    });
+    }
+
+    const updateSubscription = desktopUIController.componentRegistered$.subscribe(render);
+    render();
 
     return toDisposable(() => {
         root.unmount();

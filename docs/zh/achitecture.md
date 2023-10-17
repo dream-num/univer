@@ -65,7 +65,7 @@ export abstract class Plugin {
 }
 ```
 
-除了这四个生命周期勾子之外，插件内部的模块可以使用 `OnLifecycle` 装饰器声明自己需要在特定的声明周期阶段初始化，例如
+除了这四个生命周期勾子之外，插件内部的模块可以使用 `OnLifecycle` 装饰器声明自己需要在特定的生命周期阶段初始化，例如
 
 ```ts
 @OnLifecycle(LifecycleStages.Rendered, IMEInputController)

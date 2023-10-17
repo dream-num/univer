@@ -184,7 +184,6 @@ export const Tabs = React.memo(
         };
 
         const wheel = (e: React.WheelEvent) => {
-            e.preventDefault();
             if (!parent.current) return;
             const children = parent.current.children;
             if (e.deltaY > 0) {

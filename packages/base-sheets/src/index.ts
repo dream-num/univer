@@ -136,7 +136,7 @@ export {
     type ISetWorksheetRowHeightMutationParams,
     SetWorksheetRowHeightMutation,
 } from './commands/mutations/set-worksheet-row-height.mutation';
-export { SetScrollOperation, SetScrollRelativeOperation } from './commands/operations/scroll.operation';
+export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SetSelectionsOperation } from './commands/operations/selection.operation';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export * from './Locale';

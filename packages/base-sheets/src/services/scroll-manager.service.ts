@@ -2,8 +2,10 @@ import { Nullable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export interface IScrollManagerParam {
-    sheetViewStartRow?: number;
-    sheetViewStartColumn?: number;
+    offsetX: number;
+    offsetY: number;
+    sheetViewStartRow: number;
+    sheetViewStartColumn: number;
 }
 
 export interface IScrollManagerSearchParam {
@@ -87,7 +89,7 @@ export class ScrollManagerService {
     // }
 
     private _addByParam(insertParam: IScrollManagerInsertParam, isRefresh = true): void {
-        const { unitId, sheetId, sheetViewStartRow, sheetViewStartColumn } = insertParam;
+        const { unitId, sheetId, sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } = insertParam;
 
         if (!this._scrollInfo.has(unitId)) {
             this._scrollInfo.set(unitId, new Map());
@@ -98,6 +100,8 @@ export class ScrollManagerService {
         sheetScroll.set(sheetId, {
             sheetViewStartRow,
             sheetViewStartColumn,
+            offsetX,
+            offsetY,
         });
 
         if (isRefresh === true) {
@@ -110,6 +114,8 @@ export class ScrollManagerService {
             ...param,
             sheetViewStartRow: 0,
             sheetViewStartColumn: 0,
+            offsetX: 0,
+            offsetY: 0,
         });
 
         this._refresh(param);

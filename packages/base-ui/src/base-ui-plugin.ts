@@ -1,5 +1,5 @@
 import { ILocalStorageService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
-import { Dependency, Injector } from '@wendellhu/redi';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { ComponentManager } from './Common/ComponentManager';
 import { ZIndexManager } from './Common/ZIndexManager';
@@ -26,13 +26,14 @@ const DEFAULT_SLIDE_PLUGIN_DATA = {};
  * UI plugin provides basic interaction with users. Including workbench (menus, UI parts, notifications etc.), copy paste, shortcut.
  */
 export class UIPlugin extends Plugin {
-    protected override _injector: Injector;
-
     static override type = PluginType.Univer;
 
     private _config: IUIPluginConfig;
 
-    constructor(config: Partial<IUIPluginConfig> = {}) {
+    constructor(
+        config: Partial<IUIPluginConfig> = {},
+        @Inject(Injector) protected readonly _injector: Injector
+    ) {
         super(PLUGIN_NAMES.BASE_UI);
 
         this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);

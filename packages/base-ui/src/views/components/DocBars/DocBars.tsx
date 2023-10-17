@@ -27,10 +27,12 @@ export function DocBars() {
     return (
         <section className={styles.docBars}>
             <div className={styles.menubar}>{/* TODO: Start */}</div>
-            <div className={`${styles.toolbarWarp} ${styles.toolbar}`}>
-                {menuItems.map((item) => (
-                    <ToolbarItem key={item.id} {...item} />
-                ))}
+            <div className={styles.toolbar}>
+                <div className={styles.toolbarContainer}>
+                    {menuItems.map((item) => (
+                        <ToolbarItem key={item.id} {...item} />
+                    ))}
+                </div>
             </div>
         </section>
     );

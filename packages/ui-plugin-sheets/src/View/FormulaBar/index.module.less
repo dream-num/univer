@@ -1,9 +1,10 @@
 .formula-box {
+    height: 40px;
+    padding: 0 var(--padding-xl);
+    background: var(--bg-color-secondary);
+    border-bottom: 1px solid var(--border-color);
+    box-sizing: border-box;
     display: flex;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border-color-base);
-    height: 28px;
-    line-height: 28px;
 
     .select-button .tooltip-Group .tooltip-body {
         display: flex;
@@ -23,10 +24,9 @@
         display: flex;
 
         .formula-icon {
+            border-right: 1px solid var(--gray-15);
             display: flex;
-            border: 1px solid var(--gray-15);
-            border-top: none;
-            border-bottom: none;
+            align-items: center;
 
             span[role='img'] {
                 font-size: 24px;
@@ -45,8 +45,11 @@
             width: 100%;
             padding: 0 10px;
             overflow: hidden;
+            display: flex;
+            align-items: center;
 
             .formula-content {
+                width: 100%;
                 outline: none;
                 word-wrap: break-word;
             }

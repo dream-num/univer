@@ -1,22 +1,11 @@
 import {
     DeviceInputEventType,
-    DocumentSkeleton,
     IMouseEvent,
     IPointerEvent,
     IRenderManagerService,
     ISelectionTransformerShapeManager,
 } from '@univerjs/base-render';
-import {
-    Disposable,
-    ICommandService,
-    ITextRotation,
-    IUniverInstanceService,
-    LifecycleStages,
-    LocaleService,
-    makeCellToSelection,
-    OnLifecycle,
-    WrapStrategy,
-} from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject } from '../Basics/component-tools';
@@ -34,8 +23,7 @@ export class EditorBridgeController extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @ISelectionTransformerShapeManager
-        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
-        @Inject(LocaleService) protected readonly _localService: LocaleService
+        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager
     ) {
         super();
 
@@ -80,39 +68,25 @@ export class EditorBridgeController extends Disposable {
                 return;
             }
 
-            const documentModelObject = skeleton.getCellDocumentModel(startRow, startColumn);
+            let documentLayoutObject = skeleton.getCellDocumentModel(startRow, startColumn);
 
-            const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
-
-            if (actualRangeWithCoord == null || documentModelObject == null) {
-                return;
+            if (documentLayoutObject == null) {
+                documentLayoutObject = skeleton.getBlankCellDocumentModel(startRow, startColumn);
             }
 
-            let documentModel = documentModelObject?.documentModel;
+            // let documentModel = documentModelObject?.documentModel;
 
-            const { startX, endX } = actualRangeWithCoord;
+            // if (documentModel == null) {
+            //     documentModel = skeleton.getBlankCellDocumentModel(startRow, startColumn).documentModel;
+            // }
 
-            const { textRotation, verticalAlign, horizontalAlign, wrapStrategy } = documentModelObject;
-
-            const { a: angle } = textRotation as ITextRotation;
-
-            if (documentModel == null) {
-                documentModel = skeleton.getBlankCellDocumentModel(startRow, startColumn).documentModel;
-            }
-
-            const documentSkeleton = DocumentSkeleton.create(documentModel!, this._localService);
-
-            if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-                documentSkeleton.getModel().updateDocumentDataPageSize(endX - startX);
-            }
-
-            documentSkeleton.calculate();
+            // documentModelObject.documentModel = documentModel;
 
             this._editorBridgeService.setState({
                 primaryWithCoord,
                 unitId,
                 sheetId,
-                docSkeleton: documentSkeleton,
+                documentLayoutObject,
             });
         });
     }

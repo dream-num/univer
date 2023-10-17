@@ -74,7 +74,11 @@ export interface ITextSelectionRenderManager {
 
     getActiveRange(): Nullable<ITextSelectionRangeWithStyle>;
 
-    eventTrigger(evt: IPointerEvent | IMouseEvent, documentOffsetConfig: IDocumentOffsetConfig): void;
+    eventTrigger(
+        evt: IPointerEvent | IMouseEvent,
+        documentOffsetConfig: IDocumentOffsetConfig,
+        viewport: Nullable<Viewport>
+    ): void;
 }
 
 export interface IEditorInputConfig {
@@ -151,8 +155,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _textSelectionList: TextSelection[] = [];
 
-    private _activeViewport: Nullable<Viewport>;
-
     private _currentSegmentId: string = '';
 
     private _documentOffsetConfig: IDocumentOffsetConfig = {
@@ -177,6 +179,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _isIMEInputApply = false;
 
+    private _activeViewport: Nullable<Viewport>;
+
     constructor(
         private _docSkeleton?: Nullable<DocumentSkeleton>,
         private _scene?: Nullable<Scene>
@@ -190,10 +194,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         }
     }
 
-    set activeViewport(viewport: Nullable<Viewport>) {
-        this._attachScrollEvent(viewport);
-        this._activeViewport = viewport;
-    }
+    // set activeViewport(viewport: Nullable<Viewport>) {
+    //     this._attachScrollEvent(viewport);
+    //     this._activeViewport = viewport;
+    // }
 
     setSegment(id: string) {
         this._currentSegmentId = id;
@@ -360,12 +364,16 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._scene = scene;
 
-        this.activeViewport = scene.getViewports()[0];
+        // this.activeViewport = scene.getViewports()[0];
 
         // this._attachSelectionEvent(this._documents);
     }
 
-    eventTrigger(evt: IPointerEvent | IMouseEvent, documentOffsetConfig: IDocumentOffsetConfig) {
+    eventTrigger(
+        evt: IPointerEvent | IMouseEvent,
+        documentOffsetConfig: IDocumentOffsetConfig,
+        viewportMain: Nullable<Viewport>
+    ) {
         // this._moveInObserver = documents.onPointerEnterObserver.add(() => {
         //     documents.cursor = CURSOR_TYPE.TEXT;
         // });
@@ -383,10 +391,15 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
+        this._activeViewport = viewportMain;
+
         const scene = this._scene;
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-        this.activeViewport = scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+
+        this._attachScrollEvent(
+            viewportMain || scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]))
+        );
 
         this._documentOffsetConfig = documentOffsetConfig;
 
@@ -413,8 +426,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         }
 
         this._activeSelectionRefresh();
-
-        this._syncDomToSelection();
 
         scene.disableEvent();
 
@@ -454,6 +465,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             this._textSelection$.next(this.getTextSelectionList());
 
             scrollTimer.dispose();
+            this._syncDomToSelection();
         });
 
         // state.stopPropagation();
@@ -785,7 +797,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     private _attachScrollEvent(viewport: Nullable<Viewport>) {
-        if (!viewport) {
+        if (viewport == null) {
             return;
         }
         const key = viewport.viewPortKey;
@@ -918,12 +930,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _getTransformCoordForDocumentOffset(evtOffsetX: number, evtOffsetY: number) {
         const { documentTransform } = this._documentOffsetConfig;
-        if (this._scene == null || documentTransform == null) {
+        if (this._activeViewport == null || documentTransform == null) {
             return;
         }
-        this.activeViewport = this._scene.getActiveViewportByCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
-        const originCoord = this._scene.transformToSceneCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
+        const originCoord = this._activeViewport.getRelativeVector(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         if (!originCoord) {
             return;

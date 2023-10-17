@@ -584,10 +584,10 @@ export class Scene extends ThinScene {
         return coord;
     }
 
-    transformToSceneCoord(coord: Vector2) {
-        const pickedViewport = this.getActiveViewportByCoord(coord);
-        return pickedViewport?.getRelativeVector(coord);
-    }
+    // transformToSceneCoord(coord: Vector2) {
+    //     const pickedViewport = this.getActiveViewportByCoord(coord);
+    //     return pickedViewport?.getRelativeVector(coord);
+    // }
 
     clearLayer() {
         this._layers = [];

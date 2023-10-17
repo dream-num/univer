@@ -3,6 +3,7 @@ import {
     DeviceInputEventType,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentSkeleton,
     IEditorInputConfig,
     IRenderManagerService,
     ITextSelectionRenderManager,
@@ -12,11 +13,15 @@ import {
     Disposable,
     ICommandService,
     IContextService,
+    ITextRotation,
     IUniverInstanceService,
     LifecycleStages,
+    LocaleService,
     makeCellToSelection,
     Nullable,
     OnLifecycle,
+    VerticalAlign,
+    WrapStrategy,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
@@ -24,6 +29,8 @@ import { Subscription } from 'rxjs';
 import { getEditorObject } from '../../Basics/editor/get-editor-object';
 import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
+
+const HIDDEN_EDITOR_POSITION = -1000;
 
 @OnLifecycle(LifecycleStages.Steady, StartEditController)
 export class StartEditController extends Disposable {
@@ -38,7 +45,8 @@ export class StartEditController extends Disposable {
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(LocaleService) protected readonly _localService: LocaleService
     ) {
         super();
 
@@ -63,7 +71,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { unitId, sheetId, primaryWithCoord, docSkeleton } = param;
+            const { unitId, sheetId, primaryWithCoord, documentLayoutObject } = param;
 
             const editorObject = this._getEditorObject();
 
@@ -81,7 +89,19 @@ export class StartEditController extends Disposable {
 
             const { startX, startY, endX, endY } = actualRangeWithCoord;
 
-            const { actualWidth, actualHeight } = docSkeleton.getActualSize();
+            const { textRotation, verticalAlign, wrapStrategy, documentModel } = documentLayoutObject;
+
+            const { a: angle } = textRotation as ITextRotation;
+
+            const documentSkeleton = DocumentSkeleton.create(documentModel!, this._localService);
+
+            if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
+                documentSkeleton.getModel().updateDocumentDataPageSize(endX - startX);
+            }
+
+            documentSkeleton.calculate();
+
+            const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
 
             let editorWidth = endX - startX;
             let editorHeight = endY - startY;
@@ -92,6 +112,17 @@ export class StartEditController extends Disposable {
 
             if (editorHeight < actualHeight) {
                 editorHeight = actualHeight;
+            } else {
+                let offsetTop = 0;
+                if (verticalAlign === VerticalAlign.MIDDLE) {
+                    offsetTop = (editorHeight - actualHeight) / 2;
+                } else if (verticalAlign === VerticalAlign.BOTTOM) {
+                    offsetTop = editorHeight - actualHeight;
+                }
+                documentSkeleton.getModel().updateDocumentDataMargin({
+                    t: offsetTop,
+                });
+                documentSkeleton.calculate();
             }
 
             engine.resizeBySize(editorWidth, editorHeight);
@@ -101,13 +132,13 @@ export class StartEditController extends Disposable {
                 height: editorHeight,
             });
 
-            document.changeSkeleton(docSkeleton);
+            document.changeSkeleton(documentSkeleton);
 
             document.resize(editorWidth, editorHeight);
 
-            this._textSelectionRenderManager.changeRuntime(docSkeleton, scene);
+            this._textSelectionRenderManager.changeRuntime(documentSkeleton, scene);
 
-            this._textSelectionRenderManager.active(-1000, -1000);
+            this._textSelectionRenderManager.active(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
         });
     }
 
@@ -126,7 +157,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { unitId, sheetId, primaryWithCoord, docSkeleton } = param;
+            const { primaryWithCoord } = param;
 
             if (primaryWithCoord == null) {
                 return;
@@ -160,7 +191,7 @@ export class StartEditController extends Disposable {
         if (config == null) {
             return;
         }
-        const { event, content, activeRange, selectionList } = config;
+        // const { event, content, activeRange, selectionList } = config;
 
         this._editorBridgeService.show(DeviceInputEventType.Keyboard);
     }

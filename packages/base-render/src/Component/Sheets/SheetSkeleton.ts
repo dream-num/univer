@@ -87,6 +87,15 @@ interface IRowColumnSegment {
     endColumn: number;
 }
 
+export interface IDocumentLayoutObject {
+    documentModel: Nullable<DocumentModelSimple>;
+    fontString: string;
+    textRotation: ITextRotation;
+    wrapStrategy: WrapStrategy;
+    verticalAlign: VerticalAlign;
+    horizontalAlign: HorizontalAlign;
+}
+
 const DEFAULT_ROTATE_ANGLE = 90;
 
 export class SpreadsheetSkeleton extends Skeleton {
@@ -738,7 +747,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
-    getBlankCellDocumentModel(row: number, column: number) {
+    getBlankCellDocumentModel(row: number, column: number): IDocumentLayoutObject {
         const documentModelObject = this.getCellDocumentModel(row, column);
 
         if (documentModelObject != null) {
@@ -771,7 +780,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getCellDocumentModel(row: number, column: number) {
+    getCellDocumentModel(row: number, column: number): Nullable<IDocumentLayoutObject> {
         const cell = this._cellData.getValue(row, column);
         const style = this._styles.getStyleByCell(cell);
         if (!cell) {

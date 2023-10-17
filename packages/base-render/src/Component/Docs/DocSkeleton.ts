@@ -314,12 +314,12 @@ export class DocumentSkeleton extends Skeleton {
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
 
-            const { startX, startY, endX, endY } = this._getPageBoundingBox(page, pageLayoutType);
+            // const { startX, startY, endX, endY } = this._getPageBoundingBox(page, pageLayoutType);
 
-            if (!(x >= startX && x <= endX && y >= startY && y <= endY)) {
-                this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
-                continue;
-            }
+            // if (!(x >= startX && x <= endX && y >= startY && y <= endY)) {
+            //     this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+            //     continue;
+            // }
 
             this._findLiquid.translatePagePadding(page);
 
@@ -330,7 +330,7 @@ export class DocumentSkeleton extends Skeleton {
 
                 this._findLiquid.translateSection(section);
 
-                const { y: startY } = this._findLiquid;
+                // const { y: startY } = this._findLiquid;
 
                 // if (!(y >= startY && y <= startY + height)) {
                 //     continue;
@@ -341,7 +341,7 @@ export class DocumentSkeleton extends Skeleton {
 
                     this._findLiquid.translateColumn(column);
 
-                    const { x: startX } = this._findLiquid;
+                    // const { x: startX } = this._findLiquid;
 
                     // if (!(x >= startX && x <= startX + columnWidth)) {
                     //     continue;
@@ -491,27 +491,6 @@ export class DocumentSkeleton extends Skeleton {
     ) {
         this._findLiquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
     }
-
-    // updateDocumentDataPageSize(width?: number, height?: number) {
-    //     const documentStyle = this._docModel.documentStyle;
-    //     if (!documentStyle.pageSize) {
-    //         width = width ?? Infinity;
-    //         height = height ?? Infinity;
-    //         documentStyle.pageSize = {
-    //             width,
-    //             height,
-    //         };
-    //         return;
-    //     }
-
-    //     if (width !== undefined) {
-    //         documentStyle.pageSize.width = width;
-    //     }
-
-    //     if (height !== undefined) {
-    //         documentStyle.pageSize.height = height;
-    //     }
-    // }
 
     /**
      * \v COLUMN_BREAK

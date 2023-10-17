@@ -28,7 +28,7 @@ Univer 的模块需按照 **业务类型（Sheet / Doc / Slide）、关注面（
 
 ### 插件的公有私有模块
 
-可以通过在每个插件的 index.ts 文件中导出这些模块的 token。如果一个模块的 token 被导出，那么其它的插件就可以 import 这些模块的 token，从而建立对这些模块的依赖关系，这些模块也就成为前一个插件的公有模块，反之就是私有模块。如果你熟悉 Angular 的话，很容易发现这跟 NgModule 的概念非常相似，只不过我们不用申明 exports 字段，而是用 es module 的 export 来区分公有模块。
+可以通过在每个插件的 index.ts 文件中导出这些模块的依赖注入标识符 identifier。如果一个模块的 identifier 被导出，那么其它的插件就可以 import 这些模块的 identifier，从而建立对这些模块的依赖关系，这些模块也就成为前一个插件的公有模块，反之就是私有模块。如果你熟悉 Angular 的话，很容易发现这跟 NgModule 的概念非常相似，只不过我们不用申明 exports 字段，而是用 es module 的 export 来区分公有模块。
 
 ### 插件生命周期
 

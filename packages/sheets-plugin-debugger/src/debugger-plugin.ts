@@ -13,6 +13,7 @@ export class DebuggerPlugin extends Plugin {
     private _debuggerController!: DebuggerController;
 
     constructor(
+        config: IDebuggerPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {

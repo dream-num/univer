@@ -1,2 +1,2 @@
-export * from './DebuggerPlugin';
-export * from './Locale';
+export * from './debugger-plugin';
+export * from './locale';

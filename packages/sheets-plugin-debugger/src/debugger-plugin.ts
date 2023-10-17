@@ -1,9 +1,8 @@
 import { LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { DEBUGGER_PLUGIN_NAME } from './Basics';
 import { DebuggerController } from './controllers/debugger.controller';
-import { en } from './Locale';
+import { en } from './locale';
 import { I18nService } from './services/i18n.service';
 
 export interface IDebuggerPluginConfig {}
@@ -14,11 +13,10 @@ export class DebuggerPlugin extends Plugin {
     private _debuggerController!: DebuggerController;
 
     constructor(
-        config: IDebuggerPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(DEBUGGER_PLUGIN_NAME);
+        super('debugger');
     }
 
     initialize(): void {

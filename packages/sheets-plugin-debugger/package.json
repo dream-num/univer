@@ -19,7 +19,6 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "vitest run",
         "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {

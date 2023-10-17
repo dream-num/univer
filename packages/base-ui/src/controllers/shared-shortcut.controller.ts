@@ -1,4 +1,4 @@
-import { Disposable, ICommandService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle, RedoCommand, UndoCommand } from '@univerjs/core';
 
 import { CopyCommand, CutCommand, PasteCommand } from '../services/clipboard/clipboard.command';
 import { CopyShortcutItem, CutShortcutItem, PasteShortcutItem } from '../services/clipboard/clipboard.shortcut';
@@ -18,6 +18,7 @@ export const RedoShortcutItem: IShortcutItem = {
 /**
  * Define shared UI behavior across Univer business.
  */
+@OnLifecycle(LifecycleStages.Ready, SharedController)
 export class SharedController extends Disposable {
     constructor(
         @IShortcutService private readonly _shortcutService: IShortcutService,

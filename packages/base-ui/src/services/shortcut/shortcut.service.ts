@@ -34,7 +34,6 @@ export interface IShortcutService {
 export const IShortcutService = createIdentifier<IShortcutService>('univer.shortcut');
 
 export class DesktopShortcutService extends Disposable implements IShortcutService {
-    // TODO: @wzhudev: this should be a linked list to resolve different shortcut mapping to the same keybinding
     private readonly _shortCutMapping = new Map<number, Set<IShortcutItem>>();
 
     private readonly _idToShortcut = new Map<string, number>();

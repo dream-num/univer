@@ -1,5 +1,5 @@
 import { ILocalStorageService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
-import { Dependency, Inject, Injector } from '@wendellhu/redi';
+import { Dependency, Injector } from '@wendellhu/redi';
 
 import { ComponentManager } from './Common/ComponentManager';
 import { ZIndexManager } from './Common/ZIndexManager';
@@ -32,23 +32,21 @@ export class UIPlugin extends Plugin {
 
     private _config: IUIPluginConfig;
 
-    constructor(config: Partial<IUIPluginConfig> = {}, @Inject(Injector) injector: Injector) {
+    constructor(config: Partial<IUIPluginConfig> = {}) {
         super(PLUGIN_NAMES.BASE_UI);
 
         this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
-        this._injector = injector;
     }
 
-    override onStarting(): void {
-        this._initDependencies();
-        this._initModules();
+    override onStarting(_injector: Injector): void {
+        this._initDependencies(_injector);
     }
 
     override onReady(): void {
         this._initUI();
     }
 
-    private _initDependencies(): void {
+    private _initDependencies(injector: Injector): void {
         const dependencies: Dependency[] = [
             // legacy managers - deprecated
             [ComponentManager],
@@ -68,11 +66,7 @@ export class UIPlugin extends Plugin {
             [IUIController, { useClass: DesktopUIController }],
         ];
 
-        dependencies.forEach((dependency) => this._injector.add(dependency));
-    }
-
-    private _initModules(): void {
-        this._injector.get(SharedController).initialize();
+        dependencies.forEach((dependency) => injector.add(dependency));
     }
 
     private _initUI(): void {

@@ -51,6 +51,8 @@ interface IMenuItemBase<V> {
     value$?: Observable<V>;
     onClose?: () => void;
 
+    // FIXME@wzhudev: this parameters should not appear here
+
     /**
      * e.g. set cell text size, rotation angle of the text
      */

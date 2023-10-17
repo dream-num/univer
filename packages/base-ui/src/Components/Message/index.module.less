@@ -39,10 +39,22 @@
     &-icon {
         display: inline-flex;
         align-items: center;
+
+        &-success {
+            color: @success-color;
+        }
+
+        &-warning {
+            color: @warning-color;
+        }
+
+        &-error {
+            color: @error-color;
+        }
     }
 
     &-content {
-        padding: @padding-sm;
+        padding: @padding-base;
         font-size: @font-size-base;
         background-color: @color-white;
         border-radius: @border-radius-base;

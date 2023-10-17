@@ -63,11 +63,11 @@ export function Palette(props: IProps) {
         },
         {
             title: 'Margin',
-            colors: ['marginXs', 'marginSm', 'marginBase', 'marginLg', 'marginXl'],
+            colors: ['marginXs', 'marginXxs', 'marginSm', 'marginBase', 'marginLg', 'marginXl'],
         },
         {
             title: 'Padding',
-            colors: ['paddingXs', 'paddingSm', 'paddingBase', 'paddingLg', 'paddingXl', 'paddingXxl'],
+            colors: ['paddingXs', 'paddingSm', 'paddingBase', 'paddingLg', 'paddingXl'],
         },
         {
             title: 'Border Color',

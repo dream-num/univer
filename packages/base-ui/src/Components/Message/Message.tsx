@@ -14,9 +14,9 @@ export interface IMessageProps {
 }
 
 const iconMap = {
-    success: <Success16 />,
-    warning: <Warning16 />,
-    error: <Fail16 />,
+    success: <Success16 className={styles.messageIconSuccess} />,
+    warning: <Warning16 className={styles.messageIconWarning} />,
+    error: <Fail16 className={styles.messageIconError} />,
 };
 
 /**

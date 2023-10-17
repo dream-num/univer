@@ -5,6 +5,7 @@ import {
     Overflow24,
     RightRotationFortyFiveDegrees24,
     RightRotationNinetyDegrees24,
+    Shortcut24,
     TextDown24,
     TextHorizontallyCentered24,
     TextLeft24,
@@ -42,6 +43,8 @@ export const BrIcon = (props: BaseIconProps) => <Autowrap24 />;
 export const OverflowIcon = (props: BaseIconProps) => <Overflow24 />;
 
 export const CutIcon = (props: BaseIconProps) => <Truncation24 />;
+
+export const ShortcutIcon = (props: BaseIconProps) => <Shortcut24 />;
 
 export default {
     LeftAlignIcon,

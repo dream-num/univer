@@ -122,7 +122,7 @@ export function CustomLabel(props: IBaseCustomLabelProps): JSX.Element | null {
     const { label, display, onChange } = props;
 
     function getLocale(name: string) {
-        return context.localeService?.t(name);
+        return context.localeService?.t(name) ?? name;
     }
 
     // the new way to render toolbar item type to replace Label prop

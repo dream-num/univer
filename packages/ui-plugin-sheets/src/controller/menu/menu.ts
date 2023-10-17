@@ -98,6 +98,7 @@ export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'ForwardIcon',
         title: 'Undo',
+        tooltip: 'toolbar.undo',
         positions: [MenuPosition.TOOLBAR],
         disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
     };
@@ -111,6 +112,7 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'BackIcon',
         title: 'Redo',
+        tooltip: 'toolbar.redo',
         positions: [MenuPosition.TOOLBAR],
         disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.redos <= 0)),
     };
@@ -127,6 +129,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'BoldIcon',
         title: 'Set bold',
+        tooltip: 'toolbar.bold',
         positions: [MenuPosition.TOOLBAR],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
@@ -182,6 +185,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'ItalicIcon',
         title: 'Set italic',
+        tooltip: 'toolbar.italic',
         positions: [MenuPosition.TOOLBAR],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
@@ -239,6 +243,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'UnderLineIcon',
         title: 'Set underline',
+        tooltip: 'toolbar.underline',
         positions: [MenuPosition.TOOLBAR],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
@@ -296,6 +301,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         type: MenuItemType.BUTTON,
         icon: 'DeleteLineIcon',
         title: 'Set strike through',
+        tooltip: 'toolbar.strikethrough',
         positions: [MenuPosition.TOOLBAR],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;

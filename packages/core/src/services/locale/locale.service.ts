@@ -23,7 +23,8 @@ function getValue(locale: ILocales[LocaleType], key: string): Nullable<string | 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return key.split('.').reduce((a: any, b: string) => a[b], locale);
     } catch (error) {
-        console.error('Key %s not found', key);
+        console.warn('Key %s not found', key);
+        return key;
     }
 }
 

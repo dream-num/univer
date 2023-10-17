@@ -1,7 +1,7 @@
-import { IPosition, Nullable, Observable } from '@univerjs/core';
+import { EventState, IPosition, Nullable, Observable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from './Basics/Const';
-import { IWheelEvent } from './Basics/IEvents';
+import { IWheelEvent, PointerInput } from './Basics/IEvents';
 import { toPx } from './Basics/Tools';
 import { Transform } from './Basics/Transform';
 import { IBoundRect, Vector2 } from './Basics/Vector2';
@@ -553,6 +553,96 @@ export class Viewport {
 
         const svCoord = sceneTrans.applyPoint(coord).subtract(Vector2.FromArray([scroll.x, scroll.y]));
         return svCoord;
+    }
+    // eslint-disable-next-line max-lines-per-function
+    onMouseWheel(evt: IWheelEvent, state: EventState) {
+        if (!this._scrollBar || this.isActive === false) {
+            return;
+        }
+        let isLimitedStore;
+        if (evt.inputIndex === PointerInput.MouseWheelX) {
+            const deltaFactor = Math.abs(evt.deltaX);
+            // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+            const allWidth = this._scene.width;
+            const viewWidth = this.width || 1;
+            const scrollNum = (viewWidth / allWidth) * deltaFactor;
+
+            if (evt.deltaX > 0) {
+                isLimitedStore = this.scrollBy({
+                    x: scrollNum,
+                });
+            } else {
+                isLimitedStore = this.scrollBy({
+                    x: -scrollNum,
+                });
+            }
+
+            // 临界点时执行浏览器行为
+            if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                if (!isLimitedStore?.isLimitedX) {
+                    state.stopPropagation();
+                }
+            } else if (this._isWheelPreventDefaultX) {
+                evt.preventDefault();
+            } else if (!isLimitedStore?.isLimitedX) {
+                evt.preventDefault();
+            }
+        }
+        if (evt.inputIndex === PointerInput.MouseWheelY) {
+            const deltaFactor = Math.abs(evt.deltaY);
+            const allHeight = this._scene.height;
+            const viewHeight = this.height || 1;
+            // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+            let scrollNum = (viewHeight / allHeight) * deltaFactor;
+            if (evt.shiftKey) {
+                scrollNum *= 3;
+                if (evt.deltaY > 0) {
+                    isLimitedStore = this.scrollBy({
+                        x: scrollNum,
+                    });
+                } else {
+                    isLimitedStore = this.scrollBy({
+                        x: -scrollNum,
+                    });
+                }
+
+                // 临界点时执行浏览器行为
+                if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                    if (!isLimitedStore?.isLimitedX) {
+                        state.stopPropagation();
+                    }
+                } else if (this._isWheelPreventDefaultX) {
+                    evt.preventDefault();
+                } else if (!isLimitedStore?.isLimitedX) {
+                    evt.preventDefault();
+                }
+            } else {
+                if (evt.deltaY > 0) {
+                    isLimitedStore = this.scrollBy({
+                        y: scrollNum,
+                    });
+                } else {
+                    isLimitedStore = this.scrollBy({
+                        y: -scrollNum,
+                    });
+                }
+
+                // 临界点时执行浏览器行为
+                if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                    if (!isLimitedStore?.isLimitedY) {
+                        state.stopPropagation();
+                    }
+                } else if (this._isWheelPreventDefaultY) {
+                    evt.preventDefault();
+                } else if (!isLimitedStore?.isLimitedY) {
+                    evt.preventDefault();
+                }
+            }
+        }
+        if (evt.inputIndex === PointerInput.MouseWheelZ) {
+            // TODO
+            // ...
+        }
     }
 
     // 自己是否被选中

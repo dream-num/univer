@@ -1,4 +1,4 @@
-import { DeviceInputEventType, DocumentSkeleton } from '@univerjs/base-render';
+import { DeviceInputEventType, IDocumentLayoutObject } from '@univerjs/base-render';
 import { ISelectionCellWithCoord, Nullable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -11,8 +11,8 @@ export interface IEditorBridgeServiceVisibleParam {
 export interface IEditorBridgeServiceParam {
     unitId?: string;
     sheetId?: string;
-    primaryWithCoord: Nullable<ISelectionCellWithCoord>;
-    docSkeleton: DocumentSkeleton;
+    primaryWithCoord: ISelectionCellWithCoord;
+    documentLayoutObject: IDocumentLayoutObject;
 }
 
 export interface IEditorBridgeService {

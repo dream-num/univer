@@ -1,5 +1,6 @@
 import { Tools } from '../../Shared/Tools';
 import { IDocumentData } from '../../Types/Interfaces/IDocumentData';
+import { IPaddingData } from '../../Types/Interfaces/IStyleData';
 import { DocumentBodyModel } from './DocumentBodyModel';
 
 export const DEFAULT_DOC = {
@@ -80,6 +81,26 @@ export class DocumentModelSimple {
 
     getSnapshot() {
         return this.snapshot;
+    }
+
+    updateDocumentDataMargin(data: IPaddingData) {
+        const { t, l, b, r } = data;
+        const documentStyle = this.snapshot.documentStyle;
+        if (t != null) {
+            documentStyle.marginTop = t;
+        }
+
+        if (l != null) {
+            documentStyle.marginLeft = l;
+        }
+
+        if (b != null) {
+            documentStyle.marginBottom = b;
+        }
+
+        if (r != null) {
+            documentStyle.marginRight = r;
+        }
     }
 
     updateDocumentDataPageSize(width?: number, height?: number) {

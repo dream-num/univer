@@ -72,8 +72,8 @@ export class ScrollController extends Disposable {
             const { actualScrollX = 0, actualScrollY = 0 } = param;
 
             const { row, column } = skeleton.getCellPositionByOffset(
-                actualScrollX + rowHeaderWidthAndMarginLeft,
-                actualScrollY + columnHeaderHeightAndMarginTop,
+                (actualScrollX + rowHeaderWidthAndMarginLeft) * scaleX,
+                (actualScrollY + columnHeaderHeightAndMarginTop) * scaleY,
                 scaleX,
                 scaleY,
                 {
@@ -247,8 +247,10 @@ export class ScrollController extends Disposable {
                 scaleX,
                 scaleY
             );
+            const x = startX + offsetX;
+            const y = startY + offsetY;
 
-            const config = viewportMain.getBarScroll(startX + offsetX, startY + offsetY);
+            const config = viewportMain.getBarScroll(x, y);
             viewportMain.scrollTo(config);
         });
     }

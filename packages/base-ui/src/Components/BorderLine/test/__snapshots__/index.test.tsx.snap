@@ -1,0 +1,10 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`BorderLine > renders BorderDashDot 1`] = `
+<div>
+  <canvas
+    height="10"
+    width="100"
+  />
+</div>
+`;

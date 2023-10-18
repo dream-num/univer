@@ -143,7 +143,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   examples/univer-sheet-ts:
     dependencies:
@@ -292,7 +292,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/base-docs:
     dependencies:
@@ -344,7 +344,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/base-formula-engine:
     dependencies:
@@ -384,7 +384,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/base-numfmt-engine:
     dependencies:
@@ -421,7 +421,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/base-render:
     dependencies:
@@ -467,7 +467,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/base-sheets:
     dependencies:
@@ -562,7 +562,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/base-ui:
     dependencies:
@@ -669,6 +669,9 @@ importers:
       vitest:
         specifier: ^0.34.5
         version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+      vitest-canvas-mock:
+        specifier: ^0.3.3
+        version: 0.3.3(vitest@0.34.5)
 
   packages/common-plugin-data:
     dependencies:
@@ -687,7 +690,7 @@ importers:
         version: 0.19.3
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
 
   packages/core:
     dependencies:
@@ -800,7 +803,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/sheets-plugin-formula:
     dependencies:
@@ -855,7 +858,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/sheets-plugin-image:
     dependencies:
@@ -910,7 +913,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/sheets-plugin-import-xlsx:
     dependencies:
@@ -968,7 +971,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/sheets-plugin-numfmt:
     dependencies:
@@ -1023,7 +1026,7 @@ importers:
         version: 10.9.1(@types/node@18.14.0)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/ui-plugin-docs:
     dependencies:
@@ -1069,7 +1072,7 @@ importers:
         version: 10.9.1(@types/node@16.4.6)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
   packages/ui-plugin-sheets:
     dependencies:
@@ -1173,7 +1176,7 @@ importers:
         version: 10.9.1(@types/node@16.4.6)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.5
-        version: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
+        version: 0.34.5(happy-dom@12.1.6)(less@4.2.0)
 
 packages:
 
@@ -6991,6 +6994,10 @@ packages:
     hasBin: true
     dev: true
 
+  /cssfontparser@1.2.1:
+    resolution: {integrity: sha512-6tun4LoZnj7VN6YeegOVb67KBX/7JJsqvj+pv3ZA7F878/eN33AbGa5b/S/wXxS/tcp8nc40xRUrsPlxIyNUPg==}
+    dev: true
+
   /csstype@3.1.2:
     resolution: {integrity: sha512-I7K1Uu0MBPzaFKg4nI5Q7Vs2t+3gWWW648spaF+Rg7pI9ds18Ugn+lvg4SHczUdKlHI5LWBXyqfS8+DufyBsgQ==}
 
@@ -9212,6 +9219,13 @@ packages:
       minimatch: 3.1.2
     dev: true
 
+  /jest-canvas-mock@2.5.2:
+    resolution: {integrity: sha512-vgnpPupjOL6+L5oJXzxTxFrlGEIbHdZqFU+LFNdtLxZ3lRDCl17FlTMM7IatoRQkrcyOTMlDinjUguqmQ6bR2A==}
+    dependencies:
+      cssfontparser: 1.2.1
+      moo-color: 1.0.3
+    dev: true
+
   /jest-haste-map@29.7.0:
     resolution: {integrity: sha512-fP8u2pyfqx0K1rGn1R9pyE0/KTn+G7PxktWidOBTqFPLYX0b9ksaMFkhK5vrS3DVun09pckLdlx90QthlW7AmA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -9952,6 +9966,12 @@ packages:
       pathe: 1.1.1
       pkg-types: 1.0.3
       ufo: 1.3.0
+    dev: true
+
+  /moo-color@1.0.3:
+    resolution: {integrity: sha512-i/+ZKXMDf6aqYtBhuOcej71YSlbjT3wCO/4H1j8rPvxDJEifdwgg5MaFyu6iYAT8GBZJg2z0dkgK4YMzvURALQ==}
+    dependencies:
+      color-name: 1.1.4
     dev: true
 
   /mri@1.2.0:
@@ -12561,6 +12581,15 @@ packages:
       rollup: 3.29.1
     optionalDependencies:
       fsevents: 2.3.3
+    dev: true
+
+  /vitest-canvas-mock@0.3.3(vitest@0.34.5):
+    resolution: {integrity: sha512-3P968tYBpqYyzzOaVtqnmYjqbe13576/fkjbDEJSfQAkHtC5/UjuRHOhFEN/ZV5HVZIkaROBUWgazDKJ+Ibw+Q==}
+    peerDependencies:
+      vitest: '*'
+    dependencies:
+      jest-canvas-mock: 2.5.2
+      vitest: 0.34.5(happy-dom@12.2.0)(less@4.2.0)
     dev: true
 
   /vitest@0.34.5(happy-dom@12.1.6)(less@4.2.0):

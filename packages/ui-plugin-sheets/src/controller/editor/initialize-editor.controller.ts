@@ -4,7 +4,7 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IRenderManagerService,
 } from '@univerjs/base-render';
-import { Disposable, ICurrentUniverService, LifecycleStages, Nullable, OnLifecycle } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, Nullable, OnLifecycle } from '@univerjs/core';
 import { Subscription } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, InitializeEditorController)
@@ -12,7 +12,7 @@ export class InitializeEditorController extends Disposable {
     private _onInputSubscription: Nullable<Subscription>;
 
     constructor(
-        @ICurrentUniverService private readonly _currentUniverService: ICurrentUniverService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
@@ -34,7 +34,7 @@ export class InitializeEditorController extends Disposable {
             documentStyle: {},
         });
 
-        this._currentUniverService.focusUniverInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        // this._currentUniverService.focusUniverInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
 
         // create univer doc formula bar editor instance
 
@@ -43,7 +43,7 @@ export class InitializeEditorController extends Disposable {
             documentStyle: {},
         });
 
-        this._currentUniverService.focusUniverInstance(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+        // this._currentUniverService.focusUniverInstance(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
     }
 
     private _commandExecutedListener() {}

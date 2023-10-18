@@ -1,5 +1,7 @@
 import {
     BooleanNumber,
+    DocumentModel,
+    DocumentModelOrSimple,
     DocumentModelSimple,
     getColorStyle,
     HorizontalAlign,
@@ -88,7 +90,7 @@ interface IRowColumnSegment {
 }
 
 export interface IDocumentLayoutObject {
-    documentModel: Nullable<DocumentModelSimple>;
+    documentModel: Nullable<DocumentModelOrSimple>;
     fontString: string;
     textRotation: ITextRotation;
     wrapStrategy: WrapStrategy;
@@ -747,12 +749,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
-    getBlankCellDocumentModel(row: number, column: number): IDocumentLayoutObject {
+    getBlankCellDocumentModel(row: number, column: number, isFull: boolean = false): IDocumentLayoutObject {
         const documentModelObject = this.getCellDocumentModel(row, column);
 
         if (documentModelObject != null) {
             if (documentModelObject.documentModel == null) {
-                documentModelObject.documentModel = this._getDocumentDataByStyle('', {}, {});
+                documentModelObject.documentModel = this._getDocumentDataByStyle('', {}, {}, isFull);
             }
             return documentModelObject;
         }
@@ -768,7 +770,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         fontString = getFontStyleString({}, this._localService).fontCache;
 
-        const documentModel = this._getDocumentDataByStyle(content, {}, {});
+        const documentModel = this._getDocumentDataByStyle(content, {}, {}, isFull);
 
         return {
             documentModel,
@@ -780,7 +782,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    getCellDocumentModel(row: number, column: number): Nullable<IDocumentLayoutObject> {
+    getCellDocumentModel(row: number, column: number, isFull: boolean = false): Nullable<IDocumentLayoutObject> {
         const cell = this._cellData.getValue(row, column);
         const style = this._styles.getStyleByCell(cell);
         if (!cell) {
@@ -809,18 +811,23 @@ export class SpreadsheetSkeleton extends Skeleton {
                 centerAngle = DEFAULT_ROTATE_ANGLE;
                 vertexAngle = DEFAULT_ROTATE_ANGLE;
             }
-            documentModel = this._updateRenderConfigAndHorizon(cell.p, horizontalAlign, {
+            documentModel = this._updateRenderConfigAndHorizon(
+                cell.p,
                 horizontalAlign,
-                verticalAlign,
-                centerAngle,
-                vertexAngle,
-                wrapStrategy,
-            });
+                {
+                    horizontalAlign,
+                    verticalAlign,
+                    centerAngle,
+                    vertexAngle,
+                    wrapStrategy,
+                },
+                isFull
+            );
         } else if (content) {
             const textStyle = this._getFontFormat(style);
             fontString = getFontStyleString(textStyle, this._localService).fontCache;
 
-            documentModel = this._getDocumentDataByStyle(content.toString(), textStyle, cellOtherConfig);
+            documentModel = this._getDocumentDataByStyle(content.toString(), textStyle, cellOtherConfig, isFull);
         }
 
         return {
@@ -1261,7 +1268,8 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _updateRenderConfigAndHorizon(
         documentData: IDocumentData,
         horizontalAlign: HorizontalAlign,
-        renderConfig?: IDocumentRenderConfig
+        renderConfig?: IDocumentRenderConfig,
+        isFull: boolean = false
     ) {
         if (!renderConfig) {
             return;
@@ -1286,10 +1294,18 @@ export class SpreadsheetSkeleton extends Skeleton {
             paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
         }
 
-        return new DocumentModelSimple(documentData);
+        if (isFull === false) {
+            return new DocumentModelSimple(documentData);
+        }
+        return new DocumentModel(documentData);
     }
 
-    private _getDocumentDataByStyle(content: string, textStyle: ITextStyle, config: CellOtherConfig) {
+    private _getDocumentDataByStyle(
+        content: string,
+        textStyle: ITextStyle,
+        config: CellOtherConfig,
+        isFull: boolean = false
+    ) {
         const contentLength = content.length;
         const {
             textRotation = { a: 0, v: BooleanNumber.FALSE },
@@ -1354,7 +1370,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             },
         };
 
-        return new DocumentModelSimple(documentData);
+        if (isFull === false) {
+            return new DocumentModelSimple(documentData);
+        }
+        return new DocumentModel(documentData);
     }
 
     private _setBorderProps(r: number, c: number, type: BORDER_TYPE, style: IStyleData, cache: IStylesCache) {

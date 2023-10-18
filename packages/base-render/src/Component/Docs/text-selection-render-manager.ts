@@ -3,7 +3,7 @@ import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../Basics/Const';
-import { IDocumentSkeletonCached, PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
+import { PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
 import { IMouseEvent, IPointerEvent } from '../../Basics/IEvents';
 import { INodeInfo, INodePosition } from '../../Basics/Interfaces';
 import { getOffsetRectForDom, transformBoundingCoord } from '../../Basics/Position';
@@ -147,7 +147,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    private _skeletonObserver: Nullable<Observer<IDocumentSkeletonCached>>;
+    // private _skeletonObserver: Nullable<Observer<IDocumentSkeletonCached>>;
 
     private _viewportScrollX: number = 0;
 
@@ -358,7 +358,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene) {
-        this._docSkeleton?.onRecalculateChangeObservable.remove(this._skeletonObserver);
+        // this._docSkeleton?.onRecalculateChangeObservable.remove(this._skeletonObserver);
 
         this._docSkeleton = docSkeleton;
 
@@ -959,7 +959,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         // documents.onPointerEnterObserver.remove(this._moveInObserver);
         // documents.onPointerLeaveObserver.remove(this._moveOutObserver);
         // documents.onPointerDownObserver.remove(this._downObserver);
-        this._docSkeleton?.onRecalculateChangeObservable.remove(this._skeletonObserver);
+        // this._docSkeleton?.onRecalculateChangeObservable.remove(this._skeletonObserver);
         this._onKeydown$.complete();
         this._onInput$.complete();
         this._onCompositionstart$.complete();

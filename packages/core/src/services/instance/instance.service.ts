@@ -38,7 +38,7 @@ export interface IUniverInstanceService {
     getFocusedUniverInstance(): Workbook | DocumentModel | Slide | null;
 
     createDoc(data: Partial<IDocumentData>): DocumentModel;
-
+    changeDoc(unitId: string, doc: DocumentModel): void;
     addDoc(doc: DocumentModel): void;
     addSheet(sheet: Workbook): void;
     addSlide(slide: Slide): void;
@@ -132,6 +132,15 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         this._sheets.push(sheet);
         this._sheetAdded$.next(sheet);
         this.setCurrentUniverSheetInstance(sheet.getUnitId());
+    }
+
+    changeDoc(unitId: string, doc: DocumentModel): void {
+        const oldDoc = this._docs.find((doc) => doc.getUnitId() === unitId);
+        if (oldDoc != null) {
+            const index = this._docs.indexOf(oldDoc);
+            this._docs.splice(index, 1);
+        }
+        this.addDoc(doc);
     }
 
     addDoc(doc: DocumentModel): void {

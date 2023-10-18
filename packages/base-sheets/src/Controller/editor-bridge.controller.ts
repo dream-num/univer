@@ -68,10 +68,10 @@ export class EditorBridgeController extends Disposable {
                 return;
             }
 
-            let documentLayoutObject = skeleton.getCellDocumentModel(startRow, startColumn);
+            let documentLayoutObject = skeleton.getCellDocumentModel(startRow, startColumn, true);
 
-            if (documentLayoutObject == null) {
-                documentLayoutObject = skeleton.getBlankCellDocumentModel(startRow, startColumn);
+            if (documentLayoutObject == null || documentLayoutObject.documentModel == null) {
+                documentLayoutObject = skeleton.getBlankCellDocumentModel(startRow, startColumn, true);
             }
 
             // let documentModel = documentModelObject?.documentModel;

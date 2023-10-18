@@ -83,7 +83,7 @@ export class Documents extends DocComponent {
 
         this._initialDefaultExtension();
 
-        this._addSkeletonChangeObserver(documentSkeleton);
+        // this._addSkeletonChangeObserver(documentSkeleton);
 
         this.makeDirty(true);
     }
@@ -117,48 +117,48 @@ export class Documents extends DocComponent {
         };
     }
 
-    calculatePagePosition() {
-        const scene = this.getScene() as Scene;
+    // calculatePagePosition() {
+    //     const scene = this.getScene() as Scene;
 
-        const parent = scene?.getParent();
-        const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = this;
-        if (parent == null) {
-            return this;
-        }
-        const { width: engineWidth, height: engineHeight } = parent;
-        let docsLeft = 0;
-        let docsTop = 0;
+    //     const parent = scene?.getParent();
+    //     const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = this;
+    //     if (parent == null || docsWidth === Infinity || docsHeight === Infinity) {
+    //         return this;
+    //     }
+    //     const { width: engineWidth, height: engineHeight } = parent;
+    //     let docsLeft = 0;
+    //     let docsTop = 0;
 
-        let sceneWidth = 0;
+    //     let sceneWidth = 0;
 
-        let sceneHeight = 0;
+    //     let sceneHeight = 0;
 
-        if (engineWidth > docsWidth) {
-            docsLeft = engineWidth / 2 - docsWidth / 2;
-            sceneWidth = engineWidth - 30;
-        } else {
-            docsLeft = pageMarginLeft;
-            sceneWidth = docsWidth + pageMarginLeft * 2;
-        }
+    //     if (engineWidth > docsWidth) {
+    //         docsLeft = engineWidth / 2 - docsWidth / 2;
+    //         sceneWidth = engineWidth - 30;
+    //     } else {
+    //         docsLeft = pageMarginLeft;
+    //         sceneWidth = docsWidth + pageMarginLeft * 2;
+    //     }
 
-        if (engineHeight > docsHeight) {
-            docsTop = engineHeight / 2 - docsHeight / 2;
-            sceneHeight = engineHeight - 30;
-        } else {
-            docsTop = pageMarginTop;
-            sceneHeight = docsHeight + pageMarginTop * 2;
-        }
+    //     if (engineHeight > docsHeight) {
+    //         docsTop = engineHeight / 2 - docsHeight / 2;
+    //         sceneHeight = engineHeight - 30;
+    //     } else {
+    //         docsTop = pageMarginTop;
+    //         sceneHeight = docsHeight + pageMarginTop * 2;
+    //     }
 
-        this.docsLeft = docsLeft;
+    //     this.docsLeft = docsLeft;
 
-        this.docsTop = docsTop;
+    //     this.docsTop = docsTop;
 
-        scene.resize(sceneWidth, sceneHeight + 200);
+    //     scene.resize(sceneWidth, sceneHeight + 200);
 
-        this.translate(docsLeft, docsTop);
+    //     this.translate(docsLeft, docsTop);
 
-        return this;
-    }
+    //     return this;
+    // }
 
     override getEngine() {
         return (this.getScene() as Scene).getEngine();
@@ -419,9 +419,9 @@ export class Documents extends DocComponent {
     }
 
     changeSkeleton(newSkeleton: DocumentSkeleton) {
-        this._disposeSkeletonChangeObserver(this.getSkeleton());
+        // this._disposeSkeletonChangeObserver(this.getSkeleton());
         this.setSkeleton(newSkeleton);
-        this._addSkeletonChangeObserver(newSkeleton);
+        // this._addSkeletonChangeObserver(newSkeleton);
         return this;
     }
 
@@ -478,44 +478,44 @@ export class Documents extends DocComponent {
         });
     }
 
-    private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
-        if (!skeleton) {
-            return;
-        }
+    // private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
+    //     if (!skeleton) {
+    //         return;
+    //     }
 
-        this._skeletonObserver = skeleton.onRecalculateChangeObservable.add((data) => {
-            const pages = data.pages;
-            let width = 0;
-            let height = 0;
-            for (let i = 0, len = pages.length; i < len; i++) {
-                const page = pages[i];
-                const { pageWidth, pageHeight } = page;
-                if (this.pageLayoutType === PageLayoutType.VERTICAL) {
-                    height += pageHeight;
-                    if (i !== len - 1) {
-                        height += this.pageMarginTop;
-                    }
-                    width = Math.max(width, pageWidth);
-                } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
-                    width += pageWidth;
-                    if (i !== len - 1) {
-                        width += this.pageMarginLeft;
-                    }
-                    height = Math.max(height, pageHeight);
-                }
-            }
+    //     this._skeletonObserver = skeleton.onRecalculateChangeObservable.add((data) => {
+    //         const pages = data.pages;
+    //         let width = 0;
+    //         let height = 0;
+    //         for (let i = 0, len = pages.length; i < len; i++) {
+    //             const page = pages[i];
+    //             const { pageWidth, pageHeight } = page;
+    //             if (this.pageLayoutType === PageLayoutType.VERTICAL) {
+    //                 height += pageHeight;
+    //                 if (i !== len - 1) {
+    //                     height += this.pageMarginTop;
+    //                 }
+    //                 width = Math.max(width, pageWidth);
+    //             } else if (this.pageLayoutType === PageLayoutType.HORIZONTAL) {
+    //                 width += pageWidth;
+    //                 if (i !== len - 1) {
+    //                     width += this.pageMarginLeft;
+    //                 }
+    //                 height = Math.max(height, pageHeight);
+    //             }
+    //         }
 
-            this.resize(width, height);
-            this.calculatePagePosition();
-        });
-    }
+    //         this.resize(width, height);
+    //         this.calculatePagePosition();
+    //     });
+    // }
 
-    private _disposeSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
-        if (!skeleton) {
-            return;
-        }
-        skeleton.onRecalculateChangeObservable.remove(this._skeletonObserver);
-    }
+    // private _disposeSkeletonChangeObserver(skeleton?: DocumentSkeleton) {
+    //     if (!skeleton) {
+    //         return;
+    //     }
+    //     skeleton.onRecalculateChangeObservable.remove(this._skeletonObserver);
+    // }
 
     // private _getPageBoundingBox(page: IDocumentSkeletonPage) {
     //     const { pageWidth, pageHeight } = page;

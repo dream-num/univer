@@ -8,7 +8,6 @@ import {
     ISectionColumnProperties,
     LocaleService,
     Nullable,
-    Observable,
     PageOrientType,
     SectionType,
     VerticalAlign,
@@ -48,7 +47,7 @@ export enum DocumentSkeletonState {
 }
 
 export class DocumentSkeleton extends Skeleton {
-    onRecalculateChangeObservable = new Observable<IDocumentSkeletonCached>();
+    // onRecalculateChangeObservable = new Observable<IDocumentSkeletonCached>();
 
     private _docModel!: DocumentModelOrSimple;
 
@@ -85,7 +84,7 @@ export class DocumentSkeleton extends Skeleton {
         }
         this._skeletonData = this._createSkeleton(bounds);
 
-        this.onRecalculateChangeObservable.notifyObservers(this._skeletonData);
+        // this.onRecalculateChangeObservable.notifyObservers(this._skeletonData);
     }
 
     getSkeletonData() {

@@ -26,6 +26,14 @@ export class DataStreamTreeNode {
         return new DataStreamTreeNode(nodeType, content);
     }
 
+    dispose() {
+        this.children.forEach((child) => {
+            child.dispose();
+        });
+        this.parent = null;
+        this.blocks = [];
+    }
+
     getProps() {
         return {
             children: this.children,

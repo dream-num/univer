@@ -22,15 +22,12 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { getDocObjectById, IDocObjectParam } from '../Basics/component-tools';
-import { VIEWPORT_KEY } from '../Basics/docs-view-key';
+import { getDocObjectById } from '../Basics/component-tools';
+import { NORMAL_TEXT_SELECTION_PLUGIN_NAME, VIEWPORT_KEY } from '../Basics/docs-view-key';
 import { ISetZoomRatioMutationParams, SetZoomRatioMutation } from '../commands/mutations/set-zoom-ratio.mutation';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
-import {
-    NORMAL_TEXT_SELECTION_PLUGIN_NAME,
-    TextSelectionManagerService,
-} from '../services/text-selection-manager.service';
+import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, TextSelectionController)
 export class TextSelectionController extends Disposable {
@@ -63,10 +60,12 @@ export class TextSelectionController extends Disposable {
             }
 
             if (!this._loadedMap.has(unitId)) {
-                this._initialize(unitId);
+                this._initialMain(unitId);
                 this._loadedMap.add(unitId);
             }
         });
+
+        this._initialize();
     }
 
     override dispose(): void {
@@ -82,29 +81,27 @@ export class TextSelectionController extends Disposable {
         });
     }
 
-    private _initialize(unitId: string) {
+    private _initialize() {
+        this._onChangeListener();
+
+        this._skeletonListener();
+
+        this._userActionSyncListener();
+
+        this._commandExecutedListener();
+
+        // this._textSelectionManagerService.setCurrentSelection({
+        //     pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
+        //     unitId,
+        // });
+    }
+
+    private _initialMain(unitId: string) {
         const docObject = this._getDocObjectById(unitId);
         if (docObject == null) {
             return;
         }
 
-        this._onChangeListener(unitId);
-
-        this._initialMain(docObject);
-
-        this._skeletonListener();
-
-        this._commandExecutedListener(unitId);
-
-        this._userActionSyncListener(unitId);
-
-        this._textSelectionManagerService.setCurrentSelection({
-            pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
-            unitId,
-        });
-    }
-
-    private _initialMain(docObject: IDocObjectParam) {
         const { document, scene } = docObject;
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
@@ -125,10 +122,11 @@ export class TextSelectionController extends Disposable {
         });
     }
 
-    private _onChangeListener(unitId: string) {
+    private _onChangeListener() {
         this._textSelectionManagerService.textSelectionInfo$.subscribe((param) => {
+            const unitId = this._textSelectionManagerService.getCurrentSelection()?.unitId;
             this._textSelectionRenderManager.reset();
-            if (param == null) {
+            if (param == null || unitId == null) {
                 return;
             }
 
@@ -156,13 +154,19 @@ export class TextSelectionController extends Disposable {
         });
     }
 
-    private _userActionSyncListener(unitId: string) {
+    private _userActionSyncListener() {
         this._textSelectionRenderManager.textSelection$.subscribe((textSelections) => {
-            const docSkeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
+            const docsObject = this._docSkeletonManagerService.getCurrent();
+
+            if (docsObject == null) {
+                return;
+            }
+
+            const { skeleton: docSkeleton, unitId } = docsObject;
 
             const document = this._getDocObjectById(unitId)?.document;
 
-            if (docSkeleton == null || document == null) {
+            if (document == null) {
                 return;
             }
 
@@ -190,7 +194,7 @@ export class TextSelectionController extends Disposable {
         return getDocObjectById(unitId, this._renderManagerService);
     }
 
-    private _commandExecutedListener(unitId: string) {
+    private _commandExecutedListener() {
         const updateCommandList = [SetZoomRatioMutation.id];
 
         this.disposeWithMe(
@@ -198,6 +202,9 @@ export class TextSelectionController extends Disposable {
                 if (updateCommandList.includes(command.id)) {
                     const params = command.params as ISetZoomRatioMutationParams;
                     const { documentId } = params;
+
+                    const unitId = this._textSelectionManagerService.getCurrentSelection()?.unitId;
+
                     if (documentId !== unitId) {
                         return;
                     }

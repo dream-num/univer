@@ -14,3 +14,5 @@ export const DOCS_COMPONENT_MAIN_LAYER_INDEX = 0;
 export const DOCS_COMPONENT_HEADER_LAYER_INDEX = 2;
 
 export const DOCS_COMPONENT_DEFAULT_Z_INDEX = 10;
+
+export const NORMAL_TEXT_SELECTION_PLUGIN_NAME = 'normalTextSelectionPluginName';

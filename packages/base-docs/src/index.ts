@@ -1,4 +1,5 @@
 export * from './Basics/component-tools';
+export * from './Basics/docs-view-key';
 export {
     CoverCommand,
     DeleteCommand,

@@ -497,6 +497,15 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.getCellByIndex(row, column, scaleX, scaleY);
     }
 
+    /**
+     *
+     * @param offsetX scaled offset x
+     * @param offsetY scaled offset y
+     * @param scaleX scale x
+     * @param scaleY scale y
+     * @param scrollXY
+     * @returns
+     */
     getCellPositionByOffset(
         offsetX: number,
         offsetY: number,
@@ -513,6 +522,14 @@ export class SpreadsheetSkeleton extends Skeleton {
             column,
         };
     }
+
+    /**
+     *
+     * @param offsetX scaled offset x
+     * @param scaleX scale x
+     * @param scrollXY
+     * @returns
+     */
 
     getColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
         offsetX = this.getTransformOffsetX(offsetX, scaleX, scrollXY);
@@ -540,6 +557,13 @@ export class SpreadsheetSkeleton extends Skeleton {
         return column;
     }
 
+    /**
+     *
+     * @param offsetY scaled offset y
+     * @param scaleY scale y
+     * @param scrollXY
+     * @returns
+     */
     getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
         const { rowHeightAccumulation } = this;
 

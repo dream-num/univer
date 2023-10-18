@@ -15,7 +15,9 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
+    Rectangle,
     toDisposable,
+    Worksheet,
 } from '@univerjs/core';
 import { createIdentifier, IDisposable, Inject } from '@wendellhu/redi';
 
@@ -311,9 +313,15 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // 3. call hooks with cell position and properties and get mutations (both do mutations and undo mutations)
         // we also handle 'copy value only' or 'copy style only' as this step
-        const pastedRange = { ...selection.range };
-        pastedRange.endColumn = pastedRange.startColumn + colCount;
-        pastedRange.endRow = pastedRange.startRow + rowCount;
+        const pastedRange = this._transformPastedData(rowCount, colCount, cellMatrix, selection.range);
+        // pastedRange.endColumn = pastedRange.startColumn + colCount;
+        // pastedRange.endRow = pastedRange.startRow + rowCount;
+
+        // If PastedRange is null, it means that the paste fails
+        if (!pastedRange) {
+            return false;
+        }
+
         const hooks = this._clipboardHooks;
         const enabledHooks: ISheetClipboardHook[] = [];
         const disableCopying = hooks.some(
@@ -378,6 +386,194 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             worksheetId: worksheet.getSheetId(),
             selection,
         };
+    }
+
+    /**
+     * Handles copying one range to another range, obtained by the following rules
+     *
+     * [Content to be assigned] => [Target range]
+     *
+     * I. There are no merged cells in the upper left corner of the pasted area
+     *
+     * 1. 1 -> 1: 1 => 1
+     * 2. N -> 1: N => N
+     * 3. 1 -> N: N => N
+     * 4. N1 -> N2:
+     *     1) N1 <N2: If N2 is a multiple of N1 (X), N1 * X => N2; If not, N1 => N1 (refer to office excel, different from google sheet)
+     *     2) N1> N2: N1 => N1
+     *
+     * The above four cases can be combined and processed as
+     *
+     * Case 1, 1/2/4-2 merged into N1 => N1
+     * Case 2, 3/4-1 merge into N1 * X => N2 or Case 1
+     *
+     * In the end we only need to judge whether N2 is a multiple of N1
+     *
+     * II. The pasted area contains merged cells
+     *
+     * 1. If N2 is a multiple of N1,
+     *   1) If N2 === N1, paste this area directly and the range remains unchanged.
+     *   2) Otherwise, determine whether other cells are included
+     *     1] If included, tile, the range remains unchanged
+     *     2] If not included, determine whether the source data is a combined cell
+     *       1} If yes, tile, the range remains unchanged
+     *       2} If not, only the content will be pasted, the original style will be discarded, and the scope will remain unchanged.
+     *
+     * 2. If N2 is not a multiple of N1, determine whether the upper left corner cell (merged or non-merged or combined) is consistent with the size of the original data.
+     *   1) If consistent, only paste this area;
+     *   2) If inconsistent, then determine whether the pasted area contains other cells.
+     *     1] If yes, pasting is not allowed and an error will pop up;
+     *     2] If not, only the content will be pasted and the original style will be discarded.
+     *
+     * @param rowCount
+     * @param colCount
+     * @param cellMatrix
+     * @param range
+     */
+    private _transformPastedData(
+        rowCount: number,
+        colCount: number,
+        cellMatrix: ObjectMatrix<IParsedCellValue>,
+        range: IRange
+    ): IRange | null {
+        const { startRow, startColumn, endRow, endColumn } = range;
+        const destinationRows = endRow - startRow + 1;
+        const destinationColumns = endColumn - startColumn + 1;
+
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        // const mergedRange = worksheet.getMergedCell(startRow, startColumn);
+        const mergeData = worksheet.getMergeData();
+        // get all merged cells
+        const mergedCellsInRange = mergeData.filter((rect) =>
+            Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
+        );
+        const mergedRange = mergedCellsInRange[0];
+
+        let mergedRangeStartRow = 0;
+        let mergedRangeStartColumn = 0;
+        let mergedRangeEndRow = 0;
+        let mergedRangeEndColumn = 0;
+        if (mergedRange) {
+            mergedRangeStartRow = mergedRange.startRow;
+            mergedRangeStartColumn = mergedRange.startColumn;
+            mergedRangeEndRow = mergedRange.endRow;
+            mergedRangeEndColumn = mergedRange.endColumn;
+        }
+
+        // judge whether N2 is a multiple of N1
+        if (destinationRows % rowCount === 0 && destinationColumns % colCount === 0) {
+            // N2 !== N1
+            if (mergedCellsInRange.length > 0 && (destinationRows !== rowCount || destinationColumns !== colCount)) {
+                // Only merged cells, not other cells
+                if (
+                    mergedRangeStartRow === startRow &&
+                    mergedRangeStartColumn === startColumn &&
+                    mergedRangeEndRow === endRow &&
+                    mergedRangeEndColumn === endColumn
+                ) {
+                    const isCombine = this._isCombineCells(cellMatrix);
+                    if (isCombine) {
+                        for (let r = 0; r < destinationRows; r++) {
+                            for (let c = 0; c < destinationColumns; c++) {
+                                const cell = cellMatrix.getValue(r % rowCount, c % colCount);
+                                cell && cellMatrix.setValue(r, c, cell);
+                            }
+                        }
+                    } else {
+                        cellMatrix.forValue((row, col, cell) => {
+                            cell.properties.style = '';
+                            delete cell.colSpan;
+                            delete cell.rowSpan;
+                        });
+                    }
+                } else {
+                    for (let r = 0; r < destinationRows; r++) {
+                        for (let c = 0; c < destinationColumns; c++) {
+                            const cell = cellMatrix.getValue(r % rowCount, c % colCount);
+                            cell && cellMatrix.setValue(r, c, cell);
+                        }
+                    }
+                }
+            } else {
+                /**
+                 * Expand cellMatrix content according to the destination size
+                 * A1,B1  =>  A1,B1,C1,D1
+                 * A2,B2      A2,B2,C2,D2
+                 *            A3,B3,C3,D3
+                 *            A4,B4,C4,D4
+                 */
+                for (let r = 0; r < destinationRows; r++) {
+                    for (let c = 0; c < destinationColumns; c++) {
+                        const cell = cellMatrix.getValue(r % rowCount, c % colCount);
+                        cell && cellMatrix.setValue(r, c, cell);
+                    }
+                }
+            }
+        } else if (mergedCellsInRange.length > 0) {
+            const isMatch = this._topLeftCellsMatch(rowCount, colCount, range);
+            if (isMatch) {
+                // Expand or shrink the destination to the same size as the original range
+                range.endRow = startRow + rowCount - 1;
+                range.endColumn = startColumn + colCount - 1;
+            } else if (endRow > mergedRange.endRow || endColumn > mergedRange.endColumn) {
+                // TODO@Dushusir: use dialog component
+                alert("We can't do that to a merged cell ");
+                return null;
+            } else {
+                cellMatrix.forValue((row, col, cell) => {
+                    cell.properties.style = '';
+                    delete cell.colSpan;
+                    delete cell.rowSpan;
+                });
+            }
+        } else {
+            // Expand or shrink the destination to the same size as the original range
+            range.endRow = startRow + rowCount - 1;
+            range.endColumn = startColumn + colCount - 1;
+        }
+
+        return range;
+    }
+
+    /**
+     * To determine whether CellMatrix is a combination cell, it must consist of 2 or more cells. It can be an ordinary cell or merge cell
+     * @param cellMatrix
+     */
+    private _isCombineCells(cellMatrix: ObjectMatrix<IParsedCellValue>): boolean {
+        let count = 0;
+        cellMatrix.forValue((row, col, cell) => {
+            if (cell) {
+                count++;
+            }
+        });
+        return count > 1;
+    }
+
+    /**
+     * Determine whether the cells starting from the upper left corner of the range (merged or non-merged or combined) are consistent with the size of the original data
+     * @param cellMatrix
+     * @param range
+     */
+    private _topLeftCellsMatch(rowCount: number, colCount: number, range: IRange): boolean {
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        const { startRow, startColumn, endRow, endColumn } = range;
+
+        const isRowAcross = rowAcrossMergedCell(
+            startRow + rowCount - 1,
+            startColumn,
+            startColumn + rowCount - 1,
+            worksheet
+        );
+        const isColAcross = columnAcrossMergedCell(
+            startColumn + colCount - 1,
+            startRow,
+            startRow + rowCount - 1,
+            worksheet
+        );
+
+        return !isRowAcross && !isColAcross;
     }
 }
 
@@ -630,6 +826,30 @@ function getArrayFromTo(f: number, to: number): number[] {
 
 function isLegalSpreadsheetHTMLContent(html: string): boolean {
     return html.indexOf('<table') !== -1; // NOTE: This is just a temporary implementation. Definitely would be changed later.
+}
+
+function rowAcrossMergedCell(row: number, startColumn: number, endColumn: number, worksheet: Worksheet): boolean {
+    return worksheet
+        .getMergeData()
+        .some(
+            (mergedCell) =>
+                mergedCell.startRow <= row &&
+                row < mergedCell.endRow &&
+                startColumn <= mergedCell.startColumn &&
+                mergedCell.startColumn <= endColumn
+        );
+}
+
+function columnAcrossMergedCell(col: number, startRow: number, endRow: number, worksheet: Worksheet): boolean {
+    return worksheet
+        .getMergeData()
+        .some(
+            (mergedCell) =>
+                mergedCell.startColumn <= col &&
+                col < mergedCell.endColumn &&
+                startRow <= mergedCell.startRow &&
+                mergedCell.startRow <= endRow
+        );
 }
 
 // #endregion

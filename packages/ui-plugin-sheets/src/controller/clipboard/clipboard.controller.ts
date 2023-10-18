@@ -6,16 +6,21 @@ import {
     IInsertRowMutationParams,
     InsertColMutation,
     InsertRowMutation,
+    IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
     ISetSelectionsOperationParams,
     ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowHeightMutationParams,
     NORMAL_SELECTION_PLUGIN_NAME,
+    RemoveMergeUndoMutationFactory,
+    RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
     SetSelectionsOperation,
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/base-sheets';
+import { AddMergeUndoMutationFactory } from '@univerjs/base-sheets/commands/mutations/add-worksheet-merge.mutation.js';
 import { handleStringToStyle, IMessageService, MessageType, textTrim } from '@univerjs/base-ui';
 import {
     BooleanNumber,
@@ -35,6 +40,7 @@ import {
     ObjectArray,
     ObjectMatrix,
     OnLifecycle,
+    Rectangle,
     Worksheet,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -240,6 +246,7 @@ export class SheetClipboardController extends Disposable {
                 }
 
                 // get row height of existing rows
+                // TODO When Excel pasted, there was no width height, Do we still need to set the height?
                 const rowHeight = new ObjectArray<number>();
                 rowProperties.slice(0, existingRowsCount).forEach((property, index) => {
                     const style = property.style;
@@ -349,19 +356,29 @@ export class SheetClipboardController extends Disposable {
         undos: ICommandInfo[];
     } {
         // insert cell style, insert cell content and insert merged cell info
-        // 1. merged cell (TODO)
+        // 1. merged cell
         // 2. raw content
         // 3. cell style
 
-        const { startColumn, startRow } = range;
+        const { startColumn, startRow, endColumn, endRow } = range;
         const valueMatrix = new ObjectMatrix<ICellData>();
+        const clearStyleMatrix = new ObjectMatrix<ICellData>();
         const mergeRangeData: IRange[] = [];
         const redoMutationsInfo: ICommandInfo[] = [];
         const undoMutationsInfo: ICommandInfo[] = [];
+        let hasMerge = false;
 
         matrix.forValue((row, col, value) => {
-            // TODO@Dushusir Temporarily use handlestringostyle. After all replication and paste function is completed, fix the handlestringostyle method
+            // TODO@Dushusir Temporarily use handleStringToStyle. After all replication and paste function is completed, fix the handleStringToStyle method
             const style = handleStringToStyle(undefined, value.properties.style);
+
+            // NOTE: When pasting, the original cell may contain a default style that is not explicitly carried, resulting in the failure to overwrite the style of the target cell.
+            // If the original cell has a style (lack of other default styles) or is undefined (all default styles), we need to clear the existing styles in the target area
+            // If the original cell style is "", it is to handle the situation where the target area contains merged cells. The style is not overwritten, only the value is overwritten. There is no need to clear the existing style of the target area.
+            if (value.properties.style !== '') {
+                clearStyleMatrix.setValue(row + startRow, col + startColumn, { s: null });
+            }
+
             valueMatrix.setValue(row + startRow, col + startColumn, {
                 v: value.content,
                 s: style,
@@ -377,6 +394,7 @@ export class SheetClipboardController extends Disposable {
                     endColumn: startColumn + col + colSpan - 1,
                 };
                 mergeRangeData.push(mergeRange);
+                hasMerge = true;
             } else if (value.colSpan) {
                 const rowSpan = value.rowSpan || 1;
                 const mergeRange = {
@@ -386,11 +404,41 @@ export class SheetClipboardController extends Disposable {
                     endColumn: startColumn + col + value.colSpan - 1,
                 };
                 mergeRangeData.push(mergeRange);
+                hasMerge = true;
             }
         });
 
+        const accessor = {
+            get: this._injector.get.bind(this._injector),
+        };
+
+        // clear style
+        if (clearStyleMatrix.getLength() > 0) {
+            const clearMutation: ISetRangeValuesMutationParams = {
+                range: [range],
+                worksheetId,
+                workbookId,
+                cellValue: clearStyleMatrix.getData(),
+            };
+            redoMutationsInfo.push({
+                id: SetRangeValuesMutation.id,
+                params: clearMutation,
+            });
+
+            // undo
+            const undoClearMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+                accessor,
+                clearMutation
+            );
+
+            undoMutationsInfo.push({
+                id: SetRangeValuesMutation.id,
+                params: undoClearMutation,
+            });
+        }
+
         // set cell value and style
-        const setContentMutation: ISetRangeValuesMutationParams = {
+        const setValuesMutation: ISetRangeValuesMutationParams = {
             workbookId,
             worksheetId,
             range: [range],
@@ -399,8 +447,48 @@ export class SheetClipboardController extends Disposable {
 
         redoMutationsInfo.push({
             id: SetRangeValuesMutation.id,
-            params: setContentMutation,
+            params: setValuesMutation,
         });
+
+        // undo
+        const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+            accessor,
+            setValuesMutation
+        );
+
+        undoMutationsInfo.push({
+            id: SetRangeValuesMutation.id,
+            params: undoSetValuesMutation,
+        });
+
+        // remove current range's all merged Cell
+        if (hasMerge) {
+            // get all merged cells
+            const mergeData = this._getWorksheet(workbookId, worksheetId).getMergeData();
+            const mergedCellsInRange = mergeData.filter((rect) =>
+                Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
+            );
+
+            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+                workbookId,
+                worksheetId,
+                ranges: mergedCellsInRange,
+            };
+            redoMutationsInfo.push({
+                id: RemoveWorksheetMergeMutation.id,
+                params: removeMergeMutationParams,
+            });
+
+            const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+                accessor,
+                removeMergeMutationParams
+            );
+
+            undoMutationsInfo.push({
+                id: AddWorksheetMergeMutation.id,
+                params: undoRemoveMergeMutationParams,
+            });
+        }
 
         // set merged cell info
         const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
@@ -413,14 +501,25 @@ export class SheetClipboardController extends Disposable {
             params: addMergeMutationParams,
         });
 
+        // undo
+        const undoAddMergeMutation: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
+            accessor,
+            addMergeMutationParams
+        );
+
+        undoMutationsInfo.push({
+            id: RemoveWorksheetMergeMutation.id,
+            params: undoAddMergeMutation,
+        });
+
         // set selection
         const worksheet = this._getWorksheet(workbookId, worksheetId);
-        const destinationRange = {
-            startRow,
-            endRow: range.endRow - 1,
-            startColumn,
-            endColumn: range.endColumn - 1,
-        };
+        // const destinationRange = {
+        //     startRow,
+        //     endRow: range.endRow - 1,
+        //     startColumn,
+        //     endColumn: range.endColumn - 1,
+        // };
         const primaryCell = {
             startRow,
             endRow: startRow,
@@ -451,33 +550,17 @@ export class SheetClipboardController extends Disposable {
             primary.isMergedMainCell = true;
         }
 
+        // selection does not require undo
         const setSelectionsParam: ISetSelectionsOperationParams = {
             workbookId,
             worksheetId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            selections: [{ range: destinationRange, primary, style: null }],
+            selections: [{ range, primary, style: null }],
         };
         redoMutationsInfo.push({
             id: SetSelectionsOperation.id,
             params: setSelectionsParam,
         });
-
-        // TODO@Dushusir: undo
-        // const accessor = {
-        //     get: this._injector.get.bind(this._injector),
-        // };
-
-        // const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-        //     accessor,
-        //     setContentMutation
-        // );
-
-        // undoMutationsInfo.push({
-        //     id: SetRangeValuesMutation.id,
-        //     params: undoSetRangeValuesMutationParams,
-        // });
-
-        //
 
         return {
             redos: redoMutationsInfo,

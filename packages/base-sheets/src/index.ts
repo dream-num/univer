@@ -17,7 +17,10 @@ export { getSheetObject } from './Basics/component-tools';
 // #region commands
 
 export { type IInsertColMutationParams, type IInsertRowMutationParams } from './Basics/Interfaces/MutationInterface';
-export { type IAddWorksheetMergeMutationParams } from './Basics/Interfaces/MutationInterface';
+export {
+    type IAddWorksheetMergeMutationParams,
+    type IRemoveWorksheetMergeMutationParams,
+} from './Basics/Interfaces/MutationInterface';
 export {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -120,6 +123,7 @@ export { MoveRowsMutation } from './commands/mutations/move-rows-cols.mutation';
 export { RemoveColMutation, RemoveRowMutation } from './commands/mutations/remove-row-col.mutation';
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
 export { RemoveWorksheetMergeMutation } from './commands/mutations/remove-worksheet-merge.mutation';
+export { RemoveMergeUndoMutationFactory } from './commands/mutations/remove-worksheet-merge.mutation';
 export { SetBorderStylesMutation } from './commands/mutations/set-border-styles.mutation';
 export { SetColHiddenMutation, SetColVisibleMutation } from './commands/mutations/set-col-visible.mutation';
 export { SetFrozenMutation } from './commands/mutations/set-frozen.mutation';

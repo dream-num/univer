@@ -6,6 +6,19 @@ function convertToDashCase(input: string): string {
     return `--${dashCase}`;
 }
 
+function convertHexToRgb(input: string): string {
+    if (input.startsWith('#')) {
+        const hex = input.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+
+        return `${r}, ${g}, ${b}`;
+    }
+
+    return input;
+}
+
 class Theme {
     private styleSheet;
 
@@ -39,16 +52,14 @@ class Theme {
          *  before: {--primary-color:"#0188fb",--primary-color-hover:"#5391ff"}
          *  after:  {--primary-color:#0188fb;--primary-color-hover:#5391ff;}
          */
-
-        let currentSkin = theme;
-        currentSkin = Object.fromEntries(
-            Object.keys(theme).map((item) => [convertToDashCase(item), currentSkin[item]])
+        const currentTheme = Object.fromEntries(
+            Object.keys(theme).map((item) => [convertToDashCase(item), convertHexToRgb(theme[item])])
         );
 
         // 3. insert new theme
         // TODO: CSS selector should be configurable
         this.styleSheet.insertRule(
-            `:root ${JSON.stringify(currentSkin)
+            `:root ${JSON.stringify(currentTheme)
                 .replace(/"/g, '')
                 .replace(/,(?=--)/g, ';')}`
         );

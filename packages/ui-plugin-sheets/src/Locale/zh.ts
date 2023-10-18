@@ -18,9 +18,9 @@ export default {
         moreFormats: '更多格式',
         font: '字体',
         fontSize: '字号大小',
-        bold: '粗体 (Ctrl+B)',
-        italic: '斜体 (Ctrl+I)',
-        strikethrough: '删除线 (Alt+Shift+5)',
+        bold: '粗体',
+        italic: '斜体',
+        strikethrough: '删除线',
         underline: '下划线',
         textColor: {
             main: '文本颜色',

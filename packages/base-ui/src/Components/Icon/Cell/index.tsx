@@ -14,7 +14,7 @@ import {
 import { BaseIconProps } from '../AddIcon';
 
 export const FillColorIcon = (props: BaseIconProps) => (
-    <BorderColor24 extend={{ colorChannel1: props.color || 'white' }} />
+    <BorderColor24 extend={{ colorChannel1: props.color ?? 'white' }} />
 );
 
 export const FullBorderIcon = (props: BaseIconProps) => <TableStyle24 />;

@@ -59,6 +59,7 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         id: AddWorksheetMergeCommand.id,
         title: 'merge',
         icon: 'MergeIcon',
+        tooltip: 'toolbar.mergeCell.main',
         display: DisplayTypes.ICON,
         positions: [MenuPosition.TOOLBAR],
         type: MenuItemType.SUBITEMS,

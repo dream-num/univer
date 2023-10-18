@@ -15,7 +15,7 @@
     border-color: @border;
 }
 
-.button-disabled(@color: var(--disabled-color); @background: var(--disabled-bg); @border: var(--border-color-base)) {
+.button-disabled(@color: var(--disabled-color); @background: var(--disabled-bg); @border: var(--border-color)) {
     &[disabled] {
 
         &,
@@ -42,7 +42,7 @@
     .button-disabled()
 }
 
-.btn-default(@color: var(--text-color); @background: @bg-color-secondary; @board: var(--border-color-base); ) {
+.btn-default(@color: var(--text-color); @background: @bg-color-secondary; @board: var(--border-color); ) {
     .button-color(@color; @background; @board);
 
     &:hover,

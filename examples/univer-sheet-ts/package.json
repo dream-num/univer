@@ -11,9 +11,6 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "vitest run",
-        "test:watch": "vitest",
-        "coverage": "vitest run --coverage",
         "esbuild:demo": "node ./esbuild.config.mjs",
         "dev:demo": "node ./esbuild.config.mjs --watch"
     },
@@ -24,6 +21,7 @@
         "@univerjs/base-ui": "workspace:^0.0.1",
         "@univerjs/common-plugin-data": "workspace:^0.0.1",
         "@univerjs/core": "workspace:^0.0.1",
+        "@univerjs/sheets-plugin-debugger": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-find": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-formula": "workspace:^0.0.1",
         "@univerjs/sheets-plugin-image": "workspace:^0.0.1",
@@ -45,7 +43,6 @@
         "esbuild-style-plugin": "^1.6.2",
         "less": "^4.2.0",
         "minimist": "^1.2.8",
-        "ts-node": "^10.9.1",
-        "vitest": "^0.34.5"
+        "ts-node": "^10.9.1"
     }
 }

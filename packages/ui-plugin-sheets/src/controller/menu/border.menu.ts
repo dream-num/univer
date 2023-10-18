@@ -143,6 +143,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         id: SetBorderPositionCommand.id,
         title: 'border',
         icon: 'FullBorderIcon',
+        tooltip: 'toolbar.border.main',
         display: DisplayTypes.ICON,
         positions: [MenuPosition.TOOLBAR],
         type: MenuItemType.SELECTOR,

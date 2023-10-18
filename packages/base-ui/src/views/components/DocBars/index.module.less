@@ -5,17 +5,41 @@
 
     .menubar {
         height: 40px;
-        border-bottom: 1px solid @border-color-base;
+        border-bottom: 1px solid @border-color;
     }
 
     .toolbar {
         position: relative;
         height: 40px;
+        padding: 0 @padding-xl;
+
+        color: var(--text-color);
         font-size: var(--font-size);
         background-color: @bg-color-secondary;
         box-sizing: border-box;
         display: flex;
         align-items: center;
+
+        &-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid @border-color;
+
+            > div {
+                height: 26px;
+                display: inline-block;
+                vertical-align: middle;
+                margin: 0 1px;
+                cursor: pointer;
+
+                &.select-button:hover {
+                    background-color: #efefef;
+                }
+            }
+
+        }
 
         .single-button {
             &.more-hide {
@@ -24,25 +48,6 @@
 
             &.more-show {
                 display: block;
-            }
-        }
-
-        color: var(--text-color);
-        padding: 0 15px;
-        height: 40px;
-        position: relative;
-        display: flex;
-        align-items: center;
-
-        > div {
-            height: 26px;
-            display: inline-block;
-            vertical-align: middle;
-            margin: 0 1px;
-            cursor: pointer;
-
-            &.select-button:hover {
-                background-color: #efefef;
             }
         }
 

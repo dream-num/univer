@@ -58,38 +58,6 @@ export function App(props: IUniverAppProps) {
 
     return (
         <AppContext.Provider value={{ injector, localeService, themeService, locale, componentManager, zIndexManager }}>
-            <div
-                style={{
-                    position: 'fixed',
-                    right: '250px',
-                    top: '14px',
-                    fontSize: '14px',
-                    zIndex: 100,
-                }}
-                className="univer-dev-operation"
-            >
-                {/* language selector */}
-                <span
-                    style={{
-                        display: 'inline-block',
-                        width: 70,
-                        margin: '5px 0 0 5px',
-                    }}
-                >
-                    Language
-                </span>
-                <select
-                    value={locale}
-                    style={{ width: 70 }}
-                    onChange={(e) => {
-                        const value = e.target.value as LocaleType;
-                        localeService.setLocale(value);
-                    }}
-                >
-                    <option value={LocaleType.EN}>English</option>
-                    <option value={LocaleType.ZH}>简体中文</option>
-                </select>
-            </div>
             <Container className={style.layoutContainer}>
                 <Layout>
                     {/* outer sidebar */}

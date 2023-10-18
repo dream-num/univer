@@ -1,0 +1,27 @@
+{
+    "name": "@univerjs/sheets-plugin-debugger",
+    "version": "0.0.1",
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "MIT",
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "private": true,
+    "type": "module",
+    "scripts": {
+    },
+    "dependencies": {
+        "@univerjs/base-ui": "workspace:^0.0.1",
+        "@univerjs/core": "workspace:^0.0.1",
+        "@wendellhu/redi": "^0.12.8"
+    }
+}

@@ -18,9 +18,9 @@ export default {
         moreFormats: 'More formats',
         font: 'Font',
         fontSize: 'Font size',
-        bold: 'Bold (Ctrl+B)',
-        italic: 'Italic (Ctrl+I)',
-        strikethrough: 'Strikethrough (Alt+Shift+5)',
+        bold: 'Bold',
+        italic: 'Italic',
+        strikethrough: 'Strikethrough',
         underline: 'Underline',
         textColor: {
             main: 'Text color',

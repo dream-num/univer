@@ -1,15 +1,10 @@
 @import '../../Basics/CSS/triangle.less';
 @import '../../Basics/CSS/Skin/default.module.less';
 
-@tooltip-color: @color-white;
-@tooltip-bg: @color-black;
-
-//** Tooltip arrow width
+@tooltip-color: rgb(var(--color-white));
+@tooltip-bg: rgb(var(--color-black));
 @tooltip-arrow-width: 5px;
-//** Tooltip arrow color
-@tooltip-arrow-color: @tooltip-bg;
 
-// Base class
 .tooltip {
     position: absolute;
     z-index: 4;
@@ -40,7 +35,7 @@
         bottom: 0;
         margin-left: -@tooltip-arrow-width;
         border-width: @tooltip-arrow-width @tooltip-arrow-width 0;
-        border-top-color: @tooltip-arrow-color;
+        border-top-color: @tooltip-bg;
     }
 
     &-placement-top &-arrow {
@@ -51,7 +46,7 @@
         left: 0;
         margin-top: -@tooltip-arrow-width;
         border-width: @tooltip-arrow-width @tooltip-arrow-width @tooltip-arrow-width 0;
-        border-right-color: @tooltip-arrow-color;
+        border-right-color: @tooltip-bg;
     }
 
     &-placement-right &-arrow {
@@ -62,7 +57,7 @@
         right: 0;
         margin-top: -@tooltip-arrow-width;
         border-width: @tooltip-arrow-width 0 @tooltip-arrow-width @tooltip-arrow-width;
-        border-left-color: @tooltip-arrow-color;
+        border-left-color: @tooltip-bg;
     }
 
     &-placement-left &-arrow {
@@ -73,7 +68,7 @@
         top: 0;
         margin-left: -@tooltip-arrow-width;
         border-width: 0 @tooltip-arrow-width @tooltip-arrow-width;
-        border-bottom-color: @tooltip-arrow-color;
+        border-bottom-color: @tooltip-bg;
     }
 
     &-placement-bottom &-arrow {

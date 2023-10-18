@@ -1,4 +1,4 @@
-import { IStyleSheet } from '../../services/theme/theme';
+import { IStyleSheet } from '../../services/theme/theme.service';
 import { ILocales } from '../../Shared/Locale';
 import { LocaleType } from '../Enum';
 

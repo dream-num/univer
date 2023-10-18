@@ -51,15 +51,7 @@ export function Palette(props: IProps) {
         },
         {
             title: 'Font Size',
-            colors: [
-                'fontSizeXs',
-                'fontSizeSm',
-                'fontSizeBase',
-                'fontSizeLg',
-                'fontSizeXl',
-                'fontSizeXxl',
-                'fontSizeXxxl',
-            ],
+            colors: ['fontSizeXs', 'fontSizeSm', 'fontSizeBase', 'fontSizeLg', 'fontSizeXl', 'fontSizeXxl'],
         },
         {
             title: 'Margin',
@@ -145,7 +137,7 @@ export function Palette(props: IProps) {
                             <tr>
                                 <th>name</th>
                                 <th>value</th>
-                                <th>Less variable</th>
+                                <th>Less variable (deprecated)</th>
                                 <th>CSS variable</th>
                             </tr>
                         </thead>

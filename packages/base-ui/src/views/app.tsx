@@ -11,6 +11,7 @@ import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import style from './app.module.less';
 import { ContextMenu } from './components/contextmenu/contextmenu';
 import { DocBars } from './components/DocBars';
+import { themeInstance } from './theme';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     headerComponents?: Set<() => ComponentType>;
@@ -47,12 +48,18 @@ export function App(props: IUniverAppProps) {
     const [locale, setLocale] = useState<LocaleType>(localeService.getLocale().getCurrentLocale());
 
     useEffect(() => {
-        const listener = localeService.getLocale().locale$.subscribe((locale) => {
-            locale && setLocale(locale);
-        });
+        const listeners = [
+            localeService.getLocale().locale$.subscribe((locale) => {
+                locale && setLocale(locale);
+            }),
+            themeService.currentTheme$.subscribe((theme) => {
+                themeInstance.setTheme(theme);
+            }),
+        ];
 
         return () => {
-            listener.unsubscribe();
+            // batch unsubscribe
+            listeners.forEach((listener) => listener.unsubscribe());
         };
     }, []);
 

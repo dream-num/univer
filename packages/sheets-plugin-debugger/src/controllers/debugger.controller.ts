@@ -2,8 +2,9 @@ import { IMenuService } from '@univerjs/base-ui';
 import { Disposable, ICommandService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { I18nOperation } from '../commands/operations/i18n.operation';
-import { DebuggerMenuItemFactory } from './menu';
+import { LocaleOperation } from '../commands/operations/locale.operation';
+import { ThemeOperation } from '../commands/operations/theme.operation';
+import { LocaleMenuItemFactory, ThemeMenuItemFactory } from './menu';
 
 export class DebuggerController extends Disposable {
     constructor(
@@ -14,11 +15,12 @@ export class DebuggerController extends Disposable {
         super();
         this._initializeContextMenu();
 
-        [I18nOperation].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        [LocaleOperation].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        [ThemeOperation].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
     private _initializeContextMenu() {
-        [DebuggerMenuItemFactory].forEach((factory) => {
+        [LocaleMenuItemFactory, ThemeMenuItemFactory].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

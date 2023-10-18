@@ -2,7 +2,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 import { Nullable } from '../../common/type-utils';
 import { Disposable, toDisposable } from '../../Shared/lifecycle';
-import { IStyleSheet, themeInstance } from './theme';
+
+export interface IStyleSheet {
+    [key: string]: string;
+}
 
 export class ThemeService extends Disposable {
     private currentTheme: Nullable<IStyleSheet>;
@@ -36,7 +39,6 @@ export class ThemeService extends Disposable {
     setDarkMode(flag: boolean) {}
 
     setTheme(theme: IStyleSheet) {
-        themeInstance.setTheme(theme);
         this.currentTheme = theme;
         this._currentTheme$.next(theme);
     }

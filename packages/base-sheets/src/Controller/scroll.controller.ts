@@ -71,6 +71,7 @@ export class ScrollController extends Disposable {
 
             const { actualScrollX = 0, actualScrollY = 0 } = param;
 
+            // According to the actual scroll position, the most suitable row, column and offset combination is recalculated.
             const { row, column } = skeleton.getCellPositionByOffset(
                 (actualScrollX + rowHeaderWidthAndMarginLeft) * scaleX,
                 (actualScrollY + columnHeaderHeightAndMarginTop) * scaleY,
@@ -85,6 +86,7 @@ export class ScrollController extends Disposable {
             const offsetX = actualScrollX + rowHeaderWidthAndMarginLeft - startX;
             const offsetY = actualScrollY + columnHeaderHeightAndMarginTop - startY;
 
+            // update scroll infos in scroll manager service
             this._scrollManagerService.addOrReplaceNoRefresh({
                 sheetViewStartRow: row,
                 sheetViewStartColumn: column,

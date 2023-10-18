@@ -1,8 +1,8 @@
 import * as Icon from './Icon';
 
 export * from './Avatar';
+export * from './BorderLine';
 export * from './Button';
-export * from './CanvasIcon';
 export * from './CellRange';
 export * from './Checkbox';
 export * from './Collapse';

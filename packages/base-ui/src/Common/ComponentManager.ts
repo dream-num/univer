@@ -12,7 +12,7 @@ import {
     BorderMediumDashed,
     BorderThick,
     BorderThin,
-} from '../Components/CanvasIcon';
+} from '../Components/BorderLine';
 import {
     BackIcon,
     BoldIcon,

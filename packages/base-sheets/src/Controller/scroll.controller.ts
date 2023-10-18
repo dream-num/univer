@@ -241,14 +241,12 @@ export class ScrollController extends Disposable {
 
             const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = param;
 
-            const { mergeInfo } = skeleton.getCellByIndexWithNoHeader(
+            const { startX, startY } = skeleton.getCellByIndexWithNoHeader(
                 sheetViewStartRow,
                 sheetViewStartColumn,
                 scaleX,
                 scaleY
             );
-
-            const { startX, startY } = mergeInfo;
 
             const config = viewportMain.getBarScroll(startX + offsetX, startY + offsetY);
             viewportMain.scrollTo(config);

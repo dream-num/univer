@@ -226,9 +226,7 @@ export class SheetCanvasView {
             if (evt.inputIndex === PointerInput.MouseWheelX) {
                 const deltaFactor = Math.abs(evt.deltaX);
                 // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
-                const allWidth = scene.width;
-                const viewWidth = viewMain.width || 1;
-                const scrollNum = (viewWidth / allWidth) * deltaFactor;
+                const scrollNum = deltaFactor;
 
                 if (evt.deltaX > 0) {
                     offsetX = scrollNum;
@@ -250,10 +248,8 @@ export class SheetCanvasView {
             }
             if (evt.inputIndex === PointerInput.MouseWheelY) {
                 const deltaFactor = Math.abs(evt.deltaY);
-                const allHeight = scene.height;
-                const viewHeight = viewMain.height || 1;
                 // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
-                let scrollNum = (viewHeight / allHeight) * deltaFactor;
+                let scrollNum = deltaFactor;
                 if (evt.shiftKey) {
                     scrollNum *= 3;
                     if (evt.deltaY > 0) {

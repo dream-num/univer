@@ -1,11 +1,20 @@
-import { DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
+import {
+    defaultTheme,
+    DisplayTypes,
+    greenTheme,
+    IMenuSelectorItem,
+    MenuItemType,
+    MenuPosition,
+    SelectTypes,
+} from '@univerjs/base-ui';
 import { IAccessor } from '@wendellhu/redi';
 
-import { I18nOperation } from '../commands/operations/i18n.operation';
+import { LocaleOperation } from '../commands/operations/locale.operation';
+import { ThemeOperation } from '../commands/operations/theme.operation';
 
-export function DebuggerMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
-        id: I18nOperation.id,
+        id: LocaleOperation.id,
         icon: 'ShortcutIcon',
         title: 'debugger.locale.title',
         tooltip: 'debugger.locale.tooltip',
@@ -21,6 +30,29 @@ export function DebuggerMenuItemFactory(accessor: IAccessor): IMenuSelectorItem 
             {
                 label: '简体中文',
                 value: 'zh',
+            },
+        ],
+    };
+}
+
+export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: ThemeOperation.id,
+        icon: 'ShortcutIcon',
+        title: 'debugger.theme.title',
+        tooltip: 'debugger.theme.tooltip',
+        display: DisplayTypes.ICON,
+        type: MenuItemType.SELECTOR,
+        selectType: SelectTypes.NEO,
+        positions: [MenuPosition.TOOLBAR],
+        selections: [
+            {
+                label: 'green',
+                value: greenTheme,
+            },
+            {
+                label: 'default',
+                value: defaultTheme,
             },
         ],
     };

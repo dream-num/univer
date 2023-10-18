@@ -1,6 +1,4 @@
-export interface IStyleSheet {
-    [key: string]: string;
-}
+import { IStyleSheet } from '@univerjs/core';
 
 function convertToDashCase(input: string): string {
     const dashCase = input.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`).replace(/(\d+)/g, '-$1');

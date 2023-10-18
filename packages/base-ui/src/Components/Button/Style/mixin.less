@@ -1,7 +1,7 @@
 @import '../../../Basics/CSS/Skin/default.module.less';
 
 .button-size(@height; @padding-horizontal; @font-size; @border-radius) {
-    @padding-vertical: max((round(((@height - @font-size * @line-height-base) / 2) * 10) / 10) - @border-width-base,
+    @padding-vertical: max((round(((@height - @font-size * @line-height-base) / 2) * 10) / 10) - 1px,
         0);
     height: @height;
     // padding: @padding-vertical @padding-horizontal;
@@ -76,10 +76,10 @@
     text-align: center;
     background-image: none;
     padding: 0 10px;
-    border: @border-width-base @border-style-base transparent;
+    border: 1px solid transparent;
     cursor: pointer;
     user-select: none;
-    .button-size(30px; 15px; @font-size-base; @border-width-base);
+    .button-size(30px; 15px; @font-size-base; 1px);
 
     &,
     &:active {

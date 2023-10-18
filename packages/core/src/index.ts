@@ -30,7 +30,7 @@ export {
     type ISheetLocation,
     SheetInterceptorService,
 } from './services/sheet-interceptor/sheet-interceptor.service';
-export { ThemeService } from './services/theme/theme.service';
+export { type IStyleSheet, ThemeService } from './services/theme/theme.service';
 export {
     type IUndoRedoCommandInfos,
     IUndoRedoService,

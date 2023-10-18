@@ -3,7 +3,7 @@ import { ISelectionCell, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
-export const NORMAL_TEXT_SELECTION_PLUGIN_NAME = 'normalTextSelectionPluginName';
+import { NORMAL_TEXT_SELECTION_PLUGIN_NAME } from '../Basics/docs-view-key';
 
 export interface ITextSelectionManagerSearchParam {
     pluginName: string;
@@ -28,6 +28,10 @@ export class TextSelectionManagerService implements IDisposable {
     private readonly _textSelectionInfo$ = new BehaviorSubject<Nullable<ITextSelectionRangeWithStyle[]>>(null);
 
     readonly textSelectionInfo$ = this._textSelectionInfo$.asObservable();
+
+    getCurrentSelection() {
+        return this._currentSelection;
+    }
 
     reset() {
         if (this._currentSelection == null) {

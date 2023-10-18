@@ -49,6 +49,40 @@ export class DocSkeletonManagerService implements IDisposable {
         return this._getCurrentBySearch(this._currentSkeleton);
     }
 
+    updateCurrent(searchParm: IDocSkeletonManagerSearch) {
+        const { unitId } = searchParm;
+
+        const documentModel = this._currentUniverService.getUniverDocInstance(searchParm.unitId);
+
+        if (documentModel == null || documentModel.bodyModel == null) {
+            return;
+        }
+
+        const skeleton = this._buildSkeleton(documentModel);
+
+        skeleton.calculate();
+
+        const oldDocSkeleton = this._docSkeletonParam.find((doc) => doc.unitId === unitId);
+        if (oldDocSkeleton != null) {
+            const index = this._docSkeletonParam.indexOf(oldDocSkeleton);
+            this._docSkeletonParam.splice(index, 1);
+        }
+
+        this._docSkeletonParam.push({
+            unitId,
+            skeleton,
+            dirty: false,
+        });
+
+        this._currentSkeleton = searchParm;
+
+        this._currentSkeletonBefore$.next(this.getCurrent());
+
+        this._currentSkeleton$.next(this.getCurrent());
+
+        return this.getCurrent();
+    }
+
     setCurrent(searchParm: IDocSkeletonManagerSearch): Nullable<IDocSkeletonManagerParam> {
         const param = this._getCurrentBySearch(searchParm);
         if (param != null) {

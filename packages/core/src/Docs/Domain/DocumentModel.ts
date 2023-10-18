@@ -50,6 +50,18 @@ export class DocumentModelSimple {
         return this.snapshot.body;
     }
 
+    dispose() {
+        this.bodyModel.dispose();
+
+        this.headerTreeMap.forEach((headerTree) => {
+            headerTree.dispose();
+        });
+
+        this.footerTreeMap.forEach((headerTree) => {
+            headerTree.dispose();
+        });
+    }
+
     getShouldRenderLoopImmediately() {
         const should = this.snapshot.shouldStartRenderingImmediately;
         return should !== false;
@@ -81,6 +93,10 @@ export class DocumentModelSimple {
 
     getSnapshot() {
         return this.snapshot;
+    }
+
+    updateDocumentId(unitId: string) {
+        this.snapshot.id = unitId;
     }
 
     updateDocumentDataMargin(data: IPaddingData) {
@@ -174,6 +190,11 @@ export class DocumentModel extends DocumentModelSimple {
 
     getUnitId(): string {
         return this._unitId;
+    }
+
+    override updateDocumentId(unitId: string) {
+        super.updateDocumentId(unitId);
+        this._unitId = unitId;
     }
 
     private _initializeRowColTree() {

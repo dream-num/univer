@@ -1,9 +1,12 @@
-import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/base-docs';
+import {
+    DocSkeletonManagerService,
+    NORMAL_TEXT_SELECTION_PLUGIN_NAME,
+    TextSelectionManagerService,
+} from '@univerjs/base-docs';
 import {
     DeviceInputEventType,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    DocumentSkeleton,
     IEditorInputConfig,
     IRenderManagerService,
     ITextSelectionRenderManager,
@@ -11,6 +14,7 @@ import {
 import { IEditorBridgeService } from '@univerjs/base-sheets';
 import {
     Disposable,
+    DocumentModel,
     ICommandService,
     IContextService,
     ITextRotation,
@@ -93,13 +97,23 @@ export class StartEditController extends Disposable {
 
             const { a: angle } = textRotation as ITextRotation;
 
-            const documentSkeleton = DocumentSkeleton.create(documentModel!, this._localService);
+            documentModel!.updateDocumentId(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
 
             if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-                documentSkeleton.getModel().updateDocumentDataPageSize(endX - startX);
+                documentModel!.updateDocumentDataPageSize(endX - startX);
             }
 
-            documentSkeleton.calculate();
+            this._currentUniverService.changeDoc(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, documentModel! as DocumentModel);
+
+            const docParam = this._docSkeletonManagerService.updateCurrent({ unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY });
+
+            if (docParam == null) {
+                return;
+            }
+
+            // const documentSkeleton = DocumentSkeleton.create(documentModel!, this._localService);
+
+            const documentSkeleton = docParam.skeleton;
 
             const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
 
@@ -135,6 +149,11 @@ export class StartEditController extends Disposable {
             document.changeSkeleton(documentSkeleton);
 
             document.resize(editorWidth, editorHeight);
+
+            this._textSelectionManagerService.setCurrentSelectionNotRefresh({
+                pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
+                unitId: docParam.unitId,
+            });
 
             this._textSelectionRenderManager.changeRuntime(documentSkeleton, scene);
 

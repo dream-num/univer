@@ -28,6 +28,9 @@ export class DocumentBodyModelSimple implements IDisposable {
 
     dispose(): void {
         this._modelChange$.complete();
+        this.children.forEach((child) => {
+            child.dispose();
+        });
     }
 
     resetCache() {}

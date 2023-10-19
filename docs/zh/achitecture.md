@@ -139,7 +139,7 @@ export const enum CommandType {
     COMMAND = 0,
     /** An operation that do not require conflict resolve.  */
     OPERATION = 1,
-    /** An operation that need to be resolved before applicated on peer client. */
+    /** An operation that need to be resolved before applied on peer client. */
     MUTATION = 2,
 }
 ```

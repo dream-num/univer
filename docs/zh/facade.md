@@ -3,7 +3,7 @@
 Facade 的意图是作为
 
 1. 用户使用 Univer 的简单接口。如果用户没有自定义开发的需要而只是简单地使用一个表格组件，那么可以直接使用 Facade 提供的接口。
-2. 用户使用 AppsScripts 的接口。
+2. 用户使用 Apps Scripts 的接口。
 
 Facade 和 Microsoft Excel 的 Office Scripts 以及 Google 的 Apps Scripts 有着相似的设计思路。它们都是为了简化用户的开发流程，让用户可以直接使用简单的接口来完成复杂的操作。中国国内的部分产品也提供了基于 API 的访问，例如钉钉文档的表格。
 

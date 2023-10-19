@@ -63,34 +63,18 @@ export class ScrollController extends Disposable {
                 return;
             }
 
-            const scene = sheetObject.scene;
-
-            const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
-
-            const { scaleX, scaleY } = scene.getAncestorScale();
-
             const { actualScrollX = 0, actualScrollY = 0 } = param;
 
-            const { row, column } = skeleton.getCellPositionByOffset(
-                actualScrollX + rowHeaderWidthAndMarginLeft,
-                actualScrollY + columnHeaderHeightAndMarginTop,
-                scaleX,
-                scaleY,
-                {
-                    x: 0,
-                    y: 0,
-                }
-            );
+            // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
+            const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(actualScrollX, actualScrollY);
 
+            // update scroll infos in scroll manager service
             this._scrollManagerService.addOrReplaceNoRefresh({
                 sheetViewStartRow: row,
                 sheetViewStartColumn: column,
+                offsetX: columnOffset,
+                offsetY: rowOffset,
             });
-
-            // this._commandService.executeCommand(SetScrollOperation.id, {
-            //     sheetViewStartRow: row,
-            //     sheetViewStartColumn: column,
-            // });
         });
     }
 
@@ -126,6 +110,12 @@ export class ScrollController extends Disposable {
         }
         const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         if (viewport == null) {
+            return;
+        }
+        const { tl } = viewport.getBounding();
+
+        const sheetObject = this._getSheetObject();
+        if (sheetObject == null) {
             return;
         }
 
@@ -197,13 +187,13 @@ export class ScrollController extends Disposable {
         if (startSheetViewRow === undefined && startSheetViewColumn === undefined) {
             return;
         }
-        // sheetViewStartRow and sheetViewStartColumn maybe undefined, which means should not make scroll at its direction
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const { sheetViewStartColumn, sheetViewStartRow, offsetX, offsetY } =
+            this._scrollManagerService.getCurrentScroll() || {};
         this._commandService.executeCommand(ScrollCommand.id, {
-            unitId: workbook.getUnitId(),
-            sheetId: workbook.getActiveSheet().getSheetId(),
-            sheetViewStartRow: startSheetViewRow,
-            sheetViewStartColumn: startSheetViewColumn,
+            sheetViewStartRow: startSheetViewRow ?? sheetViewStartRow,
+            sheetViewStartColumn: startSheetViewColumn ?? sheetViewStartColumn,
+            offsetX: startSheetViewColumn === undefined ? offsetX : 0,
+            offsetY: startSheetViewRow === undefined ? offsetY : 0,
         });
     }
 
@@ -233,42 +223,19 @@ export class ScrollController extends Disposable {
                 return;
             }
 
-            const { sheetViewStartRow, sheetViewStartColumn } = param;
+            const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = param;
 
-            const { tl } = viewportMain.getBounding();
+            const { startX, startY } = skeleton.getCellByIndexWithNoHeader(
+                sheetViewStartRow,
+                sheetViewStartColumn,
+                scaleX,
+                scaleY
+            );
+            const x = startX + offsetX;
+            const y = startY + offsetY;
 
-            // if both row and column are defined, we should scroll this cell to the top left corner
-            // the scroll position is absolute position
-            if (sheetViewStartRow !== undefined && sheetViewStartColumn !== undefined) {
-                const { startX, startY } = skeleton.getCellByIndexWithNoHeader(
-                    sheetViewStartRow,
-                    sheetViewStartColumn,
-                    scaleX,
-                    scaleY
-                );
-                const config = viewportMain.getBarScroll(startX, startY);
-                viewportMain.scrollTo(config);
-            } else {
-                const { startX, startY } = skeleton.getCellByIndex(
-                    sheetViewStartRow || 0,
-                    sheetViewStartColumn || 0,
-                    scaleX,
-                    scaleY
-                );
-                // if only column is undefined, we should scroll vertically to the cell
-                // the scroll position is relative position
-                if (sheetViewStartRow !== undefined) {
-                    const offsetY = startY - tl.y;
-                    const config = viewportMain.getBarScroll(0, offsetY);
-                    viewportMain.scrollBy(config);
-                    // if only row is undefined, we should scroll horizontally to the cell
-                    // the scroll position is relative position
-                } else if (sheetViewStartColumn !== undefined) {
-                    const offsetX = startX - tl.x;
-                    const config = viewportMain.getBarScroll(offsetX, 0);
-                    viewportMain.scrollBy(config);
-                }
-            }
+            const config = viewportMain.getBarScroll(x, y);
+            viewportMain.scrollTo(config);
         });
     }
 

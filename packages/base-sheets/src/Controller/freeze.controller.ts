@@ -444,16 +444,22 @@ export class FreezeController extends Disposable {
                 return;
             }
 
-            let ySplit = this._changeToRow - sheetViewStartRow;
-
-            ySplit = ySplit < 0 ? 0 : ySplit;
-
-            let xSplit = this._changeToColumn - sheetViewStartColumn;
-
-            xSplit = xSplit < 0 ? 0 : xSplit;
-
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const worksheet = workbook.getActiveSheet();
+            const oldFreeze = worksheet.getConfig()?.freeze;
+            let xSplit = oldFreeze?.xSplit || 0;
+            let ySplit = oldFreeze?.ySplit || 0;
+
+            if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
+                ySplit = this._changeToRow - sheetViewStartRow;
+
+                ySplit = ySplit < 0 ? 0 : ySplit;
+            }
+            if (freezeDirectionType === FREEZE_DIRECTION_TYPE.COLUMN) {
+                xSplit = this._changeToColumn - sheetViewStartColumn;
+
+                xSplit = xSplit < 0 ? 0 : xSplit;
+            }
 
             this._commandService.executeCommand(SetFrozenCommand.id, {
                 startRow: this._changeToRow,

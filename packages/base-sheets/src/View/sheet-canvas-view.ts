@@ -4,7 +4,9 @@ import {
     ISelectionTransformerShapeManager,
     IWheelEvent,
     Layer,
+    PointerInput,
     Rect,
+    RENDER_CLASS_TYPE,
     Scene,
     ScrollBar,
     Spreadsheet,
@@ -12,7 +14,14 @@ import {
     SpreadsheetRowHeader,
     Viewport,
 } from '@univerjs/base-render';
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, Workbook, Worksheet } from '@univerjs/core';
+import {
+    ICommandService,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import {
@@ -21,6 +30,7 @@ import {
     SHEET_VIEW_KEY,
     VIEWPORT_KEY,
 } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, SheetCanvasView)
@@ -31,6 +41,7 @@ export class SheetCanvasView {
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionTransformerShapeManager
         private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
@@ -203,12 +214,85 @@ export class SheetCanvasView {
         });
 
         // mouse scroll
-        scene.onMouseWheelObserver.add((e: IWheelEvent, state) => {
-            if (e.ctrlKey) {
+        scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
+            if (evt.ctrlKey) {
                 return;
             }
 
-            viewMain.onMouseWheel(e, state);
+            let offsetX = 0;
+            let offsetY = 0;
+
+            const isLimitedStore = viewMain.limitedScroll();
+            if (evt.inputIndex === PointerInput.MouseWheelX) {
+                const deltaFactor = Math.abs(evt.deltaX);
+                // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+                const scrollNum = deltaFactor;
+
+                if (evt.deltaX > 0) {
+                    offsetX = scrollNum;
+                } else {
+                    offsetX = -scrollNum;
+                }
+                this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
+
+                // 临界点时执行浏览器行为
+                if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                    if (!isLimitedStore?.isLimitedX) {
+                        state.stopPropagation();
+                    }
+                } else if (viewMain.isWheelPreventDefaultX) {
+                    evt.preventDefault();
+                } else if (!isLimitedStore?.isLimitedX) {
+                    evt.preventDefault();
+                }
+            }
+            if (evt.inputIndex === PointerInput.MouseWheelY) {
+                const deltaFactor = Math.abs(evt.deltaY);
+                // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+                let scrollNum = deltaFactor;
+                if (evt.shiftKey) {
+                    scrollNum *= 3;
+                    if (evt.deltaY > 0) {
+                        offsetX = scrollNum;
+                    } else {
+                        offsetX = -scrollNum;
+                    }
+                    this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
+
+                    // 临界点时执行浏览器行为
+                    if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                        if (!isLimitedStore?.isLimitedX) {
+                            state.stopPropagation();
+                        }
+                    } else if (viewMain.isWheelPreventDefaultX) {
+                        evt.preventDefault();
+                    } else if (!isLimitedStore?.isLimitedX) {
+                        evt.preventDefault();
+                    }
+                } else {
+                    if (evt.deltaY > 0) {
+                        offsetY = scrollNum;
+                    } else {
+                        offsetY = -scrollNum;
+                    }
+                    this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
+
+                    // 临界点时执行浏览器行为
+                    if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                        if (!isLimitedStore?.isLimitedY) {
+                            state.stopPropagation();
+                        }
+                    } else if (viewMain.isWheelPreventDefaultY) {
+                        evt.preventDefault();
+                    } else if (!isLimitedStore?.isLimitedY) {
+                        evt.preventDefault();
+                    }
+                }
+            }
+            if (evt.inputIndex === PointerInput.MouseWheelZ) {
+                // TODO
+                // ...
+            }
         });
 
         // create a scroll bar

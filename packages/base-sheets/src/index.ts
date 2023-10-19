@@ -67,7 +67,7 @@ export {
     SetSpecificRowsVisibleCommand,
 } from './commands/commands/set-row-visible.command';
 export type { IScrollCommandParams } from './commands/commands/set-scroll.command';
-export { RestScrollCommand, ScrollCommand } from './commands/commands/set-scroll.command';
+export { RestScrollCommand, ScrollCommand, SetScrollRelativeCommand } from './commands/commands/set-scroll.command';
 export type {
     IExpandSelectionCommandParams,
     IMoveSelectionCommandParams,

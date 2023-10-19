@@ -220,6 +220,14 @@ export class Viewport {
         return this._right;
     }
 
+    get isWheelPreventDefaultX() {
+        return this._isWheelPreventDefaultX;
+    }
+
+    get isWheelPreventDefaultY() {
+        return this._isWheelPreventDefaultY;
+    }
+
     set width(w: Nullable<number>) {
         this._width = w;
     }
@@ -347,6 +355,24 @@ export class Viewport {
      */
     scrollBy(pos: IScrollBarPosition, isTrigger = true) {
         return this._scroll(SCROLL_TYPE.scrollBy, pos, isTrigger);
+    }
+
+    /**
+     * current position plus offset relatively
+     * the caller no need to deal with the padding when frozen
+     * @param offsetX
+     * @param offsetY
+     * @param isTrigger
+     * @returns
+     */
+    scrollByOffset(offsetX = 0, offsetY = 0, isTrigger = true) {
+        if (!this._scrollBar || this.isActive === false) {
+            return;
+        }
+        const x = offsetX + this._paddingStartX;
+        const y = offsetY + this._paddingStartY;
+        const param = this.getBarScroll(x, y);
+        return this.scrollBy(param, isTrigger);
     }
 
     getBarScroll(actualX: number, actualY: number) {
@@ -528,7 +554,6 @@ export class Viewport {
         const svCoord = sceneTrans.applyPoint(coord).subtract(Vector2.FromArray([scroll.x, scroll.y]));
         return svCoord;
     }
-
     // eslint-disable-next-line max-lines-per-function
     onMouseWheel(evt: IWheelEvent, state: EventState) {
         if (!this._scrollBar || this.isActive === false) {
@@ -670,6 +695,39 @@ export class Viewport {
         this._scene.removeViewport(this._viewPortKey);
     }
 
+    limitedScroll() {
+        if (!this._scrollBar) {
+            return;
+        }
+
+        const limitX = this._scrollBar?.limitX || Infinity;
+        const limitY = this._scrollBar?.limitY || Infinity;
+
+        let isLimitedX = true;
+        let isLimitedY = true;
+
+        if (this.scrollX < 0) {
+            this.scrollX = 0;
+        } else if (this.scrollX > limitX) {
+            this.scrollX = limitX;
+        } else {
+            isLimitedX = false;
+        }
+
+        if (this.scrollY < 0) {
+            this.scrollY = 0;
+        } else if (this.scrollY > limitY) {
+            this.scrollY = limitY;
+        } else {
+            isLimitedY = false;
+        }
+
+        return {
+            isLimitedX,
+            isLimitedY,
+        };
+    }
+
     private _resizeCacheCanvasAndScrollBar() {
         const { width, height } = this._getViewPortSize();
 
@@ -755,39 +813,6 @@ export class Viewport {
         this._preScrollY = this.scrollY;
     }
 
-    private _limitedScroll() {
-        if (!this._scrollBar) {
-            return;
-        }
-
-        const limitX = this._scrollBar?.limitX || Infinity;
-        const limitY = this._scrollBar?.limitY || Infinity;
-
-        let isLimitedX = true;
-        let isLimitedY = true;
-
-        if (this.scrollX < 0) {
-            this.scrollX = 0;
-        } else if (this.scrollX > limitX) {
-            this.scrollX = limitX;
-        } else {
-            isLimitedX = false;
-        }
-
-        if (this.scrollY < 0) {
-            this.scrollY = 0;
-        } else if (this.scrollY > limitY) {
-            this.scrollY = limitY;
-        } else {
-            isLimitedY = false;
-        }
-
-        return {
-            isLimitedX,
-            isLimitedY,
-        };
-    }
-
     private _triggerScrollStop(
         scroll: {
             x: number;
@@ -845,7 +870,7 @@ export class Viewport {
             }
         }
 
-        const limited = this._limitedScroll(); // 限制滚动范围
+        const limited = this.limitedScroll(); // 限制滚动范围
 
         this.onScrollBeforeObserver.notifyObservers({
             viewport: this,

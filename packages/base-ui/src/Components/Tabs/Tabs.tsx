@@ -102,20 +102,11 @@ export const Tabs = React.memo(
     React.forwardRef<ITabRef, IBaseTabsProps>((props: IBaseTabsProps, ref) => {
         const { type = 'line', className = '', draggable = false } = props;
         const [active, setActive] = useState<string>(props.activeKey ?? ''); // Initialize active with the provided activeKey
+        const parent = createRef<HTMLDivElement>();
 
         useEffect(() => {
             props.activeKey && setActive(props.activeKey); // Update active state when props.activeKey changes
         }, [props.activeKey]);
-
-        useEffect(() => {
-            if (!parent.current) return;
-            parent.current.removeEventListener('wheel', wheel);
-            parent.current.addEventListener('wheel', wheel);
-
-            return () => {
-                parent.current?.removeEventListener('wheel', wheel);
-            };
-        }, [props.children]);
 
         const parseNavList = () =>
             props.children.map((child) => {
@@ -155,7 +146,6 @@ export const Tabs = React.memo(
         let target: HTMLDivElement | null;
         let startX: number;
         let left: number;
-        const parent = createRef<HTMLDivElement>();
         let parentOffsetLeft: number;
         let parentOffsetTop: number;
         let list: ITabInfo[] = [];
@@ -193,8 +183,7 @@ export const Tabs = React.memo(
             return list;
         };
 
-        const wheel = (e: WheelEvent) => {
-            e.preventDefault();
+        const wheel = (e: React.WheelEvent) => {
             if (!parent.current) return;
             const children = parent.current.children;
             if (e.deltaY > 0) {
@@ -388,7 +377,7 @@ export const Tabs = React.memo(
             <div className={`${styles.tabs} ${type === 'card' ? `${styles.tabs}-card` : ''} ${className}`}>
                 <div className={styles.tabsNav}>
                     <div className={styles.tabsNavWrap}>
-                        <div className={styles.tabsNavList} ref={parent}>
+                        <div className={styles.tabsNavList} ref={parent} onWheel={wheel}>
                             {parseNavList()}
                         </div>
                     </div>

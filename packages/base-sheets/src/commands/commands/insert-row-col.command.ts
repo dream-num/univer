@@ -112,7 +112,7 @@ export const InsertRowCommand: ICommand = {
                     cellStyleByColumn.set(column, worksheetMatrix.getValue(anchorRow, column)?.s);
                 }
                 const s = cellStyleByColumn.get(column);
-                cellValue.setValue(row, column, { v: '', m: '' }); // Empty row without style
+                cellValue.setValue(row, column, { v: '', m: '', s });
             }
         }
         const insertRangeMutationParams: IInsertRangeMutationParams = {
@@ -359,7 +359,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
                 }
 
                 const s = cellStyleByRow.get(row);
-                cellValue.setValue(row, column, { v: '', m: '' }); // Empty column without style
+                cellValue.setValue(row, column, { v: '', m: '', s });
             }
         }
         const insertRangeMutationParams: IInsertRangeMutationParams = {

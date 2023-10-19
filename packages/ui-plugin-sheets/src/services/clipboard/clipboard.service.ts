@@ -193,11 +193,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const html = `<google-sheets-html-origin><table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}
 <tbody>${rowContents.join('')}</tbody></table>`;
 
-        // <style> </style> will remove td
-        //         const html = `<google-sheets-html-origin><style type="text/css"><!--td {border: 1px solid #cccccc;}br {mso-data-placement:same-cell;}--></style>
-        // <table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}
-        // <tbody>${rowContents.join('')}</tbody></table>`;
-
         // TODO: plain text copying is not implemented yet
         // 6. write html and get plain text info the clipboard interface
         await this._clipboardInterfaceService.write('TODO: plain text copy is not implemented', html);
@@ -314,6 +309,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // 3. call hooks with cell position and properties and get mutations (both do mutations and undo mutations)
         // we also handle 'copy value only' or 'copy style only' as this step
         const pastedRange = this._transformPastedData(rowCount, colCount, cellMatrix, selection.range);
+
         // pastedRange.endColumn = pastedRange.startColumn + colCount;
         // pastedRange.endRow = pastedRange.startRow + rowCount;
 
@@ -472,8 +468,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                     mergedRangeEndRow === endRow &&
                     mergedRangeEndColumn === endColumn
                 ) {
-                    const isCombine = this._isCombineCells(cellMatrix);
-                    if (isCombine) {
+                    const isMultiple = isMultipleCells(cellMatrix);
+                    if (isMultiple) {
                         for (let r = 0; r < destinationRows; r++) {
                             for (let c = 0; c < destinationColumns; c++) {
                                 const cell = cellMatrix.getValue(r % rowCount, c % colCount);
@@ -534,20 +530,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         return range;
-    }
-
-    /**
-     * To determine whether CellMatrix is a combination cell, it must consist of 2 or more cells. It can be an ordinary cell or merge cell
-     * @param cellMatrix
-     */
-    private _isCombineCells(cellMatrix: ObjectMatrix<IParsedCellValue>): boolean {
-        let count = 0;
-        cellMatrix.forValue((row, col, cell) => {
-            if (cell) {
-                count++;
-            }
-        });
-        return count > 1;
     }
 
     /**
@@ -850,6 +832,24 @@ function columnAcrossMergedCell(col: number, startRow: number, endRow: number, w
                 startRow <= mergedCell.startRow &&
                 mergedCell.startRow <= endRow
         );
+}
+
+/**
+ * Determine whether CellMatrix consists of multiple cells, it must consist of 2 or more cells. It can be an ordinary cell or merge cell
+ * @param cellMatrix
+ */
+function isMultipleCells(cellMatrix: ObjectMatrix<IParsedCellValue>): boolean {
+    let count = 0;
+    cellMatrix.forValue((row, col, cell) => {
+        if (cell) {
+            count++;
+        }
+
+        if (count > 1) {
+            return false;
+        }
+    });
+    return count > 1;
 }
 
 // #endregion

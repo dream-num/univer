@@ -50,7 +50,7 @@ function main(workbook: ExcelScript.Workbook) {
 
 [官方文档](https://developers.google.com/apps-script/reference/spreadsheet?hl=zh-cn)
 
-Apps Scripts 不仅可以操作表格，还可以操作 Google 的其他产品，例如 Google Docs，Google Drive 等等。它的语法和 JavaScript 非常类似，但是它的语法不支持 async await 等语言特性。实际上 Apps Scripts 的所有代码同时同步阻塞执行的。并且 Apps Scripts 并非运行在浏览器中，而是运行在 Google 的服务器上。
+Apps Scripts 不仅可以操作表格，还可以操作 Google 的其他产品，例如 Google Docs，Google Drive 等等。它的语法和 JavaScript 非常类似，但是它的语法不支持 async await 等语言特性。实际上 Apps Scripts 的代码是同步阻塞执行的，并且 Apps Scripts 并非运行在浏览器中，而是运行在 Google 的服务器上，猜想应该是 hack 了解释器或者别的什么方式控制了脚本的执行过程。
 
 ```js
 function createAndSendDocument() {
@@ -97,6 +97,9 @@ function createAndSendDocument() {
 2. 同步阻塞式调用。在 Facade 内将所有需要用到异步语法 API 的地方全部改为一个同步的 XHRHttpRequest 调用，Facade 本身在 web worker 内运行并向主线程请求操作（通过 service worker 实现）。
   1. 优点是：可以实现真正的同步 API，而且可以给 Scripts 用户正确的类型信息
   2. 缺点是：只能跑在 web worker 里，无法作为简单 API 使用；复杂度很高
+3. 自己控制脚本执行过程。暂时还没有明确的方案。
+  1. 优点是：可以实现真正的同步 API，而且可以给 Scripts 用户正确的类型信息
+  2. 缺点是：只能运行在服务器环境，无法作为简单 API 使用；复杂度极高
 
 如果我们愿意放弃和 Apps Scripts 语法保持一致的前提，引入 async await 语法，那么我们可以使用以下方案
 

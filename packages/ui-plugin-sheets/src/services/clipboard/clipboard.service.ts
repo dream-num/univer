@@ -212,11 +212,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const types = item.types;
         const text =
             types.indexOf(PLAIN_TEXT_CLIPBOARD_MIME_TYPE) !== -1
-                ? await item.getType(PLAIN_TEXT_CLIPBOARD_MIME_TYPE).then((blob) => blob.text())
+                ? await item.getType(PLAIN_TEXT_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text())
                 : '';
         const html =
             types.indexOf(HTML_CLIPBOARD_MIME_TYPE) !== -1
-                ? await item.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob.text())
+                ? await item.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text())
                 : '';
 
         if (html && isLegalSpreadsheetHTMLContent(html)) {
@@ -228,6 +228,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (text) {
             return this._pastePlainText(text);
         }
+
+        this._logService.error('[SheetClipboardService]', 'No valid data on clipboard');
 
         return false;
     }

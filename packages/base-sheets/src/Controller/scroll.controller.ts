@@ -63,35 +63,17 @@ export class ScrollController extends Disposable {
                 return;
             }
 
-            const scene = sheetObject.scene;
-
-            const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
-
-            const { scaleX, scaleY } = scene.getAncestorScale();
-
             const { actualScrollX = 0, actualScrollY = 0 } = param;
 
-            // According to the actual scroll position, the most suitable row, column and offset combination is recalculated.
-            const { row, column } = skeleton.getCellPositionByOffset(
-                (actualScrollX + rowHeaderWidthAndMarginLeft) * scaleX,
-                (actualScrollY + columnHeaderHeightAndMarginTop) * scaleY,
-                scaleX,
-                scaleY,
-                {
-                    x: 0,
-                    y: 0,
-                }
-            );
-            const { startX, startY } = skeleton.getCellByIndex(row, column, scaleX, scaleY);
-            const offsetX = actualScrollX + rowHeaderWidthAndMarginLeft - startX;
-            const offsetY = actualScrollY + columnHeaderHeightAndMarginTop - startY;
+            // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
+            const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(actualScrollX, actualScrollY);
 
             // update scroll infos in scroll manager service
             this._scrollManagerService.addOrReplaceNoRefresh({
                 sheetViewStartRow: row,
                 sheetViewStartColumn: column,
-                offsetX,
-                offsetY,
+                offsetX: columnOffset,
+                offsetY: rowOffset,
             });
         });
     }

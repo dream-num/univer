@@ -815,6 +815,32 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    getDecomposedOffset(offsetX: number, offsetY: number) {
+        let column = searchArray(this._columnWidthAccumulation, offsetX);
+        let columnOffset = 0;
+        if (column === -1 || column === 0) {
+            column = 0;
+            columnOffset = offsetX;
+        } else {
+            columnOffset = offsetX - this._columnWidthAccumulation[column - 1];
+        }
+
+        let row = searchArray(this._rowHeightAccumulation, offsetY);
+        let rowOffset = 0;
+        if (row === -1 || row === 0) {
+            row = 0;
+            rowOffset = offsetY;
+        } else {
+            rowOffset = offsetY - this._rowHeightAccumulation[row - 1];
+        }
+        return {
+            row,
+            column,
+            columnOffset,
+            rowOffset,
+        };
+    }
+
     /**
      *
      * @param rowHeightAccumulation Row layout information

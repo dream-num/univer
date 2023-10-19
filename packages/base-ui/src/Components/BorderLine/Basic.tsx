@@ -1,6 +1,7 @@
+/* eslint-disable no-magic-numbers */
 import { useEffect, useRef } from 'react';
 
-type IProps = {
+interface IProps {
     width: string;
     height: string;
     type: string;
@@ -9,7 +10,7 @@ type IProps = {
     mEd: number;
     lineSt: number;
     lineEd: number;
-};
+}
 
 export function CanvasIcon(props: IProps) {
     const { type, hv, mSt: m_st, mEd: m_ed, lineSt: line_st, lineEd: line_ed } = props;
@@ -17,9 +18,16 @@ export function CanvasIcon(props: IProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
-        if (!canvasRef.current) return;
+        const canvas = canvasRef.current;
 
-        const ctx = canvasRef.current.getContext('2d')!;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d')!;
+
+        const scale = window.devicePixelRatio;
+
+        ctx.scale(scale, scale);
+
         setLineDash(ctx);
     }, []);
 
@@ -49,7 +57,7 @@ export function CanvasIcon(props: IProps) {
                 ctx.setLineDash([0]);
             }
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
 
         ctx.beginPath();

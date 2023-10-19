@@ -79,6 +79,7 @@
         "less": "^4.2.0",
         "storybook": "^7.4.5",
         "ts-node": "^10.9.1",
-        "vitest": "^0.34.5"
+        "vitest": "^0.34.5",
+        "vitest-canvas-mock": "^0.3.3"
     }
 }

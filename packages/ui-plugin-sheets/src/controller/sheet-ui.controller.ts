@@ -24,9 +24,14 @@ import { connectInjector } from '@wendellhu/redi/react-bindings';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { RenameSheetCommand } from '../commands/commands/rename.command';
+import {
+    SetInfiniteFormatPainterCommand,
+    SetOnceFormatPainterCommand,
+} from '../commands/commands/set-format-painter.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
 import { SetCellEditOperation } from '../commands/operations/cell-edit.operation';
+import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { RightMenuInput } from '../View/RightMenu/RightMenuInput';
 import { RightMenuItem } from '../View/RightMenu/RightMenuItem';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../View/SheetContainer/SheetContainer';
@@ -47,6 +52,7 @@ import {
     DeleteSheetMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
+    FormatPainterMenuItemFactory,
     FrozenMenuItemFactory,
     HideColMenuItemFactory,
     HideRowMenuItemFactory,
@@ -162,6 +168,9 @@ export class SheetUIController extends Disposable {
             SetCellEditOperation,
 
             SetActivateCellEditOperation,
+            SetOnceFormatPainterCommand,
+            SetInfiniteFormatPainterCommand,
+            SetFormatPainterOperation,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
@@ -199,6 +208,7 @@ export class SheetUIController extends Disposable {
                 // toolbar
                 UndoMenuItemFactory,
                 RedoMenuItemFactory,
+                FormatPainterMenuItemFactory,
                 BoldMenuItemFactory,
                 ItalicMenuItemFactory,
                 UnderlineMenuItemFactory,

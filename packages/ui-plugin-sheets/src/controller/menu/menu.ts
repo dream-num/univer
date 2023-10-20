@@ -78,6 +78,11 @@ import { map } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from '../../Basics/Const/PLUGIN_NAME';
 import { RenameSheetCommand } from '../../commands/commands/rename.command';
+import {
+    SetInfiniteFormatPainterCommand,
+    SetOnceFormatPainterCommand,
+} from '../../commands/commands/set-format-painter.command';
+import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 
 export const CONTEXT_MENU_INPUT_LABEL = 'CONTEXT_MENU_INPUT';
 
@@ -116,6 +121,33 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.redo',
         positions: [MenuPosition.TOOLBAR],
         disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.redos <= 0)),
+    };
+}
+
+export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const formatPainterService = accessor.get(IFormatPainterService);
+    return {
+        id: SetOnceFormatPainterCommand.id,
+        subId: SetInfiniteFormatPainterCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'FormatPainterIcon',
+        title: 'Format Painter',
+        tooltip: 'toolbar.formatPainter',
+        positions: [MenuPosition.TOOLBAR],
+        activated$: new Observable<boolean>((subscriber) => {
+            let active = false;
+
+            const status$ = formatPainterService.status$.subscribe((s) => {
+                active = s !== FormatPainterStatus.OFF;
+                subscriber.next(active);
+            });
+
+            subscriber.next(active);
+
+            return () => {
+                status$.unsubscribe();
+            };
+        }),
     };
 }
 

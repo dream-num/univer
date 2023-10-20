@@ -19,6 +19,8 @@ export interface IBaseToolbarButtonProps {
     /** Set the handler to handle `click` event */
     onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 
+    onDoubleClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+
     /**
      * Set the button is activated
      * @default false
@@ -33,7 +35,16 @@ export interface IBaseToolbarButtonProps {
  * Button Component
  */
 export function ToolbarButton(props: IBaseToolbarButtonProps) {
-    const { children, className, style, disabled = false, active = false, onClick, ...restProps } = props;
+    const {
+        children,
+        className,
+        style,
+        disabled = false,
+        active = false,
+        onClick,
+        onDoubleClick,
+        ...restProps
+    } = props;
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         if (disabled) {
@@ -42,6 +53,13 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
         }
 
         onClick && onClick(e);
+    };
+    const handleDoubleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (disabled) {
+            e.preventDefault();
+            return;
+        }
+        onDoubleClick && onDoubleClick(e);
     };
 
     const _className = joinClassNames(
@@ -54,7 +72,14 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
     );
 
     return (
-        <button className={_className} style={style} disabled={disabled} onClick={handleClick} {...restProps}>
+        <button
+            className={_className}
+            style={style}
+            disabled={disabled}
+            onClick={handleClick}
+            onDoubleClick={handleDoubleClick}
+            {...restProps}
+        >
             {children}
         </button>
     );

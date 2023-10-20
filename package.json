@@ -1,9 +1,6 @@
 {
     "name": "univer",
-    "version": "1.0.0-pre-alpha",
-    "description": "Univer, Luckysheet 2.0 upgrade version",
-    "private": true,
-    "type": "module",
+    "version": "0.0.0-NOT-VALID",
     "scripts": {
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",
@@ -24,7 +21,7 @@
         "node": "^18.17.0",
         "pnpm": "^8.6.2"
     },
-    "author": "DreamNum <developer@univer.ai>",
+    "author": "DreamNum Inc. <developer@univer.ai>",
     "license": "MIT",
     "devDependencies": {
         "@changesets/cli": "^2.26.2",

@@ -36,7 +36,7 @@ export class DrawingsView extends BaseView {
 
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
-            const { skeDrawings, marginLeft, marginTop, pageWidth, pageHeight } = page;
+            const { skeDrawings, marginLeft, marginTop } = page;
 
             // cumPageLeft + = pageWidth + documents.pageMarginLeft;
 

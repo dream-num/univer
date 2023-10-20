@@ -325,9 +325,9 @@ function _lineOperator(
     const preTop = line?.top || 0;
     const lineTop = preLineHeight + preTop;
 
-    const { width, headerId, footerId } = lastPage;
-    const headersDrawings = skeHeaders?.get(headerId)?.get(width)?.skeDrawings;
-    const footersDrawings = skeFooters?.get(footerId)?.get(width)?.skeDrawings;
+    const { pageWidth, headerId, footerId } = lastPage;
+    const headersDrawings = skeHeaders?.get(headerId)?.get(pageWidth)?.skeDrawings;
+    const footersDrawings = skeFooters?.get(footerId)?.get(pageWidth)?.skeDrawings;
 
     __updateDrawingPosition(
         lineTop,

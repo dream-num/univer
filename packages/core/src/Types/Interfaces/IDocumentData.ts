@@ -808,6 +808,9 @@ export enum characterSpacingControlType {
     doNotCompress,
 }
 
+/**
+ * Paper orientation, whether it's portrait (vertical) or landscape (horizontal)
+ */
 export enum PageOrientType {
     PORTRAIT,
     LANDSCAPE,

@@ -202,8 +202,8 @@ export class Documents extends DocComponent {
                 marginBottom: pagePaddingBottom = 0,
                 marginLeft: pagePaddingLeft = 0,
                 marginRight: pagePaddingRight = 0,
-                width: pageWidth,
-                height: pageHeight,
+                width: actualWidth,
+                height: actualHeight,
                 renderConfig = {},
             } = page;
             const {
@@ -216,13 +216,13 @@ export class Documents extends DocComponent {
             } = renderConfig;
 
             const horizontalOffsetNoAngle = this._horizontalHandler(
-                pageWidth,
+                actualWidth,
                 pagePaddingLeft,
                 pagePaddingRight,
                 horizontalAlign
             );
             const verticalOffsetNoAngle = this._verticalHandler(
-                pageHeight,
+                actualHeight,
                 pagePaddingTop,
                 pagePaddingBottom,
                 verticalAlign

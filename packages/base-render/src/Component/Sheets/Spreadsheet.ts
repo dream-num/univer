@@ -310,6 +310,12 @@ export class Spreadsheet extends SheetComponent {
     //     this._hasSelection = false;
     // }
 
+    /**
+     * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
+     * @param documentSkeleton Data of the document's ViewModel
+     * @param angle The rotation angle of an Excel cell
+     * @returns
+     */
     getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angle: number = 0) {
         const skeletonData = documentSkeleton?.getSkeletonData();
 
@@ -528,7 +534,11 @@ export class Spreadsheet extends SheetComponent {
     //     return horizontalAlign;
     // }
 
-    // eslint-disable-next-line max-lines-per-function
+    /**
+     * Calculate the overflow of cell text. If there is no value on either side of the cell,
+     * the text content of this cell can be drawn to both sides, not limited by the cell's width.
+     * Overflow on the left or right is aligned according to the text's horizontal alignment.
+     */
     private _calculateOverflow() {
         const overflowCache = new ObjectMatrix<IRange>();
         const spreadsheetSkeleton = this.getSkeleton();
@@ -542,107 +552,104 @@ export class Spreadsheet extends SheetComponent {
         fontList &&
             Object.keys(fontList).forEach((fontFormat: string) => {
                 const fontObjectArray = fontList[fontFormat];
-                fontObjectArray.forEach((row, fontArray) => {
-                    fontArray.forEach((column, docsConfig) => {
-                        // wrap and angle handler
-                        const {
-                            documentSkeleton,
-                            angle = 0,
-                            verticalAlign,
-                            horizontalAlign,
-                            wrapStrategy,
-                        } = docsConfig;
-                        const cell = spreadsheetSkeleton.getCellData().getValue(row, column);
+                fontObjectArray.forValue((row, column, docsConfig) => {
+                    // Merged cells do not support overflow.
+                    if (spreadsheetSkeleton.intersectMergeRange(row, column)) {
+                        return true;
+                    }
 
-                        const sheetSkeleton = this.getSkeleton();
-                        if (!sheetSkeleton) {
+                    // wrap and angle handler
+                    const { documentSkeleton, angle = 0, verticalAlign, horizontalAlign, wrapStrategy } = docsConfig;
+                    const cell = spreadsheetSkeleton.getCellData().getValue(row, column);
+
+                    const sheetSkeleton = this.getSkeleton();
+                    if (!sheetSkeleton) {
+                        return true;
+                    }
+
+                    const { t: cellValueType = CellValueType.STRING } = cell || {};
+
+                    if (
+                        wrapStrategy === WrapStrategy.OVERFLOW &&
+                        cellValueType !== CellValueType.NUMBER &&
+                        cellValueType !== CellValueType.BOOLEAN &&
+                        horizontalAlign !== HorizontalAlign.JUSTIFIED
+                    ) {
+                        let contentSize = this.getDocsSkeletonPageSize(documentSkeleton, angle);
+
+                        if (!contentSize) {
                             return true;
                         }
 
-                        const { t: cellValueType = CellValueType.STRING } = cell || {};
-
-                        if (
-                            wrapStrategy === WrapStrategy.OVERFLOW &&
-                            cellValueType !== CellValueType.NUMBER &&
-                            cellValueType !== CellValueType.BOOLEAN &&
-                            horizontalAlign !== HorizontalAlign.JUSTIFIED
-                        ) {
-                            let contentSize = this.getDocsSkeletonPageSize(documentSkeleton, angle);
-
-                            if (!contentSize) {
-                                return true;
-                            }
-
-                            if (angle !== 0) {
-                                const { startY, endY, startX, endX } = getCellByIndex(
-                                    row,
-                                    column,
-                                    rowHeightAccumulation,
-                                    columnWidthAccumulation,
-                                    mergeData
-                                );
-                                const cellWidth = endX - startX;
-                                const cellHeight = endY - startY;
-
-                                if (contentSize.height > cellHeight) {
-                                    contentSize = {
-                                        width: cellHeight / Math.tan(Math.abs(angle)) + cellWidth,
-                                        height: cellHeight,
-                                    };
-                                    // if (angle > 0) {
-                                    //     horizontalAlign = HorizontalAlign.LEFT;
-                                    // } else {
-                                    //     horizontalAlign = HorizontalAlign.RIGHT;
-                                    // }
-                                }
-                            }
-
-                            const position = spreadsheetSkeleton.getOverflowPosition(
-                                contentSize,
-                                horizontalAlign,
-                                row,
-                                column,
-                                columnCount
-                            );
-
-                            const { startColumn, endColumn } = position;
-
-                            overflowCache.setValue(row, column, {
-                                startRow: row,
-                                endRow: row,
-                                startColumn,
-                                endColumn,
-                            });
-                        } else if (wrapStrategy === WrapStrategy.WRAP && angle !== 0) {
-                            const { startY, endY } = getCellByIndex(
+                        if (angle !== 0) {
+                            const { startY, endY, startX, endX } = getCellByIndex(
                                 row,
                                 column,
                                 rowHeightAccumulation,
                                 columnWidthAccumulation,
                                 mergeData
                             );
-
+                            const cellWidth = endX - startX;
                             const cellHeight = endY - startY;
-                            documentSkeleton.getModel().updateDocumentDataPageSize(cellHeight);
-                            documentSkeleton.calculate();
-                            const contentSize = this.getDocsSkeletonPageSize(documentSkeleton, angle);
 
-                            if (!contentSize) {
-                                return true;
+                            if (contentSize.height > cellHeight) {
+                                contentSize = {
+                                    width: cellHeight / Math.tan(Math.abs(angle)) + cellWidth,
+                                    height: cellHeight,
+                                };
+                                // if (angle > 0) {
+                                //     horizontalAlign = HorizontalAlign.LEFT;
+                                // } else {
+                                //     horizontalAlign = HorizontalAlign.RIGHT;
+                                // }
                             }
-
-                            const { startColumn, endColumn } = sheetSkeleton.getOverflowPosition(
-                                contentSize,
-                                horizontalAlign,
-                                row,
-                                column,
-                                sheetSkeleton.getColumnCount()
-                            );
-                            overflowCache.setValue(row, column, { startRow: row, endRow: row, startColumn, endColumn });
                         }
 
-                        // console.log('appendToOverflowCache', cellHeight, angle, contentSize, { rowIndex, columnIndex, startColumn, endColumn });
-                    });
+                        const position = spreadsheetSkeleton.getOverflowPosition(
+                            contentSize,
+                            horizontalAlign,
+                            row,
+                            column,
+                            columnCount
+                        );
+
+                        const { startColumn, endColumn } = position;
+
+                        overflowCache.setValue(row, column, {
+                            startRow: row,
+                            endRow: row,
+                            startColumn,
+                            endColumn,
+                        });
+                    } else if (wrapStrategy === WrapStrategy.WRAP && angle !== 0) {
+                        const { startY, endY } = getCellByIndex(
+                            row,
+                            column,
+                            rowHeightAccumulation,
+                            columnWidthAccumulation,
+                            mergeData
+                        );
+
+                        const cellHeight = endY - startY;
+                        documentSkeleton.getModel().updateDocumentDataPageSize(cellHeight);
+                        documentSkeleton.calculate();
+                        const contentSize = this.getDocsSkeletonPageSize(documentSkeleton, angle);
+
+                        if (!contentSize) {
+                            return true;
+                        }
+
+                        const { startColumn, endColumn } = sheetSkeleton.getOverflowPosition(
+                            contentSize,
+                            horizontalAlign,
+                            row,
+                            column,
+                            sheetSkeleton.getColumnCount()
+                        );
+                        overflowCache.setValue(row, column, { startRow: row, endRow: row, startColumn, endColumn });
+                    }
+
+                    // console.log('appendToOverflowCache', cellHeight, angle, contentSize, { rowIndex, columnIndex, startColumn, endColumn });
                 });
             });
 

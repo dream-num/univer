@@ -1,4 +1,4 @@
-import { ISelectionStyle, ITextSelectionRangeWithStyle } from '@univerjs/base-render';
+import { ITextSelectionRangeWithStyle } from '@univerjs/base-render';
 import { ISelectionCell, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
@@ -145,36 +145,6 @@ export class TextSelectionManagerService implements IDisposable {
         }
 
         this._removeByParam(index, this._currentSelection);
-    }
-
-    createDefaultAutoFillSelection(): ISelectionStyle {
-        return {
-            strokeWidth: 2,
-            stroke: '#FFF000',
-            fill: 'rgba(0, 0, 0, 0.2)',
-            widgets: {},
-            hasAutoFill: true,
-        };
-    }
-
-    createCopyPasteSelection(): ISelectionStyle {
-        return {
-            strokeWidth: 2,
-            stroke: '#FFF000',
-            fill: 'rgba(0, 0, 0, 0.2)',
-            widgets: {},
-            hasAutoFill: false,
-        };
-    }
-
-    createDefaultSelection(): ISelectionStyle {
-        return {
-            strokeWidth: 2,
-            stroke: '#FFF000',
-            fill: 'rgba(0, 0, 0, 0.2)',
-            widgets: { tr: true, tl: true, br: true, bl: true },
-            hasAutoFill: false,
-        };
     }
 
     private _getTextRanges(param: Nullable<ITextSelectionManagerSearchParam>) {

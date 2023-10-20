@@ -106,7 +106,7 @@ export function isEmptyCell(cell: Nullable<ICellData>) {
         return true;
     }
 
-    const content = cell?.m || '';
+    const content = cell?.m || cell?.v?.toString() || '';
     if (content.length === 0 && !cell.p) {
         return true;
     }

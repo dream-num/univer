@@ -42,8 +42,10 @@ export interface ISelectionTransformerShapeManager {
     enableSelection(): void;
     disableSelection(): void;
 
+    getViewPort(): Viewport;
+
     addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle): void;
-    changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene): void;
+    changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport): void;
     // getSpreadsheet(): void;
     // getMaxIndex(): void;
     getScene(): void;
@@ -119,6 +121,8 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
     readonly selectionRangeWithStyle$ = this._selectionRangeWithStyle$.asObservable();
 
+    private _activeViewport: Viewport;
+
     static create() {
         return new SelectionTransformerShapeManager();
     }
@@ -153,6 +157,10 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
     disableSelection() {
         this._isSelectionEnabled = false;
+    }
+
+    getViewPort() {
+        return this._activeViewport;
     }
 
     /**
@@ -200,9 +208,10 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         currentControls.push(control);
     }
 
-    changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene) {
+    changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport) {
         this._skeleton = skeleton;
         this._scene = scene;
+        this._activeViewport = viewport || scene.getViewports()[0];
     }
 
     // getSpreadsheet() {
@@ -355,6 +364,10 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
             return;
         }
 
+        if (viewport != null) {
+            this._activeViewport = viewport;
+        }
+
         const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
         let { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
@@ -504,10 +517,10 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
                 Vector2.FromArray([moveOffsetX, moveOffsetY])
             );
 
-            this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType, viewport);
+            this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType);
 
             scrollTimer.scrolling(newMoveOffsetX, newMoveOffsetY, () => {
-                this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType, viewport);
+                this._moving(newMoveOffsetX, newMoveOffsetY, selectionControl, rangeType);
             });
         });
 
@@ -615,8 +628,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         moveOffsetX: number,
         moveOffsetY: number,
         selectionControl: Nullable<SelectionTransformerShape>,
-        rangeType: RANGE_TYPE,
-        viewport?: Viewport
+        rangeType: RANGE_TYPE
     ) {
         const skeleton = this._skeleton;
 
@@ -630,7 +642,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         const scrollXY = scene.getScrollXYByRelativeCoords(
             Vector2.FromArray([this._startOffsetX, this._startOffsetY]),
-            viewport
+            this._activeViewport
         );
 
         const { scaleX, scaleY } = scene.getAncestorScale();

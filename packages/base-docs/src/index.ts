@@ -12,6 +12,10 @@ export {
     type IUpdateCommandParams,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
+export {
+    type IRichTextEditingMutationParams,
+    RichTextEditingMutation,
+} from './commands/mutations/core-editing.mutation';
 export * from './DocPlugin';
 export * from './Locale';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';

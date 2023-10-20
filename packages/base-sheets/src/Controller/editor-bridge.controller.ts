@@ -5,7 +5,14 @@ import {
     IRenderManagerService,
     ISelectionTransformerShapeManager,
 } from '@univerjs/base-render';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import {
+    Disposable,
+    ICommandService,
+    IUniverInstanceService,
+    LifecycleStages,
+    makeCellToSelection,
+    OnLifecycle,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject } from '../Basics/component-tools';
@@ -44,11 +51,16 @@ export class EditorBridgeController extends Disposable {
         this._selectionManagerService.selectionInfo$.subscribe((params) => {
             const currentSkeletonManager = this._sheetSkeletonManagerService.getCurrent();
             this._editorBridgeService.hide();
-            if (currentSkeletonManager == null) {
+
+            const sheetObject = this._getSheetObject();
+
+            if (currentSkeletonManager == null || sheetObject == null) {
                 return;
             }
 
             const { skeleton, unitId, sheetId } = currentSkeletonManager;
+
+            const { scene, engine } = sheetObject;
 
             if (params == null || params.length === 0 || skeleton == null) {
                 return;
@@ -68,6 +80,25 @@ export class EditorBridgeController extends Disposable {
                 return;
             }
 
+            const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
+
+            if (actualRangeWithCoord == null) {
+                return;
+            }
+
+            let { startX, startY, endX, endY } = actualRangeWithCoord;
+
+            const { scaleX, scaleY } = scene.getAncestorScale();
+            const scrollXY = scene.getScrollXY(this._selectionTransformerShapeManager.getViewPort());
+
+            startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY) - scrollXY.x * scaleX;
+
+            startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY) - scrollXY.y * scaleY;
+
+            endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY) - scrollXY.x * scaleX;
+
+            endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY) - scrollXY.y * scaleY;
+
             let documentLayoutObject = skeleton.getCellDocumentModel(startRow, startColumn, true);
 
             if (documentLayoutObject == null || documentLayoutObject.documentModel == null) {
@@ -83,7 +114,12 @@ export class EditorBridgeController extends Disposable {
             // documentModelObject.documentModel = documentModel;
 
             this._editorBridgeService.setState({
-                primaryWithCoord,
+                position: {
+                    startX,
+                    startY,
+                    endX,
+                    endY,
+                },
                 unitId,
                 sheetId,
                 documentLayoutObject,

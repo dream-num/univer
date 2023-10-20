@@ -64,6 +64,14 @@ export class DocumentBodyModelSimple implements IDisposable {
         return 0;
     }
 
+    getLastIndex() {
+        return this.children[this.children.length - 1].endIndex;
+    }
+
+    getBody() {
+        return this.body;
+    }
+
     protected _transformToTree(dataStream: string) {
         const dataStreamLen = dataStream.length;
 

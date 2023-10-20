@@ -431,8 +431,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         // console.log('documentSkeleton', cell?.v, column, endColumn, row, column, columnCount, contentWidth);
 
         if (horizontalAlign === HorizontalAlign.CENTER) {
-            startColumn = this._getOverflowBound(row, column, 0, contentWidth / 2);
-            endColumn = this._getOverflowBound(row, column, columnCount - 1, contentWidth / 2);
+            startColumn = this._getOverflowBound(row, column, 0, contentWidth / 2, horizontalAlign);
+            endColumn = this._getOverflowBound(row, column, columnCount - 1, contentWidth / 2, horizontalAlign);
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {
             startColumn = this._getOverflowBound(row, column, 0, contentWidth);
         } else {
@@ -782,6 +782,24 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    // convert canvas content position to physical position in screen
+    convertTransformToOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
+        const { x: scrollX } = scrollXY;
+
+        offsetX = (offsetX - scrollX) * scaleX;
+
+        return offsetX;
+    }
+
+    // convert canvas content position to physical position in screen
+    convertTransformToOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
+        const { x: scrollY } = scrollXY;
+
+        offsetY = (offsetY - scrollY) * scaleY;
+
+        return offsetY;
+    }
+
     getCellDocumentModel(row: number, column: number, isFull: boolean = false): Nullable<IDocumentLayoutObject> {
         const cell = this._cellData.getValue(row, column);
         const style = this._styles.getStyleByCell(cell);
@@ -1049,14 +1067,20 @@ export class SpreadsheetSkeleton extends Skeleton {
     //     return overflowCache;
     // }
 
-    private _getOverflowBound(row: number, startColumn: number, endColumn: number, contentWidth: number) {
+    private _getOverflowBound(
+        row: number,
+        startColumn: number,
+        endColumn: number,
+        contentWidth: number,
+        horizontalAlign = HorizontalAlign.LEFT
+    ) {
         let cumWidth = 0;
         if (startColumn > endColumn) {
             const columnCount = this._columnWidthAccumulation.length - 1;
             for (let i = startColumn; i >= endColumn; i--) {
                 const column = i;
                 const cell = this._cellData.getValue(row, column);
-                if ((!isEmptyCell(cell) && column !== startColumn) || this._intersectMergeRange(row, column)) {
+                if ((!isEmptyCell(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                     if (column === startColumn) {
                         return column;
                     }
@@ -1068,7 +1092,14 @@ export class SpreadsheetSkeleton extends Skeleton {
                     this.rowHeightAccumulation,
                     this.columnWidthAccumulation
                 );
-                cumWidth += endX - startX;
+
+                // For center alignment, the current cell's width needs to be divided in half for comparison.
+                if (horizontalAlign === HorizontalAlign.CENTER && column === startColumn) {
+                    cumWidth += (endX - startX) / 2;
+                } else {
+                    cumWidth += endX - startX;
+                }
+
                 if (contentWidth < cumWidth) {
                     return column;
                 }
@@ -1078,7 +1109,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (let i = startColumn; i <= endColumn; i++) {
             const column = i;
             const cell = this._cellData.getValue(row, column);
-            if ((!isEmptyCell(cell) && column !== startColumn) || this._intersectMergeRange(row, column)) {
+            if ((!isEmptyCell(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                 if (column === startColumn) {
                     return column;
                 }
@@ -1091,7 +1122,13 @@ export class SpreadsheetSkeleton extends Skeleton {
                 this.rowHeightAccumulation,
                 this.columnWidthAccumulation
             );
-            cumWidth += endX - startX;
+
+            if (horizontalAlign === HorizontalAlign.CENTER && column === startColumn) {
+                cumWidth += (endX - startX) / 2;
+            } else {
+                cumWidth += endX - startX;
+            }
+
             if (contentWidth < cumWidth) {
                 return column;
             }
@@ -1099,9 +1136,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         return endColumn;
     }
 
-    private _intersectMergeRange(row: number, column: number) {
+    intersectMergeRange(row: number, column: number) {
         const dataMergeCache = this.dataMergeCache;
-        let isIntersected = false;
         for (const dataCache of dataMergeCache) {
             const {
                 startRow: startRowMargeIndex,
@@ -1115,8 +1151,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 column >= startColumnMargeIndex &&
                 column <= endColumnMargeIndex
             ) {
-                isIntersected = true;
-                return false;
+                return true;
             }
         }
         // dataMergeCache?.forEach((r, dataMergeRow) => {
@@ -1124,7 +1159,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         //     });
         // });
-        return isIntersected;
+        return false;
     }
 
     // private _getMergeRangeCache() {
@@ -1442,6 +1477,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    /**
+     * Cache the merged cells on the current screen to improve computational performance.
+     * @param mergeData all marge data
+     * @param rowColumnSegment current screen range, include row and column
+     * @returns
+     */
     private _getMergeCells(mergeData: IRange[], rowColumnSegment?: IRowColumnSegment) {
         // const rowColumnSegment = this._rowColumnSegment;
         const endColumnLast = this.columnWidthAccumulation.length - 1;

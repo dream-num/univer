@@ -93,29 +93,40 @@ export class DocumentSkeleton extends Skeleton {
 
     getActualSize() {
         const skeletonData = this.getSkeletonData();
-        const pageSize = this.getPageSize();
-        let actualWidth = 0;
+
+        let actualWidth = -Infinity;
         let actualHeight = 0;
 
         skeletonData?.pages.forEach((page) => {
             const { width, height } = page;
-            if (pageSize == null || pageSize.width === Infinity) {
-                actualWidth += width;
-            } else {
-                actualWidth += pageSize.width || 0;
-            }
+            actualWidth = Math.max(actualWidth, width);
 
-            if (pageSize == null || pageSize.height === Infinity) {
-                actualHeight += height;
-            } else {
-                actualHeight += pageSize.height || 0;
-            }
+            actualHeight += height;
         });
 
         return {
             actualWidth,
             actualHeight,
         };
+    }
+
+    private _getPageActualWidth(page: IDocumentSkeletonPage) {
+        let maxWidth = -Infinity;
+        for (const section of page.sections) {
+            for (const column of section.columns) {
+                for (const line of column.lines) {
+                    let lineWidth = 0;
+                    for (const divide of line.divides) {
+                        for (const span of divide.spanGroup) {
+                            lineWidth += span.width;
+                        }
+                    }
+                    maxWidth = Math.max(maxWidth, lineWidth);
+                }
+            }
+        }
+
+        return maxWidth;
     }
 
     getPageSize() {
@@ -193,66 +204,6 @@ export class DocumentSkeleton extends Skeleton {
         const nodes = this._findNodeIterator(charIndex);
 
         return nodes?.span;
-
-        // const skeletonData = this.getSkeletonData();
-
-        // if (!skeletonData) {
-        //     return;
-        // }
-
-        // const pages = skeletonData.pages;
-
-        // for (const page of pages) {
-        //     const { sections, st, ed } = page;
-
-        //     if (charIndex < st || charIndex > ed) {
-        //         continue;
-        //     }
-
-        //     for (const section of sections) {
-        //         const { columns, st, ed } = section;
-
-        //         if (charIndex < st || charIndex > ed) {
-        //             continue;
-        //         }
-
-        //         for (const column of columns) {
-        //             const { lines, st, ed } = column;
-
-        //             if (charIndex < st || charIndex > ed) {
-        //                 continue;
-        //             }
-
-        //             for (const line of lines) {
-        //                 const { divides, lineHeight, st, ed } = line;
-        //                 const divideLength = divides.length;
-
-        //                 if (charIndex < st || charIndex > ed) {
-        //                     continue;
-        //                 }
-
-        //                 for (let i = 0; i < divideLength; i++) {
-        //                     const divide = divides[i];
-        //                     const { spanGroup, st, ed } = divide;
-
-        //                     if (charIndex < st || charIndex > ed) {
-        //                         continue;
-        //                     }
-
-        //                     if (spanGroup[0].spanType === SpanType.LIST) {
-        //                         charIndex++;
-        //                     }
-
-        //                     const span = spanGroup[charIndex - st];
-
-        //                     if (span) {
-        //                         return span;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
     }
 
     findSpanByPosition(position: Nullable<INodePosition>) {

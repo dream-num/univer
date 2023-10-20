@@ -34,6 +34,8 @@ export interface ITextSelectionRenderManager {
 
     readonly textSelection$: Observable<TextSelection[]>;
 
+    getViewPort(): Viewport;
+
     enableSelection(): void;
 
     disableSelection(): void;
@@ -179,18 +181,19 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _isIMEInputApply = false;
 
-    private _activeViewport: Nullable<Viewport>;
+    private _activeViewport: Viewport;
 
     constructor(
         private _docSkeleton?: Nullable<DocumentSkeleton>,
-        private _scene?: Nullable<Scene>
+        private _scene?: Nullable<Scene>,
+        viewport?: Nullable<Viewport>
     ) {
         super();
 
         this._initDOM();
         // this.activeViewport = this._documents?.getFirstViewport();
         if (this._docSkeleton && this._scene) {
-            this.changeRuntime(this._docSkeleton, this._scene);
+            this.changeRuntime(this._docSkeleton, this._scene, viewport);
         }
     }
 
@@ -198,6 +201,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     //     this._attachScrollEvent(viewport);
     //     this._activeViewport = viewport;
     // }
+
+    getViewPort() {
+        return this._activeViewport;
+    }
 
     setSegment(id: string) {
         this._currentSegmentId = id;
@@ -357,14 +364,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         }
     }
 
-    changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene) {
+    changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene, viewport?: Nullable<Viewport>) {
         // this._docSkeleton?.onRecalculateChangeObservable.remove(this._skeletonObserver);
 
         this._docSkeleton = docSkeleton;
 
         this._scene = scene;
 
-        // this.activeViewport = scene.getViewports()[0];
+        this._activeViewport = viewport || scene.getViewports()[0];
 
         // this._attachSelectionEvent(this._documents);
     }
@@ -391,7 +398,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        this._activeViewport = viewportMain;
+        if (viewportMain != null) {
+            this._activeViewport = viewportMain;
+        }
 
         const scene = this._scene;
 

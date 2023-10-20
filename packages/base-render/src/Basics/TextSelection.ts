@@ -15,5 +15,5 @@ export const NORMAL_TEXT_SELECTION_PLUGIN_STYLE: ITextSelectionStyle = {
 };
 
 export interface ITextSelectionRangeWithStyle extends ITextSelectionRangeParam {
-    style: ITextSelectionStyle;
+    style?: ITextSelectionStyle;
 }

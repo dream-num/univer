@@ -185,7 +185,7 @@ export class DocumentModel extends DocumentModelSimple {
 
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
         this._initializeRowColTree();
-        this.bodyModel.reset(snapshot.body ?? { dataStream: '\r\n\0' });
+        this.bodyModel.reset(snapshot.body ?? { dataStream: '\r\n' });
     }
 
     getUnitId(): string {

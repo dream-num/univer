@@ -54,20 +54,21 @@ export interface IDocumentSkeletonPage {
     headerId: string;
     footerId: string;
     // page
-    pageWidth: number;
-    pageHeight: number;
-    pageOrient: PageOrientType;
+    pageWidth: number; // default Infinity, The current page width follows the snapshot configuration, determined jointly by documentStyle and sectionBreak, representing the static limit for each page, unrelated to the actual content's text width.
+    pageHeight: number; // default Infinity, The current page's height follows the snapshot configuration, jointly determined by documentStyle and sectionBreak, representing the static limit for each page, unrelated to the total height of the actual content's text.
+    pageOrient: PageOrientType; // Paper orientation, whether it's portrait (vertical) or landscape (horizontal)
+    marginLeft: number; // The current page's padding, used to accommodate column title space, follows the snapshot configuration, jointly determined by documentStyle and sectionBreak. It represents the static limit for each page, which may vary per page.
+    marginRight: number;
+    marginTop: number;
+    marginBottom: number;
 
     pageNumber: number; // page页数
     pageNumberStart: number; // page开始页序号
     verticalAlign: Boolean; // 垂直对齐，仅对一页生效
     angle: number; // 旋转角度，仅对一页生效
-    width: number; // pageWidth，默认Infinity
-    height: number; // pageHeight，默认Infinity
-    marginLeft: number;
-    marginRight: number;
-    marginTop: number;
-    marginBottom: number;
+    width: number; // actual or content width，default 0
+    height: number; // actual or content height, default 0
+
     breakType: BreakType; // 分页产生的类型
     st: number; // startIndex 文本开始索引
     ed: number; // endIndex 文本结束索引
@@ -244,6 +245,11 @@ export enum SpanType {
     CUSTOM,
 }
 
+/**
+ * Determining the text layout, whether it's vertical or horizontal,
+ * data storage is primarily horizontal,
+ * and vertical layout is supported through rendering and drawing.
+ */
 export enum PageLayoutType {
     VERTICAL,
     HORIZONTAL,

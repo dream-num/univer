@@ -28,6 +28,9 @@ export class DocumentBodyModelSimple implements IDisposable {
 
     dispose(): void {
         this._modelChange$.complete();
+        this.children.forEach((child) => {
+            child.dispose();
+        });
     }
 
     resetCache() {}
@@ -59,6 +62,14 @@ export class DocumentBodyModelSimple implements IDisposable {
 
     getPositionInParent() {
         return 0;
+    }
+
+    getLastIndex() {
+        return this.children[this.children.length - 1].endIndex;
+    }
+
+    getBody() {
+        return this.body;
     }
 
     protected _transformToTree(dataStream: string) {

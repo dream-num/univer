@@ -6,7 +6,6 @@ import { SetScrollOperation } from './commands/operations/scroll.operation';
 import { SetSelectionsOperation } from './commands/operations/selection.operation';
 import { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
-import { EditorBridgeController } from './Controller/editor-bridge.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { FreezeController } from './Controller/freeze.controller';
 import { HeaderMenuController } from './Controller/header-menu.controller';
@@ -19,7 +18,6 @@ import { SheetRenderController } from './Controller/sheet-render.controller';
 import { ZoomController } from './Controller/zoom.controller';
 import { en } from './Locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
-import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
 import { SelectionManagerService } from './services/selection-manager.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
@@ -65,7 +63,6 @@ export class SheetPlugin extends Plugin {
                 },
             ],
             [ScrollManagerService],
-            [IEditorBridgeService, { useClass: EditorBridgeService }],
 
             // controllers
             [FormulaBarController],
@@ -79,7 +76,6 @@ export class SheetPlugin extends Plugin {
             [FreezeController],
             [ScrollController],
             [ZoomController],
-            [EditorBridgeController],
         ];
 
         dependencies.forEach((d) => {

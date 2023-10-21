@@ -1,9 +1,9 @@
-import { ISelectionStyle, ITextSelectionRangeWithStyle } from '@univerjs/base-render';
+import { ITextSelectionRangeWithStyle } from '@univerjs/base-render';
 import { ISelectionCell, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
-export const NORMAL_TEXT_SELECTION_PLUGIN_NAME = 'normalTextSelectionPluginName';
+import { NORMAL_TEXT_SELECTION_PLUGIN_NAME } from '../Basics/docs-view-key';
 
 export interface ITextSelectionManagerSearchParam {
     pluginName: string;
@@ -28,6 +28,10 @@ export class TextSelectionManagerService implements IDisposable {
     private readonly _textSelectionInfo$ = new BehaviorSubject<Nullable<ITextSelectionRangeWithStyle[]>>(null);
 
     readonly textSelectionInfo$ = this._textSelectionInfo$.asObservable();
+
+    getCurrentSelection() {
+        return this._currentSelection;
+    }
 
     reset() {
         if (this._currentSelection == null) {
@@ -141,36 +145,6 @@ export class TextSelectionManagerService implements IDisposable {
         }
 
         this._removeByParam(index, this._currentSelection);
-    }
-
-    createDefaultAutoFillSelection(): ISelectionStyle {
-        return {
-            strokeWidth: 2,
-            stroke: '#FFF000',
-            fill: 'rgba(0, 0, 0, 0.2)',
-            widgets: {},
-            hasAutoFill: true,
-        };
-    }
-
-    createCopyPasteSelection(): ISelectionStyle {
-        return {
-            strokeWidth: 2,
-            stroke: '#FFF000',
-            fill: 'rgba(0, 0, 0, 0.2)',
-            widgets: {},
-            hasAutoFill: false,
-        };
-    }
-
-    createDefaultSelection(): ISelectionStyle {
-        return {
-            strokeWidth: 2,
-            stroke: '#FFF000',
-            fill: 'rgba(0, 0, 0, 0.2)',
-            widgets: { tr: true, tl: true, br: true, bl: true },
-            hasAutoFill: false,
-        };
     }
 
     private _getTextRanges(param: Nullable<ITextSelectionManagerSearchParam>) {

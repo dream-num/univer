@@ -8,7 +8,6 @@ export interface IContextService {
 
     getContextValue(key: string): boolean;
     setContextValue(key: string, value: boolean): void;
-    matchContextValue(matchKey: string): boolean;
 }
 
 export const IContextService = createIdentifier<IContextService>('univer.context-service');
@@ -29,17 +28,17 @@ export class ContextService extends Disposable implements IContextService {
         return this._contextMap.get(key) ?? false;
     }
 
-    matchContextValue(matchKey: string): boolean {
-        let resultKey = '';
-        for (const [key] of this._contextMap) {
-            if (key.indexOf(matchKey) > -1) {
-                resultKey = key;
-                break;
-            }
-        }
+    // matchContextValue(matchKey: string): boolean {
+    //     let resultKey = '';
+    //     for (const [key] of this._contextMap) {
+    //         if (key.indexOf(matchKey) > -1) {
+    //             resultKey = key;
+    //             break;
+    //         }
+    //     }
 
-        return this._contextMap.get(resultKey) ?? false;
-    }
+    //     return this._contextMap.get(resultKey) ?? false;
+    // }
 
     setContextValue(key: string, value: boolean): void {
         this._contextMap.set(key, value);

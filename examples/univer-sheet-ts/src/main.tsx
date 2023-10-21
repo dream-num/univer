@@ -1,9 +1,5 @@
 import { DocPlugin } from '@univerjs/base-docs';
-import {
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    RenderEngine,
-} from '@univerjs/base-render';
+import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { greenTheme, UIPlugin } from '@univerjs/base-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
@@ -14,7 +10,6 @@ import { DebuggerPlugin } from '@univerjs/sheets-plugin-debugger';
 // import { ImagePlugin } from '@univerjs/sheets-plugin-image';
 // import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 // import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
-import { DocUIPlugin } from '@univerjs/ui-plugin-docs';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 
 import { locales } from './locales';
@@ -30,7 +25,7 @@ const univer = new Univer({
 univer.registerPlugin(DocPlugin, {
     hasScroll: false,
 });
-univer.registerPlugin(DocUIPlugin);
+// univer.registerPlugin(DocUIPlugin);
 univer.registerPlugin(RenderEngine);
 univer.registerPlugin(UIPlugin, {
     container: 'univer-container',
@@ -48,18 +43,6 @@ univer.registerPlugin(DebuggerPlugin);
 // univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
 // univer.registerPlugin(ImportXlsxPlugin);
 // univer.registerPlugin(ImagePlugin);
-
-// create univer doc normal editor instance
-univer.createUniverDoc({
-    id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    documentStyle: {},
-});
-
-// create univer doc formula bar editor instance
-univer.createUniverDoc({
-    id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    documentStyle: {},
-});
 
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);

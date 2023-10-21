@@ -56,8 +56,10 @@ export function createSkeletonPage(
     page.marginLeft = marginLeft;
     page.marginRight = marginRight;
     page.breakType = breakType;
-    page.width = page.pageWidth = pageWidth;
-    page.height = page.pageHeight = pageHeight;
+    page.pageWidth = pageWidth;
+    page.width = 0;
+    page.pageHeight = pageHeight;
+    page.height = 0;
     page.pageOrient = pageOrient;
 
     const { defaultHeaderId, evenPageHeaderId, firstPageHeaderId } = headerIds;

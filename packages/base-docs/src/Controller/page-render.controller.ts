@@ -1,4 +1,11 @@
-import { Documents, IPageRenderConfig, IRenderManagerService, Rect } from '@univerjs/base-render';
+import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    Documents,
+    IPageRenderConfig,
+    IRenderManagerService,
+    Rect,
+} from '@univerjs/base-render';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -48,6 +55,9 @@ export class PageRenderController extends Disposable {
             const pageSize = docsComponent.getSkeleton()?.getPageSize();
 
             docsComponent.onPageRenderObservable.add((config: IPageRenderConfig) => {
+                if ([DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY].includes(unitId)) {
+                    return;
+                }
                 const { page, pageLeft, pageTop, ctx } = config;
                 const { width, height, marginBottom, marginLeft, marginRight, marginTop } = page;
                 ctx.save();

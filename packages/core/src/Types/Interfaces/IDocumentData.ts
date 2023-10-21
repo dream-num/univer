@@ -308,6 +308,19 @@ export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderA
     textStyle?: ITextStyle; // 文字默认样式
 }
 
+/**
+ * the alignment mode is returned with respect to the offset of the sheet cell,
+ * because the document needs to render the layout for cells and
+ * support alignment across multiple cells (e.g., horizontal alignment of long text in overflow mode).
+ * The alignment mode of the document itself cannot meet this requirement,
+ * so an additional renderConfig needs to be added during the rendering of the document component.
+ * This means that there are two coexisting alignment modes.
+ * In certain cases, such as in an editor, conflicts may arise,
+ * requiring only one alignment mode to be retained.
+ * By removing the relevant configurations in renderConfig,
+ * the alignment mode of the sheet cell can be modified.
+ * The alternative alignment mode is applied to paragraphs within the document.
+ */
 export interface IDocumentRenderConfig {
     // The following are the attributes used for secondary processing of skeleton, generally not related to word
     verticalAlign?: VerticalAlign; // VerticalAlignment, only valid for pages, word does not have this arrangement, used for secondary calculation
@@ -808,6 +821,9 @@ export enum characterSpacingControlType {
     doNotCompress,
 }
 
+/**
+ * Paper orientation, whether it's portrait (vertical) or landscape (horizontal)
+ */
 export enum PageOrientType {
     PORTRAIT,
     LANDSCAPE,

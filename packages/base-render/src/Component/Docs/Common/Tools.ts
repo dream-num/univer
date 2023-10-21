@@ -53,7 +53,7 @@ export function getLastLineByColumn(column: IDocumentSkeletonColumn) {
 }
 
 export function getPageContentWidth(page: IDocumentSkeletonPage) {
-    const { width: pageWidth, marginLeft: pageMarginLeft, marginRight: pageMarginRight } = page;
+    const { pageWidth, marginLeft: pageMarginLeft, marginRight: pageMarginRight } = page;
     const pageContentWidth = pageWidth - pageMarginLeft - pageMarginRight;
     return pageContentWidth;
 }
@@ -289,14 +289,15 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
         const pageStartIndex = prePageStartIndex;
         const pageEndIndex = pageStartIndex;
         let preSectionStartIndex = pageStartIndex;
-        let maxPageWidth = -Infinity;
-        let pageHeight = 0;
+        let maxContentWidth = -Infinity;
+        let contentHeight = 0;
         for (const section of sections) {
             const { columns } = section;
             const sectionStartIndex = preSectionStartIndex;
             const sectionEndIndex = pageStartIndex;
             let preColumnStartIndex = sectionStartIndex;
             let maxSectionHeight = -Infinity;
+            let sectionWidth = 0;
             for (const column of columns) {
                 const { lines } = column;
                 const columStartIndex = preColumnStartIndex;
@@ -318,9 +319,9 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                         const divide = divides[i];
                         const { spanGroup } = divide;
 
-                        if (spanGroup.length === 0) {
-                            continue;
-                        }
+                        // if (spanGroup.length === 0) {
+                        //     continue;
+                        // }
 
                         const divStartIndex = preDivideStartIndex;
                         let divEndIndex = divStartIndex;
@@ -339,18 +340,18 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 
                             maxLineAsc = Math.max(maxLineAsc, ba);
 
-                            if (i === divideLength - 1 && divide.width === Infinity) {
+                            if (i === divideLength - 1) {
                                 // 宽度为Infinity时，最后一个divide也是Infinity，需要计算一个实际宽度。
                                 actualWidth += span.width;
                             }
                         }
 
                         if (i === divideLength - 1) {
-                            if (divide.width === Infinity) {
-                                divide.width = actualWidth;
-                            } else {
-                                actualWidth += divide.width;
-                            }
+                            // if (divide.width === Infinity) {
+                            //     divide.width = actualWidth;
+                            // } else {
+                            //     actualWidth += divide.width;
+                            // }
                             actualWidth += divide.left;
                         }
 
@@ -371,10 +372,10 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 column.st = columStartIndex === 0 ? 0 : columStartIndex + 1;
                 column.ed = preLineStartIndex >= column.st ? preLineStartIndex : column.st;
                 column.height = columnHeight;
-                if (column.width === Infinity) {
-                    column.width = maxColumnWidth;
-                }
-                maxPageWidth = Math.max(maxPageWidth, maxColumnWidth);
+
+                column.width = maxColumnWidth;
+                sectionWidth += maxColumnWidth;
+
                 maxSectionHeight = Math.max(maxSectionHeight, column.height);
 
                 preColumnStartIndex = column.ed;
@@ -383,15 +384,17 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
             section.st = sectionStartIndex === 0 ? 0 : sectionStartIndex + 1;
             section.ed = preColumnStartIndex >= section.st ? preColumnStartIndex : section.st;
             section.height = maxSectionHeight;
-            pageHeight += maxSectionHeight;
+            contentHeight += maxSectionHeight;
+
+            maxContentWidth = Math.max(maxContentWidth, sectionWidth);
 
             preSectionStartIndex = section.ed;
         }
 
         page.st = pageStartIndex === 0 ? 0 : pageStartIndex + 1;
         page.ed = preSectionStartIndex >= page.st ? preSectionStartIndex : page.st;
-        page.height = pageHeight;
-        page.width = maxPageWidth;
+        page.height = contentHeight;
+        page.width = maxContentWidth;
 
         prePageStartIndex = page.ed;
     }
@@ -506,18 +509,18 @@ export function getPositionHorizon(
             } else if (relativeFrom === ObjectRelativeFromH.OUTSIDE_MARGIN) {
                 // TODO
             } else if (relativeFrom === ObjectRelativeFromH.PAGE) {
-                const { width } = page;
+                const { pageWidth } = page;
                 let absoluteLeft = 0;
                 if (align === AlignTypeH.RIGHT) {
-                    absoluteLeft = width - objectWidth;
+                    absoluteLeft = pageWidth - objectWidth;
                 } else if (align === AlignTypeH.CENTER) {
-                    absoluteLeft = width / 2 - objectWidth / 2;
+                    absoluteLeft = pageWidth / 2 - objectWidth / 2;
                 }
                 return absoluteLeft;
             }
         }
     } else if (posOffset) {
-        const { width: pageWidth, marginLeft, marginRight } = page;
+        const { pageWidth, marginLeft, marginRight } = page;
         const boundaryLeft = marginLeft;
         const boundaryRight = pageWidth - marginRight;
 
@@ -543,7 +546,7 @@ export function getPositionHorizon(
         }
         return absoluteLeft;
     } else if (percent) {
-        const { width: pageWidth, marginLeft, marginRight } = page;
+        const { pageWidth, marginLeft, marginRight } = page;
         if (relativeFrom === ObjectRelativeFromH.LEFT_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromH.MARGIN) {
@@ -594,12 +597,12 @@ export function getPositionVertical(
         } else if (relativeFrom === ObjectRelativeFromV.OUTSIDE_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.PAGE) {
-            const { height } = page;
+            const { pageHeight } = page;
             let absoluteTop = 0;
             if (align === AlignTypeV.BOTTOM) {
-                absoluteTop = height - objectHeight;
+                absoluteTop = pageHeight - objectHeight;
             } else if (align === AlignTypeV.CENTER) {
-                absoluteTop = height / 2 - objectHeight / 2;
+                absoluteTop = pageHeight / 2 - objectHeight / 2;
             }
             return absoluteTop;
         }
@@ -624,7 +627,7 @@ export function getPositionVertical(
         }
         return absoluteTop;
     } else if (percent) {
-        const { height: pageHeight, marginBottom, marginTop } = page;
+        const { pageHeight, marginBottom, marginTop } = page;
         if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.MARGIN) {

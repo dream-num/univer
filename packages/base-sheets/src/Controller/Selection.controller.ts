@@ -202,7 +202,9 @@ export class SelectionController extends Disposable {
 
             const { scene } = currentRender;
 
-            this._selectionTransformerShapeManager.changeRuntime(skeleton, scene);
+            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+
+            this._selectionTransformerShapeManager.changeRuntime(skeleton, scene, viewportMain);
 
             this._selectionManagerService.setCurrentSelection({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,

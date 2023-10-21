@@ -534,11 +534,21 @@ export class Scene extends ThinScene {
     }
 
     getScrollXYByRelativeCoords(coord: Vector2, viewPort?: Viewport) {
-        let x = 0;
-        let y = 0;
         if (!viewPort) {
             viewPort = this.getActiveViewportByRelativeCoord(coord);
         }
+        if (!viewPort) {
+            return {
+                x: 0,
+                y: 0,
+            };
+        }
+        return this.getScrollXY(viewPort);
+    }
+
+    getScrollXY(viewPort: Viewport) {
+        let x = 0;
+        let y = 0;
         if (viewPort) {
             const actualX = viewPort.actualScrollX || 0;
             const actualY = viewPort.actualScrollY || 0;
@@ -584,10 +594,10 @@ export class Scene extends ThinScene {
         return coord;
     }
 
-    transformToSceneCoord(coord: Vector2) {
-        const pickedViewport = this.getActiveViewportByCoord(coord);
-        return pickedViewport?.getRelativeVector(coord);
-    }
+    // transformToSceneCoord(coord: Vector2) {
+    //     const pickedViewport = this.getActiveViewportByCoord(coord);
+    //     return pickedViewport?.getRelativeVector(coord);
+    // }
 
     clearLayer() {
         this._layers = [];

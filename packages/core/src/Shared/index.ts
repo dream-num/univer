@@ -13,7 +13,6 @@ export * from './GroupModel';
 export * from './HashAlgorithm';
 export * from './IOHttp';
 export * from './IOSocket';
-export * from './KeyboardUtil';
 export * from './Locale';
 export * from './Logger';
 export * from './LRU/index';

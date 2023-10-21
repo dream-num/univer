@@ -1,8 +1,8 @@
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/base-ui';
-import { CommandType, FOCUSING_SHEET, IContextService, ILogService, IMultiCommand } from '@univerjs/core';
+import { CommandType, ILogService, IMultiCommand } from '@univerjs/core';
 
+import { whenEditorNotActivated } from '../../controller/shortcuts/utils';
 import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
-import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
 
 export const SheetCopyCommand: IMultiCommand = {
     id: CopyCommand.id,
@@ -10,8 +10,7 @@ export const SheetCopyCommand: IMultiCommand = {
     type: CommandType.COMMAND,
     multi: true,
     priority: 1000,
-    preconditions: (contextService: IContextService) =>
-        contextService.getContextValue(FOCUSING_SHEET) && !contextService.matchContextValue(SHEET_EDITOR_ACTIVATED),
+    preconditions: whenEditorNotActivated,
     handler: async (accessor) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.copy();
@@ -24,8 +23,7 @@ export const SheetCutCommand: IMultiCommand = {
     type: CommandType.COMMAND,
     multi: true,
     priority: 1000,
-    preconditions: (contextService: IContextService) =>
-        contextService.getContextValue(FOCUSING_SHEET) && !contextService.matchContextValue(SHEET_EDITOR_ACTIVATED),
+    preconditions: whenEditorNotActivated,
     handler: async (accessor, params) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.cut();
@@ -38,8 +36,7 @@ export const SheetPasteCommand: IMultiCommand = {
     multi: true,
     name: 'sheet.command.paste',
     priority: 1000,
-    preconditions: (contextService: IContextService) =>
-        contextService.getContextValue(FOCUSING_SHEET) && !contextService.matchContextValue(SHEET_EDITOR_ACTIVATED),
+    preconditions: whenEditorNotActivated,
     handler: async (accessor) => {
         const logService = accessor.get(ILogService);
 

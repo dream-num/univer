@@ -8,7 +8,6 @@ import {
     ISectionColumnProperties,
     LocaleService,
     Nullable,
-    Observable,
     PageOrientType,
     SectionType,
     VerticalAlign,
@@ -48,7 +47,7 @@ export enum DocumentSkeletonState {
 }
 
 export class DocumentSkeleton extends Skeleton {
-    onRecalculateChangeObservable = new Observable<IDocumentSkeletonCached>();
+    // onRecalculateChangeObservable = new Observable<IDocumentSkeletonCached>();
 
     private _docModel!: DocumentModelOrSimple;
 
@@ -85,11 +84,49 @@ export class DocumentSkeleton extends Skeleton {
         }
         this._skeletonData = this._createSkeleton(bounds);
 
-        this.onRecalculateChangeObservable.notifyObservers(this._skeletonData);
+        // this.onRecalculateChangeObservable.notifyObservers(this._skeletonData);
     }
 
     getSkeletonData() {
         return this._skeletonData;
+    }
+
+    getActualSize() {
+        const skeletonData = this.getSkeletonData();
+
+        let actualWidth = -Infinity;
+        let actualHeight = 0;
+
+        skeletonData?.pages.forEach((page) => {
+            const { width, height } = page;
+            actualWidth = Math.max(actualWidth, width);
+
+            actualHeight += height;
+        });
+
+        return {
+            actualWidth,
+            actualHeight,
+        };
+    }
+
+    private _getPageActualWidth(page: IDocumentSkeletonPage) {
+        let maxWidth = -Infinity;
+        for (const section of page.sections) {
+            for (const column of section.columns) {
+                for (const line of column.lines) {
+                    let lineWidth = 0;
+                    for (const divide of line.divides) {
+                        for (const span of divide.spanGroup) {
+                            lineWidth += span.width;
+                        }
+                    }
+                    maxWidth = Math.max(maxWidth, lineWidth);
+                }
+            }
+        }
+
+        return maxWidth;
     }
 
     getPageSize() {
@@ -167,66 +204,6 @@ export class DocumentSkeleton extends Skeleton {
         const nodes = this._findNodeIterator(charIndex);
 
         return nodes?.span;
-
-        // const skeletonData = this.getSkeletonData();
-
-        // if (!skeletonData) {
-        //     return;
-        // }
-
-        // const pages = skeletonData.pages;
-
-        // for (const page of pages) {
-        //     const { sections, st, ed } = page;
-
-        //     if (charIndex < st || charIndex > ed) {
-        //         continue;
-        //     }
-
-        //     for (const section of sections) {
-        //         const { columns, st, ed } = section;
-
-        //         if (charIndex < st || charIndex > ed) {
-        //             continue;
-        //         }
-
-        //         for (const column of columns) {
-        //             const { lines, st, ed } = column;
-
-        //             if (charIndex < st || charIndex > ed) {
-        //                 continue;
-        //             }
-
-        //             for (const line of lines) {
-        //                 const { divides, lineHeight, st, ed } = line;
-        //                 const divideLength = divides.length;
-
-        //                 if (charIndex < st || charIndex > ed) {
-        //                     continue;
-        //                 }
-
-        //                 for (let i = 0; i < divideLength; i++) {
-        //                     const divide = divides[i];
-        //                     const { spanGroup, st, ed } = divide;
-
-        //                     if (charIndex < st || charIndex > ed) {
-        //                         continue;
-        //                     }
-
-        //                     if (spanGroup[0].spanType === SpanType.LIST) {
-        //                         charIndex++;
-        //                     }
-
-        //                     const span = spanGroup[charIndex - st];
-
-        //                     if (span) {
-        //                         return span;
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
     }
 
     findSpanByPosition(position: Nullable<INodePosition>) {
@@ -287,12 +264,12 @@ export class DocumentSkeleton extends Skeleton {
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
 
-            const { startX, startY, endX, endY } = this._getPageBoundingBox(page, pageLayoutType);
+            // const { startX, startY, endX, endY } = this._getPageBoundingBox(page, pageLayoutType);
 
-            if (!(x >= startX && x <= endX && y >= startY && y <= endY)) {
-                this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
-                continue;
-            }
+            // if (!(x >= startX && x <= endX && y >= startY && y <= endY)) {
+            //     this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+            //     continue;
+            // }
 
             this._findLiquid.translatePagePadding(page);
 
@@ -303,7 +280,7 @@ export class DocumentSkeleton extends Skeleton {
 
                 this._findLiquid.translateSection(section);
 
-                const { y: startY } = this._findLiquid;
+                // const { y: startY } = this._findLiquid;
 
                 // if (!(y >= startY && y <= startY + height)) {
                 //     continue;
@@ -314,7 +291,7 @@ export class DocumentSkeleton extends Skeleton {
 
                     this._findLiquid.translateColumn(column);
 
-                    const { x: startX } = this._findLiquid;
+                    // const { x: startX } = this._findLiquid;
 
                     // if (!(x >= startX && x <= startX + columnWidth)) {
                     //     continue;
@@ -464,27 +441,6 @@ export class DocumentSkeleton extends Skeleton {
     ) {
         this._findLiquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
     }
-
-    // updateDocumentDataPageSize(width?: number, height?: number) {
-    //     const documentStyle = this._docModel.documentStyle;
-    //     if (!documentStyle.pageSize) {
-    //         width = width ?? Infinity;
-    //         height = height ?? Infinity;
-    //         documentStyle.pageSize = {
-    //             width,
-    //             height,
-    //         };
-    //         return;
-    //     }
-
-    //     if (width !== undefined) {
-    //         documentStyle.pageSize.width = width;
-    //     }
-
-    //     if (height !== undefined) {
-    //         documentStyle.pageSize.height = height;
-    //     }
-    // }
 
     /**
      * \v COLUMN_BREAK

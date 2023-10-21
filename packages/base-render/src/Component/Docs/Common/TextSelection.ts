@@ -32,7 +32,14 @@ export function cursorConvertToTextSelection(
     docSkeleton: DocumentSkeleton,
     documentOffsetConfig: IDocumentOffsetConfig
 ): Nullable<TextSelection> {
-    const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack, style } = range;
+    const {
+        cursorStart,
+        cursorEnd,
+        isCollapse,
+        isEndBack,
+        isStartBack,
+        style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    } = range;
 
     const startNode = docSkeleton.findNodePositionByCharIndex(cursorStart, isStartBack);
     let endNode;

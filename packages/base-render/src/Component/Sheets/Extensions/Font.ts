@@ -1,8 +1,9 @@
 import { HorizontalAlign, IColorStyle, IScale, ObjectMatrix, WrapStrategy } from '@univerjs/core';
 
 import { fixLineWidthByScale } from '../../../Basics/Tools';
+import { Documents } from '../..';
 import { SpreadsheetExtensionRegistry } from '../../Extension';
-import { fontCacheItem } from '../Interfaces';
+import { IFontCacheItem } from '../Interfaces';
 import { SheetComponent } from '../SheetComponent';
 import { SpreadsheetSkeleton } from '../SheetSkeleton';
 import { SheetExtension } from './SheetExtension';
@@ -143,7 +144,7 @@ export class Font extends SheetExtension {
 
     private _renderDocuments(
         ctx: CanvasRenderingContext2D,
-        docsConfig: fontCacheItem,
+        docsConfig: IFontCacheItem,
         startX: number,
         startY: number,
         endX: number,
@@ -151,7 +152,7 @@ export class Font extends SheetExtension {
         row: number,
         column: number
     ) {
-        const documents = this.getDocuments();
+        const documents = this.getDocuments() as Documents;
 
         if (documents == null) {
             throw new Error('documents is null');

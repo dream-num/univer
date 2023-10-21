@@ -1,5 +1,6 @@
 import { Tools } from '../../Shared/Tools';
-import { IDocumentData } from '../../Types/Interfaces/IDocumentData';
+import { IDocumentData, IDocumentRenderConfig } from '../../Types/Interfaces/IDocumentData';
+import { IPaddingData } from '../../Types/Interfaces/IStyleData';
 import { DocumentBodyModel } from './DocumentBodyModel';
 
 export const DEFAULT_DOC = {
@@ -49,6 +50,18 @@ export class DocumentModelSimple {
         return this.snapshot.body;
     }
 
+    dispose() {
+        this.bodyModel.dispose();
+
+        this.headerTreeMap.forEach((headerTree) => {
+            headerTree.dispose();
+        });
+
+        this.footerTreeMap.forEach((headerTree) => {
+            headerTree.dispose();
+        });
+    }
+
     getShouldRenderLoopImmediately() {
         const should = this.snapshot.shouldStartRenderingImmediately;
         return should !== false;
@@ -80,6 +93,42 @@ export class DocumentModelSimple {
 
     getSnapshot() {
         return this.snapshot;
+    }
+
+    updateDocumentId(unitId: string) {
+        this.snapshot.id = unitId;
+    }
+
+    updateDocumentRenderConfig(config: IDocumentRenderConfig) {
+        const documentStyle = this.snapshot.documentStyle;
+        if (documentStyle.renderConfig == null) {
+            documentStyle.renderConfig = config;
+        } else {
+            documentStyle.renderConfig = {
+                ...documentStyle.renderConfig,
+                ...config,
+            };
+        }
+    }
+
+    updateDocumentDataMargin(data: IPaddingData) {
+        const { t, l, b, r } = data;
+        const documentStyle = this.snapshot.documentStyle;
+        if (t != null) {
+            documentStyle.marginTop = t;
+        }
+
+        if (l != null) {
+            documentStyle.marginLeft = l;
+        }
+
+        if (b != null) {
+            documentStyle.marginBottom = b;
+        }
+
+        if (r != null) {
+            documentStyle.marginRight = r;
+        }
     }
 
     updateDocumentDataPageSize(width?: number, height?: number) {
@@ -148,11 +197,16 @@ export class DocumentModel extends DocumentModelSimple {
 
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
         this._initializeRowColTree();
-        this.bodyModel.reset(snapshot.body ?? { dataStream: '\r\n\0' });
+        this.bodyModel.reset(snapshot.body ?? { dataStream: '\r\n' });
     }
 
     getUnitId(): string {
         return this._unitId;
+    }
+
+    override updateDocumentId(unitId: string) {
+        super.updateDocumentId(unitId);
+        this._unitId = unitId;
     }
 
     private _initializeRowColTree() {

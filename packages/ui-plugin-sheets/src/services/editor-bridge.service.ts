@@ -1,18 +1,22 @@
-import { DeviceInputEventType, DocumentSkeleton } from '@univerjs/base-render';
-import { ISelectionCellWithCoord, Nullable } from '@univerjs/core';
+import { DeviceInputEventType, IDocumentLayoutObject } from '@univerjs/base-render';
+import { KeyCode } from '@univerjs/base-ui';
+import { IPosition, Nullable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface IEditorBridgeServiceVisibleParam {
     visible: boolean;
     eventType: DeviceInputEventType;
+    keycode?: KeyCode;
 }
 
 export interface IEditorBridgeServiceParam {
-    unitId?: string;
-    sheetId?: string;
-    primaryWithCoord: Nullable<ISelectionCellWithCoord>;
-    docSkeleton: Nullable<DocumentSkeleton>;
+    unitId: string;
+    sheetId: string;
+    row: number;
+    column: number;
+    position: IPosition;
+    documentLayoutObject: IDocumentLayoutObject;
 }
 
 export interface IEditorBridgeService {
@@ -23,7 +27,7 @@ export interface IEditorBridgeService {
     getState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     show(openType: DeviceInputEventType): void;
     hide(): void;
-    isVisible(): void;
+    isVisible(): IEditorBridgeServiceVisibleParam;
 }
 
 export class EditorBridgeService implements IEditorBridgeService, IDisposable {

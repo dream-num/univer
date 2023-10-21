@@ -35,6 +35,9 @@ export class DocCanvasView {
     private _scene!: Scene;
 
     private _currentDocumentModel!: DocumentModel;
+
+    private _loadedMap = new Set();
+
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
@@ -45,10 +48,15 @@ export class DocCanvasView {
     ) {
         this._currentUniverService.currentDoc$.subscribe((documentModel) => {
             if (documentModel == null) {
-                throw new Error('documentModel is null');
+                return;
             }
-            this._currentDocumentModel = documentModel;
-            this._addNewRender();
+
+            const unitId = documentModel.getUnitId();
+            if (!this._loadedMap.has(unitId)) {
+                this._currentDocumentModel = documentModel;
+                this._addNewRender();
+                this._loadedMap.add(unitId);
+            }
         });
     }
 
@@ -70,8 +78,6 @@ export class DocCanvasView {
         } else {
             this._renderManagerService.createRender(unitId);
         }
-
-        this._renderManagerService.setCurrent(unitId);
 
         const currentRender = this._renderManagerService.getRenderById(unitId);
 
@@ -144,6 +150,8 @@ export class DocCanvasView {
                 // }
             });
         }
+
+        this._renderManagerService.setCurrent(unitId);
     }
 
     private _addComponent(currentRender: IRender) {

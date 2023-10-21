@@ -1,5 +1,7 @@
 import {
     BooleanNumber,
+    DocumentModel,
+    DocumentModelOrSimple,
     DocumentModelSimple,
     getColorStyle,
     HorizontalAlign,
@@ -87,7 +89,25 @@ interface IRowColumnSegment {
     endColumn: number;
 }
 
+export interface IDocumentLayoutObject {
+    documentModel: Nullable<DocumentModelOrSimple>;
+    fontString: string;
+    textRotation: ITextRotation;
+    wrapStrategy: WrapStrategy;
+    verticalAlign: VerticalAlign;
+    horizontalAlign: HorizontalAlign;
+    paddingData: IPaddingData;
+    fill?: Nullable<string>;
+}
+
 const DEFAULT_ROTATE_ANGLE = 90;
+
+const DEFAULT_PADDING_DATA = {
+    t: 0,
+    b: 0,
+    l: 2,
+    r: 2,
+};
 
 export class SpreadsheetSkeleton extends Skeleton {
     private _rowHeightAccumulation: number[] = [];
@@ -420,8 +440,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         // console.log('documentSkeleton', cell?.v, column, endColumn, row, column, columnCount, contentWidth);
 
         if (horizontalAlign === HorizontalAlign.CENTER) {
-            startColumn = this._getOverflowBound(row, column, 0, contentWidth / 2);
-            endColumn = this._getOverflowBound(row, column, columnCount - 1, contentWidth / 2);
+            startColumn = this._getOverflowBound(row, column, 0, contentWidth / 2, horizontalAlign);
+            endColumn = this._getOverflowBound(row, column, columnCount - 1, contentWidth / 2, horizontalAlign);
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {
             startColumn = this._getOverflowBound(row, column, 0, contentWidth);
         } else {
@@ -485,6 +505,15 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    /**
+     *
+     * @param offsetX HTML coordinate system, mouse position x.
+     * @param offsetY HTML coordinate system, mouse position y.
+     * @param scaleX render scene scale x-axis, scene.getAncestorScale
+     * @param scaleY render scene scale y-axis, scene.getAncestorScale
+     * @param scrollXY  render viewport scroll {x, y}, scene.getScrollXYByRelativeCoords, scene.getScrollXY
+     * @returns Selection data with coordinates
+     */
     calculateCellIndexByPosition(
         offsetX: number,
         offsetY: number,
@@ -499,12 +528,12 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     /**
      *
-     * @param offsetX scaled offset x
-     * @param offsetY scaled offset y
-     * @param scaleX scale x
-     * @param scaleY scale y
-     * @param scrollXY
-     * @returns
+     * @param offsetX HTML coordinate system, mouse position x.
+     * @param offsetY HTML coordinate system, mouse position y.
+     * @param scaleX render scene scale x-axis, scene.getAncestorScale
+     * @param scaleY render scene scale y-axis, scene.getAncestorScale
+     * @param scrollXY  render viewport scroll {x, y}, scene.getScrollXYByRelativeCoords, scene.getScrollXY
+     * @returns Hit cell coordinates
      */
     getCellPositionByOffset(
         offsetX: number,
@@ -762,7 +791,65 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
-    getCellModel(row: number, column: number) {
+    getBlankCellDocumentModel(row: number, column: number, isFull: boolean = false): IDocumentLayoutObject {
+        const documentModelObject = this.getCellDocumentModel(row, column);
+
+        if (documentModelObject != null) {
+            if (documentModelObject.documentModel == null) {
+                documentModelObject.documentModel = this._getDocumentDataByStyle('', {}, {}, isFull);
+            }
+            return documentModelObject;
+        }
+
+        const content = '';
+
+        let fontString = 'document';
+
+        const textRotation: ITextRotation = { a: 0, v: BooleanNumber.FALSE };
+        const horizontalAlign: HorizontalAlign = HorizontalAlign.UNSPECIFIED;
+        const verticalAlign: VerticalAlign = VerticalAlign.UNSPECIFIED;
+        const wrapStrategy: WrapStrategy = WrapStrategy.UNSPECIFIED;
+        const paddingData: IPaddingData = DEFAULT_PADDING_DATA;
+
+        fontString = getFontStyleString({}, this._localService).fontCache;
+
+        const documentModel = this._getDocumentDataByStyle(content, {}, {}, isFull);
+
+        return {
+            documentModel,
+            fontString,
+            textRotation,
+            wrapStrategy,
+            verticalAlign,
+            horizontalAlign,
+            paddingData,
+        };
+    }
+
+    // convert canvas content position to physical position in screen
+    convertTransformToOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
+        const { x: scrollX } = scrollXY;
+
+        offsetX = (offsetX - scrollX) * scaleX;
+
+        return offsetX;
+    }
+
+    // convert canvas content position to physical position in screen
+    convertTransformToOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
+        const { x: scrollY } = scrollXY;
+
+        offsetY = (offsetY - scrollY) * scaleY;
+
+        return offsetY;
+    }
+
+    getCellDocumentModel(
+        row: number,
+        column: number,
+        isFull: boolean = false,
+        isDeepClone: boolean = false
+    ): Nullable<IDocumentLayoutObject> {
         const cell = this._cellData.getValue(row, column);
         const style = this._styles.getStyleByCell(cell);
         if (!cell) {
@@ -773,16 +860,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         let documentModel: Nullable<DocumentModelSimple>;
         let fontString = 'document';
         const cellOtherConfig = this._getOtherStyle(style) as CellOtherConfig;
-        // const {
-        //     textRotation = { a: 0, v: BooleanNumber.FALSE },
-        //     horizontalAlign = HorizontalAlign.UNSPECIFIED,
-        //     verticalAlign = VerticalAlign.UNSPECIFIED,
-        //     wrapStrategy = WrapStrategy.UNSPECIFIED,
-        // }= CellOtherConfig;
+
         const textRotation: ITextRotation = cellOtherConfig.textRotation || { a: 0, v: BooleanNumber.FALSE };
         const horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || HorizontalAlign.UNSPECIFIED;
         const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || VerticalAlign.UNSPECIFIED;
         const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || WrapStrategy.UNSPECIFIED;
+        const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
         if (cell.p) {
             const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
             let centerAngle = 0;
@@ -791,20 +874,38 @@ export class SpreadsheetSkeleton extends Skeleton {
                 centerAngle = DEFAULT_ROTATE_ANGLE;
                 vertexAngle = DEFAULT_ROTATE_ANGLE;
             }
-            documentModel = this._updateRenderConfigAndHorizon(cell.p, horizontalAlign, {
+            documentModel = this._updateRenderConfigAndHorizon(
+                isDeepClone ? Tools.deepClone(cell.p) : cell.p,
                 horizontalAlign,
-                verticalAlign,
-                centerAngle,
-                vertexAngle,
-                wrapStrategy,
-            });
+                {
+                    horizontalAlign,
+                    verticalAlign,
+                    centerAngle,
+                    vertexAngle,
+                    wrapStrategy,
+                },
+                isFull
+            );
         } else if (content) {
             const textStyle = this._getFontFormat(style);
             fontString = getFontStyleString(textStyle, this._localService).fontCache;
 
-            documentModel = this._getDocumentDataByStyle(content.toString(), textStyle, cellOtherConfig);
+            documentModel = this._getDocumentDataByStyle(content.toString(), textStyle, cellOtherConfig, isFull);
         }
 
+        /**
+         * the alignment mode is returned with respect to the offset of the sheet cell,
+         * because the document needs to render the layout for cells and
+         * support alignment across multiple cells (e.g., horizontal alignment of long text in overflow mode).
+         * The alignment mode of the document itself cannot meet this requirement,
+         * so an additional renderConfig needs to be added during the rendering of the document component.
+         * This means that there are two coexisting alignment modes.
+         * In certain cases, such as in an editor, conflicts may arise,
+         * requiring only one alignment mode to be retained.
+         * By removing the relevant configurations in renderConfig,
+         * the alignment mode of the sheet cell can be modified.
+         * The alternative alignment mode is applied to paragraphs within the document.
+         */
         return {
             documentModel,
             fontString,
@@ -812,6 +913,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             wrapStrategy,
             verticalAlign,
             horizontalAlign,
+            paddingData,
+            fill: style?.bg?.rgb,
         };
     }
 
@@ -998,66 +1101,20 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
-    // private _calculateOverflowCache() {
-    //     const { font: fontList } = this.stylesCache;
-    //     // const mergeRangeCache = this._getMergeRangeCache();
-    //     const overflowCache = new ObjectMatrix<IRange>();
-    //     const columnCount = this.getColumnCount();
-    //     fontList &&
-    //         Object.keys(fontList).forEach((fontFormat: string) => {
-    //             const fontObjectArray = fontList[fontFormat];
-    //             fontObjectArray.forEach((row, fontArray) => {
-    //                 fontArray.forEach((column, docsSkeleton) => {
-    //                     // overflow handler
-    //                     const { documentSkeleton, angle, verticalAlign, horizontalAlign, wrapStrategy } = docsSkeleton;
-    //                     const cell = this._cellData.getValue(row, column);
-    //                     if (wrapStrategy !== WrapStrategy.OVERFLOW || cell?.n === BooleanNumber.TRUE) {
-    //                         return true;
-    //                     }
-
-    //                     if (horizontalAlign === HorizontalAlign.JUSTIFIED) {
-    //                         return true;
-    //                     }
-
-    //                     let contentSize = documentSkeleton.getLastPageSize(angle);
-
-    //                     if (!contentSize) {
-    //                         return true;
-    //                     }
-
-    //                     // if(angle!==0){
-    //                     //     contentSize = {
-    //                     //         width: contentSize.width,
-
-    //                     //     }
-    //                     // }
-
-    //                     const position = this.getOverflowPosition(contentSize, horizontalAlign, row, column, columnCount);
-
-    //                     const { startColumn, endColumn } = position;
-    //                     overflowCache.setValue(row, column, {
-    //                         startRow: row,
-    //                         endRow: row,
-    //                         startColumn,
-    //                         endColumn,
-    //                     });
-
-    //                     // console.log('appendToOverflowCache', angle, contentSize, { row, column, startColumn, endColumn });
-    //                 });
-    //             });
-    //         });
-
-    //     return overflowCache;
-    // }
-
-    private _getOverflowBound(row: number, startColumn: number, endColumn: number, contentWidth: number) {
+    private _getOverflowBound(
+        row: number,
+        startColumn: number,
+        endColumn: number,
+        contentWidth: number,
+        horizontalAlign = HorizontalAlign.LEFT
+    ) {
         let cumWidth = 0;
         if (startColumn > endColumn) {
             const columnCount = this._columnWidthAccumulation.length - 1;
             for (let i = startColumn; i >= endColumn; i--) {
                 const column = i;
                 const cell = this._cellData.getValue(row, column);
-                if ((!isEmptyCell(cell) && column !== startColumn) || this._intersectMergeRange(row, column)) {
+                if ((!isEmptyCell(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                     if (column === startColumn) {
                         return column;
                     }
@@ -1069,7 +1126,14 @@ export class SpreadsheetSkeleton extends Skeleton {
                     this.rowHeightAccumulation,
                     this.columnWidthAccumulation
                 );
-                cumWidth += endX - startX;
+
+                // For center alignment, the current cell's width needs to be divided in half for comparison.
+                if (horizontalAlign === HorizontalAlign.CENTER && column === startColumn) {
+                    cumWidth += (endX - startX) / 2;
+                } else {
+                    cumWidth += endX - startX;
+                }
+
                 if (contentWidth < cumWidth) {
                     return column;
                 }
@@ -1079,7 +1143,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (let i = startColumn; i <= endColumn; i++) {
             const column = i;
             const cell = this._cellData.getValue(row, column);
-            if ((!isEmptyCell(cell) && column !== startColumn) || this._intersectMergeRange(row, column)) {
+            if ((!isEmptyCell(cell) && column !== startColumn) || this.intersectMergeRange(row, column)) {
                 if (column === startColumn) {
                     return column;
                 }
@@ -1092,7 +1156,13 @@ export class SpreadsheetSkeleton extends Skeleton {
                 this.rowHeightAccumulation,
                 this.columnWidthAccumulation
             );
-            cumWidth += endX - startX;
+
+            if (horizontalAlign === HorizontalAlign.CENTER && column === startColumn) {
+                cumWidth += (endX - startX) / 2;
+            } else {
+                cumWidth += endX - startX;
+            }
+
             if (contentWidth < cumWidth) {
                 return column;
             }
@@ -1100,9 +1170,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         return endColumn;
     }
 
-    private _intersectMergeRange(row: number, column: number) {
+    intersectMergeRange(row: number, column: number) {
         const dataMergeCache = this.dataMergeCache;
-        let isIntersected = false;
         for (const dataCache of dataMergeCache) {
             const {
                 startRow: startRowMargeIndex,
@@ -1116,8 +1185,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 column >= startColumnMargeIndex &&
                 column <= endColumnMargeIndex
             ) {
-                isIntersected = true;
-                return false;
+                return true;
             }
         }
         // dataMergeCache?.forEach((r, dataMergeRow) => {
@@ -1125,7 +1193,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         //     });
         // });
-        return isIntersected;
+        return false;
     }
 
     // private _getMergeRangeCache() {
@@ -1228,7 +1296,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
         }
 
-        const modelObject = this.getCellModel(r, c);
+        const modelObject = this.getCellDocumentModel(r, c);
 
         if (modelObject == null) {
             return;
@@ -1267,24 +1335,25 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     private _updateRenderConfigAndHorizon(
-        document: IDocumentData,
+        documentData: IDocumentData,
         horizontalAlign: HorizontalAlign,
-        renderConfig?: IDocumentRenderConfig
+        renderConfig?: IDocumentRenderConfig,
+        isFull: boolean = false
     ) {
         if (!renderConfig) {
             return;
         }
 
-        if (!document.body?.dataStream) {
+        if (!documentData.body?.dataStream) {
             return;
         }
 
-        if (!document.documentStyle) {
-            document.documentStyle = {};
+        if (!documentData.documentStyle) {
+            documentData.documentStyle = {};
         }
-        document.documentStyle.renderConfig = renderConfig;
+        documentData.documentStyle.renderConfig = renderConfig;
 
-        const paragraphs = document.body.paragraphs || [];
+        const paragraphs = documentData.body.paragraphs || [];
 
         for (const paragraph of paragraphs) {
             if (!paragraph.paragraphStyle) {
@@ -1294,10 +1363,18 @@ export class SpreadsheetSkeleton extends Skeleton {
             paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
         }
 
-        return new DocumentModelSimple(document);
+        if (isFull === false) {
+            return new DocumentModelSimple(documentData);
+        }
+        return new DocumentModel(documentData);
     }
 
-    private _getDocumentDataByStyle(content: string, textStyle: ITextStyle, config: CellOtherConfig) {
+    private _getDocumentDataByStyle(
+        content: string,
+        textStyle: ITextStyle,
+        config: CellOtherConfig,
+        isFull: boolean = false
+    ) {
         const contentLength = content.length;
         const {
             textRotation = { a: 0, v: BooleanNumber.FALSE },
@@ -1362,7 +1439,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             },
         };
 
-        return new DocumentModelSimple(documentData);
+        if (isFull === false) {
+            return new DocumentModelSimple(documentData);
+        }
+        return new DocumentModel(documentData);
     }
 
     private _setBorderProps(r: number, c: number, type: BORDER_TYPE, style: IStyleData, cache: IStylesCache) {
@@ -1431,6 +1511,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    /**
+     * Cache the merged cells on the current screen to improve computational performance.
+     * @param mergeData all marge data
+     * @param rowColumnSegment current screen range, include row and column
+     * @returns
+     */
     private _getMergeCells(mergeData: IRange[], rowColumnSegment?: IRowColumnSegment) {
         // const rowColumnSegment = this._rowColumnSegment;
         const endColumnLast = this.columnWidthAccumulation.length - 1;

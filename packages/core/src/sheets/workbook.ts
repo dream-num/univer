@@ -125,6 +125,7 @@ export class Workbook extends Disposable {
         const worksheet = new Worksheet(worksheetSnapshot, this._styles);
         this._worksheets.set(id, worksheet);
         this._sheetCreated$.next(worksheet);
+
         return true;
     }
 
@@ -186,16 +187,18 @@ export class Workbook extends Disposable {
      * @returns void
      */
     flush(): void {
-        //TDOO ..
+        //TODO ..
     }
 
     getSheets(): Worksheet[] {
         const { sheetOrder } = this._snapshot;
+
         return sheetOrder.map((sheetId) => this._worksheets.get(sheetId)) as Worksheet[];
     }
 
     getSheetIndex(sheet: Worksheet): number {
         const { sheetOrder } = this._snapshot;
+
         return sheetOrder.findIndex((sheetId) => {
             if (sheet.getSheetId() === sheetId) {
                 return true;

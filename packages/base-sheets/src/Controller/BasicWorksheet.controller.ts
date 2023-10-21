@@ -66,7 +66,11 @@ import { DeltaColumnWidthCommand, SetColWidthCommand } from '../commands/command
 import { SetWorksheetHideCommand } from '../commands/commands/set-worksheet-hide.command';
 import { SetWorksheetNameCommand } from '../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-order.command';
-import { DeltaRowHeightCommand, SetRowHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
+import {
+    DeltaRowHeightCommand,
+    SetRowAutoHeightCommand,
+    SetRowHeightCommand,
+} from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
 import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { TrimWhitespaceCommand } from '../commands/commands/trim-whitespace.command';
@@ -92,7 +96,10 @@ import { SetWorksheetColWidthMutation } from '../commands/mutations/set-workshee
 import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hide.mutation';
 import { SetWorksheetNameMutation } from '../commands/mutations/set-worksheet-name.mutation';
 import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-order.mutation';
-import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
+import {
+    SetWorksheetRowAutoHeightMutation,
+    SetWorksheetRowHeightMutation,
+} from '../commands/mutations/set-worksheet-row-height.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -149,8 +156,10 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
             SetColWidthCommand,
             SetWorksheetColWidthMutation,
+            SetRowAutoHeightCommand,
             SetRowHeightCommand,
             SetWorksheetRowHeightMutation,
+            SetWorksheetRowAutoHeightMutation,
             SetRowHiddenCommand,
             SetRowHiddenMutation,
             SetColHiddenCommand,

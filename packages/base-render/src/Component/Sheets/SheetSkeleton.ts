@@ -38,6 +38,7 @@ import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
 import {
     fixLineWidthByScale,
     getCellByIndex,
+    getCellInfoInMergeData,
     getCellPositionByIndex,
     getFontStyleString,
     isRectIntersect,
@@ -47,12 +48,18 @@ import { IBoundRect } from '../../Basics/Vector2';
 import { DocumentSkeleton } from '../Docs/DocSkeleton';
 import { Skeleton } from '../Skeleton';
 import { BorderCache, IStylesCache } from './Interfaces';
+import { getDocsSkeletonPageSize } from './Spreadsheet';
 
 interface ISetCellCache {
     cache: IStylesCache;
     skipBackgroundAndBorder: boolean;
     styles?: Styles;
     cellData?: ObjectMatrix<ICellData>;
+}
+
+export interface IRowAutoHeightInfo {
+    rowNumber: number;
+    autoHeight: number;
 }
 
 interface CellOtherConfig {
@@ -292,6 +299,88 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._calculateStylesCache();
         // this._overflowCache = this._calculateOverflowCache();
         return this;
+    }
+
+    calculateAutoHeightInRange(ranges: Nullable<IRange[]>) {
+        if (!Tools.isArray(ranges)) {
+            return [];
+        }
+        const results: IRowAutoHeightInfo[] = [];
+        const { mergeData } = this._config;
+
+        for (const range of ranges) {
+            const { startRow, endRow, startColumn, endColumn } = range;
+
+            for (let i = startRow; i <= endRow; i++) {
+                // In the selection area, if a cell is not in the merged cell, the automatic height of the row needs to be calculated.
+                let hasUnMergedCell = false;
+                for (let j = startColumn; j <= endColumn; j++) {
+                    const { isMerged, isMergedMainCell } = getCellInfoInMergeData(i, j, mergeData);
+                    if (!isMerged && !isMergedMainCell) {
+                        hasUnMergedCell = true;
+                        break;
+                    }
+                }
+
+                if (hasUnMergedCell) {
+                    const autoHeight = this.calculateRowAutoHeight(i);
+
+                    results.push({
+                        rowNumber: i,
+                        autoHeight,
+                    });
+                }
+            }
+        }
+
+        return results;
+    }
+
+    calculateRowAutoHeight(rowNum: number): number {
+        const { columnCount, columnData, mergeData } = this._config;
+        const data = Tools.createObjectArray(columnData);
+        let height = 0;
+
+        for (let i = 0; i < columnCount; i++) {
+            // When calculating the automatic height of a row, if a cell is in a merged cell,
+            // skip the cell directly, which currently follows the logic of Excel
+            const { isMerged, isMergedMainCell } = getCellInfoInMergeData(rowNum, i, mergeData);
+
+            if (isMerged || isMergedMainCell) {
+                continue;
+            }
+
+            const modelObject = this.getCellDocumentModel(rowNum, i);
+            if (modelObject == null) {
+                continue;
+            }
+
+            const { documentModel, textRotation, wrapStrategy } = modelObject;
+            if (documentModel == null) {
+                continue;
+            }
+
+            let { a: angle } = textRotation as ITextRotation;
+            const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
+
+            if (isVertical === BooleanNumber.TRUE) {
+                angle = DEFAULT_ROTATE_ANGLE;
+            }
+
+            const colWidth = data.get(i)?.w;
+
+            if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
+                documentModel.updateDocumentDataPageSize(colWidth);
+            }
+
+            const documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
+            documentSkeleton.calculate();
+
+            const { height: h = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
+            height = Math.max(height, h);
+        }
+
+        return height;
     }
 
     updateLayout() {
@@ -1039,10 +1128,12 @@ export class SpreadsheetSkeleton extends Skeleton {
                     continue;
                 }
 
-                if (rowDataItem.h != null) {
-                    rowHeight = rowDataItem.h;
-                } else if (rowDataItem.ah != null) {
-                    rowHeight = rowDataItem.ah;
+                const { h = defaultRowHeight, ah, isAutoHeight } = rowDataItem;
+
+                if ((isAutoHeight == null || !!isAutoHeight) && typeof ah === 'number') {
+                    rowHeight = ah;
+                } else {
+                    rowHeight = h;
                 }
 
                 if (rowDataItem.hd === BooleanNumber.TRUE) {

@@ -1,7 +1,7 @@
 import {
+    getCellInfoInMergeData,
     ISelectionStyle,
     ISelectionWithStyle,
-    mergeCellHandler,
     NORMAL_SELECTION_PLUGIN_STYLE,
 } from '@univerjs/base-render';
 import { IRange, ISelectionCell, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
@@ -221,7 +221,7 @@ export class SelectionManagerService implements IDisposable {
     }
 
     transformCellDataToSelectionData(row: number, column: number, mergeData: IRange[]): Nullable<ISelectionWithStyle> {
-        const newCellRange = mergeCellHandler(row, column, mergeData);
+        const newCellRange = getCellInfoInMergeData(row, column, mergeData);
 
         const newSelectionData = makeCellRangeToRangeData(newCellRange);
 

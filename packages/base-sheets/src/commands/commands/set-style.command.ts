@@ -25,6 +25,7 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from '../mutations/set-range-values.mutation';
+import { SetRowAutoHeightCommand } from './set-worksheet-row-height.command';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -55,15 +56,12 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         }
 
         const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
+        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         const style = params.style;
 
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
+
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
@@ -511,7 +509,9 @@ export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
             },
         };
 
-        return commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        await commandService.executeCommand(SetStyleCommand.id, setStyleParams);
+        // TODO: 下面这样写可以吗？
+        return commandService.executeCommand(SetRowAutoHeightCommand.id);
     },
 };
 

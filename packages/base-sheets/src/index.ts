@@ -139,6 +139,7 @@ export { SetWorksheetNameMutation } from './commands/mutations/set-worksheet-nam
 export { SetWorksheetOrderMutation } from './commands/mutations/set-worksheet-order.mutation';
 export {
     type ISetWorksheetRowHeightMutationParams,
+    SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';

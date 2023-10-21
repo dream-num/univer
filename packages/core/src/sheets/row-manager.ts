@@ -76,6 +76,7 @@ export class RowManager {
         const config = this._config;
         const create = { hd: BooleanNumber.FALSE, h: config.defaultRowHeight };
         _rowData.set(rowPos, create);
+
         return create;
     }
 
@@ -114,11 +115,12 @@ export class RowManager {
         if (!row) {
             return true;
         }
+
         return row.hd !== BooleanNumber.TRUE;
     }
 
     /**
-     * Get count of column in the sheet
+     * Get count of row in the sheet
      * @returns
      */
     getSize(): number {

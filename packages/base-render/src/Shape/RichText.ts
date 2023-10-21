@@ -139,8 +139,8 @@ export class RichText extends BaseObject {
         }
         const { pages } = skeletonData;
         const lastPage = pages[pages.length - 1];
-
         const { width, height } = lastPage;
+
         return { width, height };
     }
 

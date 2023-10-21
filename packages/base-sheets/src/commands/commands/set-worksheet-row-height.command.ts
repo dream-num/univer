@@ -10,8 +10,11 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
+    ISetWorksheetRowAutoHeightMutationParams,
     ISetWorksheetRowHeightMutationParams,
+    SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SetWorksheetRowHeightMutationFactory,
 } from '../mutations/set-worksheet-row-height.mutation';
@@ -102,6 +105,62 @@ export const DeltaRowHeightCommand: ICommand = {
     },
 };
 
+export interface ISetRowAutoHeightCommandParams {}
+
+export const SetRowAutoHeightCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-row-auto-height',
+    handler: async (accessor: IAccessor, params?: ISetRowAutoHeightCommandParams) => {
+        const selectionManagerService = accessor.get(SelectionManagerService);
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const sheetSkeletonService = accessor.get(SheetSkeletonManagerService);
+
+        const selections = selectionManagerService.getRangeDatas();
+        if (!selections?.length) {
+            return false;
+        }
+
+        const { skeleton } = sheetSkeletonService.getCurrent()!;
+        const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(selections);
+
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbookId = workbook.getUnitId();
+        const worksheetId = workbook.getActiveSheet().getSheetId();
+
+        console.log(selections, workbookId, worksheetId);
+
+        const redoMutationParams: ISetWorksheetRowAutoHeightMutationParams = {
+            worksheetId,
+            workbookId,
+            rowsAutoHeightInfo,
+        };
+
+        // const undoMutationParams: ISetWorksheetRowAutoHeightMutationParams = SetWorksheetRowHeightMutationFactory(
+        //     accessor,
+        //     redoMutationParams
+        // );
+
+        const result = commandService.executeCommand(SetWorksheetRowAutoHeightMutation.id, redoMutationParams);
+        console.log(result);
+        // if (result) {
+        //     undoRedoService.pushUndoRedo({
+        //         URI: workbookId,
+        //         undo() {
+        //             return commandService.executeCommand(SetWorksheetRowHeightMutation.id, undoMutationParams);
+        //         },
+        //         redo() {
+        //             return commandService.executeCommand(SetWorksheetRowHeightMutation.id, redoMutationParams);
+        //         },
+        //     });
+
+        //     return true;
+        // }
+        return true;
+    },
+};
+
 export interface ISetRowHeightCommandParams {
     value: number;
 }
@@ -115,7 +174,9 @@ export const SetRowHeightCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selections = selectionManagerService.getRangeDatas();
-        if (!selections?.length) return false;
+        if (!selections?.length) {
+            return false;
+        }
 
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const workbookId = workbook.getUnitId();
@@ -127,6 +188,7 @@ export const SetRowHeightCommand: ICommand = {
             ranges: selections,
             rowHeight: params.value,
         };
+
         const undoMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(
             accessor,
             redoMutationParams

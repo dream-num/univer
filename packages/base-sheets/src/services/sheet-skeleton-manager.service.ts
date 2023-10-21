@@ -127,6 +127,7 @@ export class SheetSkeletonManagerService implements IDisposable {
             workbook.getStyles(),
             this._localeService
         );
+
         return spreadsheetSkeleton;
     }
 }

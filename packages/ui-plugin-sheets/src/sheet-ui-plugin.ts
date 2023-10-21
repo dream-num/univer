@@ -7,10 +7,12 @@ import { SheetClipboardController } from './controller/clipboard/clipboard.contr
 import { SheetContextMenuController } from './controller/contextmenu/contextmenu.controller';
 import { InitializeEditorController } from './controller/editor/initialize-editor.controller';
 import { StartEditController } from './controller/editor/start-edit.controller';
+import { EditorBridgeController } from './controller/editor-bridge.controller';
 import { SheetUIController } from './controller/sheet-ui.controller';
 import { en } from './Locale';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
+import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
 import { ISheetBarService, SheetBarService } from './services/sheetbar/sheetbar.service';
 
 export class SheetUIPlugin extends Plugin {
@@ -34,6 +36,7 @@ export class SheetUIPlugin extends Plugin {
             [
                 // services
                 // [ICellEditorService, { useClass: DesktopCellEditorService }],
+                [IEditorBridgeService, { useClass: EditorBridgeService }],
                 [ISheetClipboardService, { useClass: SheetClipboardService }],
                 [ISheetBarService, { useClass: SheetBarService }],
                 // [ITextSelectionRenderManager, { useClass: TextSelectionRenderManager }],
@@ -41,6 +44,7 @@ export class SheetUIPlugin extends Plugin {
                 [ICellEditorManagerService, { useClass: CellEditorManagerService }],
 
                 // controllers
+                [EditorBridgeController],
                 [SheetClipboardController],
                 [SheetContextMenuController],
                 [SheetUIController],

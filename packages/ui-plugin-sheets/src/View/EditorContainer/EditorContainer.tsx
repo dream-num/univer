@@ -66,8 +66,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     setState({
                         width: endX - startX,
                         height: endY - startY,
-                        left: startX - 2,
-                        top: startY - 2,
+                        left: startX - 1,
+                        top: startY - 1,
                     });
                 }
             });

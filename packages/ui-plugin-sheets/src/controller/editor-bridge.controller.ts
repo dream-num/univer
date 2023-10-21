@@ -5,6 +5,7 @@ import {
     IRenderManagerService,
     ISelectionTransformerShapeManager,
 } from '@univerjs/base-render';
+import { getSheetObject, SelectionManagerService, SheetSkeletonManagerService } from '@univerjs/base-sheets';
 import {
     Disposable,
     ICommandService,
@@ -15,10 +16,9 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { getSheetObject } from '../Basics/component-tools';
+import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
+import { SetCellEditOperation } from '../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
-import { SelectionManagerService } from '../services/selection-manager.service';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, EditorBridgeController)
 export class EditorBridgeController extends Disposable {
@@ -50,7 +50,10 @@ export class EditorBridgeController extends Disposable {
     private _initialSelectionListener() {
         this._selectionManagerService.selectionInfo$.subscribe((params) => {
             const currentSkeletonManager = this._sheetSkeletonManagerService.getCurrent();
-            this._editorBridgeService.hide();
+
+            this._commandService.executeCommand(SetCellEditOperation.id, {
+                visible: false,
+            });
 
             const sheetObject = this._getSheetObject();
 
@@ -113,7 +116,19 @@ export class EditorBridgeController extends Disposable {
 
             // documentModelObject.documentModel = documentModel;
 
-            this._editorBridgeService.setState({
+            // this._editorBridgeService.setState({
+            //     position: {
+            //         startX,
+            //         startY,
+            //         endX,
+            //         endY,
+            //     },
+            //     unitId,
+            //     sheetId,
+            //     documentLayoutObject,
+            // });
+
+            this._commandService.executeCommand(SetActivateCellEditOperation.id, {
                 position: {
                     startX,
                     startY,
@@ -136,7 +151,13 @@ export class EditorBridgeController extends Disposable {
         const { spreadsheet } = sheetObject;
 
         spreadsheet.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._editorBridgeService.show(DeviceInputEventType.Dblclick);
+            // this._editorBridgeService.show(DeviceInputEventType.Dblclick);
+
+            this._commandService.executeCommand(SetCellEditOperation.id, {
+                visible: true,
+                eventType: DeviceInputEventType.Dblclick,
+            });
+
             // const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
             // const scene = this._getSheetObject()?.scene;
             // if (scene == null || skeleton == null) {

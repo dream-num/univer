@@ -1,10 +1,4 @@
-import {
-    DeviceInputEventType,
-    IMouseEvent,
-    IPointerEvent,
-    IRenderManagerService,
-    ISelectionTransformerShapeManager,
-} from '@univerjs/base-render';
+import { DeviceInputEventType, IRenderManagerService, ISelectionTransformerShapeManager } from '@univerjs/base-render';
 import { getSheetObject, SelectionManagerService, SheetSkeletonManagerService } from '@univerjs/base-sheets';
 import {
     Disposable,
@@ -44,16 +38,12 @@ export class EditorBridgeController extends Disposable {
     private _initialize() {
         this._initialSelectionListener();
 
-        this._initialDblclickListener();
+        this._initialEventListener();
     }
 
     private _initialSelectionListener() {
         this._selectionManagerService.selectionInfo$.subscribe((params) => {
             const currentSkeletonManager = this._sheetSkeletonManagerService.getCurrent();
-
-            this._commandService.executeCommand(SetCellEditOperation.id, {
-                visible: false,
-            });
 
             const sheetObject = this._getSheetObject();
 
@@ -63,7 +53,7 @@ export class EditorBridgeController extends Disposable {
 
             const { skeleton, unitId, sheetId } = currentSkeletonManager;
 
-            const { scene, engine } = sheetObject;
+            const { scene } = sheetObject;
 
             if (params == null || params.length === 0 || skeleton == null) {
                 return;
@@ -102,7 +92,7 @@ export class EditorBridgeController extends Disposable {
 
             endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY) - scrollXY.y * scaleY;
 
-            let documentLayoutObject = skeleton.getCellDocumentModel(startRow, startColumn, true);
+            let documentLayoutObject = skeleton.getCellDocumentModel(startRow, startColumn, true, true);
 
             if (documentLayoutObject == null || documentLayoutObject.documentModel == null) {
                 documentLayoutObject = skeleton.getBlankCellDocumentModel(startRow, startColumn, true);
@@ -135,6 +125,8 @@ export class EditorBridgeController extends Disposable {
                     endX,
                     endY,
                 },
+                row: startRow,
+                column: startColumn,
                 unitId,
                 sheetId,
                 documentLayoutObject,
@@ -142,45 +134,36 @@ export class EditorBridgeController extends Disposable {
         });
     }
 
-    private _initialDblclickListener() {
+    private _initialEventListener() {
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
             return;
         }
 
-        const { spreadsheet } = sheetObject;
+        const { spreadsheet, scene, spreadsheetColumnHeader, spreadsheetLeftTopPlaceholder, spreadsheetRowHeader } =
+            sheetObject;
 
-        spreadsheet.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+        spreadsheet.onDblclickObserver.add(() => {
             // this._editorBridgeService.show(DeviceInputEventType.Dblclick);
 
             this._commandService.executeCommand(SetCellEditOperation.id, {
                 visible: true,
                 eventType: DeviceInputEventType.Dblclick,
             });
-
-            // const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-            // const scene = this._getSheetObject()?.scene;
-            // if (scene == null || skeleton == null) {
-            //     return;
-            // }
-            // const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-            // const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
-            // const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords);
-            // const { scaleX, scaleY } = scene.getAncestorScale();
-            // const { x: newEvtOffsetX, y: newEvtOffsetY } = relativeCoords;
-            // const selectionData = this._getSelectedRangeWithMerge(
-            //     newEvtOffsetX,
-            //     newEvtOffsetY,
-            //     scaleX,
-            //     scaleY,
-            //     scrollXY
-            // );
-            // if (!selectionData) {
-            //     return false;
-            // }
-            // const { rangeWithCoord: actualRangeWithCoord, primaryWithCoord } = selectionData;
-            // const { startRow, startColumn, endColumn, endRow, startY, endY, startX, endX } = actualRangeWithCoord;
         });
+
+        spreadsheet.onPointerDownObserver.add(this._hideEditor.bind(this));
+        spreadsheetColumnHeader.onPointerDownObserver.add(this._hideEditor.bind(this));
+        spreadsheetLeftTopPlaceholder.onPointerDownObserver.add(this._hideEditor.bind(this));
+        spreadsheetRowHeader.onPointerDownObserver.add(this._hideEditor.bind(this));
+    }
+
+    private _hideEditor() {
+        if (this._editorBridgeService.isVisible().visible === true) {
+            this._commandService.executeCommand(SetCellEditOperation.id, {
+                visible: false,
+            });
+        }
     }
 
     private _getSheetObject() {

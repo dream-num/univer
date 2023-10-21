@@ -829,7 +829,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         return offsetY;
     }
 
-    getCellDocumentModel(row: number, column: number, isFull: boolean = false): Nullable<IDocumentLayoutObject> {
+    getCellDocumentModel(
+        row: number,
+        column: number,
+        isFull: boolean = false,
+        isDeepClone: boolean = false
+    ): Nullable<IDocumentLayoutObject> {
         const cell = this._cellData.getValue(row, column);
         const style = this._styles.getStyleByCell(cell);
         if (!cell) {
@@ -855,7 +860,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 vertexAngle = DEFAULT_ROTATE_ANGLE;
             }
             documentModel = this._updateRenderConfigAndHorizon(
-                cell.p,
+                isDeepClone ? Tools.deepClone(cell.p) : cell.p,
                 horizontalAlign,
                 {
                     horizontalAlign,

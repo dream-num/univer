@@ -1,11 +1,9 @@
-import { KeyCode } from '@univerjs/base-ui';
 import { IPosition, Nullable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface ICellEditorManagerParam extends Partial<IPosition> {
     show: boolean;
-    keycode?: KeyCode;
 }
 
 export interface ICellEditorManagerService {

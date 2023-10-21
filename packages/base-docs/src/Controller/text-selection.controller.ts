@@ -70,7 +70,7 @@ export class TextSelectionController extends Disposable {
 
     override dispose(): void {
         this._renderManagerService.getRenderAll().forEach((docObject) => {
-            const { mainComponent, scene } = docObject;
+            const { mainComponent } = docObject;
             if (mainComponent == null) {
                 return;
             }

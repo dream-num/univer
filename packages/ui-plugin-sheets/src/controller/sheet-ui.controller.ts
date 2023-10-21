@@ -27,7 +27,6 @@ import { RenameSheetCommand } from '../commands/commands/rename.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
 import { SetCellEditOperation } from '../commands/operations/cell-edit.operation';
-import { QuitCellEditorCommand } from '../services/cell-editor/cell-editor.command';
 import { RightMenuInput } from '../View/RightMenu/RightMenuInput';
 import { RightMenuItem } from '../View/RightMenu/RightMenuItem';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../View/SheetContainer/SheetContainer';
@@ -153,8 +152,6 @@ export class SheetUIController extends Disposable {
             SetUnderlineCommand,
             SetFontFamilyCommand,
             SetFontSizeCommand,
-
-            QuitCellEditorCommand,
 
             ShowMenuListCommand,
             RenameSheetCommand,

@@ -21,6 +21,7 @@ import {
 import {
     Disposable,
     DocumentModel,
+    FOCUSING_EDITOR,
     HorizontalAlign,
     ICommandInfo,
     ICommandService,
@@ -43,11 +44,12 @@ import { Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../Basics/editor/get-editor-object';
 import { SetCellEditOperation } from '../../commands/operations/cell-edit.operation';
-import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 const HIDDEN_EDITOR_POSITION = -1000;
+
+const EDITOR_INPUT_SELF_EXTEND_GAP = 5;
 
 @OnLifecycle(LifecycleStages.Steady, StartEditController)
 export class StartEditController extends Disposable {
@@ -97,7 +99,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { unitId, sheetId, position, documentLayoutObject } = param;
+            const { position, documentLayoutObject } = param;
 
             const editorObject = this._getEditorObject();
 
@@ -105,11 +107,11 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { document: documentComponent, scene, engine } = editorObject;
+            const { document: documentComponent, scene } = editorObject;
 
-            const { startX, startY, endX, endY } = position;
+            const { startX, endX } = position;
 
-            const { textRotation, verticalAlign, wrapStrategy, documentModel, paddingData } = documentLayoutObject;
+            const { textRotation, wrapStrategy, documentModel } = documentLayoutObject;
 
             const { a: angle } = textRotation as ITextRotation;
 
@@ -158,9 +160,9 @@ export class StartEditController extends Disposable {
         documentSkeleton: DocumentSkeleton,
         documentLayoutObject: IDocumentLayoutObject
     ) {
-        const { startX, startY, endX, endY } = actualRangeWithCoord;
+        const { startX, endX } = actualRangeWithCoord;
 
-        const { textRotation, verticalAlign, wrapStrategy, documentModel, paddingData } = documentLayoutObject;
+        const { textRotation, wrapStrategy } = documentLayoutObject;
 
         const { a: angle } = textRotation as ITextRotation;
 
@@ -176,8 +178,8 @@ export class StartEditController extends Disposable {
 
         let editorWidth = endX - startX;
 
-        if (editorWidth < size.actualWidth + 5) {
-            editorWidth = size.actualWidth + 5;
+        if (editorWidth < size.actualWidth + EDITOR_INPUT_SELF_EXTEND_GAP) {
+            editorWidth = size.actualWidth + EDITOR_INPUT_SELF_EXTEND_GAP;
         }
 
         documentSkeleton.getModel()!.updateDocumentDataPageSize(editorWidth);
@@ -211,7 +213,7 @@ export class StartEditController extends Disposable {
             documentSkeleton,
             documentLayoutObject
         );
-        const { textRotation, verticalAlign, wrapStrategy, documentModel, paddingData, fill } = documentLayoutObject;
+        const { verticalAlign, paddingData, fill } = documentLayoutObject;
 
         let editorWidth = endX - startX;
 
@@ -300,27 +302,25 @@ export class StartEditController extends Disposable {
     }
 
     private _initialStartEdit() {
-        this._editorBridgeService.visible$.subscribe((state) => {
-            if (state.visible === this._editorVisiblePrevious) {
+        this._editorBridgeService.visible$.subscribe((param) => {
+            const { visible, eventType } = param;
+
+            if (visible === this._editorVisiblePrevious) {
                 return;
             }
 
-            this._editorVisiblePrevious = state.visible;
+            this._editorVisiblePrevious = visible;
 
-            if (state.visible === false) {
-                this._contextService.setContextValue(SHEET_EDITOR_ACTIVATED, false);
-                this._cellEditorManagerService.setState({
-                    show: state.visible,
-                });
+            if (visible === false) {
                 return;
             }
 
-            const param = this._editorBridgeService.getState();
-            if (param == null) {
+            const state = this._editorBridgeService.getState();
+            if (state == null) {
                 return;
             }
 
-            const { position, documentLayoutObject } = param;
+            const { position, documentLayoutObject } = state;
 
             const editorObject = this._getEditorObject();
 
@@ -330,7 +330,7 @@ export class StartEditController extends Disposable {
 
             const { document } = editorObject;
 
-            this._contextService.setContextValue(SHEET_EDITOR_ACTIVATED, true);
+            this._contextService.setContextValue(FOCUSING_EDITOR, true);
 
             const docParam = this._docSkeletonManagerService.getCurrent();
 
@@ -345,7 +345,7 @@ export class StartEditController extends Disposable {
             this._fitTextSize(position, skeleton, documentLayoutObject);
 
             // move selection
-            if (state.eventType === DeviceInputEventType.Keyboard) {
+            if (eventType === DeviceInputEventType.Keyboard) {
                 const snapshot = Tools.deepClone(documentModel.snapshot) as IDocumentData;
                 this._resetBodyStyle(snapshot.body!);
 

@@ -16,7 +16,7 @@ export {
     sequenceExecute,
 } from './services/command/command.service';
 export { IConfigService } from './services/config/config.service';
-export { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from './services/context/context';
+export * from './services/context/context';
 export { IContextService } from './services/context/context.service';
 export { IUniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages, OnLifecycle } from './services/lifecycle/lifecycle';

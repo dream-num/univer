@@ -52,9 +52,9 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         const { unitId, mutations } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const document = univerInstanceService.getUniverDocInstance(unitId);
-        if (!document) {
-            throw new Error(`Document not found for unitId: ${unitId}`);
+        const documentModel = univerInstanceService.getUniverDocInstance(unitId);
+        if (!documentModel) {
+            throw new Error(`DocumentModel not found for unitId: ${unitId}`);
         }
 
         const undoMutations: Array<IRetainMutationParams | IInsertMutationParams | IDeleteMutationParams> = [];
@@ -65,7 +65,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                 const { coverType, body, len, segmentId } = mutation;
                 if (body != null) {
                     const documentBody = UpdateAttributeApply(
-                        document,
+                        documentModel,
                         body,
                         len,
                         commonParameter.cursor,
@@ -87,7 +87,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                 });
             } else if (mutation.t === 'i') {
                 const { body, len, segmentId, line } = mutation;
-                InsertApply(document, body!, len, commonParameter.cursor, segmentId);
+                InsertApply(documentModel, body!, len, commonParameter.cursor, segmentId);
                 commonParameter.moveCursor(len);
                 undoMutations.push({
                     t: 'd',
@@ -97,7 +97,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                 });
             } else if (mutation.t === 'd') {
                 const { len, segmentId } = mutation;
-                const documentBody = DeleteApply(document, len, commonParameter.cursor, segmentId);
+                const documentBody = DeleteApply(documentModel, len, commonParameter.cursor, segmentId);
                 undoMutations.push({
                     ...mutation,
                     t: 'i',

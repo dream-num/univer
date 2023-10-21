@@ -190,8 +190,8 @@ export class Documents extends DocComponent {
             extension.clearCache();
         }
 
+        // broadcasting the pageTop and pageLeft for each page in the document with multiple pages.
         let pageTop = 0;
-
         let pageLeft = 0;
 
         for (let i = 0, len = pages.length; i < len; i++) {

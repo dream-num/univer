@@ -96,9 +96,18 @@ export interface IDocumentLayoutObject {
     wrapStrategy: WrapStrategy;
     verticalAlign: VerticalAlign;
     horizontalAlign: HorizontalAlign;
+    paddingData: IPaddingData;
+    fill?: Nullable<string>;
 }
 
 const DEFAULT_ROTATE_ANGLE = 90;
+
+const DEFAULT_PADDING_DATA = {
+    t: 0,
+    b: 0,
+    l: 2,
+    r: 2,
+};
 
 export class SpreadsheetSkeleton extends Skeleton {
     private _rowHeightAccumulation: number[] = [];
@@ -496,6 +505,15 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    /**
+     *
+     * @param offsetX HTML coordinate system, mouse position x.
+     * @param offsetY HTML coordinate system, mouse position y.
+     * @param scaleX render scene scale x-axis, scene.getAncestorScale
+     * @param scaleY render scene scale y-axis, scene.getAncestorScale
+     * @param scrollXY  render viewport scroll {x, y}, scene.getScrollXYByRelativeCoords, scene.getScrollXY
+     * @returns Selection data with coordinates
+     */
     calculateCellIndexByPosition(
         offsetX: number,
         offsetY: number,
@@ -508,6 +526,15 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.getCellByIndex(row, column, scaleX, scaleY);
     }
 
+    /**
+     *
+     * @param offsetX HTML coordinate system, mouse position x.
+     * @param offsetY HTML coordinate system, mouse position y.
+     * @param scaleX render scene scale x-axis, scene.getAncestorScale
+     * @param scaleY render scene scale y-axis, scene.getAncestorScale
+     * @param scrollXY  render viewport scroll {x, y}, scene.getScrollXYByRelativeCoords, scene.getScrollXY
+     * @returns Hit cell coordinates
+     */
     getCellPositionByOffset(
         offsetX: number,
         offsetY: number,
@@ -767,6 +794,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const horizontalAlign: HorizontalAlign = HorizontalAlign.UNSPECIFIED;
         const verticalAlign: VerticalAlign = VerticalAlign.UNSPECIFIED;
         const wrapStrategy: WrapStrategy = WrapStrategy.UNSPECIFIED;
+        const paddingData: IPaddingData = DEFAULT_PADDING_DATA;
 
         fontString = getFontStyleString({}, this._localService).fontCache;
 
@@ -779,6 +807,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             wrapStrategy,
             verticalAlign,
             horizontalAlign,
+            paddingData,
         };
     }
 
@@ -811,16 +840,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         let documentModel: Nullable<DocumentModelSimple>;
         let fontString = 'document';
         const cellOtherConfig = this._getOtherStyle(style) as CellOtherConfig;
-        // const {
-        //     textRotation = { a: 0, v: BooleanNumber.FALSE },
-        //     horizontalAlign = HorizontalAlign.UNSPECIFIED,
-        //     verticalAlign = VerticalAlign.UNSPECIFIED,
-        //     wrapStrategy = WrapStrategy.UNSPECIFIED,
-        // }= CellOtherConfig;
+
         const textRotation: ITextRotation = cellOtherConfig.textRotation || { a: 0, v: BooleanNumber.FALSE };
         const horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || HorizontalAlign.UNSPECIFIED;
         const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || VerticalAlign.UNSPECIFIED;
         const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || WrapStrategy.UNSPECIFIED;
+        const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
         if (cell.p) {
             const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
             let centerAngle = 0;
@@ -848,6 +873,19 @@ export class SpreadsheetSkeleton extends Skeleton {
             documentModel = this._getDocumentDataByStyle(content.toString(), textStyle, cellOtherConfig, isFull);
         }
 
+        /**
+         * the alignment mode is returned with respect to the offset of the sheet cell,
+         * because the document needs to render the layout for cells and
+         * support alignment across multiple cells (e.g., horizontal alignment of long text in overflow mode).
+         * The alignment mode of the document itself cannot meet this requirement,
+         * so an additional renderConfig needs to be added during the rendering of the document component.
+         * This means that there are two coexisting alignment modes.
+         * In certain cases, such as in an editor, conflicts may arise,
+         * requiring only one alignment mode to be retained.
+         * By removing the relevant configurations in renderConfig,
+         * the alignment mode of the sheet cell can be modified.
+         * The alternative alignment mode is applied to paragraphs within the document.
+         */
         return {
             documentModel,
             fontString,
@@ -855,6 +893,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             wrapStrategy,
             verticalAlign,
             horizontalAlign,
+            paddingData,
+            fill: style?.bg?.rgb,
         };
     }
 
@@ -1014,58 +1054,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnWidthAccumulation,
         };
     }
-
-    // private _calculateOverflowCache() {
-    //     const { font: fontList } = this.stylesCache;
-    //     // const mergeRangeCache = this._getMergeRangeCache();
-    //     const overflowCache = new ObjectMatrix<IRange>();
-    //     const columnCount = this.getColumnCount();
-    //     fontList &&
-    //         Object.keys(fontList).forEach((fontFormat: string) => {
-    //             const fontObjectArray = fontList[fontFormat];
-    //             fontObjectArray.forEach((row, fontArray) => {
-    //                 fontArray.forEach((column, docsSkeleton) => {
-    //                     // overflow handler
-    //                     const { documentSkeleton, angle, verticalAlign, horizontalAlign, wrapStrategy } = docsSkeleton;
-    //                     const cell = this._cellData.getValue(row, column);
-    //                     if (wrapStrategy !== WrapStrategy.OVERFLOW || cell?.n === BooleanNumber.TRUE) {
-    //                         return true;
-    //                     }
-
-    //                     if (horizontalAlign === HorizontalAlign.JUSTIFIED) {
-    //                         return true;
-    //                     }
-
-    //                     let contentSize = documentSkeleton.getLastPageSize(angle);
-
-    //                     if (!contentSize) {
-    //                         return true;
-    //                     }
-
-    //                     // if(angle!==0){
-    //                     //     contentSize = {
-    //                     //         width: contentSize.width,
-
-    //                     //     }
-    //                     // }
-
-    //                     const position = this.getOverflowPosition(contentSize, horizontalAlign, row, column, columnCount);
-
-    //                     const { startColumn, endColumn } = position;
-    //                     overflowCache.setValue(row, column, {
-    //                         startRow: row,
-    //                         endRow: row,
-    //                         startColumn,
-    //                         endColumn,
-    //                     });
-
-    //                     // console.log('appendToOverflowCache', angle, contentSize, { row, column, startColumn, endColumn });
-    //                 });
-    //             });
-    //         });
-
-    //     return overflowCache;
-    // }
 
     private _getOverflowBound(
         row: number,

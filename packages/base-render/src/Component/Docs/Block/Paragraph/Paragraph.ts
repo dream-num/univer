@@ -339,6 +339,13 @@ function _getNextPageNumber(lastPage: IDocumentSkeletonPage) {
     return lastPage.pageNumber + 1;
 }
 
+/**
+ * todo: @author DR-univer
+ * When aligning text horizontally within a document,
+ * it may be ineffective if the total line width is not initially calculated.
+ * Therefore, multiple calculations are performed, which may impact performance.
+ * Needs optimization for efficiency.
+ */
 function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: HorizontalAlign) {
     if (horizontalAlign === HorizontalAlign.UNSPECIFIED || horizontalAlign === HorizontalAlign.LEFT) {
         return;

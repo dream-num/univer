@@ -279,6 +279,10 @@ export class Viewport {
         this._resizeCacheCanvasAndScrollBar();
     }
 
+    removeScrollBar() {
+        this._scrollBar = null;
+    }
+
     resize(position: IViewPosition) {
         const positionKeys = Object.keys(position);
         if (positionKeys.length === 0) {

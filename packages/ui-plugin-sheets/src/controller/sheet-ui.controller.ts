@@ -25,6 +25,8 @@ import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { RenameSheetCommand } from '../commands/commands/rename.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
+import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
+import { SetCellEditOperation } from '../commands/operations/cell-edit.operation';
 import { QuitCellEditorCommand } from '../services/cell-editor/cell-editor.command';
 import { RightMenuInput } from '../View/RightMenu/RightMenuInput';
 import { RightMenuItem } from '../View/RightMenu/RightMenuItem';
@@ -156,6 +158,10 @@ export class SheetUIController extends Disposable {
 
             ShowMenuListCommand,
             RenameSheetCommand,
+
+            SetCellEditOperation,
+
+            SetActivateCellEditOperation,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });

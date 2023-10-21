@@ -18,7 +18,6 @@ import {
     Rect,
     Scene,
 } from '@univerjs/base-render';
-import { IEditorBridgeService } from '@univerjs/base-sheets';
 import {
     Disposable,
     DocumentModel,
@@ -43,8 +42,10 @@ import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../Basics/editor/get-editor-object';
+import { SetCellEditOperation } from '../../commands/operations/cell-edit.operation';
 import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -430,7 +431,12 @@ export class StartEditController extends Disposable {
         }
         // const { event, content, activeRange, selectionList } = config;
 
-        this._editorBridgeService.show(DeviceInputEventType.Keyboard);
+        // this._editorBridgeService.show(DeviceInputEventType.Keyboard);
+
+        this._commandService.executeCommand(SetCellEditOperation.id, {
+            visible: true,
+            eventType: DeviceInputEventType.Keyboard,
+        });
     }
 
     private _commandExecutedListener() {

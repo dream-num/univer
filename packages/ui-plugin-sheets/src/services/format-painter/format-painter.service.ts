@@ -33,6 +33,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
 
         this._status$ = new BehaviorSubject<FormatPainterStatus>(FormatPainterStatus.OFF);
         this.status$ = this._status$.asObservable();
+        this._selectionStyles = new ObjectMatrix<IStyleData>();
     }
 
     setStatus(status: FormatPainterStatus) {

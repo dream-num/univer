@@ -236,6 +236,40 @@ export class SelectionManagerService implements IDisposable {
         };
     }
 
+    /**
+     * Determine whether multiple current selections overlap
+     */
+    isOverlapping(): boolean {
+        const selectionDataList = this.getSelections();
+        if (selectionDataList == null) {
+            return false;
+        }
+        const rangeList = selectionDataList.map((selectionData: ISelectionWithStyle) => {
+            const range = selectionData.range;
+            const { startRow, startColumn, endRow, endColumn } = range;
+            return {
+                startRow,
+                startColumn,
+                endRow,
+                endColumn,
+            };
+        });
+
+        return rangeList.some((range, index) =>
+            rangeList.some((range2, index2) => {
+                if (index === index2) {
+                    return false;
+                }
+                return (
+                    range.startRow <= range2.endRow &&
+                    range.endRow >= range2.startRow &&
+                    range.startColumn <= range2.endColumn &&
+                    range.endColumn >= range2.startColumn
+                );
+            })
+        );
+    }
+
     private _getSelectionDatas(param: Nullable<ISelectionManagerSearchParam>) {
         if (param == null) {
             return;

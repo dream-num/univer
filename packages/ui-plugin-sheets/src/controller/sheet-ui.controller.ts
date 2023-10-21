@@ -54,6 +54,9 @@ import {
     HorizontalAlignMenuItemFactory,
     InsertColAfterMenuItemFactory,
     InsertColBeforeMenuItemFactory,
+    InsertRangeMenuItemFactory,
+    InsertRangeMoveDownMenuItemFactory,
+    InsertRangeMoveRightMenuItemFactory,
     InsertRowAfterMenuItemFactory,
     InsertRowBeforeMenuItemFactory,
     ItalicMenuItemFactory,
@@ -188,6 +191,9 @@ export class SheetUIController extends Disposable {
                 DeleteRangeMenuItemFactory,
                 DeleteRangeMoveLeftMenuItemFactory,
                 DeleteRangeMoveUpMenuItemFactory,
+                InsertRangeMenuItemFactory,
+                InsertRangeMoveRightMenuItemFactory,
+                InsertRangeMoveDownMenuItemFactory,
                 FrozenMenuItemFactory,
 
                 // toolbar

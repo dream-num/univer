@@ -668,3 +668,35 @@ export function getPrimaryForRange(range: IRange, worksheet: Worksheet): ISelect
         isMergedMainCell: true,
     };
 }
+
+/**
+ * Given the length of each interval in an array and sum
+ * @param intervals
+ * @returns
+ */
+export interface IInterval {
+    [index: string]: [start: number, end: number];
+}
+export function calculateTotalLength(intervalsObject: IInterval): number {
+    const points: number[] = [];
+
+    // Put the start and end points of the interval into the points array
+
+    Object.keys(intervalsObject).forEach((key: string) => {
+        const [start, end] = intervalsObject[key];
+        points.push(start, end);
+    });
+
+    // Sort the points array
+    points.sort((a, b) => a - b);
+
+    let totalLength = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+        const start = points[i];
+        const end = points[i + 1];
+        const length = end - start;
+        totalLength += length;
+    }
+
+    return totalLength + 1;
+}

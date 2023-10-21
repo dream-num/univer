@@ -20,15 +20,14 @@ export const SetWorksheetRowHeightMutationFactory = (
     params: ISetWorksheetRowHeightMutationParams
 ): ISetWorksheetRowHeightMutationParams => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
-
-    if (universheet == null) {
-        throw new Error('universheet is null error!');
+    const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId);
+    if (workbook == null) {
+        throw new Error('workbook is null error!');
     }
 
-    const worksheet = universheet.getSheetBySheetId(params.worksheetId);
+    const worksheet = workbook.getSheetBySheetId(params.worksheetId);
     if (worksheet == null) {
-        throw new Error('universheet is null error!');
+        throw new Error('worksheet is null error!');
     }
     const rowHeight = new ObjectArray<number>();
     const manager = worksheet.getRowManager();
@@ -46,6 +45,36 @@ export const SetWorksheetRowHeightMutationFactory = (
         worksheetId: params.worksheetId,
         ranges: params.ranges,
         rowHeight,
+    };
+};
+
+export const SetWorksheetRowAutoHeightMutationFactory = (
+    accessor: IAccessor,
+    params: ISetWorksheetRowAutoHeightMutationParams
+): ISetWorksheetRowAutoHeightMutationParams => {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId);
+    const worksheet = workbook?.getSheetBySheetId(params.worksheetId);
+    if (worksheet == null) {
+        throw new Error('workbook or worksheet is null error!');
+    }
+    const { rowsAutoHeightInfo } = params;
+    const results: IRowAutoHeightInfo[] = [];
+    const manager = worksheet.getRowManager();
+
+    for (const rowInfo of rowsAutoHeightInfo) {
+        const { rowNumber } = rowInfo;
+        const { ah } = manager.getRowOrCreate(rowNumber);
+        results.push({
+            rowNumber,
+            autoHeight: ah,
+        });
+    }
+
+    return {
+        workbookId: params.workbookId,
+        worksheetId: params.worksheetId,
+        rowsAutoHeightInfo: results,
     };
 };
 

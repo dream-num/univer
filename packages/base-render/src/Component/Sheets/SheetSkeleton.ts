@@ -59,7 +59,7 @@ interface ISetCellCache {
 
 export interface IRowAutoHeightInfo {
     rowNumber: number;
-    autoHeight: number;
+    autoHeight?: number;
 }
 
 interface CellOtherConfig {
@@ -368,7 +368,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
 
             const colWidth = data.get(i)?.w;
-
+            console.log(`row: ${rowNum}, col: ${i}, wrapStrategy: ${wrapStrategy}`);
             if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
                 documentModel.updateDocumentDataPageSize(colWidth);
             }

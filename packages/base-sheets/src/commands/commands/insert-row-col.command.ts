@@ -76,7 +76,7 @@ export const InsertRowCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId)!!;
+        const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId)!;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId)!;
 
         const { range, direction, workbookId, worksheetId } = params;

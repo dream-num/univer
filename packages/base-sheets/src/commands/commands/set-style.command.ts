@@ -13,6 +13,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     ObjectMatrix,
+    sequenceExecute,
     Tools,
     VerticalAlign,
     WrapStrategy,
@@ -25,7 +26,8 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from '../mutations/set-range-values.mutation';
-import { SetRowAutoHeightCommand } from './set-worksheet-row-height.command';
+import { SetWorksheetRowAutoHeightMutation } from '../mutations/set-worksheet-row-height.mutation';
+import { getAutoHeightUndoRedoParams } from './set-worksheet-row-height.command';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -34,6 +36,87 @@ export interface IStyleTypeValue<T> {
 
 export interface ISetStyleParams<T> {
     style: IStyleTypeValue<T>;
+}
+
+function getRangeValueUndoRedoParams<T>(accessor: IAccessor, params: ISetStyleParams<T>) {
+    const selectionManagerService = accessor.get(SelectionManagerService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+
+    const ranges = selectionManagerService.getRangeDatas();
+    if (!ranges?.length) {
+        return {
+            setRangeValuesMutationParams: null,
+            undoSetRangeValuesMutationParams: null,
+        };
+    }
+
+    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+    const style = params.style;
+
+    const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+    const worksheet = workbook?.getSheetBySheetId(worksheetId);
+
+    if (!worksheet) {
+        return {
+            setRangeValuesMutationParams: null,
+            undoSetRangeValuesMutationParams: null,
+        };
+    }
+
+    const cellValue = new ObjectMatrix<ICellData>();
+    // let value: ObjectMatrixPrimitiveType<ICellData> | undefined;
+
+    if (Tools.isArray(style.value)) {
+        for (let i = 0; i < ranges.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = ranges[i];
+
+            for (let r = 0; r <= endRow - startRow; r++) {
+                for (let c = 0; c <= endColumn - startColumn; c++) {
+                    cellValue.setValue(r + startRow, c + startColumn, {
+                        s: {
+                            [style.type]: style.value[r][c],
+                        },
+                    });
+                }
+            }
+        }
+
+        // value = cellValue.getData();
+    } else {
+        for (let i = 0; i < ranges.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = ranges[i];
+
+            const colorObj: ICellData = {
+                s: {
+                    [style.type]: style.value,
+                },
+            };
+            // value = Tools.fillObjectMatrix(endRow - startRow + 1, endColumn - startColumn + 1, colorObj);
+            for (let r = startRow; r <= endRow; r++) {
+                for (let c = startColumn; c <= endColumn; c++) {
+                    cellValue.setValue(r, c, colorObj);
+                }
+            }
+        }
+    }
+
+    const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+        range: ranges,
+        worksheetId,
+        workbookId,
+        cellValue: cellValue.getMatrix(),
+    };
+
+    const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+        accessor,
+        setRangeValuesMutationParams
+    );
+
+    return {
+        setRangeValuesMutationParams,
+        undoSetRangeValuesMutationParams,
+    };
 }
 
 /**
@@ -47,72 +130,18 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
     handler: async <T>(accessor: IAccessor, params: ISetStyleParams<T>) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const ranges = selectionManagerService.getRangeDatas();
-        if (!ranges?.length) {
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+
+        const { setRangeValuesMutationParams, undoSetRangeValuesMutationParams } = getRangeValueUndoRedoParams<T>(
+            accessor,
+            params
+        );
+
+        if (setRangeValuesMutationParams == null || undoSetRangeValuesMutationParams == null) {
             return false;
         }
-
-        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        const style = params.style;
-
-        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
-        if (!workbook) return false;
-
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
-        if (!worksheet) return false;
-
-        const cellValue = new ObjectMatrix<ICellData>();
-        // let value: ObjectMatrixPrimitiveType<ICellData> | undefined;
-
-        if (Tools.isArray(style.value)) {
-            for (let i = 0; i < ranges.length; i++) {
-                const { startRow, endRow, startColumn, endColumn } = ranges[i];
-
-                for (let r = 0; r <= endRow - startRow; r++) {
-                    for (let c = 0; c <= endColumn - startColumn; c++) {
-                        cellValue.setValue(r + startRow, c + startColumn, {
-                            s: {
-                                [style.type]: style.value[r][c],
-                            },
-                        });
-                    }
-                }
-            }
-
-            // value = cellValue.getData();
-        } else {
-            for (let i = 0; i < ranges.length; i++) {
-                const { startRow, endRow, startColumn, endColumn } = ranges[i];
-
-                const colorObj: ICellData = {
-                    s: {
-                        [style.type]: style.value,
-                    },
-                };
-                // value = Tools.fillObjectMatrix(endRow - startRow + 1, endColumn - startColumn + 1, colorObj);
-                for (let r = startRow; r <= endRow; r++) {
-                    for (let c = startColumn; c <= endColumn; c++) {
-                        cellValue.setValue(r, c, colorObj);
-                    }
-                }
-            }
-        }
-
-        const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            range: ranges,
-            worksheetId,
-            workbookId,
-            cellValue: cellValue.getMatrix(),
-        };
-
-        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-            accessor,
-            setRangeValuesMutationParams
-        );
 
         const result = commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
         if (result) {
@@ -496,12 +525,17 @@ export interface ISetTextWrapCommandParams {
 export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-text-wrap',
-    handler: async (accessor, params) => {
+    handler: async (accessor: IAccessor, params) => {
         if (!params) {
             return false;
         }
 
         const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbookId = workbook.getUnitId();
+
         const setStyleParams: ISetStyleParams<WrapStrategy> = {
             style: {
                 type: 'tb',
@@ -509,9 +543,57 @@ export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
             },
         };
 
-        await commandService.executeCommand(SetStyleCommand.id, setStyleParams);
-        // TODO: 下面这样写可以吗？
-        return commandService.executeCommand(SetRowAutoHeightCommand.id);
+        const { setRangeValuesMutationParams, undoSetRangeValuesMutationParams } = getRangeValueUndoRedoParams<number>(
+            accessor,
+            setStyleParams
+        );
+
+        if (setRangeValuesMutationParams == null || undoSetRangeValuesMutationParams == null) {
+            return false;
+        }
+
+        const { redoMutationParams, undoMutationParams } = getAutoHeightUndoRedoParams(accessor);
+
+        if (redoMutationParams == null || undoMutationParams == null) {
+            return false;
+        }
+
+        const result = await sequenceExecute(
+            [
+                { id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams },
+                { id: SetWorksheetRowAutoHeightMutation.id, params: redoMutationParams },
+            ],
+            commandService
+        );
+
+        if (result.result) {
+            undoRedoService.pushUndoRedo({
+                URI: workbookId,
+                undo: async () =>
+                    (
+                        await sequenceExecute(
+                            [
+                                { id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams },
+                                { id: SetWorksheetRowAutoHeightMutation.id, params: undoMutationParams },
+                            ],
+                            commandService
+                        )
+                    ).result,
+                redo: async () =>
+                    (
+                        await sequenceExecute(
+                            [
+                                { id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams },
+                                { id: SetWorksheetRowAutoHeightMutation.id, params: redoMutationParams },
+                            ],
+                            commandService
+                        )
+                    ).result,
+            });
+            return true;
+        }
+
+        return false;
     },
 };
 

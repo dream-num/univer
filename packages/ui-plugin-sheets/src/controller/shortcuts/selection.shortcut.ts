@@ -7,9 +7,8 @@ import {
     SelectAllCommand,
 } from '@univerjs/base-sheets';
 import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
-import { Direction, FOCUSING_SHEET } from '@univerjs/core';
+import { Direction } from '@univerjs/core';
 
-import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
 import { whenEditorNotActivated } from './utils';
 
 export const MoveSelectionDownShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
@@ -195,8 +194,7 @@ export const ExpandSelectionEndRightShortcutItem: IShortcutItem<IExpandSelection
 export const SelectAllShortcutItem: IShortcutItem<ISelectAllCommandParams> = {
     id: SelectAllCommand.id,
     binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
-    preconditions: (contextService) =>
-        contextService.getContextValue(FOCUSING_SHEET) && !contextService.matchContextValue(SHEET_EDITOR_ACTIVATED),
+    preconditions: whenEditorNotActivated,
     staticParameters: {
         expandToGapFirst: true,
         loop: true,

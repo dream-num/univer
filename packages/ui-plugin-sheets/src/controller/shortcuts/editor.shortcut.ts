@@ -6,5 +6,5 @@ import { SHEET_EDITOR_ACTIVATED } from '../../services/context/context';
 export const QuitCellEditorShortcutItem: IShortcutItem = {
     id: QuitCellEditorCommand.id,
     binding: KeyCode.ENTER,
-    preconditions: (contextService) => contextService.matchContextValue(SHEET_EDITOR_ACTIVATED),
+    preconditions: (contextService) => contextService.getContextValue(SHEET_EDITOR_ACTIVATED),
 };

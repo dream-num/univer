@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 // Useful keyboard event inspection tool https://www.toptal.com/developers/keycode
 
 /** KeyCode that maps to browser standard keycode. */

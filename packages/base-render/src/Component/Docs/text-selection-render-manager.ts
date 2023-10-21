@@ -181,7 +181,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _isIMEInputApply = false;
 
-    private _activeViewport: Viewport;
+    private _activeViewport!: Viewport;
 
     constructor(
         private _docSkeleton?: Nullable<DocumentSkeleton>,

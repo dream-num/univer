@@ -131,7 +131,7 @@ export class DocsAdaptor extends ObjectAdaptor {
 
         scene.addObject(documents);
 
-        documents.calculatePagePosition();
+        // documents.calculatePagePosition();
 
         // documents.enableEditor();
 

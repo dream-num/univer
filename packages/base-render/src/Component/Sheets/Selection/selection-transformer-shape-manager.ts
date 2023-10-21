@@ -121,7 +121,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
     readonly selectionRangeWithStyle$ = this._selectionRangeWithStyle$.asObservable();
 
-    private _activeViewport: Viewport;
+    private _activeViewport!: Viewport;
 
     static create() {
         return new SelectionTransformerShapeManager();

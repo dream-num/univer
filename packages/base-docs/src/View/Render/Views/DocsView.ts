@@ -1,4 +1,4 @@
-import { Documents, DocumentSkeleton, IDocumentSkeletonDrawing, Picture, Scene } from '@univerjs/base-render';
+import { Documents, DocumentSkeleton, Scene } from '@univerjs/base-render';
 import { DocumentModel, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -54,31 +54,31 @@ export class DocsView extends BaseView {
     }
 
     scrollToCenter() {
-        const { docsLeft, docsTop } = this._documents.calculatePagePosition();
+        // const { docsLeft, docsTop } = this._documents.calculatePagePosition();
         const pages = this._documentSkeleton.getSkeletonData()?.pages;
 
-        if (!pages) {
-            return;
-        }
+        // if (!pages) {
+        //     return;
+        // }
 
-        for (let i = 0; i < pages.length; i++) {
-            const page = pages[i];
-            for (const k of page.skeDrawings.keys()) {
-                const obj = this.getScene().getObject(k);
-                if (obj) {
-                    const drawing = page.skeDrawings.get(k) as IDocumentSkeletonDrawing;
-                    if (obj instanceof Picture) {
-                        const props = obj.getPictureProps();
-                        obj.translate(
-                            drawing.aLeft + docsLeft + (props.liX ?? 0),
-                            drawing.aTop + docsTop + (props.liY ?? 0)
-                        );
-                    } else {
-                        obj.translate(drawing.aLeft + docsLeft, drawing.aTop + docsTop);
-                    }
-                }
-            }
-        }
+        // for (let i = 0; i < pages.length; i++) {
+        //     const page = pages[i];
+        //     for (const k of page.skeDrawings.keys()) {
+        //         const obj = this.getScene().getObject(k);
+        //         if (obj) {
+        //             const drawing = page.skeDrawings.get(k) as IDocumentSkeletonDrawing;
+        //             if (obj instanceof Picture) {
+        //                 const props = obj.getPictureProps();
+        //                 obj.translate(
+        //                     drawing.aLeft + docsLeft + (props.liX ?? 0),
+        //                     drawing.aTop + docsTop + (props.liY ?? 0)
+        //                 );
+        //             } else {
+        //                 obj.translate(drawing.aLeft + docsLeft, drawing.aTop + docsTop);
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     protected override _initialize() {
@@ -144,14 +144,14 @@ export class DocsView extends BaseView {
             throw new Error();
         }
 
-        const { pageMarginLeft, pageMarginTop, docsLeft, docsTop } = documents.calculatePagePosition();
+        // const { pageMarginLeft, pageMarginTop, docsLeft, docsTop } = documents.calculatePagePosition();
 
-        for (let i = 0; i < pages.length; i++) {
-            for (const k of pages[i].skeDrawings.keys()) {
-                const obj = this.getScene().getObject(k);
-                obj?.translate(obj.left + docsLeft - pageMarginLeft, obj.top + docsTop - pageMarginTop);
-            }
-        }
+        // for (let i = 0; i < pages.length; i++) {
+        //     for (const k of pages[i].skeDrawings.keys()) {
+        //         const obj = this.getScene().getObject(k);
+        //         obj?.translate(obj.left + docsLeft - pageMarginLeft, obj.top + docsTop - pageMarginTop);
+        //     }
+        // }
     }
 
     private _buildSkeleton(model: DocumentModel) {

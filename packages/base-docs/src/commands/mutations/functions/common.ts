@@ -13,6 +13,13 @@ import {
     sortRulesFactory,
 } from '@univerjs/core';
 
+/**
+ * Inserting styled text content into the current document model.
+ * @param body The current content object of the document model.
+ * @param insertBody The newly added content object that includes complete text and textRun style information.
+ * @param textLength The length of the inserted content text.
+ * @param currentIndex Determining the index where the content will be inserted into the current content.
+ */
 export function insertTextRuns(
     body: IDocumentBody,
     insertBody: IDocumentBody,
@@ -25,7 +32,7 @@ export function insertTextRuns(
         return;
     }
 
-    let insertIndex = Infinity;
+    let insertIndex = Infinity; // The current index of the textRun where the insertion needs to be made.
     for (let i = 0, len = textRuns.length; i < len; i++) {
         const textRun = textRuns[i];
         const { st, ed } = textRun;
@@ -36,7 +43,12 @@ export function insertTextRuns(
             if (insertIndex === Infinity) {
                 insertIndex = -Infinity;
             }
-        } else if (ed >= currentIndex) {
+        } else if (ed >= currentIndex - 1) {
+            /**
+             * Inserting text at the end of a rich text content,
+             * with the newly inserted text inheriting the style of that content.
+             * So, it is necessary to set ed >= currentIndex - 1 to ensure that the new text is inserted while maintaining the style of the existing content.
+             */
             textRun.ed += textLength;
             insertIndex = i;
         }
@@ -85,6 +97,14 @@ export function insertTextRuns(
     }
 }
 
+/**
+ * Based on the insertBody parameter, which includes a paragraph object,
+ * you can add and adjust the position of paragraphs.
+ * @param body The current content object of the document model.
+ * @param insertBody The newly added content object that includes paragraph information.
+ * @param textLength The length of the inserted content text.
+ * @param currentIndex Determining the index where the content will be inserted into the current content.
+ */
 export function insertParagraphs(
     body: IDocumentBody,
     insertBody: IDocumentBody,
@@ -104,7 +124,7 @@ export function insertParagraphs(
     for (let i = 0, len = paragraphs.length; i < len; i++) {
         const paragraph = paragraphs[i];
         const { startIndex } = paragraph;
-        if (startIndex > currentIndex) {
+        if (startIndex >= currentIndex) {
             paragraph.startIndex += textLength;
         }
 
@@ -162,7 +182,14 @@ export function insertSectionBreaks(
     for (let i = 0, len = sectionBreaks.length; i < len; i++) {
         const sectionBreak = sectionBreaks[i];
         const { startIndex } = sectionBreak;
-        if (startIndex > currentIndex) {
+        if (startIndex >= currentIndex) {
+            /**
+             * Here, startIndex >= currentIndex means that the starting index of
+             * the new paragraph should be greater than or equal to the current index.
+             * This ensures that the paragraph is inserted at a position after the current paragraph.
+             * However, the accuracy of this condition depends on the specific context and
+             * implementation details, so it would be best to validate it further in your specific scenario.
+             */
             sectionBreak.startIndex += textLength;
         }
     }
@@ -194,7 +221,7 @@ export function insertCustomBlocks(
     for (let i = 0, len = customBlocks.length; i < len; i++) {
         const customBlock = customBlocks[i];
         const { startIndex } = customBlock;
-        if (startIndex > currentIndex) {
+        if (startIndex >= currentIndex) {
             customBlock.startIndex += textLength;
         }
     }
@@ -224,7 +251,7 @@ export function insertTables(body: IDocumentBody, insertBody: IDocumentBody, tex
         if (startIndex > currentIndex) {
             table.startIndex += textLength;
             table.endIndex += textLength;
-        } else if (endIndex >= currentIndex) {
+        } else if (endIndex >= currentIndex - 1) {
             table.endIndex += textLength;
         }
     }
@@ -260,7 +287,7 @@ export function insertCustomRanges(
         if (startIndex > currentIndex) {
             customRange.startIndex += textLength;
             customRange.endIndex += textLength;
-        } else if (endIndex >= currentIndex) {
+        } else if (endIndex >= currentIndex - 1) {
             customRange.endIndex += textLength;
         }
     }

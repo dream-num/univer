@@ -8,17 +8,25 @@ export interface ICellEditorManagerParam extends Partial<IPosition> {
 
 export interface ICellEditorManagerService {
     state$: Observable<Nullable<ICellEditorManagerParam>>;
+    focus$: Observable<boolean>;
     dispose(): void;
     setState(param: ICellEditorManagerParam): void;
     getState(): Readonly<Nullable<ICellEditorManagerParam>>;
+    setFocus(param: boolean): void;
 }
 
 export class CellEditorManagerService implements ICellEditorManagerService, IDisposable {
     private _state: Nullable<ICellEditorManagerParam> = null;
 
+    private _focus: boolean = false;
+
     private readonly _state$ = new BehaviorSubject<Nullable<ICellEditorManagerParam>>(null);
 
     readonly state$ = this._state$.asObservable();
+
+    private readonly _focus$ = new BehaviorSubject<boolean>(this._focus);
+
+    readonly focus$ = this._focus$.asObservable();
 
     dispose(): void {
         this._state$.complete();
@@ -33,6 +41,11 @@ export class CellEditorManagerService implements ICellEditorManagerService, IDis
 
     getState(): Readonly<Nullable<ICellEditorManagerParam>> {
         return this._state;
+    }
+
+    setFocus(param: boolean = false) {
+        this._focus = param;
+        this._focus$.next(param);
     }
 
     private _refresh(param: ICellEditorManagerParam): void {

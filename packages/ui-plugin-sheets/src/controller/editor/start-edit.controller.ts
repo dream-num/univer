@@ -1,4 +1,5 @@
 import {
+    DOCS_COMPONENT_MAIN_LAYER_INDEX,
     DocSkeletonManagerService,
     IRichTextEditingMutationParams,
     NORMAL_TEXT_SELECTION_PLUGIN_NAME,
@@ -14,11 +15,14 @@ import {
     IEditorInputConfig,
     IRenderManagerService,
     ITextSelectionRenderManager,
+    Rect,
+    Scene,
 } from '@univerjs/base-render';
 import { IEditorBridgeService } from '@univerjs/base-sheets';
 import {
     Disposable,
     DocumentModel,
+    HorizontalAlign,
     ICommandInfo,
     ICommandService,
     IContextService,
@@ -77,6 +81,13 @@ export class StartEditController extends Disposable {
         this._initialEditFocusListener();
         this._initialStartEdit();
         this._initialKeyboardListener();
+        this._initialCursorSync();
+    }
+
+    private _initialCursorSync() {
+        this._cellEditorManagerService.focus$.subscribe(() => {
+            this._textSelectionRenderManager.sync();
+        });
     }
 
     private _initialEditFocusListener() {
@@ -97,18 +108,16 @@ export class StartEditController extends Disposable {
 
             const { startX, startY, endX, endY } = position;
 
-            const { textRotation, verticalAlign, wrapStrategy, documentModel } = documentLayoutObject;
+            const { textRotation, verticalAlign, wrapStrategy, documentModel, paddingData } = documentLayoutObject;
 
             const { a: angle } = textRotation as ITextRotation;
 
             documentModel!.updateDocumentId(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
 
-            const clientWidth = document.body.clientWidth;
+            // documentModel!.updateDocumentDataMargin(paddingData);
 
             if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
                 documentModel!.updateDocumentDataPageSize(endX - startX);
-            } else {
-                documentModel!.updateDocumentDataPageSize(clientWidth - startX);
             }
 
             this._currentUniverService.changeDoc(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, documentModel! as DocumentModel);
@@ -119,44 +128,9 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            // const documentSkeleton = DocumentSkeleton.create(documentModel!, this._localService);
-
             const documentSkeleton = docParam.skeleton;
 
-            // const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
-
-            // let editorWidth = endX - startX;
-            // let editorHeight = endY - startY;
-
-            // if (editorWidth < actualWidth) {
-            //     editorWidth = actualWidth;
-            // }
-
-            // if (editorHeight < actualHeight) {
-            //     editorHeight = actualHeight;
-            // } else {
-            //     let offsetTop = 0;
-            //     if (verticalAlign === VerticalAlign.MIDDLE) {
-            //         offsetTop = (editorHeight - actualHeight) / 2;
-            //     } else if (verticalAlign === VerticalAlign.BOTTOM) {
-            //         offsetTop = editorHeight - actualHeight;
-            //     }
-            //     documentSkeleton.getModel().updateDocumentDataMargin({
-            //         t: offsetTop,
-            //     });
-            //     documentSkeleton.calculate();
-            // }
-
-            // engine.resizeBySize(editorWidth, editorHeight);
-
-            // scene.transformByState({
-            //     width: editorWidth,
-            //     height: editorHeight,
-            // });
-
             documentComponent.changeSkeleton(documentSkeleton);
-
-            // documentComponent.resize(editorWidth, editorHeight);
 
             this._textSelectionManagerService.setCurrentSelectionNotRefresh({
                 pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
@@ -178,6 +152,45 @@ export class StartEditController extends Disposable {
         });
     }
 
+    private _predictingSize(
+        actualRangeWithCoord: IPosition,
+        documentSkeleton: DocumentSkeleton,
+        documentLayoutObject: IDocumentLayoutObject
+    ) {
+        const { startX, startY, endX, endY } = actualRangeWithCoord;
+
+        const { textRotation, verticalAlign, wrapStrategy, documentModel, paddingData } = documentLayoutObject;
+
+        const { a: angle } = textRotation as ITextRotation;
+
+        const clientWidth = document.body.clientWidth;
+
+        if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
+            return documentSkeleton.getActualSize();
+        }
+        documentSkeleton.getModel().updateDocumentDataPageSize(clientWidth - startX);
+        documentSkeleton.calculate();
+
+        const size = documentSkeleton.getActualSize();
+
+        let editorWidth = endX - startX;
+
+        if (editorWidth < size.actualWidth + 5) {
+            editorWidth = size.actualWidth + 5;
+        }
+
+        documentSkeleton.getModel()!.updateDocumentDataPageSize(editorWidth);
+
+        documentSkeleton.getModel()!.updateDocumentRenderConfig({
+            horizontalAlign: HorizontalAlign.UNSPECIFIED,
+        });
+
+        return {
+            actualWidth: editorWidth,
+            actualHeight: size.actualHeight,
+        };
+    }
+
     private _fitTextSize(
         actualRangeWithCoord: IPosition,
         documentSkeleton: DocumentSkeleton,
@@ -192,9 +205,15 @@ export class StartEditController extends Disposable {
         const { document, scene, engine } = editorObject;
 
         const { startX, startY, endX, endY } = actualRangeWithCoord;
-        const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
-        const { textRotation, verticalAlign, wrapStrategy, documentModel } = documentLayoutObject;
+        const { actualWidth, actualHeight } = this._predictingSize(
+            actualRangeWithCoord,
+            documentSkeleton,
+            documentLayoutObject
+        );
+        const { textRotation, verticalAlign, wrapStrategy, documentModel, paddingData, fill } = documentLayoutObject;
+
         let editorWidth = endX - startX;
+
         let editorHeight = endY - startY;
 
         if (editorWidth < actualWidth) {
@@ -203,19 +222,28 @@ export class StartEditController extends Disposable {
 
         if (editorHeight < actualHeight) {
             editorHeight = actualHeight;
+            // To restore the page margins for the skeleton.
+            documentSkeleton.getModel().updateDocumentDataMargin(paddingData);
         } else {
-            let offsetTop = 0;
+            // Set the top margin under vertical alignment.
+            let offsetTop = paddingData.t || 0;
             if (verticalAlign === VerticalAlign.MIDDLE) {
                 offsetTop = (editorHeight - actualHeight) / 2;
             } else if (verticalAlign === VerticalAlign.BOTTOM) {
                 offsetTop = editorHeight - actualHeight;
             }
+
+            offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
+
             documentSkeleton.getModel().updateDocumentDataMargin({
                 t: offsetTop,
             });
-            documentSkeleton.calculate();
         }
 
+        // re-calculate skeleton(viewModel for component)
+        documentSkeleton.calculate();
+
+        // resize canvas
         engine.resizeBySize(editorWidth, editorHeight);
 
         scene.transformByState({
@@ -223,9 +251,9 @@ export class StartEditController extends Disposable {
             height: editorHeight,
         });
 
-        // document.changeSkeleton(documentSkeleton);
-
         document.resize(editorWidth, editorHeight);
+
+        this._addBackground(scene, editorWidth, editorHeight, fill);
 
         this._cellEditorManagerService.setState({
             startX,
@@ -235,7 +263,39 @@ export class StartEditController extends Disposable {
             show: true,
         });
 
-        this._textSelectionRenderManager.sync();
+        // this._textSelectionRenderManager.sync();
+    }
+
+    private _addBackground(scene: Scene, editorWidth: number, editorHeight: number, fill?: Nullable<string>) {
+        const fillRectKey = '_backgroundRectHelperColor_';
+        const rect = scene.getObject(fillRectKey) as Rect;
+        if (rect == null && fill == null) {
+            return;
+        }
+
+        if (rect == null) {
+            scene.addObjects(
+                [
+                    new Rect(fillRectKey, {
+                        width: editorWidth,
+                        height: editorHeight,
+                        fill,
+                        evented: false,
+                    }),
+                ],
+                DOCS_COMPONENT_MAIN_LAYER_INDEX
+            );
+        } else if (fill == null) {
+            rect.dispose();
+        } else {
+            rect.setProps({
+                fill,
+            });
+            rect.transformByState({
+                width: editorWidth,
+                height: editorHeight,
+            });
+        }
     }
 
     private _initialStartEdit() {
@@ -269,16 +329,7 @@ export class StartEditController extends Disposable {
 
             const { document } = editorObject;
 
-            // const { startX, startY, endX, endY } = position;
-
             this._contextService.setContextValue(SHEET_EDITOR_ACTIVATED, true);
-            // this._cellEditorManagerService.setState({
-            //     startX,
-            //     startY,
-            //     endX,
-            //     endY,
-            //     show: state.visible,
-            // });
 
             const docParam = this._docSkeletonManagerService.getCurrent();
 
@@ -324,10 +375,6 @@ export class StartEditController extends Disposable {
                     },
                 ]);
             }
-
-            setTimeout(() => {
-                this._textSelectionRenderManager.sync();
-            }, 0);
         });
     }
 
@@ -427,6 +474,10 @@ export class StartEditController extends Disposable {
                     const { position, documentLayoutObject } = param;
 
                     this._fitTextSize(position, skeleton, documentLayoutObject);
+
+                    // const editorObject = this._getEditorObject();
+
+                    // editorObject?.document.makeDirty();
                 }
             })
         );

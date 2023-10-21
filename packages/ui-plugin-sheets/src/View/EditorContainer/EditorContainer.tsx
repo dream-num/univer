@@ -83,6 +83,10 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         };
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
+    useEffect(() => {
+        cellEditorManagerService.setFocus(true);
+    }, [state]);
+
     return (
         <div
             className={styles.editorContainer}

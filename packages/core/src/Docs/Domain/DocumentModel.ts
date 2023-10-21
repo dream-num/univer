@@ -1,5 +1,5 @@
 import { Tools } from '../../Shared/Tools';
-import { IDocumentData } from '../../Types/Interfaces/IDocumentData';
+import { IDocumentData, IDocumentRenderConfig } from '../../Types/Interfaces/IDocumentData';
 import { IPaddingData } from '../../Types/Interfaces/IStyleData';
 import { DocumentBodyModel } from './DocumentBodyModel';
 
@@ -97,6 +97,18 @@ export class DocumentModelSimple {
 
     updateDocumentId(unitId: string) {
         this.snapshot.id = unitId;
+    }
+
+    updateDocumentRenderConfig(config: IDocumentRenderConfig) {
+        const documentStyle = this.snapshot.documentStyle;
+        if (documentStyle.renderConfig == null) {
+            documentStyle.renderConfig = config;
+        } else {
+            documentStyle.renderConfig = {
+                ...documentStyle.renderConfig,
+                ...config,
+            };
+        }
     }
 
     updateDocumentDataMargin(data: IPaddingData) {

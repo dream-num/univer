@@ -53,6 +53,34 @@ export class Liquid {
         }
     }
 
+    // const {
+    //     verticalAlign = VerticalAlign.TOP,
+    //     horizontalAlign = HorizontalAlign.LEFT,
+    //     centerAngle: centerAngleDeg = 0,
+    //     vertexAngle: vertexAngleDeg = 0,
+    //     wrapStrategy = WrapStrategy.UNSPECIFIED,
+    //     isRotateNonEastAsian = BooleanNumber.FALSE,
+    // } = renderConfig;
+
+    // let paddingTop = 0;
+
+    // if (verticalAlign === VerticalAlign.MIDDLE && pageHeight !== Infinity) {
+    //     paddingTop = (pageHeight - height) / 2;
+    // } else if (verticalAlign === VerticalAlign.BOTTOM && pageHeight !== Infinity) {
+    //     paddingTop = pageHeight - height - pagePaddingBottom;
+    // } else {
+    //     paddingTop = pagePaddingTop;
+    // }
+
+    // let paddingLeft = 0;
+
+    // if (horizontalAlign === HorizontalAlign.CENTER && pageWidth !== Infinity) {
+    //     paddingLeft = (pageWidth - width) / 2;
+    // } else if (horizontalAlign === HorizontalAlign.RIGHT && pageWidth !== Infinity) {
+    //     paddingLeft = pageWidth - width - pagePaddingRight;
+    // } else {
+    //     paddingLeft = pagePaddingLeft;
+    // }
     translatePagePadding(page: IDocumentSkeletonPage) {
         const {
             marginTop: pagePaddingTop = 0,
@@ -102,9 +130,9 @@ export class Liquid {
         let pageLeft = 0;
 
         if (type === PageLayoutType.VERTICAL) {
-            pageTop = pageHeight + top;
+            pageTop += pageHeight + top;
         } else if (type === PageLayoutType.HORIZONTAL) {
-            pageLeft = pageWidth + left;
+            pageLeft += pageWidth + left;
         }
 
         this.translate(pageLeft, pageTop);

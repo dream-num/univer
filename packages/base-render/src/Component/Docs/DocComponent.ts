@@ -11,10 +11,6 @@ import { DOCS_EXTENSION_TYPE } from './DocExtension';
 import { DocumentSkeleton } from './DocSkeleton';
 
 export class DocComponent extends RenderComponent<IDocumentSkeletonSpan | IDocumentSkeletonLine, DOCS_EXTENSION_TYPE> {
-    pageWidth: number = 100;
-
-    pageHeight: number = 100;
-
     pageMarginLeft: number = 0;
 
     pageMarginTop: number = 0;

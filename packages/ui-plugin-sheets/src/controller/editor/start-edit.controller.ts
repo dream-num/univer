@@ -151,7 +151,7 @@ export class StartEditController extends Disposable {
                     isStartBack: true,
                 },
             ]);
-            this._textSelectionRenderManager.active(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
+            this._textSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
         });
     }
 
@@ -421,8 +421,7 @@ export class StartEditController extends Disposable {
     }
 
     private _initialKeyboardListener() {
-        this._textSelectionRenderManager.onInput$.subscribe(this._showEditorByKeyboard.bind(this));
-        this._textSelectionRenderManager.onCompositionstart$.subscribe(this._showEditorByKeyboard.bind(this));
+        this._textSelectionRenderManager.onInputBefore$.subscribe(this._showEditorByKeyboard.bind(this));
     }
 
     private _showEditorByKeyboard(config: Nullable<IEditorInputConfig>) {

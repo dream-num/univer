@@ -39,9 +39,6 @@ interface ISetWorksheetMutationParams {
 
 @OnLifecycle(LifecycleStages.Rendered, SheetRenderController)
 export class SheetRenderController extends Disposable {
-    private _previousUnitId: string = '';
-    private _previousSheetId: string = '';
-
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -83,9 +80,6 @@ export class SheetRenderController extends Disposable {
             if (currentRender == null) {
                 return;
             }
-
-            this._previousUnitId = unitId;
-            this._previousSheetId = sheetId;
 
             const { mainComponent, components, scene } = currentRender;
 
@@ -140,19 +134,12 @@ export class SheetRenderController extends Disposable {
                         return;
                     }
 
-                    if (this._previousUnitId === unitId && this._previousSheetId === sheetId) {
-                        return;
-                    }
-
-                    this._previousUnitId = unitId;
-
-                    this._previousSheetId = sheetId;
-
                     if (command.id !== SetWorksheetActivateMutation.id) {
                         this._sheetSkeletonManagerService.makeDirty(
                             {
                                 unitId,
                                 sheetId,
+                                commandId: command.id,
                             },
                             true
                         );
@@ -161,6 +148,7 @@ export class SheetRenderController extends Disposable {
                     this._sheetSkeletonManagerService.setCurrent({
                         unitId,
                         sheetId,
+                        commandId: command.id,
                     });
                 }
 

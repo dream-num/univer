@@ -43,7 +43,7 @@ export class NormalInputController extends Disposable {
     }
 
     private _initialNormalInput() {
-        this._onInputSubscription = this._textSelectionRenderManager.onInput$.subscribe((config) => {
+        this._onInputSubscription = this._textSelectionRenderManager.onInput$.subscribe(async (config) => {
             if (config == null) {
                 return;
             }
@@ -66,7 +66,7 @@ export class NormalInputController extends Disposable {
 
             const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack, segmentId, style } = activeRange;
 
-            this._commandService.executeCommand(InsertCommand.id, {
+            await this._commandService.executeCommand(InsertCommand.id, {
                 unitId: documentModel.getUnitId(),
                 body: {
                     dataStream: content,

@@ -8,11 +8,13 @@ export interface ISheetSkeletonManagerParam {
     sheetId: string;
     skeleton: SpreadsheetSkeleton;
     dirty: boolean;
+    commandId?: string;
 }
 
 export interface ISheetSkeletonManagerSearch {
     unitId: string;
     sheetId: string;
+    commandId?: string;
 }
 
 /**
@@ -52,8 +54,8 @@ export class SheetSkeletonManagerService implements IDisposable {
         return this._getCurrentBySearch(this._currentSkeleton);
     }
 
-    setCurrent(searchParm: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
-        const param = this._getCurrentBySearch(searchParm);
+    setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
+        const param = this._getCurrentBySearch(searchParam);
         if (param != null) {
             if (param.dirty) {
                 param.skeleton.makeDirty(true);
@@ -61,11 +63,11 @@ export class SheetSkeletonManagerService implements IDisposable {
             }
             param.skeleton.calculate();
         } else {
-            const { unitId, sheetId } = searchParm;
+            const { unitId, sheetId } = searchParam;
 
-            const workbook = this._currentUniverService.getUniverSheetInstance(searchParm.unitId);
+            const workbook = this._currentUniverService.getUniverSheetInstance(searchParam.unitId);
 
-            const worksheet = workbook?.getSheetBySheetId(searchParm.sheetId);
+            const worksheet = workbook?.getSheetBySheetId(searchParam.sheetId);
 
             if (worksheet == null || workbook == null) {
                 return;
@@ -81,11 +83,13 @@ export class SheetSkeletonManagerService implements IDisposable {
             });
         }
 
-        this._currentSkeleton = searchParm;
+        this._currentSkeleton = searchParam;
 
-        this._currentSkeletonBefore$.next(this.getCurrent());
+        const nextParam = this.getCurrent();
 
-        this._currentSkeleton$.next(this.getCurrent());
+        this._currentSkeletonBefore$.next(nextParam);
+
+        this._currentSkeleton$.next(nextParam);
 
         return this.getCurrent();
     }
@@ -103,9 +107,15 @@ export class SheetSkeletonManagerService implements IDisposable {
     }
 
     private _getCurrentBySearch(searchParm: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
-        return this._sheetSkeletonParam.find(
+        const item = this._sheetSkeletonParam.find(
             (param) => param.unitId === searchParm.unitId && param.sheetId === searchParm.sheetId
         );
+
+        if (item != null) {
+            item.commandId = searchParm.commandId;
+        }
+
+        return item;
     }
 
     private _buildSkeleton(worksheet: Worksheet, workbook: Workbook) {

@@ -24,6 +24,7 @@ import { DocumentSkeleton } from './DocSkeleton';
 import { IDocumentOffsetConfig } from './Document';
 
 export interface ITextSelectionRenderManager {
+    readonly onInputBefore$: Observable<Nullable<IEditorInputConfig>>;
     readonly onKeydown$: Observable<Nullable<IEditorInputConfig>>;
     readonly onInput$: Observable<Nullable<IEditorInputConfig>>;
     readonly onCompositionstart$: Observable<Nullable<IEditorInputConfig>>;
@@ -58,19 +59,19 @@ export interface ITextSelectionRenderManager {
 
     scroll(): void;
 
-    active(x: number, y: number): void;
+    activate(x: number, y: number): void;
 
     focus(): void;
 
-    deactivate(withoutBlur: boolean): void;
+    blur(): void;
+
+    deactivate(): void;
 
     changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene): void;
 
     dispose(): void;
 
     reset(): void;
-
-    activate(toLastPosition: boolean): void;
 
     getRanges(): Array<Nullable<ITextSelectionRangeWithStyle>>;
 
@@ -102,6 +103,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     // onCompositionendObservable = new Observable<IEditorInputConfig>();
 
     // onSelectionStartObservable = new Observable<Nullable<INodePosition>>();
+
+    private readonly _onInputBefore$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+
+    readonly onInputBefore$ = this._onInputBefore$.asObservable();
 
     private readonly _onKeydown$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
 
@@ -293,48 +298,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         };
     }
 
-    activate(toLastPosition = false): void {
-        // const documents = this._documents;
-        // if (!documents) {
-        //     return;
-        // }
-        // setTimeout(() => {
-        //     documents.makeDirty();
-        // });
-        // FIXME: I don't know if this is correct. Just trying it.
-        // const lastCharIndex = documents.getSkeleton()!.getModel().bodyModel.body.dataStream.length;
-        // const span = documents.findNodeByCharIndex(lastCharIndex - 1);
-        // const position = documents.findPositionBySpan(span!);
-        // const remain = this.remain();
-        // if (position && remain) {
-        //     remain.startNodePosition = { ...position, isBack: true };
-        //     remain.endNodePosition = undefined;
-        // }
-        // if (!this._documents) {
-        //    return;
-        // }
-        // TODO
-        // this.activeViewport = this._documents.getActiveViewportByCoord(evtOffsetX, evtOffsetY);
-        // const startNode = this._documents.findNodeByCoord(evtOffsetX, evtOffsetY);
-        // console.log('startNode', startNode, position, evtOffsetX, evtOffsetY);
-        // if (position == null) {
-        //     this._deleteAllTextSelection();
-        //     return;
-        // }
-        // if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
-        //     position.isBack = true;
-        // }
-        // if (evt.ctrlKey || this._isEmptyTextSelection()) {
-        //     const newTextSelection = new TextSelection(this._documents.getScene(), position);
-        //     this._addTextSelection(newTextSelection);
-        // } else {
-        //     this._updateTextSelection(position);
-        // }
-        // this._activeSelectionRefresh();
-        // this._syncDomToSelection();
-    }
-
-    active(x: number, y: number) {
+    activate(x: number, y: number) {
         this._container.style.left = `${x}px`;
         this._container.style.top = `${y}px`;
         this._container.style.zIndex = `1000`;
@@ -343,7 +307,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._cursor.style.display = 'revert';
 
         setTimeout(() => {
-            this._input.focus();
+            this.focus();
         }, 0);
     }
 
@@ -351,17 +315,21 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._input.focus();
     }
 
+    blur() {
+        this._input.blur();
+    }
+
     // FIXME: for editor cell editor we don't need to blur the input element
-    deactivate(withoutBlur: boolean = true) {
+    deactivate() {
         this._container.style.left = `0px`;
         this._container.style.top = `0px`;
 
         this._cursor.style.animation = '';
         this._cursor.style.display = 'none';
 
-        if (!withoutBlur) {
-            this._input.blur();
-        }
+        // if (!withoutBlur) {
+        //     this._input.blur();
+        // }
     }
 
     changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene, viewport?: Nullable<Viewport>) {
@@ -749,6 +717,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         const activeTextSelection = this.getActiveTextSelection();
         const anchor = activeTextSelection?.getAnchor();
         if (!anchor || (anchor && !anchor.visible) || this._activeViewport == null) {
+            this.focus();
             return;
         }
 
@@ -768,7 +737,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         canvasTop += y;
 
-        this.active(canvasLeft, canvasTop);
+        this.activate(canvasLeft, canvasTop);
     }
 
     private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {
@@ -884,6 +853,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             }
 
             this._eventHandle(e, (config) => {
+                this._onInputBefore$.next(config);
                 this._onInput$.next(config);
             });
         });
@@ -906,6 +876,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._input.addEventListener('compositionupdate', (e) => {
             this._eventHandle(e, (config) => {
+                this._onInputBefore$.next(config);
                 this._onCompositionupdate$.next(config);
             });
         });
@@ -969,6 +940,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         // documents.onPointerLeaveObserver.remove(this._moveOutObserver);
         // documents.onPointerDownObserver.remove(this._downObserver);
         // this._docSkeleton?.onRecalculateChangeObservable.remove(this._skeletonObserver);
+        this._onInputBefore$.complete();
         this._onKeydown$.complete();
         this._onInput$.complete();
         this._onCompositionstart$.complete();

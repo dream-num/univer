@@ -254,12 +254,10 @@ export class ScrollController extends Disposable {
 
             this._updateSceneSize(param);
 
-            setTimeout(() => {
-                this._scrollManagerService.setCurrentScroll({
-                    unitId,
-                    sheetId,
-                });
-            }, 0);
+            this._scrollManagerService.setCurrentScroll({
+                unitId,
+                sheetId,
+            });
         });
     }
 

@@ -139,6 +139,7 @@ export class SheetRenderController extends Disposable {
                             {
                                 unitId,
                                 sheetId,
+                                commandId: command.id,
                             },
                             true
                         );
@@ -147,6 +148,7 @@ export class SheetRenderController extends Disposable {
                     this._sheetSkeletonManagerService.setCurrent({
                         unitId,
                         sheetId,
+                        commandId: command.id,
                     });
                 }
 

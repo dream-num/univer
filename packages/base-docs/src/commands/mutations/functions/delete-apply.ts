@@ -43,7 +43,7 @@ function updateAttributeByDelete(body: IDocumentBody, textLength: number, curren
 
     const startIndex = currentIndex;
 
-    const endIndex = currentIndex + textLength - 1;
+    const endIndex = currentIndex + textLength;
 
     const removeTextRuns = deleteTextRuns(body, textLength, currentIndex);
 

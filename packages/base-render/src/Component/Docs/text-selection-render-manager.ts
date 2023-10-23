@@ -16,12 +16,31 @@ import {
 import { checkStyle, injectStyle } from '../../Basics/Tools';
 import { Transform } from '../../Basics/Transform';
 import { Vector2 } from '../../Basics/Vector2';
+import { Engine } from '../../Engine';
 import { Scene } from '../../Scene';
 import { ScrollTimer } from '../../ScrollTimer';
 import { IScrollObserverParam, Viewport } from '../../Viewport';
 import { TextSelection } from './Common/TextSelection';
 import { DocumentSkeleton } from './DocSkeleton';
 import { IDocumentOffsetConfig } from './Document';
+
+export function getCanvasOffsetByEngine(engine: Nullable<Engine>) {
+    const canvas = engine?.getCanvasElement();
+
+    if (!canvas) {
+        return {
+            left: 0,
+            top: 0,
+        };
+    }
+
+    const { top, left } = getOffsetRectForDom(canvas);
+
+    return {
+        left,
+        top,
+    };
+}
 
 export interface ITextSelectionRenderManager {
     readonly onInputBefore$: Observable<Nullable<IEditorInputConfig>>;
@@ -665,22 +684,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     }
 
     private _getCanvasOffset() {
-        const engine = this._scene?.getEngine();
-        const canvas = engine?.getCanvasElement();
-
-        if (!canvas) {
-            return {
-                left: 0,
-                top: 0,
-            };
-        }
-
-        const { top, left } = getOffsetRectForDom(canvas);
-
-        return {
-            left,
-            top,
-        };
+        const engine = this._scene?.getEngine() as Engine;
+        return getCanvasOffsetByEngine(engine);
     }
 
     // Let the selection show on the current screen.

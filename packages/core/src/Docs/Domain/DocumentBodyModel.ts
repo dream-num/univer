@@ -1,5 +1,4 @@
 import { IDisposable } from '@wendellhu/redi';
-import { Observable, Subject } from 'rxjs';
 
 import { Nullable } from '../../Shared/Types';
 import { IDocumentBody, ITextRun } from '../../Types/Interfaces/IDocumentData';
@@ -10,10 +9,6 @@ export type DocumentBodyModelOrSimple = DocumentBodyModelSimple | DocumentBodyMo
 
 export class DocumentBodyModelSimple implements IDisposable {
     children: DataStreamTreeNode[] = [];
-
-    protected readonly _modelChange$: Subject<void> = new Subject();
-
-    readonly modelChange$: Observable<void> = this._modelChange$.asObservable();
 
     constructor(
         /** @deprecated this does not hold true fact about the text model, do not use this directly */
@@ -27,7 +22,6 @@ export class DocumentBodyModelSimple implements IDisposable {
     }
 
     dispose(): void {
-        this._modelChange$.complete();
         this.children.forEach((child) => {
             child.dispose();
         });
@@ -233,7 +227,6 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
     reset(body: IDocumentBody) {
         this.children = this._transformToTree(body.dataStream);
         this.body = body;
-        this._modelChange$.next();
     }
 
     insert(insertBody: IDocumentBody, insertIndex = 0) {
@@ -319,14 +312,11 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                 }
             });
         }
-
-        this._modelChange$.next();
     }
 
     delete(currentIndex: number, textLength: number) {
         const nodes = this.children;
         this.deleteTree(nodes, currentIndex, textLength);
-        this._modelChange$.next();
     }
 
     getParagraphByTree(nodes: DataStreamTreeNode[], insertIndex: number): Nullable<DataStreamTreeNode> {

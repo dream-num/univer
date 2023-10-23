@@ -16,6 +16,7 @@ export interface IEditorBridgeServiceParam {
     row: number;
     column: number;
     position: IPosition;
+    canvasOffset: { left: number; top: number };
     documentLayoutObject: IDocumentLayoutObject;
 }
 

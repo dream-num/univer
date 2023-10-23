@@ -425,7 +425,7 @@ export class Worksheet {
      * @returns the position of the last row that has content.
      */
     getLastRowWithContent(): number {
-        return this._cellData.getLength();
+        return this._cellData.getLength() - 1;
     }
 
     /**

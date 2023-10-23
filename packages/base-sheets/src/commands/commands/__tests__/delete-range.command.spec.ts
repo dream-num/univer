@@ -23,8 +23,8 @@ import { InsertRangeMutation } from '../../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
-import { InsertRangeMoveDownCommand } from '../insert-range-move-down.command';
-import { InsertRangeMoveRightCommand } from '../insert-range-move-right.command';
+import { DeleteRangeMoveLeftCommand } from '../delete-range-move-left.command';
+import { DeleteRangeMoveUpCommand } from '../delete-range-move-up.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const mergeData = [
@@ -146,7 +146,7 @@ const WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     timeZone: '',
 };
 
-describe('Test insert range commands', () => {
+describe('Test delete range commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
@@ -182,8 +182,8 @@ describe('Test insert range commands', () => {
         get = testBed.get;
 
         commandService = get(ICommandService);
-        commandService.registerCommand(InsertRangeMoveDownCommand);
-        commandService.registerCommand(InsertRangeMoveRightCommand);
+        commandService.registerCommand(DeleteRangeMoveUpCommand);
+        commandService.registerCommand(DeleteRangeMoveLeftCommand);
         commandService.registerCommand(InsertRangeMutation);
         commandService.registerCommand(DeleteRangeMutation);
         commandService.registerCommand(AddWorksheetMergeMutation);
@@ -253,7 +253,7 @@ describe('Test insert range commands', () => {
     afterEach(() => {
         univer.dispose();
     });
-    describe('Insert range move right', () => {
+    describe('Delete range move left', () => {
         describe('correct situations', () => {
             it('will insert range when there is a selected range, no merged cells', async () => {
                 selectionManager.replace([
@@ -263,13 +263,9 @@ describe('Test insert range commands', () => {
                         style: null,
                     },
                 ]);
-                expect(await commandService.executeCommand(InsertRangeMoveRightCommand.id)).toBeTruthy();
+                expect(await commandService.executeCommand(DeleteRangeMoveLeftCommand.id)).toBeTruthy();
                 expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({
-                    v: '',
-                    m: '',
-                });
-                expect(getValueByPosition(0, 1, 0, 1)).toStrictEqual({
-                    v: 'A1',
+                    v: 'B1',
                 });
 
                 // undo
@@ -284,90 +280,8 @@ describe('Test insert range commands', () => {
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({
-                    v: '',
-                    m: '',
+                    v: 'B1',
                 });
-                expect(getValueByPosition(0, 1, 0, 1)).toStrictEqual({
-                    v: 'A1',
-                });
-
-                // reset data for next test
-                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            });
-            it('will insert range when there is a selected range, with merged cells of 2 rows and 1 column, break merged cells on the right', async () => {
-                selectionManager.replace([
-                    {
-                        range: { startRow: 0, startColumn: 2, endRow: 1, endColumn: 2, rangeType: RANGE_TYPE.NORMAL },
-                        primary: null,
-                        style: null,
-                    },
-                ]);
-                expect(await commandService.executeCommand(InsertRangeMoveRightCommand.id)).toBeTruthy();
-
-                // cell value
-                expect(getValueByPosition(0, 2, 0, 2)).toStrictEqual({
-                    v: '',
-                    m: '',
-                });
-                expect(getValueByPosition(0, 3, 0, 3)).toStrictEqual({
-                    v: 'C1',
-                });
-                expect(getValueByPosition(1, 4, 1, 4)).toStrictEqual({
-                    v: 'D2',
-                });
-
-                const mergedCells = getMergedCells(0, 2, 2, 4);
-                expect(mergedCells).toStrictEqual([
-                    {
-                        startRow: 0,
-                        startColumn: 3,
-                        endRow: 1,
-                        endColumn: 3,
-                    },
-                ]);
-
-                // TODO@Dushusir: test undo redo after delete range completed
-
-                // reset data for next test
-                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            });
-            it('will insert range when there is a selected range, with merged cells of 3 rows and 1 column, will not break merged cells on the right', async () => {
-                selectionManager.replace([
-                    {
-                        range: { startRow: 4, startColumn: 2, endRow: 6, endColumn: 2, rangeType: RANGE_TYPE.NORMAL },
-                        primary: null,
-                        style: null,
-                    },
-                ]);
-                expect(await commandService.executeCommand(InsertRangeMoveRightCommand.id)).toBeTruthy();
-
-                // cell value
-                expect(getValueByPosition(4, 2, 4, 2)).toStrictEqual({
-                    v: '',
-                    m: '',
-                });
-                expect(getValueByPosition(4, 3, 4, 3)).toStrictEqual({
-                    v: 'C5',
-                });
-                expect(getValueByPosition(5, 4, 5, 4)).toStrictEqual({
-                    v: 'D6',
-                });
-
-                const mergedCells = getMergedCells(4, 2, 6, 4);
-                expect(mergedCells).toStrictEqual([
-                    {
-                        startRow: 4,
-                        startColumn: 3,
-                        endRow: 6,
-                        endColumn: 3,
-                    },
-                    {
-                        startRow: 5,
-                        startColumn: 4,
-                        endRow: 6,
-                        endColumn: 4,
-                    },
-                ]);
 
                 // reset data for next test
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
@@ -377,12 +291,12 @@ describe('Test insert range commands', () => {
         describe('fault situations', () => {
             it('will not apply when there is no selected ranges', async () => {
                 selectionManager.clear();
-                const result = await commandService.executeCommand(InsertRangeMoveRightCommand.id);
+                const result = await commandService.executeCommand(DeleteRangeMoveLeftCommand.id);
                 expect(result).toBeFalsy();
             });
         });
     });
-    describe('Insert range move down', () => {
+    describe('Delete range move up', () => {
         describe('correct situations', () => {
             it('will insert range when there is a selected range, no merged cells', async () => {
                 selectionManager.replace([
@@ -393,13 +307,9 @@ describe('Test insert range commands', () => {
                     },
                 ]);
 
-                expect(await commandService.executeCommand(InsertRangeMoveDownCommand.id)).toBeTruthy();
+                expect(await commandService.executeCommand(DeleteRangeMoveUpCommand.id)).toBeTruthy();
                 expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({
-                    v: '',
-                    m: '',
-                });
-                expect(getValueByPosition(1, 0, 1, 0)).toStrictEqual({
-                    v: 'A1',
+                    v: 'A2',
                 });
 
                 // undo
@@ -414,89 +324,8 @@ describe('Test insert range commands', () => {
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValueByPosition(0, 0, 0, 0)).toStrictEqual({
-                    v: '',
-                    m: '',
+                    v: 'A2',
                 });
-                expect(getValueByPosition(1, 0, 1, 0)).toStrictEqual({
-                    v: 'A1',
-                });
-
-                // reset data for next test
-                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            });
-
-            it('will insert range when there is a selected range, with merged cells of 1 row and 2 columns, break merged cells on the bottom', async () => {
-                selectionManager.replace([
-                    {
-                        range: { startRow: 1, startColumn: 6, endRow: 1, endColumn: 7, rangeType: RANGE_TYPE.NORMAL },
-                        primary: null,
-                        style: null,
-                    },
-                ]);
-                expect(await commandService.executeCommand(InsertRangeMoveDownCommand.id)).toBeTruthy();
-
-                // cell value
-                expect(getValueByPosition(1, 6, 1, 6)).toStrictEqual({
-                    v: '',
-                    m: '',
-                });
-                expect(getValueByPosition(2, 6, 2, 6)).toStrictEqual({
-                    v: 'G2',
-                });
-                expect(getValueByPosition(2, 5, 2, 5)).toStrictEqual({
-                    v: 'F3',
-                });
-
-                const mergedCells = getMergedCells(1, 5, 3, 7);
-                expect(mergedCells).toStrictEqual([
-                    {
-                        startRow: 2,
-                        startColumn: 6,
-                        endRow: 2,
-                        endColumn: 7,
-                    },
-                ]);
-
-                // reset data for next test
-                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            });
-            it('will insert range when there is a selected range, with merged cells of 1 row and 3 columns, will not break merged cells on the bottom', async () => {
-                selectionManager.replace([
-                    {
-                        range: { startRow: 1, startColumn: 9, endRow: 1, endColumn: 11, rangeType: RANGE_TYPE.NORMAL },
-                        primary: null,
-                        style: null,
-                    },
-                ]);
-                expect(await commandService.executeCommand(InsertRangeMoveDownCommand.id)).toBeTruthy();
-
-                // cell value
-                expect(getValueByPosition(1, 9, 1, 9)).toStrictEqual({
-                    v: '',
-                    m: '',
-                });
-                expect(getValueByPosition(2, 9, 2, 9)).toStrictEqual({
-                    v: 'J2',
-                });
-                expect(getValueByPosition(3, 9, 3, 9)).toStrictEqual({
-                    v: 'J3',
-                });
-
-                const mergedCells = getMergedCells(1, 9, 3, 11);
-                expect(mergedCells).toStrictEqual([
-                    {
-                        startRow: 3,
-                        startColumn: 9,
-                        endRow: 3,
-                        endColumn: 10,
-                    },
-                    {
-                        startRow: 2,
-                        startColumn: 9,
-                        endRow: 2,
-                        endColumn: 11,
-                    },
-                ]);
 
                 // reset data for next test
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
@@ -506,7 +335,7 @@ describe('Test insert range commands', () => {
         describe('fault situations', () => {
             it('will not apply when there is no selected ranges', async () => {
                 selectionManager.clear();
-                const result = await commandService.executeCommand(InsertRangeMoveDownCommand.id);
+                const result = await commandService.executeCommand(DeleteRangeMoveUpCommand.id);
                 expect(result).toBeFalsy();
             });
         });

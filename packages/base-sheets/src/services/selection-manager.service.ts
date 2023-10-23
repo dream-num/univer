@@ -318,7 +318,6 @@ export class SelectionManagerService implements IDisposable {
 
         this.refresh({ pluginName, unitId, sheetId });
     }
-
     private _replaceByParam(insertParam: ISelectionManagerInsertParam) {
         const { pluginName, unitId, sheetId, selectionDatas } = insertParam;
 

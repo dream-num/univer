@@ -352,7 +352,8 @@ export function Select(props: BaseSelectProps) {
     };
 
     const renderNeo = () => {
-        const { tooltip, onClick, display, value, icon, title, id, options, type, onClose, max, min } = props;
+        const { onClick, ...restProps } = props;
+        const { tooltip, display, value, icon, title, id, options, type, onClose, max, min } = restProps;
 
         const onClickInner = (...args: unknown[]) => {
             onClick?.(args[1] as number | string);
@@ -373,7 +374,7 @@ export function Select(props: BaseSelectProps) {
         return (
             <div className={`${styles.selectDouble}`}>
                 <Dropwdown2
-                    {...props}
+                    {...restProps}
                     overlay={
                         <Menu
                             menuId={id}

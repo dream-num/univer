@@ -4,6 +4,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { SetStyleCommand } from '../commands/commands/set-style.command';
 import {
     ISetWorksheetRowAutoHeightMutationParams,
+    SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { SelectionManagerService } from '../services/selection-manager.service';
@@ -70,13 +71,13 @@ export class AutoHeightController {
                 return {
                     undos: [
                         {
-                            id: command.id,
+                            id: SetWorksheetRowAutoHeightMutation.id,
                             params: undoParams,
                         },
                     ],
                     redos: [
                         {
-                            id: command.id,
+                            id: SetWorksheetRowAutoHeightMutation.id,
                             params: redoParams,
                         },
                     ],

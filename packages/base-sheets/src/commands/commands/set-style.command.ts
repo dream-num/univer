@@ -57,13 +57,8 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         }
 
         const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService
-            .getCurrentUniverSheetInstance()
+        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
-            .getActiveSheet()
-            .getSheetId();
-
-        console.log(params);
         const style = params.style;
 
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
@@ -120,19 +115,19 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
             setRangeValuesMutationParams
         );
 
+        const setRangeValuesResult = commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            setRangeValuesMutationParams
+        );
+
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
             id: SetStyleCommand.id,
             params,
         });
 
-        console.log(undos, redos);
+        const result = await sequenceExecute([...redos], commandService);
 
-        const result = await sequenceExecute(
-            [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
-            commandService
-        );
-
-        if (result.result) {
+        if (setRangeValuesResult && result.result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo: async () =>

@@ -312,6 +312,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             const { startRow, endRow, startColumn, endColumn } = range;
 
             for (let i = startRow; i <= endRow; i++) {
+                // If the row has already been calculated, it does not need to be calculated
+                if (results.some(({ rowNumber }) => rowNumber === i)) {
+                    continue;
+                }
                 // In the selection area, if a cell is not in the merged cell, the automatic height of the row needs to be calculated.
                 let hasUnMergedCell = false;
                 for (let j = startColumn; j <= endColumn; j++) {

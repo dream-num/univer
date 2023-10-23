@@ -42,13 +42,12 @@ export class FormatPainterController extends Disposable {
 
     private _bindFormatPainterStatus() {
         this._formatPainterService.status$.subscribe((status) => {
-            const engine = this._renderManagerService.getCurrent()?.engine;
-            if (!engine) return;
-            // TODO@yuhongz: set cursor not working because header-move controller will override it
+            const scene = this._renderManagerService.getCurrent()?.scene;
+            if (!scene) return;
             if (status !== FormatPainterStatus.OFF) {
-                engine.setCanvasCursor(CURSOR_TYPE.CELL);
+                scene.setDefaultCursor(CURSOR_TYPE.CELL);
             } else {
-                engine.setCanvasCursor(CURSOR_TYPE.DEFAULT);
+                scene.setDefaultCursor(CURSOR_TYPE.DEFAULT);
             }
         });
     }

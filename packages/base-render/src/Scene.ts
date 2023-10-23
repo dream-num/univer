@@ -32,6 +32,8 @@ export class Scene extends ThinScene {
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
 
+    private _defaultCursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
+
     private _addObject$ = new BehaviorSubject<Scene>(this);
 
     readonly addObject$ = this._addObject$.asObservable();
@@ -145,7 +147,7 @@ export class Scene extends ThinScene {
     }
 
     resetCursor() {
-        this.setCursor(CURSOR_TYPE.DEFAULT);
+        this.setCursor(this._defaultCursor);
     }
 
     setCursor(val: CURSOR_TYPE) {
@@ -155,6 +157,11 @@ export class Scene extends ThinScene {
             return;
         }
         engine.setCanvasCursor(val);
+    }
+
+    setDefaultCursor(val: CURSOR_TYPE) {
+        this._defaultCursor = val;
+        this.resetCursor();
     }
 
     resize(width?: number, height?: number) {

@@ -5,6 +5,7 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { SetScrollOperation } from './commands/operations/scroll.operation';
 import { SetSelectionsOperation } from './commands/operations/selection.operation';
 import { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
+import { AutoHeightController } from './Controller/auto-height.controller';
 import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
 import { FormulaBarController } from './Controller/FormulaBarController';
 import { FreezeController } from './Controller/freeze.controller';
@@ -76,6 +77,7 @@ export class SheetPlugin extends Plugin {
             [FreezeController],
             [ScrollController],
             [ZoomController],
+            [AutoHeightController],
         ];
 
         dependencies.forEach((d) => {

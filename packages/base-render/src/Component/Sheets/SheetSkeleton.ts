@@ -376,7 +376,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             const documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
             documentSkeleton.calculate();
 
-            const { height: h = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
+            const { height: h = 0, width } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
+            console.log(`row: ${rowNum}, col: ${i}, (${width}, ${h})`);
             height = Math.max(height, h);
         }
 
@@ -955,6 +956,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || VerticalAlign.UNSPECIFIED;
         const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || WrapStrategy.UNSPECIFIED;
         const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
+
         if (cell.p) {
             const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
             let centerAngle = 0;
@@ -1127,9 +1129,8 @@ export class SpreadsheetSkeleton extends Skeleton {
                 if (!rowDataItem) {
                     continue;
                 }
-
+                console.log(rowDataItem);
                 const { h = defaultRowHeight, ah, isAutoHeight } = rowDataItem;
-
                 if ((isAutoHeight == null || !!isAutoHeight) && typeof ah === 'number') {
                     rowHeight = ah;
                 } else {

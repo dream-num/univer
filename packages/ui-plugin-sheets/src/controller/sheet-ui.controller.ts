@@ -25,6 +25,7 @@ import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { RenameSheetCommand } from '../commands/commands/rename.command';
 import {
+    SetCopySelectionCommand,
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../commands/commands/set-format-painter.command';
@@ -169,6 +170,7 @@ export class SheetUIController extends Disposable {
 
             SetActivateCellEditOperation,
             SetOnceFormatPainterCommand,
+            SetCopySelectionCommand,
             SetInfiniteFormatPainterCommand,
             SetFormatPainterOperation,
         ].forEach((c) => {

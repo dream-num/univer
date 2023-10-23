@@ -1,7 +1,7 @@
 import { IUniverInstanceService, LifecycleStages, OnLifecycle, SheetInterceptorService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { SetStyleCommand } from '../commands/commands/set-style.command';
+import { ISetStyleParams, SetStyleCommand } from '../commands/commands/set-style.command';
 import {
     ISetWorksheetRowAutoHeightMutationParams,
     SetWorksheetRowAutoHeightMutation,
@@ -32,9 +32,19 @@ export class AutoHeightController {
         } = this;
 
         sheetInterceptorService.interceptCommand({
-            getMutations(command) {
-                // TODO: @jocs, 只有涉及到改变单元格布局的 style 再计算auto height
+            getMutations(command: { id: string; params: ISetStyleParams<number> }) {
                 if (command.id !== SetStyleCommand.id) {
+                    return {
+                        redos: [],
+                        undos: [],
+                    };
+                }
+
+                // TODO: @jocs, All styles that affect the size of the cell,
+                // I don't know if the enumeration is complete, to be added in the future.
+                const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
+
+                if (!AFFECT_LAYOUT_STYLES.includes(command.params?.style.type)) {
                     return {
                         redos: [],
                         undos: [],

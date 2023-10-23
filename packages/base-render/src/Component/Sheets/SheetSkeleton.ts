@@ -372,7 +372,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
 
             const colWidth = data.get(i)?.w;
-            console.log(`row: ${rowNum}, col: ${i}, wrapStrategy: ${wrapStrategy}`);
             if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
                 documentModel.updateDocumentDataPageSize(colWidth);
             }
@@ -380,8 +379,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             const documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
             documentSkeleton.calculate();
 
-            const { height: h = 0, width } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
-            console.log(`row: ${rowNum}, col: ${i}, (${width}, ${h})`);
+            const { height: h = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
+
             height = Math.max(height, h);
         }
 

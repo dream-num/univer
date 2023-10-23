@@ -1,129 +1,90 @@
 import { IMouseEvent } from '@univerjs/base-render';
 import { DisposableCollection, ICommandService } from '@univerjs/core';
-import { RediContext, WithDependency } from '@wendellhu/redi/react-bindings';
-import React, { Component, createRef } from 'react';
+import { RediContext, useDependency } from '@wendellhu/redi/react-bindings';
+import React, { useContext, useEffect, useState } from 'react';
 
-import { BaseMenuItem, Menu } from '../../../Components';
+import { Dropdown2 } from '../../../Components/Dropdown/Dropdown2';
+import { Menu2 } from '../../../Components/Menu/Menu2';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
-import { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
-import styles from './contextmenu.module.less';
 
-// WTF: props here is not correct
-export interface IContextMenuProps extends BaseMenuItem {}
-
-export interface IContextMenuState {
-    visible: boolean;
-    children: IContextMenuProps[];
-    menuItems: Array<IDisplayMenuItem<IMenuItem>>;
-    menuType: string;
-    clientPosition: {
-        clientX: number;
-        clientY: number;
-    };
+export interface IProps {
+    children: React.ReactElement;
 }
 
-export class ContextMenu extends Component<IContextMenuProps, IContextMenuState> {
-    static override contextType = RediContext;
+export function ContextMenu(props: IProps) {
+    const { children } = props;
 
-    declare context: React.ContextType<typeof RediContext>;
+    const [visible, setVisible] = useState(false);
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [menuType, setMenuType] = useState('');
 
-    @WithDependency(IContextMenuService)
-    private declare contextMenuService: IContextMenuService;
+    const context = useContext(RediContext);
 
-    private rootRef = createRef<HTMLDivElement>();
+    const contextMenuService = useDependency(IContextMenuService);
 
-    private _disposables = new DisposableCollection();
+    useEffect(() => {
+        const _disposables = new DisposableCollection();
 
-    constructor(props: IContextMenuProps) {
-        super(props);
+        document.addEventListener('click', handleClick);
 
-        this.state = {
-            visible: false,
-            children: [] as IContextMenuProps[],
-            menuItems: [] as Array<IDisplayMenuItem<IMenuItem>>,
-            menuType: '',
-            clientPosition: {
-                clientX: 0,
-                clientY: 0,
-            },
-        };
-    }
-
-    override componentDidMount() {
-        document.addEventListener('click', this.handleClick);
-
-        this._disposables.add(
-            this.contextMenuService.registerContextMenuHandler({
-                handleContextMenu: this.handleContextMenu,
+        _disposables.add(
+            contextMenuService.registerContextMenuHandler({
+                handleContextMenu,
             })
         );
+
+        return () => {
+            document.removeEventListener('click', handleClick);
+            _disposables.dispose();
+        };
+    }, []);
+
+    function handleVisibleChange(visible: boolean) {
+        setVisible(visible);
     }
 
-    override componentWillUnmount(): void {
-        document.removeEventListener('click', this.handleClick);
-        this._disposables.dispose();
-    }
-
-    override render() {
-        const { visible, clientPosition, menuType } = this.state;
-
-        return (
-            visible && (
-                <div ref={this.rootRef} className={styles.contextMenu} onContextMenu={(e) => e.preventDefault()}>
-                    <Menu
-                        menuId={menuType}
-                        onClick={this.handleClick}
-                        clientPosition={clientPosition}
-                        show={visible}
-                        onOptionSelect={(params) => {
-                            const { label: commandId, value } = params;
-                            const commandService = this.context.injector?.get(ICommandService);
-                            commandService && commandService.executeCommand(commandId as string, { value });
-                            this.setState({ visible: false });
-                        }}
-                    />
-                </div>
-            )
-        );
-    }
-
-    handleContextMenu = async (event: IMouseEvent, menuType: string) => {
+    function handleContextMenu(event: IMouseEvent, menuType: string) {
         event.preventDefault();
 
-        const showMenu = () => {
-            this.setState({
-                visible: true,
-                clientPosition: {
-                    clientX: event.clientX,
-                    clientY: event.clientY,
-                },
-                menuType,
-            });
-        };
+        requestIdleCallback(() => {
+            setVisible(true);
+        });
 
-        // if it is visible, should set it to visible and set back to refresh inner contents
+        // TODO: should calculate the correct position when the menu is too close to the edge of the viewport @jikkai
+        setPosition({
+            x: event.clientX,
+            y: event.clientY,
+        });
 
-        if (this.state.visible) {
-            this.setState({ visible: false }, () => {
-                setTimeout(() => showMenu(), 200);
-            });
-        } else {
-            showMenu();
-        }
-    };
+        setMenuType(menuType);
+    }
 
-    private handleClick = (e: MouseEvent) => {
-        const { visible } = this.state;
-        if (!this.rootRef.current) {
-            return;
-        }
-
-        if (this.rootRef.current.contains(e.target as Node)) {
-            return;
-        }
-
+    function handleClick() {
         if (visible) {
-            this.setState({ visible: false });
+            setVisible(false);
         }
-    };
+    }
+
+    return (
+        <Dropdown2
+            visible={visible}
+            trigger={['contextMenu']}
+            alignPoint
+            align={{ offset: [position.x, position.y] }}
+            overlay={
+                <Menu2
+                    menuType={menuType}
+                    onOptionSelect={(params) => {
+                        const { label: commandId, value } = params;
+                        const commandService = context.injector?.get(ICommandService);
+                        commandService && commandService.executeCommand(commandId as string, { value });
+                        setVisible(false);
+                    }}
+                />
+            }
+            onVisibleChange={handleVisibleChange}
+        >
+            {children}
+        </Dropdown2>
+    );
 }

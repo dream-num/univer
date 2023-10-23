@@ -1,9 +1,7 @@
 import React from 'react';
 import { type Preview } from '@storybook/react';
 import { defaultTheme, greenTheme } from '../src/Basics/CSS';
-import { ThemeService } from '@univerjs/core'
-
-const themeService = new ThemeService();
+import { themeInstance } from '../src/views/theme'
 
 const themes = {
     default: defaultTheme,
@@ -35,7 +33,7 @@ const preview: Preview = {
     },
 
     decorators: [(Story, context) => {
-        themeService.setTheme(themes[context.globals.theme]);
+        themeInstance.setTheme(themes[context.globals.theme]);
 
         return (
             <Story />

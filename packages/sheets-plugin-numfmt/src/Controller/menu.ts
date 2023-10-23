@@ -1,4 +1,4 @@
-import { DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition, SelectTypes } from '@univerjs/base-ui';
+import { DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { ICommandService, IPermissionService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -15,7 +15,6 @@ export function NumfmtRangeDataMenuItemFactory(accessor: IAccessor): IMenuSelect
         id: SetNumfmtRangeDataCommand.id,
         title: 'toolbar.moreFormats',
         tooltip: 'toolbar.moreFormats',
-        selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,
         display: DisplayTypes.CUSTOM,
         // display: DisplayTypes.FONT,
@@ -69,7 +68,6 @@ export function OpenMoreFormatsModalMenuItemFactory(accessor: IAccessor): IMenuS
         title: 'defaultFmt.CustomFormats.text',
         positions: SetNumfmtRangeDataCommand.id,
         display: DisplayTypes.LABEL,
-        selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,
         selections: [...MORE_FORMATS_SELECTIONS],
     };

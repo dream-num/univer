@@ -1,4 +1,3 @@
-import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils/util';
 import { LoadingIcon } from '../Icon';
 import styles from './Style/index.module.less';
@@ -9,7 +8,7 @@ export type ButtonShape = 'circle' | 'round';
 export type SizeType = 'small' | 'middle' | 'large';
 export type ButtonHTMLType = 'submit' | 'reset' | 'button';
 
-export interface IBaseButtonProps extends BaseComponentProps {
+export interface IBaseButtonProps {
     children?: React.ReactNode;
 
     /** Semantic DOM class */

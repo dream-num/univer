@@ -97,11 +97,14 @@ export function App(props: IUniverAppProps) {
                                     className={style.contentInnerRightContainer}
                                     ref={containerRef}
                                 >
-                                    <ContextMenu />
-                                    {contentComponents &&
-                                        Array.from(contentComponents.values()).map((component, index) =>
-                                            React.createElement(component(), { key: `${index}` })
-                                        )}
+                                    <ContextMenu>
+                                        <>
+                                            {contentComponents &&
+                                                Array.from(contentComponents.values()).map((component, index) =>
+                                                    React.createElement(component(), { key: `${index}` })
+                                                )}
+                                        </>
+                                    </ContextMenu>
                                     {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>} */}
                                     {/* {<RichText {...methods.cellEditor}></RichText>} */}
                                 </Container>

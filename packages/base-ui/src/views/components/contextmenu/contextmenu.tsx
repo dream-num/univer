@@ -45,17 +45,6 @@ export function ContextMenu(props: IProps) {
 
     function handleContextMenu(event: IMouseEvent, menuType: string) {
         event.preventDefault();
-
-        requestIdleCallback(() => {
-            setVisible(true);
-        });
-
-        // TODO: should calculate the correct position when the menu is too close to the edge of the viewport @jikkai
-        setPosition({
-            x: event.clientX,
-            y: event.clientY,
-        });
-
         setMenuType(menuType);
     }
 
@@ -70,7 +59,6 @@ export function ContextMenu(props: IProps) {
             visible={visible}
             trigger={['contextMenu']}
             alignPoint
-            align={{ offset: [position.x, position.y] }}
             overlay={
                 <Menu2
                     menuType={menuType}

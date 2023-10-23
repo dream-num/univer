@@ -5,7 +5,6 @@ import {
     IMenuSelectorItem,
     MenuItemType,
     MenuPosition,
-    SelectTypes,
 } from '@univerjs/base-ui';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -20,7 +19,6 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         tooltip: 'debugger.locale.tooltip',
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.NEO,
         positions: [MenuPosition.TOOLBAR],
         selections: [
             {
@@ -43,7 +41,6 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         tooltip: 'debugger.theme.tooltip',
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.NEO,
         positions: [MenuPosition.TOOLBAR],
         selections: [
             {

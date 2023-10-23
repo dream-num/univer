@@ -15,8 +15,9 @@ export class DebuggerController extends Disposable {
         super();
         this._initializeContextMenu();
 
-        [LocaleOperation].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
-        [ThemeOperation].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        [LocaleOperation, ThemeOperation].forEach((command) =>
+            this.disposeWithMe(this._commandService.registerCommand(command))
+        );
     }
 
     private _initializeContextMenu() {

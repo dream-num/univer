@@ -67,7 +67,6 @@ export class ToolbarUIController {
 
         this._toolList = [
             {
-                type: 3,
                 className: styles.selectDoubleString,
                 name: 'textRotateMode',
                 tooltip: 'toolbar.textRotateMode.main',

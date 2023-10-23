@@ -173,7 +173,7 @@ describe('Test insert and remove rows cols commands', () => {
             const result = await commandService.executeCommand(InsertRowBeforeCommand.id);
             expect(result).toBeTruthy();
             expect(getRowCount()).toBe(21);
-            // expect(getCellStyle(2, 1)).toBe(getCellStyle(3, 1)); // the style should be copied from the cell above
+            expect(getCellStyle(2, 1)).toBe(getCellStyle(3, 1)); // the style should be copied from the cell above
             // the merged cell should be moved down
             expect(getMergedInfo(3, 1)).toEqual({ startRow: 3, endRow: 4, startColumn: 1, endColumn: 1 });
 

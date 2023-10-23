@@ -91,23 +91,14 @@ export function App(props: IUniverAppProps) {
                                     )}
                             </Sider>
                             <Content className={style.contentContainerHorizontal}>
-                                {/* FIXME: context menu component shouldn't have to mount on this position */}
-                                <Container
-                                    onContextMenu={(e) => e.preventDefault()}
-                                    className={style.contentInnerRightContainer}
-                                    ref={containerRef}
-                                >
-                                    <ContextMenu>
-                                        <>
-                                            {contentComponents &&
-                                                Array.from(contentComponents.values()).map((component, index) =>
-                                                    React.createElement(component(), { key: `${index}` })
-                                                )}
-                                        </>
-                                    </ContextMenu>
-                                    {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>} */}
-                                    {/* {<RichText {...methods.cellEditor}></RichText>} */}
-                                </Container>
+                                <ContextMenu>
+                                    <Container className={style.contentInnerRightContainer} ref={containerRef}>
+                                        {contentComponents &&
+                                            Array.from(contentComponents.values()).map((component, index) =>
+                                                React.createElement(component(), { key: `${index}` })
+                                            )}
+                                    </Container>
+                                </ContextMenu>
                             </Content>
                         </Layout>
                         {/* footer */}

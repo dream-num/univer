@@ -22,6 +22,8 @@ export interface ICommand<P extends object = object, R = boolean> {
     readonly id: string;
     readonly type: CommandType;
 
+    value?: P;
+
     handler(accessor: IAccessor, params?: P): Promise<R>;
 
     /** When this command is unregistered, this function would be called. */

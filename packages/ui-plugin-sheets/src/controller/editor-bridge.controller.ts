@@ -160,9 +160,13 @@ export class EditorBridgeController extends Disposable {
 
     private _hideEditor() {
         if (this._editorBridgeService.isVisible().visible === true) {
+            this._selectionManagerService.makeDirty(false);
             this._commandService.executeCommand(SetCellEditOperation.id, {
                 visible: false,
             });
+            setTimeout(() => {
+                this._selectionManagerService.makeDirty(true);
+            }, 0);
         }
     }
 

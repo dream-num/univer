@@ -5,24 +5,9 @@ import {
     ISelectionTransformerShapeManager,
 } from '@univerjs/base-render';
 import {
-    AddWorksheetMergeMutation,
+    COMMAND_LISTENER_SKELETON_CHANGE,
     getSheetObject,
-    InsertColMutation,
-    InsertRowMutation,
-    MoveRowsMutation,
-    RemoveColMutation,
-    RemoveRowMutation,
-    RemoveWorksheetMergeMutation,
     SelectionManagerService,
-    SetBorderStylesMutation,
-    SetColHiddenMutation,
-    SetColVisibleMutation,
-    SetRangeValuesMutation,
-    SetRowHiddenMutation,
-    SetRowVisibleMutation,
-    SetWorksheetActivateMutation,
-    SetWorksheetColWidthMutation,
-    SetWorksheetRowHeightMutation,
     SheetSkeletonManagerService,
 } from '@univerjs/base-sheets';
 import {
@@ -189,24 +174,7 @@ export class EditorBridgeController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = [
-            SetWorksheetRowHeightMutation.id,
-            SetWorksheetColWidthMutation.id,
-            SetWorksheetActivateMutation.id,
-            InsertRowMutation.id,
-            RemoveRowMutation.id,
-            InsertColMutation.id,
-            RemoveColMutation.id,
-            AddWorksheetMergeMutation.id,
-            RemoveWorksheetMergeMutation.id,
-            MoveRowsMutation.id,
-            SetRangeValuesMutation.id,
-            SetBorderStylesMutation.id,
-            SetColHiddenMutation.id,
-            SetColVisibleMutation.id,
-            SetRowHiddenMutation.id,
-            SetRowVisibleMutation.id,
-        ];
+        const updateCommandList = COMMAND_LISTENER_SKELETON_CHANGE;
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {

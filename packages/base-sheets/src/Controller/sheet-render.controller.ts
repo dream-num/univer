@@ -16,19 +16,9 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
+import { COMMAND_LISTENER_SKELETON_CHANGE } from '../Basics/Const/COMMAND_LISTENER_CONST';
 import { SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
-import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
-import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
-import { MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
-import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
-import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
-import { SetBorderStylesMutation } from '../commands/mutations/set-border-styles.mutation';
-import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
-import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
-import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetWorksheetActivateMutation } from '../commands/mutations/set-worksheet-activate.mutation';
-import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
-import { SetWorksheetRowHeightMutation } from '../commands/mutations/set-worksheet-row-height.mutation';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -101,24 +91,7 @@ export class SheetRenderController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = [
-            SetWorksheetRowHeightMutation.id,
-            SetWorksheetColWidthMutation.id,
-            SetWorksheetActivateMutation.id,
-            InsertRowMutation.id,
-            RemoveRowMutation.id,
-            InsertColMutation.id,
-            RemoveColMutation.id,
-            AddWorksheetMergeMutation.id,
-            RemoveWorksheetMergeMutation.id,
-            MoveRowsMutation.id,
-            SetRangeValuesMutation.id,
-            SetBorderStylesMutation.id,
-            SetColHiddenMutation.id,
-            SetColVisibleMutation.id,
-            SetRowHiddenMutation.id,
-            SetRowVisibleMutation.id,
-        ];
+        const updateCommandList = COMMAND_LISTENER_SKELETON_CHANGE;
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {

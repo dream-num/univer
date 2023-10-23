@@ -1129,7 +1129,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                 if (!rowDataItem) {
                     continue;
                 }
-                console.log(rowDataItem);
                 const { h = defaultRowHeight, ah, isAutoHeight } = rowDataItem;
                 if ((isAutoHeight == null || !!isAutoHeight) && typeof ah === 'number') {
                     rowHeight = ah;

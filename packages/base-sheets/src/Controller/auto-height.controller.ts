@@ -32,7 +32,6 @@ export class AutoHeightController {
 
         sheetInterceptorService.interceptCommand({
             getMutations(command) {
-                console.log(command);
                 // TODO: @jocs, 只有涉及到改变单元格布局的 style 再计算auto height
                 if (command.id !== SetStyleCommand.id) {
                     return {

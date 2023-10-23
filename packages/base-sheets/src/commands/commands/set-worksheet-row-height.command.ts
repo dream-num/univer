@@ -10,11 +10,8 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
-import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
-    ISetWorksheetRowAutoHeightMutationParams,
     ISetWorksheetRowHeightMutationParams,
-    SetWorksheetRowAutoHeightMutationFactory,
     SetWorksheetRowHeightMutation,
     SetWorksheetRowHeightMutationFactory,
 } from '../mutations/set-worksheet-row-height.mutation';
@@ -22,46 +19,6 @@ import {
 export interface IDeltaRowHeightCommand {
     anchorRow: number;
     deltaY: number;
-}
-
-export function getAutoHeightUndoRedoParams(accessor: IAccessor) {
-    const selectionManagerService = accessor.get(SelectionManagerService);
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const sheetSkeletonService = accessor.get(SheetSkeletonManagerService);
-
-    const selections = selectionManagerService.getRangeDatas();
-
-    if (!selections?.length) {
-        return {
-            redoMutationParams: null,
-            undoMutationParams: null,
-        };
-    }
-
-    const { skeleton } = sheetSkeletonService.getCurrent()!;
-    const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(selections);
-
-    console.log(rowsAutoHeightInfo);
-
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-    const workbookId = workbook.getUnitId();
-    const worksheetId = workbook.getActiveSheet().getSheetId();
-
-    const redoMutationParams: ISetWorksheetRowAutoHeightMutationParams = {
-        worksheetId,
-        workbookId,
-        rowsAutoHeightInfo,
-    };
-
-    const undoMutationParams: ISetWorksheetRowAutoHeightMutationParams = SetWorksheetRowAutoHeightMutationFactory(
-        accessor,
-        redoMutationParams
-    );
-
-    return {
-        redoMutationParams,
-        undoMutationParams,
-    };
 }
 
 export const DeltaRowHeightCommand: ICommand = {

@@ -669,14 +669,15 @@ export function getPrimaryForRange(range: IRange, worksheet: Worksheet): ISelect
     };
 }
 
-/**
- * Given the length of each interval in an array and sum
- * @param intervals
- * @returns
- */
 export interface IInterval {
     [index: string]: [start: number, end: number];
 }
+
+/**
+ * Calculate the real length of the intervals
+ * @param intervalsObject
+ * @returns
+ */
 export function calculateTotalLength(intervalsObject: IInterval): number {
     const points: number[] = [];
 

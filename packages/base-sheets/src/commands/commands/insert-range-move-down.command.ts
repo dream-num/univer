@@ -53,6 +53,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
 
         if (selectionManagerService.isOverlapping()) {
+            // TODO@Dushusir: use Dialog after Dialog component completed
             logService.error('Cannot use that command on overlapping selections.');
             return false;
         }

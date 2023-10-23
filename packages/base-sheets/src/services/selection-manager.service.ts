@@ -244,19 +244,9 @@ export class SelectionManagerService implements IDisposable {
         if (selectionDataList == null) {
             return false;
         }
-        const rangeList = selectionDataList.map((selectionData: ISelectionWithStyle) => {
-            const range = selectionData.range;
-            const { startRow, startColumn, endRow, endColumn } = range;
-            return {
-                startRow,
-                startColumn,
-                endRow,
-                endColumn,
-            };
-        });
 
-        return rangeList.some((range, index) =>
-            rangeList.some((range2, index2) => {
+        return selectionDataList.some(({ range }, index) =>
+            selectionDataList.some(({ range: range2 }, index2) => {
                 if (index === index2) {
                     return false;
                 }

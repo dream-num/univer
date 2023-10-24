@@ -1,4 +1,4 @@
-import { IKeyValue, Nullable } from '@univerjs/core';
+import { Nullable } from '@univerjs/core';
 
 import { Vector2 } from '../Basics/Vector2';
 import { ThinScene } from '../ThinScene';
@@ -34,29 +34,25 @@ export class BaseScrollBar {
 
     verticalMinusMiniThumb: number = 0;
 
-    horizonBarRect!: Rect;
+    horizonBarRect: Nullable<Rect>;
 
-    horizonThumbRect!: Rect;
+    horizonThumbRect: Nullable<Rect>;
 
-    verticalBarRect!: Rect;
+    verticalBarRect: Nullable<Rect>;
 
-    verticalThumbRect!: Rect;
+    verticalThumbRect: Nullable<Rect>;
 
-    placeholderBarRect!: Rect;
-
-    constructor(props?: IScrollBarProps) {
-        this.setProps(props);
-    }
+    placeholderBarRect: Nullable<Rect>;
 
     get limitX() {
-        if (!this.horizonThumbRect.visible) {
+        if (!this.horizonThumbRect?.visible) {
             return 0;
         }
         return this.horizontalBarWidth - this.horizontalThumbWidth;
     }
 
     get limitY() {
-        if (!this.verticalThumbRect.visible) {
+        if (!this.verticalThumbRect?.visible) {
             return 0;
         }
         return this.verticalBarHeight - this.verticalThumbHeight;
@@ -97,23 +93,6 @@ export class BaseScrollBar {
         return limit / actual;
     }
 
-    setProps(props?: IScrollBarProps) {
-        if (!props) {
-            return;
-        }
-
-        const themeKeys = Object.keys(props);
-        if (themeKeys.length === 0) {
-            return;
-        }
-
-        themeKeys.forEach((key) => {
-            if (props[key as keyof IScrollBarProps] !== undefined) {
-                (this as IKeyValue)[`_${key}`] = props[key as keyof IScrollBarProps];
-            }
-        });
-    }
-
     pick(coord: Vector2) {
         if (this.horizonThumbRect?.isHit(coord)) {
             return this.horizonThumbRect;
@@ -135,19 +114,19 @@ export class BaseScrollBar {
     }
 
     dispose() {
-        this.horizonBarRect.dispose();
-        this.horizonThumbRect.dispose();
-        this.verticalBarRect.dispose();
-        this.verticalThumbRect.dispose();
-        this.placeholderBarRect.dispose();
+        this.horizonBarRect?.dispose();
+        this.horizonThumbRect?.dispose();
+        this.verticalBarRect?.dispose();
+        this.verticalThumbRect?.dispose();
+        this.placeholderBarRect?.dispose();
     }
 
     hasHorizonThumb() {
-        return this.horizonThumbRect.visible;
+        return this.horizonThumbRect?.visible || false;
     }
 
     hasVerticalThumb() {
-        return this.verticalThumbRect.visible;
+        return this.verticalThumbRect?.visible || false;
     }
 
     resize(

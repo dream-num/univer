@@ -1,4 +1,4 @@
-import { EventState, Nullable, Observer } from '@univerjs/core';
+import { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
 
 import { COLORS, EVENT_TYPE } from '../Basics/Const';
 import { IMouseEvent, IPointerEvent } from '../Basics/IEvents';
@@ -56,10 +56,11 @@ export class ScrollBar extends BaseScrollBar {
     private _verticalPointerUpObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     constructor(view: Viewport, props?: IScrollBarProps) {
-        super(props);
+        super();
         if (!view) {
             console.warn('Missing viewport');
         }
+        this.setProps(props);
         this._view = view;
         this._initialScrollRect();
         this._view.setScrollBar(this);
@@ -85,11 +86,20 @@ export class ScrollBar extends BaseScrollBar {
         const transform = new Transform([1, 0, 0, 1, left, top]);
         const m = transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        this.horizonBarRect.render(ctx);
-        this.horizonThumbRect.translate(scrollX).render(ctx);
-        this.verticalBarRect.render(ctx);
-        this.verticalThumbRect.translate(undefined, scrollY).render(ctx);
-        this.placeholderBarRect.render(ctx);
+        if (this._enableHorizontal) {
+            this.horizonBarRect!.render(ctx);
+            this.horizonThumbRect!.translate(scrollX).render(ctx);
+        }
+
+        if (this._enableVertical) {
+            this.verticalBarRect!.render(ctx);
+            this.verticalThumbRect!.translate(undefined, scrollY).render(ctx);
+        }
+
+        if (this._enableHorizontal && this._enableVertical) {
+            this.placeholderBarRect!.render(ctx);
+        }
+
         ctx.restore();
     }
 
@@ -131,6 +141,10 @@ export class ScrollBar extends BaseScrollBar {
         this._view.makeDirty(state, true);
     }
 
+    get barSize() {
+        return this._barSize;
+    }
+
     override pick(coord: Vector2) {
         if (this.horizonThumbRect?.isHit(coord)) {
             return this.horizonThumbRect;
@@ -149,6 +163,23 @@ export class ScrollBar extends BaseScrollBar {
         }
 
         return null;
+    }
+
+    setProps(props?: IScrollBarProps) {
+        if (!props) {
+            return;
+        }
+
+        const themeKeys = Object.keys(props);
+        if (themeKeys.length === 0) {
+            return;
+        }
+
+        themeKeys.forEach((key) => {
+            if (props[key as keyof IScrollBarProps] !== undefined) {
+                (this as IKeyValue)[`_${key}`] = props[key as keyof IScrollBarProps];
+            }
+        });
     }
 
     private _resizeHorizontal(parentWidth: number, parentHeight: number, contentWidth: number) {
@@ -284,17 +315,17 @@ export class ScrollBar extends BaseScrollBar {
 
         const mainScene = this._mainScene || this._view.scene;
 
-        this.verticalThumbRect.on(
+        this.verticalThumbRect?.on(
             EVENT_TYPE.PointerEnter,
             this._hoverFunc(this._thumbHoverBackgroundColor!, this.verticalThumbRect)
         );
-        this.verticalThumbRect.on(
+        this.verticalThumbRect?.on(
             EVENT_TYPE.PointerLeave,
             this._hoverFunc(this._thumbBackgroundColor!, this.verticalThumbRect)
         );
 
         // 垂直滚动条槽的点击滚动事件
-        this.verticalBarRect.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
+        this.verticalBarRect?.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             this._view.scrollTo({
                 y: e.offsetY - this._view.top - this.verticalThumbHeight / 2,
@@ -303,14 +334,14 @@ export class ScrollBar extends BaseScrollBar {
         });
 
         // 垂直滚动条的拖拽事件
-        this.verticalThumbRect.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
+        this.verticalThumbRect?.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             const srcElement = this.verticalThumbRect;
             this._isVerticalMove = true;
             this._lastX = e.offsetX;
             this._lastY = e.offsetY;
             // srcElement.fill = this._thumbHoverBackgroundColor!;
-            srcElement.setProps({
+            srcElement?.setProps({
                 fill: this._thumbActiveBackgroundColor!,
             });
             mainScene.disableEvent();
@@ -333,7 +364,7 @@ export class ScrollBar extends BaseScrollBar {
             this._isVerticalMove = false;
             // srcElement.fill = this._thumbBackgroundColor!;
             mainScene.enableEvent();
-            srcElement.setProps({
+            srcElement?.setProps({
                 fill: this._thumbBackgroundColor!,
             });
             // srcElement.makeDirty(true);
@@ -364,17 +395,17 @@ export class ScrollBar extends BaseScrollBar {
 
         const mainScene = this._mainScene || this._view.scene;
 
-        this.horizonThumbRect.on(
+        this.horizonThumbRect?.on(
             EVENT_TYPE.PointerEnter,
             this._hoverFunc(this._thumbHoverBackgroundColor!, this.horizonThumbRect)
         );
-        this.horizonThumbRect.on(
+        this.horizonThumbRect?.on(
             EVENT_TYPE.PointerLeave,
             this._hoverFunc(this._thumbBackgroundColor!, this.horizonThumbRect)
         );
 
         // 水平滚动条槽的点击滚动事件
-        this.horizonBarRect.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
+        this.horizonBarRect?.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             this._view.scrollTo({
                 x: e.offsetX - this._view.left - this.horizontalThumbWidth / 2,
@@ -383,13 +414,13 @@ export class ScrollBar extends BaseScrollBar {
         });
 
         // 水平滚动条的拖拽事件
-        this.horizonThumbRect.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
+        this.horizonThumbRect?.on(EVENT_TYPE.PointerDown, (evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             this._isHorizonMove = true;
             this._lastX = e.offsetX;
             this._lastY = e.offsetY;
             // this.fill = this._thumbHoverBackgroundColor!;
-            this.horizonThumbRect.setProps({
+            this.horizonThumbRect?.setProps({
                 fill: this._thumbActiveBackgroundColor!,
             });
             this.makeViewDirty(true);
@@ -412,7 +443,7 @@ export class ScrollBar extends BaseScrollBar {
             this._isHorizonMove = false;
             mainScene.enableEvent();
             // srcElement.fill = this._thumbBackgroundColor!;
-            srcElement.setProps({
+            srcElement?.setProps({
                 fill: this._thumbBackgroundColor!,
             });
             // srcElement.makeDirty(true);

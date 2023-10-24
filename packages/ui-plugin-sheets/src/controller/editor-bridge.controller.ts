@@ -1,7 +1,18 @@
-import { DeviceInputEventType, IRenderManagerService, ISelectionTransformerShapeManager } from '@univerjs/base-render';
-import { getSheetObject, SelectionManagerService, SheetSkeletonManagerService } from '@univerjs/base-sheets';
+import {
+    DeviceInputEventType,
+    getCanvasOffsetByEngine,
+    IRenderManagerService,
+    ISelectionTransformerShapeManager,
+} from '@univerjs/base-render';
+import {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    getSheetObject,
+    SelectionManagerService,
+    SheetSkeletonManagerService,
+} from '@univerjs/base-sheets';
 import {
     Disposable,
+    ICommandInfo,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
@@ -13,6 +24,11 @@ import { Inject } from '@wendellhu/redi';
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
 import { SetCellEditOperation } from '../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
+
+interface ISetWorksheetMutationParams {
+    workbookId: string;
+    worksheetId: string;
+}
 
 @OnLifecycle(LifecycleStages.Rendered, EditorBridgeController)
 export class EditorBridgeController extends Disposable {
@@ -53,7 +69,7 @@ export class EditorBridgeController extends Disposable {
 
             const { skeleton, unitId, sheetId } = currentSkeletonManager;
 
-            const { scene } = sheetObject;
+            const { scene, engine } = sheetObject;
 
             if (params == null || params.length === 0 || skeleton == null) {
                 return;
@@ -79,6 +95,8 @@ export class EditorBridgeController extends Disposable {
                 return;
             }
 
+            const canvasOffset = getCanvasOffsetByEngine(engine);
+
             let { startX, startY, endX, endY } = actualRangeWithCoord;
 
             const { scaleX, scaleY } = scene.getAncestorScale();
@@ -98,26 +116,6 @@ export class EditorBridgeController extends Disposable {
                 documentLayoutObject = skeleton.getBlankCellDocumentModel(startRow, startColumn, true);
             }
 
-            // let documentModel = documentModelObject?.documentModel;
-
-            // if (documentModel == null) {
-            //     documentModel = skeleton.getBlankCellDocumentModel(startRow, startColumn).documentModel;
-            // }
-
-            // documentModelObject.documentModel = documentModel;
-
-            // this._editorBridgeService.setState({
-            //     position: {
-            //         startX,
-            //         startY,
-            //         endX,
-            //         endY,
-            //     },
-            //     unitId,
-            //     sheetId,
-            //     documentLayoutObject,
-            // });
-
             this._commandService.executeCommand(SetActivateCellEditOperation.id, {
                 position: {
                     startX,
@@ -125,6 +123,7 @@ export class EditorBridgeController extends Disposable {
                     endX,
                     endY,
                 },
+                canvasOffset,
                 row: startRow,
                 column: startColumn,
                 unitId,
@@ -160,9 +159,13 @@ export class EditorBridgeController extends Disposable {
 
     private _hideEditor() {
         if (this._editorBridgeService.isVisible().visible === true) {
+            this._selectionManagerService.makeDirty(false);
             this._commandService.executeCommand(SetCellEditOperation.id, {
                 visible: false,
             });
+            setTimeout(() => {
+                this._selectionManagerService.makeDirty(true);
+            }, 0);
         }
     }
 
@@ -170,5 +173,15 @@ export class EditorBridgeController extends Disposable {
         return getSheetObject(this._currentUniverService, this._renderManagerService);
     }
 
-    private _commandExecutedListener() {}
+    private _commandExecutedListener() {
+        const updateCommandList = COMMAND_LISTENER_SKELETON_CHANGE;
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (updateCommandList.includes(command.id)) {
+                    this._hideEditor();
+                }
+            })
+        );
+    }
 }

@@ -297,9 +297,9 @@ export class HeaderResizeController extends Disposable {
 
             const viewPort = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-            const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonBarRect.height || 0) + 10;
+            const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonBarRect?.height || 0) + 10;
 
-            const scrollBarVerticalWidth = (viewPort?.getScrollBar()?.verticalBarRect.width || 0) + 10;
+            const scrollBarVerticalWidth = (viewPort?.getScrollBar()?.verticalBarRect?.width || 0) + 10;
 
             const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
 

@@ -40,6 +40,8 @@ export class SelectionManagerService implements IDisposable {
     // eslint-disable-next-line @typescript-eslint/member-ordering
     readonly selectionInfo$ = this._selectionInfo$.asObservable();
 
+    private _dirty: boolean = true;
+
     // get isSelectionEnabled() {
     //     return this._isSelectionEnabled;
     // }
@@ -76,6 +78,10 @@ export class SelectionManagerService implements IDisposable {
         // this._currentSelection$.complete();
     }
 
+    makeDirty(dirty: boolean = true) {
+        this._dirty = dirty;
+    }
+
     refreshSelection() {
         if (this._currentSelection == null) {
             return;
@@ -84,6 +90,10 @@ export class SelectionManagerService implements IDisposable {
     }
 
     setCurrentSelection(param: ISelectionManagerSearchParam) {
+        if (this._dirty === false) {
+            return;
+        }
+
         this._currentSelection = param;
 
         this.refresh(param);

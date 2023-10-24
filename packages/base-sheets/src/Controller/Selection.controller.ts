@@ -18,7 +18,6 @@ import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
-import { SetWorksheetActivateMutation } from '../commands/mutations/set-worksheet-activate.mutation';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { ISetZoomRatioOperationParams, SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
@@ -194,10 +193,6 @@ export class SelectionController extends Disposable {
                 return;
             }
             const { unitId, sheetId, skeleton, commandId } = param;
-
-            if (commandId != null && commandId !== SetWorksheetActivateMutation.id) {
-                return;
-            }
 
             const currentRender = this._renderManagerService.getRenderById(unitId);
 

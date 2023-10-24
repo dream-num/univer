@@ -5,6 +5,7 @@ import {
     NORMAL_TEXT_SELECTION_PLUGIN_NAME,
     RichTextEditingMutation,
     TextSelectionManagerService,
+    VIEWPORT_KEY,
 } from '@univerjs/base-docs';
 import {
     DeviceInputEventType,
@@ -17,6 +18,7 @@ import {
     ITextSelectionRenderManager,
     Rect,
     Scene,
+    ScrollBar,
 } from '@univerjs/base-render';
 import {
     Disposable,
@@ -46,10 +48,16 @@ import { getEditorObject } from '../../Basics/editor/get-editor-object';
 import { SetCellEditOperation } from '../../commands/operations/cell-edit.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import styles from '../../View/SheetContainer/index.module.less';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
 const EDITOR_INPUT_SELF_EXTEND_GAP = 5;
+
+interface ICanvasOffset {
+    left: number;
+    top: number;
+}
 
 @OnLifecycle(LifecycleStages.Steady, StartEditController)
 export class StartEditController extends Disposable {
@@ -157,6 +165,7 @@ export class StartEditController extends Disposable {
 
     private _predictingSize(
         actualRangeWithCoord: IPosition,
+        canvasOffset: ICanvasOffset,
         documentSkeleton: DocumentSkeleton,
         documentLayoutObject: IDocumentLayoutObject
     ) {
@@ -171,7 +180,7 @@ export class StartEditController extends Disposable {
         if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
             return documentSkeleton.getActualSize();
         }
-        documentSkeleton.getModel().updateDocumentDataPageSize(clientWidth - startX);
+        documentSkeleton.getModel().updateDocumentDataPageSize(clientWidth - startX - canvasOffset.left);
         documentSkeleton.calculate();
 
         const size = documentSkeleton.getActualSize();
@@ -196,20 +205,14 @@ export class StartEditController extends Disposable {
 
     private _fitTextSize(
         actualRangeWithCoord: IPosition,
+        canvasOffset: ICanvasOffset,
         documentSkeleton: DocumentSkeleton,
         documentLayoutObject: IDocumentLayoutObject
     ) {
-        const editorObject = this._getEditorObject();
-
-        if (editorObject == null) {
-            return;
-        }
-
-        const { document, scene, engine } = editorObject;
-
         const { startX, startY, endX, endY } = actualRangeWithCoord;
         const { actualWidth, actualHeight } = this._predictingSize(
             actualRangeWithCoord,
+            canvasOffset,
             documentSkeleton,
             documentLayoutObject
         );
@@ -246,27 +249,76 @@ export class StartEditController extends Disposable {
         // re-calculate skeleton(viewModel for component)
         documentSkeleton.calculate();
 
-        // resize canvas
-        engine.resizeBySize(editorWidth, editorHeight);
+        this._editAreaProcessing(editorWidth, editorHeight, actualRangeWithCoord, canvasOffset, fill);
+
+        // this._textSelectionRenderManager.sync();
+    }
+
+    private _editAreaProcessing(
+        editorWidth: number,
+        editorHeight: number,
+        actualRangeWithCoord: IPosition,
+        canvasOffset: ICanvasOffset,
+        fill: Nullable<string>
+    ) {
+        const editorObject = this._getEditorObject();
+
+        if (editorObject == null) {
+            return;
+        }
+
+        const { startX, startY, endX, endY } = actualRangeWithCoord;
+
+        const { document: documentComponent, scene, engine } = editorObject;
+
+        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+
+        const scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
+
+        // Todo: @
+        const clientHeight =
+            document.body.clientHeight - startY - parseFloat(styles.sheetFooterBarHeight) - canvasOffset.top;
+
+        const clientWidth = document.body.clientWidth - startX - canvasOffset.left;
+
+        editorWidth += scrollBar?.barSize || 0;
+
+        if (editorWidth > clientWidth) {
+            editorWidth = clientWidth;
+        }
+
+        let physicHeight = editorHeight;
 
         scene.transformByState({
             width: editorWidth,
             height: editorHeight,
         });
 
-        document.resize(editorWidth, editorHeight);
+        documentComponent.resize(editorWidth, editorHeight);
+
+        if (physicHeight > clientHeight) {
+            physicHeight = clientHeight;
+            if (scrollBar == null) {
+                viewportMain && new ScrollBar(viewportMain);
+            } else {
+                viewportMain?.resetSizeAndScrollBar();
+            }
+        } else {
+            viewportMain?.getScrollBar()?.dispose();
+        }
 
         this._addBackground(scene, editorWidth, editorHeight, fill);
+
+        // resize canvas
+        engine.resizeBySize(editorWidth, physicHeight);
 
         this._cellEditorManagerService.setState({
             startX,
             startY,
             endX: editorWidth + startX,
-            endY: editorHeight + startY,
+            endY: physicHeight + startY,
             show: true,
         });
-
-        // this._textSelectionRenderManager.sync();
     }
 
     private _addBackground(scene: Scene, editorWidth: number, editorHeight: number, fill?: Nullable<string>) {
@@ -320,7 +372,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { position, documentLayoutObject } = state;
+            const { position, documentLayoutObject, canvasOffset } = state;
 
             const editorObject = this._getEditorObject();
 
@@ -328,7 +380,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { document } = editorObject;
+            const { document, scene } = editorObject;
 
             this._contextService.setContextValue(FOCUSING_EDITOR, true);
 
@@ -342,7 +394,7 @@ export class StartEditController extends Disposable {
 
             const documentModel = skeleton.getModel() as DocumentModel;
 
-            this._fitTextSize(position, skeleton, documentLayoutObject);
+            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject);
 
             // move selection
             if (eventType === DeviceInputEventType.Keyboard) {
@@ -365,6 +417,10 @@ export class StartEditController extends Disposable {
                 ]);
             } else {
                 const cursor = documentModel.getBodyModel().getLastIndex() - 1 || 0;
+
+                scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
+                    y: Infinity,
+                });
 
                 this._textSelectionManagerService.replace([
                     {
@@ -476,9 +532,9 @@ export class StartEditController extends Disposable {
                         return;
                     }
 
-                    const { position, documentLayoutObject } = param;
+                    const { position, documentLayoutObject, canvasOffset } = param;
 
-                    this._fitTextSize(position, skeleton, documentLayoutObject);
+                    this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject);
 
                     // const editorObject = this._getEditorObject();
 

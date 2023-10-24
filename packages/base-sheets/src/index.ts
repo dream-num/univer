@@ -104,6 +104,7 @@ export { SetWorksheetOrderCommand } from './commands/commands/set-worksheet-orde
 export { SetRowHeightCommand as SetWorksheetRowHeightCommand } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
 export { ChangeZoomRatioCommand, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
+export { AddWorksheetMergeMutation } from './commands/mutations/add-worksheet-merge.mutation';
 export {
     InsertColMutation,
     InsertColMutationUndoFactory as InsertColMutationFactory,
@@ -111,7 +112,11 @@ export {
     InsertRowMutationUndoFactory as InsertRowMutationFactory,
 } from './commands/mutations/insert-row-col.mutation';
 export { InsertSheetMutation, InsertSheetUndoMutationFactory } from './commands/mutations/insert-sheet.mutation';
+export { MoveRowsMutation } from './commands/mutations/move-rows-cols.mutation';
+export { RemoveColMutation, RemoveRowMutation } from './commands/mutations/remove-row-col.mutation';
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
+export { RemoveWorksheetMergeMutation } from './commands/mutations/remove-worksheet-merge.mutation';
+export { SetBorderStylesMutation } from './commands/mutations/set-border-styles.mutation';
 export { SetColHiddenMutation, SetColVisibleMutation } from './commands/mutations/set-col-visible.mutation';
 export { SetFrozenMutation } from './commands/mutations/set-frozen.mutation';
 export type { ISetRangeStyleMutationParams } from './commands/mutations/set-range-styles.mutation';
@@ -141,4 +146,5 @@ export { SetSelectionsOperation } from './commands/operations/selection.operatio
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export * from './Locale';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
+
 // #endregion

@@ -23,7 +23,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics';
-import { RenameSheetCommand } from '../commands/commands/rename.command';
+import { RenameSheetOperation } from '../commands/commands/rename.command';
 import {
     SetCopySelectionCommand,
     SetInfiniteFormatPainterCommand,
@@ -164,7 +164,7 @@ export class SheetUIController extends Disposable {
             SetFontSizeCommand,
 
             ShowMenuListCommand,
-            RenameSheetCommand,
+            RenameSheetOperation,
 
             SetCellEditOperation,
 

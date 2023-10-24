@@ -77,7 +77,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from '../../Basics/Const/PLUGIN_NAME';
-import { RenameSheetCommand } from '../../commands/commands/rename.command';
+import { RenameSheetOperation } from '../../commands/commands/rename.command';
 import {
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
@@ -1423,7 +1423,7 @@ export function CopySheetMenuItemFactory(): IMenuButtonItem {
 
 export function RenameSheetMenuItemFactory(): IMenuButtonItem {
     return {
-        id: RenameSheetCommand.id,
+        id: RenameSheetOperation.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.rename',

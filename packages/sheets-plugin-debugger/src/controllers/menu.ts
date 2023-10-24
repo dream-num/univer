@@ -63,7 +63,6 @@ export function UIComponentMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         tooltip: 'debugger.uiComponent.tooltip',
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.NEO,
         positions: [MenuPosition.TOOLBAR],
         selections: [
             {

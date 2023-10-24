@@ -47,9 +47,7 @@ export class HeaderMenuResizeShape<
     }
 
     protected override _draw(ctx: CanvasRenderingContext2D) {
-        let width = this.width;
-
-        let height = this.height;
+        let { width, height } = this;
 
         let left = 0;
 

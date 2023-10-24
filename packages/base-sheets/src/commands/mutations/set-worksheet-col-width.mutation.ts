@@ -54,10 +54,14 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
         }
 
         const worksheet = universheet.getSheetBySheetId(params.worksheetId);
-        if (!worksheet) return false;
+        if (!worksheet) {
+            return false;
+        }
+
         const defaultColumnWidth = worksheet.getConfig().defaultColumnWidth;
         const manager = worksheet.getColumnManager();
         const ranges = params.ranges;
+
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
             for (let j = range.startColumn; j < range.endColumn + 1; j++) {

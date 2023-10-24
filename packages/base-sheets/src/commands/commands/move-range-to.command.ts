@@ -30,7 +30,7 @@ export const MoveRangeToCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const originRange = selectionManagerService.getRangeDatas()?.[0];
+        const originRange = selectionManagerService.getSelectionRanges()?.[0];
         if (!originRange) {
             return false;
         }

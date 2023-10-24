@@ -33,14 +33,20 @@ export const AddWorksheetMergeCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const selections = selectionManagerService.getRangeDatas();
-        if (!selections?.length) return false;
+
+        const selections = selectionManagerService.getSelectionRanges();
+        if (!selections?.length) {
+            return false;
+        }
+
         const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
-        if (!worksheet) return false;
+        const worksheet = workbook?.getSheetBySheetId(worksheetId);
+        if (!worksheet) {
+            return false;
+        }
+
         let ranges = selections;
 
         if (params && params.value != null) {

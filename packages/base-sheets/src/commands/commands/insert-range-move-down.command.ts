@@ -64,7 +64,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
 
             .getActiveSheet()
             .getSheetId();
-        const range = selectionManagerService.getRangeDatas();
+        const range = selectionManagerService.getSelectionRanges();
         if (!range?.length) return false;
 
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);

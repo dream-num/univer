@@ -46,7 +46,7 @@ export const ClearSelectionFormatCommand: ICommand = {
         const workbookId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const worksheetId = worksheet.getSheetId();
-        const selections = selectionManagerService.getRangeDatas();
+        const selections = selectionManagerService.getSelectionRanges();
         if (!selections?.length) {
             return false;
         }

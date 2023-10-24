@@ -51,7 +51,7 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const ranges = selectionManagerService.getRangeDatas();
+        const ranges = selectionManagerService.getSelectionRanges();
         if (!ranges?.length) {
             return false;
         }

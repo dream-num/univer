@@ -5,11 +5,7 @@ export * from './SheetPlugin';
 // #region services
 
 export { BorderStyleManagerService } from './services/border-style-manager.service';
-export {
-    COPY_SELECTION_PLUGIN_NAME,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-} from './services/selection/selection-manager.service';
+export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './services/selection/selection-manager.service';
 
 // #endregion
 

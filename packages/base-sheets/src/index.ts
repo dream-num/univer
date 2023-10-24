@@ -152,8 +152,8 @@ export {
     SetWorksheetRowHeightMutation,
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
-export { SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISetSelectionsOperationParams } from './commands/operations/selection.operation';
+export { SetCopySelectionsOperation, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export * from './Locale';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';

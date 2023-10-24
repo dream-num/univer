@@ -1,10 +1,12 @@
-import { Redo24, Undo24 } from '@univerjs/icons';
+import { Painter24, Redo24, Undo24 } from '@univerjs/icons';
 
 import { BaseIconProps, Icon } from '../AddIcon';
 
 export const BackIcon = (props: BaseIconProps) => <Redo24 />;
 
 export const ForwardIcon = (props: BaseIconProps) => <Undo24 />;
+
+export const FormatPainterIcon = (props: BaseIconProps) => <Painter24 {...props} />;
 
 export const FormatIcon = (props: BaseIconProps) => (
     <Icon spin={props.spin} rotate={props.rotate} name="foward" style={props.style}>
@@ -166,6 +168,7 @@ export default {
     BackIcon,
     ForwardIcon,
     FormatIcon,
+    FormatPainterIcon,
     NextIcon,
     RightIcon,
     CorrectIcon,

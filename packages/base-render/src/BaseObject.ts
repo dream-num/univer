@@ -680,7 +680,7 @@ export abstract class BaseObject {
     }
 
     resetCursor() {
-        this.setCursor(CURSOR_TYPE.DEFAULT);
+        this.getScene()?.resetCursor();
     }
 
     setCursor(val: CURSOR_TYPE) {

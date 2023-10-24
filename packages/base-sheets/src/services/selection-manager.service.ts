@@ -8,7 +8,10 @@ import { IRange, ISelectionCell, makeCellRangeToRangeData, Nullable } from '@uni
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
+import { ISetSelectionsOperationParams } from '../commands/operations/selection.operation';
+
 export const NORMAL_SELECTION_PLUGIN_NAME = 'normalSelectionPluginName';
+export const COPY_SELECTION_PLUGIN_NAME = 'copySelectionPluginName';
 
 export interface ISelectionManagerSearchParam {
     pluginName: string;
@@ -30,12 +33,14 @@ export class SelectionManagerService implements IDisposable {
     private readonly _selectionInfo: ISelectionInfo = new Map();
 
     private _currentSelection: Nullable<ISelectionManagerSearchParam> = null;
+    private _currentCopySelection: Nullable<ISelectionManagerSearchParam> = null;
 
     // private _currentStyle: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE;
 
     // private _isSelectionEnabled: boolean = true;
 
     private readonly _selectionInfo$ = new BehaviorSubject<Nullable<ISelectionWithStyle[]>>(null);
+    private readonly _copySelectionInfo$ = new BehaviorSubject<Nullable<ISelectionWithStyle[]>>(null);
 
     // eslint-disable-next-line @typescript-eslint/member-ordering
     readonly selectionInfo$ = this._selectionInfo$.asObservable();
@@ -165,6 +170,32 @@ export class SelectionManagerService implements IDisposable {
         this.refresh(this._currentSelection);
     }
 
+    replaceCopySelection(insertParam: ISetSelectionsOperationParams) {
+        let selectionDatas: ISelectionWithStyle[];
+        if (insertParam.selections.length === 0) {
+            selectionDatas = [];
+        } else {
+            selectionDatas = [
+                {
+                    ...insertParam.selections[0],
+                    style: this.createCopyPasteSelection(),
+                },
+            ];
+        }
+        this._replaceByParam({
+            selectionDatas,
+            pluginName: insertParam.pluginName,
+            unitId: insertParam.workbookId,
+            sheetId: insertParam.worksheetId,
+        });
+        this._currentCopySelection = {
+            pluginName: COPY_SELECTION_PLUGIN_NAME,
+            unitId: insertParam.workbookId,
+            sheetId: insertParam.worksheetId,
+        };
+        this.refresh();
+    }
+
     replaceWithNoRefresh(selectionDatas: ISelectionWithStyle[]) {
         if (this._currentSelection == null) {
             return;
@@ -268,8 +299,12 @@ export class SelectionManagerService implements IDisposable {
         return this._selectionInfo.get(pluginName)?.get(unitId)?.get(sheetId);
     }
 
-    private refresh(param: ISelectionManagerSearchParam): void {
-        this._selectionInfo$.next(this._getSelectionDatas(param));
+    private refresh(param?: ISelectionManagerSearchParam): void {
+        const res = [
+            ...(this._getSelectionDatas(param) || this._getSelectionDatas(this._currentSelection) || []),
+            ...(this._getSelectionDatas(this._currentCopySelection) || []),
+        ];
+        this._selectionInfo$.next(res);
     }
 
     private _getFirstByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionWithStyle>> {

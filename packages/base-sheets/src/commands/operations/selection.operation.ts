@@ -21,3 +21,16 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
         return true;
     },
 };
+
+export const SetCopySelectionsOperation: IOperation<ISetSelectionsOperationParams> = {
+    id: 'sheet.operation.set-copy-selection',
+    type: CommandType.OPERATION,
+    handler: async (accessor, params) => {
+        const selectionManagerService = accessor.get(SelectionManagerService);
+        if (!params) {
+            return false;
+        }
+        selectionManagerService.replaceCopySelection(params!);
+        return true;
+    },
+};

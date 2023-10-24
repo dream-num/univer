@@ -135,6 +135,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                     className={styles.textButton}
                     disabled={disabled}
                     onClick={() => commandService.executeCommand(props.id)}
+                    onDoubleClick={() => props.subId && commandService.executeCommand(props.subId)}
                 >
                     <CustomLabel label={icon ? { name: icon } : title} />
                 </ToolbarButton>

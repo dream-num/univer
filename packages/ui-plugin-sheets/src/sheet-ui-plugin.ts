@@ -10,11 +10,13 @@ import { EndEditController } from './controller/editor/end-edit.controller';
 import { InitializeEditorController } from './controller/editor/initialize-editor.controller';
 import { StartEditController } from './controller/editor/start-edit.controller';
 import { EditorBridgeController } from './controller/editor-bridge.controller';
+import { FormatPainterController } from './controller/format-painter/format-painter.controller';
 import { SheetUIController } from './controller/sheet-ui.controller';
 import { en } from './Locale';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
+import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { ISheetBarService, SheetBarService } from './services/sheetbar/sheetbar.service';
 
 export class SheetUIPlugin extends Plugin {
@@ -41,6 +43,7 @@ export class SheetUIPlugin extends Plugin {
                 [IEditorBridgeService, { useClass: EditorBridgeService }],
                 [ISheetClipboardService, { useClass: SheetClipboardService }],
                 [ISheetBarService, { useClass: SheetBarService }],
+                [IFormatPainterService, { useClass: FormatPainterService }],
                 // [ITextSelectionRenderManager, { useClass: TextSelectionRenderManager }],
                 // [TextSelectionManagerService],
                 [ICellEditorManagerService, { useClass: CellEditorManagerService }],
@@ -54,6 +57,7 @@ export class SheetUIPlugin extends Plugin {
                 [StartEditController],
                 [EditingController],
                 [EndEditController],
+                [FormatPainterController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

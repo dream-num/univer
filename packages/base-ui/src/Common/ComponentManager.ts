@@ -24,6 +24,7 @@ import {
     CutIcon,
     DeleteLineIcon,
     FillColorIcon,
+    FormatPainterIcon,
     ForwardIcon,
     FullBorderIcon,
     FxIcon,
@@ -67,6 +68,7 @@ export class ComponentManager {
         const iconList: Record<string, Function> = {
             ForwardIcon,
             BackIcon,
+            FormatPainterIcon,
             BoldIcon,
             ItalicIcon,
             DeleteLineIcon,

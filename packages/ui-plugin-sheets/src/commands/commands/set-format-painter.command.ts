@@ -1,5 +1,4 @@
-import { SelectionManagerService, SetCopySelectionsOperation } from '@univerjs/base-sheets';
-import { COPY_SELECTION_PLUGIN_NAME } from '@univerjs/base-sheets/services/selection-manager.service.js';
+import { COPY_SELECTION_PLUGIN_NAME, SelectionManagerService, SetCopySelectionsOperation } from '@univerjs/base-sheets';
 import { CommandType, ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 

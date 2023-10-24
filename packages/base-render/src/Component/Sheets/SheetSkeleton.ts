@@ -41,6 +41,7 @@ import {
     getCellInfoInMergeData,
     getCellPositionByIndex,
     getFontStyleString,
+    hasUnMergedCellInRow,
     isRectIntersect,
     mergeInfoOffset,
 } from '../../Basics/Tools';
@@ -58,7 +59,7 @@ interface ISetCellCache {
 }
 
 export interface IRowAutoHeightInfo {
-    rowNumber: number;
+    row: number;
     autoHeight?: number;
 }
 
@@ -305,32 +306,26 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (!Tools.isArray(ranges)) {
             return [];
         }
+
         const results: IRowAutoHeightInfo[] = [];
         const { mergeData } = this._config;
 
         for (const range of ranges) {
             const { startRow, endRow, startColumn, endColumn } = range;
 
-            for (let i = startRow; i <= endRow; i++) {
+            for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
                 // If the row has already been calculated, it does not need to be calculated
-                if (results.some(({ rowNumber }) => rowNumber === i)) {
+                if (results.some(({ row }) => row === rowIndex)) {
                     continue;
                 }
-                // In the selection area, if a cell is not in the merged cell, the automatic height of the row needs to be calculated.
-                let hasUnMergedCell = false;
-                for (let j = startColumn; j <= endColumn; j++) {
-                    const { isMerged, isMergedMainCell } = getCellInfoInMergeData(i, j, mergeData);
-                    if (!isMerged && !isMergedMainCell) {
-                        hasUnMergedCell = true;
-                        break;
-                    }
-                }
+
+                const hasUnMergedCell = hasUnMergedCellInRow(rowIndex, startColumn, endColumn, mergeData);
 
                 if (hasUnMergedCell) {
-                    const autoHeight = this.calculateRowAutoHeight(i);
+                    const autoHeight = this.calculateRowAutoHeight(rowIndex);
 
                     results.push({
-                        rowNumber: i,
+                        row: rowIndex,
                         autoHeight,
                     });
                 }
@@ -340,7 +335,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return results;
     }
 
-    calculateRowAutoHeight(rowNum: number): number {
+    private calculateRowAutoHeight(rowNum: number): number {
         const { columnCount, columnData, mergeData } = this._config;
         const data = Tools.createObjectArray(columnData);
         let height = 0;
@@ -366,7 +361,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             let { a: angle } = textRotation as ITextRotation;
             const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
-
             if (isVertical === BooleanNumber.TRUE) {
                 angle = DEFAULT_ROTATE_ANGLE;
             }

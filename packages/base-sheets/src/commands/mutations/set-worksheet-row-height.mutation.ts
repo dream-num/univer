@@ -63,10 +63,10 @@ export const SetWorksheetRowAutoHeightMutationFactory = (
     const manager = worksheet.getRowManager();
 
     for (const rowInfo of rowsAutoHeightInfo) {
-        const { rowNumber } = rowInfo;
-        const { ah } = manager.getRowOrCreate(rowNumber);
+        const { row } = rowInfo;
+        const { ah } = manager.getRowOrCreate(row);
         results.push({
-            rowNumber,
+            row,
             autoHeight: ah,
         });
     }
@@ -128,9 +128,9 @@ export const SetWorksheetRowAutoHeightMutation: IMutation<ISetWorksheetRowAutoHe
 
         const rowManager = worksheet.getRowManager();
 
-        for (const { rowNumber, autoHeight } of rowsAutoHeightInfo) {
-            const row = rowManager.getRowOrCreate(rowNumber);
-            row.ah = autoHeight;
+        for (const { row, autoHeight } of rowsAutoHeightInfo) {
+            const curRow = rowManager.getRowOrCreate(row);
+            curRow.ah = autoHeight;
         }
 
         return true;

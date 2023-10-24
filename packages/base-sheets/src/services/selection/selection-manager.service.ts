@@ -4,7 +4,6 @@ import { IDisposable, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 import { getNormalSelectionStyle, ISelectionStyle, ISelectionWithStyle } from '../../Basics/selection';
-import { ISetSelectionsOperationParams } from '../../commands/operations/selection.operation';
 
 export const NORMAL_SELECTION_PLUGIN_NAME = 'normalSelectionPluginName';
 export const COPY_SELECTION_PLUGIN_NAME = 'copySelectionPluginName';
@@ -162,9 +161,15 @@ export class SelectionManagerService implements IDisposable {
         this.refresh(this._currentSelection);
     }
 
-    replaceCopySelection(insertParam: ISetSelectionsOperationParams) {
+    replaceCopySelection(insertParam: {
+        pluginName: string;
+        unitId: string;
+        sheetId: string;
+        selections: ISelectionWithStyle[];
+    }) {
+        const { pluginName, unitId, sheetId, selections } = insertParam;
         let selectionDatas: ISelectionWithStyle[];
-        if (insertParam.selections.length === 0) {
+        if (selections.length === 0) {
             selectionDatas = [];
         } else {
             selectionDatas = [
@@ -176,14 +181,14 @@ export class SelectionManagerService implements IDisposable {
         }
         this._replaceByParam({
             selectionDatas,
-            pluginName: insertParam.pluginName,
-            unitId: insertParam.workbookId,
-            sheetId: insertParam.worksheetId,
+            pluginName,
+            unitId,
+            sheetId,
         });
         this._currentCopySelection = {
             pluginName: COPY_SELECTION_PLUGIN_NAME,
-            unitId: insertParam.workbookId,
-            sheetId: insertParam.worksheetId,
+            unitId,
+            sheetId,
         };
         this.refresh();
     }

@@ -30,7 +30,12 @@ export const SetCopySelectionsOperation: IOperation<ISetSelectionsOperationParam
         if (!params) {
             return false;
         }
-        selectionManagerService.replaceCopySelection(params!);
+        selectionManagerService.replaceCopySelection({
+            pluginName: params.pluginName,
+            unitId: params.workbookId,
+            sheetId: params.worksheetId,
+            selections: params.selections,
+        });
         return true;
     },
 };

@@ -10,7 +10,7 @@ Univer Sheet 的插件架构如下图所示：
 
 ![Univer Sheet 插件架构](../img/sheet-architecture.png)
 
-*并未绘制出全部的模块，仅做示意*。
+*上图并未绘制出全部的模块，仅做示意*。
 
 Univer Sheet 的架构主要由以下几个部分组成：
 
@@ -36,7 +36,15 @@ Univer Sheet 的架构主要由以下几个部分组成：
 
 ### base-sheets
 
-base-sheets 子包提供了大量更改 sheet 数据的 command，同时 base-sheets 还负责 canvas 渲染的状态管理和服务。
+承载 sheet 的主要（基础）业务逻辑和渲染：
+
+* 更改 sheet 数据的 commands / mutations
+* 应用程序的内部状态
+* 为高级功能提供内部扩展机制
+* canvas 渲染
+* 更改 canvas 区域状态的 operations
+
+或许 render 部分也应该单独拆解出来，但是目前还没有这个需求。
 
 ### ui-plugin-sheets
 
@@ -46,3 +54,9 @@ ui-plugin-sheets 提供了 sheet 的 UI，包括：
 * 复制粘贴逻辑
 * sheet 的 UI 组件
 * 单元格编辑器
+
+后面如果有跨运行环境的 UI，则通过进一步按照平台拆分 plugin，或者通过二级入口点来解决。
+
+### 其他功能
+
+后续的高级功能

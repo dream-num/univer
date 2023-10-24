@@ -219,7 +219,9 @@ describe('Test clear selection content commands', () => {
 
                 // set merge cell
                 expect(await commandService.executeCommand(AddWorksheetMergeCommand.id)).toBeTruthy();
-                expect(getMerge()).toStrictEqual([{ startRow: 0, startColumn: 0, endRow: 1, endColumn: 1 }]);
+                expect(getMerge()).toStrictEqual([
+                    { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                ]);
 
                 // clear formats with merged cells
                 expect(await commandService.executeCommand(ClearSelectionFormatCommand.id)).toBeTruthy();
@@ -235,7 +237,9 @@ describe('Test clear selection content commands', () => {
                 expect(getStyle()).toStrictEqual({
                     ff: 'Arial',
                 });
-                expect(getMerge()).toStrictEqual([{ startRow: 0, startColumn: 0, endRow: 1, endColumn: 1 }]);
+                expect(getMerge()).toStrictEqual([
+                    { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                ]);
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual({
@@ -365,7 +369,9 @@ describe('Test clear selection content commands', () => {
 
                 // set merge cell
                 expect(await commandService.executeCommand(AddWorksheetMergeCommand.id)).toBeTruthy();
-                expect(getMerge()).toStrictEqual([{ startRow: 0, startColumn: 0, endRow: 1, endColumn: 1 }]);
+                expect(getMerge()).toStrictEqual([
+                    { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                ]);
 
                 // clear all with merged cells
                 expect(await commandService.executeCommand(ClearSelectionAllCommand.id)).toBeTruthy();
@@ -379,7 +385,9 @@ describe('Test clear selection content commands', () => {
                 expect(getStyle()).toStrictEqual({
                     ff: 'Arial',
                 });
-                expect(getMerge()).toStrictEqual([{ startRow: 0, startColumn: 0, endRow: 1, endColumn: 1 }]);
+                expect(getMerge()).toStrictEqual([
+                    { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                ]);
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual({});

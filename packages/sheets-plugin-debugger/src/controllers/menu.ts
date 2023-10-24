@@ -10,6 +10,7 @@ import { IAccessor } from '@wendellhu/redi';
 
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
+import { UIComponentOperation } from '../commands/operations/ui-component.operation';
 
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
@@ -50,6 +51,24 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
             {
                 label: 'default',
                 value: defaultTheme,
+            },
+        ],
+    };
+}
+export function UIComponentMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: UIComponentOperation.id,
+        icon: 'ShortcutIcon',
+        title: 'debugger.uiComponent.title',
+        tooltip: 'debugger.uiComponent.tooltip',
+        display: DisplayTypes.ICON,
+        type: MenuItemType.SELECTOR,
+        selectType: SelectTypes.NEO,
+        positions: [MenuPosition.TOOLBAR],
+        selections: [
+            {
+                label: 'Notification',
+                value: 'Notification Content',
             },
         ],
     };

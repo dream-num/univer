@@ -4,7 +4,8 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
-import { LocaleMenuItemFactory, ThemeMenuItemFactory } from './menu';
+import { UIComponentOperation } from '../commands/operations/ui-component.operation';
+import { LocaleMenuItemFactory, ThemeMenuItemFactory, UIComponentMenuItemFactory } from './menu';
 
 export class DebuggerController extends Disposable {
     constructor(
@@ -15,13 +16,13 @@ export class DebuggerController extends Disposable {
         super();
         this._initializeContextMenu();
 
-        [LocaleOperation, ThemeOperation].forEach((command) =>
+        [LocaleOperation, ThemeOperation, UIComponentOperation].forEach((command) =>
             this.disposeWithMe(this._commandService.registerCommand(command))
         );
     }
 
     private _initializeContextMenu() {
-        [LocaleMenuItemFactory, ThemeMenuItemFactory].forEach((factory) => {
+        [LocaleMenuItemFactory, ThemeMenuItemFactory, UIComponentMenuItemFactory].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

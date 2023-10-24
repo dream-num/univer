@@ -1,0 +1,73 @@
+@import '../../Basics/CSS/Skin/default.module.less';
+
+@notificationPrefixCls: notification;
+
+.@{notificationPrefixCls} {
+  position: fixed;
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  max-height: 100vh;
+  box-sizing: border-box;
+  justify-content: center;
+//   pointer-events: none;
+
+&-notice{
+    display: flex;
+    align-items: center;
+
+    padding: @padding-base;
+    font-size: @font-size-base;
+    background-color: @color-white;
+    border-radius: @border-radius-base;
+    box-shadow: @box-shadow-lg;
+    gap: @margin-xs;
+}
+
+    &-icon {
+        display: inline-flex;
+        align-items: center;
+
+        &-success {
+            color: @success-color;
+        }
+
+        &-warning {
+            color: @warning-color;
+        }
+
+        &-error {
+            color: @error-color;
+        }
+    }
+    
+
+    &-container {
+        
+        display: inline-flex;
+        align-items: center;
+        
+
+        
+    }
+
+  // Position
+  &-top,
+  &-topLeft,
+  &-topRight {
+    top: 0;
+  }
+
+  &-bottom,
+  &-bottomRight,
+  &-bottomLeft {
+    bottom: 0;
+  }
+
+  &-bottomRight,
+  &-topRight {
+    right: 0;
+  }
+
+  
+}

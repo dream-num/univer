@@ -120,6 +120,7 @@ export class Worksheet {
     clone(): Worksheet {
         const { _snapshot: _config } = this;
         const copy = Tools.deepClone(_config);
+
         return new Worksheet(copy, this._styles);
     }
 

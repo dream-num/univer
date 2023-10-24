@@ -125,6 +125,8 @@ export class Engine extends ThinEngine<Scene> {
         this.disposeWithMe(fromWindowEvent('resize', () => this.resize()));
     }
 
+    // TODO: @jocs is it necessary to use ResizeObserver API?
+    // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
     resize() {
         if (!this._container) {
             return;

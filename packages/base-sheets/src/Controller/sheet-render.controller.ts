@@ -100,7 +100,6 @@ export class SheetRenderController extends Disposable {
                     const unitId = workbook.getUnitId();
                     const worksheet = workbook.getActiveSheet();
                     const sheetId = worksheet.getSheetId();
-
                     const params = command.params;
                     const { workbookId, worksheetId } = params as ISetWorksheetMutationParams;
                     if (!(workbookId === workbook.getUnitId() && worksheetId === worksheet.getSheetId())) {

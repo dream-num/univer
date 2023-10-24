@@ -527,11 +527,12 @@ export function getCellByIndex(
         columnWidthAccumulation
     );
 
-    const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = mergeCellHandler(
+    const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = getCellInfoInMergeData(
         row,
         column,
         mergeData
     );
+
     let mergeInfo = {
         startRow,
         startColumn,
@@ -582,8 +583,10 @@ export function getCellByIndex(
     };
 }
 
-// WTF: this name doesn't express any useful information about what is this used for
-export function mergeCellHandler(row: number, column: number, mergeData?: IRange[]): ISelectionCell {
+/**
+ * Determines whether the cell(row, column) is within the range of the merged cells.
+ */
+export function getCellInfoInMergeData(row: number, column: number, mergeData?: IRange[]): ISelectionCell {
     let isMerged = false; // The upper left cell only renders the content
     let isMergedMainCell = false;
     let newEndRow = row;
@@ -603,6 +606,7 @@ export function mergeCellHandler(row: number, column: number, mergeData?: IRange
             startColumn: mergeColumn,
         };
     }
+
     for (let i = 0; i < mergeData.length; i++) {
         const {
             startRow: startRowMarge,
@@ -640,6 +644,29 @@ export function mergeCellHandler(row: number, column: number, mergeData?: IRange
         startRow: mergeRow,
         startColumn: mergeColumn,
     };
+}
+
+/**
+ * Determine whether there are any cells in a row that are not in the merged cells, mainly used for the calculation of auto height
+ */
+export function hasUnMergedCellInRow(
+    row: number,
+    startColumn: number,
+    endColumn: number,
+    mergeData: IRange[]
+): boolean {
+    // In the selection area, if a cell is not in the merged cell, the automatic height of the row needs to be calculated.
+    let hasUnMergedCell = false;
+    for (let colIndex = startColumn; colIndex <= endColumn; colIndex++) {
+        const { isMerged, isMergedMainCell } = getCellInfoInMergeData(row, colIndex, mergeData);
+
+        if (!isMerged && !isMergedMainCell) {
+            hasUnMergedCell = true;
+            break;
+        }
+    }
+
+    return hasUnMergedCell;
 }
 
 export function mergeInfoOffset(

@@ -13,6 +13,8 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     ObjectMatrix,
+    sequenceExecute,
+    SheetInterceptorService,
     Tools,
     VerticalAlign,
     WrapStrategy,
@@ -55,11 +57,8 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         }
 
         const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService
-            .getCurrentUniverSheetInstance()
+        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
-            .getActiveSheet()
-            .getSheetId();
         const style = params.style;
 
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
@@ -116,16 +115,35 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
             setRangeValuesMutationParams
         );
 
-        const result = commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
-        if (result) {
+        const setRangeValuesResult = commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            setRangeValuesMutationParams
+        );
+
+        const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
+            id: SetStyleCommand.id,
+            params,
+        });
+
+        const result = await sequenceExecute([...redos], commandService);
+
+        if (setRangeValuesResult && result.result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
-                undo() {
-                    return commandService.executeCommand(SetRangeValuesMutation.id, undoSetRangeValuesMutationParams);
-                },
-                redo() {
-                    return commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
-                },
+                undo: async () =>
+                    (
+                        await sequenceExecute(
+                            [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
+                            commandService
+                        )
+                    ).result,
+                redo: async () =>
+                    (
+                        await sequenceExecute(
+                            [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
+                            commandService
+                        )
+                    ).result,
             });
 
             return true;

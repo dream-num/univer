@@ -97,7 +97,6 @@ export class SheetCanvasView {
         }
 
         const isAddedToExistedScene = container == null && parentRenderUnitId != null;
-
         if (isAddedToExistedScene) {
             this._renderManagerService.createRenderWithParent(unitId, parentRenderUnitId);
         } else {
@@ -184,7 +183,6 @@ export class SheetCanvasView {
         }
 
         const { rowHeader, columnHeader } = worksheet.getConfig();
-
         const viewMain = new Viewport(VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: rowHeader.width,
             top: columnHeader.height,
@@ -192,6 +190,7 @@ export class SheetCanvasView {
             right: 0,
             isWheelPreventDefaultX: true,
         });
+
         const viewRowTop = new Viewport(VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
             active: false,
             isWheelPreventDefaultX: true,

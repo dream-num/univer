@@ -46,6 +46,7 @@ export const SetRangeValuesUndoMutationFactory = (
     const { workbookId, worksheetId, cellValue } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const universheet = univerInstanceService.getUniverSheetInstance(workbookId);
+
     if (universheet == null) {
         throw new Error('universheet is null error!');
     }

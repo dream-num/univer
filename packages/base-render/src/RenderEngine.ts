@@ -17,6 +17,7 @@ export class RenderEngine extends Plugin {
         @Inject(Injector) override readonly _injector: Injector
     ) {
         super(PLUGIN_NAMES.BASE_RENDER);
+
         this._injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
 
         this._injector.add([

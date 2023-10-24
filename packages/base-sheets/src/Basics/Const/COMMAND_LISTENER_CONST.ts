@@ -9,10 +9,14 @@ import { SetRangeValuesMutation } from '../../commands/mutations/set-range-value
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../commands/mutations/set-row-visible.mutation';
 import { SetWorksheetActivateMutation } from '../../commands/mutations/set-worksheet-activate.mutation';
 import { SetWorksheetColWidthMutation } from '../../commands/mutations/set-worksheet-col-width.mutation';
-import { SetWorksheetRowHeightMutation } from '../../commands/mutations/set-worksheet-row-height.mutation';
+import {
+    SetWorksheetRowAutoHeightMutation,
+    SetWorksheetRowHeightMutation,
+} from '../../commands/mutations/set-worksheet-row-height.mutation';
 
 export const COMMAND_LISTENER_SKELETON_CHANGE = [
     SetWorksheetRowHeightMutation.id,
+    SetWorksheetRowAutoHeightMutation.id,
     SetWorksheetColWidthMutation.id,
     SetWorksheetActivateMutation.id,
     InsertRowMutation.id,

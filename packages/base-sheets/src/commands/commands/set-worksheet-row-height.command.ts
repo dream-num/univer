@@ -102,6 +102,42 @@ export const DeltaRowHeightCommand: ICommand = {
     },
 };
 
+export interface ISetRowAutoHeightCommandParams {}
+
+// export const SetRowAutoHeightCommand: ICommand = {
+//     type: CommandType.COMMAND,
+//     id: 'sheet.command.set-row-auto-height',
+//     handler: async (accessor: IAccessor) => {
+//         const commandService = accessor.get(ICommandService);
+//         const undoRedoService = accessor.get(IUndoRedoService);
+//         const univerInstanceService = accessor.get(IUniverInstanceService);
+//         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+//         const workbookId = workbook.getUnitId();
+//         const { redoMutationParams, undoMutationParams } = getAutoHeightUndoRedoParams(accessor);
+
+//         if (redoMutationParams == null || undoMutationParams == null) {
+//             return false;
+//         }
+
+//         const result = commandService.executeCommand(SetWorksheetRowAutoHeightMutation.id, redoMutationParams);
+
+//         if (result) {
+//             undoRedoService.pushUndoRedo({
+//                 URI: workbookId,
+//                 undo() {
+//                     return commandService.executeCommand(SetWorksheetRowAutoHeightMutation.id, undoMutationParams);
+//                 },
+//                 redo() {
+//                     return commandService.executeCommand(SetWorksheetRowAutoHeightMutation.id, redoMutationParams);
+//                 },
+//             });
+
+//             return true;
+//         }
+//         return true;
+//     },
+// };
+
 export interface ISetRowHeightCommandParams {
     value: number;
 }
@@ -115,7 +151,9 @@ export const SetRowHeightCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selections = selectionManagerService.getRangeDatas();
-        if (!selections?.length) return false;
+        if (!selections?.length) {
+            return false;
+        }
 
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const workbookId = workbook.getUnitId();
@@ -127,6 +165,7 @@ export const SetRowHeightCommand: ICommand = {
             ranges: selections,
             rowHeight: params.value,
         };
+
         const undoMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(
             accessor,
             redoMutationParams

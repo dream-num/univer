@@ -9,6 +9,10 @@ export interface IRowData {
      */
     h: number;
     /**
+     * is current row self-adaptive to its content, use `ah` to set row height when true, else use `h`.
+     */
+    isAutoHeight?: boolean;
+    /**
      * auto height
      */
     ah?: number;

@@ -37,6 +37,65 @@ import { SpreadsheetSkeleton } from './SheetSkeleton';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
+/**
+ * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
+ * @param documentSkeleton Data of the document's ViewModel
+ * @param angle The rotation angle of an Excel cell
+ * @returns
+ */
+export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angle: number = 0) {
+    const skeletonData = documentSkeleton?.getSkeletonData();
+
+    if (!skeletonData) {
+        return;
+    }
+    const { pages } = skeletonData;
+    const lastPage = pages[pages.length - 1];
+
+    if (angle === 0) {
+        const { width, height } = lastPage;
+        return { width, height };
+    }
+
+    let allRotatedWidth = 0;
+    let allRotatedHeight = 0;
+
+    const orientation = getRotateOrientation(angle);
+    const widthArray: Array<{ rotatedWidth: number; spaceWidth: number }> = [];
+    columnIterator([lastPage], (column: IDocumentSkeletonColumn) => {
+        const { lines, width: columnWidth, spaceWidth } = column;
+
+        const { rotatedHeight, rotatedWidth } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, angle);
+        allRotatedHeight += rotatedHeight;
+
+        widthArray.push({ rotatedWidth, spaceWidth });
+    });
+
+    const tanTheta = Math.tan(angle);
+    const sinTheta = Math.sin(angle);
+
+    const widthCount = widthArray.length;
+    for (let i = 0; i < widthCount; i++) {
+        const { rotatedWidth, spaceWidth } = widthArray[i];
+
+        if (i === 0) {
+            allRotatedWidth += rotatedWidth;
+        }
+
+        if (
+            (orientation === ORIENTATION_TYPE.UP && i === 0) ||
+            (orientation === ORIENTATION_TYPE.DOWN && i === widthCount - 1)
+        ) {
+            allRotatedWidth += (rotatedWidth + spaceWidth / sinTheta) / tanTheta;
+        }
+    }
+
+    return {
+        width: allRotatedWidth,
+        height: allRotatedHeight,
+    };
+}
+
 export class Spreadsheet extends SheetComponent {
     private _borderAuxiliaryExtension!: BorderAuxiliary;
 
@@ -309,65 +368,6 @@ export class Spreadsheet extends SheetComponent {
     //     this._selection?.dispose();
     //     this._hasSelection = false;
     // }
-
-    /**
-     * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
-     * @param documentSkeleton Data of the document's ViewModel
-     * @param angle The rotation angle of an Excel cell
-     * @returns
-     */
-    getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angle: number = 0) {
-        const skeletonData = documentSkeleton?.getSkeletonData();
-
-        if (!skeletonData) {
-            return;
-        }
-        const { pages } = skeletonData;
-        const lastPage = pages[pages.length - 1];
-
-        if (angle === 0) {
-            const { width, height } = lastPage;
-            return { width, height };
-        }
-
-        let allRotatedWidth = 0;
-        let allRotatedHeight = 0;
-
-        const orientation = getRotateOrientation(angle);
-        const widthArray: Array<{ rotatedWidth: number; spaceWidth: number }> = [];
-        columnIterator([lastPage], (column: IDocumentSkeletonColumn) => {
-            const { lines, width: columnWidth, spaceWidth } = column;
-
-            const { rotatedHeight, rotatedWidth } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, angle);
-            allRotatedHeight += rotatedHeight;
-
-            widthArray.push({ rotatedWidth, spaceWidth });
-        });
-
-        const tanTheta = Math.tan(angle);
-        const sinTheta = Math.sin(angle);
-
-        const widthCount = widthArray.length;
-        for (let i = 0; i < widthCount; i++) {
-            const { rotatedWidth, spaceWidth } = widthArray[i];
-
-            if (i === 0) {
-                allRotatedWidth += rotatedWidth;
-            }
-
-            if (
-                (orientation === ORIENTATION_TYPE.UP && i === 0) ||
-                (orientation === ORIENTATION_TYPE.DOWN && i === widthCount - 1)
-            ) {
-                allRotatedWidth += (rotatedWidth + spaceWidth / sinTheta) / tanTheta;
-            }
-        }
-
-        return {
-            width: allRotatedWidth,
-            height: allRotatedHeight,
-        };
-    }
     // scaleCacheCanvas() {
     //     let scaleX = this.getParent()?.ancestorScaleX || 1;
     //     let scaleY = this.getParent()?.ancestorScaleX || 1;
@@ -575,7 +575,7 @@ export class Spreadsheet extends SheetComponent {
                         cellValueType !== CellValueType.BOOLEAN &&
                         horizontalAlign !== HorizontalAlign.JUSTIFIED
                     ) {
-                        let contentSize = this.getDocsSkeletonPageSize(documentSkeleton, angle);
+                        let contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
 
                         if (!contentSize) {
                             return true;
@@ -633,7 +633,7 @@ export class Spreadsheet extends SheetComponent {
                         const cellHeight = endY - startY;
                         documentSkeleton.getModel().updateDocumentDataPageSize(cellHeight);
                         documentSkeleton.calculate();
-                        const contentSize = this.getDocsSkeletonPageSize(documentSkeleton, angle);
+                        const contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
 
                         if (!contentSize) {
                             return true;

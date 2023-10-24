@@ -38,8 +38,10 @@ import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
 import {
     fixLineWidthByScale,
     getCellByIndex,
+    getCellInfoInMergeData,
     getCellPositionByIndex,
     getFontStyleString,
+    hasUnMergedCellInRow,
     isRectIntersect,
     mergeInfoOffset,
 } from '../../Basics/Tools';
@@ -47,12 +49,18 @@ import { IBoundRect } from '../../Basics/Vector2';
 import { DocumentSkeleton } from '../Docs/DocSkeleton';
 import { Skeleton } from '../Skeleton';
 import { BorderCache, IStylesCache } from './Interfaces';
+import { getDocsSkeletonPageSize } from './Spreadsheet';
 
 interface ISetCellCache {
     cache: IStylesCache;
     skipBackgroundAndBorder: boolean;
     styles?: Styles;
     cellData?: ObjectMatrix<ICellData>;
+}
+
+export interface IRowAutoHeightInfo {
+    row: number;
+    autoHeight?: number;
 }
 
 interface CellOtherConfig {
@@ -292,6 +300,85 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._calculateStylesCache();
         // this._overflowCache = this._calculateOverflowCache();
         return this;
+    }
+
+    calculateAutoHeightInRange(ranges: Nullable<IRange[]>) {
+        if (!Tools.isArray(ranges)) {
+            return [];
+        }
+
+        const results: IRowAutoHeightInfo[] = [];
+        const { mergeData } = this._config;
+
+        for (const range of ranges) {
+            const { startRow, endRow, startColumn, endColumn } = range;
+
+            for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+                // If the row has already been calculated, it does not need to be calculated
+                if (results.some(({ row }) => row === rowIndex)) {
+                    continue;
+                }
+
+                const hasUnMergedCell = hasUnMergedCellInRow(rowIndex, startColumn, endColumn, mergeData);
+
+                if (hasUnMergedCell) {
+                    const autoHeight = this.calculateRowAutoHeight(rowIndex);
+
+                    results.push({
+                        row: rowIndex,
+                        autoHeight,
+                    });
+                }
+            }
+        }
+
+        return results;
+    }
+
+    private calculateRowAutoHeight(rowNum: number): number {
+        const { columnCount, columnData, mergeData } = this._config;
+        const data = Tools.createObjectArray(columnData);
+        let height = 0;
+
+        for (let i = 0; i < columnCount; i++) {
+            // When calculating the automatic height of a row, if a cell is in a merged cell,
+            // skip the cell directly, which currently follows the logic of Excel
+            const { isMerged, isMergedMainCell } = getCellInfoInMergeData(rowNum, i, mergeData);
+
+            if (isMerged || isMergedMainCell) {
+                continue;
+            }
+
+            const modelObject = this.getCellDocumentModel(rowNum, i);
+            if (modelObject == null) {
+                continue;
+            }
+
+            const { documentModel, textRotation, wrapStrategy } = modelObject;
+            if (documentModel == null) {
+                continue;
+            }
+
+            let { a: angle } = textRotation as ITextRotation;
+            const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
+            if (isVertical === BooleanNumber.TRUE) {
+                angle = DEFAULT_ROTATE_ANGLE;
+            }
+
+            const colWidth = data.get(i)?.w;
+            if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
+                documentModel.updateDocumentDataPageSize(colWidth);
+            }
+
+            const documentSkeleton = DocumentSkeleton.create(documentModel, this._localService);
+            documentSkeleton.calculate();
+
+            const { height: h = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
+
+            height = Math.max(height, h);
+        }
+
+        return height;
     }
 
     updateLayout() {
@@ -866,6 +953,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || VerticalAlign.UNSPECIFIED;
         const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || WrapStrategy.UNSPECIFIED;
         const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
+
         if (cell.p) {
             const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
             let centerAngle = 0;
@@ -1038,11 +1126,11 @@ export class SpreadsheetSkeleton extends Skeleton {
                 if (!rowDataItem) {
                     continue;
                 }
-
-                if (rowDataItem.h != null) {
-                    rowHeight = rowDataItem.h;
-                } else if (rowDataItem.ah != null) {
-                    rowHeight = rowDataItem.ah;
+                const { h = defaultRowHeight, ah, isAutoHeight } = rowDataItem;
+                if ((isAutoHeight == null || !!isAutoHeight) && typeof ah === 'number') {
+                    rowHeight = ah;
+                } else {
+                    rowHeight = h;
                 }
 
                 if (rowDataItem.hd === BooleanNumber.TRUE) {

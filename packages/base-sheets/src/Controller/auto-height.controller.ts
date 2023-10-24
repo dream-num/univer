@@ -1,7 +1,9 @@
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, SheetInterceptorService } from '@univerjs/core';
+import { IRange, IUniverInstanceService, LifecycleStages, OnLifecycle, SheetInterceptorService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ISetStyleParams, SetStyleCommand } from '../commands/commands/set-style.command';
+import { DeltaColumnWidthCommand, SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
+import { ISetWorksheetColWidthMutationParams } from '../commands/mutations/set-worksheet-col-width.mutation';
 import {
     ISetWorksheetRowAutoHeightMutationParams,
     SetWorksheetRowAutoHeightMutation,
@@ -22,17 +24,68 @@ export class AutoHeightController {
         this._initialize();
     }
 
-    private _initialize() {
+    private _getUndoRedoParamsOfAutoHeight(ranges: IRange[]) {
         const {
-            _sheetInterceptorService: sheetInterceptorService,
-            _selectionManagerService: selectionManagerService,
             _univerInstanceService: univerInstanceService,
             _sheetSkeletonManagerService: sheetSkeletonService,
             _injector: injector,
         } = this;
 
+        const { skeleton } = sheetSkeletonService.getCurrent()!;
+        const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
+
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbookId = workbook.getUnitId();
+        const worksheetId = workbook.getActiveSheet().getSheetId();
+
+        const redoParams: ISetWorksheetRowAutoHeightMutationParams = {
+            worksheetId,
+            workbookId,
+            rowsAutoHeightInfo,
+        };
+
+        const undoParams: ISetWorksheetRowAutoHeightMutationParams = SetWorksheetRowAutoHeightMutationFactory(
+            injector,
+            redoParams
+        );
+
+        return {
+            undos: [
+                {
+                    id: SetWorksheetRowAutoHeightMutation.id,
+                    params: undoParams,
+                },
+            ],
+            redos: [
+                {
+                    id: SetWorksheetRowAutoHeightMutation.id,
+                    params: redoParams,
+                },
+            ],
+        };
+    }
+
+    private _initialize() {
+        const { _sheetInterceptorService: sheetInterceptorService, _selectionManagerService: selectionManagerService } =
+            this;
+
+        // for intercept set-worksheet-col-width command.
         sheetInterceptorService.interceptCommand({
-            getMutations(command: { id: string; params: ISetStyleParams<number> }) {
+            getMutations: (command: { id: string; params: ISetWorksheetColWidthMutationParams }) => {
+                if (command.id !== DeltaColumnWidthCommand.id && command.id !== SetColWidthCommand.id) {
+                    return {
+                        redos: [],
+                        undos: [],
+                    };
+                }
+
+                return this._getUndoRedoParamsOfAutoHeight(command.params.ranges);
+            },
+        });
+
+        // for intercept set style command.
+        sheetInterceptorService.interceptCommand({
+            getMutations: (command: { id: string; params: ISetStyleParams<number> }) => {
                 if (command.id !== SetStyleCommand.id) {
                     return {
                         redos: [],
@@ -60,38 +113,7 @@ export class AutoHeightController {
                     };
                 }
 
-                const { skeleton } = sheetSkeletonService.getCurrent()!;
-                const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(selections);
-
-                const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-                const workbookId = workbook.getUnitId();
-                const worksheetId = workbook.getActiveSheet().getSheetId();
-
-                const redoParams: ISetWorksheetRowAutoHeightMutationParams = {
-                    worksheetId,
-                    workbookId,
-                    rowsAutoHeightInfo,
-                };
-
-                const undoParams: ISetWorksheetRowAutoHeightMutationParams = SetWorksheetRowAutoHeightMutationFactory(
-                    injector,
-                    redoParams
-                );
-
-                return {
-                    undos: [
-                        {
-                            id: SetWorksheetRowAutoHeightMutation.id,
-                            params: undoParams,
-                        },
-                    ],
-                    redos: [
-                        {
-                            id: SetWorksheetRowAutoHeightMutation.id,
-                            params: redoParams,
-                        },
-                    ],
-                };
+                return this._getUndoRedoParamsOfAutoHeight(selections);
             },
         });
     }

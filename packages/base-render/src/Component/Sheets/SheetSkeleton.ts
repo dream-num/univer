@@ -34,7 +34,9 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 
-import { BORDER_TYPE, COLOR_BLACK_RGB } from '../../Basics/Const';
+import { BORDER_TYPE, COLOR_BLACK_RGB, ORIENTATION_TYPE } from '../../Basics/Const';
+import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
+import { IDocumentSkeletonColumn } from '../../Basics/IDocumentSkeletonCached';
 import {
     fixLineWidthByScale,
     getCellByIndex,
@@ -46,10 +48,69 @@ import {
     mergeInfoOffset,
 } from '../../Basics/Tools';
 import { IBoundRect } from '../../Basics/Vector2';
+import { columnIterator } from '../Docs/Common/Tools';
 import { DocumentSkeleton } from '../Docs/DocSkeleton';
 import { Skeleton } from '../Skeleton';
 import { BorderCache, IStylesCache } from './Interfaces';
-import { getDocsSkeletonPageSize } from './Spreadsheet';
+
+/**
+ * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
+ * @param documentSkeleton Data of the document's ViewModel
+ * @param angle The rotation angle of an Excel cell
+ * @returns
+ */
+export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angle: number = 0) {
+    const skeletonData = documentSkeleton?.getSkeletonData();
+
+    if (!skeletonData) {
+        return;
+    }
+    const { pages } = skeletonData;
+    const lastPage = pages[pages.length - 1];
+
+    if (angle === 0) {
+        const { width, height } = lastPage;
+        return { width, height };
+    }
+
+    let allRotatedWidth = 0;
+    let allRotatedHeight = 0;
+
+    const orientation = getRotateOrientation(angle);
+    const widthArray: Array<{ rotatedWidth: number; spaceWidth: number }> = [];
+    columnIterator([lastPage], (column: IDocumentSkeletonColumn) => {
+        const { lines, width: columnWidth, spaceWidth } = column;
+
+        const { rotatedHeight, rotatedWidth } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, angle);
+        allRotatedHeight += rotatedHeight;
+
+        widthArray.push({ rotatedWidth, spaceWidth });
+    });
+
+    const tanTheta = Math.tan(angle);
+    const sinTheta = Math.sin(angle);
+
+    const widthCount = widthArray.length;
+    for (let i = 0; i < widthCount; i++) {
+        const { rotatedWidth, spaceWidth } = widthArray[i];
+
+        if (i === 0) {
+            allRotatedWidth += rotatedWidth;
+        }
+
+        if (
+            (orientation === ORIENTATION_TYPE.UP && i === 0) ||
+            (orientation === ORIENTATION_TYPE.DOWN && i === widthCount - 1)
+        ) {
+            allRotatedWidth += (rotatedWidth + spaceWidth / sinTheta) / tanTheta;
+        }
+    }
+
+    return {
+        width: allRotatedWidth,
+        height: allRotatedHeight,
+    };
+}
 
 interface ISetCellCache {
     cache: IStylesCache;
@@ -336,9 +397,9 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     private calculateRowAutoHeight(rowNum: number): number {
-        const { columnCount, columnData, mergeData } = this._config;
+        const { columnCount, columnData, mergeData, defaultRowHeight } = this._config;
         const data = Tools.createObjectArray(columnData);
-        let height = 0;
+        let height = defaultRowHeight;
 
         for (let i = 0; i < columnCount; i++) {
             // When calculating the automatic height of a row, if a cell is in a merged cell,

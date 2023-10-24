@@ -132,6 +132,7 @@ export class HeaderResizeController extends Disposable {
         if (sheetObject == null) {
             return;
         }
+
         const { spreadsheetRowHeader, spreadsheetColumnHeader, scene } = sheetObject;
 
         const eventBindingObject =
@@ -216,7 +217,7 @@ export class HeaderResizeController extends Disposable {
                     if (this._currentColumn === -1) {
                         return;
                     }
-
+                    // TODO: @jocs remove magic number.
                     const columnSize = columnHeaderHeight * 0.7;
 
                     this._columnResizeRect.transformByState({
@@ -474,6 +475,7 @@ export class HeaderResizeController extends Disposable {
         const { scene } = sheetObject;
         scene.onPointerMoveObserver.remove(this._moveObserver);
         scene.onPointerUpObserver.remove(this._upObserver);
+
         this._moveObserver = null;
         this._upObserver = null;
     }

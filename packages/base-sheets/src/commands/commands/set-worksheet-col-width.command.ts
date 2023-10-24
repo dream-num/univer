@@ -6,6 +6,8 @@ import {
     IUniverInstanceService,
     RANGE_TYPE,
     Rectangle,
+    sequenceExecute,
+    SheetInterceptorService,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -27,10 +29,13 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
     handler: async (accessor: IAccessor, params: IDeltaColumnWidthCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = selectionManagerService.getSelections();
+
         if (!selections?.length) {
             return false;
         }
 
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
@@ -42,13 +47,10 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
         const destColumnWidth = anchorColWidth + deltaX;
 
         const colSelections = selections.filter((s) => s.range.rangeType === RANGE_TYPE.COLUMN);
-        const rangeType = colSelections.some((s) => {
-            const r = s.range;
-            if (r.startColumn <= anchorCol && anchorCol <= r.endColumn) {
-                return true;
-            }
+        const rangeType = colSelections.some(({ range }) => {
+            const { startColumn, endColumn } = range;
 
-            return false;
+            return startColumn <= anchorCol && anchorCol <= endColumn;
         })
             ? RANGE_TYPE.COLUMN
             : RANGE_TYPE.NORMAL;
@@ -76,23 +78,38 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
                 ],
             };
         }
+
         const undoMutationParams: ISetWorksheetColWidthMutationParams = SetWorksheetColWidthMutationFactory(
             accessor,
             redoMutationParams
         );
 
-        const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const result = commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
-        if (result) {
+        const setColWidthResult = commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
+
+        const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
+            id: DeltaColumnWidthCommand.id,
+            params: redoMutationParams,
+        });
+
+        const result = await sequenceExecute([...redos], commandService);
+
+        if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
-                undo() {
-                    return commandService.executeCommand(SetWorksheetColWidthMutation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
-                },
+                undo: async () =>
+                    (
+                        await sequenceExecute(
+                            [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
+                            commandService
+                        )
+                    ).result,
+                redo: async () =>
+                    (
+                        await sequenceExecute(
+                            [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
+                            commandService
+                        )
+                    ).result,
             });
 
             return true;
@@ -121,11 +138,7 @@ export const SetColWidthCommand: ICommand = {
         }
 
         const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const worksheetId = univerInstanceService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
+        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
         const redoMutationParams: ISetWorksheetColWidthMutationParams = {
             worksheetId,
@@ -137,20 +150,37 @@ export const SetColWidthCommand: ICommand = {
             accessor,
             redoMutationParams
         );
-        const result = commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
-        if (result) {
+        const setColWidthResult = commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
+
+        const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
+            id: SetColWidthCommand.id,
+            params: redoMutationParams,
+        });
+
+        const result = await sequenceExecute([...redos], commandService);
+
+        if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
-                undo() {
-                    return commandService.executeCommand(SetWorksheetColWidthMutation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
-                },
+                undo: async () =>
+                    (
+                        await sequenceExecute(
+                            [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
+                            commandService
+                        )
+                    ).result,
+                redo: async () =>
+                    (
+                        await sequenceExecute(
+                            [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
+                            commandService
+                        )
+                    ).result,
             });
 
             return true;
         }
+
         return false;
     },
 };

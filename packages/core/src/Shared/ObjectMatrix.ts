@@ -257,16 +257,15 @@ export class ObjectMatrix<T> {
     getRange(): IRange {
         const startRow = 0;
         const startColumn = 0;
-        const endRow = this.getSizeOf();
+        const endRow = this.getLength() - 1;
         let endColumn = 0;
         const length = this.getLength();
+        // OPTIMIZE: It may be possible to reduce the number of cycles
         for (let i = 0; i < length; i++) {
             const row = this.getRow(i);
             if (row) {
-                const sizeof = row.getSizeOf();
-                if (row.getSizeOf() > endColumn) {
-                    endColumn = sizeof - 1;
-                }
+                const columnLength = row.getLength() - 1;
+                endColumn = columnLength > endColumn ? columnLength : endColumn;
             }
         }
         return {

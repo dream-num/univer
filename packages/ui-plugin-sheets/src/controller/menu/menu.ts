@@ -7,6 +7,8 @@ import {
     DeleteRangeMoveUpCommand,
     InsertColAfterCommand,
     InsertColBeforeCommand,
+    InsertRangeMoveDownCommand,
+    InsertRangeMoveRightCommand,
     InsertRowAfterCommand,
     InsertRowBeforeCommand,
     RemoveColCommand,
@@ -1348,6 +1350,34 @@ export function DeleteRangeMoveUpMenuItemFactory(): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveUp',
         positions: DELETE_RANGE_MENU_ID,
+    };
+}
+const INSERT_RANGE_MENU_ID = 'sheet.menu.insert-range';
+export function InsertRangeMenuItemFactory(): IMenuSelectorItem<string> {
+    return {
+        id: INSERT_RANGE_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        title: 'rightClick.insertCell',
+        positions: [MenuPosition.CONTEXT_MENU],
+        selectType: SelectTypes.NEO,
+    };
+}
+
+export function InsertRangeMoveRightMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: InsertRangeMoveRightCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'rightClick.moveRight',
+        positions: INSERT_RANGE_MENU_ID,
+    };
+}
+
+export function InsertRangeMoveDownMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: InsertRangeMoveDownCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'rightClick.moveDown',
+        positions: INSERT_RANGE_MENU_ID,
     };
 }
 

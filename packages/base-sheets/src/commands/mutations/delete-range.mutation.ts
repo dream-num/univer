@@ -84,8 +84,8 @@ export const DeleteRangeMutation: IMutation<IDeleteRangeMutationParams, boolean>
         if (!worksheet) return false;
 
         const cellMatrix = worksheet.getCellMatrix();
-        const lastEndRow = worksheet.getConfig().rowCount;
-        const lastEndColumn = worksheet.getConfig().columnCount;
+        const lastEndRow = worksheet.getLastRowWithContent();
+        const lastEndColumn = worksheet.getLastColumnWithContent();
 
         for (let i = 0; i < params.ranges.length; i++) {
             const { startRow, endRow, startColumn, endColumn } = params.ranges[i];
@@ -99,17 +99,7 @@ export const DeleteRangeMutation: IMutation<IDeleteRangeMutationParams, boolean>
                     for (let c = startColumn; c <= endColumn; c++) {
                         // get value blow current range
                         const value = cellMatrix.getValue(r + rows, c);
-                        if (value) {
-                            cellMatrix.setValue(r, c, Tools.deepClone(value as ICellData));
-                        } else {
-                            // null means delete
-                            const originValue = cellMatrix.getValue(r, c);
-                            if (originValue) {
-                                cellMatrix.deleteValue(r, c);
-                                // Deleting data will cause the column number to change, so subtract 1 here in advance
-                                c--;
-                            }
-                        }
+                        cellMatrix.setValue(r, c, value || {});
                     }
                 }
             } else if (params.shiftDimension === Dimension.COLUMNS) {
@@ -119,19 +109,7 @@ export const DeleteRangeMutation: IMutation<IDeleteRangeMutationParams, boolean>
                         // get value blow current range
 
                         const value = cellMatrix.getValue(r, c + columns);
-                        if (value) {
-                            cellMatrix.setValue(r, c, Tools.deepClone(value as ICellData));
-                        } else {
-                            // null means delete
-                            const originValue = cellMatrix.getValue(r, c);
-                            if (originValue) {
-                                for (let i = 0; i <= endColumn; i++) {
-                                    cellMatrix.deleteValue(r, c);
-                                }
-                                break;
-                                // Deleting data will cause the column number to change, so subtract 1 here in advance
-                            }
-                        }
+                        cellMatrix.setValue(r, c, value || {});
                     }
                 }
             }

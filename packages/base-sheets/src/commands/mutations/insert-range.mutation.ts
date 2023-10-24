@@ -65,11 +65,6 @@ export const InsertRangeMutation: IMutation<IInsertRangeMutationParams, boolean>
                     }
                 }
                 // insert cell value from user
-                // for (let r = endRow; r >= startRow; r--) {
-                //     for (let c = startColumn; c <= endColumn; c++) {
-                //         cellMatrix.setValue(r, c, (cellValue as ICellData)[r - startRow][c - startColumn]);
-                //     }
-                // }
                 for (let r = startRow; r <= endRow; r++) {
                     for (let c = endColumn; c >= startColumn; c--) {
                         cellMatrix.setValue(r, c, params.cellValue[r][c]);

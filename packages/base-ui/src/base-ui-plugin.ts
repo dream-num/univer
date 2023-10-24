@@ -26,29 +26,28 @@ const DEFAULT_SLIDE_PLUGIN_DATA = {};
  * UI plugin provides basic interaction with users. Including workbench (menus, UI parts, notifications etc.), copy paste, shortcut.
  */
 export class UIPlugin extends Plugin {
-    protected override _injector: Injector;
-
     static override type = PluginType.Univer;
 
     private _config: IUIPluginConfig;
 
-    constructor(config: Partial<IUIPluginConfig> = {}, @Inject(Injector) injector: Injector) {
+    constructor(
+        config: Partial<IUIPluginConfig> = {},
+        @Inject(Injector) protected readonly _injector: Injector
+    ) {
         super(PLUGIN_NAMES.BASE_UI);
 
         this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
-        this._injector = injector;
     }
 
-    override onStarting(): void {
-        this._initDependencies();
-        this._initModules();
+    override onStarting(_injector: Injector): void {
+        this._initDependencies(_injector);
     }
 
     override onReady(): void {
         this._initUI();
     }
 
-    private _initDependencies(): void {
+    private _initDependencies(injector: Injector): void {
         const dependencies: Dependency[] = [
             // legacy managers - deprecated
             [ComponentManager],
@@ -68,11 +67,7 @@ export class UIPlugin extends Plugin {
             [IUIController, { useClass: DesktopUIController }],
         ];
 
-        dependencies.forEach((dependency) => this._injector.add(dependency));
-    }
-
-    private _initModules(): void {
-        this._injector.get(SharedController).initialize();
+        dependencies.forEach((dependency) => injector.add(dependency));
     }
 
     private _initUI(): void {

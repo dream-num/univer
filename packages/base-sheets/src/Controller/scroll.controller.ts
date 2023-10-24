@@ -198,6 +198,7 @@ export class ScrollController extends Disposable {
         });
     }
 
+    // scroll command -> scroll manager service -> scrollInfo$ -> viewport scroll API
     private _scrollSubscribeBinding() {
         this._scrollManagerService.scrollInfo$.subscribe((param) => {
             const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;

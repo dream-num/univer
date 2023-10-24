@@ -4,10 +4,10 @@ import { ScrollManagerService } from '../../services/scroll-manager.service';
 import { SetScrollOperation } from '../operations/scroll.operation';
 
 export interface IScrollCommandParams {
-    offsetX: number;
-    offsetY: number;
-    sheetViewStartRow: number;
-    sheetViewStartColumn: number;
+    offsetX?: number;
+    offsetY?: number;
+    sheetViewStartRow?: number;
+    sheetViewStartColumn?: number;
 }
 
 export interface ISetScrollRelativeCommandParams {
@@ -53,11 +53,16 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
 export const ScrollCommand: ICommand<IScrollCommandParams> = {
     id: 'sheet.command.scroll-view',
     type: CommandType.COMMAND,
-    handler: async (accessor, params = { sheetViewStartRow: 0, sheetViewStartColumn: 0, offsetX: 0, offsetY: 0 }) => {
+    handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const currentWorkbook = univerInstanceService.getCurrentUniverSheetInstance();
         const currentWorksheet = currentWorkbook.getActiveSheet();
+        const scrollManagerService = accessor.get(ScrollManagerService);
+        const currentScroll = scrollManagerService.getCurrentScroll();
 
         if (!currentWorksheet) {
             return false;
@@ -66,14 +71,20 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
         const commandService = accessor.get(ICommandService);
 
         const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = params;
+        const {
+            sheetViewStartColumn: currentColumn,
+            sheetViewStartRow: currentRow,
+            offsetX: currentOffsetX,
+            offsetY: currentOffsetY,
+        } = currentScroll || {};
 
         return commandService.executeCommand(SetScrollOperation.id, {
             unitId: currentWorkbook.getUnitId(),
             sheetId: currentWorksheet.getSheetId(),
-            sheetViewStartRow,
-            sheetViewStartColumn,
-            offsetX,
-            offsetY,
+            sheetViewStartRow: sheetViewStartRow ?? currentColumn,
+            sheetViewStartColumn: sheetViewStartColumn ?? currentRow,
+            offsetX: offsetX ?? currentOffsetX,
+            offsetY: offsetY ?? currentOffsetY,
         });
     },
 };

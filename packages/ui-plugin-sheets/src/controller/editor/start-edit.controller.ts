@@ -54,6 +54,8 @@ const HIDDEN_EDITOR_POSITION = -1000;
 
 const EDITOR_INPUT_SELF_EXTEND_GAP = 5;
 
+const EDITOR_BORDER_SIZE = 2;
+
 interface ICanvasOffset {
     left: number;
     top: number;
@@ -267,7 +269,7 @@ export class StartEditController extends Disposable {
             return;
         }
 
-        const { startX, startY, endX, endY } = actualRangeWithCoord;
+        const { startX, startY } = actualRangeWithCoord;
 
         const { document: documentComponent, scene, engine } = editorObject;
 
@@ -275,9 +277,12 @@ export class StartEditController extends Disposable {
 
         const scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
-        // Todo: @
         const clientHeight =
-            document.body.clientHeight - startY - parseFloat(styles.sheetFooterBarHeight) - canvasOffset.top;
+            document.body.clientHeight -
+            startY -
+            parseFloat(styles.sheetFooterBarHeight) -
+            canvasOffset.top -
+            EDITOR_BORDER_SIZE * 2;
 
         const clientWidth = document.body.clientWidth - startX - canvasOffset.left;
 
@@ -299,7 +304,7 @@ export class StartEditController extends Disposable {
         if (physicHeight > clientHeight) {
             physicHeight = clientHeight;
             if (scrollBar == null) {
-                viewportMain && new ScrollBar(viewportMain);
+                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false });
             } else {
                 viewportMain?.resetSizeAndScrollBar();
             }

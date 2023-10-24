@@ -1,8 +1,8 @@
 // This file provide operations to change selection of sheets.
 
-import { ISelectionWithStyle } from '@univerjs/base-render';
 import { CommandType, IOperation } from '@univerjs/core';
 
+import { ISelectionWithStyle } from '../../Basics/selection';
 import { SelectionManagerService } from '../../services/selection/selection-manager.service';
 
 export interface ISetSelectionsOperationParams {

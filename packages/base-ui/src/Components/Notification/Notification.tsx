@@ -8,38 +8,77 @@ import { Subject } from 'rxjs';
 import { joinClassNames } from '../../Utils/util';
 import styles from './index.module.less';
 
-export type NotificationType = 'success' | 'warning' | 'error';
+export type NotificationType = 'success' | 'info' | 'warning' | 'error';
 
 const iconMap = {
-    success: <Success16 className={styles.messageIconSuccess} />,
-    warning: <Warning16 className={styles.messageIconWarning} />,
-    error: <Fail16 className={styles.messageIconError} />,
+    success: <Success16 className={styles.notificationIconSuccess} />,
+    info: <Warning16 className={styles.notificationIconInfo} />,
+    warning: <Warning16 className={styles.notificationIconWarning} />,
+    error: <Fail16 className={styles.notificationIconError} />,
 };
 
-interface INotificationProps {
+export interface INotificationMethodOptions {
+    /**
+     * Component type, optional success, warning, error
+     */
+    type: NotificationType;
+    /**
+     * The title text of the notification
+     */
+    title: string;
+    /**
+     * The content text of the notification
+     */
     content: string;
-    title?: string;
-    type?: NotificationType;
-    closeIcon?: React.ReactNode;
-    closable?: boolean;
-    maxCount?: number;
-    duration?: number;
+    /**
+     * popup position
+     */
     placement?: Placement;
+    /**
+     * Automatic close time
+     */
+    duration?: number;
+    /**
+     * Whether to support closing
+     */
+    closable?: boolean;
+    /**
+     * The number of lines of content text. Ellipses will be displayed beyond the line number.
+     */
+    lines?: number;
 }
 
-export const notificationObserver = new Subject<INotificationProps>();
+interface INotificationProps extends INotificationMethodOptions {
+    /**
+     * close button icon
+     */
+    closeIcon?: React.ReactNode;
+
+    /**
+     * The maximum number of displays. When the limit is exceeded, the oldest message will be automatically closed.
+     */
+    maxCount?: number;
+}
+
+export const notificationObserver = new Subject<INotificationMethodOptions>();
 
 export const PureContent = (props: INotificationMethodOptions) => {
-    const { type, content, title } = props;
+    const { type, content, title, lines = 0 } = props;
 
-    const className = joinClassNames(styles.notificationContainer, type);
+    const contentClassName = joinClassNames(styles.notificationContent, {
+        [styles.notificationContentEllipsis]: lines !== 0,
+    });
 
     const contentElement = (
-        <div className={className}>
-            <span className={styles.notificationIcon}>{iconMap[type]}</span>
-            {title ? <span className={styles.notificationTitle}>{title}</span> : ''}
-            <span className={styles.notificationContent}>{content}</span>
-        </div>
+        <>
+            <span className={`${styles.notificationIcon}`}>{iconMap[type]}</span>
+            <div className={styles.notificationContentContainer}>
+                <span className={styles.notificationTitle}>{title}</span>
+                <span className={contentClassName} style={{ WebkitLineClamp: lines }}>
+                    {content}
+                </span>
+            </div>
+        </>
     );
 
     return contentElement;
@@ -50,6 +89,13 @@ export function Notification(props: INotificationProps) {
     const [api, contextHolder] = useNotification({
         prefixCls: styles.notification,
         maxCount,
+        closeIcon: <Close16 />,
+        motion: {
+            motionName: styles.notificationFade,
+            motionAppear: true,
+            motionEnter: true,
+            motionLeave: true,
+        },
     });
 
     const observerRef = useRef(notificationObserver);
@@ -58,12 +104,16 @@ export function Notification(props: INotificationProps) {
         const subscription = observerRef.current.subscribe((options) => {
             api.open({
                 content: (
-                    <PureContent content={options.content} type={options.type || 'success'} title={options.title} />
+                    <PureContent
+                        content={options.content}
+                        type={options.type}
+                        title={options.title}
+                        lines={options.lines}
+                    />
                 ),
                 placement: options.placement || 'topRight',
-                duration: options.duration || 0,
+                duration: options.duration || 4.5,
                 closable: options.closable || true,
-                closeIcon: options.closeIcon || <Close16 />,
             });
         });
 
@@ -78,7 +128,6 @@ export function Notification(props: INotificationProps) {
 class NotificationInstance {
     div: HTMLDivElement;
     root: ReturnType<typeof createRoot>;
-    content: string = 'notification';
 
     constructor() {
         this.div = document.createElement('div');
@@ -89,22 +138,18 @@ class NotificationInstance {
     }
 
     show(options: INotificationMethodOptions) {
-        const { content } = options;
-        this.content = content;
         notificationObserver.next(options);
     }
 
     render() {
-        this.root.render(<Notification content={this.content} />);
+        this.root.render(<Notification content="" title="" type="success" />);
     }
 }
-
-export type INotificationMethodOptions = { type: NotificationType; title?: string; content: string };
 
 const instance = new NotificationInstance();
 
 const notification = {
-    show: (options: INotificationMethodOptions) => instance.show(Object.assign(options)),
+    show: (options: INotificationMethodOptions) => instance.show(options),
 };
 
 export { notification };

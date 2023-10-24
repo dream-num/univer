@@ -67,8 +67,20 @@ export function UIComponentMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         positions: [MenuPosition.TOOLBAR],
         selections: [
             {
-                label: 'Notification',
-                value: 'Notification Content',
+                label: 'Notification Success',
+                value: 'Notification Success random string to test Notification Success random string to test Notification Success random string to test Notification Success random string to test Notification Success random string to test',
+            },
+            {
+                label: 'Notification Info',
+                value: 'Notification Info',
+            },
+            {
+                label: 'Notification Warning',
+                value: 'Notification Warning',
+            },
+            {
+                label: 'Notification Error',
+                value: 'Notification Error',
             },
         ],
     };

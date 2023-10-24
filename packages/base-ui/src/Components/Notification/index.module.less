@@ -1,35 +1,67 @@
 @import '../../Basics/CSS/Skin/default.module.less';
 
-@notificationPrefixCls: notification;
+@width: 280px;
 
-.@{notificationPrefixCls} {
-  position: fixed;
-  display: flex;
-  align-items: flex-end;
-  flex-direction: column;
-  max-height: 100vh;
-  box-sizing: border-box;
-  justify-content: center;
-//   pointer-events: none;
-
-&-notice{
+.notification {
+    position: fixed;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
+    flex-direction: column;
+    box-sizing: border-box;
+    justify-content: center;
+    margin: @margin-xs 0;
 
-    padding: @padding-base;
-    font-size: @font-size-base;
-    background-color: @color-white;
-    border-radius: @border-radius-base;
-    box-shadow: @box-shadow-lg;
-    gap: @margin-xs;
-}
+    &-notice {
+        display: flex;
+        justify-content: space-between;
+        padding: @padding-lg;
+        font-size: @font-size-lg;
+        background-color: @color-white;
+        border-radius: @border-radius-base;
+        box-shadow: @box-shadow-lg;
+        gap: @margin-xs;
+        width: @width;
+
+        &-wrapper {
+            margin: @margin-xs @margin-base;
+        }
+
+        &-content {
+            display: inline-flex;
+            align-items: center;
+            align-items: flex-start;
+            gap: @margin-xs;
+        }
+
+        &-close {
+            color: @text-color-secondary;
+
+            cursor: pointer;
+            outline: none;
+            width: fit-content;
+            height: fit-content;
+            padding: @padding-xs;
+            border-radius: @border-radius-base;
+            transition: background-color .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+                background-color: @bg-color-hover;
+            }
+        }
+    }
 
     &-icon {
-        display: inline-flex;
-        align-items: center;
+        padding: @padding-xs;
 
         &-success {
             color: @success-color;
+        }
+
+        &-info {
+            color: @info-color;
         }
 
         &-warning {
@@ -40,34 +72,114 @@
             color: @error-color;
         }
     }
-    
 
-    &-container {
-        
+    &-content-container {
+
         display: inline-flex;
-        align-items: center;
-        
-
-        
+        align-items: flex-start;
+        flex-direction: column;
+        gap: @margin-xs;
+        padding-top: @padding-xs;
     }
 
-  // Position
-  &-top,
-  &-topLeft,
-  &-topRight {
-    top: 0;
-  }
+    &-title {
+        color: @text-color;
+    }
 
-  &-bottom,
-  &-bottomRight,
-  &-bottomLeft {
-    bottom: 0;
-  }
+    &-content {
+        color: @text-color-secondary;
 
-  &-bottomRight,
-  &-topRight {
-    right: 0;
-  }
+        &-ellipsis {
+            // Omit beyond the specified number of lines
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
 
-  
+    // Position
+    &-top,
+    &-topLeft,
+    &-topRight {
+        top: 0;
+    }
+
+    &-bottom,
+    &-bottomRight,
+    &-bottomLeft {
+        bottom: 0;
+    }
+
+    &-bottomRight,
+    &-topRight {
+        right: 0;
+    }
+
+    // Animation
+      &-fade {
+        overflow: hidden;
+        transition: all 0.3s;
+      }
+    
+      &-fade-appear-prepare {
+        opacity: 0;
+      }
+    
+      &-fade-appear-start {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    
+      &-fade-appear-active {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    
+      .fade-effect() {
+        animation-duration: 0.3s;
+        animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+        animation-fill-mode: both;
+      }
+    
+      &-fade-appear,
+      &-fade-enter {
+        opacity: 0;
+        animation-play-state: paused;
+        .fade-effect();
+      }
+    
+      &-fade-leave {
+        .fade-effect();
+        animation-play-state: paused;
+      }
+    
+      &-fade-appear&-fade-appear-active,
+      &-fade-enter&-fade-enter-active {
+        animation-name: notificationFadeIn;
+        animation-play-state: running;
+      }
+    
+      &-fade-leave&-fade-leave-active {
+        animation-name: notificationFadeOut;
+        animation-play-state: running;
+      }
+    
+      @keyframes notificationFadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+    
+      @keyframes notificationFadeOut {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
 }

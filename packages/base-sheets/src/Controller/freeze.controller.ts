@@ -47,7 +47,7 @@ const FREEZE_NORMAL_HEADER_COLOR = 'rgb(199, 199, 199)';
 
 const FREEZE_NORMAL_MAIN_COLOR = 'rgba(199, 199, 199, 0.01)';
 
-const FREEZE_ACTIVE_COLOR = 'rgb(11, 87, 208)';
+const FREEZE_ACTIVE_COLOR = '#409f11';
 
 const FREEZE_HOVER_COLOR = 'rgb(116, 119, 117)';
 

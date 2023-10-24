@@ -1,17 +1,11 @@
-import {
-    CURSOR_TYPE,
-    IMouseEvent,
-    IPointerEvent,
-    IRenderManagerService,
-    ISelectionTransformerShapeManager,
-    Rect,
-} from '@univerjs/base-render';
+import { CURSOR_TYPE, IMouseEvent, IPointerEvent, IRenderManagerService, Rect } from '@univerjs/base-render';
 import { Disposable, IUniverInstanceService, LifecycleStages, Nullable, Observer, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { getCoordByOffset, getSheetObject } from '../Basics/component-tools';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
-import { SelectionManagerService } from '../services/selection-manager.service';
+import { SelectionManagerService } from '../services/selection/selection-manager.service';
+import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { HEADER_MENU_SHAPE_TYPE, HeaderMenuShape } from '../View/header-menu-shape';
 
@@ -44,7 +38,7 @@ export class HeaderMenuController extends Disposable {
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionTransformerShapeManager
+        @ISelectionRenderService
         @Inject(SelectionManagerService)
         private readonly _selectionManagerService: SelectionManagerService
     ) {

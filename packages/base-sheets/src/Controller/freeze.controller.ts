@@ -1,21 +1,23 @@
+import { TinyColor } from '@ctrl/tinycolor';
 import {
     CURSOR_TYPE,
     IMouseEvent,
     IPointerEvent,
     IRenderManagerService,
     IScrollObserverParam,
-    ISelectionTransformerShapeManager,
     Rect,
 } from '@univerjs/base-render';
 import {
     Disposable,
     ICommandInfo,
     ICommandService,
+    IStyleSheet,
     IUniverInstanceService,
     LifecycleStages,
     Nullable,
     Observer,
     OnLifecycle,
+    ThemeService,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -25,7 +27,8 @@ import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
 import { ISetFrozenMutationParams, SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { ScrollManagerService } from '../services/scroll-manager.service';
-import { SelectionManagerService } from '../services/selection-manager.service';
+import { SelectionManagerService } from '../services/selection/selection-manager.service';
+import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 enum FREEZE_DIRECTION_TYPE {
@@ -42,14 +45,6 @@ const FREEZE_COLUMN_MAIN_NAME = '__SpreadsheetFreezeColumnMainName__';
 const FREEZE_COLUMN_HEADER_NAME = '__SpreadsheetFreezeColumnHeaderName__';
 
 const FREEZE_SIZE_NORMAL = 4;
-
-const FREEZE_NORMAL_HEADER_COLOR = 'rgb(199, 199, 199)';
-
-const FREEZE_NORMAL_MAIN_COLOR = 'rgba(199, 199, 199, 0.01)';
-
-const FREEZE_ACTIVE_COLOR = '#409f11';
-
-const FREEZE_HOVER_COLOR = 'rgb(116, 119, 117)';
 
 @OnLifecycle(LifecycleStages.Rendered, FreezeController)
 export class FreezeController extends Disposable {
@@ -81,20 +76,31 @@ export class FreezeController extends Disposable {
 
     private _changeToOffsetY: number = 0;
 
+    private _freeze_normal_header_color = 'rgb(199, 199, 199)';
+
+    private _freeze_normal_main_color = 'rgba(199, 199, 199, 0.01)';
+
+    private _freeze_active_color = '#409f11';
+
+    private _freeze_hover_color = 'rgb(116, 119, 117)';
+
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionTransformerShapeManager
-        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
+        @ISelectionRenderService
+        private readonly _selectionRenderService: ISelectionRenderService,
 
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService
+        @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
         this._initialize();
+
+        this._themeChangeInitialize();
     }
 
     private _initialize() {
@@ -108,7 +114,7 @@ export class FreezeController extends Disposable {
         // this._createFreeze(FREEZE_DIRECTION_TYPE.ROW);
         // this._createFreeze(FREEZE_DIRECTION_TYPE.COLUMN);
 
-        this._scrollListener();
+        this._skeletonListener();
 
         this._commandExecutedListener();
     }
@@ -172,7 +178,7 @@ export class FreezeController extends Disposable {
 
         if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
-                fill: FREEZE_NORMAL_HEADER_COLOR,
+                fill: this._freeze_normal_header_color,
                 width: rowHeaderWidthAndMarginLeft,
                 height: FREEZE_SIZE,
                 left: 0,
@@ -180,9 +186,9 @@ export class FreezeController extends Disposable {
                 zIndex: 3,
             });
 
-            let fill = FREEZE_NORMAL_HEADER_COLOR;
+            let fill = this._freeze_normal_header_color;
             if (freezeRow === -1 || freezeRow === 0) {
-                fill = FREEZE_NORMAL_MAIN_COLOR;
+                fill = this._freeze_normal_main_color;
             }
 
             this._rowFreezeMainRect = new Rect(FREEZE_ROW_MAIN_NAME, {
@@ -197,7 +203,7 @@ export class FreezeController extends Disposable {
             scene.addObjects([this._rowFreezeHeaderRect, this._rowFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         } else {
             this._columnFreezeHeaderRect = new Rect(FREEZE_COLUMN_HEADER_NAME, {
-                fill: FREEZE_NORMAL_HEADER_COLOR,
+                fill: this._freeze_normal_header_color,
                 width: FREEZE_SIZE,
                 height: columnHeaderHeightAndMarginTop,
                 left: startX - FREEZE_SIZE,
@@ -205,9 +211,9 @@ export class FreezeController extends Disposable {
                 zIndex: 3,
             });
 
-            let fill = FREEZE_NORMAL_HEADER_COLOR;
+            let fill = this._freeze_normal_header_color;
             if (freezeColumn === -1 || freezeColumn === 0) {
-                fill = FREEZE_NORMAL_MAIN_COLOR;
+                fill = this._freeze_normal_main_color;
             }
 
             this._columnFreezeMainRect = new Rect(FREEZE_COLUMN_MAIN_NAME, {
@@ -246,7 +252,7 @@ export class FreezeController extends Disposable {
         this._freezeMoveObservers.push(
             freezeObjectHeaderRect?.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 freezeObjectHeaderRect?.setProps({
-                    fill: FREEZE_HOVER_COLOR,
+                    fill: this._freeze_hover_color,
                     zIndex: 4,
                 });
                 scene.setCursor(CURSOR_TYPE.GRAB);
@@ -256,7 +262,7 @@ export class FreezeController extends Disposable {
         this._freezeMoveObservers.push(
             freezeObjectMainRect?.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 freezeObjectHeaderRect?.setProps({
-                    fill: FREEZE_HOVER_COLOR,
+                    fill: this._freeze_hover_color,
                     zIndex: 4,
                 });
                 scene.setCursor(CURSOR_TYPE.GRAB);
@@ -266,7 +272,7 @@ export class FreezeController extends Disposable {
         this._freezeLeaveObservers.push(
             freezeObjectHeaderRect?.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 freezeObjectHeaderRect?.setProps({
-                    fill: FREEZE_NORMAL_HEADER_COLOR,
+                    fill: this._freeze_normal_header_color,
                     zIndex: 3,
                 });
                 scene.resetCursor();
@@ -276,7 +282,7 @@ export class FreezeController extends Disposable {
         this._freezeLeaveObservers.push(
             freezeObjectMainRect?.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                 freezeObjectHeaderRect?.setProps({
-                    fill: FREEZE_NORMAL_HEADER_COLOR,
+                    fill: this._freeze_normal_header_color,
                     zIndex: 3,
                 });
                 scene.resetCursor();
@@ -336,14 +342,14 @@ export class FreezeController extends Disposable {
                         top: startY - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
-                        fill: FREEZE_ACTIVE_COLOR,
+                        fill: this._freeze_active_color,
                     });
                 freezeObjectMainRect
                     .transformByState({
                         top: startY - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
-                        fill: FREEZE_NORMAL_HEADER_COLOR,
+                        fill: this._freeze_normal_header_color,
                     });
                 this._changeToRow = row;
                 this._changeToOffsetY = startY;
@@ -353,14 +359,14 @@ export class FreezeController extends Disposable {
                         left: startX - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
-                        fill: FREEZE_ACTIVE_COLOR,
+                        fill: this._freeze_active_color,
                     });
                 freezeObjectMainRect
                     .transformByState({
                         left: startX - FREEZE_SIZE / 2,
                     })
                     ?.setProps({
-                        fill: FREEZE_NORMAL_HEADER_COLOR,
+                        fill: this._freeze_normal_header_color,
                     });
 
                 this._changeToColumn = column;
@@ -385,17 +391,17 @@ export class FreezeController extends Disposable {
                     (this._changeToColumn === 0 || this._changeToColumn === -1))
             ) {
                 freezeObjectHeaderRect.setProps({
-                    fill: FREEZE_NORMAL_HEADER_COLOR,
+                    fill: this._freeze_normal_header_color,
                 });
                 freezeObjectMainRect.setProps({
-                    fill: FREEZE_NORMAL_MAIN_COLOR,
+                    fill: this._freeze_normal_main_color,
                 });
             } else {
                 freezeObjectHeaderRect?.setProps({
-                    fill: FREEZE_NORMAL_HEADER_COLOR,
+                    fill: this._freeze_normal_header_color,
                 });
                 freezeObjectMainRect?.setProps({
-                    fill: FREEZE_NORMAL_HEADER_COLOR,
+                    fill: this._freeze_normal_header_color,
                 });
             }
 
@@ -893,17 +899,40 @@ export class FreezeController extends Disposable {
         }
     }
 
-    private _scrollListener() {
+    private _skeletonListener() {
         this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-            const worksheet = workbook.getActiveSheet();
-
-            const freeze = worksheet.getConfig().freeze;
-
-            const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = freeze;
-
-            this._refreshFreeze(startRow, startColumn, ySplit, xSplit);
+            this._refreshCurrent();
         });
+    }
+
+    private _refreshCurrent() {
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+
+        const freeze = worksheet.getConfig().freeze;
+
+        const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = freeze;
+
+        this._refreshFreeze(startRow, startColumn, ySplit, xSplit);
+    }
+
+    private _themeChangeInitialize() {
+        this._themeChange(this._themeService.getCurrentTheme());
+        this._themeService.currentTheme$.subscribe((style) => {
+            this._clearFreeze();
+            this._themeChange(style);
+            this._refreshCurrent();
+        });
+    }
+
+    private _themeChange(style: IStyleSheet) {
+        this._freeze_normal_header_color = style.grey400;
+
+        this._freeze_normal_main_color = new TinyColor(style.grey400).setAlpha(0.01).toString();
+
+        this._freeze_active_color = style.primaryColor;
+
+        this._freeze_hover_color = style.grey500;
     }
 
     private _commandExecutedListener() {

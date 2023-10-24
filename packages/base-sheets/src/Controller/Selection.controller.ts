@@ -1,10 +1,4 @@
-import {
-    convertSelectionDataToRange,
-    IMouseEvent,
-    IPointerEvent,
-    IRenderManagerService,
-    ISelectionTransformerShapeManager,
-} from '@univerjs/base-render';
+import { IMouseEvent, IPointerEvent, IRenderManagerService } from '@univerjs/base-render';
 import {
     Disposable,
     ICommandInfo,
@@ -13,14 +7,17 @@ import {
     LifecycleStages,
     OnLifecycle,
     RANGE_TYPE,
+    ThemeService,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { convertSelectionDataToRange, getNormalSelectionStyle } from '../Basics/selection';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { ISetZoomRatioOperationParams, SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection-manager.service';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection/selection-manager.service';
+import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, SelectionController)
@@ -30,9 +27,10 @@ export class SelectionController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionTransformerShapeManager
-        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+        @ISelectionRenderService
+        private readonly _selectionRenderService: ISelectionRenderService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -53,6 +51,8 @@ export class SelectionController extends Disposable {
         this._onChangeListener();
 
         this._initialMain(sheetObject);
+
+        this._themeChangeInitialize();
 
         this._initialRowHeader(sheetObject);
 
@@ -81,15 +81,27 @@ export class SelectionController extends Disposable {
         const { spreadsheet, scene } = sheetObject;
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            this._selectionTransformerShapeManager.enableDetectMergedCell();
-            this._selectionTransformerShapeManager.eventTrigger(
-                evt,
-                spreadsheet.zIndex + 1,
-                RANGE_TYPE.NORMAL,
-                viewportMain
-            );
+            this._selectionRenderService.enableDetectMergedCell();
+            this._selectionRenderService.eventTrigger(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL, viewportMain);
             if (evt.button !== 2) {
                 state.stopPropagation();
+            }
+        });
+    }
+
+    private _themeChangeInitialize() {
+        this._themeService.currentTheme$.subscribe(() => {
+            this._selectionRenderService.resetStyle();
+            const param = this._selectionManagerService.getSelections();
+            const current = this._selectionManagerService.getCurrent();
+            if (param == null || current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                return;
+            }
+            this._selectionRenderService.reset();
+            for (const selectionWithStyle of param) {
+                const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+                selectionData.style = getNormalSelectionStyle(this._themeService);
+                this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
             }
         });
     }
@@ -98,8 +110,8 @@ export class SelectionController extends Disposable {
         const { spreadsheetRowHeader, spreadsheet, scene } = sheetObject;
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            this._selectionTransformerShapeManager.disableDetectMergedCell();
-            this._selectionTransformerShapeManager.eventTrigger(
+            this._selectionRenderService.disableDetectMergedCell();
+            this._selectionRenderService.eventTrigger(
                 evt,
                 (spreadsheet?.zIndex || 1) + 1,
                 RANGE_TYPE.ROW,
@@ -117,8 +129,8 @@ export class SelectionController extends Disposable {
         const { spreadsheetColumnHeader, spreadsheet, scene } = sheetObject;
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            this._selectionTransformerShapeManager.disableDetectMergedCell();
-            this._selectionTransformerShapeManager.eventTrigger(
+            this._selectionRenderService.disableDetectMergedCell();
+            this._selectionRenderService.eventTrigger(
                 evt,
                 (spreadsheet?.zIndex || 1) + 1,
                 RANGE_TYPE.COLUMN,
@@ -132,21 +144,20 @@ export class SelectionController extends Disposable {
 
     private _onChangeListener() {
         this._selectionManagerService.selectionInfo$.subscribe((param) => {
-            this._selectionTransformerShapeManager.reset();
+            this._selectionRenderService.reset();
             if (param == null) {
                 return;
             }
 
             for (const selectionWithStyle of param) {
-                const selectionData =
-                    this._selectionTransformerShapeManager.convertSelectionRangeToData(selectionWithStyle);
-                this._selectionTransformerShapeManager.addControlToCurrentByRangeData(selectionData);
+                const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+                this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
             }
         });
     }
 
     private _userActionSyncListener() {
-        this._selectionTransformerShapeManager.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
+        this._selectionRenderService.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const unitId = workbook.getUnitId();
             const sheetId = workbook.getActiveSheet().getSheetId();
@@ -204,7 +215,7 @@ export class SelectionController extends Disposable {
 
             const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-            this._selectionTransformerShapeManager.changeRuntime(skeleton, scene, viewportMain);
+            this._selectionRenderService.changeRuntime(skeleton, scene, viewportMain);
 
             this._selectionManagerService.setCurrentSelection({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,

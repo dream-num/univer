@@ -1,4 +1,13 @@
 import {
+    IMouseEvent,
+    IPointerEvent,
+    Scene,
+    ScrollTimer,
+    SpreadsheetSkeleton,
+    Vector2,
+    Viewport,
+} from '@univerjs/base-render';
+import {
     DEFAULT_WORKSHEET_COLUMN_COUNT,
     DEFAULT_WORKSHEET_ROW_COUNT,
     IRange,
@@ -10,27 +19,22 @@ import {
     Nullable,
     Observer,
     RANGE_TYPE,
+    ThemeService,
 } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Inject } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { IMouseEvent, IPointerEvent } from '../../../Basics/IEvents';
 import {
+    getNormalSelectionStyle,
     ISelectionStyle,
     ISelectionWithCoordAndStyle,
     ISelectionWithStyle,
-    NORMAL_SELECTION_PLUGIN_STYLE,
-} from '../../../Basics/Selection';
-import { Vector2 } from '../../../Basics/Vector2';
-import { Scene } from '../../../Scene';
-import { ScrollTimer } from '../../../ScrollTimer';
-import { Viewport } from '../../../Viewport';
-import { SpreadsheetSkeleton } from '../SheetSkeleton';
-import { SelectionTransformerModel } from './selection-transformer-model';
-import { SelectionTransformerShape } from './selection-transformer-shape';
-import { SelectionTransformerShapeEvent } from './selection-transformer-shape-event';
+} from '../../Basics/selection';
+import { SelectionRenderModel } from './selection-render-model';
+import { SelectionShape } from './selection-shape';
+import { SelectionShapeExtension } from './selection-shape-extension';
 
-export interface ISelectionTransformerShapeManager {
+export interface ISelectionRenderService {
     readonly selectionRangeWithStyle$: Observable<ISelectionWithCoordAndStyle[]>;
 
     enableHeaderHighlight(): void;
@@ -56,7 +60,7 @@ export interface ISelectionTransformerShapeManager {
     clearSelectionControls(): void;
     getActiveRangeList(): Nullable<IRange[]>;
     getActiveRange(): Nullable<IRange>;
-    getActiveSelection(): Nullable<SelectionTransformerShape>;
+    getActiveSelection(): Nullable<SelectionShape>;
     convertSelectionRangeToData(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
     convertRangeDataToSelection(range: IRange): Nullable<IRangeWithCoord>;
     convertCellRangeToInfo(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
@@ -71,7 +75,7 @@ export interface ISelectionTransformerShapeManager {
  *
  * SelectionManager 维护model数据list，action也是修改这一层数据，obs监听到数据变动后，自动刷新（control仍然可以持有数据）
  */
-export class SelectionTransformerShapeManager implements ISelectionTransformerShapeManager {
+export class SelectionRenderService implements ISelectionRenderService {
     hasSelection: boolean = false;
 
     private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
@@ -80,7 +84,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    private _selectionControls: SelectionTransformerShape[] = []; // sheetID:Controls
+    private _selectionControls: SelectionShape[] = []; // sheetID:Controls
 
     private _startSelectionRange: IRangeWithCoord = {
         startY: 0,
@@ -113,7 +117,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
     // If true, the selector will respond to the range of merged cells and automatically extend the selected range. If false, it will ignore the merged cells.
     private _isDetectMergedCell: Boolean = true;
 
-    private _selectionStyle: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE;
+    private _selectionStyle!: ISelectionStyle;
 
     private _isSelectionEnabled: boolean = true;
 
@@ -123,8 +127,8 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
     private _activeViewport!: Viewport;
 
-    static create() {
-        return new SelectionTransformerShapeManager();
+    constructor(@Inject(ThemeService) private readonly _themeService: ThemeService) {
+        this._selectionStyle = getNormalSelectionStyle(this._themeService);
     }
 
     enableHeaderHighlight() {
@@ -143,12 +147,12 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         this._isDetectMergedCell = false;
     }
 
-    setStyle(style: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE) {
+    setStyle(style: ISelectionStyle) {
         this._selectionStyle = style;
     }
 
     resetStyle() {
-        this.setStyle();
+        this.setStyle(getNormalSelectionStyle(this._themeService));
     }
 
     enableSelection() {
@@ -181,7 +185,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
         let style = data.style;
 
         if (style == null) {
-            style = NORMAL_SELECTION_PLUGIN_STYLE;
+            style = getNormalSelectionStyle(this._themeService);
         }
 
         const scene = this.getScene();
@@ -190,9 +194,9 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
             return;
         }
 
-        const control = SelectionTransformerShape.create(scene, currentControls.length, this._isHeaderHighlight);
+        const control = new SelectionShape(scene, currentControls.length, this._isHeaderHighlight, this._themeService);
 
-        new SelectionTransformerShapeEvent(control, skeleton, scene);
+        new SelectionShapeExtension(control, skeleton, scene, this._themeService);
 
         const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
@@ -280,8 +284,8 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
     getActiveRangeList(): Nullable<IRange[]> {
         const controls = this.getCurrentControls();
         if (controls && controls.length > 0) {
-            const selections = controls?.map((control: SelectionTransformerShape) => {
-                const model: SelectionTransformerModel = control.model;
+            const selections = controls?.map((control: SelectionShape) => {
+                const model: SelectionRenderModel = control.model;
                 return {
                     startRow: model.startRow,
                     startColumn: model.startColumn,
@@ -315,7 +319,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
      * get active selection control
      * @returns
      */
-    getActiveSelection(): Nullable<SelectionTransformerShape> {
+    getActiveSelection(): Nullable<SelectionShape> {
         const controls = this.getCurrentControls();
         return controls && controls[controls.length - 1];
     }
@@ -411,7 +415,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
 
         this._startSelectionRange = startSelectionRange;
 
-        let selectionControl: Nullable<SelectionTransformerShape> = this.getCurrentControl();
+        let selectionControl: Nullable<SelectionShape> = this.getCurrentControl();
 
         const curControls = this.getCurrentControls();
 
@@ -474,13 +478,14 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
                 currentCell
             );
         } else {
-            selectionControl = SelectionTransformerShape.create(
+            selectionControl = new SelectionShape(
                 scene,
                 curControls.length + zIndex,
-                this._isHeaderHighlight
+                this._isHeaderHighlight,
+                this._themeService
             );
 
-            new SelectionTransformerShapeEvent(selectionControl, skeleton, scene);
+            new SelectionShapeExtension(selectionControl, skeleton, scene, this._themeService);
 
             selectionControl.update(
                 startSelectionRange,
@@ -627,7 +632,7 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
     private _moving(
         moveOffsetX: number,
         moveOffsetY: number,
-        selectionControl: Nullable<SelectionTransformerShape>,
+        selectionControl: Nullable<SelectionShape>,
         rangeType: RANGE_TYPE
     ) {
         const skeleton = this._skeleton;
@@ -836,6 +841,6 @@ export class SelectionTransformerShapeManager implements ISelectionTransformerSh
     }
 }
 
-export const ISelectionTransformerShapeManager = createIdentifier<SelectionTransformerShapeManager>(
-    'deprecated.univer.sheet.selection-transformer-manager'
+export const ISelectionRenderService = createIdentifier<SelectionRenderService>(
+    'deprecated.univer.sheet.selection-render-service'
 );

@@ -7,7 +7,7 @@ import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
-import { SelectionManagerService } from '../services/selection-manager.service';
+import { SelectionManagerService } from '../services/selection/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, AutoHeightController)

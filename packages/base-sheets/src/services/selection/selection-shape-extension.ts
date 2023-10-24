@@ -1,31 +1,30 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import { IRangeWithCoord, Nullable, Observer } from '@univerjs/core';
-
 import {
     CURSOR_TYPE,
     IMouseEvent,
     IPointerEvent,
     isRectIntersect,
-    NORMAL_SELECTION_PLUGIN_STYLE,
-    SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
+    Rect,
+    Scene,
+    ScrollTimer,
+    SpreadsheetSkeleton,
     Vector2,
-} from '../../../Basics';
-import { Scene } from '../../../Scene';
-import { ScrollTimer } from '../../../ScrollTimer';
-import { Rect } from '../../../Shape';
-import { SpreadsheetSkeleton } from '../SheetSkeleton';
-import { SelectionTransformerShape } from './selection-transformer-shape';
+} from '@univerjs/base-render';
+import { IRangeWithCoord, Nullable, Observer, ThemeService } from '@univerjs/core';
+
+import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '../../Basics/selection';
+import { SelectionShape } from './selection-shape';
 
 const HELPER_SELECTION_TEMP_NAME = '__SpreadsheetHelperSelectionTempRect';
 
 const SELECTION_CONTROL_DELETING_LIGHTEN = 35;
 
-export interface ISelectionTransformerShapeTargetSelection {
-    originControl: SelectionTransformerShape;
+export interface ISelectionShapeTargetSelection {
+    originControl: SelectionShape;
     targetSelection: IRangeWithCoord;
 }
 
-export class SelectionTransformerShapeEvent {
+export class SelectionShapeExtension {
     private _startOffsetX: number = 0;
 
     private _startOffsetY: number = 0;
@@ -62,9 +61,10 @@ export class SelectionTransformerShapeEvent {
     private _fillControlColors: string[] = [];
 
     constructor(
-        private _control: SelectionTransformerShape,
+        private _control: SelectionShape,
         private _skeleton: SpreadsheetSkeleton,
-        private _scene: Scene
+        private _scene: Scene,
+        private readonly _themeService: ThemeService
     ) {
         this._initialControl();
 
@@ -701,12 +701,13 @@ export class SelectionTransformerShapeEvent {
         const style = this._control.selectionStyle;
         let stroke = style?.stroke;
         let strokeWidth = style?.strokeWidth;
+        const defaultStyle = getNormalSelectionStyle(this._themeService);
         if (stroke == null) {
-            stroke = NORMAL_SELECTION_PLUGIN_STYLE.stroke;
+            stroke = defaultStyle.stroke;
         }
 
         if (strokeWidth == null) {
-            strokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.strokeWidth;
+            strokeWidth = defaultStyle.strokeWidth;
         }
 
         const scale = this._getScale();

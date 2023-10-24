@@ -1,6 +1,5 @@
 import {
     IRenderManagerService,
-    ISelectionTransformerShapeManager,
     Rect,
     Spreadsheet,
     SpreadsheetColumnHeader,
@@ -19,7 +18,8 @@ import { Inject } from '@wendellhu/redi';
 import { COMMAND_LISTENER_SKELETON_CHANGE } from '../Basics/Const/COMMAND_LISTENER_CONST';
 import { SHEET_VIEW_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SetWorksheetActivateMutation } from '../commands/mutations/set-worksheet-activate.mutation';
-import { SelectionManagerService } from '../services/selection-manager.service';
+import { SelectionManagerService } from '../services/selection/selection-manager.service';
+import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 interface ISetWorksheetMutationParams {
@@ -34,8 +34,8 @@ export class SheetRenderController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @ISelectionTransformerShapeManager
-        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
+        @ISelectionRenderService
+        private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();

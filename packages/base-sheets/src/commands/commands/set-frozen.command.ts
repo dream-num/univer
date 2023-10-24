@@ -9,7 +9,7 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { ScrollManagerService } from '../../services/scroll-manager.service';
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SelectionManagerService } from '../../services/selection/selection-manager.service';
 import {
     ISetFrozenMutationParams,
     SetFrozenMutation,

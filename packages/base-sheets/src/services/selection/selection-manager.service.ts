@@ -1,12 +1,9 @@
-import {
-    getCellInfoInMergeData,
-    ISelectionStyle,
-    ISelectionWithStyle,
-    NORMAL_SELECTION_PLUGIN_STYLE,
-} from '@univerjs/base-render';
-import { IRange, ISelectionCell, makeCellRangeToRangeData, Nullable } from '@univerjs/core';
-import { IDisposable } from '@wendellhu/redi';
+import { getCellInfoInMergeData } from '@univerjs/base-render';
+import { IRange, ISelectionCell, makeCellRangeToRangeData, Nullable, ThemeService } from '@univerjs/core';
+import { IDisposable, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
+
+import { getNormalSelectionStyle, ISelectionStyle, ISelectionWithStyle } from '../../Basics/selection';
 
 export const NORMAL_SELECTION_PLUGIN_NAME = 'normalSelectionPluginName';
 
@@ -31,8 +28,6 @@ export class SelectionManagerService implements IDisposable {
 
     private _currentSelection: Nullable<ISelectionManagerSearchParam> = null;
 
-    // private _currentStyle: ISelectionStyle = NORMAL_SELECTION_PLUGIN_STYLE;
-
     // private _isSelectionEnabled: boolean = true;
 
     private readonly _selectionInfo$ = new BehaviorSubject<Nullable<ISelectionWithStyle[]>>(null);
@@ -49,6 +44,12 @@ export class SelectionManagerService implements IDisposable {
     // get currentStyle() {
     //     return this._currentStyle;
     // }
+
+    constructor(@Inject(ThemeService) private readonly _themeService: ThemeService) {}
+
+    getCurrent() {
+        return this._currentSelection;
+    }
 
     reset() {
         if (this._currentSelection == null) {
@@ -232,7 +233,7 @@ export class SelectionManagerService implements IDisposable {
         return {
             range: newSelectionData,
             primary: newCellRange,
-            style: NORMAL_SELECTION_PLUGIN_STYLE,
+            style: getNormalSelectionStyle(this._themeService),
         };
     }
 

@@ -23,7 +23,7 @@ import {
     IRemoveRowsMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SelectionManagerService } from '../../services/selection/selection-manager.service';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../mutations/insert-range.mutation';

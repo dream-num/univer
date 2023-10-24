@@ -3,7 +3,7 @@
 import { ISelectionWithStyle } from '@univerjs/base-render';
 import { CommandType, IOperation } from '@univerjs/core';
 
-import { SelectionManagerService } from '../../services/selection-manager.service';
+import { SelectionManagerService } from '../../services/selection/selection-manager.service';
 
 export interface ISetSelectionsOperationParams {
     workbookId: string;

@@ -1,4 +1,3 @@
-import { ISelectionTransformerShapeManager, SelectionTransformerShapeManager } from '@univerjs/base-render';
 import { ICommandService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
@@ -20,7 +19,8 @@ import { ZoomController } from './Controller/zoom.controller';
 import { en } from './Locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
-import { SelectionManagerService } from './services/selection-manager.service';
+import { SelectionManagerService } from './services/selection/selection-manager.service';
+import { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { SheetCanvasView } from './View/sheet-canvas-view';
 
@@ -56,14 +56,15 @@ export class SheetPlugin extends Plugin {
             // services
             [BorderStyleManagerService],
             [SheetSkeletonManagerService],
-            [SelectionManagerService],
+            [SelectionRenderService],
             [
-                ISelectionTransformerShapeManager,
+                ISelectionRenderService,
                 {
-                    useClass: SelectionTransformerShapeManager,
+                    useClass: SelectionRenderService,
                 },
             ],
             [ScrollManagerService],
+            [SelectionManagerService],
 
             // controllers
             [FormulaBarController],

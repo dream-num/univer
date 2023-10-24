@@ -144,7 +144,6 @@ export class SearchFormulaContent extends Component<IProps, IState> {
                     <div className={styles.functionSelector}>
                         <Select
                             onClick={this.selectType.bind(this)}
-                            type={0}
                             children={this.getSelect()}
                             hideSelectedIcon={true}
                         ></Select>

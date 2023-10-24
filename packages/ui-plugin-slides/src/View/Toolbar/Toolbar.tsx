@@ -216,7 +216,6 @@ export class Toolbar extends Component<IProps, IState> {
                         <Select
                             key={index}
                             tooltip={item.tooltip}
-                            type={item.type}
                             display={item.display}
                             children={item.children}
                             suffix={item.suffix}

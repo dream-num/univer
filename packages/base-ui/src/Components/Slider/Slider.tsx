@@ -4,7 +4,7 @@ import { useMemo, useRef } from 'react';
 
 import { joinClassNames } from '../../Utils';
 import { Button } from '../Button/Button';
-import { Dropwdown2 } from '../Dropdown/Dropdown2';
+import { Dropdown2 } from '../Dropdown/Dropdown2';
 import { Tooltip } from '../Tooltip/Tooltip';
 import styles from './index.module.less';
 
@@ -146,7 +146,7 @@ export function Slider(props: IBaseSliderProps) {
                 <AddWorksheet28 />
             </Button>
 
-            <Dropwdown2
+            <Dropdown2
                 placement="topLeft"
                 overlay={
                     <div className={styles.sliderShortcuts}>
@@ -167,7 +167,7 @@ export function Slider(props: IBaseSliderProps) {
                 }
             >
                 <a className={styles.sliderValue}>{value}%</a>
-            </Dropwdown2>
+            </Dropdown2>
         </div>
     );
 }

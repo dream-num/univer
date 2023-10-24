@@ -4,14 +4,7 @@ import {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from '@univerjs/base-sheets';
-import {
-    ColorPicker,
-    DisplayTypes,
-    IMenuSelectorItem,
-    MenuItemType,
-    MenuPosition,
-    SelectTypes,
-} from '@univerjs/base-ui';
+import { ColorPicker, DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { BorderStyleTypes, ICommandService, IPermissionService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
@@ -85,10 +78,6 @@ export const BORDER_LINE_CHILDREN = [
 
 export const BORDER_SIZE_CHILDREN = [
     {
-        label: 'borderLine.borderNone',
-        value: BorderStyleTypes.NONE,
-    },
-    {
         label: 'BorderThin',
         value: BorderStyleTypes.THIN,
     },
@@ -146,8 +135,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         tooltip: 'toolbar.border.main',
         display: DisplayTypes.ICON,
         positions: [MenuPosition.TOOLBAR],
-        type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.NEO,
+        type: MenuItemType.SUBITEMS,
         selections: [...BORDER_LINE_CHILDREN],
         onClose: () => {
             borderStyleManagerService.setActiveBorderType(false);
@@ -162,7 +150,6 @@ export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelecto
         title: 'borderLine.borderColor',
         positions: SetBorderPositionCommand.id,
         display: DisplayTypes.COLOR,
-        selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,
         selections: [
             {
@@ -181,7 +168,6 @@ export function SetBorderStyleMenuItemFactory(accessor: IAccessor): IMenuSelecto
         label: SHEET_UI_PLUGIN_NAME + LINE_BOLD_LABEL,
         positions: SetBorderPositionCommand.id,
         display: DisplayTypes.CUSTOM,
-        selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,
         selections: [...BORDER_SIZE_CHILDREN],
         value$: borderStyleManagerService.borderInfo$.pipe(map((info) => info.style)),

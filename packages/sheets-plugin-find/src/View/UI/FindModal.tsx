@@ -252,11 +252,7 @@ export class FindModal extends Component<IProps, IState> {
                             <span>
                                 <CustomLabel label="find.search" />
                             </span>
-                            <Select
-                                onClick={this.selectSearch.bind(this)}
-                                type={0}
-                                children={this.getSelect()}
-                            ></Select>
+                            <Select onClick={this.selectSearch.bind(this)} children={this.getSelect()}></Select>
                             {showRange ? <CellRange onClick={() => {}} /> : null}
                         </div>
                         <div className={styles.box}>

@@ -88,7 +88,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
         const { disabled, value } = state;
 
         const props = this.props as IDisplayMenuItem<IMenuSelectorItem>;
-        const { icon, title, label, display, selectType, selections, id, onClose, max, min } = props;
+        const { icon, title, label, display, selections, id, onClose, max, min } = props;
 
         return (
             <Tooltip title={this.getTooltip()} placement="bottom">
@@ -116,7 +116,6 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                         }
                         commandService.executeCommand(commandId, value);
                     }}
-                    type={selectType!}
                     onClose={onClose}
                 ></Select>
             </Tooltip>

@@ -1,32 +1,20 @@
 import type { Meta } from '@storybook/react';
 
-import { Menu } from './Menu';
+import { Menu2 } from './Menu2';
 
-const meta: Meta<typeof Menu> = {
+const meta: Meta<typeof Menu2> = {
     title: 'Components / Menu',
-    component: Menu,
+    component: Menu2,
     parameters: {
         layout: 'centered',
     },
     tags: ['autodocs'],
-    args: {
-        menu: [
-            {
-                label: 'test',
-                value: 'test',
-                show: true,
-            },
-            {
-                label: 'test1',
-                value: 'test1',
-                show: true,
-            },
-        ],
-    },
 };
 
 export default meta;
 
 export const Playground = {
-    args: {},
+    render() {
+        return <Menu2 />;
+    },
 };

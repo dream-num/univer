@@ -1,20 +1,17 @@
-import { useContext, useEffect, useState } from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useEffect, useState } from 'react';
 
-import { AppContext } from '../../../Common/AppContext';
 import { IDisplayMenuItem, IMenuItem, MenuPosition } from '../../../services/menu/menu';
 import { IMenuService } from '../../../services/menu/menu.service';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
 
 export function DocBars() {
-    const context = useContext(AppContext);
+    const menuService = useDependency(IMenuService);
 
     const [menuItems, setMenuItems] = useState<Array<IDisplayMenuItem<IMenuItem>>>([]);
 
     useEffect(() => {
-        // this.props.getComponent?.(this); // pass the UI to the controller, which is not good...
-
-        const menuService = context.injector!.get(IMenuService);
         const update = () => {
             setMenuItems(menuService.getMenuItems(MenuPosition.TOOLBAR));
         };

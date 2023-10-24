@@ -9,7 +9,7 @@ import { Content, Footer, Header, Layout, Sider } from '../Components';
 import { Container } from '../Components/Container/Container';
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import style from './app.module.less';
-import { ContextMenu } from './components/contextmenu/contextmenu';
+import { ContextMenu } from './components/ContextMenu';
 import { DocBars } from './components/DocBars';
 import { themeInstance } from './theme';
 
@@ -91,20 +91,14 @@ export function App(props: IUniverAppProps) {
                                     )}
                             </Sider>
                             <Content className={style.contentContainerHorizontal}>
-                                {/* FIXME: context menu component shouldn't have to mount on this position */}
-                                <Container
-                                    onContextMenu={(e) => e.preventDefault()}
-                                    className={style.contentInnerRightContainer}
-                                    ref={containerRef}
-                                >
-                                    <ContextMenu />
-                                    {contentComponents &&
-                                        Array.from(contentComponents.values()).map((component, index) =>
-                                            React.createElement(component(), { key: `${index}` })
-                                        )}
-                                    {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>} */}
-                                    {/* {<RichText {...methods.cellEditor}></RichText>} */}
-                                </Container>
+                                <ContextMenu>
+                                    <Container className={style.contentInnerRightContainer} ref={containerRef}>
+                                        {contentComponents &&
+                                            Array.from(contentComponents.values()).map((component, index) =>
+                                                React.createElement(component(), { key: `${index}` })
+                                            )}
+                                    </Container>
+                                </ContextMenu>
                             </Content>
                         </Layout>
                         {/* footer */}

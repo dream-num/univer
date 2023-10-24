@@ -57,7 +57,6 @@ import {
     MenuItemType,
     MenuPosition,
     PasteCommand,
-    SelectTypes,
 } from '@univerjs/base-ui';
 import {
     FontItalic,
@@ -508,7 +507,6 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         id: SetFontFamilyCommand.id,
         title: 'toolbar.font',
         tooltip: 'toolbar.font',
-        selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,
         display: DisplayTypes.FONT,
         positions: [MenuPosition.TOOLBAR],
@@ -571,7 +569,6 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         title: 'fontSize',
         tooltip: 'toolbar.fontSize',
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.NEO,
         display: DisplayTypes.INPUT,
         min: 1,
         max: 400,
@@ -642,7 +639,6 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         icon: 'TextColorIcon',
         tooltip: 'toolbar.textColor.main',
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.NEO,
         positions: [MenuPosition.TOOLBAR],
         display: DisplayTypes.COLOR,
         selections: [
@@ -682,7 +678,6 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         tooltip: 'toolbar.fillColor.main',
         title: 'TextColorIcon',
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.NEO,
         positions: [MenuPosition.TOOLBAR],
         display: DisplayTypes.COLOR,
         icon: 'FillColorIcon',
@@ -735,7 +730,6 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
         tooltip: 'toolbar.horizontalAlignMode.main',
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.NEO,
         selections: HORIZONTAL_ALIGN_CHILDREN,
         value$: new Observable<HorizontalAlign>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
@@ -791,7 +785,6 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR],
-        selectType: SelectTypes.NEO,
         selections: VERTICAL_ALIGN_CHILDREN,
         value$: new Observable<VerticalAlign>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
@@ -845,7 +838,6 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
         tooltip: 'toolbar.textWrapMode.main',
         icon: TEXT_WRAP_CHILDREN[0].icon,
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.NEO,
         positions: [MenuPosition.TOOLBAR],
         selections: TEXT_WRAP_CHILDREN,
         display: DisplayTypes.ICON,
@@ -917,7 +909,6 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         icon: TEXT_ROTATE_CHILDREN[0].icon,
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
-        selectType: SelectTypes.NEO,
         selections: TEXT_ROTATE_CHILDREN,
         positions: [MenuPosition.TOOLBAR],
         value$: new Observable<number | string>((subscriber) => {
@@ -1331,7 +1322,6 @@ export function DeleteRangeMenuItemFactory(): IMenuSelectorItem<string> {
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.deleteCell',
         positions: [MenuPosition.CONTEXT_MENU],
-        selectType: SelectTypes.NEO,
     };
 }
 
@@ -1359,7 +1349,6 @@ export function InsertRangeMenuItemFactory(): IMenuSelectorItem<string> {
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insertCell',
         positions: [MenuPosition.CONTEXT_MENU],
-        selectType: SelectTypes.NEO,
     };
 }
 
@@ -1415,7 +1404,6 @@ export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
         title: 'sheetConfig.changeColor',
         positions: [SheetMenuPosition.SHEET_BAR],
         display: DisplayTypes.COLOR,
-        selectType: SelectTypes.NEO,
         type: MenuItemType.SELECTOR,
         selections: [
             {
@@ -1448,7 +1436,6 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         type: MenuItemType.SELECTOR,
         positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',
-        selectType: SelectTypes.NEO,
         disabled$: new Observable((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 if (c.id !== SetWorksheetHideCommand.id && c.id !== SetWorksheetShowCommand.id) {

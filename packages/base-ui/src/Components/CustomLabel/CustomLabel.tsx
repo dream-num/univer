@@ -84,9 +84,9 @@ export function NeoCustomLabel(
 
     if (display === DisplayTypes.ICON && icon) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const LabelComponent = context.componentManager?.get(icon) as any;
-        if (LabelComponent) {
-            return <LabelComponent {...props} />;
+        const IconComponent = context.componentManager?.get(icon) as any;
+        if (IconComponent) {
+            return <IconComponent {...props} />;
         }
     }
 

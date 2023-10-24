@@ -22,6 +22,7 @@ import { BaseMenuItem } from '../Item/Item';
 import { DisplayTypes } from '../Select/Select';
 import styles from './index.module.less';
 
+/** @deprecated */
 export interface BaseMenuProps {
     /** @deprecated */
     onClick?: (...arg: any) => void;
@@ -51,6 +52,7 @@ export interface BaseMenuProps {
     }; //Right-click menu adaptive position, send the location of the mouse click
 }
 
+/** @deprecated */
 export type BaseMenuStyle = {
     left?: string;
     right?: string;
@@ -99,6 +101,7 @@ export type BaseMenuStyle = {
 //     onOptionSelect?: (option: IValueOption) => void;
 // }
 
+/** @deprecated */
 export const Menu = (props: BaseMenuProps) => {
     const {
         display,

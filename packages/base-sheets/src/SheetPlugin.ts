@@ -56,7 +56,6 @@ export class SheetPlugin extends Plugin {
             // services
             [BorderStyleManagerService],
             [SheetSkeletonManagerService],
-            [SelectionRenderService],
             [
                 ISelectionRenderService,
                 {

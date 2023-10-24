@@ -6,7 +6,6 @@ import { BehaviorSubject } from 'rxjs';
 import { getNormalSelectionStyle, ISelectionStyle, ISelectionWithStyle } from '../../Basics/selection';
 
 export const NORMAL_SELECTION_PLUGIN_NAME = 'normalSelectionPluginName';
-export const COPY_SELECTION_PLUGIN_NAME = 'copySelectionPluginName';
 
 export interface ISelectionManagerSearchParam {
     pluginName: string;
@@ -28,7 +27,6 @@ export class SelectionManagerService implements IDisposable {
     private readonly _selectionInfo: ISelectionInfo = new Map();
 
     private _currentSelection: Nullable<ISelectionManagerSearchParam> = null;
-    private _currentCopySelection: Nullable<ISelectionManagerSearchParam> = null;
 
     // private _isSelectionEnabled: boolean = true;
 
@@ -98,7 +96,6 @@ export class SelectionManagerService implements IDisposable {
         if (this._dirty === false) {
             return;
         }
-
         this._currentSelection = param;
 
         this.refresh(param);
@@ -159,38 +156,6 @@ export class SelectionManagerService implements IDisposable {
             selectionDatas,
         });
         this.refresh(this._currentSelection);
-    }
-
-    replaceCopySelection(insertParam: {
-        pluginName: string;
-        unitId: string;
-        sheetId: string;
-        selections: ISelectionWithStyle[];
-    }) {
-        const { pluginName, unitId, sheetId, selections } = insertParam;
-        let selectionDatas: ISelectionWithStyle[];
-        if (selections.length === 0) {
-            selectionDatas = [];
-        } else {
-            selectionDatas = [
-                {
-                    ...insertParam.selections[0],
-                    style: this.createCopyPasteSelection(),
-                },
-            ];
-        }
-        this._replaceByParam({
-            selectionDatas,
-            pluginName,
-            unitId,
-            sheetId,
-        });
-        this._currentCopySelection = {
-            pluginName: COPY_SELECTION_PLUGIN_NAME,
-            unitId,
-            sheetId,
-        };
-        this.refresh();
     }
 
     replaceWithNoRefresh(selectionDatas: ISelectionWithStyle[]) {
@@ -297,11 +262,7 @@ export class SelectionManagerService implements IDisposable {
     }
 
     private refresh(param?: ISelectionManagerSearchParam): void {
-        const res = [
-            ...(this._getSelectionDatas(param) || this._getSelectionDatas(this._currentSelection) || []),
-            ...(this._getSelectionDatas(this._currentCopySelection) || []),
-        ];
-        this._selectionInfo$.next(res);
+        this._selectionInfo$.next(this._getSelectionDatas(param));
     }
 
     private _getFirstByParam(param: Nullable<ISelectionManagerSearchParam>): Readonly<Nullable<ISelectionWithStyle>> {

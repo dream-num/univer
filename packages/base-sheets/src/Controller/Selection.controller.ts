@@ -161,11 +161,12 @@ export class SelectionController extends Disposable {
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const unitId = workbook.getUnitId();
             const sheetId = workbook.getActiveSheet().getSheetId();
+            const current = this._selectionManagerService.getCurrent();
 
             this._commandService.executeCommand(SetSelectionsOperation.id, {
                 unitId,
                 sheetId,
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                pluginName: current?.pluginName || NORMAL_SELECTION_PLUGIN_NAME,
                 selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
                     convertSelectionDataToRange(selectionDataWithStyle)
                 ),

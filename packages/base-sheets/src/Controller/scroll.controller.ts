@@ -1,4 +1,4 @@
-import { IRenderManagerService, ISelectionTransformerShapeManager } from '@univerjs/base-render';
+import { IRenderManagerService } from '@univerjs/base-render';
 import {
     Direction,
     Disposable,
@@ -15,7 +15,8 @@ import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { ScrollCommand } from '../commands/commands/set-scroll.command';
 import { IMoveSelectionCommandParams, MoveSelectionCommand } from '../commands/commands/set-selections.command';
 import { ScrollManagerService } from '../services/scroll-manager.service';
-import { SelectionManagerService } from '../services/selection-manager.service';
+import { SelectionManagerService } from '../services/selection/selection-manager.service';
+import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { ISheetSkeletonManagerParam, SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, ScrollController)
@@ -25,8 +26,8 @@ export class ScrollController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionTransformerShapeManager
-        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
+        @ISelectionRenderService
+        private readonly _selectionRenderService: ISelectionRenderService,
 
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService

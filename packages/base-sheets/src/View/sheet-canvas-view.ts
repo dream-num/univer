@@ -1,7 +1,6 @@
 import {
     IRender,
     IRenderManagerService,
-    ISelectionTransformerShapeManager,
     IWheelEvent,
     Layer,
     PointerInput,
@@ -31,6 +30,7 @@ import {
     VIEWPORT_KEY,
 } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
+import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, SheetCanvasView)
@@ -47,8 +47,8 @@ export class SheetCanvasView {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionTransformerShapeManager
-        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
+        @ISelectionRenderService
+        private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         this._currentUniverService.currentSheet$.subscribe((workbook) => {

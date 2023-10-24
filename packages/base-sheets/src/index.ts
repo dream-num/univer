@@ -5,7 +5,11 @@ export * from './SheetPlugin';
 // #region services
 
 export { BorderStyleManagerService } from './services/border-style-manager.service';
-export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './services/selection-manager.service';
+export {
+    COPY_SELECTION_PLUGIN_NAME,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+} from './services/selection/selection-manager.service';
 
 // #endregion
 
@@ -156,6 +160,6 @@ export { type ISetSelectionsOperationParams } from './commands/operations/select
 export { SetCopySelectionsOperation, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export * from './Locale';
+export { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
-
 // #endregion

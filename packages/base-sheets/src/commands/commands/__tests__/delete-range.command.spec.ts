@@ -16,7 +16,10 @@ import {
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
+import {
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+} from '../../../services/selection/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation } from '../../mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../../mutations/insert-range.mutation';

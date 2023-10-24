@@ -1,20 +1,17 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import { IRangeWithCoord, ISelectionCellWithCoord, Nullable, RANGE_TYPE } from '@univerjs/core';
+import { DEFAULT_SELECTION_LAYER_INDEX, Group, Rect, Scene } from '@univerjs/base-render';
+import { IRangeWithCoord, ISelectionCellWithCoord, Nullable, RANGE_TYPE, ThemeService } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
-import { DEFAULT_SELECTION_LAYER_INDEX } from '../../../Basics/Const';
 import {
+    getNormalSelectionStyle,
     ISelectionStyle,
     ISelectionWidgetConfig,
     ISelectionWithCoordAndStyle,
-    NORMAL_SELECTION_PLUGIN_STYLE,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
-} from '../../../Basics/Selection';
-import { Group } from '../../../Group';
-import { Scene } from '../../../Scene';
-import { Rect } from '../../../Shape/Rect';
-import { SelectionTransformerModel } from './selection-transformer-model';
+} from '../../Basics/selection';
+import { SelectionRenderModel } from './selection-render-model';
 
 enum SELECTION_MANAGER_KEY {
     Selection = '__SpreadsheetSelectionShape__',
@@ -53,7 +50,7 @@ const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
 /**
  * The main selection canvas component
  */
-export class SelectionTransformerShape {
+export class SelectionShape {
     private _leftControl!: Rect;
 
     private _rightControl!: Rect;
@@ -106,7 +103,7 @@ export class SelectionTransformerShape {
 
     private _bottomRightWidget!: Rect;
 
-    private _selectionModel!: SelectionTransformerModel;
+    private _selectionModel!: SelectionRenderModel;
 
     private _selectionStyle: Nullable<ISelectionStyle>;
 
@@ -116,7 +113,7 @@ export class SelectionTransformerShape {
 
     private _widgetRects: Rect[] = [];
 
-    private _dispose$ = new BehaviorSubject<SelectionTransformerShape>(this);
+    private _dispose$ = new BehaviorSubject<SelectionShape>(this);
 
     readonly dispose$ = this._dispose$.asObservable();
 
@@ -132,10 +129,13 @@ export class SelectionTransformerShape {
 
     readonly selectionFilled$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
 
+    private _defaultStyle!: ISelectionStyle;
+
     constructor(
         private _scene: Scene,
         private _zIndex: number,
-        private _isHeaderHighlight: boolean = true
+        private _isHeaderHighlight: boolean = true,
+        private readonly _themeService: ThemeService
     ) {
         this._initialize();
     }
@@ -224,20 +224,17 @@ export class SelectionTransformerShape {
         return this._selectionStyle;
     }
 
-    static create(scene: Scene, zIndex: number, isHeaderHighlight: boolean) {
-        return new this(scene, zIndex, isHeaderHighlight);
-    }
-
     static fromJson(
         scene: Scene,
         zIndex: number,
         newSelectionData: ISelectionWithCoordAndStyle,
         rowHeaderWidth: number,
         columnHeaderHeight: number,
-        isHeaderHighlight: boolean
+        isHeaderHighlight: boolean,
+        themeService: ThemeService
     ) {
         const { rangeWithCoord, primaryWithCoord, style } = newSelectionData;
-        const control = SelectionTransformerShape.create(scene, zIndex, isHeaderHighlight);
+        const control = new SelectionShape(scene, zIndex, isHeaderHighlight, themeService);
         control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
         return control;
     }
@@ -257,23 +254,23 @@ export class SelectionTransformerShape {
      */
     _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
         const { startX, startY, endX, endY } = this._selectionModel;
-
+        const defaultStyle = this._defaultStyle;
         if (style == null) {
-            style = NORMAL_SELECTION_PLUGIN_STYLE;
+            style = defaultStyle;
         }
 
         const {
-            stroke = NORMAL_SELECTION_PLUGIN_STYLE.stroke!,
-            widgets = NORMAL_SELECTION_PLUGIN_STYLE.widgets!,
-            hasAutoFill = NORMAL_SELECTION_PLUGIN_STYLE.hasAutoFill!,
+            stroke = defaultStyle.stroke!,
+            widgets = defaultStyle.widgets!,
+            hasAutoFill = defaultStyle.hasAutoFill!,
 
-            AutofillStroke = NORMAL_SELECTION_PLUGIN_STYLE.AutofillStroke!,
+            AutofillStroke = defaultStyle.AutofillStroke!,
         } = style;
 
         let {
-            strokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.strokeWidth!,
-            AutofillSize = NORMAL_SELECTION_PLUGIN_STYLE.AutofillSize!,
-            AutofillStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.AutofillStrokeWidth!,
+            strokeWidth = defaultStyle.strokeWidth!,
+            AutofillSize = defaultStyle.AutofillSize!,
+            AutofillStrokeWidth = defaultStyle.AutofillStrokeWidth!,
         } = style;
 
         const scale = this._getScale();
@@ -375,7 +372,7 @@ export class SelectionTransformerShape {
         newSelectionRange: IRangeWithCoord,
         rowHeaderWidth: number,
         columnHeaderHeight: number,
-        style: Nullable<ISelectionStyle> = NORMAL_SELECTION_PLUGIN_STYLE,
+        style: Nullable<ISelectionStyle>,
         highlight: Nullable<ISelectionCellWithCoord>
     ) {
         this._selectionModel.setValue(newSelectionRange, highlight);
@@ -489,7 +486,9 @@ export class SelectionTransformerShape {
     }
 
     private _initialize() {
-        this._selectionModel = new SelectionTransformerModel();
+        this._defaultStyle = getNormalSelectionStyle(this._themeService);
+
+        this._selectionModel = new SelectionRenderModel();
         const zIndex = this._zIndex;
         this._leftControl = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
             zIndex,
@@ -661,8 +660,10 @@ export class SelectionTransformerShape {
     ) {
         const { startX, startY, endX, endY, rangeType } = this._selectionModel;
 
+        const defaultStyle = this._defaultStyle;
+
         if (style == null) {
-            style = NORMAL_SELECTION_PLUGIN_STYLE;
+            style = defaultStyle;
         }
 
         const scale = this._getScale();
@@ -670,18 +671,18 @@ export class SelectionTransformerShape {
         const {
             stroke,
             hasRowHeader,
-            rowHeaderFill = NORMAL_SELECTION_PLUGIN_STYLE.rowHeaderFill!,
-            rowHeaderStroke = NORMAL_SELECTION_PLUGIN_STYLE.rowHeaderStroke!,
+            rowHeaderFill = defaultStyle.rowHeaderFill!,
+            rowHeaderStroke = defaultStyle.rowHeaderStroke!,
 
             hasColumnHeader,
-            columnHeaderFill = NORMAL_SELECTION_PLUGIN_STYLE.columnHeaderFill!,
-            columnHeaderStroke = NORMAL_SELECTION_PLUGIN_STYLE.columnHeaderStroke!,
+            columnHeaderFill = defaultStyle.columnHeaderFill!,
+            columnHeaderStroke = defaultStyle.columnHeaderStroke!,
         } = style;
 
         let {
-            rowHeaderStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.rowHeaderStrokeWidth!,
+            rowHeaderStrokeWidth = defaultStyle.rowHeaderStrokeWidth!,
 
-            columnHeaderStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.columnHeaderStrokeWidth!,
+            columnHeaderStrokeWidth = defaultStyle.columnHeaderStrokeWidth!,
         } = style;
 
         rowHeaderStrokeWidth /= scale;
@@ -746,15 +747,17 @@ export class SelectionTransformerShape {
     private _updateBackgroundControl(style: Nullable<ISelectionStyle>) {
         const { startX, startY, endX, endY } = this._selectionModel;
 
+        const defaultStyle = this._defaultStyle;
+
         if (style == null) {
-            style = NORMAL_SELECTION_PLUGIN_STYLE;
+            style = defaultStyle;
         }
 
         const scale = this._getScale();
 
-        const { fill = NORMAL_SELECTION_PLUGIN_STYLE.fill! } = style;
+        const { fill = defaultStyle.fill! } = style;
 
-        let { strokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.strokeWidth! } = style;
+        let { strokeWidth = defaultStyle.strokeWidth! } = style;
 
         strokeWidth /= scale;
 
@@ -830,22 +833,21 @@ export class SelectionTransformerShape {
     private _updateWidgets(style: Nullable<ISelectionStyle>) {
         const { startX, startY, endX, endY } = this._selectionModel;
 
+        const defaultStyle = this._defaultStyle;
+
         if (style == null) {
-            style = NORMAL_SELECTION_PLUGIN_STYLE;
+            style = defaultStyle;
         }
 
         const {
-            stroke = NORMAL_SELECTION_PLUGIN_STYLE.stroke!,
-            widgets = NORMAL_SELECTION_PLUGIN_STYLE.widgets!,
-            widgetStroke = NORMAL_SELECTION_PLUGIN_STYLE.widgetStroke!,
+            stroke = defaultStyle.stroke!,
+            widgets = defaultStyle.widgets!,
+            widgetStroke = defaultStyle.widgetStroke!,
         } = style;
 
         const scale = this._getScale();
 
-        let {
-            widgetSize = NORMAL_SELECTION_PLUGIN_STYLE.widgetSize!,
-            widgetStrokeWidth = NORMAL_SELECTION_PLUGIN_STYLE.widgetStrokeWidth!,
-        } = style;
+        let { widgetSize = defaultStyle.widgetSize!, widgetStrokeWidth = defaultStyle.widgetStrokeWidth! } = style;
 
         widgetSize /= scale;
 

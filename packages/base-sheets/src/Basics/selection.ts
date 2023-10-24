@@ -1,4 +1,5 @@
-import { ISelection, ISelectionWithCoord, Nullable } from '@univerjs/core';
+import { TinyColor } from '@ctrl/tinycolor';
+import { ISelection, ISelectionWithCoord, Nullable, ThemeService } from '@univerjs/core';
 
 /**
  * Whether to display the controller that modifies the selection, distributed in 8 locations
@@ -55,31 +56,35 @@ export interface ISelectionWithStyle extends ISelection {
     style: Nullable<ISelectionStyle>;
 }
 
-export const NORMAL_SELECTION_PLUGIN_STYLE: ISelectionStyle = {
-    strokeWidth: 2,
-    stroke: '#409f11',
-    fill: 'rgba(0, 0, 0, 0.1)',
-    // widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
-    widgets: {},
-    widgetSize: 6,
-    widgetStrokeWidth: 1,
-    widgetStroke: 'rgb(255,255,255)',
+export function getNormalSelectionStyle(themeService: ThemeService): ISelectionStyle {
+    const style = themeService.getCurrentTheme();
+    const fill = new TinyColor(style.colorBlack).setAlpha(0.1).toString();
+    return {
+        strokeWidth: 2,
+        stroke: style.primaryColor,
+        fill,
+        // widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
+        widgets: {},
+        widgetSize: 6,
+        widgetStrokeWidth: 1,
+        widgetStroke: style.colorWhite,
 
-    hasAutoFill: true,
-    AutofillSize: 6,
-    AutofillStrokeWidth: 1,
-    AutofillStroke: 'rgb(255,255,255)',
+        hasAutoFill: true,
+        AutofillSize: 6,
+        AutofillStrokeWidth: 1,
+        AutofillStroke: style.colorWhite,
 
-    hasRowHeader: true,
-    rowHeaderFill: 'rgba(0, 0, 0, 0.1)',
-    rowHeaderStroke: '#409f11',
-    rowHeaderStrokeWidth: 1,
+        hasRowHeader: true,
+        rowHeaderFill: fill,
+        rowHeaderStroke: style.primaryColor,
+        rowHeaderStrokeWidth: 1,
 
-    hasColumnHeader: true,
-    columnHeaderFill: 'rgba(0, 0, 0, 0.1)',
-    columnHeaderStroke: '#409f11',
-    columnHeaderStrokeWidth: 1,
-};
+        hasColumnHeader: true,
+        columnHeaderFill: fill,
+        columnHeaderStroke: style.primaryColor,
+        columnHeaderStrokeWidth: 1,
+    };
+}
 
 export function convertSelectionDataToRange(
     selectionWithCoordAndStyle: ISelectionWithCoordAndStyle

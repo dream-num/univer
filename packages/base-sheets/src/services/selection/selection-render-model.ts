@@ -7,7 +7,7 @@ import {
     RANGE_TYPE,
 } from '@univerjs/core';
 
-export class SelectionTransformerModel implements IRangeWithCoord {
+export class SelectionRenderModel implements IRangeWithCoord {
     private _startColumn: number = -1;
 
     private _startRow: number = -1;

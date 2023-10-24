@@ -57,7 +57,7 @@ export interface ISelectionWithStyle extends ISelection {
 
 export const NORMAL_SELECTION_PLUGIN_STYLE: ISelectionStyle = {
     strokeWidth: 2,
-    stroke: 'rgb(1,136,251)',
+    stroke: '#409f11',
     fill: 'rgba(0, 0, 0, 0.1)',
     // widgets: { tl: true, tc: true, tr: true, ml: true, mr: true, bl: true, bc: true, br: true },
     widgets: {},
@@ -72,12 +72,12 @@ export const NORMAL_SELECTION_PLUGIN_STYLE: ISelectionStyle = {
 
     hasRowHeader: true,
     rowHeaderFill: 'rgba(0, 0, 0, 0.1)',
-    rowHeaderStroke: 'rgb(1,136,251)',
+    rowHeaderStroke: '#409f11',
     rowHeaderStrokeWidth: 1,
 
     hasColumnHeader: true,
     columnHeaderFill: 'rgba(0, 0, 0, 0.1)',
-    columnHeaderStroke: 'rgb(1,136,251)',
+    columnHeaderStroke: '#409f11',
     columnHeaderStrokeWidth: 1,
 };
 

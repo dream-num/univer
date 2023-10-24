@@ -1,8 +1,7 @@
 import { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
 
-import { COLORS, EVENT_TYPE } from '../Basics/Const';
+import { EVENT_TYPE } from '../Basics/Const';
 import { IMouseEvent, IPointerEvent } from '../Basics/IEvents';
-import { getColor } from '../Basics/Tools';
 import { Transform } from '../Basics/Transform';
 import { Vector2 } from '../Basics/Vector2';
 import { ThinScene } from '../ThinScene';
@@ -41,15 +40,15 @@ export class ScrollBar extends BaseScrollBar {
 
     thumbLengthRatio = 1;
 
-    thumbBackgroundColor = getColor(COLORS.black, 0.2);
+    thumbBackgroundColor = '#cccccc';
 
-    thumbHoverBackgroundColor = getColor(COLORS.black, 0.35);
+    thumbHoverBackgroundColor = '#b2b2b2';
 
-    thumbActiveBackgroundColor = getColor(COLORS.black, 0.4);
+    thumbActiveBackgroundColor = '#999999';
 
-    barBackgroundColor = getColor(COLORS.white);
+    barBackgroundColor = '#fff';
 
-    barBorderColor = getColor(COLORS.white);
+    barBorderColor = '#fff';
 
     constructor(view: Viewport, props?: IScrollBarProps) {
         super();

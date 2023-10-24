@@ -3,8 +3,6 @@ import {
     IMouseEvent,
     IPointerEvent,
     IRenderManagerService,
-    ISelectionTransformerShapeManager,
-    ISelectionWithStyle,
     Rect,
     ScrollTimer,
     Vector2,
@@ -23,13 +21,15 @@ import { Inject } from '@wendellhu/redi';
 
 import { getCoordByOffset, getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
+import { ISelectionWithStyle } from '../Basics/selection';
 import {
     IMoveColsCommandParams,
     IMoveRowsCommandParams,
     MoveColsCommand,
     MoveRowsCommand,
 } from '../commands/commands/move-rows-cols.command';
-import { SelectionManagerService } from '../services/selection-manager.service';
+import { SelectionManagerService } from '../services/selection/selection-manager.service';
+import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 const HEADER_MOVE_CONTROLLER_BACKGROUND = '__SpreadsheetHeaderMoveControllerBackground__';
@@ -111,8 +111,8 @@ export class HeaderMoveController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @ISelectionTransformerShapeManager
-        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager,
+        @ISelectionRenderService
+        private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
@@ -160,13 +160,13 @@ export class HeaderMoveController extends Disposable {
 
                 if (matchSelectionData === false) {
                     scene.resetCursor();
-                    this._selectionTransformerShapeManager.enableSelection();
+                    this._selectionRenderService.enableSelection();
                     return;
                 }
 
                 scene.setCursor(CURSOR_TYPE.GRAB);
 
-                this._selectionTransformerShapeManager.disableSelection();
+                this._selectionRenderService.disableSelection();
             })
         );
 
@@ -175,7 +175,7 @@ export class HeaderMoveController extends Disposable {
                 this._moveHelperBackgroundShape?.hide();
                 this._moveHelperLineShape?.hide();
                 scene.resetCursor();
-                this._selectionTransformerShapeManager.enableSelection();
+                this._selectionRenderService.enableSelection();
             })
         );
 
@@ -316,9 +316,7 @@ export class HeaderMoveController extends Disposable {
 
         const { startX: cellStartX, startY: cellStartY, endX: cellEndX, endY: cellEndY } = startCell;
 
-        const selectionWithCoord = this._selectionTransformerShapeManager.convertRangeDataToSelection(
-            matchSelectionData.range
-        );
+        const selectionWithCoord = this._selectionRenderService.convertRangeDataToSelection(matchSelectionData.range);
 
         if (selectionWithCoord == null) {
             return;

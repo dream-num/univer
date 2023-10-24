@@ -11,7 +11,10 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
+import {
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+} from '../../services/selection/selection-manager.service';
 import {
     ISetColHiddenMutationParams,
     ISetColVisibleMutationParams,

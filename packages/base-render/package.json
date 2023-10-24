@@ -44,7 +44,6 @@
         "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {
-        "@ctrl/tinycolor": "^4.0.2",
         "@univerjs/core": "workspace:^0.0.1",
         "@wendellhu/redi": "^0.12.8",
         "react": "^18.2.0",

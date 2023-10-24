@@ -1,12 +1,8 @@
-import {
-    DeviceInputEventType,
-    getCanvasOffsetByEngine,
-    IRenderManagerService,
-    ISelectionTransformerShapeManager,
-} from '@univerjs/base-render';
+import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/base-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     getSheetObject,
+    ISelectionRenderService,
     SelectionManagerService,
     SheetSkeletonManagerService,
 } from '@univerjs/base-sheets';
@@ -39,8 +35,8 @@ export class EditorBridgeController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionTransformerShapeManager
-        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager
+        @ISelectionRenderService
+        private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
 
@@ -83,7 +79,7 @@ export class EditorBridgeController extends Disposable {
 
             const { startRow, startColumn } = primary;
 
-            const primaryWithCoord = this._selectionTransformerShapeManager.convertCellRangeToInfo(primary);
+            const primaryWithCoord = this._selectionRenderService.convertCellRangeToInfo(primary);
 
             if (primaryWithCoord == null) {
                 return;
@@ -100,7 +96,7 @@ export class EditorBridgeController extends Disposable {
             let { startX, startY, endX, endY } = actualRangeWithCoord;
 
             const { scaleX, scaleY } = scene.getAncestorScale();
-            const scrollXY = scene.getScrollXY(this._selectionTransformerShapeManager.getViewPort());
+            const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
 
             startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY) - scrollXY.x * scaleX;
 

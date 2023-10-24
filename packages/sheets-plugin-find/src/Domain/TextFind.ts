@@ -1,5 +1,4 @@
-import { ISelectionTransformerShapeManager } from '@univerjs/base-render';
-import { SelectionManagerService } from '@univerjs/base-sheets';
+import { ISelectionRenderService, SelectionManagerService } from '@univerjs/base-sheets';
 import {
     FormatType,
     ICellData,
@@ -42,8 +41,8 @@ export class TextFinder {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionTransformerShapeManager
-        private readonly _selectionTransformerShapeManager: ISelectionTransformerShapeManager
+        @ISelectionRenderService
+        private readonly _selectionRenderService: ISelectionRenderService
     ) {}
 
     /**

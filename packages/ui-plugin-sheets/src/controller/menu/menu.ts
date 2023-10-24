@@ -1349,7 +1349,6 @@ export function InsertRangeMenuItemFactory(): IMenuSelectorItem<string> {
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insertCell',
         positions: [MenuPosition.CONTEXT_MENU],
-        selectType: SelectTypes.NEO,
     };
 }
 

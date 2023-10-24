@@ -9,7 +9,7 @@ import { Content, Footer, Header, Layout, Sider } from '../Components';
 import { Container } from '../Components/Container/Container';
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import style from './app.module.less';
-import { ContextMenu } from './components/contextmenu/contextmenu';
+import { ContextMenu } from './components/ContextMenu';
 import { DocBars } from './components/DocBars';
 import { themeInstance } from './theme';
 

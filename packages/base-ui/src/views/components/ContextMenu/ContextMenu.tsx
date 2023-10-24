@@ -15,7 +15,6 @@ export function ContextMenu(props: IProps) {
     const { children } = props;
 
     const [visible, setVisible] = useState(false);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
     const [menuType, setMenuType] = useState('');
 
     const context = useContext(RediContext);
@@ -45,6 +44,7 @@ export function ContextMenu(props: IProps) {
 
     function handleContextMenu(event: IMouseEvent, menuType: string) {
         event.preventDefault();
+
         setMenuType(menuType);
     }
 

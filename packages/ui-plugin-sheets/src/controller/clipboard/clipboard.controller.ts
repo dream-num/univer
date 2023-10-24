@@ -1,32 +1,47 @@
 import {
+    AddWorksheetMergeMutation,
+    getPrimaryForRange,
+    IAddWorksheetMergeMutationParams,
     IInsertColMutationParams,
     IInsertRowMutationParams,
     InsertColMutation,
     InsertRowMutation,
+    IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
+    ISetSelectionsOperationParams,
     ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowHeightMutationParams,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    RemoveMergeUndoMutationFactory,
+    RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    SetSelectionsOperation,
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/base-sheets';
-import { IMessageService, MessageType } from '@univerjs/base-ui';
+import { AddMergeUndoMutationFactory } from '@univerjs/base-sheets/commands/mutations/add-worksheet-merge.mutation.js';
+import { handleStringToStyle, IMessageService, MessageType, textTrim } from '@univerjs/base-ui';
 import {
     BooleanNumber,
+    DEFAULT_WORKSHEET_COLUMN_WIDTH,
+    DEFAULT_WORKSHEET_ROW_HEIGHT,
     Disposable,
+    handleStyleToString,
     ICellData,
     ICommandInfo,
     ICommandService,
     IConfigService,
     IRange,
+    IRowData,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
     ObjectArray,
     ObjectMatrix,
     OnLifecycle,
+    Rectangle,
     Worksheet,
-    WrapStrategy,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -37,9 +52,6 @@ import {
     ISheetClipboardHook,
     ISheetClipboardService,
 } from '../../services/clipboard/clipboard.service';
-
-// TODO: default row height from config?
-const DEFAULT_HEIGHT = 20;
 
 /**
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
@@ -99,36 +111,40 @@ export class SheetClipboardController extends Disposable {
                 // use worksheet.getStyle()
                 const range = currentSheet!.getRange(row, col);
                 const textStyle = range.getTextStyle();
-                const color = range.getFontColor();
-                const backgroundColor = range.getBackground();
+                // const color = range.getFontColor();
+                // const backgroundColor = range.getBackground();
 
                 let style = '';
-                if (color) {
-                    style += `color: ${color};`;
-                }
-                if (backgroundColor) {
-                    style += `background-color: ${backgroundColor};`;
-                }
-                if (textStyle?.bl) {
-                    style += 'font-weight: bold;';
-                }
-                if (textStyle?.fs) {
-                    style += `font-size: ${textStyle.fs}px;`;
-                }
-                if (textStyle?.tb === WrapStrategy.WRAP) {
-                    style += 'word-wrap: break-word;';
-                }
-                if (textStyle?.it) {
-                    style += 'font-style: italic;';
-                }
-                if (textStyle?.ff) {
-                    style += `font-family: ${textStyle.ff};`;
-                }
-                if (textStyle?.st) {
-                    style += 'text-decoration: line-through;';
-                }
-                if (textStyle?.ul) {
-                    style += 'text-decoration: underline';
+                // if (color) {
+                //     style += `color: ${color};`;
+                // }
+                // if (backgroundColor) {
+                //     style += `background-color: ${backgroundColor};`;
+                // }
+                // if (textStyle?.bl) {
+                //     style += 'font-weight: bold;';
+                // }
+                // if (textStyle?.fs) {
+                //     style += `font-size: ${textStyle.fs}px;`;
+                // }
+                // if (textStyle?.tb === WrapStrategy.WRAP) {
+                //     style += 'word-wrap: break-word;';
+                // }
+                // if (textStyle?.it) {
+                //     style += 'font-style: italic;';
+                // }
+                // if (textStyle?.ff) {
+                //     style += `font-family: ${textStyle.ff};`;
+                // }
+                // if (textStyle?.st) {
+                //     style += 'text-decoration: line-through;';
+                // }
+                // if (textStyle?.ul) {
+                //     style += 'text-decoration: underline';
+                // }
+
+                if (textStyle) {
+                    style = handleStyleToString(textStyle);
                 }
 
                 if (style) {
@@ -194,16 +210,34 @@ export class SheetClipboardController extends Disposable {
                 const addingRowsCount = range.endRow - maxRow;
                 const existingRowsCount = rowProperties.length - addingRowsCount;
                 if (addingRowsCount > 0) {
+                    const rowInfo = new ObjectArray<IRowData>();
+                    rowProperties.slice(existingRowsCount).forEach((property, index) => {
+                        const style = property.style;
+                        const cssTextArray = style.split(';');
+                        let height = DEFAULT_WORKSHEET_ROW_HEIGHT;
+
+                        cssTextArray.find((css) => {
+                            css = css.toLowerCase();
+                            const key = textTrim(css.substr(0, css.indexOf(':')));
+                            const value = textTrim(css.substr(css.indexOf(':') + 1));
+                            if (key === 'height') {
+                                height = parseFloat(value);
+                                return true;
+                            }
+                            return false;
+                        });
+
+                        rowInfo.set(index, {
+                            h: height,
+                            hd: BooleanNumber.FALSE,
+                        });
+                    });
+
                     const addRowMutation: IInsertRowMutationParams = {
                         workbookId: workbookId!,
                         worksheetId: worksheetId!,
                         ranges: [{ ...range, startRow: maxRow }],
-                        rowInfo: new ObjectArray(
-                            rowProperties.slice(existingRowsCount).map((property) => ({
-                                h: property.height ? +property.height : DEFAULT_HEIGHT,
-                                hd: BooleanNumber.FALSE,
-                            }))
-                        ),
+                        rowInfo,
                     };
                     redoMutations.push({
                         id: InsertRowMutation.id,
@@ -211,16 +245,34 @@ export class SheetClipboardController extends Disposable {
                     });
                 }
 
+                // get row height of existing rows
+                // TODO When Excel pasted, there was no width height, Do we still need to set the height?
+                const rowHeight = new ObjectArray<number>();
+                rowProperties.slice(0, existingRowsCount).forEach((property, index) => {
+                    const style = property.style;
+                    const cssTextArray = style.split(';');
+                    let height = DEFAULT_WORKSHEET_ROW_HEIGHT;
+
+                    cssTextArray.find((css) => {
+                        css = css.toLowerCase();
+                        const key = textTrim(css.substr(0, css.indexOf(':')));
+                        const value = textTrim(css.substr(css.indexOf(':') + 1));
+                        if (key === 'height') {
+                            height = parseFloat(value);
+                            return true;
+                        }
+                        return false;
+                    });
+
+                    rowHeight.set(index, height);
+                });
+
                 // apply row properties to the existing rows
                 const setRowPropertyMutation: ISetWorksheetRowHeightMutationParams = {
                     workbookId: workbookId!,
                     worksheetId: worksheetId!,
                     ranges: [{ ...range, endRow: Math.min(range.endRow, maxRow) }],
-                    rowHeight: new ObjectArray(
-                        rowProperties
-                            .slice(0, existingRowsCount)
-                            .map((property) => (property.height ? +property.height : DEFAULT_HEIGHT))
-                    ),
+                    rowHeight,
                 };
                 redoMutations.push({
                     id: SetWorksheetRowHeightMutation.id,
@@ -230,7 +282,7 @@ export class SheetClipboardController extends Disposable {
                 // TODO: add undo mutations but we cannot do it now because underlying mechanism is not ready
 
                 return {
-                    redos: [] || redoMutations,
+                    redos: redoMutations,
                     undos: [] || undoMutations,
                 };
             },
@@ -250,7 +302,7 @@ export class SheetClipboardController extends Disposable {
                         ranges: [{ ...range, startColumn: maxColumn }],
                         colInfo: new ObjectArray(
                             colProperties.slice(existingColsCount).map((property) => ({
-                                w: property.width ? +property.width : DEFAULT_HEIGHT,
+                                w: property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH,
                                 hd: BooleanNumber.FALSE,
                             }))
                         ),
@@ -260,7 +312,6 @@ export class SheetClipboardController extends Disposable {
                         params: addColMutation,
                     });
                 }
-
                 // apply row properties to the existing rows
                 const setRowPropertyMutation: ISetWorksheetColWidthMutationParams = {
                     workbookId: workbookId!,
@@ -269,7 +320,7 @@ export class SheetClipboardController extends Disposable {
                     colWidth: new ObjectArray(
                         colProperties
                             .slice(0, existingColsCount)
-                            .map((property) => (property.width ? +property.width : DEFAULT_HEIGHT))
+                            .map((property) => (property.width ? +property.width : DEFAULT_WORKSHEET_COLUMN_WIDTH))
                     ),
                 };
                 redoMutations.push({
@@ -280,7 +331,7 @@ export class SheetClipboardController extends Disposable {
                 // TODO: add undo mutations but we cannot do it now because underlying mechanism is not ready
 
                 return {
-                    redos: [] || redoMutations,
+                    redos: redoMutations,
                     undos: [] || undoMutations,
                 };
             },
@@ -305,22 +356,89 @@ export class SheetClipboardController extends Disposable {
         undos: ICommandInfo[];
     } {
         // insert cell style, insert cell content and insert merged cell info
-        // 1. merged cell (TODO)
+        // 1. merged cell
         // 2. raw content
-        // 3. cell style (TODO)
+        // 3. cell style
 
-        const { startColumn, startRow } = range;
+        const { startColumn, startRow, endColumn, endRow } = range;
         const valueMatrix = new ObjectMatrix<ICellData>();
+        const clearStyleMatrix = new ObjectMatrix<ICellData>();
+        const mergeRangeData: IRange[] = [];
         const redoMutationsInfo: ICommandInfo[] = [];
         const undoMutationsInfo: ICommandInfo[] = [];
+        let hasMerge = false;
 
         matrix.forValue((row, col, value) => {
+            // TODO@Dushusir Temporarily use handleStringToStyle. After all replication and paste function is completed, fix the handleStringToStyle method
+            const style = handleStringToStyle(undefined, value.properties.style);
+
+            // NOTE: When pasting, the original cell may contain a default style that is not explicitly carried, resulting in the failure to overwrite the style of the target cell.
+            // If the original cell has a style (lack of other default styles) or is undefined (all default styles), we need to clear the existing styles in the target area
+            // If the original cell style is "", it is to handle the situation where the target area contains merged cells. The style is not overwritten, only the value is overwritten. There is no need to clear the existing style of the target area.
+            if (value.properties.style !== '') {
+                clearStyleMatrix.setValue(row + startRow, col + startColumn, { s: null });
+            }
+
             valueMatrix.setValue(row + startRow, col + startColumn, {
                 v: value.content,
+                s: style,
             });
+
+            // rowspan and colspan to merge data
+            if (value.rowSpan) {
+                const colSpan = value.colSpan || 1;
+                const mergeRange = {
+                    startRow: startRow + row,
+                    endRow: startRow + row + value.rowSpan - 1,
+                    startColumn: startColumn + col,
+                    endColumn: startColumn + col + colSpan - 1,
+                };
+                mergeRangeData.push(mergeRange);
+                hasMerge = true;
+            } else if (value.colSpan) {
+                const rowSpan = value.rowSpan || 1;
+                const mergeRange = {
+                    startRow: startRow + row,
+                    endRow: startRow + row + rowSpan - 1,
+                    startColumn: startColumn + col,
+                    endColumn: startColumn + col + value.colSpan - 1,
+                };
+                mergeRangeData.push(mergeRange);
+                hasMerge = true;
+            }
         });
 
-        const setContentMutation: ISetRangeValuesMutationParams = {
+        const accessor = {
+            get: this._injector.get.bind(this._injector),
+        };
+
+        // clear style
+        if (clearStyleMatrix.getLength() > 0) {
+            const clearMutation: ISetRangeValuesMutationParams = {
+                range: [range],
+                worksheetId,
+                workbookId,
+                cellValue: clearStyleMatrix.getData(),
+            };
+            redoMutationsInfo.push({
+                id: SetRangeValuesMutation.id,
+                params: clearMutation,
+            });
+
+            // undo
+            const undoClearMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+                accessor,
+                clearMutation
+            );
+
+            undoMutationsInfo.push({
+                id: SetRangeValuesMutation.id,
+                params: undoClearMutation,
+            });
+        }
+
+        // set cell value and style
+        const setValuesMutation: ISetRangeValuesMutationParams = {
             workbookId,
             worksheetId,
             range: [range],
@@ -329,7 +447,119 @@ export class SheetClipboardController extends Disposable {
 
         redoMutationsInfo.push({
             id: SetRangeValuesMutation.id,
-            params: setContentMutation,
+            params: setValuesMutation,
+        });
+
+        // undo
+        const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+            accessor,
+            setValuesMutation
+        );
+
+        undoMutationsInfo.push({
+            id: SetRangeValuesMutation.id,
+            params: undoSetValuesMutation,
+        });
+
+        // remove current range's all merged Cell
+        if (hasMerge) {
+            // get all merged cells
+            const mergeData = this._getWorksheet(workbookId, worksheetId).getMergeData();
+            const mergedCellsInRange = mergeData.filter((rect) =>
+                Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
+            );
+
+            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+                workbookId,
+                worksheetId,
+                ranges: mergedCellsInRange,
+            };
+            redoMutationsInfo.push({
+                id: RemoveWorksheetMergeMutation.id,
+                params: removeMergeMutationParams,
+            });
+
+            const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+                accessor,
+                removeMergeMutationParams
+            );
+
+            undoMutationsInfo.push({
+                id: AddWorksheetMergeMutation.id,
+                params: undoRemoveMergeMutationParams,
+            });
+        }
+
+        // set merged cell info
+        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
+            workbookId,
+            worksheetId,
+            ranges: mergeRangeData,
+        };
+        redoMutationsInfo.push({
+            id: AddWorksheetMergeMutation.id,
+            params: addMergeMutationParams,
+        });
+
+        // undo
+        const undoAddMergeMutation: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
+            accessor,
+            addMergeMutationParams
+        );
+
+        undoMutationsInfo.push({
+            id: RemoveWorksheetMergeMutation.id,
+            params: undoAddMergeMutation,
+        });
+
+        // set selection
+        const worksheet = this._getWorksheet(workbookId, worksheetId);
+        // const destinationRange = {
+        //     startRow,
+        //     endRow: range.endRow - 1,
+        //     startColumn,
+        //     endColumn: range.endColumn - 1,
+        // };
+        const primaryCell = {
+            startRow,
+            endRow: startRow,
+            startColumn,
+            endColumn: startColumn,
+        };
+
+        const primary = getPrimaryForRange(primaryCell, worksheet);
+
+        const mainCell = matrix.getValue(0, 0);
+        const rowSpan = mainCell?.rowSpan || 1;
+        const colSpan = mainCell?.colSpan || 1;
+
+        if (rowSpan > 1 || colSpan > 1) {
+            const mergeRange = {
+                startRow,
+                endRow: startRow + rowSpan - 1,
+                startColumn,
+                endColumn: startColumn + colSpan - 1,
+            };
+
+            primary.startRow = mergeRange.startRow;
+            primary.endRow = mergeRange.endRow;
+            primary.startColumn = mergeRange.startColumn;
+            primary.endColumn = mergeRange.endColumn;
+
+            primary.isMerged = true;
+            primary.isMergedMainCell = true;
+        }
+
+        // selection does not require undo
+        const setSelectionsParam: ISetSelectionsOperationParams = {
+            workbookId,
+            worksheetId,
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            selections: [{ range, primary, style: null }],
+        };
+        redoMutationsInfo.push({
+            id: SetSelectionsOperation.id,
+            params: setSelectionsParam,
         });
 
         return {

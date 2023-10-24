@@ -127,7 +127,7 @@ export const ClearSelectionFormatCommand: ICommand = {
 };
 
 // Generate cellValue from range and set s to null
-function generateNullCellValue(range: IRange[]): ObjectMatrixPrimitiveType<ICellData> {
+export function generateNullCellValue(range: IRange[]): ObjectMatrixPrimitiveType<ICellData> {
     const cellValue = new ObjectMatrix<ICellData>();
     range.forEach((range: IRange) => {
         const { startRow, startColumn, endRow, endColumn } = range;

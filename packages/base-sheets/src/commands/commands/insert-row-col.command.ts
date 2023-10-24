@@ -381,7 +381,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             const count = endColumn - startColumn + 1;
             if (startColumn > merge.endColumn) {
                 continue;
-            } else if (endColumn <= merge.startColumn) {
+            } else if (startColumn <= merge.startColumn) {
                 merge.startColumn += count;
                 merge.endColumn += count;
             } else {

@@ -104,7 +104,7 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
                 if (typeof params.rowHeight === 'number') {
                     row.h = params.rowHeight;
                 } else {
-                    row.h = params.rowHeight.get(j) ?? defaultRowHeight;
+                    row.h = params.rowHeight.get(j - range.startRow) ?? defaultRowHeight;
                 }
             }
         }

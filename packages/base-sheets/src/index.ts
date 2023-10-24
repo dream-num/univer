@@ -18,6 +18,10 @@ export { getSheetObject } from './Basics/component-tools';
 
 export { type IInsertColMutationParams, type IInsertRowMutationParams } from './Basics/Interfaces/MutationInterface';
 export {
+    type IAddWorksheetMergeMutationParams,
+    type IRemoveWorksheetMergeMutationParams,
+} from './Basics/Interfaces/MutationInterface';
+export {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
@@ -106,6 +110,7 @@ export { SetWorksheetOrderCommand } from './commands/commands/set-worksheet-orde
 export { SetRowHeightCommand as SetWorksheetRowHeightCommand } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
 export { ChangeZoomRatioCommand, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
+export { getPrimaryForRange } from './commands/commands/utils/selection-util';
 export { AddWorksheetMergeMutation } from './commands/mutations/add-worksheet-merge.mutation';
 export {
     InsertColMutation,
@@ -118,6 +123,7 @@ export { MoveRowsMutation } from './commands/mutations/move-rows-cols.mutation';
 export { RemoveColMutation, RemoveRowMutation } from './commands/mutations/remove-row-col.mutation';
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
 export { RemoveWorksheetMergeMutation } from './commands/mutations/remove-worksheet-merge.mutation';
+export { RemoveMergeUndoMutationFactory } from './commands/mutations/remove-worksheet-merge.mutation';
 export { SetBorderStylesMutation } from './commands/mutations/set-border-styles.mutation';
 export { SetColHiddenMutation, SetColVisibleMutation } from './commands/mutations/set-col-visible.mutation';
 export { SetFrozenMutation } from './commands/mutations/set-frozen.mutation';
@@ -125,6 +131,7 @@ export type { ISetRangeStyleMutationParams } from './commands/mutations/set-rang
 export { SetRangeStyleMutation } from './commands/mutations/set-range-styles.mutation';
 export type { ISetRangeValuesMutationParams } from './commands/mutations/set-range-values.mutation';
 export { SetRangeValuesMutation } from './commands/mutations/set-range-values.mutation';
+export { SetRangeValuesUndoMutationFactory } from './commands/mutations/set-range-values.mutation';
 export { SetRowHiddenMutation, SetRowVisibleMutation } from './commands/mutations/set-row-visible.mutation';
 export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
 export { SetWorksheetActivateMutation } from './commands/mutations/set-worksheet-activate.mutation';
@@ -146,6 +153,7 @@ export {
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SetSelectionsOperation } from './commands/operations/selection.operation';
+export { type ISetSelectionsOperationParams } from './commands/operations/selection.operation';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export * from './Locale';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';

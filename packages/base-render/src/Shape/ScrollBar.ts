@@ -15,28 +15,6 @@ const MINI_THUMB_SIZE = 17;
 export class ScrollBar extends BaseScrollBar {
     protected _view!: Viewport;
 
-    private _barSize = 14;
-
-    private _barBorder = 1;
-
-    private _thumbMargin = 2;
-
-    private _thumbLengthRatio = 1;
-
-    private _thumbBackgroundColor = getColor(COLORS.black, 0.2);
-
-    private _thumbHoverBackgroundColor = getColor(COLORS.black, 0.35);
-
-    private _thumbActiveBackgroundColor = getColor(COLORS.black, 0.4);
-
-    private _barBackgroundColor = getColor(COLORS.white);
-
-    private _barBorderColor = getColor([218, 220, 224]);
-
-    private _enableHorizontal: boolean = true;
-
-    private _enableVertical: boolean = true;
-
     private _mainScene: Nullable<ThinScene>;
 
     private _lastX: number = -1;
@@ -54,6 +32,24 @@ export class ScrollBar extends BaseScrollBar {
     private _verticalPointerMoveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _verticalPointerUpObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+
+    barSize = 14;
+
+    barBorder = 1;
+
+    thumbMargin = 2;
+
+    thumbLengthRatio = 1;
+
+    thumbBackgroundColor = getColor(COLORS.black, 0.2);
+
+    thumbHoverBackgroundColor = getColor(COLORS.black, 0.35);
+
+    thumbActiveBackgroundColor = getColor(COLORS.black, 0.4);
+
+    barBackgroundColor = getColor(COLORS.white);
+
+    barBorderColor = getColor(COLORS.white);
 
     constructor(view: Viewport, props?: IScrollBarProps) {
         super();
@@ -86,17 +82,17 @@ export class ScrollBar extends BaseScrollBar {
         const transform = new Transform([1, 0, 0, 1, left, top]);
         const m = transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
-        if (this._enableHorizontal) {
+        if (this.enableHorizontal) {
             this.horizonBarRect!.render(ctx);
             this.horizonThumbRect!.translate(scrollX).render(ctx);
         }
 
-        if (this._enableVertical) {
+        if (this.enableVertical) {
             this.verticalBarRect!.render(ctx);
             this.verticalThumbRect!.translate(undefined, scrollY).render(ctx);
         }
 
-        if (this._enableHorizontal && this._enableVertical) {
+        if (this.enableHorizontal && this.enableVertical) {
             this.placeholderBarRect!.render(ctx);
         }
 
@@ -117,12 +113,12 @@ export class ScrollBar extends BaseScrollBar {
 
         this._resizeVertical(parentWidth, parentHeight, contentHeight);
 
-        if (this._enableHorizontal && this._enableVertical) {
+        if (this.enableHorizontal && this.enableVertical) {
             this.placeholderBarRect?.transformByState({
-                left: parentWidth - this._barSize,
-                top: parentHeight - this._barSize,
-                width: this._barSize - this._barBorder,
-                height: this._barSize - this._barBorder,
+                left: parentWidth - this.barSize,
+                top: parentHeight - this.barSize,
+                width: this.barSize - this.barBorder,
+                height: this.barSize - this.barBorder,
             });
         }
     }
@@ -139,10 +135,6 @@ export class ScrollBar extends BaseScrollBar {
 
     makeViewDirty(state: boolean) {
         this._view.makeDirty(state, true);
-    }
-
-    get barSize() {
-        return this._barSize;
     }
 
     override pick(coord: Vector2) {
@@ -177,22 +169,22 @@ export class ScrollBar extends BaseScrollBar {
 
         themeKeys.forEach((key) => {
             if (props[key as keyof IScrollBarProps] !== undefined) {
-                (this as IKeyValue)[`_${key}`] = props[key as keyof IScrollBarProps];
+                (this as IKeyValue)[`${key}`] = props[key as keyof IScrollBarProps];
             }
         });
     }
 
     private _resizeHorizontal(parentWidth: number, parentHeight: number, contentWidth: number) {
         // ratioScrollY = 内容可视区高度/内容实际区高度= 滑动条的高度/滑道高度=滚动条的顶部距离/实际内容区域顶部距离；
-        if (!this._enableHorizontal) {
+        if (!this.enableHorizontal) {
             return;
         }
 
         this.horizontalMinusMiniThumb = 0;
-        this.horizontalBarWidth = parentWidth - this._barSize;
+        this.horizontalBarWidth = parentWidth - (this.enableVertical ? this.barSize : 0) - this.barBorder;
         this.horizontalThumbWidth =
-            ((this.horizontalBarWidth * (this.horizontalBarWidth - this._barBorder)) / contentWidth) *
-            this._thumbLengthRatio;
+            ((this.horizontalBarWidth * (this.horizontalBarWidth - this.barBorder)) / contentWidth) *
+            this.thumbLengthRatio;
 
         // this._horizontalThumbWidth = this._horizontalThumbWidth < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._horizontalThumbWidth;
         if (this.horizontalThumbWidth < MINI_THUMB_SIZE) {
@@ -202,9 +194,9 @@ export class ScrollBar extends BaseScrollBar {
 
         this.horizonBarRect?.transformByState({
             left: 0,
-            top: parentHeight - this._barSize,
+            top: parentHeight - this.barSize,
             width: this.horizontalBarWidth,
-            height: this._barSize - this._barBorder,
+            height: this.barSize - this.barBorder,
         });
 
         if (this.horizontalThumbWidth >= parentWidth) {
@@ -220,22 +212,22 @@ export class ScrollBar extends BaseScrollBar {
 
             this.horizonThumbRect?.transformByState({
                 left: this._view.scrollX,
-                top: parentHeight - this._barSize + this._thumbMargin,
+                top: parentHeight - this.barSize + this.thumbMargin,
                 width: this.horizontalThumbWidth,
-                height: this._barSize - this._thumbMargin * 2,
+                height: this.barSize - this.thumbMargin * 2,
             });
         }
     }
 
     private _resizeVertical(parentWidth: number, parentHeight: number, contentHeight: number) {
-        if (!this._enableVertical) {
+        if (!this.enableVertical) {
             return;
         }
 
         this.verticalMinusMiniThumb = 0;
-        this.verticalBarHeight = parentHeight - this._barSize - this._barBorder;
+        this.verticalBarHeight = parentHeight - (this.enableHorizontal ? this.barSize : 0) - this.barBorder;
         this.verticalThumbHeight =
-            ((this.verticalBarHeight * this.verticalBarHeight) / contentHeight) * this._thumbLengthRatio;
+            ((this.verticalBarHeight * this.verticalBarHeight) / contentHeight) * this.thumbLengthRatio;
         // this._verticalThumbHeight = this._verticalThumbHeight < MINI_THUMB_SIZE ? MINI_THUMB_SIZE : this._verticalThumbHeight;
         if (this.verticalThumbHeight < MINI_THUMB_SIZE) {
             this.verticalMinusMiniThumb = MINI_THUMB_SIZE - this.verticalThumbHeight;
@@ -243,9 +235,9 @@ export class ScrollBar extends BaseScrollBar {
         }
 
         this.verticalBarRect?.transformByState({
-            left: parentWidth - this._barSize,
+            left: parentWidth - this.barSize,
             top: 0,
-            width: this._barSize - this._barBorder,
+            width: this.barSize - this.barBorder,
             height: this.verticalBarHeight,
         });
 
@@ -261,46 +253,46 @@ export class ScrollBar extends BaseScrollBar {
             }
 
             this.verticalThumbRect?.transformByState({
-                left: parentWidth - this._barSize + this._thumbMargin,
+                left: parentWidth - this.barSize + this.thumbMargin,
                 top: this._view.scrollY,
-                width: this._barSize - this._thumbMargin * 2,
+                width: this.barSize - this.thumbMargin * 2,
                 height: this.verticalThumbHeight,
             });
         }
     }
 
     private _initialScrollRect() {
-        if (this._enableHorizontal) {
+        if (this.enableHorizontal) {
             this.horizonBarRect = new Rect('__horizonBarRect__', {
-                fill: this._barBackgroundColor!,
-                strokeWidth: this._barBorder,
-                stroke: this._barBorderColor!,
+                fill: this.barBackgroundColor!,
+                strokeWidth: this.barBorder,
+                stroke: this.barBorderColor!,
             });
 
             this.horizonThumbRect = new Rect('__horizonThumbRect__', {
                 radius: 6,
-                fill: this._thumbBackgroundColor!,
+                fill: this.thumbBackgroundColor!,
             });
         }
 
-        if (this._enableVertical) {
+        if (this.enableVertical) {
             this.verticalBarRect = new Rect('__verticalBarRect__', {
-                fill: this._barBackgroundColor!,
-                strokeWidth: this._barBorder,
-                stroke: this._barBorderColor!,
+                fill: this.barBackgroundColor!,
+                strokeWidth: this.barBorder,
+                stroke: this.barBorderColor!,
             });
 
             this.verticalThumbRect = new Rect('__verticalThumbRect__', {
                 radius: 6,
-                fill: this._thumbBackgroundColor!,
+                fill: this.thumbBackgroundColor!,
             });
         }
 
-        if (this._enableHorizontal && this._enableVertical) {
+        if (this.enableHorizontal && this.enableVertical) {
             this.placeholderBarRect = new Rect('__placeholderBarRect__', {
-                fill: this._barBackgroundColor!,
-                strokeWidth: this._barBorder,
-                stroke: this._barBorderColor!,
+                fill: this.barBackgroundColor!,
+                strokeWidth: this.barBorder,
+                stroke: this.barBorderColor!,
             });
         }
 
@@ -309,7 +301,7 @@ export class ScrollBar extends BaseScrollBar {
     }
 
     private _initialVerticalEvent() {
-        if (!this._enableVertical) {
+        if (!this.enableVertical) {
             return;
         }
 
@@ -317,11 +309,11 @@ export class ScrollBar extends BaseScrollBar {
 
         this.verticalThumbRect?.on(
             EVENT_TYPE.PointerEnter,
-            this._hoverFunc(this._thumbHoverBackgroundColor!, this.verticalThumbRect)
+            this._hoverFunc(this.thumbHoverBackgroundColor!, this.verticalThumbRect)
         );
         this.verticalThumbRect?.on(
             EVENT_TYPE.PointerLeave,
-            this._hoverFunc(this._thumbBackgroundColor!, this.verticalThumbRect)
+            this._hoverFunc(this.thumbBackgroundColor!, this.verticalThumbRect)
         );
 
         // 垂直滚动条槽的点击滚动事件
@@ -342,7 +334,7 @@ export class ScrollBar extends BaseScrollBar {
             this._lastY = e.offsetY;
             // srcElement.fill = this._thumbHoverBackgroundColor!;
             srcElement?.setProps({
-                fill: this._thumbActiveBackgroundColor!,
+                fill: this.thumbActiveBackgroundColor!,
             });
             mainScene.disableEvent();
             this.makeViewDirty(true);
@@ -365,7 +357,7 @@ export class ScrollBar extends BaseScrollBar {
             // srcElement.fill = this._thumbBackgroundColor!;
             mainScene.enableEvent();
             srcElement?.setProps({
-                fill: this._thumbBackgroundColor!,
+                fill: this.thumbBackgroundColor!,
             });
             // srcElement.makeDirty(true);
             this.makeViewDirty(true);
@@ -389,7 +381,7 @@ export class ScrollBar extends BaseScrollBar {
     }
 
     private _initialHorizontalEvent() {
-        if (!this._enableHorizontal) {
+        if (!this.enableHorizontal) {
             return;
         }
 
@@ -397,11 +389,11 @@ export class ScrollBar extends BaseScrollBar {
 
         this.horizonThumbRect?.on(
             EVENT_TYPE.PointerEnter,
-            this._hoverFunc(this._thumbHoverBackgroundColor!, this.horizonThumbRect)
+            this._hoverFunc(this.thumbHoverBackgroundColor!, this.horizonThumbRect)
         );
         this.horizonThumbRect?.on(
             EVENT_TYPE.PointerLeave,
-            this._hoverFunc(this._thumbBackgroundColor!, this.horizonThumbRect)
+            this._hoverFunc(this.thumbBackgroundColor!, this.horizonThumbRect)
         );
 
         // 水平滚动条槽的点击滚动事件
@@ -421,7 +413,7 @@ export class ScrollBar extends BaseScrollBar {
             this._lastY = e.offsetY;
             // this.fill = this._thumbHoverBackgroundColor!;
             this.horizonThumbRect?.setProps({
-                fill: this._thumbActiveBackgroundColor!,
+                fill: this.thumbActiveBackgroundColor!,
             });
             this.makeViewDirty(true);
             mainScene.disableEvent();
@@ -444,7 +436,7 @@ export class ScrollBar extends BaseScrollBar {
             mainScene.enableEvent();
             // srcElement.fill = this._thumbBackgroundColor!;
             srcElement?.setProps({
-                fill: this._thumbBackgroundColor!,
+                fill: this.thumbBackgroundColor!,
             });
             // srcElement.makeDirty(true);
             this.makeViewDirty(true);

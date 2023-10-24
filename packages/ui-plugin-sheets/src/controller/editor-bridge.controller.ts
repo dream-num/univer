@@ -163,6 +163,17 @@ export class EditorBridgeController extends Disposable {
             this._commandService.executeCommand(SetCellEditOperation.id, {
                 visible: false,
             });
+
+            /**
+             * Hiding the editor triggers a SetRangeValuesMutation which saves the content.
+             * This mutation, in turn, triggers a refresh of the skeleton,
+             * causing the selection to update. In most scenarios,
+             * this update is reasonable. However, when clicking on another cell and exiting the edit,
+             * this causes the selection to be reset. Therefore,
+             * a makeDirty method has been added here to block the refresh of selection.
+             * The reason for using setTimeout is that it needs to wait for the process
+             * to finish before allowing the refresh of the selection.
+             */
             setTimeout(() => {
                 this._selectionManagerService.makeDirty(true);
             }, 0);

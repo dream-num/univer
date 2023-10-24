@@ -22,6 +22,10 @@ export interface IScrollBarProps {
 }
 
 export class BaseScrollBar {
+    enableHorizontal: boolean = true;
+
+    enableVertical: boolean = true;
+
     horizontalThumbWidth: number = 0;
 
     horizontalMinusMiniThumb: number = 0;
@@ -59,7 +63,11 @@ export class BaseScrollBar {
     }
 
     get ratioScrollX(): number {
-        if (this.horizontalThumbWidth === undefined || this.horizontalBarWidth === undefined) {
+        if (
+            this.enableHorizontal === false ||
+            this.horizontalThumbWidth === undefined ||
+            this.horizontalBarWidth === undefined
+        ) {
             return 1;
         }
         return (
@@ -69,7 +77,11 @@ export class BaseScrollBar {
     }
 
     get ratioScrollY(): number {
-        if (this.verticalThumbHeight === undefined || this.verticalBarHeight === undefined) {
+        if (
+            this.enableVertical === false ||
+            this.verticalThumbHeight === undefined ||
+            this.verticalBarHeight === undefined
+        ) {
             return 1;
         }
         return (

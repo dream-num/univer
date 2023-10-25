@@ -149,7 +149,7 @@ export const DeltaRowHeightCommand: ICommand = {
             return true;
         }
 
-        return true;
+        return false;
     },
 };
 
@@ -249,17 +249,16 @@ export const SetRowHeightCommand: ICommand = {
             return true;
         }
 
-        return true;
+        return false;
     },
 };
 
 export interface ISetRowAutoHeightCommandParams {}
 
-export const SetRowAutoHeightCommand: ICommand = {
+export const SetRowIsAutoHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-is-auto-height',
     handler: async (accessor: IAccessor) => {
-        console.log('SetRowAutoHeightCommand');
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SelectionManagerService);
@@ -289,7 +288,7 @@ export const SetRowAutoHeightCommand: ICommand = {
         );
 
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
-            id: SetRowAutoHeightCommand.id,
+            id: SetRowIsAutoHeightCommand.id,
             params: redoMutationParams,
         });
 

@@ -3,7 +3,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { ISetStyleParams, SetStyleCommand } from '../commands/commands/set-style.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
-import { SetRowAutoHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
+import { SetRowIsAutoHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
 import { ISetWorksheetColWidthMutationParams } from '../commands/mutations/set-worksheet-col-width.mutation';
 import {
     ISetWorksheetRowAutoHeightMutationParams,
@@ -73,7 +73,7 @@ export class AutoHeightController {
         // for intercept 'sheet.command.set-row-is-auto-height' command.
         sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetWorksheetRowIsAutoHeightMutationParams }) => {
-                if (command.id !== SetRowAutoHeightCommand.id) {
+                if (command.id !== SetRowIsAutoHeightCommand.id) {
                     return {
                         redos: [],
                         undos: [],

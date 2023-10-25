@@ -1,5 +1,5 @@
 import { IRowAutoHeightInfo } from '@univerjs/base-render';
-import { CommandType, IMutation, IRange, IUniverInstanceService, ObjectArray } from '@univerjs/core';
+import { CommandType, IMutation, IRange, IUniverInstanceService, Nullable, ObjectArray } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 const MAXIMUM_ROW_HEIGHT = 2000;
@@ -15,7 +15,7 @@ export interface ISetWorksheetRowIsAutoHeightMutationParams {
     workbookId: string;
     worksheetId: string;
     ranges: IRange[];
-    autoHeightInfo: boolean | ObjectArray<boolean | undefined>;
+    autoHeightInfo: boolean | ObjectArray<Nullable<boolean>>;
 }
 
 export interface ISetWorksheetRowAutoHeightMutationParams {
@@ -67,7 +67,7 @@ export const SetWorksheetRowIsAutoHeightMutationFactory = (
     const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
     const worksheet = workbook!.getSheetBySheetId(worksheetId);
 
-    const autoHeightInfo = new ObjectArray<boolean | undefined>();
+    const autoHeightInfo = new ObjectArray<Nullable<boolean>>();
     const manager = worksheet!.getRowManager();
 
     for (const { startRow, endRow } of ranges) {

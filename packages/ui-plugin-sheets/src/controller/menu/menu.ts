@@ -47,7 +47,7 @@ import {
     SetWorksheetRowHeightCommand,
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
-import { SetRowAutoHeightCommand } from '@univerjs/base-sheets/commands/commands/set-worksheet-row-height.command.js';
+import { SetRowIsAutoHeightCommand } from '@univerjs/base-sheets/commands/commands/set-worksheet-row-height.command.js';
 import {
     ColorPicker,
     CopyCommand,
@@ -1113,7 +1113,7 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
 
 export function FitContentMenuItemFactory(): IMenuButtonItem {
     return {
-        id: SetRowAutoHeightCommand.id,
+        id: SetRowIsAutoHeightCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.fitContent',

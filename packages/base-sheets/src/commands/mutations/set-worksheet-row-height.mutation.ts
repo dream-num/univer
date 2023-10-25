@@ -162,7 +162,7 @@ export const SetWorksheetRowIsAutoHeightMutation: IMutation<ISetWorksheetRowIsAu
             return false;
         }
 
-        const defaultRowIsAutoHeight = true;
+        const defaultRowIsAutoHeight = undefined;
         const manager = worksheet.getRowManager();
 
         for (const { startRow, endRow } of ranges) {

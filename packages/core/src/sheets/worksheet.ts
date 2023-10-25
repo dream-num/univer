@@ -155,6 +155,7 @@ export class Worksheet {
                 return range;
             }
         }
+
         return null;
     }
 
@@ -248,6 +249,7 @@ export class Worksheet {
      */
     getStatus() {
         const { _snapshot: _config } = this;
+
         return _config.status;
     }
 
@@ -282,6 +284,7 @@ export class Worksheet {
     getMaxColumns(): number {
         const { _snapshot: _config } = this;
         const { columnCount } = _config;
+
         return columnCount;
     }
 
@@ -292,6 +295,7 @@ export class Worksheet {
     getMaxRows(): number {
         const { _snapshot: _config } = this;
         const { rowCount } = _config;
+
         return rowCount;
     }
 
@@ -339,6 +343,7 @@ export class Worksheet {
         if (showGridlines === 0) {
             return true;
         }
+
         return false;
     }
 
@@ -349,6 +354,7 @@ export class Worksheet {
     getTabColor(): Nullable<string> {
         const { _snapshot: _config } = this;
         const { tabColor } = _config;
+
         return tabColor;
     }
 
@@ -378,6 +384,7 @@ export class Worksheet {
         const lastColumn = this.getMaxColumns() - 1;
         const ranges = this._rowManager.getHiddenRows(start, end);
         ranges.forEach((range) => (range.endColumn = lastColumn));
+
         return ranges;
     }
 
@@ -389,6 +396,7 @@ export class Worksheet {
         const lastRow = this.getMaxRows() - 1;
         const ranges = this._columnManager.getHiddenCols(start, end);
         ranges.forEach((range) => (range.endRow = lastRow));
+
         return ranges;
     }
 
@@ -399,6 +407,7 @@ export class Worksheet {
     isRightToLeft(): BooleanNumber {
         const { _snapshot: _config } = this;
         const { rightToLeft } = _config;
+
         return rightToLeft;
     }
 

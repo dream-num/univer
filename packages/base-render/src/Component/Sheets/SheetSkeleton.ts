@@ -34,7 +34,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 
-import { BORDER_TYPE, COLOR_BLACK_RGB, ORIENTATION_TYPE } from '../../Basics/Const';
+import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT, ORIENTATION_TYPE } from '../../Basics/Const';
 import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../Basics/Draw';
 import { IDocumentSkeletonColumn } from '../../Basics/IDocumentSkeletonCached';
 import {
@@ -369,7 +369,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         const results: IRowAutoHeightInfo[] = [];
-        const { mergeData } = this._config;
+        const { mergeData, rowData } = this._config;
+        const rowObjectArray = Tools.createObjectArray(rowData);
 
         for (const range of ranges) {
             const { startRow, endRow, startColumn, endColumn } = range;
@@ -377,6 +378,11 @@ export class SpreadsheetSkeleton extends Skeleton {
             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
                 // If the row has already been calculated, it does not need to be calculated
                 if (results.some(({ row }) => row === rowIndex)) {
+                    continue;
+                }
+
+                // The row sets isAutoHeight to false, and there is no need to calculate the automatic row height for the row.
+                if (rowObjectArray.get(rowIndex)?.isAutoHeight === false) {
                     continue;
                 }
 
@@ -439,7 +445,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             height = Math.max(height, h);
         }
 
-        return height;
+        return Math.min(height, MAXIMUM_ROW_HEIGHT);
     }
 
     updateLayout() {

@@ -99,6 +99,7 @@ import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-o
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
+    SetWorksheetRowIsAutoHeightMutation,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
 
 export interface IStyleTypeValue<T> {
@@ -159,6 +160,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetRowAutoHeightCommand,
             SetRowHeightCommand,
             SetWorksheetRowHeightMutation,
+            SetWorksheetRowIsAutoHeightMutation,
             SetWorksheetRowAutoHeightMutation,
             SetRowHiddenCommand,
             SetRowHiddenMutation,

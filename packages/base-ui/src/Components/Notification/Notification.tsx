@@ -69,9 +69,9 @@ export const PureContent = (props: INotificationMethodOptions) => {
         [styles.notificationContentEllipsis]: lines !== 0,
     });
 
-    const contentElement = (
+    return (
         <>
-            <span className={`${styles.notificationIcon}`}>{iconMap[type]}</span>
+            <span className={styles.notificationIcon}>{iconMap[type]}</span>
             <div className={styles.notificationContentContainer}>
                 <span className={styles.notificationTitle}>{title}</span>
                 <span className={contentClassName} style={{ WebkitLineClamp: lines }}>
@@ -80,8 +80,6 @@ export const PureContent = (props: INotificationMethodOptions) => {
             </div>
         </>
     );
-
-    return contentElement;
 };
 
 export function Notification(props: INotificationProps) {
@@ -111,9 +109,9 @@ export function Notification(props: INotificationProps) {
                         lines={options.lines}
                     />
                 ),
-                placement: options.placement || 'topRight',
-                duration: options.duration || 4.5,
-                closable: options.closable || true,
+                placement: options.placement ?? 'topRight',
+                duration: options.duration ?? 4.5,
+                closable: options.closable ?? true,
             });
         });
 

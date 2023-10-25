@@ -1,0 +1,185 @@
+@import '../../Basics/CSS/Skin/default.module.less';
+
+@width: 280px;
+
+.notification {
+    position: fixed;
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+    box-sizing: border-box;
+    justify-content: center;
+    margin: var(--margin-xs) 0;
+
+    &-notice {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--padding-lg);
+        font-size: var(--font-size-lg);
+        background-color: rgb(var(--color-white));
+        border-radius: var(--border-radius-base);
+        box-shadow: var(--box-shadow-lg);
+        gap: var(--margin-xs);
+        width: @width;
+
+        &-wrapper {
+            margin: var(--margin-xs) var(--margin-base);
+        }
+
+        &-content {
+            display: inline-flex;
+            align-items: center;
+            align-items: flex-start;
+            gap: var(--margin-xs);
+        }
+
+        &-close {
+            color: rgb(var(--text-color-secondary));
+
+            cursor: pointer;
+            outline: none;
+            width: fit-content;
+            height: fit-content;
+            padding: var(--padding-xs);
+            border-radius: var(--border-radius-base);
+            transition: background-color .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+                background-color: rgb(var(--bg-color-hover));
+            }
+        }
+    }
+
+    &-icon {
+        padding: var(--padding-xs);
+
+        &-success {
+            color: rgb(var(--success-color));
+        }
+
+        &-info {
+            color: rgb(var(--info-color));
+        }
+
+        &-warning {
+            color: rgb(var(--warning-color));
+        }
+
+        &-error {
+            color: rgb(var(--error-color));
+        }
+    }
+
+    &-content-container {
+
+        display: inline-flex;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: var(--margin-xs);
+        padding-top: var(--padding-xs);
+    }
+
+    &-title {
+        color: rgb(var(--text-color));
+    }
+
+    &-content {
+        color: rgb(var(--text-color-secondary));
+
+        &-ellipsis {
+            // Omit beyond the specified number of lines
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    // Position
+    &-top,
+    &-topLeft,
+    &-topRight {
+        top: 0;
+    }
+
+    &-bottom,
+    &-bottomRight,
+    &-bottomLeft {
+        bottom: 0;
+    }
+
+    &-bottomRight,
+    &-topRight {
+        right: 0;
+    }
+
+    // Animation
+      &-fade {
+        overflow: hidden;
+        transition: all 0.3s;
+      }
+    
+      &-fade-appear-prepare {
+        opacity: 0;
+      }
+    
+      &-fade-appear-start {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    
+      &-fade-appear-active {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    
+      .fade-effect() {
+        animation-duration: 0.3s;
+        animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+        animation-fill-mode: both;
+      }
+    
+      &-fade-appear,
+      &-fade-enter {
+        opacity: 0;
+        animation-play-state: paused;
+        .fade-effect();
+      }
+    
+      &-fade-leave {
+        .fade-effect();
+        animation-play-state: paused;
+      }
+    
+      &-fade-appear&-fade-appear-active,
+      &-fade-enter&-fade-enter-active {
+        animation-name: notificationFadeIn;
+        animation-play-state: running;
+      }
+    
+      &-fade-leave&-fade-leave-active {
+        animation-name: notificationFadeOut;
+        animation-play-state: running;
+      }
+    
+      @keyframes notificationFadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+    
+      @keyframes notificationFadeOut {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+}

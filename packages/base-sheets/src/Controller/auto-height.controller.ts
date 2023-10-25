@@ -104,7 +104,7 @@ export class AutoHeightController {
                     };
                 }
 
-                const selections = selectionManagerService.getRangeDatas();
+                const selections = selectionManagerService.getSelectionRanges();
 
                 if (!selections?.length) {
                     return {

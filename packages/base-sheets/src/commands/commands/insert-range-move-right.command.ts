@@ -60,7 +60,7 @@ export const InsertRangeMoveRightCommand: ICommand = {
 
         const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        const range = selectionManagerService.getRangeDatas();
+        const range = selectionManagerService.getSelectionRanges();
         if (!range?.length) return false;
 
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);

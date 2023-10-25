@@ -34,7 +34,7 @@ export const SetRangeFormattedValueCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const ranges = selectionManagerService.getRangeDatas();
+        const ranges = selectionManagerService.getSelectionRanges();
         if (!ranges?.length) {
             return false;
         }

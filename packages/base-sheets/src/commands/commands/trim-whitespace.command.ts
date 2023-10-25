@@ -29,7 +29,7 @@ export const TrimWhitespaceCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const selections = selectionManagerService.getRangeDatas();
+        const selections = selectionManagerService.getSelectionRanges();
         if (!selections?.length) return false;
 
         const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();

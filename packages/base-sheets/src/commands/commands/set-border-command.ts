@@ -93,7 +93,7 @@ export const SetBorderCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const borderStyleManagerService = accessor.get(BorderStyleManagerService);
 
-        const selections = selectionManagerService.getRangeDatas();
+        const selections = selectionManagerService.getSelectionRanges();
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const workbookId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();

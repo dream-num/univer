@@ -59,7 +59,7 @@ export const SetBorderCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
 
-        const range = params.range || selectionManagerService.getRangeDatas()?.[0];
+        const range = params.range || selectionManagerService.getSelectionRanges()?.[0];
         if (!range) {
             return false;
         }

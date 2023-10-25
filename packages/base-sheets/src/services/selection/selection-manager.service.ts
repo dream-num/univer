@@ -73,8 +73,8 @@ export class SelectionManagerService implements IDisposable {
         if (this._currentSelection == null) {
             return;
         }
-        this._currentSelection.pluginName = NORMAL_SELECTION_PLUGIN_NAME;
 
+        this._currentSelection.pluginName = NORMAL_SELECTION_PLUGIN_NAME;
         this.refresh(this._currentSelection);
     }
 
@@ -91,6 +91,7 @@ export class SelectionManagerService implements IDisposable {
         if (this._currentSelection == null) {
             return;
         }
+
         this.refresh(this._currentSelection);
     }
 
@@ -120,22 +121,13 @@ export class SelectionManagerService implements IDisposable {
         return this._getSelectionDatas(this._currentSelection);
     }
 
-    /** @deprecated use `getSelections` instead */
-    getRangeDatas(): Nullable<IRange[]> {
+    getSelectionRanges(): Nullable<IRange[]> {
         const selectionDataList = this.getSelections();
         if (selectionDataList == null) {
             return;
         }
-        return selectionDataList.map((selectionData: ISelectionWithStyle) => {
-            const range = selectionData.range;
-            const { startRow, startColumn, endRow, endColumn } = range;
-            return {
-                startRow,
-                startColumn,
-                endRow,
-                endColumn,
-            };
-        });
+
+        return selectionDataList.map((selectionData: ISelectionWithStyle) => selectionData.range);
     }
 
     getFirst(): Readonly<Nullable<ISelectionWithStyle>> {

@@ -227,7 +227,7 @@ export class HeaderMenuController extends Disposable {
 
             const currentColumn = this._currentColumn;
 
-            const currentSelectionDatas = this._selectionManagerService.getRangeDatas();
+            const currentSelectionDatas = this._selectionManagerService.getSelectionRanges();
 
             const selectedSelection = currentSelectionDatas?.find((data) => {
                 const { startRow, startColumn, endRow, endColumn } = data;

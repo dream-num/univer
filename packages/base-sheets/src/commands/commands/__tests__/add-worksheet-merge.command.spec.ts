@@ -76,11 +76,15 @@ describe('Test style commands', () => {
 
                 expect(getMerge()?.length).toBe(0);
                 expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
-                expect(getMerge()).toStrictEqual([{ startRow: 0, startColumn: 0, endRow: 5, endColumn: 5 }]);
+                expect(getMerge()).toStrictEqual([
+                    { startRow: 0, startColumn: 0, endRow: 5, endColumn: 5, rangeType: RANGE_TYPE.NORMAL },
+                ]);
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getMerge()?.length).toBe(0);
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                expect(getMerge()).toStrictEqual([{ startRow: 0, startColumn: 0, endRow: 5, endColumn: 5 }]);
+                expect(getMerge()).toStrictEqual([
+                    { startRow: 0, startColumn: 0, endRow: 5, endColumn: 5, rangeType: RANGE_TYPE.NORMAL },
+                ]);
             });
         });
 
@@ -119,7 +123,12 @@ describe('Test style commands', () => {
                 expect(getMerge()?.length).toBe(0);
                 expect(await commandService.executeCommand(AddWorksheetMergeVerticalCommand.id)).toBeTruthy();
                 expect(getMerge()?.length).toBe(6);
-                expect(getMerge()?.[0]).toStrictEqual({ startRow: 0, startColumn: 0, endColumn: 0, endRow: 5 });
+                expect(getMerge()?.[0]).toStrictEqual({
+                    startRow: 0,
+                    startColumn: 0,
+                    endColumn: 0,
+                    endRow: 5,
+                });
             });
         });
 

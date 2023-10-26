@@ -282,8 +282,6 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const undoMutationParams: ISetWorksheetRowIsAutoHeightMutationParams =
             SetWorksheetRowIsAutoHeightMutationFactory(accessor, redoMutationParams);
 
-        console.log(undoMutationParams);
-
         const setIsAutoHeightResult = commandService.executeCommand(
             SetWorksheetRowIsAutoHeightMutation.id,
             redoMutationParams

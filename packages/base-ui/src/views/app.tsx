@@ -48,7 +48,7 @@ export function App(props: IUniverAppProps) {
     const [locale, setLocale] = useState<LocaleType>(localeService.getLocale().getCurrentLocale());
 
     useEffect(() => {
-        const listeners = [
+        const subscriptions = [
             localeService.getLocale().locale$.subscribe((locale) => {
                 locale && setLocale(locale);
             }),
@@ -59,7 +59,7 @@ export function App(props: IUniverAppProps) {
 
         return () => {
             // batch unsubscribe
-            listeners.forEach((listener) => listener.unsubscribe());
+            subscriptions.forEach((subscription) => subscription.unsubscribe());
         };
     }, []);
 

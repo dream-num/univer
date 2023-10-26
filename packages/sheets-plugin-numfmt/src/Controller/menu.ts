@@ -18,7 +18,7 @@ export function NumfmtRangeDataMenuItemFactory(accessor: IAccessor): IMenuSelect
         type: MenuItemType.SELECTOR,
         display: DisplayTypes.CUSTOM,
         // display: DisplayTypes.FONT,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         selections: DEFAULT_DATA,
         // disabled$: new Observable((subscriber) => {
         //     let editable = false;

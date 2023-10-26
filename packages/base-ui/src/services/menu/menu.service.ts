@@ -2,35 +2,8 @@ import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { debounceTime, Observable, Subject } from 'rxjs';
 
-// TODO@wzhudev: this props should be moved to menu.service.ts to break cycle import
-import { BaseSelectChildrenProps } from '../../Components/Select/Select';
 import { IShortcutService } from '../shortcut/shortcut.service';
 import { IDisplayMenuItem, IMenuItem, MenuPosition } from './menu';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface IMenuItemState {
-    id: string;
-
-    disabled?: boolean;
-    hidden?: boolean;
-    checked?: boolean;
-}
-
-// TODO@Dushusir  remove CustomLabelProps and CustomLabel in rightMenuUIController after migrate new UI system
-
-interface CustomLabelProps {
-    prefix?: string[] | string;
-    suffix?: string[] | string;
-    options?: BaseSelectChildrenProps[];
-    label?: string;
-    children?: CustomLabelProps[];
-    onKeyUp?: (e: Event) => void;
-}
-
-export interface CustomLabel {
-    name: string;
-    props?: CustomLabelProps;
-}
 
 export const IMenuService = createIdentifier<IMenuService>('univer.menu-service');
 
@@ -111,10 +84,26 @@ export class DesktopMenuService extends Disposable implements IMenuService {
     getMenuItems(positions: MenuPosition | string): Array<IDisplayMenuItem<IMenuItem>> {
         // TODO: @wzhudev: compose shortcut to returned menu items.
         if (this._menuByPositions.has(positions)) {
-            const menuItems = [...this._menuByPositions.get(positions)!.values()].map((menu) =>
-                this.getDisplayMenuItems(menu[1])
-            );
-            return menuItems;
+            const menuItems = this._menuByPositions.get(positions);
+
+            if (menuItems) {
+                // const _this = this;
+                // const result = menuItems.map(function walk([id, item]) {
+                //     const menuItem = _this.getDisplayMenuItems(item);
+                //
+                //     const subMenu = _this._menuByPositions.get(id);
+                //     if (subMenu) {
+                //         menuItem.children = subMenu.map(walk);
+                //         return menuItem;
+                //     }
+                //
+                //     return menuItem;
+                // });
+                //
+                // console.log(result);
+
+                return [...menuItems.values()].map((menu) => this.getDisplayMenuItems(menu[1]));
+            }
         }
 
         return [] as Array<IDisplayMenuItem<IMenuItem>>;

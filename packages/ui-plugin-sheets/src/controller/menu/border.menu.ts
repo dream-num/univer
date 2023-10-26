@@ -134,7 +134,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         icon: 'FullBorderIcon',
         tooltip: 'toolbar.border.main',
         display: DisplayTypes.ICON,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         type: MenuItemType.SUBITEMS,
         selections: [...BORDER_LINE_CHILDREN],
         onClose: () => {

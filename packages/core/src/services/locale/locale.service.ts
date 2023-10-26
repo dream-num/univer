@@ -49,7 +49,7 @@ export class LocaleService extends Disposable {
     }
 
     t(key?: string): Nullable<string | number> {
-        return this.get(key);
+        return this.get(key) ?? key;
     }
 
     setLocale(locale: LocaleType): void {

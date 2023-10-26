@@ -12,6 +12,11 @@
     box-sizing: border-box;
     outline: none;
 
+    &-vertical {
+        display: grid;
+        gap: var(--margin-xxs);
+    }
+
     &-hidden,
     &-submenu-hidden {
         display: none;
@@ -154,7 +159,7 @@
         & > .menu2-item,
         & > .menu2-submenu > .menu2-submenu-title {
             width: 100%;
-            padding: var(--padding-sm);
+            padding: var(--padding-xs) var(--padding-sm);
             box-sizing: border-box;
             display: flex;
             justify-content: space-between;

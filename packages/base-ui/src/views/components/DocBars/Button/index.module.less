@@ -1,55 +1,32 @@
-@import '../../../../Components/Button/Style/mixin.less';
+@toolbar-btn-size: 28px;
 
 .toolbar-btn {
-    line-height: @line-height-base;
-    .btn();
-    .btn-default();
+    width: @toolbar-btn-size;
+    height: @toolbar-btn-size;
+    padding: 0;
+    font-size: var(--font-size-xxl);
+    background-color: transparent;
+    border: none;
+    border-radius: var(--border-radius-base);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    outline: none;
+    cursor: pointer;
 
-    >span {
-        display: inline-block;
+    &:not([disabled]):hover {
+        color: rgb(var(--text-color));
+        background-color: rgb(var(--grey-100));
+        border-color: transparent;
+    }
+    &[disabled] {
+        cursor: not-allowed;
     }
 
-    &-text {
-        .button-color(rgb(var(--text-color)), transparent, transparent);
-        box-shadow: none;
-
-        &:hover {
-            color: rgb(var(--text-color));
-            background-color: rgb(var(--grey-100));
-            border-color: transparent;
-        }
-
-        // &:active {
-        //     color: var(--text-color);
-        //     background: #eee;
-        //     border-color: transparent;
-        // }
-        .button-disabled(var(--disabled-color); transparent; transparent);
-        &-active {
-            color: rgb(var(--text-color));
-            background-color: rgb(var(--grey-100));
-            border-color: transparent;
-        }
-        height: 26px;
-    }
-
-    &::before {
-        position: absolute;
-        top: -1px;
-        right: -1px;
-        bottom: -1px;
-        left: -1px;
-        z-index: 1;
-        display: none;
-        background: @bg-color-secondary;
-        border-radius: inherit;
-        opacity: 0.35;
-        transition: opacity 0.2s;
-        content: '';
-        pointer-events: none;
-    }
-
-    &:active>span {
-        position: relative;
+    &-active {
+        color: rgb(var(--text-color));
+        background-color: rgb(var(--grey-100));
+        border-color: transparent;
     }
 }
+

@@ -1,6 +1,7 @@
 .color-select {
     position: relative;
     display: flex;
+    align-items: center;
 
     .color-select-line {
         position: absolute;
@@ -18,4 +19,12 @@
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+}
+
+.neo-custom-label {
+    &-item {
+        display: flex;
+        align-items: center;
+        gap: var(--margin-xs);
+    }
 }

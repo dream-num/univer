@@ -13,7 +13,6 @@ export * from './CustomLabel';
 export * from './Dropdown';
 export * from './Input';
 export * from './InputNumber';
-export * from './Item/Item';
 export * from './Layout';
 export * from './Menu';
 export * from './Modal';

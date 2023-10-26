@@ -7,8 +7,18 @@ export type OneOrMany<T> = T | T[];
 
 export const enum MenuPosition {
     VOID = 'void',
-    TOOLBAR = 'toolbar',
+    TOOLBAR_START = 'uiToolbar.start',
+    TOOLBAR_INSERT = 'uiToolbar.insert',
+    TOOLBAR_FORMULAS = 'uiToolbar.formulas',
+    TOOLBAR_DATA = 'uiToolbar.data',
+    TOOLBAR_VIEW = 'uiToolbar.view',
+    TOOLBAR_OTHERS = 'uiToolbar.others',
     CONTEXT_MENU = 'contextMenu',
+}
+
+export const enum MenuGroup {
+    TOOLBAR_HISTORY,
+    TOOLBAR_OTHERS,
 }
 
 export const enum MenuItemType {
@@ -28,6 +38,9 @@ interface IMenuItemBase<V> {
     description?: string;
     icon?: string;
     tooltip?: string;
+
+    /** The group that the item belongs to. */
+    group?: MenuGroup;
 
     /** In what menu should the item display. */
     positions: OneOrMany<MenuPosition | string>;
@@ -69,10 +82,6 @@ export interface IMenuButtonItem<V = undefined> extends IMenuItemBase<V> {
     type: MenuItemType.BUTTON;
 
     activated$?: Observable<boolean>;
-}
-
-export function isMenuButtonItem(v: IMenuItem): v is IMenuButtonItem {
-    return v.type === MenuItemType.BUTTON;
 }
 
 export interface IValueOption {

@@ -1,17 +1,38 @@
-@import '../../../Basics/CSS/Skin/default.module.less';
-
 .doc-bars {
     box-sizing: border-box;
 
     .menubar {
         height: 40px;
-        border-bottom: 1px solid @border-color;
+        border-bottom: 1px solid rgb(var(--border-color));
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: var(--margin-xs);
+
+        &-item {
+            padding: var(--padding-xs) var(--padding-sm);
+            font-size: var(--font-size-sm);
+            font-weight: 400;
+            border-radius: var(--border-radius-base);
+            display: block;
+            cursor: pointer;
+            transition: all 0.1s ease-in-out;
+
+            &:hover:not(&-active) {
+                background: rgb(var(--grey-300));
+            }
+
+            &-active {
+                color: rgb(var(--color-white));
+                background: rgb(var(--primary-color));
+            }
+        }
     }
 
     .toolbar {
         position: relative;
         height: 40px;
-        padding: 0 @padding-xl;
+        padding: 0 var(--padding-xl);
 
         color: rgb(var(--text-color));
         font-size: var(--font-size);
@@ -25,124 +46,25 @@
             height: 100%;
             display: flex;
             align-items: center;
+            justify-content: center;
             border-bottom: 1px solid rgb(var(--border-color));
-
-            > div {
-                height: 26px;
-                display: inline-block;
-                vertical-align: middle;
-                margin: 0 1px;
-                cursor: pointer;
-
-                &.select-button:hover {
-                    background-color: #efefef;
-                }
-            }
-
+            gap: var(--margin-xs);
         }
 
-        .single-button {
-            &.more-hide {
-                display: none;
-            }
-
-            &.more-show {
-                display: block;
-            }
-        }
-
-        .cols-menu {
-            overflow-y: auto;
-        }
-
-        .select-label-string {
-            .drop-content {
-                > div {
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                    width: 90px;
-                }
-            }
-        }
-
-        .select-double-string {
-            .drop-content {
-                > div {
-                    width: 24px;
-                }
-            }
-        }
-
-        .select-color-picker-parent {
-            .select-item-content {
-                width: 100%;
-            }
-
-            .select-color-picker {
-                cursor: default;
-
-                &:hover {
-                    background: var(--bg);
-                }
-
-                .select-item {
-                    padding: 0;
-                }
-
-                .color-picker-outer {
-                    box-shadow: none;
-                }
-            }
-        }
-
-        .select-line-bold-parent {
-            .select-item-content {
-                width: 100%;
-            }
-        }
-
-        .select-single {
-            // height: 26px;
-            // line-height: 26px;
-        }
-
-        .select-input {
-            // height: 26px;
-            // line-height: 26px;
-        }
-
-        .select-double {
-            // height: 26px;
-            // line-height: 26px;
-        }
-
-        button {
-            padding: 0 4px; // FIXME Set the BIUS buttons, the target is 26 * 26, padding 4px, but only 27.6 * 26 can be obtained
+        &-group {
             display: flex;
             align-items: center;
-            // height: 26px;
-            font-size: 18px;
-            border-radius: var(--border-radius-base);
-        }
 
-        span[role='img'].univericon-nextIcon {
-            font-size: 12px;
-        }
-
-        .text-button {
-            span[role='img'] {
-                font-size: 24px;
-            }
-
-            button {
-                padding: 0 5px;
+            &:not(:last-child) {
+                &::after {
+                    content: '';
+                    width: 1px;
+                    height: 20px;
+                    margin-left: var(--margin-xs);
+                    background-color: rgb(var(--border-color));
+                    display: block;
+                }
             }
         }
-    }
-
-    .button() {
-        padding: 0px;
-        line-height: 1;
     }
 }

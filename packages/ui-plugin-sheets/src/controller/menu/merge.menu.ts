@@ -19,7 +19,7 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         icon: 'MergeIcon',
         tooltip: 'toolbar.mergeCell.main',
         display: DisplayTypes.ICON,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         type: MenuItemType.SUBITEMS,
         // selections: [...MERGE_CHILDREN],
     };

@@ -1,4 +1,4 @@
-import { ILocalStorageService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { ILocalStorageService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { ComponentManager } from './Common/ComponentManager';
@@ -6,6 +6,7 @@ import { ZIndexManager } from './Common/ZIndexManager';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
+import { en } from './Locale';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopFocusService, IFocusService } from './services/focus/focus.service';
@@ -32,11 +33,16 @@ export class UIPlugin extends Plugin {
 
     constructor(
         config: Partial<IUIPluginConfig> = {},
-        @Inject(Injector) protected readonly _injector: Injector
+        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super(PLUGIN_NAMES.BASE_UI);
 
         this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
+
+        this._localeService.getLocale().load({
+            en,
+        });
     }
 
     override onStarting(_injector: Injector): void {

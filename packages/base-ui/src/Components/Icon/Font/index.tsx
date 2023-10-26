@@ -8,7 +8,9 @@ export const ItalicIcon = (props: BaseIconProps) => <TextItalic24 />;
 export const DeleteLineIcon = (props: BaseIconProps) => <Strikethrough24 style={props.style} />;
 export const UnderLineIcon = (props: BaseIconProps) => <Underline24 />;
 
-export const TextColorIcon = (props: BaseIconProps) => <TextColor24 style={{ color: props.color }} />;
+export const TextColorIcon = (props: BaseIconProps) => (
+    <TextColor24 style={{ color: props.color }} extend={props.extend} />
+);
 
 export default {
     BoldIcon,

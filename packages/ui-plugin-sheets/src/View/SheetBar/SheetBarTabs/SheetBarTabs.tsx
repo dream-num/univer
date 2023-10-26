@@ -13,13 +13,17 @@ import {
     SetWorksheetActivateMutation,
     SetWorksheetHideMutation,
     SetWorksheetNameMutation,
+    SetWorksheetOrderCommand,
     SetWorksheetOrderMutation,
 } from '@univerjs/base-sheets';
 import { BooleanNumber, ICommandInfo, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
+import sheetBarStyles from '../index.module.less';
+import styles from './index.module.less';
 import { IBaseSheetBarProps, SheetBarItem } from './SheetBarItem';
+import { SlideTabBar } from './utils/slide-tab-bar';
 
 export interface IProps {}
 
@@ -29,6 +33,8 @@ export function SheetBarTabs(props: IProps) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+
+    let slideTabBar: SlideTabBar;
 
     useEffect(() => {
         statusInit();
@@ -40,6 +46,35 @@ export function SheetBarTabs(props: IProps) {
             disposable.dispose();
         };
     }, []);
+
+    useEffect(() => {
+        // 在 count 发生变化时执行回调函数
+        console.log('sheetList changed:', JSON.stringify(sheetList));
+
+        if (slideTabBar) {
+            slideTabBar.destroy();
+        }
+
+        if (sheetList.length > 0) {
+            slideTabBar = new SlideTabBar({
+                slideTabBarClassName: styles.slideTabBar,
+                slideTabBarItemActiveClassName: styles.slideTabActive,
+                slideTabBarItemClassName: styles.slideTabItem,
+                slideTabBarItemAutoSort: true,
+                slideTabRootClassName: sheetBarStyles.sheetBar,
+                // pressDelay: 300,
+                onChangeName: (event: Event) => {
+                    // this.props.changeSheetName?.(event);
+                    console.info('onChangeName==', event);
+                },
+                onSlideEnd: (event: Event, order: number) => {
+                    console.info('onSlideEnd==', event, order);
+                    // this.props.dragEnd?.(slideTabBar.getSlideTabItems().map((item) => item.primeval()));
+                    commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
+                },
+            });
+        }
+    }, [sheetList]);
 
     const setupStatusUpdate = () =>
         commandService.onCommandExecuted((commandInfo: ICommandInfo<object>) => {
@@ -131,16 +166,18 @@ export function SheetBarTabs(props: IProps) {
     };
 
     return (
-        <>
-            {sheetList.map((item) => (
-                <SheetBarItem
-                    {...item}
-                    key={item.sheetId}
-                    onMouseDown={() => onMouseDown(item.sheetId ?? '')}
-                    selected={activeKey === item.sheetId}
-                />
-            ))}
-        </>
+        <div className={styles.slideTabBarContainer}>
+            <div className={styles.slideTabBar}>
+                {sheetList.map((item) => (
+                    <SheetBarItem
+                        {...item}
+                        key={item.sheetId}
+                        onMouseDown={() => onMouseDown(item.sheetId ?? '')}
+                        selected={activeKey === item.sheetId}
+                    />
+                ))}
+            </div>
+        </div>
         // <Tabs
         //     draggable
         //     className={styles.slideTabBar}

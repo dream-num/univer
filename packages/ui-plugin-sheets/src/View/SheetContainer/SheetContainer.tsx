@@ -2,7 +2,7 @@ import { ISheetUIPluginConfig } from '../../Basics';
 import { CountBar } from '../CountBar';
 import { EditorContainer } from '../EditorContainer/EditorContainer';
 import { FormulaBar } from '../FormulaBar/FormulaBar';
-import { SheetBar2 } from '../SheetBar/SheetBar2';
+import { SheetBar } from '../SheetBar/SheetBar';
 import styles from './index.module.less';
 
 export interface BaseSheetContainerProps {
@@ -14,7 +14,7 @@ export interface BaseSheetContainerProps {
 export function RenderSheetFooter() {
     return (
         <section className={styles.sheetContainer}>
-            <SheetBar2 />
+            <SheetBar />
             <CountBar />
         </section>
     );

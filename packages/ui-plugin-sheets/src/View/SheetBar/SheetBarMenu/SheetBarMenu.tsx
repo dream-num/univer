@@ -8,8 +8,9 @@ import {
     SetWorksheetOrderMutation,
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
-import { Button, Dropdown2, Icon, joinClassNames } from '@univerjs/base-ui';
+import { Button, Dropdown2, joinClassNames } from '@univerjs/base-ui';
 import { BooleanNumber, ICommandInfo, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { Selectedo24, SwitchSheet28 } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
@@ -104,7 +105,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                             onClick={() => handleClick(item)}
                             className={joinClassNames(styles.sheetBarMenuItem)}
                         >
-                            <span className={styles.sheetBarMenuItemIcon}>{item.selected ? '✔' : ''}</span>
+                            <span className={styles.sheetBarMenuItemIcon}>{item.selected ? <Selectedo24 /> : ''}</span>
                             <span
                                 className={
                                     item.hidden
@@ -119,8 +120,8 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                 </ul>
             }
         >
-            <Button className={styles.sheetBarOptionsButton} onClick={() => {}}>
-                <Icon.MenuIcon style={{ fontSize: '20px' }} />
+            <Button type="text" size="small">
+                <SwitchSheet28 />
             </Button>
         </Dropdown2>
     );

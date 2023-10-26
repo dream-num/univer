@@ -1,5 +1,6 @@
-import { Dropdown2, Icon, Menu2 } from '@univerjs/base-ui';
+import { Dropdown2, Menu2 } from '@univerjs/base-ui';
 import { BooleanNumber, ICommandService } from '@univerjs/core';
+import { SelectionBoxDropdown16 } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
@@ -58,11 +59,10 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                 key={sheetId}
                 data-id={sheetId}
                 className={
-                    currentSelected ? `${styles.tabsTabActive} ${styles.slideTabItem}` : `${styles.slideTabItem}`
+                    currentSelected ? `${styles.slideTabActive} ${styles.slideTabItem}` : `${styles.slideTabItem}`
                 }
             >
                 <div className={`${styles.slideTabContent}`}>
-                    <div className={`${styles.slideTabDivider}`}></div>
                     <div className={`${styles.slideTabTitle}`}>
                         <span className={`${styles.slideTabSpan}`}>
                             <InputEdit sheetId={sheetId} sheetName={label ?? ''} />
@@ -79,7 +79,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                             }
                         }}
                     >
-                        <Icon.NextIcon />
+                        <SelectionBoxDropdown16 />
                     </div>
                 </div>
                 <div className={`${styles.slideTabFooter}`}>

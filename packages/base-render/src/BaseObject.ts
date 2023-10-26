@@ -312,10 +312,12 @@ export abstract class BaseObject {
 
     makeDirty(state: boolean = true) {
         this._dirty = state;
+
         if (state) {
             const scene = this.getScene();
             if (scene == null) {
                 this._dirty = false;
+
                 return;
             }
             window.clearTimeout(scene.debounceParentTimeout);
@@ -325,6 +327,7 @@ export abstract class BaseObject {
             }, 0);
             // this.parent?.makeDirty(state);
         }
+
         return this;
     }
 
@@ -451,9 +454,11 @@ export abstract class BaseObject {
     transformByState(option: IObjectFullState) {
         const optionKeys = Object.keys(option);
         const preKeys: IObjectFullState = {};
+
         if (optionKeys.length === 0) {
             return;
         }
+
         optionKeys.forEach((pKey) => {
             if (option[pKey as keyof IObjectFullState] !== undefined) {
                 preKeys[pKey as keyof IObjectFullState] = this[pKey as keyof BaseObject];
@@ -578,8 +583,10 @@ export abstract class BaseObject {
     triggerDblclick(evt: IPointerEvent | IMouseEvent) {
         if (!this.onDblclickObserver.notifyObservers(evt)?.stopPropagation) {
             this._parent?.triggerDblclick(evt);
+
             return false;
         }
+
         return true;
     }
 

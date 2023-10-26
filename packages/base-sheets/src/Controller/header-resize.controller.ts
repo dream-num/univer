@@ -16,7 +16,11 @@ import {
     DeltaColumnWidthCommand,
     IDeltaColumnWidthCommandParams,
 } from '../commands/commands/set-worksheet-col-width.command';
-import { DeltaRowHeightCommand, IDeltaRowHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
+import {
+    DeltaRowHeightCommand,
+    IDeltaRowHeightCommand,
+    SetWorksheetRowIsAutoHeightCommand,
+} from '../commands/commands/set-worksheet-row-height.command';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import {
     HEADER_MENU_SHAPE_THUMB_SIZE,
@@ -32,6 +36,9 @@ const HEADER_RESIZE_CONTROLLER_SHAPE_COLUMN = '__SpreadsheetHeaderResizeControll
 const HEADER_RESIZE_CONTROLLER_SHAPE_HELPER = '__SpreadsheetHeaderResizeControllerShapeHelper__';
 
 const HEADER_RESIZE_CONTROLLER_SHAPE_HELPER_COLOR = 'rgb(199, 199, 199)';
+
+// The minimum move offset of header resize bar, less than this value will not be triggered any actions.
+const MINIMAL_OFFSET = 2;
 
 enum HEADER_RESIZE_TYPE {
     ROW,
@@ -113,6 +120,7 @@ export class HeaderResizeController extends Disposable {
 
         this._columnResizeRect = new HeaderMenuResizeShape(HEADER_RESIZE_CONTROLLER_SHAPE_COLUMN, {
             visible: false,
+            mode: HEADER_RESIZE_SHAPE_TYPE.VERTICAL,
             zIndex: 100,
         });
 
@@ -191,9 +199,11 @@ export class HeaderResizeController extends Disposable {
                         left: rowHeaderWidth / 2 - rowSize / 2,
                         top,
                     });
+
                     this._rowResizeRect.setShapeProps({
                         size: rowSize,
                     });
+
                     this._rowResizeRect.show();
                 } else {
                     let left = startX - HEADER_MENU_SHAPE_WIDTH_HEIGHT_SCALE / 2;
@@ -252,30 +262,31 @@ export class HeaderResizeController extends Disposable {
         const eventBindingObject =
             initialType === HEADER_RESIZE_TYPE.ROW ? this._rowResizeRect : this._columnResizeRect;
 
+        if (eventBindingObject == null) {
+            return;
+        }
+
         const engine = scene.getEngine();
         const canvasMaxWidth = engine?.width || 0;
         const canvasMaxHeight = engine?.height || 0;
 
-        if (eventBindingObject == null) {
-            return;
-        }
         eventBindingObject.onPointerEnterObserver.add(() => {
             if (eventBindingObject == null) {
                 return;
             }
+
             eventBindingObject.show();
 
-            if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                scene.setCursor(CURSOR_TYPE.ROW_RESIZE);
-            } else {
-                scene.setCursor(CURSOR_TYPE.COLUMN_RESIZE);
-            }
+            scene.setCursor(
+                initialType === HEADER_RESIZE_TYPE.ROW ? CURSOR_TYPE.ROW_RESIZE : CURSOR_TYPE.COLUMN_RESIZE
+            );
         });
 
         eventBindingObject.onPointerLeaveObserver.add(() => {
             if (eventBindingObject == null) {
                 return;
             }
+
             eventBindingObject.hide();
 
             scene.resetCursor();
@@ -315,6 +326,8 @@ export class HeaderResizeController extends Disposable {
             const currentOffsetY = skeleton.getOffsetByPositionY(this._currentRow);
 
             const cell = skeleton.getNoMergeCellPositionByIndex(this._currentRow, this._currentColumn, scaleX, scaleY);
+
+            let isStartMove = false;
 
             let moveChangeX = 0;
 
@@ -381,27 +394,36 @@ export class HeaderResizeController extends Disposable {
 
                 moveChangeY = moveOffsetY - this._startOffsetY - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2;
 
+                if (Math.abs(initialType === HEADER_RESIZE_TYPE.ROW ? moveChangeY : moveChangeX) >= MINIMAL_OFFSET) {
+                    isStartMove = true;
+                }
+
                 if (initialType === HEADER_RESIZE_TYPE.ROW) {
                     if (moveChangeY < -(cell.endY - cell.startY) + 2) {
                         moveChangeY = -(cell.endY - cell.startY) + 2;
+
                         return;
                     }
+
                     if (currentOffsetY + moveChangeY > canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y) {
                         moveChangeY = canvasMaxHeight - currentOffsetY - scrollBarHorizontalHeight;
+
                         return;
                     }
 
-                    this._resizeHelperShape?.transformByState({
-                        top: currentOffsetY + moveChangeY,
-                    });
+                    if (isStartMove) {
+                        this._resizeHelperShape?.transformByState({
+                            top: currentOffsetY + moveChangeY,
+                        });
 
-                    this._rowResizeRect?.transformByState({
-                        top: rowResizeRectY + moveChangeY + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
-                    });
+                        this._rowResizeRect?.transformByState({
+                            top: rowResizeRectY + moveChangeY + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
+                        });
 
-                    this._rowResizeRect?.show();
+                        this._rowResizeRect?.show();
 
-                    scene.setCursor(CURSOR_TYPE.ROW_RESIZE);
+                        scene.setCursor(CURSOR_TYPE.ROW_RESIZE);
+                    }
                 } else {
                     if (moveChangeX < -(cell.endX - cell.startX) + 2) {
                         moveChangeX = -(cell.endX - cell.startX) + 2;
@@ -412,17 +434,19 @@ export class HeaderResizeController extends Disposable {
                         return;
                     }
 
-                    this._resizeHelperShape?.transformByState({
-                        left: currentOffsetX + moveChangeX,
-                    });
+                    if (isStartMove) {
+                        this._resizeHelperShape?.transformByState({
+                            left: currentOffsetX + moveChangeX,
+                        });
 
-                    this._columnResizeRect?.transformByState({
-                        left: rowResizeRectX + moveChangeX + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
-                    });
+                        this._columnResizeRect?.transformByState({
+                            left: rowResizeRectX + moveChangeX + HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2,
+                        });
 
-                    this._columnResizeRect?.show();
+                        this._columnResizeRect?.show();
 
-                    scene.setCursor(CURSOR_TYPE.COLUMN_RESIZE);
+                        scene.setCursor(CURSOR_TYPE.COLUMN_RESIZE);
+                    }
                 }
             });
 
@@ -433,35 +457,54 @@ export class HeaderResizeController extends Disposable {
                     return;
                 }
 
-                const { scene } = sheetObject;
-                scene.resetCursor();
                 this._clearObserverEvent();
-                scene.enableEvent();
                 this._resizeHelperShape?.dispose();
                 this._resizeHelperShape = null;
-                this._rowResizeRect?.hide();
-                this._columnResizeRect?.hide();
 
-                if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                    this._commandService.executeCommand<IDeltaRowHeightCommand>(DeltaRowHeightCommand.id, {
-                        deltaY: moveChangeY,
-                        anchorRow: this._currentRow,
-                    });
-                } else {
-                    this._commandService.executeCommand<IDeltaColumnWidthCommandParams>(DeltaColumnWidthCommand.id, {
-                        deltaX: moveChangeX,
-                        anchorCol: this._currentColumn,
-                    });
+                const { scene } = sheetObject;
+                scene.enableEvent();
+
+                if (isStartMove) {
+                    scene.resetCursor();
+
+                    this._rowResizeRect?.hide();
+                    this._columnResizeRect?.hide();
+
+                    if (initialType === HEADER_RESIZE_TYPE.ROW) {
+                        this._commandService.executeCommand<IDeltaRowHeightCommand>(DeltaRowHeightCommand.id, {
+                            deltaY: moveChangeY,
+                            anchorRow: this._currentRow,
+                        });
+                    } else {
+                        this._commandService.executeCommand<IDeltaColumnWidthCommandParams>(
+                            DeltaColumnWidthCommand.id,
+                            {
+                                deltaX: moveChangeX,
+                                anchorCol: this._currentColumn,
+                            }
+                        );
+                    }
                 }
             });
         });
 
-        eventBindingObject.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            // if (initialType === HEADER_RESIZE_TYPE.ROW) {
-            //     alert(this._currentRow);
-            // } else {
-            //     alert(this._currentColumn);
-            // }
+        eventBindingObject.onDblclickObserver.add(() => {
+            if (initialType === HEADER_RESIZE_TYPE.ROW) {
+                const sheetObject = this._getSheetObject();
+                if (sheetObject == null) {
+                    return;
+                }
+
+                const { scene } = sheetObject;
+
+                scene.resetCursor();
+
+                this._commandService.executeCommand<IDeltaColumnWidthCommandParams>(
+                    SetWorksheetRowIsAutoHeightCommand.id
+                );
+
+                this._rowResizeRect?.hide();
+            }
         });
     }
 

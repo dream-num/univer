@@ -100,6 +100,7 @@ export class HeaderMenuResizeShape<
             fill: HEADER_MENU_SHAPE_RECT_FILL,
             radius: HEADER_MENU_SHAPE_THUMB_SIZE_SCALE,
         });
+
         ctx.restore();
     }
 

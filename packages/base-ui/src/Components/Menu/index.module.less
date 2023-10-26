@@ -1,5 +1,3 @@
-@import '../../Basics/CSS/Skin/default.module.less';
-
 .menu2 {
     padding: var(--padding-base);
     margin: 0;
@@ -20,13 +18,6 @@
     &-hidden,
     &-submenu-hidden {
         display: none;
-    }
-
-    &-collapse {
-        overflow: hidden;
-        // &-active {
-        transition: height 0.3s ease-out;
-        // }
     }
 
     &-item-group-list {
@@ -79,6 +70,7 @@
         display: block;
         white-space: nowrap;
         border-radius: var(--border-radius-base);
+        cursor: pointer;
 
         // Disabled state sets text to gray and nukes hover/tab effects
         &.menu2-item-disabled,
@@ -299,70 +291,4 @@
             }
         }
     }
-}
-
-// TODO: to be removed
-.cols-menu {
-    .menu-button();
-    position: fixed;
-    width: max-content;
-    padding: 6px 0;
-    font-size: 13px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    overflow-y: auto;
-    text-align: center;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-
-    .cols-menuitem {
-        min-width: 80px;
-        position: relative;
-        color: var(--text-color);
-        cursor: pointer;
-        list-style: none;
-        // margin: 0;
-        white-space: nowrap;
-        vertical-align: middle;
-        user-select: none;
-
-        // FIXME use token instead
-        padding: var(--padding-xs);
-        margin: var(--margin-xs) var(--margin-sm);
-        font-size: 14px;
-        border-radius: var(--border-radius-base);
-
-        &:hover,
-        &.select-item-selected {
-            background-color: var(--bg-color-hover);
-        }
-    }
-
-    .cols-menuitem-line {
-        width: 100%;
-        height: 1px;
-        background: rgba(0, 0, 0, 0.2);
-        margin: 5px 0;
-    }
-
-    .cols-menuitem-disabled {
-        pointer-events: none;
-        color: var(--gray-200);
-    }
-}
-
-.menu-button() {
-    border-radius: 0;
-    transition: opacity 218ms;
-    background: rgb(var(--bg-color-secondary));
-    box-shadow: var(--box-shadow-base);
-    cursor: default;
-    margin: 0;
-    outline: 0;
-    z-index: 2;
-    box-sizing: border-box;
-    user-select: none;
 }

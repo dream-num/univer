@@ -1,4 +1,4 @@
-import { ColorPickerCircleButton, SiderModal } from '@univerjs/base-ui';
+import { ColorPicker, SiderModal } from '@univerjs/base-ui';
 import { Component } from 'react';
 
 import { BorderType, NormalType, OVER_GRID_IMAGE_PLUGIN_NAME } from '../../../Basics';
@@ -100,12 +100,7 @@ export class ImagePanelUI extends Component<ImagePanelUIProps> {
                                 </div>
                                 <div className={Style.wrapItem}>
                                     <span className={Style.label}>颜色:</span>
-                                    <ColorPickerCircleButton
-                                        style={{ width: '152px', display: 'inline-block' }}
-                                        color={'#000'}
-                                        onCancel={() => {}}
-                                        onClick={(color: string) => {}}
-                                    />
+                                    <ColorPicker color={'#000'} />
                                 </div>
                             </div>
                         </div>

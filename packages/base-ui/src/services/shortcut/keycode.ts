@@ -7,7 +7,7 @@ export const enum KeyCode {
 
     BACKSPACE = 8,
     TAB = 9,
-    DELETE = 12,
+
     ENTER = 13,
     ESC = 27,
     SPACE = 32,
@@ -17,6 +17,7 @@ export const enum KeyCode {
     ARROW_RIGHT = 39,
     ARROW_DOWN = 40,
     INSERT = 45,
+    DELETE = 46,
 
     Digit0 = 48,
     Digit1,

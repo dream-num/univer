@@ -1,9 +1,8 @@
-import { getCellInfoInMergeData } from '@univerjs/base-render';
-import { IRange, ISelectionCell, makeCellRangeToRangeData, Nullable, ThemeService } from '@univerjs/core';
-import { IDisposable, Inject } from '@wendellhu/redi';
+import { IRange, ISelectionCell, Nullable } from '@univerjs/core';
+import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
-import { getNormalSelectionStyle, ISelectionStyle, ISelectionWithStyle } from '../../Basics/selection';
+import { ISelectionStyle, ISelectionWithStyle } from '../../Basics/selection';
 import { ISetSelectionsOperationParams } from '../../commands/operations/selection.operation';
 
 export const NORMAL_SELECTION_PLUGIN_NAME = 'normalSelectionPluginName';
@@ -23,7 +22,16 @@ export interface ISelectionManagerInsertParam extends ISelectionManagerSearchPar
 export type ISelectionInfo = Map<string, Map<string, Map<string, ISelectionWithStyle[]>>>;
 
 /**
- * This service is for selection.
+ * This service is responsible for managing the selection data.
+ * You can generally modify its data through SetSelectionsOperation.
+ * In the same app and sub-table, there will be different functional selection areas,
+ * such as charts, formulas, conditional formats, etc.,
+ * which are distinguished by the pluginName.
+ * The selection data drawn by the user through the SelectionRenderService will be saved to this service.
+ * Data changes within the service will also notify the SelectionController to redraw the selection area.
+ *  Not only will switching sub-tables trigger a redraw, but also changing row and column widths,
+ * hiding rows and columns, automatic row height, dragging rows and columns, deleting rows and columns,
+ * and so on, will cause the size of the selection area to change.
  */
 export class SelectionManagerService implements IDisposable {
     private readonly _selectionInfo: ISelectionInfo = new Map();
@@ -48,8 +56,6 @@ export class SelectionManagerService implements IDisposable {
     // get currentStyle() {
     //     return this._currentStyle;
     // }
-
-    constructor(@Inject(ThemeService) private readonly _themeService: ThemeService) {}
 
     getCurrent() {
         return this._currentSelection;
@@ -248,22 +254,6 @@ export class SelectionManagerService implements IDisposable {
             fill: 'rgba(0, 0, 0, 0.2)',
             widgets: { tr: true, tl: true, br: true, bl: true },
             hasAutoFill: false,
-        };
-    }
-
-    transformCellDataToSelectionData(row: number, column: number, mergeData: IRange[]): Nullable<ISelectionWithStyle> {
-        const newCellRange = getCellInfoInMergeData(row, column, mergeData);
-
-        const newSelectionData = makeCellRangeToRangeData(newCellRange);
-
-        if (!newSelectionData) {
-            return;
-        }
-
-        return {
-            range: newSelectionData,
-            primary: newCellRange,
-            style: getNormalSelectionStyle(this._themeService),
         };
     }
 

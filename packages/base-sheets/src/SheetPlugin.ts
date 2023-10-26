@@ -22,6 +22,7 @@ import { ScrollManagerService } from './services/scroll-manager.service';
 import { SelectionManagerService } from './services/selection/selection-manager.service';
 import { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
+import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { SheetCanvasView } from './View/sheet-canvas-view';
 
 /**
@@ -56,7 +57,6 @@ export class SheetPlugin extends Plugin {
             // services
             [BorderStyleManagerService],
             [SheetSkeletonManagerService],
-            [SelectionRenderService],
             [
                 ISelectionRenderService,
                 {
@@ -65,6 +65,7 @@ export class SheetPlugin extends Plugin {
             ],
             [ScrollManagerService],
             [SelectionManagerService],
+            [ShortcutExperienceService],
 
             // controllers
             [FormulaBarController],

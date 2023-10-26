@@ -18,7 +18,11 @@ export interface ISheetSkeletonManagerSearch {
 }
 
 /**
- * This service is for worksheet build sheet skeleton.
+ * This service manages the drawing of the sheet's viewModel (skeleton).
+ * Each time there is a content change, it will trigger the viewModel of the render to recalculate.
+ * Each application and sub-table has its own viewModel (skeleton).
+ * The viewModel is also a temporary storage variable, which does not need to be persisted,
+ * so it is managed uniformly through the service.
  */
 export class SheetSkeletonManagerService implements IDisposable {
     private _currentSkeleton: ISheetSkeletonManagerSearch = {

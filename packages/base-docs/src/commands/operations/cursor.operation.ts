@@ -17,11 +17,6 @@ export const MoveCursorOperation: IOperation<IMoveCursorOperationParams> = {
             return false;
         }
 
-        // const univerInstanceService = accessor.get(IUniverInstanceService);
-        // const inputController = accessor.get(InputController);
-
-        // inputController.moveCursor(univerInstanceService.getCurrentUniverDocInstance(), params.direction);
-
         return true;
     },
 };

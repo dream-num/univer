@@ -86,11 +86,9 @@ export const CONTEXT_MENU_INPUT_LABEL = 'CONTEXT_MENU_INPUT';
 export { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './border.menu';
 
 export enum SheetMenuPosition {
-    TAB_CONTEXT_MENU = 'tabContextMenu',
     ROW_HEADER_CONTEXT_MENU = 'rowHeaderContextMenu',
     COL_HEADER_CONTEXT_MENU = 'colHeaderContextMenu',
     SHEET_BAR = 'sheetBar',
-    WORKSHEET_MANAGE_MENU = 'worksheetManageMenu',
 }
 
 export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {

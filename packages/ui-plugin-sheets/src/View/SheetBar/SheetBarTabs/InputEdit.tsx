@@ -4,7 +4,7 @@ import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useState } from 'react';
 
-import { ISheetBarService } from '../../services/sheetbar/sheetbar.service';
+import { ISheetBarService } from '../../../services/sheetbar/sheetbar.service';
 
 interface IBaseInputProps {
     sheetId: string | undefined;

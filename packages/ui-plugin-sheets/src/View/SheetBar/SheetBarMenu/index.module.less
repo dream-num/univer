@@ -1,0 +1,102 @@
+@import '@univerjs/base-ui/src/Basics/CSS/Skin/default.module.less';
+
+@slider-bg: @text-color-secondary;
+@slider-width: 116px;
+@slider-height: 4px;
+@slider-radius: 15px;
+
+@slider-handle-size: 12px;
+
+@slider-value-width: 55px;
+@slider-value-height: 28px;
+
+@slider-parts-hover-color: @border-color;
+
+:export {
+    --slider-width: unit(@slider-width);
+    --slider-handle-size: unit(@slider-handle-size);
+}
+
+.sheet-bar-menu {
+    // position: absolute;
+    // bottom: 120%;
+    // left: 0;
+    // padding: 0;
+    // border: 1px solid rgba(0, 0, 0, 0.2);
+    // border-radius: 0;
+    // transition: opacity 218ms;
+    // padding: 5px;
+    // background: var(--bg);
+    // margin: 0;
+    // outline: 0;
+    // z-index: 2;
+    // box-sizing: border-box;
+    // user-select: none;
+    // box-shadow: rgb(0 0 0 / 20%) 0px 2px 4px;
+
+
+    width: 128px;
+        padding: @padding-sm;
+        font-size: @font-size-base;
+        background-color: @color-white;
+        border: 1px solid @border-color;
+        border-radius: @border-radius-lg;
+        box-shadow: @box-shadow-lg;
+        box-sizing: border-box;
+        display: grid;
+        align-items: center;
+        gap: @margin-xxs;
+        transform: translateX(-(@slider-value-width / 2));
+
+    li {
+        list-style: none;
+    }
+
+    &-item {
+        position: relative;
+        padding: 5px 10px 5px 5px;
+        text-align: left;
+
+        position: relative;
+        padding: @padding-xs 0 @padding-xs 36px;
+        color: @text-color;
+        border-radius: @border-radius-base;
+        box-sizing: border-box;
+        cursor: pointer;
+        transition: background .2s;
+
+        &:hover {
+            background-color: @bg-color-hover;
+        }
+
+
+        &-icon {
+            position: absolute;
+            left: @padding-xs;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        // &-svg {
+        //     position: absolute;
+        //     left: 50%;
+        //     top: 50%;
+        //     width: 100%;
+        //     height: 100%;
+        //     font-size: 20px;
+        //     margin-left: -10px;
+        //     margin-top: -10px;
+        // }
+
+        &-title {
+            font-size: 14px;
+            vertical-align: middle;
+            padding: 5px 5px 5px 0px;
+        }
+
+        &-hide {
+            pointer-events: none;
+            color: #eee;
+        }
+    }
+}

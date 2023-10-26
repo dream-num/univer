@@ -29,8 +29,8 @@ import { Component, createRef } from 'react';
 
 import { SheetMenuPosition } from '../../controller/menu/menu';
 import styles from './index.module.less';
-import { InputEdit } from './input-edit';
-import { ISheetBarMenuItem, SheetBarMenu } from './SheetBarMenu';
+import { ISheetBarMenuItem, SheetBarMenu } from './SheetBarMenu/SheetBarMenu';
+import { InputEdit } from './SheetBarTabs/InputEdit';
 
 export interface BaseSheetBarProps extends BaseComponentProps, Omit<BaseSelectProps, 'children'> {
     children?: any[];
@@ -438,7 +438,6 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                     }}
                 />
                 <Menu
-                    menuId={SheetMenuPosition.WORKSHEET_MANAGE_MENU}
                     show={showManageMenu}
                     onOptionSelect={(params) => {
                         // TODO: handle menu item click

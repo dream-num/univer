@@ -70,7 +70,7 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
                     return commandService.syncExecuteCommand(SetWorksheetRightToLeftMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(
+                    return commandService.syncExecuteCommand(
                         SetWorksheetRightToLeftMutation.id,
                         setWorksheetRightToLeftMutationParams
                     );

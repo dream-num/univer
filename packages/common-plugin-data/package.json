@@ -36,12 +36,12 @@
     },
     "license": "MIT",
     "dependencies": {
-        "@univerjs/core": "workspace:^0.0.1"
+        "@univerjs/core": "workspace:*"
     },
     "devDependencies": {
-        "@types/node": "^18.14.0",
-        "@vitest/coverage-v8": "^0.34.5",
-        "esbuild": "^0.19.3",
-        "vitest": "^0.34.5"
+        "@types/node": "^20.8.9",
+        "@vitest/coverage-v8": "^0.34.6",
+        "esbuild": "^0.19.5",
+        "vitest": "^0.34.6"
     }
 }

@@ -1,19 +1,26 @@
-import { SetWorksheetShowCommand } from '@univerjs/base-sheets';
+import {
+    InsertSheetMutation,
+    RemoveSheetMutation,
+    SetWorksheetActivateCommand,
+    SetWorksheetActivateMutation,
+    SetWorksheetHideMutation,
+    SetWorksheetNameMutation,
+    SetWorksheetOrderMutation,
+    SetWorksheetShowCommand,
+} from '@univerjs/base-sheets';
 import { Button, Dropdown2, Icon, joinClassNames } from '@univerjs/base-ui';
-import { BooleanNumber, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { BooleanNumber, ICommandInfo, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { IBaseSheetBarProps } from '../SheetBarTabs/SheetBarItem';
 import styles from './index.module.less';
 
 export interface ISheetBarMenuItem {
     label?: string;
-    hide?: boolean;
+    hidden?: boolean;
     selected?: boolean;
     index?: string;
     sheetId?: string;
-    onClick?: (e?: React.MouseEvent) => void;
 }
 
 export interface ISheetBarMenuProps {
@@ -22,43 +29,63 @@ export interface ISheetBarMenuProps {
 }
 
 export function SheetBarMenu(props: ISheetBarMenuProps) {
-    // const [showMenu, setShowMenu] = useState(show);
-    const [menu, setMenu] = useState<IBaseSheetBarProps[]>([]);
+    const [menu, setMenu] = useState<ISheetBarMenuItem[]>([]);
 
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
 
-    const handleClick = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, item: ISheetBarMenuItem) => {
-        e.stopPropagation();
-        if (item.onClick) {
-            item.onClick(e);
+    const handleClick = (item: ISheetBarMenuItem) => {
+        const { sheetId } = item;
+        if (!sheetId) return;
+
+        if (item.hidden) {
+            commandService.executeCommand(SetWorksheetShowCommand.id, {
+                value: sheetId,
+            });
+        } else if (!item.selected) {
+            commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                workbookId: workbook.getUnitId(),
+                worksheetId: sheetId,
+            });
         }
     };
 
     useEffect(() => {
         statusInit();
+
+        const disposable = setupStatusUpdate();
+        return () => {
+            // Clean up disposable when the component unmounts
+            disposable.dispose();
+        };
     }, []);
+
+    const setupStatusUpdate = () =>
+        commandService.onCommandExecuted((commandInfo: ICommandInfo<object>) => {
+            switch (commandInfo.id) {
+                case SetWorksheetHideMutation.id:
+                case RemoveSheetMutation.id:
+                case SetWorksheetNameMutation.id:
+                case InsertSheetMutation.id:
+                case SetWorksheetOrderMutation.id:
+                case SetWorksheetActivateMutation.id:
+                    statusInit();
+                    break;
+                default:
+                    break;
+            }
+        });
 
     const statusInit = () => {
         const sheets = workbook.getSheets();
-
         const worksheetMenuItems = sheets.map((sheet, index) => ({
             label: sheet.getName(),
             index: `${index}`,
             sheetId: sheet.getSheetId(),
-            hide: sheet.isSheetHidden() === BooleanNumber.TRUE,
+            hidden: sheet.isSheetHidden() === BooleanNumber.TRUE,
             selected: sheet.getStatus() === BooleanNumber.TRUE,
-            onClick: (e?: MouseEvent) => {
-                const worksheetId = sheet.getSheetId();
-                commandService.executeCommand(SetWorksheetShowCommand.id, {
-                    workbookId: workbook.getUnitId(),
-                    worksheetId,
-                });
-            },
         }));
-
-        // TODO: update state to the component, including active sheet index
 
         setMenu(worksheetMenuItems);
     };
@@ -74,11 +101,19 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                     {menu.map((item) => (
                         <li
                             key={item.index}
-                            onClick={(e) => handleClick(e, item)}
+                            onClick={() => handleClick(item)}
                             className={joinClassNames(styles.sheetBarMenuItem)}
                         >
-                            <span className={styles.sheetBarMenuIcon}>{item.selected ? '✔' : ''}</span>
-                            <span className={styles.sheetBarMenuTitle}>{item.label}</span>
+                            <span className={styles.sheetBarMenuItemIcon}>{item.selected ? '✔' : ''}</span>
+                            <span
+                                className={
+                                    item.hidden
+                                        ? `${styles.sheetBarMenuItemTitle} ${styles.sheetBarMenuItemHide}`
+                                        : `${styles.sheetBarMenuItemTitle}`
+                                }
+                            >
+                                {item.label}
+                            </span>
                         </li>
                     ))}
                 </ul>
@@ -89,14 +124,4 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
             </Button>
         </Dropdown2>
     );
-}
-
-function EffIcon(props: { item: ISheetBarMenuItem }) {
-    if (props.item.hide) {
-        return <Icon.HideIcon />;
-    }
-    if (props.item.selected) {
-        return <span className={styles.sheetBarMenuSvg}> ✔ </span>;
-    }
-    return <></>;
 }

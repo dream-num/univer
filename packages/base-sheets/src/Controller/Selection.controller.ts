@@ -124,40 +124,6 @@ export class SelectionController extends Disposable {
         );
     }
 
-    private _themeChangeInitialize() {
-        this._themeService.currentTheme$.subscribe(() => {
-            this._selectionRenderService.resetStyle();
-            const param = this._selectionManagerService.getSelections();
-            const current = this._selectionManagerService.getCurrent();
-            if (param == null || current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                return;
-            }
-            this._selectionRenderService.reset();
-            for (const selectionWithStyle of param) {
-                const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
-                selectionData.style = getNormalSelectionStyle(this._themeService);
-                this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
-            }
-        });
-    }
-
-    private _themeChangeInitialize() {
-        this._themeService.currentTheme$.subscribe(() => {
-            this._selectionRenderService.resetStyle();
-            const param = this._selectionManagerService.getSelections();
-            const current = this._selectionManagerService.getCurrent();
-            if (param == null || current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                return;
-            }
-            this._selectionRenderService.reset();
-            for (const selectionWithStyle of param) {
-                const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
-                selectionData.style = getNormalSelectionStyle(this._themeService);
-                this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
-            }
-        });
-    }
-
     private _initialRowHeader(sheetObject: ISheetObjectParam) {
         const { spreadsheetRowHeader, spreadsheet, scene } = sheetObject;
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);

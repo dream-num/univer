@@ -64,7 +64,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                 <div className={`${styles.slideTabContent}`}>
                     <div className={`${styles.slideTabDivider}`}></div>
                     <div className={`${styles.slideTabTitle}`}>
-                        <span className={`${styles.slideTabSpan}`} style={{ padding: '2px 5px 2px 5px' }}>
+                        <span className={`${styles.slideTabSpan}`}>
                             <InputEdit sheetId={sheetId} sheetName={label ?? ''} />
                         </span>
                     </div>

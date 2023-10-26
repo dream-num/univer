@@ -2,8 +2,10 @@ import {
     ExpandSelectionCommand,
     IExpandSelectionCommandParams,
     IMoveSelectionCommandParams,
+    IMoveSelectionEnterAndTabCommandParams,
     ISelectAllCommandParams,
     MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
     SelectAllCommand,
 } from '@univerjs/base-sheets';
 import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
@@ -51,13 +53,47 @@ export const MoveSelectionRightShortcutItem: IShortcutItem<IMoveSelectionCommand
     },
 };
 
-export const MoveSelectionTabShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
-    id: MoveSelectionCommand.id,
+export const MoveSelectionTabShortcutItem: IShortcutItem<IMoveSelectionEnterAndTabCommandParams> = {
+    id: MoveSelectionEnterAndTabCommand.id,
     binding: KeyCode.TAB,
     priority: 100,
     preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.RIGHT,
+        keycode: KeyCode.TAB,
+    },
+};
+
+export const MoveSelectionTabLeftShortcutItem: IShortcutItem<IMoveSelectionEnterAndTabCommandParams> = {
+    id: MoveSelectionEnterAndTabCommand.id,
+    binding: KeyCode.TAB | MetaKeys.SHIFT,
+    priority: 100,
+    preconditions: whenEditorNotActivated,
+    staticParameters: {
+        direction: Direction.LEFT,
+        keycode: KeyCode.TAB,
+    },
+};
+
+export const MoveSelectionEnterShortcutItem: IShortcutItem<IMoveSelectionEnterAndTabCommandParams> = {
+    id: MoveSelectionEnterAndTabCommand.id,
+    binding: KeyCode.ENTER,
+    priority: 100,
+    preconditions: whenEditorNotActivated,
+    staticParameters: {
+        direction: Direction.DOWN,
+        keycode: KeyCode.ENTER,
+    },
+};
+
+export const MoveSelectionEnterUpShortcutItem: IShortcutItem<IMoveSelectionEnterAndTabCommandParams> = {
+    id: MoveSelectionEnterAndTabCommand.id,
+    binding: KeyCode.ENTER | MetaKeys.SHIFT,
+    priority: 100,
+    preconditions: whenEditorNotActivated,
+    staticParameters: {
+        direction: Direction.UP,
+        keycode: KeyCode.ENTER,
     },
 };
 

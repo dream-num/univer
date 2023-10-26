@@ -1,3 +1,4 @@
+import { KeyCode } from '@univerjs/base-ui';
 import {
     CommandType,
     Direction,
@@ -7,12 +8,14 @@ import {
     IUniverInstanceService,
     RANGE_TYPE,
     Rectangle,
+    Tools,
 } from '@univerjs/core';
 
 import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
 } from '../../services/selection/selection-manager.service';
+import { ShortcutExperienceService } from '../../services/shortcut-experience.service';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import {
     checkIfShrink,
@@ -67,6 +70,13 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             return false;
         }
 
+        // If there are changes to the selection, clear the start position saved by the tab. This function works in conjunction with the enter and tab shortcuts.
+        accessor.get(ShortcutExperienceService).remove({
+            unitId: workbook.getUnitId(),
+            sheetId: worksheet.getSheetId(),
+            keycode: KeyCode.TAB,
+        });
+
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId: workbook.getUnitId(),
             sheetId: worksheet.getSheetId(),
@@ -87,6 +97,144 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
                     },
                 },
             ],
+        });
+    },
+};
+
+export interface IMoveSelectionEnterAndTabCommandParams {
+    direction: Direction;
+    keycode: KeyCode;
+}
+
+/**
+ * Move selection for enter and tab
+ */
+export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTabCommandParams> = {
+    id: 'sheet.command.move-selection-enter-tab',
+    type: CommandType.COMMAND,
+    handler: async (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        const workbook = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        const selection = accessor.get(SelectionManagerService).getLast();
+        const unitId = workbook.getUnitId();
+        const sheetId = worksheet.getSheetId();
+        if (!selection) {
+            return false;
+        }
+
+        const { direction, keycode } = params;
+        const { range, primary } = selection;
+        let startRange = getStartRange(range, primary, direction);
+        const shortcutExperienceService = accessor.get(ShortcutExperienceService);
+
+        const shortcutExperienceParam = shortcutExperienceService.getCurrentBySearch({
+            unitId,
+            sheetId,
+            keycode: KeyCode.TAB,
+        });
+
+        let resultRange;
+        const { startRow, endRow, startColumn, endColumn } = range;
+        if (startRow < endRow || startColumn < endColumn) {
+            shortcutExperienceService.remove({
+                unitId,
+                sheetId,
+                keycode: KeyCode.TAB,
+            });
+
+            const newPrimary = Tools.deepClone(primary);
+
+            const next = findNextRange(
+                {
+                    startRow: newPrimary.startRow,
+                    startColumn: newPrimary.startColumn,
+                    endRow: newPrimary.endRow,
+                    endColumn: newPrimary.endColumn,
+                },
+                direction,
+                worksheet,
+                {
+                    startRow,
+                    endRow,
+                    startColumn,
+                    endColumn,
+                }
+            );
+
+            const destRange = getCellAtRowCol(next.startRow, next.startColumn, worksheet);
+
+            resultRange = {
+                range: Rectangle.clone(range),
+                primary: {
+                    startRow: destRange.startRow,
+                    startColumn: destRange.startColumn,
+                    endRow: destRange.endRow,
+                    endColumn: destRange.endColumn,
+                    actualRow: next.startRow,
+                    actualColumn: next.startColumn,
+                    isMerged: destRange.isMerged,
+                    isMergedMainCell:
+                        destRange.startRow === next.startRow && destRange.startColumn === next.startColumn,
+                },
+            };
+        } else {
+            if (keycode === KeyCode.TAB) {
+                if (shortcutExperienceParam == null) {
+                    shortcutExperienceService.addOrUpdate({
+                        unitId,
+                        sheetId,
+                        keycode: KeyCode.TAB,
+                        selection,
+                    });
+                }
+            } else {
+                const selectionRemain = shortcutExperienceParam?.selection;
+
+                if (selectionRemain != null) {
+                    const { range, primary } = selectionRemain;
+                    startRange = getStartRange(range, primary, direction);
+                }
+
+                shortcutExperienceService.remove({
+                    unitId,
+                    sheetId,
+                    keycode: KeyCode.TAB,
+                });
+            }
+
+            // the start range is from the primary selection range
+            const next = findNextRange(startRange, direction, worksheet);
+            const destRange = getCellAtRowCol(next.startRow, next.startColumn, worksheet);
+
+            if (Rectangle.equals(destRange, startRange)) {
+                return false;
+            }
+
+            resultRange = {
+                range: Rectangle.clone(destRange),
+                primary: {
+                    startRow: destRange.startRow,
+                    startColumn: destRange.startColumn,
+                    endRow: destRange.endRow,
+                    endColumn: destRange.endColumn,
+                    actualRow: next.startRow,
+                    actualColumn: next.startColumn,
+                    isMerged: destRange.isMerged,
+                    isMergedMainCell:
+                        destRange.startRow === next.startRow && destRange.startColumn === next.startColumn,
+                },
+            };
+        }
+
+        return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
+            unitId,
+            sheetId,
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            selections: [resultRange],
         });
     },
 };

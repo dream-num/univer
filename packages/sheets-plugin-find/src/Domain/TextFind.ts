@@ -1,4 +1,8 @@
-import { ISelectionRenderService, SelectionManagerService } from '@univerjs/base-sheets';
+import {
+    ISelectionRenderService,
+    SelectionManagerService,
+    transformCellDataToSelectionData,
+} from '@univerjs/base-sheets';
 import {
     FormatType,
     ICellData,
@@ -334,7 +338,7 @@ export class TextFinder {
         const sheetId = range.sheetId;
         const mergeData = workbook.getActiveSheet().getMergeData();
 
-        const selectionRange = this._selectionManagerService.transformCellDataToSelectionData(
+        const selectionRange = transformCellDataToSelectionData(
             range.range.startColumn,
             range.range.endColumn,
             mergeData

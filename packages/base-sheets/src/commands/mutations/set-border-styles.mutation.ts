@@ -57,7 +57,7 @@ export const SetBorderStylesUndoMutationFactory = (
 export const SetBorderStylesMutation: IMutation<ISetBorderStylesMutationParams, boolean> = {
     id: 'sheet.mutation.set-border-styles',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;

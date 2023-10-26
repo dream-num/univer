@@ -37,17 +37,17 @@ export const SetWorksheetActivateCommand: ICommand = {
             worksheetId,
         };
         // const undoMutationParams = SetWorksheetUnActivateMutationFactory(accessor, redoMutationParams);
-        const result = commandService.executeCommand(SetWorksheetActivateMutation.id, redoMutationParams);
+        const result = commandService.syncExecuteCommand(SetWorksheetActivateMutation.id, redoMutationParams);
 
         // no need
         // if (result) {
         //     undoRedoService.pushUndoRedo({
         //         URI: workbookId,
         //         undo() {
-        //             return commandService.executeCommand(SetWorksheetActivateMutation.id, undoMutationParams);
+        //             return commandService.syncExecuteCommand(SetWorksheetActivateMutation.id, undoMutationParams);
         //         },
         //         redo() {
-        //             return commandService.executeCommand(SetWorksheetActivateMutation.id, redoMutationParams);
+        //             return commandService.syncExecuteCommand(SetWorksheetActivateMutation.id, redoMutationParams);
         //         },
         //     });
         //     return true;

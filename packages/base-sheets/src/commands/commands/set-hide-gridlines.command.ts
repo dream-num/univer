@@ -55,16 +55,19 @@ export const SetHideGridlinesCommand: ICommand = {
         };
 
         const undoMutationParams = SetHideGridlinesUndoMutationFactory(accessor, setHideGridlinesMutationParams);
-        const result = commandService.executeCommand(SetHideGridlinesMutation.id, setHideGridlinesMutationParams);
+        const result = commandService.syncExecuteCommand(SetHideGridlinesMutation.id, setHideGridlinesMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetHideGridlinesMutation.id, undoMutationParams);
+                    return commandService.syncExecuteCommand(SetHideGridlinesMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetHideGridlinesMutation.id, setHideGridlinesMutationParams);
+                    return commandService.syncExecuteCommand(
+                        SetHideGridlinesMutation.id,
+                        setHideGridlinesMutationParams
+                    );
                 },
             });
             return true;

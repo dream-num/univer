@@ -37,16 +37,22 @@ export const SetFrozenCancelCommand: ICommand = {
         };
 
         const undoMutationParams: ISetFrozenMutationParams = SetFrozenMutationFactory(accessor, redoMutationParams);
-        const result = commandService.executeCommand(SetFrozenMutation.id, redoMutationParams);
+        const result = commandService.syncExecuteCommand(SetFrozenMutation.id, redoMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetFrozenMutation.id, undoMutationParams) as Promise<boolean>;
+                    return commandService.syncExecuteCommand(
+                        SetFrozenMutation.id,
+                        undoMutationParams
+                    ) as Promise<boolean>;
                 },
                 redo() {
-                    return commandService.executeCommand(SetFrozenMutation.id, redoMutationParams) as Promise<boolean>;
+                    return commandService.syncExecuteCommand(
+                        SetFrozenMutation.id,
+                        redoMutationParams
+                    ) as Promise<boolean>;
                 },
             });
             return true;

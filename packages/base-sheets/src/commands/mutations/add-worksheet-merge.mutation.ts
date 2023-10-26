@@ -27,7 +27,7 @@ export const AddMergeUndoMutationFactory = (
 export const AddWorksheetMergeMutation: IMutation<IAddWorksheetMergeMutationParams> = {
     id: 'sheet.mutation.add-worksheet-merge',
     type: CommandType.MUTATION,
-    handler: async (accessor: IAccessor, params: IAddWorksheetMergeMutationParams) => {
+    handler: (accessor: IAccessor, params: IAddWorksheetMergeMutationParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 

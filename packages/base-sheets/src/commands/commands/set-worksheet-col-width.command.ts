@@ -84,7 +84,10 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
             redoMutationParams
         );
 
-        const setColWidthResult = commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
+        const setColWidthResult = commandService.syncExecuteCommand(
+            SetWorksheetColWidthMutation.id,
+            redoMutationParams
+        );
 
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
             id: DeltaColumnWidthCommand.id,
@@ -146,7 +149,10 @@ export const SetColWidthCommand: ICommand = {
             accessor,
             redoMutationParams
         );
-        const setColWidthResult = commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
+        const setColWidthResult = commandService.syncExecuteCommand(
+            SetWorksheetColWidthMutation.id,
+            redoMutationParams
+        );
 
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
             id: SetColWidthCommand.id,

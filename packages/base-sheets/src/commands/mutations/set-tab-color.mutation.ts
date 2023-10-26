@@ -26,7 +26,7 @@ export const SetTabColorUndoMutationFactory = (
 export const SetTabColorMutation: IMutation<ISetTabColorMutationParams> = {
     id: 'sheet.mutation.set-tab-color',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);

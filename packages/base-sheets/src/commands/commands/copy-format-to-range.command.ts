@@ -70,15 +70,15 @@ export const CopyFormatToRangeCommand: ICommand = {
             accessor,
             setRangeStyleMutationParams
         );
-        const result = commandService.executeCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
+        const result = commandService.syncExecuteCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetRangeStyleMutation.id, undoMutationParams);
+                    return commandService.syncExecuteCommand(SetRangeStyleMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
+                    return commandService.syncExecuteCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
                 },
             });
             return true;

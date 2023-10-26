@@ -115,7 +115,7 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
             setRangeValuesMutationParams
         );
 
-        const setRangeValuesResult = commandService.executeCommand(
+        const setRangeValuesResult = commandService.syncExecuteCommand(
             SetRangeValuesMutation.id,
             setRangeValuesMutationParams
         );

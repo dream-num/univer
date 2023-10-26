@@ -38,16 +38,16 @@ export const SetZoomRatioCommand: ICommand = {
         };
 
         const undoMutationParams = SetZoomRatioUndoMutationFactory(accessor, setZoomRatioMutationParams);
-        const result = commandService.executeCommand(SetZoomRatioMutation.id, setZoomRatioMutationParams);
+        const result = commandService.syncExecuteCommand(SetZoomRatioMutation.id, setZoomRatioMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: documentId,
                 undo() {
-                    return commandService.executeCommand(SetZoomRatioMutation.id, undoMutationParams);
+                    return commandService.syncExecuteCommand(SetZoomRatioMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetZoomRatioMutation.id, setZoomRatioMutationParams);
+                    return commandService.syncExecuteCommand(SetZoomRatioMutation.id, setZoomRatioMutationParams);
                 },
             });
             return true;

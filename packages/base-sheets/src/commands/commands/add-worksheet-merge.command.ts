@@ -87,7 +87,10 @@ export const AddWorksheetMergeCommand: ICommand = {
             accessor,
             removeMergeMutationParams
         );
-        const removeResult = commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+        const removeResult = commandService.syncExecuteCommand(
+            RemoveWorksheetMergeMutation.id,
+            removeMergeMutationParams
+        );
 
         const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
             workbookId,
@@ -98,7 +101,7 @@ export const AddWorksheetMergeCommand: ICommand = {
             accessor,
             addMergeMutationParams
         );
-        const result = commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+        const result = commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
 
         if (result && removeResult) {
             undoRedoService.pushUndoRedo({
@@ -126,7 +129,10 @@ export const AddWorksheetMergeCommand: ICommand = {
                         ) as Promise<boolean>
                     ).then((res) => {
                         if (res)
-                            return commandService.executeCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+                            return commandService.syncExecuteCommand(
+                                AddWorksheetMergeMutation.id,
+                                addMergeMutationParams
+                            );
                         return false;
                     });
                 },

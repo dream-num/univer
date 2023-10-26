@@ -109,7 +109,7 @@ export const ClearSelectionFormatCommand: ICommand = {
 
         const result = sequenceExecute(sequenceExecuteList, commandService);
 
-        // const result = commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
+        // const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, clearMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 // If there are multiple mutations that form an encapsulated project, they must be encapsulated in the same undo redo element.

@@ -76,7 +76,7 @@ export const DeleteRangeUndoMutationFactory = (
 export const DeleteRangeMutation: IMutation<IDeleteRangeMutationParams, boolean> = {
     id: 'sheet.mutation.delete-range',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;

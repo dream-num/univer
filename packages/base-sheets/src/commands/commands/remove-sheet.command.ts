@@ -54,7 +54,10 @@ export const RemoveSheetCommand: ICommand = {
             accessor,
             activeSheetMutationParams
         );
-        const activeResult = commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams);
+        const activeResult = commandService.syncExecuteCommand(
+            SetWorksheetActivateMutation.id,
+            activeSheetMutationParams
+        );
 
         // prepare do mutations
         const RemoveSheetMutationParams: IRemoveSheetMutationParams = {
@@ -66,7 +69,7 @@ export const RemoveSheetCommand: ICommand = {
             RemoveSheetMutationParams
         );
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.executeCommand(RemoveSheetMutation.id, RemoveSheetMutationParams);
+        const result = commandService.syncExecuteCommand(RemoveSheetMutation.id, RemoveSheetMutationParams);
 
         if (result && activeResult) {
             undoRedoService.pushUndoRedo({
@@ -79,7 +82,10 @@ export const RemoveSheetCommand: ICommand = {
                         ) as Promise<boolean>
                     ).then((res) => {
                         if (res)
-                            return commandService.executeCommand(SetWorksheetActivateMutation.id, activeMutationParams);
+                            return commandService.syncExecuteCommand(
+                                SetWorksheetActivateMutation.id,
+                                activeMutationParams
+                            );
                         return false;
                     });
                 },

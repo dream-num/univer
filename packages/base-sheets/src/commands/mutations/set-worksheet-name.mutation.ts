@@ -26,7 +26,7 @@ export const SetWorksheetNameMutationFactory = (
 export const SetWorksheetNameMutation: IMutation<ISetWorksheetNameMutationParams> = {
     id: 'sheet.mutation.set-worksheet-name',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
 
         if (universheet == null) {

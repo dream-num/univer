@@ -38,16 +38,19 @@ export const SetWorksheetOrderCommand: ICommand = {
         };
 
         const undoMutationParams = SetWorksheetOrderUndoMutationFactory(accessor, setWorksheetOrderMutationParams);
-        const result = commandService.executeCommand(SetWorksheetOrderMutation.id, setWorksheetOrderMutationParams);
+        const result = commandService.syncExecuteCommand(SetWorksheetOrderMutation.id, setWorksheetOrderMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetWorksheetOrderMutation.id, undoMutationParams);
+                    return commandService.syncExecuteCommand(SetWorksheetOrderMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetWorksheetOrderMutation.id, setWorksheetOrderMutationParams);
+                    return commandService.syncExecuteCommand(
+                        SetWorksheetOrderMutation.id,
+                        setWorksheetOrderMutationParams
+                    );
                 },
             });
             return true;

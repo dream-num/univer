@@ -39,16 +39,16 @@ export const SetTabColorCommand: ICommand = {
         };
 
         const undoMutationParams = SetTabColorUndoMutationFactory(accessor, setTabColorMutationParams);
-        const result = commandService.executeCommand(SetTabColorMutation.id, setTabColorMutationParams);
+        const result = commandService.syncExecuteCommand(SetTabColorMutation.id, setTabColorMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetTabColorMutation.id, undoMutationParams);
+                    return commandService.syncExecuteCommand(SetTabColorMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetTabColorMutation.id, setTabColorMutationParams);
+                    return commandService.syncExecuteCommand(SetTabColorMutation.id, setTabColorMutationParams);
                 },
             });
             return true;

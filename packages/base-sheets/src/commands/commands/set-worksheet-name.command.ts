@@ -38,16 +38,16 @@ export const SetWorksheetNameCommand: ICommand = {
             accessor,
             redoMutationParams
         );
-        const result = commandService.executeCommand(SetWorksheetNameMutation.id, redoMutationParams);
+        const result = commandService.syncExecuteCommand(SetWorksheetNameMutation.id, redoMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetWorksheetNameMutation.id, undoMutationParams);
+                    return commandService.syncExecuteCommand(SetWorksheetNameMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetWorksheetNameMutation.id, redoMutationParams);
+                    return commandService.syncExecuteCommand(SetWorksheetNameMutation.id, redoMutationParams);
                 },
             });
 

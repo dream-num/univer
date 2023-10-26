@@ -50,17 +50,17 @@ export const ClearSelectionContentCommand: ICommand = {
             clearMutationParams
         );
 
-        const result = commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
+        const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, clearMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 // If there are multiple mutations that form an encapsulated project, they must be encapsulated in the same undo redo element.
                 // Hooks can be used to hook the code of external controllers to add new actions.
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetRangeValuesMutation.id, undoClearMutationParams);
+                    return commandService.syncExecuteCommand(SetRangeValuesMutation.id, undoClearMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
+                    return commandService.syncExecuteCommand(SetRangeValuesMutation.id, clearMutationParams);
                 },
             });
 

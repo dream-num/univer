@@ -67,7 +67,7 @@ export const CopyValuesToRangeCommand: ICommand = {
             accessor,
             setRangeFormattedValueMutationParams
         );
-        const result = commandService.executeCommand(
+        const result = commandService.syncExecuteCommand(
             SetRangeFormattedValueMutation.id,
             setRangeFormattedValueMutationParams
         );
@@ -75,10 +75,10 @@ export const CopyValuesToRangeCommand: ICommand = {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetRangeFormattedValueMutation.id, undoMutationParams);
+                    return commandService.syncExecuteCommand(SetRangeFormattedValueMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(
+                    return commandService.syncExecuteCommand(
                         SetRangeFormattedValueMutation.id,
                         setRangeFormattedValueMutationParams
                     );

@@ -82,15 +82,15 @@ export const SetSelectionFrozenCommand: ICommand = {
         };
         const undoMutationParams: ISetFrozenMutationParams = SetFrozenMutationFactory(accessor, redoMutationParams);
 
-        const result = commandService.executeCommand(SetFrozenMutation.id, redoMutationParams);
+        const result = commandService.syncExecuteCommand(SetFrozenMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetFrozenMutation.id, undoMutationParams);
+                    return commandService.syncExecuteCommand(SetFrozenMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetFrozenMutation.id, redoMutationParams);
+                    return commandService.syncExecuteCommand(SetFrozenMutation.id, redoMutationParams);
                 },
             });
             return true;
@@ -126,16 +126,16 @@ export const SetFrozenCommand: ICommand = {
         };
 
         const undoMutationParams: ISetFrozenMutationParams = SetFrozenMutationFactory(accessor, redoMutationParams);
-        const result = commandService.executeCommand(SetFrozenMutation.id, redoMutationParams);
+        const result = commandService.syncExecuteCommand(SetFrozenMutation.id, redoMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetFrozenMutation.id, undoMutationParams);
+                    return commandService.syncExecuteCommand(SetFrozenMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetFrozenMutation.id, redoMutationParams);
+                    return commandService.syncExecuteCommand(SetFrozenMutation.id, redoMutationParams);
                 },
             });
             return true;

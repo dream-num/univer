@@ -282,7 +282,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const undoMutationParams: ISetWorksheetRowIsAutoHeightMutationParams =
             SetWorksheetRowIsAutoHeightMutationFactory(accessor, redoMutationParams);
 
-        const setIsAutoHeightResult = commandService.executeCommand(
+        const setIsAutoHeightResult = commandService.syncExecuteCommand(
             SetWorksheetRowIsAutoHeightMutation.id,
             redoMutationParams
         );
@@ -292,8 +292,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
             params: redoMutationParams,
         });
 
-        const result = await sequenceExecute([...redos], commandService);
-
+        const result = sequenceExecute([...redos], commandService);
         if (setIsAutoHeightResult && result.result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,

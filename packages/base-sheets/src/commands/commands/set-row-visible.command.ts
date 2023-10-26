@@ -80,7 +80,6 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
             commandService
         );
 
-        commandService.executeCommand(SetRowVisibleMutation.id, redoMutationParams);
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,

@@ -23,7 +23,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
 import { SHEET_UI_PLUGIN_NAME } from '../Basics';
-import { RenameSheetCommand } from '../commands/commands/rename.command';
+import { RenameSheetOperation } from '../commands/commands/rename.command';
 import {
     SetCopySelectionCommand,
     SetInfiniteFormatPainterCommand,
@@ -85,7 +85,7 @@ import {
     TextRotateMenuItemFactory,
     UnderlineMenuItemFactory,
     UndoMenuItemFactory,
-    // UnHideSheetMenuItemFactory,
+    UnHideSheetMenuItemFactory,
     VerticalAlignMenuItemFactory,
     WrapTextMenuItemFactory,
 } from './menu/menu';
@@ -164,7 +164,7 @@ export class SheetUIController extends Disposable {
             SetFontSizeCommand,
 
             ShowMenuListCommand,
-            RenameSheetCommand,
+            RenameSheetOperation,
 
             SetCellEditOperation,
 
@@ -240,7 +240,7 @@ export class SheetUIController extends Disposable {
                 RenameSheetMenuItemFactory,
                 ChangeColorSheetMenuItemFactory,
                 HideSheetMenuItemFactory,
-                // UnHideSheetMenuItemFactory,
+                UnHideSheetMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));

@@ -121,6 +121,8 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     private _isSelectionEnabled: boolean = true;
 
+    private _isShowPreviousEnable: boolean | number = 0;
+
     private readonly _selectionRangeWithStyle$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
 
     readonly selectionRangeWithStyle$ = this._selectionRangeWithStyle$.asObservable();
@@ -161,6 +163,14 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     disableSelection() {
         this._isSelectionEnabled = false;
+    }
+
+    enableShowPrevious() {
+        this._isShowPreviousEnable = true;
+    }
+
+    disableShowPrevious() {
+        this._isShowPreviousEnable = false;
     }
 
     getViewPort() {
@@ -442,7 +452,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         }
 
         // In addition to pressing the ctrl or shift key, we must clear the previous selection
-        if (curControls.length > 0 && !evt.ctrlKey && !evt.shiftKey) {
+        if (curControls.length > 0 && !evt.ctrlKey && !evt.shiftKey && !this._isShowPreviousEnable) {
             for (const control of curControls) {
                 control.dispose();
             }

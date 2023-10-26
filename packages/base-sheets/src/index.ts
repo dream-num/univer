@@ -5,11 +5,7 @@ export * from './SheetPlugin';
 // #region services
 
 export { BorderStyleManagerService } from './services/border-style-manager.service';
-export {
-    COPY_SELECTION_PLUGIN_NAME,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-} from './services/selection/selection-manager.service';
+export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './services/selection/selection-manager.service';
 
 // #endregion
 
@@ -157,7 +153,11 @@ export {
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { type ISetSelectionsOperationParams } from './commands/operations/selection.operation';
-export { SetCopySelectionsOperation, SetSelectionsOperation } from './commands/operations/selection.operation';
+export {
+    FORMAT_PAINTER_SELECTION_PLUGIN_NAME,
+    SetCopySelectionsOperation,
+    SetSelectionsOperation,
+} from './commands/operations/selection.operation';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export * from './Locale';
 export { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';

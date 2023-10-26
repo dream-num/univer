@@ -1,8 +1,8 @@
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/base-render';
 import {
+    FORMAT_PAINTER_SELECTION_PLUGIN_NAME,
     ISetRangeValuesCommandParams,
     ISetSelectionsOperationParams,
-    NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetRangeValuesCommand,
     SetSelectionsOperation,
@@ -58,7 +58,8 @@ export class FormatPainterController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (
                     command.id === SetSelectionsOperation.id &&
-                    (command.params as ISetSelectionsOperationParams)?.pluginName === NORMAL_SELECTION_PLUGIN_NAME
+                    (command.params as ISetSelectionsOperationParams)?.pluginName ===
+                        FORMAT_PAINTER_SELECTION_PLUGIN_NAME
                 ) {
                     const isFormatPainterOn = this._formatPainterService.getStatus() !== FormatPainterStatus.OFF;
                     if (!isFormatPainterOn) return;

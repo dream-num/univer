@@ -1,4 +1,9 @@
-import { COPY_SELECTION_PLUGIN_NAME, SelectionManagerService, SetCopySelectionsOperation } from '@univerjs/base-sheets';
+import {
+    FORMAT_PAINTER_SELECTION_PLUGIN_NAME,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+    SetCopySelectionsOperation,
+} from '@univerjs/base-sheets';
 import { CommandType, ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -63,25 +68,29 @@ export const SetCopySelectionCommand: ICommand = {
         const workbookId = currentService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = currentService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         let setSelectionsParam;
+        const selectionManagerService = accessor.get(SelectionManagerService);
+        const selections = selectionManagerService.getSelections();
+        if (!selections || selections.length === 0) {
+            return false;
+        }
+
         if (params.show) {
-            const selectionManagerService = accessor.get(SelectionManagerService);
-            const selections = selectionManagerService.getSelections();
-            if (!selections || selections.length === 0) {
-                return false;
-            }
             const { range, primary, style } = selections[0];
             setSelectionsParam = {
                 workbookId,
                 worksheetId,
-                pluginName: COPY_SELECTION_PLUGIN_NAME,
+                pluginName: FORMAT_PAINTER_SELECTION_PLUGIN_NAME,
                 selections: [{ range, primary, style: null }],
+                show: true,
             };
         } else {
+            const { range, primary, style } = selections[selections.length - 1];
             setSelectionsParam = {
                 workbookId,
                 worksheetId,
-                pluginName: COPY_SELECTION_PLUGIN_NAME,
-                selections: [],
+                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                selections: [{ range, primary, style }],
+                show: false,
             };
         }
 

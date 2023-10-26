@@ -24,6 +24,7 @@ import { Inject } from '@wendellhu/redi';
 import { getCoordByOffset, getSheetObject } from '../Basics/component-tools';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
+import { ScrollCommand } from '../commands/commands/set-scroll.command';
 import { ISetFrozenMutationParams, SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { ScrollManagerService } from '../services/scroll-manager.service';
@@ -608,13 +609,12 @@ export class FreezeController extends Disposable {
                 right: 0,
             });
             viewMain.resetPadding();
-            viewMain.scrollTo(
-                {
-                    x: 0,
-                    y: 0,
-                },
-                false
-            );
+            this._commandService.executeCommand(ScrollCommand.id, {
+                sheetViewStartRow: 0,
+                sheetViewStartColumn: 0,
+                offsetX: 0,
+                offsetY: 0,
+            });
         } else if (isTopView === true && isLeftView === false) {
             const topGap = endSheetView.startY - startSheetView.startY;
             viewMain.resize({
@@ -629,12 +629,10 @@ export class FreezeController extends Disposable {
                 startX: 0,
                 endX: 0,
             });
-            viewMain.scrollTo(
-                {
-                    y: 0,
-                },
-                false
-            );
+            this._commandService.executeCommand(ScrollCommand.id, {
+                sheetViewStartRow: 0,
+                offsetY: 0,
+            });
             viewMainTop.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,
@@ -695,12 +693,10 @@ export class FreezeController extends Disposable {
                 startY: 0,
                 endY: 0,
             });
-            viewMain.scrollTo(
-                {
-                    x: 0,
-                },
-                false
-            );
+            this._commandService.executeCommand(ScrollCommand.id, {
+                sheetViewStartColumn: 0,
+                offsetX: 0,
+            });
             viewMainLeft.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,
@@ -763,13 +759,12 @@ export class FreezeController extends Disposable {
                 startX: startSheetView.startX,
                 endX: endSheetView.startX,
             });
-            viewMain.scrollTo(
-                {
-                    x: 0,
-                    y: 0,
-                },
-                false
-            );
+            this._commandService.executeCommand(ScrollCommand.id, {
+                sheetViewStartRow: 0,
+                sheetViewStartColumn: 0,
+                offsetX: 0,
+                offsetY: 0,
+            });
             viewMainLeft.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop + topGap,

@@ -632,9 +632,11 @@ export class Scene extends ThinScene {
         this.getLayers().forEach((layer) => {
             layer.dispose();
         });
+
         this.getViewports().forEach((viewport) => {
             viewport.dispose();
         });
+
         this.clearLayer();
         this.clearViewports();
         this.detachControl();
@@ -653,9 +655,11 @@ export class Scene extends ThinScene {
     // Determine the only object selected
     override pick(coord: Vector2): Nullable<BaseObject | Scene | ThinScene> {
         let pickedViewport = this.getActiveViewportByCoord(coord);
+
         if (!pickedViewport) {
             pickedViewport = this._viewports[0];
         }
+
         if (!this.evented || !pickedViewport) {
             return;
         }

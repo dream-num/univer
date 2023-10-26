@@ -57,6 +57,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
             ctx.lineTo(0, topLeft);
             ctx.arc(topLeft, topLeft, topLeft, Math.PI, (Math.PI * 3) / 2, false);
         }
+
         ctx.closePath();
         this._renderPaintInOrder(ctx, props);
     }
@@ -68,6 +69,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
                 props[key] = this[key as keyof Rect];
             }
         });
+
         return {
             ...super.toJson(),
             ...props,

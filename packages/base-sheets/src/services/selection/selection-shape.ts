@@ -28,6 +28,8 @@ enum SELECTION_MANAGER_KEY {
     lineContent = '__SpreadsheetDragLineContentControl__',
     line = '__SpreadsheetDragLineControl__',
 
+    dash = '__SpreadsheetDragDashControl__',
+
     rowHeaderBackground = '__SpreadSheetSelectionRowHeaderBackground__',
     rowHeaderBorder = '__SpreadSheetSelectionRowHeaderBorder__',
     rowHeaderGroup = '__SpreadSheetSelectionRowHeaderGroup__',
@@ -102,6 +104,8 @@ export class SelectionShape {
     private _bottomCenterWidget!: Rect;
 
     private _bottomRightWidget!: Rect;
+
+    private _dashRect!: Rect;
 
     private _selectionModel!: SelectionRenderModel;
 
@@ -224,6 +228,10 @@ export class SelectionShape {
         return this._selectionStyle;
     }
 
+    get dashRect() {
+        return this._dashRect;
+    }
+
     static fromJson(
         scene: Scene,
         zIndex: number,
@@ -265,6 +273,8 @@ export class SelectionShape {
             hasAutoFill = defaultStyle.hasAutoFill!,
 
             AutofillStroke = defaultStyle.AutofillStroke!,
+
+            strokeDash,
         } = style;
 
         let {
@@ -332,6 +342,24 @@ export class SelectionShape {
             fill: stroke,
             stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
         });
+
+        if (strokeDash == null) {
+            this.dashRect.hide();
+        } else {
+            this.dashRect.transformByState({
+                height: endY - startY,
+                width: endX - startX,
+                strokeWidth,
+                left: -1,
+                top: -1,
+            });
+
+            this.dashRect.setProps({
+                strokeDashArray: [0, strokeDash],
+            });
+
+            this.dashRect.show();
+        }
 
         if (hasAutoFill === true && !this._hasWidgets(widgets)) {
             this.fillControl.setProps({
@@ -529,6 +557,12 @@ export class SelectionShape {
             zIndex: zIndex + 1,
         });
 
+        this._dashRect = new Rect(SELECTION_MANAGER_KEY.dash + zIndex, {
+            zIndex: zIndex + 2,
+            evented: false,
+            stroke: '#fff',
+        });
+
         const shapes = [
             this._fillControl,
             this._leftControl,
@@ -539,6 +573,7 @@ export class SelectionShape {
             this._backgroundControlMiddleLeft,
             this._backgroundControlMiddleRight,
             this._backgroundControlBottom,
+            this._dashRect,
         ];
 
         this._widgetRects = this._initialWidget();

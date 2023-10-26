@@ -20,10 +20,12 @@ import {
     Scene,
     ScrollBar,
 } from '@univerjs/base-render';
+import { KeyCode } from '@univerjs/base-ui';
 import {
     Disposable,
     DocumentModel,
     FOCUSING_EDITOR,
+    FOCUSING_EDITOR_BUT_HIDDEN,
     HorizontalAlign,
     ICommandInfo,
     ICommandService,
@@ -45,7 +47,7 @@ import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../Basics/editor/get-editor-object';
-import { SetCellEditOperation } from '../../commands/operations/cell-edit.operation';
+import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import styles from '../../View/SheetContainer/index.module.less';
@@ -64,6 +66,8 @@ interface ICanvasOffset {
 @OnLifecycle(LifecycleStages.Steady, StartEditController)
 export class StartEditController extends Disposable {
     private _onInputSubscription: Nullable<Subscription>;
+
+    private _onInputActivateSubscription: Nullable<Subscription>;
 
     private _editorVisiblePrevious = false;
 
@@ -88,6 +92,8 @@ export class StartEditController extends Disposable {
 
     override dispose(): void {
         this._onInputSubscription?.unsubscribe();
+
+        this._onInputActivateSubscription?.unsubscribe();
     }
 
     private _initialize() {
@@ -104,7 +110,7 @@ export class StartEditController extends Disposable {
     }
 
     private _initialEditFocusListener() {
-        this._editorBridgeService.state$.subscribe((param) => {
+        this._onInputSubscription = this._editorBridgeService.state$.subscribe((param) => {
             if (param == null) {
                 return;
             }
@@ -150,6 +156,8 @@ export class StartEditController extends Disposable {
                 unitId: docParam.unitId,
             });
 
+            this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
+
             this._textSelectionRenderManager.changeRuntime(documentSkeleton, scene);
 
             this._textSelectionManagerService.replace([
@@ -163,46 +171,6 @@ export class StartEditController extends Disposable {
             ]);
             this._textSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
         });
-    }
-
-    private _predictingSize(
-        actualRangeWithCoord: IPosition,
-        canvasOffset: ICanvasOffset,
-        documentSkeleton: DocumentSkeleton,
-        documentLayoutObject: IDocumentLayoutObject
-    ) {
-        const { startX, endX } = actualRangeWithCoord;
-
-        const { textRotation, wrapStrategy } = documentLayoutObject;
-
-        const { a: angle } = textRotation as ITextRotation;
-
-        const clientWidth = document.body.clientWidth;
-
-        if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-            return documentSkeleton.getActualSize();
-        }
-        documentSkeleton.getModel().updateDocumentDataPageSize(clientWidth - startX - canvasOffset.left);
-        documentSkeleton.calculate();
-
-        const size = documentSkeleton.getActualSize();
-
-        let editorWidth = endX - startX;
-
-        if (editorWidth < size.actualWidth + EDITOR_INPUT_SELF_EXTEND_GAP) {
-            editorWidth = size.actualWidth + EDITOR_INPUT_SELF_EXTEND_GAP;
-        }
-
-        documentSkeleton.getModel()!.updateDocumentDataPageSize(editorWidth);
-
-        documentSkeleton.getModel()!.updateDocumentRenderConfig({
-            horizontalAlign: HorizontalAlign.UNSPECIFIED,
-        });
-
-        return {
-            actualWidth: editorWidth,
-            actualHeight: size.actualHeight,
-        };
     }
 
     private _fitTextSize(
@@ -256,6 +224,55 @@ export class StartEditController extends Disposable {
         // this._textSelectionRenderManager.sync();
     }
 
+    /**
+     * Mainly used to pre-calculate the width of the editor,
+     * to determine whether it needs to be automatically widened.
+     */
+    private _predictingSize(
+        actualRangeWithCoord: IPosition,
+        canvasOffset: ICanvasOffset,
+        documentSkeleton: DocumentSkeleton,
+        documentLayoutObject: IDocumentLayoutObject
+    ) {
+        const { startX, endX } = actualRangeWithCoord;
+
+        const { textRotation, wrapStrategy } = documentLayoutObject;
+
+        const { a: angle } = textRotation as ITextRotation;
+
+        const clientWidth = document.body.clientWidth;
+
+        if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
+            return documentSkeleton.getActualSize();
+        }
+        documentSkeleton.getModel().updateDocumentDataPageSize(clientWidth - startX - canvasOffset.left);
+        documentSkeleton.calculate();
+
+        const size = documentSkeleton.getActualSize();
+
+        let editorWidth = endX - startX;
+
+        if (editorWidth < size.actualWidth + EDITOR_INPUT_SELF_EXTEND_GAP) {
+            editorWidth = size.actualWidth + EDITOR_INPUT_SELF_EXTEND_GAP;
+        }
+
+        documentSkeleton.getModel()!.updateDocumentDataPageSize(editorWidth);
+
+        documentSkeleton.getModel()!.updateDocumentRenderConfig({
+            horizontalAlign: HorizontalAlign.UNSPECIFIED,
+        });
+
+        return {
+            actualWidth: editorWidth,
+            actualHeight: size.actualHeight,
+        };
+    }
+
+    /**
+     * Mainly used to calculate the volume of scenes and objects,
+     * determine whether a scrollbar appears,
+     * and calculate the editor's boundaries relative to the browser.
+     */
     private _editAreaProcessing(
         editorWidth: number,
         editorHeight: number,
@@ -326,6 +343,9 @@ export class StartEditController extends Disposable {
         });
     }
 
+    /**
+     * Since the document does not support cell background color, an additional rect needs to be added.
+     */
     private _addBackground(scene: Scene, editorWidth: number, editorHeight: number, fill?: Nullable<string>) {
         const fillRectKey = '_backgroundRectHelperColor_';
         const rect = scene.getObject(fillRectKey) as Rect;
@@ -359,8 +379,8 @@ export class StartEditController extends Disposable {
     }
 
     private _initialStartEdit() {
-        this._editorBridgeService.visible$.subscribe((param) => {
-            const { visible, eventType } = param;
+        this._onInputActivateSubscription = this._editorBridgeService.visible$.subscribe((param) => {
+            const { visible, eventType, keycode } = param;
 
             if (visible === this._editorVisiblePrevious) {
                 return;
@@ -410,7 +430,10 @@ export class StartEditController extends Disposable {
 
                 document.makeDirty();
 
-                // skeleton.calculate();
+                if (keycode === KeyCode.BACKSPACE) {
+                    skeleton.calculate();
+                }
+
                 this._textSelectionManagerService.replace([
                     {
                         cursorStart: 0,
@@ -493,13 +516,17 @@ export class StartEditController extends Disposable {
 
         // this._editorBridgeService.show(DeviceInputEventType.Keyboard);
 
-        this._commandService.executeCommand(SetCellEditOperation.id, {
+        const event = config.event as KeyboardEvent;
+
+        this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
             visible: true,
             eventType: DeviceInputEventType.Keyboard,
+            keycode: event.which,
         });
     }
 
     private _commandExecutedListener() {
+        // Listen to document edits to refresh the size of the editor.
         const updateCommandList = [RichTextEditingMutation.id];
 
         const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY];

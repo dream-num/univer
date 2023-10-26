@@ -62,7 +62,7 @@ export class SelectionController extends Disposable {
 
         this._commandExecutedListener();
 
-        spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {});
+        spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add(() => {});
 
         this._userActionSyncListener();
 
@@ -99,6 +99,9 @@ export class SelectionController extends Disposable {
             }
             this._selectionRenderService.reset();
             for (const selectionWithStyle of param) {
+                if (selectionWithStyle == null) {
+                    continue;
+                }
                 const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
                 selectionData.style = getNormalSelectionStyle(this._themeService);
                 this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
@@ -122,7 +125,7 @@ export class SelectionController extends Disposable {
             }
         });
 
-        spreadsheetRowHeader?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {});
+        // spreadsheetRowHeader?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {});
     }
 
     private _initialColumnHeader(sheetObject: ISheetObjectParam) {
@@ -150,6 +153,9 @@ export class SelectionController extends Disposable {
             }
 
             for (const selectionWithStyle of param) {
+                if (selectionWithStyle == null) {
+                    continue;
+                }
                 const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
                 this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
             }
@@ -204,7 +210,7 @@ export class SelectionController extends Disposable {
             if (param == null) {
                 return;
             }
-            const { unitId, sheetId, skeleton, commandId } = param;
+            const { unitId, sheetId, skeleton } = param;
 
             const currentRender = this._renderManagerService.getRenderById(unitId);
 

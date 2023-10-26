@@ -88,7 +88,7 @@ export class DocRenderController extends Disposable {
 
         if (engineWidth > docsWidth) {
             docsLeft = engineWidth / 2 - docsWidth / 2;
-            sceneWidth = engineWidth - 30;
+            sceneWidth = engineWidth - 34;
         } else {
             docsLeft = pageMarginLeft;
             sceneWidth = docsWidth + pageMarginLeft * 2;
@@ -96,7 +96,7 @@ export class DocRenderController extends Disposable {
 
         if (engineHeight > docsHeight) {
             docsTop = engineHeight / 2 - docsHeight / 2;
-            sceneHeight = engineHeight - 30;
+            sceneHeight = engineHeight - 34;
         } else {
             docsTop = pageMarginTop;
             sceneHeight = docsHeight + pageMarginTop * 2;

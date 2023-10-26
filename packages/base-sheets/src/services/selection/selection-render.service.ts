@@ -73,7 +73,13 @@ export interface ISelectionRenderService {
 /**
  * TODO 注册selection拦截，可能在有公式ArrayObject时，fx公式栏显示不同
  *
- * SelectionManager 维护model数据list，action也是修改这一层数据，obs监听到数据变动后，自动刷新（control仍然可以持有数据）
+ * SelectionRenderService 维护viewModel数据list，action也是修改这一层数据，obs监听到数据变动后，自动刷新（control仍然可以持有数据）
+ *
+ * This service is related to the drawing of the selection.
+ * By modifying the properties of the service,
+ * you can adjust the style and performance of each selection area.
+ * This service is used in conjunction with the SelectionManagerService
+ * to implement functions related to the selection area in univer.
  */
 export class SelectionRenderService implements ISelectionRenderService {
     hasSelection: boolean = false;
@@ -117,14 +123,17 @@ export class SelectionRenderService implements ISelectionRenderService {
     // If true, the selector will respond to the range of merged cells and automatically extend the selected range. If false, it will ignore the merged cells.
     private _isDetectMergedCell: Boolean = true;
 
+    // The style of the selection area, including dashed lines, color, thickness, autofill, other points for modifying the range of the selection area, title highlighting, and so on, can all be customized.
     private _selectionStyle!: ISelectionStyle;
 
+    // Whether to enable the selection area. If set to false, the user cannot draw a selection area in the content area by clicking with the mouse.
     private _isSelectionEnabled: boolean = true;
 
     private _isShowPreviousEnable: boolean | number = 0;
 
     private readonly _selectionRangeWithStyle$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
 
+    // When the user draws a selection area in the canvas content area, this event is broadcasted when the drawing ends.
     readonly selectionRangeWithStyle$ = this._selectionRangeWithStyle$.asObservable();
 
     private _activeViewport!: Viewport;

@@ -25,6 +25,7 @@ export {
     type IAddWorksheetMergeMutationParams,
     type IRemoveWorksheetMergeMutationParams,
 } from './Basics/Interfaces/MutationInterface';
+export { transformCellDataToSelectionData } from './Basics/selection';
 export {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -85,7 +86,9 @@ export type {
 } from './commands/commands/set-selections.command';
 export {
     ExpandSelectionCommand,
+    type IMoveSelectionEnterAndTabCommandParams,
     MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
     SelectAllCommand,
 } from './commands/commands/set-selections.command';
 export {
@@ -118,6 +121,12 @@ export {
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
 export { ChangeZoomRatioCommand, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 export { getPrimaryForRange } from './commands/commands/utils/selection-util';
+export {
+    findNextGapRange,
+    findNextRange,
+    getCellAtRowCol,
+    getStartRange,
+} from './commands/commands/utils/selection-util';
 export { AddWorksheetMergeMutation } from './commands/mutations/add-worksheet-merge.mutation';
 export {
     InsertColMutation,

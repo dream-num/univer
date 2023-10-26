@@ -1,31 +1,10 @@
-import {
-    InsertSheetCommand,
-    InsertSheetMutation,
-    RemoveSheetMutation,
-    SetTabColorMutation,
-    SetWorksheetActivateCommand,
-    SetWorksheetActivateMutation,
-    SetWorksheetHideMutation,
-    SetWorksheetNameMutation,
-    SetWorksheetOrderMutation,
-    SetWorksheetShowCommand,
-} from '@univerjs/base-sheets';
-import {
-    AppContext,
-    BaseComponentProps,
-    BaseMenuItem,
-    BaseSelectProps,
-    IDisplayMenuItem,
-    IMenuItem,
-    ITabRef,
-    Menu,
-    TabPane,
-    Tabs,
-} from '@univerjs/base-ui';
-import { BooleanNumber, ICommandService, IKeyValue, IUniverInstanceService } from '@univerjs/core';
+import { InsertSheetCommand } from '@univerjs/base-sheets';
+import { ITabRef } from '@univerjs/base-ui';
+import { ICommandService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { IDisposable } from '@wendellhu/redi';
-import { Component, createRef } from 'react';
+import { AddWorksheet28, ScrollBarLeft12, ScrollBarRight12 } from '@univerjs/icons';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useRef } from 'react';
 
 import { SheetMenuPosition } from '../../controller/menu/menu';
 import styles from './index.module.less';

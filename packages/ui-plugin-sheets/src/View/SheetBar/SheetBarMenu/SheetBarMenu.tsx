@@ -8,8 +8,9 @@ import {
     SetWorksheetOrderMutation,
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
-import { Button, Dropdown2, joinClassNames } from '@univerjs/base-ui';
+import { Dropdown2, joinClassNames } from '@univerjs/base-ui';
 import { BooleanNumber, ICommandInfo, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { Button } from '@univerjs/design';
 import { Selectedo24, SwitchSheet28 } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';

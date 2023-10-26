@@ -21,7 +21,7 @@ export class SlideTabItem {
 
     _animate: Animate | null;
 
-    _midline: number;
+    _midline: number = 0;
 
     _translateX: number;
 
@@ -292,11 +292,11 @@ export class SlideTabBar {
 
     protected _wheelAction: (e: WheelEvent) => void;
 
-    protected _scrollIncremental: number;
+    protected _scrollIncremental: number = 0;
 
-    protected _compareDirection: number;
+    protected _compareDirection: number = 0;
 
-    protected _autoScrollTime: number | null;
+    protected _autoScrollTime: number | null = null;
 
     protected _slideScrollbar: SlideScrollbar;
 

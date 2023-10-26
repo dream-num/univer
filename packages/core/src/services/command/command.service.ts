@@ -41,6 +41,7 @@ export interface IMultiCommand<P extends object = object, R = boolean> extends I
  */
 export interface IMutation<P extends object = object, R = boolean> extends ICommand<P, R> {
     type: CommandType.MUTATION;
+
     /**
      * Mutations must be a sync process.
      * @param accessor
@@ -55,6 +56,13 @@ export interface IMutation<P extends object = object, R = boolean> extends IComm
  */
 export interface IOperation<P extends object = object, R = boolean> extends ICommand<P, R> {
     type: CommandType.OPERATION;
+
+    /**
+     * Operations must be a sync process.
+     * @param accessor
+     * @param params Params of the operation. A operation must has params.
+     */
+    handler(accessor: IAccessor, params: P): R;
 }
 
 /**

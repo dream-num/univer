@@ -23,7 +23,7 @@ export const SetZoomRatioUndoMutationFactory = (
 export const SetZoomRatioOperation: IOperation<ISetZoomRatioOperationParams> = {
     id: 'sheet.operation.set-zoom-ratio',
     type: CommandType.OPERATION,
-    handler: async (accessor, params: ISetZoomRatioOperationParams) => {
+    handler: (accessor, params: ISetZoomRatioOperationParams) => {
         const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
         if (!workbook) {
             return false;

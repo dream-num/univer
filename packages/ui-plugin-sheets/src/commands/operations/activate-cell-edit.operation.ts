@@ -7,7 +7,7 @@ import { IEditorBridgeService, IEditorBridgeServiceParam } from '../../services/
 export const SetActivateCellEditOperation: IOperation<IEditorBridgeServiceParam> = {
     id: 'sheet.operation.set-activate-cell-edit',
     type: CommandType.OPERATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const editorBridgeService = accessor.get(IEditorBridgeService);
 
         editorBridgeService.setState(params!);

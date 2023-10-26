@@ -14,7 +14,7 @@ export interface ISetTextSelectionsOperationParams {
 export const SetTextSelectionsOperation: IOperation<ISetTextSelectionsOperationParams> = {
     id: 'doc.operation.set-selections',
     type: CommandType.OPERATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         textSelectionManagerService.replace(params!.ranges);
         return true;

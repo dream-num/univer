@@ -7,7 +7,7 @@ import { IEditorBridgeService, IEditorBridgeServiceVisibleParam } from '../../se
 export const SetCellEditOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit',
     type: CommandType.OPERATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const editorBridgeService = accessor.get(IEditorBridgeService);
 
         if (params?.visible === true) {

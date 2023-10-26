@@ -111,7 +111,10 @@ export { SetColWidthCommand as SetWorksheetColWidthCommand } from './commands/co
 export { SetWorksheetHideCommand } from './commands/commands/set-worksheet-hide.command';
 export { SetWorksheetNameCommand } from './commands/commands/set-worksheet-name.command';
 export { SetWorksheetOrderCommand } from './commands/commands/set-worksheet-order.command';
-export { SetRowHeightCommand as SetWorksheetRowHeightCommand } from './commands/commands/set-worksheet-row-height.command';
+export {
+    SetRowHeightCommand as SetWorksheetRowHeightCommand,
+    SetWorksheetRowIsAutoHeightCommand,
+} from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
 export { ChangeZoomRatioCommand, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 export { getPrimaryForRange } from './commands/commands/utils/selection-util';

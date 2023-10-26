@@ -255,7 +255,7 @@ export const SetRowHeightCommand: ICommand = {
 
 export interface ISetRowAutoHeightCommandParams {}
 
-export const SetRowIsAutoHeightCommand: ICommand = {
+export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-is-auto-height',
     handler: async (accessor: IAccessor) => {
@@ -290,7 +290,7 @@ export const SetRowIsAutoHeightCommand: ICommand = {
         );
 
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
-            id: SetRowIsAutoHeightCommand.id,
+            id: SetWorksheetRowIsAutoHeightCommand.id,
             params: redoMutationParams,
         });
 

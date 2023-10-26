@@ -11,17 +11,20 @@ import {
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightMutation } from '../../..';
 import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
 } from '../../../services/selection/selection-manager.service';
 import {
+    SetWorksheetRowHeightMutation,
+    SetWorksheetRowIsAutoHeightMutation,
+} from '../../mutations/set-worksheet-row-height.mutation';
+import {
     DeltaRowHeightCommand,
     IDeltaRowHeightCommand,
     ISetRowHeightCommandParams,
     SetRowHeightCommand,
-    SetRowIsAutoHeightCommand,
+    SetWorksheetRowIsAutoHeightCommand,
 } from '../set-worksheet-row-height.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -53,7 +56,7 @@ describe('Test set row height commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(DeltaRowHeightCommand);
         commandService.registerCommand(SetRowHeightCommand);
-        commandService.registerCommand(SetRowIsAutoHeightCommand);
+        commandService.registerCommand(SetWorksheetRowIsAutoHeightCommand);
         commandService.registerCommand(SetWorksheetRowHeightMutation);
         commandService.registerCommand(SetWorksheetRowIsAutoHeightMutation);
 
@@ -162,7 +165,7 @@ describe('Test set row height commands', () => {
 
     describe('Set fit content in ranges', () => {
         it('Should change all rows isAutoHeight to true in selections', async () => {
-            await commandService.executeCommand(SetRowIsAutoHeightCommand.id);
+            await commandService.executeCommand(SetWorksheetRowIsAutoHeightCommand.id);
             expect(getRowIsAutoHeight(1)).toBe(true);
             expect(getRowIsAutoHeight(2)).toBe(true);
             expect(getRowIsAutoHeight(5)).toBe(true);

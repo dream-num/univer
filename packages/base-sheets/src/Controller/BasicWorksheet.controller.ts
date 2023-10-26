@@ -69,7 +69,7 @@ import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-ord
 import {
     DeltaRowHeightCommand,
     SetRowHeightCommand,
-    SetRowIsAutoHeightCommand,
+    SetWorksheetRowIsAutoHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
 import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
@@ -157,7 +157,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
             SetColWidthCommand,
             SetWorksheetColWidthMutation,
-            SetRowIsAutoHeightCommand,
+            SetWorksheetRowIsAutoHeightCommand,
             SetRowHeightCommand,
             SetWorksheetRowHeightMutation,
             SetWorksheetRowIsAutoHeightMutation,

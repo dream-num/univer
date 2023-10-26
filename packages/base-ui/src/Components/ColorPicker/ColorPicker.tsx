@@ -130,14 +130,15 @@ export function ColorPicker(props: IColorPickerProps) {
         onValueChange && onValueChange(value);
     }
 
-    function handleToggleMode() {
+    function handleToggleMode(e: React.MouseEvent) {
+        e.stopPropagation();
         setMode(mode === ColorPickerMode.PRESET ? ColorPickerMode.CUSTOM : ColorPickerMode.PRESET);
     }
 
     return (
         <section>
             {mode === ColorPickerMode.PRESET && (
-                <div onClick={handleStopPropagation}>
+                <div>
                     <div className={styles.colorPickerColorBlocks}>
                         {colorPresets.map((color) => (
                             <ColorBlock

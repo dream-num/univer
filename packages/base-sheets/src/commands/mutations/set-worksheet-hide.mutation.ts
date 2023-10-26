@@ -26,7 +26,7 @@ export const SetWorksheetHideMutationFactory = (
 export const SetWorksheetHideMutation: IMutation<ISetWorksheetHideMutationParams> = {
     id: 'sheet.mutation.set-worksheet-hidden',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
 
         if (universheet == null) {

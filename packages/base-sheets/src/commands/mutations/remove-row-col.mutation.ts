@@ -42,7 +42,7 @@ export const RemoveRowsUndoMutationFactory = (
 export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
     id: 'sheet.mutation.remove-rows',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
@@ -115,7 +115,7 @@ export const RemoveColMutationFactory = (
 export const RemoveColMutation: IMutation<IRemoveColMutationParams> = {
     id: 'sheet.mutation.remove-col',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 

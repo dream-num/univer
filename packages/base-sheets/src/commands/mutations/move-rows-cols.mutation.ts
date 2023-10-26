@@ -48,7 +48,7 @@ export function MoveRowsMutationUndoFactory(
 export const MoveRowsMutation: IMutation<IMoveRowsMutationParams> = {
     id: 'sheet.mutation.move-rows',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const { workbookId, worksheetId, sourceRange, targetRange } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -122,7 +122,7 @@ export function MoveColsMutationUndoFactory(
 export const MoveColsMutation: IMutation<IMoveColumnsMutationParams> = {
     id: 'sheet.mutation.move-columns',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const { workbookId, worksheetId, sourceRange, targetRange } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
 

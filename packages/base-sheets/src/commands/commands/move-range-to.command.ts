@@ -56,7 +56,7 @@ export const MoveRangeToCommand: ICommand = {
             clearMutationParams
         );
 
-        const clearResult = commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
+        const clearResult = commandService.syncExecuteCommand(SetRangeValuesMutation.id, clearMutationParams);
 
         const sheetMatrix = worksheet.getCellMatrix();
         const { startRow, endRow, startColumn, endColumn } = originRange;
@@ -86,7 +86,7 @@ export const MoveRangeToCommand: ICommand = {
             setRangeValuesMutationParams
         );
 
-        const result = commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
+        const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
 
         if (clearResult && result) {
             undoRedoService.pushUndoRedo({
@@ -100,7 +100,8 @@ export const MoveRangeToCommand: ICommand = {
                             undoClearMutationParams
                         ) as Promise<boolean>
                     ).then((res) => {
-                        if (res) return commandService.executeCommand(SetRangeValuesMutation.id, undoMutationParams);
+                        if (res)
+                            return commandService.syncExecuteCommand(SetRangeValuesMutation.id, undoMutationParams);
                         return false;
                     });
                 },

@@ -38,7 +38,7 @@ export const SetFrozenMutationFactory = (
 export const SetFrozenMutation: IMutation<ISetFrozenMutationParams> = {
     id: 'sheet.mutation.set-frozen',
     type: CommandType.MUTATION,
-    handler: async (accessor: IAccessor, params: ISetFrozenMutationParams) => {
+    handler: (accessor: IAccessor, params: ISetFrozenMutationParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 

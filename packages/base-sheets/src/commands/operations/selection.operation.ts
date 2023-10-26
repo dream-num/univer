@@ -26,7 +26,7 @@ export const FORMAT_PAINTER_SELECTION_PLUGIN_NAME = 'formatPainterSelectionPlugi
 export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> = {
     id: 'sheet.operation.set-selections',
     type: CommandType.OPERATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selections = params?.selections;
         if (!selections) {
@@ -44,7 +44,7 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
 export const SetCopySelectionsOperation: IOperation<ISetCopySelectionsOperationParams> = {
     id: 'sheet.operation.set-copy-selection',
     type: CommandType.OPERATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const selectionRenderService = accessor.get(ISelectionRenderService);
         if (!params) {

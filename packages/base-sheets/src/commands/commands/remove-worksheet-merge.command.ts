@@ -64,16 +64,19 @@ export const RemoveWorksheetMergeCommand: ICommand = {
             accessor,
             removeMergeMutationParams
         );
-        const result = commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+        const result = commandService.syncExecuteCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(AddWorksheetMergeMutation.id, undoMutationParams);
+                    return commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+                    return commandService.syncExecuteCommand(
+                        RemoveWorksheetMergeMutation.id,
+                        removeMergeMutationParams
+                    );
                 },
             });
             return true;

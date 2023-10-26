@@ -45,7 +45,7 @@ export const RemoveMergeUndoMutationFactory = (
 export const RemoveWorksheetMergeMutation: IMutation<IRemoveWorksheetMergeMutationParams> = {
     id: 'sheet.mutation.remove-worksheet-merge',
     type: CommandType.MUTATION,
-    handler: async (accessor: IAccessor, params: IRemoveWorksheetMergeMutationParams) => {
+    handler: (accessor: IAccessor, params: IRemoveWorksheetMergeMutationParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 

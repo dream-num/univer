@@ -21,7 +21,7 @@ export const InsertSheetUndoMutationFactory = (
 export const InsertSheetMutation: IMutation<IInsertSheetMutationParams, boolean> = {
     id: 'sheet.mutation.insert-sheet',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const { sheet, index, workbookId } = params;
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);

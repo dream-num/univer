@@ -29,7 +29,7 @@ export const InsertRowMutationUndoFactory = (
 export const InsertRowMutation: IMutation<IInsertRowMutationParams> = {
     id: 'sheet.mutation.insert-row',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const { workbookId, worksheetId, ranges, rowInfo } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -94,7 +94,7 @@ export const InsertColMutationUndoFactory = (
 export const InsertColMutation: IMutation<IInsertColMutationParams> = {
     id: 'sheet.mutation.insert-col',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 

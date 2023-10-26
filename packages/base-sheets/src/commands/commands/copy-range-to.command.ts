@@ -70,15 +70,15 @@ export const CopyRangeToCommand: ICommand = {
             accessor,
             setRangeValuesMutationParams
         );
-        const result = commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
+        const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetRangeValuesMutation.id, undoMutationParams);
+                    return commandService.syncExecuteCommand(SetRangeValuesMutation.id, undoMutationParams);
                 },
                 redo() {
-                    return commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
+                    return commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
                 },
             });
             return true;

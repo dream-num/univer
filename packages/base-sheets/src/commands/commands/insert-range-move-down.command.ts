@@ -231,12 +231,12 @@ export const InsertRangeMoveDownCommand: ICommand = {
         }
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = await sequenceExecute(redoMutations, commandService);
+        const result = sequenceExecute(redoMutations, commandService);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
-                undo: async () => (await sequenceExecute(undoMutations.reverse(), commandService)).result,
-                redo: async () => (await sequenceExecute(redoMutations, commandService)).result,
+                undo: async () => sequenceExecute(undoMutations.reverse(), commandService).result,
+                redo: async () => sequenceExecute(redoMutations, commandService).result,
             });
 
             return true;

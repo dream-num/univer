@@ -25,7 +25,7 @@ export const SetRowVisibleUndoMutationFactory = (accessor: IAccessor, params: IS
 export const SetRowVisibleMutation: IMutation<ISetRowVisibleMutationParams> = {
     id: 'sheet.mutation.set-row-visible',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 
@@ -72,7 +72,7 @@ export const SetRowHiddenUndoMutationFactory = (accessor: IAccessor, params: ISe
 export const SetRowHiddenMutation: IMutation<ISetRowHiddenMutationParams> = {
     id: 'sheet.mutation.set-row-hidden',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 

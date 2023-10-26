@@ -71,7 +71,7 @@ export const InsertSheetCommand: ICommand = {
             insertSheetMutationParams
         );
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.executeCommand(InsertSheetMutation.id, insertSheetMutationParams);
+        const result = commandService.syncExecuteCommand(InsertSheetMutation.id, insertSheetMutationParams);
 
         const setSheetActiveMutationParams: ISetWorksheetActivateMutationParams = {
             workbookId,
@@ -81,7 +81,7 @@ export const InsertSheetCommand: ICommand = {
             accessor,
             setSheetActiveMutationParams
         );
-        const activateResult = commandService.executeCommand(
+        const activateResult = commandService.syncExecuteCommand(
             SetWorksheetActivateMutation.id,
             setSheetActiveMutationParams
         );
@@ -97,7 +97,7 @@ export const InsertSheetCommand: ICommand = {
                         ) as Promise<boolean>
                     ).then((res) => {
                         if (res)
-                            return commandService.executeCommand(RemoveSheetMutation.id, removeSheetMutationParams);
+                            return commandService.syncExecuteCommand(RemoveSheetMutation.id, removeSheetMutationParams);
                         return false;
                     });
                 },

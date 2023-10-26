@@ -12,7 +12,7 @@ export interface IMoveCursorOperationParams {
 export const MoveCursorOperation: IOperation<IMoveCursorOperationParams> = {
     id: 'doc.operation.move-cursor',
     type: CommandType.OPERATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }

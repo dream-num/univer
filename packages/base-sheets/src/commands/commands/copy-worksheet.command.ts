@@ -60,7 +60,7 @@ export const CopySheetCommand: ICommand = {
             accessor,
             insertSheetMutationParams
         );
-        const insertResult = commandService.executeCommand(InsertSheetMutation.id, insertSheetMutationParams);
+        const insertResult = commandService.syncExecuteCommand(InsertSheetMutation.id, insertSheetMutationParams);
 
         const setSheetActiveMutationParams: ISetWorksheetActivateMutationParams = {
             workbookId,
@@ -71,7 +71,7 @@ export const CopySheetCommand: ICommand = {
             accessor,
             setSheetActiveMutationParams
         );
-        const result = commandService.executeCommand(SetWorksheetActivateMutation.id, setSheetActiveMutationParams);
+        const result = commandService.syncExecuteCommand(SetWorksheetActivateMutation.id, setSheetActiveMutationParams);
 
         if (insertResult && result) {
             undoRedoService.pushUndoRedo({
@@ -84,7 +84,7 @@ export const CopySheetCommand: ICommand = {
                         ) as Promise<boolean>
                     ).then((res) => {
                         if (res)
-                            return commandService.executeCommand(RemoveSheetMutation.id, removeSheetMutationParams);
+                            return commandService.syncExecuteCommand(RemoveSheetMutation.id, removeSheetMutationParams);
                         return false;
                     });
                 },
@@ -96,7 +96,7 @@ export const CopySheetCommand: ICommand = {
                         ) as Promise<boolean>
                     ).then((res) => {
                         if (res)
-                            return commandService.executeCommand(InsertSheetMutation.id, insertSheetMutationParams);
+                            return commandService.syncExecuteCommand(InsertSheetMutation.id, insertSheetMutationParams);
                         return false;
                     });
                 },

@@ -28,7 +28,7 @@ export const SetWorksheetConfigUndoMutationFactory = (
 export const SetWorksheetConfigMutation: IMutation<ISetWorksheetConfigMutationParams> = {
     id: 'sheet.mutation.set-worksheet-config',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);

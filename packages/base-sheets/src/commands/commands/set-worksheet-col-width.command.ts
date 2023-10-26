@@ -84,31 +84,30 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
             redoMutationParams
         );
 
-        const setColWidthResult = commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
+        const setColWidthResult = commandService.syncExecuteCommand(
+            SetWorksheetColWidthMutation.id,
+            redoMutationParams
+        );
 
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
             id: DeltaColumnWidthCommand.id,
             params: redoMutationParams,
         });
 
-        const result = await sequenceExecute([...redos], commandService);
+        const result = sequenceExecute([...redos], commandService);
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo: async () =>
-                    (
-                        await sequenceExecute(
-                            [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
+                        commandService
                     ).result,
                 redo: async () =>
-                    (
-                        await sequenceExecute(
-                            [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
+                        commandService
                     ).result,
             });
 
@@ -150,31 +149,30 @@ export const SetColWidthCommand: ICommand = {
             accessor,
             redoMutationParams
         );
-        const setColWidthResult = commandService.executeCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
+        const setColWidthResult = commandService.syncExecuteCommand(
+            SetWorksheetColWidthMutation.id,
+            redoMutationParams
+        );
 
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
             id: SetColWidthCommand.id,
             params: redoMutationParams,
         });
 
-        const result = await sequenceExecute([...redos], commandService);
+        const result = sequenceExecute([...redos], commandService);
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo: async () =>
-                    (
-                        await sequenceExecute(
-                            [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
+                        commandService
                     ).result,
                 redo: async () =>
-                    (
-                        await sequenceExecute(
-                            [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
+                        commandService
                     ).result,
             });
 

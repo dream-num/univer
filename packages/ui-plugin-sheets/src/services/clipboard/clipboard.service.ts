@@ -269,7 +269,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             cellValue,
         };
 
-        const result = this._commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesParams);
+        const result = this._commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesParams);
         return result;
     }
 

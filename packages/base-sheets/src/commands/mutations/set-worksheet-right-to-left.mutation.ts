@@ -26,7 +26,7 @@ export const SetWorksheetRightToLeftUndoMutationFactory = (
 export const SetWorksheetRightToLeftMutation: IMutation<ISetWorksheetRightToLeftMutationParams> = {
     id: 'sheet.mutation.set-worksheet-right-to-left',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(params.worksheetId);

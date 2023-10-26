@@ -84,7 +84,7 @@ export const SetRangeFormattedValueCommand: ICommand = {
             SetRangeFormattedValueUndoMutationFactory(accessor, setRangeFormattedValueMutationParams);
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.executeCommand(
+        const result = commandService.syncExecuteCommand(
             SetRangeFormattedValueMutation.id,
             setRangeFormattedValueMutationParams
         );

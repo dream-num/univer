@@ -95,15 +95,18 @@ export const SetRangeValuesCommand: ICommand = {
             setRangeValuesMutationParams
         );
 
-        const result = commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
+        const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo() {
-                    return commandService.executeCommand(SetRangeValuesMutation.id, undoSetRangeValuesMutationParams);
+                    return commandService.syncExecuteCommand(
+                        SetRangeValuesMutation.id,
+                        undoSetRangeValuesMutationParams
+                    );
                 },
                 redo() {
-                    return commandService.executeCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
+                    return commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
                 },
             });
 

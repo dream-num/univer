@@ -20,3 +20,19 @@ export async function sequence(
         index: -1,
     };
 }
+
+export function syncSequence(tasks: Array<() => boolean>): { result: boolean; index: number } {
+    for (const [index, task] of tasks.entries()) {
+        if (!task()) {
+            return {
+                index,
+                result: false,
+            };
+        }
+    }
+
+    return {
+        result: true,
+        index: -1,
+    };
+}

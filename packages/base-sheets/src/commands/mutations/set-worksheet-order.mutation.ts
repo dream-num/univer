@@ -23,7 +23,7 @@ export const SetWorksheetOrderUndoMutationFactory = (
 export const SetWorksheetOrderMutation: IMutation<ISetWorksheetOrderMutationParams> = {
     id: 'sheet.mutation.set-worksheet-order',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;
         const config = workbook.getConfig();

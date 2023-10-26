@@ -21,7 +21,7 @@ export const SetZoomRatioUndoMutationFactory = (
 export const SetZoomRatioMutation: IMutation<ISetZoomRatioMutationParams> = {
     id: 'doc.mutation.set-zoom-ratio',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const documentModel = accessor.get(IUniverInstanceService).getUniverDocInstance(params.documentId);
         if (!documentModel) return false;
         const documentData = documentModel.getSnapshot();

@@ -118,7 +118,7 @@ export const SetWorksheetRowAutoHeightMutationFactory = (
 export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMutationParams> = {
     id: 'sheet.mutation.set-worksheet-row-height',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const { workbookId, worksheetId, ranges, rowHeight } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
@@ -152,7 +152,7 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
 export const SetWorksheetRowIsAutoHeightMutation: IMutation<ISetWorksheetRowIsAutoHeightMutationParams> = {
     id: 'sheet.mutation.set-worksheet-row-is-auto-height',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const { workbookId, worksheetId, ranges, autoHeightInfo } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
@@ -184,7 +184,7 @@ export const SetWorksheetRowIsAutoHeightMutation: IMutation<ISetWorksheetRowIsAu
 export const SetWorksheetRowAutoHeightMutation: IMutation<ISetWorksheetRowAutoHeightMutationParams> = {
     id: 'sheet.mutation.set-worksheet-row-auto-height',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const { workbookId, worksheetId, rowsAutoHeightInfo } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);

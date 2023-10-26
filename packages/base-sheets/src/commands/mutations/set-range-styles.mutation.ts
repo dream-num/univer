@@ -76,7 +76,7 @@ export const SetRangeStyleUndoMutationFactory = (
 export const SetRangeStyleMutation: IMutation<ISetRangeStyleMutationParams, boolean> = {
     id: 'sheet.mutation.set-range-style',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId);
         if (!workbook) return false;

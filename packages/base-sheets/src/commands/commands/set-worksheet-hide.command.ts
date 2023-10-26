@@ -60,7 +60,7 @@ export const SetWorksheetHideCommand: ICommand = {
 
         if (!activateSheetId) return false;
 
-        const result = commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
+        const result = commandService.syncExecuteCommand(SetWorksheetHideMutation.id, redoMutationParams);
 
         const activeSheetMutationParams: ISetWorksheetActivateMutationParams = {
             workbookId,
@@ -68,7 +68,10 @@ export const SetWorksheetHideCommand: ICommand = {
         };
 
         const unActiveMutationParams = SetWorksheetUnActivateMutationFactory(accessor, activeSheetMutationParams);
-        const activeResult = commandService.executeCommand(SetWorksheetActivateMutation.id, activeSheetMutationParams);
+        const activeResult = commandService.syncExecuteCommand(
+            SetWorksheetActivateMutation.id,
+            activeSheetMutationParams
+        );
 
         if (result && activeResult) {
             undoRedoService.pushUndoRedo({
@@ -80,7 +83,8 @@ export const SetWorksheetHideCommand: ICommand = {
                             unActiveMutationParams
                         ) as Promise<boolean>
                     ).then((res) => {
-                        if (res) return commandService.executeCommand(SetWorksheetHideMutation.id, undoMutationParams);
+                        if (res)
+                            return commandService.syncExecuteCommand(SetWorksheetHideMutation.id, undoMutationParams);
                         return false;
                     });
                 },
@@ -91,7 +95,8 @@ export const SetWorksheetHideCommand: ICommand = {
                             activeSheetMutationParams
                         ) as Promise<boolean>
                     ).then((res) => {
-                        if (res) return commandService.executeCommand(SetWorksheetHideMutation.id, redoMutationParams);
+                        if (res)
+                            return commandService.syncExecuteCommand(SetWorksheetHideMutation.id, redoMutationParams);
                         return false;
                     });
                 },

@@ -45,7 +45,7 @@ export const SetWorksheetColWidthMutationFactory = (
 export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutationParams> = {
     id: 'sheet.mutation.set-worksheet-col-width',
     type: CommandType.MUTATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
 

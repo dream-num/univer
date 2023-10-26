@@ -8,10 +8,11 @@ export interface ISetFormatPainterOperationParams {
 export const SetFormatPainterOperation: IOperation<ISetFormatPainterOperationParams> = {
     id: 'sheet.operation.set-format-painter',
     type: CommandType.OPERATION,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
+
         const formatPainterService = accessor.get(IFormatPainterService);
         formatPainterService.setStatus(params.status);
         return true;

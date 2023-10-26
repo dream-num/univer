@@ -83,8 +83,8 @@ export function DocBars() {
 
             <div className={styles.toolbar}>
                 <div className={styles.toolbarContainer}>
-                    {Object.entries(toolbarGroups).map(([key, item], index) => (
-                        <div className={styles.toolbarGroup}>
+                    {Object.entries(toolbarGroups).map(([key, item]) => (
+                        <div key={key} className={styles.toolbarGroup}>
                             {item.map((subItem) => (
                                 <ToolbarItem key={subItem.id} {...subItem} />
                             ))}

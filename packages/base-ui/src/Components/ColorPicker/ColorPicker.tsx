@@ -1,404 +1,166 @@
-// interface IState {
-//     presetColors: string[][];
-//     defaultColor: string;
-//     afterColor: string;
-//     rgb: boolean;
-//     setting: boolean;
-//     styles?: JSX.CSSProperties;
-//     currentLocale: string;
-//     root: Element | null;
-// }
-// class ColorPicker extends Component<BaseColorPickerProps & ICustomComponentProps<string>, IState> {
-//     ulRef = createRef();
-//     constructor(props: BaseColorPickerProps) {
-//         super();
-//         this.initialize(props);
-//     }
-//     initialize(props: BaseColorPickerProps) {
-//         this.state = {
-//             presetColors: allColor,
-//             defaultColor: props.color || '#000',
-//             afterColor: props.color || '#000',
-//             rgb: true,
-//             setting: false,
-//             styles: {},
-//             currentLocale: '',
-//             root: null,
-//         };
-//     }
-//     /**
-//      * Gets the selected color
-//      * @param {string} presetColor new color
-//      * @param {boolean} val true:Close color selector
-//      */
-//     onChange = (presetColor: string) => {
-//         this.props.onChange && this.props.onChange(presetColor);
-//         this.setState({
-//             afterColor: presetColor,
-//         });
-//     };
-//     /**
-//      * confirm color
-//      *
-//      * @eventProperty
-//      */
-//     onClick = (color: string, e: MouseEvent) => {
-//         this.props.onClick?.(color, e);
-//         this.props.onValueChange?.(color);
-//     };
-//     /**
-//      * cancel and close
-//      *
-//      * @eventProperty
-//      */
-//     onCancel = () => {
-//         this.props.onCancel && this.props.onCancel();
-//         // this.hideSelect();
-//     };
-//     hideSelect = (e?: MouseEvent) => {
-//         if (e && this.ulRef.current.contains(e.target)) return;
-//         this.setState((prevState) => ({ styles: { display: 'none' } }));
-//         document.removeEventListener('click', this.hideSelect, true);
-//     };
-//     showSelect = (root?: Element) => {
-//         this.setState((prevState) => ({ styles: { display: 'block' } }));
-//         // 点击外部隐藏子组件
-//         document.addEventListener('click', this.hideSelect, true);
-//     };
-//     /**
-//      *
-//      * @param root Locate according to root
-//      * @param ele Element to locate
-//      * @returns
-//      */
-//     getOffset = (root: Element, ele: Element) => {
-//         const rootRect = root.getBoundingClientRect();
-//         const eleRect = this.ulRef.current.getBoundingClientRect();
-//         const w = document.documentElement.clientWidth || document.body.clientWidth;
-//         const h = document.documentElement.clientHeight || document.body.clientHeight;
-//         let left: number = 0;
-//         let top: number = 0;
-//         top = rootRect.top + eleRect.height > h ? rootRect.top - eleRect.height : rootRect.top + rootRect.height;
-//         left = rootRect.left + eleRect.width > w ? w - eleRect.width : rootRect.left;
-//         return { left, top };
-//     };
-//     /**
-//      * Custom switch
-//      * @param e
-//      */
-//     onSwitch = (e: Event) => {
-//         e.stopImmediatePropagation();
-//         new Promise((resolve, reject) => {
-//             this.setState({ setting: !this.state.setting });
-//             resolve('end');
-//         }).then(() => {
-//             if (this.state.root) {
-//                 const { top, left } = this.getOffset(this.state.root!, this.ulRef.current);
-//                 this.ulRef.current.style.left = `${left}px`;
-//                 this.ulRef.current.style.top = `${top}px`;
-//             }
-//         });
-//     };
-//     override componentDidMount() {
-//         this.props.getComponent?.(this);
-//     }
-//     render() {
-//         const obj = Object.assign(this.state.styles || {}, this.props.style);
-//         return (
-//             <div className={`${styles.colorPickerOuter} ${this.props.className}`} ref={this.ulRef} style={{ ...obj }}>
-//                 <div
-//                     className={styles.colorPicker}
-//                     onClick={(e: MouseEvent) => {
-//                         // e.stopImmediatePropagation();
-//                     }}
-//                 >
-//                     <div className={styles.picker}>
-//                         <div className={styles.pickerSwatches}>
-//                             {this.state.presetColors.map((presetColor, index) => (
-//                                 <div key={index} className={styles.pickerSwatchesItem}>
-//                                     {presetColor.map((item) => (
-//                                         <span key={item} className={styles.pickerSwatch} style={{ background: item }}>
-//                                             <Tooltip title={item} placement="top">
-//                                                 <button
-//                                                     key={item}
-//                                                     className={styles.pickerSwatchBtn}
-//                                                     style={{ background: item }}
-//                                                     onClick={(e: MouseEvent) => {
-//                                                         this.onClick(item, e);
-//                                                     }}
-//                                                 />
-//                                             </Tooltip>
-//                                         </span>
-//                                     ))}
-//                                 </div>
-//                             ))}
-//                         </div>
-//                         <div onClick={(e) => e.stopImmediatePropagation()}>
-//                             <Button onClick={this.onSwitch}>
-//                                 {this.state.setting ? <CustomLabel label="colorPicker.collapse" /> : <CustomLabel label="colorPicker.customColor" />}
-//                             </Button>
-//                         </div>
-//                     </div>
-//                     {this.state.setting ? (
-//                         <div className={styles.colorfulWarp}>
-//                             <ColorPickerPanel color={this.state.defaultColor} rgb={this.state.rgb} onChange={this.onChange.bind(this)} />
-//                             <div>
-//                                 <Button
-//                                     type="primary"
-//                                     onClick={(e: MouseEvent) => {
-//                                         this.onClick?.(this.state.afterColor, e);
-//                                         // this.hideSelect();
-//                                     }}
-//                                 >
-//                                     <CustomLabel label="colorPicker.confirmColor" />
-//                                 </Button>
-//                                 <Button
-//                                     danger
-//                                     onClick={(e: MouseEvent) => {
-//                                         this.onCancel();
-//                                     }}
-//                                 >
-//                                     <CustomLabel label="colorPicker.cancelColor" />
-//                                 </Button>
-//                                 <Button
-//                                     onClick={(e: MouseEvent) => {
-//                                         e.stopPropagation();
-//                                         this.setState({
-//                                             rgb: !this.state.rgb,
-//                                         });
-//                                     }}
-//                                 >
-//                                     <CustomLabel label="colorPicker.change" />
-//                                 </Button>
-//                             </div>
-//                         </div>
-//                     ) : null}
-//                 </div>
-//             </div>
-//         );
-//     }
-// }
-import React, { useEffect, useRef, useState } from 'react';
+import RcColorPicker, { Color, ColorBlock } from '@rc-component/color-picker';
+import { LocaleService } from '@univerjs/core';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useState } from 'react';
 
-import { BaseComponentProps } from '../../BaseComponent';
-import { CustomLabel } from '../CustomLabel';
-import { Button, Tooltip } from '../index';
-import { ColorPickerPanel } from './ColorPickerPanel';
 import styles from './index.module.less';
 
-export interface BaseColorPickerProps extends BaseComponentProps {
+export interface IColorPickerProps {
     /**
      * init color
      */
     color?: string;
 
-    /**
-     * cancel select
-     */
-    onCancel?: () => void;
-
-    /**
-     * Change colors in real time
-     */
-    onChange?: (color: string, val?: boolean) => void;
-
-    /**
-     * style
-     */
-    style?: React.CSSProperties;
-
     onClick?: (color: string, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void; // 返回所选颜色
+
     onValueChange?: (value: string) => void; // 返回所选颜色
-
-    /**
-     * class name
-     */
-    className?: string;
-
-    show?: boolean;
 }
 
-const allColor = [
-    ['#000', '#444', '#666', '#999', '#ccc', '#eee', '#f3f3f3', '#fff'],
-    ['#f00', '#f90', '#ff0', '#0f0', '#0ff', '#00f', '#90f', '#f0f'],
-    ['#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#cfe2f3', '#d9d2e9', '#ead1dc'],
-    ['#ea9999', '#f9cb9c', '#ffe599', '#b6d7a8', '#a2c4c9', '#9fc5e8', '#b4a7d6', '#d5a6bd'],
-    ['#e06666', '#f6b26b', '#ffd966', '#93c47d', '#76a5af', '#6fa8dc', '#8e7cc3', '#c27ba0'],
-    ['#c00', '#e69138', '#f1c232', '#6aa84f', '#45818e', '#3d85c6', '#674ea7', '#a64d79'],
-    ['#900', '#b45f06', '#bf9000', '#38761d', '#134f5c', '#0b5394', '#351c75', '#741b47'],
-    ['#600', '#783f04', '#7f6000', '#274e13', '#0c343d', '#073763', '#20124d', '#4c1130'],
-]; // Replace with your actual styles import
+const colorPresets = [
+    '#35322B',
+    '#505050',
+    '#606060',
+    '#6F6F6F',
+    '#8B8B8B',
+    '#B2B2B2',
+    '#CCCCCC',
+    '#E5E5E5',
+    '#F5F5F5',
+    '#FFFFFF',
+    '#9D0000',
+    '#B20000',
+    '#CD0F0F',
+    '#E30909',
+    '#F30B0B',
+    '#FE4B4B',
+    '#FA7979',
+    '#FB9D9D',
+    '#FDCECE',
+    '#FEE7E7',
+    '#B24000',
+    '#CC4F10',
+    '#DF5D00',
+    '#F96800',
+    '#FB8937',
+    '#FF8C51',
+    '#FCA669',
+    '#FDC49B',
+    '#FEE1CD',
+    '#FEF0E6',
+    '#B19401',
+    '#C5A300',
+    '#D8B300',
+    '#EBC301',
+    '#F9D700',
+    '#FBE137',
+    '#FCE869',
+    '#FDF09B',
+    '#FEF7CD',
+    '#FEFBE6',
+    '#58770A',
+    '#688C0D',
+    '#7AA017',
+    '#8BBB11',
+    '#A4DC16',
+    '#BEEE44',
+    '#CEF273',
+    '#DEF6A2',
+    '#EFFBD0',
+    '#F7FDE8',
+    '#007676',
+    '#008A8A',
+    '#009E9E',
+    '#00BBBB',
+    '#1CD8D8',
+    '#2AEAEA',
+    '#76EFEF',
+    '#A3F5F5',
+    '#D1FAFA',
+    '#E8FCFC',
+    '#001F9C',
+    '#0025B7',
+    '#012BD2',
+    '#133DE3',
+    '#2F55EB',
+    '#4567ED',
+    '#738DF2',
+    '#A2B3F6',
+    '#D0D9FB',
+    '#E8ECFD',
+    '#3F0198',
+    '#510EB0',
+    '#6721CB',
+    '#7735D4',
+    '#894EDE',
+    '#9E6DE3',
+    '#AA82E3',
+    '#C7ABED',
+    '#E3D5F6',
+    '#F1EAFA',
+    '#8F0550',
+    '#A1095C',
+    '#C1026B',
+    '#D4157E',
+    '#E7258F',
+    '#F248A6',
+    '#F273B9',
+    '#F6A2D0',
+    '#FBD0E8',
+    '#FDE8F3',
+];
 
-export function ColorPicker(props: BaseColorPickerProps) {
-    const ulRef = useRef<HTMLDivElement>(null);
+enum ColorPickerMode {
+    PRESET,
+    CUSTOM,
+}
 
-    const [presetColors, setPresetColors] = useState(allColor);
-    const [defaultColor, setDefaultColor] = useState(props.color || '#000');
-    const [afterColor, setAfterColor] = useState(props.color || '#000');
-    const [rgb, setRgb] = useState(true);
-    const [setting, setSetting] = useState(false);
-    const [style, setStyles] = useState({});
-    const [currentLocale, setCurrentLocale] = useState('');
-    const [root, setRoot] = useState(null);
-    // const [show, setShow] = useState(props.show || false);
+export function ColorPicker(props: IColorPickerProps) {
+    const { onValueChange } = props;
+    const localeService = useDependency(LocaleService);
 
-    useEffect(() => {
-        setPresetColors(allColor);
-        setDefaultColor(props.color || '#000');
-        setAfterColor(props.color || '#000');
-        setRgb(true);
-        setSetting(false);
-        setStyles({});
-        setCurrentLocale('');
-        setRoot(null);
-    }, [props.color]);
+    const [mode, setMode] = useState<ColorPickerMode>(ColorPickerMode.PRESET);
 
-    // useEffect(() => {
-    //     const { show = false } = props;
-    //     setShow(show);
+    function handleStopPropagation(e: React.MouseEvent) {
+        e.stopPropagation();
+    }
 
-    //     // if (show) {
-    //     //     document.addEventListener('click', hideSelect, true);
-    //     // }
-    // }, [props.show]);
+    function handleChange(color: Color | string) {
+        const value = (typeof color === 'string' ? color : color.toHexString()) ?? '';
 
-    const onChange = (presetColor: string) => {
-        props.onChange && props.onChange(presetColor);
-        setAfterColor(presetColor);
-    };
+        onValueChange && onValueChange(value);
+    }
 
-    const onClick = (color: string, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        props.onClick?.(color, e);
-        props.onValueChange?.(color);
-    };
-
-    const onCancel = () => {
-        props.onCancel && props.onCancel();
-        props.onValueChange?.('');
-    };
-
-    // const hideSelect = (e?: MouseEvent) => {
-    //     console.info('hide color picker. If it triggers too frequently, it needs to be corrected');
-    //     if (e && ulRef.current && ulRef.current.contains(e.target as Node)) return;
-
-    //     setShow(false);
-
-    //     document.removeEventListener('click', hideSelect, true);
-    // };
-
-    /**
-     * TODO handle ele?
-     * @param root
-     * @param ele
-     * @returns
-     */
-    const getOffset = (root: Element, ele: HTMLDivElement) => {
-        const rootRect = root.getBoundingClientRect();
-        const eleRect = ulRef.current?.getBoundingClientRect();
-
-        if (!eleRect) return { left: 0, top: 0 };
-
-        const w = document.documentElement.clientWidth || document.body.clientWidth;
-        const h = document.documentElement.clientHeight || document.body.clientHeight;
-
-        let left: number = 0;
-        let top: number = 0;
-
-        top = rootRect.top + eleRect.height > h ? rootRect.top - eleRect.height : rootRect.top + rootRect.height;
-        left = rootRect.left + eleRect.width > w ? w - eleRect.width : rootRect.left;
-
-        return { left, top };
-    };
-
-    const onSwitch = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        e.nativeEvent.stopImmediatePropagation();
-
-        new Promise((resolve, reject) => {
-            setSetting(!setting);
-            resolve('end');
-        }).then(() => {
-            if (root) {
-                if (!ulRef.current) return;
-                const { top, left } = getOffset(root, ulRef.current);
-                ulRef.current.style.left = `${left}px`;
-                ulRef.current.style.top = `${top}px`;
-            }
-        });
-    };
-
-    useEffect(() => {
-        props.getComponent?.(ulRef.current);
-    }, []);
-
-    const obj = Object.assign(style || {}, props.style);
+    function handleToggleMode() {
+        setMode(mode === ColorPickerMode.PRESET ? ColorPickerMode.CUSTOM : ColorPickerMode.PRESET);
+    }
 
     return (
-        <div className={`${styles.colorPickerOuter} ${props.className}`} ref={ulRef} style={{ ...obj }}>
-            <div className={styles.colorPicker}>
-                <div className={styles.picker}>
-                    <div className={styles.pickerSwatches}>
-                        {presetColors.map((presetColor, index) => (
-                            <div key={index} className={styles.pickerSwatchesItem}>
-                                {presetColor.map((item) => (
-                                    <span key={item} className={styles.pickerSwatch} style={{ background: item }}>
-                                        <Tooltip title={item} placement="top">
-                                            <button
-                                                key={item}
-                                                className={styles.pickerSwatchBtn}
-                                                style={{ background: item }}
-                                                onClick={(e) => {
-                                                    onClick(item, e);
-                                                }}
-                                            />
-                                        </Tooltip>
-                                    </span>
-                                ))}
-                            </div>
+        <section>
+            {mode === ColorPickerMode.PRESET && (
+                <div onClick={handleStopPropagation}>
+                    <div className={styles.colorPickerColorBlocks}>
+                        {colorPresets.map((color) => (
+                            <ColorBlock
+                                key={color}
+                                prefixCls={styles.colorPicker}
+                                color={color}
+                                onClick={() => handleChange(color)}
+                            />
                         ))}
                     </div>
-                    <div
-                        onClick={(e) => {
-                            e.nativeEvent.stopImmediatePropagation();
-                        }}
-                    >
-                        <Button onClick={onSwitch}>
-                            {setting ? (
-                                <CustomLabel label="colorPicker.collapse" />
-                            ) : (
-                                <CustomLabel label="colorPicker.customColor" />
-                            )}
-                        </Button>
-                    </div>
+                    <a className={styles.colorPickerCustomBtn} onClick={handleToggleMode}>
+                        {localeService.t('colorPicker.customColor')}
+                    </a>
                 </div>
-
-                {setting ? (
-                    <div className={styles.colorfulWarp}>
-                        <ColorPickerPanel color={defaultColor} rgb={rgb} onChange={onChange} />
-
-                        <div>
-                            <Button
-                                type="primary"
-                                onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                                    onClick(afterColor, e);
-                                }}
-                            >
-                                <CustomLabel label="colorPicker.confirmColor" />
-                            </Button>
-                            <Button danger onClick={onCancel}>
-                                <CustomLabel label="colorPicker.cancelColor" />
-                            </Button>
-                            <Button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setRgb(!rgb);
-                                }}
-                            >
-                                <CustomLabel label="colorPicker.change" />
-                            </Button>
-                        </div>
-                    </div>
-                ) : null}
-            </div>
-        </div>
+            )}
+            {mode === ColorPickerMode.CUSTOM && (
+                <section onClick={handleStopPropagation}>
+                    <RcColorPicker prefixCls={styles.colorPicker} disabledAlpha onChangeComplete={handleChange} />
+                    <a className={styles.colorPickerCancelBtn} onClick={handleToggleMode}>
+                        {localeService.t('colorPicker.cancelColor')}
+                    </a>
+                </section>
+            )}
+        </section>
     );
 }

@@ -1,8 +1,9 @@
-import { BaseComponentProps } from '../../BaseComponent';
+import { IExtendProps } from '@univerjs/icons';
+
 import { joinClassNames } from '../../Utils';
 import styles from './Style/index.module.less';
 
-export interface BaseIconProps extends BaseComponentProps {
+export interface BaseIconProps {
     spin?: boolean;
     rotate?: number;
     style?: React.CSSProperties;
@@ -12,6 +13,7 @@ export interface BaseIconProps extends BaseComponentProps {
     width?: string;
     height?: string;
     color?: string;
+    extend?: IExtendProps;
 }
 export const Icon = (props: BaseIconProps) => {
     const { spin, rotate, children, name, style, className } = props;

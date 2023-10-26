@@ -10,7 +10,7 @@ export function FindMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'SearchIcon',
         title: 'find.findLabel',
         tooltip: 'find.findLabel',
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         // TODO@Dushusir disabled$ status
     };
 }

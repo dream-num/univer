@@ -25,7 +25,7 @@ import { DisplayTypes } from '../Select/Select';
 import styles from './index.module.less';
 
 export interface IBaseMenuProps {
-    menuType?: string;
+    menuType?: string | string[];
 
     // used for selector
     display?: DisplayTypes;
@@ -40,9 +40,31 @@ function Menu2Wrapper(props: IBaseMenuProps) {
     const { menuType, onOptionSelect } = props;
     const menuService = useDependency(IMenuService);
 
-    const menuItems = menuType ? menuService.getMenuItems(menuType) : [];
+    if (!menuType) return;
 
-    return menuItems?.map((item: IDisplayMenuItem<IMenuItem>) => (
+    if (Array.isArray(menuType)) {
+        const menuTypes = menuType.map((type) => menuService.getMenuItems(type));
+
+        return (
+            <>
+                {menuTypes.map((menuItems) =>
+                    menuItems.map((item: IDisplayMenuItem<IMenuItem>) => (
+                        <Menu2Item
+                            key={item.id}
+                            menuItem={item}
+                            onClick={(object: Partial<IValueOption>) => {
+                                onOptionSelect?.({ value: '', label: item.id, ...object });
+                            }}
+                        />
+                    ))
+                )}
+            </>
+        );
+    }
+
+    const menuItems = menuService.getMenuItems(menuType);
+
+    return menuItems.map((item: IDisplayMenuItem<IMenuItem>) => (
         <Menu2Item
             key={item.id}
             menuItem={item}
@@ -164,6 +186,7 @@ export function Menu2Item({ menuItem, onClick }: IMenu2ItemProps) {
                     value={inputValue}
                     title={title}
                     label={label}
+                    icon={item.icon}
                     onChange={onChange}
                     onValueChange={() => {
                         // Right-click the menu for the title bar, and the Enter key triggers after entering the row height
@@ -225,6 +248,7 @@ export function Menu2Item({ menuItem, onClick }: IMenu2ItemProps) {
                 </SubMenu>
             );
         }
+
         return (
             <MenuItem
                 key={item.id}
@@ -268,7 +292,7 @@ export function Menu2Item({ menuItem, onClick }: IMenu2ItemProps) {
                 }
                 expandIcon={<More12 style={{ color: styles.textColorSecondary, fontSize: styles.fontSizeXs }} />}
             >
-                {menuItems.length > 0 && <Menu2Wrapper menuType={item.id} onOptionSelect={onClick} />}
+                {menuItems.length && <Menu2Wrapper menuType={item.id} onOptionSelect={onClick} />}
             </SubMenu>
         );
     };

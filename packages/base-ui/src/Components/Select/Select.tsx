@@ -5,11 +5,27 @@ import { ICustomComponent } from '../../Common';
 import { IValueOption } from '../../services/menu/menu';
 import { NeoCustomLabel } from '../CustomLabel';
 import { Dropdown2 } from '../Dropdown';
-import { BaseItemProps } from '../Item/Item';
 import { Menu2 } from '../Menu/Menu2';
 import styles from './index.module.less';
 
 // TODO: these type definitions should be moved out of components to menu service
+
+export interface BaseMenuItem {
+    className?: string;
+    style?: React.CSSProperties;
+    label?: React.ReactNode;
+    value?: any;
+    children?: BaseMenuItem[];
+    show?: boolean;
+    disabled?: boolean;
+    onClick?: (...arg: any) => void;
+    border?: boolean;
+}
+export interface BaseItemProps extends BaseMenuItem {
+    selected?: boolean;
+    suffix?: React.ReactNode;
+    border?: boolean;
+}
 
 export enum DisplayTypes {
     LABEL,

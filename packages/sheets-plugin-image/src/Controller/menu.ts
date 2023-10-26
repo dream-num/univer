@@ -10,7 +10,7 @@ export function ImportImageMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         icon: 'ImageIcon',
         title: 'Image', // FIXME use translation
         tooltip: 'Import Image', // FIXME use translation
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         // TODO@Dushusir disabled$ status
     };
 }

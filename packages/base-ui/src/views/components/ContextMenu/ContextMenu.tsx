@@ -1,7 +1,7 @@
 import { IMouseEvent } from '@univerjs/base-render';
 import { DisposableCollection, ICommandService } from '@univerjs/core';
-import { RediContext, useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useContext, useEffect, useState } from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import React, { useEffect, useState } from 'react';
 
 import { Dropdown2 } from '../../../Components/Dropdown/Dropdown2';
 import { Menu2 } from '../../../Components/Menu/Menu2';
@@ -17,9 +17,8 @@ export function ContextMenu(props: IProps) {
     const [visible, setVisible] = useState(false);
     const [menuType, setMenuType] = useState('');
 
-    const context = useContext(RediContext);
-
     const contextMenuService = useDependency(IContextMenuService);
+    const commandService = useDependency(ICommandService);
 
     useEffect(() => {
         const _disposables = new DisposableCollection();
@@ -61,10 +60,9 @@ export function ContextMenu(props: IProps) {
             alignPoint
             overlay={
                 <Menu2
-                    menuType={menuType}
+                    menuType={[menuType]}
                     onOptionSelect={(params) => {
                         const { label: commandId, value } = params;
-                        const commandService = context.injector?.get(ICommandService);
                         commandService && commandService.executeCommand(commandId as string, { value });
                         setVisible(false);
                     }}

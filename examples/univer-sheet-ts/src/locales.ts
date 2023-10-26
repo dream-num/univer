@@ -1,5 +1,6 @@
 import { zh as DocPluginZh } from '@univerjs/base-docs';
 import { zh as SheetPluginZh } from '@univerjs/base-sheets';
+import { zh as BaseUiZh } from '@univerjs/base-ui';
 import { zh as SheetDebuggerPluginZh } from '@univerjs/sheets-plugin-debugger';
 import { zh as FindPluginZh } from '@univerjs/sheets-plugin-find';
 import { zh as ImportXlsxPluginZh } from '@univerjs/sheets-plugin-import-xlsx';
@@ -17,5 +18,6 @@ export const locales = {
         ...DocUIPluginZh,
         ...SheetUIPluginZh,
         ...SheetDebuggerPluginZh,
+        ...BaseUiZh,
     },
 };

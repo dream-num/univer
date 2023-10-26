@@ -18,8 +18,7 @@ import { IMenuService } from '../../services/menu/menu.service';
 import { joinClassNames } from '../../Utils';
 import { NeoCustomLabel } from '../CustomLabel/CustomLabel';
 import { useObservable } from '../hooks/observable';
-import { BaseMenuItem } from '../Item/Item';
-import { DisplayTypes } from '../Select/Select';
+import { BaseMenuItem, DisplayTypes } from '../Select/Select';
 import styles from './index.module.less';
 
 /** @deprecated */

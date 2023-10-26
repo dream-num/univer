@@ -20,7 +20,7 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         tooltip: 'debugger.locale.tooltip',
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'English',
@@ -42,7 +42,7 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         tooltip: 'debugger.theme.tooltip',
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'green',
@@ -63,7 +63,7 @@ export function UIComponentMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         tooltip: 'debugger.uiComponent.tooltip',
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'Notification Success',

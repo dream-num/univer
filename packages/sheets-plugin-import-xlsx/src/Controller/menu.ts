@@ -9,7 +9,7 @@ export function ImportMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         title: 'importXlsx.import',
         tooltip: 'importXlsx.tooltip',
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         // TODO@Dushusir disabled$ status
     };
 }

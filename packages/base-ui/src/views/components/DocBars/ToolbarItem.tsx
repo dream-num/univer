@@ -1,14 +1,13 @@
-import { ICommandService } from '@univerjs/core';
-import { Component } from 'react';
+import { ICommandService, LocaleService } from '@univerjs/core';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { AppContext } from '../../../Common/AppContext';
-import { CustomLabel } from '../../../Components/CustomLabel/CustomLabel';
+import { ComponentManager } from '../../../Common';
 import { Select } from '../../../Components/Select/Select';
 import { Tooltip } from '../../../Components/Tooltip/Tooltip';
 import {
     IDisplayMenuItem,
-    IMenuButtonItem,
     IMenuItem,
     IMenuSelectorItem,
     IValueOption,
@@ -17,81 +16,60 @@ import {
 import { ToolbarButton } from './Button/ToolbarButton';
 import styles from './index.module.less';
 
-export interface IToolbarItemStatus {
-    disabled: boolean;
-    activated: boolean;
+export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
+    const localeService = useDependency(LocaleService);
+    const commandService = useDependency(ICommandService);
+    const componentManager = useDependency(ComponentManager);
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    value: any;
-}
+    const [value, setValue] = useState<any>();
+    const [disabled, setDisabled] = useState(false);
+    const [activated, setActivated] = useState(false);
 
-/** The component to render toolbar item. */
-export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbarItemStatus> {
-    static override contextType = AppContext;
+    useEffect(() => {
+        const subscriptions: Subscription[] = [];
 
-    declare context: React.ContextType<typeof AppContext>;
+        props.disabled$ &&
+            subscriptions.push(
+                props.disabled$.subscribe((disabled) => {
+                    setDisabled(disabled);
+                })
+            );
 
-    private disabledSubscription: Subscription | undefined;
+        if (props.type === MenuItemType.BUTTON) {
+            props.activated$ &&
+                subscriptions.push(
+                    props.activated$.subscribe((activated) => {
+                        setActivated(activated);
+                    })
+                );
+        }
 
-    private activatedSubscription: Subscription | undefined;
+        if (props.type === MenuItemType.SELECTOR) {
+            props.value$ &&
+                subscriptions.push(
+                    props.value$.subscribe((value) => {
+                        setValue(value);
+                    })
+                );
+        }
 
-    private currentValueSubscription: Subscription | undefined;
-
-    constructor(props: IDisplayMenuItem<IMenuItem>) {
-        super(props);
-
-        this.state = {
-            disabled: false,
-            activated: false,
-            value: undefined,
+        return () => {
+            subscriptions.forEach((subscription) => {
+                subscription.unsubscribe();
+            });
         };
-    }
+    }, []);
 
-    override componentDidMount() {
-        this.disabledSubscription = this.props.disabled$?.subscribe((disabled) => {
-            this.setState({ disabled });
-        });
+    const { tooltip, shortcut, icon, title, label, display, id, min, max, onClose } = props;
 
-        if (this.props.type === MenuItemType.BUTTON) {
-            const props = this.props as IDisplayMenuItem<IMenuButtonItem>;
-            this.activatedSubscription = props.activated$?.subscribe((activated) => {
-                this.setState({ activated });
-            });
-        }
+    const tooltipTitle = localeService?.t(tooltip) + (shortcut ? ` (${shortcut})` : '');
 
-        if (this.props.type === MenuItemType.SELECTOR) {
-            const props = this.props as IDisplayMenuItem<IMenuSelectorItem>;
-            this.currentValueSubscription = props.value$?.subscribe((value) => {
-                this.setState({ value });
-            });
-        }
-    }
-
-    override UNSAFE_componentWillMount() {
-        this.disabledSubscription?.unsubscribe();
-        this.activatedSubscription?.unsubscribe();
-        this.currentValueSubscription?.unsubscribe();
-    }
-
-    override render() {
-        switch (this.props.type) {
-            case MenuItemType.SUBITEMS:
-            case MenuItemType.SELECTOR:
-                return this.renderSelectorType();
-            default:
-                return this.renderButtonType();
-        }
-    }
-
-    private renderSelectorType() {
-        const { context, state } = this;
-        const commandService: ICommandService = context.injector.get(ICommandService);
-        const { disabled, value } = state;
-
-        const props = this.props as IDisplayMenuItem<IMenuSelectorItem>;
-        const { icon, title, label, display, selections, id, onClose, max, min } = props;
+    function renderSelectorType() {
+        const { selections } = props as IDisplayMenuItem<IMenuSelectorItem>;
 
         return (
-            <Tooltip title={this.getTooltip()} placement="bottom">
+            <Tooltip title={tooltipTitle} placement="bottom">
                 <Select
                     id={id}
                     title={title}
@@ -106,6 +84,7 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                     onClick={(value) => {
                         // commandService.executeCommand(id, { value })
                         // 子元素commandId会被现在的id覆盖，暂时这么写以区分
+                        // TODO: @jikkai should be refactored
                         let commandId = id;
                         if (value instanceof Object && value.id) {
                             commandId = value.id;
@@ -117,35 +96,41 @@ export class ToolbarItem extends Component<IDisplayMenuItem<IMenuItem>, IToolbar
                         commandService.executeCommand(commandId, value);
                     }}
                     onClose={onClose}
-                ></Select>
+                />
             </Tooltip>
         );
     }
 
-    private renderButtonType() {
-        const { props, context, state } = this;
-        const { disabled, activated } = state;
-        const { icon, title } = props;
-        const commandService: ICommandService = context.injector.get(ICommandService);
+    function renderButtonType() {
+        function renderIconOrLabel() {
+            if (icon) {
+                const IconComponent = componentManager.get(icon) as React.ComponentType;
+
+                if (IconComponent) return <IconComponent />;
+            }
+            return title;
+        }
 
         return (
-            <Tooltip title={this.getTooltip()} placement="bottom">
+            <Tooltip title={tooltipTitle} placement="bottom">
                 <ToolbarButton
+                    className={styles.toolbarItemTextButton}
                     active={activated}
-                    className={styles.textButton}
                     disabled={disabled}
                     onClick={() => commandService.executeCommand(props.id)}
                     onDoubleClick={() => props.subId && commandService.executeCommand(props.subId)}
                 >
-                    <CustomLabel label={icon ? { name: icon } : title} />
+                    {renderIconOrLabel()}
                 </ToolbarButton>
             </Tooltip>
         );
     }
 
-    private getTooltip(): string {
-        return (
-            this.context.localeService?.t(this.props.tooltip) + (this.props.shortcut ? ` (${this.props.shortcut})` : '')
-        );
+    switch (props.type) {
+        case MenuItemType.SUBITEMS:
+        case MenuItemType.SELECTOR:
+            return renderSelectorType();
+        default:
+            return renderButtonType();
     }
 }

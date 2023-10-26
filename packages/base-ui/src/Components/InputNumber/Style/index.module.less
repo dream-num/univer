@@ -10,8 +10,8 @@
     position: relative;
     display: flex;
     align-items: center;
-    width: 60px;
-    height: 26px;
+    width: 32px;
+    box-sizing: border-box;
 
     &:hover {
         .input-buttons {
@@ -22,11 +22,9 @@
         background-color: var(--bg-color-secondary);
         border: 2px solid var(--primary-color);
         border-radius: var(--border-radius-base);
-        
+
         // Center
         text-align: center;
-        padding-right: 21px;
-        padding: 0 26px 0 4px;
     }
 }
 
@@ -69,7 +67,7 @@
         &:hover{
             background-color: fade(@primary-color,10%);
             border-radius: 0px var(--border-radius-base) 0px 0px;
-            
+
         }
     }
 

@@ -1,18 +1,14 @@
 import { DropdownPromptSmall8 } from '@univerjs/icons';
 import React, { useRef, useState } from 'react';
 
-import { BaseComponentProps } from '../../BaseComponent';
 import { joinClassNames } from '../../Utils/util';
 import styles from './Style/index.module.less';
 
-export interface BaseInputNumberProps extends BaseComponentProps {
+export interface BaseInputNumberProps {
     /**
      * Input's class name
      */
     className?: string;
-
-    /** Semantic DOM style */
-    style?: React.CSSProperties;
 
     /**
      * The input content value
@@ -77,7 +73,6 @@ export const InputNumber: React.FC<BaseInputNumberProps> = ({
     disabled = false,
     bordered = true,
     className = '',
-    style = {},
 }) => {
     const [inputValue, setInputValue] = useState(value);
     const ref = useRef<HTMLInputElement>(null);
@@ -141,7 +136,7 @@ export const InputNumber: React.FC<BaseInputNumberProps> = ({
     });
 
     return (
-        <div className={`${styles.inputNumber} ${className}`} style={style}>
+        <div className={`${styles.inputNumber} ${className}`}>
             <div className={styles.inputWrap}>
                 <input
                     ref={ref}

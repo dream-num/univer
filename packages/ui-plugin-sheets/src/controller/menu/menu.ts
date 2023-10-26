@@ -55,6 +55,7 @@ import {
     DisplayTypes,
     IMenuButtonItem,
     IMenuSelectorItem,
+    MenuGroup,
     MenuItemType,
     MenuPosition,
     PasteCommand,
@@ -102,11 +103,12 @@ export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: UndoCommand.id,
+        group: MenuGroup.TOOLBAR_HISTORY,
         type: MenuItemType.BUTTON,
         icon: 'ForwardIcon',
         title: 'Undo',
         tooltip: 'toolbar.undo',
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
     };
 }
@@ -116,11 +118,12 @@ export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: RedoCommand.id,
+        group: MenuGroup.TOOLBAR_HISTORY,
         type: MenuItemType.BUTTON,
         icon: 'BackIcon',
         title: 'Redo',
         tooltip: 'toolbar.redo',
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.redos <= 0)),
     };
 }
@@ -134,7 +137,7 @@ export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         icon: 'FormatPainterIcon',
         title: 'Format Painter',
         tooltip: 'toolbar.formatPainter',
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         activated$: new Observable<boolean>((subscriber) => {
             let active = false;
 
@@ -164,7 +167,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'BoldIcon',
         title: 'Set bold',
         tooltip: 'toolbar.bold',
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
 
@@ -220,7 +223,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'ItalicIcon',
         title: 'Set italic',
         tooltip: 'toolbar.italic',
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
             function update() {
@@ -278,7 +281,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'UnderLineIcon',
         title: 'Set underline',
         tooltip: 'toolbar.underline',
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
             function update() {
@@ -336,7 +339,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         icon: 'DeleteLineIcon',
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
             function update() {
@@ -542,7 +545,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         tooltip: 'toolbar.font',
         type: MenuItemType.SELECTOR,
         display: DisplayTypes.FONT,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_FAMILY_CHILDREN,
         disabled$: new Observable((subscriber) => {
             let editable = false;
@@ -605,7 +608,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         display: DisplayTypes.INPUT,
         min: 1,
         max: 400,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_SIZE_CHILDREN,
         disabled$: new Observable<boolean>((subscriber) => {
             let editable = false;
@@ -672,7 +675,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         icon: 'TextColorIcon',
         tooltip: 'toolbar.textColor.main',
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         display: DisplayTypes.COLOR,
         selections: [
             {
@@ -711,7 +714,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         tooltip: 'toolbar.fillColor.main',
         title: 'TextColorIcon',
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         display: DisplayTypes.COLOR,
         icon: 'FillColorIcon',
         selections: [
@@ -759,7 +762,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
         id: SetHorizontalTextAlignCommand.id,
         title: 'horizontalAlignMode',
         icon: HORIZONTAL_ALIGN_CHILDREN[0].icon,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         tooltip: 'toolbar.horizontalAlignMode.main',
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
@@ -817,7 +820,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
         tooltip: 'toolbar.verticalAlignMode.main',
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         selections: VERTICAL_ALIGN_CHILDREN,
         value$: new Observable<VerticalAlign>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
@@ -871,7 +874,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
         tooltip: 'toolbar.textWrapMode.main',
         icon: TEXT_WRAP_CHILDREN[0].icon,
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         selections: TEXT_WRAP_CHILDREN,
         display: DisplayTypes.ICON,
         value$: new Observable((subscriber) => {
@@ -943,7 +946,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         selections: TEXT_ROTATE_CHILDREN,
-        positions: [MenuPosition.TOOLBAR],
+        positions: [MenuPosition.TOOLBAR_START],
         value$: new Observable<number | string>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
@@ -977,6 +980,7 @@ export function CopyMenuItemFactory(): IMenuButtonItem {
         id: CopyCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.copy',
+        icon: 'Copy24',
         positions: [
             MenuPosition.CONTEXT_MENU,
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
@@ -1003,6 +1007,7 @@ export function PasteMenuItemFactory(): IMenuButtonItem {
         id: PasteCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.paste',
+        icon: 'PasteSpecial24',
         positions: [
             MenuPosition.CONTEXT_MENU,
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,

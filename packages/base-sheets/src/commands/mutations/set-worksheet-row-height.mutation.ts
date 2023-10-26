@@ -28,31 +28,29 @@ export const SetWorksheetRowHeightMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetRowHeightMutationParams
 ): ISetWorksheetRowHeightMutationParams => {
+    const { workbookId, worksheetId, ranges } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId);
-    if (workbook == null) {
-        throw new Error('workbook is null error!');
-    }
+    const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+    const worksheet = workbook?.getSheetBySheetId(worksheetId);
 
-    const worksheet = workbook.getSheetBySheetId(params.worksheetId);
     if (worksheet == null) {
         throw new Error('worksheet is null error!');
     }
+
     const rowHeight = new ObjectArray<number>();
     const manager = worksheet.getRowManager();
-    const ranges = params.ranges;
-    for (let i = 0; i < ranges.length; i++) {
-        const range = ranges[i];
-        for (let j = range.startRow; j < range.endRow + 1; j++) {
-            const row = manager.getRowOrCreate(j);
-            rowHeight.set(j, row.h);
+
+    for (const { startRow, endRow } of ranges) {
+        for (let rowIndex = startRow; rowIndex < endRow + 1; rowIndex++) {
+            const row = manager.getRowOrCreate(rowIndex);
+            rowHeight.set(rowIndex, row.h);
         }
     }
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
-        ranges: params.ranges,
+        workbookId,
+        worksheetId,
+        ranges,
         rowHeight,
     };
 };
@@ -138,7 +136,7 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
                 if (typeof rowHeight === 'number') {
                     row.h = rowHeight;
                 } else {
-                    row.h = rowHeight.get(rowIndex - startRow) ?? defaultRowHeight;
+                    row.h = rowHeight.get(rowIndex) ?? defaultRowHeight;
                 }
 
                 row.h = Math.min(MAXIMUM_ROW_HEIGHT, row.h);

@@ -78,6 +78,7 @@ export const DeltaRowHeightCommand: ICommand = {
                 ],
             };
         }
+
         const undoMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(
             accessor,
             redoMutationParams

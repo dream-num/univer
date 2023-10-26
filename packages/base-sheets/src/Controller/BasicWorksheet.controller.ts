@@ -68,8 +68,8 @@ import { SetWorksheetNameCommand } from '../commands/commands/set-worksheet-name
 import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-order.command';
 import {
     DeltaRowHeightCommand,
-    // SetRowAutoHeightCommand,
     SetRowHeightCommand,
+    SetWorksheetRowIsAutoHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
 import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
@@ -99,6 +99,7 @@ import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-o
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
+    SetWorksheetRowIsAutoHeightMutation,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
 
 export interface IStyleTypeValue<T> {
@@ -156,9 +157,10 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
 
             SetColWidthCommand,
             SetWorksheetColWidthMutation,
-            // SetRowAutoHeightCommand,
+            SetWorksheetRowIsAutoHeightCommand,
             SetRowHeightCommand,
             SetWorksheetRowHeightMutation,
+            SetWorksheetRowIsAutoHeightMutation,
             SetWorksheetRowAutoHeightMutation,
             SetRowHiddenCommand,
             SetRowHiddenMutation,

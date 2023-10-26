@@ -1,18 +1,30 @@
 /* eslint-disable no-magic-numbers */
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand, Univer } from '@univerjs/core';
+import {
+    ICommandService,
+    IUniverInstanceService,
+    Nullable,
+    RANGE_TYPE,
+    RedoCommand,
+    UndoCommand,
+    Univer,
+} from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SetWorksheetRowHeightMutation } from '../../..';
 import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
 } from '../../../services/selection/selection-manager.service';
 import {
+    SetWorksheetRowHeightMutation,
+    SetWorksheetRowIsAutoHeightMutation,
+} from '../../mutations/set-worksheet-row-height.mutation';
+import {
     DeltaRowHeightCommand,
     IDeltaRowHeightCommand,
     ISetRowHeightCommandParams,
     SetRowHeightCommand,
+    SetWorksheetRowIsAutoHeightCommand,
 } from '../set-worksheet-row-height.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -28,6 +40,14 @@ describe('Test set row height commands', () => {
         return worksheet.getRowHeight(row);
     }
 
+    function getRowIsAutoHeight(row: number): Nullable<boolean> {
+        const worksheet = get(IUniverInstanceService).getCurrentUniverSheetInstance().getActiveSheet();
+        const rowManager = worksheet.getRowManager();
+        const rowInfo = rowManager.getRow(row);
+
+        return rowInfo?.isAutoHeight;
+    }
+
     beforeEach(() => {
         const testBed = createCommandTestBed();
         univer = testBed.univer;
@@ -36,16 +56,20 @@ describe('Test set row height commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(DeltaRowHeightCommand);
         commandService.registerCommand(SetRowHeightCommand);
+        commandService.registerCommand(SetWorksheetRowIsAutoHeightCommand);
         commandService.registerCommand(SetWorksheetRowHeightMutation);
+        commandService.registerCommand(SetWorksheetRowIsAutoHeightMutation);
 
         const worksheet = get(IUniverInstanceService).getCurrentUniverSheetInstance().getActiveSheet();
         const maxColumn = worksheet.getMaxColumns() - 1;
         const selectionManager = get(SelectionManagerService);
+
         selectionManager.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId: 'test',
             sheetId: 'sheet1',
         });
+
         selectionManager.add([
             {
                 range: { startRow: 1, startColumn: 0, endRow: 2, endColumn: maxColumn, rangeType: RANGE_TYPE.ROW },
@@ -62,6 +86,7 @@ describe('Test set row height commands', () => {
                 style: null,
             },
         ]);
+
         selectionManager.add([
             {
                 range: { startRow: 5, startColumn: 0, endColumn: maxColumn, endRow: 5, rangeType: RANGE_TYPE.ROW },
@@ -82,8 +107,11 @@ describe('Test set row height commands', () => {
                 anchorRow: 5,
             });
             expect(getRowHeight(1)).toBe(14);
+            expect(getRowIsAutoHeight(1)).toBe(false);
             expect(getRowHeight(2)).toBe(14);
+            expect(getRowIsAutoHeight(2)).toBe(false);
             expect(getRowHeight(5)).toBe(14);
+            expect(getRowIsAutoHeight(5)).toBe(false);
 
             await commandService.executeCommand(UndoCommand.id);
             expect(getRowHeight(1)).toBe(19);
@@ -118,8 +146,11 @@ describe('Test set row height commands', () => {
             value: 77,
         });
         expect(getRowHeight(1)).toBe(77);
+        expect(getRowIsAutoHeight(1)).toBe(false);
         expect(getRowHeight(2)).toBe(77);
+        expect(getRowIsAutoHeight(2)).toBe(false);
         expect(getRowHeight(5)).toBe(77);
+        expect(getRowIsAutoHeight(5)).toBe(false);
 
         await commandService.executeCommand(UndoCommand.id);
         expect(getRowHeight(1)).toBe(19);
@@ -130,5 +161,24 @@ describe('Test set row height commands', () => {
         expect(getRowHeight(1)).toBe(77);
         expect(getRowHeight(2)).toBe(77);
         expect(getRowHeight(5)).toBe(77);
+    });
+
+    describe('Set fit content in ranges', () => {
+        it('Should change all rows isAutoHeight to true in selections', async () => {
+            await commandService.executeCommand(SetWorksheetRowIsAutoHeightCommand.id);
+            expect(getRowIsAutoHeight(1)).toBe(true);
+            expect(getRowIsAutoHeight(2)).toBe(true);
+            expect(getRowIsAutoHeight(5)).toBe(true);
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getRowIsAutoHeight(1)).toBe(undefined);
+            expect(getRowIsAutoHeight(2)).toBe(undefined);
+            expect(getRowIsAutoHeight(5)).toBe(undefined);
+
+            await commandService.executeCommand(RedoCommand.id);
+            expect(getRowIsAutoHeight(1)).toBe(true);
+            expect(getRowIsAutoHeight(2)).toBe(true);
+            expect(getRowIsAutoHeight(5)).toBe(true);
+        });
     });
 });

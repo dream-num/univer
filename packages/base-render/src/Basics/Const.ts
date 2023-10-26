@@ -296,3 +296,5 @@ export const DOCS_NORMAL_EDITOR_UNIT_ID_KEY = '__defaultDocumentNormalEditorSpec
 export const DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY = '__defaultDocumentFormulaBarEditorSpecialUnitId_20231012__';
 
 export const DEFAULT_SELECTION_LAYER_INDEX = 1000;
+
+export const MAXIMUM_ROW_HEIGHT = 2000;

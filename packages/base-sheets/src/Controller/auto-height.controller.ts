@@ -3,9 +3,11 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { ISetStyleParams, SetStyleCommand } from '../commands/commands/set-style.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
+import { SetWorksheetRowIsAutoHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
 import { ISetWorksheetColWidthMutationParams } from '../commands/mutations/set-worksheet-col-width.mutation';
 import {
     ISetWorksheetRowAutoHeightMutationParams,
+    ISetWorksheetRowIsAutoHeightMutationParams,
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
@@ -68,6 +70,19 @@ export class AutoHeightController {
     private _initialize() {
         const { _sheetInterceptorService: sheetInterceptorService, _selectionManagerService: selectionManagerService } =
             this;
+        // for intercept 'sheet.command.set-row-is-auto-height' command.
+        sheetInterceptorService.interceptCommand({
+            getMutations: (command: { id: string; params: ISetWorksheetRowIsAutoHeightMutationParams }) => {
+                if (command.id !== SetWorksheetRowIsAutoHeightCommand.id) {
+                    return {
+                        redos: [],
+                        undos: [],
+                    };
+                }
+
+                return this._getUndoRedoParamsOfAutoHeight(command.params.ranges);
+            },
+        });
 
         // for intercept set-worksheet-col-width command.
         sheetInterceptorService.interceptCommand({

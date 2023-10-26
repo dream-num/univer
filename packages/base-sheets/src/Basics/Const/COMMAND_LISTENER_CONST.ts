@@ -12,10 +12,12 @@ import { SetWorksheetColWidthMutation } from '../../commands/mutations/set-works
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
+    SetWorksheetRowIsAutoHeightMutation,
 } from '../../commands/mutations/set-worksheet-row-height.mutation';
 
 export const COMMAND_LISTENER_SKELETON_CHANGE = [
     SetWorksheetRowHeightMutation.id,
+    SetWorksheetRowIsAutoHeightMutation.id,
     SetWorksheetRowAutoHeightMutation.id,
     SetWorksheetColWidthMutation.id,
     SetWorksheetActivateMutation.id,

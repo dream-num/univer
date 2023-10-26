@@ -1,12 +1,21 @@
 import { IRowAutoHeightInfo } from '@univerjs/base-render';
-import { CommandType, IMutation, IRange, IUniverInstanceService, ObjectArray } from '@univerjs/core';
+import { CommandType, IMutation, IRange, IUniverInstanceService, Nullable, ObjectArray } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
+
+const MAXIMUM_ROW_HEIGHT = 2000;
 
 export interface ISetWorksheetRowHeightMutationParams {
     workbookId: string;
     worksheetId: string;
     ranges: IRange[];
     rowHeight: number | ObjectArray<number>;
+}
+
+export interface ISetWorksheetRowIsAutoHeightMutationParams {
+    workbookId: string;
+    worksheetId: string;
+    ranges: IRange[];
+    autoHeightInfo: boolean | ObjectArray<Nullable<boolean>>;
 }
 
 export interface ISetWorksheetRowAutoHeightMutationParams {
@@ -48,23 +57,51 @@ export const SetWorksheetRowHeightMutationFactory = (
     };
 };
 
+export const SetWorksheetRowIsAutoHeightMutationFactory = (
+    accessor: IAccessor,
+    params: ISetWorksheetRowIsAutoHeightMutationParams
+): ISetWorksheetRowIsAutoHeightMutationParams => {
+    const { workbookId, worksheetId, ranges } = params;
+
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+    const worksheet = workbook!.getSheetBySheetId(worksheetId);
+
+    const autoHeightInfo = new ObjectArray<Nullable<boolean>>();
+    const manager = worksheet!.getRowManager();
+
+    for (const { startRow, endRow } of ranges) {
+        for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+            const row = manager.getRowOrCreate(rowIndex);
+
+            autoHeightInfo.set(rowIndex, row.isAutoHeight);
+        }
+    }
+
+    return {
+        workbookId,
+        worksheetId,
+        ranges,
+        autoHeightInfo,
+    };
+};
+
 export const SetWorksheetRowAutoHeightMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetRowAutoHeightMutationParams
 ): ISetWorksheetRowAutoHeightMutationParams => {
+    const { workbookId, worksheetId, rowsAutoHeightInfo } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = univerInstanceService.getUniverSheetInstance(params.workbookId);
-    const worksheet = workbook?.getSheetBySheetId(params.worksheetId);
-    if (worksheet == null) {
-        throw new Error('workbook or worksheet is null error!');
-    }
-    const { rowsAutoHeightInfo } = params;
+    const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+    const worksheet = workbook?.getSheetBySheetId(worksheetId);
+
     const results: IRowAutoHeightInfo[] = [];
-    const manager = worksheet.getRowManager();
+    const manager = worksheet!.getRowManager();
 
     for (const rowInfo of rowsAutoHeightInfo) {
         const { row } = rowInfo;
         const { ah } = manager.getRowOrCreate(row);
+
         results.push({
             row,
             autoHeight: ah,
@@ -72,8 +109,8 @@ export const SetWorksheetRowAutoHeightMutationFactory = (
     }
 
     return {
-        workbookId: params.workbookId,
-        worksheetId: params.worksheetId,
+        workbookId,
+        worksheetId,
         rowsAutoHeightInfo: results,
     };
 };
@@ -82,29 +119,60 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
     id: 'sheet.mutation.set-worksheet-row-height',
     type: CommandType.MUTATION,
     handler: async (accessor, params) => {
+        const { workbookId, worksheetId, ranges, rowHeight } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.workbookId);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
 
-        if (universheet == null) {
-            throw new Error('universheet is null error!');
+        const worksheet = workbook?.getSheetBySheetId(worksheetId);
+        if (!worksheet) {
+            return false;
         }
-
-        const worksheet = universheet.getSheetBySheetId(params.worksheetId);
-        if (!worksheet) return false;
 
         const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
         const manager = worksheet.getRowManager();
-        const ranges = params.ranges;
 
-        for (let i = 0; i < ranges.length; i++) {
-            const range = ranges[i];
-            for (let j = range.startRow; j < range.endRow + 1; j++) {
-                const row = manager.getRowOrCreate(j);
+        for (const { startRow, endRow } of ranges) {
+            for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+                const row = manager.getRowOrCreate(rowIndex);
 
-                if (typeof params.rowHeight === 'number') {
-                    row.h = params.rowHeight;
+                if (typeof rowHeight === 'number') {
+                    row.h = rowHeight;
                 } else {
-                    row.h = params.rowHeight.get(j - range.startRow) ?? defaultRowHeight;
+                    row.h = rowHeight.get(rowIndex - startRow) ?? defaultRowHeight;
+                }
+
+                row.h = Math.min(MAXIMUM_ROW_HEIGHT, row.h);
+            }
+        }
+
+        return true;
+    },
+};
+
+export const SetWorksheetRowIsAutoHeightMutation: IMutation<ISetWorksheetRowIsAutoHeightMutationParams> = {
+    id: 'sheet.mutation.set-worksheet-row-is-auto-height',
+    type: CommandType.MUTATION,
+    handler: async (accessor, params) => {
+        const { workbookId, worksheetId, ranges, autoHeightInfo } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
+
+        const worksheet = workbook?.getSheetBySheetId(worksheetId);
+        if (!worksheet) {
+            return false;
+        }
+
+        const defaultRowIsAutoHeight = undefined;
+        const manager = worksheet.getRowManager();
+
+        for (const { startRow, endRow } of ranges) {
+            for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
+                const row = manager.getRowOrCreate(rowIndex);
+
+                if (typeof autoHeightInfo === 'boolean') {
+                    row.isAutoHeight = autoHeightInfo;
+                } else {
+                    row.isAutoHeight = autoHeightInfo.get(rowIndex - startRow) ?? defaultRowIsAutoHeight;
                 }
             }
         }

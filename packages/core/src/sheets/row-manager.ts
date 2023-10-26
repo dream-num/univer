@@ -46,7 +46,9 @@ export class RowManager {
                 hd: BooleanNumber.FALSE,
                 h: config.defaultRowHeight,
             });
-            height += row.h;
+            const { isAutoHeight, ah, h } = row;
+
+            height += (isAutoHeight == null || !!isAutoHeight) && typeof ah === 'number' ? ah : h;
         }
 
         return height;

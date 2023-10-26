@@ -45,6 +45,7 @@ import {
     SetWorksheetColWidthCommand,
     SetWorksheetHideCommand,
     SetWorksheetRowHeightCommand,
+    SetWorksheetRowIsAutoHeightCommand,
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
 import {
@@ -1107,6 +1108,15 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
             const selections = selectionManager.getSelections();
             observer.next(selections?.length !== 1);
         }),
+    };
+}
+
+export function FitContentMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: SetWorksheetRowIsAutoHeightCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
+        title: 'rightClick.fitContent',
     };
 }
 

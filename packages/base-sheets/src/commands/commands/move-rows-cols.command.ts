@@ -175,7 +175,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         };
 
         const commandService = accessor.get(ICommandService);
-        const result = await sequenceExecute(
+        const result = sequenceExecute(
             [
                 { id: MoveRowsMutation.id, params: moveRowsParams },
                 { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
@@ -191,7 +191,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
                 URI: workbookId,
                 async undo() {
                     // NOTE: This may be affect by collaboration programming. But in google sheet, the merged cells are reverted as well :(
-                    const undoResult = await sequenceExecute(
+                    const undoResult = sequenceExecute(
                         [
                             { id: MoveRowsMutation.id, params: undoMoveRowsParams },
                             { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
@@ -204,7 +204,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
                     return undoResult.result;
                 },
                 async redo() {
-                    const redoResult = await sequenceExecute(
+                    const redoResult = sequenceExecute(
                         [
                             { id: MoveRowsMutation.id, params: moveRowsParams },
                             { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
@@ -359,7 +359,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         };
 
         const commandService = accessor.get(ICommandService);
-        const result = await sequenceExecute(
+        const result = sequenceExecute(
             [
                 { id: MoveColsMutation.id, params: moveColsParams },
                 { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
@@ -375,7 +375,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
                 URI: workbookId,
                 async undo() {
                     // NOTE: This may be affect by collaboration programming. But in google sheet, the merged cells are reverted as well :(
-                    const undoResult = await sequenceExecute(
+                    const undoResult = sequenceExecute(
                         [
                             { id: MoveColsMutation.id, params: undoMoveColsParams },
                             { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
@@ -388,7 +388,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
                     return undoResult.result;
                 },
                 async redo() {
-                    const redoResult = await sequenceExecute(
+                    const redoResult = sequenceExecute(
                         [
                             { id: MoveColsMutation.id, params: moveColsParams },
                             { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },

@@ -107,7 +107,7 @@ export const ClearSelectionFormatCommand: ICommand = {
             });
         }
 
-        const result = await sequenceExecute(sequenceExecuteList, commandService);
+        const result = sequenceExecute(sequenceExecuteList, commandService);
 
         // const result = commandService.executeCommand(SetRangeValuesMutation.id, clearMutationParams);
         if (result) {
@@ -115,8 +115,8 @@ export const ClearSelectionFormatCommand: ICommand = {
                 // If there are multiple mutations that form an encapsulated project, they must be encapsulated in the same undo redo element.
                 // Hooks can be used to hook the code of external controllers to add new actions.
                 URI: workbookId,
-                undo: async () => (await sequenceExecute(sequenceExecuteUndoList, commandService)).result,
-                redo: async () => (await sequenceExecute(sequenceExecuteList, commandService)).result,
+                undo: async () => sequenceExecute(sequenceExecuteUndoList, commandService).result,
+                redo: async () => sequenceExecute(sequenceExecuteList, commandService).result,
             });
 
             return true;

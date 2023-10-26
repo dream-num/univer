@@ -60,7 +60,7 @@ export class DisposableCollection implements IDisposable {
 export class Disposable implements IDisposable {
     private readonly _collection = new DisposableCollection();
 
-    disposeWithMe(disposable: IDisposable): IDisposable {
+    protected disposeWithMe(disposable: IDisposable): IDisposable {
         return this._collection.add(disposable);
     }
 

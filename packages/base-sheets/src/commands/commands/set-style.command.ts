@@ -125,24 +125,20 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
             params,
         });
 
-        const result = await sequenceExecute([...redos], commandService);
+        const result = sequenceExecute([...redos], commandService);
 
         if (setRangeValuesResult && result.result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo: async () =>
-                    (
-                        await sequenceExecute(
-                            [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
+                        commandService
                     ).result,
                 redo: async () =>
-                    (
-                        await sequenceExecute(
-                            [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
+                        commandService
                     ).result,
             });
 

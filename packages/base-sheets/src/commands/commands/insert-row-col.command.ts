@@ -166,7 +166,7 @@ export const InsertRowCommand: ICommand = {
             .get(SheetInterceptorService)
             .onCommandExecute({ id: InsertRowCommand.id, params: insertRowParams });
 
-        const result = await sequenceExecute(
+        const result = sequenceExecute(
             [
                 { id: InsertRowMutation.id, params: insertRowParams },
                 { id: InsertRangeMutation.id, params: insertRangeMutationParams },
@@ -181,30 +181,26 @@ export const InsertRowCommand: ICommand = {
             undoRedoService.pushUndoRedo({
                 URI: params.workbookId,
                 undo: async () =>
-                    (
-                        await sequenceExecute(
-                            [
-                                { id: DeleteRangeMutation.id, params: undoInsertRangeMutationParams },
-                                { id: RemoveRowMutation.id, params: undoRowInsertionParams },
-                                { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
-                                { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeParams },
-                                ...intercepted.undos,
-                            ],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [
+                            { id: DeleteRangeMutation.id, params: undoInsertRangeMutationParams },
+                            { id: RemoveRowMutation.id, params: undoRowInsertionParams },
+                            { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
+                            { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeParams },
+                            ...intercepted.undos,
+                        ],
+                        commandService
                     ).result,
                 redo: async () =>
-                    (
-                        await sequenceExecute(
-                            [
-                                { id: InsertRowMutation.id, params: insertRowParams },
-                                { id: InsertRangeMutation.id, params: insertRangeMutationParams },
-                                { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
-                                { id: AddWorksheetMergeMutation.id, params: addMergeParams },
-                                ...intercepted.redos,
-                            ],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [
+                            { id: InsertRowMutation.id, params: insertRowParams },
+                            { id: InsertRangeMutation.id, params: insertRangeMutationParams },
+                            { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
+                            { id: AddWorksheetMergeMutation.id, params: addMergeParams },
+                            ...intercepted.redos,
+                        ],
+                        commandService
                     ).result,
             });
             return true;
@@ -407,7 +403,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             addMergeParams
         );
 
-        const result = await sequenceExecute(
+        const result = sequenceExecute(
             [
                 { id: InsertColMutation.id, params: insertColParams },
                 { id: InsertRangeMutation.id, params: insertRangeMutationParams },
@@ -421,37 +417,33 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             undoRedoService.pushUndoRedo({
                 URI: params.workbookId,
                 undo: async () =>
-                    (
-                        await sequenceExecute(
-                            [
-                                { id: DeleteRangeMutation.id, params: undoInsertRangeParams },
-                                {
-                                    id: RemoveColMutation.id,
-                                    params: undoColInsertionParams,
-                                },
-                                {
-                                    id: RemoveWorksheetMergeMutation.id,
-                                    params: undoAddMergeParams,
-                                },
-                                {
-                                    id: AddWorksheetMergeMutation.id,
-                                    params: undoRemoveMergeParams,
-                                },
-                            ],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [
+                            { id: DeleteRangeMutation.id, params: undoInsertRangeParams },
+                            {
+                                id: RemoveColMutation.id,
+                                params: undoColInsertionParams,
+                            },
+                            {
+                                id: RemoveWorksheetMergeMutation.id,
+                                params: undoAddMergeParams,
+                            },
+                            {
+                                id: AddWorksheetMergeMutation.id,
+                                params: undoRemoveMergeParams,
+                            },
+                        ],
+                        commandService
                     ).result,
                 redo: async () =>
-                    (
-                        await sequenceExecute(
-                            [
-                                { id: InsertColMutation.id, params: insertColParams },
-                                { id: InsertRangeMutation.id, params: insertRangeMutationParams },
-                                { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
-                                { id: AddWorksheetMergeMutation.id, params: addMergeParams },
-                            ],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [
+                            { id: InsertColMutation.id, params: insertColParams },
+                            { id: InsertRangeMutation.id, params: insertRangeMutationParams },
+                            { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
+                            { id: AddWorksheetMergeMutation.id, params: addMergeParams },
+                        ],
+                        commandService
                     ).result,
             });
             return true;

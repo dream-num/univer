@@ -72,7 +72,7 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
             })),
         };
 
-        const result = await sequenceExecute(
+        const result = sequenceExecute(
             [
                 { id: SetRowVisibleMutation.id, params: redoMutationParams },
                 { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
@@ -85,25 +85,21 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 async undo() {
-                    return (
-                        await sequenceExecute(
-                            [
-                                { id: SetRowHiddenMutation.id, params: undoMutationParams },
-                                { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
-                            ],
-                            commandService
-                        )
+                    return sequenceExecute(
+                        [
+                            { id: SetRowHiddenMutation.id, params: undoMutationParams },
+                            { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
+                        ],
+                        commandService
                     ).result;
                 },
                 async redo() {
-                    return (
-                        await sequenceExecute(
-                            [
-                                { id: SetRowVisibleMutation.id, params: redoMutationParams },
-                                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
-                            ],
-                            commandService
-                        )
+                    return sequenceExecute(
+                        [
+                            { id: SetRowVisibleMutation.id, params: redoMutationParams },
+                            { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+                        ],
+                        commandService
                     ).result;
                 },
             });
@@ -198,7 +194,7 @@ export const SetRowHiddenCommand: ICommand = {
         };
 
         const undoMutationParams = SetRowHiddenUndoMutationFactory(accessor, redoMutationParams);
-        const result = await sequenceExecute(
+        const result = sequenceExecute(
             [
                 { id: SetRowHiddenMutation.id, params: redoMutationParams },
                 { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
@@ -209,25 +205,21 @@ export const SetRowHiddenCommand: ICommand = {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 async undo() {
-                    return (
-                        await sequenceExecute(
-                            [
-                                { id: SetRowVisibleMutation.id, params: undoMutationParams },
-                                { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
-                            ],
-                            commandService
-                        )
+                    return sequenceExecute(
+                        [
+                            { id: SetRowVisibleMutation.id, params: undoMutationParams },
+                            { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
+                        ],
+                        commandService
                     ).result;
                 },
                 async redo() {
-                    return (
-                        await sequenceExecute(
-                            [
-                                { id: SetRowHiddenMutation.id, params: redoMutationParams },
-                                { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
-                            ],
-                            commandService
-                        )
+                    return sequenceExecute(
+                        [
+                            { id: SetRowHiddenMutation.id, params: redoMutationParams },
+                            { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+                        ],
+                        commandService
                     ).result;
                 },
             });

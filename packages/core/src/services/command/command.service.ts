@@ -1,6 +1,6 @@
 import { createIdentifier, IAccessor, IDisposable, Inject, Injector } from '@wendellhu/redi';
 
-import { sequence } from '../../common/promise/sequence';
+import { syncSequence } from '../../common/promise/sequence';
 import { toDisposable } from '../../Shared/lifecycle';
 import { IKeyValue } from '../../Shared/Types';
 import { IContextService } from '../context/context.service';
@@ -22,7 +22,7 @@ export interface ICommand<P extends object = object, R = boolean> {
     readonly id: string;
     readonly type: CommandType;
 
-    handler(accessor: IAccessor, params?: P): Promise<R>;
+    handler(accessor: IAccessor, params?: P): Promise<R> | R;
 
     /** When this command is unregistered, this function would be called. */
     onDispose?: () => void;
@@ -41,7 +41,12 @@ export interface IMultiCommand<P extends object = object, R = boolean> extends I
  */
 export interface IMutation<P extends object = object, R = boolean> extends ICommand<P, R> {
     type: CommandType.MUTATION;
-    handler(accessor: IAccessor, params: P): Promise<R>; // mutations must have params
+    /**
+     * Mutations must be a sync process.
+     * @param accessor
+     * @param params Params of the mutation. A mutation must has params.
+     */
+    handler(accessor: IAccessor, params: P): R;
 }
 
 /**
@@ -58,6 +63,8 @@ export interface IOperation<P extends object = object, R = boolean> extends ICom
 // TODO: change object to serializable interface type
 export interface ICommandInfo<T extends object = object> {
     id: string;
+
+    type?: CommandType;
 
     /**
      * Args should be serializable.
@@ -80,7 +87,9 @@ export interface ICommandService {
         id: string,
         params?: P,
         options?: IExecutionOptions
-    ): Promise<R> | R;
+    ): Promise<R>;
+
+    syncExecuteCommand<P extends object = object, R = boolean>(id: string, params?: P, options?: IExecutionOptions): R;
 
     /**
      * Register a hook that will be triggered when the
@@ -228,6 +237,7 @@ export class CommandService implements ICommandService {
 
             const commandInfo: ICommandInfo = {
                 id: command.id,
+                type: command.type,
                 params,
             };
 
@@ -237,7 +247,28 @@ export class CommandService implements ICommandService {
             return result;
         }
 
-        throw new Error(`Command "${id}" is not registered.`);
+        throw new Error(`[CommandService]: Command "${id}" is not registered.`);
+    }
+
+    syncExecuteCommand<P extends object = object, R = boolean>(id: string, params?: P | undefined): R {
+        const item = this._commandRegistry.getCommand(id);
+        if (item) {
+            const command = item[0];
+            const injector = item[1];
+
+            const result = this._syncExecute<P, R>(command as ICommand<P, R>, injector, params);
+
+            const commandInfo: ICommandInfo = {
+                id: command.id,
+                type: command.type,
+                params,
+            };
+            this._commandExecutedListeners.forEach((listener) => listener(commandInfo));
+
+            return result;
+        }
+
+        throw new Error(`[CommandService]: Command "${id}" is not registered.`);
     }
 
     private _registerCommand(command: ICommand, injector: Injector): IDisposable {
@@ -285,6 +316,30 @@ export class CommandService implements ICommandService {
         let result: R | boolean;
         try {
             result = await injector.invoke(command.handler, params);
+            this._commandExecutingLevel--;
+        } catch (e) {
+            result = false;
+            this._commandExecutingLevel = 0;
+            throw e;
+        }
+
+        return result;
+    }
+
+    private _syncExecute<P extends object, R = boolean>(command: ICommand<P, R>, injector: Injector, params?: P): R {
+        this._log.log(
+            '[CommandService]',
+            `${'|-'.repeat(this._commandExecutingLevel)}executing command "${command.id}"`
+        );
+
+        this._commandExecutingLevel++;
+        let result: R | boolean;
+        try {
+            result = injector.invoke(command.handler, params) as R;
+            if (result instanceof Promise) {
+                throw new Error('[CommandService]: Command handler should not return a promise.');
+            }
+
             this._commandExecutingLevel--;
         } catch (e) {
             result = false;
@@ -352,7 +407,6 @@ class MultiCommand implements IMultiCommand {
 }
 
 export function sequenceExecute(tasks: ICommandInfo[], commandService: ICommandService) {
-    const promises = tasks.map((task) => () => commandService.executeCommand(task.id, task.params));
-
-    return sequence(promises);
+    const promises = tasks.map((task) => () => commandService.syncExecuteCommand(task.id, task.params));
+    return syncSequence(promises);
 }

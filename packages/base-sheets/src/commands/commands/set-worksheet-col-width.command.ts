@@ -91,24 +91,20 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
             params: redoMutationParams,
         });
 
-        const result = await sequenceExecute([...redos], commandService);
+        const result = sequenceExecute([...redos], commandService);
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo: async () =>
-                    (
-                        await sequenceExecute(
-                            [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
+                        commandService
                     ).result,
                 redo: async () =>
-                    (
-                        await sequenceExecute(
-                            [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
+                        commandService
                     ).result,
             });
 
@@ -157,24 +153,20 @@ export const SetColWidthCommand: ICommand = {
             params: redoMutationParams,
         });
 
-        const result = await sequenceExecute([...redos], commandService);
+        const result = sequenceExecute([...redos], commandService);
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
                 undo: async () =>
-                    (
-                        await sequenceExecute(
-                            [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
+                        commandService
                     ).result,
                 redo: async () =>
-                    (
-                        await sequenceExecute(
-                            [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
-                            commandService
-                        )
+                    sequenceExecute(
+                        [{ id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
+                        commandService
                     ).result,
             });
 

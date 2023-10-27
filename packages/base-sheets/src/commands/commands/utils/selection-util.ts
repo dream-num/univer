@@ -62,7 +62,8 @@ export function findNextRange(
     direction: Direction,
     worksheet: Worksheet,
     boundary?: IRange,
-    isFindNext: boolean = true
+    isFindNext: boolean = true,
+    nextStep: number = 1
 ): IRange {
     let destRange: IRange = { ...startRange };
 
@@ -82,7 +83,7 @@ export function findNextRange(
     let next: number;
     switch (direction) {
         case Direction.UP:
-            next = startRange.startRow - 1;
+            next = startRange.startRow - nextStep;
             while (next > -1 && !worksheet.getRowVisible(next)) {
                 next -= 1;
             }
@@ -99,7 +100,7 @@ export function findNextRange(
             }
             break;
         case Direction.DOWN:
-            next = startRange.endRow + 1;
+            next = startRange.endRow + nextStep;
             while (next < worksheet.getRowCount() && !worksheet.getRowVisible(next)) {
                 next += 1;
             }
@@ -116,7 +117,7 @@ export function findNextRange(
             }
             break;
         case Direction.LEFT:
-            next = startRange.startColumn - 1;
+            next = startRange.startColumn - nextStep;
             while (next > -1 && !worksheet.getColVisible(next)) {
                 next -= 1;
             }
@@ -133,7 +134,7 @@ export function findNextRange(
             }
             break;
         case Direction.RIGHT:
-            next = startRange.endColumn + 1;
+            next = startRange.endColumn + nextStep;
             while (next < worksheet.getColumnCount() && !worksheet.getColVisible(next)) {
                 next += 1;
             }

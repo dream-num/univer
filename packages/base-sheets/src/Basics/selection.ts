@@ -105,6 +105,14 @@ export function getNormalSelectionStyle(themeService: ThemeService): ISelectionS
     };
 }
 
+/**
+ * Process a selection with coordinates and style,
+ * and extract the coordinate information, because the render needs coordinates when drawing.
+ * Since the selection.manager.service is unrelated to the coordinates,
+ * it only accepts data of type ISelectionWithStyle, so a conversion is necessary.
+ * @param selectionWithCoordAndStyle Selection with coordinates and style
+ * @returns
+ */
 export function convertSelectionDataToRange(
     selectionWithCoordAndStyle: ISelectionWithCoordAndStyle
 ): ISelectionWithStyle {
@@ -137,6 +145,13 @@ export function convertSelectionDataToRange(
     return result;
 }
 
+/**
+ * Convert the coordinates of a single cell into a selection data.
+ * @param row Specified Row Coordinate
+ * @param column Specified Column Coordinate
+ * @param mergeData  Obtain the data of merged cells through the worksheet object.
+ * @returns ISelectionWithStyle
+ */
 export function transformCellDataToSelectionData(
     row: number,
     column: number,

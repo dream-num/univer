@@ -91,13 +91,11 @@ export class SheetRenderController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = COMMAND_LISTENER_SKELETON_CHANGE;
-
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (updateCommandList.includes(command.id)) {
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-                    const unitId = workbook.getUnitId();
+                const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                const unitId = workbook.getUnitId();
+                if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id)) {
                     const worksheet = workbook.getActiveSheet();
                     const sheetId = worksheet.getSheetId();
                     const params = command.params;
@@ -123,8 +121,11 @@ export class SheetRenderController extends Disposable {
                         commandId: command.id,
                     });
                 }
+                // else if (COMMAND_LISTENER_VALUE_CHANGE.includes(command.id)) {
+                //     this._sheetSkeletonManagerService.reCalculate();
+                // }
 
-                this._renderManagerService.getCurrent()?.mainComponent?.makeDirty(); // refresh spreadsheet
+                this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty(); // refresh spreadsheet
             })
         );
     }

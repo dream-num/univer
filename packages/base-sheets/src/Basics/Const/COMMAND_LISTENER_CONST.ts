@@ -28,10 +28,10 @@ export const COMMAND_LISTENER_SKELETON_CHANGE = [
     AddWorksheetMergeMutation.id,
     RemoveWorksheetMergeMutation.id,
     MoveRowsMutation.id,
-    SetRangeValuesMutation.id,
-    SetBorderStylesMutation.id,
     SetColHiddenMutation.id,
     SetColVisibleMutation.id,
     SetRowHiddenMutation.id,
     SetRowVisibleMutation.id,
 ];
+
+export const COMMAND_LISTENER_VALUE_CHANGE = [SetBorderStylesMutation.id, SetRangeValuesMutation.id];

@@ -5,7 +5,7 @@ import { SetScrollOperation } from './commands/operations/scroll.operation';
 import { SetCopySelectionsOperation, SetSelectionsOperation } from './commands/operations/selection.operation';
 import { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 import { AutoHeightController } from './Controller/auto-height.controller';
-import { BasicWorksheetController } from './Controller/basicWorksheet.controller';
+import { BasicWorksheetController } from './Controller/basic-worksheet.controller';
 import { FreezeController } from './Controller/freeze.controller';
 import { HeaderMenuController } from './Controller/header-menu.controller';
 import { HeaderMoveController } from './Controller/header-move.controller';

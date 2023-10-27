@@ -49,8 +49,13 @@ interface INotifyObserversReturn {
     stopPropagation: boolean;
 }
 
+export function isObserver(value: any) {
+    return value instanceof Observer;
+}
+
 /**
  * Represent an WorkBookObserver registered to a given Observable object.
+ * The current implementation of the rendering layer is still in use.
  *
  * @deprecated use rxjs instead
  */
@@ -63,6 +68,10 @@ export class Observer<T = void> {
      */
     unregisterOnNextCall = false;
 
+    dispose() {
+        this.observable.remove(this);
+    }
+
     /**
      * Creates a new observer
      * @param callback defines the callback to call when the observer is notified
@@ -71,12 +80,14 @@ export class Observer<T = void> {
         /**
          * Defines the callback to call when the observer is notified
          */
-        public callback: (eventData: T, eventState: EventState) => void
+        public callback: (eventData: T, eventState: EventState) => void,
+        public observable: Observable<T>
     ) {}
 }
 
 /**
  * The Observable class is a simple implementation of the Observable pattern.
+ * The current implementation of the rendering layer is still in use.
  *
  * @deprecated use rxjs instead
  *
@@ -128,7 +139,7 @@ export class Observable<T> {
             return null;
         }
 
-        const observer = new Observer(callback);
+        const observer = new Observer(callback, this);
         observer.unregisterOnNextCall = unregisterOnFirstCall;
 
         if (insertFirst) {

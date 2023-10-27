@@ -18,6 +18,7 @@ import {
     Observer,
     OnLifecycle,
     ThemeService,
+    toDisposable,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -46,6 +47,8 @@ const FREEZE_COLUMN_MAIN_NAME = '__SpreadsheetFreezeColumnMainName__';
 const FREEZE_COLUMN_HEADER_NAME = '__SpreadsheetFreezeColumnHeaderName__';
 
 const FREEZE_SIZE_NORMAL = 4;
+
+const AUXILIARY_CLICK_HIDDEN_OBJECT_TRANSPARENCY = 0.01;
 
 @OnLifecycle(LifecycleStages.Rendered, FreezeController)
 export class FreezeController extends Disposable {
@@ -77,13 +80,13 @@ export class FreezeController extends Disposable {
 
     private _changeToOffsetY: number = 0;
 
-    private _freeze_normal_header_color = 'rgb(199, 199, 199)';
+    private _freeze_normal_header_color = '';
 
-    private _freeze_normal_main_color = 'rgba(199, 199, 199, 0.01)';
+    private _freeze_normal_main_color = '';
 
-    private _freeze_active_color = '#409f11';
+    private _freeze_active_color = '';
 
-    private _freeze_hover_color = 'rgb(116, 119, 117)';
+    private _freeze_hover_color = '';
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -100,8 +103,10 @@ export class FreezeController extends Disposable {
         super();
 
         this._initialize();
+    }
 
-        this._themeChangeInitialize();
+    override dispose(): void {
+        super.dispose();
     }
 
     private _initialize() {
@@ -118,6 +123,8 @@ export class FreezeController extends Disposable {
         this._skeletonListener();
 
         this._commandExecutedListener();
+
+        this._themeChangeListener();
     }
 
     private _createFreeze(freezeDirectionType: FREEZE_DIRECTION_TYPE = FREEZE_DIRECTION_TYPE.ROW) {
@@ -133,7 +140,7 @@ export class FreezeController extends Disposable {
             return;
         }
 
-        const { startRow: freezeRow, startColumn: freezeColumn, ySplit, xSplit } = config;
+        const { startRow: freezeRow, startColumn: freezeColumn } = config;
 
         const position = this._getPositionByIndex(freezeRow, freezeColumn);
 
@@ -152,7 +159,7 @@ export class FreezeController extends Disposable {
 
         const scene = sheetObject.scene;
 
-        const { startX, endX, startY, endY } = position;
+        const { startX, startY } = position;
 
         const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } =
             skeleton;
@@ -251,7 +258,7 @@ export class FreezeController extends Disposable {
         const { scene } = sheetObject;
 
         this._freezeMoveObservers.push(
-            freezeObjectHeaderRect?.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            freezeObjectHeaderRect?.onPointerEnterObserver.add(() => {
                 freezeObjectHeaderRect?.setProps({
                     fill: this._freeze_hover_color,
                     zIndex: 4,
@@ -261,7 +268,7 @@ export class FreezeController extends Disposable {
         );
 
         this._freezeMoveObservers.push(
-            freezeObjectMainRect?.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            freezeObjectMainRect?.onPointerEnterObserver.add(() => {
                 freezeObjectHeaderRect?.setProps({
                     fill: this._freeze_hover_color,
                     zIndex: 4,
@@ -271,7 +278,7 @@ export class FreezeController extends Disposable {
         );
 
         this._freezeLeaveObservers.push(
-            freezeObjectHeaderRect?.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            freezeObjectHeaderRect?.onPointerLeaveObserver.add(() => {
                 freezeObjectHeaderRect?.setProps({
                     fill: this._freeze_normal_header_color,
                     zIndex: 3,
@@ -281,7 +288,7 @@ export class FreezeController extends Disposable {
         );
 
         this._freezeLeaveObservers.push(
-            freezeObjectMainRect?.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            freezeObjectMainRect?.onPointerLeaveObserver.add(() => {
                 freezeObjectHeaderRect?.setProps({
                     fill: this._freeze_normal_header_color,
                     zIndex: 3,
@@ -291,13 +298,13 @@ export class FreezeController extends Disposable {
         );
 
         this._freezeDownObservers.push(
-            freezeObjectHeaderRect?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            freezeObjectHeaderRect?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
                 this._FreezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
             })
         );
 
         this._freezeDownObservers.push(
-            freezeObjectMainRect?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            freezeObjectMainRect?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
                 this._FreezeDown(evt, freezeObjectHeaderRect!, freezeObjectMainRect!, freezeDirectionType);
             })
         );
@@ -326,12 +333,7 @@ export class FreezeController extends Disposable {
         scene.disableEvent();
 
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-            const { startX, startY, endX, endY, row, column } = getCoordByOffset(
-                moveEvt.offsetX,
-                moveEvt.offsetY,
-                scene,
-                skeleton
-            );
+            const { startX, startY, row, column } = getCoordByOffset(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
 
             scene.setCursor(CURSOR_TYPE.GRABBING);
 
@@ -377,13 +379,12 @@ export class FreezeController extends Disposable {
             // this._columnMoving(newMoveOffsetX, newMoveOffsetY, matchSelectionData, initialType);
         });
 
-        this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+        this._upObserver = scene.onPointerUpObserver.add(() => {
             scene.resetCursor();
             scene.enableEvent();
             this._clearObserverEvent();
 
-            const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } =
-                skeleton;
+            const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
 
             if (
                 (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW &&
@@ -666,7 +667,7 @@ export class FreezeController extends Disposable {
             });
             this._viewportObservers.push(
                 viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-                    const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
+                    const { scrollX, actualScrollX } = param;
 
                     viewMainTop
                         .updateScroll({
@@ -731,7 +732,7 @@ export class FreezeController extends Disposable {
 
             this._viewportObservers.push(
                 viewMain.onScrollAfterObserver.add((param: IScrollObserverParam) => {
-                    const { scrollX, scrollY, actualScrollX, actualScrollY } = param;
+                    const { scrollY, actualScrollY } = param;
 
                     viewMainLeft
                         .updateScroll({
@@ -895,9 +896,13 @@ export class FreezeController extends Disposable {
     }
 
     private _skeletonListener() {
-        this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-            this._refreshCurrent();
-        });
+        this.disposeWithMe(
+            toDisposable(
+                this._sheetSkeletonManagerService.currentSkeleton$.subscribe(() => {
+                    this._refreshCurrent();
+                })
+            )
+        );
     }
 
     private _refreshCurrent() {
@@ -911,19 +916,25 @@ export class FreezeController extends Disposable {
         this._refreshFreeze(startRow, startColumn, ySplit, xSplit);
     }
 
-    private _themeChangeInitialize() {
+    private _themeChangeListener() {
         this._themeChange(this._themeService.getCurrentTheme());
-        this._themeService.currentTheme$.subscribe((style) => {
-            this._clearFreeze();
-            this._themeChange(style);
-            this._refreshCurrent();
-        });
+        this.disposeWithMe(
+            toDisposable(
+                this._themeService.currentTheme$.subscribe((style) => {
+                    this._clearFreeze();
+                    this._themeChange(style);
+                    this._refreshCurrent();
+                })
+            )
+        );
     }
 
     private _themeChange(style: IStyleSheet) {
         this._freeze_normal_header_color = style.grey400;
 
-        this._freeze_normal_main_color = new TinyColor(style.grey400).setAlpha(0.01).toString();
+        this._freeze_normal_main_color = new TinyColor(style.grey400)
+            .setAlpha(AUXILIARY_CLICK_HIDDEN_OBJECT_TRANSPARENCY)
+            .toString();
 
         this._freeze_active_color = style.primaryColor;
 

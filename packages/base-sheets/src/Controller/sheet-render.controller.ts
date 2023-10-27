@@ -12,6 +12,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    toDisposable,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -45,49 +46,57 @@ export class SheetRenderController extends Disposable {
         this._commandExecutedListener();
     }
 
+    override dispose(): void {
+        super.dispose();
+    }
+
     private _initialize() {
         this._initialRenderRefresh();
     }
 
     private _initialRenderRefresh() {
-        this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-            if (param == null) {
-                return;
-            }
+        this.disposeWithMe(
+            toDisposable(
+                this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+                    if (param == null) {
+                        return;
+                    }
 
-            const { skeleton: spreadsheetSkeleton, unitId, sheetId } = param;
+                    const { skeleton: spreadsheetSkeleton, unitId, sheetId } = param;
 
-            const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+                    const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
 
-            const worksheet = workbook?.getSheetBySheetId(sheetId);
+                    const worksheet = workbook?.getSheetBySheetId(sheetId);
 
-            if (workbook == null || worksheet == null) {
-                return;
-            }
+                    if (workbook == null || worksheet == null) {
+                        return;
+                    }
 
-            const currentRender = this._renderManagerService.getRenderById(unitId);
+                    const currentRender = this._renderManagerService.getRenderById(unitId);
 
-            if (currentRender == null) {
-                return;
-            }
+                    if (currentRender == null) {
+                        return;
+                    }
 
-            const { mainComponent, components, scene } = currentRender;
+                    const { mainComponent, components, scene } = currentRender;
 
-            const spreadsheet = mainComponent as Spreadsheet;
-            const spreadsheetRowHeader = components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
-            const spreadsheetColumnHeader = components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
-            const spreadsheetLeftTopPlaceholder = components.get(SHEET_VIEW_KEY.LEFT_TOP) as Rect;
+                    const spreadsheet = mainComponent as Spreadsheet;
+                    const spreadsheetRowHeader = components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+                    const spreadsheetColumnHeader = components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+                    const spreadsheetLeftTopPlaceholder = components.get(SHEET_VIEW_KEY.LEFT_TOP) as Rect;
 
-            const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+                    const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
-            spreadsheet?.updateSkeleton(spreadsheetSkeleton);
-            spreadsheetRowHeader?.updateSkeleton(spreadsheetSkeleton);
-            spreadsheetColumnHeader?.updateSkeleton(spreadsheetSkeleton);
-            spreadsheetLeftTopPlaceholder?.transformByState({
-                width: rowHeaderWidth,
-                height: columnHeaderHeight,
-            });
-        });
+                    spreadsheet?.updateSkeleton(spreadsheetSkeleton);
+                    spreadsheetRowHeader?.updateSkeleton(spreadsheetSkeleton);
+                    spreadsheetColumnHeader?.updateSkeleton(spreadsheetSkeleton);
+                    spreadsheetLeftTopPlaceholder?.transformByState({
+                        width: rowHeaderWidth,
+                        height: columnHeaderHeight,
+                    });
+                })
+            )
+        );
     }
 
     private _commandExecutedListener() {

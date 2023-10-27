@@ -103,8 +103,6 @@ export class FreezeController extends Disposable {
         super();
 
         this._initialize();
-
-        this._themeChangeListener();
     }
 
     override dispose(): void {
@@ -934,7 +932,9 @@ export class FreezeController extends Disposable {
     private _themeChange(style: IStyleSheet) {
         this._freeze_normal_header_color = style.grey400;
 
-        this._freeze_normal_main_color = new TinyColor(style.grey400).setAlpha(0.01).toString();
+        this._freeze_normal_main_color = new TinyColor(style.grey400)
+            .setAlpha(AUXILIARY_CLICK_HIDDEN_OBJECT_TRANSPARENCY)
+            .toString();
 
         this._freeze_active_color = style.primaryColor;
 

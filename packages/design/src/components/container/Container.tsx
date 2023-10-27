@@ -1,8 +1,6 @@
 import { forwardRef, Ref } from 'react';
 
-import { BaseComponentProps } from '../../BaseComponent';
-
-interface BaseContainerProps extends BaseComponentProps {
+export interface IContainerProps {
     children?: React.ReactNode;
 
     /** Semantic DOM class */
@@ -21,12 +19,12 @@ interface BaseContainerProps extends BaseComponentProps {
 /**
  * Container Component
  */
-export const Container = forwardRef((props: BaseContainerProps, ref: Ref<HTMLDivElement>) => {
+export const Container = forwardRef((props: IContainerProps, ref: Ref<HTMLDivElement>) => {
     const { children, className, style, onClick, onContextMenu } = props;
 
     return (
-        <div ref={ref} style={style} className={className} onClick={onClick} onContextMenu={onContextMenu}>
+        <section ref={ref} className={className} style={style} onClick={onClick} onContextMenu={onContextMenu}>
             {children}
-        </div>
+        </section>
     );
 });

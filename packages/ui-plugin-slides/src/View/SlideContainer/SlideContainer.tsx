@@ -1,4 +1,5 @@
-import { BaseComponentProps, Container, Content, Footer, Header, Layout, Sider } from '@univerjs/base-ui';
+import { BaseComponentProps } from '@univerjs/base-ui';
+import { Container, Content, Footer, Header, Layout, Sider } from '@univerjs/design';
 import { Component, createRef } from 'react';
 
 import { ISlideUIPluginConfig } from '../../Basics';
@@ -187,7 +188,7 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
                                     </Container>
                                 )}
                                 <Container
-                                    onContextMenu={(e) => e.preventDefault()}
+                                    onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
                                     ref={this.contentRef}
                                     className={style.contentInnerRightContainer}
                                 >

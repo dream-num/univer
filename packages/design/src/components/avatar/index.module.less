@@ -1,0 +1,45 @@
+@avatar-size-middle: 34px;
+@avatar-size-small: 28px;
+
+.avatar-size(@size) {
+    width: @size;
+    height: @size;
+    line-height: @size;
+}
+
+.avatar {
+    position: relative;
+    color: rgb(var(--bg-color-secondary));
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+    background: rgb(var(--grey-200));
+    display: inline-block;
+    overflow: hidden;
+
+    &-square {
+        border-radius: var(--border-radius-base);
+    }
+
+    &-circle {
+        border-radius: 50%;
+    }
+
+    &-middle {
+        .avatar-size(@avatar-size-middle);
+    }
+
+    &-small {
+        .avatar-size(@avatar-size-small);
+    }
+
+    &-image {
+        background: transparent;
+
+        > img {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    }
+}

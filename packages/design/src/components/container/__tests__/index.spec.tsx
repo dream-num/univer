@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 
-import { Container } from '..';
+import { Container } from '../Container';
 
 describe('Container', () => {
     test('should display initial Container', () => {

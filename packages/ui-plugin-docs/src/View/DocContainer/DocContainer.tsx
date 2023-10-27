@@ -1,4 +1,5 @@
-import { BaseComponentProps, Container, Content, Footer, Layout, Sider } from '@univerjs/base-ui';
+import { BaseComponentProps } from '@univerjs/base-ui';
+import { Container, Content, Footer, Layout, Sider } from '@univerjs/design';
 import { Component, createRef } from 'react';
 
 import { IDocUIPluginConfig } from '../../Basics';

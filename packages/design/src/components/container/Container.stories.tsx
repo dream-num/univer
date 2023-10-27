@@ -9,13 +9,12 @@ const meta: Meta<typeof Container> = {
         layout: 'centered',
     },
     tags: ['autodocs'],
-    args: {
-        children: 'main container',
-    },
 };
 
 export default meta;
 
 export const Playground = {
-    args: {},
+    render() {
+        return <Container>main container</Container>;
+    },
 };

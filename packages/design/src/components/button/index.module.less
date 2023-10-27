@@ -74,6 +74,22 @@
         }
     }
 
+    &-link {
+        color: rgb(var(--primary-color));
+        background-color: transparent;
+        border-color: transparent;
+
+        &[disabled] {
+            &:hover {
+                background-color: transparent;
+            }
+        }
+
+        &:hover {
+            background-color: rgb(var(--bg-color-hover));
+        }
+    }
+
     /** size */
     &-small {
         padding: 6px 8px;

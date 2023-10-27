@@ -1,12 +1,10 @@
 import { LocaleService, LocaleType, ThemeService } from '@univerjs/core';
-import { defaultTheme, themeInstance } from '@univerjs/design';
+import { Container, Content, defaultTheme, Footer, Header, Layout, Sider, themeInstance } from '@univerjs/design';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { ComponentType, useEffect, useRef, useState } from 'react';
 
 import { ComponentManager, ZIndexManager } from '../Common';
 import { AppContext } from '../Common/AppContext';
-import { Content, Footer, Header, Layout, Sider } from '../Components';
-import { Container } from '../Components/Container/Container';
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import style from './app.module.less';
 import { ContextMenu } from './components/ContextMenu';

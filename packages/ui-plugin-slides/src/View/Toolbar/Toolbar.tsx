@@ -1,5 +1,5 @@
-import { AppContext, BaseComponentProps, Container, CustomLabel, debounce, Select } from '@univerjs/base-ui';
-import { Button, Tooltip } from '@univerjs/design';
+import { AppContext, BaseComponentProps, CustomLabel, debounce, Select } from '@univerjs/base-ui';
+import { Button, Container, Tooltip } from '@univerjs/design';
 import { Component, createRef } from 'react';
 
 import { SlideUIPlugin } from '../..';

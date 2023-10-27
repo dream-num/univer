@@ -1,7 +1,6 @@
+import clsx from 'clsx';
 import { useEffect, useRef, useState } from 'react';
 
-import { BaseComponentProps } from '../../BaseComponent';
-import { joinClassNames } from '../../Utils';
 import styles from './index.module.less';
 
 function getFirstChild(obj: HTMLElement) {
@@ -25,7 +24,7 @@ function getFirstChild(obj: HTMLElement) {
     return objChild;
 }
 
-export interface BaseLayoutProps extends BaseComponentProps {
+export interface ILayoutProps {
     children?: React.ReactNode;
 
     /** Semantic DOM class */
@@ -38,7 +37,7 @@ export interface BaseLayoutProps extends BaseComponentProps {
 /**
  * Layout Component
  */
-export function Layout({ children, style, className }: BaseLayoutProps) {
+export function Layout({ children, style, className }: ILayoutProps) {
     const [isAside, setIsAside] = useState(false);
     const ref = useRef<HTMLTableSectionElement>(null);
 
@@ -57,7 +56,7 @@ export function Layout({ children, style, className }: BaseLayoutProps) {
         }
     }, []);
 
-    const classes = joinClassNames(
+    const _className = clsx(
         styles.layoutWrapper,
         {
             [styles.layoutWrapperHasSider]: isAside,
@@ -66,7 +65,7 @@ export function Layout({ children, style, className }: BaseLayoutProps) {
     );
 
     return (
-        <section style={style} ref={ref} className={classes}>
+        <section ref={ref} className={_className} style={style}>
             {children}
         </section>
     );
@@ -75,11 +74,13 @@ export function Layout({ children, style, className }: BaseLayoutProps) {
 /**
  * Header Component
  */
-const Header = (props: BaseLayoutProps) => {
+export const Header = (props: ILayoutProps) => {
     const { children, className, style } = props;
 
+    const _className = clsx(styles.headerWrapper, className);
+
     return (
-        <header style={style} className={`${styles.headerWrapper} ${className}`}>
+        <header className={_className} style={style}>
             {children}
         </header>
     );
@@ -88,46 +89,44 @@ const Header = (props: BaseLayoutProps) => {
 /**
  * Footer Component
  */
-const Footer = (props: BaseLayoutProps) => {
+export function Footer(props: ILayoutProps) {
     const { children, className, style } = props;
 
-    const classes = joinClassNames(styles.footerWrapper, className);
+    const _className = clsx(styles.footerWrapper, className);
 
     return (
-        <footer className={classes} style={style}>
+        <footer className={_className} style={style}>
             {children}
         </footer>
     );
-};
+}
 
 /**
  * Content Component
  */
-const Content = (props: BaseLayoutProps) => {
+export function Content(props: ILayoutProps) {
     const { children, className, style } = props;
 
-    const classes = joinClassNames(styles.contentWrapper, className);
+    const _className = clsx(styles.contentWrapper, className);
 
     return (
-        <main className={classes} style={style}>
+        <main className={_className} style={style}>
             {children}
         </main>
     );
-};
+}
 
 /**
  * Sider Component
  */
-const Sider = (props: BaseLayoutProps) => {
+export function Sider(props: ILayoutProps) {
     const { children, className, style } = props;
 
-    const classes = joinClassNames(styles.siderWrapper, className);
+    const _className = clsx(styles.siderWrapper, className);
 
     return (
-        <aside className={classes} style={style}>
+        <aside className={_className} style={style}>
             {children}
         </aside>
     );
-};
-
-export { Content, Footer, Header, Sider };
+}

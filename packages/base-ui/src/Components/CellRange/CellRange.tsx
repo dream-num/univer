@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
 import { BaseComponentProps } from '../../BaseComponent';
-import { Icon, Modal } from '..';
+import * as Icon from '../Icon';
 import { Input } from '../Input';
+import { Modal } from '../Modal';
 import { ModalButtonGroup } from '../Modal/Modal';
 import styles from './index.module.less';
 

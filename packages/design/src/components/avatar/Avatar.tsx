@@ -1,12 +1,12 @@
-import { BaseComponentProps } from '../../BaseComponent';
-import { joinClassNames } from '../../Utils';
-import styles from './Style/index.module.less';
+import clsx from 'clsx';
+
+import styles from './index.module.less';
 
 type Shape = 'circle' | 'square';
-type AvatarSize = number | 'large' | 'small' | 'default';
+type AvatarSize = number | 'middle' | 'small';
 type ImageFit = 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
 
-export interface BaseAvatarProps extends BaseComponentProps {
+export interface IAvatarProps {
     children?: React.ReactNode;
 
     /** Semantic DOM style */
@@ -26,7 +26,7 @@ export interface BaseAvatarProps extends BaseComponentProps {
 
     /**
      * The size of the avatar
-     * @default 'default'
+     * @default 'middle'
      */
     size?: AvatarSize;
 
@@ -49,14 +49,14 @@ export interface BaseAvatarProps extends BaseComponentProps {
 /**
  * Avatar Component
  */
-export function Avatar(props: BaseAvatarProps) {
+export function Avatar(props: IAvatarProps) {
     const {
         children,
         style,
         title,
         alt,
         shape = 'circle',
-        size = 'default',
+        size = 'middle',
         src,
         fit = 'fill',
         onError,
@@ -72,20 +72,19 @@ export function Avatar(props: BaseAvatarProps) {
               }
             : {};
 
-    const prefix = styles.avatar;
-
-    const classes = joinClassNames(prefix, {
-        [`${prefix}-${shape}`]: shape,
-        [`${prefix}-image`]: src,
-        [`${prefix}-lg`]: size === 'large',
-        [`${prefix}-sm`]: size === 'small',
+    const _className = clsx(styles.avatar, {
+        [styles.avatarCircle]: shape === 'circle',
+        [styles.avatarSquare]: shape === 'square',
+        [styles.avatarImage]: src,
+        [styles.avatarMiddle]: size === 'middle',
+        [styles.avatarSmall]: size === 'small',
     });
 
     const fitStyle = fit ? { objectFit: fit } : {};
 
     if (src) {
         return (
-            <span className={classes} style={{ ...sizeStyle, ...style, ...fitStyle }}>
+            <span className={_className} style={{ ...sizeStyle, ...style, ...fitStyle }}>
                 <img src={src} title={title} alt={alt} onError={onError} onLoad={onLoad} />
                 {children}
             </span>
@@ -93,7 +92,7 @@ export function Avatar(props: BaseAvatarProps) {
     }
 
     return (
-        <span className={classes} style={{ ...sizeStyle, ...style }}>
+        <span className={_className} style={{ ...sizeStyle, ...style }}>
             {children}
         </span>
     );

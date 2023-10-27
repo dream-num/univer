@@ -2,7 +2,7 @@ import clsx from 'clsx';
 
 import styles from './index.module.less';
 
-export type ButtonType = 'primary' | 'default' | 'text';
+export type ButtonType = 'primary' | 'default' | 'text' | 'link';
 export type ButtonSize = 'small' | 'middle' | 'large';
 
 export interface IButtonProps {
@@ -66,6 +66,7 @@ export function Button(props: IButtonProps) {
             [styles.buttonPrimary]: type === 'primary',
             [styles.buttonDefault]: type === 'default',
             [styles.buttonText]: type === 'text',
+            [styles.buttonLink]: type === 'link',
             [styles.buttonSmall]: size === 'small',
             [styles.buttonMiddle]: size === 'middle',
             [styles.buttonLarge]: size === 'large',

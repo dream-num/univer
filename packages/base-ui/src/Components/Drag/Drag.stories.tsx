@@ -1,29 +1,6 @@
-// import type { Meta } from '@storybook/react';
-
-// import { Drag } from './Drag';
-
-// const meta: Meta<typeof Drag> = {
-//     title: 'Components / Drag',
-//     component: Drag,
-//     parameters: {
-//         layout: 'centered',
-//     },
-//     tags: ['autodocs'],
-//     args: {
-//         children: <div>test drag</div>,
-//     },
-// };
-
-// export default meta;
-
-// export const Playground = {
-//     args: {},
-// };
-
-// Drag.stories.js
 import { Meta, StoryFn } from '@storybook/react';
+import { Container } from '@univerjs/design'; // Introduction to components for parent containers
 
-import { Container } from '../Container/Container'; // Introduction to components for parent containers
 import { BaseDragProps, Drag } from './Drag';
 
 const meta: Meta<typeof Drag> = {

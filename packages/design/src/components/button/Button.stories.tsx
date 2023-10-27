@@ -20,6 +20,7 @@ export const ButtonType = {
                 <Button>default button</Button>
                 <Button type="primary">primary button</Button>
                 <Button type="text">text button</Button>
+                <Button type="link">link button</Button>
             </>
         );
     },

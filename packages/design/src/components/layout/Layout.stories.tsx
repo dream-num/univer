@@ -9,16 +9,9 @@ const meta: Meta<typeof Layout> = {
         layout: 'centered',
     },
     tags: ['autodocs'],
-    args: {
-        children: <div>basic layout</div>,
-    },
 };
 
 export default meta;
-
-export const Playground = {
-    args: {},
-};
 
 export const SiderLayout = {
     title: 'Sider',

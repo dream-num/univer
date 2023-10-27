@@ -207,27 +207,27 @@ describe('Test commands used for change selections', () => {
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
             });
-            expectSelectionToBe(0, 0, 0, 0);
+            expectSelectionToBe(19, 19, 19, 19);
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.RIGHT,
             });
-            expectSelectionToBe(0, 1, 0, 1);
+            expectSelectionToBe(0, 0, 0, 0);
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.DOWN,
             });
-            expectSelectionToBe(1, 1, 1, 1);
+            expectSelectionToBe(1, 0, 1, 0);
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
             });
-            expectSelectionToBe(1, 0, 1, 0);
+            expectSelectionToBe(0, 19, 0, 19);
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.UP,
             });
-            expectSelectionToBe(0, 0, 0, 0);
+            expectSelectionToBe(19, 18, 19, 18);
         });
 
         it('Should skip cells in hidden rows / cols', async () => {
@@ -289,6 +289,11 @@ describe('Test commands used for change selections', () => {
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
             });
+            expectSelectionToBe(999, 19, 999, 19);
+
+            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
+                direction: Direction.RIGHT,
+            });
             expectSelectionToBe(0, 0, 0, 0);
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
@@ -297,24 +302,19 @@ describe('Test commands used for change selections', () => {
             expectSelectionToBe(0, 1, 1, 1);
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
-                direction: Direction.RIGHT,
-            });
-            expectSelectionToBe(0, 2, 0, 2);
-
-            await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.DOWN,
             });
-            expectSelectionToBe(1, 2, 1, 2);
+            expectSelectionToBe(2, 1, 2, 1);
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
             });
-            expectSelectionToBe(0, 1, 1, 1);
+            expectSelectionToBe(2, 0, 2, 0);
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.LEFT,
             });
-            expectSelectionToBe(1, 0, 1, 0);
+            expectSelectionToBe(1, 19, 1, 19);
         });
     });
 

@@ -1,10 +1,7 @@
-@import '../Basics/CSS/Skin/default.module.less';
-
 .layout-container {
-    // theme
-    background-color: @bg-color;
-    color: @text-color;
     height: 100%;
+    background-color: rgb(var(--bg-color));
+    color: rgb(var(--text-color));
 
     .content-container-horizontal {
         position: relative;
@@ -30,7 +27,7 @@
 
         .content-inner-right-container {
             width: 50%;
-            background-color: @bg-color-secondary;
+            background-color: rgb(var(--bg-color-secondary));
             flex: 1;
             // position: relative;
         }

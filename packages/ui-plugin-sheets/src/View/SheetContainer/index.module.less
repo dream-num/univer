@@ -1,5 +1,3 @@
-@import '@univerjs/base-ui/src/Basics/CSS/Skin/default.module.less';
-
 @sheet-footer-bar-height: 40px;
 
 :export {
@@ -8,7 +6,7 @@
 
 .sheet-container {
     height: @sheet-footer-bar-height;
-    padding: 0 @padding-xl;
+    padding: 0 var(--padding-xl);
     border-top: 1px solid rgb(var(--border-color));
     box-sizing: border-box;
     display: flex;

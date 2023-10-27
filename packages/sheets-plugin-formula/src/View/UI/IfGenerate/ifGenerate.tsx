@@ -1,5 +1,6 @@
-import { AppContext, BaseSelectProps, Button, Modal, Select } from '@univerjs/base-ui';
+import { AppContext, BaseSelectProps, Modal, Select } from '@univerjs/base-ui';
 import { Nullable, Observer, Workbook } from '@univerjs/core';
+import { Button } from '@univerjs/design';
 import { Component } from 'react';
 
 import { IConfig } from '../../../Basics/Interfaces/IFormula';

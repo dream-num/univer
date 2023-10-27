@@ -26,6 +26,7 @@
         "@univerjs/base-ui": "workspace:*",
         "@univerjs/common-plugin-data": "workspace:*",
         "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
         "@univerjs/ui-plugin-docs": "workspace:*",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"

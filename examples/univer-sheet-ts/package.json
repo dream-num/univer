@@ -21,6 +21,7 @@
         "@univerjs/base-ui": "workspace:*",
         "@univerjs/common-plugin-data": "workspace:*",
         "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
         "@univerjs/sheets-plugin-debugger": "workspace:*",
         "@univerjs/sheets-plugin-find": "workspace:*",
         "@univerjs/sheets-plugin-formula": "workspace:*",

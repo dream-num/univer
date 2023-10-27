@@ -2,7 +2,6 @@ import {
     BaseCheckboxGroupOptions,
     BaseComponentProps,
     BaseItemProps,
-    Button,
     CellRange,
     CheckboxGroup,
     CustomLabel,
@@ -11,6 +10,7 @@ import {
     Modal,
     Select,
 } from '@univerjs/base-ui';
+import { Button } from '@univerjs/design';
 import { Component } from 'react';
 
 import styles from './index.module.less';

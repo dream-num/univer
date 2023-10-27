@@ -1,13 +1,5 @@
-import {
-    AppContext,
-    BaseComponentProps,
-    Button,
-    Container,
-    CustomLabel,
-    debounce,
-    Select,
-    Tooltip,
-} from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, Container, CustomLabel, debounce, Select } from '@univerjs/base-ui';
+import { Button, Tooltip } from '@univerjs/design';
 import { Component, createRef } from 'react';
 
 import { SlideUIPlugin } from '../..';
@@ -204,7 +196,7 @@ export class Toolbar extends Component<IProps, IState> {
                 if (item.show) {
                     return (
                         <Tooltip key={index} title={item.tooltip} placement={'bottom'}>
-                            <Button className={styles.textButton} active={item.active} onClick={item.onClick}>
+                            <Button className={styles.textButton} onClick={item.onClick}>
                                 <CustomLabel label={item.label} />
                             </Button>
                         </Tooltip>

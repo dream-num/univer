@@ -98,6 +98,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
       '@univerjs/ui-plugin-docs':
         specifier: workspace:*
         version: link:../../packages/ui-plugin-docs
@@ -165,6 +168,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
       '@univerjs/sheets-plugin-debugger':
         specifier: workspace:*
         version: link:../../packages/sheets-plugin-debugger
@@ -247,6 +253,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
       '@univerjs/ui-plugin-slides':
         specifier: workspace:*
         version: link:../../packages/ui-plugin-slides
@@ -506,6 +515,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
       '@univerjs/icons':
         specifier: ^0.0.10
         version: 0.0.10(react-dom@18.2.0)(react@18.2.0)
@@ -524,9 +536,6 @@ importers:
       rc-notification:
         specifier: ^5.3.0
         version: 5.3.0(react-dom@18.2.0)(react@18.2.0)
-      rc-tooltip:
-        specifier: ^6.1.2
-        version: 6.1.2(react-dom@18.2.0)(react@18.2.0)
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -669,6 +678,109 @@ importers:
         specifier: ^0.34.6
         version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
 
+  packages/design:
+    dependencies:
+      '@rc-component/color-picker':
+        specifier: ^1.4.1
+        version: 1.4.1(react-dom@18.2.0)(react@18.2.0)
+      '@rc-component/trigger':
+        specifier: ^1.18.0
+        version: 1.18.0(react-dom@18.2.0)(react@18.2.0)
+      '@univerjs/icons':
+        specifier: ^0.0.10
+        version: 0.0.10(react-dom@18.2.0)(react@18.2.0)
+      clsx:
+        specifier: ^2.0.0
+        version: 2.0.0
+      rc-dropdown:
+        specifier: ^4.1.0
+        version: 4.1.0(react-dom@18.2.0)(react@18.2.0)
+      rc-menu:
+        specifier: ^9.12.2
+        version: 9.12.2(react-dom@18.2.0)(react@18.2.0)
+      rc-notification:
+        specifier: ^5.3.0
+        version: 5.3.0(react-dom@18.2.0)(react@18.2.0)
+      rc-tooltip:
+        specifier: ^6.1.2
+        version: 6.1.2(react-dom@18.2.0)(react@18.2.0)
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: ^18.2.0
+        version: 18.2.0(react@18.2.0)
+      react-transition-group:
+        specifier: ^4.4.5
+        version: 4.4.5(react-dom@18.2.0)(react@18.2.0)
+    devDependencies:
+      '@storybook/addon-docs':
+        specifier: ^7.5.1
+        version: 7.5.1(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/addon-essentials':
+        specifier: ^7.5.1
+        version: 7.5.1(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/addon-interactions':
+        specifier: ^7.5.1
+        version: 7.5.1(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/addon-links':
+        specifier: ^7.5.1
+        version: 7.5.1(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/blocks':
+        specifier: ^7.5.1
+        version: 7.5.1(@types/react-dom@18.2.14)(@types/react@18.2.33)(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/react':
+        specifier: ^7.5.1
+        version: 7.5.1(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
+      '@storybook/react-vite':
+        specifier: ^7.5.1
+        version: 7.5.1(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)(vite@4.5.0)
+      '@storybook/testing-library':
+        specifier: ^0.2.2
+        version: 0.2.2
+      '@testing-library/react':
+        specifier: ^14.0.0
+        version: 14.0.0(react-dom@18.2.0)(react@18.2.0)
+      '@types/node':
+        specifier: ^20.8.9
+        version: 20.8.9
+      '@types/react':
+        specifier: ^18.2.33
+        version: 18.2.33
+      '@types/react-dom':
+        specifier: ^18.2.14
+        version: 18.2.14
+      '@types/react-transition-group':
+        specifier: ^4.4.8
+        version: 4.4.8
+      '@vitejs/plugin-react':
+        specifier: ^4.1.0
+        version: 4.1.0(vite@4.5.0)
+      '@vitest/coverage-v8':
+        specifier: ^0.34.6
+        version: 0.34.6(vitest@0.34.6)
+      esbuild:
+        specifier: ^0.19.5
+        version: 0.19.5
+      happy-dom:
+        specifier: ^12.10.1
+        version: 12.10.1
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      storybook:
+        specifier: ^7.5.1
+        version: 7.5.1
+      ts-node:
+        specifier: ^10.9.1
+        version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+      vitest-canvas-mock:
+        specifier: ^0.3.3
+        version: 0.3.3(vitest@0.34.6)
+
   packages/sheets-plugin-debugger:
     dependencies:
       '@univerjs/base-ui':
@@ -677,6 +789,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
       '@wendellhu/redi':
         specifier: ^0.12.8
         version: 0.12.8
@@ -698,6 +813,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets
@@ -753,6 +871,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets
@@ -1010,6 +1131,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
       '@wendellhu/redi':
         specifier: ^0.12.8
         version: 0.12.8
@@ -1065,6 +1189,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
       '@wendellhu/redi':
         specifier: ^0.12.8
         version: 0.12.8
@@ -6386,6 +6513,11 @@ packages:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
     dev: true
+
+  /clsx@2.0.0:
+    resolution: {integrity: sha512-rQ1+kcj+ttHG0MKVGBUXwayCCF1oh39BF5COIpRzuCEv8Mwjv0XucrI2ExNTOn9IlLifGClWQcU9BrZORvtw6Q==}
+    engines: {node: '>=6'}
+    dev: false
 
   /color-convert@1.9.3:
     resolution: {integrity: sha512-QfAUtd+vFdAtFQcC8CCyYt1fYWxSqAiK2cSD6zDB8N3cpsEBAvRxp9zOGg6G/SHHJYAT88/az/IuDGALsNVbGg==}

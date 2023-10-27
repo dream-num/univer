@@ -1,5 +1,3 @@
-@import '../../../Basics/CSS/Skin/default.module.less';
-
 @avatar-bg: #ccc;
 @avatar-size-base: 32px;
 @avatar-size-lg: 40px;
@@ -9,7 +7,7 @@
     position: relative;
     display: inline-block;
     overflow: hidden;
-    color: @bg-color-secondary;
+    color: var(--bg-color-secondary);
     white-space: nowrap;
     text-align: center;
     vertical-align: middle;
@@ -22,7 +20,7 @@
     }
 
     &-square {
-        border-radius: @border-radius-base;
+        border-radius: var(--border-radius-base);
     }
 
     &-lg {

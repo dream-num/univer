@@ -1,14 +1,12 @@
 export { UIPlugin } from './base-ui-plugin';
 export * from './BaseComponent';
-export * from './Basics';
 export * from './Common';
 export * from './Components';
 export { SharedController } from './controllers/shared-shortcut.controller';
 export { IUIController } from './controllers/ui/ui.controller';
 export { type IDesktopUIController } from './controllers/ui/ui-desktop.controller';
-export * from './Enum';
-export * from './Helpers';
-export * from './Locale';
+export * from './helpers';
+export { en, zh } from './locale';
 export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clipboard.command';
 export { CopyShortcutItem, CutShortcutItem, PasteShortcutItem } from './services/clipboard/clipboard.shortcut';
 export {

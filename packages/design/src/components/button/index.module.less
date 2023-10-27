@@ -1,0 +1,97 @@
+.button {
+    position: relative;
+    white-space: nowrap;
+    text-align: center;
+    line-height: 1;
+    border: 1px solid rgb(var(--border-color));
+    border-radius: var(--border-radius-base);
+    display: inline-block;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s;
+
+    &[disabled] {
+        color: rgb(var(--grey-300));
+        cursor: not-allowed;
+    }
+
+    /** type */
+    &-default {
+        font-weight: 400;
+        color: rgb(var(--text-color));
+        background-color: rgb(var(--bg-color-secondary));
+
+        &[disabled] {
+            &:hover {
+                color: rgb(var(--grey-300));
+                border-color: rgb(var(--border-color));
+            }
+        }
+
+        &:hover {
+            color: rgb(var(--primary-color));
+            border-color: rgb(var(--primary-color));
+        }
+    }
+
+    &-primary {
+        font-weight: 500;
+        color: rgb(var(--color-white));
+        background-color: rgb(var(--primary-color));
+        border-color: rgb(var(--primary-color));
+
+        &[disabled] {
+            background-color: rgb(var(--bg-color-secondary));
+            border-color: rgb(var(--border-color));
+
+            &:hover {
+                color: rgb(var(--grey-300));
+                background-color: rgb(var(--bg-color-secondary));
+                border-color: rgb(var(--border-color));
+            }
+        }
+
+        &:hover {
+            color: rgb(var(--color-white));
+            background-color: rgb(var(--primary-color-hover));
+            border-color: rgb(var(--primary-color-hover));
+        }
+    }
+
+    &-text {
+        color: rgb(var(--text-color));
+        background-color: transparent;
+        border-color: transparent;
+
+        &[disabled] {
+            &:hover {
+                background-color: transparent;
+            }
+        }
+
+        &:hover {
+            background-color: rgb(var(--bg-color-hover));
+        }
+    }
+
+    /** size */
+    &-small {
+        padding: 6px 8px;
+        font-size: var(--font-size-sm);
+    }
+
+    &-middle {
+        padding: 8px 12px;
+        font-size: var(--font-size-base);
+    }
+
+    &-large {
+        padding: 10px 20px;
+        font-size: var(--font-size-base);
+    }
+
+    /** block */
+    &-block {
+        width: 100%;
+    }
+}

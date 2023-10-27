@@ -6,7 +6,7 @@ import { ZIndexManager } from './Common/ZIndexManager';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
-import { en } from './Locale';
+import { en } from './locale';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopFocusService, IFocusService } from './services/focus/focus.service';

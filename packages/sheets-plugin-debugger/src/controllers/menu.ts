@@ -1,11 +1,5 @@
-import {
-    defaultTheme,
-    DisplayTypes,
-    greenTheme,
-    IMenuSelectorItem,
-    MenuItemType,
-    MenuPosition,
-} from '@univerjs/base-ui';
+import { DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import { defaultTheme, greenTheme } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';
 
 import { LocaleOperation } from '../commands/operations/locale.operation';

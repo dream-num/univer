@@ -1,8 +1,8 @@
 import { LocaleService, LocaleType, ThemeService } from '@univerjs/core';
+import { defaultTheme, themeInstance } from '@univerjs/design';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { ComponentType, useEffect, useRef, useState } from 'react';
 
-import { defaultTheme } from '../Basics/CSS';
 import { ComponentManager, ZIndexManager } from '../Common';
 import { AppContext } from '../Common/AppContext';
 import { Content, Footer, Header, Layout, Sider } from '../Components';
@@ -11,7 +11,6 @@ import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import style from './app.module.less';
 import { ContextMenu } from './components/ContextMenu';
 import { DocBars } from './components/DocBars';
-import { themeInstance } from './theme';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     headerComponents?: Set<() => ComponentType>;

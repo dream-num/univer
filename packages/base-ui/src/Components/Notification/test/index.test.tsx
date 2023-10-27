@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { Button } from '@univerjs/design';
 import { describe, expect, test } from 'vitest';
 
-import { Button } from '../../Button';
 import { notification } from '../Notification';
 
 describe('Notification', () => {

@@ -1,9 +1,10 @@
 import { DocPlugin } from '@univerjs/base-docs';
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
-import { greenTheme, UIPlugin } from '@univerjs/base-ui';
+import { UIPlugin } from '@univerjs/base-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { LocaleType, Univer } from '@univerjs/core';
+import { greenTheme } from '@univerjs/design';
 import { DebuggerPlugin } from '@univerjs/sheets-plugin-debugger';
 // import { FindPlugin } from '@univerjs/sheets-plugin-find';
 // import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';

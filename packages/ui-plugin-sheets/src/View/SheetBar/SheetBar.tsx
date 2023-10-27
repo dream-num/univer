@@ -15,7 +15,6 @@ import {
     BaseComponentProps,
     BaseMenuItem,
     BaseSelectProps,
-    Button,
     Icon,
     IDisplayMenuItem,
     IMenuItem,
@@ -25,6 +24,7 @@ import {
     Tabs,
 } from '@univerjs/base-ui';
 import { BooleanNumber, ICommandService, IKeyValue, IUniverInstanceService } from '@univerjs/core';
+import { Button } from '@univerjs/design';
 import { IDisposable } from '@wendellhu/redi';
 import { Component, createRef } from 'react';
 

@@ -2,7 +2,6 @@ import * as Icon from './Icon';
 
 export * from './Avatar';
 export * from './BorderLine';
-export * from './Button';
 export * from './CellRange';
 export * from './Checkbox';
 export * from './Collapse';
@@ -22,6 +21,5 @@ export * from './Separator';
 export * from './SiderModal';
 export * from './Slider';
 export * from './Tabs';
-export * from './Tooltip';
 
 export { Icon };

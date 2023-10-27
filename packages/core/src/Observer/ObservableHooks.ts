@@ -17,7 +17,7 @@ export class ObservableHooks<T> extends Observable<T> {
             return null;
         }
 
-        const observer = new Observer(callback);
+        const observer = new Observer(callback, this);
         this._observers = [observer];
 
         if (this._onObserverAdded) {

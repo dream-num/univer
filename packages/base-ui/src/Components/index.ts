@@ -7,7 +7,6 @@ export * from './CellRange';
 export * from './Checkbox';
 export * from './Collapse';
 export * from './ColorPicker';
-export * from './ColorPickerCircleButton';
 export * from './Container';
 export * from './CustomLabel';
 export * from './Dropdown';

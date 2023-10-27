@@ -1,78 +1,121 @@
-@import '../../Basics/CSS/Skin/default.module.less';
-
-.color-picker-outer {
-    width: fit-content;
-    display: block;
-    background-color: @bg-color-secondary;
-    padding: 10px;
-    // padding-bottom: 0;
-    border-radius: 10px;
-    // left: 0; // set outside
-    box-shadow: @box-shadow-base;
-    z-index: 4;
-    height: fit-content;
-}
+@inner-border-radius: 4px;
+@outer-border-radius: 8px;
+@default-handler-size: 16px;
+@handler-border-size: 2px;
 
 .color-picker {
-    width: fit-content;
-    display: flex;
+    position: absolute;
+    z-index: 1;
+    display: block;
+    width: max-content;
+    min-width: 272px;
+    visibility: visible;
 
-    .picker {
-        width: fit-content;
+    &-hidden {
+        display: none;
+    }
 
-        .picker-swatches {
-            display: flex;
-            flex-wrap: nowrap;
-            margin-bottom: 10px;
+    &-panel {
+        display: flex;
+        flex-direction: column;
+        width: 272px;
+        background-color: #fff;
+        border-radius: @outer-border-radius;
+        &-disabled {
+            cursor: not-allowed;
+        }
+    }
 
-            .picker-swatches-item {
+    &-select {
+        margin-bottom: var(--margin-xs);
+
+        .color-picker-palette {
+            min-height: 160px;
+            overflow: hidden;
+            border-radius: @inner-border-radius;
+            & > .color-picker-gradient {
+                border-top-left-radius: 5px;
+            }
+        }
+    }
+
+    &-saturation {
+        position: absolute;
+        border-radius: inherit;
+        inset: 0;
+    }
+
+    &-handler {
+        box-sizing: border-box;
+        width: @default-handler-size;
+        height: @default-handler-size;
+        border: @handler-border-size solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.06);
+    }
+
+    &-slider {
+        width: 100%;
+        .color-picker-palette {
+            height: 8px;
+        }
+        .color-picker-gradient {
+            border-radius: @inner-border-radius;
+        }
+    }
+
+    &-custom-btn {
+        color: rgb(var(--text-color));
+        font-size: var(--font-size-base);
+        cursor: pointer;
+    }
+
+    &-cancel-btn {
+        color: rgb(var(--text-color));
+        font-size: var(--font-size-base);
+        cursor: pointer;
+    }
+
+    &-color-blocks {
+        margin-bottom: var(--margin-xs);
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        grid-template-rows: repeat(9, 1fr);
+        gap: var(--margin-xs);
+    }
+
+    &-color-block {
+        position: relative;
+        width: 20px;
+        height: 20px;
+        overflow: hidden;
+        border-radius: @inner-border-radius;
+        cursor: pointer;
+
+        &-inner {
+            width: 100%;
+            height: 100%;
+            border: 1px solid rgb(var(--grey-600));
+            border-radius: @inner-border-radius;
+            box-sizing: border-box;
+        }
+    }
+
+    &-slider-container {
+        margin-bottom: var(--margin-xs);
+        display: flex;
+
+        .color-picker-slider-group {
+            flex: 1;
+
+            &-disabled-alpha {
                 display: flex;
-                flex-direction: column;
+                align-items: center;
 
-                .picker-swatch {
-                    min-width: 20px;
-                    width: 20px;
-                    height: 20px;
-                    margin: 2px;
-                    border: 1px solid #eee;
-                    padding: 0;
-                    border-radius: 50%;
-                    outline: none;
-                    // overflow: hidden;
-
-                    .picker-swatch-btn {
-                        width: 20px;
-                        height: 20px;
-                        border-radius: 50%;
-                        border: none;
-                        cursor: pointer;
-                    }
+                .color-picker-slider {
+                    margin-bottom: 0;
                 }
             }
         }
-
-        // button {
-        //     display: inline-block;
-        //     font-size: var(--font-size);
-        //     padding: 0 5px;
-        // }
     }
-
-    .colorful-warp {
-        margin-left: 10px;
-
-        button {
-            font-size: var(--font-size);
-            margin: 10px 10px 10px 0;
-        }
-    }
-
-    .color-btn {
-        border: 1px solid var(--border-color);
-    }
-}
-
-.color-picker-slot {
-    margin: 5px;
-    outline: 1px solid;
 }

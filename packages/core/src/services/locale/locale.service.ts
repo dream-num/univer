@@ -48,8 +48,8 @@ export class LocaleService extends Disposable {
         this.disposeWithMe(toDisposable(() => this._locale$.complete()));
     }
 
-    t(key?: string): Nullable<string | number> {
-        return this.get(key) ?? key;
+    t(key?: string): string | number {
+        return this.get(key) ?? key ?? '';
     }
 
     setLocale(locale: LocaleType): void {

@@ -24,6 +24,7 @@ import {
     IExpandSelectionCommandParams,
     IMoveSelectionCommandParams,
     ISelectAllCommandParams,
+    JumpOver,
     MoveSelectionCommand,
     SelectAllCommand,
 } from '../set-selections.command';
@@ -325,19 +326,19 @@ describe('Test commands used for change selections', () => {
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.RIGHT,
-                jumpOver: true,
+                jumpOver: JumpOver.moveGap,
             });
             expectSelectionToBe(0, 2, 0, 2);
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.RIGHT,
-                jumpOver: true,
+                jumpOver: JumpOver.moveGap,
             });
             expectSelectionToBe(0, 5, 1, 6);
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.RIGHT,
-                jumpOver: true,
+                jumpOver: JumpOver.moveGap,
             });
             expectSelectionToBe(0, 19, 0, 19);
         });
@@ -363,14 +364,14 @@ describe('Test commands used for change selections', () => {
 
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.RIGHT,
-                jumpOver: true,
+                jumpOver: JumpOver.moveGap,
             });
             expectSelectionToBe(0, 2, 0, 2);
 
             // skip over hidden columns and jump to the last column
             await commandService.executeCommand<IMoveSelectionCommandParams>(MoveSelectionCommand.id, {
                 direction: Direction.RIGHT,
-                jumpOver: true,
+                jumpOver: JumpOver.moveGap,
             });
             expectSelectionToBe(0, 19, 0, 19);
         });
@@ -482,19 +483,19 @@ describe('Test commands used for change selections', () => {
 
             await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
                 direction: Direction.RIGHT,
-                jumpOver: true,
+                jumpOver: JumpOver.moveGap,
             });
             expectSelectionToBe(0, 0, 0, 2); // A1:C1
 
             await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
                 direction: Direction.RIGHT,
-                jumpOver: true,
+                jumpOver: JumpOver.moveGap,
             });
             expectSelectionToBe(0, 0, 1, 6); // A1:G2, because that is a merged cell
 
             await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
                 direction: Direction.RIGHT,
-                jumpOver: true,
+                jumpOver: JumpOver.moveGap,
             });
             expectSelectionToBe(0, 0, 1, 19);
 
@@ -502,19 +503,19 @@ describe('Test commands used for change selections', () => {
 
             await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
                 direction: Direction.LEFT,
-                jumpOver: true,
+                jumpOver: JumpOver.moveGap,
             });
             expectSelectionToBe(0, 0, 1, 6); // A1:G2
 
             await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
                 direction: Direction.LEFT,
-                jumpOver: true,
+                jumpOver: JumpOver.moveGap,
             });
             expectSelectionToBe(0, 0, 1, 2); // A1:C2
 
             await commandService.executeCommand<IExpandSelectionCommandParams>(ExpandSelectionCommand.id, {
                 direction: Direction.LEFT,
-                jumpOver: true,
+                jumpOver: JumpOver.moveGap,
             });
             expectSelectionToBe(0, 0, 1, 0); // A1:A2
         });

@@ -5,11 +5,7 @@ export * from './SheetPlugin';
 // #region services
 
 export { BorderStyleManagerService } from './services/border-style-manager.service';
-export {
-    COPY_SELECTION_PLUGIN_NAME,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-} from './services/selection/selection-manager.service';
+export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './services/selection/selection-manager.service';
 
 // #endregion
 
@@ -180,4 +176,6 @@ export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.oper
 export * from './Locale';
 export { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
+export { ShortcutExperienceService } from './services/shortcut-experience.service';
+
 // #endregion

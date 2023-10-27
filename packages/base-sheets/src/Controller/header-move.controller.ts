@@ -111,8 +111,7 @@ export class HeaderMoveController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @ISelectionRenderService
-        private readonly _selectionRenderService: ISelectionRenderService,
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
@@ -140,18 +139,13 @@ export class HeaderMoveController extends Disposable {
             initialType === HEADER_MOVE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
         this._rowOrColumnMoveObservers.push(
-            eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                 if (skeleton == null) {
                     return;
                 }
 
-                const { startX, startY, endX, endY, row, column } = getCoordByOffset(
-                    evt.offsetX,
-                    evt.offsetY,
-                    scene,
-                    skeleton
-                );
+                const { row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
 
                 const matchSelectionData = this._checkInHeaderRange(
                     initialType === HEADER_MOVE_TYPE.ROW ? row : column,
@@ -171,7 +165,7 @@ export class HeaderMoveController extends Disposable {
         );
 
         this._rowOrColumnLeaveObservers.push(
-            eventBindingObject?.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            eventBindingObject?.onPointerLeaveObserver.add(() => {
                 this._moveHelperBackgroundShape?.hide();
                 this._moveHelperLineShape?.hide();
                 scene.resetCursor();
@@ -180,7 +174,7 @@ export class HeaderMoveController extends Disposable {
         );
 
         this._rowOrColumnDownObservers.push(
-            eventBindingObject?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            eventBindingObject?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                 if (skeleton == null) {
                     return;
@@ -196,12 +190,7 @@ export class HeaderMoveController extends Disposable {
 
                 this._startOffsetY = newEvtOffsetY;
 
-                const { startX, startY, endX, endY, row, column } = getCoordByOffset(
-                    evt.offsetX,
-                    evt.offsetY,
-                    scene,
-                    skeleton
-                );
+                const { row, column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
 
                 if (initialType === HEADER_MOVE_TYPE.ROW) {
                     this._changeFromRow = row;
@@ -248,7 +237,7 @@ export class HeaderMoveController extends Disposable {
                     });
                 });
 
-                this._upObserver = scene.onPointerUpObserver.add((_upEvt: IPointerEvent | IMouseEvent) => {
+                this._upObserver = scene.onPointerUpObserver.add(() => {
                     this._disposeBackgroundAndLine();
                     scene.resetCursor();
                     scene.enableEvent();

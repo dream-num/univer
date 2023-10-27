@@ -1,6 +1,7 @@
 import {
     ExpandSelectionCommand,
     MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
     SelectAllCommand,
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -31,7 +32,10 @@ import {
 } from '../commands/commands/set-format-painter.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
-import { SetCellEditOperation } from '../commands/operations/cell-edit.operation';
+import {
+    SetCellEditVisibleArrowOperation,
+    SetCellEditVisibleOperation,
+} from '../commands/operations/cell-edit.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { RightMenuInput } from '../View/RightMenu/RightMenuInput';
 import { RightMenuItem } from '../View/RightMenu/RightMenuItem';
@@ -97,7 +101,16 @@ import {
     CellMergeMenuItemFactory,
     CellMergeVerticalMenuItemFactory,
 } from './menu/merge.menu';
-import { QuitCellEditorShortcutItem } from './shortcuts/editor.shortcut';
+import {
+    EditorBreakLineShortcut,
+    EditorCursorEnterShortcut,
+    EditorCursorEscShortcut,
+    EditorCursorTabShortcut,
+    EditorDeleteLeftShortcut,
+    EditorDeleteLeftShortcutInActive,
+    generateArrowSelectionShortCuItem,
+} from './shortcuts/editor.shortcut';
+import { SetColHiddenShortcutItem, SetRowHiddenShortcutItem } from './shortcuts/operation.shortcut';
 import {
     ExpandSelectionDownShortcutItem,
     ExpandSelectionEndDownShortcutItem,
@@ -113,8 +126,11 @@ import {
     MoveSelectionEndLeftShortcutItem,
     MoveSelectionEndRightShortcutItem,
     MoveSelectionEndUpShortcutItem,
+    MoveSelectionEnterShortcutItem,
+    MoveSelectionEnterUpShortcutItem,
     MoveSelectionLeftShortcutItem,
     MoveSelectionRightShortcutItem,
+    MoveSelectionTabLeftShortcutItem,
     MoveSelectionTabShortcutItem,
     MoveSelectionUpShortcutItem,
     SelectAllShortcutItem,
@@ -155,6 +171,7 @@ export class SheetUIController extends Disposable {
         // init commands
         [
             MoveSelectionCommand,
+            MoveSelectionEnterAndTabCommand,
             ExpandSelectionCommand,
             SelectAllCommand,
             SetBoldCommand,
@@ -167,7 +184,9 @@ export class SheetUIController extends Disposable {
             ShowMenuListCommand,
             RenameSheetOperation,
 
-            SetCellEditOperation,
+            SetCellEditVisibleOperation,
+
+            SetCellEditVisibleArrowOperation,
 
             SetActivateCellEditOperation,
             SetOnceFormatPainterCommand,
@@ -256,6 +275,9 @@ export class SheetUIController extends Disposable {
             MoveSelectionLeftShortcutItem,
             MoveSelectionRightShortcutItem,
             MoveSelectionTabShortcutItem,
+            MoveSelectionTabLeftShortcutItem,
+            MoveSelectionEnterShortcutItem,
+            MoveSelectionEnterUpShortcutItem,
             MoveBackSelectionShortcutItem,
             MoveSelectionEndDownShortcutItem,
             MoveSelectionEndUpShortcutItem,
@@ -284,7 +306,17 @@ export class SheetUIController extends Disposable {
 
             // cell content editing shortcuts
             ClearSelectionValueShortcutItem,
-            QuitCellEditorShortcutItem,
+            ...generateArrowSelectionShortCuItem(),
+            EditorCursorEnterShortcut,
+            EditorCursorTabShortcut,
+            EditorBreakLineShortcut,
+            EditorDeleteLeftShortcut,
+            EditorDeleteLeftShortcutInActive,
+            EditorCursorEscShortcut,
+
+            // operation shortcuts
+            SetRowHiddenShortcutItem,
+            SetColHiddenShortcutItem,
         ].forEach((item) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(item));
         });

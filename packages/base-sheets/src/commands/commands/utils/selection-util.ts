@@ -5,6 +5,7 @@ import {
     IRange,
     ISelection,
     ISelectionCell,
+    Nullable,
     ObjectMatrix,
     RANGE_TYPE,
     Rectangle,
@@ -56,48 +57,98 @@ export function getCellAtRowCol(row: number, col: number, worksheet: Worksheet):
     return destRange;
 }
 
-export function findNextRange(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
-    const destRange: IRange = { ...startRange };
+export function findNextRange(
+    startRange: IRange,
+    direction: Direction,
+    worksheet: Worksheet,
+    boundary?: IRange,
+    isFindNext: boolean = true,
+    nextStep: number = 1,
+    isGoBack: boolean = true
+): IRange {
+    let destRange: IRange = { ...startRange };
+
+    /**
+     * Set the boundaries for moving the selection area.
+     * Here you can customize the boundaries to implement the ability to move the primary within the selection area.
+     */
+    if (boundary == null) {
+        boundary = {
+            startRow: 0,
+            endRow: worksheet.getRowCount() - 1,
+            startColumn: 0,
+            endColumn: worksheet.getColumnCount() - 1,
+        };
+    }
+
     let next: number;
     switch (direction) {
         case Direction.UP:
-            next = startRange.startRow - 1;
+            next = startRange.startRow - nextStep;
             while (next > -1 && !worksheet.getRowVisible(next)) {
                 next -= 1;
             }
-            if (next > -1) {
+            if (next >= boundary.startRow) {
                 destRange.startRow = next;
-                destRange.endRow = destRange.startRow;
+                destRange.endRow = next;
+            } else if (isGoBack) {
+                destRange.startRow = boundary.endRow;
+                destRange.endRow = boundary.endRow;
+
+                if (isFindNext) {
+                    destRange = findNextRange(destRange, Direction.LEFT, worksheet, boundary, false);
+                }
             }
             break;
         case Direction.DOWN:
-            next = startRange.endRow + 1;
+            next = startRange.endRow + nextStep;
             while (next < worksheet.getRowCount() && !worksheet.getRowVisible(next)) {
                 next += 1;
             }
-            if (next < worksheet.getRowCount()) {
+            if (next <= boundary.endRow) {
                 destRange.startRow = next;
-                destRange.endRow = destRange.startRow;
+                destRange.endRow = next;
+            } else if (isGoBack) {
+                destRange.startRow = boundary.startRow;
+                destRange.endRow = boundary.startRow;
+
+                if (isFindNext) {
+                    destRange = findNextRange(destRange, Direction.RIGHT, worksheet, boundary, false);
+                }
             }
             break;
         case Direction.LEFT:
-            next = startRange.startColumn - 1;
+            next = startRange.startColumn - nextStep;
             while (next > -1 && !worksheet.getColVisible(next)) {
                 next -= 1;
             }
-            if (next > -1) {
+            if (next >= boundary.startColumn) {
                 destRange.startColumn = next;
-                destRange.endColumn = destRange.startColumn;
+                destRange.endColumn = next;
+            } else if (isGoBack) {
+                destRange.startColumn = boundary.endColumn;
+                destRange.endColumn = boundary.endColumn;
+
+                if (isFindNext) {
+                    destRange = findNextRange(destRange, Direction.UP, worksheet, boundary, false);
+                }
             }
             break;
         case Direction.RIGHT:
-            next = startRange.endColumn + 1;
+            next = startRange.endColumn + nextStep;
             while (next < worksheet.getColumnCount() && !worksheet.getColVisible(next)) {
                 next += 1;
             }
-            if (next < worksheet.getColumnCount()) {
+            if (next <= boundary.endColumn) {
                 destRange.startColumn = next;
-                destRange.endColumn = destRange.startColumn;
+                destRange.endColumn = next;
+            } else if (isGoBack) {
+                destRange.startColumn = boundary.startColumn;
+                destRange.endColumn = boundary.startColumn;
+
+                if (isFindNext) {
+                    destRange = findNextRange(destRange, Direction.DOWN, worksheet, boundary, false);
+                }
             }
             break;
         default:
@@ -298,6 +349,10 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
     return alignToMergedCellsBorders(destRange, worksheet, true);
 }
 
+export function findNextRangeExpand(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
+    return findNextRange(startRange, direction, worksheet, undefined, false, 1, false);
+}
+
 export function expandToNextGapRange(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
     const next = findNextGapRange(startRange, direction, worksheet);
     return alignToMergedCellsBorders(Rectangle.union(next, startRange), worksheet, true);
@@ -337,7 +392,7 @@ export function alignToMergedCellsBorders(startRange: IRange, worksheet: Workshe
 }
 
 export function expandToNextCell(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
-    const next = findNextRange(startRange, direction, worksheet);
+    const next = findNextRangeExpand(startRange, direction, worksheet);
     const destRange: IRange = {
         startRow: Math.min(startRange.startRow, next.startRow),
         startColumn: Math.min(startRange.startColumn, next.startColumn),
@@ -407,7 +462,7 @@ export function shrinkToNextCell(startRange: IRange, direction: Direction, works
     const reversedDirection = getReverseDirection(direction);
     const shrinkFromEdge = getEdgeOfRange(startRange, reversedDirection, worksheet);
     const otherEdge = getEdgeOfRange(startRange, direction, worksheet);
-    const next = findNextRange(shrinkFromEdge, direction, worksheet);
+    const next = findNextRangeExpand(shrinkFromEdge, direction, worksheet);
     return alignToMergedCellsBorders(Rectangle.union(otherEdge, next), worksheet, false);
 }
 
@@ -594,8 +649,12 @@ function rangeHasValue(
     };
 }
 
-export function getStartRange(range: IRange, primary: ISelectionCell, direction: Direction): IRange {
+export function getStartRange(range: IRange, primary: Nullable<ISelectionCell>, direction: Direction): IRange {
     const ret = Rectangle.clone(range);
+
+    if (primary == null) {
+        return ret;
+    }
 
     switch (direction) {
         case Direction.UP:

@@ -21,6 +21,7 @@ export {
     type IAddWorksheetMergeMutationParams,
     type IRemoveWorksheetMergeMutationParams,
 } from './Basics/Interfaces/MutationInterface';
+export { transformCellDataToSelectionData } from './Basics/selection';
 export {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -81,7 +82,10 @@ export type {
 } from './commands/commands/set-selections.command';
 export {
     ExpandSelectionCommand,
+    type IMoveSelectionEnterAndTabCommandParams,
+    JumpOver,
     MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
     SelectAllCommand,
 } from './commands/commands/set-selections.command';
 export {
@@ -114,6 +118,12 @@ export {
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
 export { ChangeZoomRatioCommand, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 export { getPrimaryForRange } from './commands/commands/utils/selection-util';
+export {
+    findNextGapRange,
+    findNextRange,
+    getCellAtRowCol,
+    getStartRange,
+} from './commands/commands/utils/selection-util';
 export { AddWorksheetMergeMutation } from './commands/mutations/add-worksheet-merge.mutation';
 export {
     InsertColMutation,
@@ -166,4 +176,6 @@ export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.oper
 export * from './Locale';
 export { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
+export { ShortcutExperienceService } from './services/shortcut-experience.service';
+
 // #endregion

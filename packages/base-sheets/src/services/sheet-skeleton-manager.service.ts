@@ -18,7 +18,11 @@ export interface ISheetSkeletonManagerSearch {
 }
 
 /**
- * This service is for worksheet build sheet skeleton.
+ * This service manages the drawing of the sheet's viewModel (skeleton).
+ * Each time there is a content change, it will trigger the viewModel of the render to recalculate.
+ * Each application and sub-table has its own viewModel (skeleton).
+ * The viewModel is also a temporary storage variable, which does not need to be persisted,
+ * so it is managed uniformly through the service.
  */
 export class SheetSkeletonManagerService implements IDisposable {
     private _currentSkeleton: ISheetSkeletonManagerSearch = {
@@ -57,11 +61,7 @@ export class SheetSkeletonManagerService implements IDisposable {
     setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         const param = this._getCurrentBySearch(searchParam);
         if (param != null) {
-            if (param.dirty) {
-                param.skeleton.makeDirty(true);
-                param.dirty = false;
-            }
-            param.skeleton.calculate();
+            this._reCalculate(param);
         } else {
             const { unitId, sheetId } = searchParam;
 
@@ -92,6 +92,22 @@ export class SheetSkeletonManagerService implements IDisposable {
         this._currentSkeleton$.next(nextParam);
 
         return this.getCurrent();
+    }
+
+    reCalculate() {
+        const param = this.getCurrent();
+        if (param == null) {
+            return;
+        }
+        this._reCalculate(param);
+    }
+
+    private _reCalculate(param: ISheetSkeletonManagerParam) {
+        if (param.dirty) {
+            param.skeleton.makeDirty(true);
+            param.dirty = false;
+        }
+        param.skeleton.calculate();
     }
 
     makeDirtyCurrent(state: boolean = true) {

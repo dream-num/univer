@@ -26,8 +26,7 @@ export interface IEditorBridgeService {
     dispose(): void;
     setState(param: IEditorBridgeServiceParam): void;
     getState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
-    show(openType: DeviceInputEventType): void;
-    hide(): void;
+    changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     isVisible(): IEditorBridgeServiceVisibleParam;
 }
 
@@ -60,23 +59,28 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
         return this._state;
     }
 
-    show(eventType = DeviceInputEventType.Dblclick) {
-        this._visible = {
-            visible: true,
-            eventType,
-        };
-
+    changeVisible(param: IEditorBridgeServiceVisibleParam) {
+        this._visible = param;
         this._visible$.next(this._visible);
     }
 
-    hide() {
-        this._visible = {
-            visible: false,
-            eventType: this._visible.eventType,
-        };
+    // show(eventType = DeviceInputEventType.Dblclick) {
+    //     this._visible = {
+    //         visible: true,
+    //         eventType,
+    //     };
 
-        this._visible$.next(this._visible);
-    }
+    //     this._visible$.next(this._visible);
+    // }
+
+    // hide() {
+    //     this._visible = {
+    //         visible: false,
+    //         eventType: this._visible.eventType,
+    //     };
+
+    //     this._visible$.next(this._visible);
+    // }
 
     isVisible() {
         return this._visible;

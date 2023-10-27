@@ -96,19 +96,19 @@ export class HeaderMenuController extends Disposable {
             return;
         }
 
-        const { spreadsheetColumnHeader, spreadsheetRowHeader, scene } = sheetObject;
+        const { spreadsheetColumnHeader, spreadsheetRowHeader } = sheetObject;
 
         const eventBindingObject =
             initialType === HEADER_HOVER_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
         this._observers.push(
-            eventBindingObject?.onPointerEnterObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            eventBindingObject?.onPointerEnterObserver.add(() => {
                 this._hoverRect?.show();
             })
         );
 
         this._observers.push(
-            eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            eventBindingObject?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                 if (skeleton == null) {
                     return;
@@ -121,7 +121,7 @@ export class HeaderMenuController extends Disposable {
 
                 const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
-                const { startX, startY, endX, endY, row, column } = getCoordByOffset(
+                const { startX, startY, endX, endY, column } = getCoordByOffset(
                     evt.offsetX,
                     evt.offsetY,
                     sheetObject.scene,
@@ -169,7 +169,7 @@ export class HeaderMenuController extends Disposable {
         );
 
         this._observers.push(
-            eventBindingObject?.onPointerLeaveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            eventBindingObject?.onPointerLeaveObserver.add(() => {
                 this._hoverRect?.hide();
                 this._hoverMenu?.hide();
             })
@@ -217,7 +217,7 @@ export class HeaderMenuController extends Disposable {
             sheetObject.scene.resetCursor();
         });
 
-        this._hoverMenu.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+        this._hoverMenu.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent) => {
             const sheetObject = this._getSheetObject();
             if (sheetObject == null) {
                 return;
@@ -228,7 +228,7 @@ export class HeaderMenuController extends Disposable {
             const currentSelectionDatas = this._selectionManagerService.getSelectionRanges();
 
             const selectedSelection = currentSelectionDatas?.find((data) => {
-                const { startRow, startColumn, endRow, endColumn } = data;
+                const { startColumn, endColumn } = data;
                 if (currentColumn >= startColumn && startColumn <= endColumn) {
                     return true;
                 }

@@ -77,6 +77,7 @@ export function makeCellRangeToRangeData(cellInfo: Nullable<ISelectionCell>): Nu
         actualRow,
         actualColumn,
         isMerged,
+        isMergedMainCell,
         startRow: mergeStartRow,
         startColumn: mergeStartColumn,
         endRow: mergeEndRow,
@@ -86,7 +87,7 @@ export function makeCellRangeToRangeData(cellInfo: Nullable<ISelectionCell>): Nu
     let startColumn = actualColumn;
     let endRow = actualRow;
     let endColumn = actualColumn;
-    if (isMerged) {
+    if (isMerged || isMergedMainCell) {
         startRow = mergeStartRow;
         startColumn = mergeStartColumn;
         endRow = mergeEndRow;

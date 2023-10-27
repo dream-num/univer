@@ -18,7 +18,7 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
-import { SetCellEditOperation } from '../commands/operations/cell-edit.operation';
+import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
 
 interface ISetWorksheetMutationParams {
@@ -67,7 +67,7 @@ export class EditorBridgeController extends Disposable {
 
             const { scene, engine } = sheetObject;
 
-            if (params == null || params.length === 0 || skeleton == null) {
+            if (params == null || params.length === 0 || skeleton == null || params[params.length - 1] == null) {
                 return;
             }
 
@@ -141,7 +141,7 @@ export class EditorBridgeController extends Disposable {
         spreadsheet.onDblclickObserver.add(() => {
             // this._editorBridgeService.show(DeviceInputEventType.Dblclick);
 
-            this._commandService.executeCommand(SetCellEditOperation.id, {
+            this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: true,
                 eventType: DeviceInputEventType.Dblclick,
             });
@@ -156,8 +156,9 @@ export class EditorBridgeController extends Disposable {
     private _hideEditor() {
         if (this._editorBridgeService.isVisible().visible === true) {
             this._selectionManagerService.makeDirty(false);
-            this._commandService.executeCommand(SetCellEditOperation.id, {
+            this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: false,
+                eventType: DeviceInputEventType.PointerDown,
             });
 
             /**

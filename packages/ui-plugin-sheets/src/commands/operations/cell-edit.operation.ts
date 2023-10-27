@@ -4,18 +4,24 @@ import { CommandType, IOperation } from '@univerjs/core';
 
 import { IEditorBridgeService, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 
-export const SetCellEditOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
-    id: 'sheet.operation.set-cell-edit',
+export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
+    id: 'sheet.operation.set-cell-edit-visible',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const editorBridgeService = accessor.get(IEditorBridgeService);
 
-        if (params?.visible === true) {
-            editorBridgeService.show(params.eventType);
-        } else {
-            editorBridgeService.hide();
+        if (params == null) {
+            return false;
         }
+
+        editorBridgeService.changeVisible(params);
 
         return true;
     },
+};
+
+export const SetCellEditVisibleArrowOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
+    id: 'sheet.operation.set-cell-edit-visible-arrow',
+    type: CommandType.OPERATION,
+    handler: (accessor, params) => true,
 };

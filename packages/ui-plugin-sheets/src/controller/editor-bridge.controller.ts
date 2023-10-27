@@ -35,8 +35,7 @@ export class EditorBridgeController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @ISelectionRenderService
-        private readonly _selectionRenderService: ISelectionRenderService
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
 

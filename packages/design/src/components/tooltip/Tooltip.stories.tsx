@@ -1,6 +1,6 @@
 import type { Meta } from '@storybook/react';
-import { Button } from '@univerjs/design';
 
+import { Button } from '../button/Button';
 import { Tooltip } from './Tooltip';
 
 const meta: Meta<typeof Tooltip> = {
@@ -10,10 +10,6 @@ const meta: Meta<typeof Tooltip> = {
         layout: 'centered',
     },
     tags: ['autodocs'],
-    args: {
-        children: <div>test</div>,
-        title: 'test tooltip',
-    },
 };
 
 export default meta;

@@ -1,11 +1,10 @@
 /* eslint-disable no-magic-numbers */
-import { Button } from '@univerjs/design';
+import { Button, Tooltip } from '@univerjs/design';
 import { AddWorksheet28, ReduceProportion24 } from '@univerjs/icons';
 import { useMemo, useRef } from 'react';
 
 import { joinClassNames } from '../../Utils';
 import { Dropdown2 } from '../Dropdown/Dropdown2';
-import { Tooltip } from '../Tooltip/Tooltip';
 import styles from './index.module.less';
 
 /**

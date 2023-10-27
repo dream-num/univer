@@ -21,6 +21,5 @@ export * from './Separator';
 export * from './SiderModal';
 export * from './Slider';
 export * from './Tabs';
-export * from './Tooltip';
 
 export { Icon };

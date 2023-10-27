@@ -1,11 +1,11 @@
 import { ICommandService, LocaleService } from '@univerjs/core';
+import { Tooltip } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { ComponentManager } from '../../../Common';
 import { Select } from '../../../Components/Select/Select';
-import { Tooltip } from '../../../Components/Tooltip/Tooltip';
 import {
     IDisplayMenuItem,
     IMenuItem,

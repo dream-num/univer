@@ -56,6 +56,8 @@ export function Button(props: IButtonProps) {
         htmlType,
         disabled = false,
         onClick,
+
+        ...restProps
     } = props;
 
     const _className = clsx(
@@ -73,7 +75,14 @@ export function Button(props: IButtonProps) {
     );
 
     return (
-        <button className={_className} style={style} type={htmlType} onClick={onClick} disabled={disabled}>
+        <button
+            className={_className}
+            style={style}
+            type={htmlType}
+            onClick={onClick}
+            disabled={disabled}
+            {...restProps}
+        >
             {children}
         </button>
     );

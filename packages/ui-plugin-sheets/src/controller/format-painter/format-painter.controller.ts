@@ -76,16 +76,19 @@ export class FormatPainterController extends Disposable {
         const workbookId = this._currentService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = this._currentService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         if (!stylesMatrix) return;
+
         const styleRowsNum = stylesMatrix.getLength();
         const styleColsNum = stylesMatrix.getSizeOf();
         const styleValues: ICellData[][] = Array.from({ length: range.endRow - range.startRow + 1 }, () =>
             Array.from({ length: range.endColumn - range.startColumn + 1 }, () => ({}))
         );
+
         styleValues.forEach((row, rowIndex) => {
             row.forEach((col, colIndex) => {
                 const mappedRowIndex = rowIndex % styleRowsNum;
                 const mappedColIndex = colIndex % styleColsNum;
                 const style = stylesMatrix.getValue(mappedRowIndex, mappedColIndex);
+
                 if (style) {
                     styleValues[rowIndex][colIndex].s = style;
                 }
@@ -98,6 +101,7 @@ export class FormatPainterController extends Disposable {
             range,
             value: styleValues,
         };
+
         this._commandService.executeCommand(SetRangeValuesCommand.id, setRangeValuesCommandParams);
 
         // if the format painter is once, turn it off

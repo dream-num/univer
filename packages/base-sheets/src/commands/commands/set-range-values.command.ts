@@ -9,6 +9,8 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
+    sequenceExecute,
+    SheetInterceptorService,
     Tools,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
@@ -95,19 +97,31 @@ export const SetRangeValuesCommand: ICommand = {
             setRangeValuesMutationParams
         );
 
-        const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
-        if (result) {
+        const setValueMutationResult = commandService.syncExecuteCommand(
+            SetRangeValuesMutation.id,
+            setRangeValuesMutationParams
+        );
+
+        const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
+            id: SetRangeValuesCommand.id,
+            params: setRangeValuesMutationParams,
+        });
+
+        const result = sequenceExecute([...redos], commandService);
+
+        if (setValueMutationResult && result.result) {
             undoRedoService.pushUndoRedo({
                 URI: workbookId,
-                undo() {
-                    return commandService.syncExecuteCommand(
-                        SetRangeValuesMutation.id,
-                        undoSetRangeValuesMutationParams
-                    );
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
-                },
+                undo: async () =>
+                    sequenceExecute(
+                        [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
+                        commandService
+                    ).result,
+                redo: async () =>
+                    sequenceExecute(
+                        [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
+                        commandService
+                    ).result,
             });
 
             return true;

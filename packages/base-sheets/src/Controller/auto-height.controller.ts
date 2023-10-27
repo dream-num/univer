@@ -1,9 +1,11 @@
 import { IRange, IUniverInstanceService, LifecycleStages, OnLifecycle, SheetInterceptorService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
 import { ISetStyleParams, SetStyleCommand } from '../commands/commands/set-style.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
 import { SetWorksheetRowIsAutoHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
+import { ISetRangeValuesMutationParams } from '../commands/mutations/set-range-values.mutation';
 import { ISetWorksheetColWidthMutationParams } from '../commands/mutations/set-worksheet-col-width.mutation';
 import {
     ISetWorksheetRowAutoHeightMutationParams,
@@ -70,6 +72,19 @@ export class AutoHeightController {
     private _initialize() {
         const { _sheetInterceptorService: sheetInterceptorService, _selectionManagerService: selectionManagerService } =
             this;
+        // for intercept'SetRangeValuesCommand' command.
+        sheetInterceptorService.interceptCommand({
+            getMutations: (command: { id: string; params: ISetRangeValuesMutationParams }) => {
+                if (command.id !== SetRangeValuesCommand.id) {
+                    return {
+                        redos: [],
+                        undos: [],
+                    };
+                }
+
+                return this._getUndoRedoParamsOfAutoHeight(command.params.range);
+            },
+        });
         // for intercept 'sheet.command.set-row-is-auto-height' command.
         sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetWorksheetRowIsAutoHeightMutationParams }) => {

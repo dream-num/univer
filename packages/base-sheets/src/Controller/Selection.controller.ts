@@ -1,4 +1,4 @@
-import { IMouseEvent, IPointerEvent, IRenderManagerService } from '@univerjs/base-render';
+import { IMouseEvent, IPointerEvent, IRenderManagerService, SpreadsheetSkeleton } from '@univerjs/base-render';
 import {
     Disposable,
     ICommandInfo,
@@ -14,7 +14,11 @@ import { Inject } from '@wendellhu/redi';
 
 import { getSheetObject, ISheetObjectParam } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
-import { convertSelectionDataToRange, getNormalSelectionStyle } from '../Basics/selection';
+import {
+    convertSelectionDataToRange,
+    getNormalSelectionStyle,
+    transformCellDataToSelectionData,
+} from '../Basics/selection';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { ISetZoomRatioOperationParams, SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../services/selection/selection-manager.service';
@@ -191,25 +195,25 @@ export class SelectionController extends Disposable {
     }
 
     private _userActionSyncListener() {
-        this.disposeWithMe(
-            toDisposable(
-                this._selectionRenderService.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-                    const unitId = workbook.getUnitId();
-                    const sheetId = workbook.getActiveSheet().getSheetId();
-                    const current = this._selectionManagerService.getCurrent();
+        this._selectionRenderService.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+            const unitId = workbook.getUnitId();
+            const sheetId = workbook.getActiveSheet().getSheetId();
+            const current = this._selectionManagerService.getCurrent();
 
-                    this._commandService.executeCommand(SetSelectionsOperation.id, {
-                        unitId,
-                        sheetId,
-                        pluginName: current?.pluginName || NORMAL_SELECTION_PLUGIN_NAME,
-                        selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
-                            convertSelectionDataToRange(selectionDataWithStyle)
-                        ),
-                    });
-                })
-            )
-        );
+            if (selectionDataWithStyleList == null || selectionDataWithStyleList.length === 0) {
+                return;
+            }
+
+            this._commandService.executeCommand(SetSelectionsOperation.id, {
+                unitId,
+                sheetId,
+                pluginName: current?.pluginName || NORMAL_SELECTION_PLUGIN_NAME,
+                selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
+                    convertSelectionDataToRange(selectionDataWithStyle)
+                ),
+            });
+        });
     }
 
     private _getSheetObject() {
@@ -238,33 +242,60 @@ export class SelectionController extends Disposable {
     }
 
     private _skeletonListener() {
-        this.disposeWithMe(
-            toDisposable(
-                this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-                    if (param == null) {
-                        return;
-                    }
-                    const { unitId, sheetId, skeleton } = param;
+        this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+            if (param == null) {
+                return;
+            }
+            const { unitId, sheetId, skeleton } = param;
 
-                    const currentRender = this._renderManagerService.getRenderById(unitId);
+            const currentRender = this._renderManagerService.getRenderById(unitId);
 
-                    if (currentRender == null) {
-                        return;
-                    }
+            if (currentRender == null) {
+                return;
+            }
 
-                    const { scene } = currentRender;
+            const { scene } = currentRender;
 
-                    const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-                    this._selectionRenderService.changeRuntime(skeleton, scene, viewportMain);
+            this._selectionRenderService.changeRuntime(skeleton, scene, viewportMain);
 
-                    this._selectionManagerService.setCurrentSelection({
-                        pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                        unitId,
-                        sheetId,
-                    });
-                })
-            )
+            this._selectionManagerService.setCurrentSelection({
+                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                unitId,
+                sheetId,
+            });
+
+            // If there is no initial selection, add one by default in the top left corner.
+            const last = this._selectionManagerService.getLast();
+            if (last == null) {
+                this._selectionManagerService.add([this._getZeroRange(skeleton)]);
+            }
+        });
+    }
+
+    private _getZeroRange(skeleton: SpreadsheetSkeleton) {
+        const mergeData = skeleton.mergeData;
+        return (
+            transformCellDataToSelectionData(0, 0, mergeData) || {
+                range: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 0,
+                    endColumn: 0,
+                },
+                primary: {
+                    actualRow: 0,
+                    actualColumn: 0,
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 0,
+                    endColumn: 0,
+                    isMerged: false,
+                    isMergedMainCell: false,
+                },
+                style: null,
+            }
         );
     }
 }

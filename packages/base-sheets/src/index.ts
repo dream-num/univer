@@ -87,6 +87,7 @@ export type {
 export {
     ExpandSelectionCommand,
     type IMoveSelectionEnterAndTabCommandParams,
+    JumpOver,
     MoveSelectionCommand,
     MoveSelectionEnterAndTabCommand,
     SelectAllCommand,

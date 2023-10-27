@@ -4,6 +4,7 @@ import {
     IMoveSelectionCommandParams,
     IMoveSelectionEnterAndTabCommandParams,
     ISelectAllCommandParams,
+    JumpOver,
     MoveSelectionCommand,
     MoveSelectionEnterAndTabCommand,
     SelectAllCommand,
@@ -115,7 +116,7 @@ export const MoveSelectionEndDownShortcutItem: IShortcutItem<IMoveSelectionComma
     preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.DOWN,
-        jumpOver: true,
+        jumpOver: JumpOver.moveGap,
     },
 };
 
@@ -125,7 +126,7 @@ export const MoveSelectionEndUpShortcutItem: IShortcutItem<IMoveSelectionCommand
     preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.UP,
-        jumpOver: true,
+        jumpOver: JumpOver.moveGap,
     },
 };
 
@@ -135,7 +136,7 @@ export const MoveSelectionEndLeftShortcutItem: IShortcutItem<IMoveSelectionComma
     preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.LEFT,
-        jumpOver: true,
+        jumpOver: JumpOver.moveGap,
     },
 };
 
@@ -145,7 +146,7 @@ export const MoveSelectionEndRightShortcutItem: IShortcutItem<IMoveSelectionComm
     preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.RIGHT,
-        jumpOver: true,
+        jumpOver: JumpOver.moveGap,
     },
 };
 
@@ -193,7 +194,7 @@ export const ExpandSelectionEndDownShortcutItem: IShortcutItem<IExpandSelectionC
     preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.DOWN,
-        jumpOver: true,
+        jumpOver: JumpOver.moveGap,
     },
 };
 
@@ -203,7 +204,7 @@ export const ExpandSelectionEndUpShortcutItem: IShortcutItem<IExpandSelectionCom
     preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.UP,
-        jumpOver: true,
+        jumpOver: JumpOver.moveGap,
     },
 };
 
@@ -213,7 +214,7 @@ export const ExpandSelectionEndLeftShortcutItem: IShortcutItem<IExpandSelectionC
     preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.LEFT,
-        jumpOver: true,
+        jumpOver: JumpOver.moveGap,
     },
 };
 
@@ -223,7 +224,7 @@ export const ExpandSelectionEndRightShortcutItem: IShortcutItem<IExpandSelection
     preconditions: whenEditorNotActivated,
     staticParameters: {
         direction: Direction.RIGHT,
-        jumpOver: true,
+        jumpOver: JumpOver.moveGap,
     },
 };
 

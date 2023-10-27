@@ -110,12 +110,7 @@ import {
     EditorDeleteLeftShortcutInActive,
     generateArrowSelectionShortCuItem,
 } from './shortcuts/editor.shortcut';
-import {
-    SetColHiddenShortcutItem,
-    SetRedoShortcutItem,
-    SetRowHiddenShortcutItem,
-    SetUndoShortcutItem,
-} from './shortcuts/operation.shortcut';
+import { SetColHiddenShortcutItem, SetRowHiddenShortcutItem } from './shortcuts/operation.shortcut';
 import {
     ExpandSelectionDownShortcutItem,
     ExpandSelectionEndDownShortcutItem,
@@ -320,8 +315,6 @@ export class SheetUIController extends Disposable {
             EditorCursorEscShortcut,
 
             // operation shortcuts
-            SetUndoShortcutItem,
-            SetRedoShortcutItem,
             SetRowHiddenShortcutItem,
             SetColHiddenShortcutItem,
         ].forEach((item) => {

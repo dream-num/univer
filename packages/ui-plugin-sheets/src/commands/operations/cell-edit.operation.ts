@@ -23,5 +23,5 @@ export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisible
 export const SetCellEditVisibleArrowOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible-arrow',
     type: CommandType.OPERATION,
-    handler: async (accessor, params) => true,
+    handler: (accessor, params) => true,
 };

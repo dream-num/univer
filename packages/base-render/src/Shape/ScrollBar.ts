@@ -339,7 +339,7 @@ export class ScrollBar extends BaseScrollBar {
             this.makeViewDirty(true);
             state.stopPropagation();
         });
-        this._verticalPointerMoveObserver = mainScene.on(EVENT_TYPE.PointerMove, (evt: unknown, state: EventState) => {
+        this._verticalPointerMoveObserver = mainScene.onPointerMoveObserver.add((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             if (!this._isVerticalMove) {
                 return;
@@ -349,7 +349,7 @@ export class ScrollBar extends BaseScrollBar {
             });
             this._lastY = e.offsetY;
         });
-        this._verticalPointerUpObserver = mainScene.on(EVENT_TYPE.PointerUp, (evt: unknown, state: EventState) => {
+        this._verticalPointerUpObserver = mainScene.onPointerUpObserver.add((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             const srcElement = this.verticalThumbRect;
             this._isVerticalMove = false;
@@ -418,7 +418,7 @@ export class ScrollBar extends BaseScrollBar {
             mainScene.disableEvent();
             state.stopPropagation();
         });
-        this._horizonPointerMoveObserver = mainScene.on(EVENT_TYPE.PointerMove, (evt: unknown, state: EventState) => {
+        this._horizonPointerMoveObserver = mainScene.onPointerMoveObserver.add((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             if (!this._isHorizonMove) {
                 return;
@@ -428,7 +428,7 @@ export class ScrollBar extends BaseScrollBar {
             });
             this._lastX = e.offsetX;
         });
-        this._horizonPointerUpObserver = mainScene.on(EVENT_TYPE.PointerUp, (evt: unknown, state: EventState) => {
+        this._horizonPointerUpObserver = mainScene.onPointerUpObserver.add((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             const srcElement = this.horizonThumbRect;
             this._isHorizonMove = false;

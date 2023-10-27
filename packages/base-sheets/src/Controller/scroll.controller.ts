@@ -7,6 +7,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    toDisposable,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -37,6 +38,10 @@ export class ScrollController extends Disposable {
         this._initialize();
     }
 
+    override dispose(): void {
+        super.dispose();
+    }
+
     private _initialize() {
         this._scrollEventBinding();
 
@@ -53,30 +58,37 @@ export class ScrollController extends Disposable {
         }
 
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-        viewportMain?.onScrollAfterObserver.add((param) => {
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-            if (skeleton == null || param.isTrigger === false) {
-                return;
-            }
+        this.disposeWithMe(
+            toDisposable(
+                viewportMain?.onScrollAfterObserver.add((param) => {
+                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                    if (skeleton == null || param.isTrigger === false) {
+                        return;
+                    }
 
-            const sheetObject = this._getSheetObject();
-            if (skeleton == null || sheetObject == null) {
-                return;
-            }
+                    const sheetObject = this._getSheetObject();
+                    if (skeleton == null || sheetObject == null) {
+                        return;
+                    }
 
-            const { actualScrollX = 0, actualScrollY = 0 } = param;
+                    const { actualScrollX = 0, actualScrollY = 0 } = param;
 
-            // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
-            const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(actualScrollX, actualScrollY);
+                    // according to the actual scroll position, the most suitable row, column and offset combination is recalculated.
+                    const { row, column, rowOffset, columnOffset } = skeleton.getDecomposedOffset(
+                        actualScrollX,
+                        actualScrollY
+                    );
 
-            // update scroll infos in scroll manager service
-            this._scrollManagerService.addOrReplaceNoRefresh({
-                sheetViewStartRow: row,
-                sheetViewStartColumn: column,
-                offsetX: columnOffset,
-                offsetY: rowOffset,
-            });
-        });
+                    // update scroll infos in scroll manager service
+                    this._scrollManagerService.addOrReplaceNoRefresh({
+                        sheetViewStartRow: row,
+                        sheetViewStartColumn: column,
+                        offsetX: columnOffset,
+                        offsetY: rowOffset,
+                    });
+                })
+            )
+        );
     }
 
     private _commandExecutedListener() {
@@ -199,67 +211,75 @@ export class ScrollController extends Disposable {
     }
 
     private _scrollSubscribeBinding() {
-        this._scrollManagerService.scrollInfo$.subscribe((param) => {
-            const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-            const sheetObject = this._getSheetObject();
-            if (skeleton == null || sheetObject == null) {
-                return;
-            }
+        this.disposeWithMe(
+            toDisposable(
+                this._scrollManagerService.scrollInfo$.subscribe((param) => {
+                    const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                    const sheetObject = this._getSheetObject();
+                    if (skeleton == null || sheetObject == null) {
+                        return;
+                    }
 
-            const scene = sheetObject.scene;
+                    const scene = sheetObject.scene;
 
-            const { scaleX, scaleY } = sheetObject.scene.getAncestorScale();
+                    const { scaleX, scaleY } = sheetObject.scene.getAncestorScale();
 
-            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+                    const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-            if (viewportMain == null) {
-                return;
-            }
+                    if (viewportMain == null) {
+                        return;
+                    }
 
-            if (param == null) {
-                viewportMain.scrollTo({
-                    x: 0,
-                    y: 0,
-                });
-                return;
-            }
+                    if (param == null) {
+                        viewportMain.scrollTo({
+                            x: 0,
+                            y: 0,
+                        });
+                        return;
+                    }
 
-            const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = param;
+                    const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = param;
 
-            const { startX, startY } = skeleton.getCellByIndexWithNoHeader(
-                sheetViewStartRow,
-                sheetViewStartColumn,
-                scaleX,
-                scaleY
-            );
-            const x = startX + offsetX;
-            const y = startY + offsetY;
+                    const { startX, startY } = skeleton.getCellByIndexWithNoHeader(
+                        sheetViewStartRow,
+                        sheetViewStartColumn,
+                        scaleX,
+                        scaleY
+                    );
+                    const x = startX + offsetX;
+                    const y = startY + offsetY;
 
-            const config = viewportMain.getBarScroll(x, y);
-            viewportMain.scrollTo(config);
-        });
+                    const config = viewportMain.getBarScroll(x, y);
+                    viewportMain.scrollTo(config);
+                })
+            )
+        );
     }
 
     private _skeletonListener() {
-        this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-            if (param == null) {
-                return;
-            }
-            const { unitId, sheetId } = param;
+        this.disposeWithMe(
+            toDisposable(
+                this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+                    if (param == null) {
+                        return;
+                    }
+                    const { unitId, sheetId } = param;
 
-            const currentRender = this._renderManagerService.getRenderById(unitId);
+                    const currentRender = this._renderManagerService.getRenderById(unitId);
 
-            if (currentRender == null) {
-                return;
-            }
+                    if (currentRender == null) {
+                        return;
+                    }
 
-            this._updateSceneSize(param);
+                    this._updateSceneSize(param);
 
-            this._scrollManagerService.setCurrentScroll({
-                unitId,
-                sheetId,
-            });
-        });
+                    this._scrollManagerService.setCurrentScroll({
+                        unitId,
+                        sheetId,
+                    });
+                })
+            )
+        );
     }
 
     private _updateSceneSize(param: ISheetSkeletonManagerParam) {

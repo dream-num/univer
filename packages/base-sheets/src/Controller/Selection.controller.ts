@@ -8,6 +8,7 @@ import {
     OnLifecycle,
     RANGE_TYPE,
     ThemeService,
+    toDisposable,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -52,7 +53,7 @@ export class SelectionController extends Disposable {
 
         this._initialMain(sheetObject);
 
-        this._themeChangeInitialize();
+        this._themeChangeListener();
 
         this._initialRowHeader(sheetObject);
 
@@ -62,7 +63,7 @@ export class SelectionController extends Disposable {
 
         this._commandExecutedListener();
 
-        spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add(() => {});
+        this.disposeWithMe(toDisposable(spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add(() => {})));
 
         this._userActionSyncListener();
 
@@ -80,50 +81,68 @@ export class SelectionController extends Disposable {
     private _initialMain(sheetObject: ISheetObjectParam) {
         const { spreadsheet, scene } = sheetObject;
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-        spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            this._selectionRenderService.enableDetectMergedCell();
-            this._selectionRenderService.eventTrigger(evt, spreadsheet.zIndex + 1, RANGE_TYPE.NORMAL, viewportMain);
-            if (evt.button !== 2) {
-                state.stopPropagation();
-            }
-        });
+        this.disposeWithMe(
+            toDisposable(
+                spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                    this._selectionRenderService.enableDetectMergedCell();
+                    this._selectionRenderService.eventTrigger(
+                        evt,
+                        spreadsheet.zIndex + 1,
+                        RANGE_TYPE.NORMAL,
+                        viewportMain
+                    );
+                    if (evt.button !== 2) {
+                        state.stopPropagation();
+                    }
+                })
+            )
+        );
     }
 
-    private _themeChangeInitialize() {
-        this._themeService.currentTheme$.subscribe(() => {
-            this._selectionRenderService.resetStyle();
-            const param = this._selectionManagerService.getSelections();
-            const current = this._selectionManagerService.getCurrent();
-            if (param == null || current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                return;
-            }
-            this._selectionRenderService.reset();
-            for (const selectionWithStyle of param) {
-                if (selectionWithStyle == null) {
-                    continue;
-                }
-                const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
-                selectionData.style = getNormalSelectionStyle(this._themeService);
-                this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
-            }
-        });
+    private _themeChangeListener() {
+        this.disposeWithMe(
+            toDisposable(
+                this._themeService.currentTheme$.subscribe(() => {
+                    this._selectionRenderService.resetStyle();
+                    const param = this._selectionManagerService.getSelections();
+                    const current = this._selectionManagerService.getCurrent();
+                    if (param == null || current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                        return;
+                    }
+                    this._selectionRenderService.reset();
+                    for (const selectionWithStyle of param) {
+                        if (selectionWithStyle == null) {
+                            continue;
+                        }
+                        const selectionData =
+                            this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+                        selectionData.style = getNormalSelectionStyle(this._themeService);
+                        this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
+                    }
+                })
+            )
+        );
     }
 
     private _initialRowHeader(sheetObject: ISheetObjectParam) {
         const { spreadsheetRowHeader, spreadsheet, scene } = sheetObject;
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-        spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            this._selectionRenderService.disableDetectMergedCell();
-            this._selectionRenderService.eventTrigger(
-                evt,
-                (spreadsheet?.zIndex || 1) + 1,
-                RANGE_TYPE.ROW,
-                viewportMain
-            );
-            if (evt.button !== 2) {
-                state.stopPropagation();
-            }
-        });
+        this.disposeWithMe(
+            toDisposable(
+                spreadsheetRowHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                    this._selectionRenderService.disableDetectMergedCell();
+                    this._selectionRenderService.eventTrigger(
+                        evt,
+                        (spreadsheet?.zIndex || 1) + 1,
+                        RANGE_TYPE.ROW,
+                        viewportMain
+                    );
+                    if (evt.button !== 2) {
+                        state.stopPropagation();
+                    }
+                })
+            )
+        );
 
         // spreadsheetRowHeader?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {});
     }
@@ -131,52 +150,65 @@ export class SelectionController extends Disposable {
     private _initialColumnHeader(sheetObject: ISheetObjectParam) {
         const { spreadsheetColumnHeader, spreadsheet, scene } = sheetObject;
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-        spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            this._selectionRenderService.disableDetectMergedCell();
-            this._selectionRenderService.eventTrigger(
-                evt,
-                (spreadsheet?.zIndex || 1) + 1,
-                RANGE_TYPE.COLUMN,
-                viewportMain
-            );
-            if (evt.button !== 2) {
-                state.stopPropagation();
-            }
-        });
+        this.disposeWithMe(
+            toDisposable(
+                spreadsheetColumnHeader?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                    this._selectionRenderService.disableDetectMergedCell();
+                    this._selectionRenderService.eventTrigger(
+                        evt,
+                        (spreadsheet?.zIndex || 1) + 1,
+                        RANGE_TYPE.COLUMN,
+                        viewportMain
+                    );
+                    if (evt.button !== 2) {
+                        state.stopPropagation();
+                    }
+                })
+            )
+        );
     }
 
     private _onChangeListener() {
-        this._selectionManagerService.selectionInfo$.subscribe((param) => {
-            this._selectionRenderService.reset();
-            if (param == null) {
-                return;
-            }
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionInfo$.subscribe((param) => {
+                    this._selectionRenderService.reset();
+                    if (param == null) {
+                        return;
+                    }
 
-            for (const selectionWithStyle of param) {
-                if (selectionWithStyle == null) {
-                    continue;
-                }
-                const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
-                this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
-            }
-        });
+                    for (const selectionWithStyle of param) {
+                        if (selectionWithStyle == null) {
+                            continue;
+                        }
+                        const selectionData =
+                            this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+                        this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
+                    }
+                })
+            )
+        );
     }
 
     private _userActionSyncListener() {
-        this._selectionRenderService.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-            const unitId = workbook.getUnitId();
-            const sheetId = workbook.getActiveSheet().getSheetId();
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionRenderService.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                    const unitId = workbook.getUnitId();
+                    const sheetId = workbook.getActiveSheet().getSheetId();
 
-            this._commandService.executeCommand(SetSelectionsOperation.id, {
-                unitId,
-                sheetId,
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
-                    convertSelectionDataToRange(selectionDataWithStyle)
-                ),
-            });
-        });
+                    this._commandService.executeCommand(SetSelectionsOperation.id, {
+                        unitId,
+                        sheetId,
+                        pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                        selections: selectionDataWithStyleList.map((selectionDataWithStyle) =>
+                            convertSelectionDataToRange(selectionDataWithStyle)
+                        ),
+                    });
+                })
+            )
+        );
     }
 
     private _getSheetObject() {
@@ -205,29 +237,33 @@ export class SelectionController extends Disposable {
     }
 
     private _skeletonListener() {
-        this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-            if (param == null) {
-                return;
-            }
-            const { unitId, sheetId, skeleton } = param;
+        this.disposeWithMe(
+            toDisposable(
+                this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+                    if (param == null) {
+                        return;
+                    }
+                    const { unitId, sheetId, skeleton } = param;
 
-            const currentRender = this._renderManagerService.getRenderById(unitId);
+                    const currentRender = this._renderManagerService.getRenderById(unitId);
 
-            if (currentRender == null) {
-                return;
-            }
+                    if (currentRender == null) {
+                        return;
+                    }
 
-            const { scene } = currentRender;
+                    const { scene } = currentRender;
 
-            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+                    const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-            this._selectionRenderService.changeRuntime(skeleton, scene, viewportMain);
+                    this._selectionRenderService.changeRuntime(skeleton, scene, viewportMain);
 
-            this._selectionManagerService.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-                unitId,
-                sheetId,
-            });
-        });
+                    this._selectionManagerService.setCurrentSelection({
+                        pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                        unitId,
+                        sheetId,
+                    });
+                })
+            )
+        );
     }
 }

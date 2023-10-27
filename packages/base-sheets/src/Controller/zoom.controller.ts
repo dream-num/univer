@@ -6,6 +6,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    toDisposable,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
@@ -41,6 +42,10 @@ export class ZoomController extends Disposable {
         this._initialize();
     }
 
+    override dispose(): void {
+        super.dispose();
+    }
+
     private _initialize() {
         this._skeletonListener();
         this._commandExecutedListener();
@@ -54,49 +59,56 @@ export class ZoomController extends Disposable {
         }
 
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        this.disposeWithMe(
+            toDisposable(
+                scene.onMouseWheelObserver.add((e: IWheelEvent, state) => {
+                    if (!e.ctrlKey) {
+                        return;
+                    }
 
-        scene.onMouseWheelObserver.add((e: IWheelEvent, state) => {
-            if (!e.ctrlKey) {
-                return;
-            }
+                    const deltaFactor = Math.abs(e.deltaX);
+                    let ratioDelta = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
+                    ratioDelta *= e.deltaY > 0 ? -1 : 1;
+                    if (scene.scaleX < 1) {
+                        ratioDelta /= 2;
+                    }
 
-            const deltaFactor = Math.abs(e.deltaX);
-            let ratioDelta = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
-            ratioDelta *= e.deltaY > 0 ? -1 : 1;
-            if (scene.scaleX < 1) {
-                ratioDelta /= 2;
-            }
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                    const sheet = workbook.getActiveSheet();
+                    const currentRatio = sheet.getZoomRatio();
+                    let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
+                    nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
 
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-            const sheet = workbook.getActiveSheet();
-            const currentRatio = sheet.getZoomRatio();
-            let nextRatio = +parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
-            nextRatio = nextRatio >= 4 ? 4 : nextRatio <= 0.1 ? 0.1 : nextRatio;
+                    this._commandService.executeCommand(SetZoomRatioCommand.id, {
+                        zoomRatio: nextRatio,
+                        workbookId: workbook.getUnitId(),
+                        worksheetId: sheet.getSheetId(),
+                    });
 
-            this._commandService.executeCommand(SetZoomRatioCommand.id, {
-                zoomRatio: nextRatio,
-                workbookId: workbook.getUnitId(),
-                worksheetId: sheet.getSheetId(),
-            });
-
-            e.preventDefault();
-        });
+                    e.preventDefault();
+                })
+            )
+        );
     }
 
     private _skeletonListener() {
-        this._sheetSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
-            if (param == null) {
-                return;
-            }
+        this.disposeWithMe(
+            toDisposable(
+                this._sheetSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
+                    if (param == null) {
+                        return;
+                    }
 
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
 
-            const worksheet = workbook.getActiveSheet();
+                    const worksheet = workbook.getActiveSheet();
 
-            const zoomRatio = worksheet.getZoomRatio() || 1;
+                    const zoomRatio = worksheet.getZoomRatio() || 1;
 
-            this._updateViewZoom(zoomRatio);
-        });
+                    this._updateViewZoom(zoomRatio);
+                })
+            )
+        );
     }
 
     private _commandExecutedListener() {

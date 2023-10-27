@@ -896,13 +896,20 @@ export class FreezeController extends Disposable {
     }
 
     private _skeletonListener() {
-        this.disposeWithMe(
-            toDisposable(
-                this._sheetSkeletonManagerService.currentSkeleton$.subscribe(() => {
-                    this._refreshCurrent();
-                })
-            )
-        );
+        // this.disposeWithMe(
+        //     toDisposable(
+        //         this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+        //             if (
+        //                 [SetWorksheetRowIsAutoHeightMutation.id, SetWorksheetRowAutoHeightMutation.id].includes(
+        //                     param?.commandId || ''
+        //                 )
+        //             ) {
+        //                 return;
+        //             }
+        //             this._refreshCurrent();
+        //         })
+        //     )
+        // );
     }
 
     private _refreshCurrent() {

@@ -17,11 +17,10 @@
     ],
     "private": true,
     "type": "module",
-    "scripts": {
-    },
+    "scripts": {},
     "dependencies": {
-        "@univerjs/base-ui": "workspace:^0.0.1",
-        "@univerjs/core": "workspace:^0.0.1",
+        "@univerjs/base-ui": "workspace:*",
+        "@univerjs/core": "workspace:*",
         "@wendellhu/redi": "^0.12.8"
     }
 }

@@ -37,21 +37,21 @@
         "test": "vitest run"
     },
     "dependencies": {
-        "@univerjs/base-render": "workspace:^0.0.1",
-        "@univerjs/base-slides": "workspace:^0.0.1",
-        "@univerjs/base-ui": "workspace:^0.0.1",
-        "@univerjs/core": "workspace:^0.0.1",
+        "@univerjs/base-render": "workspace:*",
+        "@univerjs/base-slides": "workspace:*",
+        "@univerjs/base-ui": "workspace:*",
+        "@univerjs/core": "workspace:*",
         "@wendellhu/redi": "^0.12.8",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },
     "devDependencies": {
-        "@types/node": "^16.4.6",
-        "@types/react": "^18.2.22",
-        "@types/react-dom": "^18.2.7",
-        "@vitest/coverage-v8": "^0.34.5",
+        "@types/node": "^20.8.9",
+        "@types/react": "^18.2.33",
+        "@types/react-dom": "^18.2.14",
+        "@vitest/coverage-v8": "^0.34.6",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
-        "vitest": "^0.34.5"
+        "vitest": "^0.34.6"
     }
 }

@@ -39,27 +39,73 @@ export interface ISelectionWidgetConfig {
  * https://support.microsoft.com/en-us/office/select-cell-contents-in-excel-23f64223-2b6b-453a-8688-248355f10fa9
  */
 export interface ISelectionStyle {
-    strokeWidth: number; // The volume of the selection border determines the thickness of the selection border
-    stroke: string; // The color of the selection border.
-    strokeDash?: number; // The dashed line of the selection border. Here, the dashed line is a numerical value, different from the canvas dashed line setting. It is implemented internally as [0, strokeDash]. Setting it to 8 will look more aesthetically pleasing.
-    fill: string; // The fill color inside the selection. It needs to have a level of transparency, otherwise content in the covered area of the selection will be obscured.
-    widgets: ISelectionWidgetConfig; // The eight touch points of the selection. You can refer to Excel's formula and chart selections, which allow you to manually adjust the size of the selection. Univer has four more touch points (up, down, left, and right) than Excel.  https://support.microsoft.com/en-us/office/select-data-for-a-chart-5fca57b7-8c52-4e09-979a-631085113862
-    widgetSize?: number; // The volume of the touch points.
-    widgetStrokeWidth?: number; // The thickness of the border of the touch points
-    widgetStroke?: string; // The color of the touch points.
+    /**
+     * The volume of the selection border determines the thickness of the selection border
+     */
+    strokeWidth: number;
+    /**
+     * The color of the selection border.
+     */
+    stroke: string;
+    /**
+     * The dashed line of the selection border. Here, the dashed line is a numerical value, different from the canvas dashed line setting. It is implemented internally as [0, strokeDash]. Setting it to 8 will look more aesthetically pleasing.
+     */
+    strokeDash?: number;
+    /**
+     * The fill color inside the selection. It needs to have a level of transparency, otherwise content in the covered area of the selection will be obscured.
+     */
+    fill: string;
+    /**
+     * The eight touch points of the selection. You can refer to Excel's formula and chart selections,
+     * which allow you to manually adjust the size of the selection.
+     *  Univer has four more touch points (up, down, left, and right) than Excel.
+     *  https://support.microsoft.com/en-us/office/select-data-for-a-chart-5fca57b7-8c52-4e09-979a-631085113862
+     */
+    widgets: ISelectionWidgetConfig;
+    /**
+     * The volume of the touch points.
+     */
+    widgetSize?: number;
+    /**
+     * The thickness of the border of the touch points
+     */
+    widgetStrokeWidth?: number;
+    /**
+     *  The color of the touch points.
+     */
+    widgetStroke?: string;
 
-    // https://support.microsoft.com/en-us/office/copy-a-formula-by-dragging-the-fill-handle-in-excel-for-mac-dd928259-622b-473f-9a33-83aa1a63e218
-    hasAutoFill: boolean; // Whether to show the drop-down fill button at the bottom right corner of the selection.
+    /**
+     * https://support.microsoft.com/en-us/office/copy-a-formula-by-dragging-the-fill-handle-in-excel-for-mac-dd928259-622b-473f-9a33-83aa1a63e218
+     * Whether to show the drop-down fill button at the bottom right corner of the selection.
+     */
+    hasAutoFill: boolean;
     AutofillSize?: number; // The size of the fill button.
     AutofillStrokeWidth?: number; // The border size of the fill button.
     AutofillStroke?: string; // The color of the fill button.
 
-    hasRowHeader?: boolean; // Whether to synchronize the display of row title highlights, the highlighting range is consistent with the horizontal range of the selection.
-    rowHeaderFill?: string; // The color of the row title highlight. A level of transparency should be set to avoid covering the row title content.
-    rowHeaderStroke?: string; // The color of the bottom border of the row title.
-    rowHeaderStrokeWidth?: number; // The color of the bottom border of the row title.
+    /**
+     * Whether to synchronize the display of row title highlights, the highlighting range is consistent with the horizontal range of the selection.
+     */
+    hasRowHeader?: boolean;
+    /**
+     * The color of the row title highlight.
+     * A level of transparency should be set to avoid covering the row title content.
+     */
+    rowHeaderFill?: string;
+    /**
+     * The color of the bottom border of the row title.
+     */
+    rowHeaderStroke?: string;
+    /**
+     * The color of the bottom border of the row title.
+     */
+    rowHeaderStrokeWidth?: number;
 
-    hasColumnHeader?: boolean; // The setting of column title highlight is similar to that of row title.
+    /**
+     * The setting of column title highlight is similar to that of row title.
+     */
+    hasColumnHeader?: boolean;
     columnHeaderFill?: string;
     columnHeaderStroke?: string;
     columnHeaderStrokeWidth?: number;

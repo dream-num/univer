@@ -40,7 +40,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         let subscription: Subscription;
 
         renderManagerService.currentRender$.subscribe((unitId) => {
-            if (unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY || isLoaded === true) {
+            if (unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY || isLoaded) {
                 return;
             }
 
@@ -58,7 +58,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     show = false,
                 } = param;
 
-                if (show === false) {
+                if (!show) {
                     setState({
                         ...EDITOR_DEFAULT_POSITION,
                     });
@@ -79,7 +79,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
 
         // Clean up on unmount
         return () => {
-            subscription.unsubscribe();
+            subscription?.unsubscribe();
         };
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
@@ -97,7 +97,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 height: state.height,
             }}
         >
-            <div className={styles.editorInput} ref={editorRef}></div>
+            <div className={styles.editorInput} ref={editorRef} />
         </div>
     );
 };

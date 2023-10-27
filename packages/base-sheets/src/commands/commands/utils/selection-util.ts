@@ -63,7 +63,8 @@ export function findNextRange(
     worksheet: Worksheet,
     boundary?: IRange,
     isFindNext: boolean = true,
-    nextStep: number = 1
+    nextStep: number = 1,
+    isGoBack: boolean = true
 ): IRange {
     let destRange: IRange = { ...startRange };
 
@@ -90,7 +91,7 @@ export function findNextRange(
             if (next >= boundary.startRow) {
                 destRange.startRow = next;
                 destRange.endRow = next;
-            } else {
+            } else if (isGoBack) {
                 destRange.startRow = boundary.endRow;
                 destRange.endRow = boundary.endRow;
 
@@ -107,7 +108,7 @@ export function findNextRange(
             if (next <= boundary.endRow) {
                 destRange.startRow = next;
                 destRange.endRow = next;
-            } else {
+            } else if (isGoBack) {
                 destRange.startRow = boundary.startRow;
                 destRange.endRow = boundary.startRow;
 
@@ -124,7 +125,7 @@ export function findNextRange(
             if (next >= boundary.startColumn) {
                 destRange.startColumn = next;
                 destRange.endColumn = next;
-            } else {
+            } else if (isGoBack) {
                 destRange.startColumn = boundary.endColumn;
                 destRange.endColumn = boundary.endColumn;
 
@@ -141,7 +142,7 @@ export function findNextRange(
             if (next <= boundary.endColumn) {
                 destRange.startColumn = next;
                 destRange.endColumn = next;
-            } else {
+            } else if (isGoBack) {
                 destRange.startColumn = boundary.startColumn;
                 destRange.endColumn = boundary.startColumn;
 
@@ -348,8 +349,12 @@ export function findNextGapRange(startRange: IRange, direction: Direction, works
     return alignToMergedCellsBorders(destRange, worksheet, true);
 }
 
+export function findNextRangeExpand(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
+    return findNextRange(startRange, direction, worksheet, undefined, false, 1, false);
+}
+
 export function expandToNextGapRange(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
-    const next = findNextGapRange(startRange, direction, worksheet);
+    const next = findNextRangeExpand(startRange, direction, worksheet);
     return alignToMergedCellsBorders(Rectangle.union(next, startRange), worksheet, true);
 }
 
@@ -387,7 +392,7 @@ export function alignToMergedCellsBorders(startRange: IRange, worksheet: Workshe
 }
 
 export function expandToNextCell(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
-    const next = findNextRange(startRange, direction, worksheet);
+    const next = findNextRangeExpand(startRange, direction, worksheet);
     const destRange: IRange = {
         startRow: Math.min(startRange.startRow, next.startRow),
         startColumn: Math.min(startRange.startColumn, next.startColumn),
@@ -457,7 +462,7 @@ export function shrinkToNextCell(startRange: IRange, direction: Direction, works
     const reversedDirection = getReverseDirection(direction);
     const shrinkFromEdge = getEdgeOfRange(startRange, reversedDirection, worksheet);
     const otherEdge = getEdgeOfRange(startRange, direction, worksheet);
-    const next = findNextRange(shrinkFromEdge, direction, worksheet);
+    const next = findNextRangeExpand(shrinkFromEdge, direction, worksheet);
     return alignToMergedCellsBorders(Rectangle.union(otherEdge, next), worksheet, false);
 }
 

@@ -54,6 +54,10 @@ export class SlideTabItem {
         return result;
     }
 
+    getSlideTabItem(): HTMLElement {
+        return this._slideTabItem;
+    }
+
     isEditMode(): boolean {
         return this._editMode;
     }
@@ -237,6 +241,10 @@ export class SlideTabItem {
     equals(other: SlideTabItem | null) {
         return other && other._slideTabItem === this._slideTabItem;
     }
+
+    getId(): string {
+        return this._slideTabItem.dataset.id || '';
+    }
 }
 
 export class SlideScrollbar {
@@ -333,7 +341,6 @@ export class SlideTabBar {
         let lastPageY = 0;
         let lastTime = 0;
         this._downAction = (downEvent: MouseEvent) => {
-            console.info('mousedown=====');
             if (downEvent.button === 2) {
                 lastPageX = 0;
                 lastTime = 0;
@@ -341,108 +348,147 @@ export class SlideTabBar {
                 return;
             }
 
-            const { pageX, pageY } = downEvent;
-            const current = Date.now();
-            const diffTime = current - lastTime <= 800;
-            const diffPageX = pageX === lastPageX;
-            const diffPageY = pageY === lastPageY;
+            const slideItemIndex = this._slideTabItems.findIndex(
+                (item) =>
+                    item.getId() ===
+                    (downEvent.target as Element)?.closest(`.${config.slideTabBarItemClassName}`)?.dataset.id
+            );
 
-            // double click
-            if (diffTime && diffPageX && diffPageY) {
-                // const slideItem = this._slideTabItems.find((item) =>
-                //     item.equals(new SlideTabItem(downEvent.currentTarget as HTMLElement, this))
-                // );
-                // if (slideItem) {
-                //     // user editor
-                //     slideItem.editor();
-                // }
-                // lastTime = 0;
-                // lastPageX = 0;
-                // lastPageY = 0;
-            } else {
-                // not item is edit mode
-                if (!this._hasEditItem()) {
+            if (slideItemIndex === -1) return;
+
+            this._compareIndex = slideItemIndex;
+            this._downActionX = downEvent.pageX;
+            this._moveActionX = 0;
+            this._scrollIncremental = 0;
+            this._activeTabItem = this._slideTabItems[slideItemIndex];
+            if (!this._activeTabItem) return;
+            this._activeTabItemIndex = slideItemIndex;
+
+            // 设置定时器，延迟 200 毫秒执行拖动
+            this._longPressTimer = window.setTimeout(() => {
+                const { pageX, pageY } = downEvent;
+                const current = Date.now();
+                const diffTime = current - lastTime <= 800;
+                const diffPageX = pageX === lastPageX;
+                const diffPageY = pageY === lastPageY;
+
+                // double click
+                if (diffTime && diffPageX && diffPageY) {
+                    // const slideItem = this._slideTabItems.find((item) =>
+                    //     item.equals(new SlideTabItem(downEvent.currentTarget as HTMLElement, this))
+                    // );
+                    // if (slideItem) {
+                    //     // user editor
+                    //     slideItem.editor();
+                    // }
+                    // lastTime = 0;
+                    // lastPageX = 0;
+                    // lastPageY = 0;
+                } else {
+                    // not item is edit mode
+                    // if (!this._hasEditItem()) {
                     // if (SlideTabBar.checkedSkipSlide(downEvent)) {
                     //     lastPageX = 0;
                     //     lastTime = 0;
                     //     lastPageY = 0;
                     //     return;
                     // }
-                    const slideItemIndex = this._slideTabItems.findIndex((item) =>
-                        item.equals(new SlideTabItem(downEvent.currentTarget as HTMLElement, this))
-                    );
-                    if (slideItemIndex > -1) {
-                        this._compareIndex = slideItemIndex;
-                        this._downActionX = downEvent.pageX;
-                        this._moveActionX = 0;
-                        this._scrollIncremental = 0;
-                        this._activeTabItem = this._slideTabItems[slideItemIndex];
-                        this._activeTabItemIndex = slideItemIndex;
-                        if (this._config.activeClassNameAutoController) {
-                            this._slideTabItems.forEach((item) => {
-                                item.classList().remove(this._config.slideTabBarItemActiveClassName);
-                            });
-                            this._activeTabItem.classList().add(this._config.slideTabBarItemActiveClassName);
-                        }
-                        this._activeTabItem.enableFixed();
-                        // this._startAutoScroll();
-                        // 设置定时器，延迟 200 毫秒执行拖动
-                        this._longPressTimer = window.setTimeout(() => {
-                            this._startAutoScroll();
-                        }, 200);
-                    } else {
-                        this.updateItems();
-                        this._activeTabItemIndex = 0;
-                        this._downActionX = 0;
-                        this._scrollIncremental = 0;
-                        this._compareIndex = 0;
-                        this._activeTabItem = null;
-                    }
-                }
 
-                lastPageX = pageX;
-                lastPageY = pageY;
-                lastTime = current;
-            }
+                    // if (slideItemIndex > -1) {
+                    // this._compareIndex = slideItemIndex;
+                    // this._downActionX = downEvent.pageX;
+                    // this._moveActionX = 0;
+                    // this._scrollIncremental = 0;
+                    // this._activeTabItem = this._slideTabItems[slideItemIndex];
+                    // this._activeTabItemIndex = slideItemIndex;
+                    if (this._config.activeClassNameAutoController) {
+                        this._slideTabItems.forEach((item) => {
+                            item.classList().remove(this._config.slideTabBarItemActiveClassName);
+                        });
+                        this._activeTabItem.classList().add(this._config.slideTabBarItemActiveClassName);
+                    }
+                    this._activeTabItem.enableFixed();
+
+                    //
+                    console.info('开始拖动啦=====');
+                    this._startAutoScroll();
+                    // 设置鼠标光标为十字拖动
+                    const activeSlideItemElement = this._activeTabItem?.getSlideTabItem();
+                    activeSlideItemElement.style.cursor = 'move';
+
+                    this._activeTabItem?.addEventListener('pointermove', this._moveAction);
+                    activeSlideItemElement.setPointerCapture(downEvent.pointerId);
+                    //     } else {
+                    //         this.updateItems();
+                    //         this._activeTabItemIndex = 0;
+                    //         this._downActionX = 0;
+                    //         this._scrollIncremental = 0;
+                    //         this._compareIndex = 0;
+                    //         this._activeTabItem = null;
+                    //     }
+                    // }
+
+                    lastPageX = pageX;
+                    lastPageY = pageY;
+                    lastTime = current;
+                }
+            }, 300);
+
+            this._activeTabItem?.addEventListener('pointerup', this._upAction);
         };
 
         this._upAction = (upEvent: MouseEvent) => {
-            console.info('mouseup=====');
-            if (this._activeTabItem) {
-                // 清除定时器
-                if (this._longPressTimer) {
-                    clearTimeout(this._longPressTimer);
-                    this._longPressTimer = null;
-                }
-
-                this._closeAutoScroll();
-                this._activeTabItem.disableFixed();
-                this._sortedItems();
-                this.updateItems();
-
-                if (this._config.onSlideEnd && this._activeTabItemIndex !== this._compareIndex) {
-                    this._config.onSlideEnd(upEvent, this._compareIndex || 0);
-                }
-
-                // fix bug
-                const event = new MouseEvent('click', {
-                    view: window,
-                    bubbles: true,
-                    cancelable: true,
-                });
-                this._activeTabItem.primeval().dispatchEvent(event);
-
-                this._scrollIncremental = 0;
-                this._activeTabItemIndex = 0;
-                this._downActionX = 0;
-                this._moveActionX = 0;
-                this._compareIndex = 0;
-                this._activeTabItem = null;
+            // 清除定时器
+            if (this._longPressTimer) {
+                clearTimeout(this._longPressTimer);
+                this._longPressTimer = null;
+                console.info('清除定时器 pointerup=====');
             }
+
+            if (!this._activeTabItem) return;
+
+            console.info('松开了pointerup=====');
+            this._closeAutoScroll();
+            this._activeTabItem.disableFixed();
+            this._sortedItems();
+            this.updateItems();
+
+            this._activeTabItem?.removeEventListener('pointermove', this._moveAction);
+            this._activeTabItem?.removeEventListener('pointerup', this._upAction);
+            // this._slideTabItems.forEach((item) => {
+            //     item.removeEventListener('pointerdown', this._downAction);
+            // });
+
+            // 恢复鼠标光标
+            const activeSlideItemElement = this._activeTabItem?.getSlideTabItem();
+            if (!activeSlideItemElement) return;
+
+            activeSlideItemElement.style.cursor = 'auto';
+            activeSlideItemElement.releasePointerCapture(upEvent.pointerId);
+
+            if (this._config.onSlideEnd && this._activeTabItemIndex !== this._compareIndex) {
+                this._config.onSlideEnd(upEvent, this._compareIndex || 0);
+            }
+
+            // fix bug
+            // const event = new MouseEvent('click', {
+            //     view: window,
+            //     bubbles: true,
+            //     cancelable: true,
+            // });
+            // this._activeTabItem.primeval().dispatchEvent(event);
+
+            this._scrollIncremental = 0;
+            this._activeTabItemIndex = 0;
+            this._downActionX = 0;
+            this._moveActionX = 0;
+            this._compareIndex = 0;
+            this._activeTabItem = null;
         };
 
         this._moveAction = (moveEvent) => {
             if (this._activeTabItem) {
+                console.info('动动动===pointermove=====');
                 this._moveActionX = moveEvent.pageX - this._downActionX;
                 this._scrollIncremental = 0;
                 this._scrollLeft(moveEvent);
@@ -511,12 +557,7 @@ export class SlideTabBar {
     }
 
     destroy(): void {
-        document.removeEventListener('mousemove', this._moveAction);
-        document.removeEventListener('mouseup', this._upAction);
         document.removeEventListener('wheel', this._wheelAction);
-        this._slideTabItems.forEach((item) => {
-            item.removeEventListener('mousedown', this._downAction);
-        });
     }
 
     protected _hasEditItem(): boolean {
@@ -677,11 +718,9 @@ export class SlideTabBar {
     }
 
     protected _initialize(): void {
-        document.addEventListener('mousemove', this._moveAction);
-        document.addEventListener('mouseup', this._upAction);
         this._slideTabBar.addEventListener('wheel', this._wheelAction);
         this._slideTabItems.forEach((item) => {
-            item.addEventListener('mousedown', this._downAction);
+            item.addEventListener('pointerdown', this._downAction);
         });
     }
 }

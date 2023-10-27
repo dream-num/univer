@@ -12,19 +12,6 @@
     }
 }
 
-
-.slide-tab-active {
-    .slide-tab-content {
-        color: rgb(var(--primary-color));
-        background-color: rgb(var(--primary-color), 0.1);
-    }
-
-    .slide-tab-active-bar {
-        background: #d0d0d0;
-    }
-
-}
-
 /**
 Tab Item, Put outside to be compatible with drag styles
 */
@@ -35,8 +22,7 @@ Tab Item, Put outside to be compatible with drag styles
     justify-content: center;
     cursor: pointer;
     height: 100%;
-    background-color: var(--bg);
-
+    background-color: rgb(var(--bg-color));
     /**
     内容区域
     */
@@ -60,12 +46,11 @@ Tab Item, Put outside to be compatible with drag styles
         }
 
 
-
         .slide-tab-icon {
             width: 16px;
             height: 16px;
-            font-size: 15px;
-            color: #a1a1a1;
+            font-size: var(--font-size-xxs);
+            color: rgb(var(--text-color-secondary));
             margin-right: 6px;
         }
     }
@@ -82,6 +67,22 @@ Tab Item, Put outside to be compatible with drag styles
             height: 2px;
             width: 100%;
         }
+    }
+
+}
+
+.slide-tab-active {
+    .slide-tab-content {
+        color: rgb(var(--primary-color));
+        background-color: rgb(var(--primary-color), 0.1);
+
+        .slide-tab-icon {
+            color: rgb(var(--primary-color));
+        }
+    }
+
+    .slide-tab-active-bar {
+        background: #d0d0d0;
     }
 
 }

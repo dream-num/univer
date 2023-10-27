@@ -21,6 +21,7 @@
     "dependencies": {
         "@univerjs/base-ui": "workspace:*",
         "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
         "@wendellhu/redi": "^0.12.8"
     }
 }

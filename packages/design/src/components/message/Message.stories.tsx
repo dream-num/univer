@@ -1,7 +1,7 @@
 import type { Meta } from '@storybook/react';
 
-import { Button } from '../Button';
-import { Message, message, MessageType } from './Message';
+import { Button } from '../button/Button';
+import { Message, message, type MessageType } from './Message';
 
 const meta: Meta<typeof Message> = {
     title: 'Components / Message',

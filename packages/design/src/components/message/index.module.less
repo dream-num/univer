@@ -1,12 +1,10 @@
-@import '../../Basics/CSS/Skin/default.module.less';
-
 .message {
     position: fixed;
-    top: @margin-sm;
+    top: var(--margin-sm);
     left: 50%;
     transform: translateX(-50%);
     display: grid;
-    gap: @margin-sm;
+    gap: var(--margin-sm);
 
     &-item {
         display: flex;
@@ -41,26 +39,26 @@
         align-items: center;
 
         &-success {
-            color: @success-color;
+            color: rgb(var(--success-color));
         }
 
         &-warning {
-            color: @warning-color;
+            color: rgb(var(--warning-color));
         }
 
         &-error {
-            color: @error-color;
+            color: rgb(var(--error-color));
         }
     }
 
     &-content {
-        padding: @padding-base;
-        font-size: @font-size-base;
-        background-color: @color-white;
-        border-radius: @border-radius-base;
-        box-shadow: @box-shadow-lg;
+        padding: var(--padding-base);
+        font-size: var(--font-size-base);
+        background-color: rgb(var(--color-white));
+        border-radius: var(--border-radius-base);
+        box-shadow: var(--box-shadow-lg);
         display: inline-flex;
         align-items: center;
-        gap: @margin-xs;
+        gap: var(--margin-xs);
     }
 }

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 
-import { Button } from '../../Button';
+import { Button } from '../../button/Button';
 import { message } from '../Message';
 
 describe('Message', () => {

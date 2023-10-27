@@ -1,23 +1,24 @@
 {
-    "name": "@univerjs/base-ui",
+    "name": "@univerjs/design",
     "version": "0.0.1",
-    "description": "UniverSheet normal plugin UI manager",
+    "description": "UI component library for building exceptional Univer.",
     "keywords": [
-        "univer",
-        "ui"
+        "UI",
+        "Component Library",
+        "React"
     ],
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
     "module": "./src/index.ts",
     "publishConfig": {
-        "main": "./lib/univer-base-ui.cjs.js",
-        "module": "./lib/univer-base-ui.js",
+        "main": "./lib/univer-design.cjs.js",
+        "module": "./lib/univer-design.js",
         "types": "./lib/index.d.ts",
         "exports": {
             ".": {
-                "require": "./lib/univer-base-ui.cjs.js",
-                "default": "./lib/univer-base-ui.js"
+                "require": "./lib/univer-design.cjs.js",
+                "default": "./lib/univer-design.js"
             },
             "./*": "./lib/*"
         },
@@ -46,20 +47,15 @@
     "dependencies": {
         "@rc-component/color-picker": "^1.4.1",
         "@rc-component/trigger": "^1.18.0",
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
         "@univerjs/icons": "^0.0.10",
-        "@wendellhu/redi": "^0.12.8",
-        "localforage": "^1.10.0",
+        "clsx": "^2.0.0",
         "rc-dropdown": "^4.1.0",
         "rc-menu": "^9.12.2",
         "rc-notification": "^5.3.0",
         "rc-tooltip": "^6.1.2",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
-        "react-transition-group": "^4.4.5",
-        "rxjs": "^7.8.1"
+        "react-transition-group": "^4.4.5"
     },
     "devDependencies": {
         "@storybook/addon-docs": "^7.5.1",

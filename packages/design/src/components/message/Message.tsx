@@ -1,8 +1,8 @@
 import { Fail16, Success16, Warning16 } from '@univerjs/icons';
+import clsx from 'clsx';
 import { createRoot } from 'react-dom/client';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
-import { joinClassNames } from '../../Utils';
 import styles from './index.module.less';
 
 export type MessageType = 'success' | 'warning' | 'error';
@@ -25,7 +25,7 @@ const iconMap = {
 export const Message = (props: IMessageProps) => {
     const { type, content } = props;
 
-    const className = joinClassNames(styles.messageContent, type);
+    const className = clsx(styles.messageContent, type);
 
     const messageElement = (
         <div className={styles.messageItem}>
@@ -39,7 +39,7 @@ export const Message = (props: IMessageProps) => {
     return messageElement;
 };
 
-export const MessageContainer = (props: { messages: IMessageProps[] }) => {
+const MessageContainer = (props: { messages: IMessageProps[] }) => {
     const { messages } = props;
 
     return (
@@ -109,10 +109,8 @@ type IMessageMethodOptions = { content: string; delay?: number };
 
 const instance = new MessageInstance();
 
-const message = {
+export const message = {
     success: (options: IMessageMethodOptions) => instance.append('success', options),
     warning: (options: IMessageMethodOptions) => instance.append('warning', options),
     error: (options: IMessageMethodOptions) => instance.append('error', options),
 };
-
-export { message };

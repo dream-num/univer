@@ -1,6 +1,6 @@
 import type { Meta } from '@storybook/react';
+import { Button } from '@univerjs/design';
 
-import { Button } from '../Button/Button';
 import { Tooltip } from './Tooltip';
 
 const meta: Meta<typeof Tooltip> = {

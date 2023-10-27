@@ -1,6 +1,6 @@
 import type { Meta } from '@storybook/react';
+import { Button } from '@univerjs/design';
 
-import { Button } from '../Button';
 import { Notification, notification } from './Notification';
 
 const meta: Meta<typeof Notification> = {
@@ -31,7 +31,6 @@ export const Playground = {
                 Notification Success
             </Button>
             <Button
-                type="default"
                 onClick={() =>
                     notification.show({ type: 'info', title: 'Notification Info', content: 'Notification content' })
                 }
@@ -39,7 +38,7 @@ export const Playground = {
                 Notification Info
             </Button>
             <Button
-                type="text"
+                type="primary"
                 onClick={() =>
                     notification.show({
                         type: 'warning',
@@ -52,7 +51,6 @@ export const Playground = {
             </Button>
             <Button
                 type="primary"
-                danger
                 onClick={() =>
                     notification.show({ type: 'error', title: 'Notification Error', content: 'Notification content' })
                 }

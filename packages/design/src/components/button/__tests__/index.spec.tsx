@@ -1,15 +1,11 @@
 import { fireEvent, render } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 
-import { Button } from '..';
+import { Button } from '../Button';
 
 describe('Button', () => {
     test('renders correctly', () => {
-        const { container } = render(
-            <Button type="primary" onClick={() => {}}>
-                btn1
-            </Button>
-        );
+        const { container } = render(<Button type="primary">btn1</Button>);
         expect(container);
     });
 

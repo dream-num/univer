@@ -1,7 +1,7 @@
 import { toDisposable } from '@univerjs/core';
+import { message } from '@univerjs/design';
 import { IDisposable } from '@wendellhu/redi';
 
-import { message } from '../../Components/Message';
 import { IMessageService, IShowOptions } from './message.service';
 
 export class DesktopMessageService implements IMessageService {

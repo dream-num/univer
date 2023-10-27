@@ -83,10 +83,9 @@
 //         );
 //     }
 // }
+import { Button, ButtonType } from '@univerjs/design';
 import React, { useEffect, useState } from 'react';
 
-import { Button } from '../Button';
-import { ButtonType } from '../Button/Button';
 import { CustomLabel } from '../CustomLabel';
 import { Drag } from '../Drag';
 import * as Icon from '../Icon';

@@ -1,14 +1,10 @@
+import styles from './index.module.less';
+
 interface IProps {
     theme: Record<string, string>;
 }
 
 const levelMap = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950', '1000'];
-
-function convertToLessVar(input: string): string {
-    const dashCase = input.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`).replace(/(\d+)/g, '-$1');
-
-    return `@${dashCase}`;
-}
 
 function convertToCSSVar(input: string): string {
     const dashCase = input.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`).replace(/(\d+)/g, '-$1');
@@ -128,7 +124,7 @@ export function Palette(props: IProps) {
     ];
 
     return (
-        <section>
+        <section className={styles.palette}>
             {palettes.map((palette) => (
                 <section key={palette.title}>
                     <h3>{palette.title}</h3>
@@ -137,7 +133,6 @@ export function Palette(props: IProps) {
                             <tr>
                                 <th>name</th>
                                 <th>value</th>
-                                <th>Less variable (deprecated)</th>
                                 <th>CSS variable</th>
                             </tr>
                         </thead>
@@ -151,7 +146,6 @@ export function Palette(props: IProps) {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 gap: '6px',
-                                                fontSize: '13px',
                                             }}
                                         >
                                             {theme[color].startsWith('#') && (
@@ -164,14 +158,15 @@ export function Palette(props: IProps) {
                                                     }}
                                                 />
                                             )}
-                                            {color}
+                                            <code>{color}</code>
                                         </div>
                                     </td>
                                     <td>
-                                        <pre style={{ fontSize: '13px' }}>{theme[color]}</pre>
+                                        <code>{theme[color]}</code>
                                     </td>
-                                    <td>{convertToLessVar(color)}</td>
-                                    <td>{convertToCSSVar(color)}</td>
+                                    <td>
+                                        <code>{convertToCSSVar(color)}</code>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

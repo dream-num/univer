@@ -1,8 +1,8 @@
 import { LocaleService, LocaleType, ThemeService } from '@univerjs/core';
+import { defaultTheme } from '@univerjs/design';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { ComponentType, useEffect, useRef, useState } from 'react';
 
-import { defaultTheme } from '../Basics/CSS';
 import { ComponentManager, ZIndexManager } from '../Common';
 import { AppContext } from '../Common/AppContext';
 import { Content, Footer, Header, Layout, Sider } from '../Components';

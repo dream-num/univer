@@ -1,8 +1,9 @@
 import { RenderEngine } from '@univerjs/base-render';
 import { SlidePlugin } from '@univerjs/base-slides';
-import { greenTheme, UIPlugin } from '@univerjs/base-ui';
+import { UIPlugin } from '@univerjs/base-ui';
 import { DEFAULT_SLIDE_DATA } from '@univerjs/common-plugin-data';
 import { LocaleType, Univer } from '@univerjs/core';
+import { greenTheme } from '@univerjs/design';
 import { SlideUIPlugin } from '@univerjs/ui-plugin-slides';
 
 // univer

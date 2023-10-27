@@ -355,8 +355,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         const { mergeData } = this._config;
-
-        this._rowColumnSegment = this.getRowColumnSegment(bounds);
+        if (bounds != null) {
+            this._rowColumnSegment = this.getRowColumnSegment(bounds);
+        }
         this._dataMergeCache = mergeData && this._getMergeCells(mergeData, this._rowColumnSegment);
         this._calculateStylesCache();
         // this._overflowCache = this._calculateOverflowCache();
@@ -816,7 +817,14 @@ export class SpreadsheetSkeleton extends Skeleton {
         return rowHeightAccumulation[lastRowIndex] + columnHeaderHeightAndMarginTop;
     }
 
-    getCellByIndex(row: number, column: number, scaleX: number, scaleY: number) {
+    /**
+     * Return cell information corresponding to the current coordinates, including the merged cell object.
+     * @param row Specified Row Coordinate
+     * @param column Specified Column Coordinate
+     * @param scaleX render scene scale x-axis, current Horizontal Scale, scene.getAncestorScale
+     * @param scaleY render scene scale y-axis, current Vertical Scale, scene.getAncestorScale
+     */
+    getCellByIndex(row: number, column: number, scaleX: number, scaleY: number): ISelectionCellWithCoord {
         const {
             rowHeightAccumulation,
             columnWidthAccumulation,

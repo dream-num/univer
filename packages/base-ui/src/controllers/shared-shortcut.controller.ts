@@ -25,6 +25,8 @@ export class SharedController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
+
+        this.initialize();
     }
 
     initialize(): void {

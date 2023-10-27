@@ -33,9 +33,18 @@ import {
 
 // TODO@wzhudev: we also need to handle when the current selection is the whole spreadsheet, whole rows or whole columns
 
+// TODO@DR-UNIVER: moveStepPage and moveStepEnd implement
+export enum JumpOver {
+    moveStopeOne,
+    moveGap,
+    moveStepPage,
+    moveStepEnd,
+}
+
 export interface IMoveSelectionCommandParams {
     direction: Direction;
-    jumpOver?: boolean;
+    jumpOver?: JumpOver;
+    nextStep?: number;
 }
 
 /**
@@ -61,9 +70,10 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         const startRange = getStartRange(range, primary, direction);
 
         // the start range is from the primary selection range
-        const next = jumpOver
-            ? findNextGapRange(startRange, direction, worksheet)
-            : findNextRange(startRange, direction, worksheet);
+        const next =
+            jumpOver === JumpOver.moveGap
+                ? findNextGapRange(startRange, direction, worksheet)
+                : findNextRange(startRange, direction, worksheet);
         const destRange = getCellAtRowCol(next.startRow, next.startColumn, worksheet);
 
         if (Rectangle.equals(destRange, startRange)) {
@@ -140,6 +150,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
         let resultRange;
         const { startRow, endRow, startColumn, endColumn } = range;
         if (startRow < endRow || startColumn < endColumn) {
+            // Handle the situation of moving the active cell within the selection area.
             shortcutExperienceService.remove({
                 unitId,
                 sheetId,
@@ -182,6 +193,7 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
                 },
             };
         } else {
+            // Handle the regular situation of moving the selection area.
             if (keycode === KeyCode.TAB) {
                 if (shortcutExperienceParam == null) {
                     shortcutExperienceService.addOrUpdate({
@@ -241,8 +253,8 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
 
 export interface IExpandSelectionCommandParams {
     direction: Direction;
-
-    jumpOver?: boolean;
+    jumpOver?: JumpOver;
+    nextStep?: number;
 }
 
 // Though the command's name is "expand-selection", it actually does not expand but shrink the selection.
@@ -269,10 +281,10 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         const isShrink = checkIfShrink(selection, direction, currentWorksheet);
 
         const destRange = !isShrink
-            ? jumpOver
+            ? jumpOver === JumpOver.moveGap
                 ? expandToNextGapRange(startRange, direction, currentWorksheet)
                 : expandToNextCell(startRange, direction, currentWorksheet)
-            : jumpOver
+            : jumpOver === JumpOver.moveGap
             ? shrinkToNextGapRange(
                   startRange,
                   // TODO: should fix on SelectionManagerService's side

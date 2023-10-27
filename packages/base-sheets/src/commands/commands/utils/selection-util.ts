@@ -354,7 +354,7 @@ export function findNextRangeExpand(startRange: IRange, direction: Direction, wo
 }
 
 export function expandToNextGapRange(startRange: IRange, direction: Direction, worksheet: Worksheet): IRange {
-    const next = findNextRangeExpand(startRange, direction, worksheet);
+    const next = findNextGapRange(startRange, direction, worksheet);
     return alignToMergedCellsBorders(Rectangle.union(next, startRange), worksheet, true);
 }
 

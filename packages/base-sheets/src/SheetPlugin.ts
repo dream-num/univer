@@ -5,15 +5,14 @@ import { SetScrollOperation } from './commands/operations/scroll.operation';
 import { SetCopySelectionsOperation, SetSelectionsOperation } from './commands/operations/selection.operation';
 import { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 import { AutoHeightController } from './Controller/auto-height.controller';
-import { BasicWorksheetController } from './Controller/BasicWorksheet.controller';
-import { FormulaBarController } from './Controller/FormulaBarController';
+import { BasicWorksheetController } from './Controller/basic-worksheet.controller';
 import { FreezeController } from './Controller/freeze.controller';
 import { HeaderMenuController } from './Controller/header-menu.controller';
 import { HeaderMoveController } from './Controller/header-move.controller';
 import { HeaderResizeController } from './Controller/header-resize.controller';
 import { HeaderUnhideController } from './Controller/header-unhide.controller';
 import { ScrollController } from './Controller/scroll.controller';
-import { SelectionController } from './Controller/Selection.controller';
+import { SelectionController } from './Controller/selection.controller';
 import { SheetRenderController } from './Controller/sheet-render.controller';
 import { ZoomController } from './Controller/zoom.controller';
 import { en } from './Locale';
@@ -68,7 +67,6 @@ export class SheetPlugin extends Plugin {
             [ShortcutExperienceService],
 
             // controllers
-            [FormulaBarController],
             [BasicWorksheetController],
             [SelectionController],
             [SheetRenderController],

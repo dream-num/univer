@@ -378,7 +378,7 @@ export class HeaderResizeController extends Disposable {
                     Vector2.FromArray([this._startOffsetX, this._startOffsetY])
                 );
 
-                const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords);
+                const scrollXY = scene.getScrollXYByRelativeCoords(relativeCoords, viewPort);
 
                 const transformCoord = getTransformCoord(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
 
@@ -401,14 +401,10 @@ export class HeaderResizeController extends Disposable {
                 if (initialType === HEADER_RESIZE_TYPE.ROW) {
                     if (moveChangeY < -(cell.endY - cell.startY) + 2) {
                         moveChangeY = -(cell.endY - cell.startY) + 2;
-
-                        return;
                     }
 
-                    if (currentOffsetY + moveChangeY > canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y) {
-                        moveChangeY = canvasMaxHeight - currentOffsetY - scrollBarHorizontalHeight;
-
-                        return;
+                    if (moveChangeY > canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY) {
+                        moveChangeY = canvasMaxHeight - scrollBarHorizontalHeight + scrollXY.y - cell.startY;
                     }
 
                     if (isStartMove) {
@@ -427,11 +423,9 @@ export class HeaderResizeController extends Disposable {
                 } else {
                     if (moveChangeX < -(cell.endX - cell.startX) + 2) {
                         moveChangeX = -(cell.endX - cell.startX) + 2;
-                        return;
                     }
-                    if (currentOffsetX + moveChangeX > canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x) {
-                        moveChangeX = canvasMaxHeight - currentOffsetX - scrollBarVerticalWidth;
-                        return;
+                    if (moveChangeX > canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX) {
+                        moveChangeX = canvasMaxWidth - scrollBarVerticalWidth + scrollXY.x - cell.startX;
                     }
 
                     if (isStartMove) {

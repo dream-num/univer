@@ -1,5 +1,5 @@
 import { SetWorksheetNameCommand } from '@univerjs/base-sheets';
-import { useObservable } from '@univerjs/base-ui/Components/hooks/observable.js';
+import { useObservable } from '@univerjs/base-ui';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useState } from 'react';

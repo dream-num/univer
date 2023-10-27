@@ -20,18 +20,21 @@ import { BooleanNumber, ICommandInfo, ICommandService, IUniverInstanceService } 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
+import { ISheetBarService } from '../../../services/sheetbar/sheetbar.service';
 import sheetBarStyles from '../index.module.less';
 import styles from './index.module.less';
 import { IBaseSheetBarProps, SheetBarItem } from './SheetBarItem';
-import { SlideTabBar } from './utils/slide-tab-bar';
+import { IScrollState, SlideTabBar } from './utils/slide-tab-bar';
 
-export interface IProps {}
+export interface ISheetBarTabsProps {}
 
-export function SheetBarTabs(props: IProps) {
+export function SheetBarTabs(props: ISheetBarTabsProps) {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
     const [activeKey, setActiveKey] = useState<string>('');
+    const [subscribe, setSubscribe] = useState(false);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
+    const sheetbarService = useDependency(ISheetBarService);
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
 
     let slideTabBar: SlideTabBar;
@@ -42,39 +45,63 @@ export function SheetBarTabs(props: IProps) {
         const disposable = setupStatusUpdate();
 
         return () => {
-            // Clean up disposable when the component unmounts
             disposable.dispose();
         };
     }, []);
 
     useEffect(() => {
-        // 在 count 发生变化时执行回调函数
-        console.log('sheetList changed:', JSON.stringify(sheetList));
-
-        if (slideTabBar) {
-            slideTabBar.destroy();
-        }
-
         if (sheetList.length > 0) {
-            slideTabBar = new SlideTabBar({
-                slideTabBarClassName: styles.slideTabBar,
-                slideTabBarItemActiveClassName: styles.slideTabActive,
-                slideTabBarItemClassName: styles.slideTabItem,
-                slideTabBarItemAutoSort: true,
-                slideTabRootClassName: sheetBarStyles.sheetBar,
-                // pressDelay: 300,
-                onChangeName: (event: Event) => {
-                    // this.props.changeSheetName?.(event);
-                    console.info('onChangeName==', event);
-                },
-                onSlideEnd: (event: Event, order: number) => {
-                    console.info('onSlideEnd==', event, order);
-                    // this.props.dragEnd?.(slideTabBar.getSlideTabItems().map((item) => item.primeval()));
-                    commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
-                },
-            });
+            setupSlideTabBarUpdate();
         }
     }, [sheetList]);
+
+    const setupSlideTabBarUpdate = () => {
+        const currentIndex = sheetList.findIndex((item) => item.selected);
+
+        // TODO@Dushusir: There may not be initialization each time
+        slideTabBar = new SlideTabBar({
+            slideTabBarClassName: styles.slideTabBar,
+            slideTabBarItemActiveClassName: styles.slideTabActive,
+            slideTabBarItemClassName: styles.slideTabItem,
+            slideTabBarItemAutoSort: true,
+            slideTabRootClassName: sheetBarStyles.sheetBar,
+            currentIndex,
+            onChangeName: (event: Event) => {
+                console.info('onChangeName==', event);
+            },
+            onSlideEnd: (event: Event, order: number) => {
+                commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
+            },
+            onChangeTab: (event: Event, worksheetId: string) => {
+                commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId });
+            },
+            onScroll: (state: IScrollState) => {
+                sheetbarService.setScroll(state);
+            },
+        });
+
+        // TODO@Dushusir: Can you initialize it once without using the `subscribe` label?
+        if (!subscribe) {
+            sheetbarService.scrollX$.subscribe((x: number) => {
+                // update scrollX
+                const isEnd = slideTabBar.getScrollbar().scrollX(slideTabBar.getScrollbar().getScrollX() + x);
+
+                // update scroll button state
+                const state = {
+                    leftEnd: false,
+                    rightEnd: false,
+                };
+                if (x > 0) {
+                    state.rightEnd = isEnd;
+                } else {
+                    state.leftEnd = isEnd;
+                }
+
+                sheetbarService.setScroll(state);
+            });
+            setSubscribe(true);
+        }
+    };
 
     const setupStatusUpdate = () =>
         commandService.onCommandExecuted((commandInfo: ICommandInfo<object>) => {
@@ -178,26 +205,5 @@ export function SheetBarTabs(props: IProps) {
                 ))}
             </div>
         </div>
-        // <Tabs
-        //     draggable
-        //     className={styles.slideTabBar}
-        //     activeKey={activeKey}
-        //     // Add reRenderString and ref props here
-        // >
-        //     {sheetList.map((item) => (
-        //         <TabPane
-        //             key={item.sheetId}
-        //             keys={item.sheetId}
-        //             label={
-        //                 <SheetBarItem
-        //                     {...item}
-        //                     onMouseDown={() => onMouseDown(item.sheetId ?? '')}
-        //                     selected={activeKey === item.sheetId}
-        //                 />
-        //             }
-        //             className={styles.sheetBarTabPane}
-        //         ></TabPane>
-        //     ))}
-        // </Tabs>
     );
 }

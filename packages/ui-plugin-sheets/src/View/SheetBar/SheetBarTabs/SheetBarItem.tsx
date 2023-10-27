@@ -54,7 +54,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             onVisibleChange={setVisible}
         >
             <div
-                onClick={onMouseDown}
+                // onMouseDown={onMouseDown}
                 onContextMenu={onMouseDown}
                 key={sheetId}
                 data-id={sheetId}
@@ -74,6 +74,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                         style={{ lineHeight: 1 }}
                         data-id={sheetId}
                         onClick={(e) => {
+                            console.info('click icon');
                             if (currentSelected) {
                                 setVisible(true);
                             }

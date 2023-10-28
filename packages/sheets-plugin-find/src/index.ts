@@ -1,4 +1,1 @@
-import { FindPlugin } from './FindPlugin';
-
-export { FindPlugin };
-export * from './Locale';
+export { FindPlugin } from './FindPlugin';

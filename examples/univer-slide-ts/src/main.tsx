@@ -8,7 +8,7 @@ import { SlideUIPlugin } from '@univerjs/ui-plugin-slides';
 
 // univer
 const univer = new Univer({
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     theme: greenTheme,
 });
 

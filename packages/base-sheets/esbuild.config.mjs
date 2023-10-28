@@ -6,5 +6,10 @@ import baseConfig from '../../esbuild.config.mjs';
 esbuild.build({
     ...baseConfig,
     globalName: 'UniverBaseSheets',
-    outfile: './lib/univer-base-sheets.js',
+    entryPoints: {
+        'univer-base-sheets': './src/index.ts',
+        'locale/en-US': './src/locale/en-US.ts',
+        'locale/zh-CN': './src/locale/zh-CN.ts',
+    },
+    outdir: './lib',
 });

@@ -19,7 +19,6 @@ export {
 } from './commands/mutations/core-editing.mutation';
 export { MoveCursorOperation } from './commands/operations/cursor.operation';
 export * from './DocPlugin';
-export * from './Locale';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
 export { TextSelectionManagerService } from './services/text-selection-manager.service';

@@ -4,7 +4,7 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { NUMFMT_PLUGIN_NAME } from './Basics';
 import { NumfmtController, NumfmtModalController } from './Controller';
 import { INumfmtPluginConfig } from './Interfaces';
-import en from './Locale/en';
+import { enUS } from './locale';
 import { NumfmtModel } from './Model';
 import { NumfmtService } from './services/numfmt.service';
 import { INumfmtPluginData } from './Symbol';
@@ -34,7 +34,7 @@ export class NumfmtPlugin extends Plugin {
         this.registerExtension();
         this._numfmtController = this._injector.get(NumfmtController);
         this._numfmtModalController = this._injector.get(NumfmtModalController);
-        this._localeService.getLocale().load({ en });
+        this._localeService.getLocale().load({ enUS });
         // actionRegister.add(this._numfmtActionExtensionFactory);
     }
 

@@ -17,13 +17,15 @@
                 "require": "./lib/univer-base-docs.cjs.js",
                 "default": "./lib/univer-base-docs.js"
             },
-            "./*": "./lib/*"
+            "./*": "./lib/*",
+            "./locale/*": "./lib/locale/*.js"
         },
         "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "directories": {
         "lib": "lib"
@@ -31,10 +33,13 @@
     "files": [
         "lib"
     ],
-    "private": true,
+    "private": false,
     "type": "module",
     "scripts": {
-        "test": "vitest run"
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {
         "@univerjs/base-render": "workspace:*",
@@ -48,6 +53,7 @@
     "devDependencies": {
         "@types/node": "^20.8.9",
         "@vitest/coverage-v8": "^0.34.6",
+        "esbuild": "^0.19.5",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
         "vitest": "^0.34.6"

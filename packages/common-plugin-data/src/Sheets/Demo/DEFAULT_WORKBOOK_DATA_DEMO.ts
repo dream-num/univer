@@ -80,7 +80,7 @@ const richTextDemo1: IDocumentData = {
 
 export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     id: 'workbook-01',
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     creator: 'univer',
     name: 'UniverSheet Demo',
     extensions: [],

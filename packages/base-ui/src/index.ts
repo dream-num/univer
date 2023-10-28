@@ -7,7 +7,6 @@ export { SharedController } from './controllers/shared-shortcut.controller';
 export { IUIController } from './controllers/ui/ui.controller';
 export { DesktopUIPart, type IDesktopUIController } from './controllers/ui/ui-desktop.controller';
 export * from './helpers';
-export { en, zh } from './locale';
 export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clipboard.command';
 export { CopyShortcutItem, CutShortcutItem, PasteShortcutItem } from './services/clipboard/clipboard.shortcut';
 export {

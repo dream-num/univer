@@ -18,7 +18,7 @@ import { locales } from './locales';
 // univer
 const univer = new Univer({
     theme: greenTheme,
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     locales,
 });
 

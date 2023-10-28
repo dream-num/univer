@@ -1,4 +1,5 @@
 import { DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import { LocaleType } from '@univerjs/core';
 import { defaultTheme, greenTheme } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -18,11 +19,11 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         selections: [
             {
                 label: 'English',
-                value: 'en',
+                value: LocaleType.EN_US,
             },
             {
                 label: '简体中文',
-                value: 'zh',
+                value: LocaleType.ZH_CN,
             },
         ],
     };

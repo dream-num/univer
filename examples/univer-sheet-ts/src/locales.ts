@@ -1,23 +1,23 @@
-import { zh as DocPluginZh } from '@univerjs/base-docs';
-import { zh as SheetPluginZh } from '@univerjs/base-sheets';
-import { zh as BaseUiZh } from '@univerjs/base-ui';
-import { zh as SheetDebuggerPluginZh } from '@univerjs/sheets-plugin-debugger';
-import { zh as FindPluginZh } from '@univerjs/sheets-plugin-find';
-import { zh as ImportXlsxPluginZh } from '@univerjs/sheets-plugin-import-xlsx';
-import { zh as NumberfmtPluginZh } from '@univerjs/sheets-plugin-numfmt';
-import { zh as DocUIPluginZh } from '@univerjs/ui-plugin-docs';
-import { zh as SheetUIPluginZh } from '@univerjs/ui-plugin-sheets';
+import DocPluginZhCN from '@univerjs/base-docs/locale/zh-CN';
+import SheetPluginZhCN from '@univerjs/base-sheets/locale/zh-CN';
+import BaseUiZhCN from '@univerjs/base-ui/locale/zh-CN';
+import SheetDebuggerPluginZhCN from '@univerjs/sheets-plugin-debugger/locale/zh-CN';
+import FindPluginZhCN from '@univerjs/sheets-plugin-find/locale/zh-CN';
+import ImportXlsxPluginZhCN from '@univerjs/sheets-plugin-import-xlsx/locale/zh-CN';
+import NumberfmtPluginZhCN from '@univerjs/sheets-plugin-numfmt/locale/zh-CN';
+import DocUIPluginZhCN from '@univerjs/ui-plugin-docs/locale/zh-CN';
+import SheetUIPluginZhCN from '@univerjs/ui-plugin-sheets/locale/zh-CN';
 
 export const locales = {
-    zh: {
-        ...DocPluginZh,
-        ...SheetPluginZh,
-        ...FindPluginZh,
-        ...ImportXlsxPluginZh,
-        ...NumberfmtPluginZh,
-        ...DocUIPluginZh,
-        ...SheetUIPluginZh,
-        ...SheetDebuggerPluginZh,
-        ...BaseUiZh,
+    zhCN: {
+        ...DocPluginZhCN,
+        ...SheetPluginZhCN,
+        ...FindPluginZhCN,
+        ...ImportXlsxPluginZhCN,
+        ...NumberfmtPluginZhCN,
+        ...DocUIPluginZhCN,
+        ...SheetUIPluginZhCN,
+        ...SheetDebuggerPluginZhCN,
+        ...BaseUiZhCN,
     },
 };

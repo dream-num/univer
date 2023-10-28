@@ -29,7 +29,7 @@ const TEST_WORKBOOK_DATA: IWorkbookConfig = {
     creator: '',
     extensions: [],
     lastModifiedBy: '',
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     modifiedTime: '',
     name: '',
     sheetOrder: [],

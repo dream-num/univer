@@ -59,7 +59,7 @@ export const DEFAULT_WORKBOOK: IWorkbookConfig = {
     name: '',
     timeZone: '',
     appVersion: '',
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     creator: '',
     styles: {},
     sheets: {},

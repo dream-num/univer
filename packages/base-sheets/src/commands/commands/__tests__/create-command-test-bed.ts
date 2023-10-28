@@ -35,7 +35,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     creator: '',
     extensions: [],
     lastModifiedBy: '',
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     modifiedTime: '',
     name: '',
     sheetOrder: [],

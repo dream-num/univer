@@ -3,13 +3,16 @@ import { RenderEngine } from '@univerjs/base-render';
 import { UIPlugin } from '@univerjs/base-ui';
 import { DEFAULT_DOCUMENT_DATA_EN } from '@univerjs/common-plugin-data';
 import { LocaleType, Univer } from '@univerjs/core';
-import { greenTheme } from '@univerjs/design';
+import { defaultTheme } from '@univerjs/design';
 import { DocUIPlugin } from '@univerjs/ui-plugin-docs';
+
+import { locales } from './locales';
 
 // univer
 const univer = new Univer({
-    theme: greenTheme,
-    locale: LocaleType.EN,
+    theme: defaultTheme,
+    locale: LocaleType.EN_US,
+    locales,
 });
 
 // core plugins
@@ -32,3 +35,12 @@ univer.registerPlugin(DocUIPlugin, {
 });
 
 univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_EN);
+
+// use for console test
+declare global {
+    interface Window {
+        univer?: Univer;
+    }
+}
+
+window.univer = univer;

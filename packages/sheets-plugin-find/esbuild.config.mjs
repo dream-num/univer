@@ -6,5 +6,10 @@ import baseConfig from '../../esbuild.config.mjs';
 esbuild.build({
     ...baseConfig,
     globalName: 'UniverSheetsPluginFind',
-    outfile: './lib/univer-sheets-plugin-find.js',
+    entryPoints: {
+        'univer-sheets-plugin-find': './src/index.ts',
+        'locale/en-US': './src/locale/en-US.ts',
+        'locale/zh-CN': './src/locale/zh-CN.ts',
+    },
+    outdir: './lib',
 });

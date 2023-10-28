@@ -1,2 +1,2 @@
 export * from './ImportXlsxPlugin';
-export * from './Locale';
+export { enUS, zhCN } from './locale';

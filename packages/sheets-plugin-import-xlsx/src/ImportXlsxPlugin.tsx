@@ -3,7 +3,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { IMPORT_XLSX_PLUGIN_NAME } from './Basics';
 import { ImportXlsxController } from './Controller/ImportXlsxController';
-import { en } from './Locale';
+import { enUS } from './locale';
 import { UploadService } from './services/upload.service';
 
 export interface IImportXlsxPluginConfig {}
@@ -26,7 +26,7 @@ export class ImportXlsxPlugin extends Plugin {
          * load more Locale object
          */
         this._localeService.getLocale().load({
-            en,
+            enUS,
         });
 
         // this._importXlsxController = new ImportXlsxController(this);

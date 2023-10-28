@@ -9,7 +9,7 @@ import { DocUIPlugin } from '@univerjs/ui-plugin-docs';
 // univer
 const univer = new Univer({
     theme: greenTheme,
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
 });
 
 // core plugins

@@ -4,7 +4,7 @@ import { PAGE5_RICHTEXT_1 } from '../Slides/RichText/PAGE5_RICHTEXT_1';
 
 export const SLIDE_WORKBOOK_DATA: IWorkbookConfig = {
     id: 'workbook-01',
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     creator: 'univer',
     name: 'universheet',
     extensions: [],

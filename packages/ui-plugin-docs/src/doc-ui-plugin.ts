@@ -7,7 +7,7 @@ import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { AppUIController } from './Controller';
 import { DocClipboardController } from './Controller/clipboard.controller';
 import { DocUIController } from './Controller/doc-ui.controller';
-import { en } from './Locale';
+import { enUS } from './locale';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 
 export class DocUIPlugin extends Plugin {
@@ -21,7 +21,7 @@ export class DocUIPlugin extends Plugin {
         super(DOC_UI_PLUGIN_NAME);
 
         this._localeService.getLocale().load({
-            en,
+            enUS,
         });
 
         this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);

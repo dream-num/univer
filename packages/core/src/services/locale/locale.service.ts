@@ -32,7 +32,7 @@ function getValue(locale: ILocales[LocaleType], key: string): Nullable<string | 
  * This service provides i18n and timezone / location features to other modules.
  */
 export class LocaleService extends Disposable {
-    currentLocale: LocaleType = LocaleType.EN;
+    currentLocale: LocaleType = LocaleType.EN_US;
 
     locales: ILocales | null = null;
 
@@ -62,7 +62,7 @@ export class LocaleService extends Disposable {
     }
 
     initialize(locale: Nullable<LocaleType>) {
-        this.currentLocale = locale || LocaleType.EN;
+        this.currentLocale = locale || LocaleType.EN_US;
     }
 
     /**

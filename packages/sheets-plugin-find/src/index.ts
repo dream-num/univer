@@ -1,4 +1,4 @@
 import { FindPlugin } from './FindPlugin';
 
 export { FindPlugin };
-export * from './Locale';
+export { enUS, zhCN } from './locale';

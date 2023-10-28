@@ -34,7 +34,7 @@ import { MoveCursorController } from './Controller/move-cursor.controller';
 import { NormalInputController } from './Controller/normal-input.controller';
 import { PageRenderController } from './Controller/page-render.controller';
 import { TextSelectionController } from './Controller/text-selection.controller';
-import { en } from './Locale';
+import { enUS } from './locale';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 import { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
@@ -80,7 +80,7 @@ export class DocPlugin extends Plugin {
 
     initialize(): void {
         this._localeService.getLocale().load({
-            en,
+            enUS,
         });
 
         // if (this._config.standalone) {

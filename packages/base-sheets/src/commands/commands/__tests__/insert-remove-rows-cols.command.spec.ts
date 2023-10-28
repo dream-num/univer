@@ -333,7 +333,7 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookConfig = {
     creator: '',
     extensions: [],
     lastModifiedBy: '',
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     modifiedTime: '',
     name: '',
     sheetOrder: [],

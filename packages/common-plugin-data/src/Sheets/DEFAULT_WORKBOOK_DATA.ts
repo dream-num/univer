@@ -303,7 +303,7 @@ const richTextTest: IDocumentData = {
  */
 export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
     id: 'workbook-01',
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     creator: 'univer',
     name: 'universheet',
     extensions: [],
@@ -738,7 +738,7 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
  */
 export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookConfig = {
     id: 'workbook-02',
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     creator: 'univer',
     name: 'universheet',
     extensions: [],

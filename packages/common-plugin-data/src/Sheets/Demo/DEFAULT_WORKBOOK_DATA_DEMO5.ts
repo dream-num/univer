@@ -2,7 +2,7 @@ import { BorderStyleTypes, IWorkbookConfig, LocaleType } from '@univerjs/core';
 
 export const DEFAULT_WORKBOOK_DATA_DEMO5: IWorkbookConfig = {
     id: 'workbook-01',
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     creator: 'univer',
     name: 'universheet',
     extensions: [],

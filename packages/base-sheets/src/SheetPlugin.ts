@@ -15,7 +15,7 @@ import { ScrollController } from './Controller/scroll.controller';
 import { SelectionController } from './Controller/selection.controller';
 import { SheetRenderController } from './Controller/sheet-render.controller';
 import { ZoomController } from './Controller/zoom.controller';
-import { en } from './Locale';
+import { enUS } from './locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
 import { SelectionManagerService } from './services/selection/selection-manager.service';
@@ -44,7 +44,7 @@ export class SheetPlugin extends Plugin {
 
     override onRendered(): void {
         this._localeService.getLocale().load({
-            en,
+            enUS,
         });
     }
 

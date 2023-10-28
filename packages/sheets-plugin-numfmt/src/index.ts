@@ -1,4 +1,4 @@
 import './RegisterAction';
 
-export * from './Locale';
+export { enUS, zhCN } from './locale';
 export * from './NumfmtPlugin';

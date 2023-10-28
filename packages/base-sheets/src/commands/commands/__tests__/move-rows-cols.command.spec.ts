@@ -387,7 +387,7 @@ const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookConfig = {
     creator: '',
     extensions: [],
     lastModifiedBy: '',
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     modifiedTime: '',
     name: '',
     sheetOrder: [],

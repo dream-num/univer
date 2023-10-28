@@ -12,7 +12,7 @@ import { StartEditController } from './controller/editor/start-edit.controller';
 import { EditorBridgeController } from './controller/editor-bridge.controller';
 import { FormatPainterController } from './controller/format-painter/format-painter.controller';
 import { SheetUIController } from './controller/sheet-ui.controller';
-import { en } from './Locale';
+import { enUS } from './locale';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
@@ -31,7 +31,7 @@ export class SheetUIPlugin extends Plugin {
         super(SHEET_UI_PLUGIN_NAME);
 
         this._localeService.getLocale().load({
-            en,
+            enUS,
         });
     }
 

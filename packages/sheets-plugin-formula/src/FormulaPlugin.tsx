@@ -7,7 +7,7 @@ import { IFormulaConfig } from './Basics/Interfaces/IFormula';
 import { FormulaController } from './Controller/FormulaController';
 import { FormulaPromptController } from './Controller/FormulaPromptController';
 import { SearchFormulaController } from './Controller/SearchFormulaModalController';
-import { en } from './Locale';
+import { enUS } from './locale';
 
 export class FormulaPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -32,7 +32,7 @@ export class FormulaPlugin extends Plugin {
 
     initialize(): void {
         this._localeService.getLocale().load({
-            en,
+            enUS,
         });
     }
 

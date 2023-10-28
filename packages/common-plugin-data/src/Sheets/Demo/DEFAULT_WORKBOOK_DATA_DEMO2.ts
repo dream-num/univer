@@ -2,7 +2,7 @@ import { BooleanNumber, BorderStyleTypes, IWorkbookConfig, LocaleType, SheetType
 
 export const DEFAULT_WORKBOOK_DATA_DEMO2: IWorkbookConfig = {
     id: 'workbook-01',
-    locale: LocaleType.EN,
+    locale: LocaleType.EN_US,
     creator: 'univer',
     name: 'universheet',
     extensions: [],

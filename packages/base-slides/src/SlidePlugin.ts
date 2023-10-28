@@ -1,8 +1,8 @@
 import { Engine, IRenderingEngine } from '@univerjs/base-render';
-import { ILanguagePack, IUniverInstanceService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { en } from './Locale';
+import { enUS } from './locale';
 import { CanvasView } from './View/Render';
 
 export interface ISlidePluginConfig {}
@@ -32,7 +32,7 @@ export class SlidePlugin extends Plugin {
 
     initialize(): void {
         this._localeService.getLocale().load({
-            en: en as unknown as ILanguagePack,
+            enUS,
         });
         this.initCanvasEngine();
     }

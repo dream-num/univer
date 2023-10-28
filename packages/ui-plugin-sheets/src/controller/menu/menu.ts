@@ -55,7 +55,6 @@ import {
     DisplayTypes,
     IMenuButtonItem,
     IMenuSelectorItem,
-    MenuGroup,
     MenuItemType,
     MenuPosition,
     PasteCommand,
@@ -66,17 +65,13 @@ import {
     HorizontalAlign,
     ICommandService,
     IPermissionService,
-    IUndoRedoService,
     IUniverInstanceService,
     RANGE_TYPE,
-    RedoCommand,
-    UndoCommand,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from '../../Basics/Const/PLUGIN_NAME';
 import { RenameSheetOperation } from '../../commands/commands/rename.command';
@@ -96,36 +91,6 @@ export enum SheetMenuPosition {
     COL_HEADER_CONTEXT_MENU = 'colHeaderContextMenu',
     SHEET_BAR = 'sheetBar',
     WORKSHEET_MANAGE_MENU = 'worksheetManageMenu',
-}
-
-export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const undoRedoService = accessor.get(IUndoRedoService);
-
-    return {
-        id: UndoCommand.id,
-        group: MenuGroup.TOOLBAR_HISTORY,
-        type: MenuItemType.BUTTON,
-        icon: 'ForwardIcon',
-        title: 'Undo',
-        tooltip: 'toolbar.undo',
-        positions: [MenuPosition.TOOLBAR_START],
-        disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
-    };
-}
-
-export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const undoRedoService = accessor.get(IUndoRedoService);
-
-    return {
-        id: RedoCommand.id,
-        group: MenuGroup.TOOLBAR_HISTORY,
-        type: MenuItemType.BUTTON,
-        icon: 'BackIcon',
-        title: 'Redo',
-        tooltip: 'toolbar.redo',
-        positions: [MenuPosition.TOOLBAR_START],
-        disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.redos <= 0)),
-    };
 }
 
 export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {

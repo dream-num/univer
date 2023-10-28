@@ -17,6 +17,7 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     contentComponents?: Set<() => ComponentType>;
     footerComponents?: Set<() => ComponentType>;
     sidebarComponents?: Set<() => ComponentType>;
+    headerMenuComponents?: Set<() => ComponentType>;
     onRendered?: (container: HTMLElement) => void;
 }
 
@@ -30,7 +31,14 @@ export function App(props: IUniverAppProps) {
 
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const { headerComponents, contentComponents, footerComponents, sidebarComponents, onRendered } = props;
+    const {
+        headerComponents,
+        headerMenuComponents,
+        contentComponents,
+        footerComponents,
+        sidebarComponents,
+        onRendered,
+    } = props;
 
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
@@ -62,6 +70,8 @@ export function App(props: IUniverAppProps) {
         };
     }, []);
 
+    console.log('Header menu component', headerComponents, headerMenuComponents);
+
     return (
         <AppContext.Provider value={{ injector, localeService, themeService, locale, componentManager, zIndexManager }}>
             <Container className={style.layoutContainer}>
@@ -74,6 +84,10 @@ export function App(props: IUniverAppProps) {
                             {props.toolbar && <DocBars />}
                             {headerComponents &&
                                 Array.from(headerComponents.values()).map((component, index) =>
+                                    React.createElement(component(), { key: `${index}` })
+                                )}
+                            {headerMenuComponents &&
+                                Array.from(headerMenuComponents.values()).map((component, index) =>
                                     React.createElement(component(), { key: `${index}` })
                                 )}
                         </Header>

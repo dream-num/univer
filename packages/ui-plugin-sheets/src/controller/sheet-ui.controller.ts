@@ -73,7 +73,6 @@ import {
     InsertRowBeforeMenuItemFactory,
     ItalicMenuItemFactory,
     PasteMenuItemFactory,
-    RedoMenuItemFactory,
     RemoveColMenuItemFactory,
     RemoveRowMenuItemFactory,
     RenameSheetMenuItemFactory,
@@ -89,7 +88,6 @@ import {
     TextColorSelectorMenuItemFactory,
     TextRotateMenuItemFactory,
     UnderlineMenuItemFactory,
-    UndoMenuItemFactory,
     UnHideSheetMenuItemFactory,
     VerticalAlignMenuItemFactory,
     WrapTextMenuItemFactory,
@@ -229,8 +227,6 @@ export class SheetUIController extends Disposable {
                 FrozenMenuItemFactory,
 
                 // toolbar
-                UndoMenuItemFactory,
-                RedoMenuItemFactory,
                 FormatPainterMenuItemFactory,
                 BoldMenuItemFactory,
                 ItalicMenuItemFactory,

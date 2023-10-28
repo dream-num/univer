@@ -10,6 +10,14 @@ import { IFocusService } from '../../services/focus/focus.service';
 import { App } from '../../views/app';
 import { IUIController, IWorkbenchOptions } from './ui.controller';
 
+export enum DesktopUIPart {
+    HEADER = 'header',
+    HEADER_MENU = 'header-menu',
+    CONTENT = 'content',
+    FOOTER = 'footer',
+    SIDEBAR = 'sidebar',
+}
+
 /**
  * IDesktopUIController
  */
@@ -18,6 +26,9 @@ export interface IDesktopUIController extends IUIController {
 
     // provides multi methods for business to register workbench custom components
     // TODO@wzhudev: in the future we may bind components to different business types
+    registerComponent(part: DesktopUIPart, component: () => ComponentType): IDisposable;
+
+    getHeaderMenuComponents(): Set<() => ComponentType>;
 
     // header bar
     registerHeaderComponent(component: () => ComponentType): IDisposable;
@@ -39,11 +50,9 @@ const STEADY_TIMEOUT = 3000;
 
 export class DesktopUIController extends Disposable implements IDesktopUIController {
     private _headerComponents: Set<() => ComponentType> = new Set();
-
+    private _headerMenuComponents: Set<() => ComponentType> = new Set();
     private _contentComponents: Set<() => ComponentType> = new Set();
-
     private _footerComponents: Set<() => ComponentType> = new Set();
-
     private _sidebarComponents: Set<() => ComponentType> = new Set();
 
     private _componentRegistered$ = new Subject<void>();
@@ -73,6 +82,33 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     private _initializeEngine(element: HTMLElement) {
         const engine = this._renderManagerService.getCurrent()!.engine;
         engine.setContainer(element);
+    }
+
+    registerComponent(part: DesktopUIPart, component: () => React.ComponentType): IDisposable {
+        switch (part) {
+            case DesktopUIPart.HEADER:
+                return this.registerHeaderComponent(component);
+            case DesktopUIPart.CONTENT:
+                return this.registerContentComponent(component);
+            case DesktopUIPart.FOOTER:
+                return this.registerFooterComponent(component);
+            case DesktopUIPart.SIDEBAR:
+                return this.registerSidebarComponent(component);
+            case DesktopUIPart.HEADER_MENU:
+                return this.registerHeaderMenuComponent(component);
+            default:
+                throw new Error(`[DesktopUIController] Unknown part type: ${part}.`);
+        }
+    }
+
+    registerHeaderMenuComponent(component: () => ComponentType): IDisposable {
+        this._headerMenuComponents.add(component);
+        this._componentRegistered$.next();
+        return toDisposable(() => this._headerMenuComponents.delete(component));
+    }
+
+    getHeaderMenuComponents(): Set<() => ComponentType> {
+        return new Set([...this._headerMenuComponents]);
     }
 
     registerHeaderComponent(component: () => ComponentType): IDisposable {
@@ -147,10 +183,12 @@ function bootStrap(
         const contentComponents = desktopUIController.getContentComponents();
         const footerComponents = desktopUIController.getFooterComponents();
         const sidebarComponents = desktopUIController.getSidebarComponents();
+        const headerMenuComponents = desktopUIController.getHeaderMenuComponents();
         root.render(
             <ConnectedApp
                 {...options}
                 headerComponents={headerComponents}
+                headerMenuComponents={headerMenuComponents}
                 contentComponents={contentComponents}
                 onRendered={onRendered}
                 footerComponents={footerComponents}

@@ -74,6 +74,28 @@ export interface ISizeData {
 /**
  * Properties of document body
  * 三种更新类型，范围叠加、范围互斥、占位符
+ * \v COLUMN_BREAK
+ * \f PAGE_BREAK
+ * \0 DOCS_END
+ * \t TAB
+ *
+ * Needs to be changed：
+ * \r PARAGRAPH
+ * \n SECTION_BREAK
+ *
+ * \b customBlock: Scenarios where customBlock, images, mentions, etc. do not participate in the document flow.
+ *
+ * Table
+ * \x1A table start
+ * \x1B table row start
+ * \x1C table cell start
+ * \x1D table cell end
+ * \x1E table row end
+ * \x1F table end
+ *
+ * Special ranges within the document flow:：hyperlinks，field，structured document tags， bookmark，comment
+ * \x1F customRange start
+ * \x1E customRange end
  */
 export interface IDocumentBody {
     dataStream: string;
@@ -83,7 +105,7 @@ export interface IDocumentBody {
     paragraphs?: IParagraph[]; // paragraph
     sectionBreaks?: ISectionBreak[]; // SectionBreak https://support.microsoft.com/en-us/office/insert-a-section-break-eef20fd8-e38c-4ba6-a027-e503bdf8375c
     customBlocks?: ICustomBlock[]; // customBlock 用户通过插件自定义的block
-    tables?: ITable[]; // table
+    tables?: ITable[]; // Table
     // tableOfContents?: { [index: number]: ITableOfContent }; // tableOfContents 目录
     // links?: { [index: number]: IHyperlink }; // links 超链接
     customRanges?: ICustomRange[]; // plugin注册，实现针对stream的特殊逻辑，超链接，field，structured document tags， bookmark，comment

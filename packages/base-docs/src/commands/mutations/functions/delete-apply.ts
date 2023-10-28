@@ -1,4 +1,13 @@
-import { deleteContent, DocumentModel, getDocsUpdateBody, IDocumentBody } from '@univerjs/core';
+import {
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    deleteContent,
+    DocumentBodyModel,
+    DocumentModel,
+    getDocsUpdateBody,
+    IDocumentBody,
+    IParagraph,
+    Tools,
+} from '@univerjs/core';
 
 import {
     deleteCustomBlocks,
@@ -32,6 +41,8 @@ export function DeleteApply(
     bodyModel.delete(currentIndex, textLength);
 
     const deleBody = updateAttributeByDelete(body, textLength, currentIndex);
+
+    recoveryBody(bodyModel, body, deleBody); // If the last paragraph in the document is deleted, restore an initial blank document.
 
     console.log('删除的model打印', bodyModel, body, deleBody);
 
@@ -73,4 +84,24 @@ function updateAttributeByDelete(body: IDocumentBody, textLength: number, curren
         tables: removeTables,
         customRanges: removeCustomRanges,
     };
+}
+
+function recoveryBody(bodyModel: DocumentBodyModel, body: IDocumentBody, deleBody: IDocumentBody) {
+    if (bodyModel.children[0].children.length === 0) {
+        bodyModel.reset({
+            dataStream: DEFAULT_EMPTY_DOCUMENT_VALUE,
+        });
+    }
+
+    if (body.dataStream === '\n') {
+        body.dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
+
+        const firstParagraph = deleBody.paragraphs?.[0];
+
+        if (firstParagraph != null) {
+            const newParagraph = Tools.deepClone(firstParagraph) as IParagraph;
+            newParagraph.startIndex = 0;
+            body.paragraphs = [newParagraph];
+        }
+    }
 }

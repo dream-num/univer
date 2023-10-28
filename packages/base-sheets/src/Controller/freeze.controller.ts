@@ -22,6 +22,7 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
+import { SetWorksheetActivateMutation } from '..';
 import { getCoordByOffset, getSheetObject } from '../Basics/component-tools';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
@@ -895,21 +896,20 @@ export class FreezeController extends Disposable {
         }
     }
 
+    /**
+     * When switching sheet tabs, it is necessary to update the frozen state of the current view.
+     */
     private _skeletonListener() {
-        // this.disposeWithMe(
-        //     toDisposable(
-        //         this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-        //             if (
-        //                 [SetWorksheetRowIsAutoHeightMutation.id, SetWorksheetRowAutoHeightMutation.id].includes(
-        //                     param?.commandId || ''
-        //                 )
-        //             ) {
-        //                 return;
-        //             }
-        //             this._refreshCurrent();
-        //         })
-        //     )
-        // );
+        this.disposeWithMe(
+            toDisposable(
+                this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+                    if (![SetWorksheetActivateMutation.id].includes(param?.commandId || '')) {
+                        return;
+                    }
+                    this._refreshCurrent();
+                })
+            )
+        );
     }
 
     private _refreshCurrent() {

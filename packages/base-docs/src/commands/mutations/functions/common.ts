@@ -43,7 +43,7 @@ export function insertTextRuns(
             if (insertIndex === Infinity) {
                 insertIndex = -Infinity;
             }
-        } else if (ed >= currentIndex - 1) {
+        } else if (ed >= currentIndex) {
             /**
              * Inserting text at the end of a rich text content,
              * with the newly inserted text inheriting the style of that content.
@@ -72,7 +72,7 @@ export function insertTextRuns(
             const startSplitTextRun = {
                 ...splitTextRun,
                 st,
-                ed: insertTextRuns[0].st - 1,
+                ed: insertTextRuns[0].st,
             };
 
             if (isSameStyleTextRun(startSplitTextRun, insertTextRuns[0])) {
@@ -81,9 +81,15 @@ export function insertTextRuns(
             }
 
             const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
+
+            if (lastInsertTextRuns.ed === ed) {
+                textRuns.splice(insertIndex, 1, startSplitTextRun, ...insertTextRuns);
+                return;
+            }
+
             const endSplitTextRun = {
                 ...splitTextRun,
-                st: lastInsertTextRuns.ed + 1,
+                st: lastInsertTextRuns.ed,
                 ed,
             };
 
@@ -318,34 +324,54 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
             const textRun = textRuns[i];
             const { st, ed } = textRun;
 
-            if (startIndex <= st && endIndex >= ed) {
+            if (startIndex <= st - 1 && endIndex >= ed - 1) {
+                /**
+                 * If the selection range is larger than the current textRuns, it needs to be deleted.
+                 */
                 removeTextRuns.push({
                     ...textRun,
-                    st: st - currentIndex,
-                    ed: ed - currentIndex,
+                    st: st - startIndex,
+                    ed: ed - startIndex,
                 });
                 continue;
-            } else if (st <= startIndex && ed >= endIndex) {
+            } else if (st - 1 < startIndex && ed - 1 >= endIndex) {
+                /**
+                 * If the selection range is smaller than the current textRun,
+                 * it needs to be trimmed. After trimming, the two segments of textRun should be merged.
+                 */
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
 
                 textRun.st = segments[0];
                 textRun.ed = segments[1];
-            } else if (startIndex >= st && startIndex <= ed) {
+            } else if (startIndex > st - 1 && startIndex <= ed - 1) {
+                /**
+                 * If the cursor start position is within the textRun,
+                 * the content on the right side of the textRun needs to be removed,
+                 * leaving the content on the left
+                 */
                 removeTextRuns.push({
                     ...textRun,
-                    st: startIndex - currentIndex,
-                    ed: ed - currentIndex,
+                    st: startIndex - startIndex,
+                    ed: ed - startIndex,
                 });
-                textRun.ed = startIndex - 1;
-            } else if (endIndex >= st && endIndex <= ed) {
+                textRun.ed = startIndex;
+            } else if (endIndex > st - 1 && endIndex <= ed - 1) {
+                /**
+                 * If the cursor end position is within the textRun,
+                 * the content on the left side of the textRun needs to be removed,
+                 * leaving the content on the right.
+                 */
                 removeTextRuns.push({
                     ...textRun,
-                    st: st - currentIndex,
-                    ed: endIndex - currentIndex,
+                    st: st - startIndex,
+                    ed: endIndex - startIndex,
                 });
                 textRun.st = endIndex - textLength + 1;
                 textRun.ed -= textLength;
             } else if (st > endIndex) {
+                /**
+                 * TextRuns to the right of the selection content need to be moved as a whole
+                 */
                 textRun.st -= textLength;
                 textRun.ed -= textLength;
             }

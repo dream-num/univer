@@ -1,5 +1,1 @@
-export default {
-    BaseSheetLocale: {
-        CopyName: '副本',
-    },
-};
+export default {};

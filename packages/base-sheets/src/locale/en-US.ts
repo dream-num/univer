@@ -1,5 +1,1 @@
-export default {
-    BaseSheetLocale: {
-        CopyName: 'Copy',
-    },
-};
+export default {};

@@ -1,11 +1,7 @@
 export default {
     spreadsheetLabel: '插件',
     spreadsheetRightLabel: '更多 Sheets',
-    spreadsheet: {
-        one: '一',
-        two: '二',
-        three: '三',
-    },
+
     // toolbar.undo
     toolbar: {
         undo: '撤销',

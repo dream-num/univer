@@ -1,11 +1,6 @@
 export default {
     spreadsheetLabel: 'Spreadsheet',
     spreadsheetRightLabel: 'more Sheets',
-    spreadsheet: {
-        one: 'one',
-        two: 'two',
-        three: 'three',
-    },
 
     toolbar: {
         undo: 'Undo',

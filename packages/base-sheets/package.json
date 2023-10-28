@@ -20,13 +20,15 @@
                 "require": "./lib/univer-base-sheets.cjs.js",
                 "default": "./lib/univer-base-sheets.js"
             },
-            "./*": "./lib/*"
+            "./*": "./lib/*",
+            "./locale/*": "./lib/locale/*.js"
         },
         "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "directories": {
         "lib": "lib"

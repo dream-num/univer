@@ -6,5 +6,10 @@ import baseConfig from '../../esbuild.config.mjs';
 esbuild.build({
     ...baseConfig,
     globalName: 'UniverBaseUi',
-    outfile: './lib/univer-base-ui.js',
+    entryPoints: {
+        'univer-base-ui': './src/index.ts',
+        'locale/en-US': './src/locale/en-US.ts',
+        'locale/zh-CN': './src/locale/zh-CN.ts',
+    },
+    outdir: './lib',
 });

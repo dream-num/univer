@@ -6,5 +6,10 @@ import baseConfig from '../../esbuild.config.mjs';
 esbuild.build({
     ...baseConfig,
     globalName: 'UniverSheetsPluginImportXlsx',
-    outfile: './lib/univer-sheets-plugin-import-xlsx.js',
+    entryPoints: {
+        'univer-sheets-plugin-import-xlsx': './src/index.ts',
+        'locale/en-US': './src/locale/en-US.ts',
+        'locale/zh-CN': './src/locale/zh-CN.ts',
+    },
+    outdir: './lib',
 });

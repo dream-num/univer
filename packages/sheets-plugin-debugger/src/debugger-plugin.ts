@@ -22,9 +22,6 @@ export class DebuggerPlugin extends Plugin {
     }
 
     initialize(): void {
-        /**
-         * load more Locale object
-         */
         this._localeService.getLocale().load({
             enUS,
         });

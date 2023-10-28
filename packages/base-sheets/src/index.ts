@@ -172,7 +172,6 @@ export {
     SetSelectionsOperation,
 } from './commands/operations/selection.operation';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
-export { enUS, zhCN } from './locale';
 export { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { ShortcutExperienceService } from './services/shortcut-experience.service';

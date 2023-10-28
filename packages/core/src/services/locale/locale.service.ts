@@ -99,11 +99,6 @@ export class LocaleService extends Disposable {
     /**
      * Load more locales after init
      *
-     * @example
-     * ```ts
-     * Locale.load({zh,en})
-     * ```
-     *
      * @param locales - Locale object
      * @returns void
      *

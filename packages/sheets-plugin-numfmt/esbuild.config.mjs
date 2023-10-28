@@ -5,9 +5,9 @@ import baseConfig from '../../esbuild.config.mjs';
 
 esbuild.build({
     ...baseConfig,
-    globalName: 'UniverUiPluginSheets',
+    globalName: 'UniverSheetsPluginNumfmt',
     entryPoints: {
-        'univer-ui-plugin-sheets': './src/index.ts',
+        'univer-sheets-plugin-numfmt': './src/index.ts',
         'locale/en-US': './src/locale/en-US.ts',
         'locale/zh-CN': './src/locale/zh-CN.ts',
     },

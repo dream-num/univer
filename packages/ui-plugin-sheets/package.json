@@ -20,13 +20,15 @@
                 "require": "./lib/univer-ui-plugin-sheets.cjs.js",
                 "default": "./lib/univer-ui-plugin-sheets.js"
             },
-            "./*": "./lib/*"
+            "./*": "./lib/*",
+            "./locale/*": "./lib/locale/*.js"
         },
         "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "directories": {
         "lib": "lib"

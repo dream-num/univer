@@ -19,13 +19,15 @@
                 "require": "./lib/univer-base-ui.cjs.js",
                 "default": "./lib/univer-base-ui.js"
             },
-            "./*": "./lib/*"
+            "./*": "./lib/*",
+            "./locale/*": "./lib/locale/*.js"
         },
         "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "directories": {
         "lib": "lib"

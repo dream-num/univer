@@ -50,7 +50,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/icons": "^0.0.10",
-        "@wendellhu/redi": "^0.12.8",
+        "@wendellhu/redi": "^0.12.10",
         "localforage": "^1.10.0",
         "rc-dropdown": "^4.1.0",
         "rc-menu": "^9.12.2",

@@ -42,7 +42,7 @@
         "@univerjs/base-ui": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@wendellhu/redi": "^0.12.8",
+        "@wendellhu/redi": "^0.12.10",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },

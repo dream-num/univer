@@ -44,7 +44,7 @@
         "@univerjs/common-plugin-data": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/ui-plugin-sheets": "workspace:*",
-        "@wendellhu/redi": "^0.12.8",
+        "@wendellhu/redi": "^0.12.10",
         "luckyexcel": "^1.0.1"
     },
     "devDependencies": {

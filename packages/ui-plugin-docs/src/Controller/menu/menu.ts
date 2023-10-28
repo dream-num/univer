@@ -1,38 +1,6 @@
 import { BreakLineCommand, DeleteLeftCommand } from '@univerjs/base-docs';
-import { IMenuButtonItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/base-ui';
-import { IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { IMenuButtonItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { IAccessor } from '@wendellhu/redi';
-import { map } from 'rxjs/operators';
-
-export function UndoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const undoRedoService = accessor.get(IUndoRedoService);
-
-    return {
-        id: UndoCommand.id,
-        group: MenuGroup.TOOLBAR_HISTORY,
-        type: MenuItemType.BUTTON,
-        icon: 'ForwardIcon',
-        title: 'Undo',
-        tooltip: 'toolbar.undo',
-        positions: [MenuPosition.TOOLBAR_START],
-        disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.undos <= 0)),
-    };
-}
-
-export function RedoMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const undoRedoService = accessor.get(IUndoRedoService);
-
-    return {
-        id: RedoCommand.id,
-        group: MenuGroup.TOOLBAR_HISTORY,
-        type: MenuItemType.BUTTON,
-        icon: 'BackIcon',
-        title: 'Redo',
-        tooltip: 'toolbar.redo',
-        positions: [MenuPosition.TOOLBAR_START],
-        disabled$: undoRedoService.undoRedoStatus$.pipe(map((v) => v.redos <= 0)),
-    };
-}
 
 // TODO@Dushusir: use for test, change id later
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {

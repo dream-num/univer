@@ -9,7 +9,7 @@ import {
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { BoldMenuItemFactory, ItalicMenuItemFactory, RedoMenuItemFactory, UndoMenuItemFactory } from './menu/menu';
+import { BoldMenuItemFactory, ItalicMenuItemFactory } from './menu/menu';
 
 // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui plug-in can be added in LifecycleStages.Ready
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)
@@ -29,9 +29,7 @@ export class DocUIController extends Disposable {
 
     private _init(): void {
         // init menus
-        (
-            [UndoMenuItemFactory, RedoMenuItemFactory, BoldMenuItemFactory, ItalicMenuItemFactory] as IMenuItemFactory[]
-        ).forEach((factory) => {
+        ([BoldMenuItemFactory, ItalicMenuItemFactory] as IMenuItemFactory[]).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
     }

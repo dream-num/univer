@@ -95,8 +95,8 @@ export class Univer {
                 .getRegisterPlugins(PluginType.Sheet)
                 .forEach((p) => this._univerSheet!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
             this._tryStart();
-            this._univerSheet.init();
             addSheet();
+            this._univerSheet.init();
 
             this._tryProgressToReady();
         } else {

@@ -6,6 +6,7 @@ import { DefaultDocUiConfig, IDocUIPluginConfig } from './Basics';
 import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
 import { AppUIController } from './Controller';
 import { DocClipboardController } from './Controller/clipboard.controller';
+import { DocUIController } from './Controller/doc-ui.controller';
 import { en } from './Locale';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 
@@ -38,6 +39,7 @@ export class DocUIPlugin extends Plugin {
         const dependencies: Dependency[] = [
             [IDocClipboardService, { useClass: DocClipboardService }],
             [DocClipboardController],
+            [DocUIController],
             [
                 // controllers
                 AppUIController,

@@ -24,6 +24,7 @@ import {
     InsertRowCommand,
 } from '../commands/commands/insert-row-col.command';
 import { InsertSheetCommand } from '../commands/commands/insert-sheet.command';
+import { MoveRangeCommand } from '../commands/commands/move-range.command';
 import { MoveColsCommand, MoveRowsCommand } from '../commands/commands/move-rows-cols.command';
 import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
 import { RemoveSheetCommand } from '../commands/commands/remove-sheet.command';
@@ -79,6 +80,7 @@ import { DeleteRangeMutation } from '../commands/mutations/delete-range.mutation
 import { InsertRangeMutation } from '../commands/mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
+import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
 import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
@@ -220,6 +222,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetScrollRelativeCommand,
             SetZoomRatioCommand,
             ChangeZoomRatioCommand,
+            MoveRangeCommand,
+            MoveRangeMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 }

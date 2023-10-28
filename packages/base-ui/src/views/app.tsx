@@ -86,10 +86,12 @@ export function App(props: IUniverAppProps) {
                                 Array.from(headerComponents.values()).map((component, index) =>
                                     React.createElement(component(), { key: `${index}` })
                                 )}
-                            {headerMenuComponents &&
-                                Array.from(headerMenuComponents.values()).map((component, index) =>
-                                    React.createElement(component(), { key: `${index}` })
-                                )}
+                            <div className={style.headerMenu}>
+                                {headerMenuComponents &&
+                                    Array.from(headerMenuComponents.values()).map((component, index) =>
+                                        React.createElement(component(), { key: `${index}` })
+                                    )}
+                            </div>
                         </Header>
                         {/* content */}
                         <Layout>

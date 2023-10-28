@@ -231,10 +231,12 @@ export class DocumentModel extends DocumentModelSimple {
     }
 }
 
+export const DEFAULT_EMPTY_DOCUMENT_VALUE = '\r\n';
+
 export function createEmptyDocSnapshot(): Partial<IDocumentData> {
     return {
         body: {
-            dataStream: '\r\n\0',
+            dataStream: DEFAULT_EMPTY_DOCUMENT_VALUE,
         },
     };
 }

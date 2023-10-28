@@ -149,7 +149,14 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
 
         let resultRange;
         const { startRow, endRow, startColumn, endColumn } = range;
-        if (startRow < endRow || startColumn < endColumn) {
+        if (
+            !(
+                startRow === primary.startRow &&
+                endRow === primary.startRow &&
+                startColumn === primary.startColumn &&
+                endColumn === primary.endColumn
+            )
+        ) {
             // Handle the situation of moving the active cell within the selection area.
             shortcutExperienceService.remove({
                 unitId,

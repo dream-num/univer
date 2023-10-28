@@ -70,11 +70,11 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
     lists: DEFAULT_LIST_TEST,
     body: {
         dataStream:
-            'What’s New in the 2022 Gartner Hype Cycle for Emerging Technologies\rEmerging technologies for 2022 fit into three main themes: evolving/expanding immersive experiences, accelerated artificial intelligence automation, and optimized technologist delivery.\rThe 2022 Gartner Hype Cycle identifies 25 must-know emerging technologies designed to help enterprise architecture and technology innovation leaders: \rExpand immersive experiences\rAccelerate artificial intelligence (AI) automation\rOptimize technologist delivery \rThese technologies are expected to greatly impact business and society over the next two to 10 years, but will especially enable CIOs and IT leaders to deliver on digital business transformation. \rThree Hype Cycle themes to think about in 2022 and beyond\rThe 2022 Gartner Hype Cycle features emerging technologies and distills insights from more than 2,000 technologies into a succinct high-potential set. Most technologies have multiple use cases but enterprise architecture and technology innovation leaders should prioritize those with the greatest potential benefit for their organization. (They will also need to launch a proof-of-concept project to demonstrate the feasibility of a technology for their target use case.)\b\r\nThe benefit of these technologies is that they provide individuals with more control over their identities and data, and expand their range of experiences into virtual venues and ecosystems that can be integrated with digital currencies. These technologies also provide new ways to reach customers to strengthen or open up new revenue streams.\rDigital twin of the customer (DToC) is a dynamic virtual representation of a customer that simulates and learns to emulate and anticipate behavior. It can be used to modify and enhance the customer experience (CX) and support new digitalization efforts, products, services and opportunities. DToC will take five to 10 years until mainstream adoption but will be transformational to organizations.\rOther critical technologies in immersive experiences include the following:\rDecentralized identity (DCI) allows an entity (typically a human user) to control their own digital identity by leveraging technologies such as blockchain or other distributed ledger technologies (DLTs), along with digital wallets.\rDigital humans are interactive, AI-driven representations that have some of the characteristics, personality, knowledge and mindset of a human.\rInternal talent marketplaces match internal employees and, in some cases, a pool of contingent workers, to time-boxed projects and various work opportunities, with no recruiter involvement.\r\n\0',
+            'What’s New in the 2022 Gartner Hype Cycle for Emerging Technologies\rEmerging technologies for 2022 fit into three main themes: evolving/expanding immersive experiences, accelerated artificial intelligence automation, and optimized technologist delivery.\rThe 2022 Gartner Hype Cycle identifies 25 must-know emerging technologies designed to help enterprise architecture and technology innovation leaders: \rExpand immersive experiences\rAccelerate artificial intelligence (AI) automation\rOptimize technologist delivery \rThese technologies are expected to greatly impact business and society over the next two to 10 years, but will especially enable CIOs and IT leaders to deliver on digital business transformation. \rThree Hype Cycle themes to think about in 2022 and beyond\rThe 2022 Gartner Hype Cycle features emerging technologies and distills insights from more than 2,000 technologies into a succinct high-potential set. Most technologies have multiple use cases but enterprise architecture and technology innovation leaders should prioritize those with the greatest potential benefit for their organization. (They will also need to launch a proof-of-concept project to demonstrate the feasibility of a technology for their target use case.)\b\r\nThe benefit of these technologies is that they provide individuals with more control over their identities and data, and expand their range of experiences into virtual venues and ecosystems that can be integrated with digital currencies. These technologies also provide new ways to reach customers to strengthen or open up new revenue streams.\rDigital twin of the customer (DToC) is a dynamic virtual representation of a customer that simulates and learns to emulate and anticipate behavior. It can be used to modify and enhance the customer experience (CX) and support new digitalization efforts, products, services and opportunities. DToC will take five to 10 years until mainstream adoption but will be transformational to organizations.\rOther critical technologies in immersive experiences include the following:\rDecentralized identity (DCI) allows an entity (typically a human user) to control their own digital identity by leveraging technologies such as blockchain or other distributed ledger technologies (DLTs), along with digital wallets.\rDigital humans are interactive, AI-driven representations that have some of the characteristics, personality, knowledge and mindset of a human.\rInternal talent marketplaces match internal employees and, in some cases, a pool of contingent workers, to time-boxed projects and various work opportunities, with no recruiter involvement.\r\n',
         textRuns: [
             {
                 st: 0,
-                ed: 66,
+                ed: 67,
                 ts: {
                     bl: BooleanNumber.TRUE,
                     fs: 24,
@@ -85,7 +85,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             },
             {
                 st: 68,
-                ed: 252,
+                ed: 253,
                 ts: {
                     fs: 18,
                     cl: {
@@ -95,42 +95,42 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             },
             {
                 st: 254,
-                ed: 403,
+                ed: 404,
                 ts: {
                     fs: 16,
                 },
             },
             {
                 st: 405,
-                ed: 432,
+                ed: 433,
                 ts: {
                     fs: 16,
                 },
             },
             {
                 st: 434,
-                ed: 483,
+                ed: 484,
                 ts: {
                     fs: 16,
                 },
             },
             {
                 st: 485,
-                ed: 515,
+                ed: 516,
                 ts: {
                     fs: 16,
                 },
             },
             {
                 st: 517,
-                ed: 678,
+                ed: 679,
                 ts: {
                     fs: 16,
                 },
             },
             {
                 st: 680,
-                ed: 712,
+                ed: 713,
                 ts: {
                     fs: 16,
                     cl: {
@@ -141,7 +141,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             },
             {
                 st: 714,
-                ed: 770,
+                ed: 771,
                 ts: {
                     fs: 24,
                     cl: {
@@ -154,35 +154,35 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             },
             {
                 st: 772,
-                ed: 1243,
+                ed: 1244,
                 ts: {
                     fs: 16,
                 },
             },
             {
                 st: 1246,
-                ed: 1588,
+                ed: 1589,
                 ts: {
                     fs: 16,
                 },
             },
             {
                 st: 1590,
-                ed: 1985,
+                ed: 1986,
                 ts: {
                     fs: 16,
                 },
             },
             {
                 st: 1987,
-                ed: 2061,
+                ed: 2062,
                 ts: {
                     fs: 16,
                 },
             },
             {
                 st: 2063,
-                ed: 2085,
+                ed: 2086,
                 ts: {
                     fs: 16,
                     cl: {
@@ -193,14 +193,14 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             },
             {
                 st: 2086,
-                ed: 2293,
+                ed: 2294,
                 ts: {
                     fs: 16,
                 },
             },
             {
                 st: 2295,
-                ed: 2309,
+                ed: 2310,
                 ts: {
                     fs: 16,
                     cl: {
@@ -211,14 +211,14 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             },
             {
                 st: 2310,
-                ed: 2437,
+                ed: 2438,
                 ts: {
                     fs: 16,
                 },
             },
             {
                 st: 2439,
-                ed: 2467,
+                ed: 2468,
                 ts: {
                     fs: 16,
                     cl: {
@@ -229,7 +229,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             },
             {
                 st: 2468,
-                ed: 2627,
+                ed: 2628,
                 ts: {
                     fs: 16,
                 },

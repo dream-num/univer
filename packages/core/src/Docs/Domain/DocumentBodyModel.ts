@@ -447,6 +447,9 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         return trRange;
     }
 
+    /**
+     * textRun matches according to the selection. If the text length is 10, then the range of textRun is from 0 to 11.
+     */
     override getTextRun(index: number) {
         const textRuns = this.body.textRuns;
         if (textRuns == null) {
@@ -466,7 +469,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
 
         for (let i = this.textRunCurrentIndex, textRunsLen = textRuns.length; i < textRunsLen; i++) {
             const textRun = textRuns[i];
-            if (index >= textRun.st && index <= textRun.ed) {
+            if (index >= textRun.st && index < textRun.ed) {
                 this.textRunCurrentIndex = i;
                 return textRun;
             }

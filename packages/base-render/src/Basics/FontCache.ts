@@ -162,6 +162,9 @@ export class FontCache {
 
         let bBox = this._getBoundingBoxByFont(fontFamily, fontSize);
         if (!bBox) {
+            // if (content === DataStreamTreeTokenType.PARAGRAPH) {
+            //     content = '0';
+            // }
             const measureText = this.getMeasureText(content, fontString);
             bBox = this._calculateBoundingBoxByMeasureText(measureText, fontSize);
         }

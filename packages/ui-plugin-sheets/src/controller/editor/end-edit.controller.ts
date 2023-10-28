@@ -14,6 +14,7 @@ import {
 } from '@univerjs/base-sheets';
 import { KeyCode } from '@univerjs/base-ui';
 import {
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
     Disposable,
     DocumentModel,
@@ -156,7 +157,8 @@ export class EndEditController extends Disposable {
             } else {
                 const data = body.dataStream;
                 const lastString = data.substring(data.length - 2, data.length);
-                const newDataStream = lastString === '\r\n' ? data.substring(0, data.length - 2) : data;
+                const newDataStream =
+                    lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
 
                 if (newDataStream === cellData.v) {
                     return;

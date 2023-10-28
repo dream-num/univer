@@ -2,6 +2,7 @@
 
 import {
     BooleanNumber,
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
     DocumentModelSimple,
     IBorderData,
     IColorStyle,
@@ -232,7 +233,7 @@ export class RichText extends BaseObject {
         const documentData: IDocumentData = {
             id: 'd',
             body: {
-                dataStream: `${text}\r\n`,
+                dataStream: `${text}${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
                 textRuns: [
                     {
                         ts: {

@@ -22,6 +22,7 @@ import {
 } from '@univerjs/base-render';
 import { KeyCode } from '@univerjs/base-ui';
 import {
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
     DocumentModel,
     FOCUSING_EDITOR,
@@ -464,7 +465,7 @@ export class StartEditController extends Disposable {
     }
 
     private _resetBodyStyle(body: IDocumentBody) {
-        body.dataStream = `\r\n`;
+        body.dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
 
         if (body.textRuns != null) {
             if (body.textRuns.length === 1) {

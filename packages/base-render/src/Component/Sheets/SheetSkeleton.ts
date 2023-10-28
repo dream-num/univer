@@ -1,5 +1,6 @@
 import {
     BooleanNumber,
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
     DocumentModel,
     DocumentModelOrSimple,
     DocumentModelSimple,
@@ -1566,12 +1567,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         const documentData: IDocumentData = {
             id: 'd',
             body: {
-                dataStream: `${content}\r\n`,
+                dataStream: `${content}${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
                 textRuns: [
                     {
                         ts: textStyle,
                         st: 0,
-                        ed: contentLength - 1,
+                        ed: contentLength,
                     },
                 ],
                 paragraphs: [

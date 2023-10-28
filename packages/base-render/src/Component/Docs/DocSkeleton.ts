@@ -461,7 +461,6 @@ export class DocumentSkeleton extends Skeleton {
      * Split the document according to SectionBreak and perform layout calculations.
      * @returns view model: skeleton
      */
-    // eslint-disable-next-line max-lines-per-function
     private _createSkeleton(bounds?: IBoundRect) {
         // 每一个布局
         const DEFAULT_PAGE_SIZE = { width: Infinity, height: Infinity };

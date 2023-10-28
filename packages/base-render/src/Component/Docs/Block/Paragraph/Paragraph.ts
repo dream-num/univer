@@ -143,7 +143,7 @@ export function dealWidthParagraph(
         const charIndex = i + startIndex;
         const char = content[i];
 
-        const fontCreateConfig = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+        const fontCreateConfig = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle); // Get the style of the text.
 
         if (char === DataStreamTreeTokenType.TAB) {
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);

@@ -41,7 +41,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": "^0.12.8"
+        "@wendellhu/redi": "^0.12.9"
     },
     "devDependencies": {
         "@types/node": "^20.8.9",

@@ -46,7 +46,7 @@
         "@univerjs/common-plugin-data": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/ui-plugin-sheets": "workspace:*",
-        "@wendellhu/redi": "^0.12.8",
+        "@wendellhu/redi": "^0.12.9",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },

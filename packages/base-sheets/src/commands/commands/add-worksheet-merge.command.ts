@@ -38,7 +38,7 @@ export const AddWorksheetMergeCommand: ICommand = {
         const worksheetId = params.worksheetId;
         const selections = params.selections;
 
-        const ranges = getAddMergeMutationRange(selections, params.value);
+        const ranges = getAddMergeMutationRangeByType(selections, params.value);
 
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             workbookId,
@@ -192,7 +192,13 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
     },
 };
 
-export const getAddMergeMutationRange = (selection: IRange[], type?: Dimension) => {
+/**
+ * calculates the selection based on the merged cell type
+ * @param {IRange[]} selection
+ * @param {Dimension} [type]
+ * @return {*}
+ */
+export const getAddMergeMutationRangeByType = (selection: IRange[], type?: Dimension) => {
     let ranges = selection;
     if (type !== undefined) {
         const rectangles: IRange[] = [];

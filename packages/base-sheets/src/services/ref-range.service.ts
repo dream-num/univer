@@ -35,8 +35,6 @@ type RefRangCallback = (params: EffectParams) => {
     redos: Array<ICommandInfo<object>>;
     undos: Array<ICommandInfo<object>>;
 };
-const keyList = ['startRow', 'startColumn', 'endRow', 'endColumn', 'rangeType'];
-const SPLIT_CODE = '_';
 
 /**
  * Collect side effects caused by ref range change
@@ -52,49 +50,15 @@ export class RefRangeService extends Disposable {
         super();
         this._onRefRangeChange();
     }
-    get worksheetId() {
-        return this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-    }
-    get workbookId() {
-        return this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    }
     private _getRefRangId = (workbookId: string, worksheetId: string) => `${workbookId}_${worksheetId}`;
-    private _serializeRange = (range: IRange) =>
-        keyList.reduce((preValue, currentValue, index) => {
-            const value = range[currentValue as keyof IRange];
-            if (value !== undefined) {
-                return `${preValue}${index > 0 ? SPLIT_CODE : ''}${value}`;
-            }
-            return `${preValue}`;
-        }, '');
-
-    private _deserialize = (rangeString: string) => {
-        const map = keyList.reduce(
-            (preValue, currentValue, index) => {
-                preValue[String(index)] = currentValue;
-                return preValue;
-            },
-            {} as Record<string, string>
-        );
-        const res = rangeString.split(SPLIT_CODE).reduce(
-            (preValue, currentValue, _index) => {
-                const index = String(_index) as keyof typeof map;
-                if (currentValue && map[index]) {
-                    preValue[map[index]] = currentValue;
-                }
-                return preValue;
-            },
-            {} as Record<string, string>
-        );
-        return res as unknown as IRange;
-    };
+    private serializer = createRangeSerializer();
     private _onRefRangeChange = () => {
         this._sheetInterceptorService.interceptCommand({
             getMutations: (command) => {
                 command.params;
                 const workSheet = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-                const workbookId = this.workbookId;
-                const worksheetId = this.worksheetId;
+                const workbookId = getWorkbookId(this._univerInstanceService);
+                const worksheetId = getWorksheetId(this._univerInstanceService);
                 const getEffectsCbList = () => {
                     switch (command.id) {
                         case MoveRangeCommand.id: {
@@ -180,7 +144,7 @@ export class RefRangeService extends Disposable {
 
             keyList.forEach((key) => {
                 const cbList = manager.get(key);
-                const range = this._deserialize(key);
+                const range = this.serializer.deserialize(key);
                 // Todo@Gggpound : How to reduce this calculation
                 if (effectRanges.some((item) => Rectangle.intersects(item, range))) {
                     cbList &&
@@ -200,10 +164,10 @@ export class RefRangeService extends Disposable {
         _workbookId?: string,
         _worksheetId?: string
     ): IDisposable => {
-        const workbookId = _workbookId || this.workbookId;
-        const worksheetId = _worksheetId || this.worksheetId;
+        const workbookId = _workbookId || getWorkbookId(this._univerInstanceService);
+        const worksheetId = _worksheetId || getWorksheetId(this._univerInstanceService);
         const refRangeManageId = this._getRefRangId(workbookId, worksheetId);
-        const rangeString = this._serializeRange(range);
+        const rangeString = this.serializer.serialize(range);
 
         let manager = this._refRangeManagerMap.get(refRangeManageId) as Map<string, Set<RefRangCallback>>;
         if (!manager) {
@@ -229,5 +193,46 @@ export class RefRangeService extends Disposable {
                 }
             }
         });
+    };
+}
+
+function getWorkbookId(univerInstanceService: IUniverInstanceService) {
+    return univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+}
+function getWorksheetId(univerInstanceService: IUniverInstanceService) {
+    return univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+}
+function createRangeSerializer() {
+    const keyList = ['startRow', 'startColumn', 'endRow', 'endColumn', 'rangeType'];
+    const SPLIT_CODE = '_';
+    return {
+        deserialize: (rangeString: string) => {
+            const map = keyList.reduce(
+                (preValue, currentValue, index) => {
+                    preValue[String(index)] = currentValue;
+                    return preValue;
+                },
+                {} as Record<string, string>
+            );
+            const res = rangeString.split(SPLIT_CODE).reduce(
+                (preValue, currentValue, _index) => {
+                    const index = String(_index) as keyof typeof map;
+                    if (currentValue && map[index]) {
+                        preValue[map[index]] = currentValue;
+                    }
+                    return preValue;
+                },
+                {} as Record<string, string>
+            );
+            return res as unknown as IRange;
+        },
+        serialize: (range: IRange) =>
+            keyList.reduce((preValue, currentValue, index) => {
+                const value = range[currentValue as keyof IRange];
+                if (value !== undefined) {
+                    return `${preValue}${index > 0 ? SPLIT_CODE : ''}${value}`;
+                }
+                return `${preValue}`;
+            }, ''),
     };
 }

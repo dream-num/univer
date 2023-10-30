@@ -11,6 +11,7 @@ import { HeaderMenuController } from './Controller/header-menu.controller';
 import { HeaderMoveController } from './Controller/header-move.controller';
 import { HeaderResizeController } from './Controller/header-resize.controller';
 import { HeaderUnhideController } from './Controller/header-unhide.controller';
+import { MergeCellController } from './Controller/merge-cell.controller';
 import { MoveRangeController } from './Controller/move-range.controller';
 import { ScrollController } from './Controller/scroll.controller';
 import { SelectionController } from './Controller/selection.controller';
@@ -82,6 +83,7 @@ export class SheetPlugin extends Plugin {
             [ZoomController],
             [AutoHeightController],
             [MoveRangeController],
+            [MergeCellController],
         ];
 
         dependencies.forEach((d) => {

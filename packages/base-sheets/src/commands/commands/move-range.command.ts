@@ -111,7 +111,8 @@ export const MoveRangeCommand: ICommand = {
                 undo: async () => sequenceExecute(undos, commandService).result,
                 redo: async () => sequenceExecute(redos, commandService).result,
             });
+            return true;
         }
-        return true;
+        return false;
     },
 };

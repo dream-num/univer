@@ -155,4 +155,19 @@ export class Rectangle {
             ranges[0]
         );
     }
+    static getRelativeRange = (range: IRange, originRange: IRange) =>
+        ({
+            startRow: range.startRow - originRange.startRow,
+            endRow: range.endRow - range.startRow,
+            startColumn: range.startColumn - originRange.startColumn,
+            endColumn: range.endColumn - range.startColumn,
+        }) as IRange;
+
+    static getPositionRange = (relativeRange: IRange, originRange: IRange) =>
+        ({
+            startRow: relativeRange.startRow + originRange.startRow,
+            endRow: relativeRange.endRow + relativeRange.startRow + originRange.startRow,
+            startColumn: relativeRange.startColumn + originRange.startColumn,
+            endColumn: relativeRange.endColumn + relativeRange.startColumn + originRange.startColumn,
+        }) as IRange;
 }

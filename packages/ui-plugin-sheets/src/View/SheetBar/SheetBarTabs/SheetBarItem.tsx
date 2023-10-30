@@ -4,6 +4,7 @@ import { SelectionBoxDropdown16 } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
+import { RenameSheetOperation } from '../../../commands/commands/rename.command';
 import { SheetMenuPosition } from '../../../controller/menu/menu';
 import styles from './index.module.less';
 import { InputEdit } from './InputEdit';
@@ -11,16 +12,14 @@ import { InputEdit } from './InputEdit';
 export interface IBaseSheetBarProps {
     label?: string;
     children?: any[];
-    index?: string;
+    index?: number;
     color?: string;
     sheetId?: string;
     style?: React.CSSProperties;
     hidden?: BooleanNumber;
     addSheet?: () => void;
     onMouseDown?: (e: React.MouseEvent) => void;
-    selectSheet?: (slideItemIndex: number) => void;
     changeSheetName?: (sheetId: string, name: string) => void;
-    dragEnd?: (elements: HTMLElement[]) => void;
     selected?: boolean;
 }
 
@@ -37,6 +36,15 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
         setCurrentSelected(selected);
     }, [selected]);
 
+    // FIXME The first sheet tab will be closed automatically
+    const onVisibleChange = (visible: boolean) => {
+        setVisible(visible);
+    };
+
+    const onDoubleClick = (worksheetId: string) => {
+        commandService.executeCommand(RenameSheetOperation.id, { worksheetId });
+    };
+
     return (
         <Dropdown2
             visible={visible}
@@ -51,11 +59,11 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                     }}
                 />
             }
-            onVisibleChange={setVisible}
+            onVisibleChange={onVisibleChange}
         >
             <div
-                // onMouseDown={onMouseDown}
                 onContextMenu={onMouseDown}
+                onDoubleClick={() => sheetId && onDoubleClick(sheetId)}
                 key={sheetId}
                 data-id={sheetId}
                 className={
@@ -73,8 +81,8 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                         data-slide-skip="true"
                         style={{ lineHeight: 1 }}
                         data-id={sheetId}
-                        onClick={(e) => {
-                            console.info('click icon');
+                        onMouseDown={(e) => {
+                            console.info('mousedown icon', currentSelected);
                             if (currentSelected) {
                                 setVisible(true);
                             }

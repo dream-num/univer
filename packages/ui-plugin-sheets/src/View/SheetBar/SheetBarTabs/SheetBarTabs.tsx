@@ -28,7 +28,7 @@ import { IScrollState, SlideTabBar } from './utils/slide-tab-bar';
 
 export interface ISheetBarTabsProps {}
 
-export function SheetBarTabs(props: ISheetBarTabsProps) {
+export function SheetBarTabs() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
     const [activeKey, setActiveKey] = useState<string>('');
     const [subscribe, setSubscribe] = useState(false);
@@ -51,6 +51,7 @@ export function SheetBarTabs(props: ISheetBarTabsProps) {
 
     useEffect(() => {
         if (sheetList.length > 0) {
+            console.info('sheetList', JSON.stringify(sheetList));
             setupSlideTabBarUpdate();
         }
     }, [sheetList]);
@@ -84,20 +85,7 @@ export function SheetBarTabs(props: ISheetBarTabsProps) {
         if (!subscribe) {
             sheetbarService.scrollX$.subscribe((x: number) => {
                 // update scrollX
-                const isEnd = slideTabBar.getScrollbar().scrollX(slideTabBar.getScrollbar().getScrollX() + x);
-
-                // update scroll button state
-                const state = {
-                    leftEnd: false,
-                    rightEnd: false,
-                };
-                if (x > 0) {
-                    state.rightEnd = isEnd;
-                } else {
-                    state.leftEnd = isEnd;
-                }
-
-                sheetbarService.setScroll(state);
+                slideTabBar.setScroll(x);
             });
             setSubscribe(true);
         }
@@ -151,7 +139,7 @@ export function SheetBarTabs(props: ISheetBarTabsProps) {
             .map((sheet, index) => ({
                 sheetId: sheet.getSheetId(),
                 label: sheet.getName(),
-                index: `${index}`,
+                index,
                 selected: sheet.getStatus() === BooleanNumber.TRUE,
                 color: sheet.getTabColor() ?? undefined,
             }));
@@ -183,6 +171,7 @@ export function SheetBarTabs(props: ISheetBarTabsProps) {
     };
 
     const onMouseDown = (worksheetId: string) => {
+        console.info('onMouseDown', worksheetId);
         if (activeKey !== worksheetId) {
             // setActiveKey(worksheetId);
             commandService.executeCommand(SetWorksheetActivateCommand.id, {
@@ -191,7 +180,6 @@ export function SheetBarTabs(props: ISheetBarTabsProps) {
             });
         }
     };
-
     return (
         <div className={styles.slideTabBarContainer}>
             <div className={styles.slideTabBar}>

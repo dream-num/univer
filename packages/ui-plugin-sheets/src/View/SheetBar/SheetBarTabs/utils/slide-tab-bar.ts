@@ -289,6 +289,12 @@ export class SlideScrollbar {
 }
 
 export class SlideTabBar {
+    /** Time in milliseconds to wait to raise long press events if button is still pressed */
+    static LongPressDelay = 500; // in milliseconds
+
+    /** Time in milliseconds with two consecutive clicks will be considered as a double click */
+    static DoubleClickDelay = 300; // in milliseconds
+
     protected _activeTabItemIndex: number | null;
 
     protected _slideTabBar: HTMLElement;
@@ -323,9 +329,35 @@ export class SlideTabBar {
 
     protected _longPressTimer: number | null = null;
 
-    protected _isLeftEnd: boolean;
+    /**
+     * Whether to reach the left boundary
+     */
+    protected _isLeftEnd: boolean = false;
 
-    protected _isRightEnd: boolean;
+    /**
+     * Whether to reach the right boundary
+     */
+    protected _isRightEnd: boolean = false;
+
+    /**
+     * left border line
+     */
+    protected _leftBoundingLine: number = 0;
+
+    /**
+     * right border line
+     */
+    protected _rightBoundingLine: number = 0;
+
+    /**
+     * The distance required to move to the left border
+     */
+    protected _leftMoveX: number = 0;
+
+    /**
+     * The distance required to move to the right border
+     */
+    protected _rightMoveX: number = 0;
 
     constructor(config: Partial<SlideTabBarConfig>) {
         if (config.slideTabRootClassName == null) {
@@ -380,88 +412,101 @@ export class SlideTabBar {
             this._scrollIncremental = 0;
             // this._activeTabItem = this._slideTabItems[slideItemIndex];
             // if (!this._activeTabItem) return;
+            if (!this._activeTabItem) {
+                console.error('Not found active slide-tab-item in sheet bar');
+                return;
+            }
 
-            const activeSlideItemElement = this._activeTabItem?.getSlideTabItem();
+            const activeSlideItemElement = this._activeTabItem.getSlideTabItem();
             activeSlideItemElement?.setPointerCapture((downEvent as PointerEvent).pointerId);
             this._activeTabItem?.addEventListener('pointerup', this._upAction);
+
+            const { x, width } = this._activeTabItem.getBoundingRect();
+            const { x: containerX, width: containerWidth } = this.getBoundingRect();
+            const scrollX = this._slideScrollbar.getScrollX();
+            this._leftBoundingLine = this._downActionX - (x - scrollX);
+            const adjustment = 24;
+            this._rightBoundingLine = x - scrollX + width - this._downActionX - adjustment;
+            this._leftMoveX = x - containerX - scrollX;
+            this._rightMoveX = containerX + containerWidth - (x + width) + scrollX + adjustment;
 
             if (downEvent.button === 2) {
                 return;
             }
 
-            // 设置定时器，延迟 200 毫秒执行拖动
+            const { pageX, pageY } = downEvent;
+            const current = Date.now();
+            const diffTime = current - lastTime <= SlideTabBar.DoubleClickDelay;
+            const diffPageX = Math.abs(pageX - lastPageX) < 10;
+            const diffPageY = Math.abs(pageY - lastPageY) < 10;
+
+            // double click
+            if (diffTime && diffPageX && diffPageY) {
+                // const slideItem = this._slideTabItems.find((item) =>
+                //     item.equals(new SlideTabItem(downEvent.currentTarget as HTMLElement, this))
+                // );
+                // if (slideItem) {
+                //     // user editor
+                //     slideItem.editor();
+                // }
+                // lastTime = 0;
+                // lastPageX = 0;
+                // lastPageY = 0;
+            }
+
+            lastPageX = pageX;
+            lastPageY = pageY;
+            lastTime = current;
+
+            // Set a timer to delay dragging for 300 milliseconds
             this._longPressTimer = window.setTimeout(() => {
-                const { pageX, pageY } = downEvent;
-                const current = Date.now();
-                const diffTime = current - lastTime <= 800;
-                const diffPageX = pageX === lastPageX;
-                const diffPageY = pageY === lastPageY;
+                // not item is edit mode
+                // if (!this._hasEditItem()) {
+                // if (SlideTabBar.checkedSkipSlide(downEvent)) {
+                //     lastPageX = 0;
+                //     lastTime = 0;
+                //     lastPageY = 0;
+                //     return;
+                // }
 
-                // double click
-                if (diffTime && diffPageX && diffPageY) {
-                    // const slideItem = this._slideTabItems.find((item) =>
-                    //     item.equals(new SlideTabItem(downEvent.currentTarget as HTMLElement, this))
-                    // );
-                    // if (slideItem) {
-                    //     // user editor
-                    //     slideItem.editor();
-                    // }
-                    // lastTime = 0;
-                    // lastPageX = 0;
-                    // lastPageY = 0;
-                } else {
-                    // not item is edit mode
-                    // if (!this._hasEditItem()) {
-                    // if (SlideTabBar.checkedSkipSlide(downEvent)) {
-                    //     lastPageX = 0;
-                    //     lastTime = 0;
-                    //     lastPageY = 0;
-                    //     return;
-                    // }
-
-                    // if (slideItemIndex > -1) {
-                    // this._compareIndex = slideItemIndex;
-                    // this._downActionX = downEvent.pageX;
-                    // this._moveActionX = 0;
-                    // this._scrollIncremental = 0;
-                    // this._activeTabItem = this._slideTabItems[slideItemIndex];
-                    // this._activeTabItemIndex = slideItemIndex;
-                    if (this._config.activeClassNameAutoController) {
-                        this._slideTabItems.forEach((item) => {
-                            item.classList().remove(this._config.slideTabBarItemActiveClassName);
-                        });
-                        this._activeTabItem?.classList().add(this._config.slideTabBarItemActiveClassName);
-                    }
-                    this._activeTabItem?.enableFixed();
-
-                    //
-                    this._startAutoScroll();
-                    if (!activeSlideItemElement) return;
-                    // Set the mouse cursor to drag
-                    activeSlideItemElement.setPointerCapture((downEvent as PointerEvent).pointerId);
-                    activeSlideItemElement.style.cursor = 'move';
-
-                    this._activeTabItem?.addEventListener('pointermove', this._moveAction);
-
-                    //     } else {
-                    //         this.updateItems();
-                    //         this._activeTabItemIndex = 0;
-                    //         this._downActionX = 0;
-                    //         this._scrollIncremental = 0;
-                    //         this._compareIndex = 0;
-                    //         this._activeTabItem = null;
-                    //     }
-                    // }
-
-                    lastPageX = pageX;
-                    lastPageY = pageY;
-                    lastTime = current;
+                // if (slideItemIndex > -1) {
+                // this._compareIndex = slideItemIndex;
+                // this._downActionX = downEvent.pageX;
+                // this._moveActionX = 0;
+                // this._scrollIncremental = 0;
+                // this._activeTabItem = this._slideTabItems[slideItemIndex];
+                // this._activeTabItemIndex = slideItemIndex;
+                if (this._config.activeClassNameAutoController) {
+                    this._slideTabItems.forEach((item) => {
+                        item.classList().remove(this._config.slideTabBarItemActiveClassName);
+                    });
+                    this._activeTabItem?.classList().add(this._config.slideTabBarItemActiveClassName);
                 }
-            }, 300);
+                this._activeTabItem?.enableFixed();
+
+                //
+                this._startAutoScroll();
+                if (!activeSlideItemElement) return;
+                // Set the mouse cursor to drag
+                activeSlideItemElement.setPointerCapture((downEvent as PointerEvent).pointerId);
+                activeSlideItemElement.style.cursor = 'move';
+
+                this._activeTabItem?.addEventListener('pointermove', this._moveAction);
+
+                //     } else {
+                //         this.updateItems();
+                //         this._activeTabItemIndex = 0;
+                //         this._downActionX = 0;
+                //         this._scrollIncremental = 0;
+                //         this._compareIndex = 0;
+                //         this._activeTabItem = null;
+                //     }
+                // }
+            }, SlideTabBar.LongPressDelay);
         };
 
         this._upAction = (upEvent: MouseEvent) => {
-            // 清除定时器
+            // Clear timer
             if (this._longPressTimer) {
                 clearTimeout(this._longPressTimer);
                 this._longPressTimer = null;
@@ -485,6 +530,7 @@ export class SlideTabBar {
             activeSlideItemElement.style.cursor = '';
             activeSlideItemElement.releasePointerCapture((upEvent as PointerEvent).pointerId);
 
+            console.info('upAction+====');
             this._activeTabItem?.removeEventListener('pointermove', this._moveAction);
             this._activeTabItem?.removeEventListener('pointerup', this._upAction);
             if (this._config.onSlideEnd && this._activeTabItemIndex !== this._compareIndex) {
@@ -511,8 +557,12 @@ export class SlideTabBar {
 
         this._moveAction = (moveEvent) => {
             if (this._activeTabItem) {
-                this._moveActionX =
-                    this._scrollIncremental === 0 ? moveEvent.pageX - this._downActionX : this._moveActionX;
+                this._moveActionX = moveEvent.pageX - this._downActionX;
+                if (this._moveActionX <= -this._leftMoveX) {
+                    this._moveActionX = -this._leftMoveX;
+                } else if (this._moveActionX >= this._rightMoveX) {
+                    this._moveActionX = this._rightMoveX;
+                }
                 this._scrollIncremental = 0;
                 this._scrollLeft(moveEvent);
                 this._scrollRight(moveEvent);
@@ -520,17 +570,7 @@ export class SlideTabBar {
         };
 
         this._wheelAction = (wheelEvent: WheelEvent) => {
-            this._isLeftEnd = false;
-            this._isRightEnd = false;
-            if (wheelEvent.deltaY > 0) {
-                this._isRightEnd = this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + wheelEvent.deltaY);
-            } else {
-                this._isLeftEnd = this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + wheelEvent.deltaY);
-            }
-            this._config.onScroll({
-                leftEnd: this._isLeftEnd,
-                rightEnd: this._isRightEnd,
-            });
+            this.setScroll(wheelEvent.deltaY);
         };
 
         this._initialize();
@@ -599,6 +639,16 @@ export class SlideTabBar {
             item.removeEventListener('pointerdown', this._downAction);
         });
     }
+    setScroll(x: number) {
+        const isEnd = this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + x);
+        this._isRightEnd = x > 0 ? isEnd : false;
+        this._isLeftEnd = x < 0 ? isEnd : false;
+
+        this._config.onScroll({
+            leftEnd: this._isLeftEnd,
+            rightEnd: this._isRightEnd,
+        });
+    }
 
     protected _hasEditItem(): boolean {
         for (let index = 0; index < this._slideTabItems.length; index++) {
@@ -651,19 +701,17 @@ export class SlideTabBar {
 
     protected _scrollLeft(event: MouseEvent): void {
         const boundingRect = this.getBoundingRect();
-        const boundingLine = 40;
         const x = event.pageX - boundingRect.x;
-        if (x < boundingLine) {
-            this._scrollIncremental = -Math.min(Math.abs(x - boundingLine) * 0.1, 50);
+        if (x < this._leftBoundingLine) {
+            this._scrollIncremental = -Math.min(Math.abs(x - this._leftBoundingLine) * 0.1, 50);
         }
     }
 
     protected _scrollRight(event: MouseEvent): void {
         const boundingRect = this.getBoundingRect();
-        const boundingLine = 30;
         const x = event.pageX - boundingRect.x;
-        if (x > boundingRect.width - boundingLine) {
-            this._scrollIncremental = Math.min(Math.abs(x - (boundingRect.width - boundingLine)) * 0.1, 50);
+        if (x > boundingRect.width - this._rightBoundingLine) {
+            this._scrollIncremental = Math.min(Math.abs(x - (boundingRect.width - this._rightBoundingLine)) * 0.1, 50);
         }
     }
 

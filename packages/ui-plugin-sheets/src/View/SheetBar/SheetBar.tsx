@@ -8,13 +8,12 @@ import { useEffect, useState } from 'react';
 import { ISheetBarService } from '../../services/sheetbar/sheetbar.service';
 import styles from './index.module.less';
 import { SheetBarMenu } from './SheetBarMenu/SheetBarMenu';
-import { IBaseSheetBarProps } from './SheetBarTabs/SheetBarItem';
 import { SheetBarTabs } from './SheetBarTabs/SheetBarTabs';
 import { IScrollState } from './SheetBarTabs/utils/slide-tab-bar';
 
 const SCROLL_WIDTH = 100;
 
-export const SheetBar = (props: IBaseSheetBarProps) => {
+export const SheetBar = () => {
     const [leftScrollState, setLeftScrollState] = useState(false);
     const [rightScrollState, setRightScrollState] = useState(false);
 

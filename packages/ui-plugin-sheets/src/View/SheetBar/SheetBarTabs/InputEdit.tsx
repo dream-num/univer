@@ -1,8 +1,8 @@
 import { SetWorksheetNameCommand } from '@univerjs/base-sheets';
-import { useObservable } from '@univerjs/base-ui';
+// import { useObservable } from '@univerjs/base-ui';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { ISheetBarService } from '../../../services/sheetbar/sheetbar.service';
 
@@ -11,12 +11,38 @@ interface IBaseInputProps {
     sheetName: string;
 }
 export const InputEdit: React.FC<IBaseInputProps> = (props) => {
+    const spanRef = useRef<HTMLSpanElement>(null);
+    const [editable, setEditable] = useState(false);
     const sheetbarService = useDependency(ISheetBarService);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const renameId = useObservable(sheetbarService.renameId$, '');
+    // const renameId = useObservable(sheetbarService.renameId$, '');
     const oldValue = props.sheetName;
     const [val, setVal] = useState(props.sheetName || '');
+
+    useEffect(() => {
+        sheetbarService.renameId$.subscribe((renameId) => {
+            if (renameId === props.sheetId) {
+                setEditable(true);
+
+                setTimeout(() => {
+                    if (!spanRef?.current) return;
+                    spanRef.current.focus();
+
+                    const selection = window.getSelection();
+                    if (!selection) return;
+
+                    const range = document.createRange();
+                    range.selectNodeContents(spanRef.current);
+
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }, 1);
+
+                console.info(spanRef.current, renameId);
+            }
+        });
+    }, []);
     const changeValue = (e: React.ChangeEvent<HTMLInputElement>) => {
         setVal(e.target.value);
     };
@@ -34,7 +60,8 @@ export const InputEdit: React.FC<IBaseInputProps> = (props) => {
             });
         }
 
-        sheetbarService.setRenameId('');
+        // sheetbarService.setRenameId('');
+        setEditable(false);
     };
 
     const keydown = (ev: React.KeyboardEvent<HTMLInputElement>) => {
@@ -44,14 +71,24 @@ export const InputEdit: React.FC<IBaseInputProps> = (props) => {
         if (ev.keyCode !== undefined && ev.keyCode === 13) {
             return submit();
         }
+
+        // Support left and right keys, choose all, delete
+        if (ev.key !== undefined && ['ArrowLeft', 'ArrowRight', 'Delete', 'Backspace'].includes(ev.key)) {
+            ev.stopPropagation();
+        }
+
+        // The interception content cannot exceed 50 characters
+        if (val.length >= 50) {
+            ev.preventDefault();
+        }
     };
 
-    const isRenaming = renameId === props.sheetId;
-    return isRenaming ? (
-        <input
-            type="text"
+    return (
+        <span
+            ref={spanRef}
+            contentEditable={editable}
+            suppressContentEditableWarning={true}
             draggable={false}
-            value={val}
             onMouseDown={(e) => {
                 e.stopPropagation();
             }}
@@ -62,8 +99,8 @@ export const InputEdit: React.FC<IBaseInputProps> = (props) => {
             onClick={(e) => {
                 e.stopPropagation();
             }}
-        />
-    ) : (
-        <span>{props.sheetName}</span>
+        >
+            {val}
+        </span>
     );
 };

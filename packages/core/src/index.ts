@@ -10,6 +10,7 @@ export {
     type ICommand,
     type ICommandInfo,
     ICommandService,
+    type IExecutionOptions,
     type IMultiCommand,
     type IMutation,
     type IOperation,

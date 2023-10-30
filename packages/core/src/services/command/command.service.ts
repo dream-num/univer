@@ -84,7 +84,7 @@ export interface IExecutionOptions {
     silent?: boolean;
 }
 
-export type CommandListener = (commandInfo: Readonly<ICommandInfo>) => void;
+export type CommandListener = (commandInfo: Readonly<ICommandInfo>, options?: IExecutionOptions) => void;
 
 export interface ICommandService {
     registerCommand(command: ICommand): IDisposable;
@@ -235,14 +235,15 @@ export class CommandService implements ICommandService {
         throw new Error('Could not add a listener twice.');
     }
 
-    async executeCommand<P extends object = object, R = boolean>(id: string, params?: P): Promise<R> {
+    async executeCommand<P extends object = object, R = boolean>(
+        id: string,
+        params?: P,
+        options?: IExecutionOptions
+    ): Promise<R> {
         const item = this._commandRegistry.getCommand(id);
         if (item) {
-            const command = item[0];
-            const injector = item[1];
-
+            const [command, injector] = item;
             const result = await this._execute<P, R>(command as ICommand<P, R>, injector, params);
-
             const commandInfo: ICommandInfo = {
                 id: command.id,
                 type: command.type,
@@ -250,7 +251,7 @@ export class CommandService implements ICommandService {
             };
 
             // emit command execution info
-            this._commandExecutedListeners.forEach((listener) => listener(commandInfo));
+            this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
 
             return result;
         }
@@ -258,20 +259,21 @@ export class CommandService implements ICommandService {
         throw new Error(`[CommandService]: Command "${id}" is not registered.`);
     }
 
-    syncExecuteCommand<P extends object = object, R = boolean>(id: string, params?: P | undefined): R {
+    syncExecuteCommand<P extends object = object, R = boolean>(
+        id: string,
+        params?: P | undefined,
+        options?: IExecutionOptions
+    ): R {
         const item = this._commandRegistry.getCommand(id);
         if (item) {
-            const command = item[0];
-            const injector = item[1];
-
+            const [command, injector] = item;
             const result = this._syncExecute<P, R>(command as ICommand<P, R>, injector, params);
-
             const commandInfo: ICommandInfo = {
                 id: command.id,
                 type: command.type,
                 params,
             };
-            this._commandExecutedListeners.forEach((listener) => listener(commandInfo));
+            this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
 
             return result;
         }

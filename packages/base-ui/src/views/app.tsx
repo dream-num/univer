@@ -1,12 +1,21 @@
 import { LocaleService, LocaleType, ThemeService } from '@univerjs/core';
-import { defaultTheme, themeInstance } from '@univerjs/design';
+import {
+    ConfigProvider,
+    Container,
+    Content,
+    defaultTheme,
+    Footer,
+    Header,
+    ILocale,
+    Layout,
+    Sider,
+    themeInstance,
+} from '@univerjs/design';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import React, { ComponentType, useEffect, useRef, useState } from 'react';
 
 import { ComponentManager, ZIndexManager } from '../Common';
 import { AppContext } from '../Common/AppContext';
-import { Content, Footer, Header, Layout, Sider } from '../Components';
-import { Container } from '../Components/Container/Container';
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import style from './app.module.less';
 import { ContextMenu } from './components/ContextMenu';
@@ -70,62 +79,62 @@ export function App(props: IUniverAppProps) {
         };
     }, []);
 
-    console.log('Header menu component', headerComponents, headerMenuComponents);
-
     return (
         <AppContext.Provider value={{ injector, localeService, themeService, locale, componentManager, zIndexManager }}>
-            <Container className={style.layoutContainer}>
-                <Layout>
-                    {/* outer sidebar */}
-                    <Sider style={{ display: props.outerLeft ? 'block' : 'none' }}></Sider>
-                    <Layout className={style.mainContent} style={{ position: 'relative' }}>
-                        {/* header */}
-                        <Header style={{ display: props.header ? 'block' : 'none' }}>
-                            {props.toolbar && <DocBars />}
-                            {headerComponents &&
-                                Array.from(headerComponents.values()).map((component, index) =>
-                                    React.createElement(component(), { key: `${index}` })
-                                )}
-                            <div className={style.headerMenu}>
-                                {headerMenuComponents &&
-                                    Array.from(headerMenuComponents.values()).map((component, index) =>
+            <ConfigProvider locale={localeService.getLocales() as unknown as ILocale}>
+                <Container className={style.layoutContainer}>
+                    <Layout>
+                        {/* outer sidebar */}
+                        <Sider style={{ display: props.outerLeft ? 'block' : 'none' }}></Sider>
+                        <Layout className={style.mainContent} style={{ position: 'relative' }}>
+                            {/* header */}
+                            <Header style={{ display: props.header ? 'block' : 'none' }}>
+                                {props.toolbar && <DocBars />}
+                                {headerComponents &&
+                                    Array.from(headerComponents.values()).map((component, index) =>
                                         React.createElement(component(), { key: `${index}` })
                                     )}
-                            </div>
-                        </Header>
-                        {/* content */}
-                        <Layout>
-                            <Sider
-                                style={{ display: props.innerLeft ? 'block' : 'none' }}
-                                className={style.contentInnerLeftContainer}
-                            >
-                                {/* inner left */}
-                                {sidebarComponents &&
-                                    Array.from(sidebarComponents.values()).map((component, index) =>
+                                <div className={style.headerMenu}>
+                                    {headerMenuComponents &&
+                                        Array.from(headerMenuComponents.values()).map((component, index) =>
+                                            React.createElement(component(), { key: `${index}` })
+                                        )}
+                                </div>
+                            </Header>
+                            {/* content */}
+                            <Layout>
+                                <Sider
+                                    style={{ display: props.innerLeft ? 'block' : 'none' }}
+                                    className={style.contentInnerLeftContainer}
+                                >
+                                    {/* inner left */}
+                                    {sidebarComponents &&
+                                        Array.from(sidebarComponents.values()).map((component, index) =>
+                                            React.createElement(component(), { key: `${index}` })
+                                        )}
+                                </Sider>
+                                <Content className={style.contentContainerHorizontal}>
+                                    <ContextMenu>
+                                        <Container className={style.contentInnerRightContainer} ref={containerRef}>
+                                            {contentComponents &&
+                                                Array.from(contentComponents.values()).map((component, index) =>
+                                                    React.createElement(component(), { key: `${index}` })
+                                                )}
+                                        </Container>
+                                    </ContextMenu>
+                                </Content>
+                            </Layout>
+                            {/* footer */}
+                            <Footer style={{ display: props.footer ? 'block' : 'none' }}>
+                                {footerComponents &&
+                                    Array.from(footerComponents.values()).map((component, index) =>
                                         React.createElement(component(), { key: `${index}` })
                                     )}
-                            </Sider>
-                            <Content className={style.contentContainerHorizontal}>
-                                <ContextMenu>
-                                    <Container className={style.contentInnerRightContainer} ref={containerRef}>
-                                        {contentComponents &&
-                                            Array.from(contentComponents.values()).map((component, index) =>
-                                                React.createElement(component(), { key: `${index}` })
-                                            )}
-                                    </Container>
-                                </ContextMenu>
-                            </Content>
+                            </Footer>
                         </Layout>
-                        {/* footer */}
-                        <Footer style={{ display: props.footer ? 'block' : 'none' }}>
-                            {footerComponents &&
-                                Array.from(footerComponents.values()).map((component, index) =>
-                                    React.createElement(component(), { key: `${index}` })
-                                )}
-                        </Footer>
                     </Layout>
-                </Layout>
-            </Container>
+                </Container>
+            </ConfigProvider>
         </AppContext.Provider>
     );
 }

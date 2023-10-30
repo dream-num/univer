@@ -20,13 +20,15 @@
                 "require": "./lib/univer-design.cjs.js",
                 "default": "./lib/univer-design.js"
             },
-            "./*": "./lib/*"
+            "./*": "./lib/*",
+            "./locale/*": "./lib/locale/*.ts"
         },
         "access": "public"
     },
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "directories": {
         "lib": "lib"
@@ -50,6 +52,7 @@
         "@univerjs/icons": "^0.0.10",
         "clsx": "^2.0.0",
         "rc-dropdown": "^4.1.0",
+        "rc-input-number": "^8.4.0",
         "rc-menu": "^9.12.2",
         "rc-notification": "^5.3.0",
         "rc-tooltip": "^6.1.2",

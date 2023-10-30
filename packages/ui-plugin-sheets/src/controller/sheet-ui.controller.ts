@@ -11,7 +11,6 @@ import {
     SetUnderlineCommand,
 } from '@univerjs/base-sheets';
 import {
-    ColorPicker,
     ComponentManager,
     IDesktopUIController,
     IMenuItemFactory,
@@ -20,6 +19,7 @@ import {
     IUIController,
 } from '@univerjs/base-ui';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { ColorPicker } from '@univerjs/design';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 

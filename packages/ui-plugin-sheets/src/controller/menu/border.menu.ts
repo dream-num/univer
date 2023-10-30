@@ -4,8 +4,9 @@ import {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from '@univerjs/base-sheets';
-import { ColorPicker, DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import { DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { BorderStyleTypes, ICommandService, IPermissionService } from '@univerjs/core';
+import { ColorPicker } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
 

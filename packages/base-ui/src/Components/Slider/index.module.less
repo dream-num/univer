@@ -1,8 +1,8 @@
 @import '../../Basics/CSS/Skin/default.module.less';
 
-@slider-bg: @text-color-secondary;
+@slider-bg: rgb(var(--text-color-secondary));
 @slider-width: 116px;
-@slider-height: 4px;
+@slider-height: 2px;
 @slider-radius: 15px;
 
 @slider-handle-size: 12px;
@@ -10,7 +10,7 @@
 @slider-value-width: 55px;
 @slider-value-height: 28px;
 
-@slider-parts-hover-color: @border-color;
+@slider-parts-hover-color: rgb(var(--border-color));
 
 :export {
     --slider-width: unit(@slider-width);
@@ -20,7 +20,7 @@
 .slider {
     display: flex;
     align-items: center;
-    gap: @margin-xxs;
+    gap: var(--margin-xxs);
 
     &-rail {
         @padding: (@slider-handle-size / 2);
@@ -43,9 +43,9 @@
         top: calc(50% - @slider-handle-size / 2);
         width: @slider-handle-size;
         height: @slider-handle-size;
-        background-color: @color-white;
+        background-color: rgb(var(--color-white));
         border-radius: 50%;
-        box-shadow: @box-shadow-base;
+        box-shadow: 0 0 6px 0 rgba(0, 0, 0, .1);
         transform: translateX(-50%);
         cursor: pointer;
         transition: background .2s;
@@ -57,9 +57,9 @@
 
     &-reset-point {
         position: absolute;
-        width: @slider-height;
+        width: @slider-height * 2;
         height: @slider-height;
-        background-color: @color-white;
+        background-color: rgb(var(--color-white));
         border-radius: 50%;
         top: 50%;
         left: 50%;
@@ -72,11 +72,11 @@
         width: @slider-value-width;
         height: @slider-value-height;
         text-align: center;
-        color: @text-color-secondary;
-        font-size: 14px; // TODO: replace to token
+        color: rgb(var(--text-color-secondary));
+        font-size: var(--font-size-sm);
         font-weight: 700;
         line-height: 2;
-        border-radius: @border-radius-base;
+        border-radius: var(--border-radius-base);
         cursor: pointer;
         transition: all .2s;
         &:hover {
@@ -90,41 +90,41 @@
 
     &-shortcuts {
         width: 128px;
-        padding: @padding-sm;
-        font-size: @font-size-base;
-        background-color: @color-white;
-        border: 1px solid @border-color;
-        border-radius: @border-radius-lg;
-        box-shadow: @box-shadow-lg;
+        padding: var(--padding-sm);
+        font-size: var(--font-size-base);
+        background-color: rgb(var(--color-white));
+        border: 1px solid rgb(var(--border-color));
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--box-shadow-lg);
         box-sizing: border-box;
         display: grid;
         align-items: center;
-        gap: @margin-xxs;
+        gap: var(--margin-xxs);
         transform: translateX(-(@slider-value-width / 2));
     }
 
     &-shortcut {
         position: relative;
-        padding: @padding-xs 0 @padding-xs 36px;
-        color: @text-color;
-        border-radius: @border-radius-base;
+        padding: var(--padding-xs) 0 var(--padding-xs) 36px;
+        color: rgb(var(--text-color));
+        border-radius: var(--border-radius-base);
         box-sizing: border-box;
         cursor: pointer;
         transition: background .2s;
 
         &:hover {
-            background-color: @bg-color-hover;
+            background-color: rgb(var(--bg-color-hover));
         }
     }
 
     &-shortcut-icon {
         position: absolute;
-        left: @padding-xs;
+        left: var(--padding-xs);
         top: 50%;
         transform: translateY(-50%);
     }
 
     &-shortcut-active {
-        background-color: @bg-color-hover;
+        background-color: rgb(var(--bg-color-hover));
     }
 }

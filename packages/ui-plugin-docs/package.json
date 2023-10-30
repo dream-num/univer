@@ -39,6 +39,16 @@
         "test": "vitest run",
         "esbuild": "node ./esbuild.config.mjs"
     },
+    "dependencies": {
+        "@univerjs/base-docs": "workspace:*",
+        "@univerjs/base-render": "workspace:*",
+        "@univerjs/base-ui": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@wendellhu/redi": "^0.12.10",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+    },
     "devDependencies": {
         "@types/node": "^20.8.9",
         "@types/react": "^18.2.33",
@@ -47,15 +57,5 @@
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
         "vitest": "^0.34.6"
-    },
-    "dependencies": {
-        "@univerjs/base-docs": "workspace:*",
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/base-ui": "workspace:*",
-        "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": "^0.12.10",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "rxjs": "^7.8.1"
     }
 }

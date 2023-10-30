@@ -1,4 +1,4 @@
-import { BaseSelectChildrenProps, BaseSelectProps, ColorPicker, ComponentManager } from '@univerjs/base-ui';
+import { BaseSelectChildrenProps, BaseSelectProps, ComponentManager } from '@univerjs/base-ui';
 import {
     BorderType,
     HorizontalAlign,
@@ -9,6 +9,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import { ColorPicker } from '@univerjs/design';
 import { Inject } from '@wendellhu/redi';
 
 import { DefaultToolbarConfig, SLIDE_UI_PLUGIN_NAME, SlideToolbarConfig } from '../Basics';

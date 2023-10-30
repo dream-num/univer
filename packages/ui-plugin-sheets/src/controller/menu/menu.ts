@@ -49,7 +49,6 @@ import {
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
 import {
-    ColorPicker,
     CopyCommand,
     CutCommand,
     DisplayTypes,
@@ -70,6 +69,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import { ColorPicker } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 

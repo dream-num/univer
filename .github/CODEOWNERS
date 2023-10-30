@@ -10,6 +10,7 @@ packages/base-sheets @wzhudev @DR-Univer
 packages/base-slides @wzhudev @DR-Univer @jikkai
 
 # ui
+packages/design @jikkai @wzhudev
 packages/base-ui @jikkai @wzhudev
 packages/ui-plugin-docs @jikkai @wzhudev
 packages/ui-plugin-sheets @jikkai @wzhudev

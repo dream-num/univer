@@ -6,5 +6,10 @@ import baseConfig from '../../esbuild.config.mjs';
 esbuild.build({
     ...baseConfig,
     globalName: 'UniverDesign',
-    outfile: './lib/univer-design.js',
+    entryPoints: {
+        'univer-design': './src/index.ts',
+        'locale/en-US': './src/locale/en-US.ts',
+        'locale/zh-CN': './src/locale/zh-CN.ts',
+    },
+    outdir: './lib',
 });

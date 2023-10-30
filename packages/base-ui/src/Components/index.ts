@@ -4,7 +4,6 @@ export * from './BorderLine';
 export * from './CellRange';
 export * from './Checkbox';
 export * from './Collapse';
-export * from './ColorPicker';
 export * from './CustomLabel';
 export * from './Dropdown';
 export * from './Input';

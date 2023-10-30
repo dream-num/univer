@@ -15,5 +15,7 @@ const meta: Meta<typeof ColorPicker> = {
 export default meta;
 
 export const Playground = {
-    args: {},
+    render() {
+        return <ColorPicker />;
+    },
 };

@@ -85,6 +85,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     name: 'UniverSheet Demo',
     extensions: [],
     sheetOrder: [
+        'sheet-0011',
         'sheet-0010',
         'sheet-0009',
         'sheet-0008',

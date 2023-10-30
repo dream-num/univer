@@ -1,4 +1,5 @@
-import { ColorPicker, SiderModal } from '@univerjs/base-ui';
+import { SiderModal } from '@univerjs/base-ui';
+import { ColorPicker } from '@univerjs/design';
 import { Component } from 'react';
 
 import { BorderType, NormalType, OVER_GRID_IMAGE_PLUGIN_NAME } from '../../../Basics';

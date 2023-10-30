@@ -19,8 +19,8 @@ export const Playground = {
     render() {
         const [value, setValue] = useState('');
 
-        function handleChange(value: string) {
-            setValue(value);
+        function handleChange(value: string | number | boolean) {
+            setValue(value as string);
         }
 
         return (

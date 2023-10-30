@@ -935,6 +935,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets

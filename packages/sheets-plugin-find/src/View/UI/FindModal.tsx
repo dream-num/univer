@@ -1,16 +1,14 @@
 import {
-    BaseCheckboxGroupOptions,
     BaseComponentProps,
     BaseItemProps,
     CellRange,
-    CheckboxGroup,
     CustomLabel,
     Icon,
     Input,
     Modal,
     Select,
 } from '@univerjs/base-ui';
-import { Button } from '@univerjs/design';
+import { Button, ICheckboxGroupProps } from '@univerjs/design';
 import { Component } from 'react';
 
 import styles from './index.module.less';
@@ -49,7 +47,7 @@ export enum SelectSearch {
 }
 
 export class FindModal extends Component<IProps, IState> {
-    private _matchGroup: BaseCheckboxGroupOptions[] = [];
+    private _matchGroup: ICheckboxGroupProps[] = [];
 
     private _select: BaseItemProps[] = [];
 
@@ -65,23 +63,23 @@ export class FindModal extends Component<IProps, IState> {
             value: '',
         };
 
-        this._matchGroup = [
-            {
-                name: '',
-                label: 'find.matchCase',
-                value: '1',
-            },
-            {
-                name: '',
-                label: 'find.matchAll',
-                value: '2',
-            },
-            {
-                name: '',
-                label: 'find.matchInFormula',
-                value: '3',
-            },
-        ];
+        // this._matchGroup = [
+        //     {
+        //         name: '',
+        //         label: 'find.matchCase',
+        //         value: '1',
+        //     },
+        //     {
+        //         name: '',
+        //         label: 'find.matchAll',
+        //         value: '2',
+        //     },
+        //     {
+        //         name: '',
+        //         label: 'find.matchInFormula',
+        //         value: '3',
+        //     },
+        // ];
 
         this._select = [
             {
@@ -111,19 +109,19 @@ export class FindModal extends Component<IProps, IState> {
 
     // 国际化checkbox
     getMatchGroup() {
-        const arr: BaseCheckboxGroupOptions[] = JSON.parse(JSON.stringify(this._matchGroup));
-        arr.forEach((element: BaseCheckboxGroupOptions) => {
-            element.label = <CustomLabel label={element.label} />;
-        });
+        const arr: ICheckboxGroupProps[] = JSON.parse(JSON.stringify(this._matchGroup));
+        // arr.forEach((element: ICheckboxGroupProps) => {
+        //     element.label = <CustomLabel label={element.label} />;
+        // });
         return arr;
     }
 
     // 国际化Select
     getSelect() {
         const arr: BaseItemProps[] = JSON.parse(JSON.stringify(this._select));
-        arr.forEach((element: BaseCheckboxGroupOptions) => {
-            element.label = <CustomLabel label={element.label} />;
-        });
+        // arr.forEach((element: ICheckboxGroupProps) => {
+        //     element.label = <CustomLabel label={element.label} />;
+        // });
         return arr;
     }
 
@@ -257,10 +255,10 @@ export class FindModal extends Component<IProps, IState> {
                         </div>
                         <div className={styles.box}>
                             <span></span>
-                            <CheckboxGroup
+                            {/* <CheckboxGroup
                                 options={this.getMatchGroup()}
                                 onChange={this.handleChange.bind(this)}
-                            ></CheckboxGroup>
+                            ></CheckboxGroup> */}
                         </div>
                         <div className={styles.buttonGroup}>
                             <Button type="primary">

@@ -11,20 +11,25 @@ import {
 } from '@univerjs/core';
 import { IDisposable, Inject } from '@wendellhu/redi';
 
+import {} from '../Basics/Interfaces/MutationInterface';
 import {
-    IInsertColMutationParams,
-    IInsertRowMutationParams,
-    IRemoveColMutationParams,
-    IRemoveRowsMutationParams,
-} from '../Basics/Interfaces/MutationInterface';
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
+    InsertColCommand,
+    InsertRowCommand,
+} from '../commands/commands/insert-row-col.command';
 import { IMoveRangeCommandParams, MoveRangeCommand } from '../commands/commands/move-range.command';
+import {
+    RemoveColCommand,
+    RemoveRowColCommandParams,
+    RemoveRowCommand,
+} from '../commands/commands/remove-row-col.command';
 
 export type EffectParams =
-    | ICommandInfo<IInsertColMutationParams>
-    | ICommandInfo<IInsertRowMutationParams>
-    | ICommandInfo<IRemoveColMutationParams>
-    | ICommandInfo<IRemoveRowsMutationParams>
-    | ICommandInfo<IMoveRangeCommandParams>;
+    | ICommandInfo<IMoveRangeCommandParams>
+    | ICommandInfo<IInsertRowCommandParams>
+    | ICommandInfo<IInsertColCommandParams>
+    | ICommandInfo<RemoveRowColCommandParams>;
 
 type RefRangCallback = (params: EffectParams) => {
     redos: Array<ICommandInfo<object>>;
@@ -86,50 +91,81 @@ export class RefRangeService extends Disposable {
     private _onRefRangeChange = () => {
         this._sheetInterceptorService.interceptCommand({
             getMutations: (command) => {
-                switch (command.id) {
-                    case MoveRangeCommand.id: {
-                        const params = command as ICommandInfo<IMoveRangeCommandParams>;
-                        const workbookId = this.workbookId;
-                        const worksheetId = this.worksheetId;
-                        const cbList = this._checkRange(
-                            [params.params!.fromRange, params.params!.toRange],
-                            workbookId,
-                            worksheetId
-                        );
-                        const result = cbList
-                            .map((cb) => cb(params))
-                            .reduce(
-                                (result, currentValue) => {
-                                    result.redos.push(...currentValue.redos);
-                                    result.undos.push(...currentValue.undos);
-                                    return result;
-                                },
-                                { redos: [], undos: [] }
+                command.params;
+                const workSheet = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+                const workbookId = this.workbookId;
+                const worksheetId = this.worksheetId;
+                const getEffectsCbList = () => {
+                    switch (command.id) {
+                        case MoveRangeCommand.id: {
+                            const params = command as ICommandInfo<IMoveRangeCommandParams>;
+                            return this._checkRange(
+                                [params.params!.fromRange, params.params!.toRange],
+                                workbookId,
+                                worksheetId
                             );
-                        return result;
+                        }
+                        case InsertRowCommand.id: {
+                            const params = command as unknown as ICommandInfo<IInsertRowCommandParams>;
+                            const rowStart = params.params!.range.startRow;
+                            const range: IRange = {
+                                startRow: rowStart,
+                                endRow: workSheet.getRowCount() - 1,
+                                startColumn: 0,
+                                endColumn: workSheet.getColumnCount() - 1,
+                            };
+                            return this._checkRange([range], workbookId, worksheetId);
+                        }
+                        case InsertColCommand.id: {
+                            const params = command as unknown as ICommandInfo<IInsertColCommandParams>;
+                            const colStart = params.params!.range.startColumn;
+                            const range: IRange = {
+                                startRow: 0,
+                                endRow: workSheet.getRowCount() - 1,
+                                startColumn: colStart,
+                                endColumn: workSheet.getColumnCount() - 1,
+                            };
+                            return this._checkRange([range], workbookId, worksheetId);
+                        }
+                        case RemoveRowCommand.id: {
+                            const params = command as unknown as ICommandInfo<RemoveRowColCommandParams>;
+                            const ranges = params.params?.ranges || [];
+                            const rowStart = Math.min(...ranges.map((range) => range.startRow));
+                            const range: IRange = {
+                                startRow: rowStart,
+                                endRow: workSheet.getRowCount() - 1,
+                                startColumn: 0,
+                                endColumn: workSheet.getColumnCount() - 1,
+                            };
+                            return this._checkRange([range], workbookId, worksheetId);
+                        }
+                        case RemoveColCommand.id: {
+                            const params = command as unknown as ICommandInfo<RemoveRowColCommandParams>;
+                            const ranges = params.params?.ranges || [];
+                            const colStart = Math.min(...ranges.map((range) => range.startColumn));
+                            const range: IRange = {
+                                startRow: 0,
+                                endRow: workSheet.getRowCount() - 1,
+                                startColumn: colStart,
+                                endColumn: workSheet.getColumnCount() - 1,
+                            };
+                            return this._checkRange([range], workbookId, worksheetId);
+                        }
                     }
-                    // case InsertRowMutation.id: {
-                    //     const params = _params as unknown as IInsertRowMutationParams;
-
-                    //     break;
-                    // }
-                    // case InsertColMutation.id: {
-                    //     const params = _params as unknown as IInsertColMutationParams;
-
-                    //     break;
-                    // }
-                    // case RemoveColMutation.id: {
-                    //     const params = _params as unknown as IRemoveColMutationParams;
-
-                    //     break;
-                    // }
-                    // case RemoveRowMutation.id: {
-                    //     const params = _params as unknown as IRemoveRowsMutationParams;
-                    //     params.ranges;
-                    //     break;
-                    // }
-                }
-                return { redos: [], undos: [] };
+                    return [];
+                };
+                const cbList = getEffectsCbList();
+                const result = cbList
+                    .map((cb) => cb(command as EffectParams))
+                    .reduce(
+                        (result, currentValue) => {
+                            result.redos.push(...currentValue.redos);
+                            result.undos.push(...currentValue.undos);
+                            return result;
+                        },
+                        { redos: [], undos: [] }
+                    );
+                return result;
             },
         });
     };

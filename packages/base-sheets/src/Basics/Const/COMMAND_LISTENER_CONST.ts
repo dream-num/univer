@@ -1,8 +1,6 @@
-import { AddWorksheetMergeMutation } from '../../commands/mutations/add-worksheet-merge.mutation';
 import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
 import { MoveRowsMutation } from '../../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
-import { RemoveWorksheetMergeMutation } from '../../commands/mutations/remove-worksheet-merge.mutation';
 import { SetBorderStylesMutation } from '../../commands/mutations/set-border-styles.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../commands/mutations/set-col-visible.mutation';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
@@ -25,8 +23,6 @@ export const COMMAND_LISTENER_SKELETON_CHANGE = [
     RemoveRowMutation.id,
     InsertColMutation.id,
     RemoveColMutation.id,
-    AddWorksheetMergeMutation.id,
-    RemoveWorksheetMergeMutation.id,
     MoveRowsMutation.id,
     SetColHiddenMutation.id,
     SetColVisibleMutation.id,

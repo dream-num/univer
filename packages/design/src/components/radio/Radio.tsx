@@ -3,7 +3,7 @@ import { useRef } from 'react';
 
 import styles from './index.module.less';
 
-export interface IRadioIProps {
+export interface IRadioProps {
     children?: React.ReactNode;
 
     /**
@@ -32,7 +32,7 @@ export interface IRadioIProps {
 /**
  * Radio Component
  */
-export function Radio(props: IRadioIProps) {
+export function Radio(props: IRadioProps) {
     const { children, checked, value, disabled = false, onChange } = props;
 
     const inputRef = useRef<HTMLInputElement>(null);

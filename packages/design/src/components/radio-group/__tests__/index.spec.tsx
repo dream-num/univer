@@ -1,19 +1,20 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 
-import { Radio, RadioGroup } from '..';
+import { Radio } from '../../radio/Radio';
+import { RadioGroup } from '../RadioGroup';
 
 describe('RadioGroup', () => {
     let active = '0';
     const group = (
         <RadioGroup
-            active={active}
+            value={active}
             onChange={(value) => {
-                active = value;
+                active = value as string;
             }}
         >
-            <Radio value="0" label="0"></Radio>
-            <Radio value="1" label="1"></Radio>
+            <Radio value="0">0</Radio>
+            <Radio value="1">1</Radio>
         </RadioGroup>
     );
 

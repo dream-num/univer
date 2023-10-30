@@ -1,1 +1,1 @@
-export * from './Radio';
+export { type IRadioProps, Radio } from './Radio';

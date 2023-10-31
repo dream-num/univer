@@ -24,7 +24,10 @@ import { Inject } from '@wendellhu/redi';
 
 import { getDocObjectById } from '../Basics/component-tools';
 import { NORMAL_TEXT_SELECTION_PLUGIN_NAME, VIEWPORT_KEY } from '../Basics/docs-view-key';
-import { ISetZoomRatioMutationParams, SetZoomRatioMutation } from '../commands/mutations/set-zoom-ratio.mutation';
+import {
+    ISetDocZoomRatioOperationParams,
+    SetDocZoomRatioOperation,
+} from '../commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
@@ -151,6 +154,8 @@ export class TextSelectionController extends Disposable {
             }
 
             this._textSelectionRenderManager.sync();
+
+            this._textSelectionRenderManager.scroll();
         });
     }
 
@@ -195,12 +200,12 @@ export class TextSelectionController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = [SetZoomRatioMutation.id];
+        const updateCommandList = [SetDocZoomRatioOperation.id];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const params = command.params as ISetZoomRatioMutationParams;
+                    const params = command.params as ISetDocZoomRatioOperationParams;
                     const { documentId } = params;
 
                     const unitId = this._textSelectionManagerService.getCurrentSelection()?.unitId;

@@ -18,6 +18,8 @@ export interface IEditorBridgeServiceParam {
     position: IPosition;
     canvasOffset: { left: number; top: number };
     documentLayoutObject: IDocumentLayoutObject;
+    scaleX: number;
+    scaleY: number;
 }
 
 export interface IEditorBridgeService {

@@ -407,12 +407,7 @@ export class Documents extends DocComponent {
 
             this._resetRotation(ctx, finalAngle);
 
-            const { x, y } = this._drawLiquid.translatePage(
-                page,
-                this.pageLayoutType,
-                this.pageMarginLeft,
-                this.pageMarginTop
-            );
+            const { x, y } = this._drawLiquid.translatePage(page, this.pageLayoutType, 24, 24);
             pageLeft += x;
             pageTop += y;
         }

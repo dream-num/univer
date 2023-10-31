@@ -482,7 +482,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _initDOM() {
         const container = document.createElement('div');
-        container.style.position = 'absolute';
+        container.style.position = 'fixed';
         container.style.left = `0px`;
         container.style.top = `0px`;
 
@@ -696,22 +696,36 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const { left, top } = anchor;
+        const { scaleX, scaleY } = this._scene?.getAncestorScale() || { scaleX: 1, scaleY: 1 };
+
+        const { left, top, height, width } = anchor;
+
+        // left *= scaleX;
+
+        // top *= scaleY;
 
         const { tl, tr, bl } = this._activeViewport.getBounding();
-        const constantOffset = 100;
+        const constantOffsetWidth = (width * 2) / scaleX;
+        const constantOffsetHeight = (height * 2) / scaleY;
         let offsetY = 0;
         let offsetX = 0;
-        if (top < tl.y + constantOffset) {
-            offsetY = top - tl.y - constantOffset;
-        } else if (top > bl.y - constantOffset) {
-            offsetY = top - bl.y + constantOffset;
+
+        const boundTop = tl.y;
+        const boundBottom = bl.y;
+
+        if (top < boundTop + constantOffsetHeight) {
+            offsetY = top - boundTop - constantOffsetHeight * 2;
+        } else if (top > boundBottom - constantOffsetHeight) {
+            offsetY = top - boundBottom + constantOffsetHeight * 2;
         }
 
-        if (left < tl.x + constantOffset) {
-            offsetX = left - tl.x - constantOffset;
-        } else if (left > tr.x - constantOffset) {
-            offsetX = left - tr.x + constantOffset;
+        const boundLeft = tl.x;
+        const boundRight = tr.x;
+
+        if (left < boundLeft + constantOffsetWidth) {
+            offsetX = left - boundLeft - constantOffsetWidth * 2;
+        } else if (left > boundRight - constantOffsetWidth) {
+            offsetX = left - boundRight + constantOffsetWidth * 2;
         }
 
         const config = this._activeViewport.getBarScroll(offsetX, offsetY);
@@ -730,9 +744,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const absoluteCoord = this._activeViewport.getAbsoluteVector(Vector2.FromArray([left, top]));
 
+        const { scaleY } = this._scene?.getAncestorScale() || { scaleX: 1, scaleY: 1 };
+
         const { x, y } = absoluteCoord;
 
-        this._cursor.style.height = `${height}px`;
+        this._cursor.style.height = `${height * scaleY}px`;
 
         // console.log('_syncDomToSelection', left, top, absoluteCoord?.x || 0, absoluteCoord?.y || 0);
 

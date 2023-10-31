@@ -63,55 +63,55 @@ export class DocRenderController extends Disposable {
 
             this.recalculateSizeBySkeleton(currentRender, documentSkeleton);
 
-            this.calculatePagePosition(currentRender);
+            // this.calculatePagePosition(currentRender);
         });
     }
 
-    calculatePagePosition(currentRender: IRender) {
-        const { mainComponent, scene } = currentRender;
+    // calculatePagePosition(currentRender: IRender) {
+    //     const { mainComponent, scene } = currentRender;
 
-        const docsComponent = mainComponent as Documents;
+    //     const docsComponent = mainComponent as Documents;
 
-        const parent = scene?.getParent();
+    //     const parent = scene?.getParent();
 
-        const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = docsComponent;
-        if (parent == null || docsWidth === Infinity || docsHeight === Infinity) {
-            return;
-        }
-        const { width: engineWidth, height: engineHeight } = parent;
-        let docsLeft = 0;
-        let docsTop = 0;
+    //     const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = docsComponent;
+    //     if (parent == null || docsWidth === Infinity || docsHeight === Infinity) {
+    //         return;
+    //     }
+    //     const { width: engineWidth, height: engineHeight } = parent;
+    //     let docsLeft = 0;
+    //     let docsTop = 0;
 
-        let sceneWidth = 0;
+    //     let sceneWidth = 0;
 
-        let sceneHeight = 0;
+    //     let sceneHeight = 0;
 
-        if (engineWidth > docsWidth) {
-            docsLeft = engineWidth / 2 - docsWidth / 2;
-            sceneWidth = engineWidth - 34;
-        } else {
-            docsLeft = pageMarginLeft;
-            sceneWidth = docsWidth + pageMarginLeft * 2;
-        }
+    //     if (engineWidth > docsWidth) {
+    //         docsLeft = engineWidth / 2 - docsWidth / 2;
+    //         sceneWidth = engineWidth - 34;
+    //     } else {
+    //         docsLeft = pageMarginLeft;
+    //         sceneWidth = docsWidth + pageMarginLeft * 2;
+    //     }
 
-        if (engineHeight > docsHeight) {
-            docsTop = engineHeight / 2 - docsHeight / 2;
-            sceneHeight = engineHeight - 34;
-        } else {
-            docsTop = pageMarginTop;
-            sceneHeight = docsHeight + pageMarginTop * 2;
-        }
+    //     if (engineHeight > docsHeight) {
+    //         docsTop = engineHeight / 2 - docsHeight / 2;
+    //         sceneHeight = engineHeight - 34;
+    //     } else {
+    //         docsTop = pageMarginTop;
+    //         sceneHeight = docsHeight + pageMarginTop * 2;
+    //     }
 
-        // this.docsLeft = docsLeft;
+    //     // this.docsLeft = docsLeft;
 
-        // this.docsTop = docsTop;
+    //     // this.docsTop = docsTop;
 
-        scene.resize(sceneWidth, sceneHeight + 200);
+    //     scene.resize(sceneWidth, sceneHeight + 200);
 
-        docsComponent.translate(docsLeft, docsTop);
+    //     docsComponent.translate(docsLeft, docsTop);
 
-        return this;
-    }
+    //     return this;
+    // }
 
     recalculateSizeBySkeleton(currentRender: IRender, skeleton: DocumentSkeleton) {
         const { mainComponent, scene } = currentRender;
@@ -184,7 +184,7 @@ export class DocRenderController extends Disposable {
 
                     this.recalculateSizeBySkeleton(currentRender, skeleton);
 
-                    this.calculatePagePosition(currentRender);
+                    // this.calculatePagePosition(currentRender);
                 }
             })
         );

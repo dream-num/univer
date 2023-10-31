@@ -1,29 +1,32 @@
-import { CommandType, IMutation, IUniverInstanceService, Tools } from '@univerjs/core';
+import { CommandType, IOperation, IUniverInstanceService, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-export interface ISetZoomRatioMutationParams {
+export interface ISetDocZoomRatioOperationParams {
     zoomRatio: number;
     documentId: string;
 }
 
-export const SetZoomRatioUndoMutationFactory = (
+export const SetDocZoomRatioUndoMutationFactory = (
     accessor: IAccessor,
-    params: ISetZoomRatioMutationParams
-): ISetZoomRatioMutationParams => {
+    params: ISetDocZoomRatioOperationParams
+): ISetDocZoomRatioOperationParams => {
     const documentModel = accessor.get(IUniverInstanceService).getUniverDocInstance(params.documentId);
-    const old = documentModel?.getSettings()?.zoomRatio || 1;
+    const old = documentModel?.zoomRatio || 1;
     return {
         ...Tools.deepClone(params),
         zoomRatio: old,
     };
 };
 
-export const SetZoomRatioMutation: IMutation<ISetZoomRatioMutationParams> = {
-    id: 'doc.mutation.set-zoom-ratio',
-    type: CommandType.MUTATION,
-    handler: (accessor, params) => {
+export const SetDocZoomRatioOperation: IOperation<ISetDocZoomRatioOperationParams> = {
+    id: 'doc.operation.set-zoom-ratio',
+    type: CommandType.OPERATION,
+    handler: (accessor, params: ISetDocZoomRatioOperationParams) => {
         const documentModel = accessor.get(IUniverInstanceService).getUniverDocInstance(params.documentId);
-        if (!documentModel) return false;
+        if (!documentModel) {
+            return false;
+        }
+
         const documentData = documentModel.getSnapshot();
         if (documentData.settings == null) {
             documentData.settings = {

@@ -116,7 +116,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { position, documentLayoutObject } = param;
+            const { position, documentLayoutObject, scaleX, scaleY } = param;
 
             const editorObject = this._getEditorObject();
 
@@ -137,7 +137,7 @@ export class StartEditController extends Disposable {
             // documentModel!.updateDocumentDataMargin(paddingData);
 
             if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-                documentModel!.updateDocumentDataPageSize(endX - startX);
+                documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
             this._currentUniverService.changeDoc(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, documentModel! as DocumentModel);
@@ -178,14 +178,18 @@ export class StartEditController extends Disposable {
         actualRangeWithCoord: IPosition,
         canvasOffset: ICanvasOffset,
         documentSkeleton: DocumentSkeleton,
-        documentLayoutObject: IDocumentLayoutObject
+        documentLayoutObject: IDocumentLayoutObject,
+        scaleX: number = 1,
+        scaleY: number = 1
     ) {
         const { startX, startY, endX, endY } = actualRangeWithCoord;
         const { actualWidth, actualHeight } = this._predictingSize(
             actualRangeWithCoord,
             canvasOffset,
             documentSkeleton,
-            documentLayoutObject
+            documentLayoutObject,
+            scaleX,
+            scaleY
         );
         const { verticalAlign, paddingData, fill } = documentLayoutObject;
 
@@ -205,9 +209,9 @@ export class StartEditController extends Disposable {
             // Set the top margin under vertical alignment.
             let offsetTop = paddingData.t || 0;
             if (verticalAlign === VerticalAlign.MIDDLE) {
-                offsetTop = (editorHeight - actualHeight) / 2;
+                offsetTop = (editorHeight / scaleY - actualHeight) / 2;
             } else if (verticalAlign === VerticalAlign.BOTTOM) {
-                offsetTop = editorHeight - actualHeight;
+                offsetTop = editorHeight / scaleY - actualHeight;
             }
 
             offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
@@ -233,7 +237,9 @@ export class StartEditController extends Disposable {
         actualRangeWithCoord: IPosition,
         canvasOffset: ICanvasOffset,
         documentSkeleton: DocumentSkeleton,
-        documentLayoutObject: IDocumentLayoutObject
+        documentLayoutObject: IDocumentLayoutObject,
+        scaleX: number = 1,
+        scaleY: number = 1
     ) {
         const { startX, endX } = actualRangeWithCoord;
 
@@ -279,7 +285,9 @@ export class StartEditController extends Disposable {
         editorHeight: number,
         actualRangeWithCoord: IPosition,
         canvasOffset: ICanvasOffset,
-        fill: Nullable<string>
+        fill: Nullable<string>,
+        scaleX: number = 1,
+        scaleY: number = 1
     ) {
         const editorObject = this._getEditorObject();
 
@@ -398,7 +406,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { position, documentLayoutObject, canvasOffset } = state;
+            const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = state;
 
             const editorObject = this._getEditorObject();
 
@@ -420,7 +428,7 @@ export class StartEditController extends Disposable {
 
             const documentModel = skeleton.getModel() as DocumentModel;
 
-            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject);
+            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
 
             // move selection
             if (eventType === DeviceInputEventType.Keyboard) {
@@ -565,9 +573,9 @@ export class StartEditController extends Disposable {
                         return;
                     }
 
-                    const { position, documentLayoutObject, canvasOffset } = param;
+                    const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
 
-                    this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject);
+                    this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
 
                     // const editorObject = this._getEditorObject();
 

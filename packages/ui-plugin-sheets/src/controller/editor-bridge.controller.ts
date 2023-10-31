@@ -97,19 +97,21 @@ export class EditorBridgeController extends Disposable {
             const { scaleX, scaleY } = scene.getAncestorScale();
             const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
 
-            startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY) - scrollXY.x * scaleX;
+            startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
 
-            startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY) - scrollXY.y * scaleY;
+            startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
 
-            endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY) - scrollXY.x * scaleX;
+            endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
 
-            endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY) - scrollXY.y * scaleY;
+            endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
 
             let documentLayoutObject = skeleton.getCellDocumentModel(startRow, startColumn, true, true);
 
             if (documentLayoutObject == null || documentLayoutObject.documentModel == null) {
                 documentLayoutObject = skeleton.getBlankCellDocumentModel(startRow, startColumn, true);
             }
+
+            documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
 
             this._commandService.executeCommand(SetActivateCellEditOperation.id, {
                 position: {
@@ -118,6 +120,8 @@ export class EditorBridgeController extends Disposable {
                     endX,
                     endY,
                 },
+                scaleX,
+                scaleY,
                 canvasOffset,
                 row: startRow,
                 column: startColumn,

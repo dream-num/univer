@@ -56,6 +56,7 @@ export { Worksheet } from './sheets/worksheet';
 
 // #endregion
 
+export type { IOffset, IScale, ISize, ITransformState } from './services/floating-object/floating-object-interfaces';
 export * from './Slides/Domain';
 export * from './Types/Const';
 export * from './Types/Enum';

@@ -6,6 +6,10 @@ import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { ConfigService, IConfigService } from '../services/config/config.service';
 import { ContextService, IContextService } from '../services/context/context.service';
+import {
+    FloatingObjectManagerService,
+    IFloatingObjectManagerService,
+} from '../services/floating-object/floating-object-manager.service';
 import { IUniverInstanceService, UniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
@@ -183,6 +187,7 @@ export class Univer {
             [IPermissionService, { useClass: DesktopPermissionService }],
             [IConfigService, { useClass: ConfigService }],
             [IContextService, { useClass: ContextService }],
+            [IFloatingObjectManagerService, { useClass: FloatingObjectManagerService, lazy: true }],
         ]);
     }
 

@@ -1,3 +1,4 @@
+import { ITransformState } from '../../services/floating-object/floating-object-interfaces';
 import { IKeyType, Nullable } from '../../Shared/Types';
 import { LocaleType, ThemeColorType } from '../Enum';
 import { ShapeType } from '../Enum/ShapeType';
@@ -7,29 +8,6 @@ import { IPlaceholder } from './IPlaceholder';
 import { IShapeProperties } from './IShapeProperties';
 import { IColorStyle, IStyleBase, IStyleData } from './IStyleData';
 import { IWorksheetConfig } from './IWorksheetData';
-
-export interface ISize {
-    width?: number;
-    height?: number;
-}
-
-export interface IScale {
-    scaleX?: number;
-    scaleY?: number;
-}
-
-export interface IOffset {
-    left?: number;
-    top?: number;
-}
-
-export interface ITransformState extends IOffset, ISize, IScale {
-    angle?: number;
-    skewX?: number;
-    skewY?: number;
-    flipX?: boolean;
-    flipY?: boolean;
-}
 
 export interface ISlideData extends IReferenceSource {
     id: string; // unit id

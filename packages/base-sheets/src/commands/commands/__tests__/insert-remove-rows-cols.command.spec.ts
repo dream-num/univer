@@ -37,7 +37,7 @@ import {
     InsertRowBeforeCommand,
     InsertRowCommand,
 } from '../insert-row-col.command';
-import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
+import { RemoveColCommand, RemoveRowColCommandParams, RemoveRowCommand } from '../remove-row-col.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test insert and remove rows cols commands', () => {
@@ -160,11 +160,12 @@ describe('Test insert and remove rows cols commands', () => {
         const worksheet = workbook.getActiveSheet();
         return worksheet.getMergedCells(row, col)?.[0];
     }
+
     function getMergeData() {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        return worksheet.getConfig().mergeData;
+        return worksheet.getMergeData();
     }
 
     describe('Insert rows', () => {
@@ -282,6 +283,37 @@ describe('Test insert and remove rows cols commands', () => {
             expect(getColCount()).toBe(19);
         });
     });
+
+    describe('Remove row where contain mergeCell', () => {
+        it('reduce merge cell length', async () => {
+            await commandService.executeCommand(RemoveRowCommand.id, {
+                ranges: [
+                    {
+                        startRow: 12,
+                        endRow: 13,
+                        startColumn: 1,
+                        endColumn: 1,
+                    },
+                ],
+            } as RemoveRowColCommandParams);
+            expect(getMergedInfo(12, 2)).toEqual({ startRow: 10, endRow: 13, startColumn: 2, endColumn: 2 });
+        });
+    });
+    describe('Remove col where contain mergeCell', () => {
+        it('reduce merge cell length', async () => {
+            await commandService.executeCommand(RemoveColCommand.id, {
+                ranges: [
+                    {
+                        startRow: 1,
+                        endRow: 1,
+                        startColumn: 12,
+                        endColumn: 13,
+                    },
+                ],
+            } as RemoveRowColCommandParams);
+            expect(getMergedInfo(10, 12)).toEqual({ startRow: 10, endRow: 10, startColumn: 10, endColumn: 13 });
+        });
+    });
 });
 
 const TEST_ROW_COL_INSERTION_DEMO: IWorkbookConfig = {
@@ -325,6 +357,18 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookConfig = {
                     endRow: 3,
                     startColumn: 2,
                     endColumn: 2,
+                },
+                {
+                    startRow: 10,
+                    endRow: 15,
+                    startColumn: 2,
+                    endColumn: 2,
+                },
+                {
+                    startRow: 10,
+                    endRow: 10,
+                    startColumn: 10,
+                    endColumn: 15,
                 },
             ],
             rowCount: 20,

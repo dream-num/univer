@@ -15,6 +15,13 @@ import {
     IRemoveWorksheetMergeMutationParams,
 } from '../Basics/Interfaces/MutationInterface';
 import { getAddMergeMutationRangeByType } from '../commands/commands/add-worksheet-merge.command';
+import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-move-left.command';
+import { DeleteRangeMoveUpCommand } from '../commands/commands/delete-range-move-up.command';
+import { InsertRangeMoveDownCommand } from '../commands/commands/insert-range-move-down.command';
+import {
+    InsertRangeMoveRightCommand,
+    InsertRangeMoveRightCommandParams,
+} from '../commands/commands/insert-range-move-right.command';
 import {
     IInsertColCommandParams,
     IInsertRowCommandParams,
@@ -159,11 +166,10 @@ export class MergeCellController extends Disposable {
                                 return mergedCell;
                             }
                             if (startRow <= mergedCell.startRow) {
-                                mergedCell.startRow += count;
-                                mergedCell.endRow += count;
-                            } else {
-                                mergedCell.endRow += count;
+                                return Rectangle.moveVertical(mergedCell, count);
                             }
+                            mergedCell.endRow += count;
+
                             return mergedCell;
                         });
 
@@ -205,11 +211,10 @@ export class MergeCellController extends Disposable {
                                 return mergedCell;
                             }
                             if (startColumn <= mergedCell.startColumn) {
-                                mergedCell.startColumn += count;
-                                mergedCell.endColumn += count;
-                            } else {
-                                mergedCell.endColumn += count;
+                                return Rectangle.moveHorizontal(mergedCell, count);
                             }
+                            mergedCell.endColumn += count;
+
                             return mergedCell;
                         });
 
@@ -244,7 +249,6 @@ export class MergeCellController extends Disposable {
                     case RemoveColCommand.id: {
                         let ranges = (config.params as unknown as RemoveRowColCommandParams)?.ranges;
                         const worksheetId = workSheet.getSheetId();
-
                         if (!ranges) {
                             if (!ranges) {
                                 const selections = this._selectionManagerService.getSelections();
@@ -312,7 +316,6 @@ export class MergeCellController extends Disposable {
                     case RemoveRowCommand.id: {
                         let ranges = (config.params as unknown as RemoveRowColCommandParams)?.ranges;
                         const worksheetId = workSheet.getSheetId();
-
                         if (!ranges) {
                             if (!ranges) {
                                 const selections = this._selectionManagerService.getSelections();
@@ -331,26 +334,20 @@ export class MergeCellController extends Disposable {
                                 const { startRow, endRow } = ranges[j];
                                 const count = endRow - startRow + 1;
                                 if (endRow < mergeStartRow) {
-                                    // this merged cell should be moved up
                                     merge.startRow -= count;
                                     merge.endRow -= count;
                                 } else if (startRow > mergeEndRow) {
-                                    // this merged cell would not be affected
                                     continue;
                                 } else if (startRow <= mergeStartRow && endRow >= mergeEndRow) {
-                                    // this merged cell should be removed
                                     mergeData.splice(i, 1);
                                     i--;
                                 } else {
                                     const intersects = Rectangle.getIntersects(ranges[j], merge)!;
                                     const interLength = intersects.endRow - intersects.startRow + 1;
-
                                     if (interLength === mergedCellRowCount - 1) {
-                                        // if the merged cell's row count is reduced to 1 we should remove it as a merged cell
                                         mergeData.splice(i, 1);
                                         i--;
                                     } else {
-                                        // otherwise we only need to shrink the merged cell's row count
                                         merge.endRow -= intersects.endRow - intersects.startRow + 1;
                                     }
                                 }
@@ -381,6 +378,338 @@ export class MergeCellController extends Disposable {
                             { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
                         ];
                         return { redos, undos };
+                    }
+                    case InsertRangeMoveRightCommand.id: {
+                        const ranges =
+                            (config.params as unknown as InsertRangeMoveRightCommandParams)?.ranges ||
+                            getSelectionRanges(this._selectionManagerService);
+                        const workbookId = workbook.getUnitId();
+                        const worksheetId = workSheet.getSheetId();
+                        const maxCol = workSheet.getMaxColumns() - 1;
+                        const mergeData = workSheet.getMergeData();
+                        const removeMergeData: IRange[] = [];
+                        const addMergeData: IRange[] = [];
+                        mergeData.forEach((rect) => {
+                            for (let i = 0; i < ranges.length; i++) {
+                                const { startRow, endRow, startColumn, endColumn } = ranges[i];
+
+                                const intersects = Rectangle.intersects(
+                                    {
+                                        startRow,
+                                        startColumn,
+                                        endRow,
+                                        endColumn: maxCol,
+                                    },
+                                    rect
+                                );
+
+                                // If the merge cell intersects with the range, it is removed
+                                if (intersects) {
+                                    removeMergeData.push(rect);
+                                    const contains = Rectangle.contains(
+                                        {
+                                            startRow,
+                                            startColumn,
+                                            endRow,
+                                            endColumn: maxCol,
+                                        },
+                                        rect
+                                    );
+
+                                    // If the merge cell is completely contained in the range, it is added after recalculating the position
+
+                                    if (contains) {
+                                        const currentColumnsCount = endColumn - startColumn + 1;
+                                        addMergeData.push({
+                                            startRow: rect.startRow,
+                                            startColumn: rect.startColumn + currentColumnsCount,
+                                            endRow: rect.endRow,
+                                            endColumn: rect.endColumn + currentColumnsCount,
+                                        });
+                                        break;
+                                    }
+                                }
+                            }
+                        });
+                        const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
+                            workbookId,
+                            worksheetId,
+                            ranges: removeMergeData,
+                        };
+                        const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+                            this._injector,
+                            removeMergeParams
+                        );
+                        const addMergeParams: IAddWorksheetMergeMutationParams = {
+                            workbookId,
+                            worksheetId,
+                            ranges: addMergeData,
+                        };
+                        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
+                            this._injector,
+                            addMergeParams
+                        );
+                        return {
+                            redos: [
+                                { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
+                                {
+                                    id: AddWorksheetMergeMutation.id,
+                                    params: addMergeParams,
+                                },
+                            ],
+                            undos: [
+                                {
+                                    id: AddWorksheetMergeMutation.id,
+                                    params: undoRemoveMergeParams,
+                                },
+                                { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
+                            ],
+                        };
+                    }
+                    case InsertRangeMoveDownCommand.id: {
+                        let ranges = (config.params as unknown as RemoveRowColCommandParams)?.ranges;
+                        if (!ranges) {
+                            if (!ranges) {
+                                const selections = this._selectionManagerService.getSelections();
+                                if (!selections?.length) {
+                                    break;
+                                }
+                                ranges = selections.map((s) => Rectangle.clone(s.range));
+                            }
+                        }
+                        const worksheetId = workSheet.getSheetId();
+                        const maxRow = workSheet.getMaxRows() - 1;
+                        const mergeData = workSheet.getMergeData();
+                        const removeMergeData: IRange[] = [];
+                        const addMergeData: IRange[] = [];
+                        mergeData.forEach((rect) => {
+                            for (let i = 0; i < ranges.length; i++) {
+                                const { startRow, startColumn, endColumn, endRow } = ranges[i];
+                                const intersects = Rectangle.intersects(
+                                    { startRow, startColumn, endRow: maxRow, endColumn },
+                                    rect
+                                );
+
+                                // If the merge cell intersects with the range, it is removed
+                                if (intersects) {
+                                    removeMergeData.push(rect);
+                                    const contains = Rectangle.contains(
+                                        { startRow, startColumn, endRow: maxRow, endColumn },
+                                        rect
+                                    );
+                                    // If the merge cell is completely contained in the range, it is added after recalculating the position
+                                    if (contains) {
+                                        const rowCount = endRow - startRow + 1;
+                                        addMergeData.push({
+                                            startRow: rect.startRow + rowCount,
+                                            startColumn: rect.startColumn,
+                                            endRow: rect.endRow + rowCount,
+                                            endColumn: rect.endColumn,
+                                        });
+                                        break;
+                                    }
+                                }
+                            }
+                        });
+                        const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
+                            workbookId,
+                            worksheetId,
+                            ranges: removeMergeData,
+                        };
+                        const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+                            this._injector,
+                            removeMergeParams
+                        );
+                        const addMergeParams: IAddWorksheetMergeMutationParams = {
+                            workbookId,
+                            worksheetId,
+                            ranges: addMergeData,
+                        };
+                        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
+                            this._injector,
+
+                            addMergeParams
+                        );
+                        const redos = [
+                            {
+                                id: RemoveWorksheetMergeMutation.id,
+                                params: removeMergeParams,
+                            },
+                            {
+                                id: AddWorksheetMergeMutation.id,
+                                params: addMergeParams,
+                            },
+                        ];
+                        const undos = [
+                            {
+                                id: AddWorksheetMergeMutation.id,
+                                params: undoRemoveMergeParams,
+                            },
+                            {
+                                id: RemoveWorksheetMergeMutation.id,
+                                params: undoAddMergeParams,
+                            },
+                        ];
+                        return { redos, undos };
+                    }
+                    case DeleteRangeMoveUpCommand.id: {
+                        let ranges = (config.params as unknown as RemoveRowColCommandParams)?.ranges;
+                        if (!ranges) {
+                            if (!ranges) {
+                                const selections = this._selectionManagerService.getSelections();
+                                if (!selections?.length) {
+                                    break;
+                                }
+                                ranges = selections.map((s) => Rectangle.clone(s.range));
+                            }
+                        }
+                        const worksheetId = workSheet.getSheetId();
+                        const maxRow = workSheet.getMaxRows() - 1;
+                        const mergeData = workSheet.getMergeData();
+                        const removeMergeData: IRange[] = [];
+                        const addMergeData: IRange[] = [];
+                        mergeData.forEach((rect) => {
+                            for (let i = 0; i < ranges.length; i++) {
+                                const { startRow, startColumn, endColumn, endRow } = ranges[i];
+                                const intersects = Rectangle.intersects(
+                                    { startRow, startColumn, endRow: maxRow, endColumn },
+                                    rect
+                                );
+                                if (intersects) {
+                                    removeMergeData.push(rect);
+                                    const contains = Rectangle.contains(
+                                        { startRow, startColumn, endRow: maxRow, endColumn },
+                                        rect
+                                    );
+                                    if (contains) {
+                                        const rowCount = endRow - startRow + 1;
+                                        const range = Rectangle.moveVertical(rect, -rowCount);
+                                        addMergeData.push(range);
+                                        break;
+                                    }
+                                }
+                            }
+                        });
+                        const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
+                            workbookId,
+                            worksheetId,
+                            ranges: removeMergeData,
+                        };
+                        const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+                            this._injector,
+                            removeMergeParams
+                        );
+                        const addMergeParams: IAddWorksheetMergeMutationParams = {
+                            workbookId,
+                            worksheetId,
+                            ranges: addMergeData,
+                        };
+                        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
+                            this._injector,
+                            addMergeParams
+                        );
+                        const redos = [
+                            {
+                                id: RemoveWorksheetMergeMutation.id,
+                                params: removeMergeParams,
+                            },
+                            {
+                                id: AddWorksheetMergeMutation.id,
+                                params: addMergeParams,
+                            },
+                        ];
+                        const undos = [
+                            {
+                                id: AddWorksheetMergeMutation.id,
+                                params: undoRemoveMergeParams,
+                            },
+                            {
+                                id: RemoveWorksheetMergeMutation.id,
+                                params: undoAddMergeParams,
+                            },
+                        ];
+                        return { redos, undos };
+                    }
+                    case DeleteRangeMoveLeftCommand.id: {
+                        const ranges =
+                            (config.params as unknown as InsertRangeMoveRightCommandParams)?.ranges ||
+                            getSelectionRanges(this._selectionManagerService);
+                        const workbookId = workbook.getUnitId();
+                        const worksheetId = workSheet.getSheetId();
+                        const maxCol = workSheet.getMaxColumns() - 1;
+                        const mergeData = workSheet.getMergeData();
+                        const removeMergeData: IRange[] = [];
+                        const addMergeData: IRange[] = [];
+                        mergeData.forEach((rect) => {
+                            for (let i = 0; i < ranges.length; i++) {
+                                const { startRow, endRow, startColumn, endColumn } = ranges[i];
+                                const intersects = Rectangle.intersects(
+                                    {
+                                        startRow,
+                                        startColumn,
+                                        endRow,
+                                        endColumn: maxCol,
+                                    },
+                                    rect
+                                );
+                                if (intersects) {
+                                    removeMergeData.push(rect);
+                                    const contains = Rectangle.contains(
+                                        {
+                                            startRow,
+                                            startColumn,
+                                            endRow,
+                                            endColumn: maxCol,
+                                        },
+                                        rect
+                                    );
+                                    if (contains) {
+                                        const currentColumnsCount = endColumn - startColumn + 1;
+                                        addMergeData.push({
+                                            startRow: rect.startRow,
+                                            startColumn: rect.startColumn - currentColumnsCount,
+                                            endRow: rect.endRow,
+                                            endColumn: rect.endColumn - currentColumnsCount,
+                                        });
+                                        break;
+                                    }
+                                }
+                            }
+                        });
+                        const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
+                            workbookId,
+                            worksheetId,
+                            ranges: removeMergeData,
+                        };
+                        const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+                            this._injector,
+                            removeMergeParams
+                        );
+                        const addMergeParams: IAddWorksheetMergeMutationParams = {
+                            workbookId,
+                            worksheetId,
+                            ranges: addMergeData,
+                        };
+                        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
+                            this._injector,
+                            addMergeParams
+                        );
+                        return {
+                            redos: [
+                                { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
+                                {
+                                    id: AddWorksheetMergeMutation.id,
+                                    params: addMergeParams,
+                                },
+                            ],
+                            undos: [
+                                {
+                                    id: AddWorksheetMergeMutation.id,
+                                    params: undoRemoveMergeParams,
+                                },
+                                { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
+                            ],
+                        };
                     }
                 }
                 return { redos: [], undos: [] };
@@ -416,4 +745,7 @@ export class MergeCellController extends Disposable {
         const sheet = workbook.getActiveSheet();
         registerRefRange(workbook.getUnitId(), sheet.getSheetId());
     };
+}
+function getSelectionRanges(selectionManagerService: SelectionManagerService) {
+    return selectionManagerService.getSelectionRanges() || [];
 }

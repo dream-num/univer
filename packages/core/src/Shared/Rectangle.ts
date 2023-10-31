@@ -170,4 +170,16 @@ export class Rectangle {
             startColumn: relativeRange.startColumn + originRange.startColumn,
             endColumn: relativeRange.endColumn + relativeRange.startColumn + originRange.startColumn,
         }) as IRange;
+
+    static moveHorizontal = (range: IRange, step: number = 0, length: number = 0): IRange => ({
+        ...range,
+        startColumn: range.startColumn + step,
+        endColumn: range.endColumn + step + length,
+    });
+
+    static moveVertical = (range: IRange, step: number = 0, length: number = 0): IRange => ({
+        ...range,
+        startRow: range.startRow + step,
+        endRow: range.endRow + step + length,
+    });
 }

@@ -16,6 +16,8 @@ import {
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { MergeCellController } from '../../../Controller/merge-cell.controller';
+import { RefRangeService } from '../../../services/ref-range.service';
 import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
@@ -180,9 +182,10 @@ describe('Test insert range commands', () => {
     ) => IRange[] | undefined;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed(WORKBOOK_DATA_DEMO);
+        const testBed = createCommandTestBed(WORKBOOK_DATA_DEMO, [[MergeCellController], [RefRangeService]]);
         univer = testBed.univer;
         get = testBed.get;
+        get(MergeCellController);
 
         commandService = get(ICommandService);
         commandService.registerCommand(InsertRangeMoveDownCommand);

@@ -13,6 +13,22 @@ import { IDisposable, Inject } from '@wendellhu/redi';
 
 import {} from '../Basics/Interfaces/MutationInterface';
 import {
+    DeleteRangeMoveLeftCommand,
+    DeleteRangeMoveLeftCommandParams,
+} from '../commands/commands/delete-range-move-left.command';
+import {
+    DeleteRangeMoveUpCommand,
+    DeleteRangeMoveUpCommandParams,
+} from '../commands/commands/delete-range-move-up.command';
+import {
+    InsertRangeMoveDownCommand,
+    InsertRangeMoveDownCommandParams,
+} from '../commands/commands/insert-range-move-down.command';
+import {
+    InsertRangeMoveRightCommand,
+    InsertRangeMoveRightCommandParams,
+} from '../commands/commands/insert-range-move-right.command';
+import {
     IInsertColCommandParams,
     IInsertRowCommandParams,
     InsertColCommand,
@@ -24,12 +40,17 @@ import {
     RemoveRowColCommandParams,
     RemoveRowCommand,
 } from '../commands/commands/remove-row-col.command';
+import { SelectionManagerService } from './selection/selection-manager.service';
 
 export type EffectParams =
     | ICommandInfo<IMoveRangeCommandParams>
     | ICommandInfo<IInsertRowCommandParams>
     | ICommandInfo<IInsertColCommandParams>
-    | ICommandInfo<RemoveRowColCommandParams>;
+    | ICommandInfo<RemoveRowColCommandParams>
+    | ICommandInfo<DeleteRangeMoveLeftCommandParams>
+    | ICommandInfo<DeleteRangeMoveUpCommandParams>
+    | ICommandInfo<InsertRangeMoveDownCommandParams>
+    | ICommandInfo<InsertRangeMoveRightCommandParams>;
 
 type RefRangCallback = (params: EffectParams) => {
     redos: Array<ICommandInfo<object>>;
@@ -45,7 +66,8 @@ export class RefRangeService extends Disposable {
     // todo: range 实例过大的时候
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService
     ) {
         super();
         this._onRefRangeChange();
@@ -55,7 +77,6 @@ export class RefRangeService extends Disposable {
     private _onRefRangeChange = () => {
         this._sheetInterceptorService.interceptCommand({
             getMutations: (command) => {
-                command.params;
                 const workSheet = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 const workbookId = getWorkbookId(this._univerInstanceService);
                 const worksheetId = getWorksheetId(this._univerInstanceService);
@@ -115,6 +136,30 @@ export class RefRangeService extends Disposable {
                             };
                             return this._checkRange([range], workbookId, worksheetId);
                         }
+                        case DeleteRangeMoveUpCommand.id:
+                        case InsertRangeMoveDownCommand.id: {
+                            const params = command as unknown as ICommandInfo<InsertRangeMoveDownCommandParams>;
+                            const ranges = params.params!.ranges || getSelectionRanges(this._selectionManagerService);
+                            const effectRanges = ranges.map((range) => ({
+                                startRow: range.startRow,
+                                startColumn: range.startColumn,
+                                endColumn: range.endColumn,
+                                endRow: workSheet.getRowCount() - 1,
+                            }));
+                            return this._checkRange(effectRanges, workbookId, worksheetId);
+                        }
+                        case DeleteRangeMoveLeftCommand.id:
+                        case InsertRangeMoveRightCommand.id: {
+                            const params = command as unknown as ICommandInfo<InsertRangeMoveRightCommandParams>;
+                            const ranges = params.params!.ranges || getSelectionRanges(this._selectionManagerService);
+                            const effectRanges = ranges.map((range) => ({
+                                startRow: range.startRow,
+                                startColumn: range.startColumn,
+                                endColumn: workSheet.getColumnCount() - 1,
+                                endRow: range.endColumn,
+                            }));
+                            return this._checkRange(effectRanges, workbookId, worksheetId);
+                        }
                     }
                     return [];
                 };
@@ -166,13 +211,13 @@ export class RefRangeService extends Disposable {
     ): IDisposable => {
         const workbookId = _workbookId || getWorkbookId(this._univerInstanceService);
         const worksheetId = _worksheetId || getWorksheetId(this._univerInstanceService);
-        const refRangeManageId = this._getRefRangId(workbookId, worksheetId);
+        const refRangeManagerId = this._getRefRangId(workbookId, worksheetId);
         const rangeString = this.serializer.serialize(range);
 
-        let manager = this._refRangeManagerMap.get(refRangeManageId) as Map<string, Set<RefRangCallback>>;
+        let manager = this._refRangeManagerMap.get(refRangeManagerId) as Map<string, Set<RefRangCallback>>;
         if (!manager) {
             manager = new Map();
-            this._refRangeManagerMap.set(refRangeManageId, manager);
+            this._refRangeManagerMap.set(refRangeManagerId, manager);
         }
         const refRangeCallbackList = manager.get(rangeString);
 
@@ -188,7 +233,7 @@ export class RefRangeService extends Disposable {
                 if (!refRangeCallbackList.size) {
                     manager.delete(rangeString);
                     if (!manager.size) {
-                        this._refRangeManagerMap.delete(refRangeManageId);
+                        this._refRangeManagerMap.delete(refRangeManagerId);
                     }
                 }
             }
@@ -201,6 +246,9 @@ function getWorkbookId(univerInstanceService: IUniverInstanceService) {
 }
 function getWorksheetId(univerInstanceService: IUniverInstanceService) {
     return univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+}
+function getSelectionRanges(selectionManagerService: SelectionManagerService) {
+    return selectionManagerService.getSelectionRanges() || [];
 }
 function createRangeSerializer() {
     const keyList = ['startRow', 'startColumn', 'endRow', 'endColumn', 'rangeType'];

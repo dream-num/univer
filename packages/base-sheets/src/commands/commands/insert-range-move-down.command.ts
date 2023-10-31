@@ -13,31 +13,27 @@ import {
     IUniverInstanceService,
     ObjectArray,
     ObjectMatrix,
-    Rectangle,
     sequenceExecute,
+    SheetInterceptorService,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
-    IAddWorksheetMergeMutationParams,
     IDeleteRangeMutationParams,
     IInsertRangeMutationParams,
     IInsertRowMutationParams,
     IRemoveRowsMutationParams,
-    IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 import { SelectionManagerService } from '../../services/selection/selection-manager.service';
-import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../mutations/insert-range.mutation';
 import { InsertRowMutation, InsertRowMutationUndoFactory } from '../mutations/insert-row-col.mutation';
 import { RemoveRowMutation } from '../mutations/remove-row-col.mutation';
-import {
-    RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation,
-} from '../mutations/remove-worksheet-merge.mutation';
 import { calculateTotalLength, IInterval } from './utils/selection-util';
 
+export interface InsertRangeMoveDownCommandParams {
+    ranges: IRange[];
+}
 /**
  * The command to insert range.
  */
@@ -45,12 +41,13 @@ export const InsertRangeMoveDownCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.insert-range-move-down',
 
-    handler: async (accessor: IAccessor) => {
+    handler: async (accessor: IAccessor, params?: InsertRangeMoveDownCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const logService = accessor.get(ILogService);
         const selectionManagerService = accessor.get(SelectionManagerService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         if (selectionManagerService.isOverlapping()) {
             // TODO@Dushusir: use Dialog after Dialog component completed
@@ -64,8 +61,11 @@ export const InsertRangeMoveDownCommand: ICommand = {
 
             .getActiveSheet()
             .getSheetId();
-        const range = selectionManagerService.getSelectionRanges();
-        if (!range?.length) return false;
+        let ranges = params?.ranges as IRange[];
+        if (!ranges) {
+            ranges = selectionManagerService.getSelectionRanges() || [];
+        }
+        if (!ranges?.length) return false;
 
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
         if (!workbook) return false;
@@ -77,8 +77,8 @@ export const InsertRangeMoveDownCommand: ICommand = {
 
         // 1. insert range
         const cellValue = new ObjectMatrix<ICellData>();
-        for (let i = 0; i < range.length; i++) {
-            const { startRow, endRow, startColumn, endColumn } = range[i];
+        for (let i = 0; i < ranges.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = ranges[i];
 
             for (let r = startRow; r <= endRow; r++) {
                 for (let c = startColumn; c <= endColumn; c++) {
@@ -88,7 +88,7 @@ export const InsertRangeMoveDownCommand: ICommand = {
         }
 
         const insertRangeMutationParams: IInsertRangeMutationParams = {
-            ranges: range,
+            ranges,
             worksheetId,
             workbookId,
             shiftDimension: Dimension.ROWS,
@@ -110,8 +110,8 @@ export const InsertRangeMoveDownCommand: ICommand = {
         let lastRowHeight = 0;
         const lastRowIndex = worksheet.getMaxRows() - 1;
         const rowsObject: IInterval = {};
-        for (let i = 0; i < range.length; i++) {
-            const { startRow, endRow, startColumn, endColumn } = range[i];
+        for (let i = 0; i < ranges.length; i++) {
+            const { startRow, endRow, startColumn, endColumn } = ranges[i];
             rowsObject[`${i}`] = [startRow, endRow];
             for (let column = startColumn; column <= endColumn; column++) {
                 const lastCell = worksheet.getCell(lastRowIndex, column);
@@ -130,8 +130,8 @@ export const InsertRangeMoveDownCommand: ICommand = {
             const lastRowRange = {
                 startRow: lastRowIndex,
                 endRow: lastRowIndex,
-                startColumn: range[0].startColumn,
-                endColumn: range[0].endColumn,
+                startColumn: ranges[0].startColumn,
+                endColumn: ranges[0].endColumn,
             };
             const insertRowParams: IInsertRowMutationParams = {
                 workbookId,
@@ -158,77 +158,12 @@ export const InsertRangeMoveDownCommand: ICommand = {
             undoMutations.push({ id: RemoveRowMutation.id, params: undoRowInsertionParams });
         }
 
-        // 3. change merge cells
-        // All merged cells that intersect with the area to the bottom of rang are removed
-        // Merge cells completely in the bottom area of the range, added after recalculating the position
-        const mergeData = worksheet.getMergeData();
-        const removeMergeData: IRange[] = [];
-        const addMergeData: IRange[] = [];
-        mergeData.forEach((rect) => {
-            for (let i = 0; i < range.length; i++) {
-                const { startRow, startColumn, endColumn } = range[i];
-
-                const intersects = Rectangle.intersects(
-                    { startRow, startColumn, endRow: lastRowIndex, endColumn },
-                    rect
-                );
-
-                // If the merge cell intersects with the range, it is removed
-                if (intersects) {
-                    removeMergeData.push(rect);
-                    const contains = Rectangle.contains(
-                        { startRow, startColumn, endRow: lastRowIndex, endColumn },
-                        rect
-                    );
-
-                    // If the merge cell is completely contained in the range, it is added after recalculating the position
-                    if (contains) {
-                        const currentRowsCount = rowsObject[`${i}`][1] - rowsObject[`${i}`][0] + 1;
-                        addMergeData.push({
-                            startRow: rect.startRow + currentRowsCount,
-                            startColumn: rect.startColumn,
-                            endRow: rect.endRow + currentRowsCount,
-                            endColumn: rect.endColumn,
-                        });
-                        break;
-                    }
-                }
-            }
+        const sheetInterceptor = sheetInterceptorService.onCommandExecute({
+            id: InsertRangeMoveDownCommand.id,
+            params: { ranges } as InsertRangeMoveDownCommandParams,
         });
-
-        if (removeMergeData.length > 0) {
-            const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
-                workbookId,
-                worksheetId,
-                ranges: removeMergeData,
-            };
-            redoMutations.push({
-                id: RemoveWorksheetMergeMutation.id,
-                params: removeMergeParams,
-            });
-            const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-                accessor,
-                removeMergeParams
-            );
-            undoMutations.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeParams });
-        }
-
-        if (addMergeData.length > 0) {
-            const addMergeParams: IAddWorksheetMergeMutationParams = {
-                workbookId,
-                worksheetId,
-                ranges: addMergeData,
-            };
-            redoMutations.push({
-                id: AddWorksheetMergeMutation.id,
-                params: addMergeParams,
-            });
-            const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
-                accessor,
-                addMergeParams
-            );
-            undoMutations.push({ id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams });
-        }
+        redoMutations.push(...sheetInterceptor.redos);
+        undoMutations.push(...sheetInterceptor.undos);
 
         // execute do mutations and add undo mutations to undo stack if completed
         const result = sequenceExecute(redoMutations, commandService);

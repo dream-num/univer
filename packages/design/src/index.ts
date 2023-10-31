@@ -5,6 +5,7 @@ export { CheckboxGroup, type ICheckboxGroupProps } from './components/checkbox-g
 export { ColorPicker, type IColorPickerProps } from './components/color-picker';
 export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './components/config-provider';
 export { Container, type IContainerProps } from './components/container';
+export { Dialog, type IDialogProps } from './components/dialog';
 export { type IInputNumberProps, InputNumber } from './components/input-number';
 export { Content, Footer, Header, type ILayoutProps, Layout, Sider } from './components/layout';
 export { type IMessageProps, Message, message, type MessageType } from './components/message';

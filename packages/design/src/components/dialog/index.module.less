@@ -1,0 +1,180 @@
+.dialog {
+    position: relative;
+    width: 640px;
+    margin: 10% auto;
+
+    &-wrap {
+        position: fixed;
+        overflow: auto;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1050;
+        -webkit-overflow-scrolling: touch;
+        outline: 0;
+    }
+
+    &-title {
+        margin: 0;
+        font-size: var(--font-size-lg);
+        font-weight: 500;
+    }
+
+    &-content {
+        position: relative;
+        color: rgb(var(--text-color));
+        background-color: rgb(var(--bg-color-secondary));
+        background-clip: padding-box;
+        border: 1px solid rgb(var(--border-color));
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--box-shadow-base);
+    }
+
+    &-close {
+        position: absolute;
+        right: 28px;
+        top: 24px;
+        padding: 0;
+        font-size: var(--font-size-base);
+        font-weight: 500;
+        line-height: 1;
+        text-decoration: none;
+        color: rgb(var(--text-color));
+        background: transparent;
+        border: 0;
+        opacity: .2;
+        cursor: pointer;
+
+        &:hover {
+            text-decoration: none;
+            opacity: 1;
+        }
+    }
+
+    &-header {
+        padding: 24px 28px 20px 28px;
+        color: rgb(var(--text-color));
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        box-sizing: border-box;
+    }
+
+    &-body {
+        padding: 0 28px 20px 28px;
+    }
+
+    &-footer {
+        padding: 0 28px 24px 28px;
+        text-align: right;
+        border-radius: 0 0 5px 5px;
+    }
+
+    .effect() {
+        animation-duration: 0.3s;
+        animation-fill-mode: both;
+    }
+
+    &-zoom-enter, &-zoom-appear {
+        opacity: 0;
+        .effect();
+        animation-timing-function: cubic-bezier(0.08, 0.82, 0.17, 1);
+        animation-play-state: paused;
+    }
+
+    &-zoom-leave {
+        .effect();
+        animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.34);
+        animation-play-state: paused;
+    }
+
+    &-zoom-enter&-zoom-enter-active, &-zoom-appear&-zoom-appear-active {
+        animation-name: rcDialogZoomIn;
+        animation-play-state: running;
+    }
+
+    &-zoom-leave&-zoom-leave-active {
+        animation-name: rcDialogZoomOut;
+        animation-play-state: running;
+    }
+
+    @keyframes rcDialogZoomIn {
+        0% {
+            opacity: 0;
+            transform: scale(0, 0);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1, 1);
+        }
+    }
+    @keyframes rcDialogZoomOut {
+        0% {
+
+            transform: scale(1, 1);
+        }
+        100% {
+            opacity: 0;
+            transform: scale(0, 0);
+        }
+    }
+
+    &-mask {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 100%;
+        // background-color: rgba(55, 55, 55, 0.6);
+        z-index: 1050;
+
+        &-hidden {
+            display: none;
+        }
+    }
+
+    .fade-effect() {
+        animation-duration: 0.3s;
+        animation-fill-mode: both;
+        animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+    }
+
+    &-fade-enter,&-fade-appear {
+        opacity: 0;
+        .fade-effect();
+        animation-play-state: paused;
+    }
+
+    &-fade-leave {
+        .fade-effect();
+        animation-play-state: paused;
+    }
+
+    &-fade-enter&-fade-enter-active,&-fade-appear&-fade-appear-active  {
+        animation-name: rcDialogFadeIn;
+        animation-play-state: running;
+    }
+
+    &-fade-leave&-fade-leave-active {
+        animation-name: rcDialogFadeOut;
+        animation-play-state: running;
+    }
+
+    @keyframes rcDialogFadeIn {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+
+    @keyframes rcDialogFadeOut {
+        0% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+        }
+    }
+}

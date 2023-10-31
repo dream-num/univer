@@ -42,6 +42,18 @@ export interface IInputNumberProps {
     controls?: boolean;
 
     /**
+     * Callback when user click
+     * @param e
+     */
+    onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
+
+    /**
+     * Callback when user press a key
+     * @param e
+     */
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+
+    /**
      * Callback when user input
      * @param value
      */
@@ -49,10 +61,23 @@ export interface IInputNumberProps {
 }
 
 export function InputNumber(props: IInputNumberProps) {
-    const { value, max, min, step = 1, precision, disabled = false, controls = true, onChange } = props;
+    const {
+        value,
+        max,
+        min,
+        step = 1,
+        precision,
+        disabled = false,
+        controls = true,
+        onClick,
+        onKeyDown,
+        onChange,
+    } = props;
 
     function handleChange(value: number | null) {
-        onChange?.(value);
+        if (value !== null) {
+            onChange?.(value);
+        }
     }
 
     return (
@@ -65,6 +90,8 @@ export function InputNumber(props: IInputNumberProps) {
             precision={precision}
             disabled={disabled}
             controls={controls}
+            onClick={onClick}
+            onKeyDown={onKeyDown}
             onChange={handleChange}
         />
     );

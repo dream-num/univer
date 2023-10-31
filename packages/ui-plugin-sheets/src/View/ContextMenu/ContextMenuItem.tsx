@@ -7,7 +7,7 @@ interface IProps {
     label: string;
 }
 
-export class RightMenuItem extends Component<IProps> {
+export class ContextMenuItem extends Component<IProps> {
     override render() {
         const { label } = this.props;
 

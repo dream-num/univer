@@ -16,7 +16,9 @@ export const SetTextSelectionsOperation: IOperation<ISetTextSelectionsOperationP
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
         textSelectionManagerService.replace(params!.ranges);
+
         return true;
     },
 };

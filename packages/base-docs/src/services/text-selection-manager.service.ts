@@ -37,10 +37,12 @@ export class TextSelectionManagerService implements IDisposable {
         if (this._currentSelection == null) {
             return;
         }
+
         this._currentSelection = {
             pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
             unitId: this._currentSelection?.unitId,
         };
+
         this._textSelectionInfo.clear();
 
         this.refresh(this._currentSelection);
@@ -50,6 +52,7 @@ export class TextSelectionManagerService implements IDisposable {
         if (this._currentSelection == null) {
             return;
         }
+
         this._currentSelection.pluginName = NORMAL_TEXT_SELECTION_PLUGIN_NAME;
 
         this.refresh(this._currentSelection);
@@ -63,6 +66,7 @@ export class TextSelectionManagerService implements IDisposable {
         if (this._currentSelection == null) {
             return;
         }
+
         this.refresh(this._currentSelection);
     }
 
@@ -126,6 +130,7 @@ export class TextSelectionManagerService implements IDisposable {
         if (this._currentSelection == null) {
             return;
         }
+
         this._replaceByParam({
             ...this._currentSelection,
             textRanges,
@@ -136,6 +141,7 @@ export class TextSelectionManagerService implements IDisposable {
         if (this._currentSelection == null) {
             return;
         }
+
         this._clearByParam(this._currentSelection);
     }
 
@@ -151,7 +157,9 @@ export class TextSelectionManagerService implements IDisposable {
         if (param == null) {
             return;
         }
+
         const { pluginName, unitId } = param;
+
         return this._textSelectionInfo.get(pluginName)?.get(unitId);
     }
 

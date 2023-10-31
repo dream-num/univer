@@ -177,6 +177,8 @@ export class DocRenderController extends Disposable {
                         return;
                     }
 
+                    skeleton.calculate();
+
                     if (excludeUnitList.includes(unitId)) {
                         currentRender.mainComponent?.makeDirty();
                         return;

@@ -64,7 +64,7 @@ export class NormalInputController extends Disposable {
                 return;
             }
 
-            const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack, segmentId, style } = activeRange;
+            const { cursorStart, isEndBack, isStartBack, segmentId, style } = activeRange;
 
             await this._commandService.executeCommand(InsertCommand.id, {
                 unitId: documentModel.getUnitId(),

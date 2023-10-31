@@ -13,12 +13,74 @@ import {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
+import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import {
     IDeleteMutationParams,
     IRetainMutationParams,
     IRichTextEditingMutationParams,
     RichTextEditingMutation,
 } from '../mutations/core-editing.mutation';
+
+export const SetBoldCommand: ICommand = {
+    id: 'doc.command.set-bold',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+        console.log('set bold');
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const commandService = accessor.get(ICommandService);
+        const currentUniverService = accessor.get(IUniverInstanceService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+        const docsModel = currentUniverService.getCurrentUniverDocInstance();
+        const unitId = docsModel.getUnitId();
+
+        const selections = textSelectionManagerService.getSelections();
+
+        const { cursorStart, cursorEnd, isStartBack, isEndBack } = selections![0];
+
+        const textStart = getTextIndexByCursor(cursorStart, isStartBack);
+        const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
+        console.log(cursorStart, cursorEnd, isStartBack, isEndBack);
+        console.log(textStart, textEnd);
+
+        const params: ICommandInfo<IRichTextEditingMutationParams>['params'] = {
+            unitId,
+            mutations: [],
+        };
+
+        const body: IDocumentBody = {
+            dataStream: '',
+            textRuns: [
+                {
+                    st: 0,
+                    ed: textEnd - textStart,
+                    ts: {
+                        bl: 1,
+                    },
+                },
+            ],
+        };
+
+        if (textStart !== -1) {
+            params.mutations.push({
+                t: 'r',
+                len: textStart + 1,
+                segmentId: '',
+            });
+        }
+
+        params.mutations.push({
+            t: 'r',
+            body,
+            len: textEnd - textStart,
+            segmentId: '',
+        });
+
+        commandService.executeCommand(RichTextEditingMutation.id, params);
+
+        return true;
+    },
+};
 
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
@@ -56,7 +118,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         const commandService = accessor.get(ICommandService);
 
         const { range, segmentId, body, unitId } = params;
-        const { cursorStart, cursorEnd, isEndBack, isStartBack, isCollapse } = range;
+        const { cursorStart, isStartBack, isCollapse } = range;
         const textStart = getTextIndexByCursor(cursorStart, isStartBack);
 
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
@@ -66,6 +128,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 mutations: [],
             },
         };
+
         if (isCollapse) {
             doMutation.params!.mutations.push({
                 t: 'r',
@@ -75,6 +138,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         } else {
             doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
         }
+
         doMutation.params!.mutations.push({
             t: 'i',
             body,
@@ -92,11 +156,11 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         };
 
         // TODO@wzhudev: prepare undo mutation
-
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: unitId,
@@ -186,10 +250,10 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             throw new Error();
         }
 
+        const { range, segmentId, updateBody, coverType, unitId } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const { range, segmentId, updateBody, coverType, unitId } = params;
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
@@ -198,7 +262,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             },
         };
 
-        const { cursorStart, cursorEnd, isEndBack, isStartBack, isCollapse } = range;
+        const { cursorStart, cursorEnd, isEndBack, isStartBack } = range;
         const textStart = getTextIndexByCursor(cursorStart, isStartBack);
         const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
 
@@ -220,11 +284,12 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 URI: unitId,
                 undo() {
-                    return commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
                     return true;
                 },
                 redo() {
@@ -252,9 +317,9 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
     id: 'doc.command.ime-input',
     type: CommandType.COMMAND,
     handler: async (accessor, params: IIMEInputCommandParams) => {
+        const { unitId, newText, oldTextLen, range, segmentId } = params;
         const commandService = accessor.get(ICommandService);
 
-        const { unitId, newText, oldTextLen, range, segmentId } = params;
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
@@ -314,9 +379,10 @@ export const CoverCommand: ICommand<ICoverCommandParams> = {
     id: 'doc.command-cover-content',
     type: CommandType.COMMAND,
     handler: async (accessor, params: ICoverCommandParams) => {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
         const { unitId, snapshot, clearUndoRedoStack } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const doc = univerInstanceService.getUniverDocInstance(unitId);
+
         if (!doc) {
             return false;
         }

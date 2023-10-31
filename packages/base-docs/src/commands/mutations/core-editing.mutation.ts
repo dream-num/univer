@@ -59,10 +59,13 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         const undoMutations: Array<IRetainMutationParams | IInsertMutationParams | IDeleteMutationParams> = [];
         const commonParameter = new CommonParameter();
+
         commonParameter.reset();
+
         mutations.forEach((mutation) => {
             if (mutation.t === 'r') {
                 const { coverType, body, len, segmentId } = mutation;
+
                 if (body != null) {
                     const documentBody = UpdateAttributeApply(
                         documentModel,
@@ -72,6 +75,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                         coverType,
                         segmentId
                     );
+
                     undoMutations.push({
                         ...mutation,
                         t: 'r',
@@ -87,6 +91,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                 });
             } else if (mutation.t === 'i') {
                 const { body, len, segmentId, line } = mutation;
+
                 InsertApply(documentModel, body!, len, commonParameter.cursor, segmentId);
                 commonParameter.moveCursor(len);
                 undoMutations.push({
@@ -98,6 +103,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             } else if (mutation.t === 'd') {
                 const { len, segmentId } = mutation;
                 const documentBody = DeleteApply(documentModel, len, commonParameter.cursor, segmentId);
+
                 undoMutations.push({
                     ...mutation,
                     t: 'i',

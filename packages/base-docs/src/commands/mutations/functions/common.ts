@@ -36,6 +36,7 @@ export function insertTextRuns(
     for (let i = 0, len = textRuns.length; i < len; i++) {
         const textRun = textRuns[i];
         const { st, ed } = textRun;
+
         if (st > currentIndex) {
             textRun.st += textLength;
             textRun.ed += textLength;
@@ -55,12 +56,14 @@ export function insertTextRuns(
     }
 
     const insertTextRuns = insertBody.textRuns;
+
     if (insertTextRuns) {
         for (let i = 0, len = insertTextRuns.length; i < len; i++) {
             const insertTextRun = insertTextRuns[i];
             insertTextRun.st += currentIndex;
             insertTextRun.ed += currentIndex;
         }
+
         if (insertIndex === Infinity) {
             textRuns.push(...insertTextRuns);
         }
@@ -69,6 +72,7 @@ export function insertTextRuns(
         } else {
             const splitTextRun = textRuns[insertIndex];
             const { st, ed } = splitTextRun;
+
             const startSplitTextRun = {
                 ...splitTextRun,
                 st,
@@ -313,13 +317,14 @@ export function insertCustomRanges(
 
 export function deleteTextRuns(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { textRuns } = body;
-
     const startIndex = currentIndex;
 
     const endIndex = currentIndex + textLength - 1;
     const removeTextRuns: ITextRun[] = [];
+
     if (textRuns) {
         const newTextRuns = [];
+
         for (let i = 0, len = textRuns.length; i < len; i++) {
             const textRun = textRuns[i];
             const { st, ed } = textRun;
@@ -339,6 +344,11 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                  * If the selection range is smaller than the current textRun,
                  * it needs to be trimmed. After trimming, the two segments of textRun should be merged.
                  */
+                removeTextRuns.push({
+                    ...textRun,
+                    st: startIndex - startIndex,
+                    ed: endIndex - startIndex,
+                });
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
 
                 textRun.st = segments[0];
@@ -375,8 +385,10 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                 textRun.st -= textLength;
                 textRun.ed -= textLength;
             }
+
             newTextRuns.push(textRun);
         }
+
         body.textRuns = newTextRuns;
     }
 

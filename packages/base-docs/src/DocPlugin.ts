@@ -19,6 +19,7 @@ import {
     DeleteLeftCommand,
     IMEInputCommand,
     InsertCommand,
+    SetBoldCommand,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
@@ -96,6 +97,7 @@ export class DocPlugin extends Plugin {
             [
                 MoveCursorOperation,
                 DeleteLeftCommand,
+                SetBoldCommand,
                 BreakLineCommand,
                 InsertCommand,
                 DeleteCommand,

@@ -1,11 +1,11 @@
-import { BreakLineCommand, DeleteLeftCommand } from '@univerjs/base-docs';
+import { BreakLineCommand, SetBoldCommand } from '@univerjs/base-docs';
 import { IMenuButtonItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { IAccessor } from '@wendellhu/redi';
 
-// TODO@Dushusir: use for test, change id later
+// TODO @Dushusir: use for test, change id later
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: DeleteLeftCommand.id,
+        id: SetBoldCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'BoldSingle',
         title: 'Set bold',

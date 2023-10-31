@@ -83,7 +83,7 @@ export class DeleteLeftInputController extends Disposable {
 
         const preIsIndent = isIndentBySpan(preSpan, docsModel.body);
 
-        const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack, segmentId, style } = activeRange;
+        const { cursorStart, isCollapse, isStartBack, segmentId, style } = activeRange;
 
         let cursor = cursorStart;
 
@@ -99,6 +99,7 @@ export class DeleteLeftInputController extends Disposable {
 
         const isUpdateParagraph =
             isFirstSpan(preSpan) && span !== preSpan && (preIsBullet === true || preIsIndent === true);
+
         if (isUpdateParagraph) {
             const paragraph = getParagraphBySpan(preSpan, docsModel.body);
 
@@ -111,6 +112,7 @@ export class DeleteLeftInputController extends Disposable {
             const updateParagraph: IParagraph = { startIndex: 0 };
 
             const paragraphStyle = paragraph.paragraphStyle;
+
             if (preIsBullet === true) {
                 const paragraphStyle = paragraph.paragraphStyle;
                 if (paragraphStyle) {

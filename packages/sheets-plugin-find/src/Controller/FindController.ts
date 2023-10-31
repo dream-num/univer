@@ -1,4 +1,4 @@
-import { ComponentManager, Icon, IMenuService } from '@univerjs/base-ui';
+import { ComponentManager, IMenuService } from '@univerjs/base-ui';
 import { Disposable, ICommandService } from '@univerjs/core';
 import { IDisposable, Inject, Injector } from '@wendellhu/redi';
 
@@ -15,7 +15,7 @@ export class FindController extends Disposable implements IDisposable {
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
-        this._componentManager.register('SearchIcon', Icon.SearchIcon);
+        // this._componentManager.register('SearchIcon', Icon.SearchIcon);
 
         this._initializeContextMenu();
 

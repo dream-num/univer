@@ -15,7 +15,6 @@ import {
     BaseComponentProps,
     BaseMenuItem,
     BaseSelectProps,
-    Icon,
     IDisplayMenuItem,
     IMenuItem,
     ITabRef,
@@ -234,7 +233,7 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                             this.onContextMenuClick(e);
                         }}
                     >
-                        <Icon.NextIcon />
+                        {/* <Icon.NextIcon /> */}
                     </div>
                 </div>
                 <div className={`${styles.slideTabFooter}`}>
@@ -361,11 +360,11 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                             this._addSheet();
                         }}
                     >
-                        <Icon.Math.AddIcon style={{ fontSize: '20px' }} />
+                        {/* <Icon.Math.AddIcon style={{ fontSize: '20px' }} /> */}
                     </Button>
                     {/* all sheets button */}
                     <Button className={styles.sheetBarOptionsButton} onClick={() => this.ref.current?.showMenu(true)}>
-                        <Icon.MenuIcon style={{ fontSize: '20px' }} />
+                        {/* <Icon.MenuIcon style={{ fontSize: '20px' }} /> */}
                         <SheetBarMenu menu={menuList as ISheetBarMenuItem[]}></SheetBarMenu>
                     </Button>
                 </div>
@@ -449,10 +448,10 @@ export class SheetBar extends Component<BaseSheetBarProps, SheetState> {
                 {/* prev next scroll button */}
                 <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>
                     <Button className={styles.sheetBarOptionsButton} onClick={this.handleScrollLeft.bind(this)}>
-                        <Icon.NextIcon rotate={90} style={{ padding: '5px' }} />
+                        {/* <Icon.NextIcon rotate={90} style={{ padding: '5px' }} /> */}
                     </Button>
                     <Button className={styles.sheetBarOptionsButton} onClick={this.handleScrollRight.bind(this)}>
-                        <Icon.NextIcon rotate={-90} style={{ padding: '5px' }} />
+                        {/* <Icon.NextIcon rotate={-90} style={{ padding: '5px' }} /> */}
                     </Button>
                 </div>
             </div>

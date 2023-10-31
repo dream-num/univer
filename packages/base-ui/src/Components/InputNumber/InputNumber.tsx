@@ -1,4 +1,3 @@
-import { DropdownPromptSmall8 } from '@univerjs/icons';
 import React, { useRef, useState } from 'react';
 
 import { joinClassNames } from '../../Utils/util';
@@ -153,14 +152,10 @@ export const InputNumber: React.FC<BaseInputNumberProps> = ({
 
             <div className={styles.inputButtons} style={{ display: disabled ? 'none' : 'flex' }}>
                 <button onClick={handleIncrement} className={styles.inputButton}>
-                    <span>
-                        <DropdownPromptSmall8 style={{ transform: 'rotateZ(180deg)' }} />
-                    </span>
+                    <span>+</span>
                 </button>
                 <button onClick={handleDecrement} className={styles.inputButton}>
-                    <span>
-                        <DropdownPromptSmall8 />
-                    </span>
+                    <span>-</span>
                 </button>
             </div>
         </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { BaseComponentProps } from '../../BaseComponent';
-import * as Icon from '../Icon';
+// import * as Icon from '../Icon';
 import { Input } from '../Input';
 import { Modal } from '../Modal';
 import { ModalButtonGroup } from '../Modal/Modal';
@@ -44,7 +44,7 @@ export function CellRange(props: BaseCellRangeModalProps) {
         <div className={styles.cellRangeModal}>
             <Input placeholder={props.placeholder} value={value} onChange={handleChange}></Input>
             <span className={styles.cellModalIcon} onClick={() => setShow(true)}>
-                <Icon.Sheet.TableIcon />
+                {/* <Icon.Sheet.TableIcon /> */}
             </span>
             <Modal title={props.title} visible={show} group={group}>
                 <Input readonly={true} placeholder={props.contentPlaceholder} value={value}></Input>

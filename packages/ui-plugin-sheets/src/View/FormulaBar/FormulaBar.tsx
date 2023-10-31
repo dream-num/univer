@@ -1,4 +1,4 @@
-import { AppContext, BaseComponentProps, BaseSelectChildrenProps, debounce, Icon } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, BaseSelectChildrenProps, debounce } from '@univerjs/base-ui';
 import { Nullable } from '@univerjs/core';
 import { Component } from 'react';
 
@@ -91,12 +91,8 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
                 {/* <Select children={namedRanges} type={0}></Select> */}
                 <div className={styles.formulaBar}>
                     <div className={styles.formulaIcon}>
-                        <span className={this.state.spanClass}>
-                            <Icon.Format.CloseIcon />
-                        </span>
-                        <span className={this.state.spanClass}>
-                            <Icon.Format.CorrectIcon />
-                        </span>
+                        <span className={this.state.spanClass}>{/* <Icon.Format.CloseIcon /> */}</span>
+                        <span className={this.state.spanClass}>{/* <Icon.Format.CorrectIcon /> */}</span>
                         {fx ? (
                             <span className={styles.formulaBlack} onClick={fx.onClick}>
                                 {this.getIcon(fx.icon)}

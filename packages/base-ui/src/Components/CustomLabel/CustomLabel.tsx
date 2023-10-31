@@ -1,5 +1,5 @@
 import { LocaleService } from '@univerjs/core';
-import { Selectedo24 } from '@univerjs/icons';
+import { CheckMarkSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { isValidElement, JSX } from 'react';
 
@@ -114,10 +114,10 @@ export function NeoCustomLabel(
         >
             {selected && (
                 <span className={styles.selectItemSelected}>
-                    <Selectedo24 style={{ color: 'rgb(var(--success-color))' }} />
+                    <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />
                 </span>
             )}
-            {LabelComponent && <LabelComponent />}
+            {LabelComponent && <LabelComponent extend={{ colorChannel1: 'rgb(var(--primary-color))' }} />}
             <span className={styles.selectItemContent}>{getLocale(title)}</span>
         </div>
     );

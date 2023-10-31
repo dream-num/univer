@@ -1,4 +1,4 @@
-import { Dropdown12 } from '@univerjs/icons';
+import { MoreDownSingle } from '@univerjs/icons';
 import React from 'react';
 
 import { ICustomComponent } from '../../Common';
@@ -120,7 +120,7 @@ export function Select(props: BaseSelectProps) {
                             }}
                         />
                         <div className={styles.selectDropIcon}>
-                            <Dropdown12 />
+                            <MoreDownSingle />
                         </div>
                     </div>
                 </Dropdown2>

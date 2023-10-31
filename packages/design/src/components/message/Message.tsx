@@ -1,4 +1,4 @@
-import { Fail16, Success16, Warning16 } from '@univerjs/icons';
+import { ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import { createRoot } from 'react-dom/client';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
@@ -14,9 +14,9 @@ export interface IMessageProps {
 }
 
 const iconMap = {
-    success: <Success16 className={styles.messageIconSuccess} />,
-    warning: <Warning16 className={styles.messageIconWarning} />,
-    error: <Fail16 className={styles.messageIconError} />,
+    success: <SuccessSingle className={styles.messageIconSuccess} />,
+    warning: <WarningSingle className={styles.messageIconWarning} />,
+    error: <ErrorSingle className={styles.messageIconError} />,
 };
 
 /**

@@ -1,4 +1,4 @@
-import { AppContext, AppContextValues, BaseMenuItem, Icon, joinClassNames } from '@univerjs/base-ui';
+import { AppContext, AppContextValues, BaseMenuItem, joinClassNames } from '@univerjs/base-ui';
 import React, { useContext } from 'react';
 
 import styles from './FormatItem.module.less';
@@ -23,11 +23,7 @@ export function FormatItem(props: BaseFormatItemProps): JSX.Element {
 
     return (
         <div className={joinClassNames(styles.formatItem, disabled ? styles.selectDisabledItem : '')}>
-            {selected && (
-                <span className={styles.formatItemSelected}>
-                    <Icon.CorrectIcon />
-                </span>
-            )}
+            {selected && <span className={styles.formatItemSelected}>{/* <Icon.CorrectIcon /> */}</span>}
             <span className={styles.formatItemContent}>{getLocale(context, labelText as string) || labelText}</span>
             {suffix && (
                 <span className={styles.formatItemSuffix}>{getLocale(context, suffix as string) || suffix}</span>

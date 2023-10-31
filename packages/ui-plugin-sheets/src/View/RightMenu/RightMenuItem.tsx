@@ -1,4 +1,4 @@
-import { CustomLabel, Icon } from '@univerjs/base-ui';
+import { CustomLabel } from '@univerjs/base-ui';
 import { Component } from 'react';
 
 import styles from './index.module.less';
@@ -14,7 +14,7 @@ export class RightMenuItem extends Component<IProps> {
         return (
             <div className={styles.rightMenuItem}>
                 <CustomLabel label={label} />
-                <Icon.Format.RightIcon />
+                {/* <Icon.Format.RightIcon /> */}
             </div>
         );
     }

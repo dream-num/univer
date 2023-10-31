@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { joinClassNames } from '../../Utils';
-import { NextIcon } from '../Icon/Format';
+// import { NextIcon } from '../Icon/Format';
 import Style from './index.module.less';
 
 export interface BaseCollapseProps {
@@ -38,7 +38,7 @@ export function Collapse(props: BaseCollapseProps) {
                         panelBodyClassName!.includes('active') ? Style.panelHeaderIconRotate : ''
                     }`}
                 >
-                    <NextIcon />
+                    {/* <NextIcon /> */}
                 </span>
             </div>
             <div className={panelBodyClassName}>{children}</div>

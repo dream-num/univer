@@ -10,7 +10,7 @@ import { UIComponentOperation } from '../commands/operations/ui-component.operat
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: LocaleOperation.id,
-        icon: 'ShortcutIcon',
+        icon: 'KeyboardSingle',
         title: 'debugger.locale.title',
         tooltip: 'debugger.locale.tooltip',
         display: DisplayTypes.ICON,
@@ -32,7 +32,7 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: ThemeOperation.id,
-        icon: 'ShortcutIcon',
+        icon: 'KeyboardSingle',
         title: 'debugger.theme.title',
         tooltip: 'debugger.theme.tooltip',
         display: DisplayTypes.ICON,
@@ -53,7 +53,7 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function UIComponentMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: UIComponentOperation.id,
-        icon: 'ShortcutIcon',
+        icon: 'KeyboardSingle',
         title: 'debugger.uiComponent.title',
         tooltip: 'debugger.uiComponent.tooltip',
         display: DisplayTypes.ICON,

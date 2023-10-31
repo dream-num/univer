@@ -1,4 +1,3 @@
-import { Icon } from '@univerjs/base-ui';
 import { Component } from 'react';
 
 interface IProps {
@@ -12,7 +11,7 @@ export class FormulaLabel extends Component<IProps> {
 
         return (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Icon.Data.SumIcon />
+                {/* <Icon.Data.SumIcon /> */}
                 {label}
             </div>
         );

@@ -1,6 +1,3 @@
-import * as Icon from './Icon';
-
-export * from './BorderLine';
 export * from './CellRange';
 export * from './Collapse';
 export * from './CustomLabel';
@@ -15,5 +12,3 @@ export * from './Separator';
 export * from './SiderModal';
 export * from './Slider';
 export * from './Tabs';
-
-export { Icon };

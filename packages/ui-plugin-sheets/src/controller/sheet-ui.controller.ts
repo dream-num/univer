@@ -37,6 +37,19 @@ import {
     SetCellEditVisibleOperation,
 } from '../commands/operations/cell-edit.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
+import {
+    BorderDashDot,
+    BorderDashDotDot,
+    BorderDashed,
+    BorderDotted,
+    BorderHair,
+    BorderMedium,
+    BorderMediumDashDot,
+    BorderMediumDashDotDot,
+    BorderMediumDashed,
+    BorderThick,
+} from '../View/BorderLine';
+import { BorderThin } from '../View/BorderLine/BorderThin';
 import { RightMenuInput } from '../View/RightMenu/RightMenuInput';
 import { RightMenuItem } from '../View/RightMenu/RightMenuItem';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../View/SheetContainer/SheetContainer';
@@ -165,6 +178,22 @@ export class SheetUIController extends Disposable {
         componentManager.register(CONTEXT_MENU_INPUT_LABEL, RightMenuInput);
         componentManager.register(RightMenuItem.name, RightMenuItem);
         componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
+
+        [
+            BorderThin,
+            BorderDashDot,
+            BorderDashDotDot,
+            BorderDashed,
+            BorderDotted,
+            BorderHair,
+            BorderMedium,
+            BorderMediumDashDot,
+            BorderMediumDashDotDot,
+            BorderMediumDashed,
+            BorderThick,
+        ].forEach((BorderLine) => {
+            componentManager.register(BorderLine.name, BorderLine);
+        });
 
         // init commands
         [

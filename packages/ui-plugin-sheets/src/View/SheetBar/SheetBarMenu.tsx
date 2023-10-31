@@ -1,4 +1,4 @@
-import { CustomLabel, Icon, joinClassNames } from '@univerjs/base-ui';
+import { CustomLabel, joinClassNames } from '@univerjs/base-ui';
 import { Component } from 'react';
 
 import styles from './index.module.less';
@@ -86,10 +86,10 @@ export class SheetBarMenu extends Component<ISheetBarMenuProps, IState> {
 
 function EffIcon(props: { item: ISheetBarMenuItem }) {
     if (props.item.hide) {
-        return <Icon.HideIcon />;
+        // return <Icon.HideIcon />;
     }
     if (props.item.selected) {
-        return <Icon.Format.CorrectIcon className={styles.sheetBarMenuSvg} />;
+        // return <Icon.Format.CorrectIcon className={styles.sheetBarMenuSvg} />;
     }
     return <></>;
 }

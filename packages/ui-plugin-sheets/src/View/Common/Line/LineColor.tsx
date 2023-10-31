@@ -1,4 +1,4 @@
-import { BaseComponentProps, CustomLabel, Icon } from '@univerjs/base-ui';
+import { BaseComponentProps, CustomLabel } from '@univerjs/base-ui';
 import { Component } from 'react';
 
 interface IState {
@@ -47,7 +47,7 @@ export class LineColor extends Component<IProps, IState> {
                 <span style={{ display: 'inline-block', borderBottom: `3px solid ${color}` }}>
                     <CustomLabel label={label} />
                 </span>
-                <Icon.RightIcon />
+                {/* <Icon.RightIcon /> */}
             </div>
         );
     }

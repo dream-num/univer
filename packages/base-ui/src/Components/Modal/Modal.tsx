@@ -88,7 +88,7 @@ import React, { useEffect, useState } from 'react';
 
 import { CustomLabel } from '../CustomLabel';
 import { Drag } from '../Drag';
-import * as Icon from '../Icon';
+// import * as Icon from '../Icon';
 import styles from './index.module.less';
 
 export interface BaseModalProps {
@@ -194,7 +194,7 @@ export function Modal(props: BaseModalProps) {
                                         showModal(false);
                                     }}
                                 >
-                                    <Icon.Other.Close></Icon.Other.Close>
+                                    {/* <Icon.Other.Close></Icon.Other.Close> */}
                                 </span>
                             </div>
                             <div className={styles.modalBody}>{children}</div>

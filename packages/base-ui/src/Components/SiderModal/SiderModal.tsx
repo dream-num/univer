@@ -1,7 +1,7 @@
 import { RefObject, useContext, useEffect, useState } from 'react';
 
 import { AppContext } from '../../Common/AppContext';
-import { Icon } from '../index';
+// import { Icon } from '../index';
 
 // class SiderModal extends Component<BaseSiderModalProps, IState> {
 //     static override contextType = AppContext;
@@ -113,7 +113,7 @@ export function SiderModal(props: BaseSiderModalProps) {
             <div className="siderModalHeader">
                 <h3 className="siderModalTitle">{props.title}</h3>
                 <span className="siderModalClose" onClick={close}>
-                    <Icon.Other.Close></Icon.Other.Close>
+                    {/* <Icon.Other.Close></Icon.Other.Close> */}
                 </span>
             </div>
             <div className="siderModalBody">

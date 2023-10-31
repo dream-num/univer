@@ -270,7 +270,7 @@ export class ToolbarUIController {
 //     name: 'undo',
 //     unActive: true,
 //     label: {
-//         name: 'ForwardIcon',
+//         name: 'UndoSingle',
 //     },
 //     show: this._config.undo,
 //     onClick: () => {
@@ -283,7 +283,7 @@ export class ToolbarUIController {
 //     tooltip: 'toolbar.redo',
 //     unActive: true,
 //     label: {
-//         name: 'BackIcon',
+//         name: 'RedoSingle',
 //     },
 //     name: 'redo',
 //     show: this._config.redo,
@@ -329,7 +329,7 @@ export class ToolbarUIController {
 //     toolbarType: 1,
 //     tooltip: 'toolbar.bold',
 //     label: {
-//         name: 'BoldIcon',
+//         name: 'BoldSingle',
 //     },
 //     active: false,
 //     name: 'bold',
@@ -343,7 +343,7 @@ export class ToolbarUIController {
 //     toolbarType: 1,
 //     tooltip: 'toolbar.italic',
 //     label: {
-//         name: 'ItalicIcon',
+//         name: 'ItalicSingle',
 //     },
 //     name: 'italic',
 //     show: this._config.italic,
@@ -356,7 +356,7 @@ export class ToolbarUIController {
 //     toolbarType: 1,
 //     tooltip: 'toolbar.strikethrough',
 //     label: {
-//         name: 'DeleteLineIcon',
+//         name: 'StrikethroughSingle',
 //     },
 //     name: 'strikethrough',
 //     show: this._config.strikethrough,
@@ -372,7 +372,7 @@ export class ToolbarUIController {
 //     toolbarType: 1,
 //     tooltip: 'toolbar.underline',
 //     label: {
-//         name: 'UnderLineIcon',
+//         name: 'UnderlineSingle',
 //     },
 //     name: 'underline',
 //     show: this._config.underline,
@@ -395,7 +395,7 @@ export class ToolbarUIController {
 //             },
 //             color: '#000',
 //             label: {
-//                 name: 'TextColorIcon',
+//                 name: 'FontColor',
 //             },
 //         },
 //     },
@@ -440,7 +440,7 @@ export class ToolbarUIController {
 //             },
 //             color: '#fff',
 //             label: {
-//                 name: 'FillColorIcon',
+//                 name: 'PaintBucket',
 //             },
 //         },
 //     },
@@ -478,7 +478,7 @@ export class ToolbarUIController {
 //     type: 5,
 //     tooltip: 'toolbar.mergeCell.main',
 //     label: {
-//         name: 'MergeIcon',
+//         name: 'MergeCellSingle',
 //     },
 //     show: this._config.mergeCell,
 //     onClick: (value: string) => {

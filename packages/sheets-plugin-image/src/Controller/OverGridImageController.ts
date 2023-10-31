@@ -1,4 +1,4 @@
-import { ComponentManager, Icon, IMenuService } from '@univerjs/base-ui';
+import { ComponentManager, IMenuService } from '@univerjs/base-ui';
 import { Disposable, ICommandService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -17,7 +17,7 @@ export class OverGridImageController extends Disposable {
     ) {
         super();
 
-        this._componentManager.register('ImageIcon', Icon.View.ImageIcon);
+        // this._componentManager.register('ImageIcon', Icon.View.ImageIcon);
         this._initializeContextMenu();
 
         [UploadOperation].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));

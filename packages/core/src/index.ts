@@ -1,4 +1,5 @@
 export * from './Basics';
+export { dedupe, remove } from './common/array';
 export * from './Docs/Domain';
 export * from './Observer';
 export { Plugin, PluginType } from './plugin/plugin';

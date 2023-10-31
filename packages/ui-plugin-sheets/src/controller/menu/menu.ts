@@ -99,7 +99,7 @@ export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         id: SetOnceFormatPainterCommand.id,
         subId: SetInfiniteFormatPainterCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'FormatPainterIcon',
+        icon: 'BrushSingle',
         title: 'Format Painter',
         tooltip: 'toolbar.formatPainter',
         positions: [MenuPosition.TOOLBAR_START],
@@ -129,7 +129,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetBoldCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'BoldIcon',
+        icon: 'BoldSingle',
         title: 'Set bold',
         tooltip: 'toolbar.bold',
         positions: [MenuPosition.TOOLBAR_START],
@@ -185,7 +185,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetItalicCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'ItalicIcon',
+        icon: 'ItalicSingle',
         title: 'Set italic',
         tooltip: 'toolbar.italic',
         positions: [MenuPosition.TOOLBAR_START],
@@ -243,7 +243,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetUnderlineCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'UnderLineIcon',
+        icon: 'UnderlineSingle',
         title: 'Set underline',
         tooltip: 'toolbar.underline',
         positions: [MenuPosition.TOOLBAR_START],
@@ -301,7 +301,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     return {
         id: SetStrikeThroughCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'DeleteLineIcon',
+        icon: 'StrikethroughSingle',
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
         positions: [MenuPosition.TOOLBAR_START],
@@ -637,7 +637,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
     return {
         id: SetTextColorCommand.id,
         title: 'toolbar.textColor.main',
-        icon: 'TextColorIcon',
+        icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
@@ -677,11 +677,11 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
     return {
         id: SetBackgroundColorCommand.id,
         tooltip: 'toolbar.fillColor.main',
-        title: 'TextColorIcon',
+        title: 'FontColor',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         display: DisplayTypes.COLOR,
-        icon: 'FillColorIcon',
+        icon: 'PaintBucket',
         selections: [
             {
                 id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
@@ -705,17 +705,17 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 export const HORIZONTAL_ALIGN_CHILDREN = [
     {
         label: 'align.left',
-        icon: 'LeftAlignIcon',
+        icon: 'LeftJustifyingSingle',
         value: HorizontalAlign.LEFT,
     },
     {
         label: 'align.center',
-        icon: 'CenterAlignIcon',
+        icon: 'HorizontallySingle',
         value: HorizontalAlign.CENTER,
     },
     {
         label: 'align.right',
-        icon: 'RightAlignIcon',
+        icon: 'RightJustifyingSingle',
         value: HorizontalAlign.RIGHT,
     },
 ];
@@ -760,17 +760,17 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
 export const VERTICAL_ALIGN_CHILDREN = [
     {
         label: 'align.top',
-        icon: 'TopVerticalIcon',
+        icon: 'AlignTopSingle',
         value: VerticalAlign.TOP,
     },
     {
         label: 'align.middle',
-        icon: 'CenterVerticalIcon',
+        icon: 'VerticalCenterSingle',
         value: VerticalAlign.MIDDLE,
     },
     {
         label: 'align.bottom',
-        icon: 'BottomVerticalIcon',
+        icon: 'AlignBottomSingle',
         value: VerticalAlign.BOTTOM,
     },
 ];
@@ -815,17 +815,17 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
 export const TEXT_WRAP_CHILDREN = [
     {
         label: 'textWrap.overflow',
-        icon: 'OverflowIcon',
+        icon: 'OverflowSingle',
         value: WrapStrategy.OVERFLOW,
     },
     {
         label: 'textWrap.wrap',
-        icon: 'BrIcon',
+        icon: 'AutowrapSingle',
         value: WrapStrategy.WRAP,
     },
     {
         label: 'textWrap.clip',
-        icon: 'CutIcon',
+        icon: 'TruncationSingle',
         value: WrapStrategy.CLIP,
     },
 ];
@@ -870,32 +870,32 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
 export const TEXT_ROTATE_CHILDREN = [
     {
         label: 'textRotate.none',
-        icon: 'TextRotateIcon',
+        icon: 'NoRotationSingle',
         value: 0,
     },
     {
         label: 'textRotate.angleUp',
-        icon: 'TextRotateAngleUpIcon',
+        icon: 'LeftRotationFortyFiveDegreesSingle',
         value: -45,
     },
     {
         label: 'textRotate.angleDown',
-        icon: 'TextRotateAngleDownIcon',
+        icon: 'RightRotationFortyFiveDegreesSingle',
         value: 45,
     },
     {
         label: 'textRotate.vertical',
-        icon: 'TextRotateVerticalIcon',
+        icon: 'VerticalTextSingle',
         value: 'v',
     },
     {
         label: 'textRotate.rotationUp',
-        icon: 'TextRotateRotationUpIcon',
+        icon: 'LeftRotationNinetyDegreesSingle',
         value: -90,
     },
     {
         label: 'textRotate.rotationDown',
-        icon: 'TextRotateRotationDownIcon',
+        icon: 'RightRotationNinetyDegreesSingle',
         value: 90,
     },
 ];
@@ -945,7 +945,7 @@ export function CopyMenuItemFactory(): IMenuButtonItem {
         id: CopyCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.copy',
-        icon: 'Copy24',
+        icon: 'Copy',
         positions: [
             MenuPosition.CONTEXT_MENU,
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
@@ -972,7 +972,7 @@ export function PasteMenuItemFactory(): IMenuButtonItem {
         id: PasteCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.paste',
-        icon: 'PasteSpecial24',
+        icon: 'PasteSpecial',
         positions: [
             MenuPosition.CONTEXT_MENU,
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,

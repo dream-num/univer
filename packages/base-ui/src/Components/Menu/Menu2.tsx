@@ -1,5 +1,5 @@
 import { isRealNum } from '@univerjs/core';
-import { More12 } from '@univerjs/icons';
+import { MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import RcMenu, { MenuItem, SubMenu } from 'rc-menu';
 import React, { useState } from 'react';
@@ -233,7 +233,9 @@ export function Menu2Item({ menuItem, onClick }: IMenu2ItemProps) {
                             {item.shortcut && ` (${item.shortcut})`}
                         </>
                     }
-                    expandIcon={<More12 style={{ color: styles.textColorSecondary, fontSize: styles.fontSizeXs }} />}
+                    expandIcon={
+                        <MoreSingle style={{ color: styles.textColorSecondary, fontSize: styles.fontSizeXs }} />
+                    }
                 >
                     {selections.length > 0 && (
                         <Menu2OptionsWrapper
@@ -290,7 +292,7 @@ export function Menu2Item({ menuItem, onClick }: IMenu2ItemProps) {
                         />
                     </>
                 }
-                expandIcon={<More12 style={{ color: styles.textColorSecondary, fontSize: styles.fontSizeXs }} />}
+                expandIcon={<MoreSingle style={{ color: styles.textColorSecondary, fontSize: styles.fontSizeXs }} />}
             >
                 {menuItems.length && <Menu2Wrapper menuType={item.id} onOptionSelect={onClick} />}
             </SubMenu>

@@ -16,7 +16,7 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
     return {
         id: AddWorksheetMergeCommand.id,
         title: 'merge',
-        icon: 'MergeIcon',
+        icon: 'MergeCellSingle',
         tooltip: 'toolbar.mergeCell.main',
         display: DisplayTypes.ICON,
         positions: [MenuPosition.TOOLBAR_START],

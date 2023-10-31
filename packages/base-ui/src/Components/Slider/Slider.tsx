@@ -1,6 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { Button, Tooltip } from '@univerjs/design';
-import { AddWorksheet28, ReduceProportion24 } from '@univerjs/icons';
+import { IncreaseSingle, ReduceSingle } from '@univerjs/icons';
 import { useMemo, useRef } from 'react';
 
 import { joinClassNames } from '../../Utils';
@@ -13,7 +13,7 @@ import styles from './index.module.less';
  * 2. Localization '恢复至 100%'
  */
 
-interface IBaseSliderProps {
+interface ISliderProps {
     /** The value of slider. When range is false, use number, otherwise, use [number, number] */
     value: number;
 
@@ -43,7 +43,7 @@ interface IBaseSliderProps {
 /**
  * Slider Component
  */
-export function Slider(props: IBaseSliderProps) {
+export function Slider(props: ISliderProps) {
     const { value, min = 0, max = 400, resetPoint = 100, shortcuts, onChange } = props;
 
     const sliderInnerRailRef = useRef<HTMLDivElement>(null);
@@ -121,7 +121,7 @@ export function Slider(props: IBaseSliderProps) {
     return (
         <div className={styles.slider}>
             <Button type="text" size="small" disabled={value <= min} onClick={() => handleStep(-10)}>
-                <ReduceProportion24 />
+                <ReduceSingle />
             </Button>
 
             <div className={styles.sliderRail}>
@@ -142,7 +142,7 @@ export function Slider(props: IBaseSliderProps) {
             </div>
 
             <Button type="text" size="small" disabled={value >= max} onClick={() => handleStep(10)}>
-                <AddWorksheet28 />
+                <IncreaseSingle />
             </Button>
 
             <Dropdown2

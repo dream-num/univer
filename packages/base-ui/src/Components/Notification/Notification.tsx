@@ -1,4 +1,4 @@
-import { Close16, Fail16, Success16, Warning16 } from '@univerjs/icons';
+import { CloseSingle, ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
 import { useNotification } from 'rc-notification';
 import { Placement } from 'rc-notification/es/interface';
 import { useEffect, useRef } from 'react';
@@ -11,10 +11,10 @@ import styles from './index.module.less';
 export type NotificationType = 'success' | 'info' | 'warning' | 'error';
 
 const iconMap = {
-    success: <Success16 className={styles.notificationIconSuccess} />,
-    info: <Warning16 className={styles.notificationIconInfo} />,
-    warning: <Warning16 className={styles.notificationIconWarning} />,
-    error: <Fail16 className={styles.notificationIconError} />,
+    success: <SuccessSingle className={styles.notificationIconSuccess} />,
+    info: <WarningSingle className={styles.notificationIconInfo} />,
+    warning: <WarningSingle className={styles.notificationIconWarning} />,
+    error: <ErrorSingle className={styles.notificationIconError} />,
 };
 
 export interface INotificationMethodOptions {
@@ -87,7 +87,7 @@ export function Notification(props: INotificationProps) {
     const [api, contextHolder] = useNotification({
         prefixCls: styles.notification,
         maxCount,
-        closeIcon: <Close16 />,
+        closeIcon: <CloseSingle />,
         motion: {
             motionName: styles.notificationFade,
             motionAppear: true,

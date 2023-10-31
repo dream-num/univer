@@ -7,7 +7,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: DeleteLeftCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'BoldIcon',
+        icon: 'BoldSingle',
         title: 'Set bold',
         tooltip: 'toolbar.bold',
         positions: [MenuPosition.TOOLBAR_START],
@@ -18,7 +18,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: BreakLineCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'ItalicIcon',
+        icon: 'ItalicSingle',
         title: 'Set italic',
         tooltip: 'toolbar.italic',
         positions: [MenuPosition.TOOLBAR_START],

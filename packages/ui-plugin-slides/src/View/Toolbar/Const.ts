@@ -88,28 +88,28 @@ export const BORDER_LINE_CHILDREN = [
     {
         label: 'borderLine.borderTop',
         suffix: {
-            name: 'TopBorderIcon',
+            name: 'UpBorderSingle',
         },
         value: 'top',
     },
     {
         label: 'borderLine.borderBottom',
         suffix: {
-            name: 'BottomBorderIcon',
+            name: 'DownBorderSingle',
         },
         value: 'bottom',
     },
     {
         label: 'borderLine.borderLeft',
         suffix: {
-            name: 'LeftBorderIcon',
+            name: 'LeftBorderSingle',
         },
         value: 'left',
     },
     {
         label: 'borderLine.borderRight',
         suffix: {
-            name: 'RightBorderIcon',
+            name: 'RightBorderSingle',
         },
         value: 'right',
         border: true,
@@ -117,14 +117,14 @@ export const BORDER_LINE_CHILDREN = [
     {
         label: 'borderLine.borderNone',
         suffix: {
-            name: 'NoneBorderIcon',
+            name: 'NoBorderSingle',
         },
         value: 'none',
     },
     {
         label: 'borderLine.borderAll',
         suffix: {
-            name: 'FullBorderIcon',
+            name: 'AllBorderSingle',
         },
         value: 'all',
         selected: true,
@@ -132,28 +132,28 @@ export const BORDER_LINE_CHILDREN = [
     {
         label: 'borderLine.borderOutside',
         suffix: {
-            name: 'OuterBorderIcon',
+            name: 'OuterBorderSingle',
         },
         value: 'outside',
     },
     {
         label: 'borderLine.borderInside',
         suffix: {
-            name: 'InnerBorderIcon',
+            name: 'InnerBorderSingle',
         },
         value: 'inside',
     },
     {
         label: 'borderLine.borderHorizontal',
         suffix: {
-            name: 'StripingBorderIcon',
+            name: 'InnerBorderSingle',
         },
         value: 'horizontal',
     },
     {
         label: 'borderLine.borderVertical',
         suffix: {
-            name: 'VerticalBorderIcon',
+            name: 'InnerBorderSingle',
         },
         value: 'vertical',
     },
@@ -255,7 +255,7 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
     {
         label: 'align.left',
         suffix: {
-            name: 'LeftAlignIcon',
+            name: 'LeftJustifyingSingle',
         },
         value: 1,
     },
@@ -263,14 +263,14 @@ export const HORIZONTAL_ALIGN_CHILDREN = [
         label: 'align.center',
         selected: true,
         suffix: {
-            name: 'CenterAlignIcon',
+            name: 'HorizontallySingle',
         },
         value: 2,
     },
     {
         label: 'align.right',
         suffix: {
-            name: 'RightAlignIcon',
+            name: 'RightJustifyingSingle',
         },
         value: 3,
     },
@@ -280,21 +280,21 @@ export const VERTICAL_ALIGN_CHILDREN = [
     {
         label: 'align.top',
         suffix: {
-            name: 'TopVerticalIcon',
+            name: 'AlignTopSingle',
         },
         value: 1,
     },
     {
         label: 'align.middle',
         suffix: {
-            name: 'CenterVerticalIcon',
+            name: 'VerticalCenterSingle',
         },
         value: 2,
     },
     {
         label: 'align.bottom',
         suffix: {
-            name: 'BottomVerticalIcon',
+            name: 'AlignBottomSingle',
         },
         value: 3,
     },
@@ -304,21 +304,21 @@ export const TEXT_WRAP_CHILDREN = [
     {
         label: 'textWrap.overflow',
         suffix: {
-            name: 'OverflowIcon',
+            name: 'OverflowSingle',
         },
         value: 1,
     },
     {
         label: 'textWrap.wrap',
         suffix: {
-            name: 'BrIcon',
+            name: 'AutowrapSingle',
         },
         value: 3,
     },
     {
         label: 'textWrap.clip',
         suffix: {
-            name: 'CutIcon',
+            name: 'TruncationSingle',
         },
         value: 2,
     },
@@ -328,42 +328,42 @@ export const TEXT_ROTATE_CHILDREN = [
     {
         label: 'textRotate.none',
         suffix: {
-            name: 'TextRotateIcon',
+            name: 'NoRotationSingle',
         },
         value: 0,
     },
     {
         label: 'textRotate.angleUp',
         suffix: {
-            name: 'TextRotateAngleUpIcon',
+            name: 'LeftRotationFortyFiveDegreesSingle',
         },
         value: -45,
     },
     {
         label: 'textRotate.angleDown',
         suffix: {
-            name: 'TextRotateAngleDownIcon',
+            name: 'RightRotationFortyFiveDegreesSingle',
         },
         value: 45,
     },
     {
         label: 'textRotate.vertical',
         suffix: {
-            name: 'TextRotateVerticalIcon',
+            name: 'VerticalTextSingle',
         },
         value: 'v',
     },
     {
         label: 'textRotate.rotationUp',
         suffix: {
-            name: 'TextRotateRotationUpIcon',
+            name: 'LeftRotationNinetyDegreesSingle',
         },
         value: -90,
     },
     {
         label: 'textRotate.rotationDown',
         suffix: {
-            name: 'TextRotateRotationDownIcon',
+            name: 'RightRotationNinetyDegreesSingle',
         },
         value: 90,
     },

@@ -53,6 +53,7 @@
         "clsx": "^2.0.0",
         "rc-dialog": "^9.3.4",
         "rc-dropdown": "^4.1.0",
+        "rc-input": "^1.3.5",
         "rc-input-number": "^8.5.0",
         "rc-tooltip": "^6.1.2",
         "react": "^18.2.0",

@@ -217,14 +217,14 @@ export class Documents extends DocComponent {
 
             const horizontalOffsetNoAngle = this._horizontalHandler(
                 actualWidth * scale,
-                pagePaddingLeft,
-                pagePaddingRight,
+                pagePaddingLeft * scale,
+                pagePaddingRight * scale,
                 horizontalAlign
             );
             const verticalOffsetNoAngle = this._verticalHandler(
                 actualHeight * scale,
-                pagePaddingTop,
-                pagePaddingBottom,
+                pagePaddingTop * scale,
+                pagePaddingBottom * scale,
                 verticalAlign
             );
             const alignOffsetNoAngle = Vector2.create(horizontalOffsetNoAngle / scale, verticalOffsetNoAngle / scale);

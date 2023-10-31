@@ -6,6 +6,10 @@ const locale: ILocale = {
             custom: '自定义',
             cancel: '取消',
         },
+        Confirm: {
+            cancel: '取消',
+            confirm: '确定',
+        },
     },
 };
 

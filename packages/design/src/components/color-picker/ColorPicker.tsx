@@ -1,7 +1,7 @@
 import RcColorPicker, { Color, ColorBlock } from '@rc-component/color-picker';
 import { useContext, useState } from 'react';
 
-import { ConfigContext } from '../config-provider';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 import { colorPresets } from './presets';
 

@@ -50,8 +50,8 @@ import {
     BorderThick,
 } from '../View/BorderLine';
 import { BorderThin } from '../View/BorderLine/BorderThin';
-import { RightMenuInput } from '../View/RightMenu/RightMenuInput';
-import { RightMenuItem } from '../View/RightMenu/RightMenuItem';
+import { ContextMenuInput } from '../View/ContextMenu/ContextMenuInput';
+import { ContextMenuItem } from '../View/ContextMenu/ContextMenuItem';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../View/SheetContainer/SheetContainer';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import {
@@ -175,8 +175,8 @@ export class SheetUIController extends Disposable {
         const componentManager = this._componentManager;
 
         // FIXME: no dispose logic
-        componentManager.register(CONTEXT_MENU_INPUT_LABEL, RightMenuInput);
-        componentManager.register(RightMenuItem.name, RightMenuItem);
+        componentManager.register(CONTEXT_MENU_INPUT_LABEL, ContextMenuInput);
+        componentManager.register(ContextMenuItem.name, ContextMenuItem);
         componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
 
         [

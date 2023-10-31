@@ -740,7 +740,7 @@ export class SelectionShape {
             this._columnHeaderBorder.transformByState({
                 width: endX - startX,
                 height: columnHeaderStrokeWidth,
-                top: columnHeaderHeight - columnHeaderStrokeWidth + 1,
+                top: columnHeaderHeight - columnHeaderStrokeWidth + 1 / scale,
             });
 
             this._columnHeaderGroup.show();
@@ -767,7 +767,7 @@ export class SelectionShape {
             this._rowHeaderBorder.transformByState({
                 width: rowHeaderStrokeWidth,
                 height: endY - startY,
-                left: rowHeaderWidth - rowHeaderStrokeWidth + 1,
+                left: rowHeaderWidth - rowHeaderStrokeWidth + 1 / scale,
             });
 
             this._rowHeaderGroup.show();

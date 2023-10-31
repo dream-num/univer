@@ -116,7 +116,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { position, documentLayoutObject } = param;
+            const { position, documentLayoutObject, scaleX, scaleY } = param;
 
             const editorObject = this._getEditorObject();
 
@@ -137,7 +137,7 @@ export class StartEditController extends Disposable {
             // documentModel!.updateDocumentDataMargin(paddingData);
 
             if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-                documentModel!.updateDocumentDataPageSize(endX - startX);
+                documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
             }
 
             this._currentUniverService.changeDoc(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, documentModel! as DocumentModel);
@@ -178,14 +178,18 @@ export class StartEditController extends Disposable {
         actualRangeWithCoord: IPosition,
         canvasOffset: ICanvasOffset,
         documentSkeleton: DocumentSkeleton,
-        documentLayoutObject: IDocumentLayoutObject
+        documentLayoutObject: IDocumentLayoutObject,
+        scaleX: number = 1,
+        scaleY: number = 1
     ) {
         const { startX, startY, endX, endY } = actualRangeWithCoord;
         const { actualWidth, actualHeight } = this._predictingSize(
             actualRangeWithCoord,
             canvasOffset,
             documentSkeleton,
-            documentLayoutObject
+            documentLayoutObject,
+            scaleX,
+            scaleY
         );
         const { verticalAlign, paddingData, fill } = documentLayoutObject;
 
@@ -210,6 +214,8 @@ export class StartEditController extends Disposable {
                 offsetTop = editorHeight - actualHeight;
             }
 
+            offsetTop /= scaleY;
+
             offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
 
             documentSkeleton.getModel().updateDocumentDataMargin({
@@ -233,8 +239,11 @@ export class StartEditController extends Disposable {
         actualRangeWithCoord: IPosition,
         canvasOffset: ICanvasOffset,
         documentSkeleton: DocumentSkeleton,
-        documentLayoutObject: IDocumentLayoutObject
+        documentLayoutObject: IDocumentLayoutObject,
+        scaleX: number = 1,
+        scaleY: number = 1
     ) {
+        // startX and startY are the width and height after scaling.
         const { startX, endX } = actualRangeWithCoord;
 
         const { textRotation, wrapStrategy } = documentLayoutObject;
@@ -244,7 +253,12 @@ export class StartEditController extends Disposable {
         const clientWidth = document.body.clientWidth;
 
         if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-            return documentSkeleton.getActualSize();
+            const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
+            // The skeleton obtains the original volume, which needs to be multiplied by the magnification factor.
+            return {
+                actualWidth: actualWidth * scaleX,
+                actualHeight: actualHeight * scaleY,
+            };
         }
         documentSkeleton.getModel().updateDocumentDataPageSize(clientWidth - startX - canvasOffset.left);
         documentSkeleton.calculate();
@@ -253,11 +267,12 @@ export class StartEditController extends Disposable {
 
         let editorWidth = endX - startX;
 
-        if (editorWidth < size.actualWidth + EDITOR_INPUT_SELF_EXTEND_GAP) {
-            editorWidth = size.actualWidth + EDITOR_INPUT_SELF_EXTEND_GAP;
+        if (editorWidth < size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP) {
+            editorWidth = size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP;
         }
 
-        documentSkeleton.getModel()!.updateDocumentDataPageSize(editorWidth);
+        // Scaling is handled by the renderer, so the skeleton only accepts the original width and height, which need to be divided by the magnification factor.
+        documentSkeleton.getModel()!.updateDocumentDataPageSize(editorWidth / scaleX);
 
         documentSkeleton.getModel()!.updateDocumentRenderConfig({
             horizontalAlign: HorizontalAlign.UNSPECIFIED,
@@ -265,7 +280,7 @@ export class StartEditController extends Disposable {
 
         return {
             actualWidth: editorWidth,
-            actualHeight: size.actualHeight,
+            actualHeight: size.actualHeight * scaleY,
         };
     }
 
@@ -279,7 +294,9 @@ export class StartEditController extends Disposable {
         editorHeight: number,
         actualRangeWithCoord: IPosition,
         canvasOffset: ICanvasOffset,
-        fill: Nullable<string>
+        fill: Nullable<string>,
+        scaleX: number = 1,
+        scaleY: number = 1
     ) {
         const editorObject = this._getEditorObject();
 
@@ -398,7 +415,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { position, documentLayoutObject, canvasOffset } = state;
+            const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = state;
 
             const editorObject = this._getEditorObject();
 
@@ -420,7 +437,7 @@ export class StartEditController extends Disposable {
 
             const documentModel = skeleton.getModel() as DocumentModel;
 
-            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject);
+            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
 
             // move selection
             if (eventType === DeviceInputEventType.Keyboard) {
@@ -565,9 +582,9 @@ export class StartEditController extends Disposable {
                         return;
                     }
 
-                    const { position, documentLayoutObject, canvasOffset } = param;
+                    const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
 
-                    this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject);
+                    this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
 
                     // const editorObject = this._getEditorObject();
 

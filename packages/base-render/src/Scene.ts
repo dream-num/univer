@@ -568,6 +568,11 @@ export class Scene extends ThinScene {
         };
     }
 
+    /**
+     * In a nested scene scenario, it is necessary to obtain the relative offsets layer by layer.
+     * @param coord Coordinates to be converted.
+     * @returns
+     */
     getRelativeCoord(coord: Vector2) {
         let parent: any = this.getParent();
 

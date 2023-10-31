@@ -950,6 +950,24 @@ export class SpreadsheetSkeleton extends Skeleton {
     //     };
     // }
 
+    // convert canvas content position to physical position in screen
+    convertTransformToOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
+        const { x: scrollX } = scrollXY;
+
+        offsetX = (offsetX - scrollX) * scaleX;
+
+        return offsetX;
+    }
+
+    // convert canvas content position to physical position in screen
+    convertTransformToOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
+        const { y: scrollY } = scrollXY;
+
+        offsetY = (offsetY - scrollY) * scaleY;
+
+        return offsetY;
+    }
+
     getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
         return this.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
@@ -987,24 +1005,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             horizontalAlign,
             paddingData,
         };
-    }
-
-    // convert canvas content position to physical position in screen
-    convertTransformToOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }) {
-        const { x: scrollX } = scrollXY;
-
-        offsetX = (offsetX - scrollX) * scaleX;
-
-        return offsetX;
-    }
-
-    // convert canvas content position to physical position in screen
-    convertTransformToOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
-        const { x: scrollY } = scrollXY;
-
-        offsetY = (offsetY - scrollY) * scaleY;
-
-        return offsetY;
     }
 
     getCellDocumentModel(

@@ -21,10 +21,10 @@ import {
     InsertCommand,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
-import { SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
+import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
-import { SetZoomRatioMutation } from './commands/mutations/set-zoom-ratio.mutation';
 import { MoveCursorOperation } from './commands/operations/cursor.operation';
+import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { DeleteLeftInputController } from './Controller/delete-left-input.controller';
 import { DocRenderController } from './Controller/doc-render.controller';
@@ -34,6 +34,7 @@ import { MoveCursorController } from './Controller/move-cursor.controller';
 import { NormalInputController } from './Controller/normal-input.controller';
 import { PageRenderController } from './Controller/page-render.controller';
 import { TextSelectionController } from './Controller/text-selection.controller';
+import { ZoomController } from './Controller/zoom.cotroller';
 import { enUS } from './locale';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 import { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
@@ -102,8 +103,8 @@ export class DocPlugin extends Plugin {
                 IMEInputCommand,
                 RichTextEditingMutation,
                 CoverCommand,
-                SetZoomRatioCommand,
-                SetZoomRatioMutation,
+                SetDocZoomRatioCommand,
+                SetDocZoomRatioOperation,
                 SetTextSelectionsOperation,
             ] as ICommand[]
         ).forEach((command) => {
@@ -175,6 +176,7 @@ export class DocPlugin extends Plugin {
                 [DeleteLeftInputController],
                 [LineBreakInputController],
                 [MoveCursorController],
+                [ZoomController],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
     }

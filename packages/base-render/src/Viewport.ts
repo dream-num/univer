@@ -555,7 +555,7 @@ export class Viewport {
         const sceneTrans = this.scene.transform.clone();
         const scroll = this.getTransformedScroll();
 
-        const svCoord = sceneTrans.applyPoint(coord).subtract(Vector2.FromArray([scroll.x, scroll.y]));
+        const svCoord = sceneTrans.applyPoint(coord.subtract(Vector2.FromArray([scroll.x, scroll.y])));
         return svCoord;
     }
     // eslint-disable-next-line max-lines-per-function
@@ -927,14 +927,14 @@ export class Viewport {
             };
         }
 
-        const { scaleX, scaleY } = this._getBoundScale(this.scene.scaleX, this.scene.scaleY);
+        // const { scaleX, scaleY } = this._getBoundScale(this.scene.scaleX, this.scene.scaleY);
 
         const ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
         const ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
         const xFrom: number = this.left;
-        const xTo: number = (this.width || 0) * scaleX + this.left;
+        const xTo: number = (this.width || 0) + this.left;
         const yFrom: number = this.top;
-        const yTo: number = (this.height || 0) * scaleY + this.top;
+        const yTo: number = (this.height || 0) + this.top;
 
         let differenceX = 0;
         let differenceY = 0;

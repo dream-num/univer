@@ -50,6 +50,10 @@ export class DocumentModelSimple {
         return this.snapshot.body;
     }
 
+    get zoomRatio() {
+        return this.snapshot.settings?.zoomRatio || 1;
+    }
+
     dispose() {
         this.bodyModel.dispose();
 
@@ -171,6 +175,16 @@ export class DocumentModelSimple {
 
         objectProperties.positionH.posOffset = config.left;
         objectProperties.positionV.posOffset = config.top;
+    }
+
+    setZoomRatio(zoomRatio: number = 1) {
+        if (this.snapshot.settings == null) {
+            this.snapshot.settings = {
+                zoomRatio,
+            };
+        } else {
+            this.snapshot.settings.zoomRatio = 1;
+        }
     }
 }
 

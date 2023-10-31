@@ -21,16 +21,15 @@ export class UniverSlide extends Disposable {
         super();
     }
 
-    init(): void {
+    start(): void {
+        this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
+        this._initializerService.initModulesOnStage(LifecycleStages.Starting);
+    }
+
+    ready(): void {
         this.disposeWithMe(
             toDisposable(
                 this._lifecycleService.subscribeWithPrevious().subscribe((stage) => {
-                    if (stage === LifecycleStages.Starting) {
-                        this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
-                        this._initializerService.initModulesOnStage(LifecycleStages.Starting);
-                        return;
-                    }
-
                     if (stage === LifecycleStages.Ready) {
                         this._pluginStore.forEachPlugin((p) => p.onReady());
                         this._initializerService.initModulesOnStage(LifecycleStages.Ready);
@@ -65,7 +64,9 @@ export class UniverSlide extends Disposable {
      *
      * @internal
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     addPlugin<T extends Plugin>(plugin: PluginCtor<T>, options: any): void {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const pluginInstance: Plugin = this._injector.createInstance(plugin as unknown as Ctor<any>, options);
         this._pluginStore.addPlugin(pluginInstance);
     }

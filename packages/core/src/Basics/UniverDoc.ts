@@ -20,18 +20,18 @@ export class UniverDoc extends Disposable {
         super();
     }
 
-    init(): void {
+    start(): void {
+        this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
+        this._initService.initModulesOnStage(LifecycleStages.Starting);
+    }
+
+    ready(): void {
         this.disposeWithMe(
             toDisposable(
                 this._injector
                     .get(LifecycleService)
                     .subscribeWithPrevious()
                     .subscribe((stage) => {
-                        if (stage === LifecycleStages.Starting) {
-                            this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
-                            this._initService.initModulesOnStage(LifecycleStages.Starting);
-                        }
-
                         if (stage === LifecycleStages.Ready) {
                             this._pluginStore.forEachPlugin((p) => p.onReady());
                             this._initService.initModulesOnStage(LifecycleStages.Ready);
@@ -57,7 +57,9 @@ export class UniverDoc extends Disposable {
         return this._injector.createInstance(DocumentModel, docData);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     addPlugin<T extends Plugin>(pluginCtor: PluginCtor<T>, options: any): void {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const pluginInstance: Plugin = this._injector.createInstance(pluginCtor as unknown as Ctor<any>, options);
         pluginInstance.onStarting(this._injector);
         this._pluginStore.addPlugin(pluginInstance);

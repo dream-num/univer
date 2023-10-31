@@ -24,19 +24,18 @@ export class UniverSheet extends Disposable implements IDisposable {
         this._initDependencies(_injector);
     }
 
-    init(): void {
+    start(): void {
+        this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
+        this._initService.initModulesOnStage(LifecycleStages.Starting);
+    }
+
+    ready(): void {
         this.disposeWithMe(
             toDisposable(
                 this._injector
                     .get(LifecycleService)
                     .subscribeWithPrevious()
                     .subscribe((stage) => {
-                        if (stage === LifecycleStages.Starting) {
-                            this._pluginStore.forEachPlugin((p) => p.onStarting(this._injector));
-                            this._initService.initModulesOnStage(LifecycleStages.Starting);
-                            return;
-                        }
-
                         if (stage === LifecycleStages.Ready) {
                             this._pluginStore.forEachPlugin((p) => p.onReady());
                             this._initService.initModulesOnStage(LifecycleStages.Ready);

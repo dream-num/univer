@@ -90,15 +90,16 @@ export class Univer {
 
         if (!this._univerSheet) {
             this._univerSheet = this._rootInjector.createInstance(UniverSheet);
-
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Sheet)
                 .forEach((p) => this._univerSheet!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
             this._tryStart();
+            this._univerSheet.start();
+
             addSheet();
-            this._univerSheet.init();
 
             this._tryProgressToReady();
+            this._univerSheet.ready();
         } else {
             addSheet();
         }
@@ -115,15 +116,16 @@ export class Univer {
 
         if (!this._univerDoc) {
             this._univerDoc = this._rootInjector.createInstance(UniverDoc);
-
             this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Doc)
                 .forEach((p) => this._univerDoc!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
             this._tryStart();
-            this._univerDoc.init();
+            this._univerDoc.start();
+
             addDoc();
 
             this._tryProgressToReady();
+            this._univerDoc.ready();
         } else {
             addDoc();
         }
@@ -145,7 +147,7 @@ export class Univer {
                 .getRegisterPlugins(PluginType.Slide)
                 .forEach((p) => this._univerSlide!.addPlugin(p.plugin as unknown as PluginCtor<any>, p.options));
             this._tryStart();
-            this._univerSlide.init();
+            this._univerSlide.ready();
             addSlide();
 
             this._tryProgressToReady();

@@ -102,13 +102,6 @@ function updateTextRuns(
 
     insertTextRuns(body, updateBody, textLength, currentIndex);
 
-    console.log(
-        JSON.stringify(body.textRuns, null, 2),
-        JSON.stringify(removeTextRuns, null, 2),
-        textLength,
-        currentIndex
-    );
-
     return removeTextRuns;
 }
 
@@ -116,7 +109,7 @@ function coverTextRun(updateDataTextRuns: ITextRun[], removeTextRuns: ITextRun[]
     const newUpdateTextRun: ITextRun[] = [];
 
     for (const updateTextRun of updateDataTextRuns) {
-        let { st: updateSt } = updateTextRun;
+        const { st: updateSt } = updateTextRun;
         const { ed: updateEd, ts: updateStyle } = updateTextRun;
 
         let splitUpdateTextRuns: ITextRun[] = [];
@@ -140,28 +133,32 @@ function coverTextRun(updateDataTextRuns: ITextRun[], removeTextRuns: ITextRun[]
                 });
                 continue;
             } else if (updateSt <= removeSt && updateEd >= removeEd) {
-                if (updateSt <= removeSt - 1) {
-                    splitUpdateTextRuns.push({
-                        st: updateSt,
-                        ed: removeSt - 1,
-                        ts: newTs,
-                        sId,
-                    });
-                }
+                // if (updateSt < removeSt) {
+                //     splitUpdateTextRuns.push({
+                //         st: updateSt,
+                //         ed: removeSt,
+                //         ts: newTs,
+                //         sId,
+                //     });
+                // }
+
                 splitUpdateTextRuns.push({
                     st: removeSt,
                     ed: removeEd,
                     ts: newTs,
                     sId,
                 });
-                splitUpdateTextRuns.push({
-                    st: removeEd + 1,
-                    ed: updateEd,
-                    ts: newTs,
-                    sId,
-                });
 
-                updateSt = removeEd + 1;
+                // if (removeEd < updateEd) {
+                //     splitUpdateTextRuns.push({
+                //         st: removeEd,
+                //         ed: updateEd,
+                //         ts: newTs,
+                //         sId,
+                //     });
+                // }
+
+                // updateSt = removeEd + 1;
             } else if (updateSt >= removeSt && updateSt <= removeEd) {
                 splitUpdateTextRuns.push({
                     st: updateSt,
@@ -170,12 +167,12 @@ function coverTextRun(updateDataTextRuns: ITextRun[], removeTextRuns: ITextRun[]
                     sId,
                 });
                 splitUpdateTextRuns.push({
-                    st: removeEd + 1,
+                    st: removeEd,
                     ed: updateEd,
                     ts: newTs,
                     sId,
                 });
-                updateSt = removeEd + 1;
+                // updateSt = removeEd + 1;
             } else if (updateEd >= removeSt && updateEd <= removeEd) {
                 splitUpdateTextRuns.push({
                     st: removeSt,

@@ -1,4 +1,4 @@
-import { BaseComponentProps, Modal, ModalButtonGroup } from '@univerjs/base-ui';
+import { BaseComponentProps } from '@univerjs/base-ui';
 import { Component } from 'react';
 
 import { SearchFormulaModalData } from '../../../Basics/Interfaces/IFormula';
@@ -49,17 +49,18 @@ export class SearchFormulaModal extends Component<IProps, IState> {
                 {modalData.map((item, index) => {
                     if (!item.show) return;
                     return (
-                        <Modal
-                            key={index}
-                            isDrag={true}
-                            mask={item.mask}
-                            title={item.label?.funParams.n}
-                            visible={item.show}
-                            group={item.group as ModalButtonGroup[]} // FIXME type error
-                            onCancel={item.onCancel}
-                        >
-                            {item.modal}
-                        </Modal>
+                        // <Modal
+                        //     key={index}
+                        //     isDrag={true}
+                        //     mask={item.mask}
+                        //     title={item.label?.funParams.n}
+                        //     visible={item.show}
+                        //     group={item.group as ModalButtonGroup[]} // FIXME type error
+                        //     onCancel={item.onCancel}
+                        // >
+                        //     {item.modal}
+                        // </Modal>
+                        <></>
                     );
                 })}
             </>

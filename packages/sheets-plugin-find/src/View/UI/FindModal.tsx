@@ -1,8 +1,6 @@
-import { BaseComponentProps, BaseItemProps, CellRange, CustomLabel, Input, Modal, Select } from '@univerjs/base-ui';
-import { Button, ICheckboxGroupProps } from '@univerjs/design';
+import { BaseComponentProps, BaseItemProps } from '@univerjs/base-ui';
+import { ICheckboxGroupProps } from '@univerjs/design';
 import { Component } from 'react';
-
-import styles from './index.module.less';
 
 type searchResult = {
     count: number;
@@ -193,81 +191,82 @@ export class FindModal extends Component<IProps, IState> {
         const { show, hideAdvanced, showRange, current, count } = this.state;
         // Set Provider for entire Container
         return (
-            <Modal
-                onCancel={() => this.handleHideAdvanced(true)}
-                className={styles.findModal}
-                isDrag
-                footer={false}
-                mask={false}
-                title={<CustomLabel label={hideAdvanced ? 'find.find' : 'find.findLabel'} />}
-                visible={show}
-            >
-                <div className={styles.box}>
-                    {hideAdvanced ? null : (
-                        <span>
-                            <CustomLabel label="find.find" />
-                        </span>
-                    )}
-                    <Input onValueChange={this.findNext.bind(this)} onChange={(e) => this.onChange(e)}></Input>
-                    {count ? (
-                        <div className={styles.count}>
-                            <span onClick={this.findPrevious.bind(this)}>
-                                {/* <Icon.Format.NextIcon rotate={90}></Icon.Format.NextIcon> */}
-                            </span>
-                            {current}/{count}
-                            <span onClick={this.findNext.bind(this)}>
-                                {/* <Icon.Format.NextIcon rotate={-90}></Icon.Format.NextIcon> */}
-                            </span>
-                        </div>
-                    ) : null}
-                </div>
-                {hideAdvanced ? (
-                    <p
-                        style={{ display: hideAdvanced ? 'block' : 'none' }}
-                        onClick={() => this.handleHideAdvanced(false)}
-                    >
-                        <CustomLabel label="find.replace" />/<CustomLabel label="find.advanced" />
-                        {/* <Icon.Format.NextIcon /> */}
-                    </p>
-                ) : (
-                    <>
-                        <div className={styles.box}>
-                            <span>
-                                <CustomLabel label="find.replaceWith" />
-                            </span>
-                            <Input></Input>
-                        </div>
-                        <div className={styles.box}>
-                            <span>
-                                <CustomLabel label="find.search" />
-                            </span>
-                            <Select onClick={this.selectSearch.bind(this)} children={this.getSelect()}></Select>
-                            {showRange ? <CellRange onClick={() => {}} /> : null}
-                        </div>
-                        <div className={styles.box}>
-                            <span></span>
-                            {/* <CheckboxGroup
-                                options={this.getMatchGroup()}
-                                onChange={this.handleChange.bind(this)}
-                            ></CheckboxGroup> */}
-                        </div>
-                        <div className={styles.buttonGroup}>
-                            <Button type="primary">
-                                <CustomLabel label="button.cancel" />
-                            </Button>
-                            <Button onClick={this.replaceAll.bind(this)}>
-                                <CustomLabel label="find.allReplaceBtn" />
-                            </Button>
-                            <Button onClick={this.replaceText.bind(this)}>
-                                <CustomLabel label="find.replace" />
-                            </Button>
-                            <Button onClick={this.findNext.bind(this)}>
-                                <CustomLabel label="find.find" />
-                            </Button>
-                        </div>
-                    </>
-                )}
-            </Modal>
+            // <Modal
+            //     onCancel={() => this.handleHideAdvanced(true)}
+            //     className={styles.findModal}
+            //     isDrag
+            //     footer={false}
+            //     mask={false}
+            //     title={<CustomLabel label={hideAdvanced ? 'find.find' : 'find.findLabel'} />}
+            //     visible={show}
+            // >
+            //     <div className={styles.box}>
+            //         {hideAdvanced ? null : (
+            //             <span>
+            //                 <CustomLabel label="find.find" />
+            //             </span>
+            //         )}
+            //         <Input onValueChange={this.findNext.bind(this)} onChange={(e) => this.onChange(e)}></Input>
+            //         {count ? (
+            //             <div className={styles.count}>
+            //                 <span onClick={this.findPrevious.bind(this)}>
+            //                     {/* <Icon.Format.NextIcon rotate={90}></Icon.Format.NextIcon> */}
+            //                 </span>
+            //                 {current}/{count}
+            //                 <span onClick={this.findNext.bind(this)}>
+            //                     {/* <Icon.Format.NextIcon rotate={-90}></Icon.Format.NextIcon> */}
+            //                 </span>
+            //             </div>
+            //         ) : null}
+            //     </div>
+            //     {hideAdvanced ? (
+            //         <p
+            //             style={{ display: hideAdvanced ? 'block' : 'none' }}
+            //             onClick={() => this.handleHideAdvanced(false)}
+            //         >
+            //             <CustomLabel label="find.replace" />/<CustomLabel label="find.advanced" />
+            //             {/* <Icon.Format.NextIcon /> */}
+            //         </p>
+            //     ) : (
+            //         <>
+            //             <div className={styles.box}>
+            //                 <span>
+            //                     <CustomLabel label="find.replaceWith" />
+            //                 </span>
+            //                 <Input></Input>
+            //             </div>
+            //             <div className={styles.box}>
+            //                 <span>
+            //                     <CustomLabel label="find.search" />
+            //                 </span>
+            //                 <Select onClick={this.selectSearch.bind(this)} children={this.getSelect()}></Select>
+            //                 {showRange ? <CellRange onClick={() => {}} /> : null}
+            //             </div>
+            //             <div className={styles.box}>
+            //                 <span></span>
+            //                 {/* <CheckboxGroup
+            //                     options={this.getMatchGroup()}
+            //                     onChange={this.handleChange.bind(this)}
+            //                 ></CheckboxGroup> */}
+            //             </div>
+            //             <div className={styles.buttonGroup}>
+            //                 <Button type="primary">
+            //                     <CustomLabel label="button.cancel" />
+            //                 </Button>
+            //                 <Button onClick={this.replaceAll.bind(this)}>
+            //                     <CustomLabel label="find.allReplaceBtn" />
+            //                 </Button>
+            //                 <Button onClick={this.replaceText.bind(this)}>
+            //                     <CustomLabel label="find.replace" />
+            //                 </Button>
+            //                 <Button onClick={this.findNext.bind(this)}>
+            //                     <CustomLabel label="find.find" />
+            //                 </Button>
+            //             </div>
+            //         </>
+            //     )}
+            // </Modal>
+            <></>
         );
     }
 }

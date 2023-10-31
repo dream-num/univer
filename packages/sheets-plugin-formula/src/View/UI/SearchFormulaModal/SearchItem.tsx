@@ -1,4 +1,4 @@
-import { BaseComponentProps, CellRange, CustomLabel } from '@univerjs/base-ui';
+import { BaseComponentProps } from '@univerjs/base-ui';
 import { Component } from 'react';
 
 import { FormulaParamType, FunParams } from '../../../Basics';
@@ -73,7 +73,7 @@ export class SearchItem extends Component<IProps, IState> {
                         <div key={index}>
                             <span>{item.name}:</span>
                             <div onClick={() => this.handleClick(index)}>
-                                <CellRange
+                                {/* <CellRange
                                     contentPlaceholder={
                                         (
                                             <CustomLabel label="formula.formulaMore.tipDataRangeTitle" />
@@ -86,7 +86,7 @@ export class SearchItem extends Component<IProps, IState> {
                                     }
                                     value={rangeList[index]}
                                     onClick={() => {}}
-                                />
+                                /> */}
                             </div>
                             <span>={'{}'}</span>
                         </div>

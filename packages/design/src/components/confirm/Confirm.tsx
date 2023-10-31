@@ -1,4 +1,7 @@
+import { useContext } from 'react';
+
 import { Button } from '../button/Button';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 import { Dialog } from '../dialog/Dialog';
 import styles from './index.module.less';
 
@@ -30,12 +33,14 @@ export interface IConfirmProps {
 export function Confirm(props: IConfirmProps) {
     const { children, visible = false, title, onClose, onConfirm } = props;
 
+    const { locale } = useContext(ConfigContext);
+
     function Footer() {
         return (
             <footer className={styles.confirmFooter}>
-                <Button onClick={onClose}>取消</Button>
+                <Button onClick={onClose}>{locale.design.Confirm.cancel}</Button>
                 <Button type="primary" onClick={onConfirm}>
-                    确定
+                    {locale.design.Confirm.confirm}
                 </Button>
             </footer>
         );

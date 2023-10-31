@@ -98,12 +98,12 @@ import {
     SetColWidthMenuItemFactory,
     SetRowHeightMenuItemFactory,
     ShowColMenuItemFactory,
+    ShowMenuItemFactory,
     ShowRowMenuItemFactory,
     StrikeThroughMenuItemFactory,
     TextColorSelectorMenuItemFactory,
     TextRotateMenuItemFactory,
     UnderlineMenuItemFactory,
-    UnHideSheetMenuItemFactory,
     VerticalAlignMenuItemFactory,
     WrapTextMenuItemFactory,
 } from './menu/menu';
@@ -288,7 +288,7 @@ export class SheetUIController extends Disposable {
                 RenameSheetMenuItemFactory,
                 ChangeColorSheetMenuItemFactory,
                 HideSheetMenuItemFactory,
-                UnHideSheetMenuItemFactory,
+                ShowMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));

@@ -79,6 +79,7 @@ import {
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
+import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 
 export const CONTEXT_MENU_INPUT_LABEL = 'CONTEXT_MENU_INPUT';
@@ -1471,5 +1472,14 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
             subscriber.next(hiddenList);
             return disposable.dispose;
         }),
+    };
+}
+
+export function ShowMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: ShowMenuListCommand.id,
+        type: MenuItemType.BUTTON,
+        positions: [SheetMenuPosition.SHEET_BAR],
+        title: 'sheetConfig.unhide',
     };
 }

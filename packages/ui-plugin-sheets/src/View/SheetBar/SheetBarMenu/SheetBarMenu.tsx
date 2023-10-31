@@ -9,12 +9,19 @@ import {
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
 import { Dropdown2, joinClassNames } from '@univerjs/base-ui';
-import { BooleanNumber, ICommandInfo, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import {
+    BooleanNumber,
+    DisposableCollection,
+    ICommandInfo,
+    ICommandService,
+    IUniverInstanceService,
+} from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { Selectedo24, SwitchSheet28 } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
+import { ISheetBarService } from '../../../services/sheetbar/sheetbar.service';
 import styles from './index.module.less';
 
 export interface ISheetBarMenuItem {
@@ -31,10 +38,13 @@ export interface ISheetBarMenuProps {
 }
 
 export function SheetBarMenu(props: ISheetBarMenuProps) {
+    const { style } = props;
     const [menu, setMenu] = useState<ISheetBarMenuItem[]>([]);
+    const [visible, setVisible] = useState(false);
 
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
+    const sheetBarService = useDependency(ISheetBarService);
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
 
     const handleClick = (item: ISheetBarMenuItem) => {
@@ -51,15 +61,25 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                 worksheetId: sheetId,
             });
         }
+
+        setVisible(false);
     };
 
     useEffect(() => {
         statusInit();
 
-        const disposable = setupStatusUpdate();
+        const _disposables = new DisposableCollection();
+
+        _disposables.add(setupStatusUpdate());
+        _disposables.add(
+            sheetBarService.registerSheetBarMenuHandler({
+                handleSheetBarMenu,
+            })
+        );
+
         return () => {
             // Clean up disposable when the component unmounts
-            disposable.dispose();
+            _disposables.dispose();
         };
     }, []);
 
@@ -92,7 +112,13 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
         setMenu(worksheetMenuItems);
     };
 
-    const { style } = props;
+    function handleSheetBarMenu() {
+        setVisible(true);
+    }
+
+    const onVisibleChange = (visible: boolean) => {
+        setVisible(visible);
+    };
 
     return (
         <Dropdown2
@@ -120,6 +146,8 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                     ))}
                 </ul>
             }
+            visible={visible}
+            onVisibleChange={onVisibleChange}
         >
             <Button type="text" size="small">
                 <SwitchSheet28 />

@@ -1,22 +1,23 @@
-import { IMouseEvent, IPointerEvent } from '@univerjs/base-render';
 import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 import { IScrollState } from '../../View/SheetBar/SheetBarTabs/utils/slide-tab-bar';
 
 export interface ISheetBarMenuHandler {
-    handleSheetBarMenu(event: IPointerEvent | IMouseEvent, menuType: string): void;
+    handleSheetBarMenu(): void;
 }
 
 export interface ISheetBarService {
     renameId$: Observable<string>;
     scroll$: Observable<IScrollState>;
     scrollX$: Observable<number>;
+    addSheet$: Observable<number>;
     setRenameId(id: string): void;
     setScroll(state: IScrollState): void;
     setScrollX(x: number): void;
-    triggerSheetBarMenu(event: IPointerEvent | IMouseEvent, menuType: string): void;
+    setAddSheet(index: number): void;
+    triggerSheetBarMenu(): void;
     registerSheetBarMenuHandler(handler: ISheetBarMenuHandler): IDisposable;
 }
 
@@ -26,17 +27,19 @@ export class SheetBarService extends Disposable implements ISheetBarService {
     readonly renameId$: Observable<string>;
     readonly scroll$: Observable<IScrollState>;
     readonly scrollX$: Observable<number>;
+    readonly addSheet$: Observable<number>;
 
-    private readonly _renameId$: BehaviorSubject<string>;
+    private readonly _renameId$: Subject<string>;
     private readonly _scroll$: Subject<IScrollState>;
     private readonly _scrollX$: Subject<number>;
+    private readonly _addSheet$: Subject<number>;
 
     private _currentHandler: ISheetBarMenuHandler | null = null;
 
     constructor() {
         super();
 
-        this._renameId$ = new BehaviorSubject('');
+        this._renameId$ = new Subject();
         this.renameId$ = this._renameId$.asObservable();
 
         this._scroll$ = new Subject();
@@ -44,6 +47,9 @@ export class SheetBarService extends Disposable implements ISheetBarService {
 
         this._scrollX$ = new Subject();
         this.scrollX$ = this._scrollX$.asObservable();
+
+        this._addSheet$ = new Subject();
+        this.addSheet$ = this._addSheet$.asObservable();
     }
 
     setRenameId(renameId: string): void {
@@ -58,8 +64,12 @@ export class SheetBarService extends Disposable implements ISheetBarService {
         this._scrollX$.next(x);
     }
 
-    triggerSheetBarMenu(event: IPointerEvent | IMouseEvent, menuType: string): void {
-        this._currentHandler?.handleSheetBarMenu(event, menuType);
+    setAddSheet(index: number): void {
+        this._addSheet$.next(index);
+    }
+
+    triggerSheetBarMenu(): void {
+        this._currentHandler?.handleSheetBarMenu();
     }
 
     registerSheetBarMenuHandler(handler: ISheetBarMenuHandler): IDisposable {

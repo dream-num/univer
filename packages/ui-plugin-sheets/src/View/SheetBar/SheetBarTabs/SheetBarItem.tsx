@@ -1,13 +1,11 @@
+import { TinyColor } from '@ctrl/tinycolor';
 import { Dropdown2, Menu2 } from '@univerjs/base-ui';
-import { BooleanNumber, ICommandService } from '@univerjs/core';
-import { SelectionBoxDropdown16 } from '@univerjs/icons';
+import { BooleanNumber, ICommandService, ThemeService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { RenameSheetOperation } from '../../../commands/commands/rename.command';
 import { SheetMenuPosition } from '../../../controller/menu/menu';
 import styles from './index.module.less';
-import { InputEdit } from './InputEdit';
 
 export interface IBaseSheetBarProps {
     label?: string;
@@ -17,32 +15,32 @@ export interface IBaseSheetBarProps {
     sheetId?: string;
     style?: React.CSSProperties;
     hidden?: BooleanNumber;
-    addSheet?: () => void;
-    onMouseDown?: (e: React.MouseEvent) => void;
-    changeSheetName?: (sheetId: string, name: string) => void;
     selected?: boolean;
 }
 
 export function SheetBarItem(props: IBaseSheetBarProps) {
-    const { onMouseDown, sheetId, label, color, selected } = props;
+    const { sheetId, label, color, selected } = props;
 
     const [visible, setVisible] = useState(false);
     const [currentSelected, setCurrentSelected] = useState(selected);
 
     const commandService = useDependency(ICommandService);
+    const themeService = useDependency(ThemeService);
 
     useEffect(() => {
         // TODO: update too many times?
         setCurrentSelected(selected);
     }, [selected]);
 
-    // FIXME The first sheet tab will be closed automatically
     const onVisibleChange = (visible: boolean) => {
         setVisible(visible);
     };
 
-    const onDoubleClick = (worksheetId: string) => {
-        commandService.executeCommand(RenameSheetOperation.id, { worksheetId });
+    const getTextColor = (color: string) => {
+        const theme = themeService.getCurrentTheme();
+        const darkTextColor = theme.textColor;
+        const lightTextColor = theme.colorWhite;
+        return new TinyColor(color).isDark() ? lightTextColor : darkTextColor;
     };
 
     return (
@@ -62,34 +60,21 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             onVisibleChange={onVisibleChange}
         >
             <div
-                onContextMenu={onMouseDown}
-                onDoubleClick={() => sheetId && onDoubleClick(sheetId)}
                 key={sheetId}
                 data-id={sheetId}
                 className={
                     currentSelected ? `${styles.slideTabActive} ${styles.slideTabItem}` : `${styles.slideTabItem}`
                 }
             >
-                <div className={`${styles.slideTabContent}`}>
-                    <div className={`${styles.slideTabTitle}`}>
-                        <span className={`${styles.slideTabSpan}`}>
-                            <InputEdit sheetId={sheetId} sheetName={label ?? ''} />
-                        </span>
-                    </div>
-                    <div
-                        className={`${styles.slideTabIcon}`}
-                        data-slide-skip="true"
-                        style={{ lineHeight: 1 }}
-                        data-id={sheetId}
-                        onMouseDown={(e) => {
-                            console.info('mousedown icon', currentSelected);
-                            if (currentSelected) {
-                                setVisible(true);
-                            }
-                        }}
-                    >
-                        <SelectionBoxDropdown16 />
-                    </div>
+                <div
+                    className={`${styles.slideTabContent}`}
+                    style={{
+                        backgroundColor: !currentSelected && color ? color : '',
+                        color: !currentSelected && color ? getTextColor(color) : '',
+                        boxShadow: currentSelected && color ? `inset 0px -2px 0px 0px ${color}` : '',
+                    }}
+                >
+                    <span className={`${styles.slideTabSpan}`}>{label}</span>
                 </div>
                 <div className={`${styles.slideTabFooter}`}>
                     <div className={`${styles.slideTabActiveBar}`} style={color ? { background: color } : {}}></div>

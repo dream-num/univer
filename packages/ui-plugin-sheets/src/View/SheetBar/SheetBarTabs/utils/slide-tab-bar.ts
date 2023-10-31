@@ -8,12 +8,13 @@ export interface SlideTabBarConfig {
     slideTabBarClassName: string;
     slideTabBarItemActiveClassName: string;
     slideTabBarItemClassName: string;
+    slideTabBarSpanEditClassName: string;
     slideTabRootClassName: string;
     activeClassNameAutoController: boolean;
     slideTabBarItemAutoSort: boolean;
     currentIndex: number;
     onSlideEnd: (event: MouseEvent, compareIndex: number) => void;
-    onChangeName: (event: FocusEvent) => void;
+    onChangeName: (id: string, name: string) => void;
     onChangeTab: (event: FocusEvent, id: string) => void;
     onScroll: (state: IScrollState) => void;
 }
@@ -83,53 +84,95 @@ export class SlideTabItem {
         return this.getTranslateXDirection();
     }
 
-    // editor(callback?: (event: FocusEvent) => void): void {
-    //     if (this._editMode === false) {
-    //         const input = this.primeval().querySelector('span');
+    editor(callback?: (event: FocusEvent) => void): void {
+        let compositionFlag = true;
+        if (this._editMode === false) {
+            const input = this.primeval().querySelector('span');
 
-    //         const blurAction = (focusEvent: FocusEvent) => {
-    //             this._editMode = false;
+            const blurAction = (focusEvent: FocusEvent) => {
+                if (this.emptyCheck()) return;
 
-    //             if (input) {
-    //                 input.removeAttribute('contentEditable');
-    //                 input.removeEventListener('blur', blurAction);
-    //                 input.removeEventListener('input', inputAction);
-    //             }
+                this._editMode = false;
 
-    //             this._slideTabBar.updateItems();
+                if (input) {
+                    input.removeAttribute('contentEditable');
+                    input.removeEventListener('blur', blurAction);
+                    input.removeEventListener('compositionstart', compositionstartAction);
+                    input.removeEventListener('compositionend', compositionendAction);
+                    input.removeEventListener('input', inputAction);
+                    input.removeEventListener('keydown', keydownAction);
+                    input.classList.remove(this._slideTabBar.getConfig().slideTabBarSpanEditClassName);
+                }
 
-    //             if (this._slideTabBar.getConfig().onChangeName) {
-    //                 this._slideTabBar.getConfig().onChangeName(focusEvent);
-    //             }
+                this._slideTabBar.updateItems();
+                if (this._slideTabBar.getConfig().onChangeName) {
+                    const text = input?.innerText || '';
+                    const id = this.getId();
+                    this._slideTabBar.getConfig().onChangeName(id, text);
+                }
 
-    //             if (callback) {
-    //                 callback(focusEvent);
-    //             }
-    //         };
+                if (callback) {
+                    callback(focusEvent);
+                }
+            };
 
-    //         let inputAction = () => {
-    //             if (input) {
-    //                 const brs = input.querySelectorAll('br');
-    //                 if (brs.length > 0) {
-    //                     brs.forEach((br) => {
-    //                         if (input) {
-    //                             input.removeChild(br);
-    //                         }
-    //                     });
-    //                     input.blur();
-    //                 }
-    //             }
-    //         };
+            let keydownAction = (e: KeyboardEvent) => {
+                if (!input) return;
+                e.stopPropagation();
 
-    //         if (input) {
-    //             input.setAttribute('contentEditable', 'true');
-    //             input.addEventListener('blur', blurAction);
-    //             input.addEventListener('input', inputAction);
-    //             this._editMode = true;
-    //             SlideTabBar.keepLastIndex(input);
-    //         }
-    //     }
-    // }
+                if (e.key === 'Enter') {
+                    input.blur();
+                }
+            };
+
+            const compositionstartAction = (e: CompositionEvent) => {
+                compositionFlag = false;
+            };
+
+            const compositionendAction = (e: CompositionEvent) => {
+                compositionFlag = true;
+            };
+
+            const inputAction = (e: Event) => {
+                if (!input) return;
+                const maxLength = 50;
+
+                setTimeout(() => {
+                    if (compositionFlag) {
+                        const text = input.innerText;
+                        if (text.length > maxLength) {
+                            input.innerText = text.substring(0, maxLength);
+                            SlideTabBar.keepLastIndex(input);
+                        }
+                    }
+                }, 0);
+            };
+
+            if (input) {
+                input.setAttribute('contentEditable', 'true');
+                input.addEventListener('blur', blurAction);
+                input.addEventListener('compositionstart', compositionstartAction);
+                input.addEventListener('compositionend', compositionendAction);
+                input.addEventListener('input', inputAction);
+                input.addEventListener('keydown', keydownAction);
+                input.classList.add(this._slideTabBar.getConfig().slideTabBarSpanEditClassName);
+                this._editMode = true;
+                SlideTabBar.keepSelectAll(input);
+            }
+        }
+    }
+
+    emptyCheck() {
+        const input = this.primeval().querySelector('span');
+        if (!input) return false;
+        const text = input.innerText;
+        if (text.trim() === '') {
+            // TODO@Dushusir: i18n and dialog service
+            alert('The sheet name cannot be empty.');
+            return true;
+        }
+        return false;
+    }
 
     animate(): SlideTabItemAnimate {
         return {
@@ -410,8 +453,7 @@ export class SlideTabBar {
             this._downActionX = downEvent.pageX;
             this._moveActionX = 0;
             this._scrollIncremental = 0;
-            // this._activeTabItem = this._slideTabItems[slideItemIndex];
-            // if (!this._activeTabItem) return;
+            this._activeTabItem = this._slideTabItems[slideItemIndex];
             if (!this._activeTabItem) {
                 console.error('Not found active slide-tab-item in sheet bar');
                 return;
@@ -430,7 +472,7 @@ export class SlideTabBar {
             this._leftMoveX = x - containerX - scrollX;
             this._rightMoveX = containerX + containerWidth - (x + width) + scrollX + adjustment;
 
-            if (downEvent.button === 2) {
+            if (downEvent.button === 2 || this._hasEditItem()) {
                 return;
             }
 
@@ -442,16 +484,10 @@ export class SlideTabBar {
 
             // double click
             if (diffTime && diffPageX && diffPageY) {
-                // const slideItem = this._slideTabItems.find((item) =>
-                //     item.equals(new SlideTabItem(downEvent.currentTarget as HTMLElement, this))
-                // );
-                // if (slideItem) {
-                //     // user editor
-                //     slideItem.editor();
-                // }
-                // lastTime = 0;
-                // lastPageX = 0;
-                // lastPageY = 0;
+                if (this._activeTabItem) {
+                    // user editor
+                    this._activeTabItem.editor();
+                }
             }
 
             lastPageX = pageX;
@@ -460,22 +496,6 @@ export class SlideTabBar {
 
             // Set a timer to delay dragging for 300 milliseconds
             this._longPressTimer = window.setTimeout(() => {
-                // not item is edit mode
-                // if (!this._hasEditItem()) {
-                // if (SlideTabBar.checkedSkipSlide(downEvent)) {
-                //     lastPageX = 0;
-                //     lastTime = 0;
-                //     lastPageY = 0;
-                //     return;
-                // }
-
-                // if (slideItemIndex > -1) {
-                // this._compareIndex = slideItemIndex;
-                // this._downActionX = downEvent.pageX;
-                // this._moveActionX = 0;
-                // this._scrollIncremental = 0;
-                // this._activeTabItem = this._slideTabItems[slideItemIndex];
-                // this._activeTabItemIndex = slideItemIndex;
                 if (this._config.activeClassNameAutoController) {
                     this._slideTabItems.forEach((item) => {
                         item.classList().remove(this._config.slideTabBarItemActiveClassName);
@@ -492,16 +512,6 @@ export class SlideTabBar {
                 activeSlideItemElement.style.cursor = 'move';
 
                 this._activeTabItem?.addEventListener('pointermove', this._moveAction);
-
-                //     } else {
-                //         this.updateItems();
-                //         this._activeTabItemIndex = 0;
-                //         this._downActionX = 0;
-                //         this._scrollIncremental = 0;
-                //         this._compareIndex = 0;
-                //         this._activeTabItem = null;
-                //     }
-                // }
             }, SlideTabBar.LongPressDelay);
         };
 
@@ -516,12 +526,8 @@ export class SlideTabBar {
 
             this._closeAutoScroll();
             this._activeTabItem.disableFixed();
-            this._sortedItems();
+            // this._sortedItems();
             this.updateItems();
-
-            // this._slideTabItems.forEach((item) => {
-            //     item.removeEventListener('pointerdown', this._downAction);
-            // });
 
             // Restore the mouse cursor
             const activeSlideItemElement = this._activeTabItem?.getSlideTabItem();
@@ -530,7 +536,6 @@ export class SlideTabBar {
             activeSlideItemElement.style.cursor = '';
             activeSlideItemElement.releasePointerCapture((upEvent as PointerEvent).pointerId);
 
-            console.info('upAction+====');
             this._activeTabItem?.removeEventListener('pointermove', this._moveAction);
             this._activeTabItem?.removeEventListener('pointerup', this._upAction);
             if (this._config.onSlideEnd && this._activeTabItemIndex !== this._compareIndex) {
@@ -539,20 +544,10 @@ export class SlideTabBar {
                 this._config.onSlideEnd(upEvent, this._compareIndex || 0);
             }
 
-            // fix bug
-            // const event = new MouseEvent('click', {
-            //     view: window,
-            //     bubbles: true,
-            //     cancelable: true,
-            // });
-            // this._activeTabItem.primeval().dispatchEvent(event);
-
             this._scrollIncremental = 0;
-            // this._activeTabItemIndex = 0;
             this._downActionX = 0;
             this._moveActionX = 0;
             this._compareIndex = 0;
-            // this._activeTabItem = null;
         };
 
         this._moveAction = (moveEvent) => {
@@ -576,26 +571,38 @@ export class SlideTabBar {
         this._initialize();
     }
 
-    // static checkedSkipSlide(event: MouseEvent): boolean {
-    //     let parent: HTMLElement | null = event.target as HTMLElement;
-    //     while (parent != null && parent !== document.body) {
-    //         if (parent.getAttribute('data-slide-skip')) {
-    //             return true;
-    //         }
-    //         parent = parent.parentElement;
-    //     }
-    //     return false;
-    // }
+    static checkedSkipSlide(event: MouseEvent): boolean {
+        let parent: HTMLElement | null = event.target as HTMLElement;
+        while (parent != null && parent !== document.body) {
+            if (parent.getAttribute('data-slide-skip')) {
+                return true;
+            }
+            parent = parent.parentElement;
+        }
+        return false;
+    }
 
-    // static keepLastIndex(inputHtml: HTMLElement) {
-    //     setTimeout(() => {
-    //         const range = window.getSelection();
-    //         if (range) {
-    //             range.selectAllChildren(inputHtml);
-    //             range.collapseToEnd();
-    //         }
-    //     });
-    // }
+    static keepLastIndex(inputHtml: HTMLElement) {
+        setTimeout(() => {
+            const range = window.getSelection();
+            if (range) {
+                range.selectAllChildren(inputHtml);
+                range.collapseToEnd();
+            }
+        });
+    }
+    static keepSelectAll(inputHtml: HTMLElement) {
+        setTimeout(() => {
+            const selection = window.getSelection();
+            if (!selection) return;
+
+            const range = document.createRange();
+            range.selectNodeContents(inputHtml);
+
+            selection.removeAllRanges();
+            selection.addRange(range);
+        });
+    }
 
     primeval(): HTMLElement {
         return this._slideTabBar;
@@ -806,6 +813,9 @@ export class SlideTabBar {
     }
 
     protected _initialize(): void {
+        // TODO@Dushusir: Listener cannot be removed, resulting in repeated monitoring after renaming or setting tab color.
+        this.destroy();
+
         this._slideTabBar.addEventListener('wheel', this._wheelAction);
         this._slideTabItems.forEach((item) => {
             item.addEventListener('pointerdown', this._downAction);

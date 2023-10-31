@@ -1,17 +1,11 @@
 import {
-    IInsertSheetMutationParams,
     InsertSheetMutation,
-    IRemoveSheetMutationParams,
-    ISetTabColorMutationParams,
-    ISetWorksheetActivateMutationParams,
-    ISetWorksheetHideMutationParams,
-    ISetWorksheetNameMutationParams,
-    ISetWorksheetOrderMutationParams,
     RemoveSheetMutation,
     SetTabColorMutation,
     SetWorksheetActivateCommand,
     SetWorksheetActivateMutation,
     SetWorksheetHideMutation,
+    SetWorksheetNameCommand,
     SetWorksheetNameMutation,
     SetWorksheetOrderCommand,
     SetWorksheetOrderMutation,
@@ -51,7 +45,6 @@ export function SheetBarTabs() {
 
     useEffect(() => {
         if (sheetList.length > 0) {
-            console.info('sheetList', JSON.stringify(sheetList));
             setupSlideTabBarUpdate();
         }
     }, [sheetList]);
@@ -64,11 +57,15 @@ export function SheetBarTabs() {
             slideTabBarClassName: styles.slideTabBar,
             slideTabBarItemActiveClassName: styles.slideTabActive,
             slideTabBarItemClassName: styles.slideTabItem,
+            slideTabBarSpanEditClassName: styles.slideTabSpanEdit,
             slideTabBarItemAutoSort: true,
             slideTabRootClassName: sheetBarStyles.sheetBar,
             currentIndex,
-            onChangeName: (event: Event) => {
-                console.info('onChangeName==', event);
+            onChangeName: (worksheetId: string, worksheetName: string) => {
+                commandService.executeCommand(SetWorksheetNameCommand.id, {
+                    worksheetId,
+                    name: worksheetName,
+                });
             },
             onSlideEnd: (event: Event, order: number) => {
                 commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
@@ -87,6 +84,16 @@ export function SheetBarTabs() {
                 // update scrollX
                 slideTabBar.setScroll(x);
             });
+
+            sheetbarService.renameId$.subscribe((renameId: string) => {
+                const index = sheetList.findIndex((item) => item.sheetId === renameId);
+                slideTabBar.getSlideTabItems()[index].editor();
+            });
+
+            sheetbarService.addSheet$.subscribe((addSheet: number) => {
+                slideTabBar.getScrollbar().scrollRight();
+            });
+
             setSubscribe(true);
         }
     };
@@ -94,27 +101,6 @@ export function SheetBarTabs() {
     const setupStatusUpdate = () =>
         commandService.onCommandExecuted((commandInfo: ICommandInfo<object>) => {
             switch (commandInfo.id) {
-                // case SetTabColorMutation.id:
-                //     setTabColor(commandInfo as ICommandInfo<ISetTabColorMutationParams>);
-                //     break;
-                // case SetWorksheetHideMutation.id:
-                //     setWorksheetHide(commandInfo as ICommandInfo<ISetWorksheetHideMutationParams>);
-                //     break;
-                // case RemoveSheetMutation.id:
-                //     removeSheet(commandInfo as ICommandInfo<IRemoveSheetMutationParams>);
-                //     break;
-                // case SetWorksheetNameMutation.id:
-                //     setWorksheetName(commandInfo as ICommandInfo<ISetWorksheetNameMutationParams>);
-                //     break;
-                // case InsertSheetMutation.id:
-                //     insertSheet(commandInfo as ICommandInfo<IInsertSheetMutationParams>);
-                //     break;
-                // case SetWorksheetOrderMutation.id:
-                //     setWorksheetOrder(commandInfo as ICommandInfo<ISetWorksheetOrderMutationParams>);
-                //     break;
-                // case SetWorksheetActivateMutation.id:
-                //     setWorksheetActivate(commandInfo as ICommandInfo<ISetWorksheetActivateMutationParams>);
-                //     break;
                 case SetTabColorMutation.id:
                 case SetWorksheetHideMutation.id:
                 case RemoveSheetMutation.id:
@@ -146,50 +132,11 @@ export function SheetBarTabs() {
         setSheetList(sheetListItems);
     };
 
-    const setTabColor = (commandInfo: ICommandInfo<ISetTabColorMutationParams>) => {};
-
-    const setWorksheetHide = (commandInfo: ICommandInfo<ISetWorksheetHideMutationParams>) => {};
-
-    const removeSheet = (commandInfo: ICommandInfo<IRemoveSheetMutationParams>) => {
-        const { params } = commandInfo;
-        if (!params) return;
-        // const { worksheetId } = params;
-        console.log('removeSheet', params);
-    };
-
-    const setWorksheetName = (commandInfo: ICommandInfo<ISetWorksheetNameMutationParams>) => {};
-
-    const insertSheet = (commandInfo: ICommandInfo<IInsertSheetMutationParams>) => {};
-
-    const setWorksheetOrder = (commandInfo: ICommandInfo<ISetWorksheetOrderMutationParams>) => {};
-
-    const setWorksheetActivate = (commandInfo: ICommandInfo<ISetWorksheetActivateMutationParams>) => {
-        const { params } = commandInfo;
-        if (!params) return;
-        const { worksheetId } = params;
-        setActiveKey(worksheetId);
-    };
-
-    const onMouseDown = (worksheetId: string) => {
-        console.info('onMouseDown', worksheetId);
-        if (activeKey !== worksheetId) {
-            // setActiveKey(worksheetId);
-            commandService.executeCommand(SetWorksheetActivateCommand.id, {
-                workbookId: workbook.getUnitId(),
-                worksheetId,
-            });
-        }
-    };
     return (
         <div className={styles.slideTabBarContainer}>
             <div className={styles.slideTabBar}>
                 {sheetList.map((item) => (
-                    <SheetBarItem
-                        {...item}
-                        key={item.sheetId}
-                        onMouseDown={() => onMouseDown(item.sheetId ?? '')}
-                        selected={activeKey === item.sheetId}
-                    />
+                    <SheetBarItem {...item} key={item.sheetId} selected={activeKey === item.sheetId} />
                 ))}
             </div>
         </div>

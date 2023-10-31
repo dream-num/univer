@@ -1,4 +1,4 @@
-import { AppContext, BaseComponentProps, CustomLabel, Icon } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, CustomLabel } from '@univerjs/base-ui';
 import { BorderStyleTypes } from '@univerjs/core';
 import { Component } from 'react';
 
@@ -84,7 +84,7 @@ export class LineBold extends Component<IProps, IState> {
                         {imgComponent}
                     </div>
                 </span>
-                <Icon.RightIcon />
+                {/* <Icon.RightIcon /> */}
             </div>
         );
     }

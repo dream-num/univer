@@ -1,13 +1,4 @@
-import {
-    BaseComponentProps,
-    BaseItemProps,
-    CellRange,
-    CustomLabel,
-    Icon,
-    Input,
-    Modal,
-    Select,
-} from '@univerjs/base-ui';
+import { BaseComponentProps, BaseItemProps, CellRange, CustomLabel, Input, Modal, Select } from '@univerjs/base-ui';
 import { Button, ICheckboxGroupProps } from '@univerjs/design';
 import { Component } from 'react';
 
@@ -221,11 +212,11 @@ export class FindModal extends Component<IProps, IState> {
                     {count ? (
                         <div className={styles.count}>
                             <span onClick={this.findPrevious.bind(this)}>
-                                <Icon.Format.NextIcon rotate={90}></Icon.Format.NextIcon>
+                                {/* <Icon.Format.NextIcon rotate={90}></Icon.Format.NextIcon> */}
                             </span>
                             {current}/{count}
                             <span onClick={this.findNext.bind(this)}>
-                                <Icon.Format.NextIcon rotate={-90}></Icon.Format.NextIcon>
+                                {/* <Icon.Format.NextIcon rotate={-90}></Icon.Format.NextIcon> */}
                             </span>
                         </div>
                     ) : null}
@@ -236,7 +227,7 @@ export class FindModal extends Component<IProps, IState> {
                         onClick={() => this.handleHideAdvanced(false)}
                     >
                         <CustomLabel label="find.replace" />/<CustomLabel label="find.advanced" />
-                        <Icon.Format.NextIcon />
+                        {/* <Icon.Format.NextIcon /> */}
                     </p>
                 ) : (
                     <>

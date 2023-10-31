@@ -216,18 +216,18 @@ export class Documents extends DocComponent {
             } = renderConfig;
 
             const horizontalOffsetNoAngle = this._horizontalHandler(
-                actualWidth,
+                actualWidth * scale,
                 pagePaddingLeft,
                 pagePaddingRight,
                 horizontalAlign
             );
             const verticalOffsetNoAngle = this._verticalHandler(
-                actualHeight,
+                actualHeight * scale,
                 pagePaddingTop,
                 pagePaddingBottom,
                 verticalAlign
             );
-            const alignOffsetNoAngle = Vector2.create(horizontalOffsetNoAngle, verticalOffsetNoAngle);
+            const alignOffsetNoAngle = Vector2.create(horizontalOffsetNoAngle / scale, verticalOffsetNoAngle / scale);
 
             const centerAngle = degToRad(centerAngleDeg);
 
@@ -407,7 +407,12 @@ export class Documents extends DocComponent {
 
             this._resetRotation(ctx, finalAngle);
 
-            const { x, y } = this._drawLiquid.translatePage(page, this.pageLayoutType, 24, 24);
+            const { x, y } = this._drawLiquid.translatePage(
+                page,
+                this.pageLayoutType,
+                this.pageMarginLeft,
+                this.pageMarginTop
+            );
             pageLeft += x;
             pageTop += y;
         }

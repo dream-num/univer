@@ -209,10 +209,12 @@ export class StartEditController extends Disposable {
             // Set the top margin under vertical alignment.
             let offsetTop = paddingData.t || 0;
             if (verticalAlign === VerticalAlign.MIDDLE) {
-                offsetTop = (editorHeight / scaleY - actualHeight) / 2;
+                offsetTop = (editorHeight - actualHeight) / 2;
             } else if (verticalAlign === VerticalAlign.BOTTOM) {
-                offsetTop = editorHeight / scaleY - actualHeight;
+                offsetTop = editorHeight - actualHeight;
             }
+
+            offsetTop /= scaleY;
 
             offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
 
@@ -241,6 +243,7 @@ export class StartEditController extends Disposable {
         scaleX: number = 1,
         scaleY: number = 1
     ) {
+        // startX and startY are the width and height after scaling.
         const { startX, endX } = actualRangeWithCoord;
 
         const { textRotation, wrapStrategy } = documentLayoutObject;
@@ -250,7 +253,12 @@ export class StartEditController extends Disposable {
         const clientWidth = document.body.clientWidth;
 
         if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-            return documentSkeleton.getActualSize();
+            const { actualWidth, actualHeight } = documentSkeleton.getActualSize();
+            // The skeleton obtains the original volume, which needs to be multiplied by the magnification factor.
+            return {
+                actualWidth: actualWidth * scaleX,
+                actualHeight: actualHeight * scaleY,
+            };
         }
         documentSkeleton.getModel().updateDocumentDataPageSize(clientWidth - startX - canvasOffset.left);
         documentSkeleton.calculate();
@@ -259,11 +267,12 @@ export class StartEditController extends Disposable {
 
         let editorWidth = endX - startX;
 
-        if (editorWidth < size.actualWidth + EDITOR_INPUT_SELF_EXTEND_GAP) {
-            editorWidth = size.actualWidth + EDITOR_INPUT_SELF_EXTEND_GAP;
+        if (editorWidth < size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP) {
+            editorWidth = size.actualWidth * scaleX + EDITOR_INPUT_SELF_EXTEND_GAP;
         }
 
-        documentSkeleton.getModel()!.updateDocumentDataPageSize(editorWidth);
+        // Scaling is handled by the renderer, so the skeleton only accepts the original width and height, which need to be divided by the magnification factor.
+        documentSkeleton.getModel()!.updateDocumentDataPageSize(editorWidth / scaleX);
 
         documentSkeleton.getModel()!.updateDocumentRenderConfig({
             horizontalAlign: HorizontalAlign.UNSPECIFIED,
@@ -271,7 +280,7 @@ export class StartEditController extends Disposable {
 
         return {
             actualWidth: editorWidth,
-            actualHeight: size.actualHeight,
+            actualHeight: size.actualHeight * scaleY,
         };
     }
 

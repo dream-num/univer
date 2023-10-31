@@ -160,8 +160,8 @@ export class DocCanvasView {
 
         const unitId = documentModel.getUnitId();
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, undefined, {
-            pageMarginLeft: 24,
-            pageMarginTop: 24,
+            pageMarginLeft: documentModel.documentStyle.marginLeft || 0,
+            pageMarginTop: documentModel.documentStyle.marginTop || 0,
         });
         documents.zIndex = DOCS_COMPONENT_DEFAULT_Z_INDEX;
 

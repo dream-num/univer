@@ -1,4 +1,3 @@
-export * from './BorderLine';
 export * from './CellRange';
 export * from './Collapse';
 export * from './CustomLabel';

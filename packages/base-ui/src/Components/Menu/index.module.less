@@ -135,13 +135,6 @@
                 color: #2baee9;
             }
         }
-
-        &:after {
-            content: '\20';
-            display: block;
-            height: 0;
-            clear: both;
-        }
     }
 
     &-vertical,
@@ -151,6 +144,7 @@
         & > .menu2-item,
         & > .menu2-submenu > .menu2-submenu-title {
             width: 100%;
+            min-height: 28px;
             padding: var(--padding-xs) var(--padding-sm);
             box-sizing: border-box;
             display: flex;
@@ -168,9 +162,6 @@
             position: absolute;
             right: 16px;
             line-height: 1.5em;
-            &:before {
-                content: '\f0da';
-            }
         }
     }
 

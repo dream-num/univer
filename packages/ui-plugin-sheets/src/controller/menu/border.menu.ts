@@ -166,7 +166,7 @@ export function SetBorderStyleMenuItemFactory(accessor: IAccessor): IMenuSelecto
     return {
         id: SetBorderStyleCommand.id,
         title: 'borderLine.borderType',
-        label: SHEET_UI_PLUGIN_NAME + LINE_BOLD_LABEL,
+        // label: SHEET_UI_PLUGIN_NAME + LINE_BOLD_LABEL,
         positions: SetBorderPositionCommand.id,
         display: DisplayTypes.CUSTOM,
         type: MenuItemType.SELECTOR,

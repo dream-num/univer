@@ -37,20 +37,6 @@ import {
     VerticalTextSingle,
 } from '@univerjs/icons';
 
-import {
-    BorderDashDot,
-    BorderDashDotDot,
-    BorderDashed,
-    BorderDotted,
-    BorderHair,
-    BorderMedium,
-    BorderMediumDashDot,
-    BorderMediumDashDotDot,
-    BorderMediumDashed,
-    BorderThick,
-    BorderThin,
-} from '../Components/BorderLine';
-
 export interface ICustomComponent {
     name: string;
     props?: any;
@@ -63,18 +49,6 @@ export class ComponentManager {
 
     constructor() {
         const iconList: Record<string, Function> = {
-            BorderThin,
-            BorderHair,
-            BorderDotted,
-            BorderDashed,
-            BorderDashDot,
-            BorderDashDotDot,
-            BorderMedium,
-            BorderMediumDashed,
-            BorderMediumDashDot,
-            BorderMediumDashDotDot,
-            BorderThick,
-
             AlignBottomSingle,
             AlignTopSingle,
             AllBorderSingle,

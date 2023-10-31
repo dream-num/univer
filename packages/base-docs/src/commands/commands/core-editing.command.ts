@@ -1,4 +1,5 @@
 import {
+    BooleanNumber,
     CommandType,
     createEmptyDocSnapshot,
     getTextIndexByCursor,
@@ -25,7 +26,6 @@ export const SetBoldCommand: ICommand = {
     id: 'doc.command.set-bold',
     type: CommandType.COMMAND,
     handler: async (accessor) => {
-        console.log('set bold');
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
         const currentUniverService = accessor.get(IUniverInstanceService);
@@ -36,49 +36,76 @@ export const SetBoldCommand: ICommand = {
 
         const selections = textSelectionManagerService.getSelections();
 
-        const { cursorStart, cursorEnd, isStartBack, isEndBack } = selections![0];
-
-        const textStart = getTextIndexByCursor(cursorStart, isStartBack);
-        const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
-        console.log(cursorStart, cursorEnd, isStartBack, isEndBack);
-        console.log(textStart, textEnd);
-
-        const params: ICommandInfo<IRichTextEditingMutationParams>['params'] = {
-            unitId,
-            mutations: [],
-        };
-
-        const body: IDocumentBody = {
-            dataStream: '',
-            textRuns: [
-                {
-                    st: 0,
-                    ed: textEnd - textStart,
-                    ts: {
-                        bl: 1,
-                    },
-                },
-            ],
-        };
-
-        if (textStart !== -1) {
-            params.mutations.push({
-                t: 'r',
-                len: textStart + 1,
-                segmentId: '',
-            });
+        // I don't know if there are any of the following cases, so return it first.
+        if (!Array.isArray(selections) || selections.length === 0) {
+            return false;
         }
 
-        params.mutations.push({
-            t: 'r',
-            body,
-            len: textEnd - textStart,
-            segmentId: '',
-        });
+        const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                mutations: [],
+            },
+        };
 
-        commandService.executeCommand(RichTextEditingMutation.id, params);
+        let offset = 0;
+        for (const selection of selections) {
+            const { cursorStart, cursorEnd, isStartBack, isEndBack } = selection;
+            const textStart = getTextIndexByCursor(cursorStart, isStartBack);
+            const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
 
-        return true;
+            const body: IDocumentBody = {
+                dataStream: '',
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: textEnd - textStart,
+                        ts: {
+                            bl: BooleanNumber.TRUE,
+                        },
+                    },
+                ],
+            };
+
+            if (textStart !== -1) {
+                doMutation.params!.mutations.push({
+                    t: 'r',
+                    len: textStart + 1 - offset,
+                    segmentId: '',
+                });
+            }
+
+            doMutation.params!.mutations.push({
+                t: 'r',
+                body,
+                len: textEnd - textStart,
+                segmentId: '',
+            });
+
+            offset += textEnd + 1;
+        }
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        if (result) {
+            undoRedoService.pushUndoRedo({
+                URI: unitId,
+                undo() {
+                    return commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
+                },
+                redo() {
+                    return commandService.syncExecuteCommand(doMutation.id, doMutation.params);
+                },
+            });
+
+            return true;
+        }
+
+        return false;
     },
 };
 

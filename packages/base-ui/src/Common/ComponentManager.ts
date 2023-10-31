@@ -1,4 +1,3 @@
-import { IKeyValue } from '@univerjs/core';
 import {
     AlignBottomSingle,
     AlignTopSingle,
@@ -33,6 +32,7 @@ import {
     TruncationSingle,
     UnderlineSingle,
     UndoSingle,
+    UpBorderSingle,
     VerticalCenterSingle,
     VerticalTextSingle,
 } from '@univerjs/icons';
@@ -53,7 +53,7 @@ import {
 
 export interface ICustomComponent {
     name: string;
-    props?: IKeyValue;
+    props?: any;
 }
 
 export type ComponentList = Map<string, Function>;
@@ -75,41 +75,42 @@ export class ComponentManager {
             BorderMediumDashDotDot,
             BorderThick,
 
-            Copy,
-            PasteSpecial,
-            LeftBorderSingle,
-            PaintBucket,
-            OuterBorderSingle,
-            DownBorderSingle,
-            InnerBorderSingle,
-            MergeCellSingle,
-            NoBorderSingle,
-            RightBorderSingle,
-            AllBorderSingle,
-            StrikethroughSingle,
-            UnderlineSingle,
-            BoldSingle,
-            ItalicSingle,
-            FontColor,
-            LeftRotationFortyFiveDegreesSingle,
-            RightRotationFortyFiveDegreesSingle,
-            BrushSingle,
-            UndoSingle,
-            RedoSingle,
-            AutowrapSingle,
-            LeftRotationNinetyDegreesSingle,
-            RightRotationNinetyDegreesSingle,
-            OverflowSingle,
-            KeyboardSingle,
-            NoRotationSingle,
-            HorizontallySingle,
-            LeftJustifyingSingle,
-            RightJustifyingSingle,
-            TruncationSingle,
             AlignBottomSingle,
             AlignTopSingle,
-            VerticalTextSingle,
+            AllBorderSingle,
+            AutowrapSingle,
+            BoldSingle,
+            BrushSingle,
+            Copy,
+            DownBorderSingle,
+            FontColor,
+            HorizontallySingle,
+            InnerBorderSingle,
+            ItalicSingle,
+            KeyboardSingle,
+            LeftBorderSingle,
+            LeftJustifyingSingle,
+            LeftRotationFortyFiveDegreesSingle,
+            LeftRotationNinetyDegreesSingle,
+            MergeCellSingle,
+            NoBorderSingle,
+            NoRotationSingle,
+            OuterBorderSingle,
+            OverflowSingle,
+            PaintBucket,
+            PasteSpecial,
+            RedoSingle,
+            RightBorderSingle,
+            RightJustifyingSingle,
+            RightRotationFortyFiveDegreesSingle,
+            RightRotationNinetyDegreesSingle,
+            StrikethroughSingle,
+            TruncationSingle,
+            UnderlineSingle,
+            UndoSingle,
+            UpBorderSingle,
             VerticalCenterSingle,
+            VerticalTextSingle,
         };
 
         for (const k in iconList) {
@@ -118,6 +119,9 @@ export class ComponentManager {
     }
 
     register(name: string, component: any) {
+        if (this._componentList.has(name)) {
+            console.warn(`Component ${name} already exists.`);
+        }
         this._componentList.set(name, component);
     }
 

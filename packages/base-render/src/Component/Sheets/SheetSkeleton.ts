@@ -1428,10 +1428,16 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     private _setCellCache(r: number, c: number, skipBackgroundAndBorder: boolean) {
-        if (!this._cellData) {
+        if (!this._worksheet) {
             return true;
         }
-        const cell = this._cellData.getValue(r, c);
+
+        const hidden = this._worksheet.getColVisible(c) === false || this._worksheet.getRowVisible(r) === false;
+        if (hidden) {
+            return true;
+        }
+
+        const cell = this._worksheet.getCell(r, c);
         if (!cell) {
             return true;
         }

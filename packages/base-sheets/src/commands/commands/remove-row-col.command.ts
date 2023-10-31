@@ -93,7 +93,7 @@ export const RemoveRowCommand: ICommand = {
 
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveRowCommand.id,
-            params,
+            params: { ranges } as RemoveRowColCommandParams,
         });
 
         const commandService = accessor.get(ICommandService);
@@ -196,7 +196,7 @@ export const RemoveColCommand: ICommand = {
 
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveColCommand.id,
-            params,
+            params: { ranges } as RemoveRowColCommandParams,
         });
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(

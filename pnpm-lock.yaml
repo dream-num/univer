@@ -698,12 +698,6 @@ importers:
       rc-input-number:
         specifier: ^8.5.0
         version: 8.5.0(react-dom@18.2.0)(react@18.2.0)
-      rc-menu:
-        specifier: ^9.12.2
-        version: 9.12.2(react-dom@18.2.0)(react@18.2.0)
-      rc-notification:
-        specifier: ^5.3.0
-        version: 5.3.0(react-dom@18.2.0)(react@18.2.0)
       rc-tooltip:
         specifier: ^6.1.2
         version: 6.1.2(react-dom@18.2.0)(react@18.2.0)

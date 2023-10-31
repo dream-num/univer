@@ -3,7 +3,6 @@ export * from './Collapse';
 export * from './CustomLabel';
 export * from './Dropdown';
 export * from './Input';
-export * from './InputNumber';
 export * from './Menu';
 export * from './Modal';
 export * from './ResizeDialog';

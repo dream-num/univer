@@ -1,7 +1,7 @@
 import { InsertSheetCommand } from '@univerjs/base-sheets';
 import { ICommandService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { AddWorksheet28, ScrollBarLeft12, ScrollBarRight12 } from '@univerjs/icons';
+import { IncreaseSingle, LeftTriangleSingle, RightTriangleSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useEffect, useState } from 'react';
 
@@ -57,54 +57,11 @@ export const SheetBar = () => {
             <div className={styles.sheetBarOptions}>
                 {/* Add sheet button */}
                 <Button type="text" size="small" onClick={addSheet}>
-                    <AddWorksheet28 />
+                    <IncreaseSingle />
                 </Button>
                 {/* All sheets button */}
                 <SheetBarMenu />
             </div>
-        );
-    }
-
-    /**
-     * Update worksheet info.
-     *
-     * This method could be triggered when
-     */
-    private _updateSheetBarStatus(): void {
-        const injector = this.context.injector!;
-        const univerInstanceService = injector.get(IUniverInstanceService);
-        const commandService = injector.get(ICommandService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const sheets = workbook.getSheets();
-
-        const worksheetMenuItems = sheets.map((sheet, index) => ({
-            label: sheet.getName(),
-            index: `${index}`,
-            sheetId: sheet.getSheetId(),
-            hide: sheet.isSheetHidden() === BooleanNumber.TRUE,
-            selected: sheet.getStatus() === BooleanNumber.TRUE,
-            onClick: (e?: MouseEvent) => {
-                const worksheetId = sheet.getSheetId();
-                commandService.executeCommand(SetWorksheetShowCommand.id, {
-                    workbookId: workbook.getUnitId(),
-                    worksheetId,
-                });
-            },
-        }));
-
-        const sheetListItems = sheets
-            .filter((sheet) => !sheet.isSheetHidden())
-            .map((sheet, index) => ({
-                sheetId: sheet.getSheetId(),
-                label: sheet.getName(),
-                index: `${index}`,
-                selected: sheet.getStatus() === BooleanNumber.TRUE,
-                color: (sheet.getTabColor() as string) ?? undefined,
-                onMouseDown: () => {
-                    const worksheetId = sheet.getSheetId();
-                    this.setState({
-                        activeKey: worksheetId,
-                    });
 
             {/* All sheets tabs */}
             <SheetBarTabs />
@@ -112,12 +69,12 @@ export const SheetBar = () => {
             {/* Scroll arrows */}
             <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>
                 <Button type="text" size="small" disabled={leftScrollState} onClick={handleScrollLeft}>
-                    <ScrollBarLeft12 />
+                    <LeftTriangleSingle />
                 </Button>
                 <Button type="text" size="small" disabled={rightScrollState} onClick={handleScrollRight}>
-                    <ScrollBarRight12 />
+                    <RightTriangleSingle />
                 </Button>
             </div>
-        );
-    }
-}
+        </div>
+    );
+};

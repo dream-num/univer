@@ -17,7 +17,7 @@ import {
     IUniverInstanceService,
 } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { Selectedo24, SwitchSheet28 } from '@univerjs/icons';
+import { CheckMarkSingle, ConvertSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
@@ -132,7 +132,9 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                             onClick={() => handleClick(item)}
                             className={joinClassNames(styles.sheetBarMenuItem)}
                         >
-                            <span className={styles.sheetBarMenuItemIcon}>{item.selected ? <Selectedo24 /> : ''}</span>
+                            <span className={styles.sheetBarMenuItemIcon}>
+                                {item.selected ? <CheckMarkSingle /> : ''}
+                            </span>
                             <span
                                 className={
                                     item.hidden
@@ -150,7 +152,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
             onVisibleChange={onVisibleChange}
         >
             <Button type="text" size="small">
-                <SwitchSheet28 />
+                <ConvertSingle />
             </Button>
         </Dropdown2>
     );

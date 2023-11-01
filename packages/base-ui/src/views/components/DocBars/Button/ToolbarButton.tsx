@@ -65,7 +65,7 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
     const _className = joinClassNames(
         styles.toolbarBtn,
         {
-            [`${styles.toolbarBtn}-text-active`]: active,
+            [`${styles.toolbarBtn}-active`]: active,
         },
         className
     );

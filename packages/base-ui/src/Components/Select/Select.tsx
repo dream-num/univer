@@ -27,16 +27,11 @@ export interface BaseItemProps extends BaseMenuItem {
     border?: boolean;
 }
 
+/** @deprecated */
 export enum DisplayTypes {
     LABEL,
 
-    /** @deprecated */
-    SUFFIX,
-
     ICON,
-
-    /** Label as color display. */
-    COLOR,
 
     INPUT,
 

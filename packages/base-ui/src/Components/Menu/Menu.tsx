@@ -25,6 +25,7 @@ import { DisplayTypes } from '../Select/Select';
 import styles from './index.module.less';
 
 export interface IBaseMenuProps {
+    parentKey?: string | number;
     menuType?: string | string[];
 
     // used for selector
@@ -76,13 +77,13 @@ function MenuWrapper(props: IBaseMenuProps) {
 }
 
 function MenuOptionsWrapper(props: IBaseMenuProps) {
-    const { options, value, display, onOptionSelect } = props;
+    const { options, value, display, onOptionSelect, parentKey } = props;
 
     const componentManager = useDependency(ComponentManager);
 
     return options?.map((option: IValueOption | ICustomComponentOption, index: number) => {
         const isValueOption = isValueOptions(option);
-        const key = (isValueOption ? option.label : option.id).toString();
+        const key = `${parentKey}-${isValueOption ? option.label : option.id}-${index}`;
 
         if (isValueOption) {
             return (
@@ -239,6 +240,7 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 >
                     {selections.length > 0 && (
                         <MenuOptionsWrapper
+                            parentKey={item.id}
                             menuType={item.id}
                             options={selections}
                             display={item.display}
@@ -294,7 +296,7 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 }
                 expandIcon={<MoreSingle style={{ color: styles.textColorSecondary, fontSize: styles.fontSizeXs }} />}
             >
-                {menuItems.length && <MenuWrapper menuType={item.id} onOptionSelect={onClick} />}
+                {menuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}
             </RcSubMenu>
         );
     };

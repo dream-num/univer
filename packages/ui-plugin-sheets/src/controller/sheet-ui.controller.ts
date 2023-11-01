@@ -15,11 +15,9 @@ import {
     IUIController,
 } from '@univerjs/base-ui';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ColorPicker } from '@univerjs/design';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
-import { SHEET_UI_PLUGIN_NAME } from '../Basics';
 import { RenameSheetOperation } from '../commands/commands/rename.command';
 import {
     SetCopySelectionCommand,
@@ -39,20 +37,9 @@ import {
     SetCellEditVisibleOperation,
 } from '../commands/operations/cell-edit.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
+import { BORDER_LINE_COMPONENT, BorderLine } from '../components/border-line';
+import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
-import {
-    BorderDashDot,
-    BorderDashDotDot,
-    BorderDashed,
-    BorderDotted,
-    BorderHair,
-    BorderMedium,
-    BorderMediumDashDot,
-    BorderMediumDashDotDot,
-    BorderMediumDashed,
-    BorderThick,
-} from '../View/BorderLine';
-import { BorderThin } from '../View/BorderLine/BorderThin';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../View/SheetContainer/SheetContainer';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import {
@@ -176,23 +163,8 @@ export class SheetUIController extends Disposable {
 
         // FIXME: no dispose logic
         componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput);
-        componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
-
-        [
-            BorderThin,
-            BorderDashDot,
-            BorderDashDotDot,
-            BorderDashed,
-            BorderDotted,
-            BorderHair,
-            BorderMedium,
-            BorderMediumDashDot,
-            BorderMediumDashDotDot,
-            BorderMediumDashed,
-            BorderThick,
-        ].forEach((BorderLine) => {
-            componentManager.register(BorderLine.name, BorderLine);
-        });
+        componentManager.register(BORDER_LINE_COMPONENT, BorderLine);
+        componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker);
 
         // init commands
         [

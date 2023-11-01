@@ -6,11 +6,11 @@ import {
 } from '@univerjs/base-sheets';
 import { DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { BorderStyleTypes, ICommandService, IPermissionService } from '@univerjs/core';
-import { ColorPicker } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
 
-import { SHEET_UI_PLUGIN_NAME } from '../../Basics/Const/PLUGIN_NAME';
+import { BORDER_LINE_COMPONENT } from '../../components/border-line';
+import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 
 export const LINE_BOLD_LABEL = 'CONTEXT_MENU_INPUT';
 
@@ -79,47 +79,102 @@ export const BORDER_LINE_CHILDREN = [
 
 export const BORDER_SIZE_CHILDREN = [
     {
-        label: 'BorderThin',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.THIN,
+            },
+        },
         value: BorderStyleTypes.THIN,
     },
     {
-        label: 'BorderHair',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.HAIR,
+            },
+        },
         value: BorderStyleTypes.HAIR,
     },
     {
-        label: 'BorderDotted',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.DOTTED,
+            },
+        },
         value: BorderStyleTypes.DOTTED,
     },
     {
-        label: 'BorderDashed',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.DASHED,
+            },
+        },
         value: BorderStyleTypes.DASHED,
     },
     {
-        label: 'BorderDashDot',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.DOTTED,
+            },
+        },
         value: BorderStyleTypes.DOTTED,
     },
     {
-        label: 'BorderDashDotDot',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.DASH_DOT_DOT,
+            },
+        },
         value: BorderStyleTypes.DASH_DOT_DOT,
     },
     {
-        label: 'BorderMedium',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.MEDIUM,
+            },
+        },
         value: BorderStyleTypes.MEDIUM,
     },
     {
-        label: 'BorderMediumDashed',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.MEDIUM_DASHED,
+            },
+        },
         value: BorderStyleTypes.MEDIUM_DASHED,
     },
     {
-        label: 'BorderMediumDashDot',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.MEDIUM_DASH_DOT,
+            },
+        },
         value: BorderStyleTypes.MEDIUM_DASH_DOT,
     },
     {
-        label: 'BorderMediumDashDotDot',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
+            },
+        },
         value: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
     },
     {
-        label: 'BorderThick',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.THICK,
+            },
+        },
         value: BorderStyleTypes.THICK,
     },
 ];
@@ -150,11 +205,11 @@ export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelecto
         id: SetBorderColorCommand.id,
         title: 'borderLine.borderColor',
         positions: SetBorderPositionCommand.id,
-        display: DisplayTypes.COLOR,
+        display: DisplayTypes.CUSTOM,
         type: MenuItemType.SELECTOR,
         selections: [
             {
-                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                id: COLOR_PICKER_COMPONENT,
             },
         ],
         value$: borderStyleManagerService.borderInfo$.pipe(map((info) => info.color)),

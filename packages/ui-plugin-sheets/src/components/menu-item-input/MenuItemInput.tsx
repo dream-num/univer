@@ -1,22 +1,12 @@
-import { ICustomComponentProps } from '@univerjs/base-ui';
 import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import styles from './index.module.less';
+import { IMenuItemInputProps } from './interface';
 
-interface IProps extends ICustomComponentProps<string> {
-    prefix: string;
-    suffix: string;
-
-    /**
-     * After ENTER, execute Command, close the right-click menu
-     */
-    onValueChange?: (value: string) => void;
-}
-
-export const MenuItemInput = (props: IProps) => {
+export const MenuItemInput = (props: IMenuItemInputProps) => {
     const { prefix, suffix, value, onChange, onValueChange } = props;
 
     const localeService = useDependency(LocaleService);

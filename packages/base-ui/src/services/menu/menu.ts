@@ -34,7 +34,7 @@ interface IMenuItemBase<V> {
     /** ID of the menu item. Normally it should be the same as the ID of the command that it would invoke.  */
     id: string;
     subId?: string;
-    title: string;
+    title?: string;
     description?: string;
     icon?: string;
     tooltip?: string;

@@ -69,17 +69,16 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import { ColorPicker } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
-import { SHEET_UI_PLUGIN_NAME } from '../../Basics/Const/PLUGIN_NAME';
 import { RenameSheetOperation } from '../../commands/commands/rename.command';
 import {
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
+import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 
@@ -644,15 +643,14 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
 
     return {
         id: SetTextColorCommand.id,
-        title: 'toolbar.textColor.main',
         icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
-        display: DisplayTypes.COLOR,
+        display: DisplayTypes.CUSTOM,
         selections: [
             {
-                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                id: COLOR_PICKER_COMPONENT,
             },
         ],
         value$: new Observable<string>((subscriber) => {
@@ -685,14 +683,13 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
     return {
         id: SetBackgroundColorCommand.id,
         tooltip: 'toolbar.fillColor.main',
-        title: 'FontColor',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
-        display: DisplayTypes.COLOR,
+        display: DisplayTypes.CUSTOM,
         icon: 'PaintBucket',
         selections: [
             {
-                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                id: COLOR_PICKER_COMPONENT,
             },
         ],
         value$: new Observable<string>((subscriber) => {
@@ -1423,11 +1420,11 @@ export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
         id: SetTabColorCommand.id,
         title: 'sheetConfig.changeColor',
         positions: [SheetMenuPosition.SHEET_BAR],
-        display: DisplayTypes.COLOR,
+        display: DisplayTypes.CUSTOM,
         type: MenuItemType.SELECTOR,
         selections: [
             {
-                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                id: COLOR_PICKER_COMPONENT,
             },
         ],
     };

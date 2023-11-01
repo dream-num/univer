@@ -1,0 +1,1 @@
+export const COMPONENT_PREFIX = 'UI_PLUGIN_SHEETS';

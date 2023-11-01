@@ -50,11 +50,6 @@ export function NeoCustomLabel(
         return localeService.t(name) ?? name;
     }
 
-    if (display === DisplayTypes.COLOR) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return <ColorSelect value={value as any} title={getLocale(title) as string} icon={icon} />;
-    }
-
     if (display === DisplayTypes.FONT) {
         // According to the value, translate toolbar font
         return (
@@ -96,6 +91,7 @@ export function NeoCustomLabel(
     if (display === DisplayTypes.CUSTOM && label) {
         const labelName = typeof label === 'string' ? label : (label as ICustomComponent).name;
         const customProps = (label as ICustomComponent).props ?? {};
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const LabelComponent = componentManager.get(labelName) as any;
         if (LabelComponent) {
@@ -110,7 +106,7 @@ export function NeoCustomLabel(
     return (
         <div
             className={styles.neoCustomLabelItem}
-            style={{ fontFamily: title.indexOf('fontFamily.') === 0 ? `${value}` : 'inherit' }}
+            style={{ fontFamily: title?.indexOf('fontFamily.') === 0 ? `${value}` : 'inherit' }}
         >
             {selected && (
                 <span className={styles.selectItemSelected}>
@@ -118,7 +114,7 @@ export function NeoCustomLabel(
                 </span>
             )}
             {LabelComponent && <LabelComponent extend={{ colorChannel1: 'rgb(var(--primary-color))' }} />}
-            <span className={styles.selectItemContent}>{getLocale(title)}</span>
+            {title && <span className={styles.selectItemContent}>{getLocale(title)}</span>}
         </div>
     );
 }

@@ -1,7 +1,6 @@
+import { ISize } from '../../services/floating-object/floating-object-interfaces';
 import { BooleanNumber, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../Enum';
 import { IExtraModelConfig } from './IExtraModelConfig';
-import { IImageProperties } from './IImageProperties';
-import { IShapeProperties } from './IShapeProperties';
 import { IColorStyle, IStyleBase } from './IStyleData';
 
 // 注意：所有的尺寸单位，若无特殊说明，都是指pt，1 pt = 1 / 72 in
@@ -61,14 +60,6 @@ export interface IDrawings {
  */
 export interface IDocStyles {
     [styleId: string]: IDocStyle;
-}
-
-/**
- * A width and height.
- */
-export interface ISizeData {
-    width?: number;
-    height?: number;
 }
 
 /**
@@ -296,7 +287,7 @@ export interface IHeaderAndFooterBase {
  */
 export interface IDocStyleBase extends IMargin {
     pageNumberStart?: number; // pageNumberStart
-    pageSize?: ISizeData; // pageSize
+    pageSize?: ISize; // pageSize
 
     pageOrient?: PageOrientType;
 
@@ -444,7 +435,7 @@ export interface IParagraph {
 // }
 
 // export interface ICustomElement {
-//     size: ISizeData;
+//     size: ISize;
 // }
 
 // /**
@@ -485,7 +476,11 @@ export interface IBullet {
 export interface IDrawing {
     objectId: string;
 
-    objectProperties: IObjectProperties;
+    title: string;
+    description: string;
+    // embeddedObjectBorder?: IDocsBorder;
+
+    objectTransform: IObjectTransform;
 
     layoutType: PositionedObjectLayoutType;
 
@@ -525,18 +520,15 @@ export enum PositionedObjectLayoutType {
 /**
  * Properties of a draw object
  */
-export interface IObjectProperties {
-    title: string;
-    description: string;
-    embeddedObjectBorder?: IDocsBorder;
-    size: ISizeData;
+export interface IObjectTransform {
+    size: ISize;
     positionH: ObjectPositionH;
     positionV: ObjectPositionV;
     angle: number;
     // Union field properties can be only one of the following:
-    shapeProperties?: IShapeProperties;
-    chartProperties?: IChartProperties;
-    imageProperties?: IImageProperties;
+    // shapeProperties?: IShapeProperties;
+    // chartProperties?: IChartProperties;
+    // imageProperties?: IImageProperties;
 }
 
 /**

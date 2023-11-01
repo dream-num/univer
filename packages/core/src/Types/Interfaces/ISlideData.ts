@@ -1,8 +1,8 @@
-import { ITransformState } from '../../services/floating-object/floating-object-interfaces';
+import { ISize, ITransformState } from '../../services/floating-object/floating-object-interfaces';
 import { IKeyType, Nullable } from '../../Shared/Types';
 import { LocaleType, ThemeColorType } from '../Enum';
 import { ShapeType } from '../Enum/ShapeType';
-import { ICustomBlock, IDocumentData, ILists, ISizeData } from './IDocumentData';
+import { ICustomBlock, IDocumentData, ILists } from './IDocumentData';
 import { IImageProperties } from './IImageProperties';
 import { IPlaceholder } from './IPlaceholder';
 import { IShapeProperties } from './IShapeProperties';
@@ -13,7 +13,7 @@ export interface ISlideData extends IReferenceSource {
     id: string; // unit id
     locale?: LocaleType;
     title: string;
-    pageSize: ISizeData;
+    pageSize: ISize;
     body?: ISlidePageBody;
 }
 

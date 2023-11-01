@@ -1,5 +1,5 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import { Menu2 } from '@univerjs/base-ui';
+import { Menu } from '@univerjs/base-ui';
 import { BooleanNumber, ICommandService, ThemeService } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -49,7 +49,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
             visible={visible}
             trigger={['contextMenu']}
             overlay={
-                <Menu2
+                <Menu
                     menuType={SheetMenuPosition.SHEET_BAR}
                     onOptionSelect={(params) => {
                         const { label: commandId, value } = params;

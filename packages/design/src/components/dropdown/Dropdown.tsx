@@ -56,8 +56,7 @@ export function Dropdown(props: IDropdownProps) {
     return (
         <RcDropdown
             {...props}
-            prefixCls="univer-dropdown2"
-            overlayClassName={styles.dropdown2}
+            prefixCls={styles.dropdown}
             trigger={trigger}
             animation="slide-up"
             placement={placement}

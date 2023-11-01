@@ -5,7 +5,7 @@ import React from 'react';
 import { ICustomComponent } from '../../Common';
 import { IValueOption } from '../../services/menu/menu';
 import { NeoCustomLabel } from '../CustomLabel';
-import { Menu2 } from '../Menu/Menu2';
+import { Menu } from '../Menu/Menu';
 import styles from './index.module.less';
 
 // TODO: these type definitions should be moved out of components to menu service
@@ -95,7 +95,7 @@ export function Select(props: BaseSelectProps) {
                 <Dropdown
                     {...restProps}
                     overlay={
-                        <Menu2
+                        <Menu
                             menuType={id}
                             options={options}
                             onOptionSelect={onOptionSelect}

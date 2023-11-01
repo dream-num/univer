@@ -4,7 +4,7 @@ import { Dropdown } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { Menu2 } from '../../../Components/Menu/Menu2';
+import { Menu } from '../../../Components/Menu/Menu';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 
 export interface IProps {
@@ -59,7 +59,7 @@ export function ContextMenu(props: IProps) {
             trigger={['contextMenu']}
             alignPoint
             overlay={
-                <Menu2
+                <Menu
                     menuType={[menuType]}
                     onOptionSelect={(params) => {
                         const { label: commandId, value } = params;

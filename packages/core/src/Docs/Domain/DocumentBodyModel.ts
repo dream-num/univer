@@ -253,7 +253,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             const insertNodes = insertBodyModel.children;
 
             for (const node of insertNodes) {
-                this.foreachDown(node, (newNode) => {
+                this.forEachDown(node, (newNode) => {
                     newNode.plus(insertIndex);
                 });
             }
@@ -274,7 +274,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                 insertedLastNode
             );
 
-            this.foreachTop(insertedNode.parent, (currentNode) => {
+            this.forEachTop(insertedNode.parent, (currentNode) => {
                 // currentNode.endIndex += dataStreamLen;
                 currentNode.selfPlus(dataStreamLen, currentNode.getPositionInParent());
                 const children = currentNode.children;
@@ -288,7 +288,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                         continue;
                     }
 
-                    this.foreachDown(node, (newNode) => {
+                    this.forEachDown(node, (newNode) => {
                         newNode.plus(dataStreamLen);
                     });
                 }
@@ -301,7 +301,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             // insertedNode.endIndex += dataStreamLen;
             insertedNode.selfPlus(dataStreamLen, insertIndex);
 
-            this.foreachTop(insertedNode.parent, (currentNode) => {
+            this.forEachTop(insertedNode.parent, (currentNode) => {
                 // currentNode.endIndex += dataStreamLen;
                 currentNode.selfPlus(dataStreamLen, currentNode.getPositionInParent());
                 const children = currentNode.children;
@@ -315,7 +315,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                         continue;
                     }
 
-                    this.foreachDown(node, (newNode) => {
+                    this.forEachDown(node, (newNode) => {
                         newNode.plus(dataStreamLen);
                     });
                 }
@@ -346,7 +346,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         return null;
     }
 
-    private foreachTop(
+    private forEachTop(
         node: Nullable<DataStreamTreeNode>,
         func: (node: DataStreamTreeNode | DocumentBodyModelOrSimple) => void
     ) {
@@ -359,13 +359,13 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         func(this);
     }
 
-    private foreachDown(node: DataStreamTreeNode, func: (node: DataStreamTreeNode) => void) {
+    private forEachDown(node: DataStreamTreeNode, func: (node: DataStreamTreeNode) => void) {
         func(node);
 
         const children = node.children;
 
         for (node of children) {
-            this.foreachDown(node, func);
+            this.forEachDown(node, func);
         }
     }
 
@@ -650,7 +650,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
 
         insertedFirstNode.plus(insertStartIndex);
 
-        this.foreachDown(insertedLastNode, (newNode) => {
+        this.forEachDown(insertedLastNode, (newNode) => {
             newNode.plus(insertStartIndex + 1);
         });
 
@@ -661,7 +661,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             insertedLastNode
         );
 
-        this.foreachTop(insertedNode.parent, (currentNode) => {
+        this.forEachTop(insertedNode.parent, (currentNode) => {
             // currentNode.endIndex += dataStreamLen;
             currentNode.selfPlus(1, currentNode.getPositionInParent());
             const children = currentNode.children;
@@ -675,7 +675,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                     continue;
                 }
 
-                this.foreachDown(node, (newNode) => {
+                this.forEachDown(node, (newNode) => {
                     newNode.plus(1);
                 });
             }

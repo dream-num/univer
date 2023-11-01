@@ -82,9 +82,9 @@ export class InlineFormatController extends Disposable {
             },
         };
 
-        const commonParameter = new MemoryCursor();
+        const memoryCursor = new MemoryCursor();
 
-        commonParameter.reset();
+        memoryCursor.reset();
 
         for (const selection of selections) {
             const { cursorStart, cursorEnd, isStartBack, isEndBack } = selection;
@@ -104,7 +104,7 @@ export class InlineFormatController extends Disposable {
                 ],
             };
 
-            const len = textStart + 1 - commonParameter.cursor;
+            const len = textStart + 1 - memoryCursor.cursor;
             if (len !== 0) {
                 doMutation.params!.mutations.push({
                     t: 'r',
@@ -120,14 +120,20 @@ export class InlineFormatController extends Disposable {
                 segmentId,
             });
 
-            commonParameter.reset();
-            commonParameter.moveCursor(textEnd + 1);
+            memoryCursor.reset();
+            memoryCursor.moveCursor(textEnd + 1);
         }
 
         this._commandService.executeCommand(SetInlineFormatCommand.id, {
             unitId,
             doMutation,
         });
+
+        const REFRESH_SELECTION_COMMAND_LIST = [SetInlineFormatBoldCommand.id];
+
+        if (REFRESH_SELECTION_COMMAND_LIST.includes(command.id)) {
+            this._textSelectionManagerService.refreshSelection();
+        }
     }
 }
 

@@ -66,9 +66,9 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         }
 
         const undoMutations: Array<IRetainMutationParams | IInsertMutationParams | IDeleteMutationParams> = [];
-        const commonParameter = new MemoryCursor();
+        const memoryCursor = new MemoryCursor();
 
-        commonParameter.reset();
+        memoryCursor.reset();
 
         mutations.forEach((mutation) => {
             // FIXME: @jocs Since UpdateAttributeApply modifies the mutation(used in undo/redo),
@@ -84,7 +84,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                         documentModel,
                         body,
                         len,
-                        commonParameter.cursor,
+                        memoryCursor.cursor,
                         coverType,
                         segmentId
                     );
@@ -102,12 +102,12 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                     });
                 }
 
-                commonParameter.moveCursor(len);
+                memoryCursor.moveCursor(len);
             } else if (mutation.t === 'i') {
                 const { body, len, segmentId, line } = mutation;
 
-                InsertApply(documentModel, body!, len, commonParameter.cursor, segmentId);
-                commonParameter.moveCursor(len);
+                InsertApply(documentModel, body!, len, memoryCursor.cursor, segmentId);
+                memoryCursor.moveCursor(len);
                 undoMutations.push({
                     t: 'd',
                     len,
@@ -116,7 +116,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                 });
             } else if (mutation.t === 'd') {
                 const { len, segmentId } = mutation;
-                const documentBody = DeleteApply(documentModel, len, commonParameter.cursor, segmentId);
+                const documentBody = DeleteApply(documentModel, len, memoryCursor.cursor, segmentId);
 
                 undoMutations.push({
                     ...mutation,

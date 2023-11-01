@@ -12,7 +12,8 @@ export {
     type IUpdateCommandParams,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
-export { BreakLineCommand, DeleteLeftCommand, SetBoldCommand } from './commands/commands/core-editing.command';
+export { BreakLineCommand, DeleteLeftCommand } from './commands/commands/core-editing.command';
+export { SetInlineFormatBoldCommand, SetInlineFormatCommand } from './commands/commands/inline-format.command';
 export {
     type IRichTextEditingMutationParams,
     RichTextEditingMutation,

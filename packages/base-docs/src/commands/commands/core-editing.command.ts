@@ -1,5 +1,4 @@
 import {
-    BooleanNumber,
     CommandType,
     createEmptyDocSnapshot,
     getTextIndexByCursor,
@@ -14,106 +13,12 @@ import {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
-import CommonParameter from '../../Basics/commonParameter';
-import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import {
     IDeleteMutationParams,
     IRetainMutationParams,
     IRichTextEditingMutationParams,
     RichTextEditingMutation,
 } from '../mutations/core-editing.mutation';
-
-export const SetBoldCommand: ICommand = {
-    id: 'doc.command.set-bold',
-    type: CommandType.COMMAND,
-    handler: async (accessor) => {
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const commandService = accessor.get(ICommandService);
-        const currentUniverService = accessor.get(IUniverInstanceService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-
-        const docsModel = currentUniverService.getCurrentUniverDocInstance();
-        const unitId = docsModel.getUnitId();
-
-        const selections = textSelectionManagerService.getSelections();
-
-        // I don't know if there are any of the following cases, so return it first.
-        if (!Array.isArray(selections) || selections.length === 0) {
-            return false;
-        }
-
-        const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
-            id: RichTextEditingMutation.id,
-            params: {
-                unitId,
-                mutations: [],
-            },
-        };
-
-        const commonParameter = new CommonParameter();
-
-        commonParameter.reset();
-
-        for (const selection of selections) {
-            const { cursorStart, cursorEnd, isStartBack, isEndBack } = selection;
-            const textStart = getTextIndexByCursor(cursorStart, isStartBack);
-            const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
-
-            const body: IDocumentBody = {
-                dataStream: '',
-                textRuns: [
-                    {
-                        st: 0,
-                        ed: textEnd - textStart,
-                        ts: {
-                            bl: BooleanNumber.TRUE,
-                        },
-                    },
-                ],
-            };
-
-            const len = textStart + 1 - commonParameter.cursor;
-            if (len !== 0) {
-                doMutation.params!.mutations.push({
-                    t: 'r',
-                    len,
-                    segmentId: '',
-                });
-            }
-
-            doMutation.params!.mutations.push({
-                t: 'r',
-                body,
-                len: textEnd - textStart,
-                segmentId: '',
-            });
-
-            commonParameter.reset();
-            commonParameter.moveCursor(textEnd + 1);
-        }
-
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
-
-        if (result) {
-            undoRedoService.pushUndoRedo({
-                URI: unitId,
-                undo() {
-                    return commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(doMutation.id, doMutation.params);
-                },
-            });
-
-            return true;
-        }
-
-        return false;
-    },
-};
 
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',

@@ -127,7 +127,7 @@ export class InlineFormatController extends Disposable {
 }
 
 /**
- * When clicking on a Bold menu item, you should unbold if there is bold in the selections,
+ * When clicking on a Bold menu item, you should un-bold if there is bold in the selections,
  * or bold if there is no bold text. This method is used to get the style value calculated
  * from textRuns in the selection
  */

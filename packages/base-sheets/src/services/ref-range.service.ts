@@ -62,8 +62,6 @@ type RefRangCallback = (params: EffectParams) => {
  */
 @OnLifecycle(LifecycleStages.Steady, RefRangeService)
 export class RefRangeService extends Disposable {
-    private _refRangeManagerMap = new Map<string, Map<string, Set<RefRangCallback>>>();
-    // todo: range 实例过大的时候
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
@@ -72,8 +70,11 @@ export class RefRangeService extends Disposable {
         super();
         this._onRefRangeChange();
     }
-    private _getRefRangId = (workbookId: string, worksheetId: string) => `${workbookId}_${worksheetId}`;
+
+    private _refRangeManagerMap = new Map<string, Map<string, Set<RefRangCallback>>>();
+
     private serializer = createRangeSerializer();
+
     private _onRefRangeChange = () => {
         this._sheetInterceptorService.interceptCommand({
             getMutations: (command) => {
@@ -180,7 +181,7 @@ export class RefRangeService extends Disposable {
     };
 
     private _checkRange = (effectRanges: IRange[], workbookId: string, worksheetId: string) => {
-        const managerId = this._getRefRangId(workbookId, worksheetId);
+        const managerId = getRefRangId(workbookId, worksheetId);
         const manager = this._refRangeManagerMap.get(managerId);
         if (manager) {
             const callbackSet = new Set<RefRangCallback>();
@@ -211,7 +212,7 @@ export class RefRangeService extends Disposable {
     ): IDisposable => {
         const workbookId = _workbookId || getWorkbookId(this._univerInstanceService);
         const worksheetId = _worksheetId || getWorksheetId(this._univerInstanceService);
-        const refRangeManagerId = this._getRefRangId(workbookId, worksheetId);
+        const refRangeManagerId = getRefRangId(workbookId, worksheetId);
         const rangeString = this.serializer.serialize(range);
 
         let manager = this._refRangeManagerMap.get(refRangeManagerId) as Map<string, Set<RefRangCallback>>;
@@ -244,12 +245,19 @@ export class RefRangeService extends Disposable {
 function getWorkbookId(univerInstanceService: IUniverInstanceService) {
     return univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
 }
+
 function getWorksheetId(univerInstanceService: IUniverInstanceService) {
     return univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 }
+
 function getSelectionRanges(selectionManagerService: SelectionManagerService) {
     return selectionManagerService.getSelectionRanges() || [];
 }
+
+function getRefRangId(workbookId: string, worksheetId: string) {
+    return `${workbookId}_${worksheetId}`;
+}
+
 function createRangeSerializer() {
     const keyList = ['startRow', 'startColumn', 'endRow', 'endColumn', 'rangeType'];
     const SPLIT_CODE = '_';

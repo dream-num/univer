@@ -4,13 +4,11 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 
 import { ComponentManager, ICustomComponent } from '../../Common';
 import { IMenuSelectorItem } from '../../services/menu/menu';
-import { DisplayTypes } from '../Select';
 
 export interface IBaseCustomLabelProps {
     icon?: string;
     value?: string;
     label: string | ICustomComponent | React.ReactNode;
-    display?: DisplayTypes;
     onChange?: (e: Event) => void;
     selected?: boolean;
     title?: string;
@@ -37,7 +35,7 @@ export interface INeoCustomLabelProps {
  * @deprecated
  */
 export function NeoCustomLabel(
-    props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title'> & INeoCustomLabelProps
+    props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'title'> & INeoCustomLabelProps
 ): JSX.Element | null {
     const { title, icon, label, selected } = props;
     const localeService = useDependency(LocaleService);

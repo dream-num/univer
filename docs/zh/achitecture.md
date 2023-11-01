@@ -244,8 +244,6 @@ interface IMenuItemBase<V> {
 
     /** @deprecated this type seems unnecessary */
     type: MenuItemType;
-    /** Determines how the label of the selector should display. */
-    display?: DisplayTypes;
     /**
      * Custom label component id.
      * */

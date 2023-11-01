@@ -61,7 +61,7 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
         };
     }, []);
 
-    const { tooltip, shortcut, icon, title, label, display, id, min, max, onClose } = props;
+    const { tooltip, shortcut, icon, title, label, id, onClose } = props;
 
     const tooltipTitle = localeService?.t(tooltip) + (shortcut ? ` (${shortcut})` : '');
 
@@ -75,12 +75,9 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
                     title={title}
                     children={selections! as IValueOption[]}
                     options={selections as IValueOption[]}
-                    display={display}
                     icon={icon}
                     value={value}
                     label={label}
-                    max={max}
-                    min={min}
                     onClick={(value) => {
                         // commandService.executeCommand(id, { value })
                         // 子元素commandId会被现在的id覆盖，暂时这么写以区分

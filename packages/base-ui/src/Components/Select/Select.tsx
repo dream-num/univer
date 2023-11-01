@@ -27,13 +27,6 @@ export interface BaseItemProps extends BaseMenuItem {
     border?: boolean;
 }
 
-/** @deprecated */
-export enum DisplayTypes {
-    INPUT,
-
-    FONT,
-}
-
 export interface BaseSelectChildrenProps extends Omit<BaseItemProps, 'suffix' | 'label' | 'children'> {
     onPressEnter?: (...arg: any) => void;
     children?: BaseSelectChildrenProps[];
@@ -45,7 +38,6 @@ export interface BaseSelectChildrenProps extends Omit<BaseItemProps, 'suffix' | 
 
 export interface BaseSelectProps {
     children?: BaseSelectChildrenProps[];
-    display?: DisplayTypes;
     label?:
         | string
         | {
@@ -75,7 +67,7 @@ export interface BaseSelectProps {
 export function Select(props: BaseSelectProps) {
     const renderNeo = () => {
         const { onClick, ...restProps } = props;
-        const { display, value, icon, title, id, label, options, onClose, max, min } = restProps;
+        const { value, icon, title, id, label, options, onClose, max, min } = restProps;
 
         const onOptionSelect = (option: IValueOption) => {
             onClick?.(option);
@@ -100,18 +92,10 @@ export function Select(props: BaseSelectProps) {
                     <div className={styles.selectLabel}>
                         <NeoCustomLabel
                             icon={iconToDisplay}
-                            display={display}
                             title={title!}
                             value={value}
                             label={label}
-                            max={max}
-                            min={min}
                             onChange={(v) => onClick?.(v)}
-                            onFocus={() => {
-                                console.info(
-                                    'TODO: 需要待Dropdown与Menu分离之后，直接控制Dropdown展示文字大小下拉选项'
-                                );
-                            }}
                         />
                         <div className={styles.selectDropIcon}>
                             <MoreDownSingle />

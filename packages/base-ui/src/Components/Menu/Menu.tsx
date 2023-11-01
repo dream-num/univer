@@ -21,15 +21,12 @@ import { IMenuService } from '../../services/menu/menu.service';
 import { joinClassNames } from '../../Utils';
 import { NeoCustomLabel } from '../CustomLabel/CustomLabel';
 import { useObservable } from '../hooks/observable';
-import { DisplayTypes } from '../Select/Select';
 import styles from './index.module.less';
 
 export interface IBaseMenuProps {
     parentKey?: string | number;
     menuType?: string | string[];
 
-    // used for selector
-    display?: DisplayTypes;
     value?: string | number;
     options?: Array<IValueOption | ICustomComponentOption>;
 
@@ -77,7 +74,7 @@ function MenuWrapper(props: IBaseMenuProps) {
 }
 
 function MenuOptionsWrapper(props: IBaseMenuProps) {
-    const { options, value, display, onOptionSelect, parentKey } = props;
+    const { options, value, onOptionSelect, parentKey } = props;
 
     const componentManager = useDependency(ComponentManager);
 
@@ -104,7 +101,6 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                     <NeoCustomLabel
                         selected={String(value) === String(option.value)} // use √ for select
                         value={String(option.value)}
-                        display={display}
                         label={option.label}
                         title={typeof option.label === 'string' ? option.label : ''}
                         icon={option.icon}
@@ -170,7 +166,7 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
 
     const renderButtonType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuButtonItem>;
-        const { title, display, label } = item;
+        const { title, label } = item;
 
         return (
             <RcMenuItem
@@ -183,7 +179,6 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 }}
             >
                 <NeoCustomLabel
-                    display={display}
                     value={inputValue}
                     title={title}
                     label={label}
@@ -226,10 +221,7 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                                 value={inputValue}
                                 onChange={onChange}
                                 icon={item.icon}
-                                display={item.display}
                                 label={item.label}
-                                max={item.max}
-                                min={item.min}
                             />
                             {item.shortcut && ` (${item.shortcut})`}
                         </>
@@ -243,7 +235,6 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                             parentKey={item.id}
                             menuType={item.id}
                             options={selections}
-                            display={item.display}
                             onOptionSelect={(v) => {
                                 onClick({ value: v.value, id: item.id }); // border style don't trigger hide menu, set show true
                             }}
@@ -264,10 +255,7 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     value={inputValue}
                     onChange={onChange}
                     icon={item.icon}
-                    display={item.display}
                     label={item.label}
-                    max={item.max}
-                    min={item.min}
                 />
                 {item.shortcut && ` (${item.shortcut})`}
             </RcMenuItem>
@@ -285,13 +273,7 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 popupOffset={[18, 0]}
                 title={
                     <>
-                        <NeoCustomLabel
-                            title={item.title}
-                            value={item.title}
-                            icon={item.icon}
-                            display={item.display}
-                            label={item.label}
-                        />
+                        <NeoCustomLabel title={item.title} value={item.title} icon={item.icon} label={item.label} />
                     </>
                 }
                 expandIcon={<MoreSingle style={{ color: styles.textColorSecondary, fontSize: styles.fontSizeXs }} />}

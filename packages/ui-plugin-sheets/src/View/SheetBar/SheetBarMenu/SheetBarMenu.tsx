@@ -139,7 +139,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                                 className={
                                     item.hidden
                                         ? `${styles.sheetBarMenuItemTitle} ${styles.sheetBarMenuItemHide}`
-                                        : `${styles.sheetBarMenuItemTitle}`
+                                        : styles.sheetBarMenuItemTitle
                                 }
                             >
                                 {item.label}

@@ -8,7 +8,7 @@ import {
     SetWorksheetOrderMutation,
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
-import { Dropdown2, joinClassNames } from '@univerjs/base-ui';
+import { joinClassNames } from '@univerjs/base-ui';
 import {
     BooleanNumber,
     DisposableCollection,
@@ -16,7 +16,7 @@ import {
     ICommandService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import { Button } from '@univerjs/design';
+import { Button, Dropdown } from '@univerjs/design';
 import { CheckMarkSingle, ConvertSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
@@ -121,7 +121,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
     };
 
     return (
-        <Dropdown2
+        <Dropdown
             placement="topLeft"
             trigger={['click']}
             overlay={
@@ -154,6 +154,6 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
             <Button type="text" size="small">
                 <ConvertSingle />
             </Button>
-        </Dropdown2>
+        </Dropdown>
     );
 }

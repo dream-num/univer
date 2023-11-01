@@ -1,6 +1,7 @@
 import { TinyColor } from '@ctrl/tinycolor';
-import { Dropdown2, Menu2 } from '@univerjs/base-ui';
+import { Menu2 } from '@univerjs/base-ui';
 import { BooleanNumber, ICommandService, ThemeService } from '@univerjs/core';
+import { Dropdown } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
@@ -44,7 +45,7 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
     };
 
     return (
-        <Dropdown2
+        <Dropdown
             visible={visible}
             trigger={['contextMenu']}
             overlay={
@@ -78,6 +79,6 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                     <div className={styles.slideTabActiveBar} style={color ? { background: color } : {}}></div>
                 </div>
             </div>
-        </Dropdown2>
+        </Dropdown>
     );
 }

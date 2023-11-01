@@ -524,9 +524,6 @@ importers:
       localforage:
         specifier: ^1.10.0
         version: 1.10.0
-      rc-dropdown:
-        specifier: ^4.1.0
-        version: 4.1.0(react-dom@18.2.0)(react@18.2.0)
       rc-menu:
         specifier: ^9.12.2
         version: 9.12.2(react-dom@18.2.0)(react@18.2.0)

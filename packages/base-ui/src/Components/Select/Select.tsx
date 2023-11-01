@@ -1,10 +1,10 @@
+import { Dropdown } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
 import React from 'react';
 
 import { ICustomComponent } from '../../Common';
 import { IValueOption } from '../../services/menu/menu';
 import { NeoCustomLabel } from '../CustomLabel';
-import { Dropdown2 } from '../Dropdown';
 import { Menu2 } from '../Menu/Menu2';
 import styles from './index.module.less';
 
@@ -92,7 +92,7 @@ export function Select(props: BaseSelectProps) {
 
         return (
             <div className={styles.selectDouble}>
-                <Dropdown2
+                <Dropdown
                     {...restProps}
                     overlay={
                         <Menu2
@@ -123,7 +123,7 @@ export function Select(props: BaseSelectProps) {
                             <MoreDownSingle />
                         </div>
                     </div>
-                </Dropdown2>
+                </Dropdown>
             </div>
         );
     };

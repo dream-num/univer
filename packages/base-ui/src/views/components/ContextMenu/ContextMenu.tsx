@@ -1,9 +1,9 @@
 import { IMouseEvent } from '@univerjs/base-render';
 import { DisposableCollection, ICommandService } from '@univerjs/core';
+import { Dropdown } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { Dropdown2 } from '../../../Components/Dropdown/Dropdown2';
 import { Menu2 } from '../../../Components/Menu/Menu2';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 
@@ -54,7 +54,7 @@ export function ContextMenu(props: IProps) {
     }
 
     return (
-        <Dropdown2
+        <Dropdown
             visible={visible}
             trigger={['contextMenu']}
             alignPoint
@@ -71,6 +71,6 @@ export function ContextMenu(props: IProps) {
             onVisibleChange={handleVisibleChange}
         >
             {children}
-        </Dropdown2>
+        </Dropdown>
     );
 }

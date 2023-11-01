@@ -4,20 +4,54 @@ import Placements from 'rc-dropdown/lib/placements';
 
 import styles from './index.module.less';
 
-// TODO@jikkai Need to limit width
-export interface IDropdown2Props {
-    visible?: boolean;
-    trigger?: ActionType | ActionType[];
-    placement?: keyof typeof Placements;
+// TODO: @jikkai Need to limit width
+export interface IDropdownProps {
+    /**
+     * The dropdown content
+     */
     children: React.ReactElement;
+
+    /**
+     * Whether the dropdown is visible
+     */
+    visible?: boolean;
+
+    /**
+     * The trigger mode which executes the dropdown action
+     * @default ['click']
+     */
+    trigger?: ActionType | ActionType[];
+
+    /**
+     * The placement of the dropdown
+     */
+    placement?: keyof typeof Placements;
+
+    /**
+     * The dropdown overlay
+     */
     overlay: React.ReactElement;
+
+    /**
+     * Whether the dropdown aligns to the point
+     * @default false
+     */
     alignPoint?: boolean;
+
+    /**
+     * The align of the dropdown
+     */
     align?: AlignType;
+
+    /**
+     * Triggered after the dropdown visibility changes
+     * @param visible
+     */
     onVisibleChange?: (visible: boolean) => void;
 }
 
-export function Dropdown2(props: IDropdown2Props) {
-    const { trigger = ['click'], placement, children, overlay, alignPoint, align, onVisibleChange } = props;
+export function Dropdown(props: IDropdownProps) {
+    const { trigger = ['click'], placement, children, overlay, alignPoint = false, align, onVisibleChange } = props;
 
     return (
         <RcDropdown

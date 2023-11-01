@@ -1,11 +1,11 @@
 import type { Meta } from '@storybook/react';
-import { Button } from '@univerjs/design';
 
-import { Dropdown2 } from './Dropdown2';
+import { Button } from '../button/Button';
+import { Dropdown } from './Dropdown';
 
-const meta: Meta<typeof Dropdown2> = {
+const meta: Meta<typeof Dropdown> = {
     title: 'Components / Dropdown',
-    component: Dropdown2,
+    component: Dropdown,
     parameters: {
         layout: 'centered',
     },
@@ -17,9 +17,9 @@ export default meta;
 export const Playground = {
     render() {
         return (
-            <Dropdown2 overlay={<div>overlay</div>}>
+            <Dropdown overlay={<div>overlay</div>}>
                 <Button>Basic</Button>
-            </Dropdown2>
+            </Dropdown>
         );
     },
 };

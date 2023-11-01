@@ -6,6 +6,7 @@ export { ColorPicker, type IColorPickerProps } from './components/color-picker';
 export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './components/config-provider';
 export { Container, type IContainerProps } from './components/container';
 export { Dialog, type IDialogProps } from './components/dialog';
+export { Dropdown, type IDropdownProps } from './components/dropdown';
 export { type IInputProps, Input } from './components/input';
 export { type IInputNumberProps, InputNumber } from './components/input-number';
 export { Content, Footer, Header, type ILayoutProps, Layout, Sider } from './components/layout';

@@ -1,4 +1,4 @@
-class CommonParameter {
+class MemoryCursor {
     cursor: number = 0;
 
     reset() {
@@ -11,4 +11,4 @@ class CommonParameter {
     }
 }
 
-export default CommonParameter;
+export default MemoryCursor;

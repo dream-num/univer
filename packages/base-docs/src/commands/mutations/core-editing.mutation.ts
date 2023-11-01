@@ -7,7 +7,7 @@ import {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
-import CommonParameter from '../../Basics/commonParameter';
+import MemoryCursor from '../../Basics/memoryCursor';
 import { DeleteApply } from './functions/delete-apply';
 import { InsertApply } from './functions/insert-apply';
 import { UpdateAttributeApply } from './functions/update-apply';
@@ -66,7 +66,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         }
 
         const undoMutations: Array<IRetainMutationParams | IInsertMutationParams | IDeleteMutationParams> = [];
-        const commonParameter = new CommonParameter();
+        const commonParameter = new MemoryCursor();
 
         commonParameter.reset();
 

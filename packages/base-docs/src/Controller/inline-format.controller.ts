@@ -13,11 +13,16 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import CommonParameter from '../Basics/commonParameter';
+import MemoryCursor from '../Basics/memoryCursor';
 import { SetInlineFormatBoldCommand, SetInlineFormatCommand } from '../commands/commands/inline-format.command';
 import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
+/**
+ * Used to manage the addition and removal of inline styles,
+ * and to assemble the command parameters here,
+ * some of the logic may be moved to the command, as the command is testable.
+ */
 @OnLifecycle(LifecycleStages.Rendered, InlineFormatController)
 export class InlineFormatController extends Disposable {
     constructor(
@@ -77,7 +82,7 @@ export class InlineFormatController extends Disposable {
             },
         };
 
-        const commonParameter = new CommonParameter();
+        const commonParameter = new MemoryCursor();
 
         commonParameter.reset();
 

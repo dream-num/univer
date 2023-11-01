@@ -74,23 +74,12 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
         textRuns: [
             {
                 st: 0,
-                ed: 8,
-                ts: {
-                    bl: BooleanNumber.FALSE,
-                    fs: 24,
-                    cl: {
-                        rgb: 'rgb(0, 255, 0)',
-                    },
-                },
-            },
-            {
-                st: 8,
                 ed: 67,
                 ts: {
-                    bl: BooleanNumber.FALSE,
+                    bl: BooleanNumber.TRUE,
                     fs: 24,
                     cl: {
-                        rgb: 'rgb(0, 0, 255)',
+                        rgb: 'rgb(0, 40, 86)',
                     },
                 },
             },

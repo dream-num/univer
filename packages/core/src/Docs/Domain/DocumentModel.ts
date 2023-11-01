@@ -225,7 +225,7 @@ export class DocumentModel extends DocumentModelSimple {
         this._unitId = unitId;
     }
 
-    // TODO: 这个函数名和内容是否有点不对等？
+    // TODO: @jocs The function name and content don't match?
     private _initializeRowColTree() {
         this.headerTreeMap = new Map();
         this.footerTreeMap = new Map();

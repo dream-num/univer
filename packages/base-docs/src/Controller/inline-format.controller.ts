@@ -69,8 +69,6 @@ export class InlineFormatController extends Disposable {
             }
         }
 
-        console.log(formatValue);
-
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
@@ -128,6 +126,11 @@ export class InlineFormatController extends Disposable {
     }
 }
 
+/**
+ * When clicking on a Bold menu item, you should unbold if there is bold in the selections,
+ * or bold if there is no bold text. This method is used to get the style value calculated
+ * from textRuns in the selection
+ */
 function getFormatValueInSelection(
     textRuns: ITextRun[],
     key: 'bl',

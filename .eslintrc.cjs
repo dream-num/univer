@@ -98,6 +98,7 @@ module.exports = {
         '@typescript-eslint/lines-between-class-members': [
             'warn',
             { enforce: [{ blankLine: 'always', prev: '*', next: 'method' }] },
+            { exceptAfterSingleLine: true },
         ],
         // '@typescript-eslint/member-ordering': 'error',
         '@typescript-eslint/no-explicit-any': 'warn',

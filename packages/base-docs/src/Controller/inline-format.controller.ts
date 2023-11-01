@@ -1,4 +1,4 @@
-import { ITextSelectionRenderManager } from '@univerjs/base-render';
+import { ITextSelectionRangeWithStyle, ITextSelectionRenderManager } from '@univerjs/base-render';
 import {
     BooleanNumber,
     Disposable,
@@ -6,6 +6,7 @@ import {
     ICommandInfo,
     ICommandService,
     IDocumentBody,
+    ITextRun,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -55,7 +56,20 @@ export class InlineFormatController extends Disposable {
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
         const unitId = docsModel.getUnitId();
 
-        // console.log(command, docsModel);
+        let formatValue;
+
+        switch (command.id) {
+            case SetInlineFormatBoldCommand.id: {
+                formatValue = getFormatValueInSelection(docsModel.body!.textRuns!, 'bl', selections);
+                break;
+            }
+
+            default: {
+                throw new Error(`Unknown command: ${command.id} in handleInlineFormat`);
+            }
+        }
+
+        console.log(formatValue);
 
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -81,7 +95,7 @@ export class InlineFormatController extends Disposable {
                         st: 0,
                         ed: textEnd - textStart,
                         ts: {
-                            bl: BooleanNumber.TRUE,
+                            bl: formatValue,
                         },
                     },
                 ],
@@ -112,4 +126,37 @@ export class InlineFormatController extends Disposable {
             doMutation,
         });
     }
+}
+
+function getFormatValueInSelection(
+    textRuns: ITextRun[],
+    key: 'bl',
+    selections: ITextSelectionRangeWithStyle[]
+): BooleanNumber {
+    let ti = 0;
+    let si = 0;
+
+    while (ti !== textRuns.length && si !== selections.length) {
+        const { cursorStart, cursorEnd, isStartBack, isEndBack } = selections[si];
+
+        const textStart = getTextIndexByCursor(cursorStart, isStartBack) + 1;
+        const textEnd = getTextIndexByCursor(cursorEnd, isEndBack) + 1;
+
+        // TODO: @jocs handle sid in textRun
+        const { st, ed, ts } = textRuns[ti];
+
+        if (textEnd <= st) {
+            si++;
+        } else if (ed <= textStart) {
+            ti++;
+        } else {
+            if (ts?.[key] === BooleanNumber.TRUE) {
+                return BooleanNumber.FALSE;
+            }
+
+            ti++;
+        }
+    }
+
+    return BooleanNumber.TRUE;
 }

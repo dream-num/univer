@@ -88,8 +88,15 @@ export function insertTextRuns(
 
             const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
 
+            if (!lastInsertTextRuns) {
+                textRuns.splice(insertIndex, 1, startSplitTextRun);
+
+                return;
+            }
+
             if (lastInsertTextRuns.ed === ed) {
                 textRuns.splice(insertIndex, 1, startSplitTextRun, ...insertTextRuns);
+
                 return;
             }
 

@@ -1,4 +1,4 @@
-import { BaseComponentProps, CustomLabel, debounce, Input, Select } from '@univerjs/base-ui';
+import { BaseComponentProps, debounce, Input, Select } from '@univerjs/base-ui';
 import { Component, createRef } from 'react';
 
 import { FormulaType, FunListILabel, Label } from '../../../Basics';
@@ -100,9 +100,9 @@ export class SearchFormulaContent extends Component<IProps, IState> {
         const { select } = this.props;
         const arr: Array<{ label: string | JSX.Element }> = [];
         for (let i = 0; i < select.length; i++) {
-            arr.push({
-                label: <CustomLabel label={select[i].label} />,
-            });
+            // arr.push({
+            //     label: <CustomLabel label={select[i].label} />,
+            // });
         }
         return arr;
     }
@@ -114,7 +114,7 @@ export class SearchFormulaContent extends Component<IProps, IState> {
                 if (functionList[i][k] instanceof Array) {
                     functionList[i][k] = this.getFunctionList(functionList[i][k]);
                 } else if (typeof functionList[i][k] === 'string') {
-                    functionList[i][k] = <CustomLabel label={functionList[i][k]} />;
+                    // functionList[i][k] = <CustomLabel label={functionList[i][k]} />;
                 }
             }
         }
@@ -128,18 +128,18 @@ export class SearchFormulaContent extends Component<IProps, IState> {
             <div className={styles.functionModal}>
                 <div className={styles.functionSearch}>
                     <div className={styles.functionLabel}>
-                        <CustomLabel label="formula.formulaMore.findFunctionTitle" />;
+                        {/* <CustomLabel label="formula.formulaMore.findFunctionTitle" />; */}
                     </div>
                     <Input
-                        placeholder={
-                            (<CustomLabel label="formula.formulaMore.tipInputFunctionName" />) as unknown as string
-                        }
+                        // placeholder={
+                        //     (<CustomLabel label="formula.formulaMore.tipInputFunctionName" />) as unknown as string
+                        // }
                         onChange={debounce(this.changeInput.bind(this), 50)}
                     />
                 </div>
                 <div className={styles.functionSelect}>
                     <div className={styles.functionLabel}>
-                        <CustomLabel label="formula.formulaMore.selectCategory" />
+                        {/* <CustomLabel label="formula.formulaMore.selectCategory" /> */}
                     </div>
                     <div className={styles.functionSelector}>
                         <Select
@@ -151,7 +151,7 @@ export class SearchFormulaContent extends Component<IProps, IState> {
                 </div>
                 <div className={styles.functionList} ref={this.functionListRef}>
                     <div className={styles.functionLabel}>
-                        <CustomLabel label="formula.formulaMore.selectFunctionTitle" />
+                        {/* <CustomLabel label="formula.formulaMore.selectFunctionTitle" /> */}
                     </div>
                     <ul className={styles.functionLists}>
                         {functionList?.map((item, index) => (

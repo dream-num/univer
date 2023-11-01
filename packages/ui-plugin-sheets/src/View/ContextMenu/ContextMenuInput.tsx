@@ -1,5 +1,7 @@
-import { CustomLabel, ICustomComponentProps } from '@univerjs/base-ui';
+import { ICustomComponentProps } from '@univerjs/base-ui';
+import { LocaleService } from '@univerjs/core';
 import { InputNumber } from '@univerjs/design';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import styles from './index.module.less';
@@ -14,7 +16,11 @@ interface IProps extends ICustomComponentProps<string> {
     onValueChange?: (value: string) => void;
 }
 
-export const ContextMenuInput: React.FC<IProps> = ({ prefix, suffix, value, onChange, onValueChange }) => {
+export const ContextMenuInput = (props: IProps) => {
+    const { prefix, suffix, value, onChange, onValueChange } = props;
+
+    const localeService = useDependency(LocaleService);
+
     const [inputValue, setInputValue] = useState<string>(); // Initialized to an empty string
 
     const handleChange = (value: number | null) => {
@@ -34,11 +40,11 @@ export const ContextMenuInput: React.FC<IProps> = ({ prefix, suffix, value, onCh
 
     return (
         <div className={styles.uiPluginSheetsContextMenuInput}>
-            <CustomLabel label={prefix} />
+            {localeService.t(prefix)}
             <span onClick={(e) => e.stopPropagation()}>
                 <InputNumber value={Number(inputValue)} onKeyDown={handleKeyDown} onChange={handleChange} />
             </span>
-            <CustomLabel label={suffix} />
+            {localeService.t(suffix)}
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import { BaseComponentProps, CustomLabel, Input } from '@univerjs/base-ui';
+import { BaseComponentProps, Input } from '@univerjs/base-ui';
 import { Nullable } from '@univerjs/core';
 import { Container, Tooltip } from '@univerjs/design';
 import { Component } from 'react';
@@ -57,12 +57,8 @@ export class InfoBar extends Component<IProps, IState> {
                         <Input bordered={false} value={slide.label} onBlur={renameSheet} />
                     </Tooltip>
                 </div>
-                <div className={styles.infoDetailUpdate}>
-                    <CustomLabel label={update.label} />
-                </div>
-                <div className={styles.infoDetailSave}>
-                    <CustomLabel label={save.label} />
-                </div>
+                <div className={styles.infoDetailUpdate}>{/* <CustomLabel label={update.label} /> */}</div>
+                <div className={styles.infoDetailSave}>{/* <CustomLabel label={save.label} /> */}</div>
             </Container>
         );
     }

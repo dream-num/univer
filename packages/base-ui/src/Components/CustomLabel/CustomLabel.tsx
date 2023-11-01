@@ -1,7 +1,7 @@
 import { LocaleService } from '@univerjs/core';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { isValidElement, JSX } from 'react';
+import React, { JSX } from 'react';
 
 import { ComponentManager, ICustomComponent } from '../../Common';
 import { IMenuSelectorItem } from '../../services/menu/menu';
@@ -121,42 +121,6 @@ export function NeoCustomLabel(
             <span className={styles.selectItemContent}>{getLocale(title)}</span>
         </div>
     );
-}
-
-/** @deprecated */
-export function CustomLabel(props: IBaseCustomLabelProps): JSX.Element | null {
-    const { label, display, onChange } = props;
-
-    const localeService = useDependency(LocaleService);
-    const componentManager = useDependency(ComponentManager);
-
-    function getLocale(name: string) {
-        return localeService.t(name) ?? name;
-    }
-
-    // the new way to render toolbar item type to replace Label prop
-    if (display === DisplayTypes.COLOR) {
-        return <ColorSelect value={props.label as string} title={props.label as string} />;
-    }
-
-    if (typeof label === 'string') {
-        return <>{getLocale(label)}</>;
-    }
-
-    if (isValidElement(label)) {
-        return label;
-    }
-
-    // other types of components and icon
-    if (label) {
-        const Label = componentManager.get((label as ICustomComponent).name) as any;
-        if (Label) {
-            const props = (label as ICustomComponent).props ?? {};
-            return <Label onChange={onChange} {...props} />;
-        }
-    }
-
-    return null;
 }
 
 export interface IColorSelectProps {

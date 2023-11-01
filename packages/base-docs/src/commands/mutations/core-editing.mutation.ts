@@ -1,5 +1,13 @@
-import { CommandType, IDocumentBody, IMutation, IUniverInstanceService, UpdateDocsAttributeType } from '@univerjs/core';
+import {
+    CommandType,
+    IDocumentBody,
+    IMutation,
+    IUniverInstanceService,
+    Tools,
+    UpdateDocsAttributeType,
+} from '@univerjs/core';
 
+import CommonParameter from '../../Basics/commonParameter';
 import { DeleteApply } from './functions/delete-apply';
 import { InsertApply } from './functions/insert-apply';
 import { UpdateAttributeApply } from './functions/update-apply';
@@ -63,6 +71,11 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         commonParameter.reset();
 
         mutations.forEach((mutation) => {
+            // FIXME: @jocs Since UpdateAttributeApply modifies the mutation(used in undo/redo),
+            // so make a deep copy here, does UpdateAttributeApply need to
+            // be modified to have no side effects in the future?
+            mutation = Tools.deepClone(mutation);
+
             if (mutation.t === 'r') {
                 const { coverType, body, len, segmentId } = mutation;
 
@@ -82,13 +95,14 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                         coverType: UpdateDocsAttributeType.REPLACE,
                         body: documentBody,
                     });
+                } else {
+                    undoMutations.push({
+                        ...mutation,
+                        t: 'r',
+                    });
                 }
 
                 commonParameter.moveCursor(len);
-                undoMutations.push({
-                    ...mutation,
-                    t: 'r',
-                });
             } else if (mutation.t === 'i') {
                 const { body, len, segmentId, line } = mutation;
 
@@ -120,16 +134,3 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         };
     },
 };
-
-class CommonParameter {
-    cursor: number = 0;
-
-    reset() {
-        this.cursor = 0;
-        return this;
-    }
-
-    moveCursor(pos: number) {
-        this.cursor += pos;
-    }
-}

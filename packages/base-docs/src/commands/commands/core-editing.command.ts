@@ -14,6 +14,7 @@ import {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
+import CommonParameter from '../../Basics/commonParameter';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import {
     IDeleteMutationParams,
@@ -49,7 +50,10 @@ export const SetBoldCommand: ICommand = {
             },
         };
 
-        let offset = 0;
+        const commonParameter = new CommonParameter();
+
+        commonParameter.reset();
+
         for (const selection of selections) {
             const { cursorStart, cursorEnd, isStartBack, isEndBack } = selection;
             const textStart = getTextIndexByCursor(cursorStart, isStartBack);
@@ -68,10 +72,11 @@ export const SetBoldCommand: ICommand = {
                 ],
             };
 
-            if (textStart !== -1) {
+            const len = textStart + 1 - commonParameter.cursor;
+            if (len !== 0) {
                 doMutation.params!.mutations.push({
                     t: 'r',
-                    len: textStart + 1 - offset,
+                    len,
                     segmentId: '',
                 });
             }
@@ -83,7 +88,8 @@ export const SetBoldCommand: ICommand = {
                 segmentId: '',
             });
 
-            offset += textEnd + 1;
+            commonParameter.reset();
+            commonParameter.moveCursor(textEnd + 1);
         }
 
         const result = commandService.syncExecuteCommand<

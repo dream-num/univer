@@ -3,6 +3,7 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { ComponentManager } from './Common/ComponentManager';
 import { ZIndexManager } from './Common/ZIndexManager';
+import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
@@ -18,6 +19,7 @@ import { DesktopNotificationService } from './services/notification/desktop-noti
 import { INotificationService } from './services/notification/notification.service';
 import { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
 import { DesktopShortcutService, IShortcutService } from './services/shortcut/shortcut.service';
+import { ShortcutExperienceService } from './services/shortcut/shortcut-experience.service';
 
 export interface IUIPluginConfig extends IWorkbenchOptions {}
 
@@ -59,6 +61,7 @@ export class UIPlugin extends Plugin {
             [ComponentManager],
             [ZIndexManager],
             // services
+            [ShortcutExperienceService],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
             [IMenuService, { useClass: DesktopMenuService }],
@@ -69,8 +72,9 @@ export class UIPlugin extends Plugin {
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             // controllers
             [IFocusService, { useClass: DesktopFocusService }],
-            [SharedController],
             [IUIController, { useClass: DesktopUIController }],
+            [SharedController],
+            [ErrorController],
         ];
 
         dependencies.forEach((dependency) => injector.add(dependency));

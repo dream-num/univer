@@ -11,7 +11,6 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../../services/selection/selection-manager.service';
-import { ShortcutExperienceService } from '../../../services/shortcut-experience.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     id: 'test',
@@ -65,7 +64,6 @@ export function createCommandTestBed(workbookConfig?: IWorkbookConfig, dependenc
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([ShortcutExperienceService]);
             injector.add([SelectionManagerService]);
             injector.add([BorderStyleManagerService]);
 

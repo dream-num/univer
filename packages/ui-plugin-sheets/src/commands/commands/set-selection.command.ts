@@ -1,4 +1,22 @@
-import { KeyCode } from '@univerjs/base-ui';
+import {
+    findNextGapRange,
+    findNextRange,
+    getCellAtRowCol,
+    getStartRange,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+    SetSelectionsOperation,
+} from '@univerjs/base-sheets';
+import {
+    checkIfShrink,
+    expandToContinuousRange,
+    expandToNextCell,
+    expandToNextGapRange,
+    expandToWholeSheet,
+    shrinkToNextCell,
+    shrinkToNextGapRange,
+} from '@univerjs/base-sheets/commands/commands/utils/selection-util.js';
+import { KeyCode, ShortcutExperienceService } from '@univerjs/base-ui';
 import {
     CommandType,
     Direction,
@@ -11,29 +29,9 @@ import {
     Tools,
 } from '@univerjs/core';
 
-import {
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-} from '../../services/selection/selection-manager.service';
-import { ShortcutExperienceService } from '../../services/shortcut-experience.service';
-import { SetSelectionsOperation } from '../operations/selection.operation';
-import {
-    checkIfShrink,
-    expandToContinuousRange,
-    expandToNextCell,
-    expandToNextGapRange,
-    expandToWholeSheet,
-    findNextGapRange,
-    findNextRange,
-    getCellAtRowCol,
-    getStartRange,
-    shrinkToNextCell,
-    shrinkToNextGapRange,
-} from './utils/selection-util';
-
 // TODO@wzhudev: we also need to handle when the current selection is the whole spreadsheet, whole rows or whole columns
-
 // TODO@DR-UNIVER: moveStepPage and moveStepEnd implement
+
 export enum JumpOver {
     moveStopeOne,
     moveGap,
@@ -80,7 +78,9 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             return false;
         }
 
-        // If there are changes to the selection, clear the start position saved by the tab. This function works in conjunction with the enter and tab shortcuts.
+        // If there are changes to the selection, clear the start position saved by the tab.
+        // This function works in conjunction with the enter and tab shortcuts.
+        // TODO@wzhudev: this should be removed to sheets-ui, listening command execution
         accessor.get(ShortcutExperienceService).remove({
             unitId: workbook.getUnitId(),
             sheetId: worksheet.getSheetId(),

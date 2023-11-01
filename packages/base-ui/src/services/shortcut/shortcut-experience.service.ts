@@ -1,6 +1,7 @@
-import { KeyCode } from '@univerjs/base-ui';
 import { ISelection, ITextSelectionRangeParam, IUniverInstanceService, LocaleService, Nullable } from '@univerjs/core';
 import { IDisposable, Inject } from '@wendellhu/redi';
+
+import { KeyCode } from './keycode';
 
 export interface IShortcutExperienceSearch {
     unitId: string;

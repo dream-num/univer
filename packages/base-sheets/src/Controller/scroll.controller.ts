@@ -2,7 +2,6 @@ import { IRenderManagerService } from '@univerjs/base-render';
 import {
     Direction,
     Disposable,
-    ICommandInfo,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
@@ -14,10 +13,8 @@ import { Inject } from '@wendellhu/redi';
 import { getSheetObject } from '../Basics/component-tools';
 import { VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { ScrollCommand } from '../commands/commands/set-scroll.command';
-import { IMoveSelectionCommandParams, MoveSelectionCommand } from '../commands/commands/set-selections.command';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 import { SelectionManagerService } from '../services/selection/selection-manager.service';
-import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { ISheetSkeletonManagerParam, SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, ScrollController)
@@ -27,9 +24,6 @@ export class ScrollController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService
-        private readonly _selectionRenderService: ISelectionRenderService,
-
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService
     ) {
@@ -44,11 +38,8 @@ export class ScrollController extends Disposable {
 
     private _initialize() {
         this._scrollEventBinding();
-
         this._scrollSubscribeBinding();
-
         this._skeletonListener();
-        this._commandExecutedListener();
     }
 
     private _scrollEventBinding() {
@@ -91,20 +82,7 @@ export class ScrollController extends Disposable {
         );
     }
 
-    private _commandExecutedListener() {
-        const updateCommandList = [MoveSelectionCommand.id];
-
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (updateCommandList.includes(command.id)) {
-                    const params = command.params as IMoveSelectionCommandParams;
-                    this.scrollToVisible(params.direction);
-                }
-            })
-        );
-    }
-
-    private scrollToVisible(direction: Direction) {
+    scrollToVisible(direction: Direction) {
         let startSheetViewRow;
         let startSheetViewColumn;
         const selection = this._selectionManagerService.getLast();

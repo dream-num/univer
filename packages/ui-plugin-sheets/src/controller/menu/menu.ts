@@ -80,9 +80,8 @@ import {
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
+import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
-
-export const CONTEXT_MENU_INPUT_LABEL = 'CONTEXT_MENU_INPUT';
 
 export { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './border.menu';
 
@@ -509,6 +508,16 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         tooltip: 'toolbar.font',
         type: MenuItemType.SELECTOR,
         display: DisplayTypes.FONT,
+
+        // display: DisplayTypes.CUSTOM,
+        // label: {
+        //     name: MENU_ITEM_INPUT_COMPONENT,
+        //     props: {
+        //         prefix: 'rightClick.rowHeight',
+        //         suffix: 'px',
+        //     },
+        // },
+
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_FAMILY_CHILDREN,
         disabled$: new Observable((subscriber) => {
@@ -1243,7 +1252,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         title: 'rightClick.rowHeight',
         display: DisplayTypes.CUSTOM,
         label: {
-            name: CONTEXT_MENU_INPUT_LABEL,
+            name: MENU_ITEM_INPUT_COMPONENT,
             props: {
                 prefix: 'rightClick.rowHeight',
                 suffix: 'px',
@@ -1290,7 +1299,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.columnWidth',
         label: {
-            name: CONTEXT_MENU_INPUT_LABEL,
+            name: MENU_ITEM_INPUT_COMPONENT,
             props: {
                 prefix: 'rightClick.columnWidth',
                 suffix: 'px',

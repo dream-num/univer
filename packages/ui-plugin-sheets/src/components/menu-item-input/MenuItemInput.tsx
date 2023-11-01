@@ -16,7 +16,7 @@ interface IProps extends ICustomComponentProps<string> {
     onValueChange?: (value: string) => void;
 }
 
-export const ContextMenuInput = (props: IProps) => {
+export const MenuItemInput = (props: IProps) => {
     const { prefix, suffix, value, onChange, onValueChange } = props;
 
     const localeService = useDependency(LocaleService);

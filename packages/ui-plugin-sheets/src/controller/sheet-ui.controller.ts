@@ -39,6 +39,7 @@ import {
     SetCellEditVisibleOperation,
 } from '../commands/operations/cell-edit.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
+import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
 import {
     BorderDashDot,
     BorderDashDotDot,
@@ -52,8 +53,6 @@ import {
     BorderThick,
 } from '../View/BorderLine';
 import { BorderThin } from '../View/BorderLine/BorderThin';
-import { ContextMenuInput } from '../View/ContextMenu/ContextMenuInput';
-import { ContextMenuItem } from '../View/ContextMenu/ContextMenuItem';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../View/SheetContainer/SheetContainer';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import {
@@ -63,7 +62,6 @@ import {
     ClearSelectionAllMenuItemFactory,
     ClearSelectionContentMenuItemFactory,
     ClearSelectionFormatMenuItemFactory,
-    CONTEXT_MENU_INPUT_LABEL,
     CopyMenuItemFactory,
     CopySheetMenuItemFactory,
     DeleteRangeMenuItemFactory,
@@ -177,8 +175,7 @@ export class SheetUIController extends Disposable {
         const componentManager = this._componentManager;
 
         // FIXME: no dispose logic
-        componentManager.register(CONTEXT_MENU_INPUT_LABEL, ContextMenuInput);
-        componentManager.register(ContextMenuItem.name, ContextMenuItem);
+        componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput);
         componentManager.register(SHEET_UI_PLUGIN_NAME + ColorPicker.name, ColorPicker);
 
         [

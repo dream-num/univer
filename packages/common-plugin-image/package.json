@@ -1,0 +1,6 @@
+{
+    "name": "@univerjs/common-plugin-image",
+    "dependencies": {
+        "@univerjs/core": "workspace:*"
+    }
+}

@@ -1,4 +1,11 @@
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import {
+    Disposable,
+    DisposableCollection,
+    ICommandService,
+    LifecycleStages,
+    OnLifecycle,
+    toDisposable,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { IMoveRangeCommandParams, MoveRangeCommand } from '../commands/commands/move-range.command';
@@ -17,17 +24,17 @@ export class MoveRangeController extends Disposable {
     }
 
     private _initialize = () => {
-        const disposable = new Disposable();
+        const disposableCollection = new DisposableCollection();
 
         this.disposeWithMe(
             toDisposable(
                 this._selectionManagerService.selectionInfo$.subscribe(() => {
                     // Each range change requires re-listening
-                    disposable.dispose();
+                    disposableCollection.dispose();
 
                     const selectionControls = this._selectionRenderService.getCurrentControls();
                     selectionControls.forEach((controlSelection) => {
-                        disposable.disposeWithMe(
+                        disposableCollection.add(
                             toDisposable(
                                 controlSelection.selectionMoved$.subscribe((_toRange) => {
                                     if (!_toRange) {

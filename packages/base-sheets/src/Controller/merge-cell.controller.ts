@@ -1,5 +1,6 @@
 import {
     Disposable,
+    DisposableCollection,
     ICommandService,
     IRange,
     IUniverInstanceService,
@@ -69,7 +70,7 @@ export class MergeCellController extends Disposable {
     }
 
     private _onRefRangeChange() {
-        const disposable = new Disposable();
+        const disposableCollection = new DisposableCollection();
         const registerRefRange = (workbookId: string, worksheetId: string) => {
             const workbook = this._univerInstanceService.getUniverSheetInstance(workbookId);
             if (!workbook) {
@@ -80,7 +81,7 @@ export class MergeCellController extends Disposable {
                 return;
             }
 
-            disposable.dispose();
+            disposableCollection.dispose();
             const mergeData = workSheet.getMergeData();
             // Handles all merged unit tasks,if multiple range effect and called only once.
             const handler = (config: EffectParams) => {
@@ -129,7 +130,7 @@ export class MergeCellController extends Disposable {
                 return { redos: [], undos: [] };
             };
             mergeData.forEach((range) => {
-                disposable.disposeWithMe(
+                disposableCollection.add(
                     this._refRangeService.registerRefRange(range, handler, workbookId, worksheetId)
                 );
             });

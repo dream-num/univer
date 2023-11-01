@@ -95,7 +95,10 @@ module.exports = {
         // eslint-plugin-unused-imports
         '@typescript-eslint/consistent-type-assertions': 'off',
         '@typescript-eslint/default-param-last': 'off',
-        '@typescript-eslint/lines-between-class-members': 'off',
+        '@typescript-eslint/lines-between-class-members': [
+            'warn',
+            { enforce: [{ blankLine: 'always', prev: '*', next: 'method' }] },
+        ],
         // '@typescript-eslint/member-ordering': 'error',
         '@typescript-eslint/no-explicit-any': 'warn',
         '@typescript-eslint/no-redeclare': 'off', // dependency interface and dependency token share the same name

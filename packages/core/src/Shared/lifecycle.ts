@@ -77,7 +77,12 @@ export class DisposableCollection implements IDisposable {
         };
     }
 
-    dispose(): void {}
+    dispose(): void {
+        this._disposables.forEach((item) => {
+            item.dispose();
+            this._disposables.delete(item);
+        });
+    }
 }
 
 export class Disposable implements IDisposable {

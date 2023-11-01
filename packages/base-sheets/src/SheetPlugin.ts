@@ -11,12 +11,15 @@ import { HeaderMenuController } from './Controller/header-menu.controller';
 import { HeaderMoveController } from './Controller/header-move.controller';
 import { HeaderResizeController } from './Controller/header-resize.controller';
 import { HeaderUnhideController } from './Controller/header-unhide.controller';
+import { MergeCellController } from './Controller/merge-cell.controller';
+import { MoveRangeController } from './Controller/move-range.controller';
 import { ScrollController } from './Controller/scroll.controller';
 import { SelectionController } from './Controller/selection.controller';
 import { SheetRenderController } from './Controller/sheet-render.controller';
 import { ZoomController } from './Controller/zoom.controller';
 import { enUS } from './locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
+import { RefRangeService } from './services/ref-range.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
 import { SelectionManagerService } from './services/selection/selection-manager.service';
 import { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
@@ -65,6 +68,7 @@ export class SheetPlugin extends Plugin {
             [ScrollManagerService],
             [SelectionManagerService],
             [ShortcutExperienceService],
+            [RefRangeService],
 
             // controllers
             [BasicWorksheetController],
@@ -78,6 +82,8 @@ export class SheetPlugin extends Plugin {
             [ScrollController],
             [ZoomController],
             [AutoHeightController],
+            [MoveRangeController],
+            [MergeCellController],
         ];
 
         dependencies.forEach((d) => {

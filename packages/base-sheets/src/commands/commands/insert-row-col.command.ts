@@ -17,22 +17,18 @@ import {
     ObjectMatrix,
     sequenceExecute,
     SheetInterceptorService,
-    Tools,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
-    IAddWorksheetMergeMutationParams,
     IDeleteRangeMutationParams,
     IInsertColMutationParams,
     IInsertRangeMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
-    IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 import { SelectionManagerService } from '../../services/selection/selection-manager.service';
-import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation, InsertRangeUndoMutationFactory } from '../mutations/insert-range.mutation';
 import {
@@ -42,10 +38,6 @@ import {
     InsertRowMutationUndoFactory,
 } from '../mutations/insert-row-col.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../mutations/remove-row-col.mutation';
-import {
-    RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation,
-} from '../mutations/remove-worksheet-merge.mutation';
 
 export interface IInsertRowCommandParams {
     workbookId: string;
@@ -126,52 +118,13 @@ export const InsertRowCommand: ICommand = {
             accessor,
             insertRangeMutationParams
         );
-
-        // update merged cells & undos
-        // NOTE: the problem of our algorithm is that we created a lot of merging cells mutations and un-merging cell mutations
-        const mergedCells: IRange[] = Tools.deepClone(worksheet.getMergeData());
-        for (let i = 0; i < mergedCells.length; i++) {
-            const mergedCell = mergedCells[i];
-            const count = endRow - startRow + 1;
-            if (startRow > mergedCell.endRow) {
-                continue;
-            } else if (startRow <= mergedCell.startRow) {
-                mergedCell.startRow += count;
-                mergedCell.endRow += count;
-            } else {
-                mergedCell.endRow += count;
-            }
-        }
-        const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
-            workbookId: params.workbookId,
-            worksheetId: params.worksheetId,
-            ranges: Tools.deepClone(worksheet.getMergeData()),
-        };
-        const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-            accessor,
-            removeMergeParams
-        );
-        const addMergeParams: IAddWorksheetMergeMutationParams = {
-            workbookId: params.workbookId,
-            worksheetId: params.worksheetId,
-            ranges: mergedCells,
-        };
-        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
-            accessor,
-            addMergeParams
-        );
-
         // intercept the command execution to gether undo redo commands
-        const intercepted = accessor
-            .get(SheetInterceptorService)
-            .onCommandExecute({ id: InsertRowCommand.id, params: insertRowParams });
+        const intercepted = accessor.get(SheetInterceptorService).onCommandExecute({ id: InsertRowCommand.id, params });
 
         const result = sequenceExecute(
             [
                 { id: InsertRowMutation.id, params: insertRowParams },
                 { id: InsertRangeMutation.id, params: insertRangeMutationParams },
-                { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams }, // remove all merged cells
-                { id: AddWorksheetMergeMutation.id, params: addMergeParams }, // add all merged cells, TODO: can this be optimized?
                 ...intercepted.redos,
             ],
             commandService
@@ -183,11 +136,9 @@ export const InsertRowCommand: ICommand = {
                 undo: async () =>
                     sequenceExecute(
                         [
+                            ...intercepted.undos,
                             { id: DeleteRangeMutation.id, params: undoInsertRangeMutationParams },
                             { id: RemoveRowMutation.id, params: undoRowInsertionParams },
-                            { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
-                            { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeParams },
-                            ...intercepted.undos,
                         ],
                         commandService
                     ).result,
@@ -196,8 +147,6 @@ export const InsertRowCommand: ICommand = {
                         [
                             { id: InsertRowMutation.id, params: insertRowParams },
                             { id: InsertRangeMutation.id, params: insertRangeMutationParams },
-                            { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
-                            { id: AddWorksheetMergeMutation.id, params: addMergeParams },
                             ...intercepted.redos,
                         ],
                         commandService
@@ -319,6 +268,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const { range, direction, worksheetId, workbookId } = params;
         const { startRow, endRow, startColumn, endColumn } = params.range;
@@ -369,46 +319,15 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             accessor,
             insertRangeMutationParams
         );
-
-        // update merged cells & undos
-        const mergeData = Tools.deepClone(worksheet.getMergeData());
-        for (let i = 0; i < mergeData.length; i++) {
-            const merge = mergeData[i];
-            const count = endColumn - startColumn + 1;
-            if (startColumn > merge.endColumn) {
-                continue;
-            } else if (startColumn <= merge.startColumn) {
-                merge.startColumn += count;
-                merge.endColumn += count;
-            } else {
-                merge.endColumn += count;
-            }
-        }
-        const removeMergeParams: IRemoveWorksheetMergeMutationParams = {
-            workbookId: params.workbookId,
-            worksheetId: params.worksheetId,
-            ranges: Tools.deepClone(worksheet.getMergeData()),
-        };
-        const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-            accessor,
-            removeMergeParams
-        );
-        const addMergeParams: IAddWorksheetMergeMutationParams = {
-            workbookId: params.workbookId,
-            worksheetId: params.worksheetId,
-            ranges: mergeData,
-        };
-        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
-            accessor,
-            addMergeParams
-        );
-
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: InsertColCommand.id,
+            params,
+        });
         const result = sequenceExecute(
             [
                 { id: InsertColMutation.id, params: insertColParams },
                 { id: InsertRangeMutation.id, params: insertRangeMutationParams },
-                { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
-                { id: AddWorksheetMergeMutation.id, params: addMergeParams },
+                ...intercepted.redos,
             ],
             commandService
         );
@@ -419,18 +338,11 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
                 undo: async () =>
                     sequenceExecute(
                         [
+                            ...intercepted.undos,
                             { id: DeleteRangeMutation.id, params: undoInsertRangeParams },
                             {
                                 id: RemoveColMutation.id,
                                 params: undoColInsertionParams,
-                            },
-                            {
-                                id: RemoveWorksheetMergeMutation.id,
-                                params: undoAddMergeParams,
-                            },
-                            {
-                                id: AddWorksheetMergeMutation.id,
-                                params: undoRemoveMergeParams,
                             },
                         ],
                         commandService
@@ -440,8 +352,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
                         [
                             { id: InsertColMutation.id, params: insertColParams },
                             { id: InsertRangeMutation.id, params: insertRangeMutationParams },
-                            { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
-                            { id: AddWorksheetMergeMutation.id, params: addMergeParams },
+                            ...intercepted.redos,
                         ],
                         commandService
                     ).result,

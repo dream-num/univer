@@ -9,22 +9,19 @@ import {
     Nullable,
     Rectangle,
     sequenceExecute,
-    Tools,
+    SheetInterceptorService,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import {
-    IAddWorksheetMergeMutationParams,
     IDeleteRangeMutationParams,
     IInsertColMutationParams,
     IInsertRangeMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
-    IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
 import { SelectionManagerService } from '../../services/selection/selection-manager.service';
-import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../mutations/insert-row-col.mutation';
@@ -34,22 +31,27 @@ import {
     RemoveRowMutation,
     RemoveRowsUndoMutationFactory,
 } from '../mutations/remove-row-col.mutation';
-import {
-    RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation,
-} from '../mutations/remove-worksheet-merge.mutation';
 
+export interface RemoveRowColCommandParams {
+    ranges: IRange[];
+}
 /**
  * This command would remove the selected rows. These selected rows can be non-continuous.
  */
 export const RemoveRowCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-row',
-    handler: async (accessor: IAccessor) => {
+    handler: async (accessor: IAccessor, params?: RemoveRowColCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections();
-        if (!selections?.length) {
-            return false;
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+
+        let ranges = params?.ranges;
+        if (!ranges) {
+            const selections = selectionManagerService.getSelections();
+            if (!selections?.length) {
+                return false;
+            }
+            ranges = selections.map((s) => Rectangle.clone(s.range));
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -58,7 +60,6 @@ export const RemoveRowCommand: ICommand = {
 
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
-        const ranges = selections.map((s) => Rectangle.clone(s.range));
         const lastColumnIndex = worksheet.getMaxColumns() - 1;
         ranges.forEach((item) => {
             item.startColumn = 0;
@@ -90,67 +91,17 @@ export const RemoveRowCommand: ICommand = {
 
         if (!undoDeleteRangeValueParams) return false;
 
-        // adjust merged cells
-        const mergeData: IRange[] = Tools.deepClone(worksheet.getMergeData());
-        for (let i = 0; i < mergeData.length; i++) {
-            const merge = mergeData[i];
-            const { startRow: mergeStartRow, endRow: mergeEndRow } = merge;
-            const mergedCellRowCount = mergeEndRow - mergeStartRow + 1;
-            for (let j = 0; j < ranges.length; j++) {
-                const { startRow, endRow } = ranges[j];
-                const count = endRow - startRow + 1;
-                if (endRow < mergeStartRow) {
-                    // this merged cell should be moved up
-                    merge.startRow -= count;
-                    merge.endRow -= count;
-                } else if (startRow > mergeEndRow) {
-                    // this merged cell would not be affected
-                    continue;
-                } else if (startRow <= mergeStartRow && endRow >= mergeEndRow) {
-                    // this merged cell should be removed
-                    mergeData.splice(i, 1);
-                    i--;
-                } else {
-                    const intersects = Rectangle.getIntersects(ranges[j], merge)!;
-                    const interLength = intersects.endRow - intersects.startRow + 1;
-
-                    if (interLength === mergedCellRowCount - 1) {
-                        // if the merged cell's row count is reduced to 1 we should remove it as a merged cell
-                        mergeData.splice(i, 1);
-                        i--;
-                    } else {
-                        // otherwise we only need to shrink the merged cell's row count
-                        merge.endRow -= intersects.endRow - intersects.startRow + 1;
-                    }
-                }
-            }
-        }
-        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
-            ranges: Tools.deepClone(worksheet.getMergeData()),
-        };
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-            accessor,
-            removeMergeMutationParams
-        );
-        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
-            ranges: mergeData,
-        };
-        const deleteMergeMutationParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
-            accessor,
-            addMergeMutationParams
-        );
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: RemoveRowCommand.id,
+            params: { ranges } as RemoveRowColCommandParams,
+        });
 
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(
             [
                 { id: DeleteRangeMutation.id, params: deleteRangeValueParams },
                 { id: RemoveRowMutation.id, params: removeRowsParams },
-                { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-                { id: AddWorksheetMergeMutation.id, params: addMergeMutationParams },
+                ...intercepted.redos,
             ],
             commandService
         );
@@ -161,10 +112,10 @@ export const RemoveRowCommand: ICommand = {
                 undo: async () => {
                     const undoResult = sequenceExecute(
                         [
+                            ...intercepted.undos,
+
                             { id: InsertRowMutation.id, params: undoRemoveRowsParams },
                             { id: InsertRangeMutation.id, params: undoDeleteRangeValueParams },
-                            { id: RemoveWorksheetMergeMutation.id, params: deleteMergeMutationParams },
-                            { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
                         ],
                         commandService
                     );
@@ -175,8 +126,7 @@ export const RemoveRowCommand: ICommand = {
                         [
                             { id: DeleteRangeMutation.id, params: deleteRangeValueParams },
                             { id: RemoveRowMutation.id, params: removeRowsParams },
-                            { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-                            { id: AddWorksheetMergeMutation.id, params: addMergeMutationParams },
+                            ...intercepted.redos,
                         ],
                         commandService
                     );
@@ -197,11 +147,16 @@ export const RemoveColCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.remove-col',
     // eslint-disable-next-line max-lines-per-function
-    handler: async (accessor: IAccessor) => {
+    handler: async (accessor: IAccessor, params?: RemoveRowColCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const selections = selectionManagerService.getSelections();
-        if (!selections?.length) {
-            return false;
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        let ranges = params?.ranges;
+        if (!ranges) {
+            const selections = selectionManagerService.getSelections();
+            if (!selections?.length) {
+                return false;
+            }
+            ranges = selections.map((s) => Rectangle.clone(s.range));
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -210,7 +165,6 @@ export const RemoveColCommand: ICommand = {
 
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
-        const ranges = selections.map((s) => Rectangle.clone(s.range));
         const lastRowIndex = worksheet.getMaxRows() - 1;
         ranges.forEach((item) => {
             item.startRow = 0;
@@ -240,62 +194,16 @@ export const RemoveColCommand: ICommand = {
             throw new Error();
         }
 
-        // adjust merged cells
-        const mergeData: IRange[] = Tools.deepClone(worksheet.getMergeData());
-        for (let i = 0; i < mergeData.length; i++) {
-            const merge = mergeData[i];
-            const { startColumn: mergeStartColumn, endColumn: mergeEndColumn } = merge;
-            const mergedCellColumnCount = mergeEndColumn - mergeStartColumn + 1;
-            for (let j = 0; j < ranges.length; j++) {
-                const { startColumn, endColumn } = ranges[j];
-                const count = endColumn - startColumn + 1;
-                if (endColumn < merge.startColumn) {
-                    merge.startColumn -= count;
-                    merge.endColumn -= count;
-                } else if (startColumn > merge.endColumn) {
-                    continue;
-                } else if (startColumn <= merge.startColumn && endColumn >= merge.endColumn) {
-                    mergeData.splice(i, 1);
-                    i--;
-                } else {
-                    const intersects = Rectangle.getIntersects(ranges[j], merge)!;
-                    const interLength = intersects.endColumn - intersects.startColumn + 1;
-
-                    if (interLength === mergedCellColumnCount - 1) {
-                        mergeData.splice(i, 1);
-                        i--;
-                    } else {
-                        merge.endColumn -= intersects.endColumn - intersects.startColumn + 1;
-                    }
-                }
-            }
-        }
-        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
-            ranges: Tools.deepClone(worksheet.getMergeData()),
-        };
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-            accessor,
-            removeMergeMutationParams
-        );
-        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
-            workbookId,
-            worksheetId,
-            ranges: mergeData,
-        };
-        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
-            accessor,
-            addMergeMutationParams
-        );
-
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: RemoveColCommand.id,
+            params: { ranges } as RemoveRowColCommandParams,
+        });
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(
             [
                 { id: RemoveColMutation.id, params: removeColParams },
                 { id: DeleteRangeMutation.id, params: removeRangeValuesParams },
-                { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-                { id: AddWorksheetMergeMutation.id, params: addMergeMutationParams },
+                ...intercepted.redos,
             ],
             commandService
         );
@@ -307,10 +215,9 @@ export const RemoveColCommand: ICommand = {
                 undo: async () => {
                     const undoResult = sequenceExecute(
                         [
+                            ...intercepted.undos,
                             { id: InsertColMutation.id, params: undoRemoveColParams },
                             { id: InsertRangeMutation.id, params: undoRemoveRangeValuesParams },
-                            { id: RemoveWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
-                            { id: AddWorksheetMergeMutation.id, params: undoAddMergeParams },
                         ],
                         commandService
                     );
@@ -321,8 +228,7 @@ export const RemoveColCommand: ICommand = {
                         [
                             { id: RemoveColMutation.id, params: removeColParams },
                             { id: DeleteRangeMutation.id, params: removeRangeValuesParams },
-                            { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-                            { id: AddWorksheetMergeMutation.id, params: addMergeMutationParams },
+                            ...intercepted.redos,
                         ],
                         commandService
                     );

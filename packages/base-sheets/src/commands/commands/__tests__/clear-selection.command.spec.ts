@@ -20,7 +20,7 @@ import {
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
-import { AddWorksheetMergeCommand } from '../add-worksheet-merge.command';
+import { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand } from '../add-worksheet-merge.command';
 import { ClearSelectionAllCommand } from '../clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../clear-selection-format.command';
@@ -40,6 +40,7 @@ describe('Test clear selection content commands', () => {
         commandService = get(ICommandService);
         commandService.registerCommand(ClearSelectionContentCommand);
         commandService.registerCommand(ClearSelectionFormatCommand);
+        commandService.registerCommand(AddWorksheetMergeAllCommand);
         commandService.registerCommand(AddWorksheetMergeCommand);
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
@@ -218,7 +219,7 @@ describe('Test clear selection content commands', () => {
                 });
 
                 // set merge cell
-                expect(await commandService.executeCommand(AddWorksheetMergeCommand.id)).toBeTruthy();
+                expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
                 expect(getMerge()).toStrictEqual([
                     { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
                 ]);
@@ -368,7 +369,7 @@ describe('Test clear selection content commands', () => {
                 });
 
                 // set merge cell
-                expect(await commandService.executeCommand(AddWorksheetMergeCommand.id)).toBeTruthy();
+                expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
                 expect(getMerge()).toStrictEqual([
                     { startRow: 0, startColumn: 0, endRow: 1, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
                 ]);

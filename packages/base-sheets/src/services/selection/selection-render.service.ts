@@ -55,7 +55,7 @@ export interface ISelectionRenderService {
     getScene(): void;
     getSkeleton(): void;
     getRowAndColumnCount(): void;
-    getCurrentControls(): void;
+    getCurrentControls(): SelectionShape[];
     getCurrentControl(): void;
     clearSelectionControls(): void;
     getActiveRangeList(): Nullable<IRange[]>;

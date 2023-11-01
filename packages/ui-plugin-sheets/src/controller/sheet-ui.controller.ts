@@ -39,6 +39,12 @@ import {
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { BORDER_LINE_COMPONENT, BorderLine } from '../components/border-line';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
+import {
+    FONT_FAMILY_COMPONENT,
+    FONT_FAMILY_ITEM_COMPONENT,
+    FontFamily,
+    FontFamilyItem,
+} from '../components/font-family';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../View/SheetContainer/SheetContainer';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
@@ -165,6 +171,8 @@ export class SheetUIController extends Disposable {
         componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput);
         componentManager.register(BORDER_LINE_COMPONENT, BorderLine);
         componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker);
+        componentManager.register(FONT_FAMILY_COMPONENT, FontFamily);
+        componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem);
 
         // init commands
         [

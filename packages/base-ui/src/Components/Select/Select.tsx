@@ -46,7 +46,12 @@ export interface BaseSelectChildrenProps extends Omit<BaseItemProps, 'suffix' | 
 export interface BaseSelectProps {
     children?: BaseSelectChildrenProps[];
     display?: DisplayTypes;
-    label?: React.ReactNode;
+    label?:
+        | string
+        | {
+              name: string;
+              props?: Record<string, string | number>;
+          };
     onClick?: (...arg: any) => void; //下拉Ul点击事件
     onPressEnter?: (...arg: any) => void;
     onMainClick?: () => void; // 非功能按钮事件
@@ -70,7 +75,7 @@ export interface BaseSelectProps {
 export function Select(props: BaseSelectProps) {
     const renderNeo = () => {
         const { onClick, ...restProps } = props;
-        const { display, value, icon, title, id, options, onClose, max, min } = restProps;
+        const { display, value, icon, title, id, label, options, onClose, max, min } = restProps;
 
         const onOptionSelect = (option: IValueOption) => {
             onClick?.(option);
@@ -98,6 +103,7 @@ export function Select(props: BaseSelectProps) {
                             display={display}
                             title={title!}
                             value={value}
+                            label={label}
                             max={max}
                             min={min}
                             onChange={(v) => onClick?.(v)}

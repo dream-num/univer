@@ -51,15 +51,6 @@ export function NeoCustomLabel(
         return localeService.t(name) ?? name;
     }
 
-    if (display === DisplayTypes.FONT) {
-        // According to the value, translate toolbar font
-        return (
-            <div className={styles.fontSelect} style={{ fontFamily: value as string }}>
-                {getLocale(`fontFamily.${(`${value}` || '').replace(/\s/g, '')}`)}
-            </div>
-        );
-    }
-
     if (display === DisplayTypes.INPUT) {
         return (
             <Input
@@ -89,21 +80,23 @@ export function NeoCustomLabel(
     }
     if (label) {
         const labelName = typeof label === 'string' ? label : (label as ICustomComponent).name;
+
         const customProps = (label as ICustomComponent).props ?? {};
 
         const LabelComponent = componentManager.get(labelName) as any;
         LabelComponent && nodes.push(<LabelComponent key={index++} {...customProps} {...props} />);
     }
     if (title) {
-        nodes.push(<span className={styles.selectItemContent}>{getLocale(title)}</span>);
+        nodes.push(
+            <span key={index++} className={styles.selectItemContent}>
+                {getLocale(title)}
+            </span>
+        );
     }
 
     // Process Font Family drop-down list font
     return (
-        <div
-            className={styles.neoCustomLabelItem}
-            style={{ fontFamily: title?.indexOf('fontFamily.') === 0 ? `${value}` : 'inherit' }}
-        >
+        <div className={styles.neoCustomLabelItem}>
             {selected && (
                 <span className={styles.selectItemSelected}>
                     <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />
@@ -112,32 +105,4 @@ export function NeoCustomLabel(
             {nodes}
         </div>
     );
-}
-
-export interface IColorSelectProps {
-    icon?: string;
-    title: string;
-    /** color */
-    value: string;
-}
-
-export function ColorSelect({ value, icon, title }: IColorSelectProps) {
-    const componentManager = useDependency(ComponentManager);
-    const localeService = useDependency(LocaleService);
-
-    function renderIconComponent() {
-        if (icon) {
-            const IconComponent = componentManager.get(icon) as any;
-
-            if (IconComponent) {
-                // TODO: @jikkai fix the colorChannel1
-                // return <IconComponent extend={{ colorChannel1: value }} />;
-                return <IconComponent />;
-            }
-        }
-
-        return localeService.t(title) ?? title;
-    }
-
-    return <div className={styles.colorSelect}>{renderIconComponent()}</div>;
 }

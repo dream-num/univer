@@ -78,7 +78,7 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
                     display={display}
                     icon={icon}
                     value={value}
-                    label={value ?? label} // TODO: this line is strange
+                    label={label}
                     max={max}
                     min={min}
                     onClick={(value) => {

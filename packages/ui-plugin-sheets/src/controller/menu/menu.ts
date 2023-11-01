@@ -79,6 +79,7 @@ import {
 } from '../../commands/commands/set-format-painter.command';
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
+import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 
@@ -413,68 +414,55 @@ export const FONT_SIZE_CHILDREN = [
 
 export const FONT_FAMILY_CHILDREN = [
     {
-        label: 'fontFamily.TimesNewRoman',
-        style: { 'font-family': 'Times New Roman' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'Times New Roman',
     },
     {
-        label: 'fontFamily.Arial',
-        style: { 'font-family': 'Arial' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'Arial',
     },
     {
-        label: 'fontFamily.Tahoma',
-        style: { 'font-family': 'Tahoma' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'Tahoma',
     },
     {
-        label: 'fontFamily.Verdana',
-        style: { 'font-family': 'Verdana' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'Verdana',
     },
     {
-        label: 'fontFamily.MicrosoftYaHei',
-        style: { 'font-family': '微软雅黑' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'Microsoft YaHei',
     },
     {
-        label: 'fontFamily.SimSun',
-        style: { 'font-family': '宋体' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'SimSun',
     },
     {
-        label: 'fontFamily.SimHei',
-        style: { 'font-family': '黑体' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'SimHei',
     },
     {
-        label: 'fontFamily.Kaiti',
-        style: { 'font-family': '楷体' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'Kaiti',
     },
     {
-        label: 'fontFamily.FangSong',
-        style: { 'font-family': '仿宋' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'FangSong',
     },
     {
-        label: 'fontFamily.NSimSun',
-        style: { 'font-family': '新宋体' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'NSimSun',
     },
     {
-        label: 'fontFamily.STXinwei',
-        style: { 'font-family': '华文新魏' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'STXinwei',
     },
     {
-        label: 'fontFamily.STXingkai',
-        style: { 'font-family': '华文行楷' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'STXingkai',
     },
     {
-        label: 'fontFamily.STLiti',
-        style: { 'font-family': '华文隶书' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'STLiti',
     },
     // The following 3 fonts do not work, temporarily delete
@@ -503,18 +491,10 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 
     return {
         id: SetFontFamilyCommand.id,
-        title: 'toolbar.font',
         tooltip: 'toolbar.font',
         type: MenuItemType.SELECTOR,
-        display: DisplayTypes.FONT,
 
-        // label: {
-        //     name: MENU_ITEM_INPUT_COMPONENT,
-        //     props: {
-        //         prefix: 'rightClick.rowHeight',
-        //         suffix: 'px',
-        //     },
-        // },
+        label: FONT_FAMILY_COMPONENT,
 
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_FAMILY_CHILDREN,

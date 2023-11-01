@@ -1,13 +1,10 @@
 import { LocaleService } from '@univerjs/core';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { JSX } from 'react';
 
 import { ComponentManager, ICustomComponent } from '../../Common';
 import { IMenuSelectorItem } from '../../services/menu/menu';
-import { Input } from '../Input';
 import { DisplayTypes } from '../Select';
-import styles from './CustomLabel.module.less';
 
 export interface IBaseCustomLabelProps {
     icon?: string;
@@ -40,36 +37,14 @@ export interface INeoCustomLabelProps {
  * @deprecated
  */
 export function NeoCustomLabel(
-    props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title' | 'max' | 'min'> &
-        INeoCustomLabelProps
+    props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title'> & INeoCustomLabelProps
 ): JSX.Element | null {
-    const { display, value, title, icon, label, onChange, selected, onFocus, max, min } = props;
+    const { title, icon, label, selected } = props;
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
 
     function getLocale(name: string) {
         return localeService.t(name) ?? name;
-    }
-
-    if (display === DisplayTypes.INPUT) {
-        return (
-            <Input
-                onValueChange={(v) => onChange?.(v as unknown as string)}
-                onFocus={onFocus}
-                type="number"
-                value={`${value}`}
-                bordered={false}
-                style={{
-                    width: '32px',
-                    height: '24px',
-                    padding: '0',
-                    textAlign: 'center',
-                    background: 'transparent',
-                }}
-                max={max}
-                min={min}
-            />
-        );
     }
 
     const nodes = [];
@@ -87,18 +62,14 @@ export function NeoCustomLabel(
         LabelComponent && nodes.push(<LabelComponent key={index++} {...customProps} {...props} />);
     }
     if (title) {
-        nodes.push(
-            <span key={index++} className={styles.selectItemContent}>
-                {getLocale(title)}
-            </span>
-        );
+        nodes.push(<span key={index++}>{getLocale(title)}</span>);
     }
 
     // Process Font Family drop-down list font
     return (
-        <div className={styles.neoCustomLabelItem}>
+        <div>
             {selected && (
-                <span className={styles.selectItemSelected}>
+                <span>
                     <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />
                 </span>
             )}

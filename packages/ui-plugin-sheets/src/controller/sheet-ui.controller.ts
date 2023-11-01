@@ -45,6 +45,7 @@ import {
     FontFamily,
     FontFamilyItem,
 } from '../components/font-family';
+import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../View/SheetContainer/SheetContainer';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
@@ -173,6 +174,7 @@ export class SheetUIController extends Disposable {
         componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker);
         componentManager.register(FONT_FAMILY_COMPONENT, FontFamily);
         componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem);
+        componentManager.register(FONT_SIZE_COMPONENT, FontSize);
 
         // init commands
         [

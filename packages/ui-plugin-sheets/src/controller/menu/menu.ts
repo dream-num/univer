@@ -51,7 +51,6 @@ import {
 import {
     CopyCommand,
     CutCommand,
-    DisplayTypes,
     IMenuButtonItem,
     IMenuSelectorItem,
     MenuItemType,
@@ -80,6 +79,7 @@ import {
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
+import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 
@@ -553,12 +553,15 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 
     return {
         id: SetFontSizeCommand.id,
-        title: 'fontSize',
         tooltip: 'toolbar.fontSize',
         type: MenuItemType.SELECTOR,
-        display: DisplayTypes.INPUT,
-        min: 1,
-        max: 400,
+        label: {
+            name: FONT_SIZE_COMPONENT,
+            props: {
+                min: 1,
+                max: 400,
+            },
+        },
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_SIZE_CHILDREN,
         disabled$: new Observable<boolean>((subscriber) => {

@@ -29,6 +29,7 @@ import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-rat
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { DeleteLeftInputController } from './Controller/delete-left-input.controller';
 import { DocRenderController } from './Controller/doc-render.controller';
+import { FloatingObjectController } from './Controller/floating-object.controller';
 import { IMEInputController } from './Controller/ime-input.controller';
 import { InlineFormatController } from './Controller/inline-format.controller';
 import { LineBreakInputController } from './Controller/line-break-input.controller';
@@ -182,6 +183,7 @@ export class DocPlugin extends Plugin {
                 [LineBreakInputController],
                 [MoveCursorController],
                 [ZoomController],
+                [FloatingObjectController],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
     }

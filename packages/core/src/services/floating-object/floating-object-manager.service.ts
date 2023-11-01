@@ -1,9 +1,12 @@
-import { ITransformState, Nullable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable, Subject } from 'rxjs';
 
+import { Nullable } from '../../common/type-utils';
+import { ITransformState } from './floating-object-interfaces';
+
+export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';
+
 export interface IFloatingObjectManagerSearchParam {
-    pluginName: string; //image, chart, table, shape, smartArt and so on
     unitId: string;
     subComponentId: string; //sheetId, pageId and so on, it has a default name in doc business
 }
@@ -19,7 +22,7 @@ export interface IFloatingObjectManagerInsertParam extends IFloatingObjectManage
 export type FloatingObjects = Map<string, ITransformState>;
 
 //{ [pluginName: string]: { [unitId: string]: { [sheetId: string]: ISelectionWithCoord[] } } }
-export type IFloatingObjectManagerInfo = Map<string, Map<string, Map<string, FloatingObjects>>>;
+export type IFloatingObjectManagerInfo = Map<string, Map<string, FloatingObjects>>;
 
 export interface IFloatingObjectManagerService {
     readonly managerInfo$: Observable<Nullable<ITransformState>>;
@@ -30,11 +33,15 @@ export interface IFloatingObjectManagerService {
 
     reset(): void;
 
+    refresh(): void;
+
     dispose(): void;
 
     clear(search: IFloatingObjectManagerSearchParam): void;
 
     add(insertParam: IFloatingObjectManagerInsertParam): void;
+
+    load(insertParam: IFloatingObjectManagerInsertParam): void;
 
     remove(searchItem: IFloatingObjectManagerSearchItemParam): void;
 }
@@ -53,7 +60,7 @@ export interface IFloatingObjectManagerService {
  * Please open the architecture diagram with TLDraw.
  * https://github.com/dream-num/univer/blob/db227563b4df65572dd4fceebecdbd9f27fa7a39/docs/selection%20architecture%20design.tldr
  */
-export class FloatingObjectManagerService implements IDisposable {
+export class FloatingObjectManagerService implements IDisposable, IFloatingObjectManagerService {
     private readonly _managerInfo: IFloatingObjectManagerInfo = new Map();
 
     private readonly _managerInfo$ = new Subject<Nullable<ITransformState>>();
@@ -86,44 +93,46 @@ export class FloatingObjectManagerService implements IDisposable {
         this._addByParam(insertParam);
     }
 
+    load(insertParam: IFloatingObjectManagerInsertParam): void {
+        this._addByParam(insertParam, false);
+    }
+
     remove(searchItem: IFloatingObjectManagerSearchItemParam): void {
         this._removeByParam(searchItem);
+    }
+
+    refresh() {
+        this._refresh();
     }
 
     private _getFloatingObjects(param: Nullable<IFloatingObjectManagerSearchParam>) {
         if (param == null) {
             return;
         }
-        const { pluginName, unitId, subComponentId } = param;
-        return this._managerInfo.get(pluginName)?.get(unitId)?.get(subComponentId);
+        const { unitId, subComponentId } = param;
+        return this._managerInfo.get(unitId)?.get(subComponentId);
     }
 
     private _getFloatingObject(param: Nullable<IFloatingObjectManagerSearchItemParam>) {
         if (param == null) {
             return;
         }
-        const { pluginName, unitId, subComponentId, floatingObjectId } = param;
-        return this._managerInfo.get(pluginName)?.get(unitId)?.get(subComponentId)?.get(floatingObjectId);
+        const { unitId, subComponentId, floatingObjectId } = param;
+        return this._managerInfo.get(unitId)?.get(subComponentId)?.get(floatingObjectId);
     }
 
     private _refresh(param?: IFloatingObjectManagerSearchItemParam): void {
         this._managerInfo$.next(this._getFloatingObject(param));
     }
 
-    private _addByParam(insertParam: IFloatingObjectManagerInsertParam): void {
-        const { pluginName, unitId, subComponentId, floatingObject, floatingObjectId } = insertParam;
+    private _addByParam(insertParam: IFloatingObjectManagerInsertParam, isRefresh = true): void {
+        const { unitId, subComponentId, floatingObject, floatingObjectId } = insertParam;
 
-        if (!this._managerInfo.has(pluginName)) {
-            this._managerInfo.set(pluginName, new Map());
+        if (!this._managerInfo.has(unitId)) {
+            this._managerInfo.set(unitId, new Map());
         }
 
-        const unitManagerData = this._managerInfo.get(pluginName)!;
-
-        if (!unitManagerData.has(unitId)) {
-            unitManagerData.set(unitId, new Map());
-        }
-
-        const subComponentData = unitManagerData.get(unitId)!;
+        const subComponentData = this._managerInfo.get(unitId)!;
 
         if (!subComponentData.has(subComponentId)) {
             subComponentData.set(subComponentId, new Map());
@@ -131,7 +140,9 @@ export class FloatingObjectManagerService implements IDisposable {
 
         subComponentData.get(subComponentId)!.set(floatingObjectId, floatingObject);
 
-        this._refresh({ pluginName, unitId, subComponentId, floatingObjectId });
+        if (isRefresh) {
+            this._refresh({ unitId, subComponentId, floatingObjectId });
+        }
     }
 
     private _clearByParam(param: IFloatingObjectManagerSearchParam): void {

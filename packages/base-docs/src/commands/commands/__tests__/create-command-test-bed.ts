@@ -20,7 +20,7 @@ const TEST_DOCUMENT_DATA_EN: IDocumentData = {
                 st: 0,
                 ed: 67,
                 ts: {
-                    bl: BooleanNumber.TRUE,
+                    bl: BooleanNumber.FALSE,
                     fs: 24,
                     cl: {
                         rgb: 'rgb(0, 40, 86)',
@@ -53,7 +53,7 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
      * This plugin hooks into Doc's DI system to expose API to test scripts
      */
     class TestSpyPlugin extends Plugin {
-        static override type = PluginType.Doc;
+        static override type = PluginType.Univer;
 
         constructor(
             _config: undefined,

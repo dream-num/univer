@@ -1,4 +1,4 @@
-import { $$, getNodeIndex, xssDeal } from '@univerjs/base-ui';
+import { getNodeIndex, xssDeal } from '@univerjs/base-ui';
 import { IKeyValue, Nullable, Tools } from '@univerjs/core';
 
 import { FunList } from '../Basics';
@@ -145,11 +145,11 @@ export class CellInputHandler {
                 if (currSelection) {
                     // all browsers, except IE before version 9
                     if (currSelection?.anchorNode instanceof HTMLElement && currSelection.anchorNode?.matches('div')) {
-                        const editorlen = $$('span', $editer).length;
-                        _this.functionRangeIndex = [
-                            editorlen - 1,
-                            $$('span', $editer)[editorlen - 1].textContent.length,
-                        ];
+                        // const editorlen = $$('span', $editer).length;
+                        // _this.functionRangeIndex = [
+                        //     editorlen - 1,
+                        //     $$('span', $editer)[editorlen - 1].textContent.length,
+                        // ];
                     } else {
                         _this.functionRangeIndex = [
                             getNodeIndex(currSelection.anchorNode?.parentNode),
@@ -426,9 +426,8 @@ export class CellInputHandler {
             currSelection.selectAllChildren((obj as IKeyValue)[0]);
             currSelection.collapseToEnd();
         } else if (fri != null) {
-            const span = $$('span', obj);
-
-            _this.setCaretPosition(Array.isArray(span) ? span[fri[0]] : span, 0, fri[1]);
+            // const span = $$('span', obj);
+            // _this.setCaretPosition(Array.isArray(span) ? span[fri[0]] : span, 0, fri[1]);
         }
     }
 

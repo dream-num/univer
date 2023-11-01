@@ -1,25 +1,4 @@
 /**
- * check element
- * @param element
- * @returns
- */
-export function isElement(element: any) {
-    return element instanceof Element || element instanceof HTMLDocument;
-}
-
-/**
- * DOM selector
- * @param {String}  selector css selector
- * @param {String}  context  parent DOM
- */
-export function $$(selector: string, context?: HTMLElement | Document) {
-    context = context || document;
-    const elements = context.querySelectorAll(selector);
-
-    return elements.length === 1 ? Array.prototype.slice.call(elements)[0] : Array.prototype.slice.call(elements);
-}
-
-/**
  * add className
  * @param className
  * @param selector

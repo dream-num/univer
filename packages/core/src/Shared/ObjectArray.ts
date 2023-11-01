@@ -58,9 +58,13 @@ export class ObjectArray<T> {
 
     // FIXME: fix constructor function overload
     constructor();
+
     constructor(array: ObjectArrayPrimitiveType<T>);
+
     constructor(size: number);
+
     constructor(array: ObjectArrayPrimitiveType<T>, size: number);
+
     constructor(...argument: any) {
         switch (argument.length) {
             case 0: {
@@ -80,7 +84,7 @@ export class ObjectArray<T> {
                     this._length = length;
                     return;
                 }
-                throw new Error(`create object array error ${argument[0]}`, argument[0]);
+                throw new Error(`create object array error ${argument[0]}`);
             }
             case 2: {
                 if (likeArr(argument[0]) > -1) {

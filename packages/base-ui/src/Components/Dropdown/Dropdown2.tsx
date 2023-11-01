@@ -4,6 +4,7 @@ import Placements from 'rc-dropdown/lib/placements';
 
 import styles from './index.module.less';
 
+// TODO@jikkai Need to limit width
 export interface IDropdown2Props {
     visible?: boolean;
     trigger?: ActionType | ActionType[];

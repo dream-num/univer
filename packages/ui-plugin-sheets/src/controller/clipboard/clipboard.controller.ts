@@ -368,6 +368,7 @@ export class SheetClipboardController extends Disposable {
         const undoMutationsInfo: ICommandInfo[] = [];
         let hasMerge = false;
 
+        // TODO@Dushusir: undo selection
         matrix.forValue((row, col, value) => {
             // TODO@Dushusir Temporarily use handleStringToStyle. After all replication and paste function is completed, fix the handleStringToStyle method
             const style = handleStringToStyle(undefined, value.properties.style);

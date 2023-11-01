@@ -20,6 +20,8 @@ export {
     type IAddWorksheetMergeMutationParams,
     type IRemoveWorksheetMergeMutationParams,
 } from './Basics/Interfaces/MutationInterface';
+export { type IRemoveSheetMutationParams } from './Basics/Interfaces/MutationInterface';
+export { type IInsertSheetMutationParams } from './Basics/Interfaces/MutationInterface';
 export { transformCellDataToSelectionData } from './Basics/selection';
 export {
     AddWorksheetMergeAllCommand,
@@ -133,7 +135,9 @@ export { SetRangeValuesMutation } from './commands/mutations/set-range-values.mu
 export { SetRangeValuesUndoMutationFactory } from './commands/mutations/set-range-values.mutation';
 export { SetRowHiddenMutation, SetRowVisibleMutation } from './commands/mutations/set-row-visible.mutation';
 export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
+export { type ISetTabColorMutationParams } from './commands/mutations/set-tab-color.mutation';
 export { SetWorksheetActivateMutation } from './commands/mutations/set-worksheet-activate.mutation';
+export { type ISetWorksheetActivateMutationParams } from './commands/mutations/set-worksheet-activate.mutation';
 export {
     type ISetWorksheetColWidthMutationParams,
     SetWorksheetColWidthMutation,
@@ -144,7 +148,9 @@ export {
     SetWorksheetHideMutation,
 } from './commands/mutations/set-worksheet-hide.mutation';
 export { SetWorksheetNameMutation } from './commands/mutations/set-worksheet-name.mutation';
+export { type ISetWorksheetNameMutationParams } from './commands/mutations/set-worksheet-name.mutation';
 export { SetWorksheetOrderMutation } from './commands/mutations/set-worksheet-order.mutation';
+export { type ISetWorksheetOrderMutationParams } from './commands/mutations/set-worksheet-order.mutation';
 export {
     type ISetWorksheetRowHeightMutationParams,
     SetWorksheetRowAutoHeightMutation,

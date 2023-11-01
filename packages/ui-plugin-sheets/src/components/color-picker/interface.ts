@@ -1,0 +1,3 @@
+import { COMPONENT_PREFIX } from '../const';
+
+export const COLOR_PICKER_COMPONENT = `${COMPONENT_PREFIX}_COLOR_PICKER_COMPONENT`;

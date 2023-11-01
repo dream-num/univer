@@ -1,4 +1,4 @@
-.menu2 {
+.menu {
     padding: var(--padding-base);
     margin: 0;
     font-size: var(--font-size-sm);
@@ -73,8 +73,8 @@
         cursor: pointer;
 
         // Disabled state sets text to gray and nukes hover/tab effects
-        &.menu2-item-disabled,
-        &.menu2-submenu-disabled {
+        &.menu-item-disabled,
+        &.menu-submenu-disabled {
             color: rgb(var(--grey-200)) !important;
         }
     }
@@ -95,13 +95,13 @@
                 padding-right: 20px;
             }
         }
-        > .menu2 {
+        > .menu {
             background-color: #fff;
         }
     }
 
-    .menu2-submenu-title,
-    .menu2-item {
+    .menu-submenu-title,
+    .menu-item {
         .anticon {
             width: 14px;
             height: 14px;
@@ -118,13 +118,13 @@
         white-space: nowrap;
         overflow: hidden;
 
-        & > .menu2-item,
-        & > .menu2-submenu > .menu2-submenu-title {
+        & > .menu-item,
+        & > .menu-submenu > .menu-submenu-title {
             padding: 15px 20px;
         }
 
-        & > .menu2-submenu,
-        & > .menu2-item {
+        & > .menu-submenu,
+        & > .menu-item {
             border-bottom: 2px solid transparent;
             display: inline-block;
             vertical-align: bottom;
@@ -141,8 +141,8 @@
     &-vertical-left,
     &-vertical-right,
     &-inline {
-        & > .menu2-item,
-        & > .menu2-submenu > .menu2-submenu-title {
+        & > .menu-item,
+        & > .menu-submenu > .menu-submenu-title {
             width: 100%;
             min-height: 28px;
             padding: var(--padding-xs) var(--padding-sm);
@@ -151,7 +151,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        .menu2-submenu-arrow {
+        .menu-submenu-arrow {
             display: inline-block;
             font: normal normal normal 14px/1 FontAwesome;
             font-size: inherit;
@@ -171,8 +171,8 @@
         border-radius: 0;
         box-shadow: none;
 
-        & > .menu2-item,
-        & > .menu2-submenu > .menu2-submenu-title {
+        & > .menu-item,
+        & > .menu-submenu > .menu-submenu-title {
             padding-top: 8px;
             padding-bottom: 8px;
             padding-right: 0;

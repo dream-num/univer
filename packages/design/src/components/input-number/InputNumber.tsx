@@ -58,6 +58,12 @@ export interface IInputNumberProps {
      * @param value
      */
     onChange?: (value: number | null) => void;
+
+    /**
+     * Callback when user press enter
+     * @param e
+     */
+    onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 export function InputNumber(props: IInputNumberProps) {
@@ -72,6 +78,7 @@ export function InputNumber(props: IInputNumberProps) {
         onClick,
         onKeyDown,
         onChange,
+        onPressEnter,
     } = props;
 
     function handleChange(value: number | null) {
@@ -93,6 +100,7 @@ export function InputNumber(props: IInputNumberProps) {
             onClick={onClick}
             onKeyDown={onKeyDown}
             onChange={handleChange}
+            onPressEnter={onPressEnter}
         />
     );
 }

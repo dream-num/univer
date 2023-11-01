@@ -1,11 +1,11 @@
+import { Dropdown } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
 import React from 'react';
 
 import { ICustomComponent } from '../../Common';
 import { IValueOption } from '../../services/menu/menu';
 import { NeoCustomLabel } from '../CustomLabel';
-import { Dropdown2 } from '../Dropdown';
-import { Menu2 } from '../Menu/Menu2';
+import { Menu } from '../Menu/Menu';
 import styles from './index.module.less';
 
 // TODO: these type definitions should be moved out of components to menu service
@@ -27,24 +27,6 @@ export interface BaseItemProps extends BaseMenuItem {
     border?: boolean;
 }
 
-export enum DisplayTypes {
-    LABEL,
-
-    /** @deprecated */
-    SUFFIX,
-
-    ICON,
-
-    /** Label as color display. */
-    COLOR,
-
-    INPUT,
-
-    FONT,
-
-    CUSTOM,
-}
-
 export interface BaseSelectChildrenProps extends Omit<BaseItemProps, 'suffix' | 'label' | 'children'> {
     onPressEnter?: (...arg: any) => void;
     children?: BaseSelectChildrenProps[];
@@ -56,8 +38,12 @@ export interface BaseSelectChildrenProps extends Omit<BaseItemProps, 'suffix' | 
 
 export interface BaseSelectProps {
     children?: BaseSelectChildrenProps[];
-    display?: DisplayTypes;
-    label?: React.ReactNode;
+    label?:
+        | string
+        | {
+              name: string;
+              props?: Record<string, string | number>;
+          };
     onClick?: (...arg: any) => void; //下拉Ul点击事件
     onPressEnter?: (...arg: any) => void;
     onMainClick?: () => void; // 非功能按钮事件
@@ -66,7 +52,6 @@ export interface BaseSelectProps {
     className?: string;
     name?: string;
     suffix?: any;
-    tooltip?: string;
     value?: string | number;
     icon?: string;
     id?: string;
@@ -82,7 +67,7 @@ export interface BaseSelectProps {
 export function Select(props: BaseSelectProps) {
     const renderNeo = () => {
         const { onClick, ...restProps } = props;
-        const { display, value, icon, title, id, options, onClose, max, min } = restProps;
+        const { value, icon, title, id, label, options, onClose, max, min } = restProps;
 
         const onOptionSelect = (option: IValueOption) => {
             onClick?.(option);
@@ -92,10 +77,10 @@ export function Select(props: BaseSelectProps) {
 
         return (
             <div className={styles.selectDouble}>
-                <Dropdown2
+                <Dropdown
                     {...restProps}
                     overlay={
-                        <Menu2
+                        <Menu
                             menuType={id}
                             options={options}
                             onOptionSelect={onOptionSelect}
@@ -107,23 +92,16 @@ export function Select(props: BaseSelectProps) {
                     <div className={styles.selectLabel}>
                         <NeoCustomLabel
                             icon={iconToDisplay}
-                            display={display}
                             title={title!}
                             value={value}
-                            max={max}
-                            min={min}
+                            label={label}
                             onChange={(v) => onClick?.(v)}
-                            onFocus={() => {
-                                console.info(
-                                    'TODO: 需要待Dropdown与Menu分离之后，直接控制Dropdown展示文字大小下拉选项'
-                                );
-                            }}
                         />
                         <div className={styles.selectDropIcon}>
                             <MoreDownSingle />
                         </div>
                     </div>
-                </Dropdown2>
+                </Dropdown>
             </div>
         );
     };

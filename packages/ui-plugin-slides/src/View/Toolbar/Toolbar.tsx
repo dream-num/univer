@@ -1,4 +1,4 @@
-import { AppContext, BaseComponentProps, CustomLabel, debounce, Select } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, debounce, Select } from '@univerjs/base-ui';
 import { Button, Container, Tooltip } from '@univerjs/design';
 import { Component, createRef } from 'react';
 
@@ -197,7 +197,7 @@ export class Toolbar extends Component<IProps, IState> {
                     return (
                         <Tooltip key={index} title={item.tooltip} placement={'bottom'}>
                             <Button className={styles.textButton} onClick={item.onClick}>
-                                <CustomLabel label={item.label} />
+                                {/* <CustomLabel label={item.label} /> */}
                             </Button>
                         </Tooltip>
                     );
@@ -207,8 +207,6 @@ export class Toolbar extends Component<IProps, IState> {
                     return (
                         <Select
                             key={index}
-                            tooltip={item.tooltip}
-                            display={item.display}
                             children={item.children}
                             suffix={item.suffix}
                             label={item.label}
@@ -239,14 +237,9 @@ export class Toolbar extends Component<IProps, IState> {
                         className={styles.moreButton}
                         style={{ visibility: moreToolList.length ? 'visible' : 'hidden' }}
                     >
-                        <Tooltip
-                            title={(<CustomLabel label="toolbar.toolMoreTip" />) as unknown as string}
-                            placement={'bottom'}
-                        >
+                        <Tooltip title="toolbar.toolMoreTip" placement={'bottom'}>
                             <Button onClick={this.showMore}>
-                                <div style={{ fontSize: '14px' }}>
-                                    <CustomLabel label="toolbar.toolMore" />
-                                </div>
+                                <div style={{ fontSize: '14px' }}>{/* <CustomLabel label="toolbar.toolMore" /> */}</div>
                             </Button>
                         </Tooltip>
                     </div>

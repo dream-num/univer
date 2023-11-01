@@ -1,10 +1,9 @@
 /* eslint-disable no-magic-numbers */
-import { Button, Tooltip } from '@univerjs/design';
+import { Button, Dropdown, Tooltip } from '@univerjs/design';
 import { IncreaseSingle, ReduceSingle } from '@univerjs/icons';
 import { useMemo, useRef } from 'react';
 
 import { joinClassNames } from '../../Utils';
-import { Dropdown2 } from '../Dropdown/Dropdown2';
 import styles from './index.module.less';
 
 /**
@@ -145,7 +144,7 @@ export function Slider(props: ISliderProps) {
                 <IncreaseSingle />
             </Button>
 
-            <Dropdown2
+            <Dropdown
                 placement="topLeft"
                 overlay={
                     <div className={styles.sliderShortcuts}>
@@ -166,7 +165,7 @@ export function Slider(props: ISliderProps) {
                 }
             >
                 <a className={styles.sliderValue}>{value}%</a>
-            </Dropdown2>
+            </Dropdown>
         </div>
     );
 }

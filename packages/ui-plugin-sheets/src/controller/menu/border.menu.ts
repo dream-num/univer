@@ -4,13 +4,13 @@ import {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from '@univerjs/base-sheets';
-import { DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import { IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { BorderStyleTypes, ICommandService, IPermissionService } from '@univerjs/core';
-import { ColorPicker } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
 
-import { SHEET_UI_PLUGIN_NAME } from '../../Basics/Const/PLUGIN_NAME';
+import { BORDER_LINE_COMPONENT } from '../../components/border-line';
+import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 
 export const LINE_BOLD_LABEL = 'CONTEXT_MENU_INPUT';
 
@@ -79,47 +79,102 @@ export const BORDER_LINE_CHILDREN = [
 
 export const BORDER_SIZE_CHILDREN = [
     {
-        label: 'BorderThin',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.THIN,
+            },
+        },
         value: BorderStyleTypes.THIN,
     },
     {
-        label: 'BorderHair',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.HAIR,
+            },
+        },
         value: BorderStyleTypes.HAIR,
     },
     {
-        label: 'BorderDotted',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.DOTTED,
+            },
+        },
         value: BorderStyleTypes.DOTTED,
     },
     {
-        label: 'BorderDashed',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.DASHED,
+            },
+        },
         value: BorderStyleTypes.DASHED,
     },
     {
-        label: 'BorderDashDot',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.DOTTED,
+            },
+        },
         value: BorderStyleTypes.DOTTED,
     },
     {
-        label: 'BorderDashDotDot',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.DASH_DOT_DOT,
+            },
+        },
         value: BorderStyleTypes.DASH_DOT_DOT,
     },
     {
-        label: 'BorderMedium',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.MEDIUM,
+            },
+        },
         value: BorderStyleTypes.MEDIUM,
     },
     {
-        label: 'BorderMediumDashed',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.MEDIUM_DASHED,
+            },
+        },
         value: BorderStyleTypes.MEDIUM_DASHED,
     },
     {
-        label: 'BorderMediumDashDot',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.MEDIUM_DASH_DOT,
+            },
+        },
         value: BorderStyleTypes.MEDIUM_DASH_DOT,
     },
     {
-        label: 'BorderMediumDashDotDot',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
+            },
+        },
         value: BorderStyleTypes.MEDIUM_DASH_DOT_DOT,
     },
     {
-        label: 'BorderThick',
+        label: {
+            name: BORDER_LINE_COMPONENT,
+            props: {
+                type: BorderStyleTypes.THICK,
+            },
+        },
         value: BorderStyleTypes.THICK,
     },
 ];
@@ -131,10 +186,8 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);
     return {
         id: SetBorderPositionCommand.id,
-        title: 'border',
         icon: 'AllBorderSingle',
         tooltip: 'toolbar.border.main',
-        display: DisplayTypes.ICON,
         positions: [MenuPosition.TOOLBAR_START],
         type: MenuItemType.SUBITEMS,
         selections: [...BORDER_LINE_CHILDREN],
@@ -150,11 +203,10 @@ export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelecto
         id: SetBorderColorCommand.id,
         title: 'borderLine.borderColor',
         positions: SetBorderPositionCommand.id,
-        display: DisplayTypes.COLOR,
         type: MenuItemType.SELECTOR,
         selections: [
             {
-                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                id: COLOR_PICKER_COMPONENT,
             },
         ],
         value$: borderStyleManagerService.borderInfo$.pipe(map((info) => info.color)),
@@ -166,9 +218,7 @@ export function SetBorderStyleMenuItemFactory(accessor: IAccessor): IMenuSelecto
     return {
         id: SetBorderStyleCommand.id,
         title: 'borderLine.borderType',
-        // label: SHEET_UI_PLUGIN_NAME + LINE_BOLD_LABEL,
         positions: SetBorderPositionCommand.id,
-        display: DisplayTypes.CUSTOM,
         type: MenuItemType.SELECTOR,
         selections: [...BORDER_SIZE_CHILDREN],
         value$: borderStyleManagerService.borderInfo$.pipe(map((info) => info.style)),

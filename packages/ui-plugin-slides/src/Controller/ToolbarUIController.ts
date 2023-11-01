@@ -71,7 +71,6 @@ export class ToolbarUIController {
                 className: styles.selectDoubleString,
                 name: 'textRotateMode',
                 tooltip: 'toolbar.textRotateMode.main',
-                display: 1,
                 show: this._config.textRotateMode,
                 onClick: (value: number | string) => {
                     this.setTextRotation(value);

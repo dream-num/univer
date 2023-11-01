@@ -1,4 +1,4 @@
-import { BaseComponentProps, CustomLabel } from '@univerjs/base-ui';
+import { BaseComponentProps } from '@univerjs/base-ui';
 import { IKeyValue } from '@univerjs/core';
 import { Component, createRef } from 'react';
 
@@ -90,9 +90,7 @@ export class SearchFunction extends Component<IProps, IState> {
                 {formula.map((item: any, i: number) => (
                     <li key={i} className={selectIndex === i ? styles.searchFunctionActive : ''}>
                         <div className={styles.formulaName}>{item.n}</div>
-                        <div className={styles.formulaDetail}>
-                            <CustomLabel label={item.d} />
-                        </div>
+                        <div className={styles.formulaDetail}>{/* <CustomLabel label={item.d} /> */}</div>
                     </li>
                 ))}
             </ul>

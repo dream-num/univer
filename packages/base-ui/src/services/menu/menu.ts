@@ -1,8 +1,6 @@
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
-import { DisplayTypes } from '../../Components/Select/Select';
-
 export type OneOrMany<T> = T | T[];
 
 export const enum MenuPosition {
@@ -34,7 +32,7 @@ interface IMenuItemBase<V> {
     /** ID of the menu item. Normally it should be the same as the ID of the command that it would invoke.  */
     id: string;
     subId?: string;
-    title: string;
+    title?: string;
     description?: string;
     icon?: string;
     tooltip?: string;
@@ -47,8 +45,6 @@ interface IMenuItemBase<V> {
 
     /** @deprecated this type seems unnecessary */
     type: MenuItemType;
-    /** Determines how the label of the selector should display. */
-    display?: DisplayTypes;
     /**
      * Custom label component id.
      * */

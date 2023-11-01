@@ -1,4 +1,4 @@
-import { DisplayTypes, IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import { IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { LocaleType } from '@univerjs/core';
 import { defaultTheme, greenTheme } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';
@@ -10,10 +10,8 @@ import { UIComponentOperation } from '../commands/operations/ui-component.operat
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: LocaleOperation.id,
-        icon: 'KeyboardSingle',
         title: 'debugger.locale.title',
         tooltip: 'debugger.locale.tooltip',
-        display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
@@ -32,10 +30,8 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: ThemeOperation.id,
-        icon: 'KeyboardSingle',
         title: 'debugger.theme.title',
         tooltip: 'debugger.theme.tooltip',
-        display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
@@ -53,10 +49,8 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function UIComponentMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: UIComponentOperation.id,
-        icon: 'KeyboardSingle',
         title: 'debugger.uiComponent.title',
         tooltip: 'debugger.uiComponent.tooltip',
-        display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [

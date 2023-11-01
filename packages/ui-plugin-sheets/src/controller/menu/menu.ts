@@ -51,7 +51,6 @@ import {
 import {
     CopyCommand,
     CutCommand,
-    DisplayTypes,
     IMenuButtonItem,
     IMenuSelectorItem,
     MenuItemType,
@@ -69,20 +68,20 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import { ColorPicker } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
-import { SHEET_UI_PLUGIN_NAME } from '../../Basics/Const/PLUGIN_NAME';
 import { RenameSheetOperation } from '../../commands/commands/rename.command';
 import {
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
+import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
+import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
+import { FONT_SIZE_COMPONENT } from '../../components/font-size';
+import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
-
-export const CONTEXT_MENU_INPUT_LABEL = 'CONTEXT_MENU_INPUT';
 
 export { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './border.menu';
 
@@ -415,68 +414,55 @@ export const FONT_SIZE_CHILDREN = [
 
 export const FONT_FAMILY_CHILDREN = [
     {
-        label: 'fontFamily.TimesNewRoman',
-        style: { 'font-family': 'Times New Roman' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'Times New Roman',
     },
     {
-        label: 'fontFamily.Arial',
-        style: { 'font-family': 'Arial' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'Arial',
     },
     {
-        label: 'fontFamily.Tahoma',
-        style: { 'font-family': 'Tahoma' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'Tahoma',
     },
     {
-        label: 'fontFamily.Verdana',
-        style: { 'font-family': 'Verdana' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'Verdana',
     },
     {
-        label: 'fontFamily.MicrosoftYaHei',
-        style: { 'font-family': '微软雅黑' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'Microsoft YaHei',
     },
     {
-        label: 'fontFamily.SimSun',
-        style: { 'font-family': '宋体' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'SimSun',
     },
     {
-        label: 'fontFamily.SimHei',
-        style: { 'font-family': '黑体' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'SimHei',
     },
     {
-        label: 'fontFamily.Kaiti',
-        style: { 'font-family': '楷体' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'Kaiti',
     },
     {
-        label: 'fontFamily.FangSong',
-        style: { 'font-family': '仿宋' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'FangSong',
     },
     {
-        label: 'fontFamily.NSimSun',
-        style: { 'font-family': '新宋体' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'NSimSun',
     },
     {
-        label: 'fontFamily.STXinwei',
-        style: { 'font-family': '华文新魏' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'STXinwei',
     },
     {
-        label: 'fontFamily.STXingkai',
-        style: { 'font-family': '华文行楷' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'STXingkai',
     },
     {
-        label: 'fontFamily.STLiti',
-        style: { 'font-family': '华文隶书' },
+        label: { name: FONT_FAMILY_ITEM_COMPONENT },
         value: 'STLiti',
     },
     // The following 3 fonts do not work, temporarily delete
@@ -505,10 +491,11 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 
     return {
         id: SetFontFamilyCommand.id,
-        title: 'toolbar.font',
         tooltip: 'toolbar.font',
         type: MenuItemType.SELECTOR,
-        display: DisplayTypes.FONT,
+
+        label: FONT_FAMILY_COMPONENT,
+
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_FAMILY_CHILDREN,
         disabled$: new Observable((subscriber) => {
@@ -566,12 +553,15 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 
     return {
         id: SetFontSizeCommand.id,
-        title: 'fontSize',
         tooltip: 'toolbar.fontSize',
         type: MenuItemType.SELECTOR,
-        display: DisplayTypes.INPUT,
-        min: 1,
-        max: 400,
+        label: {
+            name: FONT_SIZE_COMPONENT,
+            props: {
+                min: 1,
+                max: 400,
+            },
+        },
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_SIZE_CHILDREN,
         disabled$: new Observable<boolean>((subscriber) => {
@@ -635,15 +625,13 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
 
     return {
         id: SetTextColorCommand.id,
-        title: 'toolbar.textColor.main',
         icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
-        display: DisplayTypes.COLOR,
         selections: [
             {
-                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                id: COLOR_PICKER_COMPONENT,
             },
         ],
         value$: new Observable<string>((subscriber) => {
@@ -676,14 +664,12 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
     return {
         id: SetBackgroundColorCommand.id,
         tooltip: 'toolbar.fillColor.main',
-        title: 'FontColor',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
-        display: DisplayTypes.COLOR,
         icon: 'PaintBucket',
         selections: [
             {
-                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                id: COLOR_PICKER_COMPONENT,
             },
         ],
         value$: new Observable<string>((subscriber) => {
@@ -724,11 +710,9 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetHorizontalTextAlignCommand.id,
-        title: 'horizontalAlignMode',
         icon: HORIZONTAL_ALIGN_CHILDREN[0].icon,
         positions: [MenuPosition.TOOLBAR_START],
         tooltip: 'toolbar.horizontalAlignMode.main',
-        display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         selections: HORIZONTAL_ALIGN_CHILDREN,
         value$: new Observable<HorizontalAlign>((subscriber) => {
@@ -779,10 +763,8 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetVerticalTextAlignCommand.id,
-        title: 'verticalAlignMode',
         icon: VERTICAL_ALIGN_CHILDREN[0].icon,
         tooltip: 'toolbar.verticalAlignMode.main',
-        display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: VERTICAL_ALIGN_CHILDREN,
@@ -834,13 +816,11 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetTextWrapCommand.id,
-        title: 'textWrapMode',
         tooltip: 'toolbar.textWrapMode.main',
         icon: TEXT_WRAP_CHILDREN[0].icon,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: TEXT_WRAP_CHILDREN,
-        display: DisplayTypes.ICON,
         value$: new Observable((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
@@ -904,10 +884,8 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetTextRotationCommand.id,
-        title: 'textRotateMode',
         tooltip: 'toolbar.textRotateMode.main',
         icon: TEXT_ROTATE_CHILDREN[0].icon,
-        display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         selections: TEXT_ROTATE_CHILDREN,
         positions: [MenuPosition.TOOLBAR_START],
@@ -1240,10 +1218,8 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         id: SetWorksheetRowHeightCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
-        title: 'rightClick.rowHeight',
-        display: DisplayTypes.CUSTOM,
         label: {
-            name: CONTEXT_MENU_INPUT_LABEL,
+            name: MENU_ITEM_INPUT_COMPONENT,
             props: {
                 prefix: 'rightClick.rowHeight',
                 suffix: 'px',
@@ -1286,11 +1262,9 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     return {
         id: SetWorksheetColWidthCommand.id,
         type: MenuItemType.BUTTON,
-        display: DisplayTypes.CUSTOM,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
-        title: 'rightClick.columnWidth',
         label: {
-            name: CONTEXT_MENU_INPUT_LABEL,
+            name: MENU_ITEM_INPUT_COMPONENT,
             props: {
                 prefix: 'rightClick.columnWidth',
                 suffix: 'px',
@@ -1414,11 +1388,10 @@ export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
         id: SetTabColorCommand.id,
         title: 'sheetConfig.changeColor',
         positions: [SheetMenuPosition.SHEET_BAR],
-        display: DisplayTypes.COLOR,
         type: MenuItemType.SELECTOR,
         selections: [
             {
-                id: SHEET_UI_PLUGIN_NAME + ColorPicker.name,
+                id: COLOR_PICKER_COMPONENT,
             },
         ],
     };

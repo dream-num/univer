@@ -1,3 +1,6 @@
+import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
+import { Direction } from '@univerjs/core';
+
 import {
     ExpandSelectionCommand,
     IExpandSelectionCommandParams,
@@ -8,10 +11,7 @@ import {
     MoveSelectionCommand,
     MoveSelectionEnterAndTabCommand,
     SelectAllCommand,
-} from '@univerjs/base-sheets';
-import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
-import { Direction } from '@univerjs/core';
-
+} from '../../commands/commands/set-selection.command';
 import { whenEditorNotActivated } from './utils';
 
 export const MoveSelectionDownShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {

@@ -6,12 +6,7 @@ import {
     IPointerEvent,
     IRenderManagerService,
 } from '@univerjs/base-render';
-import {
-    MoveSelectionCommand,
-    MoveSelectionEnterAndTabCommand,
-    SelectionManagerService,
-    SetRangeValuesCommand,
-} from '@univerjs/base-sheets';
+import { SelectionManagerService, SetRangeValuesCommand } from '@univerjs/base-sheets';
 import { KeyCode } from '@univerjs/base-ui';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -35,6 +30,7 @@ import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../Basics/editor/get-editor-object';
+import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { SetCellEditVisibleArrowOperation } from '../../commands/operations/cell-edit.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { IEditorBridgeService, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';

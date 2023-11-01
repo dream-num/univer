@@ -47,7 +47,6 @@
     "dependencies": {
         "@ctrl/tinycolor": "^4.0.2",
         "@univerjs/base-render": "workspace:*",
-        "@univerjs/base-ui": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@wendellhu/redi": "^0.12.10",
         "rxjs": "^7.8.1"

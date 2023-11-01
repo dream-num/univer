@@ -1,5 +1,5 @@
+export * from './base-shees-plugin';
 export * from './Basics';
-export * from './SheetPlugin';
 
 // #region services
 
@@ -74,19 +74,6 @@ export {
 } from './commands/commands/set-row-visible.command';
 export type { IScrollCommandParams } from './commands/commands/set-scroll.command';
 export { RestScrollCommand, ScrollCommand, SetScrollRelativeCommand } from './commands/commands/set-scroll.command';
-export type {
-    IExpandSelectionCommandParams,
-    IMoveSelectionCommandParams,
-    ISelectAllCommandParams,
-} from './commands/commands/set-selections.command';
-export {
-    ExpandSelectionCommand,
-    type IMoveSelectionEnterAndTabCommandParams,
-    JumpOver,
-    MoveSelectionCommand,
-    MoveSelectionEnterAndTabCommand,
-    SelectAllCommand,
-} from './commands/commands/set-selections.command';
 export {
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
@@ -175,6 +162,11 @@ export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.oper
 export { RefRangeService } from './services/ref-range.service';
 export { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
-export { ShortcutExperienceService } from './services/shortcut-experience.service';
 
 // #endregion
+
+// #region controllers
+
+export { ScrollController } from './Controller/scroll.controller';
+
+// #endregion controllers

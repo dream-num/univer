@@ -1,8 +1,4 @@
 import {
-    ExpandSelectionCommand,
-    MoveSelectionCommand,
-    MoveSelectionEnterAndTabCommand,
-    SelectAllCommand,
     SetBoldCommand,
     SetFontFamilyCommand,
     SetFontSizeCommand,
@@ -30,6 +26,12 @@ import {
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../commands/commands/set-format-painter.command';
+import {
+    ExpandSelectionCommand,
+    MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
+    SelectAllCommand,
+} from '../commands/commands/set-selection.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
 import {

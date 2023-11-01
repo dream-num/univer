@@ -1,6 +1,6 @@
-import { IMessageService, MessageType } from '@univerjs/base-ui';
 import {
     CommandType,
+    ErrorService,
     ICommand,
     ICommandService,
     IRange,
@@ -76,24 +76,18 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
 
-        const messageService = accessor.get(IMessageService);
+        const errorService = accessor.get(ErrorService);
         // Forbid action when some parts of a merged cell are selected.
         const rangeToMove = filteredSelections[0].range;
         const beforePrimary = filteredSelections[0].primary;
         const alignedRange = alignToMergedCellsBorders(rangeToMove, worksheet, false);
         if (!Rectangle.equals(rangeToMove, alignedRange)) {
-            messageService.show({
-                type: MessageType.Error,
-                content: 'Only part of a merged cell is selected.',
-            });
+            errorService.emit('Only part of a merged cell is selected.');
             return false;
         }
 
         if (rowAcrossMergedCell(toRow, worksheet)) {
-            messageService.show({
-                type: MessageType.Error,
-                content: 'Across a merged cell.',
-            });
+            errorService.emit('Across a merged cell.');
             return false;
         }
 
@@ -258,24 +252,18 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const workbookId = workbook.getUnitId();
         const worksheetId = worksheet.getSheetId();
 
-        const messageService = accessor.get(IMessageService);
+        const errorService = accessor.get(ErrorService);
         // Forbid action when some parts of a merged cell are selected.
         const rangeToMove = filteredSelections[0].range;
         const beforePrimary = filteredSelections[0].primary;
         const alignedRange = alignToMergedCellsBorders(rangeToMove, worksheet, false);
         if (!Rectangle.equals(rangeToMove, alignedRange)) {
-            messageService.show({
-                type: MessageType.Error,
-                content: 'Only part of a merged cell is selected.',
-            });
+            errorService.emit('Only part of a merged cell is selected.');
             return false;
         }
 
         if (columnAcrossMergedCell(toCol, worksheet)) {
-            messageService.show({
-                type: MessageType.Error,
-                content: 'Across a merged cell.',
-            });
+            errorService.emit('Across a merged cell.');
             return false;
         }
 

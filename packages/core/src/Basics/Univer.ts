@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Ctor, Injector } from '@wendellhu/redi';
 
+import { ErrorService } from '..';
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
@@ -174,6 +175,7 @@ export class Univer {
                     deps: [IContextService],
                 },
             ],
+            [ErrorService],
             [LocaleService],
             [ThemeService],
             [GenName],

@@ -20,6 +20,7 @@ export {
 export { IConfigService } from './services/config/config.service';
 export * from './services/context/context';
 export { IContextService } from './services/context/context.service';
+export { ErrorService, type IError } from './services/error/error.service';
 export { IUniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages, OnLifecycle } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';

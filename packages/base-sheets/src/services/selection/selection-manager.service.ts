@@ -21,13 +21,18 @@ export type ISelectionInfo = Map<string, Map<string, Map<string, ISelectionWithS
 
 /**
  * This service is responsible for managing the selection data.
+ *
  * You can generally modify its data through SetSelectionsOperation.
+ *
  * In the same app and sub-table, there will be different functional selection areas,
  * such as charts, formulas, conditional formats, etc.,
  * which are distinguished by the pluginName.
+ *
  * The selection data drawn by the user through the SelectionRenderService will be saved to this service.
+ *
  * Data changes within the service will also notify the SelectionController to redraw the selection area.
- *  Not only will switching sub-tables trigger a redraw, but also changing row and column widths,
+ *
+ * Not only will switching sub-tables trigger a redraw, but also changing row and column widths,
  * hiding rows and columns, automatic row height, dragging rows and columns, deleting rows and columns,
  * and so on, will cause the size of the selection area to change.
  */

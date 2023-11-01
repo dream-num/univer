@@ -1,6 +1,18 @@
 /* eslint-disable no-magic-numbers */
 
 import {
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+    SetColHiddenCommand,
+    SetColHiddenMutation,
+    SetColVisibleMutation,
+    SetRowHiddenCommand,
+    SetRowHiddenMutation,
+    SetRowVisibleMutation,
+    SetSelectedColsVisibleCommand,
+    SetSelectedRowsVisibleCommand,
+} from '@univerjs/base-sheets';
+import {
     Direction,
     ICommandService,
     IUniverInstanceService,
@@ -12,14 +24,6 @@ import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-} from '../../../services/selection/selection-manager.service';
-import { SetColHiddenMutation, SetColVisibleMutation } from '../../mutations/set-col-visible.mutation';
-import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../mutations/set-row-visible.mutation';
-import { SetColHiddenCommand, SetSelectedColsVisibleCommand } from '../set-col-visible.command';
-import { SetRowHiddenCommand, SetSelectedRowsVisibleCommand } from '../set-row-visible.command';
-import {
     ExpandSelectionCommand,
     IExpandSelectionCommandParams,
     IMoveSelectionCommandParams,
@@ -27,7 +31,7 @@ import {
     JumpOver,
     MoveSelectionCommand,
     SelectAllCommand,
-} from '../set-selections.command';
+} from '../set-selection.command';
 import {
     createSelectionCommandTestBed,
     SELECTION_WITH_EMPTY_CELLS_DATA,

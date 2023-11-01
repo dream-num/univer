@@ -1,5 +1,3 @@
-/* eslint-disable no-magic-numbers */
-import { IMessageService } from '@univerjs/base-ui';
 import {
     ICellData,
     ICommandService,
@@ -10,7 +8,6 @@ import {
     Nullable,
     RANGE_TYPE,
     RedoCommand,
-    toDisposable,
     Tools,
     UndoCommand,
     Univer,
@@ -396,7 +393,5 @@ const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookConfig = {
 };
 
 function createMoveRowsColsTestBed() {
-    return createCommandTestBed(Tools.deepClone(TEST_ROWS_COLS_MOVE_DEMO), [
-        [IMessageService, { useValue: { show: () => toDisposable(() => {}) } as IMessageService }],
-    ]);
+    return createCommandTestBed(Tools.deepClone(TEST_ROWS_COLS_MOVE_DEMO));
 }

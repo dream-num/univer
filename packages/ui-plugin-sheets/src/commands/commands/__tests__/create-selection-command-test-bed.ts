@@ -1,11 +1,14 @@
 import { SetSelectionsOperation } from '@univerjs/base-sheets';
 import { createCommandTestBed } from '@univerjs/base-sheets/commands/commands/__tests__/create-command-test-bed.js';
+import { ShortcutExperienceService } from '@univerjs/base-ui';
 import { ICommandService, IWorkbookConfig, LocaleType } from '@univerjs/core';
 
 import { ExpandSelectionCommand, MoveSelectionCommand, SelectAllCommand } from '../set-selection.command';
 
 export function createSelectionCommandTestBed(workbookConfig?: IWorkbookConfig) {
-    const { univer, get, sheet } = createCommandTestBed(workbookConfig || SIMPLE_SELECTION_WORKBOOK_DATA);
+    const { univer, get, sheet } = createCommandTestBed(workbookConfig || SIMPLE_SELECTION_WORKBOOK_DATA, [
+        [ShortcutExperienceService],
+    ]);
 
     const commandService = get(ICommandService);
     [MoveSelectionCommand, ExpandSelectionCommand, SelectAllCommand, SetSelectionsOperation].forEach((c) => {

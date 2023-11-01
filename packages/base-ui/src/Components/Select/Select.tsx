@@ -29,15 +29,9 @@ export interface BaseItemProps extends BaseMenuItem {
 
 /** @deprecated */
 export enum DisplayTypes {
-    LABEL,
-
-    ICON,
-
     INPUT,
 
     FONT,
-
-    CUSTOM,
 }
 
 export interface BaseSelectChildrenProps extends Omit<BaseItemProps, 'suffix' | 'label' | 'children'> {
@@ -61,7 +55,6 @@ export interface BaseSelectProps {
     className?: string;
     name?: string;
     suffix?: any;
-    tooltip?: string;
     value?: string | number;
     icon?: string;
     id?: string;

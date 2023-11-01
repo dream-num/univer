@@ -508,7 +508,6 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         type: MenuItemType.SELECTOR,
         display: DisplayTypes.FONT,
 
-        // display: DisplayTypes.CUSTOM,
         // label: {
         //     name: MENU_ITEM_INPUT_COMPONENT,
         //     props: {
@@ -647,7 +646,6 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         tooltip: 'toolbar.textColor.main',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
-        display: DisplayTypes.CUSTOM,
         selections: [
             {
                 id: COLOR_PICKER_COMPONENT,
@@ -685,7 +683,6 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         tooltip: 'toolbar.fillColor.main',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
-        display: DisplayTypes.CUSTOM,
         icon: 'PaintBucket',
         selections: [
             {
@@ -730,11 +727,9 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetHorizontalTextAlignCommand.id,
-        title: 'horizontalAlignMode',
         icon: HORIZONTAL_ALIGN_CHILDREN[0].icon,
         positions: [MenuPosition.TOOLBAR_START],
         tooltip: 'toolbar.horizontalAlignMode.main',
-        display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         selections: HORIZONTAL_ALIGN_CHILDREN,
         value$: new Observable<HorizontalAlign>((subscriber) => {
@@ -785,10 +780,8 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetVerticalTextAlignCommand.id,
-        title: 'verticalAlignMode',
         icon: VERTICAL_ALIGN_CHILDREN[0].icon,
         tooltip: 'toolbar.verticalAlignMode.main',
-        display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: VERTICAL_ALIGN_CHILDREN,
@@ -840,13 +833,11 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetTextWrapCommand.id,
-        title: 'textWrapMode',
         tooltip: 'toolbar.textWrapMode.main',
         icon: TEXT_WRAP_CHILDREN[0].icon,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: TEXT_WRAP_CHILDREN,
-        display: DisplayTypes.ICON,
         value$: new Observable((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
@@ -910,10 +901,8 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
     const selectionManagerService = accessor.get(SelectionManagerService);
     return {
         id: SetTextRotationCommand.id,
-        title: 'textRotateMode',
         tooltip: 'toolbar.textRotateMode.main',
         icon: TEXT_ROTATE_CHILDREN[0].icon,
-        display: DisplayTypes.ICON,
         type: MenuItemType.SELECTOR,
         selections: TEXT_ROTATE_CHILDREN,
         positions: [MenuPosition.TOOLBAR_START],
@@ -1246,8 +1235,6 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         id: SetWorksheetRowHeightCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
-        title: 'rightClick.rowHeight',
-        display: DisplayTypes.CUSTOM,
         label: {
             name: MENU_ITEM_INPUT_COMPONENT,
             props: {
@@ -1292,9 +1279,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     return {
         id: SetWorksheetColWidthCommand.id,
         type: MenuItemType.BUTTON,
-        display: DisplayTypes.CUSTOM,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
-        title: 'rightClick.columnWidth',
         label: {
             name: MENU_ITEM_INPUT_COMPONENT,
             props: {
@@ -1420,7 +1405,6 @@ export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
         id: SetTabColorCommand.id,
         title: 'sheetConfig.changeColor',
         positions: [SheetMenuPosition.SHEET_BAR],
-        display: DisplayTypes.CUSTOM,
         type: MenuItemType.SELECTOR,
         selections: [
             {

@@ -1,16 +1,16 @@
 export default {
     debugger: {
         locale: {
-            title: 'Language (Debugger Tools)',
-            tooltip: 'Language (Debugger Tools)',
+            title: 'Language',
+            tooltip: 'Language',
         },
         theme: {
-            title: 'Theme (Debugger Tools)',
-            tooltip: 'Theme (Debugger Tools)',
+            title: 'Theme',
+            tooltip: 'Theme',
         },
         uiComponent: {
-            title: 'UI Component (Debugger Tools)',
-            tooltip: 'UI Component Tooltip (Debugger Tools)',
+            title: 'UI Component',
+            tooltip: 'UI Component',
         },
     },
 };

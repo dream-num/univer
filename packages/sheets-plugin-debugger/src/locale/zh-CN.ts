@@ -1,16 +1,16 @@
 export default {
     debugger: {
         locale: {
-            title: '语言 (调试工具)',
-            tooltip: '语言 (调试工具)',
+            title: '语言',
+            tooltip: '语言',
         },
         theme: {
-            title: '主题 (调试工具)',
-            tooltip: '主题 (调试工具)',
+            title: '主题',
+            tooltip: '主题',
         },
         uiComponent: {
-            title: '组件 (调试工具)',
-            tooltip: '组件提示 (调试工具)',
+            title: '组件',
+            tooltip: '组件',
         },
     },
 };

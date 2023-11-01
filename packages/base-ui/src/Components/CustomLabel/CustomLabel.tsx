@@ -37,6 +37,7 @@ export interface INeoCustomLabelProps {
  * The component to render toolbar item label and menu item label.
  * @param props
  * @returns
+ * @deprecated
  */
 export function NeoCustomLabel(
     props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'display' | 'title' | 'max' | 'min'> &
@@ -80,27 +81,22 @@ export function NeoCustomLabel(
         );
     }
 
-    if (display === DisplayTypes.ICON && icon) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const IconComponent = componentManager.get(icon) as any;
-        if (IconComponent) {
-            return <IconComponent {...props} />;
-        }
+    const nodes = [];
+    let index = 0;
+    if (icon) {
+        const LabelComponent = componentManager.get(icon) as any;
+        nodes.push(<LabelComponent key={index++} extend={{ colorChannel1: 'rgb(var(--primary-color))' }} />);
     }
-
-    if (display === DisplayTypes.CUSTOM && label) {
+    if (label) {
         const labelName = typeof label === 'string' ? label : (label as ICustomComponent).name;
         const customProps = (label as ICustomComponent).props ?? {};
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const LabelComponent = componentManager.get(labelName) as any;
-        if (LabelComponent) {
-            return <LabelComponent {...customProps} {...props} />;
-        }
+        LabelComponent && nodes.push(<LabelComponent key={index++} {...customProps} {...props} />);
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const LabelComponent = icon ? (componentManager.get(icon) as any) : null;
+    if (title) {
+        nodes.push(<span className={styles.selectItemContent}>{getLocale(title)}</span>);
+    }
 
     // Process Font Family drop-down list font
     return (
@@ -113,8 +109,7 @@ export function NeoCustomLabel(
                     <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />
                 </span>
             )}
-            {LabelComponent && <LabelComponent extend={{ colorChannel1: 'rgb(var(--primary-color))' }} />}
-            {title && <span className={styles.selectItemContent}>{getLocale(title)}</span>}
+            {nodes}
         </div>
     );
 }

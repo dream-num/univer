@@ -4,7 +4,6 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 
 import { ComponentManager } from '../../Common';
 import { IMenuSelectorItem } from '../../services/menu/menu';
-import styles from './index.module.less';
 
 export type ICustomLabelProps = {
     value?: string | number | undefined;
@@ -50,5 +49,5 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
         nodes.push(<span key={index++}>{localeService.t(title)}</span>);
     }
 
-    return <span className={styles.customLabel}>{nodes}</span>;
+    return <>{nodes}</>;
 }

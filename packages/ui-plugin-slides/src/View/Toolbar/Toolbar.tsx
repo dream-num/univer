@@ -1,4 +1,4 @@
-import { AppContext, BaseComponentProps, debounce } from '@univerjs/base-ui';
+import { BaseComponentProps, debounce } from '@univerjs/base-ui';
 import { Button, Container, Tooltip } from '@univerjs/design';
 import { Component, createRef } from 'react';
 
@@ -21,8 +21,6 @@ interface IState {
 }
 
 export class Toolbar extends Component<IProps, IState> {
-    static override contextType = AppContext;
-
     toolbarRef = createRef<HTMLDivElement>();
 
     moreBtnRef = createRef<HTMLDivElement>();

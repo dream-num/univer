@@ -1,11 +1,11 @@
-import { AppContext, BaseComponentProps, BaseSelectChildrenProps, debounce } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, debounce } from '@univerjs/base-ui';
 import { Nullable } from '@univerjs/core';
 import { Component } from 'react';
 
 import styles from './index.module.less';
 
 type FormulaState = {
-    namedRanges: BaseSelectChildrenProps[];
+    namedRanges: any[];
     spanClass: string;
     formulaContent: string;
     fx: Nullable<Fx>;
@@ -66,7 +66,7 @@ export class FormulaBar extends Component<BaseFormulaBarProps, FormulaState> {
         });
     }
 
-    setNamedRanges(namedRanges: BaseSelectChildrenProps[]) {
+    setNamedRanges(namedRanges: any[]) {
         this.setState({
             namedRanges,
         });

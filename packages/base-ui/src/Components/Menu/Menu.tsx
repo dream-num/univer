@@ -31,7 +31,6 @@ export interface IBaseMenuProps {
     options?: Array<IValueOption | ICustomComponentOption>;
 
     onOptionSelect?: (option: IValueOption) => void;
-    onClose?: () => void;
 }
 
 function MenuWrapper(props: IBaseMenuProps) {
@@ -140,12 +139,12 @@ export const Menu = (props: IBaseMenuProps) => (
     </RcMenu>
 );
 
-export interface IMenuItemProps {
+interface IMenuItemProps {
     menuItem: IDisplayMenuItem<IMenuItem>;
     onClick: (params: Partial<IValueOption>) => void;
 }
 
-export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
+function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const menuService = useDependency(IMenuService);
 
     const menuItems = menuItem.id ? menuService.getMenuItems(menuItem.id) : [];
@@ -178,17 +177,7 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     onClick({ value: inputValue, id: item.id }); // merge cell
                 }}
             >
-                <NeoCustomLabel
-                    value={inputValue}
-                    title={title}
-                    label={label}
-                    icon={item.icon}
-                    onChange={onChange}
-                    onValueChange={() => {
-                        // Right-click the menu for the title bar, and the Enter key triggers after entering the row height
-                        onClick({ value: inputValue, id: item.id });
-                    }}
-                />
+                <NeoCustomLabel value={inputValue} title={title} label={label} icon={item.icon} onChange={onChange} />
             </RcMenuItem>
         );
     };

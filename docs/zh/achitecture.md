@@ -259,7 +259,6 @@ interface IMenuItemBase<V> {
 
     /** On observable value that should emit the value of the corresponding selection component. */
     value$?: Observable<V>;
-    onClose?: () => void;
 }
 
 export interface IMenuService {

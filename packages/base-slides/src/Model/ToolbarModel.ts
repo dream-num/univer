@@ -1,4 +1,4 @@
-// import { BaseSelectChildrenProps, BaseSelectProps } from '../View/UI/Common/Select/Select';
+// import { BaseSelectChildrenProps, IBaseSelectProps } from '../View/UI/Common/Select/Select';
 // import { BaseTextButtonProps } from '../View/UI/Common/TextButton/TextButton';
 
 // export interface IShowToolbarConfig {
@@ -53,7 +53,7 @@
 //     children?: BaseToolbarSelectChildrenProps[];
 // }
 
-// interface BaseToolbarSelectProps extends BaseSelectProps {
+// interface BaseToolbarSelectProps extends IBaseSelectProps {
 //     locale?: string;
 //     suffixLocale?: string;
 //     children?: BaseToolbarSelectChildrenProps[];

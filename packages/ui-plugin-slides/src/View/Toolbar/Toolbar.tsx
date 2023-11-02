@@ -1,4 +1,4 @@
-import { AppContext, BaseComponentProps, debounce, Select } from '@univerjs/base-ui';
+import { AppContext, BaseComponentProps, debounce } from '@univerjs/base-ui';
 import { Button, Container, Tooltip } from '@univerjs/design';
 import { Component, createRef } from 'react';
 
@@ -195,28 +195,30 @@ export class Toolbar extends Component<IProps, IState> {
             if (item.toolbarType) {
                 if (item.show) {
                     return (
-                        <Tooltip key={index} title={item.tooltip} placement={'bottom'}>
-                            <Button className={styles.textButton} onClick={item.onClick}>
-                                {/* <CustomLabel label={item.label} /> */}
-                            </Button>
-                        </Tooltip>
+                        // <Tooltip key={index} title={item.tooltip} placement={'bottom'}>
+                        //     <Button className={styles.textButton} onClick={item.onClick}>
+                        //     <CustomLabel label={item.label} />
+                        //     </Button>
+                        // </Tooltip>
+                        <></>
                     );
                 }
             } else {
                 if (item.show) {
                     return (
-                        <Select
-                            key={index}
-                            children={item.children}
-                            suffix={item.suffix}
-                            label={item.label}
-                            onClick={item.onClick}
-                            onPressEnter={item.onPressEnter}
-                            onMainClick={item.onMainClick}
-                            defaultColor={item.defaultColor}
-                            hideSelectedIcon={item.hideSelectedIcon}
-                            className={item.className}
-                        ></Select>
+                        // <Select
+                        //     key={index}
+                        //     children={item.children}
+                        //     suffix={item.suffix}
+                        //     label={item.label}
+                        //     onClick={item.onClick}
+                        //     onPressEnter={item.onPressEnter}
+                        //     onMainClick={item.onMainClick}
+                        //     defaultColor={item.defaultColor}
+                        //     hideSelectedIcon={item.hideSelectedIcon}
+                        //     className={item.className}
+                        // ></Select>
+                        <></>
                     );
                 }
             }

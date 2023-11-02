@@ -60,18 +60,6 @@ interface IMenuItemBase<V> {
     /** On observable value that should emit the value of the corresponding selection component. */
     value$?: Observable<V>;
     onClose?: () => void;
-
-    // FIXME@wzhudev: this parameters should not appear here
-
-    /**
-     * e.g. set cell text size, rotation angle of the text
-     */
-    max?: number;
-
-    /**
-     * Set the minimum value of the digital input box
-     */
-    min?: number;
 }
 
 export interface IMenuButtonItem<V = undefined> extends IMenuItemBase<V> {
@@ -93,8 +81,6 @@ export interface IValueOption {
     style?: object;
     disabled?: boolean;
     id?: string; // command id
-    show?: boolean; // show parent menu or not
-    showAfterClick?: boolean; // show children when clicked or not,暂时性做法
 }
 
 export function isValueOptions(v: IValueOption | ICustomComponentOption): v is IValueOption {

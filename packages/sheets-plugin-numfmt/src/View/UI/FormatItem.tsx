@@ -1,13 +1,15 @@
-import { AppContext, AppContextValues, BaseMenuItem, joinClassNames } from '@univerjs/base-ui';
+import { AppContext, AppContextValues, joinClassNames } from '@univerjs/base-ui';
 import React, { useContext } from 'react';
 
 import styles from './FormatItem.module.less';
 
-export interface BaseFormatItemProps extends BaseMenuItem {
+export interface BaseFormatItemProps {
     selected?: boolean;
     labelText?: string;
     suffix?: React.ReactNode;
     border?: boolean;
+    disabled?: boolean;
+    value?: string;
 }
 
 function getLocale(context: Partial<AppContextValues>, name: string) {

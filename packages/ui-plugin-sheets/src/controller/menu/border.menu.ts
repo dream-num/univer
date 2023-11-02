@@ -19,61 +19,51 @@ export const BORDER_LINE_CHILDREN = [
         label: 'borderLine.borderTop',
         icon: 'UpBorderSingle',
         value: 'top',
-        showAfterClick: true,
     },
     {
         label: 'borderLine.borderBottom',
         icon: 'DownBorderSingle',
         value: 'bottom',
-        showAfterClick: true,
     },
     {
         label: 'borderLine.borderLeft',
         icon: 'LeftBorderSingle',
         value: 'left',
-        showAfterClick: true,
     },
     {
         label: 'borderLine.borderRight',
         icon: 'RightBorderSingle',
         value: 'right',
-        showAfterClick: true,
     },
     {
         label: 'borderLine.borderNone',
         icon: 'NoBorderSingle',
         value: 'none',
-        showAfterClick: true,
     },
     {
         label: 'borderLine.borderAll',
         icon: 'AllBorderSingle',
         value: 'all',
-        showAfterClick: true,
     },
     {
         label: 'borderLine.borderOutside',
         icon: 'OuterBorderSingle',
         value: 'outside',
-        showAfterClick: true,
     },
     {
         label: 'borderLine.borderInside',
         icon: 'InnerBorderSingle',
         value: 'inside',
-        showAfterClick: true,
     },
     {
         label: 'borderLine.borderHorizontal',
         icon: 'InnerBorderSingle',
         value: 'horizontal',
-        showAfterClick: true,
     },
     {
         label: 'borderLine.borderVertical',
         icon: 'InnerBorderSingle',
         value: 'vertical',
-        showAfterClick: true,
     },
 ];
 
@@ -191,9 +181,6 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         positions: [MenuPosition.TOOLBAR_START],
         type: MenuItemType.SUBITEMS,
         selections: [...BORDER_LINE_CHILDREN],
-        onClose: () => {
-            borderStyleManagerService.setActiveBorderType(false);
-        },
     };
 }
 

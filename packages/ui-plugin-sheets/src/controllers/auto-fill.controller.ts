@@ -128,10 +128,10 @@ export class AutoFillController extends Disposable {
                 const applyData = getApplyData(copyD, csLen, asLen, direction, applyType);
                 untransformedApplyDatas.push(applyData);
             }
-            for (let i = 0; i < applyDatas[0].length; i++) {
+            for (let i = 0; i < untransformedApplyDatas[0].length; i++) {
                 const row: Array<Nullable<ICellData>> = [];
-                for (let j = 0; j < applyDatas.length; j++) {
-                    row.push(applyDatas[j][i]);
+                for (let j = 0; j < untransformedApplyDatas.length; j++) {
+                    row.push(untransformedApplyDatas[j][i]);
                 }
                 applyDatas.push(row);
             }

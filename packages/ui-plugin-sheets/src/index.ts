@@ -1,4 +1,5 @@
 export * from './Basics';
+export { SetCellEditVisibleArrowOperation } from './commands/operations/cell-edit.operation';
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 export {
     EditorBridgeService,

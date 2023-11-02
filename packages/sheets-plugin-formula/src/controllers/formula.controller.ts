@@ -1,14 +1,16 @@
-import { IDesktopUIController, IMenuService, IUIController } from '@univerjs/base-ui';
+import { IDesktopUIController, IMenuService, IShortcutService, IUIController } from '@univerjs/base-ui';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
+import { SetEditorFormulaArrowOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { RenderFormulaContent } from '../views/FormulaContainer';
 import { InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory } from './menu';
+import { promptSelectionShortcutItem } from './shortcuts/prompt.shortcut';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaController)
 export class FormulaController extends Disposable {
@@ -16,6 +18,7 @@ export class FormulaController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
+        @IShortcutService private readonly _shortcutService: IShortcutService,
         @IUIController private readonly _uiController: IDesktopUIController
     ) {
         super();
@@ -26,6 +29,7 @@ export class FormulaController extends Disposable {
     private _initialize(): void {
         this._registerCommands();
         this._registerMenus();
+        this.registerShortcuts();
         this._registerComponents();
     }
 
@@ -36,9 +40,19 @@ export class FormulaController extends Disposable {
     }
 
     private _registerCommands(): void {
-        [InsertFunctionOperation, MoreFunctionsOperation, SearchFunctionOperation, HelpFunctionOperation].forEach(
-            (command) => this.disposeWithMe(this._commandService.registerCommand(command))
-        );
+        [
+            InsertFunctionOperation,
+            MoreFunctionsOperation,
+            SearchFunctionOperation,
+            HelpFunctionOperation,
+            SetEditorFormulaArrowOperation,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+    }
+
+    private registerShortcuts(): void {
+        [...promptSelectionShortcutItem()].forEach((item) => {
+            this.disposeWithMe(this._shortcutService.registerShortcut(item));
+        });
     }
 
     private _registerComponents(): void {

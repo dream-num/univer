@@ -40,7 +40,6 @@ import { TextSelectionController } from './Controller/text-selection.controller'
 import { ZoomController } from './Controller/zoom.cotroller';
 import { enUS } from './locale';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
-import { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
 import {
@@ -170,8 +169,6 @@ export class DocPlugin extends Plugin {
                     },
                 ],
                 [TextSelectionManagerService],
-                [DocsViewManagerService],
-
                 // controllers
                 [DocRenderController],
                 [PageRenderController],

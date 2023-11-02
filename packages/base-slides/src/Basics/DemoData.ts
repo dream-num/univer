@@ -17,9 +17,9 @@ export const docsDemoData: IDocumentData = {
     drawings: {
         shapeTest1: {
             objectId: 'shapeTest1',
-            objectProperties: {
-                title: 'test shape',
-                description: 'test shape',
+            title: 'test shape',
+            description: 'test shape',
+            objectTransform: {
                 size: {
                     width: 100,
                     height: 400,
@@ -33,9 +33,9 @@ export const docsDemoData: IDocumentData = {
                     posOffset: 160,
                 },
                 angle: 0,
-                imageProperties: {
-                    contentUrl: 'https://cnbabylon.com/assets/img/agents.png',
-                },
+                // imageProperties: {
+                //     contentUrl: 'https://cnbabylon.com/assets/img/agents.png',
+                // },
             },
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
             behindDoc: BooleanNumber.FALSE,

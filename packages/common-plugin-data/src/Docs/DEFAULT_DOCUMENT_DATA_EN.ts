@@ -16,9 +16,9 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
     drawings: {
         shapeTest1: {
             objectId: 'shapeTest1',
-            objectProperties: {
-                title: 'test shape',
-                description: 'test shape',
+            title: 'test shape',
+            description: 'test shape',
+            objectTransform: {
                 size: {
                     width: 1484 * 0.15,
                     height: 864 * 0.15,
@@ -32,9 +32,6 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     posOffset: 510,
                 },
                 angle: 0,
-                imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/gartner-tech-2022.png',
-                },
             },
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
             behindDoc: BooleanNumber.FALSE,
@@ -42,9 +39,9 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
         },
         shapeTest2: {
             objectId: 'shapeTest2',
-            objectProperties: {
-                title: 'test shape',
-                description: 'test shape',
+            title: 'test shape',
+            description: 'test shape',
+            objectTransform: {
                 size: {
                     width: 2548 * 0.1,
                     height: 2343 * 0.1,
@@ -58,9 +55,6 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     posOffset: 200,
                 },
                 angle: 0,
-                imageProperties: {
-                    contentUrl: 'https://minio.cnbabylon.com/univer/slide/hype-cycle-for-emerging-tech-2022.png',
-                },
             },
             layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
             behindDoc: BooleanNumber.FALSE,

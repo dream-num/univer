@@ -604,9 +604,9 @@ function __updateDrawingPosition(
             return;
         }
 
-        const { objectProperties } = drawingOrigin;
+        const { objectTransform } = drawingOrigin;
 
-        const { positionH, positionV, size, angle } = objectProperties;
+        const { positionH, positionV, size, angle } = objectTransform;
         const { width = 0, height = 0 } = size;
 
         drawing.aLeft = getPositionHorizon(positionH, column, page, width, isPageBreak) || 0;

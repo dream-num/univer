@@ -28,6 +28,7 @@
         "@univerjs/sheets-plugin-numfmt": "workspace:*",
         "@univerjs/ui-plugin-docs": "workspace:*",
         "@univerjs/ui-plugin-sheets": "workspace:*",
+        "@univerjs/common-plugin-image": "workspace:*",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },

@@ -2,6 +2,7 @@ import { DocPlugin } from '@univerjs/base-docs';
 import { RenderEngine } from '@univerjs/base-render';
 import { UIPlugin } from '@univerjs/base-ui';
 import { DEFAULT_DOCUMENT_DATA_EN } from '@univerjs/common-plugin-data';
+import { ImagePlugin } from '@univerjs/common-plugin-image';
 import { LocaleType, Univer } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { DocUIPlugin } from '@univerjs/ui-plugin-docs';
@@ -33,6 +34,8 @@ univer.registerPlugin(DocUIPlugin, {
         },
     },
 });
+
+univer.registerPlugin(ImagePlugin);
 
 univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_EN);
 

@@ -179,10 +179,10 @@ export class DocsAdaptor extends ObjectAdaptor {
             skeDrawings.forEach((drawing: IDocumentSkeletonDrawing) => {
                 const { aLeft, aTop, height, width, drawingOrigin } = drawing;
 
-                const { objectProperties } = drawingOrigin;
+                const { objectTransform } = drawingOrigin;
 
                 const rect = new Picture(drawing.objectId, {
-                    url: objectProperties.imageProperties?.contentUrl || '',
+                    // url: objectTransform.imageProperties?.contentUrl || '',
                     left: aLeft + docsLeft + this._liquid.x,
                     top: aTop + docsTop + this._liquid.y,
                     width,

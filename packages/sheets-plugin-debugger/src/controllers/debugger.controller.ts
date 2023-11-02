@@ -2,11 +2,13 @@ import { IMenuService } from '@univerjs/base-ui';
 import { Disposable, ICommandService } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { ConfirmOperation } from '../commands/operations/confirm.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { NotificationOperation } from '../commands/operations/notification.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
 import {
+    ConfirmMenuItemFactory,
     DialogMenuItemFactory,
     LocaleMenuItemFactory,
     NotificationMenuItemFactory,
@@ -22,16 +24,20 @@ export class DebuggerController extends Disposable {
         super();
         this._initializeContextMenu();
 
-        [LocaleOperation, ThemeOperation, NotificationOperation, DialogOperation].forEach((command) =>
+        [LocaleOperation, ThemeOperation, NotificationOperation, DialogOperation, ConfirmOperation].forEach((command) =>
             this.disposeWithMe(this._commandService.registerCommand(command))
         );
     }
 
     private _initializeContextMenu() {
-        [LocaleMenuItemFactory, ThemeMenuItemFactory, NotificationMenuItemFactory, DialogMenuItemFactory].forEach(
-            (factory) => {
-                this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
-            }
-        );
+        [
+            LocaleMenuItemFactory,
+            ThemeMenuItemFactory,
+            NotificationMenuItemFactory,
+            DialogMenuItemFactory,
+            ConfirmMenuItemFactory,
+        ].forEach((factory) => {
+            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
+        });
     }
 }

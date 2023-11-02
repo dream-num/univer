@@ -4,6 +4,7 @@ export { Checkbox, type ICheckboxProps } from './components/checkbox';
 export { CheckboxGroup, type ICheckboxGroupProps } from './components/checkbox-group';
 export { ColorPicker, type IColorPickerProps } from './components/color-picker';
 export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './components/config-provider';
+export { Confirm, type IConfirmProps } from './components/confirm';
 export { Container, type IContainerProps } from './components/container';
 export { Dialog, type IDialogProps } from './components/dialog';
 export { Dropdown, type IDropdownProps } from './components/dropdown';

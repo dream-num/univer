@@ -9,6 +9,8 @@ import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { enUS } from './locale';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
+import { IConfirmService } from './services/confirm/confirm.service';
+import { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
@@ -71,6 +73,7 @@ export class UIPlugin extends Plugin {
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
             [IDialogService, { useClass: DesktopDialogService, lazy: true }],
+            [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             // controllers

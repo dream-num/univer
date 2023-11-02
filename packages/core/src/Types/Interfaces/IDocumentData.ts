@@ -9,7 +9,12 @@ import { IColorStyle, IStyleBase } from './IStyleData';
  * Properties of document
  */
 export interface IDocumentData extends IReferenceSource, IExtraModelConfig {
-    id: string; // unit id
+    /** unit ID */
+    id: string;
+
+    /** Revision of this document. Would be used in collaborated editing. Starts with zero. */
+    rev?: number;
+
     locale?: LocaleType;
     title?: string;
     body?: IDocumentBody;

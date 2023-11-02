@@ -10,15 +10,19 @@ import { IWorksheetConfig } from './IWorksheetData';
  * Properties of a workbook's configuration
  */
 export interface IWorkbookConfig extends IExtraModelConfig {
-    appVersion: string;
-    createdTime: string;
-    creator: string;
-    extensions: [];
     /**
      * unit id
      */
     id: string;
+
+    /** Revision of this document. Would be used in collaborated editing. Starts with zero. */
+    rev?: number;
+
     lastModifiedBy: string;
+    appVersion: string;
+    createdTime: string;
+    creator: string;
+    extensions: [];
     locale: LocaleType;
     modifiedTime: string;
     name: string;

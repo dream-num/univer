@@ -19,6 +19,7 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univ
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
+import { SetRangeBoldCommand } from '../commands/commands/inline-format.command';
 import { RenameSheetOperation } from '../commands/commands/rename.command';
 import {
     SetCopySelectionCommand,
@@ -198,6 +199,10 @@ export class SheetUIController extends Disposable {
             SetCellEditVisibleOperation,
             SetCopySelectionCommand,
             SetCopySelectionsOperation,
+            SetRangeBoldCommand,
+            SetItalicCommand,
+            SetStrikeThroughCommand,
+            SetUnderlineCommand,
             SetFontFamilyCommand,
             SetFontSizeCommand,
             SetFormatPainterOperation,

@@ -59,12 +59,13 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
-        const style = params.style;
+        const { style } = params;
 
         const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(worksheetId);
-        if (!worksheet) return false;
+        const worksheet = workbook?.getSheetBySheetId(worksheetId);
+        if (worksheet == null) {
+            return false;
+        }
 
         const cellValue = new ObjectMatrix<ICellData>();
         // let value: ObjectMatrixPrimitiveType<ICellData> | undefined;
@@ -150,25 +151,22 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
 };
 
 /**
- * Set bold font style to currently selected ranges. If the cell is already bold then it will cancel the bold style.
+ * Set bold font style to currently selected ranges.
+ * If the cell is already bold then it will cancel the bold style.
  */
 export const SetBoldCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-bold',
     handler: async (accessor) => {
         const selection = accessor.get(SelectionManagerService).getLast();
+
         if (!selection) {
             return false;
         }
 
-        const worksheet = accessor
-            .get(IUniverInstanceService)
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet();
-        const currentlyBold =
-            worksheet.getRange(selection.primary.actualRow, selection.primary.actualColumn).getFontWeight() ===
-            FontWeight.BOLD;
+        const worksheet = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance().getActiveSheet();
+        const { actualRow, actualColumn } = selection.primary;
+        const currentlyBold = worksheet.getRange(actualRow, actualColumn).getFontWeight() === FontWeight.BOLD;
 
         const setStyleParams: ISetStyleParams<BooleanNumber> = {
             style: {
@@ -182,7 +180,8 @@ export const SetBoldCommand: ICommand = {
 };
 
 /**
- * Set italic font style to currently selected ranges. If the cell is already italic then it will cancel the italic style.
+ * Set italic font style to currently selected ranges.
+ * If the cell is already italic then it will cancel the italic style.
  */
 export const SetItalicCommand: ICommand = {
     type: CommandType.COMMAND,

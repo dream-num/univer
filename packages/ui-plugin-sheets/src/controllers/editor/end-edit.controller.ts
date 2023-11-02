@@ -93,7 +93,7 @@ export class EndEditController extends Disposable {
 
     private _initialExitInput() {
         this._onInputSubscription = this._editorBridgeService.visible$.subscribe((param) => {
-            const { visible, keycode, eventType } = param;
+            const { visible, keycode } = param;
 
             if (visible === this._editorVisiblePrevious) {
                 return;

@@ -140,7 +140,6 @@ export class EditorBridgeController extends Disposable {
 
         spreadsheet.onDblclickObserver.add(() => {
             // this._editorBridgeService.show(DeviceInputEventType.Dblclick);
-
             this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: true,
                 eventType: DeviceInputEventType.Dblclick,

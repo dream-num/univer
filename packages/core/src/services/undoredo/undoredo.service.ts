@@ -5,7 +5,7 @@ import { Disposable, toDisposable } from '../../Shared/lifecycle';
 import { CommandService, CommandType, ICommand, ICommandInfo, ICommandService } from '../command/command.service';
 import { IUniverInstanceService } from '../instance/instance.service';
 
-// TODO:: an undo redo element may be mergeable to another undo redo element
+// TODO: an undo redo element may be mergeable to another undo redo element
 
 interface IUndoRedoItem {
     /** URI maps to unitId for UniverSheet / UniverDoc / UniverSlide */
@@ -82,6 +82,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         // TODO: undo element maybe mergeable
         // TODO: undo redo stack should have a maximum capacity, maybe we should get the config from IConfigService?
         undoStack.push(item);
+
         if (undoStack.length > STACK_CAPACITY) {
             undoStack.splice(0, 1);
         }

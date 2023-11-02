@@ -18,7 +18,6 @@ import {
     ResetTextColorCommand,
     SelectionManagerService,
     SetBackgroundColorCommand,
-    SetBoldCommand,
     SetColHiddenCommand,
     SetColHiddenMutation,
     SetColVisibleMutation,
@@ -70,6 +69,7 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
+import { SetRangeBoldCommand } from '../../commands/commands/inline-format.command';
 import { RenameSheetOperation } from '../../commands/commands/rename.command';
 import {
     SetInfiniteFormatPainterCommand,
@@ -125,7 +125,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
-        id: SetBoldCommand.id,
+        id: SetRangeBoldCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'BoldSingle',
         title: 'Set bold',
@@ -160,6 +160,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let isBold = FontWeight.NORMAL;
+
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     isBold = range?.getFontWeight();
@@ -169,6 +170,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             });
 
             subscriber.next(false);
+
             return disposable.dispose;
         }),
     };

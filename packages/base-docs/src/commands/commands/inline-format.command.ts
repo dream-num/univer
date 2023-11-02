@@ -18,9 +18,9 @@ export const SetInlineFormatCommand: ICommand = {
             doMutation: ICommandInfo<IRichTextEditingMutationParams>;
         }
     ) => {
+        const { unitId, doMutation } = params;
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
-        const { unitId, doMutation } = params;
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

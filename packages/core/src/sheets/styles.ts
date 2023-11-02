@@ -52,6 +52,7 @@ export class Styles {
     get(id: string | Nullable<IStyleData>): Nullable<IStyleData> {
         if (typeof id !== 'string') return id;
         id = String(id);
+
         return this._styles[id];
     }
 

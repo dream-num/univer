@@ -126,15 +126,17 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     id: 'sheet.mutation.set-range-values',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
+        const { cellValue, worksheetId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
+
         if (!worksheet) {
             return false;
         }
+
         const cellMatrix = worksheet.getCellMatrix();
         const styles = workbook.getStyles();
-        const { cellValue } = params;
         const newValues = new ObjectMatrix(cellValue);
 
         newValues.forValue((row, col, newVal) => {
@@ -163,7 +165,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 }
 
                 // handle style
-                if (newVal.s !== undefined) {
+                if (newVal.s != null && typeof newVal.s === 'object') {
                     // use null to clear style
                     const oldStyle = styles.getStyleByCell(oldVal);
 

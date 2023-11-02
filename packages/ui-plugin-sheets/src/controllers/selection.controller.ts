@@ -89,12 +89,14 @@ export class SelectionController extends Disposable {
             toDisposable(
                 spreadsheet?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                     this._selectionRenderService.enableDetectMergedCell();
+
                     this._selectionRenderService.eventTrigger(
                         evt,
                         spreadsheet.zIndex + 1,
                         RANGE_TYPE.NORMAL,
                         viewportMain
                     );
+
                     if (evt.button !== 2) {
                         state.stopPropagation();
                     }

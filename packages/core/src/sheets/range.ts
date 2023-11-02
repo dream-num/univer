@@ -94,11 +94,14 @@ export class Range {
     getValues(): Array<Array<Nullable<ICellData>>> {
         const { startRow, endRow, startColumn, endColumn } = this._range;
         const range: Array<Array<Nullable<ICellData>>> = [];
+
         for (let r = startRow; r <= endRow; r++) {
             const row: Array<Nullable<ICellData>> = [];
+
             for (let c = startColumn; c <= endColumn; c++) {
                 row.push(this.getMatrix().getValue(r, c) || null);
             }
+
             range.push(row);
         }
         return range;
@@ -411,8 +414,25 @@ export class Range {
 
     /**
      * Returns the font weight (normal/bold) of the cell in the top-left corner of the range.
+     * If the cell has rich text, the return value according to the textRuns of the rich text,
+     * when all styles of textRuns are bold, it will return FontWeight.BOLD,
+     * otherwise return FontWeight.NORMAL.
      */
     getFontWeight(): FontWeight {
+        const { p } = this.getValue() ?? {};
+
+        if (p && Array.isArray(p.body?.textRuns)) {
+            for (const textRun of p.body?.textRuns!) {
+                const { ts } = textRun;
+
+                if (ts?.bl == null || ts?.bl === BooleanNumber.FALSE) {
+                    return FontWeight.NORMAL;
+                }
+            }
+
+            return FontWeight.BOLD;
+        }
+
         return this.getFontWeights()[0][0];
     }
 
@@ -627,9 +647,11 @@ export class Range {
      */
     private _getStyles(arg: keyof IStyleData): Array<Array<IStyleData[keyof IStyleData]>> {
         const styles = this._deps.getStyles();
+
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 const style = styles && styles.getStyleByCell(cell);
+
                 return (style && style[arg]) || (DEFAULT_STYLES as IStyleData)[arg];
             })
         );

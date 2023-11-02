@@ -208,6 +208,7 @@ export class StartEditController extends Disposable {
         } else {
             // Set the top margin under vertical alignment.
             let offsetTop = paddingData.t || 0;
+
             if (verticalAlign === VerticalAlign.MIDDLE) {
                 offsetTop = (editorHeight - actualHeight) / 2;
             } else if (verticalAlign === VerticalAlign.BOTTOM) {
@@ -367,6 +368,7 @@ export class StartEditController extends Disposable {
     private _addBackground(scene: Scene, editorWidth: number, editorHeight: number, fill?: Nullable<string>) {
         const fillRectKey = '_backgroundRectHelperColor_';
         const rect = scene.getObject(fillRectKey) as Rect;
+
         if (rect == null && fill == null) {
             return;
         }
@@ -389,6 +391,7 @@ export class StartEditController extends Disposable {
             rect.setProps({
                 fill,
             });
+
             rect.transformByState({
                 width: editorWidth,
                 height: editorHeight,
@@ -411,6 +414,7 @@ export class StartEditController extends Disposable {
             }
 
             const state = this._editorBridgeService.getState();
+
             if (state == null) {
                 return;
             }
@@ -448,6 +452,7 @@ export class StartEditController extends Disposable {
 
                 document.makeDirty();
 
+                // @JOCS, Why calculate here？
                 if (keycode === KeyCode.BACKSPACE) {
                     skeleton.calculate();
                 }
@@ -462,6 +467,7 @@ export class StartEditController extends Disposable {
                     },
                 ]);
             } else {
+                // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
                 const cursor = documentModel.getBodyModel().getLastIndex() - 1 || 0;
 
                 scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({

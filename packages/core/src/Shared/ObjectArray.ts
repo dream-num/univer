@@ -142,6 +142,7 @@ export class ObjectArray<T> {
         // if (define(value)) {
         const length = this._length;
         this._objectArray[index] = value;
+
         if (index >= length) {
             this._length = index + 1;
         }

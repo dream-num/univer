@@ -173,6 +173,7 @@ export class Univer {
                             {
                                 createUniverDoc: (data) => this.createUniverDoc(data),
                                 createUniverSheet: (data) => this.createUniverSheet(data),
+                                createUniverSlide: (data) => this.createUniverSlide(data),
                             },
                             contextService
                         ),

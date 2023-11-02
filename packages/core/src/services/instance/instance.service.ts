@@ -6,13 +6,14 @@ import { Nullable } from '../../Shared';
 import { Disposable } from '../../Shared/lifecycle';
 import { Workbook } from '../../sheets/workbook';
 import { Slide } from '../../Slides/Domain/SlideModel';
-import { IDocumentData, IWorkbookConfig } from '../../Types/Interfaces';
+import { IDocumentData, ISlideData, IWorkbookConfig } from '../../Types/Interfaces';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context';
 import { IContextService } from '../context/context.service';
 
 export interface IUniverHandler {
     createUniverDoc(data: Partial<IDocumentData>): DocumentModel;
     createUniverSheet(data: Partial<IWorkbookConfig>): Workbook;
+    createUniverSlide(data: Partial<ISlideData>): Slide;
 }
 
 /**
@@ -38,6 +39,9 @@ export interface IUniverInstanceService {
     getFocusedUniverInstance(): Workbook | DocumentModel | Slide | null;
 
     createDoc(data: Partial<IDocumentData>): DocumentModel;
+    createSheet(data: Partial<IWorkbookConfig>): Workbook;
+    createSlide(data: Partial<ISlideData>): Slide;
+
     changeDoc(unitId: string, doc: DocumentModel): void;
     addDoc(doc: DocumentModel): void;
     addSheet(sheet: Workbook): void;
@@ -57,6 +61,9 @@ export interface IUniverInstanceService {
     getAllUniverSheetsInstance(): Workbook[];
     getAllUniverDocsInstance(): DocumentModel[];
     getAllUniverSlidesInstance(): Slide[];
+
+    /**  */
+    disposeDocument(unitId: string): boolean;
 }
 
 export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
@@ -68,35 +75,27 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
 
     private readonly _currentSheet$ = new BehaviorSubject<Nullable<Workbook>>(null);
     readonly currentSheet$ = this._currentSheet$.asObservable();
-
     private readonly _currentDoc$ = new BehaviorSubject<Nullable<DocumentModel>>(null);
     readonly currentDoc$ = this._currentDoc$.asObservable();
-
     private readonly _currentSlide$ = new BehaviorSubject<Nullable<Slide>>(null);
     readonly currentSlide$ = this._currentSlide$.asObservable();
 
     private readonly _sheetAdded$ = new Subject<Workbook>();
     readonly sheetAdded$ = this._sheetAdded$.asObservable();
-
     private readonly _docAdded$ = new Subject<DocumentModel>();
     readonly docAdded$ = this._docAdded$.asObservable();
-
     private readonly _slideAdded$ = new Subject<Slide>();
     readonly slideAdded$ = this._slideAdded$.asObservable();
 
     private readonly _sheetDisposed$ = new Subject<Workbook>();
     readonly sheetDisposed$ = this._sheetDisposed$.asObservable();
-
     private readonly _docDisposed$ = new Subject<DocumentModel>();
     readonly docDisposed$ = this._docDisposed$.asObservable();
-
     private readonly _slideDisposed$ = new Subject<Slide>();
     readonly slideDisposed$ = this._slideDisposed$.asObservable();
 
     private readonly _sheets: Workbook[] = [];
-
     private readonly _docs: DocumentModel[] = [];
-
     private readonly _slides: Slide[] = [];
 
     constructor(
@@ -126,6 +125,14 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
 
     createDoc(data: Partial<IDocumentData>): DocumentModel {
         return this._handler.createUniverDoc(data);
+    }
+
+    createSheet(data: Partial<IWorkbookConfig>): Workbook {
+        return this._handler.createUniverSheet(data);
+    }
+
+    createSlide(data: Partial<ISlideData>): Slide {
+        return this._handler.createUniverSlide(data);
     }
 
     addSheet(sheet: Workbook): void {
@@ -239,5 +246,36 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
 
     getFocusedUniverInstance(): Workbook | DocumentModel | Slide | null {
         return this._focused;
+    }
+
+    disposeDocument(unitId: string): boolean {
+        const doc = this.getUniverDocInstance(unitId);
+        if (doc) {
+            const index = this._docs.indexOf(doc);
+            this._docs.splice(index, 1);
+            this._docDisposed$.next(doc);
+            this.focusUniverInstance(null);
+            return true;
+        }
+
+        const sheet = this.getUniverSheetInstance(unitId);
+        if (sheet) {
+            const index = this._sheets.indexOf(sheet);
+            this._sheets.splice(index, 1);
+            this._sheetDisposed$.next(sheet);
+            this.focusUniverInstance(null);
+            return true;
+        }
+
+        const slide = this.getUniverSlideInstance(unitId);
+        if (slide) {
+            const index = this._slides.indexOf(slide);
+            this._slides.splice(index, 1);
+            this._slideDisposed$.next(slide);
+            this.focusUniverInstance(null);
+            return true;
+        }
+
+        return false;
     }
 }

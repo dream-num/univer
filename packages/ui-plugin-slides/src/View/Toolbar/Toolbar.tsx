@@ -1,4 +1,4 @@
-import { BaseComponentProps, debounce } from '@univerjs/base-ui';
+import { BaseComponentProps } from '@univerjs/base-ui';
 import { Button, Container, Tooltip } from '@univerjs/design';
 import { Component, createRef } from 'react';
 
@@ -32,9 +32,9 @@ export class Toolbar extends Component<IProps, IState> {
     /**
      * Gets the distance of each button from the parent element
      */
-    debounceSetToolbarListWidth = debounce(() => {
+    debounceSetToolbarListWidth = () => {
         this.setToolbarListWidth();
-    }, 50);
+    };
 
     constructor(props: IProps) {
         super(props);

@@ -74,7 +74,7 @@ export interface IValueOption {
         | {
               name: string;
               props?: Record<string, string | number>;
-          }; // custom component, send to NeoCustomLabel label property
+          }; // custom component, send to CustomLabel label property
     icon?: string;
     tooltip?: string;
     style?: object;

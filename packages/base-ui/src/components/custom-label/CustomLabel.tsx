@@ -4,8 +4,9 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 
 import { ComponentManager } from '../../Common';
 import { IMenuSelectorItem } from '../../services/menu/menu';
+import styles from './index.module.less';
 
-export interface INeoCustomLabelProps {
+export interface ICustomLabelProps {
     value?: string | number | undefined;
 
     selected?: boolean;
@@ -22,8 +23,8 @@ export interface INeoCustomLabelProps {
  * @returns
  * @deprecated
  */
-export function NeoCustomLabel(
-    props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'title'> & INeoCustomLabelProps
+export function CustomLabel(
+    props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'title'> & ICustomLabelProps
 ): JSX.Element | null {
     const { title, icon, label, selected } = props;
     const localeService = useDependency(LocaleService);
@@ -55,5 +56,5 @@ export function NeoCustomLabel(
         nodes.push(<span key={index++}>{localeService.t(title)}</span>);
     }
 
-    return <div>{nodes}</div>;
+    return <span className={styles.customLabel}>{nodes}</span>;
 }

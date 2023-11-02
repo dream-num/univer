@@ -146,7 +146,7 @@ importers:
         version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
   examples/univer-sheet-ts:
     dependencies:
@@ -295,7 +295,7 @@ importers:
         version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
   packages/base-docs:
     dependencies:
@@ -338,7 +338,7 @@ importers:
         version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
   packages/base-formula-engine:
     dependencies:
@@ -366,7 +366,7 @@ importers:
         version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
   packages/base-numfmt-engine:
     dependencies:
@@ -391,7 +391,7 @@ importers:
         version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
   packages/base-render:
     dependencies:
@@ -422,7 +422,7 @@ importers:
         version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
   packages/base-sheets:
     dependencies:
@@ -493,7 +493,7 @@ importers:
         version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
   packages/base-ui:
     dependencies:
@@ -624,7 +624,7 @@ importers:
         version: 0.19.5
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
 
   packages/core:
     dependencies:
@@ -846,7 +846,7 @@ importers:
         version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
   packages/sheets-plugin-formula:
     dependencies:
@@ -922,7 +922,7 @@ importers:
         version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
   packages/sheets-plugin-numfmt:
     dependencies:
@@ -944,6 +944,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets
@@ -980,7 +983,7 @@ importers:
         version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
   packages/ui-plugin-docs:
     dependencies:
@@ -1029,7 +1032,7 @@ importers:
         version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
   packages/ui-plugin-sheets:
     dependencies:
@@ -1145,7 +1148,7 @@ importers:
         version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
       vitest:
         specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
+        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
 packages:
 

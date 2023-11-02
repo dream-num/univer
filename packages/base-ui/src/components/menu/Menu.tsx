@@ -19,7 +19,7 @@ import {
     MenuItemType,
 } from '../../services/menu/menu';
 import { IMenuService } from '../../services/menu/menu.service';
-import { NeoCustomLabel } from '../custom-label/CustomLabel';
+import { CustomLabel } from '../custom-label/CustomLabel';
 import { useObservable } from '../hooks/observable';
 import styles from './index.module.less';
 
@@ -97,7 +97,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                         });
                     }}
                 >
-                    <NeoCustomLabel
+                    <CustomLabel
                         selected={String(value) === String(option.value)} // use √ for select
                         value={String(option.value)}
                         label={option.label}
@@ -177,7 +177,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     onClick({ value: inputValue, id: item.id }); // merge cell
                 }}
             >
-                <NeoCustomLabel value={inputValue} title={title} label={label} icon={item.icon} onChange={onChange} />
+                <CustomLabel value={inputValue} title={title} label={label} icon={item.icon} onChange={onChange} />
             </RcMenuItem>
         );
     };
@@ -205,7 +205,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     popupOffset={[18, 0]}
                     title={
                         <>
-                            <NeoCustomLabel
+                            <CustomLabel
                                 title={item.title}
                                 value={inputValue}
                                 onChange={onChange}
@@ -215,9 +215,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                             {item.shortcut && ` (${item.shortcut})`}
                         </>
                     }
-                    expandIcon={
-                        <MoreSingle style={{ color: styles.textColorSecondary, fontSize: styles.fontSizeXs }} />
-                    }
+                    expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
                 >
                     {selections.length > 0 && (
                         <MenuOptionsWrapper
@@ -239,7 +237,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 eventKey={item.id}
                 className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
             >
-                <NeoCustomLabel
+                <CustomLabel
                     title={item.title}
                     value={inputValue}
                     onChange={onChange}
@@ -262,10 +260,10 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 popupOffset={[18, 0]}
                 title={
                     <>
-                        <NeoCustomLabel title={item.title} value={item.title} icon={item.icon} label={item.label} />
+                        <CustomLabel title={item.title} value={item.title} icon={item.icon} label={item.label} />
                     </>
                 }
-                expandIcon={<MoreSingle style={{ color: styles.textColorSecondary, fontSize: styles.fontSizeXs }} />}
+                expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
             >
                 {menuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}
             </RcSubMenu>

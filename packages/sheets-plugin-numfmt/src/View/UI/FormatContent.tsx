@@ -1,4 +1,4 @@
-import { Input } from '@univerjs/base-ui';
+import { InputNumber } from '@univerjs/design';
 import { Component, createRef } from 'react';
 
 import styles from './index.module.less';
@@ -34,9 +34,8 @@ export class FormatContent extends Component<IProps, IState> {
         this.props.onClick(value);
     }
 
-    handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const value = (e.target as HTMLInputElement).value;
-        this.props.onChange?.(value);
+    handleChange(value: number | null) {
+        this.props.onChange?.(value?.toString() ?? '');
     }
 
     /**
@@ -52,7 +51,7 @@ export class FormatContent extends Component<IProps, IState> {
                 input && (
                 <div className={styles.formatInput}>
                     <span>{input}:</span>
-                    <Input type="number" value="2" onChange={this.handleChange.bind(this)}></Input>
+                    <InputNumber value={2} onChange={this.handleChange.bind(this)} />
                 </div>
                 )
                 <ul>

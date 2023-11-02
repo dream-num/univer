@@ -6,11 +6,11 @@ import {
     RemoveWorksheetMergeCommand,
 } from '@univerjs/base-sheets';
 import { IMenuButtonItem, IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
-import { ICommandService, IPermissionService } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    const permissionService = accessor.get(IPermissionService);
+    // const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -23,7 +23,7 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
     };
 }
 export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    const permissionService = accessor.get(IPermissionService);
+    // const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -34,7 +34,7 @@ export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     };
 }
 export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    const permissionService = accessor.get(IPermissionService);
+    // const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -45,7 +45,7 @@ export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButt
     };
 }
 export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    const permissionService = accessor.get(IPermissionService);
+    // const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
 
     return {
@@ -56,7 +56,7 @@ export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuBu
     };
 }
 export function CellMergeCancelMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {
-    const permissionService = accessor.get(IPermissionService);
+    // const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
 
     return {

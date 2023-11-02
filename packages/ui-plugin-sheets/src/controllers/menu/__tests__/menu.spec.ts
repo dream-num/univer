@@ -4,14 +4,15 @@ import {
     SetBoldCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
+    SheetPermissionService,
 } from '@univerjs/base-sheets';
 import {
     DisposableCollection,
     ICommandService,
-    IPermissionService,
     RANGE_TYPE,
     toDisposable,
     Univer,
+    UniverPermissionService,
 } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -48,6 +49,8 @@ describe('Test menu items', () => {
     it('Test bold menu item', async () => {
         let activated = false;
         let disabled = false;
+        const sheetPermissionService = get(SheetPermissionService);
+        const univerPermissionService = get(UniverPermissionService);
 
         const menuItem = get(Injector).invoke(BoldMenuItemFactory);
         disposableCollection.add(toDisposable(menuItem.activated$!.subscribe((v: boolean) => (activated = v))));
@@ -81,8 +84,15 @@ describe('Test menu items', () => {
         expect(await commandService.executeCommand(SetBoldCommand.id)).toBeTruthy();
         expect(activated).toBe(true);
 
-        const permissionService = get(IPermissionService);
-        permissionService.setEditable(false);
-        expect(disabled).toBe(true);
+        expect(sheetPermissionService.getSheetEditable()).toBe(true);
+        sheetPermissionService.setEditable(false);
+        expect(sheetPermissionService.getSheetEditable()).toBe(false);
+        sheetPermissionService.setEditable(true);
+        univerPermissionService.setEditable(false);
+        expect(sheetPermissionService.getSheetEditable()).toBe(false);
+        expect(univerPermissionService.getEditable()).toBe(false);
+        univerPermissionService.setEditable(true);
+        expect(univerPermissionService.getEditable()).toBe(true);
+        expect(sheetPermissionService.getSheetEditable()).toBe(true);
     });
 });

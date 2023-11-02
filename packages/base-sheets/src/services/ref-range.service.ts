@@ -92,7 +92,7 @@ export class RefRangeService extends Disposable {
                             );
                         }
                         case InsertRowCommand.id: {
-                            const params = command as unknown as ICommandInfo<IInsertRowCommandParams>;
+                            const params = command as ICommandInfo<IInsertRowCommandParams>;
                             const rowStart = params.params!.range.startRow;
                             const range: IRange = {
                                 startRow: rowStart,
@@ -103,7 +103,7 @@ export class RefRangeService extends Disposable {
                             return this._checkRange([range], workbookId, worksheetId);
                         }
                         case InsertColCommand.id: {
-                            const params = command as unknown as ICommandInfo<IInsertColCommandParams>;
+                            const params = command as ICommandInfo<IInsertColCommandParams>;
                             const colStart = params.params!.range.startColumn;
                             const range: IRange = {
                                 startRow: 0,
@@ -114,7 +114,7 @@ export class RefRangeService extends Disposable {
                             return this._checkRange([range], workbookId, worksheetId);
                         }
                         case RemoveRowCommand.id: {
-                            const params = command as unknown as ICommandInfo<RemoveRowColCommandParams>;
+                            const params = command as ICommandInfo<RemoveRowColCommandParams>;
                             const ranges = params.params?.ranges || [];
                             const rowStart = Math.min(...ranges.map((range) => range.startRow));
                             const range: IRange = {
@@ -139,7 +139,7 @@ export class RefRangeService extends Disposable {
                         }
                         case DeleteRangeMoveUpCommand.id:
                         case InsertRangeMoveDownCommand.id: {
-                            const params = command as unknown as ICommandInfo<InsertRangeMoveDownCommandParams>;
+                            const params = command as ICommandInfo<InsertRangeMoveDownCommandParams>;
                             const ranges = params.params!.ranges || getSelectionRanges(this._selectionManagerService);
                             const effectRanges = ranges.map((range) => ({
                                 startRow: range.startRow,
@@ -151,7 +151,7 @@ export class RefRangeService extends Disposable {
                         }
                         case DeleteRangeMoveLeftCommand.id:
                         case InsertRangeMoveRightCommand.id: {
-                            const params = command as unknown as ICommandInfo<InsertRangeMoveRightCommandParams>;
+                            const params = command as ICommandInfo<InsertRangeMoveRightCommandParams>;
                             const ranges = params.params!.ranges || getSelectionRanges(this._selectionManagerService);
                             const effectRanges = ranges.map((range) => ({
                                 startRow: range.startRow,

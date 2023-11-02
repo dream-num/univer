@@ -7,6 +7,7 @@ import { enUS } from './locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { RefRangeService } from './services/ref-range.service';
 import { SelectionManagerService } from './services/selection-manager.service';
+import { SheetPermissionService } from './services/sheet-permission.service';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
@@ -37,7 +38,7 @@ export class SheetPlugin extends Plugin {
             [BorderStyleManagerService],
             [SelectionManagerService],
             [RefRangeService],
-
+            [SheetPermissionService],
             // controllers
             [BasicWorksheetController],
             [MergeCellController],

@@ -2,9 +2,13 @@ import { ScrollController } from '@univerjs/base-sheets';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { IMoveSelectionCommandParams, MoveSelectionCommand } from '../../commands/commands/set-selection.command';
+import {
+    IMoveSelectionCommandParams,
+    MoveSelectionCommand,
+    MoveSelectionEnterAndTabCommand,
+} from '../../commands/commands/set-selection.command';
 
-const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id];
+const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAndTabCommand.id];
 
 @OnLifecycle(LifecycleStages.Rendered, SheetNavigationController)
 export class SheetNavigationController extends Disposable {

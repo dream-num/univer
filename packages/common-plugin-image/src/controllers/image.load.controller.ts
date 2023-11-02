@@ -86,7 +86,7 @@ export class ImageLoadController extends Disposable {
                         const imageShape = scene.getObject(imageShapeKey);
 
                         if (imageShape != null) {
-                            imageShape?.transformByState({
+                            imageShape.transformByState({
                                 left,
                                 top,
                                 width,

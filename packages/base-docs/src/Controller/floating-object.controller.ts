@@ -27,6 +27,8 @@ import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.serv
 export class FloatingObjectController extends Disposable {
     private _liquid = new Liquid();
 
+    private _pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
+
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -48,7 +50,48 @@ export class FloatingObjectController extends Disposable {
     }
 
     private _updateOnPluginChange() {
-        this._floatingObjectManagerService.pluginUpdate$.subscribe((params) => {});
+        this._floatingObjectManagerService.pluginUpdate$.subscribe((params) => {
+            const docsSkeletonObject = this._docSkeletonManagerService.getCurrent();
+
+            if (docsSkeletonObject == null) {
+                return;
+            }
+
+            const { unitId, skeleton } = docsSkeletonObject;
+
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+
+            if (currentRender == null) {
+                return;
+            }
+
+            const { mainComponent, components, scene } = currentRender;
+
+            const docsComponent = mainComponent as Documents;
+
+            const { left: docsLeft, top: docsTop } = docsComponent;
+
+            params.forEach((param) => {
+                const { unitId, subComponentId, floatingObjectId, floatingObject } = param;
+
+                const { left = 0, top = 0, width = 0, height = 0, angle, flipX, flipY, skewX, skewY } = floatingObject;
+
+                const cache = this._pageMarginCache.get(floatingObjectId);
+
+                const marginLeft = cache?.marginLeft || 0;
+                const marginTop = cache?.marginTop || 0;
+
+                skeleton?.getModel().updateDrawing(floatingObjectId, {
+                    left: left - docsLeft - marginLeft,
+                    top: top - docsTop - marginTop,
+                    height,
+                    width,
+                });
+            });
+
+            skeleton?.calculate();
+            mainComponent?.makeDirty();
+        });
     }
 
     private _initialRenderRefresh() {
@@ -131,6 +174,11 @@ export class FloatingObjectController extends Disposable {
         const { pages } = skeletonData;
 
         const Objects: IFloatingObjectManagerParam[] = [];
+
+        this._liquid.reset();
+
+        this._pageMarginCache.clear();
+
         // const objectList: BaseObject[] = [];
         // const pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
 
@@ -162,29 +210,10 @@ export class FloatingObjectController extends Disposable {
                     },
                 });
 
-                // refreshObjects.push({
-                //     unitId,
-                //     subComponentId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
-                //     floatingObjectId: objectId,
-                // });
-
-                // const rect = new Picture(drawing.objectId, {
-                //     url: objectTransform.imageProperties?.contentUrl || '',                //     left: aLeft + docsLeft + this._liquid.x,
-                //     top: aTop + docsTop + this._liquid.y,
-                //     width,
-                //     height,
-                //     liY: this._liquid.y,
-                //     liX: this._liquid.x,
-                //     zIndex: 11,
-                //     isTransformer: true,
-                // });
-
-                // pageMarginCache.set(drawing.objectId, {
-                //     marginLeft: this._liquid.x,
-                //     marginTop: this._liquid.y,
-                // });
-
-                // objectList.push(rect);
+                this._pageMarginCache.set(objectId, {
+                    marginLeft: this._liquid.x,
+                    marginTop: this._liquid.y,
+                });
             });
 
             this._liquid.translatePage(

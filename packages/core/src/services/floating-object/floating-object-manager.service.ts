@@ -29,7 +29,7 @@ export interface IFloatingObjectManagerService {
 
     readonly andOrUpdate$: Observable<IFloatingObjectManagerParam[]>;
 
-    readonly pluginUpdate$: Observable<IFloatingObjectManagerSearchItemParam[]>;
+    readonly pluginUpdate$: Observable<IFloatingObjectManagerParam[]>;
 
     getFloatObject(searchItem: IFloatingObjectManagerSearchItemParam): Nullable<ITransformState>;
 

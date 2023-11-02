@@ -435,6 +435,11 @@ export class Transformer implements ITransformerConfig {
                 scene.enableEvent();
                 scene.resetCursor();
                 scrollTimer.dispose();
+
+                this.onChangeEndObservable.notifyObservers({
+                    objects: this._selectedObjectMap,
+                    type: MoveObserverType.MOVE_END,
+                });
             });
 
             state.stopPropagation();

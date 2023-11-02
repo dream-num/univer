@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Ctor, Injector } from '@wendellhu/redi';
 
-import { ErrorService } from '..';
 import { DocumentModel } from '../Docs/Domain/DocumentModel';
 import { Plugin, PluginCtor, PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
 import { CommandService, ICommandService } from '../services/command/command.service';
 import { ConfigService, IConfigService } from '../services/config/config.service';
 import { ContextService, IContextService } from '../services/context/context.service';
+import { ErrorService } from '../services/error/error.service';
 import { IUniverInstanceService, UniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
@@ -23,6 +23,12 @@ import { IDocumentData, ISlideData, IUniverData, IWorkbookConfig } from '../Type
 import { UniverDoc } from './UniverDoc';
 import { UniverSheet } from './UniverSheet';
 import { UniverSlide } from './UniverSlide';
+
+export const enum DocumentType {
+    DOC = 0,
+    SHEET = 1,
+    SLIDE = 2,
+}
 
 /**
  * Univer.

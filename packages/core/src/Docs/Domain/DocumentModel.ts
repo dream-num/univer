@@ -202,6 +202,14 @@ export class DocumentModel extends DocumentModelSimple {
         this._initializeRowColTree();
     }
 
+    getRev(): number {
+        return this.snapshot.rev ?? 0;
+    }
+
+    incrementRev(): void {
+        this.snapshot.rev = this.getRev() + 1;
+    }
+
     getSettings() {
         return this.snapshot.settings;
     }

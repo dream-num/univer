@@ -14,7 +14,13 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import MemoryCursor from '../Basics/memoryCursor';
-import { SetInlineFormatBoldCommand, SetInlineFormatCommand } from '../commands/commands/inline-format.command';
+import {
+    SetInlineFormatBoldCommand,
+    SetInlineFormatCommand,
+    SetInlineFormatItalicCommand,
+    SetInlineFormatStrikethroughCommand,
+    SetInlineFormatUnderlineCommand,
+} from '../commands/commands/inline-format.command';
 import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
@@ -37,7 +43,12 @@ export class InlineFormatController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = [SetInlineFormatBoldCommand.id];
+        const updateCommandList = [
+            SetInlineFormatBoldCommand.id,
+            SetInlineFormatItalicCommand.id,
+            SetInlineFormatUnderlineCommand.id,
+            SetInlineFormatStrikethroughCommand.id,
+        ];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {

@@ -12,16 +12,14 @@ export const SetRangeBoldCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-range-bold',
     handler: async (accessor) => {
-        console.log('SetRangeBoldCommand');
+        const commandService = accessor.get(ICommandService);
         const contextService = accessor.get(IContextService);
         const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
 
-        console.log(isCellEditorFocus);
-
         if (isCellEditorFocus) {
-            return accessor.get(ICommandService).executeCommand(SetInlineFormatBoldCommand.id);
+            return commandService.executeCommand(SetInlineFormatBoldCommand.id);
         }
 
-        return accessor.get(ICommandService).executeCommand(SetBoldCommand.id);
+        return commandService.executeCommand(SetBoldCommand.id);
     },
 };

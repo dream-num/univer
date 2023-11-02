@@ -8,6 +8,24 @@ export const SetInlineFormatBoldCommand: ICommand = {
     handler: async () => true,
 };
 
+export const SetInlineFormatItalicCommand: ICommand = {
+    id: 'doc.command.set-inline-format-italic',
+    type: CommandType.COMMAND,
+    handler: async () => true,
+};
+
+export const SetInlineFormatUnderlineCommand: ICommand = {
+    id: 'doc.command.set-inline-format-underline',
+    type: CommandType.COMMAND,
+    handler: async () => true,
+};
+
+export const SetInlineFormatStrikethroughCommand: ICommand = {
+    id: 'doc.command.set-inline-format-strikethrough',
+    type: CommandType.COMMAND,
+    handler: async () => true,
+};
+
 export const SetInlineFormatCommand: ICommand = {
     id: 'doc.command.set-inline-format',
     type: CommandType.COMMAND,

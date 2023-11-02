@@ -102,6 +102,14 @@ export class Workbook extends Disposable {
         return this._unitId;
     }
 
+    getRev(): number {
+        return this._snapshot.rev ?? 0;
+    }
+
+    incrementRev(): void {
+        this._snapshot.rev = this.getRev() + 1;
+    }
+
     getShouldRenderLoopImmediately() {
         const should = this._snapshot.shouldStartRenderingImmediately;
         return should !== false;

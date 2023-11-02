@@ -177,12 +177,6 @@ importers:
       '@univerjs/sheets-plugin-find':
         specifier: workspace:*
         version: link:../../packages/sheets-plugin-find
-      '@univerjs/sheets-plugin-formula':
-        specifier: workspace:*
-        version: link:../../packages/sheets-plugin-formula
-      '@univerjs/sheets-plugin-image':
-        specifier: workspace:*
-        version: link:../../packages/sheets-plugin-image
       '@univerjs/sheets-plugin-import-xlsx':
         specifier: workspace:*
         version: link:../../packages/sheets-plugin-import-xlsx
@@ -853,9 +847,6 @@ importers:
 
   packages/sheets-plugin-formula:
     dependencies:
-      '@univerjs/base-formula-engine':
-        specifier: workspace:*
-        version: link:../base-formula-engine
       '@univerjs/base-render':
         specifier: workspace:*
         version: link:../base-render
@@ -883,89 +874,6 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
-    devDependencies:
-      '@types/node':
-        specifier: ^20.8.9
-        version: 20.8.9
-      '@types/react':
-        specifier: ^18.2.33
-        version: 18.2.33
-      '@types/react-dom':
-        specifier: ^18.2.14
-        version: 18.2.14
-      '@vitest/coverage-v8':
-        specifier: ^0.34.6
-        version: 0.34.6(vitest@0.34.6)
-      esbuild:
-        specifier: ^0.19.5
-        version: 0.19.5
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      ts-node:
-        specifier: ^10.9.1
-        version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
-      vitest:
-        specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
-
-  packages/sheets-plugin-image:
-    dependencies:
-      '@univerjs/base-render':
-        specifier: workspace:*
-        version: link:../base-render
-      '@univerjs/base-sheets':
-        specifier: workspace:*
-        version: link:../base-sheets
-      '@univerjs/base-ui':
-        specifier: workspace:*
-        version: link:../base-ui
-      '@univerjs/common-plugin-data':
-        specifier: workspace:*
-        version: link:../common-plugin-data
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/ui-plugin-sheets':
-        specifier: workspace:*
-        version: link:../ui-plugin-sheets
-      '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
-      react-dom:
-        specifier: ^18.2.0
-        version: 18.2.0(react@18.2.0)
-    devDependencies:
-      '@types/node':
-        specifier: ^20.8.9
-        version: 20.8.9
-      '@types/react':
-        specifier: ^18.2.33
-        version: 18.2.33
-      '@types/react-dom':
-        specifier: ^18.2.14
-        version: 18.2.14
-      '@vitest/coverage-v8':
-        specifier: ^0.34.6
-        version: 0.34.6(vitest@0.34.6)
-      esbuild:
-        specifier: ^0.19.5
-        version: 0.19.5
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      ts-node:
-        specifier: ^10.9.1
-        version: 10.9.1(@types/node@20.8.9)(typescript@5.2.2)
-      vitest:
-        specifier: ^0.34.6
-        version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
   packages/sheets-plugin-import-xlsx:
     dependencies:

@@ -1,0 +1,14 @@
+{
+    "name": "@univerjs/sheets-plugin-formula",
+    "dependencies": {
+        "@univerjs/base-render": "workspace:*",
+        "@univerjs/base-sheets": "workspace:*",
+        "@univerjs/base-ui": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/ui-plugin-sheets": "workspace:*",
+        "@wendellhu/redi": "^0.12.10",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+    }
+}

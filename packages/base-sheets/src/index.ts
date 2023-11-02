@@ -23,6 +23,7 @@ export {
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from './commands/commands/add-worksheet-merge.command';
+export { AutoFillCommand } from './commands/commands/auto-fill.command';
 export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';

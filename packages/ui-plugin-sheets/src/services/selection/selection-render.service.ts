@@ -32,8 +32,14 @@ import { SelectionRenderModel } from './selection-render-model';
 import { SelectionShape } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
 
+export interface IControlFillConfig {
+    oldRange: IRange;
+    newRange: IRange;
+}
+
 export interface ISelectionRenderService {
     readonly selectionRangeWithStyle$: Observable<ISelectionWithCoordAndStyle[]>;
+    readonly controlFillConfig$: Observable<IControlFillConfig | null>;
 
     enableHeaderHighlight(): void;
     disableHeaderHighlight(): void;
@@ -79,6 +85,10 @@ export class SelectionRenderService implements ISelectionRenderService {
     private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+
+    private _controlFillConfig$: BehaviorSubject<IControlFillConfig | null> =
+        new BehaviorSubject<IControlFillConfig | null>(null);
+    readonly controlFillConfig$ = this._controlFillConfig$.asObservable();
 
     private _selectionControls: SelectionShape[] = []; // sheetID:Controls
 
@@ -217,6 +227,39 @@ export class SelectionRenderService implements ISelectionRenderService {
         } else {
             control.disableHeaderHighlight();
         }
+        // update drag observer
+        control.selectionFilled$.subscribe((filled) => {
+            const { startColumn, endColumn, startRow, endRow } = control.model;
+            const {
+                startColumn: newStartColumn,
+                endColumn: newEndColumn,
+                startRow: newStartRow,
+                endRow: newEndRow,
+            } = filled || {};
+            // if no change happened, return
+            if (
+                startColumn === newStartColumn &&
+                endColumn === newEndColumn &&
+                startRow === newStartRow &&
+                endRow === newEndRow
+            ) {
+                return;
+            }
+            this._controlFillConfig$.next({
+                oldRange: {
+                    startColumn,
+                    endColumn,
+                    startRow,
+                    endRow,
+                },
+                newRange: {
+                    startColumn: newStartColumn || startColumn,
+                    endColumn: newEndColumn || endColumn,
+                    startRow: newStartRow || startRow,
+                    endRow: newEndRow || endRow,
+                },
+            });
+        });
 
         currentControls.push(control);
     }

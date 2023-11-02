@@ -759,7 +759,7 @@ export class SelectionShapeExtension {
             this._clearObserverEvent();
             scene.enableEvent();
             this._scrollTimer?.dispose();
-            this._control.selectionFilled$.next(this._targetSelection);
+            this._control.refreshSelectionFilled(this._targetSelection);
             this._isInMergeState = false;
             this._controlHandler((o, index) => {
                 o.setProps({

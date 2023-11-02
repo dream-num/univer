@@ -15,35 +15,39 @@ export interface IFloatingObjectManagerSearchItemParam extends IFloatingObjectMa
     floatingObjectId: string;
 }
 
-export interface IFloatingObjectManagerInsertParam extends IFloatingObjectManagerSearchItemParam {
+export interface IFloatingObjectManagerParam extends IFloatingObjectManagerSearchItemParam {
     floatingObject: ITransformState;
 }
 
 export type FloatingObjects = Map<string, ITransformState>;
 
-//{ [pluginName: string]: { [unitId: string]: { [sheetId: string]: ISelectionWithCoord[] } } }
+//{ [unitId: string]: { [sheetId: string]: ISelectionWithCoord[] } }
 export type IFloatingObjectManagerInfo = Map<string, Map<string, FloatingObjects>>;
 
 export interface IFloatingObjectManagerService {
-    readonly managerInfo$: Observable<Nullable<ITransformState>>;
+    readonly remove$: Observable<IFloatingObjectManagerParam[]>;
+
+    readonly andOrUpdate$: Observable<IFloatingObjectManagerParam[]>;
+
+    readonly pluginUpdate$: Observable<IFloatingObjectManagerSearchItemParam[]>;
 
     getFloatObject(searchItem: IFloatingObjectManagerSearchItemParam): Nullable<ITransformState>;
 
     getFloatObjects(search: IFloatingObjectManagerSearchParam): Nullable<FloatingObjects>;
 
-    reset(): void;
-
-    refresh(): void;
-
     dispose(): void;
 
     clear(search: IFloatingObjectManagerSearchParam): void;
 
-    add(insertParam: IFloatingObjectManagerInsertParam): void;
-
-    load(insertParam: IFloatingObjectManagerInsertParam): void;
+    addOrUpdate(insertParam: IFloatingObjectManagerParam): void;
 
     remove(searchItem: IFloatingObjectManagerSearchItemParam): void;
+
+    BatchAddOrUpdate(insertParam: IFloatingObjectManagerParam[]): void;
+
+    remove(searchItem: IFloatingObjectManagerSearchItemParam): void;
+
+    pluginUpdateRefresh(searchObjects: IFloatingObjectManagerParam[]): void;
 }
 
 /**
@@ -63,8 +67,27 @@ export interface IFloatingObjectManagerService {
 export class FloatingObjectManagerService implements IDisposable, IFloatingObjectManagerService {
     private readonly _managerInfo: IFloatingObjectManagerInfo = new Map();
 
-    private readonly _managerInfo$ = new Subject<Nullable<ITransformState>>();
-    readonly managerInfo$ = this._managerInfo$.asObservable();
+    /**
+     * The deletion action is triggered and broadcasted within the core business plugin.
+     * Upon receiving the deletion broadcast, the plugin executes the plugin command logic.
+     */
+    private readonly _remove$ = new Subject<IFloatingObjectManagerParam[]>();
+    readonly remove$ = this._remove$.asObservable();
+
+    /**
+     * Addition and updates are also triggered and broadcasted within the core business plugin.
+     * Upon receiving the update broadcast, the plugin updates the location of its business components.
+     */
+    private readonly _andOrUpdate$ = new Subject<IFloatingObjectManagerParam[]>();
+    readonly andOrUpdate$ = this._andOrUpdate$.asObservable();
+
+    /**
+     * The position, width, and height of the plugin's business components can be changed by the user through interface operations.
+     * Here, it is necessary to notify the core business plugin to update the relevant location model.
+     * The logic converges in the core business plugin.
+     */
+    private readonly _pluginUpdate$ = new Subject<IFloatingObjectManagerParam[]>();
+    readonly pluginUpdate$ = this._pluginUpdate$.asObservable();
 
     getFloatObject(searchItem: IFloatingObjectManagerSearchItemParam): Nullable<ITransformState> {
         return this._getFloatingObject(searchItem);
@@ -74,35 +97,38 @@ export class FloatingObjectManagerService implements IDisposable, IFloatingObjec
         return this._getFloatingObjects(search);
     }
 
-    reset(): void {
-        this._managerInfo.clear();
-
-        this._refresh();
-    }
-
     dispose(): void {
-        this._managerInfo$.complete();
+        this._remove$.complete();
+        this._andOrUpdate$.complete();
+        this._pluginUpdate$.complete();
         this._managerInfo.clear();
     }
 
     clear(search: IFloatingObjectManagerSearchParam): void {
-        this._clearByParam(search);
+        const searchObjects = this._clearByParam(search);
+        this._remove$.next(searchObjects);
     }
 
-    add(insertParam: IFloatingObjectManagerInsertParam): void {
-        this._addByParam(insertParam);
+    addOrUpdate(insertParam: IFloatingObjectManagerParam): void {
+        const searchObjects = this._addByParam(insertParam);
+        this._andOrUpdate$.next(searchObjects);
     }
 
-    load(insertParam: IFloatingObjectManagerInsertParam): void {
-        this._addByParam(insertParam, false);
+    BatchAddOrUpdate(insertParams: IFloatingObjectManagerParam[]): void {
+        const searchObjects: IFloatingObjectManagerParam[] = [];
+        insertParams.forEach((insertParam) => {
+            searchObjects.push(...this._addByParam(insertParam));
+        });
+        this._andOrUpdate$.next(searchObjects);
     }
 
     remove(searchItem: IFloatingObjectManagerSearchItemParam): void {
-        this._removeByParam(searchItem);
+        const searchObjects = this._removeByParam(searchItem);
+        this._remove$.next(searchObjects);
     }
 
-    refresh() {
-        this._refresh();
+    pluginUpdateRefresh(updateObjects: IFloatingObjectManagerParam[]) {
+        this._pluginUpdate$.next(updateObjects);
     }
 
     private _getFloatingObjects(param: Nullable<IFloatingObjectManagerSearchParam>) {
@@ -121,11 +147,7 @@ export class FloatingObjectManagerService implements IDisposable, IFloatingObjec
         return this._managerInfo.get(unitId)?.get(subComponentId)?.get(floatingObjectId);
     }
 
-    private _refresh(param?: IFloatingObjectManagerSearchItemParam): void {
-        this._managerInfo$.next(this._getFloatingObject(param));
-    }
-
-    private _addByParam(insertParam: IFloatingObjectManagerInsertParam, isRefresh = true): void {
+    private _addByParam(insertParam: IFloatingObjectManagerParam): IFloatingObjectManagerParam[] {
         const { unitId, subComponentId, floatingObject, floatingObjectId } = insertParam;
 
         if (!this._managerInfo.has(unitId)) {
@@ -140,25 +162,41 @@ export class FloatingObjectManagerService implements IDisposable, IFloatingObjec
 
         subComponentData.get(subComponentId)!.set(floatingObjectId, floatingObject);
 
-        if (isRefresh) {
-            this._refresh({ unitId, subComponentId, floatingObjectId });
-        }
+        return [{ unitId, subComponentId, floatingObjectId, floatingObject }];
     }
 
-    private _clearByParam(param: IFloatingObjectManagerSearchParam): void {
+    private _clearByParam(param: IFloatingObjectManagerSearchParam): IFloatingObjectManagerParam[] {
         const floatingObjects = this._getFloatingObjects(param);
+
+        const { unitId, subComponentId } = param;
+
+        const refreshObjects: IFloatingObjectManagerParam[] = [];
+
+        floatingObjects?.forEach((value, key) => {
+            refreshObjects.push({
+                unitId,
+                subComponentId,
+                floatingObjectId: key,
+                floatingObject: value,
+            });
+        });
 
         floatingObjects?.clear();
 
-        this._refresh();
+        return refreshObjects;
     }
 
-    private _removeByParam(param: IFloatingObjectManagerSearchItemParam): void {
+    private _removeByParam(param: IFloatingObjectManagerSearchItemParam): IFloatingObjectManagerParam[] {
         const floatingObjects = this._getFloatingObjects(param);
+        const item = floatingObjects?.get(param.floatingObjectId);
 
-        this._refresh(param);
+        if (item == null) {
+            return [];
+        }
 
         floatingObjects?.delete(param.floatingObjectId);
+
+        return [{ ...param, floatingObject: item }];
     }
 }
 

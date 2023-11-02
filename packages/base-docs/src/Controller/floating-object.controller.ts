@@ -12,6 +12,7 @@ import {
     Disposable,
     ICommandInfo,
     ICommandService,
+    IFloatingObjectManagerParam,
     IFloatingObjectManagerService,
     IUniverInstanceService,
     LifecycleStages,
@@ -22,7 +23,7 @@ import { Inject } from '@wendellhu/redi';
 import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 
-@OnLifecycle(LifecycleStages.Rendered, FloatingObjectController)
+@OnLifecycle(LifecycleStages.Steady, FloatingObjectController)
 export class FloatingObjectController extends Disposable {
     private _liquid = new Liquid();
 
@@ -42,6 +43,12 @@ export class FloatingObjectController extends Disposable {
 
     private _initialize() {
         this._initialRenderRefresh();
+
+        this._updateOnPluginChange();
+    }
+
+    private _updateOnPluginChange() {
+        this._floatingObjectManagerService.pluginUpdate$.subscribe((params) => {});
     }
 
     private _initialRenderRefresh() {
@@ -122,12 +129,16 @@ export class FloatingObjectController extends Disposable {
         const { left: docsLeft, top: docsTop } = documents;
 
         const { pages } = skeletonData;
+
+        const Objects: IFloatingObjectManagerParam[] = [];
         // const objectList: BaseObject[] = [];
         // const pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
 
         // const cumPageLeft = 0;
         // const cumPageTop = 0;
-
+        /**
+         * TODO: @DR-Univer We should not refresh all floating elements, but instead make a diff.
+         */
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
             const { skeDrawings, marginLeft, marginTop } = page;
@@ -139,7 +150,7 @@ export class FloatingObjectController extends Disposable {
             skeDrawings.forEach((drawing) => {
                 const { aLeft, aTop, height, width, objectId } = drawing;
 
-                this._floatingObjectManagerService.load({
+                Objects.push({
                     unitId,
                     subComponentId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
                     floatingObjectId: objectId,
@@ -151,9 +162,14 @@ export class FloatingObjectController extends Disposable {
                     },
                 });
 
+                // refreshObjects.push({
+                //     unitId,
+                //     subComponentId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
+                //     floatingObjectId: objectId,
+                // });
+
                 // const rect = new Picture(drawing.objectId, {
-                //     url: objectTransform.imageProperties?.contentUrl || '',
-                //     left: aLeft + docsLeft + this._liquid.x,
+                //     url: objectTransform.imageProperties?.contentUrl || '',                //     left: aLeft + docsLeft + this._liquid.x,
                 //     top: aTop + docsTop + this._liquid.y,
                 //     width,
                 //     height,
@@ -179,6 +195,6 @@ export class FloatingObjectController extends Disposable {
             );
         }
 
-        this._floatingObjectManagerService.refresh();
+        this._floatingObjectManagerService.BatchAddOrUpdate(Objects);
     }
 }

@@ -37,14 +37,15 @@ export class Univer {
     private readonly _rootInjector: Injector;
 
     private readonly _univerPluginStore = new PluginStore();
-
     private readonly _univerPluginRegistry = new PluginRegistry();
 
     private _univerSheet: UniverSheet | null = null;
-
     private _univerDoc: UniverDoc | null = null;
-
     private _univerSlide: UniverSlide | null = null;
+
+    private get _currentUniverService(): IUniverInstanceService {
+        return this._rootInjector.get(IUniverInstanceService);
+    }
 
     constructor(univerData: Partial<IUniverData> = {}) {
         this._rootInjector = this._initDependencies();
@@ -55,19 +56,16 @@ export class Univer {
         locale && this._rootInjector.get(LocaleService).setLocale(locale);
     }
 
-    dispose(): void {
-        // left empty for purpose
-        // TODO@wzhudev: dispose all the businesses
+    __getInjector(): Injector {
+        return this._rootInjector;
     }
 
-    private get _currentUniverService(): IUniverInstanceService {
-        return this._rootInjector.get(IUniverInstanceService);
+    dispose(): void {
+        this._rootInjector.dispose();
     }
 
     /** Register a plugin into univer. */
     registerPlugin<T extends Plugin>(plugin: PluginCtor<T>, configs?: any): void {
-        // TODO: type of `configs` could be optimized here using typescript infer
-
         if (plugin.type === PluginType.Univer) {
             this._registerUniverPlugin(plugin, configs);
         } else if (plugin.type === PluginType.Sheet) {

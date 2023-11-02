@@ -60,6 +60,8 @@ export type { IOffset, IScale, ISize, ITransformState } from './services/floatin
 export {
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
     FloatingObjectManagerService,
+    type IFloatingObjectManagerParam,
+    type IFloatingObjectManagerSearchItemParam,
     IFloatingObjectManagerService,
 } from './services/floating-object/floating-object-manager.service';
 export * from './Slides/Domain';

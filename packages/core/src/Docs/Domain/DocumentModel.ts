@@ -168,13 +168,13 @@ export class DocumentModelSimple {
             return;
         }
 
-        const objectProperties = drawing.objectProperties;
+        const objectTransform = drawing.objectTransform;
 
-        objectProperties.size.width = config.width;
-        objectProperties.size.height = config.height;
+        objectTransform.size.width = config.width;
+        objectTransform.size.height = config.height;
 
-        objectProperties.positionH.posOffset = config.left;
-        objectProperties.positionV.posOffset = config.top;
+        objectTransform.positionH.posOffset = config.left;
+        objectTransform.positionV.posOffset = config.top;
     }
 
     setZoomRatio(zoomRatio: number = 1) {

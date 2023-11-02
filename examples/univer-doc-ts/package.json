@@ -28,6 +28,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/ui-plugin-docs": "workspace:*",
+        "@univerjs/common-plugin-image": "workspace:*",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },

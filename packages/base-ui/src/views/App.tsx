@@ -16,8 +16,8 @@ import React, { ComponentType, useEffect, useRef, useState } from 'react';
 
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import style from './app.module.less';
-import { ContextMenu } from './components/ContextMenu';
-import { DocBars } from './components/DocBars';
+import { ContextMenu } from './components/context-menu/ContextMenu';
+import { DocBars } from './components/doc-bars/DocBars';
 import { Parts } from './Parts';
 
 export interface IUniverAppProps extends IWorkbenchOptions {

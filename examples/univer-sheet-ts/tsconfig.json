@@ -8,10 +8,7 @@
         "baseUrl": "./",
         "esModuleInterop": true, // auto allowSyntheticDefaultImports true
         "emitDecoratorMetadata": true,
-        "strictPropertyInitialization": false,
+        "strictPropertyInitialization": false
     },
-    "include": [
-        "src/**/*",
-        "test/**/*.test.(ts|tsx|js)"
-    ]
+    "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)"]
 }

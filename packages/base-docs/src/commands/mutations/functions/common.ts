@@ -36,7 +36,8 @@ export function insertTextRuns(
     for (let i = 0, len = textRuns.length; i < len; i++) {
         const textRun = textRuns[i];
         const { st, ed } = textRun;
-        if (st > currentIndex) {
+
+        if (st >= currentIndex) {
             textRun.st += textLength;
             textRun.ed += textLength;
 
@@ -50,17 +51,21 @@ export function insertTextRuns(
              * So, it is necessary to set ed >= currentIndex - 1 to ensure that the new text is inserted while maintaining the style of the existing content.
              */
             textRun.ed += textLength;
-            insertIndex = i;
+            if (!Number.isFinite(insertIndex)) {
+                insertIndex = i;
+            }
         }
     }
 
     const insertTextRuns = insertBody.textRuns;
+
     if (insertTextRuns) {
         for (let i = 0, len = insertTextRuns.length; i < len; i++) {
             const insertTextRun = insertTextRuns[i];
             insertTextRun.st += currentIndex;
             insertTextRun.ed += currentIndex;
         }
+
         if (insertIndex === Infinity) {
             textRuns.push(...insertTextRuns);
         }
@@ -69,6 +74,7 @@ export function insertTextRuns(
         } else {
             const splitTextRun = textRuns[insertIndex];
             const { st, ed } = splitTextRun;
+
             const startSplitTextRun = {
                 ...splitTextRun,
                 st,
@@ -82,8 +88,15 @@ export function insertTextRuns(
 
             const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
 
+            if (!lastInsertTextRuns) {
+                textRuns.splice(insertIndex, 1, startSplitTextRun);
+
+                return;
+            }
+
             if (lastInsertTextRuns.ed === ed) {
                 textRuns.splice(insertIndex, 1, startSplitTextRun, ...insertTextRuns);
+
                 return;
             }
 
@@ -313,18 +326,19 @@ export function insertCustomRanges(
 
 export function deleteTextRuns(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { textRuns } = body;
-
     const startIndex = currentIndex;
 
-    const endIndex = currentIndex + textLength - 1;
+    const endIndex = currentIndex + textLength;
     const removeTextRuns: ITextRun[] = [];
+
     if (textRuns) {
         const newTextRuns = [];
+
         for (let i = 0, len = textRuns.length; i < len; i++) {
             const textRun = textRuns[i];
             const { st, ed } = textRun;
 
-            if (startIndex <= st - 1 && endIndex >= ed - 1) {
+            if (startIndex <= st && endIndex >= ed) {
                 /**
                  * If the selection range is larger than the current textRuns, it needs to be deleted.
                  */
@@ -334,16 +348,21 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     ed: ed - startIndex,
                 });
                 continue;
-            } else if (st - 1 < startIndex && ed - 1 >= endIndex) {
+            } else if (st <= startIndex && ed >= endIndex) {
                 /**
                  * If the selection range is smaller than the current textRun,
                  * it needs to be trimmed. After trimming, the two segments of textRun should be merged.
                  */
-                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
+                removeTextRuns.push({
+                    ...textRun,
+                    st: startIndex - startIndex,
+                    ed: endIndex - startIndex,
+                });
+                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex - 1);
 
                 textRun.st = segments[0];
                 textRun.ed = segments[1];
-            } else if (startIndex > st - 1 && startIndex <= ed - 1) {
+            } else if (startIndex >= st && startIndex < ed) {
                 /**
                  * If the cursor start position is within the textRun,
                  * the content on the right side of the textRun needs to be removed,
@@ -355,7 +374,7 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     ed: ed - startIndex,
                 });
                 textRun.ed = startIndex;
-            } else if (endIndex > st - 1 && endIndex <= ed - 1) {
+            } else if (endIndex > st && endIndex <= ed) {
                 /**
                  * If the cursor end position is within the textRun,
                  * the content on the left side of the textRun needs to be removed,
@@ -366,17 +385,19 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     st: st - startIndex,
                     ed: endIndex - startIndex,
                 });
-                textRun.st = endIndex - textLength + 1;
+                textRun.st = endIndex - textLength;
                 textRun.ed -= textLength;
-            } else if (st > endIndex) {
+            } else if (st >= endIndex) {
                 /**
                  * TextRuns to the right of the selection content need to be moved as a whole
                  */
                 textRun.st -= textLength;
                 textRun.ed -= textLength;
             }
+
             newTextRuns.push(textRun);
         }
+
         body.textRuns = newTextRuns;
     }
 

@@ -21,6 +21,7 @@ import {
     InsertCommand,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
+import { SetInlineFormatBoldCommand, SetInlineFormatCommand } from './commands/commands/inline-format.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { MoveCursorOperation } from './commands/operations/cursor.operation';
@@ -29,6 +30,7 @@ import { SetTextSelectionsOperation } from './commands/operations/text-selection
 import { DeleteLeftInputController } from './Controller/delete-left-input.controller';
 import { DocRenderController } from './Controller/doc-render.controller';
 import { IMEInputController } from './Controller/ime-input.controller';
+import { InlineFormatController } from './Controller/inline-format.controller';
 import { LineBreakInputController } from './Controller/line-break-input.controller';
 import { MoveCursorController } from './Controller/move-cursor.controller';
 import { NormalInputController } from './Controller/normal-input.controller';
@@ -96,6 +98,8 @@ export class DocPlugin extends Plugin {
             [
                 MoveCursorOperation,
                 DeleteLeftCommand,
+                SetInlineFormatBoldCommand,
+                SetInlineFormatCommand,
                 BreakLineCommand,
                 InsertCommand,
                 DeleteCommand,
@@ -174,6 +178,7 @@ export class DocPlugin extends Plugin {
                 [NormalInputController],
                 [IMEInputController],
                 [DeleteLeftInputController],
+                [InlineFormatController],
                 [LineBreakInputController],
                 [MoveCursorController],
                 [ZoomController],

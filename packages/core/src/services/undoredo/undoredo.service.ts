@@ -106,6 +106,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
 
     pitchTopUndoElement(): IUndoRedoItem | null {
         const undoStack = this.getUndoStackForFocused();
+
         if (undoStack.length) {
             return undoStack[undoStack.length - 1];
         }
@@ -221,6 +222,7 @@ export const UndoCommand = new (class extends MultiImplementationCommand impleme
         const result = await element.undo();
         if (result) {
             undoRedoService.popUndoToRedo();
+
             return true;
         }
 
@@ -243,6 +245,7 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
         const result = await element.redo();
         if (result) {
             undoRedoService.popRedoToUndo();
+
             return true;
         }
 

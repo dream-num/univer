@@ -73,16 +73,20 @@ export class DocumentBodyModelSimple implements IDisposable {
         const sectionList: DataStreamTreeNode[] = [];
         let nodeList: DataStreamTreeNode[] = [];
         let currentBlocks: number[] = [];
+
         // let paragraphIndex = 0;
         for (let i = 0; i < dataStreamLen; i++) {
             const char = dataStream[i];
+
             if (char === DataStreamTreeTokenType.PARAGRAPH) {
                 content += DataStreamTreeTokenType.PARAGRAPH;
+
                 const node = DataStreamTreeNode.create(
                     DataStreamTreeNodeType.PARAGRAPH,
 
                     content
                 );
+
                 // const isBullet = this._checkParagraphBullet(paragraphIndex);
                 // const isIndent = isBullet === true ? true : this._checkParagraphIndent(paragraphIndex);
                 // paragraphIndex++;
@@ -95,11 +99,15 @@ export class DocumentBodyModelSimple implements IDisposable {
                 currentBlocks = [];
             } else if (char === DataStreamTreeTokenType.SECTION_BREAK) {
                 const sectionTree = DataStreamTreeNode.create(DataStreamTreeNodeType.SECTION_BREAK);
+
                 this._batchParent(sectionTree, nodeList);
+
                 const lastNode = nodeList[nodeList.length - 1];
+
                 if (lastNode && lastNode.content) {
                     lastNode.content += DataStreamTreeTokenType.SECTION_BREAK;
                 }
+
                 sectionList.push(sectionTree);
                 nodeList = [];
             } else if (char === DataStreamTreeTokenType.TABLE_START) {
@@ -233,6 +241,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         const dataStream = insertBody.dataStream;
         let dataStreamLen = dataStream.length;
         const insertedNode = this.getParagraphByTree(this.children, insertIndex);
+
         if (insertedNode == null) {
             return;
         }
@@ -244,7 +253,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             const insertNodes = insertBodyModel.children;
 
             for (const node of insertNodes) {
-                this.foreachDown(node, (newNode) => {
+                this.forEachDown(node, (newNode) => {
                     newNode.plus(insertIndex);
                 });
             }
@@ -265,7 +274,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                 insertedLastNode
             );
 
-            this.foreachTop(insertedNode.parent, (currentNode) => {
+            this.forEachTop(insertedNode.parent, (currentNode) => {
                 // currentNode.endIndex += dataStreamLen;
                 currentNode.selfPlus(dataStreamLen, currentNode.getPositionInParent());
                 const children = currentNode.children;
@@ -279,7 +288,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                         continue;
                     }
 
-                    this.foreachDown(node, (newNode) => {
+                    this.forEachDown(node, (newNode) => {
                         newNode.plus(dataStreamLen);
                     });
                 }
@@ -292,7 +301,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             // insertedNode.endIndex += dataStreamLen;
             insertedNode.selfPlus(dataStreamLen, insertIndex);
 
-            this.foreachTop(insertedNode.parent, (currentNode) => {
+            this.forEachTop(insertedNode.parent, (currentNode) => {
                 // currentNode.endIndex += dataStreamLen;
                 currentNode.selfPlus(dataStreamLen, currentNode.getPositionInParent());
                 const children = currentNode.children;
@@ -306,7 +315,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                         continue;
                     }
 
-                    this.foreachDown(node, (newNode) => {
+                    this.forEachDown(node, (newNode) => {
                         newNode.plus(dataStreamLen);
                     });
                 }
@@ -319,21 +328,25 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         this.deleteTree(nodes, currentIndex, textLength);
     }
 
-    getParagraphByTree(nodes: DataStreamTreeNode[], insertIndex: number): Nullable<DataStreamTreeNode> {
+    private getParagraphByTree(nodes: DataStreamTreeNode[], insertIndex: number): Nullable<DataStreamTreeNode> {
         for (const node of nodes) {
-            const { startIndex, endIndex, children } = node;
+            const { children } = node;
+
             if (node.exclude(insertIndex)) {
                 continue;
             }
+
             if (node.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
                 return node;
             }
+
             return this.getParagraphByTree(children, insertIndex);
         }
+
         return null;
     }
 
-    foreachTop(
+    private forEachTop(
         node: Nullable<DataStreamTreeNode>,
         func: (node: DataStreamTreeNode | DocumentBodyModelOrSimple) => void
     ) {
@@ -346,11 +359,13 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         func(this);
     }
 
-    foreachDown(node: DataStreamTreeNode, func: (node: DataStreamTreeNode) => void) {
+    private forEachDown(node: DataStreamTreeNode, func: (node: DataStreamTreeNode) => void) {
         func(node);
+
         const children = node.children;
+
         for (node of children) {
-            this.foreachDown(node, func);
+            this.forEachDown(node, func);
         }
     }
 
@@ -457,8 +472,9 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
 
         const curTextRun = textRuns[this.textRunCurrentIndex];
+
         if (curTextRun != null) {
-            if (index >= curTextRun.st && index <= curTextRun.ed) {
+            if (index >= curTextRun.st && index < curTextRun.ed) {
                 return curTextRun;
             }
 
@@ -469,6 +485,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
 
         for (let i = this.textRunCurrentIndex, textRunsLen = textRuns.length; i < textRunsLen; i++) {
             const textRun = textRuns[i];
+
             if (index >= textRun.st && index < textRun.ed) {
                 this.textRunCurrentIndex = i;
                 return textRun;
@@ -633,7 +650,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
 
         insertedFirstNode.plus(insertStartIndex);
 
-        this.foreachDown(insertedLastNode, (newNode) => {
+        this.forEachDown(insertedLastNode, (newNode) => {
             newNode.plus(insertStartIndex + 1);
         });
 
@@ -644,7 +661,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             insertedLastNode
         );
 
-        this.foreachTop(insertedNode.parent, (currentNode) => {
+        this.forEachTop(insertedNode.parent, (currentNode) => {
             // currentNode.endIndex += dataStreamLen;
             currentNode.selfPlus(1, currentNode.getPositionInParent());
             const children = currentNode.children;
@@ -658,7 +675,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                     continue;
                 }
 
-                this.foreachDown(node, (newNode) => {
+                this.forEachDown(node, (newNode) => {
                     newNode.plus(1);
                 });
             }

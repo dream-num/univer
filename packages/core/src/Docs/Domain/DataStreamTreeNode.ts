@@ -35,14 +35,15 @@ export class DataStreamTreeNode {
     }
 
     getProps() {
-        return {
-            children: this.children,
-            parent: this.parent,
-            startIndex: this.startIndex,
-            endIndex: this.endIndex,
-            nodeType: this.nodeType,
+        const { children, parent, startIndex, endIndex, nodeType, content } = this;
 
-            content: this.content,
+        return {
+            children,
+            parent,
+            startIndex,
+            endIndex,
+            nodeType,
+            content,
         };
     }
 
@@ -60,7 +61,9 @@ export class DataStreamTreeNode {
     }
 
     exclude(index: number) {
-        return index < this.startIndex || index > this.endIndex;
+        const { startIndex, endIndex } = this;
+
+        return index < startIndex || index > endIndex;
     }
 
     plus(len: number) {
@@ -197,13 +200,17 @@ export class DataStreamTreeNode {
         if (this.nodeType !== DataStreamTreeNodeType.PARAGRAPH) {
             return;
         }
+
         if (this.content == null) {
             return;
         }
+
         if (this.content.length === 0) {
             return;
         }
+
         this.blocks = [];
+
         for (let i = 0, len = this.content.length; i < len; i++) {
             const char = this.content[i];
             if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {

@@ -79,7 +79,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     bl: BooleanNumber.TRUE,
                     fs: 24,
                     cl: {
-                        rgb: 'rgb(0,40,86)',
+                        rgb: 'rgb(0, 40, 86)',
                     },
                 },
             },
@@ -89,7 +89,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 ts: {
                     fs: 18,
                     cl: {
-                        rgb: 'rgb(0,40,86)',
+                        rgb: 'rgb(0, 40, 86)',
                     },
                 },
             },

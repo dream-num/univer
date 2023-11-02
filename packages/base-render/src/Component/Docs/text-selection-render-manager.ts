@@ -306,6 +306,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     getActiveRange(): Nullable<ITextSelectionRangeWithStyle> {
         const range = this.getActiveTextSelection()?.getRange();
+
         if (range == null) {
             return;
         }

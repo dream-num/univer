@@ -94,10 +94,12 @@ function updateTextRuns(
     }
 
     const removeTextRuns = deleteTextRuns(body, textLength, currentIndex);
+
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateTextRun = coverTextRun(updateDataTextRuns, removeTextRuns, coverType);
         updateBody.textRuns = newUpdateTextRun;
     }
+
     insertTextRuns(body, updateBody, textLength, currentIndex);
 
     return removeTextRuns;
@@ -105,75 +107,37 @@ function updateTextRuns(
 
 function coverTextRun(updateDataTextRuns: ITextRun[], removeTextRuns: ITextRun[], coverType: UpdateDocsAttributeType) {
     const newUpdateTextRun: ITextRun[] = [];
-    for (const updateTextRun of updateDataTextRuns) {
-        let { st: updateSt } = updateTextRun;
-        const { ed: updateEd, ts: updateStyle } = updateTextRun;
-        let splitUpdateTextRuns: ITextRun[] = [];
-        for (const removeTextRun of removeTextRuns) {
-            const { st: removeSt, ed: removeEd, ts: removeStyle, sId } = removeTextRun;
-            let newTs;
-            if (coverType === UpdateDocsAttributeType.COVER) {
-                newTs = { ...removeStyle, ...updateStyle };
-            } else {
-                newTs = { ...updateStyle, ...removeStyle };
-            }
-            if (updateSt >= removeSt && updateEd <= removeEd) {
-                splitUpdateTextRuns.push({
-                    st: updateSt,
-                    ed: updateEd,
-                    ts: newTs,
-                    sId,
-                });
-                continue;
-            } else if (updateSt <= removeSt && updateEd >= removeEd) {
-                if (updateSt <= removeSt - 1) {
-                    splitUpdateTextRuns.push({
-                        st: updateSt,
-                        ed: removeSt - 1,
-                        ts: newTs,
-                        sId,
-                    });
-                }
-                splitUpdateTextRuns.push({
-                    st: removeSt,
-                    ed: removeEd,
-                    ts: newTs,
-                    sId,
-                });
-                splitUpdateTextRuns.push({
-                    st: removeEd + 1,
-                    ed: updateEd,
-                    ts: newTs,
-                    sId,
-                });
+    let updateIndex = 0;
+    let removeIndex = 0;
 
-                updateSt = removeEd + 1;
-            } else if (updateSt >= removeSt && updateSt <= removeEd) {
-                splitUpdateTextRuns.push({
-                    st: updateSt,
-                    ed: removeEd,
-                    ts: newTs,
-                    sId,
-                });
-                splitUpdateTextRuns.push({
-                    st: removeEd + 1,
-                    ed: updateEd,
-                    ts: newTs,
-                    sId,
-                });
-                updateSt = removeEd + 1;
-            } else if (updateEd >= removeSt && updateEd <= removeEd) {
-                splitUpdateTextRuns.push({
-                    st: removeSt,
-                    ed: updateEd,
-                    ts: newTs,
-                    sId,
-                });
-            }
+    while (updateIndex !== updateDataTextRuns.length && removeIndex !== removeTextRuns.length) {
+        const { st: updateSt, ed: updateEd, ts: updateStyle } = updateDataTextRuns[updateIndex];
+        const { st: removeSt, ed: removeEd, ts: removeStyle, sId } = removeTextRuns[removeIndex];
+        let newTs;
+
+        if (coverType === UpdateDocsAttributeType.COVER) {
+            newTs = { ...removeStyle, ...updateStyle };
+        } else {
+            newTs = { ...updateStyle, ...removeStyle };
         }
-        newUpdateTextRun.push(...splitUpdateTextRuns);
-        splitUpdateTextRuns = [];
+
+        newUpdateTextRun.push({
+            st: updateSt >= removeSt ? updateSt : removeSt,
+            ed: updateEd >= removeEd ? removeEd : updateEd,
+            ts: newTs,
+            sId,
+        });
+
+        if (updateEd > removeEd) {
+            removeIndex++;
+        } else if (updateEd === removeEd) {
+            updateIndex++;
+            removeIndex++;
+        } else {
+            updateIndex++;
+        }
     }
+
     return newUpdateTextRun;
 }
 

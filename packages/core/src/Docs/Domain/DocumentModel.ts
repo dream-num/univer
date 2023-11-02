@@ -61,13 +61,14 @@ export class DocumentModelSimple {
             headerTree.dispose();
         });
 
-        this.footerTreeMap.forEach((headerTree) => {
-            headerTree.dispose();
+        this.footerTreeMap.forEach((footerTree) => {
+            footerTree.dispose();
         });
     }
 
     getShouldRenderLoopImmediately() {
         const should = this.snapshot.shouldStartRenderingImmediately;
+
         return should !== false;
     }
 
@@ -104,7 +105,8 @@ export class DocumentModelSimple {
     }
 
     updateDocumentRenderConfig(config: IDocumentRenderConfig) {
-        const documentStyle = this.snapshot.documentStyle;
+        const { documentStyle } = this.snapshot;
+
         if (documentStyle.renderConfig == null) {
             documentStyle.renderConfig = config;
         } else {
@@ -117,7 +119,8 @@ export class DocumentModelSimple {
 
     updateDocumentDataMargin(data: IPaddingData) {
         const { t, l, b, r } = data;
-        const documentStyle = this.snapshot.documentStyle;
+        const { documentStyle } = this.snapshot;
+
         if (t != null) {
             documentStyle.marginTop = t;
         }
@@ -136,7 +139,8 @@ export class DocumentModelSimple {
     }
 
     updateDocumentDataPageSize(width?: number, height?: number) {
-        const documentStyle = this.snapshot.documentStyle;
+        const { documentStyle } = this.snapshot;
+
         if (!documentStyle.pageSize) {
             width = width ?? Infinity;
             height = height ?? Infinity;
@@ -144,6 +148,7 @@ export class DocumentModelSimple {
                 width,
                 height,
             };
+
             return;
         }
 
@@ -157,24 +162,21 @@ export class DocumentModelSimple {
     }
 
     updateDrawing(id: string, config: IDrawingUpdateConfig) {
-        const drawings = this.drawings;
-        if (!drawings) {
-            return;
-        }
-
-        const drawing = drawings[id];
+        const { drawings } = this;
+        const { width, height, left, top } = config;
+        const drawing = drawings?.[id];
 
         if (!drawing) {
             return;
         }
 
-        const objectProperties = drawing.objectProperties;
+        const { objectProperties } = drawing;
 
-        objectProperties.size.width = config.width;
-        objectProperties.size.height = config.height;
+        objectProperties.size.width = width;
+        objectProperties.size.height = height;
 
-        objectProperties.positionH.posOffset = config.left;
-        objectProperties.positionV.posOffset = config.top;
+        objectProperties.positionH.posOffset = left;
+        objectProperties.positionV.posOffset = top;
     }
 
     setZoomRatio(zoomRatio: number = 1) {
@@ -223,6 +225,7 @@ export class DocumentModel extends DocumentModelSimple {
         this._unitId = unitId;
     }
 
+    // TODO: @jocs The function name and content don't match?
     private _initializeRowColTree() {
         this.headerTreeMap = new Map();
         this.footerTreeMap = new Map();

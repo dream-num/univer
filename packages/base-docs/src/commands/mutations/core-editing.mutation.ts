@@ -1,5 +1,13 @@
-import { CommandType, IDocumentBody, IMutation, IUniverInstanceService, UpdateDocsAttributeType } from '@univerjs/core';
+import {
+    CommandType,
+    IDocumentBody,
+    IMutation,
+    IUniverInstanceService,
+    Tools,
+    UpdateDocsAttributeType,
+} from '@univerjs/core';
 
+import MemoryCursor from '../../Basics/memoryCursor';
 import { DeleteApply } from './functions/delete-apply';
 import { InsertApply } from './functions/insert-apply';
 import { UpdateAttributeApply } from './functions/update-apply';
@@ -58,37 +66,48 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         }
 
         const undoMutations: Array<IRetainMutationParams | IInsertMutationParams | IDeleteMutationParams> = [];
-        const commonParameter = new CommonParameter();
-        commonParameter.reset();
+        const memoryCursor = new MemoryCursor();
+
+        memoryCursor.reset();
+
         mutations.forEach((mutation) => {
+            // FIXME: @jocs Since UpdateAttributeApply modifies the mutation(used in undo/redo),
+            // so make a deep copy here, does UpdateAttributeApply need to
+            // be modified to have no side effects in the future?
+            mutation = Tools.deepClone(mutation);
+
             if (mutation.t === 'r') {
                 const { coverType, body, len, segmentId } = mutation;
+
                 if (body != null) {
                     const documentBody = UpdateAttributeApply(
                         documentModel,
                         body,
                         len,
-                        commonParameter.cursor,
+                        memoryCursor.cursor,
                         coverType,
                         segmentId
                     );
+
                     undoMutations.push({
                         ...mutation,
                         t: 'r',
                         coverType: UpdateDocsAttributeType.REPLACE,
                         body: documentBody,
                     });
+                } else {
+                    undoMutations.push({
+                        ...mutation,
+                        t: 'r',
+                    });
                 }
 
-                commonParameter.moveCursor(len);
-                undoMutations.push({
-                    ...mutation,
-                    t: 'r',
-                });
+                memoryCursor.moveCursor(len);
             } else if (mutation.t === 'i') {
                 const { body, len, segmentId, line } = mutation;
-                InsertApply(documentModel, body!, len, commonParameter.cursor, segmentId);
-                commonParameter.moveCursor(len);
+
+                InsertApply(documentModel, body!, len, memoryCursor.cursor, segmentId);
+                memoryCursor.moveCursor(len);
                 undoMutations.push({
                     t: 'd',
                     len,
@@ -97,7 +116,8 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                 });
             } else if (mutation.t === 'd') {
                 const { len, segmentId } = mutation;
-                const documentBody = DeleteApply(documentModel, len, commonParameter.cursor, segmentId);
+                const documentBody = DeleteApply(documentModel, len, memoryCursor.cursor, segmentId);
+
                 undoMutations.push({
                     ...mutation,
                     t: 'i',
@@ -114,16 +134,3 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         };
     },
 };
-
-class CommonParameter {
-    cursor: number = 0;
-
-    reset() {
-        this.cursor = 0;
-        return this;
-    }
-
-    moveCursor(pos: number) {
-        this.cursor += pos;
-    }
-}

@@ -23,6 +23,7 @@ export function horizontalLineSegmentsSubtraction(A1: number, A2: number, B1: nu
 
     const subLength = B2 - B1 + 1;
     let result: number[] = [];
+
     if (A1 === B1) {
         // Subtract the start segment
         result = [B2 + 1 - subLength, A2 - subLength];

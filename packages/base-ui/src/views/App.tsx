@@ -18,6 +18,7 @@ import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import style from './app.module.less';
 import { ContextMenu } from './components/ContextMenu';
 import { DocBars } from './components/DocBars';
+import { Parts } from './Parts';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     headerComponents?: Set<() => ComponentType>;
@@ -128,6 +129,7 @@ export function App(props: IUniverAppProps) {
                     </Layout>
                 </Layout>
             </Container>
+            <Parts />
         </ConfigProvider>
     );
 }

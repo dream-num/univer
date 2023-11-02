@@ -146,8 +146,6 @@ class NotificationInstance {
 
 const instance = new NotificationInstance();
 
-const notification = {
+export const notification = {
     show: (options: INotificationMethodOptions) => instance.show(options),
 };
-
-export { notification };

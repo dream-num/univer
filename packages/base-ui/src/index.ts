@@ -20,6 +20,8 @@ export {
     type IContextMenuHandler,
     IContextMenuService,
 } from './services/contextmenu/contextmenu.service';
+export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
+export { IDialogService } from './services/dialog/dialog.service';
 export {
     type ICustomComponentOption,
     type ICustomComponentProps,

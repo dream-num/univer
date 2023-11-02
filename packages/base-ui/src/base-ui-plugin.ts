@@ -10,6 +10,8 @@ import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { enUS } from './locale';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
+import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
+import { IDialogService } from './services/dialog/dialog.service';
 import { DesktopFocusService, IFocusService } from './services/focus/focus.service';
 import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 import { DesktopMenuService, IMenuService } from './services/menu/menu.service';
@@ -68,6 +70,7 @@ export class UIPlugin extends Plugin {
             [IContextMenuService, { useClass: DesktopContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
+            [IDialogService, { useClass: DesktopDialogService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             // controllers

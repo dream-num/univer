@@ -7,7 +7,7 @@ import { createRoot } from 'react-dom/client';
 import { Observable, Subject } from 'rxjs';
 
 import { IFocusService } from '../../services/focus/focus.service';
-import { App } from '../../views/app';
+import { App } from '../../views/App';
 import { IUIController, IWorkbenchOptions } from './ui.controller';
 
 export enum DesktopUIPart {

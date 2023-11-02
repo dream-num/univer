@@ -3,9 +3,10 @@ import { LocaleType } from '@univerjs/core';
 import { defaultTheme, greenTheme } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';
 
+import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
+import { NotificationOperation } from '../commands/operations/notification.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
-import { UIComponentOperation } from '../commands/operations/ui-component.operation';
 
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
@@ -46,29 +47,46 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         ],
     };
 }
-export function UIComponentMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+
+export function NotificationMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
-        id: UIComponentOperation.id,
+        id: NotificationOperation.id,
         title: 'debugger.uiComponent.title',
         tooltip: 'debugger.uiComponent.tooltip',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
-                label: 'Notification Success',
-                value: 'Notification Success random string to test Notification Success random string to test Notification Success random string to test Notification Success random string to test Notification Success random string to test',
+                label: 'Dialog Success',
+                value: 'Dialog Success random string to test Dialog Success random string to test Dialog Success random string to test Dialog Success random string to test Dialog Success random string to test',
             },
             {
-                label: 'Notification Info',
-                value: 'Notification Info',
+                label: 'Dialog Info',
+                value: 'Dialog Info',
             },
             {
-                label: 'Notification Warning',
-                value: 'Notification Warning',
+                label: 'Dialog Warning',
+                value: 'Dialog Warning',
             },
             {
-                label: 'Notification Error',
-                value: 'Notification Error',
+                label: 'Dialog Error',
+                value: 'Dialog Error',
+            },
+        ],
+    };
+}
+
+export function DialogMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: DialogOperation.id,
+        title: 'debugger.uiComponent.title',
+        tooltip: 'debugger.uiComponent.tooltip',
+        type: MenuItemType.SELECTOR,
+        positions: [MenuPosition.TOOLBAR_OTHERS],
+        selections: [
+            {
+                label: 'Open dialog',
+                value: 'dialog',
             },
         ],
     };

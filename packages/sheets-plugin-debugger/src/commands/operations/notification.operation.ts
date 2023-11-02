@@ -6,8 +6,8 @@ export interface IUIComponentCommandParams {
     value: string;
 }
 
-export const UIComponentOperation: ICommand = {
-    id: 'debugger.operation.ui-component',
+export const NotificationOperation: ICommand = {
+    id: 'debugger.operation.notification',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IUIComponentCommandParams) => {
         const notificationService = accessor.get(INotificationService);

@@ -8,7 +8,6 @@ import {
     SetWorksheetOrderMutation,
     SetWorksheetShowCommand,
 } from '@univerjs/base-sheets';
-import { joinClassNames } from '@univerjs/base-ui';
 import {
     BooleanNumber,
     DisposableCollection,
@@ -127,11 +126,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
             overlay={
                 <ul className={styles.sheetBarMenu} style={{ ...style }}>
                     {menu.map((item) => (
-                        <li
-                            key={item.index}
-                            onClick={() => handleClick(item)}
-                            className={joinClassNames(styles.sheetBarMenuItem)}
-                        >
+                        <li key={item.index} onClick={() => handleClick(item)} className={styles.sheetBarMenuItem}>
                             <span className={styles.sheetBarMenuItemIcon}>
                                 {item.selected ? <CheckMarkSingle /> : ''}
                             </span>

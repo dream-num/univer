@@ -1,6 +1,7 @@
 import { isRealNum } from '@univerjs/core';
 import { MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import clsx from 'clsx';
 import RcMenu, { MenuItem as RcMenuItem, SubMenu as RcSubMenu } from 'rc-menu';
 import React, { useState } from 'react';
 import { isObservable, of } from 'rxjs';
@@ -18,8 +19,7 @@ import {
     MenuItemType,
 } from '../../services/menu/menu';
 import { IMenuService } from '../../services/menu/menu.service';
-import { joinClassNames } from '../../Utils';
-import { NeoCustomLabel } from '../CustomLabel/CustomLabel';
+import { CustomLabel } from '../custom-label/CustomLabel';
 import { useObservable } from '../hooks/observable';
 import styles from './index.module.less';
 
@@ -31,7 +31,6 @@ export interface IBaseMenuProps {
     options?: Array<IValueOption | ICustomComponentOption>;
 
     onOptionSelect?: (option: IValueOption) => void;
-    onClose?: () => void;
 }
 
 function MenuWrapper(props: IBaseMenuProps) {
@@ -87,7 +86,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                 <RcMenuItem
                     key={key}
                     eventKey={key}
-                    className={joinClassNames(
+                    className={clsx(
                         styles.menuItem,
                         option.disabled ? styles.colsMenuitemDisabled : ''
                         // String(value) === String(option.value) ? styles.selectItemSelected : '' // Set the background color of Item
@@ -98,7 +97,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                         });
                     }}
                 >
-                    <NeoCustomLabel
+                    <CustomLabel
                         selected={String(value) === String(option.value)} // use √ for select
                         value={String(option.value)}
                         label={option.label}
@@ -114,7 +113,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
             <RcMenuItem
                 key={key}
                 eventKey={key}
-                className={joinClassNames(
+                className={clsx(
                     styles.menuItem,
                     styles.menuItemCustom,
                     option.disabled ? styles.colsMenuitemDisabled : ''
@@ -140,12 +139,12 @@ export const Menu = (props: IBaseMenuProps) => (
     </RcMenu>
 );
 
-export interface IMenuItemProps {
+interface IMenuItemProps {
     menuItem: IDisplayMenuItem<IMenuItem>;
     onClick: (params: Partial<IValueOption>) => void;
 }
 
-export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
+function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const menuService = useDependency(IMenuService);
 
     const menuItems = menuItem.id ? menuService.getMenuItems(menuItem.id) : [];
@@ -172,23 +171,13 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             <RcMenuItem
                 key={item.id}
                 eventKey={item.id}
-                className={joinClassNames(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
+                className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
                 // disabled={disabled} // FIXME disabled is not working
                 onClick={() => {
                     onClick({ value: inputValue, id: item.id }); // merge cell
                 }}
             >
-                <NeoCustomLabel
-                    value={inputValue}
-                    title={title}
-                    label={label}
-                    icon={item.icon}
-                    onChange={onChange}
-                    onValueChange={() => {
-                        // Right-click the menu for the title bar, and the Enter key triggers after entering the row height
-                        onClick({ value: inputValue, id: item.id });
-                    }}
-                />
+                <CustomLabel value={inputValue} title={title} label={label} icon={item.icon} onChange={onChange} />
             </RcMenuItem>
         );
     };
@@ -212,11 +201,11 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 <RcSubMenu
                     key={item.id}
                     eventKey={item.id}
-                    className={joinClassNames(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
+                    className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
                     popupOffset={[18, 0]}
                     title={
                         <>
-                            <NeoCustomLabel
+                            <CustomLabel
                                 title={item.title}
                                 value={inputValue}
                                 onChange={onChange}
@@ -226,9 +215,7 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                             {item.shortcut && ` (${item.shortcut})`}
                         </>
                     }
-                    expandIcon={
-                        <MoreSingle style={{ color: styles.textColorSecondary, fontSize: styles.fontSizeXs }} />
-                    }
+                    expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
                 >
                     {selections.length > 0 && (
                         <MenuOptionsWrapper
@@ -248,9 +235,9 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             <RcMenuItem
                 key={item.id}
                 eventKey={item.id}
-                className={joinClassNames(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
+                className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
             >
-                <NeoCustomLabel
+                <CustomLabel
                     title={item.title}
                     value={inputValue}
                     onChange={onChange}
@@ -269,14 +256,14 @@ export function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             <RcSubMenu
                 key={item.id}
                 eventKey={item.id}
-                className={joinClassNames(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
+                className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
                 popupOffset={[18, 0]}
                 title={
                     <>
-                        <NeoCustomLabel title={item.title} value={item.title} icon={item.icon} label={item.label} />
+                        <CustomLabel title={item.title} value={item.title} icon={item.icon} label={item.label} />
                     </>
                 }
-                expandIcon={<MoreSingle style={{ color: styles.textColorSecondary, fontSize: styles.fontSizeXs }} />}
+                expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
             >
                 {menuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}
             </RcSubMenu>

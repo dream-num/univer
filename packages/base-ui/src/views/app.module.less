@@ -9,27 +9,15 @@
         display: flex;
 
         .content-inner-left-container {
-            // position: relative;
             width: 50%;
             padding-right: 10px;
             flex: none;
-
-            .hover-cursor {
-                position: absolute;
-                right: 0;
-                top: 0;
-                height: 100%;
-                width: 10px;
-                background: gray;
-                cursor: e-resize;
-            }
         }
 
         .content-inner-right-container {
             width: 50%;
             background-color: rgb(var(--bg-color-secondary));
             flex: 1;
-            // position: relative;
         }
     }
 
@@ -40,20 +28,9 @@
         position: relative;
 
         .content-inner-left-container {
-            // position: relative;
             height: 50%;
             padding-bottom: 10px;
             flex: none;
-
-            .hover-cursor {
-                position: absolute;
-                left: 0;
-                bottom: 0;
-                height: 10px;
-                width: 100%;
-                background: gray;
-                cursor: n-resize;
-            }
         }
 
         .content-inner-right-container {
@@ -63,6 +40,7 @@
     }
 
     .main-content {
+        position: relative;
     }
 
     .header-menu {
@@ -72,14 +50,5 @@
         height: 40px;
         top: 0;
         right: 0;
-    }
-
-    .outer-right-container {
-        // position: relative;
-        flex: 0 0 280px;
-        > div {
-            position: absolute;
-            width: 100%;
-        }
     }
 }

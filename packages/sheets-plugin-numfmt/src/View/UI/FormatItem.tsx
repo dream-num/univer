@@ -1,17 +1,14 @@
-import { AppContext, AppContextValues, BaseMenuItem, joinClassNames } from '@univerjs/base-ui';
-import React, { useContext } from 'react';
+// import { joinClassNames } from '@univerjs/base-ui';
+import { LocaleService } from '@univerjs/core';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 
-import styles from './FormatItem.module.less';
-
-export interface BaseFormatItemProps extends BaseMenuItem {
+export interface BaseFormatItemProps {
     selected?: boolean;
     labelText?: string;
-    suffix?: React.ReactNode;
+    suffix?: string;
     border?: boolean;
-}
-
-function getLocale(context: Partial<AppContextValues>, name: string) {
-    return context.localeService?.t(name);
+    disabled?: boolean;
+    value?: string;
 }
 
 /**
@@ -19,15 +16,14 @@ function getLocale(context: Partial<AppContextValues>, name: string) {
  */
 export function FormatItem(props: BaseFormatItemProps): JSX.Element {
     const { selected, labelText, suffix, disabled, value } = props;
-    const context = useContext(AppContext);
+    const localeService = useDependency(LocaleService);
 
     return (
-        <div className={joinClassNames(styles.formatItem, disabled ? styles.selectDisabledItem : '')}>
-            {selected && <span className={styles.formatItemSelected}>{/* <Icon.CorrectIcon /> */}</span>}
-            <span className={styles.formatItemContent}>{getLocale(context, labelText as string) || labelText}</span>
-            {suffix && (
-                <span className={styles.formatItemSuffix}>{getLocale(context, suffix as string) || suffix}</span>
-            )}
-        </div>
+        // <div className={joinClassNames(styles.formatItem, disabled ? styles.selectDisabledItem : '')}>
+        //     {selected && <span className={styles.formatItemSelected}>{/* <Icon.CorrectIcon /> */}</span>}
+        //     <span className={styles.formatItemContent}>{localeService.t(labelText as string) || labelText}</span>
+        //     {suffix && <span className={styles.formatItemSuffix}>{localeService.t(suffix as string) || suffix}</span>}
+        // </div>
+        <></>
     );
 }

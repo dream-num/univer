@@ -1,7 +1,7 @@
 import { toDisposable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
-import { INotificationMethodOptions, notification } from '../../Components/Notification/Notification';
+import { INotificationMethodOptions, notification } from '../../components/notification/Notification';
 import { INotificationService } from './notification.service';
 
 export class DesktopNotificationService implements INotificationService {

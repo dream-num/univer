@@ -1,11 +1,13 @@
 import { ICommandService, LocaleService } from '@univerjs/core';
-import { Tooltip } from '@univerjs/design';
+import { Dropdown, Tooltip } from '@univerjs/design';
+import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { ComponentManager } from '../../../Common';
-import { Select } from '../../../Components/Select/Select';
+import { CustomLabel } from '../../../components/custom-label/CustomLabel';
+import { Menu } from '../../../components/menu/Menu';
 import {
     IDisplayMenuItem,
     IMenuItem,
@@ -61,73 +63,78 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
         };
     }, []);
 
-    const { tooltip, shortcut, icon, title, label, id, onClose } = props;
+    const { tooltip, shortcut, icon, title, label, id } = props;
 
     const tooltipTitle = localeService?.t(tooltip) + (shortcut ? ` (${shortcut})` : '');
 
     function renderSelectorType() {
         const { selections } = props as IDisplayMenuItem<IMenuSelectorItem>;
 
-        return (
-            <Tooltip title={tooltipTitle} placement="bottom">
-                <Select
-                    id={id}
-                    title={title}
-                    children={selections! as IValueOption[]}
-                    options={selections as IValueOption[]}
-                    icon={icon}
-                    value={value}
-                    label={label}
-                    onClick={(value) => {
-                        // commandService.executeCommand(id, { value })
-                        // 子元素commandId会被现在的id覆盖，暂时这么写以区分
-                        // TODO: @jikkai should be refactored
-                        let commandId = id;
-                        if (value instanceof Object && value.id) {
-                            commandId = value.id;
-                        }
+        const options = selections as IValueOption[];
+        const iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
 
-                        if (typeof value === 'string') {
-                            value = { value };
-                        }
-                        commandService.executeCommand(commandId, value);
-                    }}
-                    onClose={onClose}
-                />
-            </Tooltip>
+        function handleSelect(option: IValueOption) {
+            let commandId = id;
+            const value = option;
+
+            if (option.id) {
+                commandId = option.id;
+            }
+
+            commandService.executeCommand(commandId, value);
+        }
+
+        function handleChange(value: string | number) {
+            const commandId = id;
+            commandService.executeCommand(commandId, { value });
+        }
+
+        return (
+            <Dropdown overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}>
+                <div className={styles.toolbarItemSelectButton}>
+                    <CustomLabel
+                        icon={iconToDisplay}
+                        title={title!}
+                        value={value}
+                        label={label}
+                        onChange={handleChange}
+                    />
+                    <div className={styles.toolbarItemSelectButtonArrow}>
+                        <MoreDownSingle />
+                    </div>
+                </div>
+            </Dropdown>
         );
     }
 
     function renderButtonType() {
-        function renderIconOrLabel() {
-            if (icon) {
-                const IconComponent = componentManager.get(icon) as React.ComponentType;
-
-                if (IconComponent) return <IconComponent />;
-            }
-            return title;
-        }
-
         return (
-            <Tooltip title={tooltipTitle} placement="bottom">
-                <ToolbarButton
-                    className={styles.toolbarItemTextButton}
-                    active={activated}
-                    disabled={disabled}
-                    onClick={() => commandService.executeCommand(props.id)}
-                    onDoubleClick={() => props.subId && commandService.executeCommand(props.subId)}
-                >
-                    {renderIconOrLabel()}
-                </ToolbarButton>
-            </Tooltip>
+            <ToolbarButton
+                className={styles.toolbarItemTextButton}
+                active={activated}
+                disabled={disabled}
+                onClick={() => commandService.executeCommand(props.id)}
+                onDoubleClick={() => props.subId && commandService.executeCommand(props.subId)}
+            >
+                <CustomLabel icon={icon} />
+            </ToolbarButton>
         );
     }
 
-    switch (props.type) {
-        case MenuItemType.SUBITEMS:
-        case MenuItemType.SELECTOR:
-            return renderSelectorType();
-        default:
-            return renderButtonType();
+    function renderItem() {
+        switch (props.type) {
+            case MenuItemType.SUBITEMS:
+            case MenuItemType.SELECTOR:
+                return renderSelectorType();
+            case MenuItemType.BUTTON:
+            default:
+                return renderButtonType();
+        }
     }
+
+    return (
+        <Tooltip title={tooltipTitle} placement="bottom">
+            {renderItem()}
+        </Tooltip>
+    );
 }

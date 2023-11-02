@@ -1,4 +1,4 @@
-import { AppContext, BaseComponentProps, debounce, Select } from '@univerjs/base-ui';
+import { BaseComponentProps } from '@univerjs/base-ui';
 import { Button, Container, Tooltip } from '@univerjs/design';
 import { Component, createRef } from 'react';
 
@@ -21,8 +21,6 @@ interface IState {
 }
 
 export class Toolbar extends Component<IProps, IState> {
-    static override contextType = AppContext;
-
     toolbarRef = createRef<HTMLDivElement>();
 
     moreBtnRef = createRef<HTMLDivElement>();
@@ -34,9 +32,9 @@ export class Toolbar extends Component<IProps, IState> {
     /**
      * Gets the distance of each button from the parent element
      */
-    debounceSetToolbarListWidth = debounce(() => {
+    debounceSetToolbarListWidth = () => {
         this.setToolbarListWidth();
-    }, 50);
+    };
 
     constructor(props: IProps) {
         super(props);
@@ -195,28 +193,30 @@ export class Toolbar extends Component<IProps, IState> {
             if (item.toolbarType) {
                 if (item.show) {
                     return (
-                        <Tooltip key={index} title={item.tooltip} placement={'bottom'}>
-                            <Button className={styles.textButton} onClick={item.onClick}>
-                                {/* <CustomLabel label={item.label} /> */}
-                            </Button>
-                        </Tooltip>
+                        // <Tooltip key={index} title={item.tooltip} placement={'bottom'}>
+                        //     <Button className={styles.textButton} onClick={item.onClick}>
+                        //     <CustomLabel label={item.label} />
+                        //     </Button>
+                        // </Tooltip>
+                        <></>
                     );
                 }
             } else {
                 if (item.show) {
                     return (
-                        <Select
-                            key={index}
-                            children={item.children}
-                            suffix={item.suffix}
-                            label={item.label}
-                            onClick={item.onClick}
-                            onPressEnter={item.onPressEnter}
-                            onMainClick={item.onMainClick}
-                            defaultColor={item.defaultColor}
-                            hideSelectedIcon={item.hideSelectedIcon}
-                            className={item.className}
-                        ></Select>
+                        // <Select
+                        //     key={index}
+                        //     children={item.children}
+                        //     suffix={item.suffix}
+                        //     label={item.label}
+                        //     onClick={item.onClick}
+                        //     onPressEnter={item.onPressEnter}
+                        //     onMainClick={item.onMainClick}
+                        //     defaultColor={item.defaultColor}
+                        //     hideSelectedIcon={item.hideSelectedIcon}
+                        //     className={item.className}
+                        // ></Select>
+                        <></>
                     );
                 }
             }

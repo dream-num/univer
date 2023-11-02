@@ -1,4 +1,4 @@
-import { AppContext, BaseComponentProps, ComponentManager } from '@univerjs/base-ui';
+import { BaseComponentProps, ComponentManager } from '@univerjs/base-ui';
 import { Component } from 'react';
 
 import { ModalDataProps } from '../../Controller/NumfmtModalController';
@@ -10,7 +10,7 @@ interface IState {
 }
 
 export class NumfmtModal extends Component<IProps, IState> {
-    static override contextType = AppContext;
+    // static override contextType = AppContext;
 
     constructor(props: IProps) {
         super(props);

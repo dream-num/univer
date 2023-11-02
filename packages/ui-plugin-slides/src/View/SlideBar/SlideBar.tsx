@@ -1,5 +1,5 @@
-import { AppContext, BaseComponentProps } from '@univerjs/base-ui';
-import { ISlidePage, IUniverInstanceService } from '@univerjs/core';
+import { BaseComponentProps } from '@univerjs/base-ui';
+import { ISlidePage } from '@univerjs/core';
 import { Component, createRef } from 'react';
 
 import styles from './index.module.less';
@@ -15,10 +15,6 @@ interface IProps extends BaseComponentProps {
 }
 
 export class SlideBar extends Component<{}, SlideBarState> {
-    static override contextType = AppContext;
-
-    declare context: React.ContextType<typeof AppContext>;
-
     slideBarRef = createRef<HTMLDivElement>();
 
     constructor(props: {}) {
@@ -66,18 +62,18 @@ export class SlideBar extends Component<{}, SlideBarState> {
 
     private _init(): void {
         // TODO: should subscribe to active slide change event
-        const univerInstanceService = this.context.injector.get(IUniverInstanceService);
-        const model = univerInstanceService.getCurrentUniverSlideInstance();
-        const pages = model.getPages();
-        const pageOrder = model.getPageOrder();
-        if (!pages || !pageOrder) {
-            return;
-        }
+        // const univerInstanceService = this.context.injector.get(IUniverInstanceService);
+        // const model = univerInstanceService.getCurrentUniverSlideInstance();
+        // const pages = model.getPages();
+        // const pageOrder = model.getPageOrder();
+        // if (!pages || !pageOrder) {
+        //     return;
+        // }
 
         const p: ISlidePage[] = [];
-        pageOrder.forEach((pageKey) => {
-            p.push(pages[pageKey]);
-        });
+        // pageOrder.forEach((pageKey) => {
+        //     p.push(pages[pageKey]);
+        // });
 
         this.setState({
             slideList: p,

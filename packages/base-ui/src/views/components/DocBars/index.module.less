@@ -54,6 +54,7 @@
         &-group {
             display: flex;
             align-items: center;
+            gap: var(--margin-xs);
 
             &:not(:last-child) {
                 &::after {
@@ -63,6 +64,32 @@
                     margin-left: var(--margin-xs);
                     background-color: rgb(var(--border-color));
                     display: block;
+                }
+            }
+        }
+
+        &-item {
+            &-select-button {
+                position: relative;
+                height: 28px;
+                padding: 0 var(--padding-xs);
+                border-radius: var(--border-radius-base);
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                gap: var(--margin-xs);
+
+                &:hover {
+                    background-color: rgb(var(--grey-100));
+                    border-radius: var(--border-radius-base);
+                }
+
+                &-arrow {
+                    height: 100%;
+                    color: rgb(var(--grey-400));
+                    font-size: 10px;
+                    display: flex;
+                    align-items: center;
                 }
             }
         }

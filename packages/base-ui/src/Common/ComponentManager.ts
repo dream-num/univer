@@ -42,13 +42,13 @@ export interface ICustomComponent {
     props?: any;
 }
 
-export type ComponentList = Map<string, Function>;
+export type ComponentList = Map<string, React.ForwardRefExoticComponent<any>>;
 
 export class ComponentManager {
     private _componentList: ComponentList = new Map();
 
     constructor() {
-        const iconList: Record<string, Function> = {
+        const iconList: Record<string, React.ForwardRefExoticComponent<any>> = {
             AlignBottomSingle,
             AlignTopSingle,
             AllBorderSingle,

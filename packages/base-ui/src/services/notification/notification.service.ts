@@ -1,6 +1,6 @@
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
-import { INotificationMethodOptions } from '../../Components/Notification/Notification';
+import { INotificationMethodOptions } from '../../components/notification/Notification';
 
 export const INotificationService = createIdentifier<INotificationService>('univer.notification-service');
 

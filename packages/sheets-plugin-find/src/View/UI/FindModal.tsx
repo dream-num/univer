@@ -1,4 +1,4 @@
-import { BaseComponentProps, BaseItemProps } from '@univerjs/base-ui';
+import { BaseComponentProps } from '@univerjs/base-ui';
 import { ICheckboxGroupProps } from '@univerjs/design';
 import { Component } from 'react';
 
@@ -38,7 +38,7 @@ export enum SelectSearch {
 export class FindModal extends Component<IProps, IState> {
     private _matchGroup: ICheckboxGroupProps[] = [];
 
-    private _select: BaseItemProps[] = [];
+    private _select: any[] = [];
 
     constructor(props: IProps) {
         super(props);
@@ -107,7 +107,7 @@ export class FindModal extends Component<IProps, IState> {
 
     // 国际化Select
     getSelect() {
-        const arr: BaseItemProps[] = JSON.parse(JSON.stringify(this._select));
+        const arr: any[] = JSON.parse(JSON.stringify(this._select));
         // arr.forEach((element: ICheckboxGroupProps) => {
         //     element.label = <CustomLabel label={element.label} />;
         // });

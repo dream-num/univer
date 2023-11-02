@@ -1,4 +1,5 @@
-import { joinClassNames } from '../../../../Utils/util';
+import clsx from 'clsx';
+
 import styles from './index.module.less';
 
 export interface IBaseToolbarButtonProps {
@@ -62,7 +63,7 @@ export function ToolbarButton(props: IBaseToolbarButtonProps) {
         onDoubleClick && onDoubleClick(e);
     };
 
-    const _className = joinClassNames(
+    const _className = clsx(
         styles.toolbarBtn,
         {
             [`${styles.toolbarBtn}-active`]: active,

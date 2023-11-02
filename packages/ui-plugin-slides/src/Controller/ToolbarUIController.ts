@@ -1,4 +1,4 @@
-import { BaseSelectChildrenProps, BaseSelectProps, ComponentManager } from '@univerjs/base-ui';
+import { ComponentManager } from '@univerjs/base-ui';
 import {
     BorderType,
     HorizontalAlign,
@@ -14,11 +14,10 @@ import { Inject } from '@wendellhu/redi';
 
 import { DefaultToolbarConfig, SLIDE_UI_PLUGIN_NAME, SlideToolbarConfig } from '../Basics';
 import { Toolbar } from '../View/Toolbar';
-import { TEXT_ROTATE_CHILDREN } from '../View/Toolbar/Const';
 import styles from '../View/Toolbar/index.module.less';
 
-export interface BaseToolbarSelectProps extends BaseSelectProps {
-    children?: BaseSelectChildrenProps[];
+export interface BaseToolbarSelectProps {
+    children?: any[];
 }
 
 enum ToolbarType {
@@ -27,6 +26,7 @@ enum ToolbarType {
 }
 
 export interface IToolbarItemProps extends BaseToolbarSelectProps {
+    name: string;
     active?: boolean;
     unActive?: boolean; //button不需保持状态
     show?: boolean; //是否显示按钮
@@ -45,7 +45,7 @@ interface BorderInfo {
 export class ToolbarUIController {
     private _toolbar?: Toolbar;
 
-    private _toolList: IToolbarItemProps[];
+    private _toolList: IToolbarItemProps[] = [];
 
     private _config: SlideToolbarConfig;
 
@@ -66,19 +66,19 @@ export class ToolbarUIController {
     ) {
         this._config = Tools.deepMerge({}, DefaultToolbarConfig, config);
 
-        this._toolList = [
-            {
-                className: styles.selectDoubleString,
-                name: 'textRotateMode',
-                tooltip: 'toolbar.textRotateMode.main',
-                show: this._config.textRotateMode,
-                onClick: (value: number | string) => {
-                    this.setTextRotation(value);
-                    this.hideTooltip();
-                },
-                children: TEXT_ROTATE_CHILDREN,
-            },
-        ];
+        // this._toolList = [
+        //     {
+        //         className: styles.selectDoubleString,
+        //         name: 'textRotateMode',
+        //         tooltip: 'toolbar.textRotateMode.main',
+        //         show: this._config.textRotateMode,
+        //         onClick: (value: number | string) => {
+        //             this.setTextRotation(value);
+        //             this.hideTooltip();
+        //         },
+        //         children: TEXT_ROTATE_CHILDREN,
+        //     },
+        // ];
 
         this._initialize();
     }

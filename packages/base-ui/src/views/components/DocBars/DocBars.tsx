@@ -1,10 +1,10 @@
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import clsx from 'clsx';
 import { useEffect, useMemo, useState } from 'react';
 
 import { IDisplayMenuItem, IMenuItem, MenuGroup, MenuPosition } from '../../../services/menu/menu';
 import { IMenuService } from '../../../services/menu/menu.service';
-import { joinClassNames } from '../../../Utils';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
 
@@ -71,12 +71,12 @@ export function DocBars() {
                 {menuGroups.map((group, index) => (
                     <a
                         key={index}
-                        className={joinClassNames(styles.menubarItem, {
+                        className={clsx(styles.menubarItem, {
                             [styles.menubarItemActive]: group.name === activeMenuGroup?.name,
                         })}
                         onClick={() => setActiveMenuGroup(group)}
                     >
-                        {localeService.t(group.name) ?? ''}
+                        {localeService.t(group.name)}
                     </a>
                 ))}
             </div>

@@ -1,9 +1,9 @@
 /* eslint-disable no-magic-numbers */
 import { Button, Dropdown, Tooltip } from '@univerjs/design';
 import { IncreaseSingle, ReduceSingle } from '@univerjs/icons';
+import clsx from 'clsx';
 import { useMemo, useRef } from 'react';
 
-import { joinClassNames } from '../../Utils';
 import styles from './index.module.less';
 
 /**
@@ -151,7 +151,7 @@ export function Slider(props: ISliderProps) {
                         {shortcuts?.map((item) => (
                             <a
                                 key={item}
-                                className={joinClassNames(
+                                className={clsx(
                                     styles.sliderShortcut,
                                     item === value ? styles.sliderShortcutActive : ''
                                 )}

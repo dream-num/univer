@@ -1,8 +1,8 @@
 export { UIPlugin } from './base-ui-plugin';
 export * from './BaseComponent';
 export * from './Common';
-export * from './Components';
-export { useObservable } from './Components/hooks/observable';
+export * from './components';
+export { useObservable } from './components/hooks/observable';
 export { SharedController } from './controllers/shared-shortcut.controller';
 export { IUIController } from './controllers/ui/ui.controller';
 export { DesktopUIPart, type IDesktopUIController } from './controllers/ui/ui-desktop.controller';

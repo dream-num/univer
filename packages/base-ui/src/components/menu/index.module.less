@@ -102,18 +102,15 @@
 
     .menu-submenu-title,
     .menu-item {
-        .anticon {
-            width: 14px;
-            height: 14px;
-            margin-right: 8px;
-            top: -1px;
+        &-more-icon {
+            color: rgb(var(--text-color));
+            font-size: var(--font-size-sm);
         }
     }
 
     &-horizontal {
-        background-color: #f3f5f7;
         border: none;
-        border-bottom: 1px solid #d9d9d9;
+        border-bottom: 1px solid rgb(var(--border-color));
         box-shadow: none;
         white-space: nowrap;
         overflow: hidden;
@@ -128,12 +125,6 @@
             border-bottom: 2px solid transparent;
             display: inline-block;
             vertical-align: bottom;
-
-            &-active {
-                border-bottom: 2px solid #2db7f5;
-                background-color: #f3f5f7;
-                color: #2baee9;
-            }
         }
     }
 
@@ -148,12 +139,11 @@
             padding: var(--padding-xs) var(--padding-sm);
             box-sizing: border-box;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
         }
         .menu-submenu-arrow {
             display: inline-block;
-            font: normal normal normal 14px/1 FontAwesome;
             font-size: inherit;
             vertical-align: baseline;
             text-align: center;

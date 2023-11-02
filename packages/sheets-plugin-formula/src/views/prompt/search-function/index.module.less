@@ -1,0 +1,27 @@
+.formula {
+    &-search-function {
+        padding: var(--padding-xs);
+        margin: 0;
+        font-size: var(--font-size-sm);
+        list-style: none;
+        background-color: rgb(var(--bg-color-secondary));
+        border: 1px solid rgb(var(--border-color));
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--box-shadow-base);
+        box-sizing: border-box;
+        outline: none;
+
+        &-item{
+            padding: var(--padding-sm) var(--padding-base);
+            color: rgb(var(--text-color));
+            border-radius: var(--border-radius-base);
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: background .2s;
+
+            &:hover {
+                background-color: rgb(var(--bg-color-hover));
+            }
+        }
+    }
+}

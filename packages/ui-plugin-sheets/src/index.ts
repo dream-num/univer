@@ -1,4 +1,5 @@
 export * from './Basics';
+export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 export {
     EditorBridgeService,
     IEditorBridgeService,

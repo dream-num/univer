@@ -1,4 +1,4 @@
-import { LocaleService, LocaleType, ThemeService } from '@univerjs/core';
+import { LocaleService, ThemeService } from '@univerjs/core';
 import {
     ConfigProvider,
     Container,
@@ -11,10 +11,9 @@ import {
     Sider,
     themeInstance,
 } from '@univerjs/design';
-import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { ComponentType, useEffect, useRef, useState } from 'react';
 
-import { ComponentManager, ZIndexManager } from '../Common';
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import style from './app.module.less';
 import { ContextMenu } from './components/ContextMenu';
@@ -31,11 +30,8 @@ export interface IUniverAppProps extends IWorkbenchOptions {
 
 // eslint-disable-next-line max-lines-per-function
 export function App(props: IUniverAppProps) {
-    const injector = useInjector();
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
-    const zIndexManager = useDependency(ZIndexManager);
-    const componentManager = useDependency(ComponentManager);
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -60,12 +56,12 @@ export function App(props: IUniverAppProps) {
         }
     }, [onRendered]);
 
-    const [locale, setLocale] = useState<LocaleType>(localeService.getLocale().getCurrentLocale());
+    const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
 
     useEffect(() => {
         const subscriptions = [
             localeService.getLocale().locale$.subscribe((locale) => {
-                locale && setLocale(locale);
+                locale && setLocale(localeService.getLocales() as unknown as ILocale);
             }),
             themeService.currentTheme$.subscribe((theme) => {
                 themeInstance.setTheme(theme);
@@ -79,12 +75,12 @@ export function App(props: IUniverAppProps) {
     }, []);
 
     return (
-        <ConfigProvider locale={localeService.getLocales() as unknown as ILocale}>
+        <ConfigProvider locale={locale}>
             <Container className={style.layoutContainer}>
                 <Layout>
                     {/* outer sidebar */}
                     <Sider style={{ display: props.outerLeft ? 'block' : 'none' }}></Sider>
-                    <Layout className={style.mainContent} style={{ position: 'relative' }}>
+                    <Layout className={style.mainContent}>
                         {/* header */}
                         <Header style={{ display: props.header ? 'block' : 'none' }}>
                             {props.toolbar && <DocBars />}

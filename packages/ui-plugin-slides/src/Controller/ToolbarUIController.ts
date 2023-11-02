@@ -1,4 +1,4 @@
-import { ComponentManager, IBaseSelectProps } from '@univerjs/base-ui';
+import { ComponentManager } from '@univerjs/base-ui';
 import {
     BorderType,
     HorizontalAlign,
@@ -16,7 +16,7 @@ import { DefaultToolbarConfig, SLIDE_UI_PLUGIN_NAME, SlideToolbarConfig } from '
 import { Toolbar } from '../View/Toolbar';
 import styles from '../View/Toolbar/index.module.less';
 
-export interface BaseToolbarSelectProps extends IBaseSelectProps {
+export interface BaseToolbarSelectProps {
     children?: any[];
 }
 
@@ -26,6 +26,7 @@ enum ToolbarType {
 }
 
 export interface IToolbarItemProps extends BaseToolbarSelectProps {
+    name: string;
     active?: boolean;
     unActive?: boolean; //button不需保持状态
     show?: boolean; //是否显示按钮

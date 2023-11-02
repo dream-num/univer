@@ -59,7 +59,6 @@ interface IMenuItemBase<V> {
     disabled$?: Observable<boolean>;
     /** On observable value that should emit the value of the corresponding selection component. */
     value$?: Observable<V>;
-    onClose?: () => void;
 }
 
 export interface IMenuButtonItem<V = undefined> extends IMenuItemBase<V> {

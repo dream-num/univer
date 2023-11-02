@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { ComponentManager } from '../../../Common';
-import { Select } from '../../../Components/Select/Select';
 import {
     IDisplayMenuItem,
     IMenuItem,
@@ -15,6 +14,7 @@ import {
 } from '../../../services/menu/menu';
 import { ToolbarButton } from './Button/ToolbarButton';
 import styles from './index.module.less';
+import { Select } from './Select/Select';
 
 export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
     const localeService = useDependency(LocaleService);
@@ -130,6 +130,7 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
         case MenuItemType.SUBITEMS:
         case MenuItemType.SELECTOR:
             return renderSelectorType();
+        case MenuItemType.BUTTON:
         default:
             return renderButtonType();
     }

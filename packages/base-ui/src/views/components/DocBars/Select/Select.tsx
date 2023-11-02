@@ -1,12 +1,12 @@
 import { Dropdown } from '@univerjs/design';
 import { MoreDownSingle } from '@univerjs/icons';
 
-import { IValueOption } from '../../services/menu/menu';
-import { NeoCustomLabel } from '../CustomLabel';
-import { Menu } from '../Menu/Menu';
+import { NeoCustomLabel } from '../../../../components/custom-label/CustomLabel';
+import { Menu } from '../../../../components/menu/Menu';
+import { IValueOption } from '../../../../services/menu/menu';
 import styles from './index.module.less';
 
-export interface IBaseSelectProps {
+interface IProps {
     label?:
         | string
         | {
@@ -23,7 +23,7 @@ export interface IBaseSelectProps {
     onClick?: (option: IValueOption | number | string) => void;
 }
 
-export function Select(props: IBaseSelectProps) {
+export function Select(props: IProps) {
     const { onClick, ...restProps } = props;
     const { value, icon, title, id, label, options } = restProps;
 

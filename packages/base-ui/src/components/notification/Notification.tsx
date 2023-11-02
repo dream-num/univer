@@ -1,11 +1,11 @@
 import { CloseSingle, ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
+import clsx from 'clsx';
 import { useNotification } from 'rc-notification';
 import { Placement } from 'rc-notification/es/interface';
 import { useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 
-import { joinClassNames } from '../../Utils/util';
 import styles from './index.module.less';
 
 export type NotificationType = 'success' | 'info' | 'warning' | 'error';
@@ -65,7 +65,7 @@ export const notificationObserver = new Subject<INotificationMethodOptions>();
 export const PureContent = (props: INotificationMethodOptions) => {
     const { type, content, title, lines = 0 } = props;
 
-    const contentClassName = joinClassNames(styles.notificationContent, {
+    const contentClassName = clsx(styles.notificationContent, {
         [styles.notificationContentEllipsis]: lines !== 0,
     });
 

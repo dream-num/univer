@@ -1,6 +1,7 @@
 import { isRealNum } from '@univerjs/core';
 import { MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import clsx from 'clsx';
 import RcMenu, { MenuItem as RcMenuItem, SubMenu as RcSubMenu } from 'rc-menu';
 import React, { useState } from 'react';
 import { isObservable, of } from 'rxjs';
@@ -18,8 +19,7 @@ import {
     MenuItemType,
 } from '../../services/menu/menu';
 import { IMenuService } from '../../services/menu/menu.service';
-import { joinClassNames } from '../../Utils';
-import { NeoCustomLabel } from '../CustomLabel/CustomLabel';
+import { NeoCustomLabel } from '../custom-label/CustomLabel';
 import { useObservable } from '../hooks/observable';
 import styles from './index.module.less';
 
@@ -86,7 +86,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                 <RcMenuItem
                     key={key}
                     eventKey={key}
-                    className={joinClassNames(
+                    className={clsx(
                         styles.menuItem,
                         option.disabled ? styles.colsMenuitemDisabled : ''
                         // String(value) === String(option.value) ? styles.selectItemSelected : '' // Set the background color of Item
@@ -113,7 +113,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
             <RcMenuItem
                 key={key}
                 eventKey={key}
-                className={joinClassNames(
+                className={clsx(
                     styles.menuItem,
                     styles.menuItemCustom,
                     option.disabled ? styles.colsMenuitemDisabled : ''
@@ -171,7 +171,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             <RcMenuItem
                 key={item.id}
                 eventKey={item.id}
-                className={joinClassNames(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
+                className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
                 // disabled={disabled} // FIXME disabled is not working
                 onClick={() => {
                     onClick({ value: inputValue, id: item.id }); // merge cell
@@ -201,7 +201,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 <RcSubMenu
                     key={item.id}
                     eventKey={item.id}
-                    className={joinClassNames(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
+                    className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
                     popupOffset={[18, 0]}
                     title={
                         <>
@@ -237,7 +237,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             <RcMenuItem
                 key={item.id}
                 eventKey={item.id}
-                className={joinClassNames(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
+                className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
             >
                 <NeoCustomLabel
                     title={item.title}
@@ -258,7 +258,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             <RcSubMenu
                 key={item.id}
                 eventKey={item.id}
-                className={joinClassNames(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
+                className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
                 popupOffset={[18, 0]}
                 title={
                     <>

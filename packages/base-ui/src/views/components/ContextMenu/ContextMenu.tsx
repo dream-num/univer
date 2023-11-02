@@ -4,7 +4,7 @@ import { Dropdown } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { Menu } from '../../../Components/Menu/Menu';
+import { Menu } from '../../../components/menu/Menu';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
 
 export interface IProps {

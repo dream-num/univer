@@ -89,7 +89,7 @@ export class ScrollController extends Disposable {
         if (selection == null) {
             return;
         }
-        const { startRow: selectionStartRow, startColumn: selectionStartColumn } = selection.range;
+        const { actualRow: selectionStartRow, actualColumn: selectionStartColumn } = selection.primary;
         const { rowHeightAccumulation, columnWidthAccumulation } =
             this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) {

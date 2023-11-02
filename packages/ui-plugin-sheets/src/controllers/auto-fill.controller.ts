@@ -14,17 +14,6 @@ import {
 
 import { IControlFillConfig, ISelectionRenderService } from '../services/selection/selection-render.service';
 
-export interface IClassifyCells {
-    direction: Direction;
-    [prop: string]: string | number | ILinkNode[];
-}
-
-export interface ILinkNode {
-    x: number;
-    y: number;
-    [prop: string]: any;
-}
-
 @OnLifecycle(LifecycleStages.Ready, AutoFillController)
 export class AutoFillController extends Disposable {
     private _direction: Direction;

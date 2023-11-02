@@ -11,6 +11,7 @@ import { InitializeEditorController } from './controller/editor/initialize-edito
 import { StartEditController } from './controller/editor/start-edit.controller';
 import { EditorBridgeController } from './controller/editor-bridge.controller';
 import { FormatPainterController } from './controller/format-painter/format-painter.controller';
+import { SheetNavigationController } from './controller/navigation/navigation.controller';
 import { SheetUIController } from './controller/sheet-ui.controller';
 import { enUS } from './locale';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
@@ -49,6 +50,7 @@ export class SheetUIPlugin extends Plugin {
                 [ICellEditorManagerService, { useClass: CellEditorManagerService }],
 
                 // controllers
+                [SheetNavigationController],
                 [EditorBridgeController],
                 [SheetClipboardController],
                 [SheetContextMenuController],

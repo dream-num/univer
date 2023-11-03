@@ -8,9 +8,17 @@ export default {
             title: 'Theme',
             tooltip: 'Theme',
         },
-        uiComponent: {
-            title: 'UI Component',
-            tooltip: 'UI Component',
+        notification: {
+            title: 'Notification',
+            tooltip: 'Notification',
+        },
+        dialog: {
+            title: 'Dialog',
+            tooltip: 'Dialog',
+        },
+        confirm: {
+            title: 'Confirm',
+            tooltip: 'Confirm',
         },
     },
 };

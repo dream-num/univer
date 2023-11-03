@@ -1,7 +1,5 @@
-import { CommandType, ICommand, IStyleSheet } from '@univerjs/core';
+import { CommandType, ICommand, IStyleSheet, ThemeService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
-
-import { ThemeService } from '../../services/theme.service';
 
 export interface IThemeCommandParams {
     value?: IStyleSheet;

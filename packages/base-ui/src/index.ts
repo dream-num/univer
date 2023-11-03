@@ -15,11 +15,15 @@ export {
     IClipboardInterfaceService,
     PLAIN_TEXT_CLIPBOARD_MIME_TYPE,
 } from './services/clipboard/clipboard-interface.service';
+export { IConfirmService } from './services/confirm/confirm.service';
+export { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
 export {
     DesktopContextMenuService,
     type IContextMenuHandler,
     IContextMenuService,
 } from './services/contextmenu/contextmenu.service';
+export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
+export { IDialogService } from './services/dialog/dialog.service';
 export {
     type ICustomComponentOption,
     type ICustomComponentProps,

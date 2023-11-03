@@ -4,28 +4,21 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 
 import { ComponentManager } from '../../Common';
 import { IMenuSelectorItem } from '../../services/menu/menu';
-import styles from './index.module.less';
 
-export interface ICustomLabelProps {
+export type ICustomLabelProps = {
     value?: string | number | undefined;
 
     selected?: boolean;
 
-    /**
-     * Triggered after value change
-     */
     onChange?(v: string | number): void;
-}
+} & Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'title'>;
 
 /**
  * The component to render toolbar item label and menu item label.
  * @param props
  * @returns
- * @deprecated
  */
-export function CustomLabel(
-    props: Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'title'> & ICustomLabelProps
-): JSX.Element | null {
+export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
     const { title, icon, label, selected } = props;
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
@@ -56,5 +49,5 @@ export function CustomLabel(
         nodes.push(<span key={index++}>{localeService.t(title)}</span>);
     }
 
-    return <span className={styles.customLabel}>{nodes}</span>;
+    return <>{nodes}</>;
 }

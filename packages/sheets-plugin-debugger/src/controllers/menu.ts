@@ -3,9 +3,11 @@ import { LocaleType } from '@univerjs/core';
 import { defaultTheme, greenTheme } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';
 
+import { ConfirmOperation } from '../commands/operations/confirm.operation';
+import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
+import { NotificationOperation } from '../commands/operations/notification.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
-import { UIComponentOperation } from '../commands/operations/ui-component.operation';
 
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
@@ -46,11 +48,12 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         ],
     };
 }
-export function UIComponentMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+
+export function NotificationMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
-        id: UIComponentOperation.id,
-        title: 'debugger.uiComponent.title',
-        tooltip: 'debugger.uiComponent.tooltip',
+        id: NotificationOperation.id,
+        title: 'debugger.notification.title',
+        tooltip: 'debugger.notification.tooltip',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
@@ -69,6 +72,38 @@ export function UIComponentMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
             {
                 label: 'Notification Error',
                 value: 'Notification Error',
+            },
+        ],
+    };
+}
+
+export function DialogMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: DialogOperation.id,
+        title: 'debugger.dialog.title',
+        tooltip: 'debugger.dialog.tooltip',
+        type: MenuItemType.SELECTOR,
+        positions: [MenuPosition.TOOLBAR_OTHERS],
+        selections: [
+            {
+                label: 'Open dialog',
+                value: 'dialog',
+            },
+        ],
+    };
+}
+
+export function ConfirmMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: ConfirmOperation.id,
+        title: 'debugger.confirm.title',
+        tooltip: 'debugger.confirm.tooltip',
+        type: MenuItemType.SELECTOR,
+        positions: [MenuPosition.TOOLBAR_OTHERS],
+        selections: [
+            {
+                label: 'Open confirm',
+                value: 'confirm',
             },
         ],
     };

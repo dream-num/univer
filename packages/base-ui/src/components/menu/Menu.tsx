@@ -97,13 +97,15 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                         });
                     }}
                 >
-                    <CustomLabel
-                        selected={String(value) === String(option.value)} // use √ for select
-                        value={String(option.value)}
-                        label={option.label}
-                        title={typeof option.label === 'string' ? option.label : ''}
-                        icon={option.icon}
-                    />
+                    <span className={styles.menuItemContent}>
+                        <CustomLabel
+                            selected={String(value) === String(option.value)} // use √ for select
+                            value={String(option.value)}
+                            label={option.label}
+                            title={typeof option.label === 'string' ? option.label : ''}
+                            icon={option.icon}
+                        />
+                    </span>
                 </RcMenuItem>
             );
         }
@@ -204,7 +206,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
                     popupOffset={[18, 0]}
                     title={
-                        <>
+                        <span className={styles.menuItemContent}>
                             <CustomLabel
                                 title={item.title}
                                 value={inputValue}
@@ -213,7 +215,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                                 label={item.label}
                             />
                             {item.shortcut && ` (${item.shortcut})`}
-                        </>
+                        </span>
                     }
                     expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
                 >
@@ -237,14 +239,16 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 eventKey={item.id}
                 className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
             >
-                <CustomLabel
-                    title={item.title}
-                    value={inputValue}
-                    onChange={onChange}
-                    icon={item.icon}
-                    label={item.label}
-                />
-                {item.shortcut && ` (${item.shortcut})`}
+                <span className={styles.menuItemContent}>
+                    <CustomLabel
+                        title={item.title}
+                        value={inputValue}
+                        onChange={onChange}
+                        icon={item.icon}
+                        label={item.label}
+                    />
+                    {item.shortcut && ` (${item.shortcut})`}
+                </span>
             </RcMenuItem>
         );
     };
@@ -259,9 +263,9 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
                 popupOffset={[18, 0]}
                 title={
-                    <>
+                    <span className={styles.menuItemContent}>
                         <CustomLabel title={item.title} value={item.title} icon={item.icon} label={item.label} />
-                    </>
+                    </span>
                 }
                 expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
             >

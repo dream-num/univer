@@ -139,7 +139,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 subscriber.next(!e.value);
             });
             return () => {
-                permission$ && permission$.unsubscribe();
+                permission$?.unsubscribe();
             };
         }),
         activated$: new Observable<boolean>((subscriber) => {
@@ -191,7 +191,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 subscriber.next(!e.value);
             });
             return () => {
-                permission$ && permission$.unsubscribe();
+                permission$?.unsubscribe();
             };
         }),
         activated$: new Observable<boolean>((subscriber) => {
@@ -241,7 +241,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 subscriber.next(!e.value);
             });
             return () => {
-                permission$ && permission$.unsubscribe();
+                permission$?.unsubscribe();
             };
         }),
         activated$: new Observable<boolean>((subscriber) => {
@@ -291,7 +291,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                 subscriber.next(!e.value);
             });
             return () => {
-                permission$ && permission$.unsubscribe();
+                permission$?.unsubscribe();
             };
         }),
         activated$: new Observable<boolean>((subscriber) => {
@@ -478,7 +478,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                 subscriber.next(!e.value);
             });
             return () => {
-                permission$ && permission$.unsubscribe();
+                permission$?.unsubscribe();
             };
         }),
         value$: new Observable((subscriber) => {
@@ -536,7 +536,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                 subscriber.next(!e.value);
             });
             return () => {
-                permission$ && permission$.unsubscribe();
+                permission$?.unsubscribe();
             };
         }),
         value$: new Observable((subscriber) => {

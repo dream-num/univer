@@ -64,9 +64,9 @@ export interface ICommandInterceptor {
 
 export interface ICommandPermissionInterceptor {
     /**
-     * this function will have side effects
+     * This function maybe have side effects !!!
      */
-    check(command: ICommandInfo): boolean;
+    checkPermission(command: ICommandInfo): boolean;
 }
 
 /**
@@ -170,12 +170,11 @@ export class SheetInterceptorService extends Disposable {
     }
 
     /**
-     * check the permissions of the user when commands will be executed.
-     * if the return value someone is false, the command will not be executed.
-     * this function maybe have side effects !!!
+     * Check the permissions of the user when commands will be executed.
+     * If one of the return values is false, the command is not executed.
      */
     onCommandPermissionCheck(command: ICommandInfo): boolean {
-        const result = this._commandPermissionInterceptor.some((handler) => !handler.check(command));
+        const result = this._commandPermissionInterceptor.some((handler) => !handler.checkPermission(command));
         return !result;
     }
 

@@ -40,7 +40,7 @@ export class SheetPermissionService extends Disposable {
     private interceptCommandPermission() {
         this.disposeWithMe(
             this._sheetInterceptorService.interceptCommandPermission({
-                check: (commandInfo) => {
+                checkPermission: (commandInfo) => {
                     const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
                     const sheet = workbook?.getActiveSheet();
                     const workbookId = workbook?.getUnitId();

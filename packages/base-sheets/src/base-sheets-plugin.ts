@@ -5,9 +5,9 @@ import { BasicWorksheetController } from './controllers/basic-worksheet.controll
 import { MergeCellController } from './controllers/merge-cell.controller';
 import { enUS } from './locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
+import { SheetPermissionService } from './services/permission';
 import { RefRangeService } from './services/ref-range.service';
 import { SelectionManagerService } from './services/selection-manager.service';
-import { SheetPermissionService } from './services/sheet-permission.service';
 
 /**
  * The main sheet base, construct the sheet container and layout, mount the rendering engine

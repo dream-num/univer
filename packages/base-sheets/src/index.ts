@@ -193,5 +193,5 @@ export {
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
+export { SheetEditablePermission, SheetPermissionService } from './services/permission';
 export { RefRangeService } from './services/ref-range.service';
-export { SheetPermissionService } from './services/sheet-permission.service';

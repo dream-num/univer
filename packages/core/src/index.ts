@@ -28,8 +28,13 @@ export { LifecycleService } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';
 export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService } from './services/log/log.service';
-export { IPermissionService, PermissionService } from './services/permission/permission.service';
-export { UniverPermissionService } from './services/permission/univer.permission.service';
+export {
+    IPermissionService,
+    PermissionService,
+    UniverEditablePermission,
+    UniverEditablePermissionPoint,
+    UniverPermissionService,
+} from './services/permission';
 export {
     type ICellInterceptor,
     type ISheetLocation,

@@ -24,6 +24,8 @@ import {
 import {
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
+    SetInlineFormatFontFamilyCommand,
+    SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
     SetInlineFormatUnderlineCommand,
@@ -108,6 +110,8 @@ export class DocPlugin extends Plugin {
                 SetInlineFormatItalicCommand,
                 SetInlineFormatUnderlineCommand,
                 SetInlineFormatStrikethroughCommand,
+                SetInlineFormatFontSizeCommand,
+                SetInlineFormatFontFamilyCommand,
                 SetInlineFormatCommand,
                 BreakLineCommand,
                 InsertCommand,

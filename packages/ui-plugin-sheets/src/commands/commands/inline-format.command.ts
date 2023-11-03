@@ -1,10 +1,19 @@
 import {
     SetInlineFormatBoldCommand,
+    SetInlineFormatFontFamilyCommand,
+    SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
     SetInlineFormatUnderlineCommand,
 } from '@univerjs/base-docs';
-import { SetBoldCommand, SetItalicCommand, SetStrikeThroughCommand, SetUnderlineCommand } from '@univerjs/base-sheets';
+import {
+    SetBoldCommand,
+    SetFontFamilyCommand,
+    SetFontSizeCommand,
+    SetItalicCommand,
+    SetStrikeThroughCommand,
+    SetUnderlineCommand,
+} from '@univerjs/base-sheets';
 import { CommandType, FOCUSING_EDITOR, ICommand, ICommandService, IContextService } from '@univerjs/core';
 
 /**
@@ -74,5 +83,37 @@ export const SetRangeStrickThroughCommand: ICommand = {
         }
 
         return commandService.executeCommand(SetStrikeThroughCommand.id);
+    },
+};
+
+export const SetRangeFontSizeCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-range-fontsize',
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const contextService = accessor.get(IContextService);
+        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+
+        if (isCellEditorFocus) {
+            return commandService.executeCommand(SetInlineFormatFontSizeCommand.id, params);
+        }
+
+        return commandService.executeCommand(SetFontSizeCommand.id, params);
+    },
+};
+
+export const SetRangeFontFamilyCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-range-font-family',
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const contextService = accessor.get(IContextService);
+        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+
+        if (isCellEditorFocus) {
+            return commandService.executeCommand(SetInlineFormatFontFamilyCommand.id, params);
+        }
+
+        return commandService.executeCommand(SetFontFamilyCommand.id, params);
     },
 };

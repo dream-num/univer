@@ -22,8 +22,6 @@ import {
     SetColHiddenMutation,
     SetColVisibleMutation,
     SetColWidthCommand,
-    SetFontFamilyCommand,
-    SetFontSizeCommand,
     SetHorizontalTextAlignCommand,
     SetRangeStyleMutation,
     SetRangeValuesMutation,
@@ -68,6 +66,8 @@ import { Observable } from 'rxjs';
 
 import {
     SetRangeBoldCommand,
+    SetRangeFontFamilyCommand,
+    SetRangeFontSizeCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,
     SetRangeUnderlineCommand,
@@ -494,7 +494,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
-        id: SetFontFamilyCommand.id,
+        id: SetRangeFontFamilyCommand.id,
         tooltip: 'toolbar.font',
         type: MenuItemType.SELECTOR,
 
@@ -556,7 +556,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
-        id: SetFontSizeCommand.id,
+        id: SetRangeFontSizeCommand.id,
         tooltip: 'toolbar.fontSize',
         type: MenuItemType.SELECTOR,
         label: {

@@ -16,6 +16,8 @@ export { BreakLineCommand, DeleteLeftCommand } from './commands/commands/core-ed
 export {
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
+    SetInlineFormatFontFamilyCommand,
+    SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
     SetInlineFormatUnderlineCommand,

@@ -19,6 +19,8 @@ import MemoryCursor from '../Basics/memoryCursor';
 import {
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
+    SetInlineFormatFontFamilyCommand,
+    SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
     SetInlineFormatUnderlineCommand,
@@ -50,6 +52,8 @@ export class InlineFormatController extends Disposable {
             SetInlineFormatItalicCommand.id,
             SetInlineFormatUnderlineCommand.id,
             SetInlineFormatStrikethroughCommand.id,
+            SetInlineFormatFontSizeCommand.id,
+            SetInlineFormatFontFamilyCommand.id,
         ];
 
         this.disposeWithMe(
@@ -58,12 +62,17 @@ export class InlineFormatController extends Disposable {
                     return;
                 }
 
-                this.handleInlineFormat(command);
+                this.handleInlineFormat(command as ICommandInfo<{ value: string }>);
             })
         );
     }
 
-    private handleInlineFormat(command: ICommandInfo) {
+    private handleInlineFormat(
+        command: ICommandInfo<{
+            value: string;
+        }>
+    ) {
+        console.log(command);
         const segmentId = this._textSelectionRenderManager.getActiveRange()?.segmentId;
         const selections = this._textSelectionManagerService.getSelections();
 
@@ -81,6 +90,8 @@ export class InlineFormatController extends Disposable {
             [SetInlineFormatItalicCommand.id]: 'it',
             [SetInlineFormatUnderlineCommand.id]: 'ul',
             [SetInlineFormatStrikethroughCommand.id]: 'st',
+            [SetInlineFormatFontSizeCommand.id]: 'fs',
+            [SetInlineFormatFontFamilyCommand.id]: 'ff',
         };
 
         switch (command.id) {
@@ -94,6 +105,12 @@ export class InlineFormatController extends Disposable {
                     selections
                 );
 
+                break;
+            }
+
+            case SetInlineFormatFontSizeCommand.id:
+            case SetInlineFormatFontFamilyCommand.id: {
+                formatValue = command.params?.value;
                 break;
             }
 
@@ -157,7 +174,11 @@ export class InlineFormatController extends Disposable {
             doMutation,
         });
 
-        const REFRESH_SELECTION_COMMAND_LIST = [SetInlineFormatBoldCommand.id];
+        const REFRESH_SELECTION_COMMAND_LIST = [
+            SetInlineFormatBoldCommand.id,
+            SetInlineFormatFontSizeCommand.id,
+            SetInlineFormatFontFamilyCommand.id,
+        ];
 
         if (REFRESH_SELECTION_COMMAND_LIST.includes(command.id)) {
             this._textSelectionManagerService.refreshSelection();

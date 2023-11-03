@@ -26,6 +26,18 @@ export const SetInlineFormatStrikethroughCommand: ICommand = {
     handler: async () => true,
 };
 
+export const SetInlineFormatFontSizeCommand: ICommand = {
+    id: 'doc.command.set-inline-format-fontsize',
+    type: CommandType.COMMAND,
+    handler: async () => true,
+};
+
+export const SetInlineFormatFontFamilyCommand: ICommand = {
+    id: 'doc.command.set-inline-format-font-family',
+    type: CommandType.COMMAND,
+    handler: async () => true,
+};
+
 export const SetInlineFormatCommand: ICommand = {
     id: 'doc.command.set-inline-format',
     type: CommandType.COMMAND,

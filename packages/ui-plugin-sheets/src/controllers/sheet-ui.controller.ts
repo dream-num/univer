@@ -21,6 +21,8 @@ import { connectInjector } from '@wendellhu/redi/react-bindings';
 
 import {
     SetRangeBoldCommand,
+    SetRangeFontFamilyCommand,
+    SetRangeFontSizeCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,
     SetRangeUnderlineCommand,
@@ -208,6 +210,8 @@ export class SheetUIController extends Disposable {
             SetRangeItalicCommand,
             SetRangeUnderlineCommand,
             SetRangeStrickThroughCommand,
+            SetRangeFontSizeCommand,
+            SetRangeFontFamilyCommand,
             SetItalicCommand,
             SetStrikeThroughCommand,
             SetUnderlineCommand,

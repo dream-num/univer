@@ -1,11 +1,13 @@
 import { CURSOR_TYPE, IMouseEvent, IPointerEvent, IRenderManagerService, Rect } from '@univerjs/base-render';
 import { SelectionManagerService } from '@univerjs/base-sheets';
+import { IContextMenuService } from '@univerjs/base-ui';
 import { Disposable, IUniverInstanceService, LifecycleStages, Nullable, Observer, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../common/keys';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { HEADER_MENU_SHAPE_TYPE, HeaderMenuShape } from '../views/header-menu-shape';
+import { SheetMenuPosition } from './menu/menu';
 import { getCoordByOffset, getSheetObject } from './utils/component-tools';
 
 const HEADER_MENU_CONTROLLER_SHAPE = '__SpreadsheetHeaderMenuSHAPEControllerShape__';
@@ -37,6 +39,7 @@ export class HeaderMenuController extends Disposable {
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @Inject(SelectionManagerService)
         private readonly _selectionManagerService: SelectionManagerService
     ) {
@@ -238,9 +241,8 @@ export class HeaderMenuController extends Disposable {
             if (selectedSelection == null) {
                 sheetObject.spreadsheetColumnHeader.onPointerDownObserver.notifyObservers(evt);
             } else {
-                console.log(
-                    `hoverMenu, column${this._currentColumn}, range:${selectedSelection.startColumn}: ${selectedSelection.endColumn}`
-                );
+                evt.stopPropagation();
+                this._contextMenuService.triggerContextMenu(evt, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
             }
         });
     }

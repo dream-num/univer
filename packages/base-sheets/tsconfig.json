@@ -12,5 +12,5 @@
         "esModuleInterop": true, // auto allowSyntheticDefaultImports true
         "strictPropertyInitialization": false
     },
-    "include": ["src/**/*", "test/**/*", "../ui-plugin-sheets/src/commands/commands/set-scroll.command.ts" ]
+    "include": ["src/**/*", "test/**/*"]
 }

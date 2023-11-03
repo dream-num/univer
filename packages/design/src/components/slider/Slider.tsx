@@ -1,18 +1,20 @@
 /* eslint-disable no-magic-numbers */
-import { Button, Dropdown, Tooltip } from '@univerjs/design';
 import { IncreaseSingle, ReduceSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import { useMemo, useRef } from 'react';
+import { useContext, useMemo, useRef } from 'react';
 
+import { Button } from '../button/Button';
+import { ConfigContext } from '../config-provider/ConfigProvider';
+import { Dropdown } from '../dropdown/Dropdown';
+import { Tooltip } from '../tooltip/Tooltip';
 import styles from './index.module.less';
 
 /**
  * TODO:
- * 1. Replace icons
  * 2. Localization '恢复至 100%'
  */
 
-interface ISliderProps {
+export interface ISliderProps {
     /** The value of slider. When range is false, use number, otherwise, use [number, number] */
     value: number;
 
@@ -46,6 +48,8 @@ export function Slider(props: ISliderProps) {
     const { value, min = 0, max = 400, resetPoint = 100, shortcuts, onChange } = props;
 
     const sliderInnerRailRef = useRef<HTMLDivElement>(null);
+
+    const { locale } = useContext(ConfigContext);
 
     function handleReset() {
         onChange && onChange(resetPoint);
@@ -105,7 +109,7 @@ export function Slider(props: ISliderProps) {
         function onMouseUp() {
             isDragging = false;
             document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
+            window.removeEventListener('mouseup', onMouseUp);
         }
 
         function onMouseOut(e: MouseEvent) {
@@ -113,7 +117,7 @@ export function Slider(props: ISliderProps) {
         }
 
         document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
+        window.addEventListener('mouseup', onMouseUp);
         window.addEventListener('mouseout', onMouseOut);
     }
 
@@ -125,7 +129,7 @@ export function Slider(props: ISliderProps) {
 
             <div className={styles.sliderRail}>
                 <div ref={sliderInnerRailRef} className={styles.sliderInnerRail}>
-                    <Tooltip title={'恢复至 100%'}>
+                    <Tooltip title={`${locale.design.Slider.resetTo} ${resetPoint}%`}>
                         <a className={styles.sliderResetPoint} onClick={handleReset} />
                     </Tooltip>
 

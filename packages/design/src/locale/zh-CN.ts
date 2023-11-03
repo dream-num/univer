@@ -10,6 +10,9 @@ const locale: ILocale = {
             cancel: '取消',
             confirm: '确定',
         },
+        Slider: {
+            resetTo: '恢复至',
+        },
     },
 };
 

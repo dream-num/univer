@@ -14,6 +14,7 @@ export { Content, Footer, Header, type ILayoutProps, Layout, Sider } from './com
 export { type IMessageProps, Message, message, type MessageType } from './components/message';
 export { type IRadioProps, Radio } from './components/radio';
 export { type IRadioGroupProps, RadioGroup } from './components/radio-group';
+export { type ISliderProps, Slider } from './components/slider';
 export { type ITooltipProps, Tooltip } from './components/tooltip';
 export { type ILocale } from './locale/interface';
 export { defaultTheme, greenTheme, themeInstance } from './themes';

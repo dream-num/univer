@@ -5,6 +5,7 @@ import {
     Disposable,
     ICellData,
     ICommandService,
+    IRange,
     IUniverInstanceService,
     LifecycleStages,
     Nullable,
@@ -12,7 +13,18 @@ import {
     toDisposable,
 } from '@univerjs/core';
 
+import { fillCopy, fillCopyStyles, getDataIndex, getLenS } from '../Basics/fill-tools';
+import { AutoFillCommand } from '../commands/commands/auto-fill.command';
+import { APPLY_TYPE, IAutoFillService } from '../services/auto-fill/auto-fill.service';
+import { APPLY_FUNCTIONS, ICopyDataPiece, IRuleConfirmedData, otherRule } from '../services/auto-fill/fill-rules';
 import { IControlFillConfig, ISelectionRenderService } from '../services/selection/selection-render.service';
+
+export interface ICopyDataInType {
+    data: Array<Nullable<ICellData>>;
+    index: ICopyDataInTypeIndexInfo;
+}
+
+export type ICopyDataInTypeIndexInfo = number[];
 
 @OnLifecycle(LifecycleStages.Ready, AutoFillController)
 export class AutoFillController extends Disposable {
@@ -20,7 +32,8 @@ export class AutoFillController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IAutoFillService private readonly _autoFillService: IAutoFillService
     ) {
         super();
         this._onSelectionControlFillChanged();
@@ -39,12 +52,177 @@ export class AutoFillController extends Disposable {
         );
     }
 
-    private _getApplyType() {
-        return APPLY_TYPE.SERIES; // default apply type
+    private _getApplyData(
+        copyDataPiece: ICopyDataPiece,
+        csLen: number,
+        asLen: number,
+        direction: Direction,
+        applyType: APPLY_TYPE,
+        hasStyle: boolean = true
+    ) {
+        const applyData: Array<Nullable<ICellData>> = [];
+        const num = Math.floor(asLen / csLen);
+        const rsd = asLen % csLen;
+        const rules = this._autoFillService.getRules();
+
+        if (!hasStyle && applyType === APPLY_TYPE.ONLY_FORMAT) {
+            console.error('ERROR: only format can not be applied when hasStyle is false');
+            return [];
+        }
+
+        const applyDataInTypes: { [key: string]: any[] } = {};
+
+        rules.forEach((r) => {
+            applyDataInTypes[r.type] = [];
+        });
+
+        rules.forEach((r) => {
+            const { type, applyFunctions: customApplyFunctions } = r;
+            const copyDataInType = copyDataPiece[type];
+            if (!copyDataInType) {
+                return;
+            }
+            copyDataInType.forEach((copySquad) => {
+                const s = getLenS(copySquad.index, rsd);
+                const len = copySquad.index.length * num + s;
+                const arrData = this._applyFunctions(copySquad.data, len, direction, applyType, customApplyFunctions);
+                const arrIndex = getDataIndex(csLen, asLen, copySquad.index);
+                applyDataInTypes[type].push({ data: arrData, index: arrIndex });
+            });
+        });
+
+        for (let x = 1; x <= asLen; x++) {
+            rules.forEach((r) => {
+                const { type } = r;
+                const applyDataInType = applyDataInTypes[type];
+                for (let y = 0; y < applyDataInType.length; y++) {
+                    if (x in applyDataInType[y].index) {
+                        applyData.push(applyDataInType[y].data[applyDataInType[y].index[x]]);
+                    }
+                }
+            });
+        }
+
+        return applyData;
+    }
+
+    private _applyFunctions(
+        data: Array<Nullable<ICellData>>,
+        len: number,
+        direction: Direction,
+        applyType: APPLY_TYPE,
+        customApplyFunctions?: APPLY_FUNCTIONS
+    ) {
+        const isReverse = direction === Direction.UP || direction === Direction.LEFT;
+        if (applyType === APPLY_TYPE.COPY) {
+            const custom = customApplyFunctions?.[APPLY_TYPE.COPY];
+            if (custom) {
+                return custom(data, len, direction);
+            }
+            isReverse && data.reverse();
+            return fillCopy(data, len);
+        }
+        if (applyType === APPLY_TYPE.SERIES) {
+            const custom = customApplyFunctions?.[APPLY_TYPE.SERIES];
+            if (custom) {
+                return custom(data, len, direction);
+            }
+            isReverse && data.reverse();
+            return fillCopy(data, len);
+        }
+        if (applyType === APPLY_TYPE.ONLY_FORMAT) {
+            const custom = customApplyFunctions?.[APPLY_TYPE.ONLY_FORMAT];
+            if (custom) {
+                return custom(data, len, direction);
+            }
+            return fillCopyStyles(data, len);
+        }
+    }
+
+    private _getCopyData(copyRange: IRange, direction: Direction) {
+        const {
+            startRow: copyStartRow,
+            startColumn: copyStartColumn,
+            endRow: copyEndRow,
+            endColumn: copyEndColumn,
+        } = copyRange;
+        const currentCellDatas = this._univerInstanceService
+            .getCurrentUniverSheetInstance()
+            .getActiveSheet()
+            .getCellMatrix();
+        const rules = this._autoFillService.getRules();
+        const copyData = [];
+        const isVertical = direction === Direction.DOWN || direction === Direction.UP;
+        let a1;
+        let a2;
+        let b1;
+        let b2;
+        if (isVertical) {
+            a1 = copyStartColumn;
+            a2 = copyEndColumn;
+            b1 = copyStartRow;
+            b2 = copyEndRow;
+        } else {
+            a1 = copyStartRow;
+            a2 = copyEndRow;
+            b1 = copyStartColumn;
+            b2 = copyEndColumn;
+        }
+        for (let a = a1; a <= a2; a++) {
+            const copyDataPiece = this._getEmptyCopyDataPiece();
+            const prevData: IRuleConfirmedData = {
+                type: undefined,
+                cellData: undefined,
+            };
+            for (let b = b1; b <= b2; b++) {
+                let data: Nullable<ICellData>;
+                if (isVertical) {
+                    data = currentCellDatas.getValue(b, a);
+                } else {
+                    data = currentCellDatas.getValue(a, b);
+                }
+                const { type, isContinue } = rules.find((r) => r.match(data)) || otherRule;
+                if (isContinue(prevData, data)) {
+                    const typeInfo = copyDataPiece[type];
+
+                    const last = typeInfo![typeInfo!.length - 1];
+                    last.data.push(data);
+                    last.index.push(b - b1 + 1);
+                } else {
+                    const typeInfo = copyDataPiece[type];
+                    if (typeInfo) {
+                        typeInfo.push({
+                            data: [data],
+                            index: [b - b1 + 1],
+                        });
+                    } else {
+                        copyDataPiece[type] = [
+                            {
+                                data: [data],
+                                index: [b - b1 + 1],
+                            },
+                        ];
+                    }
+                }
+                prevData.type = type;
+                prevData.cellData = data;
+            }
+            copyData.push(copyDataPiece);
+        }
+        return copyData;
+    }
+
+    private _getEmptyCopyDataPiece() {
+        const copyDataPiece: ICopyDataPiece = {};
+        this._autoFillService.getRules().forEach((r) => {
+            copyDataPiece[r.type] = [];
+        });
+        return copyDataPiece;
     }
 
     private _fillData(config: IControlFillConfig) {
         const { newRange, oldRange: copyRange } = config;
+        const hasStyle = this._autoFillService.isFillingStyle();
         const applyRange = {
             startRow: newRange.startRow,
             endRow: newRange.endRow,
@@ -84,19 +262,7 @@ export class AutoFillController extends Disposable {
             endColumn: applyEndColumn,
         } = applyRange;
 
-        const currentCellDatas = this._univerInstanceService
-            .getCurrentUniverSheetInstance()
-            .getActiveSheet()
-            .getCellMatrix();
-
-        const copyData = getCopyData(
-            currentCellDatas,
-            copyStartRow,
-            copyEndRow,
-            copyStartColumn,
-            copyEndColumn,
-            direction
-        );
+        const copyData = this._getCopyData(copyRange, direction);
 
         let csLen;
         if (direction === Direction.DOWN || direction === Direction.UP) {
@@ -105,7 +271,7 @@ export class AutoFillController extends Disposable {
             csLen = copyEndColumn - copyStartColumn + 1;
         }
 
-        const applyType = this._getApplyType();
+        const applyType = this._autoFillService.getApplyType();
         const applyDatas: Array<Array<Nullable<ICellData>>> = [];
 
         if (direction === Direction.DOWN || direction === Direction.UP) {
@@ -114,7 +280,7 @@ export class AutoFillController extends Disposable {
             for (let i = applyStartColumn; i <= applyEndColumn; i++) {
                 const copyD = copyData[i - applyStartColumn];
 
-                const applyData = getApplyData(copyD, csLen, asLen, direction, applyType);
+                const applyData = this._getApplyData(copyD, csLen, asLen, direction, applyType, hasStyle);
                 untransformedApplyDatas.push(applyData);
             }
             for (let i = 0; i < untransformedApplyDatas[0].length; i++) {
@@ -128,7 +294,7 @@ export class AutoFillController extends Disposable {
             const asLen = applyEndColumn - applyStartColumn + 1;
             for (let i = applyStartRow; i <= applyEndRow; i++) {
                 const copyD = copyData[i - applyStartRow];
-                const applyData = getApplyData(copyD, csLen, asLen, direction, applyType);
+                const applyData = this._getApplyData(copyD, csLen, asLen, direction, applyType, hasStyle);
                 applyDatas.push(applyData);
             }
         }

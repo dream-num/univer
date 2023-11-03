@@ -1,15 +1,11 @@
 import { Direction, ICellData, Nullable, ObjectMatrix, Tools } from '@univerjs/core';
 
+import { APPLY_TYPE } from '../services/auto-fill/auto-fill.service';
+
 export const chnNumChar = { 零: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
 export const chnNumChar2 = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
 export const chnUnitSection = ['', '万', '亿', '万亿', '亿亿'];
 export const chnUnitChar = ['', '十', '百', '千'];
-export enum APPLY_TYPE {
-    COPY = '0',
-    SERIES = '1',
-    ONLY_FORMAT = '2',
-    NO_FORMAT = '3',
-}
 
 export enum DATA_TYPE {
     NUMBER = 'number',
@@ -143,7 +139,10 @@ export function numberToChinese(num: number) {
     return chnStr;
 }
 
-export function isChnNumber(txt: string) {
+export function isChnNumber(txt?: string) {
+    if (!txt) {
+        return false;
+    }
     let isChnNumber = true;
 
     if (txt) {
@@ -166,7 +165,12 @@ export function isChnNumber(txt: string) {
     return isChnNumber;
 }
 
-export function isExtendNumber(txt: string) {
+export function matchExtendNumber(txt?: string) {
+    if (!txt) {
+        return {
+            isExtendNumber: false,
+        };
+    }
     const reg = /0|([1-9]+[0-9]*)/g;
     const isExtendNumber = reg.test(txt);
 
@@ -178,12 +182,21 @@ export function isExtendNumber(txt: string) {
             const beforeTxt = txt.substr(0, matchIndex);
             const afterTxt = txt.substr(matchIndex + matchTxt.length);
 
-            return [isExtendNumber, Number(matchTxt), beforeTxt, afterTxt];
+            return {
+                isExtendNumber: true,
+                matchTxt: Number(matchTxt),
+                beforeTxt,
+                afterTxt,
+            };
         }
-        return [false];
+        return {
+            isExtendNumber: false,
+        };
     }
 
-    return [isExtendNumber];
+    return {
+        isExtendNumber,
+    };
 }
 
 export function isChnWeek1(txt: string) {
@@ -973,6 +986,18 @@ export function fillCopy(data: Array<Nullable<ICellData>>, len: number) {
     return applyData;
 }
 
+export function fillCopyStyles(data: Array<Nullable<ICellData>>, len: number) {
+    const applyData = [];
+    for (let i = 1; i <= len; i++) {
+        const index = (i - 1) % data.length;
+        const d = { s: data[index]?.s };
+
+        applyData.push(d);
+    }
+
+    return applyData;
+}
+
 export function isEqualRatio(arr: number[]) {
     let ratio = true;
     const step = arr[1] / arr[0];
@@ -1039,7 +1064,6 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
             applyData.push(d);
         }
     }
-    console.error('fill series:', applyData);
     return applyData;
 }
 

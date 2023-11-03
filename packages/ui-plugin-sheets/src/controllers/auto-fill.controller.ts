@@ -1,3 +1,4 @@
+import { getCellInfoInMergeData } from '@univerjs/base-render';
 import { AutoFillCommand } from '@univerjs/base-sheets';
 import { APPLY_TYPE } from '@univerjs/base-sheets/services/auto-fill/type.js';
 import {
@@ -13,18 +14,12 @@ import {
     toDisposable,
 } from '@univerjs/core';
 
-import { fillCopy, fillCopyStyles, getDataIndex, getLenS } from '../Basics/fill-tools';
 import { AutoFillCommand } from '../commands/commands/auto-fill.command';
-import { APPLY_TYPE, IAutoFillService } from '../services/auto-fill/auto-fill.service';
-import { APPLY_FUNCTIONS, ICopyDataPiece, IRuleConfirmedData, otherRule } from '../services/auto-fill/fill-rules';
+import { IAutoFillService } from '../services/auto-fill/auto-fill.service';
+import { otherRule } from '../services/auto-fill/rules';
+import { fillCopy, fillCopyStyles, getDataIndex, getLenS } from '../services/auto-fill/tools';
+import { APPLY_FUNCTIONS, APPLY_TYPE, ICopyDataPiece, IRuleConfirmedData } from '../services/auto-fill/type';
 import { IControlFillConfig, ISelectionRenderService } from '../services/selection/selection-render.service';
-
-export interface ICopyDataInType {
-    data: Array<Nullable<ICellData>>;
-    index: ICopyDataInTypeIndexInfo;
-}
-
-export type ICopyDataInTypeIndexInfo = number[];
 
 @OnLifecycle(LifecycleStages.Ready, AutoFillController)
 export class AutoFillController extends Disposable {
@@ -220,6 +215,74 @@ export class AutoFillController extends Disposable {
         return copyDataPiece;
     }
 
+    private _getMergeApplyData(copyRange: IRange, newRange: IRange, direction: Direction, csLen: number) {
+        const mergeData = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getMergeData();
+        const applyMergeRanges = [];
+        for (let i = copyRange.startRow; i <= copyRange.endRow; i++) {
+            for (let j = copyRange.startColumn; j <= copyRange.endColumn; j++) {
+                const { isMergedMainCell, startRow, startColumn, endRow, endColumn } = getCellInfoInMergeData(
+                    i,
+                    j,
+                    mergeData
+                );
+                if (isMergedMainCell) {
+                    if (direction === Direction.DOWN) {
+                        let windowStartRow = startRow + csLen;
+                        let windowEndRow = endRow + csLen;
+                        while (windowEndRow <= newRange.endRow) {
+                            applyMergeRanges.push({
+                                startRow: windowStartRow,
+                                startColumn,
+                                endRow: windowEndRow,
+                                endColumn,
+                            });
+                            windowStartRow += csLen;
+                            windowEndRow += csLen;
+                        }
+                    } else if (direction === Direction.UP) {
+                        let windowStartRow = startRow - csLen;
+                        let windowEndRow = endRow - csLen;
+                        while (windowStartRow >= newRange.startRow) {
+                            applyMergeRanges.push({
+                                startRow: windowStartRow,
+                                startColumn,
+                                endRow: windowEndRow,
+                                endColumn,
+                            });
+                            windowStartRow -= csLen;
+                            windowEndRow -= csLen;
+                        }
+                    } else if (direction === Direction.RIGHT) {
+                        let windowStartColumn = startColumn + csLen;
+                        let windowEndColumn = endColumn + csLen;
+                        while (windowEndColumn <= newRange.endColumn) {
+                            applyMergeRanges.push({
+                                startRow,
+                                startColumn: windowStartColumn,
+                                endRow,
+                                endColumn: windowEndColumn,
+                            });
+                            windowStartColumn += csLen;
+                            windowEndColumn += csLen;
+                        }
+                    } else if (direction === Direction.LEFT) {
+                        const windowStartColumn = startColumn - csLen;
+                        const windowEndColumn = endColumn - csLen;
+                        while (windowStartColumn >= newRange.startColumn) {
+                            applyMergeRanges.push({
+                                startRow,
+                                startColumn: windowStartColumn,
+                                endRow,
+                                endColumn: windowEndColumn,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        return applyMergeRanges;
+    }
+
     private _fillData(config: IControlFillConfig) {
         const { newRange, oldRange: copyRange } = config;
         const hasStyle = this._autoFillService.isFillingStyle();
@@ -298,12 +361,26 @@ export class AutoFillController extends Disposable {
                 applyDatas.push(applyData);
             }
         }
+
+        let applyMergeRanges;
+        if (hasStyle) {
+            applyMergeRanges = this._getMergeApplyData(copyRange, newRange, direction, csLen);
+        } else {
+            applyDatas.forEach((row) => {
+                row.forEach((cellData) => {
+                    cellData && (cellData.s = undefined);
+                });
+            });
+        }
+
+        console.error('applyMergeRanges', applyMergeRanges);
         this._commandService.executeCommand(AutoFillCommand.id, {
             selectionRange: newRange,
             applyRange,
             applyDatas,
             workbookId: this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
             worksheetId: this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
+            applyMergeRanges,
         });
     }
 }

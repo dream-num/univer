@@ -8,21 +8,9 @@ import {
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../selection/selection-manager.service';
-import {
-    chnNumberRule,
-    chnWeek2Rule,
-    chnWeek3Rule,
-    extendNumberRule,
-    IAutoFillRule,
-    numberRule,
-    otherRule,
-} from './fill-rules';
+import { chnNumberRule, chnWeek2Rule, chnWeek3Rule, extendNumberRule, numberRule, otherRule } from './rules';
+import { APPLY_TYPE, IAutoFillRule } from './type';
 
-export enum APPLY_TYPE {
-    COPY = '0',
-    SERIES = '1',
-    ONLY_FORMAT = '2',
-}
 export interface IAutoFillService {
     getRules(): IAutoFillRule[];
     getApplyType(): APPLY_TYPE;

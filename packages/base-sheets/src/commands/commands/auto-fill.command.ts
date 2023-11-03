@@ -2,6 +2,7 @@ import { CommandType, ICellData, ICommand, ICommandService, IRange } from '@univ
 import { IAccessor } from '@wendellhu/redi';
 
 import { SetSelectionsOperation } from '../operations/selection.operation';
+import { AddWorksheetMergeCommand } from './add-worksheet-merge.command';
 import { SetRangeValuesCommand } from './set-range-values.command';
 
 interface IAutoFillCommandParams {
@@ -10,6 +11,7 @@ interface IAutoFillCommandParams {
     applyRange: IRange;
     selectionRange: IRange;
     applyDatas: ICellData[][];
+    applyMergeRanges?: IRange[];
 }
 
 export const AutoFillCommand: ICommand = {
@@ -18,7 +20,7 @@ export const AutoFillCommand: ICommand = {
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params?: IAutoFillCommandParams) => {
         const commandService = accessor.get(ICommandService);
-        const { applyRange, selectionRange, applyDatas, workbookId, worksheetId } = params || {};
+        const { applyRange, selectionRange, applyDatas, workbookId, worksheetId, applyMergeRanges } = params || {};
         if (!applyRange || !applyDatas || !selectionRange) {
             return false;
         }
@@ -27,6 +29,15 @@ export const AutoFillCommand: ICommand = {
             range: applyRange,
             value: applyDatas,
         });
+
+        if (applyMergeRanges) {
+            commandService.executeCommand(AddWorksheetMergeCommand.id, {
+                selections: applyMergeRanges,
+                workbookId,
+                worksheetId,
+            });
+        }
+
         commandService.executeCommand(SetSelectionsOperation.id, {
             selections: [
                 {

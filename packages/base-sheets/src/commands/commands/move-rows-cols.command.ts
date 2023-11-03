@@ -17,10 +17,7 @@ import {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
-import {
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-} from '../../services/selection/selection-manager.service';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {
     IMoveColumnsMutationParams,

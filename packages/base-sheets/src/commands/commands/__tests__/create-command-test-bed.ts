@@ -10,7 +10,7 @@ import {
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
-import { SelectionManagerService } from '../../../services/selection/selection-manager.service';
+import { SelectionManagerService } from '../../../services/selection-manager.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     id: 'test',

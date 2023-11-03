@@ -3,10 +3,7 @@ import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoC
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import {
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-} from '../../../services/selection/selection-manager.service';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { SetWorksheetColWidthMutation } from '../../mutations/set-worksheet-col-width.mutation';
 import {
     DeltaColumnWidthCommand,

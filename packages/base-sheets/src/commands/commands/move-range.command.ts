@@ -12,7 +12,7 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { NORMAL_SELECTION_PLUGIN_NAME } from '../../services/selection/selection-manager.service';
+import { NORMAL_SELECTION_PLUGIN_NAME } from '../../services/selection-manager.service';
 import { MoveRangeMutation, MoveRangeMutationParams } from '../mutations/move-range.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 

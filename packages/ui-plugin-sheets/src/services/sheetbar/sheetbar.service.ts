@@ -2,7 +2,7 @@ import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable, Subject } from 'rxjs';
 
-import { IScrollState } from '../../View/SheetBar/SheetBarTabs/utils/slide-tab-bar';
+import { IScrollState } from '../../views/SheetBar/SheetBarTabs/utils/slide-tab-bar';
 
 export interface ISheetBarMenuHandler {
     handleSheetBarMenu(): void;

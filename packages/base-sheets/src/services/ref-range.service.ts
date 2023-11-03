@@ -40,7 +40,7 @@ import {
     RemoveRowColCommandParams,
     RemoveRowCommand,
 } from '../commands/commands/remove-row-col.command';
-import { SelectionManagerService } from './selection/selection-manager.service';
+import { SelectionManagerService } from './selection-manager.service';
 
 export type EffectParams =
     | ICommandInfo<IMoveRangeCommandParams>

@@ -12,7 +12,7 @@ import {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
-import { SelectionManagerService } from '../../services/selection/selection-manager.service';
+import { SelectionManagerService } from '../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {
     RemoveMergeUndoMutationFactory,

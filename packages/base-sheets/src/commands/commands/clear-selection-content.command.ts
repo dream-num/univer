@@ -11,7 +11,7 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { SelectionManagerService } from '../../services/selection/selection-manager.service';
+import { SelectionManagerService } from '../../services/selection-manager.service';
 import {
     ISetRangeValuesMutationParams,
     SetRangeValuesMutation,

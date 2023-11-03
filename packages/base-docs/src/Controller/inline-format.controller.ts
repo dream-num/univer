@@ -6,6 +6,8 @@ import {
     ICommandInfo,
     ICommandService,
     IDocumentBody,
+    IStyleBase,
+    ITextDecoration,
     ITextRun,
     IUniverInstanceService,
     LifecycleStages,
@@ -74,9 +76,24 @@ export class InlineFormatController extends Disposable {
 
         let formatValue;
 
+        const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {
+            [SetInlineFormatBoldCommand.id]: 'bl',
+            [SetInlineFormatItalicCommand.id]: 'it',
+            [SetInlineFormatUnderlineCommand.id]: 'ul',
+            [SetInlineFormatStrikethroughCommand.id]: 'st',
+        };
+
         switch (command.id) {
-            case SetInlineFormatBoldCommand.id: {
-                formatValue = getFormatValueInSelection(docsModel.body!.textRuns!, 'bl', selections);
+            case SetInlineFormatBoldCommand.id: // fallthrough
+            case SetInlineFormatItalicCommand.id: // fallthrough
+            case SetInlineFormatUnderlineCommand.id: // fallthrough
+            case SetInlineFormatStrikethroughCommand.id: {
+                formatValue = getReverseFormatValueInSelection(
+                    docsModel.body!.textRuns!,
+                    COMMAND_ID_TO_FORMAT_KEY_MAP[command.id],
+                    selections
+                );
+
                 break;
             }
 
@@ -109,7 +126,7 @@ export class InlineFormatController extends Disposable {
                         st: 0,
                         ed: textEnd - textStart,
                         ts: {
-                            bl: formatValue,
+                            [COMMAND_ID_TO_FORMAT_KEY_MAP[command.id]]: formatValue,
                         },
                     },
                 ],
@@ -148,16 +165,20 @@ export class InlineFormatController extends Disposable {
     }
 }
 
+function isTextDecoration(value: unknown | ITextDecoration): value is ITextDecoration {
+    return value !== null && typeof value === 'object';
+}
+
 /**
  * When clicking on a Bold menu item, you should un-bold if there is bold in the selections,
  * or bold if there is no bold text. This method is used to get the style value calculated
  * from textRuns in the selection
  */
-function getFormatValueInSelection(
+function getReverseFormatValueInSelection(
     textRuns: ITextRun[],
-    key: 'bl',
+    key: keyof IStyleBase,
     selections: ITextSelectionRangeWithStyle[]
-): BooleanNumber {
+): BooleanNumber | ITextDecoration {
     let ti = 0;
     let si = 0;
 
@@ -175,13 +196,31 @@ function getFormatValueInSelection(
         } else if (ed <= textStart) {
             ti++;
         } else {
-            if (ts?.[key] === BooleanNumber.TRUE) {
-                return BooleanNumber.FALSE;
+            if (ts?.[key] == null) {
+                return /bl|it/.test(key)
+                    ? BooleanNumber.TRUE
+                    : {
+                          s: BooleanNumber.TRUE,
+                      };
+            }
+
+            if (ts[key] === BooleanNumber.FALSE) {
+                return BooleanNumber.TRUE;
+            }
+
+            if (isTextDecoration(ts[key]) && (ts[key] as ITextDecoration).s === BooleanNumber.FALSE) {
+                return {
+                    s: BooleanNumber.TRUE,
+                };
             }
 
             ti++;
         }
     }
 
-    return BooleanNumber.TRUE;
+    return /bl|it/.test(key)
+        ? BooleanNumber.FALSE
+        : {
+              s: BooleanNumber.FALSE,
+          };
 }

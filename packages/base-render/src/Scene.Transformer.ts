@@ -201,6 +201,10 @@ export class Transformer implements ITransformerConfig {
         return this._scene;
     }
 
+    hideControl() {
+        this._hideControl();
+    }
+
     attachTo(applyObject: BaseObject) {
         if (!applyObject.isTransformer) {
             return;
@@ -239,7 +243,7 @@ export class Transformer implements ITransformerConfig {
             this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                 this._moving(moveOffsetX, moveOffsetY, scrollTimer);
-                this._hiddenControl();
+                this._hideControl();
                 scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
                     this._moving(moveOffsetX, moveOffsetY, scrollTimer);
                 });
@@ -681,7 +685,7 @@ export class Transformer implements ITransformerConfig {
         });
     }
 
-    private _hiddenControl() {
+    private _hideControl() {
         this._transformerControlMap.forEach((control) => {
             control.hide();
             control.makeDirty(true);

@@ -21,6 +21,7 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
+import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Steady, FloatingObjectController)
@@ -119,7 +120,7 @@ export class FloatingObjectController extends Disposable {
     }
 
     private _commandExecutedListener() {
-        const updateCommandList = [RichTextEditingMutation.id];
+        const updateCommandList = [RichTextEditingMutation.id, SetDocZoomRatioOperation.id];
 
         const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
@@ -163,17 +164,21 @@ export class FloatingObjectController extends Disposable {
     private _refreshFloatingObject(unitId: string, skeleton: DocumentSkeleton, currentRender: IRender) {
         const skeletonData = skeleton?.getSkeletonData();
 
-        const documents = currentRender.mainComponent as Documents;
+        const { mainComponent, scene } = currentRender;
+
+        const documentComponent = mainComponent as Documents;
 
         if (!skeletonData) {
             return;
         }
 
-        const { left: docsLeft, top: docsTop } = documents;
+        const { left: docsLeft, top: docsTop, pageLayoutType, pageMarginLeft, pageMarginTop } = documentComponent;
 
         const { pages } = skeletonData;
 
         const Objects: IFloatingObjectManagerParam[] = [];
+
+        const { scaleX, scaleY } = scene.getAncestorScale();
 
         this._liquid.reset();
 
@@ -216,12 +221,7 @@ export class FloatingObjectController extends Disposable {
                 });
             });
 
-            this._liquid.translatePage(
-                page,
-                documents.pageLayoutType,
-                documents.pageMarginLeft,
-                documents.pageMarginTop
-            );
+            this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
         this._floatingObjectManagerService.BatchAddOrUpdate(Objects);

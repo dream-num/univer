@@ -34,7 +34,7 @@ export const SetDocZoomRatioCommand: ICommand = {
 
         const setZoomRatioMutationParams: ISetDocZoomRatioOperationParams = {
             zoomRatio,
-            documentId,
+            unitId: documentId,
         };
 
         const undoMutationParams = SetDocZoomRatioUndoMutationFactory(accessor, setZoomRatioMutationParams);

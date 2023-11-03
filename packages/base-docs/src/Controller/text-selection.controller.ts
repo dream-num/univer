@@ -206,7 +206,7 @@ export class TextSelectionController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     const params = command.params as ISetDocZoomRatioOperationParams;
-                    const { documentId } = params;
+                    const { unitId: documentId } = params;
 
                     const unitId = this._textSelectionManagerService.getCurrentSelection()?.unitId;
 

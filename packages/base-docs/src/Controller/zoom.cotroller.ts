@@ -20,9 +20,10 @@ import { VIEWPORT_KEY } from '../Basics/docs-view-key';
 import { SetDocZoomRatioCommand } from '../commands/commands/set-doc-zoom-ratio.command';
 import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
+import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 interface ISetDocMutationParams {
-    documentId: string;
+    unitId: string;
 }
 
 @OnLifecycle(LifecycleStages.Rendered, ZoomController)
@@ -33,7 +34,8 @@ export class ZoomController extends Disposable {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -144,8 +146,8 @@ export class ZoomController extends Disposable {
                     const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
 
                     const params = command.params;
-                    const { documentId } = params as ISetDocMutationParams;
-                    if (!(documentId === documentModel.getUnitId())) {
+                    const { unitId } = params as ISetDocMutationParams;
+                    if (!(unitId === documentModel.getUnitId())) {
                         return;
                     }
 
@@ -166,6 +168,10 @@ export class ZoomController extends Disposable {
         docObject.scene.scale(zoomRatio, zoomRatio);
 
         this._calculatePagePosition(docObject, zoomRatio);
+
+        this._textSelectionManagerService.refreshSelection();
+
+        docObject.scene.getTransformer()?.hideControl();
     }
 
     private _calculatePagePosition(currentRender: IDocObjectParam, zoomRatio: number) {
@@ -190,7 +196,7 @@ export class ZoomController extends Disposable {
         if (engineWidth > (docsWidth + pageMarginLeft * 2) * zoomRatio) {
             docsLeft = engineWidth / 2 - (docsWidth * zoomRatio) / 2;
             docsLeft /= zoomRatio;
-            sceneWidth = engineWidth - 34;
+            sceneWidth = (engineWidth - pageMarginLeft * 2) / zoomRatio;
 
             scrollToX = 0;
         } else {
@@ -202,7 +208,7 @@ export class ZoomController extends Disposable {
 
         if (engineHeight > docsHeight) {
             docsTop = engineHeight / 2 - docsHeight / 2;
-            sceneHeight = engineHeight - 34;
+            sceneHeight = (engineHeight - pageMarginTop * 2) / zoomRatio;
         } else {
             docsTop = pageMarginTop;
             sceneHeight = docsHeight + pageMarginTop * 2;

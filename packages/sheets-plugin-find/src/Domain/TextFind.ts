@@ -1,8 +1,4 @@
-import {
-    ISelectionRenderService,
-    SelectionManagerService,
-    transformCellDataToSelectionData,
-} from '@univerjs/base-sheets';
+import { SelectionManagerService, transformCellDataToSelectionData } from '@univerjs/base-sheets';
 import {
     FormatType,
     ICellData,
@@ -13,6 +9,7 @@ import {
     Range,
     Worksheet,
 } from '@univerjs/core';
+import { ISelectionRenderService } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { FindType } from '../IData';

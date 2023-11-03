@@ -25,6 +25,7 @@ import {
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,
+    SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../commands/commands/inline-format.command';
 import { RenameSheetOperation } from '../commands/commands/rename.command';
@@ -212,6 +213,7 @@ export class SheetUIController extends Disposable {
             SetRangeStrickThroughCommand,
             SetRangeFontSizeCommand,
             SetRangeFontFamilyCommand,
+            SetRangeTextColorCommand,
             SetItalicCommand,
             SetStrikeThroughCommand,
             SetUnderlineCommand,

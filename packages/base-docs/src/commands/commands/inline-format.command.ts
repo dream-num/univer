@@ -38,6 +38,12 @@ export const SetInlineFormatFontFamilyCommand: ICommand = {
     handler: async () => true,
 };
 
+export const SetInlineFormatTextColorCommand: ICommand = {
+    id: 'doc.command.set-inline-format-text-color',
+    type: CommandType.COMMAND,
+    handler: async () => true,
+};
+
 export const SetInlineFormatCommand: ICommand = {
     id: 'doc.command.set-inline-format',
     type: CommandType.COMMAND,

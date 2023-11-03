@@ -23,6 +23,7 @@ import {
     SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
+    SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from '../commands/commands/inline-format.command';
 import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
@@ -54,6 +55,7 @@ export class InlineFormatController extends Disposable {
             SetInlineFormatStrikethroughCommand.id,
             SetInlineFormatFontSizeCommand.id,
             SetInlineFormatFontFamilyCommand.id,
+            SetInlineFormatTextColorCommand.id,
         ];
 
         this.disposeWithMe(
@@ -92,6 +94,7 @@ export class InlineFormatController extends Disposable {
             [SetInlineFormatStrikethroughCommand.id]: 'st',
             [SetInlineFormatFontSizeCommand.id]: 'fs',
             [SetInlineFormatFontFamilyCommand.id]: 'ff',
+            [SetInlineFormatTextColorCommand.id]: 'cl',
         };
 
         switch (command.id) {
@@ -111,6 +114,13 @@ export class InlineFormatController extends Disposable {
             case SetInlineFormatFontSizeCommand.id:
             case SetInlineFormatFontFamilyCommand.id: {
                 formatValue = command.params?.value;
+                break;
+            }
+
+            case SetInlineFormatTextColorCommand.id: {
+                formatValue = {
+                    rgb: command.params?.value,
+                };
                 break;
             }
 

@@ -28,6 +28,7 @@ import {
     SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
+    SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
@@ -112,6 +113,7 @@ export class DocPlugin extends Plugin {
                 SetInlineFormatStrikethroughCommand,
                 SetInlineFormatFontSizeCommand,
                 SetInlineFormatFontFamilyCommand,
+                SetInlineFormatTextColorCommand,
                 SetInlineFormatCommand,
                 BreakLineCommand,
                 InsertCommand,

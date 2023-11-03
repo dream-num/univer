@@ -4,6 +4,7 @@ import {
     SetInlineFormatFontSizeCommand,
     SetInlineFormatItalicCommand,
     SetInlineFormatStrikethroughCommand,
+    SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from '@univerjs/base-docs';
 import {
@@ -12,6 +13,7 @@ import {
     SetFontSizeCommand,
     SetItalicCommand,
     SetStrikeThroughCommand,
+    SetTextColorCommand,
     SetUnderlineCommand,
 } from '@univerjs/base-sheets';
 import { CommandType, FOCUSING_EDITOR, ICommand, ICommandService, IContextService } from '@univerjs/core';
@@ -115,5 +117,21 @@ export const SetRangeFontFamilyCommand: ICommand = {
         }
 
         return commandService.executeCommand(SetFontFamilyCommand.id, params);
+    },
+};
+
+export const SetRangeTextColorCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-range-text-color',
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const contextService = accessor.get(IContextService);
+        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+
+        if (isCellEditorFocus) {
+            return commandService.executeCommand(SetInlineFormatTextColorCommand.id, params);
+        }
+
+        return commandService.executeCommand(SetTextColorCommand.id, params);
     },
 };

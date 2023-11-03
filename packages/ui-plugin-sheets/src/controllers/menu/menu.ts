@@ -33,7 +33,6 @@ import {
     SetSelectedRowsVisibleCommand,
     SetSelectionsOperation,
     SetTabColorCommand,
-    SetTextColorCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
@@ -70,6 +69,7 @@ import {
     SetRangeFontSizeCommand,
     SetRangeItalicCommand,
     SetRangeStrickThroughCommand,
+    SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../../commands/commands/inline-format.command';
 import { RenameSheetOperation } from '../../commands/commands/rename.command';
@@ -620,7 +620,7 @@ export function ResetTextColorMenuItemFactory(): IMenuButtonItem {
         id: ResetTextColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
-        positions: SetTextColorCommand.id,
+        positions: SetRangeTextColorCommand.id,
     };
 }
 
@@ -628,7 +628,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
     const commandService = accessor.get(ICommandService);
 
     return {
-        id: SetTextColorCommand.id,
+        id: SetRangeTextColorCommand.id,
         icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
         type: MenuItemType.SELECTOR,
@@ -641,7 +641,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         value$: new Observable<string>((subscriber) => {
             const defaultColor = '#000';
             const disposable = commandService.onCommandExecuted((c) => {
-                if (c.id === SetTextColorCommand.id) {
+                if (c.id === SetRangeTextColorCommand.id) {
                     const color = (c.params as { value: string }).value;
                     subscriber.next(color ?? defaultColor);
                 }

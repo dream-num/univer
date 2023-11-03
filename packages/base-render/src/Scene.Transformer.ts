@@ -201,6 +201,10 @@ export class Transformer implements ITransformerConfig {
         return this._scene;
     }
 
+    hiddenControl() {
+        this._hiddenControl();
+    }
+
     attachTo(applyObject: BaseObject) {
         if (!applyObject.isTransformer) {
             return;

@@ -3,14 +3,14 @@ import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetDocZoomRatioOperationParams {
     zoomRatio: number;
-    documentId: string;
+    unitId: string;
 }
 
 export const SetDocZoomRatioUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetDocZoomRatioOperationParams
 ): ISetDocZoomRatioOperationParams => {
-    const documentModel = accessor.get(IUniverInstanceService).getUniverDocInstance(params.documentId);
+    const documentModel = accessor.get(IUniverInstanceService).getUniverDocInstance(params.unitId);
     const old = documentModel?.zoomRatio || 1;
     return {
         ...Tools.deepClone(params),
@@ -22,7 +22,7 @@ export const SetDocZoomRatioOperation: IOperation<ISetDocZoomRatioOperationParam
     id: 'doc.operation.set-zoom-ratio',
     type: CommandType.OPERATION,
     handler: (accessor, params: ISetDocZoomRatioOperationParams) => {
-        const documentModel = accessor.get(IUniverInstanceService).getUniverDocInstance(params.documentId);
+        const documentModel = accessor.get(IUniverInstanceService).getUniverDocInstance(params.unitId);
         if (!documentModel) {
             return false;
         }

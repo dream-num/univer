@@ -13,13 +13,26 @@ export const DialogOperation: ICommand = {
         const dialogService = accessor.get(IDialogService);
 
         dialogService.open({
+            id: 'dialog1',
             visible: true,
             children: { title: 'Dialog Content' },
             footer: { title: 'Dialog Footer' },
             title: { title: 'Dialog Title' },
+            draggable: false,
+            onClose() {
+                dialogService.close('dialog1');
+            },
+        });
+
+        dialogService.open({
+            id: 'dialog2',
+            visible: true,
+            children: { title: 'Dialog2 Content' },
+            footer: { title: 'Dialog2 Footer' },
+            title: { title: 'Dialog2 Title' },
             draggable: true,
             onClose() {
-                dialogService.close();
+                dialogService.close('dialog2');
             },
         });
 

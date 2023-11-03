@@ -8,7 +8,7 @@ export const IDialogService = createIdentifier<IDialogService>('univer.dialog-se
 export interface IDialogService {
     open(params: IDialogPartMethodOptions): IDisposable;
 
-    close(): void;
+    close(id: string): void;
 
-    getObservableDialog(): Subject<IDialogPartMethodOptions>;
+    getObservableDialog(): Subject<IDialogPartMethodOptions[]>;
 }

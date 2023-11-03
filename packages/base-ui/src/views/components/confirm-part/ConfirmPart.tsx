@@ -9,14 +9,12 @@ import { IConfirmPartMethodOptions } from './interface';
 export function ConfirmPart() {
     const confirmService = useDependency(IConfirmService);
 
-    const [options, setOptions] = useState<IConfirmPartMethodOptions>({
-        visible: false,
-    });
+    const [confirmOptions, setConfirmOptions] = useState<IConfirmPartMethodOptions[]>([]);
 
     useEffect(() => {
         const confirm$ = confirmService.getObservableConfirm();
-        const subscribtion = confirm$.subscribe((options: IConfirmPartMethodOptions) => {
-            setOptions(options);
+        const subscribtion = confirm$.subscribe((options: IConfirmPartMethodOptions[]) => {
+            setConfirmOptions(options);
         });
 
         return () => {
@@ -24,17 +22,21 @@ export function ConfirmPart() {
         };
     }, []);
 
-    const { children, title, ...restProps } = options;
+    const props = confirmOptions.map((options) => {
+        const { children, title, ...restProps } = options;
 
-    const confirmProps = restProps as IConfirmProps;
-    for (const key of ['children', 'title']) {
-        const k = key as keyof IConfirmPartMethodOptions;
-        const props = options[k] as any;
+        const confirmProps = restProps as IConfirmProps & { id: string };
+        for (const key of ['children', 'title']) {
+            const k = key as keyof IConfirmPartMethodOptions;
+            const props = options[k] as any;
 
-        if (props) {
-            (confirmProps as any)[k] = <CustomLabel {...props} />;
+            if (props) {
+                (confirmProps as any)[k] = <CustomLabel {...props} />;
+            }
         }
-    }
 
-    return <Confirm {...confirmProps} />;
+        return confirmProps;
+    });
+
+    return props?.map((options, index) => <Confirm key={index} {...options} />);
 }

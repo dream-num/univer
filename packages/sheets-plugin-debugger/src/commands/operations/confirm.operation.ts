@@ -13,11 +13,22 @@ export const ConfirmOperation: ICommand = {
         const confirmService = accessor.get(IConfirmService);
 
         confirmService.open({
+            id: 'confirm1',
             visible: true,
             children: { title: 'Confirm Content' },
             title: { title: 'Confirm Title' },
             onClose() {
-                confirmService.close();
+                confirmService.close('confirm1');
+            },
+        });
+
+        confirmService.open({
+            id: 'confirm2',
+            visible: true,
+            children: { title: 'Confirm2 Content' },
+            title: { title: 'Confirm2 Title' },
+            onClose() {
+                confirmService.close('confirm2');
             },
         });
 

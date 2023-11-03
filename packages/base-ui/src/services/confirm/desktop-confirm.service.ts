@@ -6,19 +6,32 @@ import { type IConfirmPartMethodOptions } from '../../views/components/confirm-p
 import { IConfirmService } from './confirm.service';
 
 export class DesktopConfirmService implements IConfirmService {
-    private readonly confirm$ = new Subject<IConfirmPartMethodOptions>();
+    private confirmOptions: IConfirmPartMethodOptions[] = [];
+    private readonly confirmOptions$ = new Subject<IConfirmPartMethodOptions[]>();
 
-    open(options: IConfirmPartMethodOptions): IDisposable {
-        this.confirm$.next(options);
+    open(option: IConfirmPartMethodOptions): IDisposable {
+        if (this.confirmOptions.find((item) => item.id === option.id)) {
+            this.confirmOptions = this.confirmOptions.map((item) => (item.id === option.id ? option : item));
+        } else {
+            this.confirmOptions.push(option);
+        }
+        this.confirmOptions$.next(this.confirmOptions);
 
-        return toDisposable(() => {});
+        return toDisposable(() => {
+            this.confirmOptions = [];
+            this.confirmOptions$.next([]);
+        });
     }
 
-    close() {
-        this.confirm$.next({ visible: false });
+    close(id: string): void {
+        this.confirmOptions = this.confirmOptions.map((item) => ({
+            ...item,
+            visible: item.id === id ? false : item.visible,
+        }));
+        this.confirmOptions$.next([...this.confirmOptions]);
     }
 
     getObservableConfirm() {
-        return this.confirm$;
+        return this.confirmOptions$;
     }
 }

@@ -8,7 +8,7 @@ export const IConfirmService = createIdentifier<IConfirmService>('univer.confirm
 export interface IConfirmService {
     open(params: IConfirmPartMethodOptions): IDisposable;
 
-    close(): void;
+    close(id: string): void;
 
-    getObservableConfirm(): Subject<IConfirmPartMethodOptions>;
+    getObservableConfirm(): Subject<IConfirmPartMethodOptions[]>;
 }

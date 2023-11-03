@@ -9,14 +9,12 @@ import { IDialogPartMethodOptions } from './interface';
 export function DialogPart() {
     const dialogService = useDependency(IDialogService);
 
-    const [options, setOptions] = useState<IDialogPartMethodOptions>({
-        visible: false,
-    });
+    const [dialogOptions, setDialogOptions] = useState<IDialogPartMethodOptions[]>([]);
 
     useEffect(() => {
         const dialog$ = dialogService.getObservableDialog();
-        const subscribtion = dialog$.subscribe((options: IDialogPartMethodOptions) => {
-            setOptions(options);
+        const subscribtion = dialog$.subscribe((options: IDialogPartMethodOptions[]) => {
+            setDialogOptions(options);
         });
 
         return () => {
@@ -24,17 +22,21 @@ export function DialogPart() {
         };
     }, []);
 
-    const { children, title, closeIcon, footer, ...restProps } = options;
+    const props = dialogOptions.map((options) => {
+        const { children, title, closeIcon, footer, ...restProps } = options;
 
-    const dialogProps = restProps as IDialogProps;
-    for (const key of ['children', 'title', 'closeIcon', 'footer']) {
-        const k = key as keyof IDialogPartMethodOptions;
-        const props = options[k] as any;
+        const dialogProps = restProps as IDialogProps & { id: string };
+        for (const key of ['children', 'title', 'closeIcon', 'footer']) {
+            const k = key as keyof IDialogPartMethodOptions;
+            const props = options[k] as any;
 
-        if (props) {
-            (dialogProps as any)[k] = <CustomLabel {...props} />;
+            if (props) {
+                (dialogProps as any)[k] = <CustomLabel {...props} />;
+            }
         }
-    }
 
-    return <Dialog {...dialogProps} />;
+        return dialogProps;
+    });
+
+    return <>{props?.map((options) => <Dialog key={options.id} {...options} />)}</>;
 }

@@ -6,19 +6,32 @@ import { type IDialogPartMethodOptions } from '../../views/components/dialog-par
 import { IDialogService } from './dialog.service';
 
 export class DesktopDialogService implements IDialogService {
-    private readonly dialog$ = new Subject<IDialogPartMethodOptions>();
+    private dialogOptions: IDialogPartMethodOptions[] = [];
+    private readonly dialogOptions$ = new Subject<IDialogPartMethodOptions[]>();
 
-    open(options: IDialogPartMethodOptions): IDisposable {
-        this.dialog$.next(options);
+    open(option: IDialogPartMethodOptions): IDisposable {
+        if (this.dialogOptions.find((item) => item.id === option.id)) {
+            this.dialogOptions = this.dialogOptions.map((item) => (item.id === option.id ? option : item));
+        } else {
+            this.dialogOptions.push(option);
+        }
+        this.dialogOptions$.next(this.dialogOptions);
 
-        return toDisposable(() => {});
+        return toDisposable(() => {
+            this.dialogOptions = [];
+            this.dialogOptions$.next([]);
+        });
     }
 
-    close() {
-        this.dialog$.next({ visible: false });
+    close(id: string) {
+        this.dialogOptions = this.dialogOptions.map((item) => ({
+            ...item,
+            visible: item.id === id ? false : item.visible,
+        }));
+        this.dialogOptions$.next([...this.dialogOptions]);
     }
 
     getObservableDialog() {
-        return this.dialog$;
+        return this.dialogOptions$;
     }
 }

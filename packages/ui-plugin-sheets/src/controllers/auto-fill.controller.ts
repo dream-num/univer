@@ -365,15 +365,18 @@ export class AutoFillController extends Disposable {
         let applyMergeRanges;
         if (hasStyle) {
             applyMergeRanges = this._getMergeApplyData(copyRange, newRange, direction, csLen);
-        } else {
             applyDatas.forEach((row) => {
                 row.forEach((cellData) => {
-                    cellData && (cellData.s = undefined);
+                    if (cellData) {
+                        const style = this._univerInstanceService.getCurrentUniverSheetInstance().getStyles();
+                        if (style) {
+                            cellData.s = style.getStyleByCell(cellData);
+                        }
+                    }
                 });
             });
         }
 
-        console.error('applyMergeRanges', applyMergeRanges);
         this._commandService.executeCommand(AutoFillCommand.id, {
             selectionRange: newRange,
             applyRange,

@@ -5,7 +5,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
-import { FUNCTION_LIST } from '../services/function-list';
+import { IFormulaPromptService } from '../services/prompt.service';
 
 @OnLifecycle(LifecycleStages.Starting, PromptController)
 export class PromptController extends Disposable {
@@ -14,7 +14,8 @@ export class PromptController extends Disposable {
         @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
         @IUIController private readonly _uiController: IDesktopUIController,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService
     ) {
         super();
 
@@ -23,28 +24,24 @@ export class PromptController extends Disposable {
 
     private _initialize(): void {
         this._initialCursorSync();
+        this._initAcceptFormula();
     }
 
     private _initialCursorSync() {
         this._textSelectionManagerService.textSelectionInfo$.subscribe((text) => {
             // TODO@Dushusir: use real text info
-            const show = Math.random() > 0.5;
+            return;
+            const show = true;
             const searchText = Math.random() > 0.5 ? 'SU' : 'TA';
-            const searchList = this._getSearchList(searchText);
 
-            this._commandService.executeCommand(SearchFunctionOperation.id, { show, searchList });
+            this._commandService.executeCommand(SearchFunctionOperation.id, { show, searchText });
             this._commandService.executeCommand(HelpFunctionOperation.id, { show: !show });
         });
     }
 
-    private _getSearchList(searchText: string) {
-        const result: string[] = [];
-        FUNCTION_LIST.forEach((item) => {
-            if (item.n.indexOf(searchText) > -1) {
-                result.push(item.n);
-            }
+    private _initAcceptFormula() {
+        this._formulaPromptService.acceptFormulaName$.subscribe((name: string) => {
+            console.log(`TODO: set ${name} to cell editor`);
         });
-
-        return result;
     }
 }

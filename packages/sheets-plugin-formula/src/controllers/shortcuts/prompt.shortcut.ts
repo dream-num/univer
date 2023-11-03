@@ -9,6 +9,7 @@ export const PROMPT_SELECTION_KEYCODE_LIST = [
     KeyCode.ARROW_UP,
     KeyCode.ARROW_LEFT,
     KeyCode.ARROW_RIGHT,
+    KeyCode.ENTER,
     KeyCode.TAB,
 ];
 

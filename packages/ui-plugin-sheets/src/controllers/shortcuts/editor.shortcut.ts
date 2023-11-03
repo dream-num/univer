@@ -24,7 +24,7 @@ export function generateArrowSelectionShortCuItem() {
         shortcutList.push({
             id: SetCellEditVisibleArrowOperation.id,
             binding: keycode,
-            preconditions: (contextService) => !contextService.getContextValue(FOCUSING_EDITOR), // TODO@Dushusir test
+            preconditions: (contextService) => contextService.getContextValue(FOCUSING_EDITOR),
             staticParameters: {
                 visible: false,
                 eventType: DeviceInputEventType.Keyboard,
@@ -49,7 +49,7 @@ export const EditorCursorEnterShortcut: IShortcutItem = {
 export const EditorCursorTabShortcut: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
     binding: KeyCode.TAB,
-    preconditions: (contextService) => !contextService.getContextValue(FOCUSING_EDITOR), // test
+    preconditions: (contextService) => contextService.getContextValue(FOCUSING_EDITOR),
     staticParameters: {
         visible: false,
         eventType: DeviceInputEventType.Keyboard,

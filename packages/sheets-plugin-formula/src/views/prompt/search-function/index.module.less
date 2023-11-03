@@ -1,6 +1,7 @@
+@item-width: 200px;
 .formula {
     &-search-function {
-        padding: var(--padding-xs);
+        padding: var(--padding-base);
         margin: 0;
         font-size: var(--font-size-sm);
         list-style: none;
@@ -12,12 +13,19 @@
         outline: none;
 
         &-item{
-            padding: var(--padding-sm) var(--padding-base);
+            width: @item-width;
+            padding: var(--padding-sm);
             color: rgb(var(--text-color));
             border-radius: var(--border-radius-base);
             box-sizing: border-box;
             cursor: pointer;
             transition: background .2s;
+
+            &-name {
+                &-light{
+                    color: rgb(var(--error-color));
+                }
+            }
 
             &-active {
                 background-color: rgb(var(--bg-color-hover));

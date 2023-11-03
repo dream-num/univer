@@ -22,17 +22,17 @@ export interface IFunctionParam {
     /**
      * Function name, with internationalization
      */
-    name?: string;
+    name: string;
 
     /**
      * Detailed description of function, with internationalization
      */
-    detail?: string;
+    detail: string;
 
     /**
      * Function example
      */
-    example?: string;
+    example: string;
 
     /**
      * Is it optional
@@ -40,7 +40,7 @@ export interface IFunctionParam {
      * true: required
      * false: optional
      */
-    require?: BooleanNumber;
+    require: BooleanNumber;
 
     /**
      * Whether it is repeatable, in the case of repeatability, the maximum parameter of m is generally set to 255, such as [1,255]
@@ -48,7 +48,7 @@ export interface IFunctionParam {
      * true: repeatable
      * false: not repeatable
      */
-    repeat?: BooleanNumber;
+    repeat: BooleanNumber;
 
     /**
      * Parameter types
@@ -56,7 +56,7 @@ export interface IFunctionParam {
      * include ['range', 'rangeall', 'rangenumber', 'rangestring', 'rangedatetime', 'rangedate', 'string']
      * Detected before each calculation
      */
-    type?: string;
+    type: string;
 }
 
 export interface IFunctionInfo {
@@ -68,28 +68,28 @@ export interface IFunctionInfo {
     /**
      * Function type
      */
-    t?: FunctionType;
+    t: FunctionType;
 
     /**
      * Detailed description
      */
-    d?: string;
+    d: string;
 
     /**
      * Concise description
      */
-    a?: string;
+    a: string;
 
     /**
      * [Minimum number of parameters, maximum number of parameters]
      * Detected before each calculation of the function
      */
-    m?: [min: number, max: number];
+    m: [min: number, max: number];
 
     /**
      * Function params
      */
-    p?: IFunctionParam[];
+    p: IFunctionParam[];
 }
 
 export const FUNCTION_LIST: IFunctionInfo[] = [

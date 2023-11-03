@@ -25,6 +25,7 @@ export const SetEditorFormulaArrowOperation: IOperation<ISetEditorFormulaArrowOp
             case KeyCode.ARROW_UP:
                 formulaPromptService.setNavigate({ direction: Direction.UP });
                 break;
+            case KeyCode.ENTER:
             case KeyCode.TAB:
                 formulaPromptService.setAccept(true);
                 break;

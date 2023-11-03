@@ -2,6 +2,11 @@ import { Direction } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable, Subject } from 'rxjs';
 
+export interface ISearchItem {
+    name: string;
+    desc: string;
+}
+
 export interface ISearchFunctionParams {
     /**
      * show SearchFunction Component or not
@@ -9,9 +14,9 @@ export interface ISearchFunctionParams {
     show: boolean;
 
     /**
-     * function search result list
+     * function search text
      */
-    searchList: string[];
+    searchText: string;
 }
 
 export interface INavigateParam {
@@ -51,7 +56,7 @@ export interface IFormulaPromptService {
     setNavigate(param: INavigateParam): void;
 
     /**
-     * listen accept shortcut, TAB
+     * listen accept shortcut, TAB/ENTER
      */
     accept$: Observable<boolean>;
 
@@ -59,6 +64,16 @@ export interface IFormulaPromptService {
      * set accept shortcut
      */
     setAccept(param: boolean): void;
+
+    /**
+     * accept formula name
+     */
+    acceptFormulaName$: Observable<string>;
+
+    /**
+     * set accept formula name
+     */
+    setAcceptFormulaName(param: string): void;
 
     dispose(): void;
 }
@@ -74,6 +89,8 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
     private readonly _accept$ = new Subject<boolean>();
 
+    private readonly _acceptFormulaName$ = new Subject<string>();
+
     readonly search$ = this._search$.asObservable();
 
     readonly help$ = this._help$.asObservable();
@@ -82,11 +99,14 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
     readonly accept$ = this._accept$.asObservable();
 
+    readonly acceptFormulaName$ = this._acceptFormulaName$.asObservable();
+
     dispose(): void {
         this._search$.complete();
         this._help$.complete();
         this._navigate$.complete();
         this._accept$.complete();
+        this._acceptFormulaName$.complete();
     }
 
     setSearch(param: ISearchFunctionParams) {
@@ -103,5 +123,9 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
     setAccept(param: boolean) {
         this._accept$.next(param);
+    }
+
+    setAcceptFormulaName(param: string) {
+        this._acceptFormulaName$.next(param);
     }
 }

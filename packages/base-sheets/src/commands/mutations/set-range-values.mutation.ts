@@ -165,13 +165,17 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 }
 
                 // handle style
-                if (newVal.s != null && typeof newVal.s === 'object') {
+                if (newVal.s !== undefined) {
                     // use null to clear style
                     const oldStyle = styles.getStyleByCell(oldVal);
 
                     if (oldStyle == null) {
                         // clear
                         delete oldVal.s;
+                    }
+
+                    if (typeof newVal.s === 'string') {
+                        newVal.s = styles.get(newVal.s);
                     }
 
                     // set style

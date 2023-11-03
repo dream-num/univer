@@ -24,12 +24,6 @@ import { UniverDoc } from './UniverDoc';
 import { UniverSheet } from './UniverSheet';
 import { UniverSlide } from './UniverSlide';
 
-export const enum DocumentType {
-    DOC = 0,
-    SHEET = 1,
-    SLIDE = 2,
-}
-
 /**
  * Univer.
  */

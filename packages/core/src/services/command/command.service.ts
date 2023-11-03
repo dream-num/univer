@@ -81,7 +81,7 @@ export interface ICommandInfo<T extends object = object> {
 }
 
 export interface IExecutionOptions {
-    silent?: boolean;
+    local?: boolean;
 }
 
 export type CommandListener = (commandInfo: Readonly<ICommandInfo>, options?: IExecutionOptions) => void;

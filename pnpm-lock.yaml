@@ -184,7 +184,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/sheets-plugin-find
       '@univerjs/sheets-plugin-formula':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../packages/sheets-plugin-formula
       '@univerjs/sheets-plugin-import-xlsx':
         specifier: workspace:*

@@ -1,5 +1,10 @@
-import { SetInlineFormatBoldCommand } from '@univerjs/base-docs';
-import { SetBoldCommand } from '@univerjs/base-sheets';
+import {
+    SetInlineFormatBoldCommand,
+    SetInlineFormatItalicCommand,
+    SetInlineFormatStrikethroughCommand,
+    SetInlineFormatUnderlineCommand,
+} from '@univerjs/base-docs';
+import { SetBoldCommand, SetItalicCommand, SetStrikeThroughCommand, SetUnderlineCommand } from '@univerjs/base-sheets';
 import { CommandType, FOCUSING_EDITOR, ICommand, ICommandService, IContextService } from '@univerjs/core';
 
 /**
@@ -21,5 +26,53 @@ export const SetRangeBoldCommand: ICommand = {
         }
 
         return commandService.executeCommand(SetBoldCommand.id);
+    },
+};
+
+export const SetRangeItalicCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-range-italic',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        const contextService = accessor.get(IContextService);
+        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+
+        if (isCellEditorFocus) {
+            return commandService.executeCommand(SetInlineFormatItalicCommand.id);
+        }
+
+        return commandService.executeCommand(SetItalicCommand.id);
+    },
+};
+
+export const SetRangeUnderlineCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-range-underline',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        const contextService = accessor.get(IContextService);
+        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+
+        if (isCellEditorFocus) {
+            return commandService.executeCommand(SetInlineFormatUnderlineCommand.id);
+        }
+
+        return commandService.executeCommand(SetUnderlineCommand.id);
+    },
+};
+
+export const SetRangeStrickThroughCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-range-stroke',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        const contextService = accessor.get(IContextService);
+        const isCellEditorFocus = contextService.getContextValue(FOCUSING_EDITOR);
+
+        if (isCellEditorFocus) {
+            return commandService.executeCommand(SetInlineFormatStrikethroughCommand.id);
+        }
+
+        return commandService.executeCommand(SetStrikeThroughCommand.id);
     },
 };

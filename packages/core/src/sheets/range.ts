@@ -6,9 +6,11 @@ import {
     ICellData,
     IDocumentData,
     IRange,
+    IStyleBase,
     IStyleData,
     ITextDecoration,
     ITextRotation,
+    ITextRun,
 } from '../Types/Interfaces';
 import { Styles } from './styles';
 import type { Worksheet } from './worksheet';
@@ -25,6 +27,39 @@ type IValueOptionsType = {
 
 export interface IRangeDependencies {
     getStyles(): Readonly<Styles>;
+}
+
+function isAllFormatInTextRuns(key: keyof IStyleBase, textRuns: ITextRun[]): BooleanNumber {
+    for (const textRun of textRuns) {
+        const { ts = {} } = textRun;
+
+        if (ts[key] == null) {
+            return BooleanNumber.FALSE;
+        }
+
+        switch (key) {
+            case 'bl': // fallthrough
+            case 'it': {
+                if (ts[key] === BooleanNumber.FALSE) {
+                    return BooleanNumber.FALSE;
+                }
+                break;
+            }
+
+            case 'ul': // fallthrough
+            case 'st': {
+                if (ts[key]!.s === BooleanNumber.FALSE) {
+                    return BooleanNumber.FALSE;
+                }
+                break;
+            }
+
+            default:
+                throw new Error(`unknown style key: ${key} in IStyleBase`);
+        }
+    }
+
+    return BooleanNumber.TRUE;
 }
 
 /**
@@ -341,6 +376,18 @@ export class Range {
      * Returns the underline of the cells in the range.
      */
     getUnderline(): ITextDecoration {
+        const { p } = this.getValue() ?? {};
+
+        if (p && Array.isArray(p.body?.textRuns)) {
+            return isAllFormatInTextRuns('ul', p.body?.textRuns!) === BooleanNumber.TRUE
+                ? {
+                      s: BooleanNumber.TRUE,
+                  }
+                : {
+                      s: BooleanNumber.FALSE,
+                  };
+        }
+
         return this.getUnderlines()[0][0];
     }
 
@@ -359,17 +406,29 @@ export class Range {
     }
 
     /**
-     * Returns the strikeThroughs of the cells in the range.
-     */
-    getStrikeThroughs(): ITextDecoration[][] {
-        return this._getStyles('st') as ITextDecoration[][];
-    }
-
-    /**
      * Returns the strikeThrough of the cells in the range.
      */
     getStrikeThrough(): ITextDecoration {
+        const { p } = this.getValue() ?? {};
+
+        if (p && Array.isArray(p.body?.textRuns)) {
+            return isAllFormatInTextRuns('st', p.body?.textRuns!) === BooleanNumber.TRUE
+                ? {
+                      s: BooleanNumber.TRUE,
+                  }
+                : {
+                      s: BooleanNumber.FALSE,
+                  };
+        }
+
         return this.getStrikeThroughs()[0][0];
+    }
+
+    /**
+     * Returns the strikeThroughs of the cells in the range.
+     */
+    private getStrikeThroughs(): ITextDecoration[][] {
+        return this._getStyles('st') as ITextDecoration[][];
     }
 
     /**
@@ -402,13 +461,21 @@ export class Range {
      * Returns the font style ('italic' or 'normal') of the cell in the top-left corner of the range.
      */
     getFontStyle(): FontItalic {
+        const { p } = this.getValue() ?? {};
+
+        if (p && Array.isArray(p.body?.textRuns)) {
+            return isAllFormatInTextRuns('it', p.body?.textRuns!) === BooleanNumber.TRUE
+                ? FontItalic.ITALIC
+                : FontItalic.NORMAL;
+        }
+
         return this.getFontStyles()[0][0];
     }
 
     /**
      * Returns the font styles of the cells in the range.
      */
-    getFontStyles(): FontItalic[][] {
+    private getFontStyles(): FontItalic[][] {
         return this._getStyles('it') as FontItalic[][];
     }
 
@@ -422,15 +489,9 @@ export class Range {
         const { p } = this.getValue() ?? {};
 
         if (p && Array.isArray(p.body?.textRuns)) {
-            for (const textRun of p.body?.textRuns!) {
-                const { ts } = textRun;
-
-                if (ts?.bl == null || ts?.bl === BooleanNumber.FALSE) {
-                    return FontWeight.NORMAL;
-                }
-            }
-
-            return FontWeight.BOLD;
+            return isAllFormatInTextRuns('bl', p.body?.textRuns!) === BooleanNumber.TRUE
+                ? FontWeight.BOLD
+                : FontWeight.NORMAL;
         }
 
         return this.getFontWeights()[0][0];
@@ -439,7 +500,7 @@ export class Range {
     /**
      * Returns the font weights of the cells in the range.
      */
-    getFontWeights(): FontWeight[][] {
+    private getFontWeights(): FontWeight[][] {
         return this._getStyles('bl') as FontWeight[][];
     }
 
@@ -645,14 +706,14 @@ export class Range {
      * @param arg Shorthand for the style that gets
      * @returns style value
      */
-    private _getStyles(arg: keyof IStyleData): Array<Array<IStyleData[keyof IStyleData]>> {
+    private _getStyles(styleKey: keyof IStyleData): Array<Array<IStyleData[keyof IStyleData]>> {
         const styles = this._deps.getStyles();
 
         return this.getValues().map((row) =>
             row.map((cell: Nullable<ICellData>) => {
                 const style = styles && styles.getStyleByCell(cell);
 
-                return (style && style[arg]) || (DEFAULT_STYLES as IStyleData)[arg];
+                return (style && style[styleKey]) || (DEFAULT_STYLES as IStyleData)[styleKey];
             })
         );
     }

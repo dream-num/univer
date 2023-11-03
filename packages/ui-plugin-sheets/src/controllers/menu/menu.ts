@@ -25,7 +25,6 @@ import {
     SetFontFamilyCommand,
     SetFontSizeCommand,
     SetHorizontalTextAlignCommand,
-    SetItalicCommand,
     SetRangeStyleMutation,
     SetRangeValuesMutation,
     SetRowHeightCommand,
@@ -35,12 +34,10 @@ import {
     SetSelectedColsVisibleCommand,
     SetSelectedRowsVisibleCommand,
     SetSelectionsOperation,
-    SetStrikeThroughCommand,
     SetTabColorCommand,
     SetTextColorCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
-    SetUnderlineCommand,
     SetVerticalTextAlignCommand,
     SetWorksheetHideCommand,
     SetWorksheetRowIsAutoHeightCommand,
@@ -69,7 +66,12 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
-import { SetRangeBoldCommand } from '../../commands/commands/inline-format.command';
+import {
+    SetRangeBoldCommand,
+    SetRangeItalicCommand,
+    SetRangeStrickThroughCommand,
+    SetRangeUnderlineCommand,
+} from '../../commands/commands/inline-format.command';
 import { RenameSheetOperation } from '../../commands/commands/rename.command';
 import {
     SetInfiniteFormatPainterCommand,
@@ -183,7 +185,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
-        id: SetItalicCommand.id,
+        id: SetRangeItalicCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'ItalicSingle',
         title: 'Set italic',
@@ -241,7 +243,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
-        id: SetUnderlineCommand.id,
+        id: SetRangeUnderlineCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'UnderlineSingle',
         title: 'Set underline',
@@ -299,7 +301,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
-        id: SetStrikeThroughCommand.id,
+        id: SetRangeStrickThroughCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'StrikethroughSingle',
         title: 'Set strike through',

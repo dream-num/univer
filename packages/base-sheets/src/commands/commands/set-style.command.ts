@@ -188,20 +188,18 @@ export const SetItalicCommand: ICommand = {
     id: 'sheet.command.set-italic',
     handler: async (accessor) => {
         const selection = accessor.get(SelectionManagerService).getLast();
+
         if (!selection) {
             return false;
         }
 
-        const worksheet = accessor
-            .get(IUniverInstanceService)
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet();
+        const worksheet = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance().getActiveSheet();
         let currentlyItalic = true;
+
         if (selection.primary) {
-            currentlyItalic =
-                worksheet.getRange(selection.primary.startRow, selection.primary.startColumn).getFontStyle() ===
-                FontItalic.ITALIC;
+            const { startRow, startColumn } = selection.primary;
+
+            currentlyItalic = worksheet.getRange(startRow, startColumn).getFontStyle() === FontItalic.ITALIC;
         }
 
         const setStyleParams: ISetStyleParams<BooleanNumber> = {

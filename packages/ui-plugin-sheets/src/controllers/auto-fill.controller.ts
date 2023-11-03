@@ -47,6 +47,7 @@ export class AutoFillController extends Disposable {
         );
     }
 
+    // calc apply data according to copy data and direction
     private _getApplyData(
         copyDataPiece: ICopyDataPiece,
         csLen: number,
@@ -71,12 +72,15 @@ export class AutoFillController extends Disposable {
             applyDataInTypes[r.type] = [];
         });
 
+        // calc cell data to apply
         rules.forEach((r) => {
             const { type, applyFunctions: customApplyFunctions } = r;
             const copyDataInType = copyDataPiece[type];
             if (!copyDataInType) {
                 return;
             }
+            // copyDataInType is an array of copy-squads in same types
+            // a copy-squad is an array of continuous cells that has the same type, e.g. [1, 3, 5] is a copy squad, but [1, 3, ab, 5] will be divided into two copy-squads
             copyDataInType.forEach((copySquad) => {
                 const s = getLenS(copySquad.index, rsd);
                 const len = copySquad.index.length * num + s;
@@ -86,6 +90,7 @@ export class AutoFillController extends Disposable {
             });
         });
 
+        // calc index
         for (let x = 1; x <= asLen; x++) {
             rules.forEach((r) => {
                 const { type } = r;
@@ -109,6 +114,8 @@ export class AutoFillController extends Disposable {
         customApplyFunctions?: APPLY_FUNCTIONS
     ) {
         const isReverse = direction === Direction.UP || direction === Direction.LEFT;
+
+        // according to applyType, apply functions. if customApplyFunctions is provided, use it instead of default apply functions
         if (applyType === APPLY_TYPE.COPY) {
             const custom = customApplyFunctions?.[APPLY_TYPE.COPY];
             if (custom) {
@@ -123,6 +130,7 @@ export class AutoFillController extends Disposable {
                 return custom(data, len, direction);
             }
             isReverse && data.reverse();
+            // special rules should provide custom SERIES apply functions, or will be applied as copy
             return fillCopy(data, len);
         }
         if (applyType === APPLY_TYPE.ONLY_FORMAT) {
@@ -164,6 +172,7 @@ export class AutoFillController extends Disposable {
             b2 = copyEndColumn;
         }
         for (let a = a1; a <= a2; a++) {
+            // a copyDataPiece is an array of original cells in same column or row, depending on direction (horizontal or vertical)
             const copyDataPiece = this._getEmptyCopyDataPiece();
             const prevData: IRuleConfirmedData = {
                 type: undefined,
@@ -283,6 +292,7 @@ export class AutoFillController extends Disposable {
         return applyMergeRanges;
     }
 
+    // auto fill entry
     private _fillData(config: IControlFillConfig) {
         const { newRange, oldRange: copyRange } = config;
         const hasStyle = this._autoFillService.isFillingStyle();

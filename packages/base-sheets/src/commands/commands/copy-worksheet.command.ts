@@ -75,7 +75,7 @@ export const CopySheetCommand: ICommand = {
 
         if (insertResult && result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo() {
                     return (
                         commandService.executeCommand(

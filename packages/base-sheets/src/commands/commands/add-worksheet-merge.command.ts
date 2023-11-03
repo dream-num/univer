@@ -67,7 +67,7 @@ export const AddWorksheetMergeCommand: ICommand = {
 
         if (result && removeResult) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo() {
                     return (
                         commandService.executeCommand(

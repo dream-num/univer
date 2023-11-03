@@ -41,7 +41,7 @@ export const InsertDrawingCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: documentId,
+                unitID: documentId,
                 undo() {
                     return commandService.syncExecuteCommand(RemoveDrawingMutation.id, undoMutationParams);
                 },

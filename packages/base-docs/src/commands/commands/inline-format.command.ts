@@ -186,7 +186,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: unitId,
+                unitID: unitId,
                 undo() {
                     return commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
                 },

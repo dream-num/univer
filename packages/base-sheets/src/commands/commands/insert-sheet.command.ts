@@ -88,7 +88,7 @@ export const InsertSheetCommand: ICommand = {
 
         if (result && activateResult) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo() {
                     return (
                         commandService.executeCommand(

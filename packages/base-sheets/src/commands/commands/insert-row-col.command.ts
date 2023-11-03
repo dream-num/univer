@@ -132,7 +132,7 @@ export const InsertRowCommand: ICommand = {
 
         if (result.result) {
             undoRedoService.pushUndoRedo({
-                URI: params.workbookId,
+                unitID: params.workbookId,
                 undo: async () =>
                     sequenceExecute(
                         [
@@ -334,7 +334,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
 
         if (result.result) {
             undoRedoService.pushUndoRedo({
-                URI: params.workbookId,
+                unitID: params.workbookId,
                 undo: async () =>
                     sequenceExecute(
                         [

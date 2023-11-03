@@ -42,7 +42,7 @@ export const RemoveDrawingCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: documentId,
+                unitID: documentId,
                 undo() {
                     return commandService.syncExecuteCommand(InsertDrawingMutation.id, undoMutationParams);
                 },

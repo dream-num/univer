@@ -36,7 +36,9 @@ export {
 export { type IStyleSheet, ThemeService } from './services/theme/theme.service';
 export {
     type IUndoRedoCommandInfos,
+    type IUndoRedoItem,
     IUndoRedoService,
+    type IUndoRedoStatus,
     LocalUndoRedoService,
     RedoCommand,
     UndoCommand,

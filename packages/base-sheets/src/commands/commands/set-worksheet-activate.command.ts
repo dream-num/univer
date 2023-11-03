@@ -42,7 +42,7 @@ export const SetWorksheetActivateCommand: ICommand = {
         // no need
         // if (result) {
         //     undoRedoService.pushUndoRedo({
-        //         URI: workbookId,
+        //         unitID: workbookId,
         //         undo() {
         //             return commandService.syncExecuteCommand(SetWorksheetActivateMutation.id, undoMutationParams);
         //         },

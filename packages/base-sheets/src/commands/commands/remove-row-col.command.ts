@@ -108,7 +108,7 @@ export const RemoveRowCommand: ICommand = {
 
         if (result.result) {
             accessor.get(IUndoRedoService).pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo: async () => {
                     const undoResult = sequenceExecute(
                         [
@@ -211,7 +211,7 @@ export const RemoveColCommand: ICommand = {
         if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo: async () => {
                     const undoResult = sequenceExecute(
                         [

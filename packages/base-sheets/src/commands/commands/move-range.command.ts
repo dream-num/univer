@@ -107,7 +107,7 @@ export const MoveRangeCommand: ICommand = {
         const result = await sequenceExecute(redos, commandService).result;
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo: async () => sequenceExecute(undos, commandService).result,
                 redo: async () => sequenceExecute(redos, commandService).result,
             });

@@ -101,7 +101,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: unitId,
+                unitID: unitId,
                 undo() {
                     return commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
                 },
@@ -154,7 +154,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         >(doMutation.id, doMutation.params);
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: unitId,
+                unitID: unitId,
                 undo() {
                     return commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
                 },
@@ -225,7 +225,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: unitId,
+                unitID: unitId,
                 undo() {
                     commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
                     return true;

@@ -170,13 +170,13 @@ export class DocumentModelSimple {
             return;
         }
 
-        const { objectProperties } = drawing;
+        const objectTransform = drawing.objectTransform;
 
-        objectProperties.size.width = width;
-        objectProperties.size.height = height;
+        objectTransform.size.width = config.width;
+        objectTransform.size.height = config.height;
 
-        objectProperties.positionH.posOffset = left;
-        objectProperties.positionV.posOffset = top;
+        objectTransform.positionH.posOffset = config.left;
+        objectTransform.positionV.posOffset = config.top;
     }
 
     setZoomRatio(zoomRatio: number = 1) {

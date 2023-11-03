@@ -29,6 +29,7 @@ import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-rat
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { DeleteLeftInputController } from './Controller/delete-left-input.controller';
 import { DocRenderController } from './Controller/doc-render.controller';
+import { FloatingObjectController } from './Controller/floating-object.controller';
 import { IMEInputController } from './Controller/ime-input.controller';
 import { InlineFormatController } from './Controller/inline-format.controller';
 import { LineBreakInputController } from './Controller/line-break-input.controller';
@@ -39,7 +40,6 @@ import { TextSelectionController } from './Controller/text-selection.controller'
 import { ZoomController } from './Controller/zoom.cotroller';
 import { enUS } from './locale';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
-import { DocsViewManagerService } from './services/docs-view-manager/docs-view-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
 import {
@@ -169,8 +169,6 @@ export class DocPlugin extends Plugin {
                     },
                 ],
                 [TextSelectionManagerService],
-                [DocsViewManagerService],
-
                 // controllers
                 [DocRenderController],
                 [PageRenderController],
@@ -182,6 +180,7 @@ export class DocPlugin extends Plugin {
                 [LineBreakInputController],
                 [MoveCursorController],
                 [ZoomController],
+                [FloatingObjectController],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
     }

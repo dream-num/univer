@@ -131,7 +131,7 @@ export interface IFontCreateConfig {
 
 // export interface IPageConfig {
 //     pageNumberStart: number;
-//     pageSize: ISizeData;
+//     pageSize: ISize;
 //     headerIds: IHeaderIds;
 //     footerIds: IFooterIds;
 //     footers?: IFooters;

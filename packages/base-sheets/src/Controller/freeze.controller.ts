@@ -22,12 +22,12 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { SetWorksheetActivateMutation } from '..';
 import { getCoordByOffset, getSheetObject } from '../Basics/component-tools';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
 import { ScrollCommand } from '../commands/commands/set-scroll.command';
 import { ISetFrozenMutationParams, SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
+import { SetWorksheetActivateMutation } from '../commands/mutations/set-worksheet-activate.mutation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 import { SelectionManagerService } from '../services/selection/selection-manager.service';

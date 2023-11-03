@@ -58,6 +58,8 @@ export const SetRangeValuesCommand: ICommand = {
                 .getSheetId(),
         } = params;
 
+        console.log(JSON.stringify(value, null, 2));
+
         const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
         if (!currentSelections || !currentSelections.length) {
             return false;

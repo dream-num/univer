@@ -14,7 +14,6 @@ export const DialogOperation: ICommand = {
 
         dialogService.open({
             id: 'dialog1',
-            visible: true,
             children: { title: 'Dialog Content' },
             footer: { title: 'Dialog Footer' },
             title: { title: 'Dialog Title' },
@@ -26,7 +25,6 @@ export const DialogOperation: ICommand = {
 
         dialogService.open({
             id: 'dialog2',
-            visible: true,
             children: { title: 'Dialog2 Content' },
             footer: { title: 'Dialog2 Footer' },
             title: { title: 'Dialog2 Title' },

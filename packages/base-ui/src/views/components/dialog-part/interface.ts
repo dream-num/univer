@@ -4,7 +4,6 @@ import { type ICustomLabelProps } from '../../../components/custom-label/CustomL
 
 export type IDialogPartMethodOptions = {
     id: string;
-    visible: boolean;
     children?: ICustomLabelProps;
     title?: ICustomLabelProps;
     closeIcon?: ICustomLabelProps;

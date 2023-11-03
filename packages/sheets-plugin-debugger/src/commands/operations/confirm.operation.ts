@@ -14,7 +14,6 @@ export const ConfirmOperation: ICommand = {
 
         confirmService.open({
             id: 'confirm1',
-            visible: true,
             children: { title: 'Confirm Content' },
             title: { title: 'Confirm Title' },
             onClose() {
@@ -24,7 +23,6 @@ export const ConfirmOperation: ICommand = {
 
         confirmService.open({
             id: 'confirm2',
-            visible: true,
             children: { title: 'Confirm2 Content' },
             title: { title: 'Confirm2 Title' },
             onClose() {

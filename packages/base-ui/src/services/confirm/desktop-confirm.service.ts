@@ -11,9 +11,15 @@ export class DesktopConfirmService implements IConfirmService {
 
     open(option: IConfirmPartMethodOptions): IDisposable {
         if (this.confirmOptions.find((item) => item.id === option.id)) {
-            this.confirmOptions = this.confirmOptions.map((item) => (item.id === option.id ? option : item));
+            this.confirmOptions = this.confirmOptions.map((item) => ({
+                ...(item.id === option.id ? option : item),
+                visible: true,
+            }));
         } else {
-            this.confirmOptions.push(option);
+            this.confirmOptions.push({
+                ...option,
+                visible: true,
+            });
         }
         this.confirmOptions$.next(this.confirmOptions);
 

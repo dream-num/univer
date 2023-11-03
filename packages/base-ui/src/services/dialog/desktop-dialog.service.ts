@@ -11,10 +11,17 @@ export class DesktopDialogService implements IDialogService {
 
     open(option: IDialogPartMethodOptions): IDisposable {
         if (this.dialogOptions.find((item) => item.id === option.id)) {
-            this.dialogOptions = this.dialogOptions.map((item) => (item.id === option.id ? option : item));
+            this.dialogOptions = this.dialogOptions.map((item) => ({
+                ...(item.id === option.id ? option : item),
+                visible: true,
+            }));
         } else {
-            this.dialogOptions.push(option);
+            this.dialogOptions.push({
+                ...option,
+                visible: true,
+            });
         }
+
         this.dialogOptions$.next(this.dialogOptions);
 
         return toDisposable(() => {

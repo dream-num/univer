@@ -12,5 +12,5 @@
         "esModuleInterop": true, // auto allowSyntheticDefaultImports true
         "strictPropertyInitialization": false
     },
-    "include": ["src/**/*", "test/**/*", "../ui-plugin-sheets/src/commands/commands/__tests__/create-selection-command-test-bed.ts", "../ui-plugin-sheets/src/commands/commands/__tests__/set-selections.command.spec.ts"]
+    "include": ["src/**/*", "test/**/*", "../ui-plugin-sheets/src/commands/commands/set-scroll.command.ts" ]
 }

@@ -1,13 +1,9 @@
-import {
-    FORMAT_PAINTER_SELECTION_PLUGIN_NAME,
-    NORMAL_SELECTION_PLUGIN_NAME,
-    SelectionManagerService,
-    SetCopySelectionsOperation,
-} from '@univerjs/base-sheets';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/base-sheets';
 import { CommandType, ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
+import { FORMAT_PAINTER_SELECTION_PLUGIN_NAME, SetCopySelectionsOperation } from '../operations/selection.operation';
 import { SetFormatPainterOperation } from '../operations/set-format-painter.operation';
 
 export interface ISetFormatPainterCommandParams {

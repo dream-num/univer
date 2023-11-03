@@ -16,7 +16,7 @@ import {
 } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { SheetClipboardController } from '../../../controller/clipboard/clipboard.controller';
+import { SheetClipboardController } from '../../../controllers/clipboard/clipboard.controller';
 import { ISheetClipboardService, SheetClipboardService } from '../clipboard.service';
 
 const cellData = {

@@ -1,7 +1,7 @@
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/base-ui';
 import { CommandType, ILogService, IMultiCommand } from '@univerjs/core';
 
-import { whenEditorNotActivated } from '../../controller/shortcuts/utils';
+import { whenEditorNotActivated } from '../../controllers/shortcuts/utils';
 import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
 
 export const SheetCopyCommand: IMultiCommand = {

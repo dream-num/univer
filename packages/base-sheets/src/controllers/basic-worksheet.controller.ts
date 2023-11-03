@@ -40,7 +40,7 @@ import {
     SetSelectedColsVisibleCommand,
     SetSpecificColsVisibleCommand,
 } from '../commands/commands/set-col-visible.command';
-import { SetFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
 import { SetRangeFormattedValueCommand } from '../commands/commands/set-range-formatted-value.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
@@ -49,7 +49,6 @@ import {
     SetSelectedRowsVisibleCommand,
     SetSpecificRowsVisibleCommand,
 } from '../commands/commands/set-row-visible.command';
-import { ScrollCommand, SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
 import {
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
@@ -73,7 +72,6 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
-import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { TrimWhitespaceCommand } from '../commands/commands/trim-whitespace.command';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { DeleteRangeMutation } from '../commands/mutations/delete-range.mutation';
@@ -215,13 +213,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             InsertSheetCommand,
             InsertSheetMutation,
             SetFrozenCommand,
-            SetSelectionFrozenCommand,
             SetFrozenMutation,
             SetFrozenCancelCommand,
-            ScrollCommand,
-            SetScrollRelativeCommand,
-            SetZoomRatioCommand,
-            ChangeZoomRatioCommand,
             MoveRangeCommand,
             MoveRangeMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));

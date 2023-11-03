@@ -21,7 +21,7 @@ import {
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
 } from '../../Basics/Interfaces/MutationInterface';
-import { SelectionManagerService } from '../../services/selection/selection-manager.service';
+import { SelectionManagerService } from '../../services/selection-manager.service';
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../mutations/insert-range.mutation';
 import { InsertColMutation, InsertRowMutation } from '../mutations/insert-row-col.mutation';

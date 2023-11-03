@@ -17,7 +17,7 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 
 import { BorderStyleManagerService } from '../../services/border-style-manager.service';
-import { SelectionManagerService } from '../../services/selection/selection-manager.service';
+import { SelectionManagerService } from '../../services/selection-manager.service';
 import {
     ISetBorderStylesMutationParams,
     SetBorderStylesMutation,

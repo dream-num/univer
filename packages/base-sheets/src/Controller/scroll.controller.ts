@@ -89,7 +89,7 @@ export class ScrollController extends Disposable {
         if (selection == null) {
             return;
         }
-        const { startRow: selectionStartRow, startColumn: selectionStartColumn } = selection.range;
+        const { actualRow: selectionStartRow, actualColumn: selectionStartColumn } = selection.primary;
         const { rowHeightAccumulation, columnWidthAccumulation } =
             this._sheetSkeletonManagerService.getCurrent()?.skeleton ?? {};
         if (rowHeightAccumulation == null || columnWidthAccumulation == null) {
@@ -131,11 +131,7 @@ export class ScrollController extends Disposable {
         } = skeleton.getRowColumnSegment(bounds);
 
         // vertical overflow only happens when the selection's row is in not the freeze area
-        if (
-            (direction === Direction.UP || direction === Direction.DOWN) &&
-            selectionStartRow >= freezeStartRow &&
-            selectionStartColumn >= freezeStartColumn - freezeXSplit
-        ) {
+        if (selectionStartRow >= freezeStartRow && selectionStartColumn >= freezeStartColumn - freezeXSplit) {
             // top overflow
             if (selectionStartRow <= viewportStartRow) {
                 startSheetViewRow = selectionStartRow;
@@ -153,11 +149,7 @@ export class ScrollController extends Disposable {
             }
         }
         // horizontal overflow only happens when the selection's column is in not the freeze area
-        if (
-            (direction === Direction.LEFT || direction === Direction.RIGHT) &&
-            selectionStartColumn >= freezeStartColumn &&
-            selectionStartRow >= freezeStartRow - freezeYSplit
-        ) {
+        if (selectionStartColumn >= freezeStartColumn && selectionStartRow >= freezeStartRow - freezeYSplit) {
             // left overflow
             if (selectionStartColumn <= viewportStartColumn) {
                 startSheetViewColumn = selectionStartColumn;

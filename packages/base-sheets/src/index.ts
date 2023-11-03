@@ -173,6 +173,6 @@ export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.s
 
 // #region controllers
 
-export { ScrollController } from './Controller/scroll.controller';
+export { ScrollController } from './controllers/scroll.controller';
 
 // #endregion controllers

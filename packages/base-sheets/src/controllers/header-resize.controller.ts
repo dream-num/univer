@@ -27,7 +27,7 @@ import {
     HEADER_MENU_SHAPE_WIDTH_HEIGHT,
     HEADER_RESIZE_SHAPE_TYPE,
     HeaderMenuResizeShape,
-} from '../View/header-resize-shape';
+} from '../views/header-resize-shape';
 
 const HEADER_RESIZE_CONTROLLER_SHAPE_ROW = '__SpreadsheetHeaderResizeControllerShapeRow__';
 

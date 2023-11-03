@@ -6,7 +6,7 @@ import { getCoordByOffset, getSheetObject } from '../Basics/component-tools';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../Basics/Const/DEFAULT_SPREADSHEET_VIEW';
 import { SelectionManagerService } from '../services/selection/selection-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { HEADER_MENU_SHAPE_TYPE, HeaderMenuShape } from '../View/header-menu-shape';
+import { HEADER_MENU_SHAPE_TYPE, HeaderMenuShape } from '../views/header-menu-shape';
 
 const HEADER_MENU_CONTROLLER_SHAPE = '__SpreadsheetHeaderMenuSHAPEControllerShape__';
 

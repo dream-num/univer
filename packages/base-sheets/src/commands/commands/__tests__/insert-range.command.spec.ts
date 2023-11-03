@@ -16,7 +16,7 @@ import {
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { MergeCellController } from '../../../Controller/merge-cell.controller';
+import { MergeCellController } from '../../../controllers/merge-cell.controller';
 import { RefRangeService } from '../../../services/ref-range.service';
 import {
     NORMAL_SELECTION_PLUGIN_NAME,

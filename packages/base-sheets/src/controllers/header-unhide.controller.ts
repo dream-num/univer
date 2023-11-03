@@ -26,7 +26,7 @@ import {
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { HeaderUnhideShape, HeaderUnhideShapeType } from '../View/header-unhide-shape';
+import { HeaderUnhideShape, HeaderUnhideShapeType } from '../views/header-unhide-shape';
 
 const HEADER_UNHIDE_CONTROLLER_SHAPE = '__SpreadsheetHeaderUnhideSHAPEControllerShape__';
 

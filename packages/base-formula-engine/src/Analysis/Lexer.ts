@@ -88,9 +88,9 @@ export class LexerTreeMaker {
 
         this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
 
-        // const state = this._nodeMaker(this._formulaString);
+        const state = this._nodeMaker(this._formulaString);
 
-        // console.log('error', state);
+        console.log('error', state);
 
         const node = this._getTopNode(this._currentLexerNode);
         if (node) {

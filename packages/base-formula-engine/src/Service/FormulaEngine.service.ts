@@ -2,10 +2,10 @@ import { IUnitRange } from '@univerjs/core';
 
 import { LexerTreeMaker } from '../Analysis/Lexer';
 import { AstTreeMaker } from '../Analysis/Parser';
+import { FormulaDataType, IInterpreterDatasetConfig } from '../Basics/Common';
 import { FormulaDependencyGenerator } from '../Dependency/FormulaDependency';
 import { Interpreter } from '../Interpreter/Interpreter';
 import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
-import { FormulaDataType, IInterpreterDatasetConfig } from '../Types';
 
 export class FormulaEngineService {
     /**
@@ -61,7 +61,7 @@ export class FormulaEngineService {
         const lexerTreeMaker = new LexerTreeMaker(formulaString);
         const lexerNode = lexerTreeMaker.treeMaker();
         lexerTreeMaker.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
-        // console.log('lexerNode', lexerNode.serialize());
+        console.log('lexerNode', lexerNode.serialize());
 
         // this.getObserver('onAfterFormulaLexerObservable')?.notifyObservers(lexerNode);
 
@@ -69,7 +69,7 @@ export class FormulaEngineService {
 
         const astNode = astTreeMaker.parse(lexerNode);
 
-        // console.log('astNode', astNode.serialize());
+        console.log('astNode', astNode?.serialize());
 
         const interpreter = Interpreter.create();
 

@@ -319,10 +319,6 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                         const divide = divides[i];
                         const { spanGroup } = divide;
 
-                        // if (spanGroup.length === 0) {
-                        //     continue;
-                        // }
-
                         const divStartIndex = preDivideStartIndex;
                         let divEndIndex = divStartIndex;
                         for (const span of spanGroup) {
@@ -353,6 +349,10 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             //     actualWidth += divide.width;
                             // }
                             actualWidth += divide.left;
+                        }
+
+                        if (spanGroup.length === 0) {
+                            continue;
                         }
 
                         divide.st = divStartIndex === 0 ? 0 : divStartIndex + 1;

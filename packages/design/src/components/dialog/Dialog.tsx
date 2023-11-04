@@ -1,7 +1,8 @@
 import RcDialog from 'rc-dialog';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import Draggable from 'react-draggable';
 
+import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
 export interface IDialogProps {
@@ -44,6 +45,8 @@ export function Dialog(props: IDialogProps) {
     const { children, visible = false, title, draggable = false, closeIcon, footer, onClose } = props;
     const [dragDisabled, setDragDisabled] = useState(false);
 
+    const { mountContainer } = useContext(ConfigContext);
+
     const TitleIfDraggable = draggable ? (
         <div
             style={{
@@ -73,6 +76,7 @@ export function Dialog(props: IDialogProps) {
     return (
         <RcDialog
             prefixCls={styles.dialog}
+            getContainer={() => mountContainer}
             visible={visible}
             title={TitleIfDraggable}
             modalRender={modalRender}

@@ -1,5 +1,7 @@
 import RcTooltip from 'rc-tooltip';
+import { useContext } from 'react';
 
+import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 import { placements } from './placements';
 
@@ -12,9 +14,12 @@ export interface ITooltipProps {
 export const Tooltip = (props: ITooltipProps) => {
     const { children, placement = 'top', title } = props;
 
+    const { mountContainer } = useContext(ConfigContext);
+
     return (
         <RcTooltip
             prefixCls={styles.tooltip}
+            getTooltipContainer={() => mountContainer}
             overlay={<div className={styles.tooltipContent}>{typeof title === 'function' ? title() : title}</div>}
             builtinPlacements={placements}
             placement={placement}

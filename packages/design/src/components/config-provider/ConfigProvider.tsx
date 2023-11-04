@@ -4,17 +4,17 @@ import { enUS, ILocale } from '../../locale';
 
 export interface IConfigProviderProps {
     children: React.ReactNode;
-    locale?: ILocale | unknown;
+    locale: ILocale;
+    mountContainer: HTMLElement;
 }
 
-export const ConfigContext = createContext<{
-    locale: ILocale;
-}>({
+export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'>>({
     locale: enUS,
+    mountContainer: document.body,
 });
 
 export function ConfigProvider(props: IConfigProviderProps) {
-    const { children, locale = {} } = props;
+    const { children, locale = {}, mountContainer } = props;
 
     // set default locale to enUS
     let _locale: ILocale;
@@ -24,5 +24,5 @@ export function ConfigProvider(props: IConfigProviderProps) {
         _locale = enUS;
     }
 
-    return <ConfigContext.Provider value={{ locale: _locale }}>{children}</ConfigContext.Provider>;
+    return <ConfigContext.Provider value={{ locale: _locale, mountContainer }}>{children}</ConfigContext.Provider>;
 }

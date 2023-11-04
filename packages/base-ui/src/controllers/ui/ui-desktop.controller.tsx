@@ -187,6 +187,7 @@ function bootStrap(
         root.render(
             <ConnectedApp
                 {...options}
+                mountContainer={mountContainer}
                 headerComponents={headerComponents}
                 headerMenuComponents={headerMenuComponents}
                 contentComponents={contentComponents}

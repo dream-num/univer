@@ -51,7 +51,6 @@ export class DesktopMenuService extends Disposable implements IMenuService {
         this._menuChanged$.next();
 
         return toDisposable(() => {
-            console.log(item.id);
             this._menuItemMap.delete(item.id);
 
             if (Array.isArray(item.positions)) {

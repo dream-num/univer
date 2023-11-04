@@ -29,7 +29,7 @@ export const Playground = {
             <>
                 <Button onClick={() => handleChangeLocale(enUS)}>enUS</Button>
                 <Button onClick={() => handleChangeLocale(zhCN)}>zhCN</Button>
-                <ConfigProvider locale={locale}>
+                <ConfigProvider locale={locale} mountContainer={document.body}>
                     <ColorPicker />
                 </ConfigProvider>
             </>

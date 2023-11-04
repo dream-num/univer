@@ -29,7 +29,14 @@ export class AutoFillController extends Disposable {
         @IAutoFillService private readonly _autoFillService: IAutoFillService
     ) {
         super();
+        this._init();
+    }
+
+    private _init() {
         this._onSelectionControlFillChanged();
+        [AutoFillCommand].forEach((command) => {
+            this.disposeWithMe(this._commandService.registerCommand(command));
+        });
     }
 
     private _onSelectionControlFillChanged() {

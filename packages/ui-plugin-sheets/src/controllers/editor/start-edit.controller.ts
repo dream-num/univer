@@ -170,6 +170,7 @@ export class StartEditController extends Disposable {
                     isStartBack: true,
                 },
             ]);
+
             this._textSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
         });
     }

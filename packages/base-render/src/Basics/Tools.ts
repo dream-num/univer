@@ -40,6 +40,7 @@ export const getColor = (RgbArray: number[], opacity?: number): string => {
     if (opacity != null) {
         return `${RGBA_PAREN + RgbArray.join(',')},${opacity})`;
     }
+
     return `${RGB_PAREN + RgbArray.join(',')})`;
 };
 

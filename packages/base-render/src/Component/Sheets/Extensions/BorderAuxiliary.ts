@@ -46,7 +46,7 @@ export class BorderAuxiliary extends SheetExtension {
         const scale = this._getScale(parentScale);
         ctx.beginPath();
         ctx.lineWidth = getLineWith(1) / scale;
-        ctx.strokeStyle = getColor([212, 212, 212])!;
+        ctx.strokeStyle = getColor([212, 212, 212]);
         const width = fixLineWidthByScale(columnTotalWidth, scale);
         const height = fixLineWidthByScale(rowTotalHeight, scale);
         const columnWidthAccumulationLength = columnWidthAccumulation.length;

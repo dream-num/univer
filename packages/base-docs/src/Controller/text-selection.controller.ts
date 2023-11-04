@@ -119,6 +119,7 @@ export class TextSelectionController extends Disposable {
 
         this._downObserver = document?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
             this._textSelectionRenderManager.eventTrigger(evt, document.getOffsetConfig(), viewportMain);
+
             if (evt.button !== 2) {
                 state.stopPropagation();
             }

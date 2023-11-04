@@ -252,6 +252,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     getActiveTextSelection() {
         const list = this._textSelectionList;
+
         for (const textSelection of list) {
             if (textSelection.isActive()) {
                 return textSelection;
@@ -267,14 +268,17 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         if (textSelection == null) {
             return;
         }
+
         this._addTextSelection(textSelection);
     }
 
+    // @jocs, what's the meaning of this method? and it is not being used anywhere
     remain() {
         const activeSelection = this.getActiveTextSelection();
         if (activeSelection == null) {
             return;
         }
+
         const index = this._textSelectionList.indexOf(activeSelection);
 
         return this._textSelectionList.splice(index, 1)[0];
@@ -292,9 +296,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         return this.getTextSelectionList()
             .map((textSelection) => {
                 const range = textSelection.getRange();
+
                 if (range == null) {
                     return;
                 }
+
                 return {
                     ...range,
                     segmentId: this._currentSegmentId,
@@ -321,14 +327,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     activate(x: number, y: number) {
         this._container.style.left = `${x}px`;
         this._container.style.top = `${y}px`;
-        this._container.style.zIndex = `1000`;
+        this._container.style.zIndex = '1000';
 
         this._cursor.style.animation = 'univer_cursor_blinkStyle 1s steps(1) infinite';
         this._cursor.style.display = 'revert';
 
-        setTimeout(() => {
-            this.focus();
-        }, 0);
+        requestAnimationFrame(() => this.focus());
     }
 
     focus(): void {
@@ -364,6 +368,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         // this._attachSelectionEvent(this._documents);
     }
 
+    // Handle pointer down.
     eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         documentOffsetConfig: IDocumentOffsetConfig,
@@ -417,6 +422,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         if (evt.ctrlKey || this._isEmptyTextSelection()) {
             const newTextSelection = new TextSelection(scene, position);
+
             this._addTextSelection(newTextSelection);
         } else {
             this._updateTextSelection(position);
@@ -443,13 +449,17 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             scene.setCursor(CURSOR_TYPE.TEXT);
+
             if (Math.sqrt((moveOffsetX - preMoveOffsetX) ** 2 + (moveOffsetY - preMoveOffsetY) ** 2) < 3) {
                 return;
             }
+
             this._moving(moveOffsetX, moveOffsetY, scrollTimer);
+
             scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
                 this._moving(moveOffsetX, moveOffsetY, scrollTimer);
             });
+
             preMoveOffsetX = moveOffsetX;
             preMoveOffsetY = moveOffsetY;
         });
@@ -457,6 +467,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
             scene.onPointerMoveObserver.remove(this._moveObserver);
             scene.onPointerUpObserver.remove(this._upObserver);
+
             scene.enableEvent();
 
             this._textSelection$.next(this.getTextSelectionList());
@@ -611,10 +622,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         if (position == null) {
             return;
         }
-
+        const HALF = 0.5;
         let isBack = false;
         //|| (span.streamType === DataStreamTreeTokenType.PARAGRAPH && isStart)
-        if (ratioX < 0.5) {
+        if (ratioX < HALF) {
             isBack = true;
         }
 
@@ -627,10 +638,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _interactTextSelection(activeTextSelection: TextSelection) {
         const newTextSelection: TextSelection[] = [];
         let hasIntersection = false;
+
         this._textSelectionList.forEach((textSelection) => {
             if (textSelection === activeTextSelection) {
                 return true;
             }
+
             if (!activeTextSelection.isIntersection(textSelection)) {
                 newTextSelection.push(textSelection);
             } else {
@@ -642,6 +655,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         if (!hasIntersection) {
             return;
         }
+
         newTextSelection.push(activeTextSelection);
         this._textSelectionList = newTextSelection;
     }

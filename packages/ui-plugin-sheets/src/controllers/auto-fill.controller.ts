@@ -21,7 +21,6 @@ import { IControlFillConfig, ISelectionRenderService } from '../services/selecti
 
 @OnLifecycle(LifecycleStages.Ready, AutoFillController)
 export class AutoFillController extends Disposable {
-    private _direction: Direction;
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
@@ -324,7 +323,6 @@ export class AutoFillController extends Disposable {
         } else {
             return;
         }
-        this._direction = direction;
 
         const {
             startRow: copyStartRow,

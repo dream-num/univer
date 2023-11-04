@@ -18,10 +18,9 @@ export interface IAutoFillService {
 }
 @OnLifecycle(LifecycleStages.Rendered, AutoFillService)
 export class AutoFillService extends Disposable implements IAutoFillService {
-    private _rules: IAutoFillRule[];
-    private _applyType: APPLY_TYPE;
-    private _isFillingStyle: boolean;
-    private _allApplyType: APPLY_TYPE[];
+    private _rules: IAutoFillRule[] = [];
+    private _applyType: APPLY_TYPE = APPLY_TYPE.SERIES;
+    private _isFillingStyle: boolean = true;
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
@@ -35,7 +34,6 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         this._rules = [numberRule, extendNumberRule, chnNumberRule, chnWeek2Rule, chnWeek3Rule, otherRule];
         this._applyType = APPLY_TYPE.SERIES;
         this._isFillingStyle = true;
-        this._allApplyType = [APPLY_TYPE.COPY, APPLY_TYPE.SERIES, APPLY_TYPE.ONLY_FORMAT];
     }
 
     getRules() {

@@ -1,9 +1,8 @@
+import { AddWorksheetMergeCommand } from '@univerjs/base-sheets/commands/commands/add-worksheet-merge.command.js';
+import { SetRangeValuesCommand } from '@univerjs/base-sheets/commands/commands/set-range-values.command.js';
+import { SetSelectionsOperation } from '@univerjs/base-sheets/commands/operations/selection.operation.js';
 import { CommandType, ICellData, ICommand, ICommandService, IRange } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
-
-import { SetSelectionsOperation } from '../operations/selection.operation';
-import { AddWorksheetMergeCommand } from './add-worksheet-merge.command';
-import { SetRangeValuesCommand } from './set-range-values.command';
 
 interface IAutoFillCommandParams {
     worksheetId: string;

@@ -1,3 +1,4 @@
+import { SelectionManagerService } from '@univerjs/base-sheets';
 import {
     Disposable,
     IUniverInstanceService,
@@ -7,7 +8,6 @@ import {
 } from '@univerjs/core';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
-import { SelectionManagerService } from '../selection/selection-manager.service';
 import { chnNumberRule, chnWeek2Rule, chnWeek3Rule, extendNumberRule, numberRule, otherRule } from './rules';
 import { APPLY_TYPE, IAutoFillRule } from './type';
 

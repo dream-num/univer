@@ -1,6 +1,4 @@
 import { getCellInfoInMergeData } from '@univerjs/base-render';
-import { AutoFillCommand } from '@univerjs/base-sheets';
-import { APPLY_TYPE } from '@univerjs/base-sheets/services/auto-fill/type.js';
 import {
     Direction,
     Disposable,

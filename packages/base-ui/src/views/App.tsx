@@ -21,6 +21,7 @@ import { DocBars } from './components/doc-bars/DocBars';
 import { Parts } from './Parts';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
+    mountContainer: HTMLElement;
     headerComponents?: Set<() => ComponentType>;
     contentComponents?: Set<() => ComponentType>;
     footerComponents?: Set<() => ComponentType>;
@@ -37,6 +38,7 @@ export function App(props: IUniverAppProps) {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const {
+        mountContainer,
         headerComponents,
         headerMenuComponents,
         contentComponents,
@@ -59,13 +61,18 @@ export function App(props: IUniverAppProps) {
 
     const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
 
+    // Create a portal container for injecting global component themes.
+    const portalContainer: HTMLElement = document.createElement('div');
+    document.body.appendChild(portalContainer);
+
     useEffect(() => {
         const subscriptions = [
             localeService.getLocale().locale$.subscribe((locale) => {
                 locale && setLocale(localeService.getLocales() as unknown as ILocale);
             }),
             themeService.currentTheme$.subscribe((theme) => {
-                themeInstance.setTheme(theme);
+                themeInstance.setTheme(mountContainer, theme);
+                themeInstance.setTheme(portalContainer, theme);
             }),
         ];
 
@@ -76,7 +83,7 @@ export function App(props: IUniverAppProps) {
     }, []);
 
     return (
-        <ConfigProvider locale={locale}>
+        <ConfigProvider locale={locale} mountContainer={portalContainer}>
             <Container className={style.layoutContainer}>
                 <Layout>
                     {/* outer sidebar */}

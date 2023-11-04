@@ -28,7 +28,7 @@ class Theme {
         this.styleSheet = document.styleSheets[index];
     }
 
-    setTheme(theme: Record<string, string>) {
+    setTheme(root: HTMLElement, theme: Record<string, string>) {
         // 1. remove old theme
         if (this.styleSheet) {
             let index = 0;
@@ -50,17 +50,11 @@ class Theme {
          *  before: {--primary-color:"#0188fb",--primary-color-hover:"#5391ff"}
          *  after:  {--primary-color:#0188fb;--primary-color-hover:#5391ff;}
          */
-        const currentTheme = Object.fromEntries(
-            Object.keys(theme).map((item) => [convertToDashCase(item), convertHexToRgb(theme[item])])
-        );
-
-        // 3. insert new theme
-        // TODO: CSS selector should be configurable
-        this.styleSheet.insertRule(
-            `:root ${JSON.stringify(currentTheme)
-                .replace(/"/g, '')
-                .replace(/,(?=--)/g, ';')}`
-        );
+        Object.keys(theme).forEach((key) => {
+            const property = convertToDashCase(key);
+            const value = convertHexToRgb(theme[key]);
+            root.style.setProperty(property, value);
+        });
     }
 }
 

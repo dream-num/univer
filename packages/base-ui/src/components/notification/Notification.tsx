@@ -1,9 +1,9 @@
+import { ConfigContext } from '@univerjs/design';
 import { CloseSingle, ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import { useNotification } from 'rc-notification';
 import { Placement } from 'rc-notification/es/interface';
-import { useEffect, useRef } from 'react';
-import { createRoot } from 'react-dom/client';
+import { useContext, useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
 
 import styles from './index.module.less';
@@ -48,18 +48,6 @@ export interface INotificationMethodOptions {
     lines?: number;
 }
 
-interface INotificationProps extends INotificationMethodOptions {
-    /**
-     * close button icon
-     */
-    closeIcon?: React.ReactNode;
-
-    /**
-     * The maximum number of displays. When the limit is exceeded, the oldest message will be automatically closed.
-     */
-    maxCount?: number;
-}
-
 export const notificationObserver = new Subject<INotificationMethodOptions>();
 
 export const PureContent = (props: INotificationMethodOptions) => {
@@ -82,12 +70,14 @@ export const PureContent = (props: INotificationMethodOptions) => {
     );
 };
 
-export function Notification(props: INotificationProps) {
-    const { maxCount = 3 } = props;
+export function Notification() {
+    const { mountContainer } = useContext(ConfigContext);
+
     const [api, contextHolder] = useNotification({
         prefixCls: styles.notification,
-        maxCount,
+        maxCount: 3,
         closeIcon: <CloseSingle />,
+        getContainer: () => mountContainer,
         motion: {
             motionName: styles.notificationFade,
             motionAppear: true,
@@ -123,29 +113,8 @@ export function Notification(props: INotificationProps) {
     return <>{contextHolder}</>;
 }
 
-class NotificationInstance {
-    div: HTMLDivElement;
-    root: ReturnType<typeof createRoot>;
-
-    constructor() {
-        this.div = document.createElement('div');
-        document.body.appendChild(this.div);
-        this.root = createRoot(this.div);
-
-        this.render();
-    }
-
-    show(options: INotificationMethodOptions) {
-        notificationObserver.next(options);
-    }
-
-    render() {
-        this.root.render(<Notification content="" title="" type="success" />);
-    }
-}
-
-const instance = new NotificationInstance();
-
 export const notification = {
-    show: (options: INotificationMethodOptions) => instance.show(options),
+    show: (options: INotificationMethodOptions) => {
+        notificationObserver.next(options);
+    },
 };

@@ -179,7 +179,9 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     onClick({ value: inputValue, id: item.id }); // merge cell
                 }}
             >
-                <CustomLabel value={inputValue} title={title} label={label} icon={item.icon} onChange={onChange} />
+                <span className={styles.menuItemContent}>
+                    <CustomLabel value={inputValue} title={title} label={label} icon={item.icon} onChange={onChange} />
+                </span>
             </RcMenuItem>
         );
     };

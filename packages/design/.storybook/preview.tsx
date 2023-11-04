@@ -32,7 +32,7 @@ const preview: Preview = {
     },
 
     decorators: [(Story, context) => {
-        themeInstance.setTheme(themes[context.globals.theme]);
+        themeInstance.setTheme(document.body, themes[context.globals.theme]);
 
         return (
             <Story />

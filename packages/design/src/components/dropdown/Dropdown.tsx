@@ -1,7 +1,9 @@
 import type { ActionType, AlignType } from '@rc-component/trigger';
 import RcDropdown from 'rc-dropdown';
 import Placements from 'rc-dropdown/lib/placements';
+import { useContext } from 'react';
 
+import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
 // TODO: @jikkai Need to limit width
@@ -53,10 +55,13 @@ export interface IDropdownProps {
 export function Dropdown(props: IDropdownProps) {
     const { trigger = ['click'], placement, children, overlay, alignPoint = false, align, onVisibleChange } = props;
 
+    const { mountContainer } = useContext(ConfigContext);
+
     return (
         <RcDropdown
             {...props}
             prefixCls={styles.dropdown}
+            getPopupContainer={() => mountContainer}
             trigger={trigger}
             animation="slide-up"
             placement={placement}

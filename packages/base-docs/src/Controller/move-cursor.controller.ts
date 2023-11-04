@@ -5,14 +5,13 @@ import {
     INodePosition,
     INodeSearch,
     IRenderManagerService,
-    isFirstSpan,
-    isPlaceholderOrSpace,
     ITextSelectionRenderManager,
     NodePositionConvertToCursor,
 } from '@univerjs/base-render';
 import {
     Direction,
     Disposable,
+    getTextIndexByCursor,
     ICommandInfo,
     ICommandService,
     IUniverInstanceService,
@@ -71,6 +70,7 @@ export class MoveCursorController extends Disposable {
 
     private _moveCursorFunction(direction: Direction) {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
+        const allRanges = this._textSelectionRenderManager.getRanges();
 
         const activeSelection = this._textSelectionRenderManager.getActiveTextSelection();
 
@@ -83,15 +83,46 @@ export class MoveCursorController extends Disposable {
         }
 
         const startNodePosition = activeSelection.getStart();
+
         const preSpan = skeleton.findSpanByPosition(startNodePosition);
 
         const documentOffsetConfig = docObject.document.getOffsetConfig();
 
-        const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack, segmentId, style } = activeRange;
+        const { cursorStart, cursorEnd, isEndBack, isStartBack, style } = activeRange;
 
-        let cursor = cursorStart;
+        if (direction === Direction.LEFT || direction === Direction.RIGHT) {
+            let cursor;
 
-        if (direction === Direction.DOWN || direction === Direction.UP) {
+            if (!activeRange.isCollapse || allRanges.length > 1) {
+                let min = Infinity;
+                let max = -Infinity;
+
+                for (const range of allRanges) {
+                    min = Math.min(min, getTextIndexByCursor(range!.cursorStart, range!.isStartBack) + 1);
+                    max = Math.max(max, getTextIndexByCursor(range!.cursorEnd, range!.isEndBack) + 1);
+                }
+
+                cursor = direction === Direction.LEFT ? min : max;
+            } else {
+                if (direction === Direction.LEFT) {
+                    cursor = Math.max(0, getTextIndexByCursor(cursorStart, isStartBack));
+                } else {
+                    const dataStreamLength = skeleton.getModel().getSnapshot().body?.dataStream?.length ?? Infinity;
+                    cursor = Math.min(dataStreamLength - 2, getTextIndexByCursor(cursorEnd, isEndBack) + 2);
+                }
+            }
+
+            this._textSelectionManagerService.replace([
+                {
+                    cursorStart: cursor,
+                    cursorEnd: cursor,
+                    isCollapse: true,
+                    isEndBack: true,
+                    isStartBack: true,
+                    style,
+                },
+            ]);
+        } else {
             const newPos = this._getTopOrBottomPosition(skeleton, preSpan, direction === Direction.DOWN);
             if (newPos == null) {
                 return;
@@ -109,77 +140,6 @@ export class MoveCursorController extends Disposable {
                     style,
                 },
             ]);
-
-            // const selectionRemain = documents.remainActiveSelection() as TextSelection | undefined;
-            // if (selectionRemain == null) {
-            //     return;
-            // }
-
-            // this._syncSelection(documents as Documents, selectionRemain, newPos, true);
-        } else if (direction === Direction.LEFT) {
-            let span: Nullable<IDocumentSkeletonSpan>;
-            let isBack = false;
-            if (isFirstSpan(preSpan)) {
-                span = skeleton.findNodeByCharIndex(cursor);
-
-                if (preSpan === span) {
-                    isBack = true;
-                }
-
-                while (isPlaceholderOrSpace(span)) {
-                    span = skeleton.findNodeByCharIndex(--cursor);
-                }
-            } else {
-                span = skeleton.findNodeByCharIndex(--cursor);
-            }
-
-            // move selection
-            this._textSelectionManagerService.replace([
-                {
-                    cursorStart: cursor,
-                    cursorEnd: cursor,
-                    isCollapse: true,
-                    isEndBack: isBack,
-                    isStartBack: isBack,
-                    style,
-                },
-            ]);
-
-            // const selectionRemain = documents.remainActiveSelection() as TextSelection | undefined;
-            // this._adjustSelection(documents, selectionRemain, span, isBack, true);
-        } else {
-            if (isStartBack === true) {
-                cursor -= 1;
-            }
-
-            let span = skeleton.findNodeByCharIndex(++cursor);
-
-            const originCursor = cursor;
-
-            while (isPlaceholderOrSpace(span)) {
-                span = skeleton.findNodeByCharIndex(++cursor);
-            }
-
-            let isBack = false;
-            if (isFirstSpan(span) && preSpan !== span) {
-                isBack = true;
-            } else {
-                cursor = originCursor;
-            }
-
-            // move selection
-            this._textSelectionManagerService.replace([
-                {
-                    cursorStart: cursor,
-                    cursorEnd: cursor,
-                    isCollapse: true,
-                    isEndBack: isBack,
-                    isStartBack: isBack,
-                    style,
-                },
-            ]);
-            // const selectionRemain = documents.remainActiveSelection() as TextSelection | undefined;
-            // this._adjustSelection(documents, selectionRemain, span, isBack, true);
         }
     }
 

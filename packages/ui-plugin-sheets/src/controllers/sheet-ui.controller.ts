@@ -19,6 +19,15 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univ
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
+import {
+    SetRangeBoldCommand,
+    SetRangeFontFamilyCommand,
+    SetRangeFontSizeCommand,
+    SetRangeItalicCommand,
+    SetRangeStrickThroughCommand,
+    SetRangeTextColorCommand,
+    SetRangeUnderlineCommand,
+} from '../commands/commands/inline-format.command';
 import { RenameSheetOperation } from '../commands/commands/rename.command';
 import {
     SetCopySelectionCommand,
@@ -198,17 +207,24 @@ export class SheetUIController extends Disposable {
             SetCellEditVisibleOperation,
             SetCopySelectionCommand,
             SetCopySelectionsOperation,
+            SetRangeBoldCommand,
+            SetRangeItalicCommand,
+            SetRangeUnderlineCommand,
+            SetRangeStrickThroughCommand,
+            SetRangeFontSizeCommand,
+            SetRangeFontFamilyCommand,
+            SetRangeTextColorCommand,
+            SetItalicCommand,
+            SetStrikeThroughCommand,
             SetFontFamilyCommand,
             SetFontSizeCommand,
             SetFormatPainterOperation,
             SetInfiniteFormatPainterCommand,
-            SetItalicCommand,
             SetOnceFormatPainterCommand,
             SetScrollOperation,
             SetScrollRelativeCommand,
             SetSelectionFrozenCommand,
             SetSelectionsOperation,
-            SetStrikeThroughCommand,
             SetUnderlineCommand,
             SetZoomRatioCommand,
             SetZoomRatioOperation,

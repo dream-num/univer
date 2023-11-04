@@ -18,15 +18,11 @@ import {
     ResetTextColorCommand,
     SelectionManagerService,
     SetBackgroundColorCommand,
-    SetBoldCommand,
     SetColHiddenCommand,
     SetColHiddenMutation,
     SetColVisibleMutation,
     SetColWidthCommand,
-    SetFontFamilyCommand,
-    SetFontSizeCommand,
     SetHorizontalTextAlignCommand,
-    SetItalicCommand,
     SetRangeStyleMutation,
     SetRangeValuesMutation,
     SetRowHeightCommand,
@@ -36,12 +32,9 @@ import {
     SetSelectedColsVisibleCommand,
     SetSelectedRowsVisibleCommand,
     SetSelectionsOperation,
-    SetStrikeThroughCommand,
     SetTabColorCommand,
-    SetTextColorCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
-    SetUnderlineCommand,
     SetVerticalTextAlignCommand,
     SetWorksheetHideCommand,
     SetWorksheetRowIsAutoHeightCommand,
@@ -70,6 +63,15 @@ import {
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
+import {
+    SetRangeBoldCommand,
+    SetRangeFontFamilyCommand,
+    SetRangeFontSizeCommand,
+    SetRangeItalicCommand,
+    SetRangeStrickThroughCommand,
+    SetRangeTextColorCommand,
+    SetRangeUnderlineCommand,
+} from '../../commands/commands/inline-format.command';
 import { RenameSheetOperation } from '../../commands/commands/rename.command';
 import {
     SetInfiniteFormatPainterCommand,
@@ -125,7 +127,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
-        id: SetBoldCommand.id,
+        id: SetRangeBoldCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'BoldSingle',
         title: 'Set bold',
@@ -160,6 +162,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 const primary = selectionManagerService.getLast()?.primary;
                 const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let isBold = FontWeight.NORMAL;
+
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
                     isBold = range?.getFontWeight();
@@ -169,6 +172,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             });
 
             subscriber.next(false);
+
             return disposable.dispose;
         }),
     };
@@ -181,7 +185,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
-        id: SetItalicCommand.id,
+        id: SetRangeItalicCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'ItalicSingle',
         title: 'Set italic',
@@ -239,7 +243,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
-        id: SetUnderlineCommand.id,
+        id: SetRangeUnderlineCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'UnderlineSingle',
         title: 'Set underline',
@@ -297,7 +301,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
-        id: SetStrikeThroughCommand.id,
+        id: SetRangeStrickThroughCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'StrikethroughSingle',
         title: 'Set strike through',
@@ -490,7 +494,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
-        id: SetFontFamilyCommand.id,
+        id: SetRangeFontFamilyCommand.id,
         tooltip: 'toolbar.font',
         type: MenuItemType.SELECTOR,
 
@@ -552,7 +556,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const selectionManagerService = accessor.get(SelectionManagerService);
 
     return {
-        id: SetFontSizeCommand.id,
+        id: SetRangeFontSizeCommand.id,
         tooltip: 'toolbar.fontSize',
         type: MenuItemType.SELECTOR,
         label: {
@@ -616,7 +620,7 @@ export function ResetTextColorMenuItemFactory(): IMenuButtonItem {
         id: ResetTextColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
-        positions: SetTextColorCommand.id,
+        positions: SetRangeTextColorCommand.id,
     };
 }
 
@@ -624,7 +628,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
     const commandService = accessor.get(ICommandService);
 
     return {
-        id: SetTextColorCommand.id,
+        id: SetRangeTextColorCommand.id,
         icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
         type: MenuItemType.SELECTOR,
@@ -637,7 +641,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         value$: new Observable<string>((subscriber) => {
             const defaultColor = '#000';
             const disposable = commandService.onCommandExecuted((c) => {
-                if (c.id === SetTextColorCommand.id) {
+                if (c.id === SetRangeTextColorCommand.id) {
                     const color = (c.params as { value: string }).value;
                     subscriber.next(color ?? defaultColor);
                 }

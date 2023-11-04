@@ -45,13 +45,11 @@ export const SetRangeValuesUndoMutationFactory = (
 ): ISetRangeValuesMutationParams => {
     const { workbookId, worksheetId, cellValue } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(workbookId);
+    const workbook = univerInstanceService.getUniverSheetInstance(workbookId);
 
-    if (universheet == null) {
-        throw new Error('universheet is null error!');
+    if (workbook == null) {
+        throw new Error('workbook is null error!');
     }
-
-    const workbook = universheet;
 
     const worksheet = workbook.getSheetBySheetId(worksheetId);
     if (worksheet == null) {
@@ -64,25 +62,15 @@ export const SetRangeValuesUndoMutationFactory = (
 
     const newValues = new ObjectMatrix(cellValue);
 
-    // for (let i = 0; i < range.length; i++) {
     newValues.forValue((row, col, newVal) => {
         const cell = Tools.deepClone(cellMatrix?.getValue(row, col)) || {}; // clone cell data，prevent modify the original data
         const oldStyle = styles.getStyleByCell(cell);
         const newStyle = transformStyle(oldStyle, newVal && newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
+
         cell.s = newStyle;
 
         undoData.setValue(row, col, setNull(cell));
     });
-    // for (let i = 0; i < params.range.length; i++) {
-    //     const { startRow, endRow, startColumn, endColumn } = params.range[i];
-
-    //     for (let r = startRow; r <= endRow; r++) {
-    //         for (let c = startColumn; c <= endColumn; c++) {
-    //             const value = cellMatrix?.getValue(r, c);
-    //             undoData.setValue(r, c, Tools.deepClone(value as ICellData));
-    //         }
-    //     }
-    // }
 
     return {
         ...Tools.deepClone(params),
@@ -126,15 +114,17 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     id: 'sheet.mutation.set-range-values',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
+        const { cellValue, worksheetId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getSheetBySheetId(params.worksheetId);
+        const worksheet = workbook.getSheetBySheetId(worksheetId);
+
         if (!worksheet) {
             return false;
         }
+
         const cellMatrix = worksheet.getCellMatrix();
         const styles = workbook.getStyles();
-        const { cellValue } = params;
         const newValues = new ObjectMatrix(cellValue);
 
         newValues.forValue((row, col, newVal) => {
@@ -170,6 +160,10 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                     if (oldStyle == null) {
                         // clear
                         delete oldVal.s;
+                    }
+
+                    if (typeof newVal.s === 'string') {
+                        newVal.s = styles.get(newVal.s);
                     }
 
                     // set style

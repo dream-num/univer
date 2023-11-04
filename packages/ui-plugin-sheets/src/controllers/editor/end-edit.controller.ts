@@ -25,6 +25,7 @@ import {
     Nullable,
     Observer,
     OnLifecycle,
+    Tools,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
@@ -93,7 +94,7 @@ export class EndEditController extends Disposable {
 
     private _initialExitInput() {
         this._onInputSubscription = this._editorBridgeService.visible$.subscribe((param) => {
-            const { visible, keycode, eventType } = param;
+            const { visible, keycode } = param;
 
             if (visible === this._editorVisiblePrevious) {
                 return;
@@ -136,7 +137,7 @@ export class EndEditController extends Disposable {
                 return;
             }
 
-            const cellData: ICellData = worksheet.getCell(row, column) || {};
+            const cellData: ICellData = Tools.deepClone(worksheet.getCell(row, column) || {});
 
             const documentModel = documentLayoutObject.documentModel as DocumentModel;
 
@@ -161,6 +162,7 @@ export class EndEditController extends Disposable {
                 }
 
                 cellData.v = newDataStream;
+                cellData.m = newDataStream;
             }
 
             this._commandService.executeCommand(SetRangeValuesCommand.id, {

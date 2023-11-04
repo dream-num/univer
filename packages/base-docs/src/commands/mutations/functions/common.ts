@@ -68,8 +68,7 @@ export function insertTextRuns(
 
         if (insertIndex === Infinity) {
             textRuns.push(...insertTextRuns);
-        }
-        if (insertIndex === -Infinity) {
+        } else if (insertIndex === -Infinity) {
             textRuns.unshift(...insertTextRuns);
         } else {
             const splitTextRun = textRuns[insertIndex];

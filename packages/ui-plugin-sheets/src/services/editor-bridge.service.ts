@@ -66,24 +66,6 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
         this._visible$.next(this._visible);
     }
 
-    // show(eventType = DeviceInputEventType.Dblclick) {
-    //     this._visible = {
-    //         visible: true,
-    //         eventType,
-    //     };
-
-    //     this._visible$.next(this._visible);
-    // }
-
-    // hide() {
-    //     this._visible = {
-    //         visible: false,
-    //         eventType: this._visible.eventType,
-    //     };
-
-    //     this._visible$.next(this._visible);
-    // }
-
     isVisible() {
         return this._visible;
     }

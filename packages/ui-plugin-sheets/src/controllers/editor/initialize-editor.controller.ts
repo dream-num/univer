@@ -17,6 +17,7 @@ export class InitializeEditorController extends Disposable {
     ) {
         super();
 
+        // TODO: @JOCS, remove use setTimeout.
         setTimeout(() => {
             this._initialize();
         }, 0);

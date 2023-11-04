@@ -226,6 +226,7 @@ export class CommandService implements ICommandService {
     onCommandExecuted(listener: (commandInfo: ICommandInfo) => void): IDisposable {
         if (this._commandExecutedListeners.indexOf(listener) === -1) {
             this._commandExecutedListeners.push(listener);
+
             return toDisposable(() => {
                 const index = this._commandExecutedListeners.indexOf(listener);
                 this._commandExecutedListeners.splice(index, 1);
@@ -289,6 +290,7 @@ export class CommandService implements ICommandService {
         // compose a multi command and register it
         const registry = this._commandRegistry.getCommand(command.id);
         let multiCommand: MultiCommand;
+
         if (!registry) {
             multiCommand = new MultiCommand(command.id);
             this._multiCommandDisposables.set(
@@ -304,6 +306,7 @@ export class CommandService implements ICommandService {
         }
 
         const commandDisposable = multiCommand.registerImplementation(command as IMultiCommand, injector);
+
         return toDisposable(() => {
             commandDisposable.dispose();
             if (!multiCommand.hasImplementations()) {
@@ -418,6 +421,7 @@ class MultiCommand implements IMultiCommand {
 
 export function sequenceExecute(tasks: ICommandInfo[], commandService: ICommandService, options?: IExecutionOptions) {
     const promises = tasks.map((task) => () => commandService.syncExecuteCommand(task.id, task.params, options));
+
     return syncSequence(promises);
 }
 
@@ -427,5 +431,6 @@ export function sequenceExecuteAsync(
     options?: IExecutionOptions
 ) {
     const promises = tasks.map((task) => () => commandService.executeCommand(task.id, task.params, options));
+
     return sequence(promises);
 }

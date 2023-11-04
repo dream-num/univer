@@ -38,6 +38,7 @@ export class Styles {
             // Move the accessed entry to the end of the Map to represent its recent usage
             this._cacheMap.delete(styleObject);
             this._cacheMap.set(styleObject, id);
+
             return id;
         }
 
@@ -52,6 +53,7 @@ export class Styles {
     get(id: string | Nullable<IStyleData>): Nullable<IStyleData> {
         if (typeof id !== 'string') return id;
         id = String(id);
+
         return this._styles[id];
     }
 

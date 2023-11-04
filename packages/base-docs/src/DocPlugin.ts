@@ -21,7 +21,16 @@ import {
     InsertCommand,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
-import { SetInlineFormatBoldCommand, SetInlineFormatCommand } from './commands/commands/inline-format.command';
+import {
+    SetInlineFormatBoldCommand,
+    SetInlineFormatCommand,
+    SetInlineFormatFontFamilyCommand,
+    SetInlineFormatFontSizeCommand,
+    SetInlineFormatItalicCommand,
+    SetInlineFormatStrikethroughCommand,
+    SetInlineFormatTextColorCommand,
+    SetInlineFormatUnderlineCommand,
+} from './commands/commands/inline-format.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { MoveCursorOperation } from './commands/operations/cursor.operation';
@@ -99,6 +108,12 @@ export class DocPlugin extends Plugin {
                 MoveCursorOperation,
                 DeleteLeftCommand,
                 SetInlineFormatBoldCommand,
+                SetInlineFormatItalicCommand,
+                SetInlineFormatUnderlineCommand,
+                SetInlineFormatStrikethroughCommand,
+                SetInlineFormatFontSizeCommand,
+                SetInlineFormatFontFamilyCommand,
+                SetInlineFormatTextColorCommand,
                 SetInlineFormatCommand,
                 BreakLineCommand,
                 InsertCommand,

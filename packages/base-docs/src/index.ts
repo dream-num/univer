@@ -13,7 +13,16 @@ export {
     UpdateCommand,
 } from './commands/commands/core-editing.command';
 export { BreakLineCommand, DeleteLeftCommand } from './commands/commands/core-editing.command';
-export { SetInlineFormatBoldCommand, SetInlineFormatCommand } from './commands/commands/inline-format.command';
+export {
+    SetInlineFormatBoldCommand,
+    SetInlineFormatCommand,
+    SetInlineFormatFontFamilyCommand,
+    SetInlineFormatFontSizeCommand,
+    SetInlineFormatItalicCommand,
+    SetInlineFormatStrikethroughCommand,
+    SetInlineFormatTextColorCommand,
+    SetInlineFormatUnderlineCommand,
+} from './commands/commands/inline-format.command';
 export {
     type IRichTextEditingMutationParams,
     RichTextEditingMutation,

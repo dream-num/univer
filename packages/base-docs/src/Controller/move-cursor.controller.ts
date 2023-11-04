@@ -107,7 +107,8 @@ export class MoveCursorController extends Disposable {
                 if (direction === Direction.LEFT) {
                     cursor = Math.max(0, getTextIndexByCursor(cursorStart, isStartBack));
                 } else {
-                    const dataStreamLength = skeleton.getModel().getSnapshot().body?.dataStream?.length ?? Infinity;
+                    const dataStreamLength = skeleton.getModel().getBodyModel().getBody().dataStream.length ?? Infinity;
+                    // -1 because the length of the string will be 1 larger than the index, and the reason for subtracting another 1 is because it ends in \n
                     cursor = Math.min(dataStreamLength - 2, getTextIndexByCursor(cursorEnd, isEndBack) + 2);
                 }
             }

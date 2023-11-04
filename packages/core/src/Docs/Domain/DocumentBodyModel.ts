@@ -508,6 +508,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         }
 
         this.children.forEach((n) => traverseTreeNode(n));
+
         return pieces.join('');
     }
 

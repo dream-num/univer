@@ -1,6 +1,6 @@
 import { SetWorksheetActivateCommand } from '@univerjs/base-sheets';
-import { Slider } from '@univerjs/base-ui';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { Slider } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useEffect, useState } from 'react';
 

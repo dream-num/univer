@@ -51,8 +51,8 @@ export const ClearSelectionAllCommand: ICommand = {
             return false;
         }
 
-        const sequenceExecuteList: Array<ICommandInfo<object>> = [];
-        const sequenceExecuteUndoList: Array<ICommandInfo<object>> = [];
+        const sequenceExecuteList: ICommandInfo[] = [];
+        const sequenceExecuteUndoList: ICommandInfo[] = [];
 
         // clear style and content
         const clearMutationParams: ISetRangeValuesMutationParams = {

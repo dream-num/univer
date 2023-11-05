@@ -99,7 +99,7 @@ export function SheetBarTabs() {
     };
 
     const setupStatusUpdate = () =>
-        commandService.onCommandExecuted((commandInfo: ICommandInfo<object>) => {
+        commandService.onCommandExecuted((commandInfo: ICommandInfo) => {
             switch (commandInfo.id) {
                 case SetTabColorMutation.id:
                 case SetWorksheetHideMutation.id:

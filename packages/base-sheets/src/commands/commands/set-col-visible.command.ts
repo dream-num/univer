@@ -75,7 +75,7 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
         if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 async undo() {
                     return sequenceExecute(
                         [
@@ -196,7 +196,7 @@ export const SetColHiddenCommand: ICommand = {
             const undoRedoService = accessor.get(IUndoRedoService);
             const undoMutationParams = SetColHiddenUndoMutationFactory(accessor, redoMutationParams);
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 async undo() {
                     return sequenceExecute(
                         [

@@ -76,7 +76,7 @@ export const SetSelectionFrozenCommand: ICommand = {
         const result = commandService.syncExecuteCommand(SetFrozenMutation.id, redoMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo() {
                     return commandService.syncExecuteCommand(SetFrozenMutation.id, undoMutationParams);
                 },

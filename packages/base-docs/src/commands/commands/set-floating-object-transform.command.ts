@@ -56,7 +56,7 @@ export const SetDrawingSizeCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: documentId,
+                unitID: documentId,
                 undo() {
                     return commandService.syncExecuteCommand(SetDrawingTransformMutation.id, undoMutationParams);
                 },
@@ -113,7 +113,7 @@ export const SetDrawingPositionCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: documentId,
+                unitID: documentId,
                 undo() {
                     return commandService.syncExecuteCommand(SetDrawingTransformMutation.id, undoMutationParams);
                 },

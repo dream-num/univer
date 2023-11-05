@@ -68,7 +68,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo() {
                     return commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, undoMutationParams);
                 },

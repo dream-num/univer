@@ -4,8 +4,6 @@ import { IExtraModelConfig } from './IExtraModelConfig';
 import { IStyleData } from './IStyleData';
 import { IWorksheetConfig } from './IWorksheetData';
 
-// TODO@wzhudev: there are some strange fields in this interface, such as `pluginMeta` and `skin`
-
 /**
  * Properties of a workbook's configuration
  */
@@ -15,7 +13,7 @@ export interface IWorkbookConfig extends IExtraModelConfig {
      */
     id: string;
 
-    /** Revision of this document. Would be used in collaborated editing. Starts with zero. */
+    /** Revision of this document. Would be used in collaborated editing. Starts from one. */
     rev?: number;
 
     lastModifiedBy: string;

@@ -83,7 +83,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
     }, []);
 
     const setupStatusUpdate = () =>
-        commandService.onCommandExecuted((commandInfo: ICommandInfo<object>) => {
+        commandService.onCommandExecuted((commandInfo: ICommandInfo) => {
             switch (commandInfo.id) {
                 case SetWorksheetHideMutation.id:
                 case RemoveSheetMutation.id:

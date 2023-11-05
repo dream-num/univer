@@ -79,7 +79,7 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
 
         if (result.result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 async undo() {
                     return sequenceExecute(
                         [
@@ -199,7 +199,7 @@ export const SetRowHiddenCommand: ICommand = {
         );
         if (result.result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 async undo() {
                     return sequenceExecute(
                         [

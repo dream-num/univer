@@ -73,7 +73,7 @@ export const CopyFormatToRangeCommand: ICommand = {
         const result = commandService.syncExecuteCommand(SetRangeStyleMutation.id, setRangeStyleMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo() {
                     return commandService.syncExecuteCommand(SetRangeStyleMutation.id, undoMutationParams);
                 },

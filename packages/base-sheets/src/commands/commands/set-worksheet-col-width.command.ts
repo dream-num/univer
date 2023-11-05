@@ -98,7 +98,7 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo: async () =>
                     sequenceExecute(
                         [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
@@ -163,7 +163,7 @@ export const SetColWidthCommand: ICommand = {
 
         if (setColWidthResult && result.result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo: async () =>
                     sequenceExecute(
                         [{ id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],

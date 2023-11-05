@@ -75,7 +75,7 @@ export const SetWorksheetHideCommand: ICommand = {
 
         if (result && activeResult) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo() {
                     return (
                         commandService.executeCommand(

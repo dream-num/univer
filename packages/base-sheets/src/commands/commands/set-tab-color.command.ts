@@ -43,7 +43,7 @@ export const SetTabColorCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo() {
                     return commandService.syncExecuteCommand(SetTabColorMutation.id, undoMutationParams);
                 },

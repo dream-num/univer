@@ -179,7 +179,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 async undo() {
                     // NOTE: This may be affect by collaboration programming. But in google sheet, the merged cells are reverted as well :(
                     const undoResult = sequenceExecute(
@@ -357,7 +357,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         if (result.result) {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 async undo() {
                     // NOTE: This may be affect by collaboration programming. But in google sheet, the merged cells are reverted as well :(
                     const undoResult = sequenceExecute(

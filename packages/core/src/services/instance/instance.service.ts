@@ -11,9 +11,10 @@ import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context
 import { IContextService } from '../context/context.service';
 
 export const enum DocumentType {
-    DOC = 0,
-    SHEET = 1,
-    SLIDE = 2,
+    UNKNOWN = 0,
+    DOC = 1,
+    SHEET = 2,
+    SLIDE = 3,
 }
 
 export interface IUniverHandler {

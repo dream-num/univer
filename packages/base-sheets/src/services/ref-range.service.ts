@@ -53,8 +53,8 @@ export type EffectParams =
     | ICommandInfo<InsertRangeMoveRightCommandParams>;
 
 type RefRangCallback = (params: EffectParams) => {
-    redos: Array<ICommandInfo<object>>;
-    undos: Array<ICommandInfo<object>>;
+    redos: ICommandInfo[];
+    undos: ICommandInfo[];
 };
 
 /**

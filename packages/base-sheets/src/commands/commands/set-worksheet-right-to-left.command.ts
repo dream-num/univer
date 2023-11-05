@@ -65,7 +65,7 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
 
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo() {
                     return commandService.syncExecuteCommand(SetWorksheetRightToLeftMutation.id, undoMutationParams);
                 },

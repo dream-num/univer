@@ -113,7 +113,7 @@ export const DeltaRowHeightCommand: ICommand = {
 
         if (result.result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo: async () =>
                     (
                         await sequenceExecute(
@@ -213,7 +213,7 @@ export const SetRowHeightCommand: ICommand = {
 
         if (result.result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo: async () =>
                     (
                         await sequenceExecute(
@@ -296,7 +296,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const result = sequenceExecute([...redos], commandService);
         if (setIsAutoHeightResult && result.result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo: async () =>
                     (
                         await sequenceExecute(

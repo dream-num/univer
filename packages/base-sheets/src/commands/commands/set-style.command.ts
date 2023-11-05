@@ -130,7 +130,7 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
 
         if (setRangeValuesResult && result.result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo: async () =>
                     sequenceExecute(
                         [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],

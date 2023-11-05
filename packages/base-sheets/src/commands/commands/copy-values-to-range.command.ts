@@ -73,7 +73,7 @@ export const CopyValuesToRangeCommand: ICommand = {
         );
         if (result) {
             undoRedoService.pushUndoRedo({
-                URI: workbookId,
+                unitID: workbookId,
                 undo() {
                     return commandService.syncExecuteCommand(SetRangeFormattedValueMutation.id, undoMutationParams);
                 },

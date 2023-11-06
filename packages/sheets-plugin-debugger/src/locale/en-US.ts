@@ -21,5 +21,9 @@ export default {
             title: 'Confirm',
             tooltip: 'Confirm',
         },
+        sidebar: {
+            title: 'Sidebar',
+            tooltip: 'Sidebar',
+        },
     },
 };

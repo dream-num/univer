@@ -18,7 +18,8 @@ import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import style from './app.module.less';
 import { ContextMenu } from './components/context-menu/ContextMenu';
 import { DocBars } from './components/doc-bars/DocBars';
-import { Parts } from './Parts';
+import { Sidebar } from './components/sidebar/Sidebar';
+import { globalComponents } from './parts';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -28,6 +29,16 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     sidebarComponents?: Set<() => ComponentType>;
     headerMenuComponents?: Set<() => ComponentType>;
     onRendered?: (container: HTMLElement) => void;
+}
+
+function ComponentContainer(props: { components?: Set<() => ComponentType> }) {
+    const { components } = props;
+
+    if (!components) return null;
+
+    return Array.from(components.values()).map((component, index) =>
+        React.createElement(component(), { key: `${index}` })
+    );
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -87,22 +98,20 @@ export function App(props: IUniverAppProps) {
             <Container className={style.layoutContainer}>
                 <Layout>
                     {/* outer sidebar */}
-                    <Sider style={{ display: props.outerLeft ? 'block' : 'none' }}></Sider>
+                    <Sider style={{ display: props.outerLeft ? 'block' : 'none' }} />
+
                     <Layout className={style.mainContent}>
                         {/* header */}
                         <Header style={{ display: props.header ? 'block' : 'none' }}>
                             {props.toolbar && <DocBars />}
-                            {headerComponents &&
-                                Array.from(headerComponents.values()).map((component, index) =>
-                                    React.createElement(component(), { key: `${index}` })
-                                )}
+
+                            <ComponentContainer components={headerComponents} />
+
                             <div className={style.headerMenu}>
-                                {headerMenuComponents &&
-                                    Array.from(headerMenuComponents.values()).map((component, index) =>
-                                        React.createElement(component(), { key: `${index}` })
-                                    )}
+                                <ComponentContainer components={headerMenuComponents} />
                             </div>
                         </Header>
+
                         {/* content */}
                         <Layout>
                             <Sider
@@ -110,33 +119,29 @@ export function App(props: IUniverAppProps) {
                                 className={style.contentInnerLeftContainer}
                             >
                                 {/* inner left */}
-                                {sidebarComponents &&
-                                    Array.from(sidebarComponents.values()).map((component, index) =>
-                                        React.createElement(component(), { key: `${index}` })
-                                    )}
+                                <ComponentContainer components={sidebarComponents} />
                             </Sider>
+
                             <Content className={style.contentContainerHorizontal}>
                                 <ContextMenu>
-                                    <Container className={style.contentInnerRightContainer} ref={containerRef}>
-                                        {contentComponents &&
-                                            Array.from(contentComponents.values()).map((component, index) =>
-                                                React.createElement(component(), { key: `${index}` })
-                                            )}
+                                    <Container ref={containerRef} className={style.contentInnerRightContainer}>
+                                        <ComponentContainer components={contentComponents} />
                                     </Container>
                                 </ContextMenu>
                             </Content>
                         </Layout>
+
                         {/* footer */}
                         <Footer style={{ display: props.footer ? 'block' : 'none' }}>
-                            {footerComponents &&
-                                Array.from(footerComponents.values()).map((component, index) =>
-                                    React.createElement(component(), { key: `${index}` })
-                                )}
+                            <ComponentContainer components={footerComponents} />
                         </Footer>
                     </Layout>
+
+                    <Sidebar />
                 </Layout>
             </Container>
-            <Parts />
+
+            <ComponentContainer components={globalComponents} />
         </ConfigProvider>
     );
 }

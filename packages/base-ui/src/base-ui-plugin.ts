@@ -25,6 +25,8 @@ import { INotificationService } from './services/notification/notification.servi
 import { DesktopPlatformService, IPlatformService } from './services/platform/platform.service';
 import { DesktopShortcutService, IShortcutService } from './services/shortcut/shortcut.service';
 import { ShortcutExperienceService } from './services/shortcut/shortcut-experience.service';
+import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
+import { ISidebarService } from './services/sidebar/sidebar.service';
 
 export interface IUIPluginConfig extends IWorkbenchOptions {}
 
@@ -75,6 +77,7 @@ export class UIPlugin extends Plugin {
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],
             [IDialogService, { useClass: DesktopDialogService, lazy: true }],
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
+            [ISidebarService, { useClass: DesktopSidebarService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],

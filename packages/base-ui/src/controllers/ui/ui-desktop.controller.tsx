@@ -15,7 +15,7 @@ export enum DesktopUIPart {
     HEADER_MENU = 'header-menu',
     CONTENT = 'content',
     FOOTER = 'footer',
-    SIDEBAR = 'sidebar',
+    // SIDEBAR = 'sidebar',
 }
 
 /**
@@ -42,8 +42,8 @@ export interface IDesktopUIController extends IUIController {
     registerFooterComponent(component: () => ComponentType): IDisposable;
     getFooterComponents(): Set<() => ComponentType>;
 
-    registerSidebarComponent(component: () => ComponentType): IDisposable;
-    getSidebarComponents(): Set<() => ComponentType>;
+    // registerSidebarComponent(component: () => ComponentType): IDisposable;
+    // getSidebarComponents(): Set<() => ComponentType>;
 }
 
 const STEADY_TIMEOUT = 3000;
@@ -53,7 +53,7 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     private _headerMenuComponents: Set<() => ComponentType> = new Set();
     private _contentComponents: Set<() => ComponentType> = new Set();
     private _footerComponents: Set<() => ComponentType> = new Set();
-    private _sidebarComponents: Set<() => ComponentType> = new Set();
+    // private _sidebarComponents: Set<() => ComponentType> = new Set();
 
     private _componentRegistered$ = new Subject<void>();
     componentRegistered$ = this._componentRegistered$.asObservable();
@@ -92,8 +92,8 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
                 return this.registerContentComponent(component);
             case DesktopUIPart.FOOTER:
                 return this.registerFooterComponent(component);
-            case DesktopUIPart.SIDEBAR:
-                return this.registerSidebarComponent(component);
+            // case DesktopUIPart.SIDEBAR:
+            //     return this.registerSidebarComponent(component);
             case DesktopUIPart.HEADER_MENU:
                 return this.registerHeaderMenuComponent(component);
             default:
@@ -141,15 +141,15 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
         return new Set([...this._footerComponents]);
     }
 
-    registerSidebarComponent(component: () => ComponentType): IDisposable {
-        this._sidebarComponents.add(component);
-        this._componentRegistered$.next();
-        return toDisposable(() => this._footerComponents.delete(component));
-    }
+    // registerSidebarComponent(component: () => ComponentType): IDisposable {
+    //     // this._sidebarComponents.add(component);
+    //     this._componentRegistered$.next();
+    //     return toDisposable(() => this._footerComponents.delete(component));
+    // }
 
-    getSidebarComponents(): Set<() => React.ComponentType> {
-        return new Set([...this._sidebarComponents]);
-    }
+    // getSidebarComponents(): Set<() => React.ComponentType> {
+    //     return new Set([...this._sidebarComponents]);
+    // }
 }
 
 function bootStrap(
@@ -182,7 +182,7 @@ function bootStrap(
         const headerComponents = desktopUIController.getHeaderComponents();
         const contentComponents = desktopUIController.getContentComponents();
         const footerComponents = desktopUIController.getFooterComponents();
-        const sidebarComponents = desktopUIController.getSidebarComponents();
+        // const sidebarComponents = desktopUIController.getSidebarComponents();
         const headerMenuComponents = desktopUIController.getHeaderMenuComponents();
         root.render(
             <ConnectedApp
@@ -193,7 +193,6 @@ function bootStrap(
                 contentComponents={contentComponents}
                 onRendered={onRendered}
                 footerComponents={footerComponents}
-                sidebarComponents={sidebarComponents}
             />
         );
     }

@@ -59,7 +59,7 @@ export class SheetPermissionService extends Disposable {
         );
     }
 
-    getEditable$ = (workbookId?: string, sheetId?: string) => {
+    getEditable$(workbookId?: string, sheetId?: string) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const _workbookId = workbookId || workbook.getUnitId();
         const sheet = workbook.getActiveSheet();
@@ -72,9 +72,9 @@ export class SheetPermissionService extends Disposable {
                 return { value: editable, status };
             })
         );
-    };
+    }
 
-    getSheetEditable = (workbookId?: string, sheetId?: string) => {
+    getSheetEditable(workbookId?: string, sheetId?: string) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const _workbookId = workbookId || workbook.getUnitId();
         const sheet = workbook.getActiveSheet();
@@ -83,7 +83,7 @@ export class SheetPermissionService extends Disposable {
         return this._permissionService
             .composePermission([UniverEditablePermissionPoint, sheetPermission.id])
             .every((item) => item.value);
-    };
+    }
 
     setEditable(v: boolean, workbookId?: string, sheetId?: string) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();

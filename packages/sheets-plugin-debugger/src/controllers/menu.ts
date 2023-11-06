@@ -8,6 +8,7 @@ import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { MessageOperation } from '../commands/operations/message.operation';
 import { NotificationOperation } from '../commands/operations/notification.operation';
+import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
 
@@ -142,6 +143,26 @@ export function SidebarMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
             {
                 label: 'Close sidebar',
                 value: 'close',
+            },
+        ],
+    };
+}
+
+export function SetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: SetEditable.id,
+        title: 'Editable',
+        tooltip: 'Editable',
+        type: MenuItemType.SELECTOR,
+        positions: [MenuPosition.TOOLBAR_OTHERS],
+        selections: [
+            {
+                label: 'univer',
+                value: 'univer',
+            },
+            {
+                label: 'sheet',
+                value: 'sheet',
             },
         ],
     };

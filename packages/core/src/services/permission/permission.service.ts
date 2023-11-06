@@ -26,23 +26,23 @@ export class PermissionService extends Disposable implements IPermissionService 
 
     private permissionItemMap: Map<string, BehaviorSubject<PermissionPoint>> = new Map();
 
-    deletePermissionItem = (id: string) => {
+    deletePermissionItem(id: string) {
         const subject = this.permissionItemMap.get(id);
         if (subject) {
             subject.complete();
             this.permissionItemMap.delete(id);
         }
-    };
+    }
 
-    addPermissionPoint = (item: PermissionPoint) => {
+    addPermissionPoint(item: PermissionPoint) {
         if (!this.permissionItemMap.has(item.id)) {
             this.permissionItemMap.set(item.id, new BehaviorSubject(item));
             return true;
         }
         return false;
-    };
+    }
 
-    updatePermissionPoint = <T = any>(permissionId: string, value: T) => {
+    updatePermissionPoint<T = any>(permissionId: string, value: T) {
         const permissionSubject = this.permissionItemMap.get(permissionId);
         if (permissionSubject) {
             const subject = permissionSubject.getValue() as PermissionPoint<T>;
@@ -50,15 +50,15 @@ export class PermissionService extends Disposable implements IPermissionService 
             subject.status = PermissionStatus.DONE;
             permissionSubject.next(subject);
         }
-    };
+    }
 
-    getPermissionPoint = (permissionId: string) => {
+    getPermissionPoint(permissionId: string) {
         const item = this.permissionItemMap.get(permissionId);
         if (item) {
             return item.getValue();
         }
         throw new Error(`${permissionId} permissionPoint does not exist`);
-    };
+    }
 
     composePermission$(permissionIdList: string[]) {
         const subjectList = permissionIdList.map((id) => {

@@ -7,6 +7,7 @@ import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
 import { MessageOperation } from '../commands/operations/message.operation';
 import { NotificationOperation } from '../commands/operations/notification.operation';
+import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
 import {
@@ -15,6 +16,7 @@ import {
     LocaleMenuItemFactory,
     MessageMenuItemFactory,
     NotificationMenuItemFactory,
+    SetEditableMenuItemFactory,
     SidebarMenuItemFactory,
     ThemeMenuItemFactory,
 } from './menu';
@@ -36,6 +38,7 @@ export class DebuggerController extends Disposable {
             ConfirmOperation,
             MessageOperation,
             SidebarOperation,
+            SetEditable,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
@@ -49,6 +52,7 @@ export class DebuggerController extends Disposable {
             DialogMenuItemFactory,
             ConfirmMenuItemFactory,
             SidebarMenuItemFactory,
+            SetEditableMenuItemFactory,
         ].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });

@@ -64,7 +64,7 @@ export interface ICommandInterceptor {
 
 export interface ICommandPermissionInterceptor {
     /**
-     * This function maybe have side effects !!!
+     * This function maybe have side effects ,a pop-up/alert/confirm may be required when the return value is false
      */
     checkPermission(command: ICommandInfo): boolean;
 }

@@ -32,7 +32,7 @@ export interface IFormulaPromptService {
     /**
      * open search function
      */
-    setSearch(param: ISearchFunctionParams): void;
+    search(param: ISearchFunctionParams): void;
 
     /**
      * listen help function open
@@ -43,7 +43,7 @@ export interface IFormulaPromptService {
      * open help function
      */
 
-    setHelp(param: boolean): void;
+    help(param: boolean): void;
 
     /**
      * listen navigate shortcut, UP and DOWN
@@ -53,7 +53,7 @@ export interface IFormulaPromptService {
     /**
      * set navigate shortcut
      */
-    setNavigate(param: INavigateParam): void;
+    navigate(param: INavigateParam): void;
 
     /**
      * listen accept shortcut, TAB/ENTER
@@ -63,7 +63,7 @@ export interface IFormulaPromptService {
     /**
      * set accept shortcut
      */
-    setAccept(param: boolean): void;
+    accept(param: boolean): void;
 
     /**
      * accept formula name
@@ -73,7 +73,7 @@ export interface IFormulaPromptService {
     /**
      * set accept formula name
      */
-    setAcceptFormulaName(param: string): void;
+    acceptFormulaName(param: string): void;
 
     dispose(): void;
 }
@@ -109,23 +109,23 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
         this._acceptFormulaName$.complete();
     }
 
-    setSearch(param: ISearchFunctionParams) {
+    search(param: ISearchFunctionParams) {
         this._search$.next(param);
     }
 
-    setHelp(param: boolean) {
+    help(param: boolean) {
         this._help$.next(param);
     }
 
-    setNavigate(param: INavigateParam) {
+    navigate(param: INavigateParam) {
         this._navigate$.next(param);
     }
 
-    setAccept(param: boolean) {
+    accept(param: boolean) {
         this._accept$.next(param);
     }
 
-    setAcceptFormulaName(param: string) {
+    acceptFormulaName(param: string) {
         this._acceptFormulaName$.next(param);
     }
 }

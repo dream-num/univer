@@ -3,7 +3,7 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univ
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
-import { SetEditorFormulaArrowOperation } from '../commands/operations/editor-formula.operation';
+import { SetEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
@@ -29,7 +29,7 @@ export class FormulaController extends Disposable {
     private _initialize(): void {
         this._registerCommands();
         this._registerMenus();
-        this.registerShortcuts();
+        this._registerShortcuts();
         this._registerComponents();
     }
 
@@ -45,11 +45,11 @@ export class FormulaController extends Disposable {
             MoreFunctionsOperation,
             SearchFunctionOperation,
             HelpFunctionOperation,
-            SetEditorFormulaArrowOperation,
+            SetEditorFormulaOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
-    private registerShortcuts(): void {
+    private _registerShortcuts(): void {
         [...promptSelectionShortcutItem()].forEach((item) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(item));
         });

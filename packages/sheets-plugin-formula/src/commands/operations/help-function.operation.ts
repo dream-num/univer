@@ -7,7 +7,7 @@ export interface IHelpFunctionCommandParams {
     /**
      * show HelpFunction Component or not
      */
-    show: boolean;
+    visible: boolean;
 }
 
 export const HelpFunctionOperation: ICommand = {
@@ -15,7 +15,7 @@ export const HelpFunctionOperation: ICommand = {
     type: CommandType.OPERATION,
     handler: async (accessor: IAccessor, params: IHelpFunctionCommandParams) => {
         const promptService = accessor.get(IFormulaPromptService);
-        promptService.setHelp(params.show);
+        promptService.help(params.visible);
 
         return true;
     },

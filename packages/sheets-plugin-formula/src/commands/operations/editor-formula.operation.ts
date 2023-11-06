@@ -1,4 +1,4 @@
-// This file provide operations to change selection of sheets.
+// This file provides operations to change formula selection of sheets.
 
 import { DeviceInputEventType } from '@univerjs/base-render';
 import { KeyCode } from '@univerjs/base-ui';
@@ -6,12 +6,12 @@ import { CommandType, Direction, IOperation } from '@univerjs/core';
 
 import { IFormulaPromptService } from '../../services/prompt.service';
 
-export interface ISetEditorFormulaArrowOperationParam {
+export interface ISetEditorFormulaOperationParam {
     eventType: DeviceInputEventType;
     keycode?: KeyCode;
 }
 
-export const SetEditorFormulaArrowOperation: IOperation<ISetEditorFormulaArrowOperationParam> = {
+export const SetEditorFormulaOperation: IOperation<ISetEditorFormulaOperationParam> = {
     id: 'formula.operation.set-editor-formula-arrow',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
@@ -20,14 +20,14 @@ export const SetEditorFormulaArrowOperation: IOperation<ISetEditorFormulaArrowOp
 
         switch (keycode) {
             case KeyCode.ARROW_DOWN:
-                formulaPromptService.setNavigate({ direction: Direction.DOWN });
+                formulaPromptService.navigate({ direction: Direction.DOWN });
                 break;
             case KeyCode.ARROW_UP:
-                formulaPromptService.setNavigate({ direction: Direction.UP });
+                formulaPromptService.navigate({ direction: Direction.UP });
                 break;
             case KeyCode.ENTER:
             case KeyCode.TAB:
-                formulaPromptService.setAccept(true);
+                formulaPromptService.accept(true);
                 break;
             default:
                 break;

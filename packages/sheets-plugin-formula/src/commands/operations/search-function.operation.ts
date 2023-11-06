@@ -8,7 +8,7 @@ export const SearchFunctionOperation: ICommand = {
     type: CommandType.OPERATION,
     handler: async (accessor: IAccessor, params: ISearchFunctionParams) => {
         const promptService = accessor.get(IFormulaPromptService);
-        promptService.setSearch(params);
+        promptService.search(params);
 
         return true;
     },

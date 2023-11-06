@@ -65,7 +65,7 @@ export function SearchFunction() {
 
         const subscribeAccept = promptService.accept$.subscribe((params: boolean) => {
             const functionName = updatedSearchList[updatedActive].name;
-            promptService.setAcceptFormulaName(functionName);
+            promptService.acceptFormulaName(functionName);
         });
 
         return () => {
@@ -106,7 +106,7 @@ export function SearchFunction() {
                             }
                             onMouseEnter={() => handleLiMouseEnter(index)}
                             onMouseLeave={handleLiMouseLeave}
-                            onClick={() => promptService.setAcceptFormulaName(item.name)}
+                            onClick={() => promptService.acceptFormulaName(item.name)}
                         >
                             <span className={styles.formulaSearchFunctionItemName}>
                                 <span className={styles.formulaSearchFunctionItemNameLight}>{searchText}</span>

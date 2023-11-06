@@ -26,6 +26,8 @@ const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
 
 const TEXT_ANCHOR_KEY_PREFIX = '__TestSelectionAnchor__';
 
+const ID_LENGTH = 6;
+
 export function cursorConvertToTextSelection(
     scene: Scene,
     range: ITextSelectionRangeWithStyle,
@@ -43,6 +45,7 @@ export function cursorConvertToTextSelection(
 
     const startNode = docSkeleton.findNodePositionByCharIndex(cursorStart, isStartBack);
     let endNode;
+
     if (isCollapse !== true) {
         endNode = docSkeleton.findNodePositionByCharIndex(cursorEnd, isEndBack);
     }
@@ -171,7 +174,6 @@ export class TextSelection {
 
     refresh(documentOffsetConfig: IDocumentOffsetConfig, docSkeleton: DocumentSkeleton) {
         const start = this.startNodePosition;
-
         const end = this.endNodePosition;
 
         this._anchorShape?.hide();
@@ -183,20 +185,21 @@ export class TextSelection {
 
         const { docsLeft, docsTop } = documentOffsetConfig;
 
-        const convert = new NodePositionConvertToCursor(documentOffsetConfig, docSkeleton);
+        const convertor = new NodePositionConvertToCursor(documentOffsetConfig, docSkeleton);
 
         if (this.isCollapsed()) {
-            const data = convert.getRangePointData(start, start);
-            const { pointGroup, cursorList } = data;
+            const { pointGroup, cursorList } = convertor.getRangePointData(start, start);
+
             this._setRangeList(cursorList);
-            pointGroup.length > 0 && this._createAndUpdateAnchor(pointGroup, docsLeft, docsTop);
+            pointGroup.length > 0 && this._createOrUpdateAnchor(pointGroup, docsLeft, docsTop);
+
             return;
         }
 
-        const data = convert.getRangePointData(start, end);
-        const { pointGroup, cursorList } = data;
+        const { pointGroup, cursorList } = convertor.getRangePointData(start, end);
+
         this._setRangeList(cursorList);
-        pointGroup.length > 0 && this._createAndUpdateRange(pointGroup, docsLeft, docsTop);
+        pointGroup.length > 0 && this._createOrUpdateRange(pointGroup, docsLeft, docsTop);
     }
 
     getStart() {
@@ -254,17 +257,19 @@ export class TextSelection {
         return true;
     }
 
-    private _createAndUpdateRange(pointsGroup: IPoint[][], left: number, top: number) {
+    private _createOrUpdateRange(pointsGroup: IPoint[][], left: number, top: number) {
         if (this._rangeShape) {
             this._rangeShape.translate(left, top);
             this._rangeShape.updatePointGroup(pointsGroup);
             this._rangeShape.show();
+
             return;
         }
 
-        const polygon = new RegularPolygon(TEXT_RANGE_KEY_PREFIX + Tools.generateRandomId(6), {
+        const OPACITY = 0.2;
+        const polygon = new RegularPolygon(TEXT_RANGE_KEY_PREFIX + Tools.generateRandomId(ID_LENGTH), {
             pointsGroup,
-            fill: this._style?.fill || getColor(COLORS.black, 0.2),
+            fill: this._style?.fill || getColor(COLORS.black, OPACITY),
             left,
             top,
             evented: false,
@@ -293,16 +298,18 @@ export class TextSelection {
         };
     }
 
-    private _createAndUpdateAnchor(pointsGroup: IPoint[][], docsLeft: number, docsTop: number) {
+    private _createOrUpdateAnchor(pointsGroup: IPoint[][], docsLeft: number, docsTop: number) {
         const bounding = this._getAnchorBounding(pointsGroup);
-        const { left, top, width, height } = bounding;
+        const { left, top, height } = bounding;
+
         if (this._anchorShape) {
             this._anchorShape.transformByState({ left: left + docsLeft, top: top + docsTop, height });
             this._anchorShape.show();
+
             return;
         }
 
-        const anchor = new Rect(TEXT_ANCHOR_KEY_PREFIX + Tools.generateRandomId(6), {
+        const anchor = new Rect(TEXT_ANCHOR_KEY_PREFIX + Tools.generateRandomId(ID_LENGTH), {
             left: left + docsLeft,
             top: top + docsTop,
             height,

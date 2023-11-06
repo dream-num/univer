@@ -54,7 +54,7 @@ export class ScrollTimer {
         this._runRenderLoop();
     }
 
-    _scroll(viewport: Nullable<any>) {
+    private _scroll(viewport: Nullable<any>) {
         const topBounding = viewport?.top || 0;
         const bottomBounding = topBounding + (viewport?.height || 0);
         const leftBounding = viewport?.left || 0;

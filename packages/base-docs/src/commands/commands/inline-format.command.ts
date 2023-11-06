@@ -2,7 +2,6 @@ import { ITextSelectionRangeWithStyle } from '@univerjs/base-render';
 import {
     BooleanNumber,
     CommandType,
-    getTextIndexByCursor,
     ICommand,
     ICommandInfo,
     ICommandService,
@@ -142,16 +141,14 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         memoryCursor.reset();
 
         for (const selection of selections) {
-            const { cursorStart, cursorEnd, isStartBack, isEndBack } = selection;
-            const textStart = getTextIndexByCursor(cursorStart, isStartBack);
-            const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
+            const { cursorStart, cursorEnd } = selection;
 
             const body: IDocumentBody = {
                 dataStream: '',
                 textRuns: [
                     {
                         st: 0,
-                        ed: textEnd - textStart,
+                        ed: cursorEnd - cursorStart,
                         ts: {
                             [COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId]]: formatValue,
                         },
@@ -159,7 +156,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 ],
             };
 
-            const len = textStart + 1 - memoryCursor.cursor;
+            const len = cursorStart - memoryCursor.cursor;
             if (len !== 0) {
                 doMutation.params!.mutations.push({
                     t: 'r',
@@ -171,12 +168,12 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             doMutation.params!.mutations.push({
                 t: 'r',
                 body,
-                len: textEnd - textStart,
+                len: cursorEnd - cursorStart,
                 segmentId,
             });
 
             memoryCursor.reset();
-            memoryCursor.moveCursor(textEnd + 1);
+            memoryCursor.moveCursor(cursorEnd);
         }
 
         const result = commandService.syncExecuteCommand<
@@ -220,17 +217,14 @@ function getReverseFormatValueInSelection(
     let si = 0;
 
     while (ti !== textRuns.length && si !== selections.length) {
-        const { cursorStart, cursorEnd, isStartBack, isEndBack } = selections[si];
-
-        const textStart = getTextIndexByCursor(cursorStart, isStartBack) + 1;
-        const textEnd = getTextIndexByCursor(cursorEnd, isEndBack) + 1;
+        const { cursorStart, cursorEnd } = selections[si];
 
         // TODO: @jocs handle sid in textRun
         const { st, ed, ts } = textRuns[ti];
 
-        if (textEnd <= st) {
+        if (cursorEnd <= st) {
             si++;
-        } else if (ed <= textStart) {
+        } else if (ed <= cursorStart) {
             ti++;
         } else {
             if (ts?.[key] == null) {

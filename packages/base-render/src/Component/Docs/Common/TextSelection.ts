@@ -34,21 +34,10 @@ export function cursorConvertToTextSelection(
     docSkeleton: DocumentSkeleton,
     documentOffsetConfig: IDocumentOffsetConfig
 ): Nullable<TextSelection> {
-    const {
-        cursorStart,
-        cursorEnd,
-        isCollapse,
-        isEndBack,
-        isStartBack,
-        style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-    } = range;
+    const { cursorStart, cursorEnd, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE } = range;
 
-    const startNode = docSkeleton.findNodePositionByCharIndex(cursorStart, isStartBack);
-    let endNode;
-
-    if (isCollapse !== true) {
-        endNode = docSkeleton.findNodePositionByCharIndex(cursorEnd, isEndBack);
-    }
+    const startNode = docSkeleton.findNodePositionByCharIndex(cursorStart);
+    const endNode = cursorStart !== cursorEnd ? docSkeleton.findNodePositionByCharIndex(cursorEnd) : null;
 
     const textSelection = new TextSelection(scene, startNode, endNode, style);
 
@@ -157,19 +146,10 @@ export class TextSelection {
             return false;
         }
 
-        const activeStart = this._getCursorPosition(activeRange.cursorStart, activeRange.isStartBack);
+        const { cursorStart: activeStart, cursorEnd: activeEnd } = activeRange;
+        const { cursorStart: compareStart, cursorEnd: compareEnd } = compareRange;
 
-        const activeEnd = this._getCursorPosition(activeRange.cursorEnd, activeRange.isEndBack);
-
-        const compareStart = this._getCursorPosition(compareRange.cursorStart, compareRange.isStartBack);
-
-        const compareEnd = this._getCursorPosition(compareRange.cursorEnd, compareRange.isEndBack);
-
-        if (activeStart > compareEnd || activeEnd < compareStart) {
-            return false;
-        }
-
-        return true;
+        return activeStart <= compareEnd && activeEnd >= compareStart;
     }
 
     refresh(documentOffsetConfig: IDocumentOffsetConfig, docSkeleton: DocumentSkeleton) {
@@ -331,9 +311,5 @@ export class TextSelection {
         // const firstCursor = cursorList[0];
 
         this._rangeList = rangeList;
-    }
-
-    private _getCursorPosition(index: number, isBack: boolean) {
-        return index - (isBack === true ? 1 : 0);
     }
 }

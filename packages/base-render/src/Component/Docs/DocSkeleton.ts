@@ -164,7 +164,7 @@ export class DocumentSkeleton extends Skeleton {
         };
     }
 
-    findNodePositionByCharIndex(charIndex: number, isBack: boolean = false): Nullable<INodePosition> {
+    findNodePositionByCharIndex(charIndex: number, isBack: boolean = true): Nullable<INodePosition> {
         const nodes = this._findNodeIterator(charIndex);
 
         if (nodes == null) {
@@ -235,11 +235,13 @@ export class DocumentSkeleton extends Skeleton {
         pageMarginLeft: number,
         pageMarginTop: number
     ): Nullable<INodeInfo> {
+        console.log(coord, pageLayoutType, pageMarginLeft, pageMarginTop);
         const { x, y } = coord;
 
         this._findLiquid.reset();
 
         const skeletonData = this.getSkeletonData();
+        console.log(skeletonData);
 
         if (skeletonData == null) {
             return;

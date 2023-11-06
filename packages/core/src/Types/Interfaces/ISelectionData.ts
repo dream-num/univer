@@ -38,12 +38,10 @@ export interface ISelectionWithCoord {
 
 export interface ITextSelectionRangeStart {
     cursorStart: number;
-    isStartBack: boolean;
 }
 
 export interface ITextSelectionRange extends ITextSelectionRangeStart {
     cursorEnd: number;
-    isEndBack: boolean;
     isCollapse: boolean;
 }
 

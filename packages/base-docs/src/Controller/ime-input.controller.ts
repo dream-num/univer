@@ -90,7 +90,7 @@ export class IMEInputController extends Disposable {
 
             const { event, activeRange } = config;
 
-            const { cursorStart, cursorEnd, isEndBack, isStartBack, segmentId, style } = this._previousIMERange;
+            const { cursorStart, cursorEnd, segmentId, style } = this._previousIMERange;
 
             if (skeleton == null || activeRange == null) {
                 return;
@@ -122,8 +122,6 @@ export class IMEInputController extends Disposable {
                     cursorStart: cursorStart + len,
                     cursorEnd: cursorEnd + len,
                     isCollapse: true,
-                    isEndBack,
-                    isStartBack,
                     style,
                 },
             ]);

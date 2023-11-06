@@ -68,14 +68,9 @@ export class LineBreakInputController extends Disposable {
 
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
 
-        const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack, segmentId, style } = activeRange;
+        const { cursorStart, segmentId, style } = activeRange;
 
         // split paragraph
-        let cursor = cursorStart;
-
-        if (isStartBack === false) {
-            cursor += 1;
-        }
 
         // const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
 
@@ -94,11 +89,9 @@ export class LineBreakInputController extends Disposable {
         // move selection
         this._textSelectionManagerService.replace([
             {
-                cursorStart: cursor + 1,
-                cursorEnd: cursor + 1,
+                cursorStart: cursorStart + 1,
+                cursorEnd: cursorStart + 1,
                 isCollapse: true,
-                isEndBack,
-                isStartBack,
                 style,
             },
         ]);

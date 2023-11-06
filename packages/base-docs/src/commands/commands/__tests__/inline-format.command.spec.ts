@@ -69,9 +69,7 @@ describe('Test inline format commands', () => {
         selectionManager.add([
             {
                 cursorStart: 0,
-                isStartBack: true,
                 cursorEnd: 5,
-                isEndBack: false,
                 isCollapse: false,
                 segmentId: '',
             },

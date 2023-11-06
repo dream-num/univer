@@ -1,23 +1,15 @@
 import { LocaleService, ThemeService } from '@univerjs/core';
-import {
-    ConfigProvider,
-    Container,
-    Content,
-    defaultTheme,
-    Footer,
-    Header,
-    ILocale,
-    Layout,
-    Sider,
-    themeInstance,
-} from '@univerjs/design';
+import { ConfigProvider, defaultTheme, ILocale, themeInstance } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import clsx from 'clsx';
 import React, { ComponentType, useEffect, useRef, useState } from 'react';
 
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
-import style from './app.module.less';
+import { ISidebarService } from '../services/sidebar/sidebar.service';
+import styles from './app.module.less';
 import { ContextMenu } from './components/context-menu/ContextMenu';
-import { DocBars } from './components/doc-bars/DocBars';
+import { MenuBar } from './components/doc-bars/MenuBar';
+import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { globalComponents } from './parts';
 
@@ -26,7 +18,7 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     headerComponents?: Set<() => ComponentType>;
     contentComponents?: Set<() => ComponentType>;
     footerComponents?: Set<() => ComponentType>;
-    sidebarComponents?: Set<() => ComponentType>;
+    // sidebarComponents?: Set<() => ComponentType>;
     headerMenuComponents?: Set<() => ComponentType>;
     onRendered?: (container: HTMLElement) => void;
 }
@@ -45,8 +37,9 @@ function ComponentContainer(props: { components?: Set<() => ComponentType> }) {
 export function App(props: IUniverAppProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
+    const sidebarService = useDependency(ISidebarService);
 
-    const containerRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const {
         mountContainer,
@@ -54,7 +47,7 @@ export function App(props: IUniverAppProps) {
         headerMenuComponents,
         contentComponents,
         footerComponents,
-        sidebarComponents,
+        // sidebarComponents,
         onRendered,
     } = props;
 
@@ -65,12 +58,13 @@ export function App(props: IUniverAppProps) {
     }, []);
 
     useEffect(() => {
-        if (containerRef.current) {
-            onRendered?.(containerRef.current);
+        if (contentRef.current) {
+            onRendered?.(contentRef.current);
         }
     }, [onRendered]);
 
     const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
+    const [mainCollapsed, setMainCollapsed] = useState<boolean>(false);
 
     // Create a portal container for injecting global component themes.
     const portalContainer: HTMLElement = document.createElement('div');
@@ -85,6 +79,9 @@ export function App(props: IUniverAppProps) {
                 themeInstance.setTheme(mountContainer, theme);
                 themeInstance.setTheme(portalContainer, theme);
             }),
+            sidebarService.getObservableSidebar().subscribe((sidebar) => {
+                setMainCollapsed(sidebar?.visible ?? false);
+            }),
         ];
 
         return () => {
@@ -95,51 +92,42 @@ export function App(props: IUniverAppProps) {
 
     return (
         <ConfigProvider locale={locale} mountContainer={portalContainer}>
-            <Container className={style.layoutContainer}>
-                <Layout>
-                    {/* outer sidebar */}
-                    <Sider style={{ display: props.outerLeft ? 'block' : 'none' }} />
+            <section className={styles.appLayout}>
+                {/* header */}
+                <header>{props.toolbar && <MenuBar />}</header>
 
-                    <Layout className={style.mainContent}>
-                        {/* header */}
-                        <Header style={{ display: props.header ? 'block' : 'none' }}>
-                            {props.toolbar && <DocBars />}
+                {/* content */}
+                <section className={styles.appContainer}>
+                    <section
+                        className={clsx(styles.appContainerMain, { [styles.appContainerMainCollapsed]: mainCollapsed })}
+                    >
+                        <header className={styles.appContainerHeader}>
+                            {props.toolbar && <Toolbar />}
 
                             <ComponentContainer components={headerComponents} />
 
-                            <div className={style.headerMenu}>
-                                <ComponentContainer components={headerMenuComponents} />
-                            </div>
-                        </Header>
+                            <ComponentContainer components={headerMenuComponents} />
+                        </header>
 
-                        {/* content */}
-                        <Layout>
-                            <Sider
-                                style={{ display: props.innerLeft ? 'block' : 'none' }}
-                                className={style.contentInnerLeftContainer}
-                            >
-                                {/* inner left */}
-                                <ComponentContainer components={sidebarComponents} />
-                            </Sider>
+                        {/* <ComponentContainer components={sidebarComponents} /> */}
 
-                            <Content className={style.contentContainerHorizontal}>
-                                <ContextMenu>
-                                    <Container ref={containerRef} className={style.contentInnerRightContainer}>
-                                        <ComponentContainer components={contentComponents} />
-                                    </Container>
-                                </ContextMenu>
-                            </Content>
-                        </Layout>
+                        <ContextMenu>
+                            <section ref={contentRef} className={styles.appContainerContent}>
+                                <ComponentContainer components={contentComponents} />
+                            </section>
+                        </ContextMenu>
+                    </section>
 
-                        {/* footer */}
-                        <Footer style={{ display: props.footer ? 'block' : 'none' }}>
-                            <ComponentContainer components={footerComponents} />
-                        </Footer>
-                    </Layout>
+                    <aside className={styles.appContainerSidebar}>
+                        <Sidebar />
+                    </aside>
+                </section>
 
-                    <Sidebar />
-                </Layout>
-            </Container>
+                {/* footer */}
+                <footer className={styles.appFooter}>
+                    <ComponentContainer components={footerComponents} />
+                </footer>
+            </section>
 
             <ComponentContainer components={globalComponents} />
         </ConfigProvider>

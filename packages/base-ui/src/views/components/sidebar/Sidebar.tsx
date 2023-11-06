@@ -63,17 +63,19 @@ export function Sidebar() {
 
     return (
         <section className={_className} style={style}>
-            <header className={styles.sidebarHeader}>
-                {options?.header}
+            <section className={styles.sidebarContainer}>
+                <header className={styles.sidebarHeader}>
+                    {options?.header}
 
-                <a className={styles.sidebarHeaderClose} onClick={handleClose}>
-                    <CloseSingle />
-                </a>
-            </header>
+                    <a className={styles.sidebarHeaderClose} onClick={handleClose}>
+                        <CloseSingle />
+                    </a>
+                </header>
 
-            <section className={styles.sidebarBody}>{options?.children}</section>
+                <section className={styles.sidebarBody}>{options?.children}</section>
 
-            {options?.footer && <footer className={styles.sidebarFooter}>{options.footer}</footer>}
+                {options?.footer && <footer className={styles.sidebarFooter}>{options.footer}</footer>}
+            </section>
         </section>
     );
 }

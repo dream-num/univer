@@ -1,6 +1,6 @@
 export enum PermissionStatus {
     INIT = 'init',
-    FETCH = 'fetch',
+    FETCHING = 'fetching',
     DONE = 'done',
 }
 export abstract class PermissionPoint<T = any> {
@@ -12,6 +12,6 @@ export abstract class PermissionPoint<T = any> {
 export const getTypeFromPermissionItemList = (list: PermissionPoint[]) =>
     list.some((item) => item.status === PermissionStatus.INIT)
         ? PermissionStatus.INIT
-        : list.some((item) => item.status === PermissionStatus.FETCH)
-        ? PermissionStatus.FETCH
+        : list.some((item) => item.status === PermissionStatus.FETCHING)
+        ? PermissionStatus.FETCHING
         : PermissionStatus.DONE;

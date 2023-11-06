@@ -7,9 +7,9 @@ import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 
 export interface IPermissionService {
     deletePermissionItem(id: string): void;
-    addPermissionItem<T = any>(item: PermissionPoint<T>): boolean;
-    updatePermissionItem(id: string, value: any): void;
-    getPermissionItem<T = any>(id: string): PermissionPoint<T>;
+    addPermissionPoint<T = any>(item: PermissionPoint<T>): boolean;
+    updatePermissionPoint(id: string, value: any): void;
+    getPermissionPoint<T = any>(id: string): PermissionPoint<T>;
     composePermission$(permissionIdList: string[]): Observable<PermissionPoint[]>;
     composePermission(permissionIdList: string[]): PermissionPoint[];
 }
@@ -34,7 +34,7 @@ export class PermissionService extends Disposable implements IPermissionService 
         }
     };
 
-    addPermissionItem = (item: PermissionPoint) => {
+    addPermissionPoint = (item: PermissionPoint) => {
         if (!this.permissionItemMap.has(item.id)) {
             this.permissionItemMap.set(item.id, new BehaviorSubject(item));
             return true;
@@ -42,7 +42,7 @@ export class PermissionService extends Disposable implements IPermissionService 
         return false;
     };
 
-    updatePermissionItem = <T = any>(permissionId: string, value: T) => {
+    updatePermissionPoint = <T = any>(permissionId: string, value: T) => {
         const permissionSubject = this.permissionItemMap.get(permissionId);
         if (permissionSubject) {
             const subject = permissionSubject.getValue() as PermissionPoint<T>;
@@ -52,19 +52,19 @@ export class PermissionService extends Disposable implements IPermissionService 
         }
     };
 
-    getPermissionItem = (permissionId: string) => {
+    getPermissionPoint = (permissionId: string) => {
         const item = this.permissionItemMap.get(permissionId);
         if (item) {
             return item.getValue();
         }
-        throw new Error(`${permissionId} permissionItem does not exist`);
+        throw new Error(`${permissionId} permissionPoint does not exist`);
     };
 
     composePermission$(permissionIdList: string[]) {
         const subjectList = permissionIdList.map((id) => {
             const subject = this.permissionItemMap.get(id);
             if (!subject) {
-                throw new Error(`${id} permission is not exist`);
+                throw new Error(`${id} permissionPoint is not exist`);
             }
             return subject.asObservable();
         });
@@ -75,7 +75,7 @@ export class PermissionService extends Disposable implements IPermissionService 
         const valueList = permissionIdList.map((id) => {
             const subject = this.permissionItemMap.get(id);
             if (!subject) {
-                throw new Error(`${id} permission is not exist`);
+                throw new Error(`${id} permissionPoint is not exist`);
             }
             return subject.getValue();
         });

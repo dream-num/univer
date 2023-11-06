@@ -13,7 +13,7 @@ import { Inject } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
 
 import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
-import { SheetEditablePermission } from './permissionEnum';
+import { SheetEditablePermission } from './permission-point';
 
 @OnLifecycle(LifecycleStages.Ready, SheetPermissionService)
 export class SheetPermissionService extends Disposable {
@@ -33,7 +33,7 @@ export class SheetPermissionService extends Disposable {
         workbook.getSheets().forEach((worksheet) => {
             const subComponentId = worksheet.getSheetId();
             const sheetPermission = new SheetEditablePermission(unitId, subComponentId);
-            this._permissionService.addPermissionItem(sheetPermission);
+            this._permissionService.addPermissionPoint(sheetPermission);
         });
     }
 
@@ -91,6 +91,6 @@ export class SheetPermissionService extends Disposable {
         const sheet = workbook.getActiveSheet();
         const _sheetId = sheetId || sheet.getSheetId();
         const sheetPermission = new SheetEditablePermission(_workbookId, _sheetId);
-        this._permissionService.updatePermissionItem(sheetPermission.id, v);
+        this._permissionService.updatePermissionPoint(sheetPermission.id, v);
     }
 }

@@ -69,14 +69,17 @@ export class DataStreamTreeNode {
     plus(len: number) {
         this.startIndex += len;
         this.endIndex += len;
+
         this.addIndexForBlock(len);
     }
 
     selfPlus(len: number, index?: number) {
         this.endIndex += len;
+
         if (index == null) {
             index = this.startIndex;
         }
+
         this.addIndexForBlock(len, index);
     }
 
@@ -91,14 +94,16 @@ export class DataStreamTreeNode {
         const firstEndIndex = index - startIndex;
 
         const lastStartIndex = firstEndIndex;
-        const lastEndIndex = endIndex;
 
-        const firstNode = DataStreamTreeNode.create(nodeType, content.slice(firstStartIndex, firstEndIndex));
+        const firstNodeContent = content.slice(firstStartIndex, firstEndIndex);
+
+        const firstNode = DataStreamTreeNode.create(nodeType, firstNodeContent);
 
         firstNode.parent = parent;
         firstNode.setIndexRange(firstStartIndex, firstEndIndex - 1);
 
-        const lastNodeContent = content.slice(lastStartIndex, lastEndIndex);
+        const lastNodeContent = content.slice(lastStartIndex);
+
         const lastNode = DataStreamTreeNode.create(nodeType, lastNodeContent);
 
         lastNode.parent = parent;
@@ -109,6 +114,7 @@ export class DataStreamTreeNode {
 
         for (const node of children) {
             const { startIndex: childStartIndex } = node;
+
             if (node.exclude(index)) {
                 if (index < childStartIndex) {
                     firstChildNodes.push(node);
@@ -190,6 +196,7 @@ export class DataStreamTreeNode {
     private addIndexForBlock(addLen: number, index: number = -Infinity) {
         for (let i = 0, len = this.blocks.length; i < len; i++) {
             const block = this.blocks[i];
+
             if (block >= index) {
                 this.blocks[i] = block + addLen;
             }

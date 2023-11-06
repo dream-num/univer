@@ -148,7 +148,7 @@ export function insertParagraphs(
             paragraph.startIndex += textLength;
         }
 
-        if (firstInsertParagraphNextIndex === -1 && startIndex > currentIndex) {
+        if (firstInsertParagraphNextIndex === -1 && startIndex >= currentIndex) {
             firstInsertParagraphNextIndex = i;
         }
 

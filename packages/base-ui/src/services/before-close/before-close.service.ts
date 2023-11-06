@@ -1,6 +1,6 @@
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
-import { INotificationService } from '../..';
+import { INotificationService } from '../notification/notification.service';
 
 export interface IBeforeCloseService {
     /**

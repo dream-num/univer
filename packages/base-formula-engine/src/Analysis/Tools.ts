@@ -16,7 +16,7 @@ export function generateAstNode(formulaString: string) {
     const lexerNode = lexerTreeMaker.treeMaker();
     lexerTreeMaker.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
 
-    const astTreeMaker = AstTreeMaker.create();
+    const astTreeMaker = new AstTreeMaker();
 
     astNode = astTreeMaker.parse(lexerNode);
 

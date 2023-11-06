@@ -19,19 +19,12 @@ import {
 import { LexerNode } from './LexerNode';
 
 export class AstTreeMaker {
-    static maker: AstTreeMaker = new AstTreeMaker();
-
     private _parserDataLoader = new ParserDataLoader();
 
     private _astNodeFactoryList: BaseAstNodeFactory[] = [];
 
-    static create() {
-        if (!this.maker) {
-            this.maker = new AstTreeMaker();
-            this.maker._parserDataLoader.initialize();
-        }
-
-        return this.maker;
+    constructor() {
+        this._parserDataLoader.initialize();
     }
 
     parse(lexerNode: LexerNode) {
@@ -109,7 +102,7 @@ export class AstTreeMaker {
             if (lexerNode.getToken() === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
                 let resultNode: BaseAstNode | false = this._lambdaParameterHandler(lexerNode, parent as LambdaNode);
                 if (resultNode === false) {
-                    // console.log('error1', resultNode, currentAstNode, lexerNode);
+                    console.log('error1', resultNode, currentAstNode, lexerNode);
                     resultNode = ErrorNode.create(ErrorType.ERROR);
                 }
 
@@ -118,14 +111,14 @@ export class AstTreeMaker {
 
             currentAstNode = this._checkAstNode(lexerNode);
             if (currentAstNode == null) {
-                // console.log('error2', currentAstNode, lexerNode);
+                console.log('error2', currentAstNode, lexerNode);
                 return ErrorNode.create(ErrorType.ERROR);
             }
 
             // currentAstNode.setParent(parent);
             // parent.addChildren(currentAstNode);
         }
-        // console.log('currentAstNode', currentAstNode.nodeType, currentAstNode, lexerNode);
+        console.log('currentAstNode', currentAstNode.nodeType, currentAstNode, lexerNode);
         for (let i = 0; i < childrenCount; i++) {
             if (
                 currentAstNode.nodeType === NodeType.LAMBDA &&
@@ -148,7 +141,7 @@ export class AstTreeMaker {
             }
 
             if (astNode == null) {
-                // console.log('error3', astNode, currentAstNode, lexerNode);
+                console.log('error3', astNode, currentAstNode, lexerNode);
                 return ErrorNode.create(ErrorType.ERROR);
             }
 
@@ -156,7 +149,7 @@ export class AstTreeMaker {
             if (astNode == null) {
                 return;
             }
-            // console.log('bugfix1', astNode, astNode.nodeType, currentAstNode, lexerNode);
+            console.log('bugfix1', astNode, astNode.nodeType, currentAstNode, lexerNode);
             switch (astNode.nodeType) {
                 case NodeType.ERROR:
                     return astNode;
@@ -175,14 +168,14 @@ export class AstTreeMaker {
                     if (parameterNode2) {
                         parameterNode2.setParent(astNode);
                     } else {
-                        // console.log('error4', currentAstNode, lexerNode, children, i);
+                        console.log('error4', currentAstNode, lexerNode, children, i);
                         return ErrorNode.create(ErrorType.ERROR);
                     }
 
                     if (parameterNode1) {
                         parameterNode1.setParent(astNode);
                     } else {
-                        // console.log('error5', currentAstNode, lexerNode, children, i);
+                        console.log('error5', currentAstNode, lexerNode, children, i);
                         return ErrorNode.create(ErrorType.ERROR);
                     }
 

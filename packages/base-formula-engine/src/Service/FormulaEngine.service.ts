@@ -1,4 +1,5 @@
 import { IUnitRange } from '@univerjs/core';
+import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { LexerTreeMaker } from '../Analysis/Lexer';
 import { AstTreeMaker } from '../Analysis/Parser';
@@ -8,6 +9,10 @@ import { Interpreter } from '../Interpreter/Interpreter';
 import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 
 export class FormulaEngineService {
+    constructor(@Inject(Injector) readonly _injector: Injector) {
+        this._initializeDependencies(this._injector);
+    }
+
     /**
      *
      * @param unitId
@@ -65,26 +70,39 @@ export class FormulaEngineService {
 
         // this.getObserver('onAfterFormulaLexerObservable')?.notifyObservers(lexerNode);
 
-        const astTreeMaker = AstTreeMaker.create();
+        const astTreeMaker = new AstTreeMaker();
 
         const astNode = astTreeMaker.parse(lexerNode);
 
         console.log('astNode', astNode?.serialize());
 
-        const interpreter = Interpreter.create();
+        // const interpreter = Interpreter.create();
 
-        if (astNode == null) {
-            return;
-        }
+        // if (astNode == null) {
+        //     return;
+        // }
 
-        if (interpreter.checkAsyncNode(astNode)) {
-            const resultPromise = interpreter.executeAsync(astNode);
+        // if (interpreter.checkAsyncNode(astNode)) {
+        //     const resultPromise = interpreter.executeAsync(astNode);
 
-            resultPromise.then((value) => {
-                console.log('formulaResult', value);
-            });
-        } else {
-            console.log(interpreter.execute(astNode));
-        }
+        //     resultPromise.then((value) => {
+        //         console.log('formulaResult', value);
+        //     });
+        // } else {
+        //     console.log(interpreter.execute(astNode));
+        // }
+    }
+
+    private _initializeDependencies(injector: Injector) {
+        const dependencies: Dependency[] = [
+            // services
+            // [BorderStyleManagerService],
+            // [SelectionManagerService],
+            // [RefRangeService],
+        ];
+
+        dependencies.forEach((d) => {
+            injector.add(d);
+        });
     }
 }

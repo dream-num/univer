@@ -22,7 +22,27 @@ function singleReferenceToGrid(refBody: string) {
     };
 }
 
-export function referenceToGrid(refString: string): IGridRangeName {
+/**
+ * Serialize an `IRange` into a string.
+ * @param sheetID ID of the Worksheet
+ * @param range The `IRange` to be serialized
+ */
+export function serializeRange(range: IRange): string {
+    const { startColumn, startRow, endColumn, endRow } = range;
+    return `${Tools.chatAtABC(startColumn) + (startRow + 1)}:${Tools.chatAtABC(endColumn)}${endRow + 1}`;
+}
+
+/**
+ * Serialize an `IRange` and a sheetID into a string.
+ * @param sheetName
+ * @param range
+ * @returns
+ */
+export function serializeRangeWithSheet(sheetName: string, range: IRange): string {
+    return `${sheetName}!${serializeRange(range)}`;
+}
+
+export function deserializeRangeWithSheet(refString: string): IGridRangeName {
     const sheetNameIndex = refString.indexOf('!');
     let sheetName: string = '';
     let refBody: string = '';
@@ -53,30 +73,21 @@ export function referenceToGrid(refString: string): IGridRangeName {
     }
 
     const refStartString = refBody.substring(0, colonIndex);
-
     const refEndString = refBody.substring(colonIndex + 1);
-
     const startGrid = singleReferenceToGrid(refStartString);
-
     const endGrid = singleReferenceToGrid(refEndString);
-
     const startRow = startGrid.row;
-
     const startColumn = startGrid.column;
-
     const endRow = endGrid.row;
-
     const endColumn = endGrid.column;
-
-    const range: IRange = {
-        startRow,
-        startColumn,
-        endRow,
-        endColumn,
-    };
 
     return {
         sheetName,
-        range,
+        range: {
+            startRow,
+            startColumn,
+            endRow,
+            endColumn,
+        },
     };
 }

@@ -1,4 +1,4 @@
-import { IRange, referenceToGrid } from '@univerjs/core';
+import { deserializeRangeWithSheet, IRange } from '@univerjs/core';
 
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -8,7 +8,7 @@ import { RangeReferenceObject } from './RangeReferenceObject';
 export class CellReferenceObject extends BaseReferenceObject {
     constructor(token: string) {
         super(token);
-        const grid = referenceToGrid(token);
+        const grid = deserializeRangeWithSheet(token);
         this.setForcedSheetName(grid.sheetName);
         this.setRangeData(grid.range);
     }

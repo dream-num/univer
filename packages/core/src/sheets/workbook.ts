@@ -8,7 +8,6 @@ import { BooleanNumber } from '../Types/Enum';
 import {
     IColumnStartEndData,
     IGridRange,
-    IRange,
     IRangeArrayData,
     IRangeStringData,
     IRangeType,
@@ -81,17 +80,6 @@ export class Workbook extends Disposable {
 
         this._sheetCreated$.complete();
         this._sheetDisposed$.complete();
-    }
-
-    /**
-     *
-     * @param range
-     * @returns
-     */
-    static rangeDataToRangeStringData(range: IRange) {
-        const { startRow, endRow, startColumn, endColumn } = range;
-
-        return `${Tools.chatAtABC(startColumn) + (startRow + 1)}:${Tools.chatAtABC(endColumn)}${endRow + 1}`;
     }
 
     static isIRangeType(range: IRangeType | IRangeType[]): Boolean {

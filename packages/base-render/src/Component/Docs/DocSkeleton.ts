@@ -235,13 +235,11 @@ export class DocumentSkeleton extends Skeleton {
         pageMarginLeft: number,
         pageMarginTop: number
     ): Nullable<INodeInfo> {
-        console.log(coord, pageLayoutType, pageMarginLeft, pageMarginTop);
         const { x, y } = coord;
 
         this._findLiquid.reset();
 
         const skeletonData = this.getSkeletonData();
-        console.log(skeletonData);
 
         if (skeletonData == null) {
             return;
@@ -534,7 +532,9 @@ export class DocumentSkeleton extends Skeleton {
         skeleton.pages = allSkeletonPages;
 
         const bodyModel = this._docModel.bodyModel;
+
         bodyModel.resetCache();
+
         for (let i = 0, len = bodyModel.children.length; i < len; i++) {
             const sectionNode = bodyModel.children[i];
             const sectionBreak = bodyModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
@@ -610,6 +610,7 @@ export class DocumentSkeleton extends Skeleton {
 
             let curSkeletonPage: IDocumentSkeletonPage = getLastPage(allSkeletonPages);
             let isContinuous = false;
+
             if (sectionType === SectionType.CONTINUOUS) {
                 updateBlockIndex(allSkeletonPages);
                 this.__addNewSectionByContinuous(curSkeletonPage, columnProperties, columnSeparatorType);

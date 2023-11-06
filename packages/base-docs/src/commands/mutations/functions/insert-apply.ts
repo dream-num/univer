@@ -30,11 +30,17 @@ export function InsertApply(
         throw new Error('no body has changed');
     }
 
+    console.log(JSON.stringify(insertBody, null, 2));
+    console.log(JSON.stringify(body.paragraphs, null, 2));
+    // console.log(body.dataStream.length);
+
     bodyModel.insert(insertBody, currentIndex);
 
     updateAttributeByInsert(body, insertBody, textLength, currentIndex);
 
-    // console.log('插入的model打印', bodyModel, body, textLength);
+    console.log(JSON.stringify(body.paragraphs, null, 2));
+    // console.log(body.dataStream.length);
+    console.log('插入的model打印', textLength, currentIndex);
 }
 
 function updateAttributeByInsert(

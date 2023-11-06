@@ -99,7 +99,7 @@ export class DeleteLeftInputController extends Disposable {
 
         const isUpdateParagraph =
             isFirstSpan(preSpan) && span !== preSpan && (preIsBullet === true || preIsIndent === true);
-        console.log(isUpdateParagraph);
+
         if (isUpdateParagraph) {
             const paragraph = getParagraphBySpan(preSpan, docsModel.body);
 

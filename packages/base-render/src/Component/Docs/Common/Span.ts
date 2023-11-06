@@ -192,6 +192,7 @@ export function addSpanToDivide(
     // }
 
     setSpanGroupLeft(spanGroup, offsetLeft);
+
     for (const span of spanGroup) {
         span.parent = divide;
     }

@@ -18,6 +18,24 @@ import { BreakLineCommand, InsertCommand } from '../commands/commands/core-editi
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
+function generateParagraphs(dataStream: string) {
+    const paragraphs: IParagraph[] = [];
+
+    for (let i = 0, len = dataStream.length; i < len; i++) {
+        const char = dataStream[i];
+
+        if (char !== DataStreamTreeTokenType.PARAGRAPH) {
+            continue;
+        }
+
+        paragraphs.push({
+            startIndex: i,
+        });
+    }
+
+    return paragraphs;
+}
+
 @OnLifecycle(LifecycleStages.Rendered, LineBreakInputController)
 export class LineBreakInputController extends Disposable {
     private _onInputSubscription: Nullable<Subscription>;
@@ -67,18 +85,16 @@ export class LineBreakInputController extends Disposable {
         }
 
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const unitId = docsModel.getUnitId();
 
         const { cursorStart, segmentId, style } = activeRange;
 
         // split paragraph
-
-        // const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
-
         this._commandService.executeCommand(InsertCommand.id, {
-            unitId: docsModel.getUnitId(),
+            unitId,
             body: {
                 dataStream: DataStreamTreeTokenType.PARAGRAPH,
-                paragraphs: this._generateParagraph(DataStreamTreeTokenType.PARAGRAPH),
+                paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH),
             },
             range: activeRange,
             segmentId,
@@ -95,25 +111,6 @@ export class LineBreakInputController extends Disposable {
                 style,
             },
         ]);
-
-        // const span = document.findNodeByCharIndex(++cursor);
-
-        // this._adjustSelection(document as Documents, selectionRemain, span, true);
-    }
-
-    private _generateParagraph(dataStream: string) {
-        const paragraphs: IParagraph[] = [];
-        for (let i = 0, len = dataStream.length; i < len; i++) {
-            const char = dataStream[i];
-            if (char !== DataStreamTreeTokenType.PARAGRAPH) {
-                continue;
-            }
-
-            paragraphs.push({
-                startIndex: i,
-            });
-        }
-        return paragraphs;
     }
 
     private _getDocObject() {

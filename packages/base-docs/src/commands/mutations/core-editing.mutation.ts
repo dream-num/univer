@@ -59,13 +59,14 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
     handler: (accessor, params) => {
         const { unitId, mutations } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-
         const documentModel = univerInstanceService.getUniverDocInstance(unitId);
+
         if (!documentModel) {
             throw new Error(`DocumentModel not found for unitId: ${unitId}`);
         }
 
         const undoMutations: Array<IRetainMutationParams | IInsertMutationParams | IDeleteMutationParams> = [];
+
         const memoryCursor = new MemoryCursor();
 
         memoryCursor.reset();

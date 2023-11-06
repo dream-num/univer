@@ -92,6 +92,7 @@ function _divideOperator(
 ) {
     const lastPage = getLastPage(pages);
     const divideInfo = getLastNotFullDivideInfo(lastPage); // 取得最新一行里内容未满的第一个divide
+
     if (divideInfo) {
         const width = __getSpanGroupWidth(spanGroup);
         const divide = divideInfo.divide;
@@ -128,6 +129,7 @@ function _divideOperator(
             } else if (column && width > column.width) {
                 // 一个字符超列宽
                 setColumnFullState(column, true);
+
                 if (isBlankColumn(column)) {
                     addSpanToDivide(divide, spanGroup, preOffsetLeft);
                     // divide.spanGroup.push(...spanGroup);
@@ -142,8 +144,12 @@ function _divideOperator(
                     );
                 }
             } else if (divideInfo.isLast) {
-                // 最后一个divide
-                if (spanGroup.length === 1 && spanGroup[0].content === DataStreamTreeTokenType.SPACE) {
+                // 最后一个 divide
+                if (
+                    spanGroup.length === 1 &&
+                    (spanGroup[0].content === DataStreamTreeTokenType.SPACE ||
+                        spanGroup[0].content === DataStreamTreeTokenType.PARAGRAPH)
+                ) {
                     addSpanToDivide(divide, spanGroup, preOffsetLeft);
                 } else {
                     _lineOperator(

@@ -22,19 +22,13 @@ import {
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
     type: CommandType.COMMAND,
-    handler: async (accessor) =>
-        // const inputController = accessor.get(InputController);
-        // inputController.deleteLeft();
-        true,
+    handler: async () => true,
 };
 
 export const BreakLineCommand: ICommand = {
     id: 'doc.command.break-line',
     type: CommandType.COMMAND,
-    handler: async (accessor) =>
-        // const inputController = accessor.get(InputController);
-        // inputController.breakLine();
-        true,
+    handler: async () => true,
 };
 
 export interface IInsertCommandParams {
@@ -82,14 +76,6 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             line: 0, // FIXME: line shouldn't be 0 here?
             segmentId,
         });
-
-        const undoMutation: ICommandInfo<IRichTextEditingMutationParams> = {
-            id: RichTextEditingMutation.id,
-            params: {
-                unitId,
-                mutations: [],
-            },
-        };
 
         // TODO@wzhudev: prepare undo mutation
         const result = commandService.syncExecuteCommand<

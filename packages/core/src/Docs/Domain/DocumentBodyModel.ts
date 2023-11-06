@@ -667,6 +667,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             currentNode.selfPlus(1, currentNode.getPositionInParent());
             const children = currentNode.children;
             let isStartFix = false;
+
             for (const node of children) {
                 if (node.startIndex >= insertEndIndex + 1) {
                     isStartFix = true;

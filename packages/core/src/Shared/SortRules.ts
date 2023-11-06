@@ -29,9 +29,11 @@ export function sortRulesFactory(key = 'index', ruler = 1) {
         if (oa[key] > ob[key]) {
             return ruler;
         }
+
         if (oa[key] === ob[key]) {
             return 0;
         }
+
         return -ruler;
     };
 }

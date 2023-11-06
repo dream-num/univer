@@ -8,6 +8,7 @@ import { SharedController } from './controllers/shared-shortcut.controller';
 import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { enUS } from './locale';
+import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { IConfirmService } from './services/confirm/confirm.service';
 import { DesktopConfirmService } from './services/confirm/desktop-confirm.service';
@@ -76,6 +77,7 @@ export class UIPlugin extends Plugin {
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
+            [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             // controllers
             [IFocusService, { useClass: DesktopFocusService }],
             [IUIController, { useClass: DesktopUIController }],

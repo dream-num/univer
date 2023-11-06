@@ -1,7 +1,6 @@
 import { ILocalStorageService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { DesktopBeforeCloseService, IBeforeCloseService } from '.';
 import { ComponentManager } from './Common/ComponentManager';
 import { ZIndexManager } from './Common/ZIndexManager';
 import { ErrorController } from './controllers/error/error.controller';
@@ -9,6 +8,7 @@ import { SharedController } from './controllers/shared-shortcut.controller';
 import { IUIController, IWorkbenchOptions } from './controllers/ui/ui.controller';
 import { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 import { enUS } from './locale';
+import { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 import { BrowserClipboardService, IClipboardInterfaceService } from './services/clipboard/clipboard-interface.service';
 import { IConfirmService } from './services/confirm/confirm.service';
 import { DesktopConfirmService } from './services/confirm/desktop-confirm.service';

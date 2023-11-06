@@ -1,6 +1,7 @@
 import { ILocalStorageService, LocaleService, Plugin, PLUGIN_NAMES, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
+import { DesktopBeforeCloseService, IBeforeCloseService } from '.';
 import { ComponentManager } from './Common/ComponentManager';
 import { ZIndexManager } from './Common/ZIndexManager';
 import { ErrorController } from './controllers/error/error.controller';
@@ -76,6 +77,7 @@ export class UIPlugin extends Plugin {
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
+            [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             // controllers
             [IFocusService, { useClass: DesktopFocusService }],
             [IUIController, { useClass: DesktopUIController }],

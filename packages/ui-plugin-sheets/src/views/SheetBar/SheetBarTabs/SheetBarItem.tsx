@@ -64,20 +64,13 @@ export function SheetBarItem(props: IBaseSheetBarProps) {
                 key={sheetId}
                 data-id={sheetId}
                 className={currentSelected ? `${styles.slideTabActive} ${styles.slideTabItem}` : styles.slideTabItem}
+                style={{
+                    backgroundColor: !currentSelected && color ? color : '',
+                    color: !currentSelected && color ? getTextColor(color) : '',
+                    boxShadow: currentSelected && color ? `inset 0px -2px 0px 0px ${color}` : '',
+                }}
             >
-                <div
-                    className={styles.slideTabContent}
-                    style={{
-                        backgroundColor: !currentSelected && color ? color : '',
-                        color: !currentSelected && color ? getTextColor(color) : '',
-                        boxShadow: currentSelected && color ? `inset 0px -2px 0px 0px ${color}` : '',
-                    }}
-                >
-                    <span className={styles.slideTabSpan}>{label}</span>
-                </div>
-                <div className={styles.slideTabFooter}>
-                    <div className={styles.slideTabActiveBar} style={color ? { background: color } : {}}></div>
-                </div>
+                <span className={styles.slideTabSpan}>{label}</span>
             </div>
         </Dropdown>
     );

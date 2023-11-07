@@ -1,14 +1,17 @@
 
 @sheet-bar-height: 31px;
+@sheet-bar-max-width: 1515px;
+@right-width: 300px;
 
 .sheet-bar {
     position: relative;
     height: @sheet-bar-height;
+    width: calc(100% - @right-width);
+    max-width: @sheet-bar-max-width;
     display: flex;
     flex-direction: row;
     background-color: rgb(var(--bg-color));
     flex: 1;
-    width: calc(100% - 350px);
 }
 
 .sheet-bar-options {

@@ -1,8 +1,5 @@
-@right-bar-width: 700px;
-
 .slide-tab-bar-container {
     overflow: hidden;
-    max-width: calc(100% - @right-bar-width);
 
     .slide-tab-bar {
         user-select: none;
@@ -20,68 +17,40 @@ Tab Item, Put outside to be compatible with drag styles
 .slide-tab-item {
     user-select: none;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    box-sizing: border-box;
+    border-radius: var(--border-radius-base);
+    font-size: var(--font-size-sm);
     cursor: pointer;
     margin: 0 var(--margin-xxs);
 
-    /**
-    Content area
-    */
-    .slide-tab-content {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        flex-grow: 1;
-        box-sizing: border-box;
-        border-radius: var(--border-radius-base);
-        font-size: var(--font-size-sm);
-        // box-shadow: inset 0px -2px 0px 0px red;
+        .slide-tab-span {
+            white-space: nowrap;
+            box-sizing: border-box;
+            padding: var(--padding-xs) var(--padding-base);
+            border: 2px solid transparent;
+            border-radius: var(--border-radius-base);
+            
+            
+            &-edit {
+                outline: none;
+                cursor: text;
+                border-color: rgb(var(--primary-color));
 
-            .slide-tab-span {
-                white-space: nowrap;
-                box-sizing: border-box;
-                padding: var(--padding-xs) var(--padding-base);
-                border: 2px solid transparent;
-                border-radius: var(--border-radius-base);
-                
-                
-                &-edit {
-                    outline: none;
-                    cursor: text;
-                    border-color: rgb(var(--primary-color));
-
-                    &::selection{
-                        background-color: rgb(var(--primary-color));
-                        color: rgb(var(--color-white));
-                    }
+                &::selection{
+                    background-color: rgb(var(--primary-color));
+                    color: rgb(var(--color-white));
                 }
-
             }
 
-
-    }
-
-    /**
-    Bottom area
-    */
-    // .slide-tab-footer {
-    //     height: auto;
-    //     width: 100%;
-    //     flex-grow: 0;
-
-    //     .slide-tab-active-bar {
-    //         height: 2px;
-    //         width: 100%;
-    //     }
-    // }
-
+        }
 }
 
+
 .slide-tab-active {
-    .slide-tab-content {
         color: rgb(var(--primary-color));
         background-color: rgb(var(--bg-color-secondary));
         font-weight: 700;
-    }
 }

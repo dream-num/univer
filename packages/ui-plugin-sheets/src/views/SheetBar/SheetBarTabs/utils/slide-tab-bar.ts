@@ -56,6 +56,14 @@ export class SlideTabItem {
         return item.getBoundingRect().x + item.getBoundingRect().width / 2;
     }
 
+    static leftLine(item: SlideTabItem) {
+        return item.getBoundingRect().x;
+    }
+
+    static rightLine(item: SlideTabItem) {
+        return item.getBoundingRect().x + item.getBoundingRect().width;
+    }
+
     static make(nodeList: NodeList, slideTabBar: SlideTabBar): SlideTabItem[] {
         const result: SlideTabItem[] = [];
         nodeList.forEach((item) => result.push(new SlideTabItem(item as HTMLElement, slideTabBar)));
@@ -104,6 +112,8 @@ export class SlideTabItem {
                     input.classList.remove(this._slideTabBar.getConfig().slideTabBarSpanEditClassName);
                 }
 
+                // Event must be removed before updateItems
+                this._slideTabBar.destroy();
                 this._slideTabBar.updateItems();
                 if (this._slideTabBar.getConfig().onChangeName) {
                     const text = input?.innerText || '';
@@ -221,6 +231,11 @@ export class SlideTabItem {
             this._slideTabItem.style.removeProperty('height');
             this._slideTabItem.style.removeProperty('box-shadow');
             this._slideTabItem.style.removeProperty('background');
+            this._slideTabItem.style.removeProperty('padding');
+            this._slideTabItem.style.removeProperty('boxSizing');
+            this._slideTabItem.style.removeProperty('fontSize');
+            this._slideTabItem.style.removeProperty('color');
+            this._slideTabItem.style.removeProperty('borderRadius');
 
             this._placeholder.after(this._slideTabItem);
             primeval.removeChild(this._placeholder);
@@ -231,17 +246,29 @@ export class SlideTabItem {
     enableFixed() {
         const placeholder = document.createElement('div');
         const boundingRect = this.getBoundingRect();
+        const computedStyles = getComputedStyle(this._slideTabItem);
+        const innerSpan = this._slideTabItem.querySelector('span');
 
         this._placeholder = placeholder;
         this._placeholder.style.width = `${boundingRect.width}px`;
         this._placeholder.style.height = `${boundingRect.height}px`;
         this._placeholder.style.flexShrink = '0';
+        this._placeholder.style.margin = computedStyles.margin;
+
+        this._slideTabItem.style.background = computedStyles.background;
+        if (innerSpan) {
+            const innerPadding = getComputedStyle(innerSpan).padding;
+            this._slideTabItem.style.padding = innerPadding;
+        }
+        this._slideTabItem.style.boxSizing = computedStyles.boxSizing;
+        this._slideTabItem.style.fontSize = computedStyles.fontSize;
+        this._slideTabItem.style.color = computedStyles.color;
+        this._slideTabItem.style.borderRadius = computedStyles.borderRadius;
 
         this._slideTabItem.style.left = `${boundingRect.x - this.getScrollbar().getScrollX()}px`;
         this._slideTabItem.style.top = `${boundingRect.y}px`;
         this._slideTabItem.style.width = `${boundingRect.width}px`;
         this._slideTabItem.style.height = `${boundingRect.height}px`;
-        this._slideTabItem.style.background = getComputedStyle(this._slideTabItem).background;
         this._slideTabItem.style.boxShadow = '0px 0px 1px 1px rgba(82,82,82,0.1)';
         this._slideTabItem.style.position = 'fixed';
 
@@ -424,6 +451,7 @@ export class SlideTabBar {
         this._compareDirection = 0;
         this._compareIndex = 0;
         this._slideTabBar = slideTabBar as HTMLElement;
+
         this._slideScrollbar = new SlideScrollbar(this);
         this._slideTabItems = SlideTabItem.make(slideTabItems, this);
         this._activeTabItemIndex = this._config.currentIndex;
@@ -467,10 +495,9 @@ export class SlideTabBar {
             const { x: containerX, width: containerWidth } = this.getBoundingRect();
             const scrollX = this._slideScrollbar.getScrollX();
             this._leftBoundingLine = this._downActionX - (x - scrollX);
-            const adjustment = 24;
-            this._rightBoundingLine = x - scrollX + width - this._downActionX - adjustment;
+            this._rightBoundingLine = x - scrollX + width - this._downActionX;
             this._leftMoveX = x - containerX - scrollX;
-            this._rightMoveX = containerX + containerWidth - (x + width) + scrollX + adjustment;
+            this._rightMoveX = containerX + containerWidth - (x + width) + scrollX;
 
             if (downEvent.button === 2 || this._hasEditItem()) {
                 return;
@@ -766,7 +793,8 @@ export class SlideTabBar {
             let notFound = true;
             for (let i = collect.length - 1; i >= 0; i--) {
                 const item = collect[i];
-                if (SlideTabItem.midline(this._activeTabItem) < item.getMidLine()) {
+                // Left side border reaches the midline
+                if (SlideTabItem.leftLine(this._activeTabItem) < item.getMidLine()) {
                     item.animate().translateX(this._activeTabItem.getWidth());
                     this._compareIndex = i;
                     notFound = false;
@@ -800,7 +828,8 @@ export class SlideTabBar {
             let notFound = true;
             for (let i = 0; i < collect.length; i++) {
                 const item = collect[i];
-                if (SlideTabItem.midline(this._activeTabItem) > item.getMidLine()) {
+                // Right side border reaches the midline
+                if (SlideTabItem.rightLine(this._activeTabItem) > item.getMidLine()) {
                     item.animate().translateX(-this._activeTabItem.getWidth());
                     this._compareIndex = splice + i + 1;
                     notFound = false;
@@ -815,9 +844,6 @@ export class SlideTabBar {
     }
 
     protected _initialize(): void {
-        // TODO@Dushusir: Listener cannot be removed, resulting in repeated monitoring after renaming or setting tab color.
-        this.destroy();
-
         this._slideTabBar.addEventListener('wheel', this._wheelAction);
         this._slideTabItems.forEach((item) => {
             item.addEventListener('pointerdown', this._downAction);

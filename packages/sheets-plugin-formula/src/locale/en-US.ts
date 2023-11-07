@@ -49,5 +49,10 @@ export default {
                 },
             },
         },
+
+        formulaMore: {
+            helpExample: 'EXAMPLE',
+            helpAbstract: 'ABOUT',
+        },
     },
 };

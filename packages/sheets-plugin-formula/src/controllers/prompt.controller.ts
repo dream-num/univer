@@ -31,11 +31,17 @@ export class PromptController extends Disposable {
         this._textSelectionManagerService.textSelectionInfo$.subscribe((text) => {
             // TODO@Dushusir: use real text info
             return;
-            const visible = true;
-            const searchText = Math.random() > 0.5 ? 'SU' : 'TA';
+            const visible = Math.random() > 0.5;
+            // const searchText = Math.random() > 0.5 ? 'SUMIF' : 'TAN';
+            const searchText = 'SUMIF';
+            const paramIndex = Math.random() > 0.5 ? 0 : 1;
 
             this._commandService.executeCommand(SearchFunctionOperation.id, { visible, searchText });
-            this._commandService.executeCommand(HelpFunctionOperation.id, { visible: !visible });
+            this._commandService.executeCommand(HelpFunctionOperation.id, {
+                visible: !visible,
+                functionName: searchText,
+                paramIndex,
+            });
         });
     }
 

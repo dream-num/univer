@@ -50,5 +50,10 @@ export default {
                 },
             },
         },
+
+        formulaMore: {
+            helpExample: '示例',
+            helpAbstract: '简介',
+        },
     },
 };

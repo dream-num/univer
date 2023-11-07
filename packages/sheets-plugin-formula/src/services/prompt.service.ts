@@ -11,12 +11,29 @@ export interface ISearchFunctionParams {
     /**
      * show SearchFunction Component or not
      */
-    show: boolean;
+    visible: boolean;
 
     /**
      * function search text
      */
     searchText: string;
+}
+
+export interface IHelpFunctionCommandParams {
+    /**
+     * show HelpFunction Component or not
+     */
+    visible: boolean;
+
+    /**
+     * function name
+     */
+    functionName: string;
+
+    /**
+     * function param index
+     */
+    paramIndex: number;
 }
 
 export interface INavigateParam {
@@ -37,13 +54,13 @@ export interface IFormulaPromptService {
     /**
      * listen help function open
      */
-    help$: Observable<boolean>;
+    help$: Observable<IHelpFunctionCommandParams>;
 
     /**
      * open help function
      */
 
-    help(param: boolean): void;
+    help(param: IHelpFunctionCommandParams): void;
 
     /**
      * listen navigate shortcut, UP and DOWN
@@ -83,7 +100,7 @@ export const IFormulaPromptService = createIdentifier<FormulaPromptService>('uni
 export class FormulaPromptService implements IFormulaPromptService, IDisposable {
     private readonly _search$ = new Subject<ISearchFunctionParams>();
 
-    private readonly _help$ = new Subject<boolean>();
+    private readonly _help$ = new Subject<IHelpFunctionCommandParams>();
 
     private readonly _navigate$ = new Subject<INavigateParam>();
 
@@ -113,7 +130,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
         this._search$.next(param);
     }
 
-    help(param: boolean) {
+    help(param: IHelpFunctionCommandParams) {
         this._help$.next(param);
     }
 

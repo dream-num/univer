@@ -31,7 +31,7 @@ export interface INotificationMethodOptions {
      */
     content: string;
     /**
-     * popup position
+     * Popup position
      */
     placement?: Placement;
     /**

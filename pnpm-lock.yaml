@@ -900,7 +900,7 @@ importers:
   packages/sheets-plugin-formula:
     dependencies:
       '@univerjs/base-docs':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../base-docs
       '@univerjs/base-render':
         specifier: workspace:*
@@ -917,6 +917,9 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/icons':
+        specifier: ^0.1.3
+        version: 0.1.3(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets
@@ -5786,7 +5789,7 @@ packages:
       std-env: 3.4.3
       test-exclude: 6.0.0
       v8-to-istanbul: 9.1.3
-      vitest: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
+      vitest: 0.34.6(happy-dom@12.10.1)(less@4.2.0)
     transitivePeerDependencies:
       - supports-color
     dev: true

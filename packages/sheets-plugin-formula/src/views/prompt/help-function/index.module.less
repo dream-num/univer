@@ -1,5 +1,91 @@
+@width: 340px;
+@max-height: 300px;
+
 .formula-help-function {
-    width: 200px;
-    height: 200px;
-    background-color: rgb(var(--bg-color));
+    width: @width;
+    padding: var(--padding-xl);
+    margin: 0;
+    font-size: var(--font-size-sm);
+    list-style: none;
+    background-color: rgb(var(--bg-color-secondary));
+    border: 1px solid rgb(var(--border-color));
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--box-shadow-base);
+    box-sizing: border-box;
+    outline: none;
+    user-select: none;
+
+    &-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: var(--font-size-xs);
+        color: rgb(var(--text-color));
+        font-weight: 500;
+
+        &-icons {
+            display: flex;
+        }
+
+        &-icon {
+            color: rgb(var(--text-color-secondary));
+            cursor: pointer;
+            outline: none;
+            width: fit-content;
+            height: fit-content;
+            padding: var(--padding-xs);
+            margin-left: var(--margin-sm);
+            border-radius: var(--border-radius-base);
+            transition: background-color .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+                background-color: rgb(var(--bg-color-hover));
+            }
+        }
+
+    }
+
+    &-content {
+        max-height: @max-height;
+        overflow-y: auto;
+
+        &-inner {
+            margin-top: var(--padding-xl);
+            padding: var(--padding-base) 0;
+            border-top: 1px solid rgb(var(--border-color));
+        }
+
+        &-params {
+            margin: var(--margin-xs) 0;
+
+            &-title {
+                font-size: var(--font-size-xs);
+                color: rgb(var(--text-color));
+                font-weight: 500;
+                margin-bottom: var(--margin-xs);
+            }
+
+            &-detail {
+                font-size: var(--font-size-xxs);
+                color: rgb(var(--text-color-secondary));
+                font-weight: 400;
+            }
+        }
+    }
+
+    &-active {
+        color: rgb(var(--primary-color));
+    }
+}
+
+.formula-help-decorator {
+    position: absolute;
+    display: flex;
+    padding: var(--padding-xs);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }

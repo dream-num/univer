@@ -1,6 +1,7 @@
-@item-width: 200px;
+@width: 340px;
 
 .formula-search-function {
+    width: @width;
     padding: var(--padding-base);
     margin: 0;
     font-size: var(--font-size-sm);
@@ -13,7 +14,6 @@
     outline: none;
 
     &-item {
-        width: @item-width;
         padding: var(--padding-sm);
         color: rgb(var(--text-color));
         border-radius: var(--border-radius-base);
@@ -25,6 +25,11 @@
             &-light {
                 color: rgb(var(--error-color));
             }
+        }
+
+        &-desc{
+            display: block;
+            margin-top: var(--margin-xs);
         }
 
         &-active {

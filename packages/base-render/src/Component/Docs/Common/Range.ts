@@ -178,29 +178,29 @@ export class TextRange {
     }
 
     private _isCollapsed() {
-        const start = this.anchorNodePosition;
-        const end = this.focusNodePosition;
+        const anchor = this.anchorNodePosition;
+        const focus = this.focusNodePosition;
 
-        if (start != null && end == null) {
+        if (anchor != null && focus == null) {
             return true;
         }
 
-        if (start == null || end == null) {
+        if (anchor == null || focus == null) {
             return false;
         }
 
         const keys = Object.keys(NodePositionMap);
 
         for (const key of keys) {
-            const startNodeValue = start[key as keyof INodePosition] as number;
-            const endNodeValue = end[key as keyof INodePosition] as number;
+            const startNodeValue = anchor[key as keyof INodePosition] as number;
+            const endNodeValue = focus[key as keyof INodePosition] as number;
 
             if (startNodeValue !== endNodeValue) {
                 return false;
             }
         }
 
-        if (start.isBack !== end.isBack) {
+        if (anchor.isBack !== focus.isBack) {
             return false;
         }
 

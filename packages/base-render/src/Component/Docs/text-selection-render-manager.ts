@@ -629,8 +629,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._removeAllTextRanges();
         lastRange.activate();
-        lastRange.startNodePosition = position;
-        lastRange.endNodePosition = null;
+        lastRange.anchorNodePosition = position;
+        lastRange.focusNodePosition = null;
         this._rangeList = [lastRange];
     }
 
@@ -737,7 +737,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        activeRangeInstance.endNodePosition = endPosition;
+        activeRangeInstance.focusNodePosition = endPosition;
 
         activeRangeInstance.refresh();
 

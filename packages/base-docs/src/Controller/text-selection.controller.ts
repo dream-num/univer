@@ -163,7 +163,7 @@ export class TextSelectionController extends Disposable {
     }
 
     private _userActionSyncListener() {
-        this._textSelectionRenderManager.textSelection$.subscribe((textSelections) => {
+        this._textSelectionRenderManager.textSelection$.subscribe((textRanges) => {
             const docsObject = this._docSkeletonManagerService.getCurrent();
 
             if (docsObject == null) {
@@ -183,13 +183,15 @@ export class TextSelectionController extends Disposable {
             this._commandService.executeCommand(SetTextSelectionsOperation.id, {
                 unitId,
                 pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
-                ranges: textSelections
-                    .map((textSelection) => {
-                        let { focusNodePosition } = textSelection;
-                        const { anchorNodePosition } = textSelection;
+                ranges: textRanges
+                    .map((textRange) => {
+                        let { focusNodePosition } = textRange;
+                        const { anchorNodePosition } = textRange;
+
                         if (focusNodePosition == null) {
                             focusNodePosition = anchorNodePosition;
                         }
+
                         const rangeList = convert.getRangePointData(anchorNodePosition, focusNodePosition).cursorList;
 
                         return getOneTextSelectionRange(rangeList);

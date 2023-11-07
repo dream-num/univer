@@ -11,7 +11,12 @@ import { RegularPolygon } from '../../../Shape/RegularPolygon';
 import { ThinScene } from '../../../ThinScene';
 import { DocumentSkeleton } from '../DocSkeleton';
 import { IDocumentOffsetConfig } from '../Document';
-import { compareNodePosition, NodePositionConvertToCursor, NodePositionMap } from './convert-cursor';
+import {
+    compareNodePosition,
+    getOneTextSelectionRange,
+    NodePositionConvertToCursor,
+    NodePositionMap,
+} from './convert-cursor';
 
 const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
 
@@ -51,6 +56,8 @@ export class TextRange {
     private _rangeShape: Nullable<RegularPolygon>;
     // The rendered range graphic when collapsed is true
     private _anchorShape: Nullable<Rect>;
+
+    private _cursorList: ITextRange[] = [];
     // The start position of the range
     startOffset: number;
     // The end position of the range
@@ -132,7 +139,7 @@ export class TextRange {
         if (this._isCollapsed()) {
             const { pointGroup, cursorList } = convertor.getRangePointData(anchor, anchor);
 
-            this._setOffsets(cursorList);
+            this._setCursorList(cursorList);
             pointGroup.length > 0 && this._createOrUpdateAnchor(pointGroup, docsLeft, docsTop);
 
             return;
@@ -140,7 +147,7 @@ export class TextRange {
 
         const { pointGroup, cursorList } = convertor.getRangePointData(anchor, focus);
 
-        this._setOffsets(cursorList);
+        this._setCursorList(cursorList);
 
         pointGroup.length > 0 && this._createOrUpdateRange(pointGroup, docsLeft, docsTop);
     }
@@ -273,12 +280,14 @@ export class TextRange {
         this._scene.addObject(anchor, 2);
     }
 
-    private _setOffsets(cursorList: ITextRange[]) {
-        if (cursorList[0] == null) {
+    private _setCursorList(cursorList: ITextRange[]) {
+        if (cursorList.length === 0) {
             return;
         }
 
-        const { startOffset, endOffset } = cursorList[0];
+        this._cursorList = cursorList;
+
+        const { startOffset, endOffset } = getOneTextSelectionRange(cursorList)!;
 
         this.startOffset = startOffset;
         this.endOffset = endOffset;

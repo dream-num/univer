@@ -409,6 +409,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
             scene.enableEvent();
 
+            console.log(this.getAllTextRanges());
+
             this._textSelection$.next(this.getAllTextRanges());
 
             scrollTimer.dispose();

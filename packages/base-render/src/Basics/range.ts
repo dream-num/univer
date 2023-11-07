@@ -1,4 +1,4 @@
-import { ITextSelectionRangeParam } from '@univerjs/core';
+import { ITextRangeParam } from '@univerjs/core';
 
 export interface ITextSelectionStyle {
     strokeWidth: number;
@@ -14,6 +14,6 @@ export const NORMAL_TEXT_SELECTION_PLUGIN_STYLE: ITextSelectionStyle = {
     fill: 'rgba(0, 0, 0, 0.2)',
 };
 
-export interface ITextSelectionRangeWithStyle extends ITextSelectionRangeParam {
+export interface ITextRangeWithStyle extends ITextRangeParam {
     style?: ITextSelectionStyle;
 }

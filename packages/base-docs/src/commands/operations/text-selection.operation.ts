@@ -1,6 +1,6 @@
 // This file provide operations to change selection of sheets.
 
-import { ITextSelectionRangeWithStyle } from '@univerjs/base-render';
+import { ITextRangeWithStyle } from '@univerjs/base-render';
 import { CommandType, IOperation } from '@univerjs/core';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
@@ -8,7 +8,7 @@ import { TextSelectionManagerService } from '../../services/text-selection-manag
 export interface ISetTextSelectionsOperationParams {
     unitId: string;
     pluginName: string;
-    ranges: ITextSelectionRangeWithStyle[];
+    ranges: ITextRangeWithStyle[];
 }
 
 export const SetTextSelectionsOperation: IOperation<ISetTextSelectionsOperationParams> = {

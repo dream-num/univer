@@ -6,7 +6,7 @@ import {
     ICommandService,
     IDocumentBody,
     IDocumentData,
-    ITextSelectionRange,
+    ITextRange,
     IUndoRedoService,
     IUniverInstanceService,
     UpdateDocsAttributeType,
@@ -34,7 +34,7 @@ export const BreakLineCommand: ICommand = {
 export interface IInsertCommandParams {
     unitId: string;
     body: IDocumentBody;
-    range: ITextSelectionRange;
+    range: ITextRange;
     segmentId?: string;
 }
 
@@ -49,7 +49,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         const commandService = accessor.get(ICommandService);
 
         const { range, segmentId, body, unitId } = params;
-        const { cursorStart, isCollapse } = range;
+        const { startOffset, collapsed } = range;
 
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -59,10 +59,10 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             },
         };
 
-        if (isCollapse) {
+        if (collapsed) {
             doMutation.params!.mutations.push({
                 t: 'r',
-                len: cursorStart,
+                len: startOffset,
                 segmentId,
             });
         } else {
@@ -103,7 +103,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
 
 export interface IDeleteCommandParams {
     unitId: string;
-    range: ITextSelectionRange;
+    range: ITextRange;
     segmentId?: string;
 }
 
@@ -156,7 +156,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
 export interface IUpdateCommandParams {
     unitId: string;
     updateBody: IDocumentBody;
-    range: ITextSelectionRange;
+    range: ITextRange;
     coverType: UpdateDocsAttributeType;
     segmentId?: string;
 }
@@ -184,18 +184,18 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             },
         };
 
-        const { cursorStart, cursorEnd } = range;
+        const { startOffset, endOffset } = range;
 
         doMutation.params!.mutations.push({
             t: 'r',
-            len: cursorStart,
+            len: startOffset,
             segmentId,
         });
 
         doMutation.params!.mutations.push({
             t: 'r',
             body: updateBody,
-            len: cursorEnd - cursorStart,
+            len: endOffset - startOffset,
             segmentId,
             coverType,
         });
@@ -228,7 +228,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
 export interface IIMEInputCommandParams {
     newText: string;
     oldTextLen: number;
-    range: ITextSelectionRange;
+    range: ITextRange;
     segmentId?: string;
     unitId: string;
 }
@@ -248,10 +248,10 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             },
         };
 
-        if (range.isCollapse) {
+        if (range.collapsed) {
             doMutation.params!.mutations.push({
                 t: 'r',
-                len: range.cursorStart,
+                len: range.startOffset,
                 segmentId,
             });
         } else {
@@ -317,14 +317,14 @@ export const CoverCommand: ICommand<ICoverCommandParams> = {
 };
 
 function getRetainAndDeleteFromReplace(
-    range: ITextSelectionRange,
+    range: ITextRange,
     segmentId?: string
 ): Array<IRetainMutationParams | IDeleteMutationParams> {
-    const { cursorStart, cursorEnd, isCollapse } = range;
+    const { startOffset, endOffset, collapsed } = range;
     const dos: Array<IRetainMutationParams | IDeleteMutationParams> = [];
 
-    const textStart = cursorStart + (isCollapse ? -1 : 0);
-    const textEnd = cursorEnd - 1;
+    const textStart = startOffset + (collapsed ? -1 : 0);
+    const textEnd = endOffset - 1;
 
     if (textStart > 0) {
         dos.push({

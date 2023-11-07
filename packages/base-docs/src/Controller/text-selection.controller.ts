@@ -1,12 +1,12 @@
 import {
     CURSOR_TYPE,
-    cursorConvertToTextSelection,
+    cursorConvertToTextRange,
     Documents,
     getOneTextSelectionRange,
     IMouseEvent,
     IPointerEvent,
     IRenderManagerService,
-    ITextSelectionRangeWithStyle,
+    ITextRangeWithStyle,
     ITextSelectionRenderManager,
     NodePositionConvertToCursor,
 } from '@univerjs/base-render';
@@ -129,7 +129,9 @@ export class TextSelectionController extends Disposable {
     private _onChangeListener() {
         this._textSelectionManagerService.textSelectionInfo$.subscribe((param) => {
             const unitId = this._textSelectionManagerService.getCurrentSelection()?.unitId;
+            // Remove all textRanges.
             this._textSelectionRenderManager.reset();
+
             if (param == null || unitId == null) {
                 return;
             }
@@ -145,7 +147,7 @@ export class TextSelectionController extends Disposable {
             const { scene, document } = currentRender;
 
             for (const selectionWithStyle of param) {
-                const textSelection = cursorConvertToTextSelection(
+                const textSelection = cursorConvertToTextRange(
                     scene,
                     selectionWithStyle,
                     docSkeleton,
@@ -189,9 +191,10 @@ export class TextSelectionController extends Disposable {
                             endNodePosition = startNodePosition;
                         }
                         const rangeList = convert.getRangePointData(startNodePosition, endNodePosition).cursorList;
+
                         return getOneTextSelectionRange(rangeList);
                     })
-                    .filter((x) => x !== null) as ITextSelectionRangeWithStyle[],
+                    .filter((x) => x !== null) as ITextRangeWithStyle[],
             });
         });
     }

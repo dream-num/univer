@@ -64,7 +64,7 @@ export class NormalInputController extends Disposable {
                 return;
             }
 
-            const { cursorStart, segmentId, style } = activeRange;
+            const { startOffset, segmentId, style } = activeRange;
 
             await this._commandService.executeCommand(InsertCommand.id, {
                 unitId: documentModel.getUnitId(),
@@ -82,9 +82,9 @@ export class NormalInputController extends Disposable {
             // move selection
             this._textSelectionManagerService.replace([
                 {
-                    cursorStart: cursorStart + len,
-                    cursorEnd: cursorStart + len,
-                    isCollapse: true,
+                    startOffset: startOffset + len,
+                    endOffset: startOffset + len,
+                    collapsed: true,
                     style,
                 },
             ]);

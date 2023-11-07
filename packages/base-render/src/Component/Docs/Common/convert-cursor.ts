@@ -1,4 +1,4 @@
-import { IPosition, ITextSelectionRange, Nullable } from '@univerjs/core';
+import { IPosition, ITextRange, Nullable } from '@univerjs/core';
 
 import {
     IDocumentSkeletonColumn,
@@ -115,7 +115,7 @@ export function compareNodePosition(pos1: INodePosition, pos2: INodePosition) {
     };
 }
 
-export function getOneTextSelectionRange(rangeList: ITextSelectionRange[]): Nullable<ITextSelectionRange> {
+export function getOneTextSelectionRange(rangeList: ITextRange[]): Nullable<ITextRange> {
     const rangeCount = rangeList.length;
     if (rangeCount === 0) {
         return;
@@ -125,12 +125,12 @@ export function getOneTextSelectionRange(rangeList: ITextSelectionRange[]): Null
 
     const lastCursor = rangeList[rangeCount - 1];
 
-    const isCollapse = rangeList.length === 1 && firstCursor.isCollapse;
+    const collapsed = rangeList.length === 1 && firstCursor.collapsed;
 
     return {
-        cursorStart: firstCursor.cursorStart,
-        cursorEnd: lastCursor.cursorEnd,
-        isCollapse,
+        startOffset: firstCursor.startOffset,
+        endOffset: lastCursor.endOffset,
+        collapsed,
     };
 }
 
@@ -168,7 +168,7 @@ export class NodePositionConvertToCursor {
     getRangePointData(startOrigin: Nullable<INodePosition>, endOrigin: Nullable<INodePosition>) {
         const pointGroup: IPoint[][] = [];
 
-        const cursorList: ITextSelectionRange[] = [];
+        const cursorList: ITextRange[] = [];
 
         if (startOrigin == null || endOrigin == null) {
             return {
@@ -202,18 +202,18 @@ export class NodePositionConvertToCursor {
 
             const hasList = spanGroup[0]?.spanType === SpanType.LIST;
 
-            let cursorStart = start_sp + st;
+            let startOffset = start_sp + st;
 
-            let cursorEnd = end_sp + st;
+            let endOffset = end_sp + st;
 
             const isStartBack = start.span === start_sp && isFirst ? start.isBack : true;
 
             const isEndBack = end.span === end_sp && isLast ? end.isBack : false;
 
-            const isCollapse = start === end;
+            const collapsed = start === end;
 
             if (start_sp === 0 && end_sp === spanGroup.length - 1) {
-                cursorEnd -= hasList ? 1 : 0;
+                endOffset -= hasList ? 1 : 0;
 
                 position = {
                     startX: startX + firstSpanLeft + (isCurrentList ? firstSpanWidth : 0),
@@ -226,13 +226,13 @@ export class NodePositionConvertToCursor {
 
                 // isEndBackFin = isEndBack;
 
-                // cursorStart += isStartBackFin ? 0 : 1;
+                // startOffset += isStartBackFin ? 0 : 1;
 
-                cursorStart -= hasList && !isCurrentList ? 1 : 0;
+                startOffset -= hasList && !isCurrentList ? 1 : 0;
 
-                // cursorEnd += isEndBackFin ? 0 : 1;
+                // endOffset += isEndBackFin ? 0 : 1;
 
-                cursorEnd -= hasList && !isCurrentList ? 1 : 0;
+                endOffset -= hasList && !isCurrentList ? 1 : 0;
 
                 position = {
                     startX: startX + firstSpanLeft + (isStartBackFin ? 0 : firstSpanWidth),
@@ -250,9 +250,9 @@ export class NodePositionConvertToCursor {
             pointGroup.push(this._pushToPoints(position));
 
             cursorList.push({
-                cursorStart: isStartBack ? cursorStart : cursorStart + 1,
-                cursorEnd: isEndBack ? cursorEnd : cursorEnd + 1,
-                isCollapse,
+                startOffset: isStartBack ? startOffset : startOffset + 1,
+                endOffset: isEndBack ? endOffset : endOffset + 1,
+                collapsed,
             });
         });
 

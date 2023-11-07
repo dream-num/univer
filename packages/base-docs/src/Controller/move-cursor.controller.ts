@@ -69,54 +69,54 @@ export class MoveCursorController extends Disposable {
 
     private _moveCursorFunction(direction: Direction) {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
-        const allRanges = this._textSelectionRenderManager.getRanges();
+        const allRanges = this._textSelectionRenderManager.getAllTextRanges();
 
-        const activeSelection = this._textSelectionRenderManager.getActiveTextSelection();
+        const activeRangeInstance = this._textSelectionRenderManager.getActiveRangeInstance();
 
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
         const docObject = this._getDocObject();
 
-        if (activeRange == null || skeleton == null || activeSelection == null || docObject == null) {
+        if (activeRange == null || skeleton == null || activeRangeInstance == null || docObject == null) {
             return;
         }
 
-        const startNodePosition = activeSelection.getStart();
+        const startNodePosition = activeRangeInstance.getStart();
 
         const preSpan = skeleton.findSpanByPosition(startNodePosition);
 
         const documentOffsetConfig = docObject.document.getOffsetConfig();
 
-        const { cursorStart, cursorEnd, style } = activeRange;
+        const { startOffset, endOffset, style } = activeRange;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             let cursor;
 
-            if (!activeRange.isCollapse || allRanges.length > 1) {
+            if (!activeRange.collapsed || allRanges.length > 1) {
                 let min = Infinity;
                 let max = -Infinity;
 
                 for (const range of allRanges) {
-                    min = Math.min(min, range!.cursorStart);
-                    max = Math.max(max, range!.cursorEnd);
+                    min = Math.min(min, range!.startOffset);
+                    max = Math.max(max, range!.endOffset);
                 }
 
                 cursor = direction === Direction.LEFT ? min : max;
             } else {
                 if (direction === Direction.LEFT) {
-                    cursor = Math.max(0, cursorStart - 1);
+                    cursor = Math.max(0, startOffset - 1);
                 } else {
                     const dataStreamLength = skeleton.getModel().getBodyModel().getBody().dataStream.length ?? Infinity;
                     // -1 because the length of the string will be 1 larger than the index, and the reason for subtracting another 1 is because it ends in \n
-                    cursor = Math.min(dataStreamLength - 2, cursorEnd + 1);
+                    cursor = Math.min(dataStreamLength - 2, endOffset + 1);
                 }
             }
 
             this._textSelectionManagerService.replace([
                 {
-                    cursorStart: cursor,
-                    cursorEnd: cursor,
-                    isCollapse: true,
+                    startOffset: cursor,
+                    endOffset: cursor,
+                    collapsed: true,
                     style,
                 },
             ]);
@@ -151,7 +151,7 @@ export class MoveCursorController extends Disposable {
         if (selectionRange == null) {
             return;
         }
-        const referenceSpan = docSkeleton.findNodeByCharIndex(selectionRange.cursorStart);
+        const referenceSpan = docSkeleton.findNodeByCharIndex(selectionRange.startOffset);
         if (referenceSpan == null || span == null) {
             return;
         }

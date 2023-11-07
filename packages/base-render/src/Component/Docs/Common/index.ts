@@ -3,7 +3,7 @@ export * from './convert-cursor';
 export * from './Line';
 export * from './Liquid';
 export * from './Page';
+export * from './Range';
 export * from './Section';
 export * from './Span';
-export * from './TextSelection';
 export * from './Tools';

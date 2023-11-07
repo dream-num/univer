@@ -1,4 +1,4 @@
-import { ITextSelectionRangeWithStyle } from '@univerjs/base-render';
+import { ITextRangeWithStyle } from '@univerjs/base-render';
 import {
     BooleanNumber,
     CommandType,
@@ -141,14 +141,14 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         memoryCursor.reset();
 
         for (const selection of selections) {
-            const { cursorStart, cursorEnd } = selection;
+            const { startOffset, endOffset } = selection;
 
             const body: IDocumentBody = {
                 dataStream: '',
                 textRuns: [
                     {
                         st: 0,
-                        ed: cursorEnd - cursorStart,
+                        ed: endOffset - startOffset,
                         ts: {
                             [COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId]]: formatValue,
                         },
@@ -156,7 +156,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 ],
             };
 
-            const len = cursorStart - memoryCursor.cursor;
+            const len = startOffset - memoryCursor.cursor;
             if (len !== 0) {
                 doMutation.params!.mutations.push({
                     t: 'r',
@@ -168,12 +168,12 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             doMutation.params!.mutations.push({
                 t: 'r',
                 body,
-                len: cursorEnd - cursorStart,
+                len: endOffset - startOffset,
                 segmentId,
             });
 
             memoryCursor.reset();
-            memoryCursor.moveCursor(cursorEnd);
+            memoryCursor.moveCursor(endOffset);
         }
 
         const result = commandService.syncExecuteCommand<
@@ -211,20 +211,20 @@ function isTextDecoration(value: unknown | ITextDecoration): value is ITextDecor
 function getReverseFormatValueInSelection(
     textRuns: ITextRun[],
     key: keyof IStyleBase,
-    selections: ITextSelectionRangeWithStyle[]
+    selections: ITextRangeWithStyle[]
 ): BooleanNumber | ITextDecoration {
     let ti = 0;
     let si = 0;
 
     while (ti !== textRuns.length && si !== selections.length) {
-        const { cursorStart, cursorEnd } = selections[si];
+        const { startOffset, endOffset } = selections[si];
 
         // TODO: @jocs handle sid in textRun
         const { st, ed, ts } = textRuns[ti];
 
-        if (cursorEnd <= st) {
+        if (endOffset <= st) {
             si++;
-        } else if (ed <= cursorStart) {
+        } else if (ed <= startOffset) {
             ti++;
         } else {
             if (ts?.[key] == null) {

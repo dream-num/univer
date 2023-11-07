@@ -1,12 +1,8 @@
-import { ITextSelectionRange, Nullable, Tools } from '@univerjs/core';
+import { ITextRange, Nullable, Tools } from '@univerjs/core';
 
 import { COLORS } from '../../../Basics/Const';
 import { INodePosition } from '../../../Basics/Interfaces';
-import {
-    ITextSelectionRangeWithStyle,
-    ITextSelectionStyle,
-    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-} from '../../../Basics/TextSelection';
+import { ITextRangeWithStyle, ITextSelectionStyle, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '../../../Basics/range';
 import { getColor } from '../../../Basics/Tools';
 import { IPoint } from '../../../Basics/Vector2';
 import { Scene } from '../../../Scene';
@@ -15,12 +11,7 @@ import { RegularPolygon } from '../../../Shape/RegularPolygon';
 import { ThinScene } from '../../../ThinScene';
 import { DocumentSkeleton } from '../DocSkeleton';
 import { IDocumentOffsetConfig } from '../Document';
-import {
-    compareNodePosition,
-    getOneTextSelectionRange,
-    NodePositionConvertToCursor,
-    NodePositionMap,
-} from './convert-cursor';
+import { NodePositionConvertToCursor, NodePositionMap } from './convert-cursor';
 
 const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
 
@@ -28,46 +19,51 @@ const TEXT_ANCHOR_KEY_PREFIX = '__TestSelectionAnchor__';
 
 const ID_LENGTH = 6;
 
-export function cursorConvertToTextSelection(
+export function cursorConvertToTextRange(
     scene: Scene,
-    range: ITextSelectionRangeWithStyle,
+    range: ITextRangeWithStyle,
     docSkeleton: DocumentSkeleton,
     documentOffsetConfig: IDocumentOffsetConfig
-): Nullable<TextSelection> {
-    const { cursorStart, cursorEnd, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE } = range;
+): Nullable<TextRange> {
+    const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE } = range;
+    const minOffset = Math.min(startOffset, endOffset);
+    const maxOffset = Math.max(startOffset, endOffset);
 
-    const startNode = docSkeleton.findNodePositionByCharIndex(cursorStart);
-    const endNode = cursorStart !== cursorEnd ? docSkeleton.findNodePositionByCharIndex(cursorEnd) : null;
+    const startPosition = docSkeleton.findNodePositionByCharIndex(minOffset);
+    const endPosition = minOffset !== maxOffset ? docSkeleton.findNodePositionByCharIndex(maxOffset) : startPosition;
 
-    const textSelection = new TextSelection(scene, startNode, endNode, style);
+    const textRange = new TextRange(scene, documentOffsetConfig, docSkeleton, startPosition, endPosition, style);
 
-    textSelection.refresh(documentOffsetConfig, docSkeleton);
+    textRange.refresh();
 
-    return textSelection;
+    return textRange;
 }
 
-export class TextSelection {
+export class TextRange {
+    // Identifies whether the range is the current one, most of which is the last range.
     private _current = false;
-
+    // The rendered range graphic when collapsed is false
     private _rangeShape: Nullable<RegularPolygon>;
-
+    // The rendered range graphic when collapsed is true
     private _anchorShape: Nullable<Rect>;
-
-    private _rangeList: ITextSelectionRange[] = [];
+    // The start position of the range
+    startOffset: number;
+    // The end position of the range
+    endOffset: number;
 
     constructor(
         private _scene: ThinScene,
+        private _documentOffsetConfig: IDocumentOffsetConfig,
+        private _docSkeleton: DocumentSkeleton,
         public startNodePosition?: Nullable<INodePosition>,
         public endNodePosition?: Nullable<INodePosition>,
         private _style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE
     ) {}
 
-    getRange(): Nullable<ITextSelectionRange> {
-        return getOneTextSelectionRange(this._rangeList);
-    }
+    get collapsed() {
+        const { startOffset, endOffset } = this;
 
-    getRangeList() {
-        return this._rangeList;
+        return startOffset != null && startOffset === endOffset;
     }
 
     getAnchor() {
@@ -98,38 +94,6 @@ export class TextSelection {
         this._current = false;
     }
 
-    isEmpty() {
-        return this.startNodePosition == null && this.endNodePosition == null;
-    }
-
-    isCollapsed() {
-        if (this.startNodePosition != null && this.endNodePosition == null) {
-            return true;
-        }
-
-        if (this.isSamePosition()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    isRange() {
-        const start = this.startNodePosition;
-
-        const end = this.endNodePosition;
-
-        if (start == null || end == null) {
-            return false;
-        }
-
-        if (this.isSamePosition()) {
-            return false;
-        }
-
-        return true;
-    }
-
     dispose() {
         this._rangeShape?.dispose();
         this._rangeShape = null;
@@ -137,40 +101,33 @@ export class TextSelection {
         this._anchorShape = null;
     }
 
-    isIntersection(textSelection: TextSelection) {
-        const activeRange = this.getRange();
-
-        const compareRange = textSelection.getRange();
-
-        if (compareRange == null || activeRange == null) {
-            return false;
-        }
-
-        const { cursorStart: activeStart, cursorEnd: activeEnd } = activeRange;
-        const { cursorStart: compareStart, cursorEnd: compareEnd } = compareRange;
+    isIntersection(compareRange: TextRange) {
+        const { startOffset: activeStart, endOffset: activeEnd } = this;
+        const { startOffset: compareStart, endOffset: compareEnd } = compareRange;
 
         return activeStart <= compareEnd && activeEnd >= compareStart;
     }
 
-    refresh(documentOffsetConfig: IDocumentOffsetConfig, docSkeleton: DocumentSkeleton) {
+    refresh() {
+        const { _documentOffsetConfig, _docSkeleton } = this;
         const start = this.startNodePosition;
         const end = this.endNodePosition;
 
         this._anchorShape?.hide();
         this._rangeShape?.hide();
 
-        if (this.isEmpty()) {
+        if (this._isEmpty()) {
             return;
         }
 
-        const { docsLeft, docsTop } = documentOffsetConfig;
+        const { docsLeft, docsTop } = _documentOffsetConfig;
 
-        const convertor = new NodePositionConvertToCursor(documentOffsetConfig, docSkeleton);
+        const convertor = new NodePositionConvertToCursor(_documentOffsetConfig, _docSkeleton);
 
-        if (this.isCollapsed()) {
+        if (this._isCollapsed()) {
             const { pointGroup, cursorList } = convertor.getRangePointData(start, start);
 
-            this._setRangeList(cursorList);
+            this._setOffsets(cursorList);
             pointGroup.length > 0 && this._createOrUpdateAnchor(pointGroup, docsLeft, docsTop);
 
             return;
@@ -178,41 +135,25 @@ export class TextSelection {
 
         const { pointGroup, cursorList } = convertor.getRangePointData(start, end);
 
-        this._setRangeList(cursorList);
+        this._setOffsets(cursorList);
+
         pointGroup.length > 0 && this._createOrUpdateRange(pointGroup, docsLeft, docsTop);
     }
 
     getStart() {
-        if (this.startNodePosition == null) {
-            return null;
-        }
-
-        if (this.endNodePosition == null) {
-            return this.startNodePosition;
-        }
-
-        const { start } = compareNodePosition(this.startNodePosition, this.endNodePosition);
-
-        return start;
+        return this.startNodePosition;
     }
 
     getEnd() {
-        if (this.startNodePosition == null) {
-            return this.endNodePosition;
-        }
-
-        if (this.endNodePosition == null) {
-            return null;
-        }
-
-        const { end } = compareNodePosition(this.startNodePosition, this.endNodePosition);
-
-        return end;
+        return this.endNodePosition;
     }
 
-    private isSamePosition() {
-        const start = this.startNodePosition;
+    private _isEmpty() {
+        return this.startNodePosition == null && this.endNodePosition == null;
+    }
 
+    private _isCollapsed() {
+        const start = this.startNodePosition;
         const end = this.endNodePosition;
 
         if (start == null || end == null) {
@@ -303,13 +244,10 @@ export class TextSelection {
         this._scene.addObject(anchor, 2);
     }
 
-    private _setRangeList(rangeList: ITextSelectionRange[]) {
-        if (rangeList.length === 0) {
-            return;
-        }
+    private _setOffsets(cursorList: ITextRange[]) {
+        const { startOffset, endOffset } = cursorList[0];
 
-        // const firstCursor = cursorList[0];
-
-        this._rangeList = rangeList;
+        this.startOffset = startOffset;
+        this.endOffset = endOffset;
     }
 }

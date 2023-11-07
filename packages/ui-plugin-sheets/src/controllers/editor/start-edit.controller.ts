@@ -166,8 +166,6 @@ export class StartEditController extends Disposable {
                     cursorStart: 0,
                     cursorEnd: 0,
                     isCollapse: true,
-                    isEndBack: true,
-                    isStartBack: true,
                 },
             ]);
 
@@ -463,8 +461,6 @@ export class StartEditController extends Disposable {
                         cursorStart: 0,
                         cursorEnd: 0,
                         isCollapse: true,
-                        isEndBack: true,
-                        isStartBack: true,
                     },
                 ]);
             } else {
@@ -480,8 +476,6 @@ export class StartEditController extends Disposable {
                         cursorStart: cursor,
                         cursorEnd: cursor,
                         isCollapse: true,
-                        isEndBack: true,
-                        isStartBack: true,
                     },
                 ]);
             }

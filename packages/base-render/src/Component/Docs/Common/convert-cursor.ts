@@ -101,12 +101,14 @@ export function compareNodePositionLogic(pos1: INodePosition, pos2: INodePositio
 
 export function compareNodePosition(pos1: INodePosition, pos2: INodePosition) {
     const compare = compareNodePositionLogic(pos1, pos2);
+
     if (compare) {
         return {
             start: pos1,
             end: pos2,
         };
     }
+
     return {
         start: pos2,
         end: pos1,
@@ -114,23 +116,20 @@ export function compareNodePosition(pos1: INodePosition, pos2: INodePosition) {
 }
 
 export function getOneTextSelectionRange(rangeList: ITextSelectionRange[]): Nullable<ITextSelectionRange> {
-    const cursorList = rangeList;
-
-    if (rangeList.length === 0) {
+    const rangeCount = rangeList.length;
+    if (rangeCount === 0) {
         return;
     }
 
-    const firstCursor = cursorList[0];
+    const firstCursor = rangeList[0];
 
-    const lastCursor = cursorList[cursorList.length - 1];
+    const lastCursor = rangeList[rangeCount - 1];
 
-    const isCollapse = cursorList.length === 1 && firstCursor.isCollapse;
+    const isCollapse = rangeList.length === 1 && firstCursor.isCollapse;
 
     return {
         cursorStart: firstCursor.cursorStart,
         cursorEnd: lastCursor.cursorEnd,
-        isStartBack: firstCursor.isStartBack,
-        isEndBack: lastCursor.isEndBack,
         isCollapse,
     };
 }
@@ -211,10 +210,6 @@ export class NodePositionConvertToCursor {
 
             const isEndBack = end.span === end_sp && isLast ? end.isBack : false;
 
-            // let isStartBackFin = isStartBack;
-
-            // let isEndBackFin = isEndBack;
-
             const isCollapse = start === end;
 
             if (start_sp === 0 && end_sp === spanGroup.length - 1) {
@@ -253,11 +248,10 @@ export class NodePositionConvertToCursor {
             }
 
             pointGroup.push(this._pushToPoints(position));
+
             cursorList.push({
-                isStartBack,
-                isEndBack,
-                cursorStart,
-                cursorEnd,
+                cursorStart: isStartBack ? cursorStart : cursorStart + 1,
+                cursorEnd: isEndBack ? cursorEnd : cursorEnd + 1,
                 isCollapse,
             });
         });

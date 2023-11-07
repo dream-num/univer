@@ -34,7 +34,7 @@ export function InsertApply(
 
     updateAttributeByInsert(body, insertBody, textLength, currentIndex);
 
-    // console.log('插入的model打印', bodyModel, body, textLength);
+    console.log('插入的model打印', bodyModel, textLength, currentIndex);
 }
 
 function updateAttributeByInsert(

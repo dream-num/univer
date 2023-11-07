@@ -284,6 +284,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
     // }
 
     let prePageStartIndex = start;
+
     for (const page of pages) {
         const { sections } = page;
         const pageStartIndex = prePageStartIndex;
@@ -291,6 +292,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
         let preSectionStartIndex = pageStartIndex;
         let maxContentWidth = -Infinity;
         let contentHeight = 0;
+
         for (const section of sections) {
             const { columns } = section;
             const sectionStartIndex = preSectionStartIndex;
@@ -298,6 +300,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
             let preColumnStartIndex = sectionStartIndex;
             let maxSectionHeight = -Infinity;
             let sectionWidth = 0;
+
             for (const column of columns) {
                 const { lines } = column;
                 const columStartIndex = preColumnStartIndex;
@@ -306,6 +309,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 let columnHeight = 0;
                 let maxColumnWidth = -Infinity;
                 let preLine: Nullable<IDocumentSkeletonLine> = null;
+
                 for (const line of lines) {
                     const { divides, lineHeight } = line;
                     const lineStartIndex = preLineStartIndex;
@@ -315,12 +319,14 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                     let maxLineAsc = 0;
                     columnHeight += lineHeight;
                     const divideLength = divides.length;
+
                     for (let i = 0; i < divideLength; i++) {
                         const divide = divides[i];
                         const { spanGroup } = divide;
 
                         const divStartIndex = preDivideStartIndex;
                         let divEndIndex = divStartIndex;
+
                         for (const span of spanGroup) {
                             const increaseValue = span.spanType === SpanType.LIST ? 0 : span.count || 1;
                             // pageEndIndex += increaseValue;

@@ -351,6 +351,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         func: (node: DataStreamTreeNode | DocumentBodyModelOrSimple) => void
     ) {
         let parent: Nullable<DataStreamTreeNode> = node;
+
         while (parent) {
             func(parent);
             parent = parent.parent;
@@ -667,7 +668,13 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
             currentNode.selfPlus(1, currentNode.getPositionInParent());
             const children = currentNode.children;
             let isStartFix = false;
+
             for (const node of children) {
+                // `insertedLastNode` no need to fix, because it already add 1.
+                if (node === insertedLastNode) {
+                    continue;
+                }
+
                 if (node.startIndex >= insertEndIndex + 1) {
                     isStartFix = true;
                 }

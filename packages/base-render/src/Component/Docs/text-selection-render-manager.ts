@@ -615,19 +615,16 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const { node: span, ratioX, ratioY } = node;
+        const { node: span, ratioX } = node;
 
         const position = this._docSkeleton?.findPositionBySpan(span);
 
         if (position == null) {
             return;
         }
+
         const HALF = 0.5;
-        let isBack = false;
-        //|| (span.streamType === DataStreamTreeTokenType.PARAGRAPH && isStart)
-        if (ratioX < HALF) {
-            isBack = true;
-        }
+        const isBack = ratioX < HALF;
 
         return {
             ...position,

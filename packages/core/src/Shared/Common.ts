@@ -497,10 +497,6 @@ export function getBorderStyleType(type: string) {
     return str;
 }
 
-export function getTextIndexByCursor(index: number, isBack: boolean = false) {
-    return isBack ? index - 1 : index;
-}
-
 export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
     let body = model.body;
 

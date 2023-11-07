@@ -1,7 +1,6 @@
 import {
     CommandType,
     createEmptyDocSnapshot,
-    getTextIndexByCursor,
     ICommand,
     ICommandInfo,
     ICommandService,
@@ -23,19 +22,13 @@ import {
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
     type: CommandType.COMMAND,
-    handler: async (accessor) =>
-        // const inputController = accessor.get(InputController);
-        // inputController.deleteLeft();
-        true,
+    handler: async () => true,
 };
 
 export const BreakLineCommand: ICommand = {
     id: 'doc.command.break-line',
     type: CommandType.COMMAND,
-    handler: async (accessor) =>
-        // const inputController = accessor.get(InputController);
-        // inputController.breakLine();
-        true,
+    handler: async () => true,
 };
 
 export interface IInsertCommandParams {
@@ -56,8 +49,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         const commandService = accessor.get(ICommandService);
 
         const { range, segmentId, body, unitId } = params;
-        const { cursorStart, isStartBack, isCollapse } = range;
-        const textStart = getTextIndexByCursor(cursorStart, isStartBack);
+        const { cursorStart, isCollapse } = range;
 
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -70,7 +62,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         if (isCollapse) {
             doMutation.params!.mutations.push({
                 t: 'r',
-                len: textStart + 1,
+                len: cursorStart,
                 segmentId,
             });
         } else {
@@ -84,14 +76,6 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             line: 0, // FIXME: line shouldn't be 0 here?
             segmentId,
         });
-
-        const undoMutation: ICommandInfo<IRichTextEditingMutationParams> = {
-            id: RichTextEditingMutation.id,
-            params: {
-                unitId,
-                mutations: [],
-            },
-        };
 
         // TODO@wzhudev: prepare undo mutation
         const result = commandService.syncExecuteCommand<
@@ -200,20 +184,18 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             },
         };
 
-        const { cursorStart, cursorEnd, isEndBack, isStartBack } = range;
-        const textStart = getTextIndexByCursor(cursorStart, isStartBack);
-        const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
+        const { cursorStart, cursorEnd } = range;
 
         doMutation.params!.mutations.push({
             t: 'r',
-            len: textStart + 1,
+            len: cursorStart,
             segmentId,
         });
 
         doMutation.params!.mutations.push({
             t: 'r',
             body: updateBody,
-            len: textEnd - textStart + 1,
+            len: cursorEnd - cursorStart,
             segmentId,
             coverType,
         });
@@ -267,11 +249,9 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         };
 
         if (range.isCollapse) {
-            const start = getTextIndexByCursor(range.cursorStart, range.isStartBack);
-
             doMutation.params!.mutations.push({
                 t: 'r',
-                len: start + 1,
+                len: range.cursorStart,
                 segmentId,
             });
         } else {
@@ -340,11 +320,11 @@ function getRetainAndDeleteFromReplace(
     range: ITextSelectionRange,
     segmentId?: string
 ): Array<IRetainMutationParams | IDeleteMutationParams> {
-    const { cursorStart, cursorEnd, isEndBack, isStartBack, isCollapse } = range;
+    const { cursorStart, cursorEnd, isCollapse } = range;
     const dos: Array<IRetainMutationParams | IDeleteMutationParams> = [];
 
-    const textStart = getTextIndexByCursor(cursorStart, isStartBack) + (isCollapse ? 0 : 1);
-    const textEnd = getTextIndexByCursor(cursorEnd, isEndBack);
+    const textStart = cursorStart + (isCollapse ? -1 : 0);
+    const textEnd = cursorEnd - 1;
 
     if (textStart > 0) {
         dos.push({

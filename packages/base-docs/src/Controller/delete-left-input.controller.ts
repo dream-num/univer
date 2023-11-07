@@ -76,20 +76,20 @@ export class DeleteLeftInputController extends Disposable {
         }
 
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
+
         const startNodePosition = activeSelection.getStart();
+
         const preSpan = skeleton.findSpanByPosition(startNodePosition);
 
         const preIsBullet = hasListSpan(preSpan);
 
         const preIsIndent = isIndentBySpan(preSpan, docsModel.body);
 
-        const { cursorStart, isCollapse, isStartBack, segmentId, style } = activeRange;
+        const { cursorStart, isCollapse, segmentId, style } = activeRange;
 
         let cursor = cursorStart;
 
-        if (isStartBack === true) {
-            cursor -= 1;
-        }
+        cursor--;
 
         if (isCollapse === false) {
             cursor += 1;
@@ -137,16 +137,15 @@ export class DeleteLeftInputController extends Disposable {
                     paragraphs: [{ ...updateParagraph }],
                 },
                 range: {
-                    cursorStart: paragraphIndex,
-                    cursorEnd: paragraphIndex,
-                    isEndBack: false,
-                    isStartBack: false,
+                    cursorStart: paragraphIndex + 1,
+                    cursorEnd: paragraphIndex + 1,
                     isCollapse: true,
                 },
                 segmentId,
             });
         } else {
             const endNodePosition = activeSelection?.getEnd();
+
             if (endNodePosition != null) {
                 const endSpan = skeleton.findSpanByPosition(endNodePosition);
                 if (hasListSpan(endSpan) && !isSameLine(preSpan, endSpan)) {
@@ -163,15 +162,8 @@ export class DeleteLeftInputController extends Disposable {
 
         skeleton?.calculate();
 
-        let isBack = false;
-
         if (isUpdateParagraph) {
-            isBack = true;
             cursor++;
-        } else if (isFirstSpan(span)) {
-            isBack = true;
-        } else {
-            cursor--;
         }
 
         // move selection
@@ -180,8 +172,6 @@ export class DeleteLeftInputController extends Disposable {
                 cursorStart: cursor,
                 cursorEnd: cursor,
                 isCollapse: true,
-                isEndBack: isBack,
-                isStartBack: isBack,
                 style,
             },
         ]);

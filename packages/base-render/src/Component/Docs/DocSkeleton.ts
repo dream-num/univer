@@ -164,7 +164,7 @@ export class DocumentSkeleton extends Skeleton {
         };
     }
 
-    findNodePositionByCharIndex(charIndex: number, isBack: boolean = false): Nullable<INodePosition> {
+    findNodePositionByCharIndex(charIndex: number, isBack: boolean = true): Nullable<INodePosition> {
         const nodes = this._findNodeIterator(charIndex);
 
         if (nodes == null) {
@@ -532,7 +532,9 @@ export class DocumentSkeleton extends Skeleton {
         skeleton.pages = allSkeletonPages;
 
         const bodyModel = this._docModel.bodyModel;
+
         bodyModel.resetCache();
+
         for (let i = 0, len = bodyModel.children.length; i < len; i++) {
             const sectionNode = bodyModel.children[i];
             const sectionBreak = bodyModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
@@ -608,6 +610,7 @@ export class DocumentSkeleton extends Skeleton {
 
             let curSkeletonPage: IDocumentSkeletonPage = getLastPage(allSkeletonPages);
             let isContinuous = false;
+
             if (sectionType === SectionType.CONTINUOUS) {
                 updateBlockIndex(allSkeletonPages);
                 this.__addNewSectionByContinuous(curSkeletonPage, columnProperties, columnSeparatorType);

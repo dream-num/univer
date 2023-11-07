@@ -803,8 +803,6 @@ export class Transformer implements ITransformerConfig {
         const scene = this.getScene();
         scene.addObject(transformerControl, 2);
 
-        console.log(scene, applyObject);
-
         this._transformerControlMap.set(oKey, transformerControl);
 
         this.onCreateControlObservable.notifyObservers(transformerControl);

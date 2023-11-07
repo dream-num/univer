@@ -11,7 +11,6 @@ import {
 import {
     Direction,
     Disposable,
-    getTextIndexByCursor,
     ICommandInfo,
     ICommandService,
     IUniverInstanceService,
@@ -88,7 +87,7 @@ export class MoveCursorController extends Disposable {
 
         const documentOffsetConfig = docObject.document.getOffsetConfig();
 
-        const { cursorStart, cursorEnd, isEndBack, isStartBack, style } = activeRange;
+        const { cursorStart, cursorEnd, style } = activeRange;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             let cursor;
@@ -98,18 +97,18 @@ export class MoveCursorController extends Disposable {
                 let max = -Infinity;
 
                 for (const range of allRanges) {
-                    min = Math.min(min, getTextIndexByCursor(range!.cursorStart, range!.isStartBack) + 1);
-                    max = Math.max(max, getTextIndexByCursor(range!.cursorEnd, range!.isEndBack) + 1);
+                    min = Math.min(min, range!.cursorStart);
+                    max = Math.max(max, range!.cursorEnd);
                 }
 
                 cursor = direction === Direction.LEFT ? min : max;
             } else {
                 if (direction === Direction.LEFT) {
-                    cursor = Math.max(0, getTextIndexByCursor(cursorStart, isStartBack));
+                    cursor = Math.max(0, cursorStart - 1);
                 } else {
                     const dataStreamLength = skeleton.getModel().getBodyModel().getBody().dataStream.length ?? Infinity;
                     // -1 because the length of the string will be 1 larger than the index, and the reason for subtracting another 1 is because it ends in \n
-                    cursor = Math.min(dataStreamLength - 2, getTextIndexByCursor(cursorEnd, isEndBack) + 2);
+                    cursor = Math.min(dataStreamLength - 2, cursorEnd + 1);
                 }
             }
 
@@ -118,8 +117,6 @@ export class MoveCursorController extends Disposable {
                     cursorStart: cursor,
                     cursorEnd: cursor,
                     isCollapse: true,
-                    isEndBack: true,
-                    isStartBack: true,
                     style,
                 },
             ]);
@@ -159,9 +156,7 @@ export class MoveCursorController extends Disposable {
             return;
         }
 
-        let isBack = selectionRange.isStartBack;
-
-        const offsetLeft = this._getSpanLeftOffsetInLine(referenceSpan, isBack);
+        const offsetLeft = this._getSpanLeftOffsetInLine(referenceSpan);
 
         const line = this._getNextOrPrevLine(span, direction);
 
@@ -171,16 +166,15 @@ export class MoveCursorController extends Disposable {
 
         const position: Nullable<INodeSearch> = this._matchPositionByLeftOffset(docSkeleton, line, offsetLeft);
 
-        isBack = isBack == null ? false : isBack;
-
         if (position == null) {
             return;
         }
 
-        return { ...position, isBack };
+        // TODO: @jocs, hardcode isBack to true, `_getTopOrBottomPosition` need to rewrite.
+        return { ...position, isBack: true };
     }
 
-    private _getSpanLeftOffsetInLine(span: IDocumentSkeletonSpan, isBack: boolean) {
+    private _getSpanLeftOffsetInLine(span: IDocumentSkeletonSpan) {
         const divide = span.parent;
 
         if (divide == null) {
@@ -189,15 +183,11 @@ export class MoveCursorController extends Disposable {
 
         const divideLeft = divide.left;
 
-        const { left, width } = span;
+        const { left } = span;
 
         const start = divideLeft + left;
 
-        if (isBack === true) {
-            return start;
-        }
-
-        return start + width;
+        return start;
     }
 
     private _matchPositionByLeftOffset(docSkeleton: DocumentSkeleton, line: IDocumentSkeletonLine, offsetLeft: number) {

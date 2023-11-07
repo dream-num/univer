@@ -140,14 +140,16 @@ export function insertParagraphs(
 
     const paragraphIndexList = [];
     let firstInsertParagraphNextIndex = -1;
+
     for (let i = 0, len = paragraphs.length; i < len; i++) {
         const paragraph = paragraphs[i];
         const { startIndex } = paragraph;
+
         if (startIndex >= currentIndex) {
             paragraph.startIndex += textLength;
         }
 
-        if (firstInsertParagraphNextIndex === -1 && startIndex > currentIndex) {
+        if (firstInsertParagraphNextIndex === -1 && startIndex >= currentIndex) {
             firstInsertParagraphNextIndex = i;
         }
 
@@ -155,6 +157,7 @@ export function insertParagraphs(
     }
 
     let deleteReptIndex = -1;
+
     if (insertParagraphs) {
         for (let i = 0, len = insertParagraphs.length; i < len; i++) {
             const insertParagraph = insertParagraphs[i];

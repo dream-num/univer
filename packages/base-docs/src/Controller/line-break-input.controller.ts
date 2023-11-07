@@ -18,6 +18,24 @@ import { BreakLineCommand, InsertCommand } from '../commands/commands/core-editi
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
+function generateParagraphs(dataStream: string) {
+    const paragraphs: IParagraph[] = [];
+
+    for (let i = 0, len = dataStream.length; i < len; i++) {
+        const char = dataStream[i];
+
+        if (char !== DataStreamTreeTokenType.PARAGRAPH) {
+            continue;
+        }
+
+        paragraphs.push({
+            startIndex: i,
+        });
+    }
+
+    return paragraphs;
+}
+
 @OnLifecycle(LifecycleStages.Rendered, LineBreakInputController)
 export class LineBreakInputController extends Disposable {
     private _onInputSubscription: Nullable<Subscription>;
@@ -67,23 +85,16 @@ export class LineBreakInputController extends Disposable {
         }
 
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const unitId = docsModel.getUnitId();
 
-        const { cursorStart, cursorEnd, isCollapse, isEndBack, isStartBack, segmentId, style } = activeRange;
+        const { cursorStart, segmentId, style } = activeRange;
 
         // split paragraph
-        let cursor = cursorStart;
-
-        if (isStartBack === false) {
-            cursor += 1;
-        }
-
-        // const selectionRemain = document.remainActiveSelection() as TextSelection | undefined;
-
         this._commandService.executeCommand(InsertCommand.id, {
-            unitId: docsModel.getUnitId(),
+            unitId,
             body: {
                 dataStream: DataStreamTreeTokenType.PARAGRAPH,
-                paragraphs: this._generateParagraph(DataStreamTreeTokenType.PARAGRAPH),
+                paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH),
             },
             range: activeRange,
             segmentId,
@@ -94,33 +105,12 @@ export class LineBreakInputController extends Disposable {
         // move selection
         this._textSelectionManagerService.replace([
             {
-                cursorStart: cursor + 1,
-                cursorEnd: cursor + 1,
+                cursorStart: cursorStart + 1,
+                cursorEnd: cursorStart + 1,
                 isCollapse: true,
-                isEndBack,
-                isStartBack,
                 style,
             },
         ]);
-
-        // const span = document.findNodeByCharIndex(++cursor);
-
-        // this._adjustSelection(document as Documents, selectionRemain, span, true);
-    }
-
-    private _generateParagraph(dataStream: string) {
-        const paragraphs: IParagraph[] = [];
-        for (let i = 0, len = dataStream.length; i < len; i++) {
-            const char = dataStream[i];
-            if (char !== DataStreamTreeTokenType.PARAGRAPH) {
-                continue;
-            }
-
-            paragraphs.push({
-                startIndex: i,
-            });
-        }
-        return paragraphs;
     }
 
     private _getDocObject() {

@@ -229,6 +229,9 @@ export class SelectionRenderService implements ISelectionRenderService {
         }
         // update drag observer
         control.selectionFilled$.subscribe((filled) => {
+            if (filled == null) {
+                return;
+            }
             const { startColumn, endColumn, startRow, endRow } = control.model;
             const {
                 startColumn: newStartColumn,

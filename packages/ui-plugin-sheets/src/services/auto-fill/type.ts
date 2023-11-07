@@ -41,4 +41,7 @@ export enum APPLY_TYPE {
     COPY = '0',
     SERIES = '1',
     ONLY_FORMAT = '2',
+    NO_FORMAT = '3',
 }
+
+export type APPLY_TYPE_IN_USE = Omit<APPLY_TYPE, APPLY_TYPE.NO_FORMAT>;

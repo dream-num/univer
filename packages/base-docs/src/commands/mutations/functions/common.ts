@@ -37,7 +37,7 @@ export function insertTextRuns(
         const textRun = textRuns[i];
         const { st, ed } = textRun;
 
-        if (st >= currentIndex) {
+        if (st > currentIndex) {
             textRun.st += textLength;
             textRun.ed += textLength;
 
@@ -51,6 +51,7 @@ export function insertTextRuns(
              * So, it is necessary to set ed >= currentIndex - 1 to ensure that the new text is inserted while maintaining the style of the existing content.
              */
             textRun.ed += textLength;
+
             if (!Number.isFinite(insertIndex)) {
                 insertIndex = i;
             }

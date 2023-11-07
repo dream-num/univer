@@ -187,6 +187,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _selectionStyle: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE;
 
     private _isSelectionEnabled: boolean = true;
+
     private _viewPortObserverMap = new Map<
         string,
         {

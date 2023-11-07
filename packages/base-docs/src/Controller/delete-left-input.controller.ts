@@ -144,7 +144,7 @@ export class DeleteLeftInputController extends Disposable {
                 segmentId,
             });
         } else {
-            const endNodePosition = activeSelection?.getEnd();
+            const endNodePosition = activeRangeInstance?.getEnd();
 
             if (endNodePosition != null) {
                 const endSpan = skeleton.findSpanByPosition(endNodePosition);

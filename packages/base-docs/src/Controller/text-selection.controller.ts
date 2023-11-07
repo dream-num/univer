@@ -185,12 +185,12 @@ export class TextSelectionController extends Disposable {
                 pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
                 ranges: textSelections
                     .map((textSelection) => {
-                        let { endNodePosition } = textSelection;
-                        const { startNodePosition } = textSelection;
-                        if (endNodePosition == null) {
-                            endNodePosition = startNodePosition;
+                        let { focusNodePosition } = textSelection;
+                        const { anchorNodePosition } = textSelection;
+                        if (focusNodePosition == null) {
+                            focusNodePosition = anchorNodePosition;
                         }
-                        const rangeList = convert.getRangePointData(startNodePosition, endNodePosition).cursorList;
+                        const rangeList = convert.getRangePointData(anchorNodePosition, focusNodePosition).cursorList;
 
                         return getOneTextSelectionRange(rangeList);
                     })

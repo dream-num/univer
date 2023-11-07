@@ -11,7 +11,7 @@ import { RegularPolygon } from '../../../Shape/RegularPolygon';
 import { ThinScene } from '../../../ThinScene';
 import { DocumentSkeleton } from '../DocSkeleton';
 import { IDocumentOffsetConfig } from '../Document';
-import { NodePositionConvertToCursor, NodePositionMap } from './convert-cursor';
+import { compareNodePosition, NodePositionConvertToCursor, NodePositionMap } from './convert-cursor';
 
 const TEXT_RANGE_KEY_PREFIX = '__TestSelectionRange__';
 
@@ -26,13 +26,18 @@ export function cursorConvertToTextRange(
     documentOffsetConfig: IDocumentOffsetConfig
 ): Nullable<TextRange> {
     const { startOffset, endOffset, style = NORMAL_TEXT_SELECTION_PLUGIN_STYLE } = range;
-    const minOffset = Math.min(startOffset, endOffset);
-    const maxOffset = Math.max(startOffset, endOffset);
 
-    const startPosition = docSkeleton.findNodePositionByCharIndex(minOffset);
-    const endPosition = minOffset !== maxOffset ? docSkeleton.findNodePositionByCharIndex(maxOffset) : startPosition;
+    const anchorNodePosition = docSkeleton.findNodePositionByCharIndex(startOffset);
+    const focusNodePosition = startOffset !== endOffset ? docSkeleton.findNodePositionByCharIndex(endOffset) : null;
 
-    const textRange = new TextRange(scene, documentOffsetConfig, docSkeleton, startPosition, endPosition, style);
+    const textRange = new TextRange(
+        scene,
+        documentOffsetConfig,
+        docSkeleton,
+        anchorNodePosition,
+        focusNodePosition,
+        style
+    );
 
     textRange.refresh();
 
@@ -55,8 +60,8 @@ export class TextRange {
         private _scene: ThinScene,
         private _documentOffsetConfig: IDocumentOffsetConfig,
         private _docSkeleton: DocumentSkeleton,
-        public startNodePosition?: Nullable<INodePosition>,
-        public endNodePosition?: Nullable<INodePosition>,
+        public anchorNodePosition?: Nullable<INodePosition>,
+        public focusNodePosition?: Nullable<INodePosition>,
         private _style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE
     ) {}
 
@@ -110,8 +115,8 @@ export class TextRange {
 
     refresh() {
         const { _documentOffsetConfig, _docSkeleton } = this;
-        const start = this.startNodePosition;
-        const end = this.endNodePosition;
+        const anchor = this.anchorNodePosition;
+        const focus = this.focusNodePosition;
 
         this._anchorShape?.hide();
         this._rangeShape?.hide();
@@ -125,7 +130,7 @@ export class TextRange {
         const convertor = new NodePositionConvertToCursor(_documentOffsetConfig, _docSkeleton);
 
         if (this._isCollapsed()) {
-            const { pointGroup, cursorList } = convertor.getRangePointData(start, start);
+            const { pointGroup, cursorList } = convertor.getRangePointData(anchor, anchor);
 
             this._setOffsets(cursorList);
             pointGroup.length > 0 && this._createOrUpdateAnchor(pointGroup, docsLeft, docsTop);
@@ -133,7 +138,7 @@ export class TextRange {
             return;
         }
 
-        const { pointGroup, cursorList } = convertor.getRangePointData(start, end);
+        const { pointGroup, cursorList } = convertor.getRangePointData(anchor, focus);
 
         this._setOffsets(cursorList);
 
@@ -141,20 +146,44 @@ export class TextRange {
     }
 
     getStart() {
-        return this.startNodePosition;
+        if (this.anchorNodePosition == null) {
+            return null;
+        }
+
+        if (this.focusNodePosition == null) {
+            return this.anchorNodePosition;
+        }
+
+        const { start } = compareNodePosition(this.anchorNodePosition, this.focusNodePosition);
+
+        return start;
     }
 
     getEnd() {
-        return this.endNodePosition;
+        if (this.anchorNodePosition == null) {
+            return this.focusNodePosition;
+        }
+
+        if (this.focusNodePosition == null) {
+            return null;
+        }
+
+        const { end } = compareNodePosition(this.anchorNodePosition, this.focusNodePosition);
+
+        return end;
     }
 
     private _isEmpty() {
-        return this.startNodePosition == null && this.endNodePosition == null;
+        return this.anchorNodePosition == null && this.focusNodePosition == null;
     }
 
     private _isCollapsed() {
-        const start = this.startNodePosition;
-        const end = this.endNodePosition;
+        const start = this.anchorNodePosition;
+        const end = this.focusNodePosition;
+
+        if (start != null && end == null) {
+            return true;
+        }
 
         if (start == null || end == null) {
             return false;
@@ -245,6 +274,10 @@ export class TextRange {
     }
 
     private _setOffsets(cursorList: ITextRange[]) {
+        if (cursorList[0] == null) {
+            return;
+        }
+
         const { startOffset, endOffset } = cursorList[0];
 
         this.startOffset = startOffset;

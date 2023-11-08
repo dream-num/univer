@@ -1,27 +1,34 @@
 import {
+    AddMergeUndoMutationFactory,
+    AddWorksheetMergeMutation,
+    getAddMergeMutationRangeByType,
+    IAddWorksheetMergeMutationParams,
+    IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
+    RemoveMergeUndoMutationFactory,
+    RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from '@univerjs/base-sheets';
-import { AddWorksheetMergeCommand } from '@univerjs/base-sheets/commands/commands/add-worksheet-merge.command.js';
-import { SetRangeValuesCommand } from '@univerjs/base-sheets/commands/commands/set-range-values.command.js';
 import { SetSelectionsOperation } from '@univerjs/base-sheets/commands/operations/selection.operation.js';
 import {
     CommandType,
     ICellData,
     ICommand,
+    ICommandInfo,
     ICommandService,
     IRange,
     IUndoRedoService,
     IUniverInstanceService,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
+    sequenceExecute,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface IAutoFillCommandParams {
-    worksheetId: string;
-    workbookId: string;
+    worksheetId?: string;
+    workbookId?: string;
     applyRange: IRange;
     selectionRange: IRange;
     applyDatas: ICellData[][];
@@ -34,25 +41,50 @@ export const AutoFillCommand: ICommand = {
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params?: IAutoFillCommandParams) => {
         const commandService = accessor.get(ICommandService);
-        const { applyRange, selectionRange, applyDatas, workbookId, worksheetId, applyMergeRanges } = params || {};
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+
+        const {
+            applyRange,
+            selectionRange,
+            applyDatas,
+            workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
+            worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
+            applyMergeRanges,
+        } = params || {};
         if (!applyRange || !applyDatas || !selectionRange) {
             return false;
         }
-        commandService.executeCommand(SetRangeValuesCommand.id, {
-            ...params,
-            range: applyRange,
-            value: applyDatas,
-        });
 
-        if (applyMergeRanges) {
-            commandService.executeCommand(AddWorksheetMergeCommand.id, {
-                selections: applyMergeRanges,
-                workbookId,
-                worksheetId,
-            });
+        // set range value
+        const cellValue = new ObjectMatrix<ICellData>();
+        const { startRow, startColumn, endRow, endColumn } = applyRange;
+
+        for (let r = 0; r <= endRow - startRow; r++) {
+            for (let c = 0; c <= endColumn - startColumn; c++) {
+                cellValue.setValue(r + startRow, c + startColumn, applyDatas[r][c]);
+            }
         }
 
-        commandService.executeCommand(SetSelectionsOperation.id, {
+        const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+            range: [selectionRange],
+            worksheetId,
+            workbookId,
+            cellValue: cellValue.getMatrix(),
+        };
+
+        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+            accessor,
+            setRangeValuesMutationParams
+        );
+
+        const setRangeResult = commandService.syncExecuteCommand(
+            SetRangeValuesMutation.id,
+            setRangeValuesMutationParams
+        );
+
+        // set selection
+        const selectionResult = commandService.syncExecuteCommand(SetSelectionsOperation.id, {
             selections: [
                 {
                     primary: {
@@ -66,6 +98,55 @@ export const AutoFillCommand: ICommand = {
             workbookId,
             worksheetId,
         });
+
+        const undoSeq: ICommandInfo[] = [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }];
+        const redoSeq: ICommandInfo[] = [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }];
+
+        let removeMergeResult = true;
+        let addMergeResult = true;
+
+        // add worksheet merge
+        if (applyMergeRanges) {
+            const ranges = getAddMergeMutationRangeByType(applyMergeRanges);
+            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+                workbookId,
+                worksheetId,
+                ranges,
+            };
+            const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+                accessor,
+                removeMergeMutationParams
+            );
+            removeMergeResult = commandService.syncExecuteCommand(
+                RemoveWorksheetMergeMutation.id,
+                removeMergeMutationParams
+            );
+            const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
+                workbookId,
+                worksheetId,
+                ranges,
+            };
+            const undoRemoveMutationParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
+                accessor,
+                addMergeMutationParams
+            );
+            addMergeResult = commandService.syncExecuteCommand(AddWorksheetMergeMutation.id, addMergeMutationParams);
+
+            undoSeq.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+            undoSeq.push({ id: RemoveWorksheetMergeMutation.id, params: undoRemoveMutationParams });
+            redoSeq.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
+            redoSeq.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
+        }
+
+        if (setRangeResult && removeMergeResult && addMergeResult && selectionResult) {
+            undoRedoService.pushUndoRedo({
+                unitID: workbookId,
+                undo: async () => sequenceExecute(undoSeq, commandService).result,
+                redo: async () => sequenceExecute(redoSeq, commandService).result,
+            });
+
+            return true;
+        }
         return true;
     },
 };
@@ -120,6 +201,8 @@ export const AutoClearContentCommand: ICommand = {
                 // If there are multiple mutations that form an encapsulated project, they must be encapsulated in the same undo redo element.
                 // Hooks can be used to hook the code of external controllers to add new actions.
                 unitID: workbookId,
+                undoMutations: [{ id: SetRangeValuesMutation.id, params: undoClearMutationParams }],
+                redoMutations: [{ id: SetRangeValuesMutation.id, params: clearMutationParams }],
                 undo() {
                     return commandService.syncExecuteCommand(SetRangeValuesMutation.id, undoClearMutationParams);
                 },

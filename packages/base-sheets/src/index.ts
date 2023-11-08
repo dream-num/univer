@@ -22,6 +22,7 @@ export {
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
+    getAddMergeMutationRangeByType,
 } from './commands/commands/add-worksheet-merge.command';
 export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';
@@ -119,7 +120,10 @@ export {
     getCellAtRowCol,
     getStartRange,
 } from './commands/commands/utils/selection-util';
-export { AddWorksheetMergeMutation } from './commands/mutations/add-worksheet-merge.mutation';
+export {
+    AddMergeUndoMutationFactory,
+    AddWorksheetMergeMutation,
+} from './commands/mutations/add-worksheet-merge.mutation';
 export {
     InsertColMutation,
     InsertColMutationUndoFactory,

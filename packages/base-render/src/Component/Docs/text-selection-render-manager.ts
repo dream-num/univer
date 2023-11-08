@@ -7,7 +7,12 @@ import { PageLayoutType } from '../../Basics/IDocumentSkeletonCached';
 import { IMouseEvent, IPointerEvent } from '../../Basics/IEvents';
 import { INodeInfo, INodePosition } from '../../Basics/Interfaces';
 import { getOffsetRectForDom, transformBoundingCoord } from '../../Basics/Position';
-import { ITextRangeWithStyle, ITextSelectionStyle, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '../../Basics/range';
+import {
+    ITextRangeWithStyle,
+    ITextSelectionStyle,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    RANGE_DIRECTION,
+} from '../../Basics/range';
 import { getCurrentScrollXY } from '../../Basics/ScrollXY';
 import { checkStyle, injectStyle } from '../../Basics/Tools';
 import { Transform } from '../../Basics/Transform';
@@ -84,9 +89,13 @@ export interface ITextSelectionRenderManager {
 
     reset(): void;
 
-    getActiveRangeInstance(): Nullable<TextRange>;
-
-    getActiveRange(): Nullable<ITextRangeWithStyle>;
+    getActiveRange(): Nullable<
+        ITextRangeWithStyle & {
+            startNodePosition: Nullable<INodePosition>;
+            endNodePosition: Nullable<INodePosition>;
+            direction: RANGE_DIRECTION;
+        }
+    >;
 
     eventTrigger(
         evt: IPointerEvent | IMouseEvent,
@@ -238,10 +247,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._isSelectionEnabled = false;
     }
 
-    getActiveRangeInstance() {
-        return this._rangeList.find((range) => range.isActive());
-    }
-
     getActiveRange() {
         const activeRange = this._rangeList.find((range) => range.isActive());
 
@@ -249,12 +254,19 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return null;
         }
 
-        const { startOffset, endOffset, collapsed } = activeRange;
+        const { startOffset, endOffset, collapsed, startNodePosition, endNodePosition, direction } = activeRange;
+
+        if (startOffset == null || endOffset == null) {
+            return null;
+        }
 
         return {
             startOffset,
             endOffset,
             collapsed,
+            startNodePosition,
+            endNodePosition,
+            direction,
             segmentId: this._currentSegmentId,
             style: this._selectionStyle,
         };
@@ -379,7 +391,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._viewportScrollX = scrollX;
         this._viewportScrollY = scrollY;
 
-        this._onSelectionStart$.next(this.getActiveRangeInstance()?.getStart());
+        this._onSelectionStart$.next(this.getActiveRangeInstance()?.startNodePosition);
 
         let preMoveOffsetX = evtOffsetX;
 
@@ -409,8 +421,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
             scene.enableEvent();
 
-            console.log(this.getAllTextRanges());
-
             this._textSelection$.next(this.getAllTextRanges());
 
             scrollTimer.dispose();
@@ -421,6 +431,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     reset() {
         this._removeAllTextRanges();
         this.deactivate();
+    }
+
+    private getActiveRangeInstance() {
+        return this._rangeList.find((range) => range.isActive());
     }
 
     override dispose() {
@@ -725,11 +739,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const endNode = this._findNodeByCoord(moveOffsetX, moveOffsetY);
 
-        const endPosition = this._getNodePosition(endNode);
+        const focusNodePosition = this._getNodePosition(endNode);
 
-        // console.log('endNode', endNode, endPosition, { moveOffsetX, moveOffsetY, _viewportScrollY: this._viewportScrollY, scrollX });
+        // console.log('endNode', endNode, focusNodePosition, { moveOffsetX, moveOffsetY, _viewportScrollY: this._viewportScrollY, scrollX });
 
-        if (!endPosition) {
+        if (!focusNodePosition) {
             return;
         }
 
@@ -739,7 +753,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        activeRangeInstance.focusNodePosition = endPosition;
+        activeRangeInstance.focusNodePosition = focusNodePosition;
 
         activeRangeInstance.refresh();
 

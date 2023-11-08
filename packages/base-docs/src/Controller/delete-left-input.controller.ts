@@ -67,25 +67,21 @@ export class DeleteLeftInputController extends Disposable {
     private _deleteFunction() {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
 
-        const activeRangeInstance = this._textSelectionRenderManager.getActiveRangeInstance();
-
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
-        if (activeRange == null || skeleton == null || activeRangeInstance == null) {
+        if (activeRange == null || skeleton == null) {
             return;
         }
 
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
 
-        const startNodePosition = activeRangeInstance.getStart();
+        const { startOffset, collapsed, segmentId, style, startNodePosition } = activeRange;
 
         const preSpan = skeleton.findSpanByPosition(startNodePosition);
 
         const preIsBullet = hasListSpan(preSpan);
 
         const preIsIndent = isIndentBySpan(preSpan, docsModel.body);
-
-        const { startOffset, collapsed, segmentId, style } = activeRange;
 
         let cursor = startOffset;
 
@@ -144,7 +140,7 @@ export class DeleteLeftInputController extends Disposable {
                 segmentId,
             });
         } else {
-            const endNodePosition = activeRangeInstance?.getEnd();
+            const { endNodePosition } = activeRange;
 
             if (endNodePosition != null) {
                 const endSpan = skeleton.findSpanByPosition(endNodePosition);

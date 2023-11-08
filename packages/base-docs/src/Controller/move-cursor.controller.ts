@@ -71,23 +71,19 @@ export class MoveCursorController extends Disposable {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
         const allRanges = this._textSelectionRenderManager.getAllTextRanges();
 
-        const activeRangeInstance = this._textSelectionRenderManager.getActiveRangeInstance();
-
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
         const docObject = this._getDocObject();
 
-        if (activeRange == null || skeleton == null || activeRangeInstance == null || docObject == null) {
+        if (activeRange == null || skeleton == null || docObject == null) {
             return;
         }
 
-        const startNodePosition = activeRangeInstance.getStart();
+        const { startOffset, endOffset, style, startNodePosition } = activeRange;
 
         const preSpan = skeleton.findSpanByPosition(startNodePosition);
 
         const documentOffsetConfig = docObject.document.getOffsetConfig();
-
-        const { startOffset, endOffset, style } = activeRange;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             let cursor;
@@ -97,8 +93,8 @@ export class MoveCursorController extends Disposable {
                 let max = -Infinity;
 
                 for (const range of allRanges) {
-                    min = Math.min(min, range!.startOffset);
-                    max = Math.max(max, range!.endOffset);
+                    min = Math.min(min, range.startOffset!);
+                    max = Math.max(max, range.endOffset!);
                 }
 
                 cursor = direction === Direction.LEFT ? min : max;

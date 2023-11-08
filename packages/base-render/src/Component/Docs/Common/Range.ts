@@ -2,7 +2,12 @@ import { ITextRange, Nullable, Tools } from '@univerjs/core';
 
 import { COLORS } from '../../../Basics/Const';
 import { INodePosition } from '../../../Basics/Interfaces';
-import { ITextRangeWithStyle, ITextSelectionStyle, NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '../../../Basics/range';
+import {
+    ITextRangeWithStyle,
+    ITextSelectionStyle,
+    NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
+    RANGE_DIRECTION,
+} from '../../../Basics/range';
 import { getColor } from '../../../Basics/Tools';
 import { IPoint } from '../../../Basics/Vector2';
 import { Scene } from '../../../Scene';
@@ -13,6 +18,7 @@ import { DocumentSkeleton } from '../DocSkeleton';
 import { IDocumentOffsetConfig } from '../Document';
 import {
     compareNodePosition,
+    compareNodePositionLogic,
     getOneTextSelectionRange,
     NodePositionConvertToCursor,
     NodePositionMap,
@@ -58,10 +64,6 @@ export class TextRange {
     private _anchorShape: Nullable<Rect>;
 
     private _cursorList: ITextRange[] = [];
-    // The start position of the range
-    startOffset: number;
-    // The end position of the range
-    endOffset: number;
 
     constructor(
         private _scene: ThinScene,
@@ -72,10 +74,64 @@ export class TextRange {
         private _style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE
     ) {}
 
+    // The start position of the range
+    get startOffset() {
+        const { startOffset } = getOneTextSelectionRange(this._cursorList) ?? {};
+
+        return startOffset;
+    }
+
+    // The end position of the range
+    get endOffset() {
+        const { endOffset } = getOneTextSelectionRange(this._cursorList) ?? {};
+
+        return endOffset;
+    }
+
     get collapsed() {
         const { startOffset, endOffset } = this;
 
         return startOffset != null && startOffset === endOffset;
+    }
+
+    get startNodePosition() {
+        if (this.anchorNodePosition == null) {
+            return null;
+        }
+
+        if (this.focusNodePosition == null) {
+            return this.anchorNodePosition;
+        }
+
+        const { start } = compareNodePosition(this.anchorNodePosition, this.focusNodePosition);
+
+        return start;
+    }
+
+    get endNodePosition() {
+        if (this.anchorNodePosition == null) {
+            return this.focusNodePosition;
+        }
+
+        if (this.focusNodePosition == null) {
+            return null;
+        }
+
+        const { end } = compareNodePosition(this.anchorNodePosition, this.focusNodePosition);
+
+        return end;
+    }
+
+    get direction() {
+        const { collapsed, anchorNodePosition, focusNodePosition } = this;
+
+        if (collapsed || anchorNodePosition == null || focusNodePosition == null) {
+            return RANGE_DIRECTION.NONE;
+        }
+
+        const compare = compareNodePositionLogic(anchorNodePosition, focusNodePosition);
+
+        return compare ? RANGE_DIRECTION.FORWARD : RANGE_DIRECTION.BACKWARD;
     }
 
     getAnchor() {
@@ -117,6 +173,10 @@ export class TextRange {
         const { startOffset: activeStart, endOffset: activeEnd } = this;
         const { startOffset: compareStart, endOffset: compareEnd } = compareRange;
 
+        if (activeStart == null || activeEnd == null || compareStart == null || compareEnd == null) {
+            return false;
+        }
+
         return activeStart <= compareEnd && activeEnd >= compareStart;
     }
 
@@ -150,34 +210,6 @@ export class TextRange {
         this._setCursorList(cursorList);
 
         pointGroup.length > 0 && this._createOrUpdateRange(pointGroup, docsLeft, docsTop);
-    }
-
-    getStart() {
-        if (this.anchorNodePosition == null) {
-            return null;
-        }
-
-        if (this.focusNodePosition == null) {
-            return this.anchorNodePosition;
-        }
-
-        const { start } = compareNodePosition(this.anchorNodePosition, this.focusNodePosition);
-
-        return start;
-    }
-
-    getEnd() {
-        if (this.anchorNodePosition == null) {
-            return this.focusNodePosition;
-        }
-
-        if (this.focusNodePosition == null) {
-            return null;
-        }
-
-        const { end } = compareNodePosition(this.anchorNodePosition, this.focusNodePosition);
-
-        return end;
     }
 
     private _isEmpty() {
@@ -286,10 +318,5 @@ export class TextRange {
         }
 
         this._cursorList = cursorList;
-
-        const { startOffset, endOffset } = getOneTextSelectionRange(cursorList)!;
-
-        this.startOffset = startOffset;
-        this.endOffset = endOffset;
     }
 }

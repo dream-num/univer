@@ -17,3 +17,9 @@ export const NORMAL_TEXT_SELECTION_PLUGIN_STYLE: ITextSelectionStyle = {
 export interface ITextRangeWithStyle extends ITextRangeParam {
     style?: ITextSelectionStyle;
 }
+
+export enum RANGE_DIRECTION {
+    NONE = 'none',
+    BACKWARD = 'backward',
+    FORWARD = 'forward',
+}

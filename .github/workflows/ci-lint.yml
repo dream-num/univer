@@ -1,4 +1,4 @@
-name: 🧪 CI Test
+name: 🩺 CI Lint
 
 on:
     push:
@@ -8,7 +8,6 @@ on:
 
 permissions:
     contents: read
-    pull-requests: write
 
 jobs:
     build:
@@ -46,13 +45,20 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-pnpm-store-
 
+            - name: Setup ESLint cache
+              uses: actions/cache@v3
+              with:
+                  path: .eslintcache
+                  key: |
+                      ${{ runner.os }}-eslint-${{ hashFiles('.eslintrc.cjs') }}
+                  restore-keys: |
+                      ${{ runner.os }}-eslint-
+
             - name: Install dependencies
               run: pnpm install
 
-            - name: 🩺 Run test
-              run: pnpm run coverage
+            - name: 🧼 Type checking
+              run: npx tsc --noEmit
 
-            - name: 🧬 Report coverage
-              uses: codecov/codecov-action@v3
-              env:
-                  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+            - name: 🌡️ Run ESLint
+              run: pnpm run lint

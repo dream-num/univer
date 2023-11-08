@@ -1,5 +1,7 @@
 # Univer
 
+[![codecov](https://codecov.io/gh/dream-num/univer/graph/badge.svg?token=aPfyW2pIMN)](https://codecov.io/gh/dream-num/univer)
+
 简体中文 | [English](./README.md)
 
 ## 介绍

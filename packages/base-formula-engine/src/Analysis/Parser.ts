@@ -23,7 +23,7 @@ import { IRuntimeService } from '../Service/runtime.service';
 import { LexerNode } from './LexerNode';
 
 export class AstTreeMaker extends Disposable {
-    private _astNodeFactoryList: AstRootNodeFactory[];
+    private _astNodeFactoryList: AstRootNodeFactory[] = [];
 
     constructor(
         @IRuntimeService private readonly _runtimeService: IRuntimeService,

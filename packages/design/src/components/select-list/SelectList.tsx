@@ -39,9 +39,9 @@ export function SelectList(props: ISelectListProps) {
 
     return (
         <ul className={styles.selectList}>
-            {options.map((option) => (
+            {options.map((option, index) => (
                 <li
-                    key={option.value}
+                    key={index}
                     className={clsx(styles.selectListItem, { [styles.selectListItemSelect]: value === option.value })}
                 >
                     <a onClick={() => handleSelect(option.value)}>

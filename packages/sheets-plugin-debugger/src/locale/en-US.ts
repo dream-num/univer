@@ -4,6 +4,7 @@ export default {
             title: 'Language',
             tooltip: 'Language',
         },
+        message: 'Message',
         theme: {
             title: 'Theme',
             tooltip: 'Theme',

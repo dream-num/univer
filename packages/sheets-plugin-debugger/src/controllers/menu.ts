@@ -6,6 +6,7 @@ import { IAccessor } from '@wendellhu/redi';
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
+import { MessageOperation } from '../commands/operations/message.operation';
 import { NotificationOperation } from '../commands/operations/notification.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
 
@@ -104,6 +105,22 @@ export function ConfirmMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
             {
                 label: 'Open confirm',
                 value: 'confirm',
+            },
+        ],
+    };
+}
+
+export function MessageMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+    return {
+        id: MessageOperation.id,
+        title: 'debugger.message',
+        tooltip: 'debugger.message',
+        type: MenuItemType.SELECTOR,
+        positions: [MenuPosition.TOOLBAR_OTHERS],
+        selections: [
+            {
+                label: 'Open message',
+                value: '',
             },
         ],
     };

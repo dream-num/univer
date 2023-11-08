@@ -42,18 +42,8 @@ export const SetFrozenCancelCommand: ICommand = {
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo() {
-                    return commandService.syncExecuteCommand(
-                        SetFrozenMutation.id,
-                        undoMutationParams
-                    ) as Promise<boolean>;
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(
-                        SetFrozenMutation.id,
-                        redoMutationParams
-                    ) as Promise<boolean>;
-                },
+                undoMutations: [{ id: SetFrozenMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetFrozenMutation.id, params: redoMutationParams }],
             });
             return true;
         }

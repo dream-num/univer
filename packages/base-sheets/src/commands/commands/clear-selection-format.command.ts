@@ -115,8 +115,8 @@ export const ClearSelectionFormatCommand: ICommand = {
                 // If there are multiple mutations that form an encapsulated project, they must be encapsulated in the same undo redo element.
                 // Hooks can be used to hook the code of external controllers to add new actions.
                 unitID: workbookId,
-                undo: async () => sequenceExecute(sequenceExecuteUndoList, commandService).result,
-                redo: async () => sequenceExecute(sequenceExecuteList, commandService).result,
+                undoMutations: sequenceExecuteUndoList,
+                redoMutations: sequenceExecuteList,
             });
 
             return true;

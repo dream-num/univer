@@ -57,22 +57,17 @@ export const CopySheetToCommand: ICommand = {
             accessor,
             setWorksheetConfigMutationParams
         );
+
         const result = commandService.syncExecuteCommand(
             SetWorksheetConfigMutation.id,
             setWorksheetConfigMutationParams
         );
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo() {
-                    return commandService.syncExecuteCommand(SetWorksheetConfigMutation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.executeCommand(
-                        SetWorksheetConfigMutation.id,
-                        setWorksheetConfigMutationParams
-                    );
-                },
+                undoMutations: [{ id: SetWorksheetConfigMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetWorksheetConfigMutation.id, params: setWorksheetConfigMutationParams }],
             });
             return true;
         }

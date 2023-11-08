@@ -180,32 +180,18 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                async undo() {
-                    // NOTE: This may be affect by collaboration programming. But in google sheet, the merged cells are reverted as well :(
-                    const undoResult = sequenceExecute(
-                        [
-                            { id: MoveRowsMutation.id, params: undoMoveRowsParams },
-                            { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
-                            { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
-                            { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
-                        ],
-                        commandService
-                    );
-
-                    return undoResult.result;
-                },
-                async redo() {
-                    const redoResult = sequenceExecute(
-                        [
-                            { id: MoveRowsMutation.id, params: moveRowsParams },
-                            { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-                            { id: AddWorksheetMergeMutation.id, params: addMergeParams },
-                            { id: SetSelectionsOperation.id, params: setSelectionsParam },
-                        ],
-                        commandService
-                    );
-                    return redoResult.result;
-                },
+                undoMutations: [
+                    { id: MoveRowsMutation.id, params: undoMoveRowsParams },
+                    { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
+                    { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
+                    { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
+                ],
+                redoMutations: [
+                    { id: MoveRowsMutation.id, params: moveRowsParams },
+                    { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
+                    { id: AddWorksheetMergeMutation.id, params: addMergeParams },
+                    { id: SetSelectionsOperation.id, params: setSelectionsParam },
+                ],
             });
             return true;
         }
@@ -358,32 +344,18 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                async undo() {
-                    // NOTE: This may be affect by collaboration programming. But in google sheet, the merged cells are reverted as well :(
-                    const undoResult = sequenceExecute(
-                        [
-                            { id: MoveColsMutation.id, params: undoMoveColsParams },
-                            { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
-                            { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
-                            { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
-                        ],
-                        commandService
-                    );
-
-                    return undoResult.result;
-                },
-                async redo() {
-                    const redoResult = sequenceExecute(
-                        [
-                            { id: MoveColsMutation.id, params: moveColsParams },
-                            { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-                            { id: AddWorksheetMergeMutation.id, params: addMergeParams },
-                            { id: SetSelectionsOperation.id, params: setSelectionsParam },
-                        ],
-                        commandService
-                    );
-                    return redoResult.result;
-                },
+                undoMutations: [
+                    { id: MoveColsMutation.id, params: undoMoveColsParams },
+                    { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
+                    { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
+                    { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
+                ],
+                redoMutations: [
+                    { id: MoveColsMutation.id, params: moveColsParams },
+                    { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
+                    { id: AddWorksheetMergeMutation.id, params: addMergeParams },
+                    { id: SetSelectionsOperation.id, params: setSelectionsParam },
+                ],
             });
             return true;
         }

@@ -76,30 +76,14 @@ export const SetWorksheetHideCommand: ICommand = {
         if (result && activeResult) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo() {
-                    return (
-                        commandService.executeCommand(
-                            SetWorksheetActivateMutation.id,
-                            unActiveMutationParams
-                        ) as Promise<boolean>
-                    ).then((res) => {
-                        if (res)
-                            return commandService.syncExecuteCommand(SetWorksheetHideMutation.id, undoMutationParams);
-                        return false;
-                    });
-                },
-                redo() {
-                    return (
-                        commandService.executeCommand(
-                            SetWorksheetActivateMutation.id,
-                            activeSheetMutationParams
-                        ) as Promise<boolean>
-                    ).then((res) => {
-                        if (res)
-                            return commandService.syncExecuteCommand(SetWorksheetHideMutation.id, redoMutationParams);
-                        return false;
-                    });
-                },
+                undoMutations: [
+                    { id: SetWorksheetActivateMutation.id, params: unActiveMutationParams },
+                    { id: SetWorksheetHideMutation.id, params: undoMutationParams },
+                ],
+                redoMutations: [
+                    { id: SetWorksheetActivateMutation.id, params: activeSheetMutationParams },
+                    { id: SetWorksheetHideMutation.id, params: redoMutationParams },
+                ],
             });
             return true;
         }

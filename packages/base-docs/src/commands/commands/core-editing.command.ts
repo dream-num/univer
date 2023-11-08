@@ -73,11 +73,10 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             t: 'i',
             body,
             len: body.dataStream.length,
-            line: 0, // FIXME: line shouldn't be 0 here?
+            line: 0,
             segmentId,
         });
 
-        // TODO@wzhudev: prepare undo mutation
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
@@ -86,12 +85,8 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undo() {
-                    return commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
-                },
+                undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
+                redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
             });
 
             return true;
@@ -139,12 +134,8 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undo() {
-                    return commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(doMutation.id, doMutation.params);
-                },
+                undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
+                redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
             });
             return false;
         }
@@ -200,7 +191,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             coverType,
         });
 
-        const result = await commandService.syncExecuteCommand<
+        const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
@@ -208,14 +199,8 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
-                    return true;
-                },
-                redo() {
-                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
-                    return true;
-                },
+                undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
+                redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
             });
 
             return true;

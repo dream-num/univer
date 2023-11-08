@@ -2,7 +2,7 @@ import { createIdentifier, IAccessor, IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../Shared/lifecycle';
-import { CommandType, ICommand, ICommandInfo, ICommandService } from '../command/command.service';
+import { CommandType, ICommand, ICommandInfo, ICommandService, sequenceExecute } from '../command/command.service';
 import { IUniverInstanceService } from '../instance/instance.service';
 
 // TODO: an undo redo element may be merge-able to another undo redo element
@@ -11,13 +11,11 @@ export interface IUndoRedoItem {
     /** unitID maps to unitId for UniverSheet / UniverDoc / UniverSlide */
     unitID: string;
 
-    undoMutations?: ICommandInfo[];
-    redoMutations?: ICommandInfo[];
+    undoMutations: ICommandInfo[];
+    redoMutations: ICommandInfo[];
 
-    /** @deprecated, push to `undoMutations` instead. */
-    undo(): Promise<boolean> | boolean;
-    /** @deprecated, push to `redoMutations` instead. */
-    redo(): Promise<boolean> | boolean;
+    undo?(mutations: ICommandInfo[]): Promise<boolean> | boolean;
+    redo?(mutations: ICommandInfo[]): Promise<boolean> | boolean;
 }
 
 export interface IUndoRedoService {
@@ -220,7 +218,10 @@ export const UndoCommand = new (class extends MultiImplementationCommand impleme
             return false;
         }
 
-        const result = await element.undo();
+        const commandService = accessor.get(ICommandService);
+        const result = element.undo
+            ? await element.undo(element.undoMutations)
+            : sequenceExecute(element.undoMutations, commandService);
         if (result) {
             undoRedoService.popUndoToRedo();
 
@@ -243,7 +244,10 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
             return false;
         }
 
-        const result = await element.redo();
+        const commandService = accessor.get(ICommandService);
+        const result = element.redo
+            ? await element.redo(element.redoMutations)
+            : sequenceExecute(element.redoMutations, commandService);
         if (result) {
             undoRedoService.popRedoToUndo();
 

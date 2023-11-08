@@ -43,15 +43,8 @@ export const SetWorksheetOrderCommand: ICommand = {
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo() {
-                    return commandService.syncExecuteCommand(SetWorksheetOrderMutation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(
-                        SetWorksheetOrderMutation.id,
-                        setWorksheetOrderMutationParams
-                    );
-                },
+                undoMutations: [{ id: SetWorksheetOrderMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetWorksheetOrderMutation.id, params: setWorksheetOrderMutationParams }],
             });
             return true;
         }

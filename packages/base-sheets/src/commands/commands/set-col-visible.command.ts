@@ -76,25 +76,14 @@ export const SetSpecificColsVisibleCommand: ICommand<ISetSpecificColsVisibleComm
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                async undo() {
-                    return sequenceExecute(
-                        [
-                            { id: SetColHiddenMutation.id, params: undoMutationParams },
-                            { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
-                        ],
-                        commandService
-                    ).result;
-                },
-
-                async redo() {
-                    return sequenceExecute(
-                        [
-                            { id: SetColVisibleMutation.id, params: redoMutationParams },
-                            { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
-                        ],
-                        commandService
-                    ).result;
-                },
+                undoMutations: [
+                    { id: SetColHiddenMutation.id, params: undoMutationParams },
+                    { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
+                ],
+                redoMutations: [
+                    { id: SetColVisibleMutation.id, params: redoMutationParams },
+                    { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+                ],
             });
 
             return true;
@@ -197,24 +186,14 @@ export const SetColHiddenCommand: ICommand = {
             const undoMutationParams = SetColHiddenUndoMutationFactory(accessor, redoMutationParams);
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                async undo() {
-                    return sequenceExecute(
-                        [
-                            { id: SetColVisibleMutation.id, params: undoMutationParams },
-                            { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
-                        ],
-                        commandService
-                    ).result;
-                },
-                async redo() {
-                    return sequenceExecute(
-                        [
-                            { id: SetColHiddenMutation.id, params: redoMutationParams },
-                            { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
-                        ],
-                        commandService
-                    ).result;
-                },
+                undoMutations: [
+                    { id: SetColVisibleMutation.id, params: undoMutationParams },
+                    { id: SetSelectionsOperation.id, params: undoSetSelectionsOperationParams },
+                ],
+                redoMutations: [
+                    { id: SetColHiddenMutation.id, params: redoMutationParams },
+                    { id: SetSelectionsOperation.id, params: setSelectionOperationParams },
+                ],
             });
             return true;
         }

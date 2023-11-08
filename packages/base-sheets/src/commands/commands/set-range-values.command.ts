@@ -112,16 +112,8 @@ export const SetRangeValuesCommand: ICommand = {
         if (setValueMutationResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo: async () =>
-                    sequenceExecute(
-                        [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
-                        commandService
-                    ).result,
-                redo: async () =>
-                    sequenceExecute(
-                        [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
-                        commandService
-                    ).result,
+                undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
+                redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
             });
 
             return true;

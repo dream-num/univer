@@ -109,30 +109,17 @@ export const RemoveRowCommand: ICommand = {
         if (result.result) {
             accessor.get(IUndoRedoService).pushUndoRedo({
                 unitID: workbookId,
-                undo: async () => {
-                    const undoResult = sequenceExecute(
-                        [
-                            ...intercepted.undos,
+                undoMutations: [
+                    ...intercepted.undos,
 
-                            { id: InsertRowMutation.id, params: undoRemoveRowsParams },
-                            { id: InsertRangeMutation.id, params: undoDeleteRangeValueParams },
-                        ],
-                        commandService
-                    );
-                    return undoResult.result;
-                },
-                redo: async () => {
-                    const result = sequenceExecute(
-                        [
-                            { id: DeleteRangeMutation.id, params: deleteRangeValueParams },
-                            { id: RemoveRowMutation.id, params: removeRowsParams },
-                            ...intercepted.redos,
-                        ],
-                        commandService
-                    );
-
-                    return result.result;
-                },
+                    { id: InsertRowMutation.id, params: undoRemoveRowsParams },
+                    { id: InsertRangeMutation.id, params: undoDeleteRangeValueParams },
+                ],
+                redoMutations: [
+                    { id: DeleteRangeMutation.id, params: deleteRangeValueParams },
+                    { id: RemoveRowMutation.id, params: removeRowsParams },
+                    ...intercepted.redos,
+                ],
             });
             return true;
         }
@@ -212,28 +199,16 @@ export const RemoveColCommand: ICommand = {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo: async () => {
-                    const undoResult = sequenceExecute(
-                        [
-                            ...intercepted.undos,
-                            { id: InsertColMutation.id, params: undoRemoveColParams },
-                            { id: InsertRangeMutation.id, params: undoRemoveRangeValuesParams },
-                        ],
-                        commandService
-                    );
-                    return undoResult.result;
-                },
-                redo: async () => {
-                    const result = sequenceExecute(
-                        [
-                            { id: RemoveColMutation.id, params: removeColParams },
-                            { id: DeleteRangeMutation.id, params: removeRangeValuesParams },
-                            ...intercepted.redos,
-                        ],
-                        commandService
-                    );
-                    return result.result;
-                },
+                undoMutations: [
+                    ...intercepted.undos,
+                    { id: InsertColMutation.id, params: undoRemoveColParams },
+                    { id: InsertRangeMutation.id, params: undoRemoveRangeValuesParams },
+                ],
+                redoMutations: [
+                    { id: RemoveColMutation.id, params: removeColParams },
+                    { id: DeleteRangeMutation.id, params: removeRangeValuesParams },
+                    ...intercepted.redos,
+                ],
             });
 
             return true;

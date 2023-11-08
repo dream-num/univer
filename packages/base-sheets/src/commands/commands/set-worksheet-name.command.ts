@@ -43,12 +43,8 @@ export const SetWorksheetNameCommand: ICommand = {
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo() {
-                    return commandService.syncExecuteCommand(SetWorksheetNameMutation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(SetWorksheetNameMutation.id, redoMutationParams);
-                },
+                undoMutations: [{ id: SetWorksheetNameMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetWorksheetNameMutation.id, params: redoMutationParams }],
             });
 
             return true;

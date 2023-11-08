@@ -66,15 +66,10 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo() {
-                    return commandService.syncExecuteCommand(SetWorksheetRightToLeftMutation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(
-                        SetWorksheetRightToLeftMutation.id,
-                        setWorksheetRightToLeftMutationParams
-                    );
-                },
+                undoMutations: [{ id: SetWorksheetRightToLeftMutation.id, params: undoMutationParams }],
+                redoMutations: [
+                    { id: SetWorksheetRightToLeftMutation.id, params: setWorksheetRightToLeftMutationParams },
+                ],
             });
             return true;
         }

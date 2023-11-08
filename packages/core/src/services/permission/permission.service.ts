@@ -7,7 +7,7 @@ import { PermissionPoint, PermissionStatus } from '../../shared/permission';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 
 export interface IPermissionService {
-    deletePermissionItem(id: string): void;
+    deletePermissionPoint(id: string): void;
     addPermissionPoint<T = any>(item: PermissionPoint<T>): boolean;
     updatePermissionPoint(id: string, value: any): void;
     getPermissionPoint<T = any>(id: string): PermissionPoint<T>;
@@ -21,49 +21,49 @@ export class PermissionService extends Disposable implements IPermissionService 
     constructor(initPermissionConfig: PermissionPoint[] = []) {
         super();
         initPermissionConfig.forEach((item) => {
-            this.permissionItemMap.set(item.id, new BehaviorSubject<PermissionPoint>(item));
+            this.permissionPointMap.set(item.id, new BehaviorSubject<PermissionPoint>(item));
         });
     }
 
-    private permissionItemMap: Map<string, BehaviorSubject<PermissionPoint>> = new Map();
+    private permissionPointMap: Map<string, BehaviorSubject<PermissionPoint>> = new Map();
 
-    deletePermissionItem(id: string) {
-        const subject = this.permissionItemMap.get(id);
+    deletePermissionPoint = (id: string) => {
+        const subject = this.permissionPointMap.get(id);
         if (subject) {
             subject.complete();
-            this.permissionItemMap.delete(id);
+            this.permissionPointMap.delete(id);
         }
-    }
+    };
 
-    addPermissionPoint(item: PermissionPoint) {
-        if (!this.permissionItemMap.has(item.id)) {
-            this.permissionItemMap.set(item.id, new BehaviorSubject(item));
+    addPermissionPoint = (item: PermissionPoint) => {
+        if (!this.permissionPointMap.has(item.id)) {
+            this.permissionPointMap.set(item.id, new BehaviorSubject(item));
             return true;
         }
         return false;
-    }
+    };
 
-    updatePermissionPoint<T = any>(permissionId: string, value: T) {
-        const permissionSubject = this.permissionItemMap.get(permissionId);
+    updatePermissionPoint = <T = any>(permissionId: string, value: T) => {
+        const permissionSubject = this.permissionPointMap.get(permissionId);
         if (permissionSubject) {
             const subject = permissionSubject.getValue() as PermissionPoint<T>;
             subject.value = value;
             subject.status = PermissionStatus.DONE;
             permissionSubject.next(subject);
         }
-    }
+    };
 
-    getPermissionPoint(permissionId: string) {
-        const item = this.permissionItemMap.get(permissionId);
+    getPermissionPoint = (permissionId: string) => {
+        const item = this.permissionPointMap.get(permissionId);
         if (item) {
             return item.getValue();
         }
         throw new Error(`${permissionId} permissionPoint does not exist`);
-    }
+    };
 
     composePermission$(permissionIdList: string[]) {
         const subjectList = permissionIdList.map((id) => {
-            const subject = this.permissionItemMap.get(id);
+            const subject = this.permissionPointMap.get(id);
             if (!subject) {
                 throw new Error(`${id} permissionPoint is not exist`);
             }
@@ -72,7 +72,7 @@ export class PermissionService extends Disposable implements IPermissionService 
         return combineLatest(subjectList).pipe(
             // Check that all permissions exist
             map((list) => {
-                if (list.every((item) => this.permissionItemMap.get(item.id))) {
+                if (list.every((item) => this.permissionPointMap.get(item.id))) {
                     return list;
                 }
                 return list;
@@ -82,7 +82,7 @@ export class PermissionService extends Disposable implements IPermissionService 
 
     composePermission(permissionIdList: string[]) {
         const valueList = permissionIdList.map((id) => {
-            const subject = this.permissionItemMap.get(id);
+            const subject = this.permissionPointMap.get(id);
             if (!subject) {
                 throw new Error(`${id} permissionPoint is not exist`);
             }

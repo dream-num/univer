@@ -85,9 +85,9 @@ describe('Test menu items', () => {
         expect(activated).toBe(true);
 
         expect(sheetPermissionService.getSheetEditable()).toBe(true);
-        sheetPermissionService.setEditable(false);
+        sheetPermissionService.setSheetEditable(false);
         expect(sheetPermissionService.getSheetEditable()).toBe(false);
-        sheetPermissionService.setEditable(true);
+        sheetPermissionService.setSheetEditable(true);
         univerPermissionService.setEditable(false);
         expect(sheetPermissionService.getSheetEditable()).toBe(false);
         expect(univerPermissionService.getEditable()).toBe(false);

@@ -53,11 +53,11 @@ describe('test sheet permission service', () => {
             initPermission.value
         );
 
-        sheetPermissionService.setEditable(false);
+        sheetPermissionService.setSheetEditable(false);
         expect(univerPermissionService.getEditable()).toBe(true);
         expect(sheetPermissionService.getSheetEditable(workbook.getUnitId(), sheet.getSheetId())).toBe(false);
 
-        sheetPermissionService.setEditable(true);
+        sheetPermissionService.setSheetEditable(true);
         expect(univerPermissionService.getEditable()).toBe(true);
         expect(sheetPermissionService.getSheetEditable(workbook.getUnitId(), sheet.getSheetId())).toBe(true);
     });

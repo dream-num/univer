@@ -24,7 +24,7 @@ export class SheetPermissionService extends Disposable {
     ) {
         super();
         this._init();
-        this.interceptCommandPermission();
+        this._interceptCommandPermission();
     }
 
     private _init() {
@@ -37,7 +37,7 @@ export class SheetPermissionService extends Disposable {
         });
     }
 
-    private interceptCommandPermission() {
+    private _interceptCommandPermission() {
         this.disposeWithMe(
             this._sheetInterceptorService.interceptCommandPermission({
                 checkPermission: (commandInfo) => {
@@ -85,7 +85,7 @@ export class SheetPermissionService extends Disposable {
             .every((item) => item.value);
     }
 
-    setEditable(v: boolean, workbookId?: string, sheetId?: string) {
+    setSheetEditable(v: boolean, workbookId?: string, sheetId?: string) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const _workbookId = workbookId || workbook.getUnitId();
         const sheet = workbook.getActiveSheet();

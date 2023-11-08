@@ -1,1 +1,1 @@
-export { type IMessageProps, Message, message, type MessageType } from './Message';
+export { type IMessageMethodOptions, type IMessageProps, Message, MessageType } from './Message';

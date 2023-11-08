@@ -1,7 +1,8 @@
 import { Disposable, ErrorService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
 import { Inject } from '@wendellhu/redi';
 
-import { IMessageService, MessageType } from '../../services/message/message.service';
+import { IMessageService } from '../../services/message/message.service';
 
 @OnLifecycle(LifecycleStages.Starting, ErrorController)
 export class ErrorController extends Disposable {

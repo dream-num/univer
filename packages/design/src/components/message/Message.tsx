@@ -1,11 +1,14 @@
 import { ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
-import clsx from 'clsx';
 import { createRoot } from 'react-dom/client';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import styles from './index.module.less';
 
-export type MessageType = 'success' | 'warning' | 'error';
+export enum MessageType {
+    Success = 'success',
+    Warning = 'warning',
+    Error = 'error',
+}
 
 export interface IMessageProps {
     key: number;
@@ -13,23 +16,23 @@ export interface IMessageProps {
     content?: string;
 }
 
+export interface IMessageMethodOptions {
+    content: string;
+    delay?: number;
+}
+
 const iconMap = {
-    success: <SuccessSingle className={styles.messageIconSuccess} />,
-    warning: <WarningSingle className={styles.messageIconWarning} />,
-    error: <ErrorSingle className={styles.messageIconError} />,
+    [MessageType.Success]: <SuccessSingle className={styles.messageIconSuccess} />,
+    [MessageType.Warning]: <WarningSingle className={styles.messageIconWarning} />,
+    [MessageType.Error]: <ErrorSingle className={styles.messageIconError} />,
 };
 
-/**
- * Message Component
- */
-export const Message = (props: IMessageProps) => {
+const MessageItem = (props: IMessageProps) => {
     const { type, content } = props;
-
-    const className = clsx(styles.messageContent, type);
 
     const messageElement = (
         <div className={styles.messageItem}>
-            <div className={className}>
+            <div className={styles.messageContent}>
                 <span className={styles.messageIcon}>{iconMap[type]}</span>
                 <span>{content}</span>
             </div>
@@ -55,22 +58,21 @@ const MessageContainer = (props: { messages: IMessageProps[] }) => {
                         exitDone: styles.exitActive,
                     }}
                 >
-                    <Message {...message} />
+                    <MessageItem {...message} />
                 </CSSTransition>
             ))}
         </TransitionGroup>
     );
 };
 
-class MessageInstance {
-    div: HTMLDivElement;
-    root: ReturnType<typeof createRoot>;
+export class Message {
+    private div: HTMLDivElement;
+    private root: ReturnType<typeof createRoot>;
+    private messages: IMessageProps[] = [];
 
-    messages: IMessageProps[] = [];
-
-    constructor() {
+    constructor(container: HTMLElement) {
         this.div = document.createElement('div');
-        document.body.appendChild(this.div);
+        container.appendChild(this.div);
         this.root = createRoot(this.div);
 
         this.render();
@@ -103,14 +105,16 @@ class MessageInstance {
     render() {
         this.root.render(<MessageContainer messages={this.messages} />);
     }
+
+    success(options: IMessageMethodOptions) {
+        this.append(MessageType.Success, options);
+    }
+
+    warning(options: IMessageMethodOptions) {
+        this.append(MessageType.Warning, options);
+    }
+
+    error(options: IMessageMethodOptions) {
+        this.append(MessageType.Error, options);
+    }
 }
-
-type IMessageMethodOptions = { content: string; delay?: number };
-
-const instance = new MessageInstance();
-
-export const message = {
-    success: (options: IMessageMethodOptions) => instance.append('success', options),
-    warning: (options: IMessageMethodOptions) => instance.append('warning', options),
-    error: (options: IMessageMethodOptions) => instance.append('error', options),
-};

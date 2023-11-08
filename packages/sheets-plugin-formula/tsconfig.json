@@ -1,0 +1,13 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "rootDir": "./",
+        "outDir": "lib",
+        "baseUrl": "./",
+        "esModuleInterop": true, // auto allowSyntheticDefaultImports true
+        "strictPropertyInitialization": false
+    },
+    "include": [
+        "src/**/*"
+    ]
+}

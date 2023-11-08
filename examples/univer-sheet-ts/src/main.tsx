@@ -7,7 +7,7 @@ import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
 import { DebuggerPlugin } from '@univerjs/sheets-plugin-debugger';
 // import { FindPlugin } from '@univerjs/sheets-plugin-find';
-// import { DEFAULT_FORMULA_DATA_DEMO, FormulaPlugin } from '@univerjs/sheets-plugin-formula';
+import { FormulaPlugin } from '@univerjs/sheets-plugin-formula';
 // import { ImagePlugin } from '@univerjs/sheets-plugin-image';
 // import { ImportXlsxPlugin } from '@univerjs/sheets-plugin-import-xlsx';
 // import { NumfmtPlugin } from '@univerjs/sheets-plugin-numfmt';
@@ -41,7 +41,7 @@ univer.registerPlugin(SheetUIPlugin);
 univer.registerPlugin(DebuggerPlugin);
 // univer.registerPlugin(NumfmtPlugin);
 // univer.registerPlugin(FindPlugin);
-// univer.registerPlugin(FormulaPlugin, DEFAULT_FORMULA_DATA_DEMO);
+univer.registerPlugin(FormulaPlugin);
 // univer.registerPlugin(ImportXlsxPlugin);
 // univer.registerPlugin(ImagePlugin);
 

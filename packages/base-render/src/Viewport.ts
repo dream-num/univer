@@ -558,6 +558,7 @@ export class Viewport {
         const svCoord = sceneTrans.applyPoint(coord.subtract(Vector2.FromArray([scroll.x, scroll.y])));
         return svCoord;
     }
+
     // eslint-disable-next-line max-lines-per-function
     onMouseWheel(evt: IWheelEvent, state: EventState) {
         if (!this._scrollBar || this.isActive === false) {

@@ -11,6 +11,7 @@ import {
     ISearchFunctionParams,
     ISearchItem,
 } from '../../../services/prompt.service';
+import { getFunctionName } from '../util';
 import styles from './index.module.less';
 
 export function SearchFunction() {
@@ -36,10 +37,16 @@ export function SearchFunction() {
 
             const result: ISearchItem[] = [];
             FUNCTION_LIST.forEach((item) => {
-                if (item.n.indexOf(searchText) > -1) {
-                    result.push({ name: item.n, desc: localeService.t(item.a) as string });
+                const functionName = getFunctionName(item, localeService);
+                if (functionName.indexOf(searchText) > -1) {
+                    result.push({ name: functionName, desc: localeService.t(item.abstract) as string });
                 }
             });
+
+            if (result.length === 0) {
+                setVisible(false);
+                return;
+            }
 
             setSearchText(searchText);
             setSearchList(result);

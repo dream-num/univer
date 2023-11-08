@@ -11,9 +11,10 @@ export default {
         },
         functionList: {
             SUMIF: {
-                d: 'Returns a conditional sum across a range.',
-                a: 'A conditional sum across a range.',
-                p: {
+                aliasFunctionName: '33IF',
+                description: 'Returns a conditional sum across a range.',
+                abstract: 'A conditional sum across a range.',
+                functionParameter: {
                     range: {
                         name: 'range',
                         detail: 'The range which is tested against `criterion`.',
@@ -29,25 +30,25 @@ export default {
                 },
             },
             TAN: {
-                d: 'Returns the tangent of an angle provided in radians.',
-                a: 'Tangent of an angle provided in radians.',
-                p: {
+                description: 'Returns the tangent of an angle provided in radians.',
+                abstract: 'Tangent of an angle provided in radians.',
+                functionParameter: {
                     angle: {
                         name: 'angle',
                         detail: 'The angle to find the tangent of, in radians.',
                     },
                 },
             },
-            TANH: {
-                d: 'Returns the hyperbolic tangent of any real number.',
-                a: 'Hyperbolic tangent of any real number.',
-                p: {
-                    value: {
-                        name: 'value',
-                        detail: 'Any real value to calculate the hyperbolic tangent of.',
-                    },
-                },
-            },
+            // TANH: {
+            //     description: 'Returns the hyperbolic tangent of any real number.',
+            //     abstract: 'Hyperbolic tangent of any real number.',
+            //     functionParameter: {
+            //         value: {
+            //             name: 'value',
+            //             detail: 'Any real value to calculate the hyperbolic tangent of.',
+            //         },
+            //     },
+            // },
         },
 
         formulaMore: {

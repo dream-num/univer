@@ -63,62 +63,74 @@ export interface IFunctionInfo {
     /**
      * Function name
      */
-    n: string;
+    functionName: string;
+
+    /**
+     * Alias Function name
+     */
+    aliasFunctionName?: string;
 
     /**
      * Function type
      */
-    t: FunctionType;
+    functionType: FunctionType;
 
     /**
      * Detailed description
      */
-    d: string;
+    description: string;
 
     /**
-     * Concise description
+     * Concise abstract
      */
-    a: string;
+    abstract: string;
 
     /**
      * [Minimum number of parameters, maximum number of parameters]
      * Detected before each calculation of the function
      */
-    m: [min: number, max: number];
+    parameterRange: [min: number, max: number];
 
     /**
      * Function params
      */
-    p: IFunctionParam[];
+    functionParameter: IFunctionParam[];
+}
+
+// TODO@Dushusir: register custom function
+// TODO@Dushusir: register custom locale file
+export interface IFunctionDescription {
+    [functionName: string]: IFunctionInfo;
 }
 
 export const FUNCTION_LIST: IFunctionInfo[] = [
     {
-        n: 'SUMIF',
-        t: 0,
-        d: 'formula.functionList.SUMIF.d',
-        a: 'formula.functionList.SUMIF.a',
-        m: [2, 3],
-        p: [
+        functionName: 'SUMIF',
+        aliasFunctionName: 'formula.functionList.SUMIF.aliasFunctionName',
+        functionType: 0,
+        description: 'formula.functionList.SUMIF.description',
+        abstract: 'formula.functionList.SUMIF.abstract',
+        parameterRange: [2, 3],
+        functionParameter: [
             {
-                name: 'formula.functionList.SUMIF.p.range.name',
-                detail: 'formula.functionList.SUMIF.p.range.detail',
+                name: 'formula.functionList.SUMIF.functionParameter.range.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.range.detail',
                 example: 'A1:A10',
                 require: 1,
                 repeat: 0,
                 type: 'range',
             },
             {
-                name: 'formula.functionList.SUMIF.p.criterion.name',
-                detail: 'formula.functionList.SUMIF.p.criterion.detail',
+                name: 'formula.functionList.SUMIF.functionParameter.criterion.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.criterion.detail',
                 example: '">20"',
                 require: 1,
                 repeat: 0,
                 type: 'rangeall',
             },
             {
-                name: 'formula.functionList.SUMIF.p.sum_range.name',
-                detail: 'formula.functionList.SUMIF.p.sum_range.detail',
+                name: 'formula.functionList.SUMIF.functionParameter.sum_range.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.sum_range.detail',
                 example: 'B1:B10',
                 require: 0,
                 repeat: 0,
@@ -127,15 +139,16 @@ export const FUNCTION_LIST: IFunctionInfo[] = [
         ],
     },
     {
-        n: 'TAN',
-        t: 0,
-        d: 'formula.functionList.TAN.d',
-        a: 'formula.functionList.TAN.a',
-        m: [1, 1],
-        p: [
+        functionName: 'TAN',
+        aliasFunctionName: 'formula.functionList.TAN.aliasFunctionName',
+        functionType: 0,
+        description: 'formula.functionList.TAN.description',
+        abstract: 'formula.functionList.TAN.abstract',
+        parameterRange: [1, 1],
+        functionParameter: [
             {
-                name: 'formula.functionList.TAN.p.angle.name',
-                detail: 'formula.functionList.TAN.p.angle.detail',
+                name: 'formula.functionList.TAN.functionParameter.angle.name',
+                detail: 'formula.functionList.TAN.functionParameter.angle.detail',
                 example: '45*PI()/180',
                 require: 1,
                 repeat: 0,
@@ -144,15 +157,15 @@ export const FUNCTION_LIST: IFunctionInfo[] = [
         ],
     },
     {
-        n: 'TANH',
-        t: 0,
-        d: 'formula.functionList.TANH.d',
-        a: 'formula.functionList.TANH.a',
-        m: [1, 1],
-        p: [
+        functionName: 'TANH',
+        functionType: 0,
+        description: 'formula.functionList.TANH.description',
+        abstract: 'formula.functionList.TANH.abstract',
+        parameterRange: [1, 1],
+        functionParameter: [
             {
-                name: 'formula.functionList.TANH.p.value.name',
-                detail: 'formula.functionList.TANH.p.value.detail',
+                name: 'formula.functionList.TANH.functionParameter.value.name',
+                detail: 'formula.functionList.TANH.functionParameter.value.detail',
                 example: 'A2',
                 require: 1,
                 repeat: 0,

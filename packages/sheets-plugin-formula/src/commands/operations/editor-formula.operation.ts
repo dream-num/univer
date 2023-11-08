@@ -12,7 +12,7 @@ export interface ISetEditorFormulaOperationParam {
 }
 
 export const SetEditorFormulaOperation: IOperation<ISetEditorFormulaOperationParam> = {
-    id: 'formula.operation.set-editor-formula-arrow',
+    id: 'formula.operation.set-editor-formula',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const { keycode } = params;

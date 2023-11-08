@@ -1,7 +1,7 @@
 import { TextSelectionManagerService } from '@univerjs/base-docs';
-import { IDesktopUIController, IMenuService, IUIController } from '@univerjs/base-ui';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Disposable, ICommandService, isFormulaString, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { EditorBridgeService, IEditorBridgeService } from '@univerjs/ui-plugin-sheets';
+import { Inject } from '@wendellhu/redi';
 
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
@@ -10,11 +10,9 @@ import { IFormulaPromptService } from '../services/prompt.service';
 @OnLifecycle(LifecycleStages.Starting, PromptController)
 export class PromptController extends Disposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
-        @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IUIController private readonly _uiController: IDesktopUIController,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(IEditorBridgeService) private readonly _editorBridgeService: EditorBridgeService,
         @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService
     ) {
         super();
@@ -30,19 +28,57 @@ export class PromptController extends Disposable {
     private _initialCursorSync() {
         this._textSelectionManagerService.textSelectionInfo$.subscribe((text) => {
             // TODO@Dushusir: use real text info
-            // return;
-            const visible = Math.random() > 0.5;
-            const searchText = Math.random() > 0.5 ? 'SUMIF' : 'TAN';
-            // const searchText = 'SUMIF';
-            const paramIndex = Math.random() > 0.5 ? 0 : 1;
+            const input = this._testGetCellEditInput();
+            if (!input) return;
 
-            this._commandService.executeCommand(SearchFunctionOperation.id, { visible, searchText });
+            const { visibleSearch, visibleHelp, searchText, paramIndex } = input;
+
+            this._commandService.executeCommand(SearchFunctionOperation.id, { visible: visibleSearch, searchText });
             this._commandService.executeCommand(HelpFunctionOperation.id, {
-                visible: !visible,
+                visible: visibleHelp,
                 functionName: searchText,
                 paramIndex,
             });
         });
+    }
+
+    // TODO@Dushusir: remove after use real text info
+    private _testGetCellEditInput() {
+        const state = this._editorBridgeService.getState();
+        let currentInputValue = state?.documentLayoutObject?.documentModel?.snapshot?.body?.dataStream;
+
+        if (currentInputValue) {
+            currentInputValue = currentInputValue.split('\r\n')[0];
+            if (isFormulaString(currentInputValue)) {
+                const searchText = currentInputValue.substring(1);
+
+                const matchList = ['SUMIF', 'TAN', 'TANH'];
+
+                // help function
+                if (matchList.includes(searchText)) {
+                    const paramIndex = Math.random() > 0.5 ? 0 : 1;
+                    return {
+                        visibleSearch: false,
+                        visibleHelp: true,
+                        searchText,
+                        paramIndex,
+                    };
+                }
+                return {
+                    visibleSearch: true,
+                    visibleHelp: false,
+                    searchText,
+                    paramIndex: 0,
+                };
+            }
+
+            return {
+                visibleSearch: false,
+                visibleHelp: false,
+                searchText: '',
+                paramIndex: 0,
+            };
+        }
     }
 
     private _initAcceptFormula() {

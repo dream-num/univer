@@ -13,6 +13,36 @@ import {
     sortRulesFactory,
 } from '@univerjs/core';
 
+function normalizeTextRuns(textRuns: ITextRun[]) {
+    const results: ITextRun[] = [];
+
+    for (const textRun of textRuns) {
+        const { st, ed } = textRun;
+
+        if (st === ed) {
+            continue;
+        }
+
+        if (results.length === 0) {
+            results.push(textRun);
+            continue;
+        }
+
+        const peak = results.pop()!;
+        if (isSameStyleTextRun(textRun, peak)) {
+            results.push({
+                ...textRun,
+                st: peak.st,
+                ed,
+            });
+        } else {
+            results.push(peak, textRun);
+        }
+    }
+
+    return results;
+}
+
 /**
  * Inserting styled text content into the current document model.
  * @param body The current content object of the document model.
@@ -32,37 +62,30 @@ export function insertTextRuns(
         return;
     }
 
+    console.log('old', JSON.stringify(textRuns, null, 2));
+
     let insertIndex = Infinity; // The current index of the textRun where the insertion needs to be made.
     for (let i = 0, len = textRuns.length; i < len; i++) {
         const textRun = textRuns[i];
         const { st, ed } = textRun;
 
-        if (st >= currentIndex) {
-            // Handles the insertion of text at the beginning of a paragraph
-            if (st === currentIndex && insertBody.textRuns) {
-                textRun.st += textLength;
-            }
-
+        if (st > currentIndex) {
+            textRun.st += textLength;
             textRun.ed += textLength;
-
-            if (insertIndex === Infinity) {
-                insertIndex = -Infinity;
-            }
         } else if (ed >= currentIndex) {
-            /**
-             * Inserting text at the end of a rich text content,
-             * with the newly inserted text inheriting the style of that content.
-             * So, it is necessary to set ed >= currentIndex - 1 to ensure that the new text is inserted while maintaining the style of the existing content.
-             */
             textRun.ed += textLength;
+        }
 
-            if (!Number.isFinite(insertIndex)) {
-                insertIndex = i;
-            }
+        if (currentIndex >= textRun.st && currentIndex <= textRun.ed) {
+            insertIndex = i;
         }
     }
 
     const insertTextRuns = insertBody.textRuns;
+    console.log(currentIndex);
+    console.log(insertIndex);
+
+    console.log('insert', JSON.stringify(insertTextRuns, null, 2));
 
     if (insertTextRuns) {
         for (let i = 0, len = insertTextRuns.length; i < len; i++) {
@@ -79,30 +102,18 @@ export function insertTextRuns(
             const splitTextRun = textRuns[insertIndex];
             const { st, ed } = splitTextRun;
 
+            const pendingTextRuns = [];
+
             const startSplitTextRun = {
                 ...splitTextRun,
                 st,
                 ed: insertTextRuns[0].st,
             };
 
-            if (isSameStyleTextRun(startSplitTextRun, insertTextRuns[0])) {
-                startSplitTextRun.ed = insertTextRuns[0].ed;
-                insertTextRuns.shift();
-            }
+            pendingTextRuns.push(startSplitTextRun);
+            pendingTextRuns.push(...insertTextRuns);
 
             const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
-
-            if (!lastInsertTextRuns) {
-                textRuns.splice(insertIndex, 1, startSplitTextRun);
-
-                return;
-            }
-
-            if (lastInsertTextRuns.ed === ed) {
-                textRuns.splice(insertIndex, 1, startSplitTextRun, ...insertTextRuns);
-
-                return;
-            }
 
             const endSplitTextRun = {
                 ...splitTextRun,
@@ -110,13 +121,12 @@ export function insertTextRuns(
                 ed,
             };
 
-            if (isSameStyleTextRun(endSplitTextRun, lastInsertTextRuns)) {
-                endSplitTextRun.st = lastInsertTextRuns.st;
-                insertTextRuns.pop();
-            }
+            pendingTextRuns.push(endSplitTextRun);
 
-            textRuns.splice(insertIndex, 1, startSplitTextRun, ...insertTextRuns, endSplitTextRun);
+            textRuns.splice(insertIndex, 1, ...pendingTextRuns);
         }
+
+        body.textRuns = normalizeTextRuns(textRuns);
     }
 }
 

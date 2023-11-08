@@ -2,9 +2,9 @@ export type {
     ArrayFormulaDataType,
     FormulaDataType,
     IFormulaData,
-    IInterpreterDatasetConfig,
     SheetDataType,
     SheetNameMapType,
     UnitDataType,
 } from './Basics/Common';
-export { FormulaEngineService } from './Service/FormulaEngine.service';
+export { FUNCTION_NAMES, FunctionType, type IFunctionInfo, type IFunctionParam } from './Basics/Function';
+export { FormulaEngineService } from './Service/formula-engine.service';

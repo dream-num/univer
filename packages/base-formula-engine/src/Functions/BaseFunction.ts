@@ -1,21 +1,21 @@
+import { Disposable } from '@univerjs/core';
+import { IAccessor } from '@wendellhu/redi';
+
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { FunctionVariantType, NodeValueType } from '../ReferenceObject/BaseReferenceObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
 
-export class BaseFunction {
-    static functionMap: Map<string, BaseFunction> = new Map();
-
-    get name() {
-        return '';
+export class BaseFunction extends Disposable {
+    constructor(
+        readonly accessor: IAccessor,
+        private _name: string
+    ) {
+        super();
     }
 
-    static create(): BaseFunction {
-        if (this.functionMap.has(this.name)) {
-            return this.functionMap.get(this.name)!;
-        }
-
-        return new this();
+    get name() {
+        return this._name;
     }
 
     isAsync() {

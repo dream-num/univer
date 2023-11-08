@@ -1,5 +1,5 @@
 import { DocSkeletonManagerService, getDocObject, TextSelectionManagerService } from '@univerjs/base-docs';
-import { FormulaEngineService } from '@univerjs/base-formula-engine';
+import { FormulaEngineService, SheetDataType } from '@univerjs/base-formula-engine';
 import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/base-render';
 import {
     Disposable,
@@ -7,6 +7,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     Nullable,
+    ObjectMatrix,
     OnLifecycle,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
@@ -51,7 +52,57 @@ export class EditingController extends Disposable {
         // =1+(3*4=4)*5+1
         // =(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect("A5"):B10# + B6# + A1:offset("C5", 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) & "美国人才" + sum((1+2%)*30%, 1+2)%
         // formulaEngine?.calculate(`=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)`);
-        console.log('calculate', this._formulaEngineService.calculate('=lambda(x,y, x*y*x)+1-max(100,200)'));
+
+        const sheetData: SheetDataType = {};
+        this._currentUniverService
+            .getCurrentUniverSheetInstance()
+            .getSheets()
+            .forEach((sheet) => {
+                const sheetConfig = sheet.getConfig();
+                sheetData[sheet.getSheetId()] = {
+                    cellData: new ObjectMatrix(sheetConfig.cellData),
+                    rowCount: sheetConfig.rowCount,
+                    columnCount: sheetConfig.columnCount,
+                };
+            });
+
+        const formulaData = {
+            'workbook-01': {
+                'sheet-0011': {
+                    9: {
+                        8: {
+                            f: '=sum(A1:C3)',
+                            si: '',
+                        },
+                    },
+                    20: {
+                        8: {
+                            f: '=1+(3*4=4)*5+1',
+                            si: '',
+                        },
+                    },
+                },
+            },
+        };
+
+        this._formulaEngineService
+            .execute('workbook-01', {
+                unitData: {
+                    'workbook-01': sheetData,
+                },
+                formulaData,
+                sheetNameMap: {},
+                forceCalculate: true,
+                updateRangeList: [],
+            })
+            .then((res) => {
+                console.log(res.sheetData, res.arrayFormulaData);
+            });
+
+        // console.log(
+        //     'calculate',
+        //     this._formulaEngineService.calculate('=1+REDUCE(1, A1:C2, LAMBDA(x,y,LAMBDA(a,b,a*b*a)(x,y)))')
+        // );
     }
 
     private _commandExecutedListener() {}

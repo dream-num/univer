@@ -2,11 +2,10 @@ import { Nullable, Tools } from '@univerjs/core';
 
 import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../Basics/TokenType';
+import { IRuntimeService } from '../Service/runtime.service';
 import { BaseAstNode, ErrorNode, LambdaPrivacyVarType } from './BaseAstNode';
-import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export const LAMBDA_TOKEN: string = 'LAMBDA';
@@ -35,11 +34,15 @@ export class LambdaNode extends BaseAstNode {
 }
 
 export class LambdaNodeFactory extends BaseAstNodeFactory {
-    override get zIndex() {
-        return NODE_ORDER_MAP.get(NodeType.LAMBDA) || 100;
+    constructor(@IRuntimeService private readonly _runtimeService: IRuntimeService) {
+        super();
     }
 
-    override create(param: LexerNode, parserDataLoader: ParserDataLoader): BaseAstNode {
+    override get zIndex() {
+        return NODE_ORDER_MAP.get(NodeType.LAMBDA) || DEFAULT_AST_NODE_FACTORY_Z_INDEX;
+    }
+
+    override create(param: LexerNode): BaseAstNode {
         const children = param.getChildren();
         const lambdaVar = children[0];
         const parameterArray = children.slice(1, -1);
@@ -61,7 +64,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
         // const lambdaId = nanoid(8);
         const lambdaId = Tools.generateRandomId(8);
 
-        const lambdaRuntime = parserDataLoader.getLambdaRuntime();
+        // const lambdaRuntime = parserDataLoader.getLambdaRuntime();
         const currentLambdaPrivacyVar = new Map<string, Nullable<BaseAstNode>>();
 
         for (let i = 0; i < parameterArray.length; i++) {
@@ -74,14 +77,14 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
             }
         }
 
-        lambdaRuntime?.registerLambdaPrivacyVar(lambdaId, currentLambdaPrivacyVar);
+        this._runtimeService.registerLambdaPrivacyVar(lambdaId, currentLambdaPrivacyVar);
 
         this._updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
 
         return new LambdaNode(param.getToken(), lambdaId);
     }
 
-    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override checkAndCreateNodeType(param: LexerNode | string) {
         if (!(param instanceof LexerNode)) {
             return;
         }
@@ -91,7 +94,7 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
             return;
         }
 
-        return this.create(param, parserDataLoader);
+        return this.create(param);
     }
 
     private _updateLambdaStatement(
@@ -127,5 +130,3 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
         }
     }
 }
-
-FORMULA_AST_NODE_REGISTRY.add(new LambdaNodeFactory());

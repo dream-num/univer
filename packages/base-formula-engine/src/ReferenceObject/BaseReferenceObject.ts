@@ -1,6 +1,6 @@
 import { CellValueType, ICellData, IRange, Nullable } from '@univerjs/core';
 
-import { SheetNameMapType, UnitDataType } from '../Basics/Common';
+import { RuntimeUnitDataType, SheetNameMapType, UnitDataType } from '../Basics/Common';
 import { ERROR_TYPE_SET, ErrorType } from '../Basics/ErrorType';
 import { ObjectClassType } from '../Basics/ObjectClassType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -36,7 +36,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _forcedUnitId: string = '';
 
-    private _runtimeData: UnitDataType = {};
+    private _runtimeData: RuntimeUnitDataType = {};
 
     constructor(private _token: string) {
         super();
@@ -177,24 +177,16 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._runtimeData;
     }
 
-    setRuntimeData(runtimeData: UnitDataType) {
+    setRuntimeData(runtimeData: RuntimeUnitDataType) {
         this._runtimeData = runtimeData;
     }
 
     getRowCount() {
-        return this._rowCount;
-    }
-
-    setRowCount(rowCount: number) {
-        this._rowCount = rowCount;
+        return this.getCurrentActiveSheetData().rowCount;
     }
 
     getColumnCount() {
-        return this._columnCount;
-    }
-
-    setColumnCount(columnCount: number) {
-        this._columnCount = columnCount;
+        return this.getCurrentActiveSheetData().columnCount;
     }
 
     isCell() {
@@ -267,7 +259,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const activeRuntimeData = this.getCurrentRuntimeSheetData();
 
-        return activeRuntimeData?.getValue(row, column) || activeSheetData.getValue(row, column);
+        return activeRuntimeData?.getValue(row, column) || activeSheetData.cellData.getValue(row, column);
     }
 
     getCellByPosition(row?: number, column?: number) {

@@ -1,23 +1,8 @@
-import { BooleanNumber, ICellData, IRange, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
-
-export type SheetDataType = { [sheetId: string]: ObjectMatrix<ICellData> };
-
-export type UnitDataType = { [unitId: string]: SheetDataType };
+import { BooleanNumber, ICellData, IRange, IUnitRange, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
 
 export type ArrayFormulaDataType = { [sheetId: string]: ObjectMatrix<IRange> };
 
 export type UnitArrayFormulaDataType = { [unitId: string]: ArrayFormulaDataType };
-
-export interface IFormulaData {
-    formula: string; // formulaString
-    row: number;
-    column: number;
-    sheetId: string;
-}
-
-export type FormulaDataType = { [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaData> } };
-
-export type SheetNameMapType = { [sheetName: string]: string };
 
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
 
@@ -37,6 +22,39 @@ export enum AstNodePromiseType {
     ERROR,
 }
 
+export type SheetItemType = {
+    cellData: ObjectMatrix<ICellData>;
+    rowCount: number;
+    columnCount: number;
+};
+
+export type SheetDataType = { [sheetId: string]: SheetItemType };
+
+export type UnitDataType = { [unitId: string]: SheetDataType };
+
+export type RuntimeSheetDataType = { [sheetId: string]: ObjectMatrix<ICellData> };
+
+export type RuntimeUnitDataType = { [unitId: string]: RuntimeSheetDataType };
+
+export type SheetNameMapType = { [sheetName: string]: string };
+
+export interface IFormulaData {
+    f: string; // formulaString
+    si: string;
+    // row: number;
+    // column: number;
+    // sheetId: string;
+}
+
+export type FormulaDataType = { [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaData> } };
+
+export interface ISuperTable {
+    sheetId: string;
+    hasCustomTitle: BooleanNumber;
+    titleMap: Map<string, number>;
+    range: IRange;
+}
+
 export enum TableOptionType {
     ALL = '#All',
     DATA = '#Data',
@@ -44,23 +62,12 @@ export enum TableOptionType {
     TOTALS = '#Totals',
 }
 
-export interface IInterpreterDatasetConfig {
+export interface IFormulaDatasetConfig {
     unitData: UnitDataType;
     formulaData: FormulaDataType;
     sheetNameMap: SheetNameMapType;
-    currentRow: number;
-    currentColumn: number;
-    currentSheetId: string;
-    currentUnitId: string;
-    rowCount: number;
-    columnCount: number;
-}
-
-export interface ISuperTable {
-    sheetId: string;
-    hasCustomTitle: BooleanNumber;
-    titleMap: Map<string, number>;
-    range: IRange;
+    forceCalculate: boolean;
+    updateRangeList: IUnitRange[];
 }
 
 export enum ConcatenateType {

@@ -74,10 +74,6 @@ export class CellReferenceObject extends BaseReferenceObject {
 
         rangeReferenceObject.setDefaultSheetId(this.getDefaultSheetId());
 
-        rangeReferenceObject.setRowCount(this.getRowCount());
-
-        rangeReferenceObject.setColumnCount(this.getColumnCount());
-
         rangeReferenceObject.setDefaultUnitId(this.getDefaultUnitId());
 
         rangeReferenceObject.setRuntimeData(this.getRuntimeData());

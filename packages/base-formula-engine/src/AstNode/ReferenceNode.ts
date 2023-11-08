@@ -1,26 +1,30 @@
+import { IAccessor, Inject, Injector } from '@wendellhu/redi';
+
 import { LexerTreeMaker } from '../Analysis/Lexer';
 import { LexerNode } from '../Analysis/LexerNode';
-import { IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
 import {
     $SUPER_TABLE_COLUMN_REGEX,
     REFERENCE_REGEX_SINGLE_COLUMN,
     REFERENCE_REGEX_SINGLE_ROW,
     REFERENCE_SINGLE_RANGE_REGEX,
 } from '../Basics/Regex';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
 import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
 import { ColumnReferenceObject } from '../ReferenceObject/ColumnReferenceObject';
 import { RowReferenceObject } from '../ReferenceObject/RowReferenceObject';
 import { TableReferenceObject } from '../ReferenceObject/TableReferenceObject';
+import { ICurrentConfigService } from '../Service/current-data.service';
+import { IDefinedNamesService } from '../Service/defined-names.service';
+import { IRuntimeService } from '../Service/runtime.service';
+import { ISuperTableService } from '../Service/super-table.service';
 import { BaseAstNode, ErrorNode } from './BaseAstNode';
-import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class ReferenceNode extends BaseAstNode {
     constructor(
+        private _accessor: IAccessor,
         private _operatorString: string,
         private _referenceObject: BaseReferenceObject
     ) {
@@ -31,31 +35,36 @@ export class ReferenceNode extends BaseAstNode {
         return NodeType.REFERENCE;
     }
 
-    override execute(interpreterCalculateProps?: IInterpreterDatasetConfig, runtimeData?: UnitDataType) {
-        const props = interpreterCalculateProps;
-        if (props) {
-            this._referenceObject.setUnitData(props.unitData);
-            this._referenceObject.setDefaultSheetId(props.currentSheetId);
-            this._referenceObject.setForcedSheetId(props.sheetNameMap);
-            this._referenceObject.setRowCount(props.rowCount);
-            this._referenceObject.setColumnCount(props.columnCount);
-            this._referenceObject.setDefaultUnitId(props.currentUnitId);
-        }
+    override execute() {
+        const currentConfigService = this._accessor.get(ICurrentConfigService);
+        const runtimeService = this._accessor.get(IRuntimeService);
 
-        if (runtimeData) {
-            this._referenceObject.setRuntimeData(runtimeData);
-        }
+        this._referenceObject.setUnitData(currentConfigService.getUnitData());
+        this._referenceObject.setForcedSheetId(currentConfigService.getSheetNameMap());
+
+        this._referenceObject.setDefaultSheetId(runtimeService.currentSheetId);
+        this._referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
+        this._referenceObject.setRuntimeData(runtimeService.getUnitData());
 
         this.setValue(this._referenceObject);
     }
 }
 
 export class ReferenceNodeFactory extends BaseAstNodeFactory {
-    override get zIndex() {
-        return NODE_ORDER_MAP.get(NodeType.REFERENCE) || 100;
+    constructor(
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @ISuperTableService private readonly _superTableService: ISuperTableService,
+        @Inject(LexerTreeMaker) private readonly _lexerTreeMaker: LexerTreeMaker,
+        @Inject(Injector) private readonly _injector: Injector
+    ) {
+        super();
     }
 
-    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override get zIndex() {
+        return NODE_ORDER_MAP.get(NodeType.REFERENCE) || DEFAULT_AST_NODE_FACTORY_Z_INDEX;
+    }
+
+    override checkAndCreateNodeType(param: LexerNode | string) {
         let isLexerNode = false;
         let tokenTrim: string;
         if (param instanceof LexerNode) {
@@ -75,31 +84,29 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         }
 
         if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(tokenTrim)) {
-            return new ReferenceNode(tokenTrim, new CellReferenceObject(tokenTrim));
+            return new ReferenceNode(this._injector, tokenTrim, new CellReferenceObject(tokenTrim));
         }
 
         if (isLexerNode && new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(tokenTrim)) {
-            return new ReferenceNode(tokenTrim, new RowReferenceObject(tokenTrim));
+            return new ReferenceNode(this._injector, tokenTrim, new RowReferenceObject(tokenTrim));
         }
 
         if (isLexerNode && new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(tokenTrim)) {
-            return new ReferenceNode(tokenTrim, new ColumnReferenceObject(tokenTrim));
+            return new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim));
         }
 
-        const nameMap = parserDataLoader.getDefinedNameMap();
+        const nameMap = this._definedNamesService.getDefinedNameMap();
 
         if (!isLexerNode && nameMap.has(tokenTrim)) {
             const nameString = nameMap.get(tokenTrim)!;
-            const lexerTreeMaker = new LexerTreeMaker(nameString);
-            const lexerNode = lexerTreeMaker.treeMaker();
-            lexerTreeMaker.suffixExpressionHandler(lexerNode);
+            const lexerNode = this._lexerTreeMaker.treeMaker(nameString);
             /** todo */
             return new ErrorNode(ErrorType.VALUE);
         }
 
         // parserDataLoader.get
 
-        const tableMap = parserDataLoader.getTableMap();
+        const tableMap = this._superTableService.getTableMap();
         const $regex = $SUPER_TABLE_COLUMN_REGEX;
         const tableName = tokenTrim.replace($regex, '');
         if (!isLexerNode && tableMap.has(tableName)) {
@@ -109,13 +116,12 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
                 columnDataString = columnResult[0];
             }
             const tableData = tableMap.get(tableName)!;
-            const tableOption = parserDataLoader.getTableOptionMap();
+            const tableOption = this._superTableService.getTableOptionMap();
             return new ReferenceNode(
+                this._injector,
                 tokenTrim,
                 new TableReferenceObject(tokenTrim, tableData, columnDataString, tableOption)
             );
         }
     }
 }
-
-FORMULA_AST_NODE_REGISTRY.add(new ReferenceNodeFactory());

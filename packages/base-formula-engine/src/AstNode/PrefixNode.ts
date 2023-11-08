@@ -1,21 +1,24 @@
+import { Nullable } from '@univerjs/core';
+import { IAccessor, Inject, Injector } from '@wendellhu/redi';
+
 import { LexerNode } from '../Analysis/LexerNode';
-import { IInterpreterDatasetConfig } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { prefixToken } from '../Basics/Token';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
+import { IFunctionService } from '../Service/function.service';
+import { IRuntimeService } from '../Service/runtime.service';
 import { NumberValueObject } from '../ValueObject/PrimitiveObject';
 import { BaseAstNode, ErrorNode } from './BaseAstNode';
-import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class PrefixNode extends BaseAstNode {
     constructor(
+        private _accessor: IAccessor,
         private _operatorString: string,
-        private _functionExecutor?: BaseFunction
+        private _functionExecutor?: Nullable<BaseFunction>
     ) {
         super(_operatorString);
     }
@@ -24,7 +27,7 @@ export class PrefixNode extends BaseAstNode {
         return NodeType.PREFIX;
     }
 
-    override execute(interpreterDatasetConfig?: IInterpreterDatasetConfig) {
+    override execute() {
         const children = this.getChildren();
         const value = children[0].getValue();
         let result: FunctionVariantType;
@@ -34,14 +37,14 @@ export class PrefixNode extends BaseAstNode {
         if (this._operatorString === prefixToken.MINUS) {
             result = this._functionExecutor!.calculate(new NumberValueObject(0), value) as FunctionVariantType;
         } else if (this._operatorString === prefixToken.AT) {
-            result = this._handlerAT(value, interpreterDatasetConfig);
+            result = this._handlerAT(value);
         } else {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }
         this.setValue(result);
     }
 
-    private _handlerAT(value: FunctionVariantType, interpreterDatasetConfig?: IInterpreterDatasetConfig) {
+    private _handlerAT(value: FunctionVariantType) {
         if (!value.isReferenceObject()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
@@ -52,8 +55,10 @@ export class PrefixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const currentRow = interpreterDatasetConfig?.currentRow || 0;
-        const currentColumn = interpreterDatasetConfig?.currentColumn || 0;
+        const runtimeService = this._accessor.get(IRuntimeService);
+
+        const currentRow = runtimeService.currentRow || 0;
+        const currentColumn = runtimeService.currentColumn || 0;
 
         // @ projection to current
         if (currentValue.isRow()) {
@@ -74,11 +79,18 @@ export class PrefixNode extends BaseAstNode {
 }
 
 export class PrefixNodeFactory extends BaseAstNodeFactory {
-    override get zIndex() {
-        return NODE_ORDER_MAP.get(NodeType.PREFIX) || 100;
+    constructor(
+        @IFunctionService private readonly _functionService: IFunctionService,
+        @Inject(Injector) private readonly _injector: Injector
+    ) {
+        super();
     }
 
-    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override get zIndex() {
+        return NODE_ORDER_MAP.get(NodeType.PREFIX) || DEFAULT_AST_NODE_FACTORY_Z_INDEX;
+    }
+
+    override checkAndCreateNodeType(param: LexerNode | string) {
         if (!(param instanceof LexerNode)) {
             return;
         }
@@ -94,18 +106,16 @@ export class PrefixNodeFactory extends BaseAstNodeFactory {
         if (tokenTrim === prefixToken.MINUS) {
             functionName = 'MINUS';
         } else if (tokenTrim === prefixToken.AT) {
-            return new PrefixNode(tokenTrim);
+            return new PrefixNode(this._injector, tokenTrim);
         } else {
             return;
         }
 
-        const functionExecutor = parserDataLoader.getExecutor(functionName);
+        const functionExecutor = this._functionService.getExecutor(functionName);
         if (!functionExecutor) {
             console.error(`No function ${token}`);
             return ErrorNode.create(ErrorType.NAME);
         }
-        return new PrefixNode(tokenTrim, functionExecutor);
+        return new PrefixNode(this._injector, tokenTrim, functionExecutor);
     }
 }
-
-FORMULA_AST_NODE_REGISTRY.add(new PrefixNodeFactory());

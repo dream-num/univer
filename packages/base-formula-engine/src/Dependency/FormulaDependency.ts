@@ -1,30 +1,43 @@
-import { IRange, IUnitRange, ObjectMatrix } from '@univerjs/core';
+import { Disposable, IRange, IUnitRange, LifecycleStages, Nullable, ObjectMatrix, OnLifecycle } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
-import { generateAstNode } from '../Analysis/Tools';
-import { FunctionNode, PrefixNode, SuffixNode } from '../AstNode';
+import { LexerTreeMaker } from '../Analysis/Lexer';
+import { AstTreeMaker } from '../Analysis/Parser';
+import { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
+import { FormulaASTCache } from '../AstNode/CacheLRU';
 import { NodeType } from '../AstNode/NodeType';
-import { FormulaDataType, IInterpreterDatasetConfig } from '../Basics/Common';
 import { PreCalculateNodeType } from '../Basics/NodeType';
 import { prefixToken, suffixToken } from '../Basics/Token';
 import { Interpreter } from '../Interpreter/Interpreter';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
+import { ICurrentConfigService } from '../Service/current-data.service';
+import { IRuntimeService } from '../Service/runtime.service';
 import { FormulaDependencyTree } from './DependencyTree';
 
-export class FormulaDependencyGenerator {
+@OnLifecycle(LifecycleStages.Rendered, FormulaDependencyGenerator)
+export class FormulaDependencyGenerator extends Disposable {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange>>();
 
     constructor(
-        private _formulaData: FormulaDataType,
-        private _forceCalculate = false
-    ) {}
-
-    static create(formulaData: FormulaDataType, forceCalculate = false) {
-        return new FormulaDependencyGenerator(formulaData, forceCalculate);
+        @ICurrentConfigService private readonly _currentConfigService: ICurrentConfigService,
+        @IRuntimeService private readonly _runtimeService: IRuntimeService,
+        @Inject(Interpreter) private readonly _interpreter: Interpreter,
+        @Inject(AstTreeMaker) private readonly _astTreeMaker: AstTreeMaker,
+        @Inject(LexerTreeMaker) private readonly _lexerTreeMaker: LexerTreeMaker
+    ) {
+        super();
     }
 
-    updateRangeFlatten(updateRangeList: IUnitRange[]) {
-        if (this._forceCalculate) {
+    override dispose(): void {
+        this._updateRangeFlattenCache.clear();
+        FormulaASTCache.clear();
+    }
+
+    updateRangeFlatten() {
+        const forceCalculate = this._currentConfigService.isForceCalculate();
+        const updateRangeList = this._currentConfigService.getUpdateRangeList();
+        if (forceCalculate) {
             return;
         }
         this._updateRangeFlattenCache = new Map<string, Map<string, IRange>>();
@@ -38,26 +51,28 @@ export class FormulaDependencyGenerator {
         }
     }
 
-    async generate(updateRangeList: IUnitRange[] = [], interpreterDatasetConfig?: IInterpreterDatasetConfig) {
-        this.updateRangeFlatten(updateRangeList);
+    async generate() {
+        this.updateRangeFlatten();
 
-        const formulaInterpreter = Interpreter.create(interpreterDatasetConfig);
+        // const formulaInterpreter = Interpreter.create(interpreterDatasetConfig);
 
-        const formulaDataKeys = Object.keys(this._formulaData);
+        const formulaData = this._currentConfigService.getFormulaData();
+
+        const formulaDataKeys = Object.keys(formulaData);
 
         const treeList: FormulaDependencyTree[] = [];
 
         for (const unitId of formulaDataKeys) {
-            const sheetData = this._formulaData[unitId];
+            const sheetData = formulaData[unitId];
 
             const sheetDataKeys = Object.keys(sheetData);
 
             for (const sheetId of sheetDataKeys) {
                 const matrixData = new ObjectMatrix(sheetData[sheetId]);
 
-                matrixData.forValue((row, column, formulaData) => {
-                    const formulaString = formulaData.formula;
-                    const node = generateAstNode(formulaString);
+                matrixData.forValue((row, column, formulaDataItem) => {
+                    const formulaString = formulaDataItem.f;
+                    const node = this._generateAstNode(formulaString);
 
                     const FDtree = new FormulaDependencyTree();
 
@@ -76,13 +91,13 @@ export class FormulaDependencyGenerator {
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
 
-            formulaInterpreter.setCurrentPosition(tree.row, tree.column, tree.sheetId, tree.unitId);
+            this._runtimeService.setCurrent(tree.row, tree.column, tree.sheetId, tree.unitId);
 
             if (tree.node == null) {
                 throw new Error('tree node is null');
             }
 
-            const rangeList = await this._getRangeListByNode(tree.node, formulaInterpreter);
+            const rangeList = await this._getRangeListByNode(tree.node);
 
             for (let r = 0, rLen = rangeList.length; r < rLen; r++) {
                 tree.pushRangeList(rangeList[r]);
@@ -92,6 +107,27 @@ export class FormulaDependencyGenerator {
         const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList);
 
         return Promise.resolve(this._calculateRunList(updateTreeList));
+    }
+
+    private _generateAstNode(formulaString: string) {
+        let astNode: Nullable<AstRootNode> = FormulaASTCache.get(formulaString);
+
+        if (astNode) {
+            return astNode;
+        }
+
+        const lexerNode = this._lexerTreeMaker.treeMaker(formulaString);
+        // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
+
+        astNode = this._astTreeMaker.parse(lexerNode);
+
+        if (astNode == null) {
+            throw new Error('astNode is null');
+        }
+
+        FormulaASTCache.set(formulaString, astNode);
+
+        return astNode;
     }
 
     private _addFlattenCache(unitId: string, sheetId: string, range: IRange) {
@@ -170,17 +206,17 @@ export class FormulaDependencyGenerator {
         }
     }
 
-    private async _executeNode(node: PreCalculateNodeType | FunctionNode, formulaInterpreter: Interpreter) {
+    private async _executeNode(node: PreCalculateNodeType | FunctionNode) {
         let value: BaseReferenceObject;
-        if (formulaInterpreter.checkAsyncNode(node)) {
-            value = (await formulaInterpreter.executeAsync(node)) as BaseReferenceObject;
+        if (this._interpreter.checkAsyncNode(node)) {
+            value = (await this._interpreter.executeAsync(node)) as BaseReferenceObject;
         } else {
-            value = formulaInterpreter.execute(node) as BaseReferenceObject;
+            value = this._interpreter.execute(node) as BaseReferenceObject;
         }
         return value;
     }
 
-    private async _getRangeListByNode(node: BaseAstNode, formulaInterpreter: Interpreter) {
+    private async _getRangeListByNode(node: BaseAstNode) {
         // ref function in offset indirect INDEX
         const preCalculateNodeList: PreCalculateNodeType[] = [];
         const referenceFunctionList: FunctionNode[] = [];
@@ -194,7 +230,7 @@ export class FormulaDependencyGenerator {
         for (let i = 0, len = preCalculateNodeList.length; i < len; i++) {
             const node = preCalculateNodeList[i];
 
-            const value: BaseReferenceObject = await this._executeNode(node, formulaInterpreter);
+            const value: BaseReferenceObject = await this._executeNode(node);
 
             const gridRange = value.toUnitRange();
 
@@ -203,7 +239,7 @@ export class FormulaDependencyGenerator {
 
         for (let i = 0, len = referenceFunctionList.length; i < len; i++) {
             const node = referenceFunctionList[i];
-            const value: BaseReferenceObject = await this._executeNode(node, formulaInterpreter);
+            const value: BaseReferenceObject = await this._executeNode(node);
 
             const gridRange = value.toUnitRange();
 
@@ -239,6 +275,7 @@ export class FormulaDependencyGenerator {
     private _getUpdateTreeListAndMakeDependency(treeList: FormulaDependencyTree[]) {
         const newTreeList: FormulaDependencyTree[] = [];
         const existTree = new Set<FormulaDependencyTree>();
+        const forceCalculate = this._currentConfigService.isForceCalculate();
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
             for (let m = 0, mLen = treeList.length; m < mLen; m++) {
@@ -258,9 +295,7 @@ export class FormulaDependencyGenerator {
              * includeTree: modification range contains formula
              */
             if (
-                (this._forceCalculate ||
-                    tree.dependencyRange(this._updateRangeFlattenCache) ||
-                    this._includeTree(tree)) &&
+                (forceCalculate || tree.dependencyRange(this._updateRangeFlattenCache) || this._includeTree(tree)) &&
                 !existTree.has(tree)
             ) {
                 newTreeList.push(tree);

@@ -1,10 +1,9 @@
 import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../Basics/TokenType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseAstNode, ErrorNode, LambdaPrivacyVarType } from './BaseAstNode';
-import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class LambdaParameterNode extends BaseAstNode {
@@ -32,7 +31,7 @@ export class LambdaParameterNode extends BaseAstNode {
 
 export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
     override get zIndex() {
-        return NODE_ORDER_MAP.get(NodeType.LAMBDA_PARAMETER) || 100;
+        return NODE_ORDER_MAP.get(NodeType.LAMBDA_PARAMETER) || DEFAULT_AST_NODE_FACTORY_Z_INDEX;
     }
 
     override create(param: LexerNode): BaseAstNode {
@@ -60,5 +59,3 @@ export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
         return this.create(param);
     }
 }
-
-FORMULA_AST_NODE_REGISTRY.add(new LambdaParameterNodeFactory());

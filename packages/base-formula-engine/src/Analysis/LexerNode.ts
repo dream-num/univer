@@ -26,6 +26,15 @@ export class LexerNode {
 
     private _lambdaParameter: string = '';
 
+    dispose() {
+        this._children.forEach((node) => {
+            if (!(typeof node === 'string')) {
+                node.dispose();
+            }
+        });
+        this._lambdaPrivacyVar?.clear();
+    }
+
     getLambdaId() {
         return this._lambdaId;
     }

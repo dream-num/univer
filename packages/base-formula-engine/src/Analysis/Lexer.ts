@@ -1,4 +1,4 @@
-import { Nullable } from '@univerjs/core';
+import { Disposable, Nullable } from '@univerjs/core';
 
 import { ErrorType } from '../Basics/ErrorType';
 import {
@@ -22,7 +22,7 @@ enum bracketType {
     LAMBDA,
 }
 
-export class LexerTreeMaker {
+export class LexerTreeMaker extends Disposable {
     private _currentLexerNode: LexerNode = new LexerNode();
 
     private _upLevel = 0;
@@ -41,7 +41,10 @@ export class LexerTreeMaker {
 
     private _colonState = false; // :
 
-    constructor(private _formulaString: string) {}
+    override dispose(): void {
+        this._currentLexerNode.dispose();
+        this._bracketState = [];
+    }
 
     getUpLevel() {
         return this._upLevel;
@@ -83,12 +86,12 @@ export class LexerTreeMaker {
         return this._currentLexerNode;
     }
 
-    treeMaker() {
+    treeMaker(formulaString: string) {
         this._resetCurrentLexerNode();
 
         this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
 
-        const state = this._nodeMaker(this._formulaString);
+        const state = this._nodeMaker(formulaString);
 
         console.log('error', state);
 
@@ -97,10 +100,12 @@ export class LexerTreeMaker {
             this._currentLexerNode = node;
         }
 
+        this._suffixExpressionHandler(this._currentLexerNode);
+
         return this._currentLexerNode;
     }
 
-    suffixExpressionHandler(lexerNode: LexerNode) {
+    private _suffixExpressionHandler(lexerNode: LexerNode) {
         const children = lexerNode.getChildren();
         if (!children) {
             return;
@@ -158,7 +163,7 @@ export class LexerTreeMaker {
                     baseStack.push(node as string);
                 }
             } else {
-                this.suffixExpressionHandler(node as LexerNode);
+                this._suffixExpressionHandler(node as LexerNode);
                 baseStack.push(node);
             }
         }

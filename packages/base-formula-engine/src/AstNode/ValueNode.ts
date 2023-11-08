@@ -1,9 +1,8 @@
 import { LexerNode } from '../Analysis/LexerNode';
 import { BooleanValue } from '../Basics/Common';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { ValueObjectFactory } from '../ValueObject/ArrayValueObject';
 import { BaseAstNode } from './BaseAstNode';
-import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class ValueNode extends BaseAstNode {
@@ -22,7 +21,7 @@ export class ValueNode extends BaseAstNode {
 
 export class ValueNodeFactory extends BaseAstNodeFactory {
     override get zIndex() {
-        return NODE_ORDER_MAP.get(NodeType.VALUE) || 100;
+        return NODE_ORDER_MAP.get(NodeType.VALUE) || DEFAULT_AST_NODE_FACTORY_Z_INDEX;
     }
 
     _checkValueNode(token: string) {
@@ -55,5 +54,3 @@ export class ValueNodeFactory extends BaseAstNodeFactory {
         return this._checkValueNode(param);
     }
 }
-
-FORMULA_AST_NODE_REGISTRY.add(new ValueNodeFactory());

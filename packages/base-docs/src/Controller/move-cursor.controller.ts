@@ -128,7 +128,11 @@ export class MoveCursorController extends Disposable {
         let focusOffset = collapsed ? endOffset : rangeDirection === RANGE_DIRECTION.FORWARD ? endOffset : startOffset;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
+            const dataStreamLength = skeleton.getModel().getBodyModel().getBody().dataStream.length ?? Infinity;
+
             focusOffset = direction === Direction.RIGHT ? ++focusOffset : --focusOffset;
+
+            focusOffset = Math.min(dataStreamLength - 2, Math.max(0, focusOffset));
 
             this._textSelectionManagerService.replace([
                 {

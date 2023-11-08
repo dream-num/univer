@@ -19,13 +19,19 @@ export interface ISelectListProps {
     }>;
 
     /**
+     * Whether to hide the check mark
+     * @default false
+     */
+    hideCheckMark?: boolean;
+
+    /**
      * The callback function that is triggered when the value is changed
      */
     onChange: (value: string) => void;
 }
 
 export function SelectList(props: ISelectListProps) {
-    const { value, options = [], onChange } = props;
+    const { value, options = [], hideCheckMark = false, onChange } = props;
 
     function handleSelect(value: string) {
         onChange(value);
@@ -39,9 +45,11 @@ export function SelectList(props: ISelectListProps) {
                     className={clsx(styles.selectListItem, { [styles.selectListItemSelect]: value === option.value })}
                 >
                     <a onClick={() => handleSelect(option.value)}>
-                        <span className={styles.selectListItemIcon}>
-                            {value === option.value && <CheckMarkSingle />}
-                        </span>
+                        {!hideCheckMark && (
+                            <span className={styles.selectListItemIcon}>
+                                {value === option.value && <CheckMarkSingle />}
+                            </span>
+                        )}
                         {option.label}
                     </a>
                 </li>

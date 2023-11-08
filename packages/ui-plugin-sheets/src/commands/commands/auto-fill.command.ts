@@ -141,6 +141,8 @@ export const AutoFillCommand: ICommand = {
         if (setRangeResult && removeMergeResult && addMergeResult && selectionResult) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
+                undoMutations: undoSeq,
+                redoMutations: redoSeq,
                 undo: async () => sequenceExecute(undoSeq, commandService).result,
                 redo: async () => sequenceExecute(redoSeq, commandService).result,
             });

@@ -34,7 +34,11 @@ export interface IRuleConfirmedData {
 }
 
 export type APPLY_FUNCTIONS = {
-    [key in APPLY_TYPE]?: (data: Array<Nullable<ICellData>>, len: number, direction: Direction) => ICellData[];
+    [key in APPLY_TYPE]?: (
+        data: Array<Nullable<ICellData>>,
+        len: number,
+        direction: Direction
+    ) => Array<Nullable<ICellData>>;
 };
 
 export enum APPLY_TYPE {

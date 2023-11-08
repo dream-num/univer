@@ -386,9 +386,11 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
                 num = Number(data[0]?.v) / (Number(data[1]?.v) / Number(data[0]?.v)) ** i;
             }
 
-            d.v = num;
-            d.m = `${num}`;
-            applyData.push(d);
+            if (d) {
+                d.v = num;
+                d.m = `${num}`;
+                applyData.push(d);
+            }
         }
     } else {
         const xArr = getXArr(data.length);
@@ -403,9 +405,11 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
                 y = forecast(1 - i, dataNumArr, xArr);
             }
 
-            d.v = y;
-            d.m = `${y}`;
-            applyData.push(d);
+            if (d) {
+                d.v = y;
+                d.m = `${y}`;
+                applyData.push(d);
+            }
         }
     }
     return applyData;
@@ -461,10 +465,12 @@ export function fillExtendNumber(data: Array<Nullable<ICellData>>, len: number, 
         const lastIndex = last.lastIndexOf(lastTxt);
         const valueTxt = last.substr(0, lastIndex) + num.toString() + last.substr(lastIndex + lastTxt.length);
 
-        d.v = valueTxt;
-        d.m = valueTxt;
+        if (d) {
+            d.v = valueTxt;
+            d.m = valueTxt;
 
-        applyData.push(d);
+            applyData.push(d);
+        }
     }
 
     return applyData;
@@ -476,11 +482,12 @@ export function fillOnlyFormat(data: Array<Nullable<ICellData>>, len: number) {
         const index = (i - 1) % data.length;
         const d = Tools.deepClone(data[index]);
 
-        delete d.f;
-        delete d.m;
-        delete d.v;
+        if (d) {
+            delete d.m;
+            delete d.v;
 
-        applyData.push(d);
+            applyData.push(d);
+        }
     }
 
     return applyData;
@@ -517,10 +524,12 @@ export function fillChnWeek(data: Array<Nullable<ICellData>>, len: number, step:
         }
 
         const rsd = num % 7;
-        d.m = keyword[rsd];
-        d.v = keyword[rsd];
+        if (d) {
+            d.m = keyword[rsd];
+            d.v = keyword[rsd];
 
-        applyData.push(d);
+            applyData.push(d);
+        }
     }
 
     return applyData;
@@ -542,9 +551,11 @@ export function fillChnNumber(data: Array<Nullable<ICellData>>, len: number, ste
             txt = numberToChinese(num);
         }
 
-        d.v = txt;
-        d.m = txt.toString();
-        applyData.push(d);
+        if (d) {
+            d.v = txt;
+            d.m = txt.toString();
+            applyData.push(d);
+        }
     }
 
     return applyData;

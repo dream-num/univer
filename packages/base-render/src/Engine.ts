@@ -125,12 +125,10 @@ export class Engine extends ThinEngine<Scene> {
         let timer: number | undefined;
         const resizeObserver = new ResizeObserver(() => {
             if (!timer) {
-                timer = window.setTimeout(() => {
-                    window.requestIdleCallback(() => {
-                        this.resize();
-                    });
+                timer = window.requestIdleCallback(() => {
+                    this.resize();
                     timer = undefined;
-                }, 100);
+                });
             }
         });
 

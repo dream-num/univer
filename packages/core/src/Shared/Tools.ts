@@ -283,22 +283,23 @@ export class Tools {
         return diffValue(one, tow);
     }
 
-    static deepClone(value: any): any {
+    static deepClone<T = unknown>(value: T): T {
         if (!this.isDefine(value)) {
             return value;
         }
         if (this.isRegExp(value)) {
-            return new RegExp(value);
+            return new RegExp(value) as T;
         }
+        // @ts-ignore
         if (this.isDate(value)) {
-            return new Date(value);
+            return new Date(value) as T;
         }
         if (this.isArray(value)) {
             const clone: any[] = [];
             value.forEach((item, index) => {
                 clone[index] = Tools.deepClone(item);
             });
-            return clone;
+            return clone as T;
         }
         if (this.isObject(value)) {
             const clone: IKeyValue = {};
@@ -307,7 +308,7 @@ export class Tools {
                 clone[key] = Tools.deepClone(item);
             });
             Object.setPrototypeOf(clone, Object.getPrototypeOf(value));
-            return clone;
+            return clone as T;
         }
         return value;
     }

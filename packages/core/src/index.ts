@@ -14,6 +14,7 @@ export {
     type IExecutionOptions,
     type IMultiCommand,
     type IMutation,
+    type IMutationInfo,
     type IOperation,
     sequenceExecute,
 } from './services/command/command.service';

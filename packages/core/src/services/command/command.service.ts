@@ -80,6 +80,12 @@ export interface ICommandInfo<T extends object = object> {
     params?: T;
 }
 
+export interface IMutationInfo<T extends object = object> {
+    id: string;
+    type?: CommandType.MUTATION;
+    params: T;
+}
+
 export interface IExecutionOptions {
     local?: boolean;
 }

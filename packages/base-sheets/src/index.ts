@@ -177,4 +177,5 @@ export {
     SetWorksheetRowIsAutoHeightMutation,
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
+export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { RefRangeService } from './services/ref-range.service';

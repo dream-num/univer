@@ -2,7 +2,7 @@ import { LocaleService, ThemeService } from '@univerjs/core';
 import { ConfigProvider, defaultTheme, ILocale, themeInstance } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import React, { ComponentType, useEffect, useRef, useState } from 'react';
+import React, { ComponentType, useEffect, useMemo, useRef, useState } from 'react';
 
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { ISidebarService } from '../services/sidebar/sidebar.service';
@@ -67,17 +67,18 @@ export function App(props: IUniverAppProps) {
     const [mainCollapsed, setMainCollapsed] = useState<boolean>(false);
 
     // Create a portal container for injecting global component themes.
-    const portalContainer: HTMLElement = document.createElement('div');
-    document.body.appendChild(portalContainer);
+    const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
 
     useEffect(() => {
+        document.body.appendChild(portalContainer);
+
         const subscriptions = [
             localeService.getLocale().locale$.subscribe((locale) => {
                 locale && setLocale(localeService.getLocales() as unknown as ILocale);
             }),
             themeService.currentTheme$.subscribe((theme) => {
                 themeInstance.setTheme(mountContainer, theme);
-                themeInstance.setTheme(portalContainer, theme);
+                portalContainer && themeInstance.setTheme(portalContainer, theme);
             }),
             sidebarService.getObservableSidebar().subscribe((sidebar) => {
                 setMainCollapsed(sidebar?.visible ?? false);
@@ -88,7 +89,7 @@ export function App(props: IUniverAppProps) {
             // batch unsubscribe
             subscriptions.forEach((subscription) => subscription.unsubscribe());
         };
-    }, []);
+    }, [portalContainer]);
 
     return (
         <ConfigProvider locale={locale} mountContainer={portalContainer}>

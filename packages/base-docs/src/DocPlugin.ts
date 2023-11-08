@@ -33,7 +33,7 @@ import {
 } from './commands/commands/inline-format.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
-import { MoveCursorOperation } from './commands/operations/cursor.operation';
+import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { DeleteLeftInputController } from './Controller/delete-left-input.controller';
@@ -56,6 +56,10 @@ import {
     MoveCursorLeftShortcut,
     MoveCursorRightShortcut,
     MoveCursorUpShortcut,
+    MoveSelectionDownShortcut,
+    MoveSelectionLeftShortcut,
+    MoveSelectionRightShortcut,
+    MoveSelectionUpShortcut,
 } from './shortcuts/cursor.shortcut';
 import { DocCanvasView } from './View/doc-canvas-view';
 
@@ -106,6 +110,7 @@ export class DocPlugin extends Plugin {
         (
             [
                 MoveCursorOperation,
+                MoveSelectionOperation,
                 DeleteLeftCommand,
                 SetInlineFormatBoldCommand,
                 SetInlineFormatItalicCommand,
@@ -135,6 +140,10 @@ export class DocPlugin extends Plugin {
             MoveCursorDownShortcut,
             MoveCursorRightShortcut,
             MoveCursorLeftShortcut,
+            MoveSelectionUpShortcut,
+            MoveSelectionDownShortcut,
+            MoveSelectionLeftShortcut,
+            MoveSelectionRightShortcut,
             DeleteLeftShortcut,
             BreakLineShortcut,
         ].forEach((shortcut) => {

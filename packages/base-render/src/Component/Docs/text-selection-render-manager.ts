@@ -276,12 +276,15 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         return this._rangeList;
     }
 
-    add(textSelection: Nullable<TextRange>) {
-        if (textSelection == null) {
+    add(textRange: Nullable<TextRange>) {
+        if (textRange == null) {
             return;
         }
 
-        this._addTextRange(textSelection);
+        this._addTextRange(textRange);
+
+        // FIXME: @jocs, why I need to refresh textRange? it already refreshed when create.
+        textRange.refresh();
     }
 
     sync() {
@@ -706,6 +709,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _syncDomToSelection() {
         const activeRangeInstance = this.getActiveRangeInstance();
         const anchor = activeRangeInstance?.getAnchor();
+
         if (!anchor || (anchor && !anchor.visible) || this._activeViewport == null) {
             this.focus();
             return;

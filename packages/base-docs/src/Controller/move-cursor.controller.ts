@@ -7,6 +7,7 @@ import {
     IRenderManagerService,
     ITextSelectionRenderManager,
     NodePositionConvertToCursor,
+    RANGE_DIRECTION,
 } from '@univerjs/base-render';
 import {
     Direction,
@@ -22,7 +23,11 @@ import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
 
 import { getDocObject } from '../Basics/component-tools';
-import { IMoveCursorOperationParams, MoveCursorOperation } from '../commands/operations/cursor.operation';
+import {
+    IMoveCursorOperationParams,
+    MoveCursorOperation,
+    MoveSelectionOperation,
+} from '../commands/operations/cursor.operation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
@@ -52,7 +57,7 @@ export class MoveCursorController extends Disposable {
     private _initialize() {}
 
     private _commandExecutedListener() {
-        const updateCommandList = [MoveCursorOperation.id];
+        const updateCommandList = [MoveCursorOperation.id, MoveSelectionOperation.id];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -62,9 +67,106 @@ export class MoveCursorController extends Disposable {
 
                 const param = command.params as IMoveCursorOperationParams;
 
-                this._moveCursorFunction(param.direction);
+                switch (command.id) {
+                    case MoveCursorOperation.id: {
+                        return this._moveCursorFunction(param.direction);
+                    }
+
+                    case MoveSelectionOperation.id: {
+                        return this._moveSelectionFunction(param.direction);
+                    }
+
+                    default: {
+                        throw new Error('Unknown command');
+                    }
+                }
             })
         );
+    }
+
+    private _moveSelectionFunction(direction: Direction) {
+        const activeRange = this._textSelectionRenderManager.getActiveRange();
+        const allRanges = this._textSelectionRenderManager.getAllTextRanges();
+
+        const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
+
+        const docObject = this._getDocObject();
+
+        if (activeRange == null || skeleton == null || docObject == null) {
+            return;
+        }
+
+        const { startOffset, endOffset, style, collapsed, direction: rangeDirection } = activeRange;
+
+        if (allRanges.length > 1) {
+            let min = Infinity;
+            let max = -Infinity;
+
+            for (const range of allRanges) {
+                min = Math.min(min, range.startOffset!);
+                max = Math.max(max, range.endOffset!);
+            }
+
+            this._textSelectionManagerService.replace([
+                {
+                    startOffset: direction === Direction.LEFT || direction === Direction.UP ? max : min,
+                    endOffset: direction === Direction.LEFT || direction === Direction.UP ? min : max,
+                    collapsed: false,
+                    style,
+                },
+            ]);
+
+            return;
+        }
+
+        const anchorOffset = collapsed
+            ? startOffset
+            : rangeDirection === RANGE_DIRECTION.FORWARD
+            ? startOffset
+            : endOffset;
+
+        let focusOffset = collapsed ? endOffset : rangeDirection === RANGE_DIRECTION.FORWARD ? endOffset : startOffset;
+
+        if (direction === Direction.LEFT || direction === Direction.RIGHT) {
+            const dataStreamLength = skeleton.getModel().getBodyModel().getBody().dataStream.length ?? Infinity;
+
+            focusOffset = direction === Direction.RIGHT ? ++focusOffset : --focusOffset;
+
+            focusOffset = Math.min(dataStreamLength - 2, Math.max(0, focusOffset));
+
+            this._textSelectionManagerService.replace([
+                {
+                    startOffset: anchorOffset,
+                    endOffset: focusOffset,
+                    collapsed: anchorOffset === focusOffset,
+                    style,
+                },
+            ]);
+        } else {
+            const focusSpan = skeleton.findNodeByCharIndex(focusOffset);
+
+            const documentOffsetConfig = docObject.document.getOffsetConfig();
+
+            const newPos = this._getTopOrBottomPosition(skeleton, focusSpan, direction === Direction.DOWN);
+            if (newPos == null) {
+                return;
+            }
+
+            const newActiveRange = new NodePositionConvertToCursor(documentOffsetConfig, skeleton).getRangePointData(
+                newPos,
+                newPos
+            ).cursorList[0];
+
+            // move selection
+            this._textSelectionManagerService.replace([
+                {
+                    startOffset: anchorOffset,
+                    endOffset: newActiveRange.endOffset,
+                    collapsed: anchorOffset === newActiveRange.endOffset,
+                    style,
+                },
+            ]);
+        }
     }
 
     private _moveCursorFunction(direction: Direction) {
@@ -79,11 +181,7 @@ export class MoveCursorController extends Disposable {
             return;
         }
 
-        const { startOffset, endOffset, style, startNodePosition } = activeRange;
-
-        const preSpan = skeleton.findSpanByPosition(startNodePosition);
-
-        const documentOffsetConfig = docObject.document.getOffsetConfig();
+        const { startOffset, endOffset, style } = activeRange;
 
         if (direction === Direction.LEFT || direction === Direction.RIGHT) {
             let cursor;
@@ -117,6 +215,10 @@ export class MoveCursorController extends Disposable {
                 },
             ]);
         } else {
+            const preSpan = skeleton.findNodeByCharIndex(endOffset);
+
+            const documentOffsetConfig = docObject.document.getOffsetConfig();
+
             const newPos = this._getTopOrBottomPosition(skeleton, preSpan, direction === Direction.DOWN);
             if (newPos == null) {
                 return;
@@ -142,17 +244,11 @@ export class MoveCursorController extends Disposable {
         span: Nullable<IDocumentSkeletonSpan>,
         direction: boolean
     ): Nullable<INodePosition> {
-        // const referenceSpan = docSkeleton.findSpanByPosition(this._currentNodePosition);
-        const selectionRange = this._textSelectionManagerService.getFirst();
-        if (selectionRange == null) {
-            return;
-        }
-        const referenceSpan = docSkeleton.findNodeByCharIndex(selectionRange.startOffset);
-        if (referenceSpan == null || span == null) {
+        if (span == null) {
             return;
         }
 
-        const offsetLeft = this._getSpanLeftOffsetInLine(referenceSpan);
+        const offsetLeft = this._getSpanLeftOffsetInLine(span);
 
         const line = this._getNextOrPrevLine(span, direction);
 
@@ -193,17 +289,16 @@ export class MoveCursorController extends Disposable {
         } = {
             distance: Infinity,
         };
+
         for (const divide of line.divides) {
             const divideLeft = divide.left;
-            for (const span of divide.spanGroup) {
-                const { left, width } = span;
-                const leftSide = divideLeft + left;
-                const rightSide = leftSide + width;
-                if (offsetLeft >= leftSide && offsetLeft <= rightSide) {
-                    return docSkeleton.findPositionBySpan(span);
-                }
 
-                const distance = Math.abs(offsetLeft - (leftSide + rightSide) / 2);
+            for (const span of divide.spanGroup) {
+                const { left } = span;
+                const leftSide = divideLeft + left;
+
+                const distance = Math.abs(offsetLeft - leftSide);
+
                 if (distance < nearestNode.distance) {
                     nearestNode.span = span;
                     nearestNode.distance = distance;

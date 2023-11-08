@@ -1,4 +1,4 @@
-import { ISelection, ITextSelectionRangeParam, IUniverInstanceService, LocaleService, Nullable } from '@univerjs/core';
+import { ISelection, ITextRangeParam, IUniverInstanceService, LocaleService, Nullable } from '@univerjs/core';
 import { IDisposable, Inject } from '@wendellhu/redi';
 
 import { KeyCode } from './keycode';
@@ -11,7 +11,7 @@ export interface IShortcutExperienceSearch {
 
 export interface IShortcutExperienceParam extends IShortcutExperienceSearch {
     selection?: ISelection;
-    textSelection?: ITextSelectionRangeParam;
+    textSelection?: ITextRangeParam;
 }
 
 /**

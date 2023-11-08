@@ -107,13 +107,22 @@ export class Documents extends DocComponent {
     }
 
     getOffsetConfig(): IDocumentOffsetConfig {
+        const {
+            transform: documentTransform,
+            pageLayoutType,
+            pageMarginLeft,
+            pageMarginTop,
+            left: docsLeft,
+            top: docsTop,
+        } = this;
+
         return {
-            documentTransform: this.transform,
-            pageLayoutType: this.pageLayoutType,
-            pageMarginLeft: this.pageMarginLeft,
-            pageMarginTop: this.pageMarginTop,
-            docsLeft: this.left,
-            docsTop: this.top,
+            documentTransform,
+            pageLayoutType,
+            pageMarginLeft,
+            pageMarginTop,
+            docsLeft,
+            docsTop,
         };
     }
 

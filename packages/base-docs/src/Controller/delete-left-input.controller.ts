@@ -67,17 +67,15 @@ export class DeleteLeftInputController extends Disposable {
     private _deleteFunction() {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
 
-        const activeSelection = this._textSelectionRenderManager.getActiveTextSelection();
-
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
-        if (activeRange == null || skeleton == null || activeSelection == null) {
+        if (activeRange == null || skeleton == null) {
             return;
         }
 
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
 
-        const startNodePosition = activeSelection.getStart();
+        const { startOffset, collapsed, segmentId, style, startNodePosition } = activeRange;
 
         const preSpan = skeleton.findSpanByPosition(startNodePosition);
 
@@ -85,13 +83,11 @@ export class DeleteLeftInputController extends Disposable {
 
         const preIsIndent = isIndentBySpan(preSpan, docsModel.body);
 
-        const { cursorStart, isCollapse, segmentId, style } = activeRange;
-
-        let cursor = cursorStart;
+        let cursor = startOffset;
 
         cursor--;
 
-        if (isCollapse === false) {
+        if (collapsed === false) {
             cursor += 1;
         }
 
@@ -137,19 +133,19 @@ export class DeleteLeftInputController extends Disposable {
                     paragraphs: [{ ...updateParagraph }],
                 },
                 range: {
-                    cursorStart: paragraphIndex + 1,
-                    cursorEnd: paragraphIndex + 1,
-                    isCollapse: true,
+                    startOffset: paragraphIndex + 1,
+                    endOffset: paragraphIndex + 1,
+                    collapsed: true,
                 },
                 segmentId,
             });
         } else {
-            const endNodePosition = activeSelection?.getEnd();
+            const { endNodePosition } = activeRange;
 
             if (endNodePosition != null) {
                 const endSpan = skeleton.findSpanByPosition(endNodePosition);
                 if (hasListSpan(endSpan) && !isSameLine(preSpan, endSpan)) {
-                    activeRange.cursorEnd -= 1;
+                    activeRange.endOffset -= 1;
                 }
             }
 
@@ -169,9 +165,9 @@ export class DeleteLeftInputController extends Disposable {
         // move selection
         this._textSelectionManagerService.replace([
             {
-                cursorStart: cursor,
-                cursorEnd: cursor,
-                isCollapse: true,
+                startOffset: cursor,
+                endOffset: cursor,
+                collapsed: true,
                 style,
             },
         ]);

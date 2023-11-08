@@ -163,9 +163,9 @@ export class StartEditController extends Disposable {
 
             this._textSelectionManagerService.replace([
                 {
-                    cursorStart: 0,
-                    cursorEnd: 0,
-                    isCollapse: true,
+                    startOffset: 0,
+                    endOffset: 0,
+                    collapsed: true,
                 },
             ]);
 
@@ -227,8 +227,6 @@ export class StartEditController extends Disposable {
         documentSkeleton.calculate();
 
         this._editAreaProcessing(editorWidth, editorHeight, actualRangeWithCoord, canvasOffset, fill);
-
-        // this._textSelectionRenderManager.sync();
     }
 
     /**
@@ -458,9 +456,9 @@ export class StartEditController extends Disposable {
 
                 this._textSelectionManagerService.replace([
                     {
-                        cursorStart: 0,
-                        cursorEnd: 0,
-                        isCollapse: true,
+                        startOffset: 0,
+                        endOffset: 0,
+                        collapsed: true,
                     },
                 ]);
             } else {
@@ -473,9 +471,9 @@ export class StartEditController extends Disposable {
 
                 this._textSelectionManagerService.replace([
                     {
-                        cursorStart: cursor,
-                        cursorEnd: cursor,
-                        isCollapse: true,
+                        startOffset: cursor,
+                        endOffset: cursor,
+                        collapsed: true,
                     },
                 ]);
             }

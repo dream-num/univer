@@ -36,19 +36,15 @@ export interface ISelectionWithCoord {
     primaryWithCoord: Nullable<ISelectionCellWithCoord>;
 }
 
-export interface ITextSelectionRangeStart {
-    cursorStart: number;
+export interface ITextRangeStart {
+    startOffset: number;
 }
 
-export interface ITextSelectionRange extends ITextSelectionRangeStart {
-    cursorEnd: number;
-    isCollapse: boolean;
+export interface ITextRange extends ITextRangeStart {
+    endOffset: number;
+    collapsed: boolean;
 }
 
-export interface ITextSelectionRangeParam extends ITextSelectionRange {
+export interface ITextRangeParam extends ITextRange {
     segmentId?: string; //The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
-}
-
-export interface ITextSelectionRangeStartParam extends ITextSelectionRangeStart {
-    segmentId?: string;
 }

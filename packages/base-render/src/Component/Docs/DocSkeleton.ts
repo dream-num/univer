@@ -740,7 +740,7 @@ export class DocumentSkeleton extends Skeleton {
                     }
 
                     for (const line of lines) {
-                        const { divides, lineHeight, st, ed } = line;
+                        const { divides, st, ed } = line;
                         const divideLength = divides.length;
 
                         if (charIndex < st || charIndex > ed) {

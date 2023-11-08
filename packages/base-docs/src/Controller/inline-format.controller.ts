@@ -62,7 +62,7 @@ export class InlineFormatController extends Disposable {
     }
 
     private handleInlineFormat(command: ICommandInfo) {
-        const segmentId = this._textSelectionRenderManager.getActiveRange()?.segmentId;
+        const { segmentId } = this._textSelectionRenderManager.getActiveRange() ?? {};
 
         if (segmentId == null) {
             return;

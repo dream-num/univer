@@ -1,12 +1,12 @@
 import {
     CURSOR_TYPE,
-    cursorConvertToTextSelection,
+    cursorConvertToTextRange,
     Documents,
     getOneTextSelectionRange,
     IMouseEvent,
     IPointerEvent,
     IRenderManagerService,
-    ITextSelectionRangeWithStyle,
+    ITextRangeWithStyle,
     ITextSelectionRenderManager,
     NodePositionConvertToCursor,
 } from '@univerjs/base-render';
@@ -129,7 +129,9 @@ export class TextSelectionController extends Disposable {
     private _onChangeListener() {
         this._textSelectionManagerService.textSelectionInfo$.subscribe((param) => {
             const unitId = this._textSelectionManagerService.getCurrentSelection()?.unitId;
+            // Remove all textRanges.
             this._textSelectionRenderManager.reset();
+
             if (param == null || unitId == null) {
                 return;
             }
@@ -145,7 +147,7 @@ export class TextSelectionController extends Disposable {
             const { scene, document } = currentRender;
 
             for (const selectionWithStyle of param) {
-                const textSelection = cursorConvertToTextSelection(
+                const textSelection = cursorConvertToTextRange(
                     scene,
                     selectionWithStyle,
                     docSkeleton,
@@ -161,7 +163,7 @@ export class TextSelectionController extends Disposable {
     }
 
     private _userActionSyncListener() {
-        this._textSelectionRenderManager.textSelection$.subscribe((textSelections) => {
+        this._textSelectionRenderManager.textSelection$.subscribe((textRanges) => {
             const docsObject = this._docSkeletonManagerService.getCurrent();
 
             if (docsObject == null) {
@@ -181,17 +183,20 @@ export class TextSelectionController extends Disposable {
             this._commandService.executeCommand(SetTextSelectionsOperation.id, {
                 unitId,
                 pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
-                ranges: textSelections
-                    .map((textSelection) => {
-                        let { endNodePosition } = textSelection;
-                        const { startNodePosition } = textSelection;
-                        if (endNodePosition == null) {
-                            endNodePosition = startNodePosition;
+                ranges: textRanges
+                    .map((textRange) => {
+                        let { focusNodePosition } = textRange;
+                        const { anchorNodePosition } = textRange;
+
+                        if (focusNodePosition == null) {
+                            focusNodePosition = anchorNodePosition;
                         }
-                        const rangeList = convert.getRangePointData(startNodePosition, endNodePosition).cursorList;
+
+                        const rangeList = convert.getRangePointData(anchorNodePosition, focusNodePosition).cursorList;
+
                         return getOneTextSelectionRange(rangeList);
                     })
-                    .filter((x) => x !== null) as ITextSelectionRangeWithStyle[],
+                    .filter((x) => x !== null) as ITextRangeWithStyle[],
             });
         });
     }

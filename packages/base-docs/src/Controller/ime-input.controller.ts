@@ -1,8 +1,4 @@
-import {
-    IRenderManagerService,
-    ITextSelectionRangeWithStyle,
-    ITextSelectionRenderManager,
-} from '@univerjs/base-render';
+import { IRenderManagerService, ITextRangeWithStyle, ITextSelectionRenderManager } from '@univerjs/base-render';
 import {
     Disposable,
     ICommandService,
@@ -23,7 +19,7 @@ import { TextSelectionManagerService } from '../services/text-selection-manager.
 export class IMEInputController extends Disposable {
     private _previousIMEContent: string = '';
 
-    private _previousIMERange: Nullable<ITextSelectionRangeWithStyle>;
+    private _previousIMERange: Nullable<ITextRangeWithStyle>;
 
     private _onStartSubscription: Nullable<Subscription>;
 
@@ -90,7 +86,7 @@ export class IMEInputController extends Disposable {
 
             const { event, activeRange } = config;
 
-            const { cursorStart, cursorEnd, segmentId, style } = this._previousIMERange;
+            const { startOffset, endOffset, segmentId, style } = this._previousIMERange;
 
             if (skeleton == null || activeRange == null) {
                 return;
@@ -119,15 +115,15 @@ export class IMEInputController extends Disposable {
             // move selection
             this._textSelectionManagerService.replace([
                 {
-                    cursorStart: cursorStart + len,
-                    cursorEnd: cursorEnd + len,
-                    isCollapse: true,
+                    startOffset: startOffset + len,
+                    endOffset: endOffset + len,
+                    collapsed: true,
                     style,
                 },
             ]);
 
-            if (!this._previousIMERange.isCollapse) {
-                this._previousIMERange.isCollapse = true;
+            if (!this._previousIMERange.collapsed) {
+                this._previousIMERange.collapsed = true;
             }
 
             this._previousIMEContent = content;

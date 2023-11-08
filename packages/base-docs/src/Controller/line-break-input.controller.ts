@@ -87,7 +87,7 @@ export class LineBreakInputController extends Disposable {
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
         const unitId = docsModel.getUnitId();
 
-        const { cursorStart, segmentId, style } = activeRange;
+        const { startOffset, segmentId, style } = activeRange;
 
         // split paragraph
         this._commandService.executeCommand(InsertCommand.id, {
@@ -105,9 +105,9 @@ export class LineBreakInputController extends Disposable {
         // move selection
         this._textSelectionManagerService.replace([
             {
-                cursorStart: cursorStart + 1,
-                cursorEnd: cursorStart + 1,
-                isCollapse: true,
+                startOffset: startOffset + 1,
+                endOffset: startOffset + 1,
+                collapsed: true,
                 style,
             },
         ]);

@@ -1,4 +1,5 @@
-import { ICommandInfo, ICommandService, toDisposable } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/base-render';
+import { ICommandInfo, ICommandService, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { Button, Dropdown } from '@univerjs/design';
 import { CheckMarkSingle, Paste } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -12,9 +13,11 @@ import {
 import { RefillCommand } from '../../commands/commands/refill.command';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
+import { getSheetObject } from '../../controllers/utils/component-tools';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { APPLY_TYPE } from '../../services/auto-fill/type';
-import { ISelectionRenderService } from '../../services/selection/selection-render.service';
+import { SelectionRenderService } from '../../services/selection/selection-render.service';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import styles from './index.module.less';
 
 export interface IAnchorPoint {
@@ -58,13 +61,24 @@ const menu = [
 ];
 
 export const SmartButton: React.FC<{}> = () => {
-    const [visible, setVisible] = useState(false);
     const commandService = useDependency(ICommandService);
-    const selectionRenderService = useDependency(ISelectionRenderService);
+    const sheetSkeletonManagerService = useDependency(SheetSkeletonManagerService);
+    const currentUniverService = useDependency(IUniverInstanceService);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const selectionRenderService = useDependency(SelectionRenderService);
     const autoFillService = useDependency(IAutoFillService);
+
+    const [visible, setVisible] = useState(false);
     const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
     const [selected, setSelected] = useState<number>(1);
     const forceUpdate = useUpdate();
+
+    const sheetObject = getSheetObject(currentUniverService, renderManagerService);
+
+    if (sheetObject == null) {
+        return null;
+    }
+    const { scene } = sheetObject;
 
     useEffect(() => {
         const disposable = commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -94,9 +108,8 @@ export const SmartButton: React.FC<{}> = () => {
     if (anchor.col < 0 || anchor.row < 0) {
         return null;
     }
-    const skeleton = selectionRenderService.getSkeleton();
+    const skeleton = sheetSkeletonManagerService.getCurrent()?.skeleton;
     const viewport = selectionRenderService.getViewPort();
-    const scene = selectionRenderService.getScene();
     const scaleX = scene?.scaleX;
     const scaleY = scene?.scaleY;
     const scrollXY = scene?.getScrollXY(viewport);

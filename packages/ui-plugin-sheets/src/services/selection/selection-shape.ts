@@ -54,19 +54,13 @@ const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
  */
 export class SelectionShape {
     private _leftControl!: Rect;
-
     private _rightControl!: Rect;
-
     private _topControl!: Rect;
-
     private _bottomControl!: Rect;
 
     private _backgroundControlTop!: Rect;
-
     private _backgroundControlBottom!: Rect;
-
     private _backgroundControlMiddleLeft!: Rect;
-
     private _backgroundControlMiddleRight!: Rect;
 
     private _fillControl!: Rect;
@@ -74,35 +68,21 @@ export class SelectionShape {
     private _selectionShape!: Group;
 
     private _rowHeaderBackground!: Rect;
-
     private _rowHeaderBorder!: Rect;
-
     private _rowHeaderGroup!: Group;
-
     private _rowHeaderHighlight!: Rect;
-
     private _columnHeaderBackground!: Rect;
-
     private _columnHeaderBorder!: Rect;
-
     private _columnHeaderGroup!: Group;
-
     private _columnHeaderHighlight!: Rect;
 
     private _topLeftWidget!: Rect;
-
     private _topCenterWidget!: Rect;
-
     private _topRightWidget!: Rect;
-
     private _middleLeftWidget!: Rect;
-
     private _middleRightWidget!: Rect;
-
     private _bottomLeftWidget!: Rect;
-
     private _bottomCenterWidget!: Rect;
-
     private _bottomRightWidget!: Rect;
 
     private _dashRect!: Rect;
@@ -112,25 +92,18 @@ export class SelectionShape {
     private _selectionStyle: Nullable<ISelectionStyle>;
 
     private _rowHeaderWidth: number = 0;
-
     private _columnHeaderHeight: number = 0;
 
     private _widgetRects: Rect[] = [];
 
     private _dispose$ = new BehaviorSubject<SelectionShape>(this);
-
     readonly dispose$ = this._dispose$.asObservable();
 
     readonly selectionMoving$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
-
     readonly selectionMoved$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
-
     readonly selectionScaling$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
-
     readonly selectionScaled$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
-
     readonly selectionFilling$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
-
     readonly selectionFilled$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
 
     private _defaultStyle!: ISelectionStyle;
@@ -232,21 +205,6 @@ export class SelectionShape {
         return this._dashRect;
     }
 
-    static fromJson(
-        scene: Scene,
-        zIndex: number,
-        newSelectionData: ISelectionWithCoordAndStyle,
-        rowHeaderWidth: number,
-        columnHeaderHeight: number,
-        isHeaderHighlight: boolean,
-        themeService: ThemeService
-    ) {
-        const { rangeWithCoord, primaryWithCoord, style } = newSelectionData;
-        const control = new SelectionShape(scene, zIndex, isHeaderHighlight, themeService);
-        control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
-        return control;
-    }
-
     enableHeaderHighlight() {
         this._isHeaderHighlight = true;
     }
@@ -260,7 +218,7 @@ export class SelectionShape {
      *
      * inner update
      */
-    _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
+    private _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
         const { startX, startY, endX, endY } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
         if (style == null) {
@@ -432,37 +390,22 @@ export class SelectionShape {
         this._selectionShape?.dispose();
 
         this._rowHeaderBackground?.dispose();
-
         this._rowHeaderBorder?.dispose();
-
         this._rowHeaderGroup?.dispose();
-
         this._rowHeaderBackground?.dispose();
-
         this._columnHeaderBackground?.dispose();
-
         this._columnHeaderBorder?.dispose();
-
         this._columnHeaderGroup?.dispose();
 
         this._topLeftWidget?.dispose();
-
         this._topCenterWidget?.dispose();
-
         this._topRightWidget?.dispose();
-
         this._middleLeftWidget?.dispose();
-
         this._middleRightWidget?.dispose();
-
         this._bottomLeftWidget?.dispose();
-
         this._bottomCenterWidget?.dispose();
-
         this._bottomRightWidget?.dispose();
-
         this._dispose$.next(this);
-
         this._dispose$.complete();
     }
 

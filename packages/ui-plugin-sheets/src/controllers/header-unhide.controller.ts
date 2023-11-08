@@ -25,7 +25,7 @@ import { takeUntil } from 'rxjs';
 
 import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../common/keys';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { HeaderUnhideShape, HeaderUnhideShapeType } from '../views/header-unhide-shape';
+import { HeaderUnhideShape, HeaderUnhideShapeType, UNHIDE_ICON_SIZE } from '../views/header-unhide-shape';
 import { getCoordByCell, getSheetObject } from './utils/component-tools';
 
 const HEADER_UNHIDE_CONTROLLER_SHAPE = '__SpreadsheetHeaderUnhideSHAPEControllerShape__';
@@ -48,7 +48,7 @@ export class HeaderUnhideController extends RxDisposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _cmdSrv: ICommandService,
-        @IUniverInstanceService private readonly _cuSrv: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _rendererManagerService: IRenderManagerService
     ) {
         super();
@@ -61,29 +61,28 @@ export class HeaderUnhideController extends RxDisposable {
     }
 
     private _init(): void {
-        // First just let me render a unhide button of the column header!.
         const sheetObject = this._getSheetObject();
         if (!sheetObject) {
             return;
         }
 
-        // try to render the unhide button for the current worksheet
-        const workbook = this._cuSrv.getCurrentUniverSheetInstance();
+        // Try to render the unhide button for the current worksheet.
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         if (worksheet) {
             this._initForWorksheet(workbook, worksheet);
         }
 
-        // re-render when sheet skeleton is changed
+        // Re-render when sheet skeleton changes.
         this._sheetSkeletonManagerService.currentSkeleton$.pipe(takeUntil(this.dispose$)).subscribe((skeleton) => {
             if (skeleton) {
-                const workbook = this._cuSrv.getUniverSheetInstance(skeleton.unitId)!;
+                const workbook = this._univerInstanceService.getUniverSheetInstance(skeleton.unitId)!;
                 const worksheet = workbook.getSheetBySheetId(skeleton.sheetId)!;
                 this._updateWorksheet(workbook!, worksheet);
             }
         });
 
-        // re-render hidden rows / cols when specific commands are executed
+        // Re-render hidden rows / cols when specific commands are executed.
         this.disposeWithMe(
             this._cmdSrv.onCommandExecuted((command) => {
                 if (
@@ -95,7 +94,9 @@ export class HeaderUnhideController extends RxDisposable {
                     return;
                 }
 
-                const workbook = this._cuSrv.getUniverSheetInstance((command.params as IKeyValue).workbookId);
+                const workbook = this._univerInstanceService.getUniverSheetInstance(
+                    (command.params as IKeyValue).workbookId
+                );
                 const worksheet = workbook?.getSheetBySheetId((command.params as IKeyValue).worksheetId);
                 if (worksheet) {
                     this._updateWorksheet(workbook!, worksheet);
@@ -138,8 +139,8 @@ export class HeaderUnhideController extends RxDisposable {
                     hovered: false,
                     hasPrevious,
                     hasNext,
-                    top: position.startY - (hasPrevious ? 12 : 0),
-                    left: position.startX - 12,
+                    top: position.startY - (hasPrevious ? UNHIDE_ICON_SIZE : 0),
+                    left: position.startX - UNHIDE_ICON_SIZE,
                 },
                 () =>
                     this._cmdSrv.executeCommand<ISetSpecificRowsVisibleCommandParams>(
@@ -165,8 +166,9 @@ export class HeaderUnhideController extends RxDisposable {
                     hovered: false,
                     hasPrevious,
                     hasNext,
-                    left: position.startX - (hasPrevious ? 12 : 0),
-                    top: 20 - 12,
+                    left: position.startX - (hasPrevious ? UNHIDE_ICON_SIZE : 0),
+                    // eslint-disable-next-line no-magic-numbers
+                    top: 20 - UNHIDE_ICON_SIZE,
                 },
                 () =>
                     this._cmdSrv.executeCommand<ISetSpecificColsVisibleCommandParams>(
@@ -193,6 +195,6 @@ export class HeaderUnhideController extends RxDisposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._cuSrv, this._rendererManagerService);
+        return getSheetObject(this._univerInstanceService, this._rendererManagerService);
     }
 }

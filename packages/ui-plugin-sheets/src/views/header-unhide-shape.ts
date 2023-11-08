@@ -18,7 +18,7 @@ export interface IHeaderUnhideShapeProps extends IShapeProps {
     hasNext: boolean;
 }
 
-const UNHIDE_ICON_SIZE = 12;
+export const UNHIDE_ICON_SIZE = 12;
 const UNHIDE_ARROW_RATIO = 0.4;
 
 export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhideShapeProps> extends Shape<T> {

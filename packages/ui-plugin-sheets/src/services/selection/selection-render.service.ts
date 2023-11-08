@@ -14,8 +14,6 @@ import {
     ISelectionWithStyle,
 } from '@univerjs/base-sheets/Basics/selection.js';
 import {
-    DEFAULT_WORKSHEET_COLUMN_COUNT,
-    DEFAULT_WORKSHEET_ROW_COUNT,
     IRange,
     IRangeWithCoord,
     ISelectionCell,
@@ -46,18 +44,10 @@ export interface ISelectionRenderService {
     enableSelection(): void;
     disableSelection(): void;
 
-    getViewPort(): Viewport;
-
     addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle): void;
     changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport): void;
-    // getSpreadsheet(): void;
-    // getMaxIndex(): void;
-    getScene(): void;
-    getSkeleton(): void;
-    getRowAndColumnCount(): void;
+    getViewPort(): Viewport;
     getCurrentControls(): SelectionShape[];
-    getCurrentControl(): void;
-    clearSelectionControls(): void;
     getActiveRangeList(): Nullable<IRange[]>;
     getActiveRange(): Nullable<IRange>;
     getActiveSelection(): Nullable<SelectionShape>;
@@ -207,7 +197,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             style = getNormalSelectionStyle(this._themeService);
         }
 
-        const scene = this.getScene();
+        const scene = this._scene;
 
         if (scene == null || skeleton == null) {
             return;
@@ -237,30 +227,6 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._activeViewport = viewport || scene.getViewports()[0];
     }
 
-    // getSpreadsheet() {
-    //     return this._sheetComponent;
-    // }
-
-    // getMaxIndex() {
-    //     return this._sheetComponent.zIndex + 1;
-    // }
-
-    getScene() {
-        return this._scene;
-    }
-
-    getSkeleton() {
-        return this._skeleton;
-    }
-
-    getRowAndColumnCount() {
-        const skeleton = this.getSkeleton();
-        return {
-            rowCount: skeleton?.getRowCount() || DEFAULT_WORKSHEET_ROW_COUNT,
-            columnCount: skeleton?.getColumnCount() || DEFAULT_WORKSHEET_COLUMN_COUNT,
-        };
-    }
-
     getSelectionDataWithStyle() {
         const selectionControls = this._selectionControls;
         return selectionControls.map((control) => control.getValue());
@@ -270,7 +236,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         return this._selectionControls;
     }
 
-    getCurrentControl() {
+    private _getCurrentControl() {
         const controls = this.getCurrentControls();
         if (controls && controls.length > 0) {
             for (const control of controls) {
@@ -282,7 +248,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         }
     }
 
-    clearSelectionControls() {
+    private _clearSelectionControls() {
         const curControls = this.getCurrentControls();
 
         if (curControls.length > 0) {
@@ -348,7 +314,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     }
 
     reset() {
-        this.clearSelectionControls();
+        this._clearSelectionControls();
         this._moveObserver = null;
         this._upObserver = null;
         this._downObserver = null;
@@ -381,7 +347,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
-        const scene = this.getScene();
+        const scene = this._scene;
 
         if (scene == null || skeleton == null) {
             return;
@@ -434,7 +400,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._startSelectionRange = startSelectionRange;
 
-        let selectionControl: Nullable<SelectionShape> = this.getCurrentControl();
+        let selectionControl: Nullable<SelectionShape> = this._getCurrentControl();
 
         const curControls = this.getCurrentControls();
 
@@ -523,7 +489,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         scene.disableEvent();
 
-        const scrollTimer = ScrollTimer.create(this.getScene());
+        const scrollTimer = ScrollTimer.create(this._scene);
         scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewport);
 
         this._scrollTimer = scrollTimer;
@@ -579,8 +545,8 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     convertRangeDataToSelection(range: IRange): Nullable<IRangeWithCoord> {
         const { startRow, startColumn, endRow, endColumn, rangeType } = range;
-        const scene = this.getScene();
-        const skeleton = this.getSkeleton();
+        const scene = this._scene;
+        const skeleton = this._skeleton;
         if (scene == null || skeleton == null) {
             return;
         }
@@ -606,8 +572,8 @@ export class SelectionRenderService implements ISelectionRenderService {
             return;
         }
 
-        const scene = this.getScene();
-        const skeleton = this.getSkeleton();
+        const scene = this._scene;
+        const skeleton = this._skeleton;
         if (scene == null || skeleton == null) {
             return;
         }
@@ -752,7 +718,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     }
 
     private _endSelection() {
-        const scene = this.getScene();
+        const scene = this._scene;
         if (scene == null) {
             return;
         }
@@ -768,7 +734,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     }
 
     private _addCancelObserver() {
-        const scene = this.getScene();
+        const scene = this._scene;
         if (scene == null) {
             return;
         }

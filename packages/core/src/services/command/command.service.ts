@@ -322,7 +322,7 @@ export class CommandService implements ICommandService {
     ): Promise<R> {
         this._log.log(
             '[CommandService]',
-            `${'|-'.repeat(this._commandExecutingLevel)}executing command "${command.id}"`
+            `${'|-'.repeat(Math.max(this._commandExecutingLevel, 0))}executing command "${command.id}"`
         );
 
         this._commandExecutingLevel++;
@@ -342,7 +342,7 @@ export class CommandService implements ICommandService {
     private _syncExecute<P extends object, R = boolean>(command: ICommand<P, R>, injector: Injector, params?: P): R {
         this._log.log(
             '[CommandService]',
-            `${'|-'.repeat(this._commandExecutingLevel)}executing command "${command.id}"`
+            `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${command.id}"`
         );
 
         this._commandExecutingLevel++;

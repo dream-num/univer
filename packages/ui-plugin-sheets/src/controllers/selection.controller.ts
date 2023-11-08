@@ -45,36 +45,24 @@ export class SelectionController extends Disposable {
     private _initialize() {
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
             return;
         }
 
-        const { spreadsheetLeftTopPlaceholder } = sheetObject;
+        // TODO@wzhudev: listen clicking event on the top-left corner to select all cells.
 
-        this._onChangeListener();
-
-        this._initialMain(sheetObject);
-
-        this._themeChangeListener();
-
-        this._initialRowHeader(sheetObject);
-
-        this._initialColumnHeader(sheetObject);
-
-        this._skeletonListener();
-
-        this._commandExecutedListener();
-
-        this.disposeWithMe(toDisposable(spreadsheetLeftTopPlaceholder?.onPointerDownObserver.add(() => {})));
-
-        this._userActionSyncListener();
+        this._initViewMainListener(sheetObject);
+        this._initRowHeader(sheetObject);
+        this._initColumnHeader(sheetObject);
+        this._initSelectionChangeListener();
+        this._initThemeChangeListener();
+        this._initSkeletonChangeListener();
+        this._initCommandListener();
+        this._initUserActionSyncListener();
 
         const unitId = workbook.getUnitId();
-
         const sheetId = worksheet.getSheetId();
-
         this._selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId,
@@ -82,7 +70,7 @@ export class SelectionController extends Disposable {
         });
     }
 
-    private _initialMain(sheetObject: ISheetObjectParam) {
+    private _initViewMainListener(sheetObject: ISheetObjectParam) {
         const { spreadsheet, scene } = sheetObject;
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         this.disposeWithMe(
@@ -105,7 +93,7 @@ export class SelectionController extends Disposable {
         );
     }
 
-    private _themeChangeListener() {
+    private _initThemeChangeListener() {
         this.disposeWithMe(
             toDisposable(
                 this._themeService.currentTheme$.subscribe(() => {
@@ -130,7 +118,7 @@ export class SelectionController extends Disposable {
         );
     }
 
-    private _initialRowHeader(sheetObject: ISheetObjectParam) {
+    private _initRowHeader(sheetObject: ISheetObjectParam) {
         const { spreadsheetRowHeader, spreadsheet, scene } = sheetObject;
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         this.disposeWithMe(
@@ -153,7 +141,7 @@ export class SelectionController extends Disposable {
         // spreadsheetRowHeader?.onPointerMoveObserver.add((evt: IPointerEvent | IMouseEvent, state) => {});
     }
 
-    private _initialColumnHeader(sheetObject: ISheetObjectParam) {
+    private _initColumnHeader(sheetObject: ISheetObjectParam) {
         const { spreadsheetColumnHeader, spreadsheet, scene } = sheetObject;
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
         this.disposeWithMe(
@@ -174,7 +162,7 @@ export class SelectionController extends Disposable {
         );
     }
 
-    private _onChangeListener() {
+    private _initSelectionChangeListener() {
         this.disposeWithMe(
             toDisposable(
                 this._selectionManagerService.selectionInfo$.subscribe((param) => {
@@ -196,7 +184,7 @@ export class SelectionController extends Disposable {
         );
     }
 
-    private _userActionSyncListener() {
+    private _initUserActionSyncListener() {
         this._selectionRenderService.selectionRangeWithStyle$.subscribe((selectionDataWithStyleList) => {
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const unitId = workbook.getUnitId();
@@ -222,7 +210,7 @@ export class SelectionController extends Disposable {
         return getSheetObject(this._currentUniverService, this._renderManagerService);
     }
 
-    private _commandExecutedListener() {
+    private _initCommandListener() {
         const updateCommandList = [SetZoomRatioOperation.id];
 
         this.disposeWithMe(
@@ -243,7 +231,7 @@ export class SelectionController extends Disposable {
         );
     }
 
-    private _skeletonListener() {
+    private _initSkeletonChangeListener() {
         this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
             if (param == null) {
                 return;

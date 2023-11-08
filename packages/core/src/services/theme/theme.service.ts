@@ -13,14 +13,11 @@ export class ThemeService extends Disposable {
     // TODO: dark mode
     private darkMode: boolean = false;
 
-    readonly currentTheme$: Observable<IStyleSheet>;
-
     private readonly _currentTheme$ = new BehaviorSubject<IStyleSheet>({});
+    readonly currentTheme$: Observable<IStyleSheet> = this._currentTheme$.asObservable();
 
     constructor() {
         super();
-
-        this.currentTheme$ = this._currentTheme$.asObservable();
 
         this.disposeWithMe(toDisposable(() => this._currentTheme$.complete()));
     }

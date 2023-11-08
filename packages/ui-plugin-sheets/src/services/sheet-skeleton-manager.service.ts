@@ -33,7 +33,6 @@ export class SheetSkeletonManagerService implements IDisposable {
     private _sheetSkeletonParam: ISheetSkeletonManagerParam[] = [];
 
     private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
-
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
 
     /**

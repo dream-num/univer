@@ -1,54 +1,49 @@
-.layout-container {
-    height: 100%;
-    background-color: rgb(var(--bg-color));
-    color: rgb(var(--text-color));
-
-    .content-container-horizontal {
-        position: relative;
-        min-height: 14em;
-        display: flex;
-
-        .content-inner-left-container {
-            width: 50%;
-            padding-right: 10px;
-            flex: none;
-        }
-
-        .content-inner-right-container {
-            width: 50%;
-            background-color: rgb(var(--bg-color-secondary));
-            flex: 1;
-        }
-    }
-
-    .content-container-vertical {
+.app {
+    &-layout {
+        height: 100%;
+        background-color: rgb(var(--bg-color));
         display: flex;
         flex-direction: column;
-        min-height: 14em;
-        position: relative;
-
-        .content-inner-left-container {
-            height: 50%;
-            padding-bottom: 10px;
-            flex: none;
-        }
-
-        .content-inner-right-container {
-            height: 50%;
-            flex: 1;
-        }
     }
 
-    .main-content {
-        position: relative;
-    }
-
-    .header-menu {
-        position: absolute;
-        display: flex;
-        align-items: center;
+    &-header {
         height: 40px;
-        top: 0;
-        right: 0;
+    }
+
+    &-container {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 1fr auto;
+
+        &-main {
+            border-top: 1px solid rgb(var(--border-color));
+            border-bottom: 1px solid rgb(var(--border-color));
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr;
+
+            &&-collapsed {
+                border-right: 1px solid rgb(var(--border-color));
+                border-top-right-radius: var(--border-radius-lg);
+                border-bottom-right-radius: var(--border-radius-lg);
+            }
+        }
+
+        &-header {
+            width: 100%;
+        }
+
+        &-content {
+            position: relative;
+            background-color: rgb(var(--bg-color-secondary));
+        }
+
+        &-sidebar {
+            height: 100%;
+        }
+    }
+
+    &-footer {
+        height: 40px;
     }
 }

@@ -1,41 +1,45 @@
 import { LocaleService, ThemeService } from '@univerjs/core';
-import {
-    ConfigProvider,
-    Container,
-    Content,
-    defaultTheme,
-    Footer,
-    Header,
-    ILocale,
-    Layout,
-    Sider,
-    themeInstance,
-} from '@univerjs/design';
+import { ConfigProvider, defaultTheme, ILocale, themeInstance } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { ComponentType, useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
+import React, { ComponentType, useEffect, useMemo, useRef, useState } from 'react';
 
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
-import style from './app.module.less';
+import { ISidebarService } from '../services/sidebar/sidebar.service';
+import styles from './app.module.less';
 import { ContextMenu } from './components/context-menu/ContextMenu';
-import { DocBars } from './components/doc-bars/DocBars';
-import { Parts } from './Parts';
+import { MenuBar } from './components/doc-bars/MenuBar';
+import { Toolbar } from './components/doc-bars/Toolbar';
+import { Sidebar } from './components/sidebar/Sidebar';
+import { globalComponents } from './parts';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
     headerComponents?: Set<() => ComponentType>;
     contentComponents?: Set<() => ComponentType>;
     footerComponents?: Set<() => ComponentType>;
-    sidebarComponents?: Set<() => ComponentType>;
+    // sidebarComponents?: Set<() => ComponentType>;
     headerMenuComponents?: Set<() => ComponentType>;
     onRendered?: (container: HTMLElement) => void;
+}
+
+function ComponentContainer(props: { components?: Set<() => ComponentType> }) {
+    const { components } = props;
+
+    if (!components) return null;
+
+    return Array.from(components.values()).map((component, index) =>
+        React.createElement(component(), { key: `${index}` })
+    );
 }
 
 // eslint-disable-next-line max-lines-per-function
 export function App(props: IUniverAppProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
+    const sidebarService = useDependency(ISidebarService);
 
-    const containerRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const {
         mountContainer,
@@ -43,7 +47,7 @@ export function App(props: IUniverAppProps) {
         headerMenuComponents,
         contentComponents,
         footerComponents,
-        sidebarComponents,
+        // sidebarComponents,
         onRendered,
     } = props;
 
@@ -54,25 +58,30 @@ export function App(props: IUniverAppProps) {
     }, []);
 
     useEffect(() => {
-        if (containerRef.current) {
-            onRendered?.(containerRef.current);
+        if (contentRef.current) {
+            onRendered?.(contentRef.current);
         }
     }, [onRendered]);
 
     const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);
+    const [mainCollapsed, setMainCollapsed] = useState<boolean>(false);
 
     // Create a portal container for injecting global component themes.
-    const portalContainer: HTMLElement = document.createElement('div');
-    document.body.appendChild(portalContainer);
+    const portalContainer = useMemo<HTMLElement>(() => document.createElement('div'), []);
 
     useEffect(() => {
+        document.body.appendChild(portalContainer);
+
         const subscriptions = [
             localeService.getLocale().locale$.subscribe((locale) => {
                 locale && setLocale(localeService.getLocales() as unknown as ILocale);
             }),
             themeService.currentTheme$.subscribe((theme) => {
                 themeInstance.setTheme(mountContainer, theme);
-                themeInstance.setTheme(portalContainer, theme);
+                portalContainer && themeInstance.setTheme(portalContainer, theme);
+            }),
+            sidebarService.getObservableSidebar().subscribe((sidebar) => {
+                setMainCollapsed(sidebar?.visible ?? false);
             }),
         ];
 
@@ -80,63 +89,48 @@ export function App(props: IUniverAppProps) {
             // batch unsubscribe
             subscriptions.forEach((subscription) => subscription.unsubscribe());
         };
-    }, []);
+    }, [portalContainer]);
 
     return (
         <ConfigProvider locale={locale} mountContainer={portalContainer}>
-            <Container className={style.layoutContainer}>
-                <Layout>
-                    {/* outer sidebar */}
-                    <Sider style={{ display: props.outerLeft ? 'block' : 'none' }}></Sider>
-                    <Layout className={style.mainContent}>
-                        {/* header */}
-                        <Header style={{ display: props.header ? 'block' : 'none' }}>
-                            {props.toolbar && <DocBars />}
-                            {headerComponents &&
-                                Array.from(headerComponents.values()).map((component, index) =>
-                                    React.createElement(component(), { key: `${index}` })
-                                )}
-                            <div className={style.headerMenu}>
-                                {headerMenuComponents &&
-                                    Array.from(headerMenuComponents.values()).map((component, index) =>
-                                        React.createElement(component(), { key: `${index}` })
-                                    )}
-                            </div>
-                        </Header>
-                        {/* content */}
-                        <Layout>
-                            <Sider
-                                style={{ display: props.innerLeft ? 'block' : 'none' }}
-                                className={style.contentInnerLeftContainer}
-                            >
-                                {/* inner left */}
-                                {sidebarComponents &&
-                                    Array.from(sidebarComponents.values()).map((component, index) =>
-                                        React.createElement(component(), { key: `${index}` })
-                                    )}
-                            </Sider>
-                            <Content className={style.contentContainerHorizontal}>
-                                <ContextMenu>
-                                    <Container className={style.contentInnerRightContainer} ref={containerRef}>
-                                        {contentComponents &&
-                                            Array.from(contentComponents.values()).map((component, index) =>
-                                                React.createElement(component(), { key: `${index}` })
-                                            )}
-                                    </Container>
-                                </ContextMenu>
-                            </Content>
-                        </Layout>
-                        {/* footer */}
-                        <Footer style={{ display: props.footer ? 'block' : 'none' }}>
-                            {footerComponents &&
-                                Array.from(footerComponents.values()).map((component, index) =>
-                                    React.createElement(component(), { key: `${index}` })
-                                )}
-                        </Footer>
-                    </Layout>
-                </Layout>
-            </Container>
-            <Parts />
+            <section className={styles.appLayout}>
+                {/* header */}
+                <header>{props.toolbar && <MenuBar />}</header>
+
+                {/* content */}
+                <section className={styles.appContainer}>
+                    <section
+                        className={clsx(styles.appContainerMain, { [styles.appContainerMainCollapsed]: mainCollapsed })}
+                    >
+                        <header className={styles.appContainerHeader}>
+                            {props.toolbar && <Toolbar />}
+
+                            <ComponentContainer components={headerComponents} />
+
+                            <ComponentContainer components={headerMenuComponents} />
+                        </header>
+
+                        {/* <ComponentContainer components={sidebarComponents} /> */}
+
+                        <ContextMenu>
+                            <section ref={contentRef} className={styles.appContainerContent}>
+                                <ComponentContainer components={contentComponents} />
+                            </section>
+                        </ContextMenu>
+                    </section>
+
+                    <aside className={styles.appContainerSidebar}>
+                        <Sidebar />
+                    </aside>
+                </section>
+
+                {/* footer */}
+                <footer className={styles.appFooter}>
+                    <ComponentContainer components={footerComponents} />
+                </footer>
+            </section>
+
+            <ComponentContainer components={globalComponents} />
         </ConfigProvider>
     );
 }

@@ -148,12 +148,10 @@ export class MoveCursorController extends Disposable {
                 return;
             }
 
-            const cursorList = new NodePositionConvertToCursor(documentOffsetConfig, skeleton).getRangePointData(
+            const newActiveRange = new NodePositionConvertToCursor(documentOffsetConfig, skeleton).getRangePointData(
                 newPos,
                 newPos
-            ).cursorList;
-
-            const newActiveRange = cursorList[0];
+            ).cursorList[0];
 
             // move selection
             this._textSelectionManagerService.replace([

@@ -1,12 +1,12 @@
 export * from './Basics';
 export { SetCellEditVisibleArrowOperation } from './commands/operations/cell-edit.operation';
-export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 export {
     getCoordByCell,
     getCoordByOffset,
     getSheetObject,
     getTransformCoord,
 } from './controllers/utils/component-tools';
+export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 export {
     EditorBridgeService,
     IEditorBridgeService,

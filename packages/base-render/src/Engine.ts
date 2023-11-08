@@ -1,4 +1,4 @@
-import { Nullable, Observable } from '@univerjs/core';
+import { Nullable, Observable, toDisposable } from '@univerjs/core';
 
 import { CURSOR_TYPE } from './Basics/Const';
 import { DeviceType, IKeyboardEvent, IPointerEvent, PointerInput } from './Basics/IEvents';
@@ -6,7 +6,6 @@ import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './Basics/Interfaces';
 import { PerformanceMonitor } from './Basics/PerformanceMonitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './Basics/Tools';
 import { Canvas } from './Canvas';
-import { fromWindowEvent } from './common/lifecycle';
 import { Scene } from './Scene';
 import { ThinEngine } from './ThinEngine';
 
@@ -122,11 +121,26 @@ export class Engine extends ThinEngine<Scene> {
         this._container.appendChild(this._canvasEle);
 
         this.resize();
-        this.disposeWithMe(fromWindowEvent('resize', () => this.resize()));
+
+        let timer: number | undefined;
+        const resizeObserver = new ResizeObserver(() => {
+            if (!timer) {
+                timer = window.requestIdleCallback(() => {
+                    this.resize();
+                    timer = undefined;
+                });
+            }
+        });
+
+        resizeObserver.observe(this._container);
+
+        this.disposeWithMe(
+            toDisposable(() => {
+                resizeObserver.unobserve(this._container as HTMLElement);
+            })
+        );
     }
 
-    // TODO: @jocs is it necessary to use ResizeObserver API?
-    // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
     resize() {
         if (!this._container) {
             return;

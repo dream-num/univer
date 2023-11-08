@@ -37,8 +37,12 @@ export function insertTextRuns(
         const textRun = textRuns[i];
         const { st, ed } = textRun;
 
-        if (st > currentIndex) {
-            textRun.st += textLength;
+        if (st >= currentIndex) {
+            // Handles the insertion of text at the beginning of a paragraph
+            if (st === currentIndex && insertBody.textRuns) {
+                textRun.st += textLength;
+            }
+
             textRun.ed += textLength;
 
             if (insertIndex === Infinity) {

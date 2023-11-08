@@ -59,6 +59,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         // first map shortcut to a number, so it could be converted and fetched quickly
         const binding = this.getBindingFromItem(shortcut);
         const existing = this._shortCutMapping.get(binding);
+
         if (existing) {
             existing.add(shortcut);
         } else {

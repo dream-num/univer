@@ -27,7 +27,7 @@ export {
     type IRichTextEditingMutationParams,
     RichTextEditingMutation,
 } from './commands/mutations/core-editing.mutation';
-export { MoveCursorOperation } from './commands/operations/cursor.operation';
+export { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
 export * from './DocPlugin';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { TextSelectionManagerService } from './services/text-selection-manager.service';

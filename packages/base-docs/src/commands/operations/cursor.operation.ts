@@ -20,3 +20,18 @@ export const MoveCursorOperation: IOperation<IMoveCursorOperationParams> = {
         return true;
     },
 };
+
+/**
+ * The operation to move selection in the current document.
+ */
+export const MoveSelectionOperation: IOperation<IMoveCursorOperationParams> = {
+    id: 'doc.operation.move-selection',
+    type: CommandType.OPERATION,
+    handler: (accessor, params) => {
+        if (!params) {
+            return false;
+        }
+
+        return true;
+    },
+};

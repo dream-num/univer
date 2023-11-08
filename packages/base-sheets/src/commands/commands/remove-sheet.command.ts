@@ -41,6 +41,7 @@ export const RemoveSheetCommand: ICommand = {
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
+        if (workbook.getSheets().length <= 1) return false;
 
         const index = workbook.getSheetIndex(worksheet);
         const activateSheetId = workbook.getConfig().sheetOrder[index + 1];

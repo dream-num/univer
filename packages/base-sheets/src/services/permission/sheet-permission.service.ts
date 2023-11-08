@@ -7,6 +7,7 @@ import {
     OnLifecycle,
     PermissionService,
     SheetInterceptorService,
+    toDisposable,
     UniverEditablePermissionPoint,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
@@ -35,6 +36,24 @@ export class SheetPermissionService extends Disposable {
             const sheetPermission = new SheetEditablePermission(unitId, subComponentId);
             this._permissionService.addPermissionPoint(sheetPermission);
         });
+        this.disposeWithMe(
+            toDisposable(
+                workbook.sheetCreated$.subscribe((worksheet) => {
+                    const subComponentId = worksheet.getSheetId();
+                    const sheetPermission = new SheetEditablePermission(unitId, subComponentId);
+                    this._permissionService.addPermissionPoint(sheetPermission);
+                })
+            )
+        );
+        this.disposeWithMe(
+            toDisposable(
+                workbook.sheetDisposed$.subscribe((worksheet) => {
+                    const subComponentId = worksheet.getSheetId();
+                    const sheetPermission = new SheetEditablePermission(unitId, subComponentId);
+                    this._permissionService.deletePermissionPoint(sheetPermission.id);
+                })
+            )
+        );
     }
 
     private _interceptCommandPermission() {

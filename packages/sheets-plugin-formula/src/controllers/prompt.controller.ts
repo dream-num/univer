@@ -30,10 +30,10 @@ export class PromptController extends Disposable {
     private _initialCursorSync() {
         this._textSelectionManagerService.textSelectionInfo$.subscribe((text) => {
             // TODO@Dushusir: use real text info
-            return;
+            // return;
             const visible = Math.random() > 0.5;
-            // const searchText = Math.random() > 0.5 ? 'SUMIF' : 'TAN';
-            const searchText = 'SUMIF';
+            const searchText = Math.random() > 0.5 ? 'SUMIF' : 'TAN';
+            // const searchText = 'SUMIF';
             const paramIndex = Math.random() > 0.5 ? 0 : 1;
 
             this._commandService.executeCommand(SearchFunctionOperation.id, { visible, searchText });

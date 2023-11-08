@@ -1,5 +1,6 @@
 import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { Disposable } from '../../shared/lifecycle';
 import { PermissionPoint, PermissionStatus } from '../../shared/permission';
@@ -68,7 +69,15 @@ export class PermissionService extends Disposable implements IPermissionService 
             }
             return subject.asObservable();
         });
-        return combineLatest(subjectList);
+        return combineLatest(subjectList).pipe(
+            // Check that all permissions exist
+            map((list) => {
+                if (list.every((item) => this.permissionItemMap.get(item.id))) {
+                    return list;
+                }
+                return list;
+            })
+        );
     }
 
     composePermission(permissionIdList: string[]) {

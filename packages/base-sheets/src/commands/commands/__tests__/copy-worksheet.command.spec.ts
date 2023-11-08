@@ -6,6 +6,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
     CopySheetCommand,
     InsertSheetMutation,
+    RemoveSheetCommand,
+    RemoveSheetMutation,
     SetWorksheetActivateCommand,
     SetWorksheetActivateMutation,
 } from '../../..';
@@ -26,6 +28,8 @@ describe('Test copy worksheet commands', () => {
         commandService.registerCommand(InsertSheetMutation);
         commandService.registerCommand(SetWorksheetActivateMutation);
         commandService.registerCommand(SetWorksheetActivateCommand);
+        commandService.registerCommand(RemoveSheetCommand);
+        commandService.registerCommand(RemoveSheetMutation);
     });
 
     afterEach(() => {

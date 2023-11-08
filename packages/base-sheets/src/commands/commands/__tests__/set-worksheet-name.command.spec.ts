@@ -3,7 +3,8 @@ import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, Univ
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SetWorksheetNameCommand, SetWorksheetNameMutation } from '../../..';
+import { SetWorksheetNameMutation } from '../../mutations/set-worksheet-name.mutation';
+import { SetWorksheetNameCommand } from '../set-worksheet-name.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test set worksheet name commands', () => {

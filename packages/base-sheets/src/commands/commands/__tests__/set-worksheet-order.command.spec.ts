@@ -3,14 +3,12 @@ import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, Univ
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import {
-    InsertSheetCommand,
-    InsertSheetMutation,
-    SetWorksheetActivateCommand,
-    SetWorksheetActivateMutation,
-    SetWorksheetOrderCommand,
-    SetWorksheetOrderMutation,
-} from '../../..';
+import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
+import { SetWorksheetActivateMutation } from '../../mutations/set-worksheet-activate.mutation';
+import { SetWorksheetOrderMutation } from '../../mutations/set-worksheet-order.mutation';
+import { InsertSheetCommand } from '../insert-sheet.command';
+import { SetWorksheetActivateCommand } from '../set-worksheet-activate.command';
+import { SetWorksheetOrderCommand } from '../set-worksheet-order.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test set worksheet order commands', () => {

@@ -9,14 +9,12 @@ import {
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import {
-    InsertSheetCommand,
-    InsertSheetMutation,
-    SetWorksheetActivateCommand,
-    SetWorksheetActivateMutation,
-    SetWorksheetHideCommand,
-    SetWorksheetHideMutation,
-} from '../../..';
+import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
+import { SetWorksheetActivateMutation } from '../../mutations/set-worksheet-activate.mutation';
+import { SetWorksheetHideMutation } from '../../mutations/set-worksheet-hide.mutation';
+import { InsertSheetCommand } from '../insert-sheet.command';
+import { SetWorksheetActivateCommand } from '../set-worksheet-activate.command';
+import { SetWorksheetHideCommand } from '../set-worksheet-hide.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test set worksheet hide commands', () => {

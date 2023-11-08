@@ -11,7 +11,8 @@ import {
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SetFrozenCommand, SetFrozenMutation } from '../../..';
+import { SetFrozenMutation } from '../../mutations/set-frozen.mutation';
+import { SetFrozenCommand } from '../set-frozen.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const WORKBOOK_DATA_DEMO: IWorkbookConfig = {

@@ -64,19 +64,23 @@ export function insertTextRuns(
 
     console.log('old', JSON.stringify(textRuns, null, 2));
 
+    // TODO: @jocs, handle insertTextRuns between two textRuns.
     let insertIndex = Infinity; // The current index of the textRun where the insertion needs to be made.
     for (let i = 0, len = textRuns.length; i < len; i++) {
         const textRun = textRuns[i];
         const { st, ed } = textRun;
 
-        if (st > currentIndex) {
-            textRun.st += textLength;
+        if (st >= currentIndex) {
+            if (Number.isFinite(insertIndex)) {
+                textRun.st += textLength;
+            }
+
             textRun.ed += textLength;
         } else if (ed >= currentIndex) {
             textRun.ed += textLength;
         }
 
-        if (currentIndex >= textRun.st && currentIndex <= textRun.ed) {
+        if (!Number.isFinite(insertIndex) && currentIndex >= st && currentIndex <= ed) {
             insertIndex = i;
         }
     }

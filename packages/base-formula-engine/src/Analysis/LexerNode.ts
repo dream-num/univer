@@ -33,6 +33,8 @@ export class LexerNode {
             }
         });
         this._lambdaPrivacyVar?.clear();
+
+        this._parent = null;
     }
 
     getLambdaId() {

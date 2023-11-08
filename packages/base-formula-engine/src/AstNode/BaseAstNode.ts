@@ -36,6 +36,8 @@ export class BaseAstNode extends Disposable {
             node.dispose();
         });
         this._valueObject?.dispose();
+
+        this._parent = null;
     }
 
     get nodeType() {

@@ -57,12 +57,8 @@ export const SetDrawingSizeCommand: ICommand = {
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: documentId,
-                undo() {
-                    return commandService.syncExecuteCommand(SetDrawingTransformMutation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(SetDrawingTransformMutation.id, redoMutationParams);
-                },
+                undoMutations: [{ id: SetDrawingTransformMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetDrawingTransformMutation.id, params: redoMutationParams }],
             });
             return true;
         }
@@ -114,12 +110,8 @@ export const SetDrawingPositionCommand: ICommand = {
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: documentId,
-                undo() {
-                    return commandService.syncExecuteCommand(SetDrawingTransformMutation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(SetDrawingTransformMutation.id, redoMutationParams);
-                },
+                undoMutations: [{ id: SetDrawingTransformMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetDrawingTransformMutation.id, params: redoMutationParams }],
             });
             return true;
         }

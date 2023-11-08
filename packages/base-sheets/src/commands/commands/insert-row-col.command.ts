@@ -133,25 +133,18 @@ export const InsertRowCommand: ICommand = {
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: params.workbookId,
-                undo: async () =>
-                    sequenceExecute(
-                        [
-                            ...intercepted.undos,
-                            { id: DeleteRangeMutation.id, params: undoInsertRangeMutationParams },
-                            { id: RemoveRowMutation.id, params: undoRowInsertionParams },
-                        ],
-                        commandService
-                    ).result,
-                redo: async () =>
-                    sequenceExecute(
-                        [
-                            { id: InsertRowMutation.id, params: insertRowParams },
-                            { id: InsertRangeMutation.id, params: insertRangeMutationParams },
-                            ...intercepted.redos,
-                        ],
-                        commandService
-                    ).result,
+                undoMutations: [
+                    ...intercepted.undos,
+                    { id: DeleteRangeMutation.id, params: undoInsertRangeMutationParams },
+                    { id: RemoveRowMutation.id, params: undoRowInsertionParams },
+                ],
+                redoMutations: [
+                    { id: InsertRowMutation.id, params: insertRowParams },
+                    { id: InsertRangeMutation.id, params: insertRangeMutationParams },
+                    ...intercepted.redos,
+                ],
             });
+
             return true;
         }
 
@@ -335,27 +328,19 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: params.workbookId,
-                undo: async () =>
-                    sequenceExecute(
-                        [
-                            ...intercepted.undos,
-                            { id: DeleteRangeMutation.id, params: undoInsertRangeParams },
-                            {
-                                id: RemoveColMutation.id,
-                                params: undoColInsertionParams,
-                            },
-                        ],
-                        commandService
-                    ).result,
-                redo: async () =>
-                    sequenceExecute(
-                        [
-                            { id: InsertColMutation.id, params: insertColParams },
-                            { id: InsertRangeMutation.id, params: insertRangeMutationParams },
-                            ...intercepted.redos,
-                        ],
-                        commandService
-                    ).result,
+                undoMutations: [
+                    ...intercepted.undos,
+                    { id: DeleteRangeMutation.id, params: undoInsertRangeParams },
+                    {
+                        id: RemoveColMutation.id,
+                        params: undoColInsertionParams,
+                    },
+                ],
+                redoMutations: [
+                    { id: InsertColMutation.id, params: insertColParams },
+                    { id: InsertRangeMutation.id, params: insertRangeMutationParams },
+                    ...intercepted.redos,
+                ],
             });
             return true;
         }

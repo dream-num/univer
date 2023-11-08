@@ -76,30 +76,14 @@ export const CopySheetCommand: ICommand = {
         if (insertResult && result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo() {
-                    return (
-                        commandService.executeCommand(
-                            SetWorksheetActivateMutation.id,
-                            undoMutationParams
-                        ) as Promise<boolean>
-                    ).then((res) => {
-                        if (res)
-                            return commandService.syncExecuteCommand(RemoveSheetMutation.id, removeSheetMutationParams);
-                        return false;
-                    });
-                },
-                redo() {
-                    return (
-                        commandService.executeCommand(
-                            SetWorksheetActivateMutation.id,
-                            setSheetActiveMutationParams
-                        ) as Promise<boolean>
-                    ).then((res) => {
-                        if (res)
-                            return commandService.syncExecuteCommand(InsertSheetMutation.id, insertSheetMutationParams);
-                        return false;
-                    });
-                },
+                undoMutations: [
+                    { id: SetWorksheetActivateMutation.id, params: undoMutationParams },
+                    { id: RemoveSheetMutation.id, params: removeSheetMutationParams },
+                ],
+                redoMutations: [
+                    { id: SetWorksheetActivateMutation.id, params: setSheetActiveMutationParams },
+                    { id: InsertSheetMutation.id, params: insertSheetMutationParams },
+                ],
             });
             return true;
         }

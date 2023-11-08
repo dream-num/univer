@@ -43,12 +43,8 @@ export const SetDocZoomRatioCommand: ICommand = {
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: documentId,
-                undo() {
-                    return commandService.syncExecuteCommand(SetDocZoomRatioOperation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(SetDocZoomRatioOperation.id, setZoomRatioMutationParams);
-                },
+                undoMutations: [{ id: SetDocZoomRatioOperation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetDocZoomRatioOperation.id, params: setZoomRatioMutationParams }],
             });
             return true;
         }

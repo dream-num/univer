@@ -165,8 +165,8 @@ export const InsertRangeMoveRightCommand: ICommand = {
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo: async () => sequenceExecute(undoMutations.reverse(), commandService).result,
-                redo: async () => sequenceExecute(redoMutations, commandService).result,
+                undoMutations: undoMutations.reverse(),
+                redoMutations,
             });
 
             return true;

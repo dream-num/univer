@@ -364,18 +364,9 @@ export const SetBorderCommand: ICommand = {
         const result = commandService.syncExecuteCommand(SetBorderStylesMutation.id, setBorderStylesMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
-                // 如果有多个 mutation 构成一个封装项目，那么要封装在同一个 undo redo element 里面
-                // 通过勾子可以 hook 外部 controller 的代码来增加新的 action
                 unitID: workbookId,
-                undo() {
-                    return commandService.syncExecuteCommand(
-                        SetBorderStylesMutation.id,
-                        undoSetBorderStylesMutationParams
-                    );
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(SetBorderStylesMutation.id, setBorderStylesMutationParams);
-                },
+                undoMutations: [{ id: SetBorderStylesMutation.id, params: undoSetBorderStylesMutationParams }],
+                redoMutations: [{ id: SetBorderStylesMutation.id, params: setBorderStylesMutationParams }],
             });
 
             return true;

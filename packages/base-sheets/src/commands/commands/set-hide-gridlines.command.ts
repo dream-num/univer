@@ -60,15 +60,8 @@ export const SetHideGridlinesCommand: ICommand = {
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo() {
-                    return commandService.syncExecuteCommand(SetHideGridlinesMutation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(
-                        SetHideGridlinesMutation.id,
-                        setHideGridlinesMutationParams
-                    );
-                },
+                undoMutations: [{ id: SetHideGridlinesMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetHideGridlinesMutation.id, params: setHideGridlinesMutationParams }],
             });
             return true;
         }

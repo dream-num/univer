@@ -114,38 +114,26 @@ export const DeltaRowHeightCommand: ICommand = {
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo: async () =>
-                    (
-                        await sequenceExecute(
-                            [
-                                {
-                                    id: SetWorksheetRowHeightMutation.id,
-                                    params: undoMutationParams,
-                                },
-                                {
-                                    id: SetWorksheetRowIsAutoHeightMutation.id,
-                                    params: undoSetIsAutoHeightParams,
-                                },
-                            ],
-                            commandService
-                        )
-                    ).result,
-                redo: async () =>
-                    (
-                        await sequenceExecute(
-                            [
-                                {
-                                    id: SetWorksheetRowHeightMutation.id,
-                                    params: redoMutationParams,
-                                },
-                                {
-                                    id: SetWorksheetRowIsAutoHeightMutation.id,
-                                    params: redoSetIsAutoHeightParams,
-                                },
-                            ],
-                            commandService
-                        )
-                    ).result,
+                undoMutations: [
+                    {
+                        id: SetWorksheetRowHeightMutation.id,
+                        params: undoMutationParams,
+                    },
+                    {
+                        id: SetWorksheetRowIsAutoHeightMutation.id,
+                        params: undoSetIsAutoHeightParams,
+                    },
+                ],
+                redoMutations: [
+                    {
+                        id: SetWorksheetRowHeightMutation.id,
+                        params: redoMutationParams,
+                    },
+                    {
+                        id: SetWorksheetRowIsAutoHeightMutation.id,
+                        params: redoSetIsAutoHeightParams,
+                    },
+                ],
             });
             return true;
         }
@@ -214,38 +202,26 @@ export const SetRowHeightCommand: ICommand = {
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo: async () =>
-                    (
-                        await sequenceExecute(
-                            [
-                                {
-                                    id: SetWorksheetRowHeightMutation.id,
-                                    params: undoMutationParams,
-                                },
-                                {
-                                    id: SetWorksheetRowIsAutoHeightMutation.id,
-                                    params: undoSetIsAutoHeightParams,
-                                },
-                            ],
-                            commandService
-                        )
-                    ).result,
-                redo: async () =>
-                    (
-                        await sequenceExecute(
-                            [
-                                {
-                                    id: SetWorksheetRowHeightMutation.id,
-                                    params: redoMutationParams,
-                                },
-                                {
-                                    id: SetWorksheetRowIsAutoHeightMutation.id,
-                                    params: redoSetIsAutoHeightParams,
-                                },
-                            ],
-                            commandService
-                        )
-                    ).result,
+                undoMutations: [
+                    {
+                        id: SetWorksheetRowHeightMutation.id,
+                        params: undoMutationParams,
+                    },
+                    {
+                        id: SetWorksheetRowIsAutoHeightMutation.id,
+                        params: undoSetIsAutoHeightParams,
+                    },
+                ],
+                redoMutations: [
+                    {
+                        id: SetWorksheetRowHeightMutation.id,
+                        params: redoMutationParams,
+                    },
+                    {
+                        id: SetWorksheetRowIsAutoHeightMutation.id,
+                        params: redoSetIsAutoHeightParams,
+                    },
+                ],
             });
             return true;
         }
@@ -297,20 +273,8 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         if (setIsAutoHeightResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo: async () =>
-                    (
-                        await sequenceExecute(
-                            [{ id: SetWorksheetRowIsAutoHeightMutation.id, params: undoMutationParams }, ...undos],
-                            commandService
-                        )
-                    ).result,
-                redo: async () =>
-                    (
-                        await sequenceExecute(
-                            [{ id: SetWorksheetRowIsAutoHeightMutation.id, params: redoMutationParams }, ...redos],
-                            commandService
-                        )
-                    ).result,
+                undoMutations: [{ id: SetWorksheetRowIsAutoHeightMutation.id, params: undoMutationParams }, ...undos],
+                redoMutations: [{ id: SetWorksheetRowIsAutoHeightMutation.id, params: redoMutationParams }, ...redos],
             });
 
             return true;

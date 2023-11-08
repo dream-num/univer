@@ -36,22 +36,7 @@ export const SetWorksheetActivateCommand: ICommand = {
             workbookId,
             worksheetId,
         };
-        // const undoMutationParams = SetWorksheetUnActivateMutationFactory(accessor, redoMutationParams);
-        const result = commandService.syncExecuteCommand(SetWorksheetActivateMutation.id, redoMutationParams);
 
-        // no need
-        // if (result) {
-        //     undoRedoService.pushUndoRedo({
-        //         unitID: workbookId,
-        //         undo() {
-        //             return commandService.syncExecuteCommand(SetWorksheetActivateMutation.id, undoMutationParams);
-        //         },
-        //         redo() {
-        //             return commandService.syncExecuteCommand(SetWorksheetActivateMutation.id, redoMutationParams);
-        //         },
-        //     });
-        //     return true;
-        // }
-        return true;
+        return commandService.syncExecuteCommand(SetWorksheetActivateMutation.id, redoMutationParams);
     },
 };

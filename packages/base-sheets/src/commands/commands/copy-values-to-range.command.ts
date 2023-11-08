@@ -74,15 +74,10 @@ export const CopyValuesToRangeCommand: ICommand = {
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undo() {
-                    return commandService.syncExecuteCommand(SetRangeFormattedValueMutation.id, undoMutationParams);
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(
-                        SetRangeFormattedValueMutation.id,
-                        setRangeFormattedValueMutationParams
-                    );
-                },
+                undoMutations: [{ id: SetRangeFormattedValueMutation.id, params: undoMutationParams }],
+                redoMutations: [
+                    { id: SetRangeFormattedValueMutation.id, params: setRangeFormattedValueMutationParams },
+                ],
             });
             return true;
         }

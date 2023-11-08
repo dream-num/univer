@@ -121,10 +121,17 @@ export class Engine extends ThinEngine<Scene> {
         this._container.appendChild(this._canvasEle);
 
         this.resize();
+
+        let timer: number | undefined;
         const resizeObserver = new ResizeObserver(() => {
-            window.requestIdleCallback(() => {
-                this.resize();
-            });
+            if (!timer) {
+                timer = window.setTimeout(() => {
+                    window.requestIdleCallback(() => {
+                        this.resize();
+                    });
+                    timer = undefined;
+                }, 100);
+            }
         });
 
         resizeObserver.observe(this._container);

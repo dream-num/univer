@@ -34,6 +34,16 @@ export const SetFrozenCommand: ICommand = {
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
+        const { startColumn, startRow, xSplit, ySplit } = params;
+
+        if (
+            startRow >= worksheet.getRowCount() ||
+            startColumn >= worksheet.getColumnCount() ||
+            xSplit >= worksheet.getColumnCount() ||
+            ySplit >= worksheet.getRowCount()
+        ) {
+            return false;
+        }
         const redoMutationParams: ISetFrozenMutationParams = {
             workbookId,
             worksheetId,

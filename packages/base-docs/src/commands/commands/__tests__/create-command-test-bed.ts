@@ -14,11 +14,11 @@ import { TextSelectionManagerService } from '../../../services/text-selection-ma
 const TEST_DOCUMENT_DATA_EN: IDocumentData = {
     id: 'test-doc',
     body: {
-        dataStream: 'What’s New in the 2022 Gartner Hype Cycle for Emerging Technologies\r\n',
+        dataStream: 'What’s New in the 2022\r Gartner Hype Cycle for Emerging Technologies\r\n',
         textRuns: [
             {
                 st: 0,
-                ed: 67,
+                ed: 22,
                 ts: {
                     bl: BooleanNumber.FALSE,
                     fs: 24,
@@ -27,8 +27,30 @@ const TEST_DOCUMENT_DATA_EN: IDocumentData = {
                     },
                 },
             },
+            {
+                st: 23,
+                ed: 68,
+                ts: {
+                    bl: BooleanNumber.TRUE,
+                    fs: 24,
+                    cl: {
+                        rgb: 'rgb(0, 40, 86)',
+                    },
+                },
+            },
         ],
-        paragraphs: [],
+        paragraphs: [
+            {
+                startIndex: 22,
+            },
+            {
+                startIndex: 68,
+                paragraphStyle: {
+                    spaceAbove: 20,
+                    indentFirstLine: 20,
+                },
+            },
+        ],
         sectionBreaks: [],
         customBlocks: [],
     },

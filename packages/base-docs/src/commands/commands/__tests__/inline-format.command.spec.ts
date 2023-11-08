@@ -74,6 +74,15 @@ describe('Test inline format commands', () => {
                 segmentId: '',
             },
         ]);
+
+        selectionManager.add([
+            {
+                startOffset: 20,
+                endOffset: 30,
+                collapsed: false,
+                segmentId: '',
+            },
+        ]);
     });
 
     afterEach(() => univer.dispose());
@@ -81,6 +90,8 @@ describe('Test inline format commands', () => {
     describe('Set Bold by SetInlineFormatCommand', () => {
         it('Should change text in range(0, 5) to bold', async () => {
             expect(getFormatValueAt('bl', 1)).toBe(BooleanNumber.FALSE);
+            expect(getFormatValueAt('bl', 21)).toBe(BooleanNumber.FALSE);
+            expect(getFormatValueAt('bl', 25)).toBe(BooleanNumber.TRUE);
 
             const commandParams = {
                 segmentId: '',
@@ -90,12 +101,18 @@ describe('Test inline format commands', () => {
             await commandService.executeCommand(SetInlineFormatCommand.id, commandParams);
 
             expect(getFormatValueAt('bl', 1)).toBe(BooleanNumber.TRUE);
+            expect(getFormatValueAt('bl', 21)).toBe(BooleanNumber.TRUE);
+            expect(getFormatValueAt('bl', 25)).toBe(BooleanNumber.TRUE);
 
             await commandService.executeCommand(UndoCommand.id);
             expect(getFormatValueAt('bl', 1)).toBe(BooleanNumber.FALSE);
+            expect(getFormatValueAt('bl', 21)).toBe(BooleanNumber.FALSE);
+            expect(getFormatValueAt('bl', 25)).toBe(BooleanNumber.TRUE);
 
             await commandService.executeCommand(RedoCommand.id);
             expect(getFormatValueAt('bl', 1)).toBe(BooleanNumber.TRUE);
+            expect(getFormatValueAt('bl', 21)).toBe(BooleanNumber.TRUE);
+            expect(getFormatValueAt('bl', 25)).toBe(BooleanNumber.TRUE);
         });
     });
 

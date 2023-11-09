@@ -1,6 +1,8 @@
 import {
+    CellValueType,
     CommandType,
     ICellData,
+    ICellV,
     ICopyToOptionsData,
     IMutation,
     IRange,
@@ -147,9 +149,12 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 if (newVal.m !== undefined) {
                     oldVal.m = newVal.m;
                 }
+                console.info('oldVaue======', oldVal);
 
                 if (newVal.t !== undefined) {
                     oldVal.t = newVal.t;
+                } else if (oldVal.v !== undefined) {
+                    oldVal.t = checkCellValueType(oldVal.v);
                 }
 
                 // handle style
@@ -191,3 +196,18 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
         return true;
     },
 };
+
+function checkCellValueType(v: Nullable<ICellV>): Nullable<CellValueType> {
+    if (v === null) return null;
+
+    if (typeof v === 'string') {
+        return CellValueType.STRING;
+    }
+    if (typeof v === 'number') {
+        return CellValueType.NUMBER;
+    }
+    if (typeof v === 'boolean') {
+        return CellValueType.BOOLEAN;
+    }
+    return CellValueType.FORCE_STRING;
+}

@@ -1,15 +1,15 @@
 import { PageElementType } from '@univerjs/core';
 
-import { DEFAULT_LIST_TEST } from '../../docs/default_-list';
+import { DEFAULT_LIST_TEST } from '../../docs/default-list';
 
-export const PAGE3_RICHTEXT_1 = {
-    id: 'detailContent1',
+export const PAGE3_RICHTEXT_2 = {
+    id: 'detailContent2',
     zIndex: 3,
-    left: 53,
+    left: 334,
     top: 363,
     width: 273,
-    height: 54,
-    title: 'detailContent1',
+    height: 120,
+    title: 'detailContent2',
     description: '',
     type: PageElementType.TEXT,
     richText: {
@@ -17,18 +17,18 @@ export const PAGE3_RICHTEXT_1 = {
             id: 'd',
             lists: DEFAULT_LIST_TEST,
             body: {
-                dataStream: `Digital Immune System\rApplied Observability\r\n`,
+                dataStream: `combine SaaS, PaaS and IaaS with tailored\rprovides a curated set of tools, capabilities and processes that are packaged for easy consumption by developers and end users\r\n`,
                 textRuns: [
                     {
                         st: 0,
-                        ed: 20,
+                        ed: 40,
                         ts: {
                             fs: 12,
                         },
                     },
                     {
-                        st: 22,
-                        ed: 42,
+                        st: 42,
+                        ed: 167,
                         ts: {
                             fs: 12,
                         },
@@ -36,7 +36,7 @@ export const PAGE3_RICHTEXT_1 = {
                 ],
                 paragraphs: [
                     {
-                        startIndex: 21,
+                        startIndex: 41,
                         bullet: {
                             listId: 'testBullet',
                             nestingLevel: 0,
@@ -49,7 +49,7 @@ export const PAGE3_RICHTEXT_1 = {
                         },
                     },
                     {
-                        startIndex: 43,
+                        startIndex: 168,
                         bullet: {
                             listId: 'testBullet',
                             nestingLevel: 0,

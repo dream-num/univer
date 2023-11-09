@@ -1,6 +1,6 @@
 import { BooleanNumber, IDocumentData, IWorkbookConfig, LocaleType, SheetTypes } from '@univerjs/core';
 
-import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5_-richtext_1';
+import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
 const richTextDemo: IDocumentData = {
     id: 'd',

@@ -1,6 +1,6 @@
 import { IWorksheetConfig, PageElementType, PageType, ShapeType } from '@univerjs/core';
 
-import { SLIDE_WORKBOOK_DATA } from '../../sheets/slide_-workbook_-data';
+import { SLIDE_WORKBOOK_DATA } from '../../sheets/slide-workbook-data';
 
 const worksheetConfig = SLIDE_WORKBOOK_DATA.sheets[SLIDE_WORKBOOK_DATA.sheetOrder[0]] as IWorksheetConfig;
 const spreadStyles = SLIDE_WORKBOOK_DATA.styles;

@@ -1,6 +1,6 @@
 import { BooleanNumber, BorderStyleTypes, IWorkbookConfig, LocaleType, SheetTypes } from '@univerjs/core';
 
-import { PAGE5_RICHTEXT_1 } from '../slides/rich-text/page5_-richtext_1';
+import { PAGE5_RICHTEXT_1 } from '../slides/rich-text/page5-richtext1';
 
 export const SLIDE_WORKBOOK_DATA: IWorkbookConfig = {
     id: 'workbook-01',

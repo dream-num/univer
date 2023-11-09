@@ -1,6 +1,6 @@
 import { BooleanNumber, ColumnSeparatorType, IDocumentData, SectionType } from '@univerjs/core';
 
-import { DEFAULT_LIST_TEST } from '../../docs/default_-list';
+import { DEFAULT_LIST_TEST } from '../../docs/default-list';
 
 export const PAGE5_RICHTEXT_1: IDocumentData = {
     id: 'd',

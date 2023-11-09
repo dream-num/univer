@@ -1,5 +1,5 @@
 import { Nullable } from '../../common/type-utils';
-import { THEME_COLORS } from '../../types/const/theme_-color_-map';
+import { THEME_COLORS } from '../../types/const/theme-color-map';
 import { ColorType, ThemeColors, ThemeColorType } from '../../types/enum';
 import { ColorBuilder } from './color-builder';
 

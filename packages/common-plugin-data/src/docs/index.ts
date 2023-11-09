@@ -1,5 +1,5 @@
 // @index('./*.ts', f => `export * from '${f.path}'`)
-export * from './default_-document_-data';
-export * from './default_-document_-data_-en';
-export * from './default_-document_-data_-simple';
+export * from './default-document-data';
+export * from './default-document-data-en';
+export * from './default-document-data-simple';
 // @endindex

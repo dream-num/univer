@@ -2,7 +2,7 @@ import { IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui
 import { ICommandService, IPermissionService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { DEFAULT_DATA, MORE_FORMATS_SELECTIONS } from '../basics/const/default_-data';
+import { DEFAULT_DATA, MORE_FORMATS_SELECTIONS } from '../basics/const/default-data';
 import { SetNumfmtRangeDataCommand } from '../commands/commands/set-numfmt-range-data.command';
 import { ShowModalOperation } from '../commands/operations/show-modal.operation';
 

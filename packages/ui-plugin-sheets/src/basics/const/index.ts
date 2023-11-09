@@ -1,2 +1,2 @@
 export * from './default-univer-sheet-config';
-export * from './plugin_-name';
+export * from './plugin-name';

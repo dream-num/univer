@@ -1,8 +1,19 @@
 export * from './base-sheets-plugin';
-export * from './basics';
 
 // #region services
 
+export { COMMAND_LISTENER_SKELETON_CHANGE } from './basics/const/command-listener-const';
+export {
+    convertSelectionDataToRange,
+    getNormalSelectionStyle,
+    type ISelectionStyle,
+    type ISelectionWidgetConfig,
+    type ISelectionWithCoordAndStyle,
+    type ISelectionWithStyle,
+    SELECTION_CONTROL_BORDER_BUFFER_COLOR,
+    SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
+    transformCellDataToSelectionData,
+} from './basics/selection';
 export { BorderStyleManagerService } from './services/border-style-manager.service';
 export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './services/selection-manager.service';
 

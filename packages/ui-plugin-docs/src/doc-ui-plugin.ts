@@ -3,7 +3,7 @@ import { IUniverInstanceService, LocaleService, Plugin, PluginType, Tools } from
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { DefaultDocUiConfig, IDocUIPluginConfig } from './basics';
-import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin_-name';
+import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AppUIController } from './controllers';
 import { DocClipboardController } from './controllers/clipboard.controller';
 import { DocUIController } from './controllers/doc-ui.controller';

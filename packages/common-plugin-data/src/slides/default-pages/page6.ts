@@ -1,6 +1,6 @@
 import { PageElementType, PageType, ShapeType } from '@univerjs/core';
 
-import { DEFAULT_DOCUMENT_DATA_EN } from '../../docs/default_-document_-data_-en';
+import { DEFAULT_DOCUMENT_DATA_EN } from '../../docs/default-document-data-en';
 
 export const DEFAULT_SIXTH_PAGE = {
     id: 'richText_1',

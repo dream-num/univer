@@ -1,6 +1,6 @@
 // @index('./*.ts', f => `export * from '${f.path}'`)
 export * from './config';
-export * from './default_-data';
+export * from './default-data';
 export * from './formatdetail';
-export * from './plugin_-name';
+export * from './plugin-name';
 // @endindex

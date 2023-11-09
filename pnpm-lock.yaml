@@ -906,7 +906,7 @@ importers:
         specifier: workspace:*
         version: link:../base-docs
       '@univerjs/base-formula-engine':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../base-formula-engine
       '@univerjs/base-render':
         specifier: workspace:*

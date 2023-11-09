@@ -1,4 +1,3 @@
-// @index('./*.ts', f => `export * from '${f.path}'`)
+export * from './mutation-interface';
 export * from './selection-config';
 export * from './spreadsheet-config';
-// @endindex

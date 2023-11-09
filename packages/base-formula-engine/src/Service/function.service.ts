@@ -1,7 +1,7 @@
 import { Disposable, Nullable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import { IFunctionInfo } from '../Basics/Function';
+import { FUNCTION_NAMES, IFunctionInfo } from '../Basics/Function';
 import { BaseFunction } from '../Functions/BaseFunction';
 
 export interface IFunctionService {
@@ -43,11 +43,11 @@ export class FunctionService extends Disposable implements IFunctionService {
         return this._functionExecutors;
     }
 
-    getExecutor(functionToken: string) {
+    getExecutor(functionToken: string | FUNCTION_NAMES) {
         return this._functionExecutors.get(functionToken);
     }
 
-    hasExecutor(functionToken: string) {
+    hasExecutor(functionToken: string | FUNCTION_NAMES) {
         return this._functionExecutors.has(functionToken);
     }
 

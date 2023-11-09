@@ -3,6 +3,7 @@ import { IAccessor, Inject, Injector } from '@wendellhu/redi';
 import { LexerTreeBuilder } from '../Analysis/Lexer';
 import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
+import { FUNCTION_NAMES } from '../Basics/Function';
 import { suffixToken } from '../Basics/Token';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -107,7 +108,7 @@ export class SuffixNodeFactory extends BaseAstNodeFactory {
 
         let functionName = '';
         if (tokenTrim === suffixToken.PERCENTAGE) {
-            functionName = 'DIVIDED';
+            functionName = FUNCTION_NAMES.DIVIDED;
         } else if (tokenTrim === suffixToken.POUND) {
             return new SuffixNode(this._injector, tokenTrim);
         } else {

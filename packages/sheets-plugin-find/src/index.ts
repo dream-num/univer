@@ -1,1 +1,1 @@
-export { FindPlugin } from './FindPlugin';
+export { FindPlugin } from './find-plugin';

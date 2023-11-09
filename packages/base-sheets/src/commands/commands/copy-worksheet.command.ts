@@ -8,7 +8,7 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
+import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../basics/interfaces/mutation-interface';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
 import {

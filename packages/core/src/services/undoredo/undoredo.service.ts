@@ -1,7 +1,7 @@
 import { createIdentifier, IAccessor, IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { Disposable, toDisposable } from '../../Shared/lifecycle';
+import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { CommandType, ICommand, ICommandInfo, ICommandService, sequenceExecute } from '../command/command.service';
 import { IUniverInstanceService } from '../instance/instance.service';
 

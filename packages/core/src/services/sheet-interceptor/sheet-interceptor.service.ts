@@ -2,10 +2,10 @@ import { IDisposable } from '@wendellhu/redi';
 
 import { remove } from '../../common/array';
 import { Nullable } from '../../common/type-utils';
-import { Disposable, DisposableCollection, toDisposable } from '../../Shared/lifecycle';
+import { Disposable, DisposableCollection, toDisposable } from '../../shared/lifecycle';
 import { Workbook } from '../../sheets/workbook';
 import { Worksheet } from '../../sheets/worksheet';
-import { ICellData } from '../../Types/Interfaces/ICellData';
+import { ICellData } from '../../types/interfaces/i-cell-data';
 import { ICommandInfo } from '../command/command.service';
 import { IUniverInstanceService } from '../instance/instance.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';

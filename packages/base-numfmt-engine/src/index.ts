@@ -1,13 +1,13 @@
-import { codeToLocale } from './core/codeToLocale';
+import { codeToLocale } from './core/code-to-locale';
 import { dec2frac } from './core/dec2frac';
-import { color, formatNumber, isDate, isPercent, isText } from './core/formatNumber';
+import { color, formatNumber, isDate, isPercent, isText } from './core/format-number';
 import { addLocale, getLocale, LocaleData, parseLocale } from './core/locale';
 import { options, OptionsData } from './core/options';
-import { PartType } from './core/parsePart';
-import { parseCatch, parsePattern, PatternType } from './core/parsePattern';
-import { parseBool, parseDate, parseNumber, parseTime, parseValue } from './core/parseValue';
+import { PartType } from './core/parse-part';
+import { parseCatch, parsePattern, PatternType } from './core/parse-pattern';
+import { parseBool, parseDate, parseNumber, parseTime, parseValue } from './core/parse-value';
 import { round } from './core/round';
-import { dateFromSerial, dateToSerial } from './core/serialDate';
+import { dateFromSerial, dateToSerial } from './core/serial-date';
 
 export interface FormatterType {
     pattern: string | undefined;

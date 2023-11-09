@@ -47,11 +47,11 @@ import {
 import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
 
-import { getEditorObject } from '../../Basics/editor/get-editor-object';
+import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
-import styles from '../../views/SheetContainer/index.module.less';
+import styles from '../../views/sheet-container/index.module.less';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 

@@ -4,7 +4,7 @@ import { IAccessor } from '@wendellhu/redi';
 import {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
-} from '../../Basics/Interfaces/MutationInterface';
+} from '../../basics/interfaces/mutation-interface';
 
 export const RemoveMergeUndoMutationFactory = (
     accessor: IAccessor,

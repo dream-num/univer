@@ -16,7 +16,7 @@ import { IAccessor } from '@wendellhu/redi';
 import {
     IAddWorksheetMergeMutationParams,
     IRemoveWorksheetMergeMutationParams,
-} from '../../Basics/Interfaces/MutationInterface';
+} from '../../basics/interfaces/mutation-interface';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from '../mutations/add-worksheet-merge.mutation';
 import {

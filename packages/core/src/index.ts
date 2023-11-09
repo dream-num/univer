@@ -1,7 +1,7 @@
-export * from './Basics';
+export * from './basics';
 export { dedupe, remove } from './common/array';
-export * from './Docs/Domain';
-export * from './Observer';
+export * from './docs/domain';
+export * from './observer';
 export { Plugin, PluginType } from './plugin/plugin';
 
 // #region services
@@ -47,9 +47,9 @@ export {
 
 // #endregion
 
-export * from './Shared';
-export { Disposable, DisposableCollection, fromObservable, RxDisposable, toDisposable } from './Shared/lifecycle';
-export { createRowColIter, type IRowColIter } from './Shared/RowColIter';
+export * from './shared';
+export { Disposable, DisposableCollection, fromObservable, RxDisposable, toDisposable } from './shared/lifecycle';
+export { createRowColIter, type IRowColIter } from './shared/row-col-iter';
 
 // #region sheet
 
@@ -69,7 +69,7 @@ export {
     type IFloatingObjectManagerSearchItemParam,
     IFloatingObjectManagerService,
 } from './services/floating-object/floating-object-manager.service';
-export * from './Slides/Domain';
-export * from './Types/Const';
-export * from './Types/Enum';
-export * from './Types/Interfaces';
+export * from './slides/domain';
+export * from './types/const';
+export * from './types/enum';
+export * from './types/interfaces';

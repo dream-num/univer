@@ -12,7 +12,7 @@ import {
     ISelectionStyle,
     ISelectionWithCoordAndStyle,
     ISelectionWithStyle,
-} from '@univerjs/base-sheets/Basics/selection.js';
+} from '@univerjs/base-sheets';
 import {
     IRange,
     IRangeWithCoord,

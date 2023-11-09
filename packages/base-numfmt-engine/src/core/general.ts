@@ -1,6 +1,6 @@
 import { LocaleData } from './locale';
 import { numdec } from './numdec';
-import { PartType } from './parsePart';
+import { PartType } from './parse-part';
 import { round } from './round';
 
 const fixLocale = (s: string, l10n: any) => s.replace(/\./, l10n.decimal);

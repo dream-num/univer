@@ -1,8 +1,8 @@
-import { Nullable, ObjectMatrix, Rectangle, Tools } from '../Shared';
-import { createRowColIter } from '../Shared/RowColIter';
-import { DEFAULT_WORKSHEET } from '../Types/Const';
-import { BooleanNumber, SheetTypes } from '../Types/Enum';
-import { ICellData, IFreeze, IRange, IWorksheetConfig } from '../Types/Interfaces';
+import { Nullable, ObjectMatrix, Rectangle, Tools } from '../shared';
+import { createRowColIter } from '../shared/row-col-iter';
+import { DEFAULT_WORKSHEET } from '../types/const';
+import { BooleanNumber, SheetTypes } from '../types/enum';
+import { ICellData, IFreeze, IRange, IWorksheetConfig } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';

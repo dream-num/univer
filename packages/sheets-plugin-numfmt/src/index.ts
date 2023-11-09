@@ -1,3 +1,3 @@
-import './RegisterAction';
+import './register-action';
 
-export * from './NumfmtPlugin';
+export * from './numfmt-plugin';

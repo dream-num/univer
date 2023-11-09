@@ -1,8 +1,8 @@
 import { createIdentifier, IAccessor, IDisposable, Inject, Injector } from '@wendellhu/redi';
 
 import { sequence, syncSequence } from '../../common/promise/sequence';
-import { toDisposable } from '../../Shared/lifecycle';
-import { IKeyValue } from '../../Shared/Types';
+import { toDisposable } from '../../shared/lifecycle';
+import { IKeyValue } from '../../shared/types';
 import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
 

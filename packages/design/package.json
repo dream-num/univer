@@ -42,9 +42,7 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "esbuild": "node ./esbuild.config.mjs",
-        "sb": "storybook dev -p 6006 --no-open",
-        "build:doc": "storybook build"
+        "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {
         "@rc-component/color-picker": "^1.4.1",
@@ -64,25 +62,15 @@
         "react-transition-group": "^4.4.5"
     },
     "devDependencies": {
-        "@storybook/addon-docs": "^7.5.2",
-        "@storybook/addon-essentials": "^7.5.2",
-        "@storybook/addon-interactions": "^7.5.2",
-        "@storybook/addon-links": "^7.5.2",
-        "@storybook/blocks": "^7.5.2",
-        "@storybook/react": "^7.5.2",
-        "@storybook/react-vite": "^7.5.2",
-        "@storybook/testing-library": "^0.2.2",
         "@testing-library/react": "^14.0.0",
         "@types/node": "^20.8.9",
         "@types/react": "^18.2.33",
         "@types/react-dom": "^18.2.14",
         "@types/react-transition-group": "^4.4.8",
-        "@vitejs/plugin-react": "^4.1.0",
         "@vitest/coverage-istanbul": "^0.34.6",
         "esbuild": "^0.19.5",
         "happy-dom": "^12.10.3",
         "less": "^4.2.0",
-        "storybook": "^7.5.2",
         "ts-node": "^10.9.1",
         "vitest": "^0.34.6"
     }

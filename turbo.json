@@ -9,8 +9,6 @@
         },
         "esbuild:demo": {
         },
-        "build:doc": {
-        },
         "dev:demo": {
             "cache": false,
             "persistent": true

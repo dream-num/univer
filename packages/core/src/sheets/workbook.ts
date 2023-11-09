@@ -1,10 +1,10 @@
 import { forwardRef, Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
-import { GenName, Nullable, Tools } from '../Shared';
-import { Disposable } from '../Shared/lifecycle';
-import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../Types/Const';
-import { BooleanNumber } from '../Types/Enum';
+import { GenName, Nullable, Tools } from '../shared';
+import { Disposable } from '../shared/lifecycle';
+import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../types/const';
+import { BooleanNumber } from '../types/enum';
 import {
     IColumnStartEndData,
     IGridRange,
@@ -14,7 +14,7 @@ import {
     IRowStartEndData,
     IWorkbookConfig,
     IWorksheetConfig,
-} from '../Types/Interfaces';
+} from '../types/interfaces';
 import { Styles } from './styles';
 import { Worksheet } from './worksheet';
 

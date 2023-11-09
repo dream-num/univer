@@ -1,9 +1,9 @@
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { Univer } from '../../../Basics/Univer';
+import { Univer } from '../../../basics/univer';
 import { Nullable } from '../../../common/type-utils';
-import { ICellData } from '../../../Types/Interfaces/ICellData';
+import { ICellData } from '../../../types/interfaces/i-cell-data';
 import { IUniverInstanceService } from '../../instance/instance.service';
 import { SheetInterceptorService } from '../sheet-interceptor.service';
 import { createCoreTestBed } from './create-core-test-bed';

@@ -17,7 +17,7 @@ import {
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
     IRemoveWorksheetMergeMutationParams,
-} from '../Basics/Interfaces/MutationInterface';
+} from '../basics/interfaces/mutation-interface';
 import { getAddMergeMutationRangeByType } from '../commands/commands/add-worksheet-merge.command';
 import {
     DeleteRangeMoveLeftCommand,

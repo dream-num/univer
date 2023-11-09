@@ -1,5 +1,5 @@
-export * from './Basics/component-tools';
-export * from './Basics/docs-view-key';
+export * from './basics/component-tools';
+export * from './basics/docs-view-key';
 export {
     CoverCommand,
     DeleteCommand,
@@ -28,6 +28,6 @@ export {
     RichTextEditingMutation,
 } from './commands/mutations/core-editing.mutation';
 export { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
-export * from './DocPlugin';
+export * from './doc-plugin';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { TextSelectionManagerService } from './services/text-selection-manager.service';

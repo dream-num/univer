@@ -2,7 +2,7 @@
 
 import { createIdentifier } from '@wendellhu/redi';
 
-import { Disposable } from '../../Shared/lifecycle';
+import { Disposable } from '../../shared/lifecycle';
 
 export interface ILogService {
     log(...args: any[]): void;

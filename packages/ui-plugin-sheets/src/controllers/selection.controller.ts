@@ -3,9 +3,10 @@ import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetSelectionsOperation,
+    convertSelectionDataToRange,
+    getNormalSelectionStyle,
     transformCellDataToSelectionData,
 } from '@univerjs/base-sheets';
-import { convertSelectionDataToRange, getNormalSelectionStyle } from '@univerjs/base-sheets/Basics/selection.js';
 import {
     Disposable,
     ICommandInfo,

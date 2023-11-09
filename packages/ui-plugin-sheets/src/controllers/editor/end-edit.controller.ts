@@ -30,7 +30,7 @@ import {
 import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
 
-import { getEditorObject } from '../../Basics/editor/get-editor-object';
+import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { SetCellEditVisibleArrowOperation } from '../../commands/operations/cell-edit.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';

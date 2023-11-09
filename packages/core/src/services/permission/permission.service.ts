@@ -1,7 +1,7 @@
 import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { Disposable } from '../../Shared/lifecycle';
+import { Disposable } from '../../shared/lifecycle';
 
 export interface IPermissionService {
     readonly editable$: Observable<boolean>;

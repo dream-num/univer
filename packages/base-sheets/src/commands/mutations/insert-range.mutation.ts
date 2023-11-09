@@ -1,7 +1,7 @@
 import { CommandType, Dimension, ICellData, IMutation, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
+import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../basics/interfaces/mutation-interface';
 
 /**
  * Generate undo mutation of a `InsertRangeMutation`

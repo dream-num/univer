@@ -13,7 +13,7 @@ import {
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../Basics/Interfaces/MutationInterface';
+import { IDeleteRangeMutationParams, IInsertRangeMutationParams } from '../../basics/interfaces/mutation-interface';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import { DeleteRangeMutation, DeleteRangeUndoMutationFactory } from '../mutations/delete-range.mutation';
 import { InsertRangeMutation } from '../mutations/insert-range.mutation';

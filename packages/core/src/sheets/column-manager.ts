@@ -1,7 +1,7 @@
-import { Nullable, Tools } from '../Shared';
-import { ObjectArray, ObjectArrayType } from '../Shared/ObjectArray';
-import { BooleanNumber } from '../Types/Enum';
-import { IColumnData, IRange, IWorksheetConfig, RANGE_TYPE } from '../Types/Interfaces';
+import { Nullable, Tools } from '../shared';
+import { ObjectArray, ObjectArrayType } from '../shared/object-array';
+import { BooleanNumber } from '../types/enum';
+import { IColumnData, IRange, IWorksheetConfig, RANGE_TYPE } from '../types/interfaces';
 
 /**
  * Manage configuration information of all columns, get column width, column length, set column width, etc.

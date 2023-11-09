@@ -2,7 +2,7 @@ import { IRange, ISelectionCell, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
-import { ISelectionStyle, ISelectionWithStyle } from '../Basics/selection';
+import { ISelectionStyle, ISelectionWithStyle } from '../basics/selection';
 
 export const NORMAL_SELECTION_PLUGIN_NAME = 'normalSelectionPluginName';
 

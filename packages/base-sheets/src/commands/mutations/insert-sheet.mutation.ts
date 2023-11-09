@@ -1,7 +1,7 @@
 import { CommandType, IMutation, IUniverInstanceService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../Basics/Interfaces/MutationInterface';
+import { IInsertSheetMutationParams, IRemoveSheetMutationParams } from '../../basics/interfaces/mutation-interface';
 
 /**
  * Generate undo mutation of a `InsertSheetMutation`

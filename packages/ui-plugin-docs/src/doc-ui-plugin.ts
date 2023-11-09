@@ -2,11 +2,11 @@ import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY } from '@univerjs/base-render';
 import { IUniverInstanceService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { DefaultDocUiConfig, IDocUIPluginConfig } from './Basics';
-import { DOC_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
-import { AppUIController } from './Controller';
-import { DocClipboardController } from './Controller/clipboard.controller';
-import { DocUIController } from './Controller/doc-ui.controller';
+import { DefaultDocUiConfig, IDocUIPluginConfig } from './basics';
+import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin_-name';
+import { AppUIController } from './controllers';
+import { DocClipboardController } from './controllers/clipboard.controller';
+import { DocUIController } from './controllers/doc-ui.controller';
 import { enUS } from './locale';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 

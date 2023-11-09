@@ -1,7 +1,7 @@
 import { Inject, Injector } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { Disposable, toDisposable } from '../../Shared/lifecycle';
+import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { ILogService } from '../log/log.service';
 import { LifecycleNameMap, LifecycleStages, LifecycleToModules } from './lifecycle';
 

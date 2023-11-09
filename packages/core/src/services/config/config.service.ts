@@ -1,6 +1,6 @@
 import { createIdentifier } from '@wendellhu/redi';
 
-import { IKeyValue, Nullable } from '../../Shared/Types';
+import { IKeyValue, Nullable } from '../../shared/types';
 
 export const IConfigService = createIdentifier<IConfigService>('univer.config-service');
 

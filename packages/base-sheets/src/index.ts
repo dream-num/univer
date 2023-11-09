@@ -1,5 +1,5 @@
 export * from './base-sheets-plugin';
-export * from './Basics';
+export * from './basics';
 
 // #region services
 
@@ -10,13 +10,13 @@ export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './service
 
 // #region commands
 
-export { type IInsertColMutationParams, type IInsertRowMutationParams } from './Basics/Interfaces/MutationInterface';
+export { type IInsertColMutationParams, type IInsertRowMutationParams } from './basics/interfaces/mutation-interface';
 export {
     type IAddWorksheetMergeMutationParams,
     type IRemoveWorksheetMergeMutationParams,
-} from './Basics/Interfaces/MutationInterface';
-export { type IRemoveSheetMutationParams } from './Basics/Interfaces/MutationInterface';
-export { type IInsertSheetMutationParams } from './Basics/Interfaces/MutationInterface';
+} from './basics/interfaces/mutation-interface';
+export { type IRemoveSheetMutationParams } from './basics/interfaces/mutation-interface';
+export { type IInsertSheetMutationParams } from './basics/interfaces/mutation-interface';
 export {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,

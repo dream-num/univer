@@ -64,7 +64,7 @@ import {
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
-import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/SheetContainer/SheetContainer';
+import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import {
     BackgroundColorSelectorMenuItemFactory,

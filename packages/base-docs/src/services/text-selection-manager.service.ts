@@ -3,7 +3,7 @@ import { ISelectionCell, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
-import { NORMAL_TEXT_SELECTION_PLUGIN_NAME } from '../Basics/docs-view-key';
+import { NORMAL_TEXT_SELECTION_PLUGIN_NAME } from '../basics/docs-view-key';
 
 export interface ITextSelectionManagerSearchParam {
     pluginName: string;

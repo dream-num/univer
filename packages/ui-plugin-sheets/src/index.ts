@@ -1,4 +1,4 @@
-export * from './Basics';
+export * from './basics';
 export { SetCellEditVisibleArrowOperation } from './commands/operations/cell-edit.operation';
 export {
     getCoordByCell,

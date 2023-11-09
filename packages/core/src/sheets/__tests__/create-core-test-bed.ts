@@ -1,11 +1,11 @@
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { Univer } from '../../Basics/Univer';
+import { Univer } from '../../basics/univer';
 import { Plugin, PluginType } from '../../plugin/plugin';
 import { IUniverInstanceService } from '../../services/instance/instance.service';
 import { ILogService } from '../../services/log/log.service';
-import { LocaleType } from '../../Types/Enum/LocaleType';
-import { IWorkbookConfig } from '../../Types/Interfaces/IWorkbookData';
+import { LocaleType } from '../../types/enum/locale-type';
+import { IWorkbookConfig } from '../../types/interfaces/i-workbook-data';
 
 const TEST_WORKBOOK_DATA: IWorkbookConfig = {
     id: 'test',

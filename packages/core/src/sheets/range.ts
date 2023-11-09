@@ -1,6 +1,6 @@
-import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../Shared';
-import { DEFAULT_STYLES } from '../Types/Const';
-import { BooleanNumber, FontItalic, FontWeight, HorizontalAlign, VerticalAlign, WrapStrategy } from '../Types/Enum';
+import { Nullable, ObjectMatrix, ObjectMatrixPrimitiveType, Tools } from '../shared';
+import { DEFAULT_STYLES } from '../types/const';
+import { BooleanNumber, FontItalic, FontWeight, HorizontalAlign, VerticalAlign, WrapStrategy } from '../types/enum';
 import {
     IBorderData,
     ICellData,
@@ -11,7 +11,7 @@ import {
     ITextDecoration,
     ITextRotation,
     ITextRun,
-} from '../Types/Interfaces';
+} from '../types/interfaces';
 import { Styles } from './styles';
 import type { Worksheet } from './worksheet';
 

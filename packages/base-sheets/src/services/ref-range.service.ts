@@ -11,7 +11,7 @@ import {
 } from '@univerjs/core';
 import { IDisposable, Inject } from '@wendellhu/redi';
 
-import {} from '../Basics/Interfaces/MutationInterface';
+import {} from '../basics/interfaces/mutation-interface';
 import {
     DeleteRangeMoveLeftCommand,
     DeleteRangeMoveLeftCommandParams,

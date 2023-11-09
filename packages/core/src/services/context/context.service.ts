@@ -1,7 +1,7 @@
 import { createIdentifier } from '@wendellhu/redi';
 import { Observable, Subject } from 'rxjs';
 
-import { Disposable } from '../../Shared/lifecycle';
+import { Disposable } from '../../shared/lifecycle';
 
 export interface IContextService {
     contextChanged$: Observable<void>;

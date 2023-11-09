@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 
-import { Disposable } from '../../Shared/lifecycle';
+import { Disposable } from '../../shared/lifecycle';
 
 export interface IError {
     errorKey: string;

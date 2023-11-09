@@ -14,7 +14,7 @@ import {
     IInsertRowMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
-} from '../../Basics/Interfaces/MutationInterface';
+} from '../../basics/interfaces/mutation-interface';
 
 export const RemoveRowsUndoMutationFactory = (
     params: IRemoveRowsMutationParams,

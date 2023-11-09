@@ -2,11 +2,11 @@ import { ComponentManager } from '@univerjs/base-ui';
 import { IUniverInstanceService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { DefaultSlideUIConfig, ISlideUIPluginConfig } from './Basics';
-import { SLIDE_UI_PLUGIN_NAME } from './Basics/Const/PLUGIN_NAME';
-import { IToolbarItemProps } from './Controller';
-import { AppUIController } from './Controller/AppUIController';
-import { SlideUIController } from './Controller/slide-ui.controller';
+import { DefaultSlideUIConfig, ISlideUIPluginConfig } from './basics';
+import { SLIDE_UI_PLUGIN_NAME } from './basics/const/plugin_-name';
+import { IToolbarItemProps } from './controllers';
+import { AppUIController } from './controllers/app-ui-controller';
+import { SlideUIController } from './controllers/slide-ui.controller';
 import { enUS } from './locale';
 
 export class SlideUIPlugin extends Plugin {

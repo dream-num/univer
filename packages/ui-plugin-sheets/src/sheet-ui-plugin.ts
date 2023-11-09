@@ -3,7 +3,7 @@ import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univ
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
 
-import { SHEET_UI_PLUGIN_NAME } from './Basics';
+import { SHEET_UI_PLUGIN_NAME } from './basics';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';

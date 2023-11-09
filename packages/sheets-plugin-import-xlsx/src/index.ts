@@ -1,1 +1,1 @@
-export * from './ImportXlsxPlugin';
+export * from './import-xlsx-plugin';

@@ -1,8 +1,8 @@
 import { isRealNum } from '@univerjs/core';
+import { Menu as DesignMenu, MenuItem as DesignMenuItem, SubMenu as DesignSubMenu } from '@univerjs/design';
 import { MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import RcMenu, { MenuItem as RcMenuItem, SubMenu as RcSubMenu } from 'rc-menu';
 import React, { useState } from 'react';
 import { isObservable, of } from 'rxjs';
 
@@ -22,6 +22,8 @@ import { IMenuService } from '../../services/menu/menu.service';
 import { CustomLabel } from '../custom-label/CustomLabel';
 import { useObservable } from '../hooks/observable';
 import styles from './index.module.less';
+
+// TODO: @jikkai disabled and hidden are not working
 
 export interface IBaseMenuProps {
     parentKey?: string | number;
@@ -83,11 +85,10 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
 
         if (isValueOption) {
             return (
-                <RcMenuItem
+                <DesignMenuItem
                     key={key}
                     eventKey={key}
                     className={clsx(
-                        styles.menuItem,
                         option.disabled ? styles.colsMenuitemDisabled : ''
                         // String(value) === String(option.value) ? styles.selectItemSelected : '' // Set the background color of Item
                     )}
@@ -106,21 +107,13 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                             icon={option.icon}
                         />
                     </span>
-                </RcMenuItem>
+                </DesignMenuItem>
             );
         }
 
         const CustomComponent = componentManager.get(option.id) as React.ComponentType<any>;
         return (
-            <RcMenuItem
-                key={key}
-                eventKey={key}
-                className={clsx(
-                    styles.menuItem,
-                    styles.menuItemCustom,
-                    option.disabled ? styles.colsMenuitemDisabled : ''
-                )}
-            >
+            <DesignMenuItem key={key} eventKey={key} className={clsx(styles.menuItemCustom)}>
                 <CustomComponent
                     onValueChange={(v: string | number) => {
                         onOptionSelect?.({
@@ -129,16 +122,16 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                         });
                     }}
                 />
-            </RcMenuItem>
+            </DesignMenuItem>
         );
     });
 }
 
 export const Menu = (props: IBaseMenuProps) => (
-    <RcMenu prefixCls={styles.menu} selectable={false}>
+    <DesignMenu selectable={false}>
         <MenuOptionsWrapper {...props} />
         <MenuWrapper {...props} />
-    </RcMenu>
+    </DesignMenu>
 );
 
 interface IMenuItemProps {
@@ -170,10 +163,10 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
         const { title, label } = item;
 
         return (
-            <RcMenuItem
+            <DesignMenuItem
                 key={item.id}
                 eventKey={item.id}
-                className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
+                className={clsx(disabled ? styles.menuItemDisabled : '')}
                 // disabled={disabled} // FIXME disabled is not working
                 onClick={() => {
                     onClick({ value: inputValue, id: item.id }); // merge cell
@@ -182,7 +175,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 <span className={styles.menuItemContent}>
                     <CustomLabel value={inputValue} title={title} label={label} icon={item.icon} onChange={onChange} />
                 </span>
-            </RcMenuItem>
+            </DesignMenuItem>
         );
     };
 
@@ -202,10 +195,10 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
 
         if (selections.length > 0) {
             return (
-                <RcSubMenu
+                <DesignSubMenu
                     key={item.id}
                     eventKey={item.id}
-                    className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
+                    className={clsx(disabled ? styles.menuItemDisabled : '')}
                     popupOffset={[18, 0]}
                     title={
                         <span className={styles.menuItemContent}>
@@ -231,16 +224,12 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                             }}
                         />
                     )}
-                </RcSubMenu>
+                </DesignSubMenu>
             );
         }
 
         return (
-            <RcMenuItem
-                key={item.id}
-                eventKey={item.id}
-                className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
-            >
+            <DesignMenuItem key={item.id} eventKey={item.id} className={clsx(disabled ? styles.menuItemDisabled : '')}>
                 <span className={styles.menuItemContent}>
                     <CustomLabel
                         title={item.title}
@@ -251,7 +240,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     />
                     {item.shortcut && ` (${item.shortcut})`}
                 </span>
-            </RcMenuItem>
+            </DesignMenuItem>
         );
     };
 
@@ -259,10 +248,10 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
 
         return (
-            <RcSubMenu
+            <DesignSubMenu
                 key={item.id}
                 eventKey={item.id}
-                className={clsx(styles.menuItem, disabled ? styles.menuItemDisabled : '')}
+                className={clsx(disabled ? styles.menuItemDisabled : '')}
                 popupOffset={[18, 0]}
                 title={
                     <span className={styles.menuItemContent}>
@@ -272,7 +261,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}
             >
                 {menuItems.length && <MenuWrapper menuType={item.id} parentKey={item.id} onOptionSelect={onClick} />}
-            </RcSubMenu>
+            </DesignSubMenu>
         );
     };
 

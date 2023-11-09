@@ -7,7 +7,7 @@ import {
     SetCellEditVisibleArrowOperation,
     SetCellEditVisibleOperation,
 } from '../../commands/operations/cell-edit.operation';
-import { whenEditorActivatedIsVisible, whenEditorFocusIsHidden, whenEditorNotFormulaActivated } from './utils';
+import { whenEditorActivatedIsVisible, whenEditorDidNotInputFormulaActivated, whenEditorFocusIsHidden } from './utils';
 
 export const ARROW_SELECTION_KEYCODE_LIST = [
     KeyCode.ARROW_DOWN,
@@ -24,7 +24,7 @@ export function generateArrowSelectionShortCuItem() {
         shortcutList.push({
             id: SetCellEditVisibleArrowOperation.id,
             binding: keycode,
-            preconditions: (contextService) => whenEditorNotFormulaActivated(contextService),
+            preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
             staticParameters: {
                 visible: false,
                 eventType: DeviceInputEventType.Keyboard,
@@ -38,7 +38,7 @@ export function generateArrowSelectionShortCuItem() {
 export const EditorCursorEnterShortcut: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
     binding: KeyCode.ENTER,
-    preconditions: (contextService) => whenEditorNotFormulaActivated(contextService),
+    preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
     staticParameters: {
         visible: false,
         eventType: DeviceInputEventType.Keyboard,
@@ -49,7 +49,7 @@ export const EditorCursorEnterShortcut: IShortcutItem = {
 export const EditorCursorTabShortcut: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,
     binding: KeyCode.TAB,
-    preconditions: (contextService) => whenEditorNotFormulaActivated(contextService),
+    preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
     staticParameters: {
         visible: false,
         eventType: DeviceInputEventType.Keyboard,

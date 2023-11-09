@@ -1,7 +1,7 @@
 import { TextSelectionManagerService } from '@univerjs/base-docs';
 import {
     Disposable,
-    FOCUSING_EDITOR_FORMULA,
+    FOCUSING_EDITOR_INPUT_FORMULA,
     ICommandService,
     IContextService,
     isFormulaString,
@@ -49,11 +49,11 @@ export class PromptController extends Disposable {
             const { visibleSearch, visibleHelp, searchText, paramIndex, searchList, functionInfo } = input;
 
             if (visibleSearch) {
-                this._contextService.setContextValue(FOCUSING_EDITOR_FORMULA, true);
+                this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
             } else if (visibleHelp) {
-                this._contextService.setContextValue(FOCUSING_EDITOR_FORMULA, false);
+                this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
             } else {
-                this._contextService.setContextValue(FOCUSING_EDITOR_FORMULA, false);
+                this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
             }
 
             this._commandService.executeCommand(SearchFunctionOperation.id, {

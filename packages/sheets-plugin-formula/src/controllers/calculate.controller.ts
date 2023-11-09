@@ -1,7 +1,5 @@
-import { TextSelectionManagerService } from '@univerjs/base-docs';
 import { FormulaEngineService, IFormulaData, ISheetData } from '@univerjs/base-formula-engine';
 import { ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/base-sheets';
-import { IDesktopUIController, IMenuService, IUIController } from '@univerjs/base-ui';
 import {
     Disposable,
     ICommandInfo,
@@ -16,22 +14,16 @@ import {
     OnLifecycle,
     Tools,
 } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 
 import { ISetFormulaDataMutationParams, SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
-import { IFormulaPromptService } from '../services/prompt.service';
 
 @OnLifecycle(LifecycleStages.Starting, CalculateController)
 export class CalculateController extends Disposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IUIController private readonly _uiController: IDesktopUIController,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {

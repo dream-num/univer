@@ -1,7 +1,7 @@
 import {
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
-    FOCUSING_EDITOR_FORMULA,
+    FOCUSING_EDITOR_INPUT_FORMULA,
     FOCUSING_SHEET,
     IContextService,
 } from '@univerjs/core';
@@ -22,10 +22,15 @@ export function whenEditorActivatedIsVisible(contextService: IContextService) {
     );
 }
 
-export function whenEditorFormulaActivated(contextService: IContextService) {
-    return contextService.getContextValue(FOCUSING_EDITOR) && contextService.getContextValue(FOCUSING_EDITOR_FORMULA);
+export function whenEditorInputFormulaActivated(contextService: IContextService) {
+    return (
+        contextService.getContextValue(FOCUSING_EDITOR) && contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)
+    );
 }
 
-export function whenEditorNotFormulaActivated(contextService: IContextService) {
-    return contextService.getContextValue(FOCUSING_EDITOR) && !contextService.getContextValue(FOCUSING_EDITOR_FORMULA);
+export function whenEditorDidNotInputFormulaActivated(contextService: IContextService) {
+    return (
+        contextService.getContextValue(FOCUSING_EDITOR) &&
+        !contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)
+    );
 }

@@ -1,5 +1,6 @@
-import { IMessageService, MessageType } from '@univerjs/base-ui';
+import { IMessageService } from '@univerjs/base-ui';
 import { CommandType, ICommand } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
 import { IAccessor } from '@wendellhu/redi';
 
 export const MessageOperation: ICommand = {

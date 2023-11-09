@@ -1,19 +1,10 @@
+import { IMessageMethodOptions, IMessageProps } from '@univerjs/design';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
 export const IMessageService = createIdentifier<IMessageService>('univer.message-service');
 
-export enum MessageType {
-    Success = 'success',
-    Warning = 'warning',
-    Error = 'error',
-}
-
-export interface IShowOptions {
-    type: MessageType;
-    content: string;
-    delay?: number;
-}
-
 export interface IMessageService {
-    show(options: IShowOptions): IDisposable;
+    show(options: IMessageMethodOptions & Omit<IMessageProps, 'key'>): IDisposable;
+
+    setContainer(container: HTMLElement): void;
 }

@@ -21,7 +21,7 @@ import {
     SetWorksheetRowHeightMutation,
 } from '@univerjs/base-sheets';
 import { AddMergeUndoMutationFactory } from '@univerjs/base-sheets/commands/mutations/add-worksheet-merge.mutation.js';
-import { handleStringToStyle, IMessageService, MessageType, textTrim } from '@univerjs/base-ui';
+import { handleStringToStyle, IMessageService, textTrim } from '@univerjs/base-ui';
 import {
     BooleanNumber,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
@@ -43,6 +43,7 @@ import {
     Rectangle,
     Worksheet,
 } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SheetCopyCommand, SheetCutCommand, SheetPasteCommand } from '../../commands/commands/clipboard.command';

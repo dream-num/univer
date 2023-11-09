@@ -4,6 +4,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { ComponentType, useEffect, useMemo, useRef, useState } from 'react';
 
+import { IMessageService } from '..';
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { ISidebarService } from '../services/sidebar/sidebar.service';
 import styles from './app.module.less';
@@ -38,6 +39,7 @@ export function App(props: IUniverAppProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
     const sidebarService = useDependency(ISidebarService);
+    const messageService = useDependency(IMessageService);
 
     const contentRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +73,7 @@ export function App(props: IUniverAppProps) {
 
     useEffect(() => {
         document.body.appendChild(portalContainer);
+        messageService.setContainer(portalContainer);
 
         const subscriptions = [
             localeService.getLocale().locale$.subscribe((locale) => {

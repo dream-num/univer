@@ -1,14 +1,14 @@
 import { Disposable, IUnitRange } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import { IFormulaData, IFormulaDatasetConfig, ISheetNameMap, IUnitData } from '../Basics/Common';
+import { IFormulaData, IFormulaDatasetConfig, IUnitData, IUnitSheetNameMap } from '../Basics/Common';
 
 export interface IFormulaCurrentConfigService {
     getUnitData(): IUnitData;
 
     getFormulaData(): IFormulaData;
 
-    getSheetNameMap(): ISheetNameMap;
+    getSheetNameMap(): IUnitSheetNameMap;
 
     isForceCalculate(): boolean;
 
@@ -18,13 +18,13 @@ export interface IFormulaCurrentConfigService {
 
     registerFormulaData(formulaData: IFormulaData): void;
 
-    registerSheetNameMap(sheetNameMap: ISheetNameMap): void;
+    registerSheetNameMap(sheetNameMap: IUnitSheetNameMap): void;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
     private _unitData: IUnitData = {};
     private _formulaData: IFormulaData = {};
-    private _sheetNameMap: ISheetNameMap = {};
+    private _sheetNameMap: IUnitSheetNameMap = {};
 
     private _forceCalculate: boolean = false;
 
@@ -75,7 +75,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._formulaData = formulaData;
     }
 
-    registerSheetNameMap(sheetNameMap: ISheetNameMap) {
+    registerSheetNameMap(sheetNameMap: IUnitSheetNameMap) {
         this._sheetNameMap = sheetNameMap;
     }
 }

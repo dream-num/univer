@@ -28,6 +28,7 @@ import {
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../commands/commands/inline-format.command';
+import { RefillCommand } from '../commands/commands/refill.command';
 import { RenameSheetOperation } from '../commands/commands/rename.command';
 import {
     SetCopySelectionCommand,
@@ -229,6 +230,7 @@ export class SheetUIController extends Disposable {
             SetZoomRatioCommand,
             SetZoomRatioOperation,
             ShowMenuListCommand,
+            RefillCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });

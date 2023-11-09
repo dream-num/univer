@@ -104,7 +104,10 @@ export class SelectionShape {
     readonly selectionScaling$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
     readonly selectionScaled$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
     readonly selectionFilling$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
-    readonly selectionFilled$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
+
+    private readonly _selectionFilled$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
+
+    readonly selectionFilled$ = this._selectionFilled$.asObservable();
 
     private _defaultStyle!: ISelectionStyle;
 
@@ -211,6 +214,10 @@ export class SelectionShape {
 
     disableHeaderHighlight() {
         this._isHeaderHighlight = false;
+    }
+
+    refreshSelectionFilled(val: IRangeWithCoord) {
+        this._selectionFilled$.next(val);
     }
 
     /**

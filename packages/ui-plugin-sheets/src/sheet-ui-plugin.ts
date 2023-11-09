@@ -3,6 +3,7 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
 
 import { SHEET_UI_PLUGIN_NAME } from './Basics';
+import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
 import { SheetContextMenuController } from './controllers/contextmenu/contextmenu.controller';
@@ -25,6 +26,7 @@ import { SheetRenderController } from './controllers/sheet-render.controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
 import { ZoomController } from './controllers/zoom.controller';
 import { enUS } from './locale';
+import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 import { EditorBridgeService, IEditorBridgeService } from './services/editor-bridge.service';
@@ -63,6 +65,7 @@ export class SheetUIPlugin extends Plugin {
                 [ISheetBarService, { useClass: SheetBarService }],
                 [IFormatPainterService, { useClass: FormatPainterService }],
                 [ICellEditorManagerService, { useClass: CellEditorManagerService }],
+                [IAutoFillService, { useClass: AutoFillService }],
                 [ScrollManagerService],
                 [SheetSkeletonManagerService],
                 [
@@ -94,6 +97,7 @@ export class SheetUIPlugin extends Plugin {
                 [SheetUIController],
                 [StartEditController],
                 [ZoomController],
+                [AutoFillController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

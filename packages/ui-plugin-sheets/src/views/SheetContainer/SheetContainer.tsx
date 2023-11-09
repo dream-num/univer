@@ -2,6 +2,7 @@ import { ISheetUIPluginConfig } from '../../Basics';
 import { CountBar } from '../CountBar';
 import { EditorContainer } from '../EditorContainer/EditorContainer';
 import { FormulaBar } from '../FormulaBar/FormulaBar';
+import { OperateContainer } from '../OperateContainer';
 import { SheetBar } from '../SheetBar/SheetBar';
 import styles from './index.module.less';
 
@@ -32,6 +33,7 @@ export function RenderSheetContent() {
     return (
         <>
             <EditorContainer />
+            <OperateContainer />
         </>
     );
 }

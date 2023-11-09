@@ -86,7 +86,7 @@ export class LexerTreeBuilder extends Disposable {
         return this._currentLexerNode;
     }
 
-    treeBuilder(formulaString: string) {
+    treeBuilder(formulaString: string, transformSuffix = true) {
         this._resetCurrentLexerNode();
 
         this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
@@ -100,7 +100,9 @@ export class LexerTreeBuilder extends Disposable {
             this._currentLexerNode = node;
         }
 
-        this._suffixExpressionHandler(this._currentLexerNode);
+        if (transformSuffix) {
+            this._suffixExpressionHandler(this._currentLexerNode);
+        }
 
         return this._currentLexerNode;
     }

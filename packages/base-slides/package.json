@@ -44,7 +44,7 @@
     },
     "devDependencies": {
         "@types/node": "^20.8.9",
-        "@vitest/coverage-v8": "^0.34.6",
+        "@vitest/coverage-istanbul": "^0.34.6",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
         "vitest": "^0.34.6"

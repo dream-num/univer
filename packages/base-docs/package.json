@@ -52,7 +52,7 @@
     },
     "devDependencies": {
         "@types/node": "^20.8.9",
-        "@vitest/coverage-v8": "^0.34.6",
+        "@vitest/coverage-istanbul": "^0.34.6",
         "esbuild": "^0.19.5",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",

@@ -1,4 +1,10 @@
-import { IDesktopUIController, IMenuService, IShortcutService, IUIController } from '@univerjs/base-ui';
+import {
+    ComponentManager,
+    IDesktopUIController,
+    IMenuService,
+    IShortcutService,
+    IUIController,
+} from '@univerjs/base-ui';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
@@ -9,7 +15,9 @@ import { HelpFunctionOperation } from '../commands/operations/help-function.oper
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
-import { RenderFormulaContent } from '../views/FormulaContainer';
+import { RenderFormulaPromptContent } from '../views/FormulaPromptContainer';
+import { MORE_FUNCTIONS_COMPONENT } from '../views/MoreFunctions/interface';
+import { MoreFunctions } from '../views/MoreFunctions/MoreFunctions';
 import { InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory } from './menu';
 import { promptSelectionShortcutItem } from './shortcuts/prompt.shortcut';
 
@@ -20,7 +28,8 @@ export class FormulaController extends Disposable {
         @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @IUIController private readonly _uiController: IDesktopUIController
+        @IUIController private readonly _uiController: IDesktopUIController,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
 
@@ -59,7 +68,11 @@ export class FormulaController extends Disposable {
 
     private _registerComponents(): void {
         this.disposeWithMe(
-            this._uiController.registerContentComponent(() => connectInjector(RenderFormulaContent, this._injector))
+            this._uiController.registerContentComponent(() =>
+                connectInjector(RenderFormulaPromptContent, this._injector)
+            )
         );
+
+        this._componentManager.register(MORE_FUNCTIONS_COMPONENT, MoreFunctions);
     }
 }

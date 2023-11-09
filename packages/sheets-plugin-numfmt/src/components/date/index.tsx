@@ -13,9 +13,9 @@ export const DatePanel: FC<BusinessComponentProps> = (props) => {
     const [currentDate] = useState(() => new Date().toLocaleString());
 
     const preview = useMemo(() => {
-        const res = numfmt.parseDate(props.defaultValue || '') || numfmt.parseDate(currentDate);
+        const res = numfmt.parseDate(String(props.defaultValue) || '') || numfmt.parseDate(currentDate);
         if (res) {
-            return numfmt.format(suffix, res.v);
+            return numfmt.format(suffix, Number(res.v));
         }
         return '';
     }, [suffix, props.defaultValue]);

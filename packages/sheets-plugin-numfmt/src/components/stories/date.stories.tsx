@@ -15,14 +15,9 @@ export default meta;
 
 export const Test: StoryObj<SheetNumfmtPanelProps> = {
     args: {
-        initValue: '123',
-        initPattern: '',
-
-        onConfirm(pattern) {
+        value: { defaultPattern: '', defaultValue: 123123 },
+        onChange(pattern) {
             console.log(pattern);
-        },
-        onCancel() {
-            console.log('cancel');
         },
     },
 };

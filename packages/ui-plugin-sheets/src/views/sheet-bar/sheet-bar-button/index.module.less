@@ -6,6 +6,7 @@
     padding: 0;
     font-size: var(--font-size-base);
     background-color: transparent;
+    color: rgb(var(--text-color));
     border: none;
     border-radius: var(--border-radius-base);
     display: flex;
@@ -15,11 +16,12 @@
     cursor: pointer;
 
     &:not([disabled]):hover {
-        color: rgb(var(--text-color));
+        
         background-color: rgb(var(--bg-color-hover));
         border-color: transparent;
     }
     &[disabled] {
+        color: rgb(var(--grey-200));
         cursor: not-allowed;
     }
 }

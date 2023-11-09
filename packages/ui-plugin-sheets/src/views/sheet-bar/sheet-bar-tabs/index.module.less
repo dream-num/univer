@@ -1,12 +1,12 @@
-@tab-shadow:0px 0px 12px rgba(0, 0, 0, 0.2);
+@tab-shadow:0px 0px 8px rgba(0, 0, 0, 0.08);
+@padding-left-right: 6px;
 
 .slide-tab-bar-container {
     overflow: hidden;
 
     .slide-tab-bar {
         user-select: none;
-        width: 100%;
-        padding: var(--padding-xs) 0;
+        padding: var(--padding-xs) @padding-left-right;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -33,7 +33,7 @@ Tab Item, Put outside to be compatible with drag styles
         .slide-tab-span {
             white-space: nowrap;
             box-sizing: border-box;
-            padding: var(--padding-xs) var(--padding-base);
+            padding: var(--padding-xs) var(--padding-sm);
             border: 2px solid transparent;
             border-radius: var(--border-radius-base);
             

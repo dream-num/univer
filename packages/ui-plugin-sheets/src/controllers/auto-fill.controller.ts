@@ -221,10 +221,10 @@ export class AutoFillController extends Disposable {
         const rules = this._autoFillService.getRules();
         const copyData = [];
         const isVertical = direction === Direction.DOWN || direction === Direction.UP;
-        let a1;
-        let a2;
-        let b1;
-        let b2;
+        let a1: number;
+        let a2: number;
+        let b1: number;
+        let b2: number;
         if (isVertical) {
             a1 = copyStartColumn;
             a2 = copyEndColumn;

@@ -7,9 +7,9 @@ import { useEffect, useState } from 'react';
 
 import { ISheetBarService } from '../../services/sheetbar/sheetbar.service';
 import styles from './index.module.less';
-import { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
 import { SheetBarMenu } from './sheet-bar-menu/SheetBarMenu';
 import { SheetBarTabs } from './sheet-bar-tabs/SheetBarTabs';
+import { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
 
 const SCROLL_WIDTH = 100;
 

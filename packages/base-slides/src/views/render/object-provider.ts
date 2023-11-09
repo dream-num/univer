@@ -1,4 +1,4 @@
-import './Adaptors';
+import './adaptors';
 
 import { BaseObject, Scene } from '@univerjs/base-render';
 import { IPageElement, sortRules } from '@univerjs/core';

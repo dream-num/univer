@@ -1,10 +1,10 @@
 import { IMouseEvent, IPointerEvent, IRenderManagerService, SpreadsheetSkeleton } from '@univerjs/base-render';
 import {
+    convertSelectionDataToRange,
+    getNormalSelectionStyle,
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetSelectionsOperation,
-    convertSelectionDataToRange,
-    getNormalSelectionStyle,
     transformCellDataToSelectionData,
 } from '@univerjs/base-sheets';
 import {

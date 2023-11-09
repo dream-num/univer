@@ -1,9 +1,10 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { LocaleType } from '../../types/enum/locale-type';
-import { toDisposable, Disposable } from '../../shared/lifecycle';
-import { ILocales } from '../../shared/locale';
+
 import { Nullable } from '../../common/type-utils';
+import { Disposable, toDisposable } from '../../shared/lifecycle';
+import { ILocales } from '../../shared/locale';
 import { Tools } from '../../shared/tools';
+import { LocaleType } from '../../types/enum/locale-type';
 
 /**
  * get value from Locale object and key

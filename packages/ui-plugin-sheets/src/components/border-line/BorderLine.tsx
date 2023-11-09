@@ -1,6 +1,5 @@
 import { BorderStyleTypes } from '@univerjs/core';
 
-import { IBorderLineProps } from './interface';
 import { BorderDashDot } from './icons/BorderDashDot';
 import { BorderDashDotDot } from './icons/BorderDashDotDot';
 import { BorderDashed } from './icons/BorderDashed';
@@ -11,6 +10,7 @@ import { BorderMediumDashDotDot } from './icons/BorderMediumDashDotDot';
 import { BorderMediumDashed } from './icons/BorderMediumDashed';
 import { BorderThick } from './icons/BorderThick';
 import { BorderThin } from './icons/BorderThin';
+import { IBorderLineProps } from './interface';
 
 export function BorderLine(props: IBorderLineProps) {
     const { type = BorderStyleTypes.THIN } = props;

@@ -1,5 +1,5 @@
 import { SelectionManagerService } from '@univerjs/base-sheets';
-import { ICellData, IStyleData, IUniverInstanceService, ObjectMatrix, Disposable } from '@univerjs/core';
+import { Disposable, ICellData, IStyleData, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 

@@ -8,6 +8,12 @@ import {
     Viewport,
 } from '@univerjs/base-render';
 import {
+    getNormalSelectionStyle,
+    ISelectionStyle,
+    ISelectionWithCoordAndStyle,
+    ISelectionWithStyle,
+} from '@univerjs/base-sheets';
+import {
     IRange,
     IRangeWithCoord,
     ISelectionCell,
@@ -25,7 +31,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { SelectionRenderModel } from './selection-render-model';
 import { SelectionShape } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
-import { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle, getNormalSelectionStyle } from '@univerjs/base-sheets';
 
 export interface IControlFillConfig {
     oldRange: IRange;

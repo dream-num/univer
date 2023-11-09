@@ -130,7 +130,7 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     setForcedSheetId(sheetNameMap: IUnitSheetNameMap) {
-        this._forcedSheetId = sheetNameMap[this.getUnitId()][this._forcedSheetName];
+        this._forcedSheetId = sheetNameMap[this.getUnitId()]?.[this._forcedSheetName];
     }
 
     setForcedSheetIdDirect(sheetId: string) {

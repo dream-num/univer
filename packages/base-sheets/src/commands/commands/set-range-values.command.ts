@@ -19,7 +19,6 @@ import { IAccessor } from '@wendellhu/redi';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import {
     ISetRangeValuesMutationParams,
-    ISetRangeValuesRangeMutationParams,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from '../mutations/set-range-values.mutation';
@@ -109,7 +108,7 @@ export const SetRangeValuesCommand: ICommand = {
 
         const { undos, redos } = sheetInterceptorService.onCommandExecute({
             id: SetRangeValuesCommand.id,
-            params: { ...setRangeValuesMutationParams, range: currentSelections } as ISetRangeValuesRangeMutationParams,
+            params: { ...setRangeValuesMutationParams, range: currentSelections },
         });
 
         const result = sequenceExecute([...redos], commandService);

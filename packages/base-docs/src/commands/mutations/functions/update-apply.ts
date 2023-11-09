@@ -9,6 +9,7 @@ import {
     ITable,
     ITextRun,
     Nullable,
+    Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
@@ -23,6 +24,7 @@ import {
     insertParagraphs,
     insertTables,
     insertTextRuns,
+    normalizeTextRuns,
 } from './common';
 
 export function UpdateAttributeApply(
@@ -116,11 +118,27 @@ export function coverTextRuns(
         return updateDataTextRuns;
     }
 
+    updateDataTextRuns = Tools.deepClone(updateDataTextRuns);
+    removeTextRuns = Tools.deepClone(removeTextRuns);
+
     const newUpdateTextRun: ITextRun[] = [];
+    const updateLength = updateDataTextRuns.length;
+    const removeLength = removeTextRuns.length;
     let updateIndex = 0;
     let removeIndex = 0;
+    let pending: Nullable<ITextRun> = null;
 
-    while (updateIndex !== updateDataTextRuns.length && removeIndex !== removeTextRuns.length) {
+    function pushPendingAndReturnStatus() {
+        if (pending) {
+            newUpdateTextRun.push(pending);
+            pending = null;
+            return true;
+        }
+
+        return false;
+    }
+
+    while (updateIndex < updateDataTextRuns.length && removeIndex < removeTextRuns.length) {
         const { st: updateSt, ed: updateEd, ts: updateStyle } = updateDataTextRuns[updateIndex];
         const { st: removeSt, ed: removeEd, ts: removeStyle, sId } = removeTextRuns[removeIndex];
         let newTs;
@@ -131,24 +149,66 @@ export function coverTextRuns(
             newTs = { ...updateStyle, ...removeStyle };
         }
 
-        newUpdateTextRun.push({
-            st: updateSt >= removeSt ? updateSt : removeSt,
-            ed: updateEd >= removeEd ? removeEd : updateEd,
-            ts: newTs,
-            sId,
-        });
+        if (updateEd < removeSt) {
+            if (!pushPendingAndReturnStatus()) {
+                newUpdateTextRun.push(updateDataTextRuns[updateIndex]);
+            }
 
-        if (updateEd > removeEd) {
-            removeIndex++;
-        } else if (updateEd === removeEd) {
             updateIndex++;
+        } else if (removeEd < updateSt) {
+            if (!pushPendingAndReturnStatus()) {
+                newUpdateTextRun.push(removeTextRuns[removeIndex]);
+            }
+
             removeIndex++;
         } else {
-            updateIndex++;
+            newUpdateTextRun.push({
+                st: updateSt < removeSt ? updateSt : removeSt,
+                ed: updateSt < removeSt ? removeSt : updateSt,
+                ts: updateSt < removeSt ? { ...updateStyle } : { ...removeStyle },
+                sId: updateSt < removeSt ? undefined : sId,
+            });
+
+            newUpdateTextRun.push({
+                st: Math.max(updateSt, removeSt),
+                ed: Math.min(updateEd, removeEd),
+                ts: newTs,
+                sId,
+            });
+
+            if (updateEd < removeEd) {
+                updateIndex++;
+                removeTextRuns[removeIndex].st = updateEd;
+            } else {
+                removeIndex++;
+                updateDataTextRuns[updateIndex].st = removeEd;
+            }
+
+            pending = {
+                st: Math.min(updateEd, removeEd),
+                ed: Math.max(updateEd, removeEd),
+                ts: updateEd < removeEd ? { ...removeStyle } : { ...updateStyle },
+                sId: updateEd < removeEd ? sId : undefined,
+            };
         }
     }
 
-    return newUpdateTextRun;
+    pushPendingAndReturnStatus();
+
+    // If the last textRun is also disjoint, then the last textRun needs to be pushed in `newUpdateTextRun`
+    const tempTopTextRun = newUpdateTextRun[newUpdateTextRun.length - 1];
+    const updateLastTextRun = updateDataTextRuns[updateLength - 1];
+    const removeLastTextRun = removeTextRuns[removeLength - 1];
+
+    if (tempTopTextRun.ed !== Math.max(updateLastTextRun.ed, removeLastTextRun.ed)) {
+        if (updateLastTextRun.ed > removeLastTextRun.ed) {
+            newUpdateTextRun.push(updateLastTextRun);
+        } else {
+            newUpdateTextRun.push(removeLastTextRun);
+        }
+    }
+
+    return normalizeTextRuns(newUpdateTextRun);
 }
 
 function updateParagraphs(

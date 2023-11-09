@@ -46,6 +46,7 @@ describe('example', () => {
                 ed: 10,
                 ts: {
                     bl: BooleanNumber.TRUE,
+                    fs: 28,
                 },
             },
         ];
@@ -110,15 +111,43 @@ describe('example', () => {
             expect(needUpdateTextRuns.length).toBe(1);
             expect(needUpdateTextRuns[0].st).toBe(0);
             expect(needUpdateTextRuns[0].ed).toBe(10);
-            expect(needUpdateTextRuns[0].ts).toStrictEqual({ bl: BooleanNumber.TRUE });
+            expect(needUpdateTextRuns[0].ts?.bl).toBe(BooleanNumber.TRUE);
         });
 
-        it('it should be passed when the removeTextRuns is scattered', async () => {
+        it('it should be passed when the removeTextRuns are continuous', async () => {
+            const removeTextRuns = [
+                {
+                    st: 0,
+                    ed: 5,
+                    ts: {
+                        it: BooleanNumber.TRUE,
+                        bl: BooleanNumber.FALSE,
+                    },
+                },
+                {
+                    st: 5,
+                    ed: 10,
+                    ts: {
+                        it: BooleanNumber.FALSE,
+                        bl: BooleanNumber.FALSE,
+                    },
+                },
+            ];
+
+            const needUpdateTextRuns = coverTextRuns(updateTextRuns, removeTextRuns, UpdateDocsAttributeType.COVER);
+
+            expect(needUpdateTextRuns.length).toBe(2);
+            expect(needUpdateTextRuns[0]?.ts?.bl).toBe(BooleanNumber.TRUE);
+            expect(needUpdateTextRuns[1]?.ts?.bl).toBe(BooleanNumber.TRUE);
+        });
+
+        it('it should be passed when the removeTextRuns are scattered', async () => {
             const removeTextRuns = [
                 {
                     st: 3,
                     ed: 5,
                     ts: {
+                        it: BooleanNumber.TRUE,
                         bl: BooleanNumber.FALSE,
                     },
                 },
@@ -126,19 +155,118 @@ describe('example', () => {
                     st: 7,
                     ed: 9,
                     ts: {
+                        it: BooleanNumber.FALSE,
                         bl: BooleanNumber.FALSE,
                     },
                 },
             ];
 
             const needUpdateTextRuns = coverTextRuns(updateTextRuns, removeTextRuns, UpdateDocsAttributeType.COVER);
-            // console.log(JSON.stringify(needUpdateTextRuns, null, 2));
+
             expect(needUpdateTextRuns.length).toBe(5);
             expect(needUpdateTextRuns[0]?.ts?.bl).toBe(BooleanNumber.TRUE);
             expect(needUpdateTextRuns[1]?.ts?.bl).toBe(BooleanNumber.TRUE);
             expect(needUpdateTextRuns[2]?.ts?.bl).toBe(BooleanNumber.TRUE);
             expect(needUpdateTextRuns[3]?.ts?.bl).toBe(BooleanNumber.TRUE);
             expect(needUpdateTextRuns[4]?.ts?.bl).toBe(BooleanNumber.TRUE);
+        });
+
+        it('it should be pass the test when the removeTextRuns and updateTextRuns are both scattered', async () => {
+            const updateTextRuns = [
+                {
+                    st: 1,
+                    ed: 3,
+                    ts: {
+                        fs: 28,
+                        bl: BooleanNumber.TRUE,
+                    },
+                },
+                {
+                    st: 5,
+                    ed: 10,
+                    ts: {
+                        fs: 23,
+                        bl: BooleanNumber.FALSE,
+                    },
+                },
+            ];
+
+            const removeTextRuns = [
+                {
+                    st: 2,
+                    ed: 4,
+                    ts: {
+                        it: BooleanNumber.TRUE,
+                        bl: BooleanNumber.FALSE,
+                    },
+                },
+                {
+                    st: 6,
+                    ed: 8,
+                    ts: {
+                        it: BooleanNumber.FALSE,
+                        bl: BooleanNumber.TRUE,
+                    },
+                },
+            ];
+
+            const needUpdateTextRuns = coverTextRuns(updateTextRuns, removeTextRuns, UpdateDocsAttributeType.COVER);
+
+            expect(needUpdateTextRuns.length).toBe(6);
+            expect(needUpdateTextRuns[0]?.ts?.bl).toBe(BooleanNumber.TRUE);
+            expect(needUpdateTextRuns[1]?.ts?.bl).toBe(BooleanNumber.TRUE);
+            expect(needUpdateTextRuns[2]?.ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(needUpdateTextRuns[3]?.ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(needUpdateTextRuns[4]?.ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(needUpdateTextRuns[5]?.ts?.bl).toBe(BooleanNumber.FALSE);
+        });
+
+        it('it should be pass the test when the removeTextRuns and updateTextRuns are both scattered, and has no intersection', async () => {
+            const updateTextRuns = [
+                {
+                    st: 1,
+                    ed: 2,
+                    ts: {
+                        fs: 28,
+                        bl: BooleanNumber.TRUE,
+                    },
+                },
+                {
+                    st: 5,
+                    ed: 6,
+                    ts: {
+                        fs: 23,
+                        bl: BooleanNumber.FALSE,
+                    },
+                },
+            ];
+
+            const removeTextRuns = [
+                {
+                    st: 3,
+                    ed: 4,
+                    ts: {
+                        it: BooleanNumber.TRUE,
+                        bl: BooleanNumber.FALSE,
+                    },
+                },
+                {
+                    st: 7,
+                    ed: 8,
+                    ts: {
+                        it: BooleanNumber.FALSE,
+                        bl: BooleanNumber.TRUE,
+                    },
+                },
+            ];
+
+            const needUpdateTextRuns = coverTextRuns(updateTextRuns, removeTextRuns, UpdateDocsAttributeType.COVER);
+
+            expect(needUpdateTextRuns.length).toBe(4);
+            expect(needUpdateTextRuns[0]?.ts?.bl).toBe(BooleanNumber.TRUE);
+            expect(needUpdateTextRuns[1]?.ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(needUpdateTextRuns[2]?.ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(needUpdateTextRuns[3]?.ts?.bl).toBe(BooleanNumber.TRUE);
         });
     });
 });

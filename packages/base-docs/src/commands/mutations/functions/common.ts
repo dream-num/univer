@@ -13,7 +13,7 @@ import {
     sortRulesFactory,
 } from '@univerjs/core';
 
-function normalizeTextRuns(textRuns: ITextRun[]) {
+export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
 
     for (const textRun of textRuns) {

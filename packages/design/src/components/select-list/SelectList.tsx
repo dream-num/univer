@@ -16,6 +16,7 @@ export interface ISelectListProps {
     options?: Array<{
         label: string;
         value: string;
+        color?: string;
     }>;
 
     /**
@@ -50,7 +51,7 @@ export function SelectList(props: ISelectListProps) {
                                 {value === option.value && <CheckMarkSingle />}
                             </span>
                         )}
-                        {option.label}
+                        <span style={{ color: option.color }}>{option.label}</span>
                     </a>
                 </li>
             ))}

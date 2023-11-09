@@ -31,9 +31,12 @@
         }
     },
     "exports": {
-        ".": "./src/index.ts",
-        "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+      ".": {
+        "require": "./lib/univer-sheets-plugin-numfmt.cjs.js",
+        "default": "./lib/univer-sheets-plugin-numfmt.js"
+      },
+      "./*": "./lib/*",
+      "./locale/*": "./lib/locale/*.js"
     },
     "directories": {
         "lib": "lib"

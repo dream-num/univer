@@ -1,5 +1,6 @@
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorType } from '../basics/error-type';
+import { FUNCTION_NAMES } from '../basics/function';
 import { compareToken, OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../basics/token';
 import { BaseFunction } from '../functions/base-function';
 import { Compare } from '../functions/meta/compare';

@@ -3,6 +3,7 @@ import { IAccessor, Inject, Injector } from '@wendellhu/redi';
 import { LexerTreeBuilder } from '../analysis/lexer';
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorType } from '../basics/error-type';
+import { FUNCTION_NAMES } from '../basics/function';
 import { suffixToken } from '../basics/token';
 import { BaseFunction } from '../functions/base-function';
 import { ErrorValueObject } from '../other-object/error-value-object';

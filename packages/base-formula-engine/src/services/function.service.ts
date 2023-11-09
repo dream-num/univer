@@ -1,7 +1,7 @@
 import { Disposable, Nullable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import { IFunctionInfo } from '../basics/function';
+import { FUNCTION_NAMES, IFunctionInfo } from '../basics/function';
 import { BaseFunction } from '../functions/base-function';
 
 export interface IFunctionService {

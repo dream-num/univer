@@ -4,6 +4,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { LexerNode } from '../analysis/lexer-node';
 import { AstNodePromiseType } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
+import { FUNCTION_NAMES } from '../basics/function';
 import { prefixToken } from '../basics/token';
 import { BaseFunction } from '../functions/base-function';
 import { AsyncObject, FunctionVariantType } from '../reference-object/base-reference-object';

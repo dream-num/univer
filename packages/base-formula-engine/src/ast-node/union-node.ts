@@ -1,5 +1,6 @@
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorType } from '../basics/error-type';
+import { FUNCTION_NAMES } from '../basics/function';
 import { matchToken } from '../basics/token';
 import { BaseFunction } from '../functions/base-function';
 import { ErrorValueObject } from '../other-object/error-value-object';

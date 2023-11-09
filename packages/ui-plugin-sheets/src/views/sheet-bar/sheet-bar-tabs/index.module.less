@@ -1,13 +1,18 @@
+@padding: 6px;
+@tab-shadow:0px 0px 12px rgba(0, 0, 0, 0.2);
+
 .slide-tab-bar-container {
     overflow: hidden;
 
     .slide-tab-bar {
         user-select: none;
         width: 100%;
+        padding: @padding 0;
         display: flex;
         flex-direction: row;
         align-items: center;
         overflow: hidden;
+        box-shadow: inset 10px 0px 10px -10px rgba(0, 0, 0, 0.2), inset -10px 0px 10px -10px rgba(0, 0, 0, 0.2);
     }
 }
 
@@ -53,4 +58,5 @@ Tab Item, Put outside to be compatible with drag styles
         color: rgb(var(--primary-color));
         background-color: rgb(var(--bg-color-secondary));
         font-weight: 700;
+        box-shadow: @tab-shadow;
 }

@@ -1,7 +1,7 @@
 import { InsertSheetCommand } from '@univerjs/base-sheets';
 import { ICommandService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { IncreaseSingle, LeftTriangleSingle, RightTriangleSingle } from '@univerjs/icons';
+import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useEffect, useState } from 'react';
 
@@ -67,12 +67,12 @@ export const SheetBar = () => {
             <SheetBarTabs />
 
             {/* Scroll arrows */}
-            <div className={`${styles.sheetBarOptions} ${styles.sheetBarScrollButton}`}>
+            <div className={styles.sheetBarOptions}>
                 <Button type="text" size="small" disabled={leftScrollState} onClick={handleScrollLeft}>
-                    <LeftTriangleSingle />
+                    <MoreSingle style={{ transform: 'rotateZ(180deg)' }} />
                 </Button>
                 <Button type="text" size="small" disabled={rightScrollState} onClick={handleScrollRight}>
-                    <RightTriangleSingle />
+                    <MoreSingle />
                 </Button>
             </div>
         </div>

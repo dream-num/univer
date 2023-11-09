@@ -26,7 +26,7 @@
         "@univerjs/base-ui": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/icons": "^0.1.3",
+        "@univerjs/icons": "^0.1.7",
         "@univerjs/ui-plugin-sheets": "workspace:*",
         "@wendellhu/redi": "^0.12.10",
         "react": "^18.2.0",

@@ -16,7 +16,7 @@ import {
     IUniverInstanceService,
 } from '@univerjs/core';
 import { Button, Dropdown } from '@univerjs/design';
-import { CheckMarkSingle, ConvertSingle } from '@univerjs/icons';
+import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
@@ -126,19 +126,27 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
             overlay={
                 <ul className={styles.sheetBarMenu} style={{ ...style }}>
                     {menu.map((item) => (
-                        <li key={item.index} onClick={() => handleClick(item)} className={styles.sheetBarMenuItem}>
+                        <li
+                            key={item.index}
+                            onClick={() => handleClick(item)}
+                            className={
+                                item.selected
+                                    ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemSelect}`
+                                    : item.hidden
+                                    ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemHide}`
+                                    : styles.sheetBarMenuItem
+                            }
+                        >
                             <span className={styles.sheetBarMenuItemIcon}>
-                                {item.selected ? <CheckMarkSingle /> : ''}
+                                {item.selected ? (
+                                    <CheckMarkSingle />
+                                ) : item.hidden ? (
+                                    <EyelashSingle />
+                                ) : (
+                                    <CheckMarkSingle />
+                                )}
                             </span>
-                            <span
-                                className={
-                                    item.hidden
-                                        ? `${styles.sheetBarMenuItemTitle} ${styles.sheetBarMenuItemHide}`
-                                        : styles.sheetBarMenuItemTitle
-                                }
-                            >
-                                {item.label}
-                            </span>
+                            {item.label}
                         </li>
                     ))}
                 </ul>

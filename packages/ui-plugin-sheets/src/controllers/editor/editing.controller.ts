@@ -97,24 +97,26 @@ export class EditingController extends Disposable {
             },
         };
 
-        this._formulaEngineService
-            .execute('workbook-01', {
-                unitData: {
-                    'workbook-01': sheetData,
-                },
-                formulaData,
-                sheetNameMap: {},
-                forceCalculate: true,
-                updateRangeList: [],
-            })
-            .then((res) => {
-                console.log(res.sheetData, res.arrayFormulaData);
-            });
+        // this._formulaEngineService
+        //     .execute('workbook-01', {
+        //         unitData: {
+        //             'workbook-01': sheetData,
+        //         },
+        //         formulaData,
+        //         sheetNameMap: {},
+        //         forceCalculate: true,
+        //         updateRangeList: [],
+        //     })
+        //     .then((res) => {
+        //         console.log(res.sheetData, res.arrayFormulaData);
+        //     });
 
-        // console.log(
-        //     'calculate',
-        //     this._formulaEngineService.calculate('=1+REDUCE(1, A1:C2, LAMBDA(x,y,LAMBDA(a,b,a*b*a)(x,y)))')
-        // );
+        console.log(
+            'calculate',
+            this._formulaEngineService.calculate(
+                '=(sum(max(B1:C10,10, A4, A:A3, 3:3, A)*5-100+A3,((1+1)*2+5)/2,10, lambda(x,y, x*y*x)(sum(1,(1+2)*3),2))+lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+count(B1:C10,10*5-100))*5-100'
+            )
+        );
     }
 
     private _commandExecutedListener() {}

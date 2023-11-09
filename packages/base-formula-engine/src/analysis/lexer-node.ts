@@ -26,6 +26,10 @@ export class LexerNode {
 
     private _lambdaParameter: string = '';
 
+    private _startIndex: number = -1;
+
+    private _endIndex: number = -1;
+
     dispose() {
         this._children.forEach((node) => {
             if (!(typeof node === 'string')) {
@@ -89,6 +93,11 @@ export class LexerNode {
         this._token = token;
     }
 
+    setIndex(st: number, ed: number) {
+        this._startIndex = st;
+        this._endIndex = ed;
+    }
+
     changeToParent(newParentLexerNode: LexerNode) {
         const parentNode = this.getParent();
         if (parentNode) {
@@ -127,6 +136,8 @@ export class LexerNode {
         }
         return {
             token,
+            st: this._startIndex,
+            ed: this._endIndex,
             children: childrenSerialization,
         };
     }

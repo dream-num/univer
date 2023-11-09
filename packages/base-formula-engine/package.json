@@ -44,7 +44,7 @@
         "@wendellhu/redi": "^0.12.10"
     },
     "devDependencies": {
-        "@types/node": "^20.8.9",
+        "@types/node": "^20.9.0",
         "@vitest/coverage-istanbul": "^0.34.6",
         "esbuild": "^0.19.5",
         "less": "^4.2.0",

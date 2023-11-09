@@ -1,7 +1,7 @@
 // TODO@wzhudev: re-export from base-sheets
 import {
     DeltaColumnWidthCommand,
-    ISetRangeValuesMutationParams,
+    ISetRangeValuesRangeMutationParams,
     ISetStyleParams,
     ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowAutoHeightMutationParams,
@@ -77,7 +77,7 @@ export class AutoHeightController {
             this;
         // for intercept'SetRangeValuesCommand' command.
         sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: ISetRangeValuesMutationParams }) => {
+            getMutations: (command: { id: string; params: ISetRangeValuesRangeMutationParams }) => {
                 if (command.id !== SetRangeValuesCommand.id) {
                     return {
                         redos: [],

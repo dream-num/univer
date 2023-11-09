@@ -4,6 +4,7 @@ import {
     CommandType,
     IBorderData,
     IBorderStyleData,
+    ICellData,
     ICommand,
     ICommandService,
     IRange,
@@ -19,10 +20,10 @@ import { IAccessor } from '@wendellhu/redi';
 import { BorderStyleManagerService } from '../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import {
-    ISetBorderStylesMutationParams,
-    SetBorderStylesMutation,
-    SetBorderStylesUndoMutationFactory,
-} from '../mutations/set-border-styles.mutation';
+    ISetRangeValuesMutationParams,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+} from '../mutations/set-range-values.mutation';
 
 function forEach(range: IRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = range;
@@ -171,7 +172,7 @@ export const SetBorderCommand: ICommand = {
             endColumn: range.endColumn,
         };
 
-        const mr = new ObjectMatrix<IStyleData>();
+        const mr = new ObjectMatrix<ICellData>();
 
         const border: IBorderStyleData = {
             s: style,
@@ -206,18 +207,20 @@ export const SetBorderCommand: ICommand = {
 
                 if (rectangle) {
                     if (reserve) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
                         bdStyle = style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle;
                     }
                     mr.setValue(rectangle.startRow, rectangle.startColumn, {
-                        bd: bdStyle,
+                        s: {
+                            bd: bdStyle,
+                        },
                     });
                 } else {
                     if (reserve) {
-                        const style = mr.getValue(row, column);
+                        const style = mr.getValue(row, column)?.s as IStyleData;
                         bdStyle = style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle;
                     }
-                    mr.setValue(row, column, { bd: bdStyle });
+                    mr.setValue(row, column, { s: { bd: bdStyle } });
                 }
             });
         }
@@ -244,20 +247,24 @@ export const SetBorderCommand: ICommand = {
                 const rectangle = hasMerge(row, column);
                 if (rectangle) {
                     if (rectangle.endColumn !== range.endColumn) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
                         mr.setValue(row, column, {
-                            bd: style?.bd
-                                ? Object.assign(style.bd, { r: Tools.deepClone(border) })
-                                : { r: Tools.deepClone(border) },
+                            s: {
+                                bd: style?.bd
+                                    ? Object.assign(style.bd, { r: Tools.deepClone(border) })
+                                    : { r: Tools.deepClone(border) },
+                            },
                         });
                     }
                 } else {
                     if (column !== range.endColumn) {
-                        const style = mr.getValue(row, column);
+                        const style = mr.getValue(row, column)?.s as IStyleData;
                         mr.setValue(row, column, {
-                            bd: style?.bd
-                                ? Object.assign(style.bd, { r: Tools.deepClone(border) })
-                                : { r: Tools.deepClone(border) },
+                            s: {
+                                bd: style?.bd
+                                    ? Object.assign(style.bd, { r: Tools.deepClone(border) })
+                                    : { r: Tools.deepClone(border) },
+                            },
                         });
                     }
                 }
@@ -269,20 +276,24 @@ export const SetBorderCommand: ICommand = {
                 const rectangle = hasMerge(row, column);
                 if (rectangle) {
                     if (rectangle.endRow !== range.endRow) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
                         mr.setValue(row, column, {
-                            bd: style?.bd
-                                ? Object.assign(style.bd, { b: Tools.deepClone(border) })
-                                : { b: Tools.deepClone(border) },
+                            s: {
+                                bd: style?.bd
+                                    ? Object.assign(style.bd, { b: Tools.deepClone(border) })
+                                    : { b: Tools.deepClone(border) },
+                            },
                         });
                     }
                 } else {
                     if (row !== range.endRow) {
-                        const style = mr.getValue(row, column);
+                        const style = mr.getValue(row, column)?.s as IStyleData;
                         mr.setValue(row, column, {
-                            bd: style?.bd
-                                ? Object.assign(style.bd, { b: Tools.deepClone(border) })
-                                : { b: Tools.deepClone(border) },
+                            s: {
+                                bd: style?.bd
+                                    ? Object.assign(style.bd, { b: Tools.deepClone(border) })
+                                    : { b: Tools.deepClone(border) },
+                            },
                         });
                     }
                 }
@@ -304,83 +315,99 @@ export const SetBorderCommand: ICommand = {
                 if (rectangle) {
                     // Clear the right border of all columns except the last column
                     if (rectangle.endColumn !== range.endColumn) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
                         mr.setValue(row, column, {
-                            bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+                            },
                         });
                     }
                     // Clear the left border of all columns except the first column
                     if (rectangle.startColumn !== range.startColumn) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
                         mr.setValue(row, column, {
-                            bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
+                            },
                         });
                     }
                     // Clear all the bottom border except the last line
                     if (rectangle.endRow !== range.endRow) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
                         mr.setValue(row, column, {
-                            bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+                            },
                         });
                     }
                     // Clear the top border of all lines except the first line
                     if (rectangle.startRow !== range.startRow) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn);
+                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
                         mr.setValue(row, column, {
-                            bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
+                            },
                         });
                     }
                 } else {
                     // Clear the right border of all columns except the last column
                     if (column !== range.endColumn) {
-                        const style = mr.getValue(row, column);
+                        const style = mr.getValue(row, column)?.s as IStyleData;
                         mr.setValue(row, column, {
-                            bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+                            },
                         });
                     }
                     // Clear the left border of all columns except the first column
                     if (column !== range.startColumn) {
-                        const style = mr.getValue(row, column);
+                        const style = mr.getValue(row, column)?.s as IStyleData;
                         mr.setValue(row, column, {
-                            bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
+                            },
                         });
                     }
                     // Clear all the bottom border except the last line
                     if (row !== range.endRow) {
-                        const style = mr.getValue(row, column);
+                        const style = mr.getValue(row, column)?.s as IStyleData;
                         mr.setValue(row, column, {
-                            bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+                            },
                         });
                     }
                     // Clear the top border of all lines except the first line
                     if (row !== range.startRow) {
-                        const style = mr.getValue(row, column);
+                        const style = mr.getValue(row, column)?.s as IStyleData;
                         mr.setValue(row, column, {
-                            bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
+                            },
                         });
                     }
                 }
             });
         }
 
-        const setBorderStylesMutationParams: ISetBorderStylesMutationParams = {
+        const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             workbookId,
             worksheetId,
-            value: mr.getData(),
+            cellValue: mr.getData(),
         };
 
-        const undoSetBorderStylesMutationParams: ISetBorderStylesMutationParams = SetBorderStylesUndoMutationFactory(
+        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
             accessor,
-            setBorderStylesMutationParams
+            setRangeValuesMutationParams
         );
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.syncExecuteCommand(SetBorderStylesMutation.id, setBorderStylesMutationParams);
+        const result = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: workbookId,
-                undoMutations: [{ id: SetBorderStylesMutation.id, params: undoSetBorderStylesMutationParams }],
-                redoMutations: [{ id: SetBorderStylesMutation.id, params: setBorderStylesMutationParams }],
+                undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }],
+                redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }],
             });
 
             return true;

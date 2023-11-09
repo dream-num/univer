@@ -1,7 +1,6 @@
 import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
 import { MoveRowsMutation } from '../../commands/mutations/move-rows-cols.mutation';
 import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
-import { SetBorderStylesMutation } from '../../commands/mutations/set-border-styles.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../commands/mutations/set-col-visible.mutation';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../commands/mutations/set-row-visible.mutation';
@@ -30,4 +29,4 @@ export const COMMAND_LISTENER_SKELETON_CHANGE = [
     SetRowVisibleMutation.id,
 ];
 
-export const COMMAND_LISTENER_VALUE_CHANGE = [SetBorderStylesMutation.id, SetRangeValuesMutation.id];
+export const COMMAND_LISTENER_VALUE_CHANGE = [SetRangeValuesMutation.id];

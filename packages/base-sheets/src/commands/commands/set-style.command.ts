@@ -105,7 +105,6 @@ export const SetStyleCommand: ICommand<ISetStyleParams<unknown>> = {
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            range: ranges,
             worksheetId,
             workbookId,
             cellValue: cellValue.getMatrix(),

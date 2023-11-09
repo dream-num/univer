@@ -56,7 +56,6 @@ export const ClearSelectionAllCommand: ICommand = {
 
         // clear style and content
         const clearMutationParams: ISetRangeValuesMutationParams = {
-            range: selections,
             worksheetId,
             workbookId,
             cellValue: generateNullCellValue(selections),

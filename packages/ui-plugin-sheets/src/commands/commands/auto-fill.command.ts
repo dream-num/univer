@@ -66,7 +66,6 @@ export const AutoFillCommand: ICommand = {
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            range: [selectionRange],
             worksheetId,
             workbookId,
             cellValue: cellValue.getMatrix(),
@@ -170,7 +169,6 @@ export const AutoClearContentCommand: ICommand = {
         const { clearRange, selectionRange } = params;
 
         const clearMutationParams: ISetRangeValuesMutationParams = {
-            range: [clearRange],
             worksheetId,
             workbookId,
             cellValue: generateNullCellValue([clearRange]),

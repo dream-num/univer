@@ -265,7 +265,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const setRangeValuesParams: ISetRangeValuesMutationParams = {
             workbookId: target.workbookId,
             worksheetId: target.worksheetId,
-            range: [target.selection.range],
             cellValue,
         };
 

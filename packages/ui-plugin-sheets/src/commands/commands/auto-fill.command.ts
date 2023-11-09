@@ -22,7 +22,6 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     ObjectMatrixPrimitiveType,
-    sequenceExecute,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -143,8 +142,6 @@ export const AutoFillCommand: ICommand = {
                 unitID: workbookId,
                 undoMutations: undoSeq,
                 redoMutations: redoSeq,
-                undo: async () => sequenceExecute(undoSeq, commandService).result,
-                redo: async () => sequenceExecute(redoSeq, commandService).result,
             });
 
             return true;

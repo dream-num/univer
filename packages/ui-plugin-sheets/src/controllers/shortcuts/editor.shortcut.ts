@@ -1,6 +1,6 @@
 import { BreakLineCommand, DeleteLeftCommand } from '@univerjs/base-docs';
 import { DeviceInputEventType } from '@univerjs/base-render';
-import { IShortcutItem, KeyCode } from '@univerjs/base-ui';
+import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
 import { FOCUSING_EDITOR } from '@univerjs/core';
 
 import {
@@ -71,7 +71,7 @@ export const EditorCursorEscShortcut: IShortcutItem = {
 export const EditorBreakLineShortcut: IShortcutItem = {
     id: BreakLineCommand.id,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_EDITOR),
-    binding: KeyCode.ENTER,
+    binding: KeyCode.ENTER | MetaKeys.ALT,
 };
 
 export const EditorDeleteLeftShortcut: IShortcutItem = {

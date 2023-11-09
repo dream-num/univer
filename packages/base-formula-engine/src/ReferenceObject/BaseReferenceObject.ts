@@ -42,6 +42,12 @@ export class BaseReferenceObject extends ObjectClassType {
         super();
     }
 
+    override dispose(): void {
+        this._unitData = {};
+
+        this._runtimeData = {};
+    }
+
     getRangePosition() {
         let startRow = this._rangeData.startRow;
         let endRow = this._rangeData.endRow;

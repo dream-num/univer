@@ -4,6 +4,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { LexerNode } from '../Analysis/LexerNode';
 import { AstNodePromiseType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
+import { FUNCTION_NAMES } from '../Basics/Function';
 import { prefixToken } from '../Basics/Token';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { AsyncObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
@@ -104,7 +105,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         const prefix = tokenTrim.slice(0, 2);
         let sliceLength = 0;
         if (new RegExp(prefixToken.MINUS, 'g').test(prefix)) {
-            const functionExecutor = this._functionService.getExecutor('MINUS');
+            const functionExecutor = this._functionService.getExecutor(FUNCTION_NAMES.MINUS);
             minusPrefixNode = new PrefixNode(this._injector, prefixToken.MINUS, functionExecutor);
             sliceLength++;
         }

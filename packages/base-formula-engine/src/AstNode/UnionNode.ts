@@ -1,5 +1,6 @@
 import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
+import { FUNCTION_NAMES } from '../Basics/Function';
 import { matchToken } from '../Basics/Token';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -52,7 +53,7 @@ export class UnionNodeFactory extends BaseAstNodeFactory {
     }
 
     override create(param: string): BaseAstNode {
-        const functionExecutor = this._functionService.getExecutor(UNION_EXECUTOR_NAME);
+        const functionExecutor = this._functionService.getExecutor(FUNCTION_NAMES.UNION);
         if (!functionExecutor) {
             console.error(`No function ${param}`);
             return ErrorNode.create(ErrorType.NAME);

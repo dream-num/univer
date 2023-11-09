@@ -1,5 +1,6 @@
 import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
+import { FUNCTION_NAMES } from '../Basics/Function';
 import { compareToken, OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../Basics/Token';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { Compare } from '../Functions/meta/Compare';
@@ -62,19 +63,19 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
         let functionName = '';
         const tokenTrim = param;
         if (tokenTrim === operatorToken.PLUS) {
-            functionName = PLUS_EXECUTOR_NAME;
+            functionName = FUNCTION_NAMES.PLUS;
         } else if (tokenTrim === operatorToken.MINUS) {
-            functionName = MINUS_EXECUTOR_NAME;
+            functionName = FUNCTION_NAMES.MINUS;
         } else if (tokenTrim === operatorToken.MULTIPLY) {
-            functionName = MULTIPLY_EXECUTOR_NAME;
+            functionName = FUNCTION_NAMES.MULTIPLY;
         } else if (tokenTrim === operatorToken.DIVIDED) {
-            functionName = DIVIDED_EXECUTOR_NAME;
+            functionName = FUNCTION_NAMES.DIVIDED;
         } else if (tokenTrim === operatorToken.CONCATENATE) {
-            functionName = CONCATENATE_EXECUTOR_NAME;
+            functionName = FUNCTION_NAMES.CONCATENATE;
         } else if (tokenTrim === operatorToken.POWER) {
-            functionName = POWER_EXECUTOR_NAME;
+            functionName = FUNCTION_NAMES.POWER;
         } else if (OPERATOR_TOKEN_COMPARE_SET.has(tokenTrim)) {
-            functionName = COMPARE_EXECUTOR_NAME;
+            functionName = FUNCTION_NAMES.COMPARE;
         }
 
         const functionExecutor = this._functionService.getExecutor(functionName);

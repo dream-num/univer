@@ -11,6 +11,7 @@ export { Dropdown, type IDropdownProps } from './components/dropdown';
 export { type IInputProps, Input } from './components/input';
 export { type IInputNumberProps, InputNumber } from './components/input-number';
 export { Content, Footer, Header, type ILayoutProps, Layout, Sider } from './components/layout';
+export { Menu, MenuItem, SubMenu } from './components/menu';
 export { type IMessageMethodOptions, type IMessageProps, Message, MessageType } from './components/message';
 export { type IRadioProps, Radio } from './components/radio';
 export { type IRadioGroupProps, RadioGroup } from './components/radio-group';

@@ -9,6 +9,7 @@ import { enUS } from './locale';
 import { FormulaDataModel, IFormulaConfig } from './models/formula-data.model';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 
+// TODO@Dushusir: user config IFunctionInfo, we will register all function info in formula engine
 export class FormulaPlugin extends Plugin {
     static override type = PluginType.Sheet;
 

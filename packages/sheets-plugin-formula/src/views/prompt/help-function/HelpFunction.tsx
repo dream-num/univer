@@ -1,3 +1,4 @@
+import { IFunctionInfo, IFunctionParam } from '@univerjs/base-formula-engine';
 import { LocaleService } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
@@ -5,7 +6,6 @@ import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { IFunctionInfo, IFunctionParam } from '../../../services/function-list';
 import { IFormulaPromptService, IHelpFunctionCommandParams } from '../../../services/prompt.service';
 import styles from './index.module.less';
 

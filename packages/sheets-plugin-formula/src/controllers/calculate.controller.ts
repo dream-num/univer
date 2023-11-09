@@ -55,7 +55,7 @@ export class CalculateController extends Disposable {
         const { params } = command;
         if (!params) return;
 
-        const { range, worksheetId: sheetId, workbookId: unitId, cellValue } = params;
+        const { worksheetId: sheetId, workbookId: unitId, cellValue } = params;
         if (cellValue == null) return;
 
         const formulaData = Tools.deepClone(this._formulaDataModel.getFormulaData());
@@ -142,7 +142,6 @@ export class CalculateController extends Disposable {
                 sheetIds.forEach((sheetId) => {
                     const cellData = sheetData[sheetId];
                     const setRangeValuesMutation: ISetRangeValuesMutationParams = {
-                        range: [],
                         worksheetId: sheetId,
                         workbookId: unitId,
                         cellValue: cellData.getData(),

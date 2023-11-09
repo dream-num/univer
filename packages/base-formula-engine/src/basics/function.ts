@@ -66,6 +66,11 @@ export interface IFunctionInfo {
     functionName: string;
 
     /**
+     * Alias function name
+     */
+    aliasFunctionName?: string;
+
+    /**
      * Function type
      */
     functionType: FunctionType;

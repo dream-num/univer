@@ -1,17 +1,10 @@
-import { FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
 import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
 import { BaseValueObject } from '../ValueObject/BaseValueObject';
 import { NumberValueObject } from '../ValueObject/PrimitiveObject';
 import { BaseFunction } from './BaseFunction';
 
-const FUNCTION_NAME = 'COUNT';
-
 export class Count extends BaseFunction {
-    override get name() {
-        return FUNCTION_NAME;
-    }
-
     override calculate(...variants: FunctionVariantType[]) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
@@ -31,5 +24,3 @@ export class Count extends BaseFunction {
         return accumulatorAll;
     }
 }
-
-FORMULA_FUNCTION_REGISTRY.add(FUNCTION_NAME, Count.create());

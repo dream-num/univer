@@ -1,18 +1,11 @@
 import { ErrorType } from '../../Basics/ErrorType';
-import { FORMULA_FUNCTION_REGISTRY } from '../../Basics/Registry';
 import { compareToken } from '../../Basics/Token';
 import { ErrorValueObject } from '../../OtherObject/ErrorValueObject';
 import { BaseReferenceObject, FunctionVariantType } from '../../ReferenceObject/BaseReferenceObject';
 import { BaseFunction } from '../BaseFunction';
 
-const FUNCTION_NAME = 'UNION';
-
 export class Union extends BaseFunction {
     private _compareType: compareToken = compareToken.EQUALS;
-
-    override get name() {
-        return FUNCTION_NAME;
-    }
 
     setCompareType(token: compareToken) {
         this._compareType = token;
@@ -44,5 +37,3 @@ export class Union extends BaseFunction {
         return ErrorValueObject.create(ErrorType.REF);
     }
 }
-
-FORMULA_FUNCTION_REGISTRY.add(FUNCTION_NAME, Union.create());

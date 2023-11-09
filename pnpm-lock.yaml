@@ -1113,6 +1113,9 @@ importers:
       '@univerjs/base-docs':
         specifier: workspace:*
         version: link:../base-docs
+      '@univerjs/base-formula-engine':
+        specifier: workspace:*
+        version: link:../base-formula-engine
       '@univerjs/base-render':
         specifier: workspace:*
         version: link:../base-render

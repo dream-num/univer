@@ -1,6 +1,6 @@
 import { CellValueType, ICellData, IRange, Nullable } from '@univerjs/core';
 
-import { SheetNameMapType, UnitDataType } from '../Basics/Common';
+import { IRuntimeUnitDataType, ISheetNameMap, IUnitData } from '../Basics/Common';
 import { ERROR_TYPE_SET, ErrorType } from '../Basics/ErrorType';
 import { ObjectClassType } from '../Basics/ObjectClassType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -26,7 +26,7 @@ export class BaseReferenceObject extends ObjectClassType {
         endColumn: -1,
     };
 
-    private _unitData: UnitDataType = {};
+    private _unitData: IUnitData = {};
 
     private _rowCount: number = 0;
 
@@ -36,7 +36,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _forcedUnitId: string = '';
 
-    private _runtimeData: UnitDataType = {};
+    private _runtimeData: IRuntimeUnitDataType = {};
 
     constructor(private _token: string) {
         super();
@@ -129,7 +129,7 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._forcedUnitId;
     }
 
-    setForcedSheetId(sheetNameMap: SheetNameMapType) {
+    setForcedSheetId(sheetNameMap: ISheetNameMap) {
         this._forcedSheetId = sheetNameMap[this._forcedSheetName];
     }
 
@@ -169,7 +169,7 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._unitData;
     }
 
-    setUnitData(unitData: UnitDataType) {
+    setUnitData(unitData: IUnitData) {
         this._unitData = unitData;
     }
 
@@ -177,24 +177,16 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._runtimeData;
     }
 
-    setRuntimeData(runtimeData: UnitDataType) {
+    setRuntimeData(runtimeData: IRuntimeUnitDataType) {
         this._runtimeData = runtimeData;
     }
 
     getRowCount() {
-        return this._rowCount;
-    }
-
-    setRowCount(rowCount: number) {
-        this._rowCount = rowCount;
+        return this.getCurrentActiveSheetData().rowCount;
     }
 
     getColumnCount() {
-        return this._columnCount;
-    }
-
-    setColumnCount(columnCount: number) {
-        this._columnCount = columnCount;
+        return this.getCurrentActiveSheetData().columnCount;
     }
 
     isCell() {
@@ -267,7 +259,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
         const activeRuntimeData = this.getCurrentRuntimeSheetData();
 
-        return activeRuntimeData?.getValue(row, column) || activeSheetData.getValue(row, column);
+        return activeRuntimeData?.getValue(row, column) || activeSheetData.cellData.getValue(row, column);
     }
 
     getCellByPosition(row?: number, column?: number) {

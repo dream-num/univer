@@ -1,15 +1,15 @@
 import { Nullable } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { LexerNode } from '../Analysis/LexerNode';
 import { AstNodePromiseType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { prefixToken } from '../Basics/Token';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { AsyncObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
+import { IFunctionService } from '../Service/function.service';
 import { BaseAstNode, ErrorNode } from './BaseAstNode';
-import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 import { PrefixNode } from './PrefixNode';
 
@@ -73,12 +73,19 @@ export class FunctionNode extends BaseAstNode {
 }
 
 export class FunctionNodeFactory extends BaseAstNodeFactory {
-    override get zIndex() {
-        return NODE_ORDER_MAP.get(NodeType.FUNCTION) || 100;
+    constructor(
+        @IFunctionService private readonly _functionService: IFunctionService,
+        @Inject(Injector) private readonly _injector: Injector
+    ) {
+        super();
     }
 
-    override create(token: string, parserDataLoader: ParserDataLoader): BaseAstNode {
-        const functionExecutor = parserDataLoader.getExecutor(token);
+    override get zIndex() {
+        return NODE_ORDER_MAP.get(NodeType.FUNCTION) || DEFAULT_AST_NODE_FACTORY_Z_INDEX;
+    }
+
+    override create(token: string): BaseAstNode {
+        const functionExecutor = this._functionService.getExecutor(token);
         if (!functionExecutor) {
             console.error(`No function ${token}`);
             return ErrorNode.create(ErrorType.NAME);
@@ -86,7 +93,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         return new FunctionNode(token, functionExecutor);
     }
 
-    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override checkAndCreateNodeType(param: LexerNode | string) {
         if (typeof param === 'string') {
             return;
         }
@@ -97,13 +104,13 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         const prefix = tokenTrim.slice(0, 2);
         let sliceLength = 0;
         if (new RegExp(prefixToken.MINUS, 'g').test(prefix)) {
-            const functionExecutor = parserDataLoader.getExecutor('MINUS');
-            minusPrefixNode = new PrefixNode(prefixToken.MINUS, functionExecutor);
+            const functionExecutor = this._functionService.getExecutor('MINUS');
+            minusPrefixNode = new PrefixNode(this._injector, prefixToken.MINUS, functionExecutor);
             sliceLength++;
         }
 
         if (new RegExp(prefixToken.AT, 'g').test(prefix)) {
-            atPrefixNode = new PrefixNode(prefixToken.AT);
+            atPrefixNode = new PrefixNode(this._injector, prefixToken.AT);
             if (minusPrefixNode) {
                 // minusPrefixNode.addChildren(atPrefixNode);
                 atPrefixNode.setParent(minusPrefixNode);
@@ -115,8 +122,8 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             tokenTrim = tokenTrim.slice(sliceLength);
         }
 
-        if (parserDataLoader?.hasExecutor(tokenTrim)) {
-            const functionNode = this.create(tokenTrim, parserDataLoader);
+        if (this._functionService.hasExecutor(tokenTrim)) {
+            const functionNode = this.create(tokenTrim);
             if (atPrefixNode) {
                 functionNode.setParent(atPrefixNode);
                 // return atPrefixNode;
@@ -129,4 +136,4 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
     }
 }
 
-FORMULA_AST_NODE_REGISTRY.add(new FunctionNodeFactory());
+// FORMULA_AST_NODE_REGISTRY.add(new FunctionNodeFactory());

@@ -1,13 +1,12 @@
 import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { matchToken } from '../Basics/Token';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
+import { IFunctionService } from '../Service/function.service';
 import { BaseAstNode, ErrorNode } from './BaseAstNode';
-import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 const UNION_EXECUTOR_NAME = 'UNION';
@@ -44,12 +43,16 @@ export class UnionNode extends BaseAstNode {
 }
 
 export class UnionNodeFactory extends BaseAstNodeFactory {
-    override get zIndex() {
-        return NODE_ORDER_MAP.get(NodeType.UNION) || 100;
+    constructor(@IFunctionService private readonly _functionService: IFunctionService) {
+        super();
     }
 
-    override create(param: string, parserDataLoader: ParserDataLoader): BaseAstNode {
-        const functionExecutor = parserDataLoader.getExecutor(UNION_EXECUTOR_NAME);
+    override get zIndex() {
+        return NODE_ORDER_MAP.get(NodeType.UNION) || DEFAULT_AST_NODE_FACTORY_Z_INDEX;
+    }
+
+    override create(param: string): BaseAstNode {
+        const functionExecutor = this._functionService.getExecutor(UNION_EXECUTOR_NAME);
         if (!functionExecutor) {
             console.error(`No function ${param}`);
             return ErrorNode.create(ErrorType.NAME);
@@ -57,7 +60,7 @@ export class UnionNodeFactory extends BaseAstNodeFactory {
         return new UnionNode(param, functionExecutor);
     }
 
-    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override checkAndCreateNodeType(param: LexerNode | string) {
         if (!(param instanceof LexerNode)) {
             return;
         }
@@ -74,8 +77,6 @@ export class UnionNodeFactory extends BaseAstNodeFactory {
             return;
         }
 
-        return this.create(tokenTrim, parserDataLoader);
+        return this.create(tokenTrim);
     }
 }
-
-FORMULA_AST_NODE_REGISTRY.add(new UnionNodeFactory());

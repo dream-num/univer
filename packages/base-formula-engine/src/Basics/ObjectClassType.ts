@@ -1,4 +1,6 @@
-export class ObjectClassType {
+import { Disposable } from '@univerjs/core';
+
+export class ObjectClassType extends Disposable {
     isErrorObject() {
         return false;
     }

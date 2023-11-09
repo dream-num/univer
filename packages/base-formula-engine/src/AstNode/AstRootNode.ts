@@ -1,8 +1,7 @@
 import { LexerNode } from '../Analysis/LexerNode';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { DEFAULT_TOKEN_TYPE_ROOT } from '../Basics/TokenType';
 import { BaseAstNode } from './BaseAstNode';
-import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class AstRootNode extends BaseAstNode {
@@ -45,7 +44,7 @@ export class AstRootNode extends BaseAstNode {
 
 export class AstRootNodeFactory extends BaseAstNodeFactory {
     override get zIndex() {
-        return NODE_ORDER_MAP.get(NodeType.ROOT) || 100;
+        return NODE_ORDER_MAP.get(NodeType.ROOT) || DEFAULT_AST_NODE_FACTORY_Z_INDEX;
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {
@@ -59,4 +58,4 @@ export class AstRootNodeFactory extends BaseAstNodeFactory {
     }
 }
 
-FORMULA_AST_NODE_REGISTRY.add(new AstRootNodeFactory());
+// FORMULA_AST_NODE_REGISTRY.add(new AstRootNodeFactory());

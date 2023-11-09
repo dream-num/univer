@@ -1,23 +1,8 @@
-import { BooleanNumber, ICellData, IRange, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
-
-export type SheetDataType = { [sheetId: string]: ObjectMatrix<ICellData> };
-
-export type UnitDataType = { [unitId: string]: SheetDataType };
+import { BooleanNumber, ICellData, IRange, IUnitRange, ObjectMatrix, ObjectMatrixPrimitiveType } from '@univerjs/core';
 
 export type ArrayFormulaDataType = { [sheetId: string]: ObjectMatrix<IRange> };
 
 export type UnitArrayFormulaDataType = { [unitId: string]: ArrayFormulaDataType };
-
-export interface IFormulaData {
-    formula: string; // formulaString
-    row: number;
-    column: number;
-    sheetId: string;
-}
-
-export type FormulaDataType = { [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaData> } };
-
-export type SheetNameMapType = { [sheetName: string]: string };
 
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
 
@@ -37,23 +22,50 @@ export enum AstNodePromiseType {
     ERROR,
 }
 
-export enum TableOptionType {
-    ALL = '#All',
-    DATA = '#Data',
-    HEADERS = '#Headers',
-    TOTALS = '#Totals',
-}
-
-export interface IInterpreterDatasetConfig {
-    unitData: UnitDataType;
-    formulaData: FormulaDataType;
-    sheetNameMap: SheetNameMapType;
-    currentRow: number;
-    currentColumn: number;
-    currentSheetId: string;
-    currentUnitId: string;
+export type ISheetItem = {
+    cellData: ObjectMatrix<ICellData>;
     rowCount: number;
     columnCount: number;
+};
+
+export interface ISheetData {
+    [sheetId: string]: ISheetItem;
+}
+
+/**
+ * The subset of workbook data needs to be assembled into a new reference object when being passed in,
+ * and then input through the FormulaCurrentConfigService.
+ */
+export interface IUnitData {
+    [unitId: string]: ISheetData;
+}
+
+export interface IRuntimeSheetData {
+    [sheetId: string]: ObjectMatrix<ICellData>;
+}
+
+export interface IRuntimeUnitDataType {
+    [unitId: string]: IRuntimeSheetData;
+}
+
+export interface ISheetNameMap {
+    [sheetName: string]: string;
+}
+
+/**
+ * @f  formulaString, the text string of the formula.
+ * @si The formula ID can be utilized in scenarios such as copy-pasting and drag-filling to convert formulas into references, eliminating the need for recreating the formulaString.
+ */
+export interface IFormulaDataItem {
+    f: string; // formulaString
+    si: string; // formulaId,
+    // row: number;
+    // column: number;
+    // sheetId: string;
+}
+
+export interface IFormulaData {
+    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaDataItem> };
 }
 
 export interface ISuperTable {
@@ -61,6 +73,21 @@ export interface ISuperTable {
     hasCustomTitle: BooleanNumber;
     titleMap: Map<string, number>;
     range: IRange;
+}
+
+export enum TableOptionType {
+    ALL = '#All',
+    DATA = '#Data',
+    HEADERS = '#Headers',
+    TOTALS = '#Totals',
+}
+
+export interface IFormulaDatasetConfig {
+    unitData: IUnitData;
+    formulaData: IFormulaData;
+    sheetNameMap: ISheetNameMap;
+    forceCalculate: boolean;
+    updateRangeList: IUnitRange[];
 }
 
 export enum ConcatenateType {

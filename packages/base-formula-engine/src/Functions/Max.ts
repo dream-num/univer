@@ -1,4 +1,3 @@
-import { FORMULA_FUNCTION_REGISTRY } from '../Basics/Registry';
 import { compareToken } from '../Basics/Token';
 import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
@@ -6,13 +5,7 @@ import { BaseValueObject } from '../ValueObject/BaseValueObject';
 import { BooleanValueObject, NumberValueObject } from '../ValueObject/PrimitiveObject';
 import { BaseFunction } from './BaseFunction';
 
-const FUNCTION_NAME = 'MAX';
-
 export class Max extends BaseFunction {
-    override get name() {
-        return FUNCTION_NAME;
-    }
-
     override calculate(...variants: FunctionVariantType[]) {
         let accumulatorAll: BaseValueObject = new NumberValueObject(-Infinity);
         for (let i = 0; i < variants.length; i++) {
@@ -43,5 +36,3 @@ export class Max extends BaseFunction {
         return accumulatorAll;
     }
 }
-
-FORMULA_FUNCTION_REGISTRY.add(FUNCTION_NAME, Max.create());

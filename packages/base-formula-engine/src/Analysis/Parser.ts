@@ -1,57 +1,69 @@
-import '../AstNode';
+import { Disposable, Nullable, sortRules } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
-import { Nullable } from '@univerjs/core';
-
-import { AstRootNode } from '../AstNode/AstRootNode';
+import { AstRootNode, AstRootNodeFactory } from '../AstNode/AstRootNode';
 import { BaseAstNode, ErrorNode } from '../AstNode/BaseAstNode';
-import { BaseAstNodeFactory } from '../AstNode/BaseAstNodeFactory';
-import { LambdaNode } from '../AstNode/LambdaNode';
-import { LambdaRuntime } from '../AstNode/LambdaRuntime';
+import { FunctionNodeFactory } from '../AstNode/FunctionNode';
+import { LambdaNode, LambdaNodeFactory } from '../AstNode/LambdaNode';
+import { LambdaParameterNodeFactory } from '../AstNode/LambdaParameterNode';
 import { NodeType } from '../AstNode/NodeType';
+import { OperatorNodeFactory } from '../AstNode/OperatorNode';
+import { PrefixNodeFactory } from '../AstNode/PrefixNode';
+import { ReferenceNodeFactory } from '../AstNode/ReferenceNode';
+import { SuffixNodeFactory } from '../AstNode/SuffixNode';
+import { UnionNodeFactory } from '../AstNode/UnionNode';
+import { ValueNodeFactory } from '../AstNode/ValueNode';
 import { ErrorType } from '../Basics/ErrorType';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import {
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../Basics/TokenType';
+import { IFormulaRuntimeService } from '../Service/runtime.service';
 import { LexerNode } from './LexerNode';
 
-export class AstTreeMaker {
-    static maker: AstTreeMaker = new AstTreeMaker();
+export class AstTreeBuilder extends Disposable {
+    private _astNodeFactoryList: AstRootNodeFactory[] = [];
 
-    private _parserDataLoader = new ParserDataLoader();
+    constructor(
+        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
+        @Inject(AstRootNodeFactory) private readonly _astRootNodeFactory: AstRootNodeFactory,
+        @Inject(FunctionNodeFactory) private readonly _functionNodeFactory: FunctionNodeFactory,
+        @Inject(LambdaNodeFactory) private readonly _lambdaNodeFactory: LambdaNodeFactory,
+        @Inject(LambdaParameterNodeFactory) private readonly _lambdaParameterNodeFactory: LambdaParameterNodeFactory,
+        @Inject(OperatorNodeFactory) private readonly _operatorNodeFactory: OperatorNodeFactory,
+        @Inject(PrefixNodeFactory) private readonly _prefixNodeFactory: PrefixNodeFactory,
+        @Inject(ReferenceNodeFactory) private readonly _referenceNodeFactory: ReferenceNodeFactory,
+        @Inject(SuffixNodeFactory) private readonly _suffixNodeFactory: SuffixNodeFactory,
+        @Inject(UnionNodeFactory) private readonly _unionNodeFactory: UnionNodeFactory,
+        @Inject(ValueNodeFactory) private readonly _valueNodeFactory: ValueNodeFactory
+    ) {
+        super();
 
-    private _astNodeFactoryList: BaseAstNodeFactory[] = [];
+        this._initializeAstNode();
+    }
 
-    static create() {
-        if (!this.maker) {
-            this.maker = new AstTreeMaker();
-            this.maker._parserDataLoader.initialize();
-        }
+    override dispose(): void {
+        this._astNodeFactoryList.forEach((nodeFactory) => {
+            nodeFactory.dispose();
+        });
 
-        return this.maker;
+        this._astNodeFactoryList = [];
     }
 
     parse(lexerNode: LexerNode) {
-        this._astNodeFactoryList = FORMULA_AST_NODE_REGISTRY.getData() as BaseAstNodeFactory[];
-        this._parserDataLoader.setLambdaRuntime(new LambdaRuntime());
         const astNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
+
         const node = this._parse(lexerNode, astNode);
         return node;
-    }
-
-    getDataLoader() {
-        return this._parserDataLoader;
     }
 
     private _lambdaParameterHandler(lexerNode: LexerNode, parent: LambdaNode) {
         const lambdaId = parent.getLambdaId();
         const parentAstNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
 
-        const lambdaRuntime = this._parserDataLoader.getLambdaRuntime();
-        const currentLambdaPrivacyVar = lambdaRuntime?.getCurrentPrivacyVar(lambdaId);
+        // const lambdaRuntime = this._parserDataLoader.getLambdaRuntime();
+        const currentLambdaPrivacyVar = this._runtimeService.getLambdaPrivacyVar(lambdaId);
 
         if (!currentLambdaPrivacyVar) {
             return false;
@@ -64,9 +76,9 @@ export class AstTreeMaker {
 
         for (let i = 0; i < childrenCount; i++) {
             const item = children[i];
-            let astNode: Nullable<BaseAstNode> = null;
+
             if (item instanceof LexerNode) {
-                astNode = this._parse(item, parentAstNode);
+                this._parse(item, parentAstNode);
             } else {
                 return false;
             }
@@ -96,7 +108,6 @@ export class AstTreeMaker {
         return parent;
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _parse(lexerNode: LexerNode, parent: BaseAstNode): Nullable<BaseAstNode> {
         const children = lexerNode.getChildren();
         const childrenCount = children.length;
@@ -109,7 +120,7 @@ export class AstTreeMaker {
             if (lexerNode.getToken() === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
                 let resultNode: BaseAstNode | false = this._lambdaParameterHandler(lexerNode, parent as LambdaNode);
                 if (resultNode === false) {
-                    // console.log('error1', resultNode, currentAstNode, lexerNode);
+                    console.log('error1', resultNode, currentAstNode, lexerNode);
                     resultNode = ErrorNode.create(ErrorType.ERROR);
                 }
 
@@ -118,14 +129,14 @@ export class AstTreeMaker {
 
             currentAstNode = this._checkAstNode(lexerNode);
             if (currentAstNode == null) {
-                // console.log('error2', currentAstNode, lexerNode);
+                console.log('error2', currentAstNode, lexerNode);
                 return ErrorNode.create(ErrorType.ERROR);
             }
 
             // currentAstNode.setParent(parent);
             // parent.addChildren(currentAstNode);
         }
-        // console.log('currentAstNode', currentAstNode.nodeType, currentAstNode, lexerNode);
+        console.log('currentAstNode', currentAstNode.nodeType, currentAstNode, lexerNode);
         for (let i = 0; i < childrenCount; i++) {
             if (
                 currentAstNode.nodeType === NodeType.LAMBDA &&
@@ -148,7 +159,7 @@ export class AstTreeMaker {
             }
 
             if (astNode == null) {
-                // console.log('error3', astNode, currentAstNode, lexerNode);
+                console.log('error3', astNode, currentAstNode, lexerNode);
                 return ErrorNode.create(ErrorType.ERROR);
             }
 
@@ -156,7 +167,7 @@ export class AstTreeMaker {
             if (astNode == null) {
                 return;
             }
-            // console.log('bugfix1', astNode, astNode.nodeType, currentAstNode, lexerNode);
+            console.log('bugfix1', astNode, astNode.nodeType, currentAstNode, lexerNode);
             switch (astNode.nodeType) {
                 case NodeType.ERROR:
                     return astNode;
@@ -175,14 +186,14 @@ export class AstTreeMaker {
                     if (parameterNode2) {
                         parameterNode2.setParent(astNode);
                     } else {
-                        // console.log('error4', currentAstNode, lexerNode, children, i);
+                        console.log('error4', currentAstNode, lexerNode, children, i);
                         return ErrorNode.create(ErrorType.ERROR);
                     }
 
                     if (parameterNode1) {
                         parameterNode1.setParent(astNode);
                     } else {
-                        // console.log('error5', currentAstNode, lexerNode, children, i);
+                        console.log('error5', currentAstNode, lexerNode, children, i);
                         return ErrorNode.create(ErrorType.ERROR);
                     }
 
@@ -225,7 +236,7 @@ export class AstTreeMaker {
         const astNodeFactoryListCount = this._astNodeFactoryList.length;
         for (let x = 0; x < astNodeFactoryListCount; x++) {
             const astNodeFactory = this._astNodeFactoryList[x];
-            astNode = astNodeFactory.checkAndCreateNodeType(item, this._parserDataLoader);
+            astNode = astNodeFactory.checkAndCreateNodeType(item);
             if (astNode != null) {
                 break;
             }
@@ -234,5 +245,18 @@ export class AstTreeMaker {
         return astNode;
     }
 
-    private _findTopNode() {}
+    private _initializeAstNode() {
+        this._astNodeFactoryList = [
+            this._astRootNodeFactory,
+            this._functionNodeFactory,
+            this._lambdaNodeFactory,
+            this._lambdaParameterNodeFactory,
+            this._operatorNodeFactory,
+            this._prefixNodeFactory,
+            this._referenceNodeFactory,
+            this._suffixNodeFactory,
+            this._unionNodeFactory,
+            this._valueNodeFactory,
+        ].sort(sortRules);
+    }
 }

@@ -1,21 +1,23 @@
-import { LexerTreeMaker } from '../Analysis/Lexer';
+import { IAccessor, Inject, Injector } from '@wendellhu/redi';
+
+import { LexerTreeBuilder } from '../Analysis/Lexer';
 import { LexerNode } from '../Analysis/LexerNode';
-import { IInterpreterDatasetConfig } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { suffixToken } from '../Basics/Token';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
+import { IFormulaCurrentConfigService } from '../Service/current-data.service';
+import { IFunctionService } from '../Service/function.service';
 import { NumberValueObject } from '../ValueObject/PrimitiveObject';
 import { BaseAstNode, ErrorNode } from './BaseAstNode';
-import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 export class SuffixNode extends BaseAstNode {
     constructor(
+        private _accessor: IAccessor,
         private _operatorString: string,
         private _functionExecutor?: BaseFunction
     ) {
@@ -26,7 +28,7 @@ export class SuffixNode extends BaseAstNode {
         return NodeType.SUFFIX;
     }
 
-    override execute(interpreterCalculateProps?: IInterpreterDatasetConfig) {
+    override execute() {
         const children = this.getChildren();
         const value = children[0].getValue();
         let result: FunctionVariantType;
@@ -36,14 +38,14 @@ export class SuffixNode extends BaseAstNode {
         if (this._operatorString === suffixToken.PERCENTAGE) {
             result = this._functionExecutor!.calculate(value, new NumberValueObject(100)) as FunctionVariantType;
         } else if (this._operatorString === suffixToken.POUND) {
-            result = this._handlerPound(value, interpreterCalculateProps);
+            result = this._handlerPound(value);
         } else {
             result = ErrorValueObject.create(ErrorType.VALUE);
         }
         this.setValue(result);
     }
 
-    private _handlerPound(value: FunctionVariantType, interpreterDatasetConfig?: IInterpreterDatasetConfig) {
+    private _handlerPound(value: FunctionVariantType) {
         // const sheetData = interpreterDatasetConfig.sheetData;
         // if (!sheetData) {
         //     return false;
@@ -57,21 +59,23 @@ export class SuffixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
+        const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
+
+        const lexerTreeBuilder = this._accessor.get(LexerTreeBuilder);
+
         const cellValue = value as CellReferenceObject;
         const range = cellValue.getRangeData();
         const unitId = cellValue.getUnitId();
         const sheetId = cellValue.getSheetId();
-        const formulaData = interpreterDatasetConfig?.formulaData;
+        const formulaData = currentConfigService.getFormulaData();
 
-        const formulaString = formulaData?.[unitId]?.[sheetId]?.[range.startRow]?.[range.startColumn]?.formula;
+        const formulaString = formulaData?.[unitId]?.[sheetId]?.[range.startRow]?.[range.startColumn]?.f;
 
         if (!formulaString) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const lexerTreeMaker = new LexerTreeMaker(formulaString);
-        const lexerNode = lexerTreeMaker.treeMaker();
-        lexerTreeMaker.suffixExpressionHandler(lexerNode);
+        const lexerNode = lexerTreeBuilder.treeBuilder(formulaString);
 
         return ErrorValueObject.create(ErrorType.VALUE);
         /** todo */
@@ -79,11 +83,18 @@ export class SuffixNode extends BaseAstNode {
 }
 
 export class SuffixNodeFactory extends BaseAstNodeFactory {
-    override get zIndex() {
-        return NODE_ORDER_MAP.get(NodeType.SUFFIX) || 100;
+    constructor(
+        @IFunctionService private readonly _functionService: IFunctionService,
+        @Inject(Injector) private readonly _injector: Injector
+    ) {
+        super();
     }
 
-    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override get zIndex() {
+        return NODE_ORDER_MAP.get(NodeType.SUFFIX) || DEFAULT_AST_NODE_FACTORY_Z_INDEX;
+    }
+
+    override checkAndCreateNodeType(param: LexerNode | string) {
         if (!(param instanceof LexerNode)) {
             return;
         }
@@ -98,18 +109,16 @@ export class SuffixNodeFactory extends BaseAstNodeFactory {
         if (tokenTrim === suffixToken.PERCENTAGE) {
             functionName = 'DIVIDED';
         } else if (tokenTrim === suffixToken.POUND) {
-            return new SuffixNode(tokenTrim);
+            return new SuffixNode(this._injector, tokenTrim);
         } else {
             return;
         }
 
-        const functionExecutor = parserDataLoader.getExecutor(functionName);
+        const functionExecutor = this._functionService.getExecutor(functionName);
         if (!functionExecutor) {
             console.error(`No function ${param}`);
             return ErrorNode.create(ErrorType.NAME);
         }
-        return new SuffixNode(tokenTrim, functionExecutor);
+        return new SuffixNode(this._injector, tokenTrim, functionExecutor);
     }
 }
-
-FORMULA_AST_NODE_REGISTRY.add(new SuffixNodeFactory());

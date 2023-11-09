@@ -23,7 +23,7 @@ export function fromObjectToString(array: IArrayValueObject) {
 }
 
 export class ArrayValueObject extends BaseValueObject {
-    private _value: CalculateValueType[][];
+    private _value: CalculateValueType[][] = [];
 
     private _rowCount: number = -1;
 
@@ -38,6 +38,16 @@ export class ArrayValueObject extends BaseValueObject {
         }
 
         this._value = this._formatValue(rawValue);
+    }
+
+    override dispose(): void {
+        this._value.forEach((cells) => {
+            cells.forEach((cell) => {
+                cell.dispose();
+            });
+        });
+
+        this._value = [];
     }
 
     getRowCount() {

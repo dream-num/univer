@@ -1,14 +1,16 @@
-import { Nullable } from '@univerjs/core';
+import { Disposable, Nullable } from '@univerjs/core';
 
 import { LexerNode } from '../Analysis/LexerNode';
 import { BaseAstNode } from './BaseAstNode';
 
-export class BaseAstNodeFactory {
+export const DEFAULT_AST_NODE_FACTORY_Z_INDEX = 100;
+
+export class BaseAstNodeFactory extends Disposable {
     get zIndex() {
         return 0;
     }
 
-    create(param: LexerNode | string, parserDataLoader?: any): BaseAstNode {
+    create(param: LexerNode | string): BaseAstNode {
         let token;
         if (param instanceof LexerNode) {
             token = param.getToken();
@@ -18,5 +20,5 @@ export class BaseAstNodeFactory {
         return new BaseAstNode(token);
     }
 
-    checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: any): Nullable<BaseAstNode> {}
+    checkAndCreateNodeType(param: LexerNode | string): Nullable<BaseAstNode> {}
 }

@@ -13800,7 +13800,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     sheets: {
         'sheet-0010': {
             name: 'sheet-0010',
-            status: 1,
             id: 'sheet-0010',
             type: 0,
             tabColor: '',
@@ -24156,6 +24155,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
                     hd: BooleanNumber.FALSE,
                 },
             },
+            status: 1,
             cellData: {
                 0: {
                     0: {

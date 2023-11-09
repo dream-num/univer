@@ -1,7 +1,6 @@
-import { IRange, IUnitRange, Nullable } from '@univerjs/core';
+import { Disposable, IRange, IUnitRange, Nullable } from '@univerjs/core';
 
 import { BaseAstNode } from '../AstNode/BaseAstNode';
-import { IFormulaData } from '../Basics/Common';
 
 export enum FDtreeStateType {
     DEFAULT,
@@ -9,7 +8,7 @@ export enum FDtreeStateType {
     SKIP,
 }
 
-export class FormulaDependencyTree implements IFormulaData {
+export class FormulaDependencyTree extends Disposable {
     node: Nullable<BaseAstNode>;
 
     children: FormulaDependencyTree[] = [];
@@ -29,6 +28,17 @@ export class FormulaDependencyTree implements IFormulaData {
     rangeList: IUnitRange[] = [];
 
     private _state = FDtreeStateType.DEFAULT;
+
+    override dispose(): void {
+        this.children.forEach((tree) => {
+            tree.dispose();
+        });
+        this.rangeList = [];
+
+        this.parents = [];
+
+        this.node?.dispose();
+    }
 
     setAdded() {
         this._state = FDtreeStateType.ADDED;

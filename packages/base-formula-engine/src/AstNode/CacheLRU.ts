@@ -19,6 +19,10 @@ class FormulaAstLRU {
         return this._cache.get(hash);
     }
 
+    clear() {
+        this._cache.clear();
+    }
+
     private _hash(formulaString: string) {
         return hashAlgorithm(formulaString);
     }

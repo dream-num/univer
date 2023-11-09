@@ -1,13 +1,12 @@
 import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
-import { ParserDataLoader } from '../Basics/ParserDataLoader';
-import { FORMULA_AST_NODE_REGISTRY } from '../Basics/Registry';
 import { compareToken, OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../Basics/Token';
 import { BaseFunction } from '../Functions/BaseFunction';
 import { Compare } from '../Functions/meta/Compare';
 import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
+import { IFunctionService } from '../Service/function.service';
 import { BaseAstNode, ErrorNode } from './BaseAstNode';
-import { BaseAstNodeFactory } from './BaseAstNodeFactory';
+import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
 
 const PLUS_EXECUTOR_NAME = 'PLUS';
@@ -51,11 +50,15 @@ export class OperatorNode extends BaseAstNode {
 }
 
 export class OperatorNodeFactory extends BaseAstNodeFactory {
-    override get zIndex() {
-        return NODE_ORDER_MAP.get(NodeType.OPERATOR) || 100;
+    constructor(@IFunctionService private readonly _functionService: IFunctionService) {
+        super();
     }
 
-    override create(param: string, parserDataLoader: ParserDataLoader): BaseAstNode {
+    override get zIndex() {
+        return NODE_ORDER_MAP.get(NodeType.OPERATOR) || DEFAULT_AST_NODE_FACTORY_Z_INDEX;
+    }
+
+    override create(param: string): BaseAstNode {
         let functionName = '';
         const tokenTrim = param;
         if (tokenTrim === operatorToken.PLUS) {
@@ -74,7 +77,7 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
             functionName = COMPARE_EXECUTOR_NAME;
         }
 
-        const functionExecutor = parserDataLoader.getExecutor(functionName);
+        const functionExecutor = this._functionService.getExecutor(functionName);
         if (!functionExecutor) {
             console.error(`No function ${param}`);
             return ErrorNode.create(ErrorType.NAME);
@@ -82,7 +85,7 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
         return new OperatorNode(tokenTrim, functionExecutor);
     }
 
-    override checkAndCreateNodeType(param: LexerNode | string, parserDataLoader: ParserDataLoader) {
+    override checkAndCreateNodeType(param: LexerNode | string) {
         if (param instanceof LexerNode) {
             return;
         }
@@ -93,9 +96,7 @@ export class OperatorNodeFactory extends BaseAstNodeFactory {
         }
 
         if (OPERATOR_TOKEN_SET.has(tokenTrim)) {
-            return this.create(tokenTrim, parserDataLoader);
+            return this.create(tokenTrim);
         }
     }
 }
-
-FORMULA_AST_NODE_REGISTRY.add(new OperatorNodeFactory());

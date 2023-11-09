@@ -1,6 +1,6 @@
-import { Nullable } from '@univerjs/core';
+import { Disposable, Nullable } from '@univerjs/core';
 
-import { AstNodePromiseType, IInterpreterDatasetConfig, UnitDataType } from '../Basics/Common';
+import { AstNodePromiseType } from '../Basics/Common';
 import { ErrorType } from '../Basics/ErrorType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
@@ -14,7 +14,7 @@ interface AstNodeNodeJson {
 
 export type LambdaPrivacyVarType = Map<string, Nullable<BaseAstNode>>;
 
-export class BaseAstNode {
+export class BaseAstNode extends Disposable {
     private _children: BaseAstNode[] = [];
 
     private _parent: Nullable<BaseAstNode>;
@@ -27,7 +27,18 @@ export class BaseAstNode {
 
     private _address = false;
 
-    constructor(private _token: string) {}
+    constructor(private _token: string) {
+        super();
+    }
+
+    override dispose(): void {
+        this._children.forEach((node) => {
+            node.dispose();
+        });
+        this._valueObject?.dispose();
+
+        this._parent = null;
+    }
 
     get nodeType() {
         return NodeType.BASE;
@@ -86,11 +97,11 @@ export class BaseAstNode {
         this._calculateState = true;
     }
 
-    execute(interpreterDatasetConfig?: IInterpreterDatasetConfig, runtimeData?: UnitDataType) {
+    execute() {
         /* abstract */
     }
 
-    async executeAsync(interpreterDatasetConfig?: IInterpreterDatasetConfig): Promise<AstNodePromiseType> {
+    async executeAsync(): Promise<AstNodePromiseType> {
         /* abstract */
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }

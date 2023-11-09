@@ -54,9 +54,9 @@
         "react-dom": "^18.2.0"
     },
     "devDependencies": {
-        "@types/node": "^20.8.9",
-        "@types/react": "^18.2.33",
-        "@types/react-dom": "^18.2.14",
+        "@types/node": "^20.9.0",
+        "@types/react": "^18.2.37",
+        "@types/react-dom": "^18.2.15",
         "@vitest/coverage-istanbul": "^0.34.6",
         "esbuild": "^0.19.5",
         "less": "^4.2.0",

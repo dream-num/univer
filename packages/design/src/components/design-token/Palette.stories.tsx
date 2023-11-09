@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { themes } from '../../../.storybook/preview';
+// eslint-disable-next-line import/no-relative-packages
+import { themes } from '../../../../../.storybook/preview';
 import { Palette } from './Palette';
 
 const meta: Meta = {

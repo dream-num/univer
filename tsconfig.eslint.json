@@ -1,12 +1,12 @@
 {
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-  },
-  "include": [
-    "packages/**/*",
-    "examples/**/*",
-    "scripts/**/*",
-    ".eslintrc.cjs",
-    "./vitest.workspace.ts"
-  ],
+    "extends": "./tsconfig.json",
+    "compilerOptions": {},
+    "include": [
+        "packages/**/*",
+        "examples/**/*",
+        "scripts/**/*",
+        ".eslintrc.cjs",
+        "./vitest.workspace.ts",
+        "./storybook/**/*"
+    ]
 }

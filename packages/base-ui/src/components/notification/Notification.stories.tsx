@@ -18,6 +18,7 @@ export default meta;
 export const Playground = {
     render: () => (
         <>
+            <Notification />
             <Button
                 type="primary"
                 onClick={() =>

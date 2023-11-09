@@ -1,6 +1,6 @@
 import { Inject } from '@wendellhu/redi';
 
-import { Disposable } from '../../Shared/lifecycle';
+import { Disposable } from '../../shared';
 import { IUniverInstanceService } from '../instance/instance.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 import { IPermissionService } from './permission.service';

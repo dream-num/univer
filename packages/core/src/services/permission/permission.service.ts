@@ -2,15 +2,14 @@ import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { Disposable } from '../../shared/lifecycle';
-import { PermissionPoint, PermissionStatus } from '../../shared/permission';
+import { Disposable, PermissionPoint, PermissionStatus } from '../../shared';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 
 export interface IPermissionService {
     deletePermissionPoint(id: string): void;
-    addPermissionPoint<T = any>(item: PermissionPoint<T>): boolean;
+    addPermissionPoint(item: PermissionPoint): boolean;
     updatePermissionPoint(id: string, value: any): void;
-    getPermissionPoint<T = any>(id: string): PermissionPoint<T>;
+    getPermissionPoint(id: string): PermissionPoint;
     composePermission$(permissionIdList: string[]): Observable<PermissionPoint[]>;
     composePermission(permissionIdList: string[]): PermissionPoint[];
 }
@@ -43,10 +42,10 @@ export class PermissionService extends Disposable implements IPermissionService 
         return false;
     };
 
-    updatePermissionPoint = <T = any>(permissionId: string, value: T) => {
+    updatePermissionPoint = (permissionId: string, value: any) => {
         const permissionSubject = this.permissionPointMap.get(permissionId);
         if (permissionSubject) {
-            const subject = permissionSubject.getValue() as PermissionPoint<T>;
+            const subject = permissionSubject.getValue() as PermissionPoint;
             subject.value = value;
             subject.status = PermissionStatus.DONE;
             permissionSubject.next(subject);

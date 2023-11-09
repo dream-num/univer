@@ -54,8 +54,6 @@ export {
 // #endregion
 
 export * from './shared';
-export { Disposable, DisposableCollection, fromObservable, RxDisposable, toDisposable } from './shared/lifecycle';
-export { createRowColIter, type IRowColIter } from './shared/row-col-iter';
 
 // #region sheet
 

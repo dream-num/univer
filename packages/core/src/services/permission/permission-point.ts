@@ -1,4 +1,4 @@
-import { PermissionPoint } from '../../Shared/permission';
+import { PermissionPoint } from '../../shared';
 
 export const UniverEditablePermissionPoint = 'univer.editable';
 export class UniverEditablePermission extends PermissionPoint<boolean> {

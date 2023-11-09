@@ -14,7 +14,7 @@ export const SetEditable: ICommand = {
         if (params.value === 'sheet') {
             const sheetPermissionService = accessor.get(SheetPermissionService);
             const editable = sheetPermissionService.getSheetEditable();
-            sheetPermissionService.setEditable(!editable);
+            sheetPermissionService.setSheetEditable(!editable);
         } else {
             const univerPermissionService = accessor.get(UniverPermissionService);
             const editable = univerPermissionService.getEditable();

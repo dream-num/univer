@@ -3,7 +3,7 @@ import { IUniverInstanceService, LocaleService, Plugin, PluginType, Tools } from
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { DefaultSlideUIConfig, ISlideUIPluginConfig } from './basics';
-import { SLIDE_UI_PLUGIN_NAME } from './basics/const/plugin_-name';
+import { SLIDE_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { IToolbarItemProps } from './controllers';
 import { AppUIController } from './controllers/app-ui-controller';
 import { SlideUIController } from './controllers/slide-ui.controller';

@@ -1,7 +1,7 @@
 import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { FORMULA_PLUGIN_NAME } from './common/plugin_-name';
+import { FORMULA_PLUGIN_NAME } from './common/plugin-name';
 import { FormulaController } from './controllers/formula.controller';
 import { PromptController } from './controllers/prompt.controller';
 import { enUS } from './locale';

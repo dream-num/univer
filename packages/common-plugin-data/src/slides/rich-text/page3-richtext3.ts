@@ -1,6 +1,6 @@
 import { PageElementType } from '@univerjs/core';
 
-import { DEFAULT_LIST_TEST } from '../../docs/default_-list';
+import { DEFAULT_LIST_TEST } from '../../docs/default-list';
 
 export const PAGE3_RICHTEXT_3 = {
     id: 'detailContent3',

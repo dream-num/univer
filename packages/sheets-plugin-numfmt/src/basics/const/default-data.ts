@@ -1,4 +1,4 @@
-import { NUMFMT_PLUGIN_NAME } from './plugin_-name';
+import { NUMFMT_PLUGIN_NAME } from './plugin-name';
 
 export const DEFAULT_DATA = [
     {

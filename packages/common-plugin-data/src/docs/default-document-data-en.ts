@@ -9,7 +9,7 @@ import {
     WrapTextType,
 } from '@univerjs/core';
 
-import { DEFAULT_LIST_TEST } from './default_-list';
+import { DEFAULT_LIST_TEST } from './default-list';
 
 export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
     id: 'd',

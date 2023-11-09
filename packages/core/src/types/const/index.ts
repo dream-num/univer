@@ -1,7 +1,7 @@
 // @index('./*.ts', f => `export * from '${f.path}'`)
-export * from './action_-names';
+export * from './action-names';
 export * from './const';
-export * from './extension_-names';
-export * from './plugin_-names';
-export * from './theme_-color_-map';
+export * from './extension-names';
+export * from './plugin-names';
+export * from './theme-color-map';
 // @endindex

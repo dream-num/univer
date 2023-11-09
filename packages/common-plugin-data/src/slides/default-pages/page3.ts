@@ -1,8 +1,8 @@
 import { PageElementType, PageType, ShapeType } from '@univerjs/core';
 
-import { PAGE3_RICHTEXT_1 } from '../rich-text/page3_-richtext_1';
-import { PAGE3_RICHTEXT_2 } from '../rich-text/page3_-richtext_2';
-import { PAGE3_RICHTEXT_3 } from '../rich-text/page3_-richtext_3';
+import { PAGE3_RICHTEXT_1 } from '../rich-text/page3-richtext1';
+import { PAGE3_RICHTEXT_2 } from '../rich-text/page3-richtext2';
+import { PAGE3_RICHTEXT_3 } from '../rich-text/page3-richtext3';
 
 export const DEFAULT_THIRD_PAGE = {
     id: 'strategic_1',

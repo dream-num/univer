@@ -1,4 +1,4 @@
-// import { FIND_PLUGIN_NAME } from '../const/plugin_-name';
+// import { FIND_PLUGIN_NAME } from '../const/plugin-name';
 // import { FindPlugin } from '../find-plugin';
 // import { SearchContent } from '../views/ui/search-content';
 

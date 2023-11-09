@@ -1,2 +1,2 @@
 export * from './default-univer-slide-config';
-export * from './plugin_-name';
+export * from './plugin-name';

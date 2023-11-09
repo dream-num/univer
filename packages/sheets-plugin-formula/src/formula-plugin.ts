@@ -1,4 +1,3 @@
-import { FormulaEngineService } from '@univerjs/base-formula-engine';
 import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
@@ -33,7 +32,6 @@ export class FormulaPlugin extends Plugin {
             // models
             [FormulaDataModel, { useFactory: () => this._injector.createInstance(FormulaDataModel, this._config) }],
             // services
-            [FormulaEngineService],
             [IFormulaPromptService, { useClass: FormulaPromptService }],
             // controllers
             [FormulaController],

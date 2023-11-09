@@ -1,8 +1,8 @@
 import { DeviceInputEventType } from '@univerjs/base-render';
 import { IShortcutItem, KeyCode } from '@univerjs/base-ui';
+import { whenEditorFormulaActivated } from '@univerjs/ui-plugin-sheets';
 
 import { SetEditorFormulaOperation } from '../../commands/operations/editor-formula.operation';
-import { whenEditorFormulaActivated } from './utils';
 
 export const PROMPT_SELECTION_KEYCODE_LIST = [
     KeyCode.ARROW_DOWN,

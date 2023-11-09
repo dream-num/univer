@@ -1,5 +1,6 @@
 export * from './basics';
 export { SetCellEditVisibleArrowOperation } from './commands/operations/cell-edit.operation';
+export { whenEditorFormulaActivated } from './controllers/shortcuts/utils';
 export {
     getCoordByCell,
     getCoordByOffset,

@@ -1,26 +1,14 @@
-import { ArrayFormulaDataType, FormulaDataType } from '@univerjs/base-formula-engine';
+import { ArrayFormulaDataType, IFormulaData } from '@univerjs/base-formula-engine';
 import { Disposable, ObjectMatrix } from '@univerjs/core';
 
 export interface IFormulaConfig {
-    formulaData: FormulaDataType;
-    calculationChain?: string[];
-    recalculationMode?: RecalculationModeType;
-}
-
-export enum RecalculationModeType {
-    AUTOMATIC = 'Automatic',
-    MANUAL = 'Manual',
-    AUTOMATIC_EXCEPT_TABLE = 'AutomaticExceptTable',
+    formulaData: IFormulaData;
 }
 
 export class FormulaDataModel extends Disposable {
-    private _formulaData: FormulaDataType = {};
+    private _formulaData: IFormulaData = {};
 
     private _arrayFormulaData: ArrayFormulaDataType = {};
-
-    private _calculationChain: string[] = [];
-
-    private _recalculationMode = RecalculationModeType.AUTOMATIC;
 
     constructor(config?: IFormulaConfig) {
         super();
@@ -28,21 +16,13 @@ export class FormulaDataModel extends Disposable {
         if (config?.formulaData) {
             this._formulaData = config.formulaData;
         }
-
-        if (config?.calculationChain) {
-            this._calculationChain = config.calculationChain;
-        }
-
-        if (config?.recalculationMode) {
-            this._recalculationMode = config.recalculationMode;
-        }
     }
 
     getFormulaData() {
         return this._formulaData;
     }
 
-    setFormulaData(value: FormulaDataType) {
+    setFormulaData(value: IFormulaData) {
         this._formulaData = value;
     }
 

@@ -5,9 +5,8 @@ import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { FUNCTION_LIST, IFunctionInfo, IFunctionParam } from '../../../services/function-list';
+import { IFunctionInfo, IFunctionParam } from '../../../services/function-list';
 import { IFormulaPromptService, IHelpFunctionCommandParams } from '../../../services/prompt.service';
-import { getFunctionName } from '../util';
 import styles from './index.module.less';
 
 export function HelpFunction() {
@@ -27,20 +26,19 @@ export function HelpFunction() {
             const selection = cellEditorManagerService.getState();
             if (!selection) return;
 
-            const { visible, functionName, paramIndex } = params;
-            const info = FUNCTION_LIST.find((item) => getFunctionName(item, localeService) === functionName);
-            if (!info) {
-                setVisible(false);
+            const { visible, paramIndex, functionInfo } = params;
+            if (!visible) {
+                setVisible(visible);
                 return;
             }
 
             const localeInfo: IFunctionInfo = {
-                functionName: info.functionName as string,
-                functionType: info.functionType,
-                description: localeService.t(info.description) as string,
-                abstract: localeService.t(info.abstract) as string,
-                parameterRange: info.parameterRange,
-                functionParameter: info.functionParameter.map((item) => ({
+                functionName: functionInfo.functionName as string,
+                functionType: functionInfo.functionType,
+                description: localeService.t(functionInfo.description) as string,
+                abstract: localeService.t(functionInfo.abstract) as string,
+                parameterRange: functionInfo.parameterRange,
+                functionParameter: functionInfo.functionParameter.map((item) => ({
                     name: localeService.t(item.name) as string,
                     detail: localeService.t(item.detail) as string,
                     example: item.example,

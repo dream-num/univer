@@ -11,7 +11,6 @@ export default {
         },
         functionList: {
             SUMIF: {
-                aliasFunctionName: '33IF',
                 description: 'Returns a conditional sum across a range.',
                 abstract: 'A conditional sum across a range.',
                 functionParameter: {

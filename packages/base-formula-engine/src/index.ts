@@ -2,6 +2,7 @@ export type {
     ArrayFormulaDataType,
     IFormulaData,
     IFormulaDataItem,
+    IFormulaDatasetConfig,
     ISheetData,
     IUnitData,
     IUnitSheetNameMap,

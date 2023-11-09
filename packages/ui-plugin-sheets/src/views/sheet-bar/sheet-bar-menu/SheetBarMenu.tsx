@@ -15,12 +15,13 @@ import {
     ICommandService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import { Button, Dropdown } from '@univerjs/design';
+import { Dropdown } from '@univerjs/design';
 import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import { ISheetBarService } from '../../../services/sheetbar/sheetbar.service';
+import { SheetBarButton } from '../sheet-bar-button/SheetBarButton';
 import styles from './index.module.less';
 
 export interface ISheetBarMenuItem {
@@ -154,9 +155,9 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
             visible={visible}
             onVisibleChange={onVisibleChange}
         >
-            <Button type="text" size="small">
+            <SheetBarButton>
                 <ConvertSingle />
-            </Button>
+            </SheetBarButton>
         </Dropdown>
     );
 }

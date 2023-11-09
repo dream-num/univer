@@ -26,6 +26,8 @@ export function SheetBarTabs() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
     const [activeKey, setActiveKey] = useState<string>('');
     const [subscribe, setSubscribe] = useState(false);
+    const [boxShadow, setBoxShadow] = useState('');
+
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const sheetbarService = useDependency(ISheetBarService);
@@ -35,11 +37,12 @@ export function SheetBarTabs() {
 
     useEffect(() => {
         statusInit();
-
         const disposable = setupStatusUpdate();
+        const subscription = setupSubscribeScroll();
 
         return () => {
             disposable.dispose();
+            subscription.unsubscribe();
         };
     }, []);
 
@@ -132,9 +135,31 @@ export function SheetBarTabs() {
         setSheetList(sheetListItems);
     };
 
+    const setupSubscribeScroll = () =>
+        sheetbarService.scroll$.subscribe((state: IScrollState) => {
+            updateScrollButtonState(state);
+        });
+
+    const updateScrollButtonState = (state: IScrollState) => {
+        const { leftEnd, rightEnd } = state;
+        // box-shadow: inset 10px 0px 10px -10px rgba(0, 0, 0, 0.2), inset -10px 0px 10px -10px rgba(0, 0, 0, 0.2);
+        let boxShadow = '';
+        if (leftEnd && rightEnd) {
+            boxShadow = '';
+        } else if (leftEnd && !rightEnd) {
+            boxShadow = 'inset -10px 0px 10px -10px rgba(0, 0, 0, 0.2)';
+        } else if (!leftEnd && rightEnd) {
+            boxShadow = 'inset 10px 0px 10px -10px rgba(0, 0, 0, 0.2)';
+        } else if (!leftEnd && !rightEnd) {
+            boxShadow = 'inset 10px 0px 10px -10px rgba(0, 0, 0, 0.2), inset -10px 0px 10px -10px rgba(0, 0, 0, 0.2)';
+        }
+
+        setBoxShadow(boxShadow);
+    };
+
     return (
         <div className={styles.slideTabBarContainer}>
-            <div className={styles.slideTabBar}>
+            <div className={styles.slideTabBar} style={{ boxShadow }}>
                 {sheetList.map((item) => (
                     <SheetBarItem {...item} key={item.sheetId} selected={activeKey === item.sheetId} />
                 ))}

@@ -1,4 +1,3 @@
-@padding: 6px;
 @tab-shadow:0px 0px 12px rgba(0, 0, 0, 0.2);
 
 .slide-tab-bar-container {
@@ -7,12 +6,11 @@
     .slide-tab-bar {
         user-select: none;
         width: 100%;
-        padding: @padding 0;
+        padding: var(--padding-xs) 0;
         display: flex;
         flex-direction: row;
         align-items: center;
         overflow: hidden;
-        box-shadow: inset 10px 0px 10px -10px rgba(0, 0, 0, 0.2), inset -10px 0px 10px -10px rgba(0, 0, 0, 0.2);
     }
 }
 
@@ -27,9 +25,10 @@ Tab Item, Put outside to be compatible with drag styles
     flex-grow: 1;
     box-sizing: border-box;
     border-radius: var(--border-radius-base);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     cursor: pointer;
     margin: 0 var(--margin-xxs);
+    color: rgb(var(--grey-1000));
 
         .slide-tab-span {
             white-space: nowrap;
@@ -37,7 +36,6 @@ Tab Item, Put outside to be compatible with drag styles
             padding: var(--padding-xs) var(--padding-base);
             border: 2px solid transparent;
             border-radius: var(--border-radius-base);
-            
             
             &-edit {
                 outline: none;

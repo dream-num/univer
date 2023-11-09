@@ -1,12 +1,12 @@
 import { InsertSheetCommand } from '@univerjs/base-sheets';
 import { ICommandService } from '@univerjs/core';
-import { Button } from '@univerjs/design';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useEffect, useState } from 'react';
 
 import { ISheetBarService } from '../../services/sheetbar/sheetbar.service';
 import styles from './index.module.less';
+import { SheetBarButton } from './sheet-bar-button/SheetBarButton';
 import { SheetBarMenu } from './sheet-bar-menu/SheetBarMenu';
 import { SheetBarTabs } from './sheet-bar-tabs/SheetBarTabs';
 import { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
@@ -26,7 +26,7 @@ export const SheetBar = () => {
         });
 
         return () => {
-            subscription?.unsubscribe();
+            subscription.unsubscribe();
         };
     }, []);
 
@@ -56,9 +56,9 @@ export const SheetBar = () => {
         <div className={styles.sheetBar}>
             <div className={styles.sheetBarOptions}>
                 {/* Add sheet button */}
-                <Button type="text" size="small" onClick={addSheet}>
+                <SheetBarButton onClick={addSheet}>
                     <IncreaseSingle />
-                </Button>
+                </SheetBarButton>
                 {/* All sheets button */}
                 <SheetBarMenu />
             </div>
@@ -68,12 +68,12 @@ export const SheetBar = () => {
 
             {/* Scroll arrows */}
             <div className={styles.sheetBarOptions}>
-                <Button type="text" size="small" disabled={leftScrollState} onClick={handleScrollLeft}>
+                <SheetBarButton disabled={leftScrollState} onClick={handleScrollLeft}>
                     <MoreSingle style={{ transform: 'rotateZ(180deg)' }} />
-                </Button>
-                <Button type="text" size="small" disabled={rightScrollState} onClick={handleScrollRight}>
+                </SheetBarButton>
+                <SheetBarButton disabled={rightScrollState} onClick={handleScrollRight}>
                     <MoreSingle />
-                </Button>
+                </SheetBarButton>
             </div>
         </div>
     );

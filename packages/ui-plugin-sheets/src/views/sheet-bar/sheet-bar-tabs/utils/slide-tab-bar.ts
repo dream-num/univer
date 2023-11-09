@@ -335,22 +335,16 @@ export class SlideScrollbar {
         this._slideTabBar = slideTabBar;
     }
 
-    scrollX(x: number): boolean {
-        const preX = this._scrollX;
+    scrollX(x: number) {
         const primeval = this._slideTabBar.primeval();
         primeval.scrollLeft = x;
         this._scrollX = primeval.scrollLeft;
-
-        return preX === this._scrollX;
     }
 
-    scrollRight(): boolean {
-        const preX = this._scrollX;
+    scrollRight() {
         const primeval = this._slideTabBar.primeval();
         primeval.scrollLeft = primeval.scrollWidth;
         this._scrollX = primeval.scrollLeft;
-
-        return preX === this._scrollX;
     }
 
     getScrollX(): number {
@@ -398,16 +392,6 @@ export class SlideTabBar {
     protected _slideScrollbar: SlideScrollbar;
 
     protected _longPressTimer: number | null = null;
-
-    /**
-     * Whether to reach the left boundary
-     */
-    protected _isLeftEnd: boolean = false;
-
-    /**
-     * Whether to reach the right boundary
-     */
-    protected _isRightEnd: boolean = false;
 
     /**
      * left border line
@@ -661,11 +645,13 @@ export class SlideTabBar {
     }
 
     isLeftEnd(): boolean {
-        return this._isLeftEnd;
+        return this._slideTabBar.scrollLeft === 0;
     }
 
     isRightEnd(): boolean {
-        return this._isRightEnd;
+        const parent = this._slideTabBar.parentElement;
+        if (!parent) return false;
+        return this._slideTabBar.scrollWidth - parent.clientWidth === this._slideTabBar.scrollLeft;
     }
 
     destroy(): void {
@@ -676,13 +662,11 @@ export class SlideTabBar {
     }
 
     setScroll(x: number) {
-        const isEnd = this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + x);
-        this._isRightEnd = x > 0 ? isEnd : false;
-        this._isLeftEnd = x < 0 ? isEnd : false;
+        this._slideScrollbar.scrollX(this._slideScrollbar.getScrollX() + x);
 
         this._config.onScroll({
-            leftEnd: this._isLeftEnd,
-            rightEnd: this._isRightEnd,
+            leftEnd: this.isLeftEnd(),
+            rightEnd: this.isRightEnd(),
         });
     }
 

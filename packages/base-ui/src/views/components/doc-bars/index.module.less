@@ -1,5 +1,7 @@
+@toolbar-btn-size: 24px;
+
 .menubar {
-    height: 40px;
+    height: 32px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -7,7 +9,7 @@
 
     &-item {
         padding: var(--padding-xs) var(--padding-sm);
-        font-size: var(--font-size-sm);
+        font-size: var(--font-size-xs);
         font-weight: 400;
         border-radius: var(--border-radius-base);
         display: block;
@@ -27,11 +29,11 @@
 
 .toolbar {
     position: relative;
-    height: 40px;
+    height: 32px;
     padding: 0 var(--padding-xl);
 
     color: rgb(var(--text-color));
-    font-size: var(--font-size);
+    font-size: var(--font-size-base);
     background-color: rgb(var(--bg-color-secondary));
     box-sizing: border-box;
     display: flex;
@@ -44,6 +46,7 @@
         align-items: center;
         justify-content: center;
         border-bottom: 1px solid rgb(var(--border-color));
+        box-sizing: border-box;
         gap: var(--margin-xs);
     }
 
@@ -66,7 +69,7 @@
     &-item {
         &-select-button {
             position: relative;
-            height: 28px;
+            height: @toolbar-btn-size;
             padding: 0 var(--padding-xs);
             border-radius: var(--border-radius-base);
             display: flex;

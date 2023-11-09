@@ -104,7 +104,7 @@ function updateTextRuns(
 
     insertTextRuns(body, updateBody, textLength, currentIndex);
 
-    // console.log('new', JSON.stringify(body.textRuns, null, 2));
+    console.log('new', JSON.stringify(body.textRuns, null, 2));
 
     return removeTextRuns;
 }

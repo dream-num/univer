@@ -62,76 +62,84 @@ export function insertTextRuns(
         return;
     }
 
-    // console.log('old', JSON.stringify(textRuns, null, 2));
+    const newTextRuns: ITextRun[] = [];
+    const len = textRuns.length;
+    let hasInserted = false;
 
-    // TODO: @jocs, handle insertTextRuns between two textRuns.
-    let insertIndex = Infinity; // The current index of the textRun where the insertion needs to be made.
-    for (let i = 0, len = textRuns.length; i < len; i++) {
-        const textRun = textRuns[i];
-        const { st, ed } = textRun;
+    console.log('old', JSON.stringify(textRuns, null, 2));
 
-        if (st >= currentIndex) {
-            if (Number.isFinite(insertIndex)) {
-                textRun.st += textLength;
-            }
-
-            textRun.ed += textLength;
-        } else if (ed >= currentIndex) {
-            textRun.ed += textLength;
-        }
-
-        if (!Number.isFinite(insertIndex) && currentIndex >= st && currentIndex <= ed) {
-            insertIndex = i;
-        }
-    }
-
-    const insertTextRuns = insertBody.textRuns;
-    // console.log(currentIndex);
-    // console.log(insertIndex);
-
-    // console.log('insert', JSON.stringify(insertTextRuns, null, 2));
-
-    if (insertTextRuns) {
+    const insertTextRuns = insertBody.textRuns ?? [];
+    if (insertTextRuns.length) {
         for (let i = 0, len = insertTextRuns.length; i < len; i++) {
             const insertTextRun = insertTextRuns[i];
             insertTextRun.st += currentIndex;
             insertTextRun.ed += currentIndex;
         }
-
-        if (insertIndex === Infinity) {
-            textRuns.push(...insertTextRuns);
-        } else if (insertIndex === -Infinity) {
-            textRuns.unshift(...insertTextRuns);
-        } else {
-            const splitTextRun = textRuns[insertIndex];
-            const { st, ed } = splitTextRun;
-
-            const pendingTextRuns = [];
-
-            const startSplitTextRun = {
-                ...splitTextRun,
-                st,
-                ed: insertTextRuns[0].st,
-            };
-
-            pendingTextRuns.push(startSplitTextRun);
-            pendingTextRuns.push(...insertTextRuns);
-
-            const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
-
-            const endSplitTextRun = {
-                ...splitTextRun,
-                st: lastInsertTextRuns.ed,
-                ed,
-            };
-
-            pendingTextRuns.push(endSplitTextRun);
-
-            textRuns.splice(insertIndex, 1, ...pendingTextRuns);
-        }
-
-        body.textRuns = normalizeTextRuns(textRuns);
     }
+
+    for (let i = 0; i < len; i++) {
+        const textRun = textRuns[i];
+        const { st, ed } = textRun;
+
+        if (ed < currentIndex) {
+            newTextRuns.push(textRun);
+        } else if (currentIndex >= st && currentIndex <= ed) {
+            if (!hasInserted) {
+                hasInserted = true;
+                textRun.ed += textLength;
+
+                const pendingTextRuns = [];
+
+                const startSplitTextRun = {
+                    ...textRun,
+                    st,
+                    ed: insertTextRuns[0].st,
+                };
+
+                pendingTextRuns.push(startSplitTextRun);
+                pendingTextRuns.push(...insertTextRuns);
+
+                const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
+
+                const endSplitTextRun = {
+                    ...textRun,
+                    st: lastInsertTextRuns.ed,
+                    ed: ed + textLength,
+                };
+
+                pendingTextRuns.push(endSplitTextRun);
+
+                newTextRuns.push(...pendingTextRuns);
+            } else {
+                textRun.st += textLength;
+                textRun.ed += textLength;
+
+                newTextRuns.push(textRun);
+            }
+        } else {
+            // currentIndex < st
+            textRun.st += textLength;
+            textRun.ed += textLength;
+
+            if (!hasInserted) {
+                hasInserted = true;
+                newTextRuns.push(...insertTextRuns);
+            }
+
+            newTextRuns.push(textRun);
+        }
+    }
+
+    if (!hasInserted) {
+        hasInserted = true;
+        newTextRuns.push(...insertTextRuns);
+    }
+
+    console.log(currentIndex);
+
+    console.log('insert', JSON.stringify(insertTextRuns, null, 2));
+
+    body.textRuns = normalizeTextRuns(newTextRuns);
 }
 
 /**

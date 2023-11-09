@@ -54,13 +54,21 @@ jobs:
             - name: 📦 Build demo
               run: pnpm run build:demo
 
-            - name: 🚀 Deploy to Vercel
+            - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
-              id: vercel-action
+              id: vercel-demo
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ secrets.ORG_ID}}
                   vercel-project-id: ${{ secrets.PROJECT_ID}}
+
+            - name: 🚀 Deploy to Vercel (storybook)
+              uses: amondnet/vercel-action@v25
+              id: vercel-storybook
+              with:
+                  vercel-token: ${{ secrets.VERCEL_TOKEN }}
+                  vercel-org-id: ${{ secrets.ORG_ID}}
+                  vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK}}
 
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
@@ -71,9 +79,12 @@ jobs:
                   description: |
                       CI Pipeline: Success 🏆
                       **[View Deployment]**
-                      - [Doc](${{ steps.vercel-action.outputs.preview-url }}/doc/)
-                      - [Sheet](${{ steps.vercel-action.outputs.preview-url }}/sheet/)
-                      - [Slide](${{ steps.vercel-action.outputs.preview-url }}/slide/)
+                      - [Doc](${{ steps.vercel-demo.outputs.preview-url }}/doc/)
+                      - [Sheet](${{ steps.vercel-demo.outputs.preview-url }}/sheet/)
+                      - [Slide](${{ steps.vercel-demo.outputs.preview-url }}/slide/)
+
+                      **[View Storybook]**
+                      - [Storybook](${{ steps.vercel-storybook.outputs.preview-url }}/)
                   nofail: false
                   nodetail: false
                   color: 0x00b894
@@ -111,5 +122,8 @@ jobs:
                       ## View Deployment
                       | 📝 Doc | 📊 Sheet | 📽️ Slide |
                       | --- | --- | --- |
-                      | [🔗 Preview link](${{ steps.vercel-action.outputs.preview-url }}/doc/) | [🔗 Preview link](${{ steps.vercel-action.outputs.preview-url }}/sheet/) | [🔗 Preview link](${{ steps.vercel-action.outputs.preview-url }}/slide/) |
+                      | [🔗 Preview link](${{ steps.vercel-demo.outputs.preview-url }}/doc/) | [🔗 Preview link](${{ steps.vercel-demo.outputs.preview-url }}/sheet/) | [🔗 Preview link](${{ steps.vercel-demo.outputs.preview-url }}/slide/) |
+
+                      ## View Storybook
+                      [Storybook](${{ steps.vercel-storybook.outputs.preview-url }}/)
                   edit-mode: replace

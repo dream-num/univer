@@ -1,7 +1,7 @@
 import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IRenderManagerService } from '@univerjs/base-render';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useEffect, useRef, useState } from 'react';
-import { Subscription } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import styles from './index.module.less';
@@ -16,8 +16,6 @@ const EDITOR_DEFAULT_POSITION = {
     top: HIDDEN_EDITOR_POSITION,
     left: HIDDEN_EDITOR_POSITION,
 };
-
-let isLoaded = false;
 
 export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const [state, setState] = useState({
@@ -36,20 +34,19 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         if (editor == null) {
             return;
         }
-
-        let subscription: Subscription;
-
-        renderManagerService.currentRender$.subscribe((unitId) => {
-            if (unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY || isLoaded) {
-                return;
-            }
-
-            const engine = renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.engine;
-
-            subscription = cellEditorManagerService.state$.subscribe((param) => {
+        const renderSubscription = renderManagerService.currentRender$
+            .pipe(
+                switchMap(() => {
+                    const engine = renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.engine;
+                    engine?.setContainer(editor);
+                    return cellEditorManagerService.state$;
+                })
+            )
+            .subscribe((param) => {
                 if (param == null) {
                     return;
                 }
+
                 const {
                     startX = HIDDEN_EDITOR_POSITION,
                     startY = HIDDEN_EDITOR_POSITION,
@@ -72,14 +69,9 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 }
             });
 
-            engine?.setContainer(editor);
-
-            isLoaded = true;
-        });
-
         // Clean up on unmount
         return () => {
-            subscription?.unsubscribe();
+            renderSubscription.unsubscribe();
         };
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 

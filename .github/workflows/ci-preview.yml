@@ -125,5 +125,7 @@ jobs:
                       | [🔗 Preview link](${{ steps.vercel-demo.outputs.preview-url }}/doc/) | [🔗 Preview link](${{ steps.vercel-demo.outputs.preview-url }}/sheet/) | [🔗 Preview link](${{ steps.vercel-demo.outputs.preview-url }}/slide/) |
 
                       ## View Storybook
-                      [Storybook](${{ steps.vercel-storybook.outputs.preview-url }}/)
+                      | 📚 Storybook |
+                      | --- |
+                      | [🔗 Preview link](${{ steps.vercel-storybook.outputs.preview-url }}/) |
                   edit-mode: replace

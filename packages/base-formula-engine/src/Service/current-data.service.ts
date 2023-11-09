@@ -1,30 +1,30 @@
 import { Disposable, IUnitRange } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import { FormulaDataType, IFormulaDatasetConfig, SheetNameMapType, UnitDataType } from '../Basics/Common';
+import { IFormulaData, IFormulaDatasetConfig, ISheetNameMap, IUnitData } from '../Basics/Common';
 
-export interface ICurrentConfigService {
-    getUnitData(): UnitDataType;
+export interface IFormulaCurrentConfigService {
+    getUnitData(): IUnitData;
 
-    getFormulaData(): FormulaDataType;
+    getFormulaData(): IFormulaData;
 
-    getSheetNameMap(): SheetNameMapType;
+    getSheetNameMap(): ISheetNameMap;
 
     isForceCalculate(): boolean;
 
     getUpdateRangeList(): IUnitRange[];
 
-    registerUnitData(unitData: UnitDataType): void;
+    registerUnitData(unitData: IUnitData): void;
 
-    registerFormulaData(formulaData: FormulaDataType): void;
+    registerFormulaData(formulaData: IFormulaData): void;
 
-    registerSheetNameMap(sheetNameMap: SheetNameMapType): void;
+    registerSheetNameMap(sheetNameMap: ISheetNameMap): void;
 }
 
-export class CurrentConfigService extends Disposable implements ICurrentConfigService {
-    private _unitData: UnitDataType = {};
-    private _formulaData: FormulaDataType = {};
-    private _sheetNameMap: SheetNameMapType = {};
+export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
+    private _unitData: IUnitData = {};
+    private _formulaData: IFormulaData = {};
+    private _sheetNameMap: ISheetNameMap = {};
 
     private _forceCalculate: boolean = false;
 
@@ -67,17 +67,19 @@ export class CurrentConfigService extends Disposable implements ICurrentConfigSe
         this._updateRangeList = config.updateRangeList;
     }
 
-    registerUnitData(unitData: UnitDataType) {
+    registerUnitData(unitData: IUnitData) {
         this._unitData = unitData;
     }
 
-    registerFormulaData(formulaData: FormulaDataType) {
+    registerFormulaData(formulaData: IFormulaData) {
         this._formulaData = formulaData;
     }
 
-    registerSheetNameMap(sheetNameMap: SheetNameMapType) {
+    registerSheetNameMap(sheetNameMap: ISheetNameMap) {
         this._sheetNameMap = sheetNameMap;
     }
 }
 
-export const ICurrentConfigService = createIdentifier<CurrentConfigService>('univer.formula.current-data.service');
+export const IFormulaCurrentConfigService = createIdentifier<FormulaCurrentConfigService>(
+    'univer.formula.current-data.service'
+);

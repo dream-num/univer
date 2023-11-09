@@ -19,14 +19,14 @@ import {
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../Basics/TokenType';
-import { IRuntimeService } from '../Service/runtime.service';
+import { IFormulaRuntimeService } from '../Service/runtime.service';
 import { LexerNode } from './LexerNode';
 
-export class AstTreeMaker extends Disposable {
+export class AstTreeBuilder extends Disposable {
     private _astNodeFactoryList: AstRootNodeFactory[] = [];
 
     constructor(
-        @IRuntimeService private readonly _runtimeService: IRuntimeService,
+        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @Inject(AstRootNodeFactory) private readonly _astRootNodeFactory: AstRootNodeFactory,
         @Inject(FunctionNodeFactory) private readonly _functionNodeFactory: FunctionNodeFactory,
         @Inject(LambdaNodeFactory) private readonly _lambdaNodeFactory: LambdaNodeFactory,

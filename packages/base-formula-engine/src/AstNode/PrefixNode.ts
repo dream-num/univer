@@ -8,7 +8,7 @@ import { BaseFunction } from '../Functions/BaseFunction';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { IFunctionService } from '../Service/function.service';
-import { IRuntimeService } from '../Service/runtime.service';
+import { IFormulaRuntimeService } from '../Service/runtime.service';
 import { NumberValueObject } from '../ValueObject/PrimitiveObject';
 import { BaseAstNode, ErrorNode } from './BaseAstNode';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
@@ -55,7 +55,7 @@ export class PrefixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const runtimeService = this._accessor.get(IRuntimeService);
+        const runtimeService = this._accessor.get(IFormulaRuntimeService);
 
         const currentRow = runtimeService.currentRow || 0;
         const currentColumn = runtimeService.currentColumn || 0;

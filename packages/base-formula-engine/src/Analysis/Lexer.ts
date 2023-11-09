@@ -22,7 +22,7 @@ enum bracketType {
     LAMBDA,
 }
 
-export class LexerTreeMaker extends Disposable {
+export class LexerTreeBuilder extends Disposable {
     private _currentLexerNode: LexerNode = new LexerNode();
 
     private _upLevel = 0;
@@ -86,7 +86,7 @@ export class LexerTreeMaker extends Disposable {
         return this._currentLexerNode;
     }
 
-    treeMaker(formulaString: string) {
+    treeBuilder(formulaString: string) {
         this._resetCurrentLexerNode();
 
         this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);

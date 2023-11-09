@@ -1,6 +1,6 @@
 import { CellValueType, ICellData, IRange, Nullable } from '@univerjs/core';
 
-import { RuntimeUnitDataType, SheetNameMapType, UnitDataType } from '../Basics/Common';
+import { IRuntimeUnitDataType, ISheetNameMap, IUnitData } from '../Basics/Common';
 import { ERROR_TYPE_SET, ErrorType } from '../Basics/ErrorType';
 import { ObjectClassType } from '../Basics/ObjectClassType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -26,7 +26,7 @@ export class BaseReferenceObject extends ObjectClassType {
         endColumn: -1,
     };
 
-    private _unitData: UnitDataType = {};
+    private _unitData: IUnitData = {};
 
     private _rowCount: number = 0;
 
@@ -36,7 +36,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _forcedUnitId: string = '';
 
-    private _runtimeData: RuntimeUnitDataType = {};
+    private _runtimeData: IRuntimeUnitDataType = {};
 
     constructor(private _token: string) {
         super();
@@ -129,7 +129,7 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._forcedUnitId;
     }
 
-    setForcedSheetId(sheetNameMap: SheetNameMapType) {
+    setForcedSheetId(sheetNameMap: ISheetNameMap) {
         this._forcedSheetId = sheetNameMap[this._forcedSheetName];
     }
 
@@ -169,7 +169,7 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._unitData;
     }
 
-    setUnitData(unitData: UnitDataType) {
+    setUnitData(unitData: IUnitData) {
         this._unitData = unitData;
     }
 
@@ -177,7 +177,7 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._runtimeData;
     }
 
-    setRuntimeData(runtimeData: RuntimeUnitDataType) {
+    setRuntimeData(runtimeData: IRuntimeUnitDataType) {
         this._runtimeData = runtimeData;
     }
 

@@ -1,8 +1,8 @@
 import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Ctor, Dependency, Inject, Injector } from '@wendellhu/redi';
 
-import { LexerTreeMaker } from '../Analysis/Lexer';
-import { AstTreeMaker } from '../Analysis/Parser';
+import { LexerTreeBuilder } from '../Analysis/Lexer';
+import { AstTreeBuilder } from '../Analysis/Parser';
 import { AstRootNodeFactory } from '../AstNode/AstRootNode';
 import { FunctionNodeFactory } from '../AstNode/FunctionNode';
 import { LambdaNodeFactory } from '../AstNode/LambdaNode';
@@ -36,10 +36,10 @@ import {
 import { BaseFunction } from '../Functions/BaseFunction';
 import { Interpreter } from '../Interpreter/Interpreter';
 import { FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
-import { CurrentConfigService, ICurrentConfigService } from './current-data.service';
+import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from './defined-names.service';
 import { FunctionService, IFunctionService } from './function.service';
-import { IRuntimeService, RuntimeService } from './runtime.service';
+import { FormulaRuntimeService, IFormulaRuntimeService } from './runtime.service';
 import { ISuperTableService, SuperTableService } from './super-table.service';
 
 @OnLifecycle(LifecycleStages.Rendered, FormulaEngineService)
@@ -54,11 +54,11 @@ export class FormulaEngineService extends Disposable {
     override dispose(): void {}
 
     get currentConfigService() {
-        return this._injector.get(ICurrentConfigService);
+        return this._injector.get(IFormulaCurrentConfigService);
     }
 
     get runtimeService() {
-        return this._injector.get(IRuntimeService);
+        return this._injector.get(IFormulaRuntimeService);
     }
 
     get superTableService() {
@@ -77,16 +77,16 @@ export class FormulaEngineService extends Disposable {
         return this._injector.get(Interpreter);
     }
 
-    get astTreeMaker() {
-        return this._injector.get(AstTreeMaker);
+    get astTreeBuilder() {
+        return this._injector.get(AstTreeBuilder);
     }
 
     get functionService() {
         return this._injector.get(IFunctionService);
     }
 
-    get lexerTreeMaker() {
-        return this._injector.get(LexerTreeMaker);
+    get lexerTreeBuilder() {
+        return this._injector.get(LexerTreeBuilder);
     }
 
     /**
@@ -144,15 +144,15 @@ export class FormulaEngineService extends Disposable {
     calculate(formulaString: string) {
         // TODO how to observe @alex
         // this.getObserver('onBeforeFormulaCalculateObservable')?.notifyObservers(formulaString);
-        const lexerNode = this.lexerTreeMaker.treeMaker(formulaString);
-        // this.lexerTreeMaker.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
+        const lexerNode = this.lexerTreeBuilder.treeBuilder(formulaString);
+        // this.lexerTreeBuilder.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
         console.log('lexerNode', lexerNode.serialize());
 
         // this.getObserver('onAfterFormulaLexerObservable')?.notifyObservers(lexerNode);
 
-        // const astTreeMaker = new AstTreeMaker();
+        // const astTreeBuilder = new AstTreeBuilder();
 
-        const astNode = this.astTreeMaker.parse(lexerNode);
+        const astNode = this.astTreeBuilder.parse(lexerNode);
 
         console.log('astNode', astNode?.serialize());
 
@@ -176,8 +176,8 @@ export class FormulaEngineService extends Disposable {
     private _initializeDependencies() {
         const dependencies: Dependency[] = [
             // Config or data services
-            [ICurrentConfigService, { useClass: CurrentConfigService }],
-            [IRuntimeService, { useClass: RuntimeService }],
+            [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
+            [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
 
             [ISuperTableService, { useClass: SuperTableService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
@@ -186,8 +186,8 @@ export class FormulaEngineService extends Disposable {
             // Calculation engine
             [FormulaDependencyGenerator],
             [Interpreter],
-            [LexerTreeMaker],
-            [AstTreeMaker],
+            [LexerTreeBuilder],
+            [AstTreeBuilder],
 
             // AstNode factory
             [AstRootNodeFactory],

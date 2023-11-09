@@ -22,31 +22,51 @@ export enum AstNodePromiseType {
     ERROR,
 }
 
-export type SheetItemType = {
+export type ISheetItem = {
     cellData: ObjectMatrix<ICellData>;
     rowCount: number;
     columnCount: number;
 };
 
-export type SheetDataType = { [sheetId: string]: SheetItemType };
+export interface ISheetData {
+    [sheetId: string]: ISheetItem;
+}
 
-export type UnitDataType = { [unitId: string]: SheetDataType };
+/**
+ * The subset of workbook data needs to be assembled into a new reference object when being passed in,
+ * and then input through the FormulaCurrentConfigService.
+ */
+export interface IUnitData {
+    [unitId: string]: ISheetData;
+}
 
-export type RuntimeSheetDataType = { [sheetId: string]: ObjectMatrix<ICellData> };
+export interface IRuntimeSheetData {
+    [sheetId: string]: ObjectMatrix<ICellData>;
+}
 
-export type RuntimeUnitDataType = { [unitId: string]: RuntimeSheetDataType };
+export interface IRuntimeUnitDataType {
+    [unitId: string]: IRuntimeSheetData;
+}
 
-export type SheetNameMapType = { [sheetName: string]: string };
+export interface ISheetNameMap {
+    [sheetName: string]: string;
+}
 
-export interface IFormulaData {
+/**
+ * @f  formulaString, the text string of the formula.
+ * @si The formula ID can be utilized in scenarios such as copy-pasting and drag-filling to convert formulas into references, eliminating the need for recreating the formulaString.
+ */
+export interface IFormulaDataItem {
     f: string; // formulaString
-    si: string;
+    si: string; // formulaId,
     // row: number;
     // column: number;
     // sheetId: string;
 }
 
-export type FormulaDataType = { [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaData> } };
+export interface IFormulaData {
+    [unitId: string]: { [sheetId: string]: ObjectMatrixPrimitiveType<IFormulaDataItem> };
+}
 
 export interface ISuperTable {
     sheetId: string;
@@ -63,9 +83,9 @@ export enum TableOptionType {
 }
 
 export interface IFormulaDatasetConfig {
-    unitData: UnitDataType;
-    formulaData: FormulaDataType;
-    sheetNameMap: SheetNameMapType;
+    unitData: IUnitData;
+    formulaData: IFormulaData;
+    sheetNameMap: ISheetNameMap;
     forceCalculate: boolean;
     updateRangeList: IUnitRange[];
 }

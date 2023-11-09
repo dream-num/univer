@@ -1,6 +1,6 @@
 import { IAccessor, Inject, Injector } from '@wendellhu/redi';
 
-import { LexerTreeMaker } from '../Analysis/Lexer';
+import { LexerTreeBuilder } from '../Analysis/Lexer';
 import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
 import { suffixToken } from '../Basics/Token';
@@ -8,7 +8,7 @@ import { BaseFunction } from '../Functions/BaseFunction';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
 import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/BaseReferenceObject';
 import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
-import { ICurrentConfigService } from '../Service/current-data.service';
+import { IFormulaCurrentConfigService } from '../Service/current-data.service';
 import { IFunctionService } from '../Service/function.service';
 import { NumberValueObject } from '../ValueObject/PrimitiveObject';
 import { BaseAstNode, ErrorNode } from './BaseAstNode';
@@ -59,9 +59,9 @@ export class SuffixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const currentConfigService = this._accessor.get(ICurrentConfigService);
+        const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
 
-        const lexerTreeMaker = this._accessor.get(LexerTreeMaker);
+        const lexerTreeBuilder = this._accessor.get(LexerTreeBuilder);
 
         const cellValue = value as CellReferenceObject;
         const range = cellValue.getRangeData();
@@ -75,7 +75,7 @@ export class SuffixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const lexerNode = lexerTreeMaker.treeMaker(formulaString);
+        const lexerNode = lexerTreeBuilder.treeBuilder(formulaString);
 
         return ErrorValueObject.create(ErrorType.VALUE);
         /** todo */

@@ -1,8 +1,8 @@
 import { Disposable, IRange, IUnitRange, LifecycleStages, Nullable, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { LexerTreeMaker } from '../Analysis/Lexer';
-import { AstTreeMaker } from '../Analysis/Parser';
+import { LexerTreeBuilder } from '../Analysis/Lexer';
+import { AstTreeBuilder } from '../Analysis/Parser';
 import { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../AstNode';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import { FormulaASTCache } from '../AstNode/CacheLRU';
@@ -11,8 +11,8 @@ import { PreCalculateNodeType } from '../Basics/NodeType';
 import { prefixToken, suffixToken } from '../Basics/Token';
 import { Interpreter } from '../Interpreter/Interpreter';
 import { BaseReferenceObject } from '../ReferenceObject/BaseReferenceObject';
-import { ICurrentConfigService } from '../Service/current-data.service';
-import { IRuntimeService } from '../Service/runtime.service';
+import { IFormulaCurrentConfigService } from '../Service/current-data.service';
+import { IFormulaRuntimeService } from '../Service/runtime.service';
 import { FormulaDependencyTree } from './DependencyTree';
 
 @OnLifecycle(LifecycleStages.Rendered, FormulaDependencyGenerator)
@@ -20,11 +20,11 @@ export class FormulaDependencyGenerator extends Disposable {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange>>();
 
     constructor(
-        @ICurrentConfigService private readonly _currentConfigService: ICurrentConfigService,
-        @IRuntimeService private readonly _runtimeService: IRuntimeService,
+        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
+        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @Inject(Interpreter) private readonly _interpreter: Interpreter,
-        @Inject(AstTreeMaker) private readonly _astTreeMaker: AstTreeMaker,
-        @Inject(LexerTreeMaker) private readonly _lexerTreeMaker: LexerTreeMaker
+        @Inject(AstTreeBuilder) private readonly _astTreeBuilder: AstTreeBuilder,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
     ) {
         super();
     }
@@ -116,10 +116,10 @@ export class FormulaDependencyGenerator extends Disposable {
             return astNode;
         }
 
-        const lexerNode = this._lexerTreeMaker.treeMaker(formulaString);
+        const lexerNode = this._lexerTreeBuilder.treeBuilder(formulaString);
         // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
 
-        astNode = this._astTreeMaker.parse(lexerNode);
+        astNode = this._astTreeBuilder.parse(lexerNode);
 
         if (astNode == null) {
             throw new Error('astNode is null');

@@ -1,5 +1,5 @@
 import { DocSkeletonManagerService, getDocObject, TextSelectionManagerService } from '@univerjs/base-docs';
-import { FormulaEngineService, SheetDataType } from '@univerjs/base-formula-engine';
+import { FormulaEngineService, ISheetData } from '@univerjs/base-formula-engine';
 import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/base-render';
 import {
     Disposable,
@@ -53,7 +53,7 @@ export class EditingController extends Disposable {
         // =(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect("A5"):B10# + B6# + A1:offset("C5", 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) & "美国人才" + sum((1+2%)*30%, 1+2)%
         // formulaEngine?.calculate(`=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)`);
 
-        const sheetData: SheetDataType = {};
+        const sheetData: ISheetData = {};
         this._currentUniverService
             .getCurrentUniverSheetInstance()
             .getSheets()
@@ -78,6 +78,18 @@ export class EditingController extends Disposable {
                     20: {
                         8: {
                             f: '=1+(3*4=4)*5+1',
+                            si: '',
+                        },
+                    },
+                    22: {
+                        8: {
+                            f: '=1--1',
+                            si: '',
+                        },
+                    },
+                    23: {
+                        8: {
+                            f: '=1--1%',
                             si: '',
                         },
                     },

@@ -3,7 +3,7 @@ import { Nullable, Tools } from '@univerjs/core';
 import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../Basics/TokenType';
-import { IRuntimeService } from '../Service/runtime.service';
+import { IFormulaRuntimeService } from '../Service/runtime.service';
 import { BaseAstNode, ErrorNode, LambdaPrivacyVarType } from './BaseAstNode';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
 import { NODE_ORDER_MAP, NodeType } from './NodeType';
@@ -34,7 +34,7 @@ export class LambdaNode extends BaseAstNode {
 }
 
 export class LambdaNodeFactory extends BaseAstNodeFactory {
-    constructor(@IRuntimeService private readonly _runtimeService: IRuntimeService) {
+    constructor(@IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService) {
         super();
     }
 

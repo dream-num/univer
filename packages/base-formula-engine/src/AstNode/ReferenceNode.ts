@@ -1,6 +1,6 @@
 import { IAccessor, Inject, Injector } from '@wendellhu/redi';
 
-import { LexerTreeMaker } from '../Analysis/Lexer';
+import { LexerTreeBuilder } from '../Analysis/Lexer';
 import { LexerNode } from '../Analysis/LexerNode';
 import { ErrorType } from '../Basics/ErrorType';
 import {
@@ -14,9 +14,9 @@ import { CellReferenceObject } from '../ReferenceObject/CellReferenceObject';
 import { ColumnReferenceObject } from '../ReferenceObject/ColumnReferenceObject';
 import { RowReferenceObject } from '../ReferenceObject/RowReferenceObject';
 import { TableReferenceObject } from '../ReferenceObject/TableReferenceObject';
-import { ICurrentConfigService } from '../Service/current-data.service';
+import { IFormulaCurrentConfigService } from '../Service/current-data.service';
 import { IDefinedNamesService } from '../Service/defined-names.service';
-import { IRuntimeService } from '../Service/runtime.service';
+import { IFormulaRuntimeService } from '../Service/runtime.service';
 import { ISuperTableService } from '../Service/super-table.service';
 import { BaseAstNode, ErrorNode } from './BaseAstNode';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './BaseAstNodeFactory';
@@ -36,8 +36,8 @@ export class ReferenceNode extends BaseAstNode {
     }
 
     override execute() {
-        const currentConfigService = this._accessor.get(ICurrentConfigService);
-        const runtimeService = this._accessor.get(IRuntimeService);
+        const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
+        const runtimeService = this._accessor.get(IFormulaRuntimeService);
 
         this._referenceObject.setUnitData(currentConfigService.getUnitData());
         this._referenceObject.setForcedSheetId(currentConfigService.getSheetNameMap());
@@ -54,7 +54,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
     constructor(
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @ISuperTableService private readonly _superTableService: ISuperTableService,
-        @Inject(LexerTreeMaker) private readonly _lexerTreeMaker: LexerTreeMaker,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -99,7 +99,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
 
         if (!isLexerNode && nameMap.has(tokenTrim)) {
             const nameString = nameMap.get(tokenTrim)!;
-            const lexerNode = this._lexerTreeMaker.treeMaker(nameString);
+            const lexerNode = this._lexerTreeBuilder.treeBuilder(nameString);
             /** todo */
             return new ErrorNode(ErrorType.VALUE);
         }

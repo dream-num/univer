@@ -4,8 +4,8 @@ import { createIdentifier } from '@wendellhu/redi';
 import { BaseAstNode } from '../AstNode/BaseAstNode';
 import {
     ArrayFormulaDataType,
-    RuntimeSheetDataType,
-    RuntimeUnitDataType,
+    IRuntimeSheetData,
+    IRuntimeUnitDataType,
     UnitArrayFormulaDataType,
 } from '../Basics/Common';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -13,7 +13,7 @@ import { BaseReferenceObject, FunctionVariantType } from '../ReferenceObject/Bas
 import { ArrayValueObject } from '../ValueObject/ArrayValueObject';
 import { BaseValueObject, CalculateValueType } from '../ValueObject/BaseValueObject';
 
-export interface IRuntimeService {
+export interface IFormulaRuntimeService {
     currentRow: number;
 
     currentColumn: number;
@@ -34,22 +34,22 @@ export interface IRuntimeService {
 
     setRuntimeData(functionVariant: FunctionVariantType): void;
 
-    getSheetData(unitId: string): RuntimeSheetDataType;
+    getSheetData(unitId: string): IRuntimeSheetData;
 
     getSheetArrayFormula(unitId: string): ArrayFormulaDataType;
 
-    getUnitData(): RuntimeUnitDataType;
+    getUnitData(): IRuntimeUnitDataType;
 
     getUnitArrayFormula(): UnitArrayFormulaDataType;
 }
 
-export class RuntimeService extends Disposable implements IRuntimeService {
+export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
     private _currentRow: number = 0;
     private _currentColumn: number = 0;
     private _currentSheetId: string = '';
     private _currentUnitId: string = '';
 
-    private _runtimeData: RuntimeUnitDataType = {};
+    private _runtimeData: IRuntimeUnitDataType = {};
 
     private _unitArrayFormulaData: UnitArrayFormulaDataType = {};
 
@@ -200,4 +200,4 @@ export class RuntimeService extends Disposable implements IRuntimeService {
     }
 }
 
-export const IRuntimeService = createIdentifier<RuntimeService>('univer.formula.runtime.service');
+export const IFormulaRuntimeService = createIdentifier<FormulaRuntimeService>('univer.formula.runtime.service');

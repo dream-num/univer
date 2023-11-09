@@ -48,8 +48,8 @@ export interface IRuntimeUnitDataType {
     [unitId: string]: IRuntimeSheetData;
 }
 
-export interface ISheetNameMap {
-    [sheetName: string]: string;
+export interface IUnitSheetNameMap {
+    [unitId: string]: { [sheetName: string]: string };
 }
 
 /**
@@ -85,7 +85,7 @@ export enum TableOptionType {
 export interface IFormulaDatasetConfig {
     unitData: IUnitData;
     formulaData: IFormulaData;
-    sheetNameMap: ISheetNameMap;
+    sheetNameMap: IUnitSheetNameMap;
     forceCalculate: boolean;
     updateRangeList: IUnitRange[];
 }

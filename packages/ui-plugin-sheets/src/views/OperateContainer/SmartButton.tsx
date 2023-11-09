@@ -16,7 +16,7 @@ import { SetScrollOperation } from '../../commands/operations/scroll.operation';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { APPLY_TYPE } from '../../services/auto-fill/type';
-import { SelectionRenderService } from '../../services/selection/selection-render.service';
+import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import styles from './index.module.less';
 
@@ -65,7 +65,7 @@ export const SmartButton: React.FC<{}> = () => {
     const sheetSkeletonManagerService = useDependency(SheetSkeletonManagerService);
     const currentUniverService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
-    const selectionRenderService = useDependency(SelectionRenderService);
+    const selectionRenderService = useDependency(ISelectionRenderService);
     const autoFillService = useDependency(IAutoFillService);
 
     const [visible, setVisible] = useState(false);

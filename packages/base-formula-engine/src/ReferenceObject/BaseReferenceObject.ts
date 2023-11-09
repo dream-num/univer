@@ -1,6 +1,6 @@
 import { CellValueType, ICellData, IRange, Nullable } from '@univerjs/core';
 
-import { IRuntimeUnitDataType, ISheetNameMap, IUnitData } from '../Basics/Common';
+import { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../Basics/Common';
 import { ERROR_TYPE_SET, ErrorType } from '../Basics/ErrorType';
 import { ObjectClassType } from '../Basics/ObjectClassType';
 import { ErrorValueObject } from '../OtherObject/ErrorValueObject';
@@ -129,8 +129,8 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._forcedUnitId;
     }
 
-    setForcedSheetId(sheetNameMap: ISheetNameMap) {
-        this._forcedSheetId = sheetNameMap[this._forcedSheetName];
+    setForcedSheetId(sheetNameMap: IUnitSheetNameMap) {
+        this._forcedSheetId = sheetNameMap[this.getUnitId()]?.[this._forcedSheetName];
     }
 
     setForcedSheetIdDirect(sheetId: string) {

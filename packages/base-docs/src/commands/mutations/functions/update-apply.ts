@@ -96,18 +96,26 @@ function updateTextRuns(
     const removeTextRuns = deleteTextRuns(body, textLength, currentIndex);
 
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
-        const newUpdateTextRun = coverTextRun(updateDataTextRuns, removeTextRuns, coverType);
+        const newUpdateTextRun = coverTextRuns(updateDataTextRuns, removeTextRuns, coverType);
         updateBody.textRuns = newUpdateTextRun;
     }
 
     insertTextRuns(body, updateBody, textLength, currentIndex);
 
-    console.log('new', JSON.stringify(body.textRuns, null, 2));
+    // console.log('new', JSON.stringify(body.textRuns, null, 2));
 
     return removeTextRuns;
 }
 
-function coverTextRun(updateDataTextRuns: ITextRun[], removeTextRuns: ITextRun[], coverType: UpdateDocsAttributeType) {
+export function coverTextRuns(
+    updateDataTextRuns: ITextRun[],
+    removeTextRuns: ITextRun[],
+    coverType: UpdateDocsAttributeType
+) {
+    if (removeTextRuns.length === 0) {
+        return updateDataTextRuns;
+    }
+
     const newUpdateTextRun: ITextRun[] = [];
     let updateIndex = 0;
     let removeIndex = 0;

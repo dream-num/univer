@@ -62,7 +62,7 @@ export function insertTextRuns(
         return;
     }
 
-    console.log('old', JSON.stringify(textRuns, null, 2));
+    // console.log('old', JSON.stringify(textRuns, null, 2));
 
     // TODO: @jocs, handle insertTextRuns between two textRuns.
     let insertIndex = Infinity; // The current index of the textRun where the insertion needs to be made.
@@ -86,10 +86,10 @@ export function insertTextRuns(
     }
 
     const insertTextRuns = insertBody.textRuns;
-    console.log(currentIndex);
-    console.log(insertIndex);
+    // console.log(currentIndex);
+    // console.log(insertIndex);
 
-    console.log('insert', JSON.stringify(insertTextRuns, null, 2));
+    // console.log('insert', JSON.stringify(insertTextRuns, null, 2));
 
     if (insertTextRuns) {
         for (let i = 0, len = insertTextRuns.length; i < len; i++) {
@@ -348,7 +348,6 @@ export function insertCustomRanges(
 export function deleteTextRuns(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { textRuns } = body;
     const startIndex = currentIndex;
-
     const endIndex = currentIndex + textLength;
     const removeTextRuns: ITextRun[] = [];
 
@@ -379,10 +378,8 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     st: startIndex - startIndex,
                     ed: endIndex - startIndex,
                 });
-                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex - 1);
 
-                textRun.st = segments[0];
-                textRun.ed = segments[1];
+                textRun.ed -= textLength;
             } else if (startIndex >= st && startIndex < ed) {
                 /**
                  * If the cursor start position is within the textRun,
@@ -394,6 +391,7 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     st: startIndex - startIndex,
                     ed: ed - startIndex,
                 });
+
                 textRun.ed = startIndex;
             } else if (endIndex > st && endIndex <= ed) {
                 /**
@@ -406,6 +404,7 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     st: st - startIndex,
                     ed: endIndex - startIndex,
                 });
+
                 textRun.st = endIndex - textLength;
                 textRun.ed -= textLength;
             } else if (st >= endIndex) {

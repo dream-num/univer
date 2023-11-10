@@ -5,7 +5,7 @@ import {
     AddWorksheetMergeVerticalCommand,
     RemoveWorksheetMergeCommand,
 } from '@univerjs/base-sheets';
-import { IMenuButtonItem, IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import { IMenuButtonItem, IMenuSelectorItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { ICommandService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
@@ -18,6 +18,7 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         icon: 'MergeCellSingle',
         tooltip: 'toolbar.mergeCell.main',
         positions: [MenuPosition.TOOLBAR_START],
+        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.SUBITEMS,
         // selections: [...MERGE_CHILDREN],
     };

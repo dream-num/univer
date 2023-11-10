@@ -1,5 +1,10 @@
 import { isRealNum } from '@univerjs/core';
-import { Menu as DesignMenu, MenuItem as DesignMenuItem, SubMenu as DesignSubMenu } from '@univerjs/design';
+import {
+    Menu as DesignMenu,
+    MenuItem as DesignMenuItem,
+    MenuItemGroup as DesignMenuItemGroup,
+    SubMenu as DesignSubMenu,
+} from '@univerjs/design';
 import { MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
@@ -15,6 +20,7 @@ import {
     IMenuSelectorItem,
     isValueOptions,
     IValueOption,
+    MenuGroup,
     MenuItemDefaultValueType,
     MenuItemType,
 } from '../../services/menu/menu';
@@ -44,17 +50,37 @@ function MenuWrapper(props: IBaseMenuProps) {
     if (Array.isArray(menuType)) {
         const menuTypes = menuType.map((type) => menuService.getMenuItems(type));
 
+        const group = menuTypes.map((menuItems) =>
+            menuItems.reduce(
+                (acc, item: IDisplayMenuItem<IMenuItem>) => {
+                    if (item.group) {
+                        acc[item.group] = acc[item.group] ?? [];
+                        acc[item.group].push(item);
+                    } else {
+                        acc[MenuGroup.CONTEXT_MENU_OTHERS] = acc[MenuGroup.CONTEXT_MENU_OTHERS] ?? [];
+                        acc[MenuGroup.CONTEXT_MENU_OTHERS].push(item);
+                    }
+                    return acc;
+                },
+                {} as Record<MenuGroup, Array<IDisplayMenuItem<IMenuItem>>>
+            )
+        );
+
         return (
             <>
-                {menuTypes.map((menuItems) =>
-                    menuItems.map((item: IDisplayMenuItem<IMenuItem>) => (
-                        <MenuItem
-                            key={item.id}
-                            menuItem={item}
-                            onClick={(object: Partial<IValueOption>) => {
-                                onOptionSelect?.({ value: '', label: item.id, ...object });
-                            }}
-                        />
+                {group.map((groupItem) =>
+                    Object.keys(groupItem).map((groupKey: string) => (
+                        <DesignMenuItemGroup key={groupKey} eventKey={groupKey}>
+                            {groupItem[groupKey as unknown as MenuGroup].map((item: IDisplayMenuItem<IMenuItem>) => (
+                                <MenuItem
+                                    key={item.id}
+                                    menuItem={item}
+                                    onClick={(object: Partial<IValueOption>) => {
+                                        onOptionSelect?.({ value: '', label: item.id, ...object });
+                                    }}
+                                />
+                            ))}
+                        </DesignMenuItemGroup>
                     ))
                 )}
             </>
@@ -88,10 +114,6 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
                 <DesignMenuItem
                     key={key}
                     eventKey={key}
-                    className={clsx(
-                        option.disabled ? styles.colsMenuitemDisabled : ''
-                        // String(value) === String(option.value) ? styles.selectItemSelected : '' // Set the background color of Item
-                    )}
                     onClick={() => {
                         onOptionSelect?.({
                             ...option,
@@ -112,6 +134,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
         }
 
         const CustomComponent = componentManager.get(option.id) as React.ComponentType<any>;
+
         return (
             <DesignMenuItem key={key} eventKey={key} className={clsx(styles.menuItemCustom)}>
                 <CustomComponent
@@ -166,7 +189,6 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             <DesignMenuItem
                 key={item.id}
                 eventKey={item.id}
-                className={clsx(disabled ? styles.menuItemDisabled : '')}
                 // disabled={disabled} // FIXME disabled is not working
                 onClick={() => {
                     onClick({ value: inputValue, id: item.id }); // merge cell
@@ -198,7 +220,6 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 <DesignSubMenu
                     key={item.id}
                     eventKey={item.id}
-                    className={clsx(disabled ? styles.menuItemDisabled : '')}
                     popupOffset={[18, 0]}
                     title={
                         <span className={styles.menuItemContent}>
@@ -229,7 +250,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
         }
 
         return (
-            <DesignMenuItem key={item.id} eventKey={item.id} className={clsx(disabled ? styles.menuItemDisabled : '')}>
+            <DesignMenuItem key={item.id} eventKey={item.id}>
                 <span className={styles.menuItemContent}>
                     <CustomLabel
                         title={item.title}
@@ -251,7 +272,6 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             <DesignSubMenu
                 key={item.id}
                 eventKey={item.id}
-                className={clsx(disabled ? styles.menuItemDisabled : '')}
                 popupOffset={[18, 0]}
                 title={
                     <span className={styles.menuItemContent}>

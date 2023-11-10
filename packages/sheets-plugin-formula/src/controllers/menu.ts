@@ -1,4 +1,4 @@
-import { IMenuItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import { IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { IAccessor } from '@wendellhu/redi';
 
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
@@ -9,6 +9,7 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
         id: InsertFunctionOperation.id,
         icon: 'UnderlineSingle',
         tooltip: 'formula.insert.tooltip',
+        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: [

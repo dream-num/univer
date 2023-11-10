@@ -41,17 +41,18 @@ export function MenuBar() {
 
     return (
         <div className={styles.menubar}>
-            {group.map((item, index) => (
-                <a
-                    key={index}
-                    className={clsx(styles.menubarItem, {
-                        [styles.menubarItemActive]: item.name === position,
-                    })}
-                    onClick={() => setPosition(item.name)}
-                >
-                    {localeService.t(item.name)}
-                </a>
-            ))}
+            {group.length > 1 &&
+                group.map((item, index) => (
+                    <a
+                        key={index}
+                        className={clsx(styles.menubarItem, {
+                            [styles.menubarItemActive]: item.name === position,
+                        })}
+                        onClick={() => setPosition(item.name)}
+                    >
+                        {localeService.t(item.name)}
+                    </a>
+                ))}
         </div>
     );
 }

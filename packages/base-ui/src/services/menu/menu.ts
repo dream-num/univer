@@ -16,7 +16,17 @@ export const enum MenuPosition {
 
 export const enum MenuGroup {
     TOOLBAR_HISTORY,
+    TOOLBAR_FORMAT,
+    TOOLBAR_LAYOUT,
+    TOOLBAR_FORMULAS_INSERT,
+    TOOLBAR_FORMULAS_VIEW,
+    TOOLBAR_FILE,
     TOOLBAR_OTHERS,
+
+    CONTEXT_MENU_FORMAT,
+    CONTEXT_MENU_LAYOUT,
+    CONTEXT_MENU_DATA,
+    CONTEXT_MENU_OTHERS,
 }
 
 export const enum MenuItemType {

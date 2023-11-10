@@ -46,6 +46,7 @@ import {
     CutCommand,
     IMenuButtonItem,
     IMenuSelectorItem,
+    MenuGroup,
     MenuItemType,
     MenuPosition,
     PasteCommand,
@@ -98,6 +99,7 @@ export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     return {
         id: SetOnceFormatPainterCommand.id,
         subId: SetInfiniteFormatPainterCommand.id,
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'BrushSingle',
         title: 'Format Painter',
@@ -129,6 +131,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeBoldCommand.id,
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'BoldSingle',
         title: 'Set bold',
@@ -181,6 +184,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeItalicCommand.id,
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'ItalicSingle',
         title: 'Set italic',
@@ -231,6 +235,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeUnderlineCommand.id,
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'UnderlineSingle',
         title: 'Set underline',
@@ -281,6 +286,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeStrickThroughCommand.id,
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'StrikethroughSingle',
         title: 'Set strike through',
@@ -467,10 +473,9 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     return {
         id: SetRangeFontFamilyCommand.id,
         tooltip: 'toolbar.font',
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.SELECTOR,
-
         label: FONT_FAMILY_COMPONENT,
-
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_FAMILY_CHILDREN,
         disabled$: new Observable((subscriber) => {
@@ -520,8 +525,9 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeFontSizeCommand.id,
-        tooltip: 'toolbar.fontSize',
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.SELECTOR,
+        tooltip: 'toolbar.fontSize',
         label: {
             name: FONT_SIZE_COMPONENT,
             props: {
@@ -585,6 +591,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         id: SetRangeTextColorCommand.id,
         icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: [
@@ -622,6 +629,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
     return {
         id: SetBackgroundColorCommand.id,
         tooltip: 'toolbar.fillColor.main',
+        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         icon: 'PaintBucket',
@@ -671,6 +679,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
         icon: HORIZONTAL_ALIGN_CHILDREN[0].icon,
         positions: [MenuPosition.TOOLBAR_START],
         tooltip: 'toolbar.horizontalAlignMode.main',
+        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.SELECTOR,
         selections: HORIZONTAL_ALIGN_CHILDREN,
         value$: new Observable<HorizontalAlign>((subscriber) => {
@@ -723,6 +732,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
         id: SetVerticalTextAlignCommand.id,
         icon: VERTICAL_ALIGN_CHILDREN[0].icon,
         tooltip: 'toolbar.verticalAlignMode.main',
+        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: VERTICAL_ALIGN_CHILDREN,
@@ -776,6 +786,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
         id: SetTextWrapCommand.id,
         tooltip: 'toolbar.textWrapMode.main',
         icon: TEXT_WRAP_CHILDREN[0].icon,
+        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: TEXT_WRAP_CHILDREN,
@@ -844,6 +855,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         id: SetTextRotationCommand.id,
         tooltip: 'toolbar.textRotateMode.main',
         icon: TEXT_ROTATE_CHILDREN[0].icon,
+        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.SELECTOR,
         selections: TEXT_ROTATE_CHILDREN,
         positions: [MenuPosition.TOOLBAR_START],
@@ -878,6 +890,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
 export function CopyMenuItemFactory(): IMenuButtonItem {
     return {
         id: CopyCommand.id,
+        group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.copy',
         icon: 'Copy',
@@ -892,6 +905,7 @@ export function CopyMenuItemFactory(): IMenuButtonItem {
 export function CutMenuItemFactory(): IMenuButtonItem {
     return {
         id: CutCommand.id,
+        group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         title: 'contextMenu.cut',
         positions: [
@@ -905,6 +919,7 @@ export function CutMenuItemFactory(): IMenuButtonItem {
 export function PasteMenuItemFactory(): IMenuButtonItem {
     return {
         id: PasteCommand.id,
+        group: MenuGroup.CONTEXT_MENU_FORMAT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.paste',
         icon: 'PasteSpecial',
@@ -917,17 +932,28 @@ export function PasteMenuItemFactory(): IMenuButtonItem {
 }
 
 // #endregion
+const CLEAR_SELECTION_MENU_ID = 'sheet.menu.clear-selection';
+export function ClearSelectionMenuItemFactory(): IMenuSelectorItem<string> {
+    return {
+        id: CLEAR_SELECTION_MENU_ID,
+        group: MenuGroup.CONTEXT_MENU_FORMAT,
+        type: MenuItemType.SUBITEMS,
+        icon: 'ClearFormat',
+        title: 'rightClick.clearSelection',
+        positions: [
+            MenuPosition.CONTEXT_MENU,
+            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
+            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
+        ],
+    };
+}
 
 export function ClearSelectionContentMenuItemFactory(): IMenuButtonItem {
     return {
         id: ClearSelectionContentCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearContent',
-        positions: [
-            MenuPosition.CONTEXT_MENU,
-            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
-            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
-        ],
+        positions: [CLEAR_SELECTION_MENU_ID],
     };
 }
 export function ClearSelectionFormatMenuItemFactory(): IMenuButtonItem {
@@ -935,11 +961,7 @@ export function ClearSelectionFormatMenuItemFactory(): IMenuButtonItem {
         id: ClearSelectionFormatCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearFormat',
-        positions: [
-            MenuPosition.CONTEXT_MENU,
-            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
-            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
-        ],
+        positions: [CLEAR_SELECTION_MENU_ID],
     };
 }
 export function ClearSelectionAllMenuItemFactory(): IMenuButtonItem {
@@ -947,11 +969,41 @@ export function ClearSelectionAllMenuItemFactory(): IMenuButtonItem {
         id: ClearSelectionAllCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.clearAll',
-        positions: [
-            MenuPosition.CONTEXT_MENU,
-            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
-            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
-        ],
+        positions: [CLEAR_SELECTION_MENU_ID],
+    };
+}
+
+const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
+export function ColInsertMenuItemFactory(): IMenuSelectorItem<string> {
+    return {
+        id: COL_INSERT_MENU_ID,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.SUBITEMS,
+        title: 'rightClick.insert',
+        icon: 'ClearFormat',
+        positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
+    };
+}
+const ROW_INSERT_MENU_ID = 'sheet.menu.row-insert';
+export function RowInsertMenuItemFactory(): IMenuSelectorItem<string> {
+    return {
+        id: ROW_INSERT_MENU_ID,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.SUBITEMS,
+        title: 'rightClick.insert',
+        icon: 'ClearFormat',
+        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
+    };
+}
+const CELL_INSERT_MENU_ID = 'sheet.menu.cell-insert';
+export function CellInsertMenuItemFactory(): IMenuSelectorItem<string> {
+    return {
+        id: CELL_INSERT_MENU_ID,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.SUBITEMS,
+        title: 'rightClick.insert',
+        icon: 'ClearFormat',
+        positions: [MenuPosition.CONTEXT_MENU],
     };
 }
 
@@ -962,7 +1014,7 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
         id: InsertRowBeforeCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertRowBefore',
-        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU, MenuPosition.CONTEXT_MENU],
+        positions: [ROW_INSERT_MENU_ID, CELL_INSERT_MENU_ID],
         hidden$: new Observable((observer) => {
             // if there are multi selections this item should be hidden
             const selections = selectionManager.getSelections();
@@ -976,7 +1028,7 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
     return {
         id: InsertRowAfterCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
+        positions: [ROW_INSERT_MENU_ID],
         title: 'rightClick.insertRow',
         hidden$: new Observable((observer) => {
             // if there are multi selections this item should be hidden
@@ -991,7 +1043,7 @@ export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
     return {
         id: InsertColBeforeCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU, MenuPosition.CONTEXT_MENU],
+        positions: [COL_INSERT_MENU_ID, CELL_INSERT_MENU_ID],
         title: 'rightClick.insertColumnBefore',
         hidden$: new Observable((observer) => {
             // if there are multi selections this item should be hidden
@@ -1006,7 +1058,7 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
     return {
         id: InsertColAfterCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
+        positions: [COL_INSERT_MENU_ID],
         title: 'rightClick.insertColumn',
         hidden$: new Observable((observer) => {
             // if there are multi selections this item should be hidden
@@ -1016,9 +1068,80 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
     };
 }
 
+export function InsertRangeMoveRightMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: InsertRangeMoveRightCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'rightClick.moveRight',
+        positions: [CELL_INSERT_MENU_ID],
+    };
+}
+
+export function InsertRangeMoveDownMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: InsertRangeMoveDownCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'rightClick.moveDown',
+        positions: [CELL_INSERT_MENU_ID],
+    };
+}
+
+const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';
+export function DeleteRangeMenuItemFactory(): IMenuSelectorItem<string> {
+    return {
+        id: DELETE_RANGE_MENU_ID,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.SUBITEMS,
+        title: 'rightClick.delete',
+        icon: 'ClearFormat',
+        positions: [MenuPosition.CONTEXT_MENU],
+    };
+}
+
+export function RemoveColMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: RemoveColCommand.id,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.BUTTON,
+        positions: [DELETE_RANGE_MENU_ID, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
+        title: 'rightClick.deleteSelectedColumn',
+    };
+}
+
+export function RemoveRowMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: RemoveRowCommand.id,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.BUTTON,
+        positions: [DELETE_RANGE_MENU_ID, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
+        title: 'rightClick.deleteSelectedRow',
+    };
+}
+
+export function DeleteRangeMoveLeftMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: DeleteRangeMoveLeftCommand.id,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.BUTTON,
+        title: 'rightClick.moveLeft',
+        positions: [DELETE_RANGE_MENU_ID],
+    };
+}
+
+export function DeleteRangeMoveUpMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: DeleteRangeMoveUpCommand.id,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.BUTTON,
+        title: 'rightClick.moveUp',
+        positions: [DELETE_RANGE_MENU_ID],
+    };
+}
+
 export function FitContentMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetWorksheetRowIsAutoHeightCommand.id,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.fitContent',
@@ -1038,18 +1161,10 @@ export function FrozenMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-export function RemoveRowMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: RemoveRowCommand.id,
-        type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
-        title: 'rightClick.deleteSelectedRow',
-    };
-}
-
 export function HideRowMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetRowHiddenCommand.id,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.hideSelectedRow',
@@ -1059,6 +1174,7 @@ export function HideRowMenuItemFactory(): IMenuButtonItem {
 export function HideColMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetColHiddenCommand.id,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.hideSelectedColumn',
@@ -1091,6 +1207,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: SetSelectedRowsVisibleCommand.id,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.showHideRow',
@@ -1138,6 +1255,7 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: SetSelectedColsVisibleCommand.id,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.showHideColumn',
@@ -1158,15 +1276,6 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     };
 }
 
-export function RemoveColMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: RemoveColCommand.id,
-        type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
-        title: 'rightClick.deleteSelectedColumn',
-    };
-}
-
 export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonItem<number> {
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -1174,6 +1283,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
     return {
         id: SetRowHeightCommand.id,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         label: {
@@ -1219,6 +1329,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
     return {
         id: SetColWidthCommand.id,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         label: {
@@ -1255,61 +1366,6 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             update();
             return disposable.dispose;
         }),
-    };
-}
-
-const DELETE_RANGE_MENU_ID = 'sheet.menu.delete-range';
-export function DeleteRangeMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
-        id: DELETE_RANGE_MENU_ID,
-        type: MenuItemType.SUBITEMS,
-        title: 'rightClick.deleteCell',
-        positions: [MenuPosition.CONTEXT_MENU],
-    };
-}
-
-export function DeleteRangeMoveLeftMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: DeleteRangeMoveLeftCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.moveLeft',
-        positions: DELETE_RANGE_MENU_ID,
-    };
-}
-
-export function DeleteRangeMoveUpMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: DeleteRangeMoveUpCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.moveUp',
-        positions: DELETE_RANGE_MENU_ID,
-    };
-}
-const INSERT_RANGE_MENU_ID = 'sheet.menu.insert-range';
-export function InsertRangeMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
-        id: INSERT_RANGE_MENU_ID,
-        type: MenuItemType.SUBITEMS,
-        title: 'rightClick.insertCell',
-        positions: [MenuPosition.CONTEXT_MENU],
-    };
-}
-
-export function InsertRangeMoveRightMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: InsertRangeMoveRightCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.moveRight',
-        positions: INSERT_RANGE_MENU_ID,
-    };
-}
-
-export function InsertRangeMoveDownMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: InsertRangeMoveDownCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.moveDown',
-        positions: INSERT_RANGE_MENU_ID,
     };
 }
 

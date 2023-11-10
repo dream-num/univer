@@ -1,6 +1,12 @@
 # Univer Contributing Guide
 
-## Develop
+Welcome, and thank you for your interest in contributing to Univer!
+
+## Asking Questions
+
+## Reporting Issues
+
+## Contributing Code
 
 ### Install dependencies
 
@@ -20,6 +26,10 @@ pnmp install
 npm run dev:sheet
 ```
 
+### Architecture
+
+Please refer to the architecture doc. The [Chinese version](./docs/zh/achitecture.md).
+
 ### Debugging
 
 We provided some Visual Studio Code (vscode) tasks to help you debug in vscode.
@@ -28,8 +38,7 @@ After stating dev server, you can launch Edge or Chrome instance and debug in vs
 
 ![image](https://github.com/dream-num/univer/assets/12122021/25da436c-2155-4ea0-8646-ff3b3dc23112)
 
-
-## Code Style
+### Code Style
 
 ### Source Code Organization
 
@@ -79,4 +88,3 @@ To ensure code quality and consistency, please adhere to the following guideline
 * Do not expose properties or methods those are not necessary to be public.
 * Group related methods or properties together. Do not always use blank lines to separate them.
 * Keep your concepts consistent by naming your variables consistently.
-

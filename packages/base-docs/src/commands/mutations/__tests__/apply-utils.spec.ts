@@ -2,7 +2,7 @@
 import { BooleanNumber, IDocumentBody, ITextRun, Nullable, UpdateDocsAttributeType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { deleteTextRuns } from '../functions/common';
+import { deleteTextRuns, insertTextRuns } from '../functions/common';
 import { coverTextRuns } from '../functions/update-apply';
 
 interface IMockBody {
@@ -28,6 +28,7 @@ describe('example', () => {
                     ed: 20,
                     ts: {
                         bl: BooleanNumber.FALSE,
+                        it: BooleanNumber.TRUE,
                     },
                 },
                 {
@@ -267,6 +268,89 @@ describe('example', () => {
             expect(needUpdateTextRuns[1]?.ts?.bl).toBe(BooleanNumber.FALSE);
             expect(needUpdateTextRuns[2]?.ts?.bl).toBe(BooleanNumber.FALSE);
             expect(needUpdateTextRuns[3]?.ts?.bl).toBe(BooleanNumber.TRUE);
+        });
+    });
+
+    describe('test cases in function insertTextRuns', () => {
+        it('it should pass the case when the insertTextRuns is at the beginning of one testRun', async () => {
+            insertTextRuns(
+                body as IDocumentBody,
+                {
+                    textRuns: updateTextRuns,
+                } as IDocumentBody,
+                10,
+                0
+            );
+
+            expect(body?.textRuns.length).toBe(4);
+        });
+
+        it('it should pass the case when the insertTextRuns is between original testRuns', async () => {
+            insertTextRuns(
+                body as IDocumentBody,
+                {
+                    textRuns: updateTextRuns,
+                } as IDocumentBody,
+                10,
+                25
+            );
+
+            expect(body?.textRuns.length).toBe(4);
+            expect(body?.textRuns[0].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns[1].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns[2].ts?.bl).toBe(BooleanNumber.TRUE);
+            expect(body?.textRuns[3].ts?.bl).toBe(BooleanNumber.FALSE);
+        });
+
+        it('it should pass the case when the insertTextRuns is at the end of one testRun', async () => {
+            insertTextRuns(
+                body as IDocumentBody,
+                {
+                    textRuns: updateTextRuns,
+                } as IDocumentBody,
+                10,
+                15
+            );
+
+            expect(body?.textRuns.length).toBe(4);
+        });
+
+        it('it should pass the case when the insertTextRuns is at the in the middle of one testRun', async () => {
+            insertTextRuns(
+                body as IDocumentBody,
+                {
+                    textRuns: updateTextRuns,
+                } as IDocumentBody,
+                10,
+                10
+            );
+
+            expect(body?.textRuns.length).toBe(5);
+        });
+
+        it('it should pass the case when the insertTextRuns has the same style with the origin textRun, and should be merged', async () => {
+            const updateTextRuns = [
+                {
+                    st: 0,
+                    ed: 10,
+                    ts: {
+                        bl: BooleanNumber.FALSE,
+                    },
+                },
+            ];
+            insertTextRuns(
+                body as IDocumentBody,
+                {
+                    textRuns: updateTextRuns,
+                } as IDocumentBody,
+                10,
+                10
+            );
+
+            expect(body?.textRuns.length).toBe(3);
+            expect(body?.textRuns[0].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns[1].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns[2].ts?.bl).toBe(BooleanNumber.FALSE);
         });
     });
 });

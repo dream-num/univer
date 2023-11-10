@@ -66,8 +66,6 @@ export function insertTextRuns(
     const len = textRuns.length;
     let hasInserted = false;
 
-    console.log('old', JSON.stringify(textRuns, null, 2));
-
     const insertTextRuns = insertBody.textRuns ?? [];
     if (insertTextRuns.length) {
         for (let i = 0, len = insertTextRuns.length; i < len; i++) {
@@ -134,10 +132,6 @@ export function insertTextRuns(
         hasInserted = true;
         newTextRuns.push(...insertTextRuns);
     }
-
-    console.log(currentIndex);
-
-    console.log('insert', JSON.stringify(insertTextRuns, null, 2));
 
     body.textRuns = normalizeTextRuns(newTextRuns);
 }

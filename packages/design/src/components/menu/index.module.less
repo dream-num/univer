@@ -1,14 +1,16 @@
 .menu {
-    padding: var(--padding-base);
+    box-sizing: border-box;
     margin: 0;
+    padding: var(--padding-base);
+
     font-size: var(--font-size-xs);
     list-style: none;
+
     background-color: rgb(var(--bg-color-secondary));
     border: 1px solid rgb(var(--border-color));
     border-radius: var(--border-radius-lg);
-    box-shadow: var(--box-shadow-base);
-    box-sizing: border-box;
     outline: none;
+    box-shadow: var(--box-shadow-base);
 
     &-vertical {
         display: grid;
@@ -30,10 +32,10 @@
     }
 
     &-item-group-list {
-        margin: 0;
-        padding: 0;
         display: grid;
         gap: var(--margin-xxs);
+        margin: 0;
+        padding: 0;
     }
 
     &-item-group-title {
@@ -46,9 +48,9 @@
     }
 
     &-item-selected {
-        background-color: rgb(var(--bg-color-hover));
         // fix chrome render bug
         transform: translateZ(0);
+        background-color: rgb(var(--bg-color-hover));
     }
 
     &-submenu-selected {
@@ -69,20 +71,24 @@
 
     &-item {
         display: flex;
-        align-items: center;
         gap: var(--margin-xs);
+        align-items: center;
     }
 
     &-item,
     &-submenu {
+        cursor: pointer;
+
         position: relative;
+
+        box-sizing: border-box;
         margin: 0;
         padding: var(--padding-xs);
+
         white-space: nowrap;
-        border-radius: var(--border-radius-base);
         list-style: none;
-        box-sizing: border-box;
-        cursor: pointer;
+
+        border-radius: var(--border-radius-base);
 
         // Disabled state sets text to gray and nukes hover/tab effects
         &.menu-item-disabled,
@@ -111,17 +117,19 @@
     .menu-item {
         &-more-icon {
             margin-left: var(--margin-xs);
-            color: rgb(var(--text-color));
             font-size: var(--font-size-sm);
+            color: rgb(var(--text-color));
         }
     }
 
     &-horizontal {
+        overflow: hidden;
+
+        white-space: nowrap;
+
         border: none;
         border-bottom: 1px solid rgb(var(--border-color));
         box-shadow: none;
-        white-space: nowrap;
-        overflow: hidden;
 
         & > .menu-item,
         & > .menu-submenu > .menu-submenu-title {
@@ -130,9 +138,9 @@
 
         & > .menu-submenu,
         & > .menu-item {
-            border-bottom: 2px solid transparent;
             display: inline-block;
             vertical-align: bottom;
+            border-bottom: 2px solid transparent;
         }
     }
 
@@ -142,24 +150,28 @@
     &-inline {
         & > .menu-item,
         & > .menu-submenu > .menu-submenu-title {
-            width: 100%;
-            min-height: 28px;
-            padding: var(--padding-xs) var(--padding-sm);
-            box-sizing: border-box;
             display: flex;
             align-items: center;
             justify-content: space-between;
+
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 28px;
+            padding: var(--padding-xs) var(--padding-sm);
         }
+
         .menu-submenu-arrow {
+            position: absolute;
+            right: 16px;
+
             display: inline-block;
+
             font-size: inherit;
-            vertical-align: baseline;
+            line-height: 1.5em;
             text-align: center;
             text-transform: none;
             text-rendering: auto;
-            position: absolute;
-            right: 16px;
-            line-height: 1.5em;
+            vertical-align: baseline;
         }
     }
 
@@ -172,111 +184,120 @@
         & > .menu-item,
         & > .menu-submenu > .menu-submenu-title {
             padding-top: 8px;
-            padding-bottom: 8px;
             padding-right: 0;
+            padding-bottom: 8px;
         }
     }
 
     .effect() {
+        transform-origin: 0 0;
         animation-duration: 0.3s;
         animation-fill-mode: both;
-        transform-origin: 0 0;
     }
 
     &-open {
         &-slide-up-enter,
         &-slide-up-appear {
             .effect();
+
             opacity: 0;
-            animation-timing-function: cubic-bezier(0.08, 0.82, 0.17, 1);
             animation-play-state: paused;
+            animation-timing-function: cubic-bezier(0.08, 0.82, 0.17, 1);
         }
 
         &-slide-up-leave {
             .effect();
+
             opacity: 1;
-            animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.34);
             animation-play-state: paused;
+            animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.34);
         }
 
         &-slide-up-enter&-slide-up-enter-active,
         &-slide-up-appear&-slide-up-appear-active {
-            animation-name: rcMenuOpenSlideUpIn;
+            animation-name: menu-open-slide-up-in;
             animation-play-state: running;
         }
 
         &-slide-up-leave&-slide-up-leave-active {
-            animation-name: rcMenuOpenSlideUpOut;
+            animation-name: menu-open-slide-up-out;
             animation-play-state: running;
         }
 
-        @keyframes rcMenuOpenSlideUpIn {
+        @keyframes menu-open-slide-up-in {
             0% {
-                opacity: 0;
                 transform-origin: 0% 0%;
                 transform: scaleY(0);
+                opacity: 0;
             }
+
             100% {
-                opacity: 1;
                 transform-origin: 0% 0%;
                 transform: scaleY(1);
+                opacity: 1;
             }
         }
-        @keyframes rcMenuOpenSlideUpOut {
+
+        @keyframes menu-open-slide-up-out {
             0% {
-                opacity: 1;
                 transform-origin: 0% 0%;
                 transform: scaleY(1);
+                opacity: 1;
             }
+
             100% {
-                opacity: 0;
                 transform-origin: 0% 0%;
                 transform: scaleY(0);
+                opacity: 0;
             }
         }
 
         &-zoom-enter,
         &-zoom-appear {
             opacity: 0;
-            .effect();
-            animation-timing-function: cubic-bezier(0.08, 0.82, 0.17, 1);
             animation-play-state: paused;
+            animation-timing-function: cubic-bezier(0.08, 0.82, 0.17, 1);
+            .effect();
         }
 
         &-zoom-leave {
             .effect();
-            animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.34);
+
             animation-play-state: paused;
+            animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.34);
         }
 
         &-zoom-enter&-zoom-enter-active,
         &-zoom-appear&-zoom-appear-active {
-            animation-name: rcMenuOpenZoomIn;
+            animation-name: menu-open-zoom-in;
             animation-play-state: running;
         }
 
         &-zoom-leave&-zoom-leave-active {
-            animation-name: rcMenuOpenZoomOut;
+            animation-name: menu-open-zoom-out;
             animation-play-state: running;
         }
 
-        @keyframes rcMenuOpenZoomIn {
+        @keyframes menu-open-zoom-in {
             0% {
-                opacity: 0;
                 transform: scale(0, 0);
+                opacity: 0;
             }
+
             100% {
-                opacity: 1;
                 transform: scale(1, 1);
+                opacity: 1;
             }
         }
-        @keyframes rcMenuOpenZoomOut {
+
+        @keyframes menu-open-zoom-out {
             0% {
                 transform: scale(1, 1);
             }
+
             100% {
-                opacity: 0;
                 transform: scale(0, 0);
+                opacity: 0;
             }
         }
     }

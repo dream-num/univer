@@ -1,27 +1,32 @@
 @toolbar-btn-size: 24px;
 
 .toolbar-btn {
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     width: @toolbar-btn-size;
     height: @toolbar-btn-size;
     padding: 0;
+
     font-size: var(--font-size-base);
-    background-color: transparent;
     color: rgb(var(--text-color));
+
+    background-color: transparent;
     border: none;
     border-radius: var(--border-radius-base);
-    display: flex;
-    justify-content: center;
-    align-items: center;
     outline: none;
-    cursor: pointer;
 
     &:not([disabled]):hover {
         background-color: rgb(var(--grey-100));
         border-color: transparent;
     }
+
     &[disabled] {
-        color: rgb(var(--grey-200));
         cursor: not-allowed;
+        color: rgb(var(--grey-200));
     }
 
     &-active {
@@ -30,4 +35,3 @@
         border-color: transparent;
     }
 }
-

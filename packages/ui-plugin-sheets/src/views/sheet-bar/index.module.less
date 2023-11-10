@@ -4,13 +4,16 @@
 
 .sheet-bar {
     position: relative;
-    width: calc(100% - @right-width);
-    height: 100%;
-    max-width: @sheet-bar-max-width;
+
     display: flex;
-    flex-direction: row;
-    background-color: rgb(var(--bg-color));
     flex: 1;
+    flex-direction: row;
+
+    width: calc(100% - @right-width);
+    max-width: @sheet-bar-max-width;
+    height: 100%;
+
+    background-color: rgb(var(--bg-color));
 }
 
 .sheet-bar-options {

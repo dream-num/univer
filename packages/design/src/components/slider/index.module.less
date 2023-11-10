@@ -17,16 +17,18 @@
 
 .slider {
     display: flex;
-    align-items: center;
     gap: var(--margin-xxs);
+    align-items: center;
 
     &-rail {
         @padding: (@slider-handle-size / 2);
 
         position: relative;
+
         width: @slider-width;
         height: @slider-height;
         padding: 0 @padding;
+
         background-color: @slider-bg;
         border-radius: @slider-radius;
     }
@@ -37,16 +39,21 @@
     }
 
     &-handle {
+        cursor: pointer;
+
         position: absolute;
         top: calc(50% - @slider-handle-size / 2);
+        transform: translateX(-50%);
+
         width: @slider-handle-size;
         height: @slider-handle-size;
+
         background-color: rgb(var(--color-white));
         border-radius: 50%;
-        box-shadow: 0 0 6px 0 rgba(0, 0, 0, .1);
-        transform: translateX(-50%);
-        cursor: pointer;
+        box-shadow: 0 0 6px 0 rgb(0 0 0 / 10%);
+
         transition: background .2s;
+
         &:hover {
             background-color: @slider-parts-hover-color;
             box-shadow: none;
@@ -54,28 +61,36 @@
     }
 
     &-reset-point {
+        cursor: pointer;
+
         position: absolute;
-        width: @slider-height * 2;
-        height: @slider-height;
-        background-color: rgb(var(--color-white));
-        border-radius: 50%;
         top: 50%;
         left: 50%;
-        box-sizing: border-box;
         transform: translate(-50%, -50%);
-        cursor: pointer;
+
+        box-sizing: border-box;
+        width: @slider-height * 2;
+        height: @slider-height;
+
+        background-color: rgb(var(--color-white));
+        border-radius: 50%;
     }
 
     &-value {
+        cursor: pointer;
+
         width: @slider-value-width;
         height: @slider-value-height;
-        text-align: center;
-        color: rgb(var(--text-color-secondary));
+
         font-size: var(--font-size-xs);
         line-height: 2;
+        color: rgb(var(--text-color-secondary));
+        text-align: center;
+
         border-radius: var(--border-radius-base);
-        cursor: pointer;
+
         transition: all .2s;
+
         &:hover {
             background-color: @slider-parts-hover-color;
         }
@@ -86,27 +101,36 @@
     }
 
     &-shortcuts {
+        transform: translateX(-(@slider-value-width / 2));
+
+        display: grid;
+        gap: var(--margin-xxs);
+        align-items: center;
+
+        box-sizing: border-box;
         width: 128px;
         padding: var(--padding-sm);
+
         font-size: var(--font-size-xs);
+
         background-color: rgb(var(--color-white));
         border: 1px solid rgb(var(--border-color));
         border-radius: var(--border-radius-lg);
         box-shadow: var(--box-shadow-lg);
-        box-sizing: border-box;
-        display: grid;
-        align-items: center;
-        gap: var(--margin-xxs);
-        transform: translateX(-(@slider-value-width / 2));
     }
 
     &-shortcut {
-        position: relative;
-        padding: var(--padding-xs) 0 var(--padding-xs) 36px;
-        color: rgb(var(--text-color));
-        border-radius: var(--border-radius-base);
-        box-sizing: border-box;
         cursor: pointer;
+
+        position: relative;
+
+        box-sizing: border-box;
+        padding: var(--padding-xs) 0 var(--padding-xs) 36px;
+
+        color: rgb(var(--text-color));
+
+        border-radius: var(--border-radius-base);
+
         transition: background .2s;
 
         &:hover {
@@ -116,8 +140,8 @@
 
     &-shortcut-icon {
         position: absolute;
-        left: var(--padding-xs);
         top: 50%;
+        left: var(--padding-xs);
         transform: translateY(-50%);
     }
 

@@ -5,25 +5,31 @@
         input {
             width: 80px;
             height: 24px;
-            padding: 0 5px;
             margin-left: 5px;
+            padding: 0 5px;
         }
     }
 
     ul {
-        height: 240px;
-        border: 1px solid var(--gray-5);
         overflow-y: auto;
-        list-style: none;
+
+        height: 240px;
         padding: 0;
 
+        list-style: none;
+
+        border: 1px solid var(--gray-5);
+
         li {
-            height: 30px;
-            padding: 0 20px;
-            border-bottom: 1px solid #dfdfdf;
-            line-height: 30px;
             display: flex;
             justify-content: space-between;
+
+            height: 30px;
+            padding: 0 20px;
+
+            line-height: 30px;
+
+            border-bottom: 1px solid #dfdfdf;
         }
 
         .format-selected {
@@ -57,7 +63,7 @@
 
         ul {
             .select-item {
-                padding: 0 14px 0 14px;
+                padding: 0 14px;
             }
         }
     }

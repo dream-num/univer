@@ -1,18 +1,23 @@
 .button {
-    position: relative;
-    white-space: nowrap;
-    text-align: center;
-    line-height: 1;
-    border: 1px solid rgb(var(--border-color));
-    border-radius: var(--border-radius-base);
-    display: inline-block;
     cursor: pointer;
     user-select: none;
+
+    position: relative;
+
+    display: inline-block;
+
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+
+    border: 1px solid rgb(var(--border-color));
+    border-radius: var(--border-radius-base);
+
     transition: all 0.15s;
 
     &[disabled] {
-        color: rgb(var(--grey-300));
         cursor: not-allowed;
+        color: rgb(var(--grey-300));
     }
 
     /** type */

@@ -1,6 +1,6 @@
 .input {
-    color: rgb(var(--text-color));
     box-sizing: border-box;
+    color: rgb(var(--text-color));
 
     &::selection {
         color: rgb(var(--color-white));
@@ -12,30 +12,33 @@
     // }
 
     &-affix-wrapper {
+        overflow: hidden;
+
+        box-sizing: border-box;
+
         border: 1px solid rgb(var(--border-color));
         border-radius: var(--border-radius-base);
-        box-sizing: border-box;
-        overflow: hidden;
+
         transition: all 0.15s;
 
         &-mini {
-            font-size: var(--font-size-xs);
             padding: 2px var(--padding-lg);
+            font-size: var(--font-size-xs);
         }
 
         &-small {
-            font-size: var(--font-size-xs);
             padding: 6px var(--padding-lg);
+            font-size: var(--font-size-xs);
         }
 
         &-middle {
-            font-size: var(--font-size-sm);
             padding: 6px var(--padding-lg);
+            font-size: var(--font-size-sm);
         }
 
         &-large {
-            font-size: var(--font-size-sm);
             padding: 8px var(--padding-lg);
+            font-size: var(--font-size-sm);
         }
 
         &:hover,
@@ -44,8 +47,8 @@
         }
 
         &-disabled {
-            border-color: rgb(var(--border-color));
             cursor: not-allowed;
+            border-color: rgb(var(--border-color));
 
             &:hover {
                 border-color: rgb(var(--border-color));
@@ -56,10 +59,11 @@
             padding: 0;
             border: none;
             outline: none;
+
             &[disabled] {
+                cursor: inherit;
                 color: rgb(var(--grey-200));
                 background-color: rgb(var(--bg-color-secondary));
-                cursor: inherit;
             }
         }
     }

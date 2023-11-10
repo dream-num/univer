@@ -39,6 +39,7 @@ import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT, ORIENTATION_TYPE } fr
 import { getRotateOffsetAndFarthestHypotenuse, getRotateOrientation } from '../../basics/draw';
 import { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import {
+    degToRad,
     fixLineWidthByScale,
     getCellByIndex,
     getCellInfoInMergeData,
@@ -57,11 +58,12 @@ import { BorderCache, IStylesCache } from './interfaces';
 /**
  * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
  * @param documentSkeleton Data of the document's ViewModel
- * @param angle The rotation angle of an Excel cell
+ * @param angleInDegree The rotation angle of an Excel cell, it's **degree**
  * @returns
  */
-export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angle: number = 0) {
+export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angleInDegree: number = 0) {
     const skeletonData = documentSkeleton?.getSkeletonData();
+    const angle = degToRad(angleInDegree);
 
     if (!skeletonData) {
         return;
@@ -79,10 +81,12 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
 
     const orientation = getRotateOrientation(angle);
     const widthArray: Array<{ rotatedWidth: number; spaceWidth: number }> = [];
+
     columnIterator([lastPage], (column: IDocumentSkeletonColumn) => {
         const { lines, width: columnWidth, spaceWidth } = column;
 
         const { rotatedHeight, rotatedWidth } = getRotateOffsetAndFarthestHypotenuse(lines, columnWidth, angle);
+
         allRotatedHeight += rotatedHeight;
 
         widthArray.push({ rotatedWidth, spaceWidth });
@@ -92,6 +96,7 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
     const sinTheta = Math.sin(angle);
 
     const widthCount = widthArray.length;
+
     for (let i = 0; i < widthCount; i++) {
         const { rotatedWidth, spaceWidth } = widthArray[i];
 
@@ -430,6 +435,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             let { a: angle } = textRotation as ITextRotation;
             const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
+
             if (isVertical === BooleanNumber.TRUE) {
                 angle = DEFAULT_ROTATE_ANGLE;
             }

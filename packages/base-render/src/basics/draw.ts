@@ -209,10 +209,12 @@ export function getRotateOffsetAndFarthestHypotenuse(
 
     const orientation = getRotateOrientation(vertexAngle);
     const linesCount = lines.length;
+
     vertexAngle = Math.abs(vertexAngle);
     const tanTheta = Math.tan(vertexAngle);
     const sinTheta = Math.sin(vertexAngle);
     const cosTheta = Math.cos(vertexAngle);
+
     if (orientation === ORIENTATION_TYPE.UP) {
         let cumRectHeight = 0;
 
@@ -221,7 +223,7 @@ export function getRotateOffsetAndFarthestHypotenuse(
             const { lineHeight: rectHeight = 0 } = line;
             cumRectHeight += i === 0 ? 0 : rectHeight;
 
-            const currentRotateHeight = (rectHeight / tanTheta + rectWidth) * sinTheta;
+            const currentRotateHeight = rectWidth * sinTheta + rectHeight * cosTheta;
 
             rotateTranslateXList.push(cumRectHeight / tanTheta);
 
@@ -279,7 +281,7 @@ export function getRotateOffsetAndFarthestHypotenuse(
             }
         }
 
-        let cumRotateHeightFix = lines[maxOffsetLineIndex].lineHeight || 0;
+        let cumRotateHeightFix = lines[maxOffsetLineIndex]?.lineHeight || 0;
 
         let cumBlowValue = 0;
         for (let i = maxOffsetLineIndex + 1; i <= linesCount - 1; i++) {

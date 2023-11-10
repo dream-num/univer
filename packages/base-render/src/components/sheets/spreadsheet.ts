@@ -493,7 +493,8 @@ export class Spreadsheet extends SheetComponent {
                     }
 
                     // wrap and angle handler
-                    const { documentSkeleton, angle = 0, verticalAlign, horizontalAlign, wrapStrategy } = docsConfig;
+                    const { documentSkeleton, angle = 0, horizontalAlign, wrapStrategy } = docsConfig;
+
                     const cell = spreadsheetSkeleton.getCellData().getValue(row, column);
 
                     const sheetSkeleton = this.getSkeleton();

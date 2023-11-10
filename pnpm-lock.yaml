@@ -549,8 +549,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.3
-        version: 0.1.3(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.7
+        version: 0.1.7(react-dom@18.2.0)(react@18.2.0)
       '@wendellhu/redi':
         specifier: ^0.12.10
         version: 0.12.10
@@ -751,8 +751,8 @@ importers:
         specifier: ^1.18.1
         version: 1.18.1(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/icons':
-        specifier: ^0.1.3
-        version: 0.1.3(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.7
+        version: 0.1.7(react-dom@18.2.0)(react@18.2.0)
       clsx:
         specifier: ^2.0.0
         version: 2.0.0
@@ -921,8 +921,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.3
-        version: 0.1.3(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.7
+        version: 0.1.7(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets
@@ -1150,8 +1150,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.3
-        version: 0.1.3(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.7
+        version: 0.1.7(react-dom@18.2.0)(react@18.2.0)
       '@wendellhu/redi':
         specifier: ^0.12.10
         version: 0.12.10
@@ -5707,8 +5707,8 @@ packages:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: true
 
-  /@univerjs/icons@0.1.3(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-or+u/eqINYamdHX6WCpZto2Cc7tGgGO3DQSHAG0Jw+uXQOyFqv5UV4UWCPh2ORbLeNIX7hnGoTYX7ZRUKCVU4g==}
+  /@univerjs/icons@0.1.7(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-jFzcqluGXPrNmbQ0GaB/aXrDtis+bV5igyWcYvx8/3ZIuwddQ0MVy//O4DulhV42Tc5XJMdRKeN41+iBHLiYXQ==}
     peerDependencies:
       react: '*'
       react-dom: '*'

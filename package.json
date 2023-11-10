@@ -10,7 +10,6 @@
         "dev": "turbo dev:demo --filter ./examples/univer-doc-ts --filter ./examples/univer-sheet-ts --filter ./examples/univer-slide-ts",
         "build": "turbo esbuild",
         "build:demo": "turbo esbuild:demo",
-        "clean": "npm cache clean --force && node scripts/clean.mjs && pnpm install",
         "prepare": "husky install",
         "pre-commit": "lint-staged",
         "lint": "eslint --cache packages/**/src/**/*.{tsx,ts}",

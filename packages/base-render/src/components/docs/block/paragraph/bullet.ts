@@ -20,13 +20,13 @@ export function dealWidthBullet(
     const list = lists[listId];
 
     if (!list || !list.nestingLevel) {
-        return getDefaultBulletSke(listId, listLevelAncestors?.[nestingLevel]?.startIndexItem, localeService);
+        return getDefaultBulletSke(listId, listLevelAncestors?.[nestingLevel]?.startIndexItem);
     }
 
     const nesting = list.nestingLevel[nestingLevel];
 
     if (!nesting) {
-        return getDefaultBulletSke(listId, listLevelAncestors?.[nestingLevel]?.startIndexItem, localeService);
+        return getDefaultBulletSke(listId, listLevelAncestors?.[nestingLevel]?.startIndexItem);
     }
 
     const bulletSke = _getBulletSke(
@@ -40,17 +40,14 @@ export function dealWidthBullet(
     return bulletSke;
 }
 
-export function getDefaultBulletSke(
-    listId: string,
-    startIndex: number = 1,
-    localeService?: LocaleService
-): IDocumentSkeletonBullet {
+export function getDefaultBulletSke(listId: string, startIndex: number = 1): IDocumentSkeletonBullet {
     return {
         listId,
         symbol: '\u25CF', // symbol 列表的内容
         ts: {
-            ff: (localeService?.get('defaultFont') || 'Arial') as string,
-            fs: (localeService?.get('defaultFontSize') || 9) as number,
+            // TODO: @jikkai @DR-Univer should read default font from configuration, not from locale service
+            ff: 'Arial',
+            fs: 9,
         }, // 文字样式
         startIndexItem: startIndex,
         bBox: {

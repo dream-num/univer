@@ -34,7 +34,7 @@ export class NumfmtPlugin extends Plugin {
         this.registerExtension();
         this._numfmtController = this._injector.get(NumfmtController);
         this._numfmtModalController = this._injector.get(NumfmtModalController);
-        this._localeService.getLocale().load({ enUS });
+        this._localeService.load({ enUS });
         // actionRegister.add(this._numfmtActionExtensionFactory);
     }
 

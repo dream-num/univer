@@ -20,7 +20,7 @@ export class DocUIPlugin extends Plugin {
     ) {
         super(DOC_UI_PLUGIN_NAME);
 
-        this._localeService.getLocale().load({
+        this._localeService.load({
             enUS,
         });
 

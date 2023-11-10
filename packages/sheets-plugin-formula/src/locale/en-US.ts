@@ -49,10 +49,14 @@ export default {
             //     },
             // },
         },
-
         formulaMore: {
             helpExample: 'EXAMPLE',
             helpAbstract: 'ABOUT',
+        },
+        moreFunctions: {
+            confirm: 'Confirm',
+            prev: 'Previous',
+            next: 'Next',
         },
     },
 };

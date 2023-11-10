@@ -55,5 +55,11 @@ export default {
             helpExample: '示例',
             helpAbstract: '简介',
         },
+
+        moreFunctions: {
+            confirm: '确定',
+            prev: '上一步',
+            next: '下一步',
+        },
     },
 };

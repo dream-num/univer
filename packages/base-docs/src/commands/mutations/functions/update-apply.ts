@@ -136,7 +136,7 @@ export function coverTextRuns(
         return false;
     }
 
-    while (updateIndex < updateDataTextRuns.length && removeIndex < removeTextRuns.length) {
+    while (updateIndex < updateLength && removeIndex < removeLength) {
         const { st: updateSt, ed: updateEd, ts: updateStyle } = updateDataTextRuns[updateIndex];
         const { st: removeSt, ed: removeEd, ts: removeStyle, sId } = removeTextRuns[removeIndex];
         let newTs;
@@ -161,8 +161,8 @@ export function coverTextRuns(
             removeIndex++;
         } else {
             newUpdateTextRun.push({
-                st: updateSt < removeSt ? updateSt : removeSt,
-                ed: updateSt < removeSt ? removeSt : updateSt,
+                st: Math.min(updateSt, removeSt),
+                ed: Math.max(updateSt, removeSt),
                 ts: updateSt < removeSt ? { ...updateStyle } : { ...removeStyle },
                 sId: updateSt < removeSt ? undefined : sId,
             });

@@ -8,7 +8,7 @@ Welcome, and thank you for your interest in contributing to Univer!
 
 ## Contributing Code
 
-### Install dependencies
+### Install Dependencies
 
 Univer requires Node.js >= 18.17.0. We recommend using nvm or fnm to switch between different versions of Node.js.
 
@@ -22,8 +22,14 @@ npm i -g pnpm
 # install dependencies
 pnmp install
 
-# start Univer sheet
-npm run dev:sheet
+```
+
+### Start Dev Server
+
+```shell
+pnpm dev:sheet # start sheet dev server
+pnpm dev:doc # start doc dev server
+pnpm dev:slide # start slide dev server
 ```
 
 ### Architecture
@@ -37,8 +43,6 @@ We provided some Visual Studio Code (vscode) tasks to help you debug in vscode.
 After stating dev server, you can launch Edge or Chrome instance and debug in vscode.
 
 ![image](https://github.com/dream-num/univer/assets/12122021/25da436c-2155-4ea0-8646-ff3b3dc23112)
-
-### Code Style
 
 ### Source Code Organization
 
@@ -81,7 +85,26 @@ To ensure code quality and consistency, please adhere to the following guideline
 - Resolve all ESLint issues that are identified in the code.
 - Do use conventional type names including .service, .controller, .menu, .command, .mutation, and .operation. Invent additional type names if you must but take care not to create too many.
 
-### Clear code
+### Submitting Pull Requests
+
+Before merging a pull request, please make sure the following requirements are met:
+
+- All tests are passed. ESLint and Prettier errors are fixed.
+- Test coverage is not decreased.
+
+We provide preview deployments for pull requests. You can view the preview deployment by clicking the "Preview" link in the "View Deployment" section.
+
+### Storybook
+
+We use Storybook to develop and test components in isolation. It is a great tool to develop UI components in isolation, which can improve component reuse, testability, and development efficiency. You can use the following command to start Storybook:
+
+```shell
+pnpm storybook
+```
+
+When a new pull request is submitted, a Storybook deployment will be automatically generated. You can view the Storybook deployment by clicking the "Preview" link in the "View Storybook" section.
+
+### Clean Code
 
 > Programs are meant to be ready by humans and only icidentally for computers to execute.
 

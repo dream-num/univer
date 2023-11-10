@@ -140,5 +140,14 @@ describe('Test SheetInterceptorService', () => {
 
             expect(result).toBe('zero first');
         });
+
+        it('should return the initial value when there is no interceptor', () => {
+            const result = get(SheetInterceptorService).fetchThroughInterceptors(
+                INTERCEPTOR_NAMES.BEFORE_CELL_EDIT,
+                'zero'
+            );
+
+            expect(result).toBe('zero');
+        });
     });
 });

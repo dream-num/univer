@@ -146,9 +146,6 @@ export class SheetInterceptorService extends Disposable {
         );
 
         // register default viewModel interceptor
-        // this.intercept(INTERCEPTOR_NAMES.CELL_CONTENT, {
-
-        // });
         this.interceptCellContent({
             priority: 0,
             getCell(content, location): Nullable<ICellData> {

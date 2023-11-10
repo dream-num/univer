@@ -51,16 +51,19 @@ function MenuWrapper(props: IBaseMenuProps) {
         const menuTypes = menuType.map((type) => menuService.getMenuItems(type));
 
         const group = menuTypes.map((menuItems) =>
-            menuItems.reduce((acc: any, item: IDisplayMenuItem<IMenuItem>) => {
-                if (item.group) {
-                    acc[item.group] = acc[item.group] ?? [];
-                    acc[item.group].push(item);
-                } else {
-                    acc[MenuGroup.CONTEXT_MENU_OTHERS] = acc[MenuGroup.CONTEXT_MENU_OTHERS] ?? [];
-                    acc[MenuGroup.CONTEXT_MENU_OTHERS].push(item);
-                }
-                return acc;
-            }, {})
+            menuItems.reduce(
+                (acc, item: IDisplayMenuItem<IMenuItem>) => {
+                    if (item.group) {
+                        acc[item.group] = acc[item.group] ?? [];
+                        acc[item.group].push(item);
+                    } else {
+                        acc[MenuGroup.CONTEXT_MENU_OTHERS] = acc[MenuGroup.CONTEXT_MENU_OTHERS] ?? [];
+                        acc[MenuGroup.CONTEXT_MENU_OTHERS].push(item);
+                    }
+                    return acc;
+                },
+                {} as Record<MenuGroup, Array<IDisplayMenuItem<IMenuItem>>>
+            )
         );
 
         return (
@@ -68,7 +71,7 @@ function MenuWrapper(props: IBaseMenuProps) {
                 {group.map((groupItem) =>
                     Object.keys(groupItem).map((groupKey: string) => (
                         <DesignMenuItemGroup key={groupKey} eventKey={groupKey}>
-                            {groupItem[groupKey].map((item: IDisplayMenuItem<IMenuItem>) => (
+                            {groupItem[groupKey as unknown as MenuGroup].map((item: IDisplayMenuItem<IMenuItem>) => (
                                 <MenuItem
                                     key={item.id}
                                     menuItem={item}

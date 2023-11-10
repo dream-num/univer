@@ -14,11 +14,11 @@ We provide JavaScript part of code in the repository, including a canvas-based f
 
 ## Demo
 
-- [Univer Demo](https://dream-num.github.io/univer-demo/)
+-   [Univer Demo](https://dream-num.github.io/univer-demo/)
 
 ## Contribution
 
-For more development tutorials, please refer to [Contribution Guide](./CONTRIBUTING.md).
+Please refer to [Contribution Guide](./CONTRIBUTING.md).
 
 ## Community
 
@@ -55,6 +55,11 @@ Univer sheet, document, and slide adopt the same rendering engine architecture, 
 Univer formula engine, supports asynchronous calculation, lambda function and range naming
 
 ![image](./docs/source/Formula%20Engine.png)
+
+---
+
+Copyright DreamNum Inc. 2023-present
+
 <!--
 ## Development Plan
 

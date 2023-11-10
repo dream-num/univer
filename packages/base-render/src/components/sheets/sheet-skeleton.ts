@@ -58,12 +58,12 @@ import { BorderCache, IStylesCache } from './interfaces';
 /**
  * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
  * @param documentSkeleton Data of the document's ViewModel
- * @param angle The rotation angle of an Excel cell, it's **degree**
+ * @param angleInDegree The rotation angle of an Excel cell, it's **degree**
  * @returns
  */
-export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angle: number = 0) {
+export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angleInDegree: number = 0) {
     const skeletonData = documentSkeleton?.getSkeletonData();
-    angle = degToRad(angle);
+    const angle = degToRad(angleInDegree);
 
     if (!skeletonData) {
         return;

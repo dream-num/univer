@@ -5,18 +5,19 @@ packages/core @DR-Univer @wzhudev
 packages/base-render @DR-Univer @wzhudev
 
 # business cores
-packages/base-docs @wzhudev @DR-Univer @Jocs
+packages/base-docs @DR-Univer @Jocs
 packages/base-sheets @wzhudev @DR-Univer
 packages/base-slides @wzhudev @DR-Univer @jikkai
 
 # ui
 packages/design @jikkai @wzhudev
-packages/base-ui @jikkai @wzhudev
-packages/ui-plugin-docs @jikkai @wzhudev
+packages/base-ui @jikkai @wzhudev @Jocs
+packages/ui-plugin-docs @jikkai @Jocs
 packages/ui-plugin-sheets @jikkai @wzhudev
 packages/ui-plugin-slides @jikkai @wzhudev
 
-# documents
-docs/graphs.tldr @wzhudev
+# formula
+packages/base-formula-engine @DR-Univer
+packages/base-numfmt-engine @Gggpound
 
 # sheet-plugins TBD

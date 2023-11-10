@@ -36,7 +36,7 @@ export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
 
     override create(param: LexerNode): BaseAstNode {
         // const lambdaId = param.getLambdaId();
-        const currentLambdaPrivacyVar = param.getLambdaPrivacyVar();
+        const currentLambdaPrivacyVar = param.getFunctionDefinitionPrivacyVar();
         const lambdaParameter = param.getLambdaParameter();
 
         if (!currentLambdaPrivacyVar) {

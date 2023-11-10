@@ -28,9 +28,9 @@ export interface IFormulaRuntimeService {
 
     setCurrent(row: number, column: number, sheetId: string, unitId: string): void;
 
-    registerLambdaPrivacyVar(lambdaId: string, lambdaVar: Map<string, Nullable<BaseAstNode>>): void;
+    registerFunctionDefinitionPrivacyVar(lambdaId: string, lambdaVar: Map<string, Nullable<BaseAstNode>>): void;
 
-    getLambdaPrivacyVar(lambdaId: string): Nullable<Map<string, Nullable<BaseAstNode>>>;
+    getFunctionDefinitionPrivacyVar(lambdaId: string): Nullable<Map<string, Nullable<BaseAstNode>>>;
 
     setRuntimeData(functionVariant: FunctionVariantType): void;
 
@@ -54,7 +54,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _unitArrayFormulaData: UnitArrayFormulaDataType = {};
 
     // lambdaId: { key: BaseAstNode }
-    private _lambdaPrivacyVar: Map<string, Map<string, Nullable<BaseAstNode>>> = new Map();
+    private _functionDefinitionPrivacyVar: Map<string, Map<string, Nullable<BaseAstNode>>> = new Map();
 
     get currentRow() {
         return this._currentRow;
@@ -79,7 +79,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     reset() {
         this._runtimeData = {};
         this._unitArrayFormulaData = {};
-        this._lambdaPrivacyVar.clear();
+        this._functionDefinitionPrivacyVar.clear();
     }
 
     setCurrent(row: number, column: number, sheetId: string, unitId: string) {
@@ -89,16 +89,16 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._currentUnitId = unitId;
     }
 
-    clearLambdaPrivacyVar() {
-        this._lambdaPrivacyVar.clear();
+    clearFunctionDefinitionPrivacyVar() {
+        this._functionDefinitionPrivacyVar.clear();
     }
 
-    registerLambdaPrivacyVar(lambdaId: string, lambdaVar: Map<string, Nullable<BaseAstNode>>) {
-        this._lambdaPrivacyVar.set(lambdaId, lambdaVar);
+    registerFunctionDefinitionPrivacyVar(lambdaId: string, lambdaVar: Map<string, Nullable<BaseAstNode>>) {
+        this._functionDefinitionPrivacyVar.set(lambdaId, lambdaVar);
     }
 
-    getLambdaPrivacyVar(lambdaId: string): Nullable<Map<string, Nullable<BaseAstNode>>> {
-        return this._lambdaPrivacyVar.get(lambdaId);
+    getFunctionDefinitionPrivacyVar(lambdaId: string): Nullable<Map<string, Nullable<BaseAstNode>>> {
+        return this._functionDefinitionPrivacyVar.get(lambdaId);
     }
 
     setRuntimeData(functionVariant: FunctionVariantType) {

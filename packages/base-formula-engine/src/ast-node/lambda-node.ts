@@ -71,13 +71,13 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
             const parameter = parameterArray[i];
             if (parameter instanceof LexerNode) {
                 const variant = parameter.getChildren()[0] as string;
-                currentLambdaPrivacyVar.set(variant, null);
+                currentLambdaPrivacyVar.set(variant.trim(), null);
             } else {
                 return ErrorNode.create(ErrorType.VALUE);
             }
         }
 
-        this._runtimeService.registerLambdaPrivacyVar(lambdaId, currentLambdaPrivacyVar);
+        this._runtimeService.registerFunctionDefinitionPrivacyVar(lambdaId, currentLambdaPrivacyVar);
 
         this._updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
 

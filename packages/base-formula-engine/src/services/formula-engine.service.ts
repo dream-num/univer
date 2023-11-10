@@ -166,7 +166,7 @@ export class FormulaEngineService extends Disposable {
     calculate(formulaString: string) {
         // TODO how to observe @alex
         // this.getObserver('onBeforeFormulaCalculateObservable')?.notifyObservers(formulaString);
-        const lexerNode = this.lexerTreeBuilder.treeBuilder(formulaString, false);
+        const lexerNode = this.lexerTreeBuilder.treeBuilder(formulaString);
         // this.lexerTreeBuilder.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
         console.log('lexerNode', lexerNode.serialize());
 

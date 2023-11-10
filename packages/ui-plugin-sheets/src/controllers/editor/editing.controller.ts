@@ -113,9 +113,7 @@ export class EditingController extends Disposable {
 
         console.log(
             'calculate',
-            this._formulaEngineService.calculate(
-                '=(sum(max(B1:C10,10, A4, A:A3, 3:3, A)*5-100+A3,((1+1)*2+5)/2,10, lambda(x,y, x*y*x)(sum(1,(1+2)*3),2))+lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+count(B1:C10,10*5-100))*5-100'
-            )
+            this._formulaEngineService.calculate('=lambda(a, b, lambda(x,y, x*y*x)(a,b))(sum(1,2,3), 2)')
         );
     }
 

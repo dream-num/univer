@@ -63,7 +63,7 @@ export class AstTreeBuilder extends Disposable {
         const parentAstNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
 
         // const lambdaRuntime = this._parserDataLoader.getLambdaRuntime();
-        const currentLambdaPrivacyVar = this._runtimeService.getLambdaPrivacyVar(lambdaId);
+        const currentLambdaPrivacyVar = this._runtimeService.getFunctionDefinitionPrivacyVar(lambdaId);
 
         if (!currentLambdaPrivacyVar) {
             return false;

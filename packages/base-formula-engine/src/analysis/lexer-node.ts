@@ -22,7 +22,7 @@ export class LexerNode {
 
     private _lambdaId: Nullable<string>;
 
-    private _lambdaPrivacyVar: Nullable<LambdaPrivacyVarType>;
+    private _functionDefinitionPrivacyVar: Nullable<LambdaPrivacyVarType>;
 
     private _lambdaParameter: string = '';
 
@@ -36,7 +36,7 @@ export class LexerNode {
                 node.dispose();
             }
         });
-        this._lambdaPrivacyVar?.clear();
+        this._functionDefinitionPrivacyVar?.clear();
 
         this._parent = null;
     }
@@ -49,12 +49,12 @@ export class LexerNode {
         this._lambdaId = lambdaId;
     }
 
-    getLambdaPrivacyVar() {
-        return this._lambdaPrivacyVar;
+    getFunctionDefinitionPrivacyVar() {
+        return this._functionDefinitionPrivacyVar;
     }
 
     setLambdaPrivacyVar(lambdaPrivacyVar: LambdaPrivacyVarType) {
-        this._lambdaPrivacyVar = lambdaPrivacyVar;
+        this._functionDefinitionPrivacyVar = lambdaPrivacyVar;
     }
 
     getLambdaParameter() {

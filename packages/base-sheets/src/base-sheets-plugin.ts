@@ -27,7 +27,7 @@ export class SheetPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._localeService.getLocale().load({
+        this._localeService.load({
             enUS,
         });
     }

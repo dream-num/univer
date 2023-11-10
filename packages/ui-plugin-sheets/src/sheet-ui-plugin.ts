@@ -49,7 +49,7 @@ export class SheetUIPlugin extends Plugin {
     ) {
         super(SHEET_UI_PLUGIN_NAME);
 
-        this._localeService.getLocale().load({
+        this._localeService.load({
             enUS,
         });
     }

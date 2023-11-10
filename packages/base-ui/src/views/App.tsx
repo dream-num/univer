@@ -76,8 +76,8 @@ export function App(props: IUniverAppProps) {
         messageService.setContainer(portalContainer);
 
         const subscriptions = [
-            localeService.getLocale().locale$.subscribe((locale) => {
-                locale && setLocale(localeService.getLocales() as unknown as ILocale);
+            localeService.localeChanged$.subscribe(() => {
+                setLocale(localeService.getLocales() as unknown as ILocale);
             }),
             themeService.currentTheme$.subscribe((theme) => {
                 themeInstance.setTheme(mountContainer, theme);

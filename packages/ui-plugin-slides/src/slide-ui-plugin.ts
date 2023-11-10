@@ -35,7 +35,7 @@ export class SlideUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._localeService.getLocale().load({
+        this._localeService.load({
             enUS,
         });
     }

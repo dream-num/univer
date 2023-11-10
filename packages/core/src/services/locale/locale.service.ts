@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { Nullable } from '../../common/type-utils';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
@@ -14,11 +14,11 @@ import { LocaleType } from '../../types/enum/locale-type';
  *
  * @private
  */
-function getValue(locale: ILocales[LocaleType], key: string): Nullable<string | object> {
+function getValue(locale: ILocales[LocaleType], key: string): Nullable<string> {
     if (!locale) return;
 
     try {
-        if (locale[key]) return locale[key];
+        if (locale[key]) return locale[key] as string;
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return key.split('.').reduce((a: any, b: string) => a[b], locale);
@@ -32,68 +32,16 @@ function getValue(locale: ILocales[LocaleType], key: string): Nullable<string | 
  * This service provides i18n and timezone / location features to other modules.
  */
 export class LocaleService extends Disposable {
-    currentLocale: LocaleType = LocaleType.EN_US;
+    private currentLocale: LocaleType = LocaleType.EN_US;
 
-    locales: ILocales | null = null;
+    private locales: ILocales | null = null;
 
-    readonly locale$: Observable<Nullable<LocaleType>>;
-
-    private readonly _locale$ = new BehaviorSubject<Nullable<LocaleType>>(undefined);
+    localeChanged$ = new Subject<void>();
 
     constructor() {
         super();
 
-        this.locale$ = this._locale$.asObservable();
-
-        this.disposeWithMe(toDisposable(() => this._locale$.complete()));
-    }
-
-    t(key?: string): string | number {
-        return this.get(key) ?? key ?? '';
-    }
-
-    setLocale(locale: LocaleType): void {
-        this.initialize(locale);
-        this._locale$.next(locale);
-    }
-
-    getLocale() {
-        return this;
-    }
-
-    initialize(locale: Nullable<LocaleType>) {
-        this.currentLocale = locale || LocaleType.EN_US;
-    }
-
-    /**
-     * Get the formatted message by key
-     *
-     * @example
-     * ```ts
-     * Locale.get('name')
-     * ```
-     *
-     * @param key - The string representing key in Locale data file
-     * @returns Get the translation corresponding to the Key
-     */
-    get(key: string | undefined): Nullable<string | number> {
-        const { locales, currentLocale } = this;
-        if (!locales) {
-            throw new Error();
-        }
-
-        if (key) {
-            return getValue(locales[currentLocale], key) as string;
-        }
-    }
-
-    getObject<T>(key: string): T {
-        const { locales, currentLocale } = this;
-        if (!locales) {
-            throw new Error();
-        }
-
-        return getValue(locales[currentLocale], key) as unknown as T;
+        this.disposeWithMe(toDisposable(() => this.localeChanged$.complete()));
     }
 
     /**
@@ -103,31 +51,22 @@ export class LocaleService extends Disposable {
      * @returns void
      *
      */
-    load(locales: ILocales): void {
+    load(locales: ILocales) {
         this.locales = Tools.deepMerge(this.locales ?? {}, locales);
     }
 
-    /**
-     * change Locale
-     *
-     * @example
-     * Change to Chinese
-     * ```ts
-     * Locale.change(LocaleType.ZH)
-     * ```
-     *
-     * @param locale - Locale Type, see {@link LocaleType}
-     *
-     */
-    change(locale: LocaleType): void {
-        this.currentLocale = locale;
+    t(key: string): string {
+        if (!this.locales) throw new Error('Locale not initialized');
+
+        return getValue(this.locales[this.currentLocale], key) ?? key;
     }
 
-    getCurrentLocale() {
-        return this.currentLocale;
+    setLocale(locale: LocaleType): void {
+        this.currentLocale = locale;
+        this.localeChanged$.next();
     }
 
     getLocales() {
-        return this?.locales?.[this.currentLocale];
+        return this.locales?.[this.currentLocale];
     }
 }

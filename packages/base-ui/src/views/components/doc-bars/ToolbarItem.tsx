@@ -5,7 +5,6 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { ComponentManager } from '../../../Common';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { Menu } from '../../../components/menu/Menu';
 import {
@@ -21,7 +20,6 @@ import styles from './index.module.less';
 export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
-    const componentManager = useDependency(ComponentManager);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [value, setValue] = useState<any>();
@@ -65,7 +63,7 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
 
     const { tooltip, shortcut, icon, title, label, id } = props;
 
-    const tooltipTitle = localeService?.t(tooltip) + (shortcut ? ` (${shortcut})` : '');
+    const tooltipTitle = localeService.t(tooltip ?? '') + (shortcut ? ` (${shortcut})` : '');
 
     function renderSelectorType() {
         const { selections } = props as IDisplayMenuItem<IMenuSelectorItem>;

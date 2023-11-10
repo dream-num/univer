@@ -54,7 +54,7 @@ export class FindPlugin extends Plugin {
     // }
 
     initialize(): void {
-        this._localeService.getLocale().load({
+        this._localeService.load({
             enUS,
         });
 

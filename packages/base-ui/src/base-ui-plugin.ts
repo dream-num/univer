@@ -49,7 +49,7 @@ export class UIPlugin extends Plugin {
 
         this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
 
-        this._localeService.getLocale().load({
+        this._localeService.load({
             enUS,
         });
     }

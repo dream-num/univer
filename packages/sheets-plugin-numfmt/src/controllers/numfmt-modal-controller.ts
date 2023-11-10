@@ -58,7 +58,7 @@ export class NumfmtModalController {
                     name: NUMFMT_PLUGIN_NAME + FormatContent.name,
                     props: {
                         data: this.resetContentData(CURRENCYDETAIL),
-                        input: this._localeService.getLocale().get('format.decimalPlaces'),
+                        input: this._localeService.t('format.decimalPlaces'),
                         onClick: (value: string) => console.dir(value),
                         onChange: (value: string) => console.dir(value),
                     },
@@ -121,10 +121,9 @@ export class NumfmtModalController {
     }
 
     resetContentData(data: any[]): any[] {
-        const locale = this._localeService.getLocale();
         for (let i = 0; i < data.length; i++) {
             if (data[i].locale) {
-                data[i].label = locale.get(data[i].locale);
+                data[i].label = this._localeService.t(data[i].locale);
             }
         }
         return data;
@@ -132,12 +131,11 @@ export class NumfmtModalController {
 
     // 渲染所需数据
     resetModalData(): void {
-        const locale = this._localeService.getLocale();
         this._modalData.forEach((item) => {
-            item.title = locale.get(item.locale) as string;
+            item.title = this._localeService.t(item.locale);
             if (item.group && item.group.length) {
                 item.group.forEach((ele) => {
-                    ele.label = locale.get(ele.locale) as string;
+                    ele.label = this._localeService.t(ele.locale);
                 });
             }
         });

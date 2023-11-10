@@ -25,7 +25,7 @@ export class ImportXlsxPlugin extends Plugin {
         /**
          * load more Locale object
          */
-        this._localeService.getLocale().load({
+        this._localeService.load({
             enUS,
         });
 

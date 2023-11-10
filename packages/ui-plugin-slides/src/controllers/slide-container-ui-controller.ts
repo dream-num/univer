@@ -74,7 +74,7 @@ export class SlideContainerUIController {
      *
      */
     changeLocale = (locale: string) => {
-        this._localeService.getLocale().change(locale as LocaleType);
+        this._localeService.setLocale(locale as LocaleType);
     };
 
     getContentRef() {

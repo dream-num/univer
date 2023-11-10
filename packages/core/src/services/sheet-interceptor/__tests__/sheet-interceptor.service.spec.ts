@@ -5,7 +5,7 @@ import { Univer } from '../../../basics/univer';
 import { Nullable } from '../../../common/type-utils';
 import { ICellData } from '../../../types/interfaces/i-cell-data';
 import { IUniverInstanceService } from '../../instance/instance.service';
-import { SheetInterceptorService } from '../sheet-interceptor.service';
+import { INTERCEPTOR_NAMES, ISheetLocation, SheetInterceptorService } from '../sheet-interceptor.service';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('Test SheetInterceptorService', () => {
@@ -28,9 +28,9 @@ describe('Test SheetInterceptorService', () => {
 
     describe('Test intercept getting cell content', () => {
         it('should intercept cells and merge result if next is called', () => {
-            get(SheetInterceptorService).interceptCellContent({
+            get(SheetInterceptorService).intercept(INTERCEPTOR_NAMES.CELL_CONTENT, {
                 priority: 100,
-                getCell(_cell, location, next) {
+                handler(_cell, location: ISheetLocation, next: (v: Nullable<ICellData>) => Nullable<ICellData>) {
                     if (location.row === 0 && location.col === 0) {
                         return next({ m: 'intercepted' });
                     }
@@ -44,9 +44,9 @@ describe('Test SheetInterceptorService', () => {
         });
 
         it('interceptors should directly return result if next is not called', () => {
-            get(SheetInterceptorService).interceptCellContent({
+            get(SheetInterceptorService).intercept(INTERCEPTOR_NAMES.CELL_CONTENT, {
                 priority: 100,
-                getCell(_cell, location, next) {
+                handler(_cell, location: ISheetLocation, next: (v: Nullable<ICellData>) => Nullable<ICellData>) {
                     if (location.row === 0 && location.col === 0) {
                         return { m: 'intercepted' };
                     }

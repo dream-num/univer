@@ -36,7 +36,7 @@ export {
     UniverPermissionService,
 } from './services/permission';
 export {
-    type ICellInterceptor,
+    type IInterceptor,
     type ISheetLocation,
     SheetInterceptorService,
 } from './services/sheet-interceptor/sheet-interceptor.service';

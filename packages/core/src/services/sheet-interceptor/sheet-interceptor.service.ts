@@ -14,34 +14,7 @@ import { IUndoRedoCommandInfos } from '../undoredo/undoredo.service';
 /**
  * A helper to compose a certain type of interceptors.
  */
-export function compose(interceptors: ICellInterceptor[]) {
-    // eslint-disable-next-line func-names
-    return function (location: ISheetLocation) {
-        let index = -1;
-
-        function passThrough(i: number, v: Nullable<ICellData>): Nullable<ICellData> {
-            if (i <= index) {
-                throw new Error('[SheetInterceptorService]: next() called multiple times!');
-            }
-
-            index = i;
-            if (i === interceptors.length) {
-                return v;
-            }
-
-            const interceptor = interceptors[i];
-
-            return interceptor.getCell!(v, location, passThrough.bind(null, i + 1));
-        }
-
-        return passThrough(0, undefined);
-    };
-}
-
-/**
- * A helper to compose a certain type of interceptors.
- */
-export function composeInterceptors<M, T>(interceptors: Array<IInterceptor<M, T>>) {
+function composeInterceptors<M, T>(interceptors: Array<IInterceptor<M, T>>) {
     // eslint-disable-next-line func-names
     return function (initialValue: Nullable<M>, context: Nullable<T>) {
         let index = -1;
@@ -78,14 +51,6 @@ export interface ISheetLocation {
  * Sheet features can provide a `ICellContentInterceptor` to intercept cell content that would be perceived by
  * other features, such as copying, rendering, etc.
  */
-export interface ICellInterceptor {
-    priority?: number;
-    getCell(
-        cell: Nullable<ICellData>,
-        location: ISheetLocation,
-        next: (v: Nullable<ICellData>) => Nullable<ICellData>
-    ): Nullable<ICellData>;
-}
 
 export interface IInterceptor<M = unknown, T = unknown> {
     priority?: number;
@@ -118,7 +83,6 @@ export enum INTERCEPTOR_NAMES {
 @OnLifecycle(LifecycleStages.Starting, SheetInterceptorService)
 export class SheetInterceptorService extends Disposable {
     private _interceptorsByName: Map<INTERCEPTOR_NAMES, IInterceptor[]> = new Map();
-    private _cellInterceptors: ICellInterceptor[] = [];
     private _commandInterceptors: ICommandInterceptor[] = [];
     private _commandPermissionInterceptor: ICommandPermissionInterceptor[] = [];
 
@@ -146,9 +110,9 @@ export class SheetInterceptorService extends Disposable {
         );
 
         // register default viewModel interceptor
-        this.interceptCellContent({
-            priority: 0,
-            getCell(content, location): Nullable<ICellData> {
+        this.intercept(INTERCEPTOR_NAMES.CELL_CONTENT, {
+            priority: -1,
+            handler(content, location: ISheetLocation): Nullable<ICellData> {
                 const rawData = location.worksheet.getCellRaw(location.row, location.col);
                 if (content) {
                     return { ...rawData, ...content };
@@ -165,17 +129,6 @@ export class SheetInterceptorService extends Disposable {
         this._workbookDisposables.forEach((disposable) => disposable.dispose());
         this._workbookDisposables.clear();
         this._worksheetDisposables.clear();
-    }
-
-    interceptCellContent(interceptor: ICellInterceptor): IDisposable {
-        if (this._cellInterceptors.includes(interceptor)) {
-            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
-        }
-
-        this._cellInterceptors.push(interceptor);
-        this._cellInterceptors = this._cellInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-
-        return this.disposeWithMe(toDisposable(() => remove(this._cellInterceptors, interceptor)));
     }
 
     interceptCommand(interceptor: ICommandInterceptor): IDisposable {
@@ -253,7 +206,7 @@ export class SheetInterceptorService extends Disposable {
                 const sheetDisposables = new DisposableCollection();
                 const cellInterceptorDisposable = viewModel.registerCellContentInterceptor({
                     getCell(row: number, col: number): Nullable<ICellData> {
-                        return compose(self._cellInterceptors.filter((i) => !!i.getCell))({
+                        return self.fetchThroughInterceptors(INTERCEPTOR_NAMES.CELL_CONTENT, undefined, {
                             workbookId,
                             worksheetId,
                             row,

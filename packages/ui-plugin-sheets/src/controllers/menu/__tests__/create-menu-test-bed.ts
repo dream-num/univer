@@ -1,4 +1,4 @@
-import { SelectionManagerService } from '@univerjs/base-sheets';
+import { SelectionManagerService, SheetPermissionService } from '@univerjs/base-sheets';
 import { DesktopMenuService, DesktopShortcutService, IMenuService, IShortcutService } from '@univerjs/base-ui';
 import { IWorkbookConfig, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -54,6 +54,7 @@ export function createMenuTestBed() {
             injector.add([SelectionManagerService]);
             injector.add([IShortcutService, { useClass: DesktopShortcutService }]);
             injector.add([IMenuService, { useClass: DesktopMenuService }]);
+            injector.add([SheetPermissionService]);
         }
 
         override onDestroy(): void {

@@ -826,6 +826,9 @@ importers:
 
   packages/sheets-plugin-debugger:
     dependencies:
+      '@univerjs/base-sheets':
+        specifier: workspace:*
+        version: link:../base-sheets
       '@univerjs/base-ui':
         specifier: workspace:*
         version: link:../base-ui

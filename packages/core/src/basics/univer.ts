@@ -16,7 +16,8 @@ import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { LocaleService } from '../services/locale/locale.service';
 import { DesktopLogService, ILogService } from '../services/log/log.service';
-import { DesktopPermissionService, IPermissionService } from '../services/permission/permission.service';
+import { IPermissionService, PermissionService } from '../services/permission/permission.service';
+import { UniverPermissionService } from '../services/permission/univer.permission.service';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
 import { GenName } from '../shared/gen-name';
@@ -184,10 +185,11 @@ export class Univer {
             [GenName],
             [LifecycleService],
             [LifecycleInitializerService],
+            [IPermissionService, { useClass: PermissionService }],
+            [UniverPermissionService],
             [ILogService, { useClass: DesktopLogService, lazy: true }],
             [ICommandService, { useClass: CommandService, lazy: true }],
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],
-            [IPermissionService, { useClass: DesktopPermissionService }],
             [IConfigService, { useClass: ConfigService }],
             [IContextService, { useClass: ContextService }],
             [IFloatingObjectManagerService, { useClass: FloatingObjectManagerService, lazy: true }],

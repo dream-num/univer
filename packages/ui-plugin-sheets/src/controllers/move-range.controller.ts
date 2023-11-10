@@ -61,6 +61,10 @@ export class MoveRangeController extends Disposable {
                                         return;
                                     }
 
+                                    if (toRange.startRow < 0 || toRange.startColumn < 0) {
+                                        return;
+                                    }
+
                                     const params: IMoveRangeCommandParams = {
                                         fromRange,
                                         toRange,

@@ -39,6 +39,7 @@ import {
     SetWorksheetHideCommand,
     SetWorksheetRowIsAutoHeightCommand,
     SetWorksheetShowCommand,
+    SheetPermissionService,
 } from '@univerjs/base-sheets';
 import {
     CopyCommand,
@@ -54,7 +55,6 @@ import {
     FontWeight,
     HorizontalAlign,
     ICommandService,
-    IPermissionService,
     IUniverInstanceService,
     RANGE_TYPE,
     VerticalAlign,
@@ -122,10 +122,11 @@ export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
-    const permissionService = accessor.get(IPermissionService);
+    const sheetPermissionService = accessor.get(SheetPermissionService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
-
+    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeBoldCommand.id,
         type: MenuItemType.BUTTON,
@@ -134,18 +135,11 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.bold',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable<boolean>((subscriber) => {
-            let editable = false;
-
-            // it can hook in other business logic via permissionService and sheet business logic
-            const permission$ = permissionService.editable$.subscribe((e) => {
-                editable = e;
-                subscriber.next(!editable);
+            const permission$ = sheetPermissionService.getEditable$(workbookId, sheetId)?.subscribe((e) => {
+                subscriber.next(!e.value);
             });
-
-            subscriber.next(!editable);
-
             return () => {
-                permission$.unsubscribe();
+                permission$?.unsubscribe();
             };
         }),
         activated$: new Observable<boolean>((subscriber) => {
@@ -179,11 +173,12 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 }
 
 export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
-
+    const sheetPermissionService = accessor.get(SheetPermissionService);
+    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeItalicCommand.id,
         type: MenuItemType.BUTTON,
@@ -192,20 +187,11 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.italic',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable<boolean>((subscriber) => {
-            let editable = false;
-            function update() {
-                subscriber.next(!editable);
-            }
-
-            update();
-
-            const permission$ = permissionService.editable$.subscribe((e) => {
-                editable = e;
-                update();
+            const permission$ = sheetPermissionService.getEditable$(workbookId, sheetId)?.subscribe((e) => {
+                subscriber.next(!e.value);
             });
-
             return () => {
-                permission$.unsubscribe();
+                permission$?.unsubscribe();
             };
         }),
         activated$: new Observable<boolean>((subscriber) => {
@@ -237,11 +223,12 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 }
 
 export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
-
+    const sheetPermissionService = accessor.get(SheetPermissionService);
+    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeUnderlineCommand.id,
         type: MenuItemType.BUTTON,
@@ -250,20 +237,11 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.underline',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable<boolean>((subscriber) => {
-            let editable = false;
-            function update() {
-                subscriber.next(!editable);
-            }
-
-            update();
-
-            const permission$ = permissionService.editable$.subscribe((e) => {
-                editable = e;
-                update();
+            const permission$ = sheetPermissionService.getEditable$(workbookId, sheetId)?.subscribe((e) => {
+                subscriber.next(!e.value);
             });
-
             return () => {
-                permission$.unsubscribe();
+                permission$?.unsubscribe();
             };
         }),
         activated$: new Observable<boolean>((subscriber) => {
@@ -295,11 +273,12 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 }
 
 export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
-
+    const sheetPermissionService = accessor.get(SheetPermissionService);
+    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeStrickThroughCommand.id,
         type: MenuItemType.BUTTON,
@@ -308,20 +287,11 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         tooltip: 'toolbar.strikethrough',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: new Observable<boolean>((subscriber) => {
-            let editable = false;
-            function update() {
-                subscriber.next(!editable);
-            }
-
-            update();
-
-            const permission$ = permissionService.editable$.subscribe((e) => {
-                editable = e;
-                update();
+            const permission$ = sheetPermissionService.getEditable$(workbookId, sheetId)?.subscribe((e) => {
+                subscriber.next(!e.value);
             });
-
             return () => {
-                permission$.unsubscribe();
+                permission$?.unsubscribe();
             };
         }),
         activated$: new Observable<boolean>((subscriber) => {
@@ -488,11 +458,12 @@ export const FONT_FAMILY_CHILDREN = [
 ];
 
 export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
-
+    const sheetPermissionService = accessor.get(SheetPermissionService);
+    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeFontFamilyCommand.id,
         tooltip: 'toolbar.font',
@@ -503,20 +474,11 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_FAMILY_CHILDREN,
         disabled$: new Observable((subscriber) => {
-            let editable = false;
-            function update() {
-                subscriber.next(!editable);
-            }
-
-            update();
-
-            const permission$ = permissionService.editable$.subscribe((e) => {
-                editable = e;
-                update();
+            const permission$ = sheetPermissionService.getEditable$(workbookId, sheetId)?.subscribe((e) => {
+                subscriber.next(!e.value);
             });
-
             return () => {
-                permission$.unsubscribe();
+                permission$?.unsubscribe();
             };
         }),
         value$: new Observable((subscriber) => {
@@ -550,11 +512,12 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 }
 
 export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<number> {
-    const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
-
+    const sheetPermissionService = accessor.get(SheetPermissionService);
+    const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     return {
         id: SetRangeFontSizeCommand.id,
         tooltip: 'toolbar.fontSize',
@@ -569,20 +532,11 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_SIZE_CHILDREN,
         disabled$: new Observable<boolean>((subscriber) => {
-            let editable = false;
-            function update() {
-                subscriber.next(!editable);
-            }
-
-            update();
-
-            const permission$ = permissionService.editable$.subscribe((e) => {
-                editable = e;
-                update();
+            const permission$ = sheetPermissionService.getEditable$(workbookId, sheetId)?.subscribe((e) => {
+                subscriber.next(!e.value);
             });
-
             return () => {
-                permission$.unsubscribe();
+                permission$?.unsubscribe();
             };
         }),
         value$: new Observable((subscriber) => {

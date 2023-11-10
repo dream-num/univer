@@ -23,6 +23,7 @@
         "@univerjs/base-ui": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/base-sheets": "workspace:*",
         "@wendellhu/redi": "^0.12.10"
     }
 }

@@ -1,5 +1,5 @@
 import { IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
-import { ICommandService, IPermissionService } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { DEFAULT_DATA, MORE_FORMATS_SELECTIONS } from '../basics/const/default-data';
@@ -7,7 +7,7 @@ import { SetNumfmtRangeDataCommand } from '../commands/commands/set-numfmt-range
 import { ShowModalOperation } from '../commands/operations/show-modal.operation';
 
 export function NumfmtRangeDataMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    const permissionService = accessor.get(IPermissionService);
+    // const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     // const selectionManager = accessor.get(ISelectionManager);
 
@@ -57,7 +57,7 @@ export function NumfmtRangeDataMenuItemFactory(accessor: IAccessor): IMenuSelect
 }
 
 export function OpenMoreFormatsModalMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    const permissionService = accessor.get(IPermissionService);
+    // const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
     // const selectionManager = accessor.get(ISelectionManager);
     return {

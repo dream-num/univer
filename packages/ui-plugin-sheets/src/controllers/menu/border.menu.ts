@@ -5,7 +5,7 @@ import {
     SetBorderStyleCommand,
 } from '@univerjs/base-sheets';
 import { IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
-import { BorderStyleTypes, ICommandService, IPermissionService } from '@univerjs/core';
+import { BorderStyleTypes, ICommandService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
 
@@ -170,7 +170,7 @@ export const BORDER_SIZE_CHILDREN = [
 ];
 
 export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
-    const permissionService = accessor.get(IPermissionService);
+    // const permissionService = accessor.get(IPermissionService);
     const commandService = accessor.get(ICommandService);
 
     const borderStyleManagerService = accessor.get(BorderStyleManagerService);

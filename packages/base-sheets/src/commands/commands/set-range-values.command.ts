@@ -46,18 +46,13 @@ export const SetRangeValuesCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
-
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const {
             value,
             range,
             workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
-            worksheetId = univerInstanceService
-                .getCurrentUniverSheetInstance()
-
-                .getActiveSheet()
-                .getSheetId(),
+            worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
         } = params;
-
         const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
         if (!currentSelections || !currentSelections.length) {
             return false;
@@ -97,12 +92,21 @@ export const SetRangeValuesCommand: ICommand = {
             setRangeValuesMutationParams
         );
 
+        if (
+            !sheetInterceptorService.onCommandPermissionCheck({
+                id: SetRangeValuesCommand.id,
+                params: setRangeValuesMutationParams,
+            })
+        ) {
+            return false;
+        }
+
         const setValueMutationResult = commandService.syncExecuteCommand(
             SetRangeValuesMutation.id,
             setRangeValuesMutationParams
         );
 
-        const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
+        const { undos, redos } = sheetInterceptorService.onCommandExecute({
             id: SetRangeValuesCommand.id,
             params: setRangeValuesMutationParams,
         });

@@ -28,7 +28,13 @@ export { LifecycleService } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';
 export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService } from './services/log/log.service';
-export { DesktopPermissionService, IPermissionService } from './services/permission/permission.service';
+export {
+    IPermissionService,
+    PermissionService,
+    UniverEditablePermission,
+    UniverEditablePermissionPoint,
+    UniverPermissionService,
+} from './services/permission';
 export {
     type ICellInterceptor,
     type ISheetLocation,
@@ -48,8 +54,6 @@ export {
 // #endregion
 
 export * from './shared';
-export { Disposable, DisposableCollection, fromObservable, RxDisposable, toDisposable } from './shared/lifecycle';
-export { createRowColIter, type IRowColIter } from './shared/row-col-iter';
 
 // #region sheet
 

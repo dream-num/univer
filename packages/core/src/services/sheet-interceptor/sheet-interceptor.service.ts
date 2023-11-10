@@ -62,6 +62,13 @@ export interface ICommandInterceptor {
     getMutations(command: ICommandInfo): IUndoRedoCommandInfos;
 }
 
+export interface ICommandPermissionInterceptor {
+    /**
+     * This function maybe have side effects ,a pop-up/alert/confirm may be required when the return value is false
+     */
+    checkPermission(command: ICommandInfo): boolean;
+}
+
 /**
  * This class expose methods for sheet features to inject code to sheet underlying logic.
  *
@@ -71,6 +78,7 @@ export interface ICommandInterceptor {
 export class SheetInterceptorService extends Disposable {
     private _cellInterceptors: ICellInterceptor[] = [];
     private _commandInterceptors: ICommandInterceptor[] = [];
+    private _commandPermissionInterceptor: ICommandPermissionInterceptor[] = [];
 
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
@@ -139,6 +147,14 @@ export class SheetInterceptorService extends Disposable {
         return this.disposeWithMe(toDisposable(() => remove(this._commandInterceptors, interceptor)));
     }
 
+    interceptCommandPermission(interceptor: ICommandPermissionInterceptor): IDisposable {
+        if (this._commandPermissionInterceptor.includes(interceptor)) {
+            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
+        }
+        this._commandPermissionInterceptor.push(interceptor);
+        return this.disposeWithMe(toDisposable(() => remove(this._commandPermissionInterceptor, interceptor)));
+    }
+
     /**
      * When command is executing, call this method to gether undo redo mutations from upper features.
      * @param command
@@ -151,6 +167,15 @@ export class SheetInterceptorService extends Disposable {
             undos: infos.map((i) => i.undos).flat(),
             redos: infos.map((i) => i.redos).flat(),
         };
+    }
+
+    /**
+     * Check the permissions of the user when commands will be executed.
+     * If one of the return values is false, the command is not executed.
+     */
+    onCommandPermissionCheck(command: ICommandInfo): boolean {
+        const result = this._commandPermissionInterceptor.some((handler) => !handler.checkPermission(command));
+        return !result;
     }
 
     private _interceptWorkbook(workbook: Workbook): void {

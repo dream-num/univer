@@ -5,7 +5,7 @@ export default {
     toolbar: {
         undo: 'Undo',
         redo: 'Redo',
-        paintFormat: 'Paint format',
+        formatPainter: 'Paint format',
         currencyFormat: 'Format as currency',
         percentageFormat: 'Format as percent',
         numberDecrease: 'Decrease decimal places',
@@ -461,6 +461,7 @@ export default {
         confirm: 'Confirm',
         orderAZ: 'A-Z order',
         orderZA: 'Z-A order',
+        clearSelection: 'Clear',
         clearContent: 'Clear Contents',
         clearFormat: 'Clear Formats',
         clearAll: 'Clear All',

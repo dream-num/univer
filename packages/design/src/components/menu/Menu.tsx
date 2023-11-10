@@ -1,4 +1,12 @@
-import RcMenu, { MenuItem as RcMenuItem, MenuItemProps, MenuProps, SubMenu as RcSubMenu, SubMenuProps } from 'rc-menu';
+import RcMenu, {
+    MenuItem as RcMenuItem,
+    MenuItemGroup as RcMenuItemGroup,
+    MenuItemGroupProps,
+    MenuItemProps,
+    MenuProps,
+    SubMenu as RcSubMenu,
+    SubMenuProps,
+} from 'rc-menu';
 import React, { useContext } from 'react';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -13,9 +21,13 @@ export function Menu(props: MenuProps) {
 }
 
 export function MenuItem(props: MenuItemProps) {
-    return React.cloneElement(<RcMenuItem className={styles.menuItem} />, { ...props });
+    return React.cloneElement(<RcMenuItem />, { ...props });
 }
 
 export function SubMenu(props: SubMenuProps) {
-    return React.cloneElement(<RcSubMenu className={styles.menuItem} />, { ...props });
+    return React.cloneElement(<RcSubMenu />, { ...props });
+}
+
+export function MenuItemGroup(props: MenuItemGroupProps) {
+    return React.cloneElement(<RcMenuItemGroup />, { ...props });
 }

@@ -20,25 +20,29 @@
         display: none;
     }
 
+    &-item {
+        &-group {
+            &:not(:last-child) {
+                padding-bottom: var(--padding-xs);
+                border-bottom: 1px solid rgb(var(--border-color));
+            }
+        }
+    }
+
     &-item-group-list {
         margin: 0;
         padding: 0;
+        display: grid;
+        gap: var(--margin-xxs);
     }
 
     &-item-group-title {
         color: rgb(var(--text-color));
-        line-height: 1.5;
-        padding: 8px 10px;
-        border-bottom: 1px solid #dedede;
     }
 
     &-item-active,
-    &-submenu-active > &-submenu-title {
+    &-submenu-active {
         background-color: rgb(var(--bg-color-hover));
-    }
-
-    &-item-custom {
-        background: none;
     }
 
     &-item-selected {
@@ -64,20 +68,20 @@
     }
 
     &-item {
-        &-content {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--margin-xs);
-        }
+        display: flex;
+        align-items: center;
+        gap: var(--margin-xs);
     }
 
     &-item,
-    &-submenu-title {
-        margin: 0;
+    &-submenu {
         position: relative;
-        display: block;
+        margin: 0;
+        padding: var(--padding-xs);
         white-space: nowrap;
         border-radius: var(--border-radius-base);
+        list-style: none;
+        box-sizing: border-box;
         cursor: pointer;
 
         // Disabled state sets text to gray and nukes hover/tab effects
@@ -85,14 +89,6 @@
         &.menu-submenu-disabled {
             color: rgb(var(--grey-200)) !important;
         }
-    }
-    &-item-divider {
-        height: 1px;
-        margin: 1px 0;
-        overflow: hidden;
-        padding: 0;
-        line-height: 0;
-        background-color: #e5e5e5;
     }
 
     &-submenu {
@@ -103,14 +99,18 @@
                 padding-right: 20px;
             }
         }
-        > .menu {
-            background-color: #fff;
+
+        &-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
     }
 
     .menu-submenu-title,
     .menu-item {
         &-more-icon {
+            margin-left: var(--margin-xs);
             color: rgb(var(--text-color));
             font-size: var(--font-size-sm);
         }

@@ -1,179 +1,18 @@
 .menu {
-    padding: var(--padding-base);
-    margin: 0;
-    font-size: var(--font-size-sm);
-    list-style: none;
-    background-color: rgb(var(--bg-color-secondary));
-    border: 1px solid rgb(var(--border-color));
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--box-shadow-base);
-    box-sizing: border-box;
-    outline: none;
-
-    &-vertical {
-        display: grid;
-        gap: var(--margin-xxs);
-    }
-
-    &-hidden,
-    &-submenu-hidden {
-        display: none;
-    }
-
-    &-item-group-list {
-        margin: 0;
-        padding: 0;
-    }
-
-    &-item-group-title {
-        color: rgb(var(--text-color));
-        line-height: 1.5;
-        padding: 8px 10px;
-        border-bottom: 1px solid #dedede;
-    }
-
-    &-item-active,
-    &-submenu-active > &-submenu-title {
-        background-color: rgb(var(--bg-color-hover));
-    }
-
-    &-item-custom {
-        background: none;
-    }
-
-    &-item-selected {
-        background-color: rgb(var(--bg-color-hover));
-        // fix chrome render bug
-        transform: translateZ(0);
-    }
-
-    &-submenu-selected {
-        background-color: rgb(var(--bg-color-hover));
-    }
-
-    & > li&-submenu {
-        padding: 0;
-    }
-
-    &-horizontal&-sub,
-    &-vertical&-sub,
-    &-vertical-left&-sub,
-    &-vertical-right&-sub {
-        min-width: 160px;
-        margin-top: 0;
-    }
-
     &-item {
+        &-custom {
+            background: none;
+        }
+
         &-content {
             display: inline-flex;
             align-items: center;
             gap: var(--margin-xs);
         }
-    }
 
-    &-item,
-    &-submenu-title {
-        margin: 0;
-        position: relative;
-        display: block;
-        white-space: nowrap;
-        border-radius: var(--border-radius-base);
-        cursor: pointer;
-
-        // Disabled state sets text to gray and nukes hover/tab effects
-        &.menu-item-disabled,
-        &.menu-submenu-disabled {
-            color: rgb(var(--grey-200)) !important;
-        }
-    }
-    &-item-divider {
-        height: 1px;
-        margin: 1px 0;
-        overflow: hidden;
-        padding: 0;
-        line-height: 0;
-        background-color: #e5e5e5;
-    }
-
-    &-submenu {
-        &-popup {
-            position: absolute;
-
-            .submenu-title-wrapper {
-                padding-right: 20px;
-            }
-        }
-        > .menu {
-            background-color: #fff;
-        }
-    }
-
-    .menu-submenu-title,
-    .menu-item {
         &-more-icon {
             color: rgb(var(--text-color));
             font-size: var(--font-size-sm);
-        }
-    }
-
-    &-horizontal {
-        border: none;
-        border-bottom: 1px solid rgb(var(--border-color));
-        box-shadow: none;
-        white-space: nowrap;
-        overflow: hidden;
-
-        & > .menu-item,
-        & > .menu-submenu > .menu-submenu-title {
-            padding: 15px 20px;
-        }
-
-        & > .menu-submenu,
-        & > .menu-item {
-            border-bottom: 2px solid transparent;
-            display: inline-block;
-            vertical-align: bottom;
-        }
-    }
-
-    &-vertical,
-    &-vertical-left,
-    &-vertical-right,
-    &-inline {
-        & > .menu-item,
-        & > .menu-submenu > .menu-submenu-title {
-            width: 100%;
-            min-height: 28px;
-            padding: var(--padding-xs) var(--padding-sm);
-            box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .menu-submenu-arrow {
-            display: inline-block;
-            font-size: inherit;
-            vertical-align: baseline;
-            text-align: center;
-            text-transform: none;
-            text-rendering: auto;
-            position: absolute;
-            right: 16px;
-            line-height: 1.5em;
-        }
-    }
-
-    &-sub&-inline {
-        padding: 0;
-        border: none;
-        border-radius: 0;
-        box-shadow: none;
-
-        & > .menu-item,
-        & > .menu-submenu > .menu-submenu-title {
-            padding-top: 8px;
-            padding-bottom: 8px;
-            padding-right: 0;
         }
     }
 }

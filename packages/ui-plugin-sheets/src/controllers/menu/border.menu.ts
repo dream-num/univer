@@ -4,7 +4,7 @@ import {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from '@univerjs/base-sheets';
-import { IMenuSelectorItem, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import { IMenuSelectorItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { BorderStyleTypes, ICommandService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
@@ -177,6 +177,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     return {
         id: SetBorderPositionCommand.id,
         icon: 'AllBorderSingle',
+        group: MenuGroup.TOOLBAR_FORMAT,
         tooltip: 'toolbar.border.main',
         positions: [MenuPosition.TOOLBAR_START],
         type: MenuItemType.SUBITEMS,

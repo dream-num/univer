@@ -14,12 +14,12 @@ import { IUndoRedoCommandInfos } from '../undoredo/undoredo.service';
 /**
  * A helper to compose a certain type of interceptors.
  */
-export function compose(interceptors: ICellInterceptor[]) {
+function composeInterceptors<M, T>(interceptors: Array<IInterceptor<M, T>>) {
     // eslint-disable-next-line func-names
-    return function (location: ISheetLocation) {
+    return function (initialValue: Nullable<M>, context: Nullable<T>) {
         let index = -1;
-        return passThrough(0, undefined);
-        function passThrough(i: number, v: Nullable<ICellData>): Nullable<ICellData> {
+
+        function passThrough(i: number, v: Nullable<M>): Nullable<M> {
             if (i <= index) {
                 throw new Error('[SheetInterceptorService]: next() called multiple times!');
             }
@@ -30,8 +30,11 @@ export function compose(interceptors: ICellInterceptor[]) {
             }
 
             const interceptor = interceptors[i];
-            return interceptor.getCell!(v, location, passThrough.bind(null, i + 1));
+
+            return interceptor.handler!(v, context, passThrough.bind(null, i + 1));
         }
+
+        return passThrough(0, initialValue);
     };
 }
 
@@ -48,13 +51,10 @@ export interface ISheetLocation {
  * Sheet features can provide a `ICellContentInterceptor` to intercept cell content that would be perceived by
  * other features, such as copying, rendering, etc.
  */
-export interface ICellInterceptor {
+
+export interface IInterceptor<M = unknown, T = unknown> {
     priority?: number;
-    getCell(
-        cell: Nullable<ICellData>,
-        location: ISheetLocation,
-        next: (v: Nullable<ICellData>) => Nullable<ICellData>
-    ): Nullable<ICellData>;
+    handler(value: Nullable<M>, context: Nullable<T>, next: (v: Nullable<M>) => Nullable<M>): Nullable<M>;
 }
 
 export interface ICommandInterceptor {
@@ -69,6 +69,12 @@ export interface ICommandPermissionInterceptor {
     checkPermission(command: ICommandInfo): boolean;
 }
 
+export enum INTERCEPTOR_NAMES {
+    CELL_CONTENT,
+    BEFORE_CELL_EDIT,
+    AFTER_CELL_EDIT,
+}
+
 /**
  * This class expose methods for sheet features to inject code to sheet underlying logic.
  *
@@ -76,7 +82,7 @@ export interface ICommandPermissionInterceptor {
  */
 @OnLifecycle(LifecycleStages.Starting, SheetInterceptorService)
 export class SheetInterceptorService extends Disposable {
-    private _cellInterceptors: ICellInterceptor[] = [];
+    private _interceptorsByName: Map<INTERCEPTOR_NAMES, IInterceptor[]> = new Map();
     private _commandInterceptors: ICommandInterceptor[] = [];
     private _commandPermissionInterceptor: ICommandPermissionInterceptor[] = [];
 
@@ -104,9 +110,9 @@ export class SheetInterceptorService extends Disposable {
         );
 
         // register default viewModel interceptor
-        this.interceptCellContent({
-            priority: 0,
-            getCell(content, location): Nullable<ICellData> {
+        this.intercept(INTERCEPTOR_NAMES.CELL_CONTENT, {
+            priority: -1,
+            handler(content, location: ISheetLocation): Nullable<ICellData> {
                 const rawData = location.worksheet.getCellRaw(location.row, location.col);
                 if (content) {
                     return { ...rawData, ...content };
@@ -123,17 +129,6 @@ export class SheetInterceptorService extends Disposable {
         this._workbookDisposables.forEach((disposable) => disposable.dispose());
         this._workbookDisposables.clear();
         this._worksheetDisposables.clear();
-    }
-
-    interceptCellContent(interceptor: ICellInterceptor): IDisposable {
-        if (this._cellInterceptors.includes(interceptor)) {
-            throw new Error('[SheetInterceptorService]: Interceptor already exists!');
-        }
-
-        this._cellInterceptors.push(interceptor);
-        this._cellInterceptors = this._cellInterceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-
-        return this.disposeWithMe(toDisposable(() => remove(this._cellInterceptors, interceptor)));
     }
 
     interceptCommand(interceptor: ICommandInterceptor): IDisposable {
@@ -175,7 +170,29 @@ export class SheetInterceptorService extends Disposable {
      */
     onCommandPermissionCheck(command: ICommandInfo): boolean {
         const result = this._commandPermissionInterceptor.some((handler) => !handler.checkPermission(command));
+
         return !result;
+    }
+
+    intercept(name: INTERCEPTOR_NAMES, interceptor: IInterceptor) {
+        if (!this._interceptorsByName.has(name)) {
+            this._interceptorsByName.set(name, []);
+        }
+        const interceptors = this._interceptorsByName.get(name)!;
+        interceptors.push(interceptor);
+
+        this._interceptorsByName.set(
+            name,
+            interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+        );
+
+        return this.disposeWithMe(toDisposable(() => remove(this._interceptorsByName.get(name)!, interceptor)));
+    }
+
+    fetchThroughInterceptors<M, T>(name: INTERCEPTOR_NAMES, initialValue: Nullable<M>, context: Nullable<T>) {
+        const interceptors = (this._interceptorsByName.get(name) ?? []) as Array<IInterceptor<M, T>>;
+
+        return composeInterceptors<M, T>(interceptors)(initialValue, context);
     }
 
     private _interceptWorkbook(workbook: Workbook): void {
@@ -189,7 +206,7 @@ export class SheetInterceptorService extends Disposable {
                 const sheetDisposables = new DisposableCollection();
                 const cellInterceptorDisposable = viewModel.registerCellContentInterceptor({
                     getCell(row: number, col: number): Nullable<ICellData> {
-                        return compose(self._cellInterceptors.filter((i) => !!i.getCell))({
+                        return self.fetchThroughInterceptors(INTERCEPTOR_NAMES.CELL_CONTENT, undefined, {
                             workbookId,
                             worksheetId,
                             row,
@@ -213,6 +230,7 @@ export class SheetInterceptorService extends Disposable {
                 workbook.sheetDisposed$.subscribe((worksheet) => this._disposeSheetInterceptor(workbookId, worksheet))
             )
         );
+
         // Dispose all underlying interceptors when workbook is disposed.
         disposables.add(
             toDisposable(() =>
@@ -224,6 +242,7 @@ export class SheetInterceptorService extends Disposable {
     private _disposeWorkbookInterceptor(workbook: Workbook): void {
         const workbookId = workbook.getUnitId();
         const disposable = this._workbookDisposables.get(workbookId);
+
         if (disposable) {
             disposable.dispose();
             this._workbookDisposables.delete(workbookId);
@@ -233,6 +252,7 @@ export class SheetInterceptorService extends Disposable {
     private _disposeSheetInterceptor(workbookId: string, worksheet: Worksheet): void {
         const disposableId = getWorksheetDisposableID(workbookId, worksheet);
         const disposable = this._worksheetDisposables.get(disposableId);
+
         if (disposable) {
             disposable.dispose();
             this._worksheetDisposables.delete(disposableId);

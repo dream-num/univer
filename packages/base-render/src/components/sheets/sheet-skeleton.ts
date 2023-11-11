@@ -1024,6 +1024,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (!cell) {
             return;
         }
+
         const content = cell.m || cell.v;
 
         let documentModel: Nullable<DocumentModelSimple>;

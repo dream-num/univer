@@ -1,6 +1,6 @@
 import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
 
-import { DocCopyCommand } from '../commands/commands/clipboard.command';
+import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 
 export class DocClipboardController extends Disposable {
@@ -13,7 +13,7 @@ export class DocClipboardController extends Disposable {
     }
 
     initialize() {
-        [DocCopyCommand, DocCopyCommand, DocCopyCommand].forEach((command) =>
+        [DocCopyCommand, DocCutCommand, DocPasteCommand].forEach((command) =>
             this.disposeWithMe(this._commandService.registerAsMultipleCommand(command))
         );
     }

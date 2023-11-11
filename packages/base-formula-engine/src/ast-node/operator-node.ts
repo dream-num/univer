@@ -10,20 +10,6 @@ import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
-const PLUS_EXECUTOR_NAME = 'PLUS';
-
-const MINUS_EXECUTOR_NAME = 'MINUS';
-
-const MULTIPLY_EXECUTOR_NAME = 'MULTIPLY';
-
-const DIVIDED_EXECUTOR_NAME = 'DIVIDED';
-
-const CONCATENATE_EXECUTOR_NAME = 'CONCATENATE';
-
-const POWER_EXECUTOR_NAME = 'POWER';
-
-const COMPARE_EXECUTOR_NAME = 'COMPARE';
-
 export class OperatorNode extends BaseAstNode {
     constructor(
         private _operatorString: string,
@@ -38,7 +24,7 @@ export class OperatorNode extends BaseAstNode {
 
     override execute() {
         const children = this.getChildren();
-        if (this._functionExecutor.name === COMPARE_EXECUTOR_NAME) {
+        if (this._functionExecutor.name === FUNCTION_NAMES.COMPARE) {
             (this._functionExecutor as Compare).setCompareType(this.getToken() as compareToken);
         }
         const object1 = children[0].getValue();

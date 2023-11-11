@@ -11,6 +11,7 @@ export enum NodeType {
     UNION = 'UnionNode',
     PREFIX = 'PrefixNode',
     SUFFIX = 'SuffixNode',
+    NULL = 'NullNode',
 }
 
 export const NODE_ORDER_MAP = new Map([

@@ -85,6 +85,10 @@ export class LexerNode {
         this._children.push(children);
     }
 
+    addChildrenFirst(children: LexerNode | string) {
+        this._children.unshift(children);
+    }
+
     getToken() {
         return this._token;
     }
@@ -98,6 +102,18 @@ export class LexerNode {
         this._endIndex = ed;
     }
 
+    replaceChild(lexerNode: LexerNode, newLexerNode: LexerNode) {
+        const i = this._getIndexInParent(lexerNode);
+
+        if (i == null) {
+            return;
+        }
+
+        this.getChildren().splice(i, 1, newLexerNode);
+
+        newLexerNode.setParent(this);
+    }
+
     changeToParent(newParentLexerNode: LexerNode) {
         const parentNode = this.getParent();
         if (parentNode) {
@@ -109,15 +125,21 @@ export class LexerNode {
     }
 
     removeChild(lexerNode: LexerNode) {
-        const childrenNode = this.getChildren();
-        const childrenCount = childrenNode.length;
-        for (let i = 0; i < childrenCount; i++) {
-            const child = childrenNode[i];
-            if (child === lexerNode) {
-                childrenNode.splice(i, 1);
-                return;
-            }
+        const i = this._getIndexInParent(lexerNode);
+
+        if (i == null) {
+            return;
         }
+
+        this.getChildren().splice(i, 1);
+        // const childrenCount = childrenNode.length;
+        // for (let i = 0; i < childrenCount; i++) {
+        //     const child = childrenNode[i];
+        //     if (child === lexerNode) {
+        //         childrenNode.splice(i, 1);
+        //         return;
+        //     }
+        // }
     }
 
     serialize() {
@@ -140,5 +162,16 @@ export class LexerNode {
             ed: this._endIndex,
             children: childrenSerialization,
         };
+    }
+
+    private _getIndexInParent(lexerNode: LexerNode) {
+        const childrenNode = this.getChildren();
+        const childrenCount = childrenNode.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const child = childrenNode[i];
+            if (child === lexerNode) {
+                return i;
+            }
+        }
     }
 }

@@ -58,6 +58,10 @@ export class BaseValueObject extends ObjectClassType {
         return false;
     }
 
+    isNull() {
+        return false;
+    }
+
     getNegative(): CalculateValueType {
         return ErrorValueObject.create(ErrorType.VALUE);
     }

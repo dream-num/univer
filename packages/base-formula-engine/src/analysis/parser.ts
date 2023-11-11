@@ -7,6 +7,7 @@ import { FunctionNodeFactory } from '../ast-node/function-node';
 import { LambdaNode, LambdaNodeFactory } from '../ast-node/lambda-node';
 import { LambdaParameterNodeFactory } from '../ast-node/lambda-parameter-node';
 import { NodeType } from '../ast-node/node-type';
+import { NullNode } from '../ast-node/null-node';
 import { OperatorNodeFactory } from '../ast-node/operator-node';
 import { PrefixNodeFactory } from '../ast-node/prefix-node';
 import { ReferenceNodeFactory } from '../ast-node/reference-node';
@@ -14,7 +15,10 @@ import { SuffixNodeFactory } from '../ast-node/suffix-node';
 import { UnionNodeFactory } from '../ast-node/union-node';
 import { ValueNodeFactory } from '../ast-node/value-node';
 import { ErrorType } from '../basics/error-type';
+import { isChildRunTimeParameter, isFirstChildParameter } from '../basics/function-definition';
 import {
+    DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
+    DEFAULT_TOKEN_LET_FUNCTION_NAME,
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
@@ -60,6 +64,7 @@ export class AstTreeBuilder extends Disposable {
 
     private _lambdaParameterHandler(lexerNode: LexerNode, parent: LambdaNode) {
         const lambdaId = parent.getLambdaId();
+
         const parentAstNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
 
         // const lambdaRuntime = this._parserDataLoader.getLambdaRuntime();
@@ -99,6 +104,48 @@ export class AstTreeBuilder extends Disposable {
         return parent;
     }
 
+    private _changeLetToLambda(letLexerNode: LexerNode) {
+        const letChildren = letLexerNode.getChildren();
+
+        const letChildrenCount = letChildren.length;
+        if (letChildrenCount % 2 !== 1 || letChildrenCount === 0) {
+            return;
+        }
+
+        const newLambdaNode = new LexerNode();
+        newLambdaNode.setToken(DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME);
+
+        const newLambdaParameterNode = new LexerNode();
+        newLambdaParameterNode.setToken(DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER);
+
+        // const lastLetChild = letChildren[letChildrenCount - 1];
+
+        const copyChildren = [...letChildren];
+
+        for (let i = 0; i < letChildrenCount; i++) {
+            const child = copyChildren[i];
+            if (!(child instanceof LexerNode)) {
+                return;
+            }
+
+            if (i % 2 === 0) {
+                child.changeToParent(newLambdaNode);
+            } else {
+                child.changeToParent(newLambdaParameterNode);
+            }
+        }
+
+        newLambdaNode.addChildrenFirst(newLambdaParameterNode);
+
+        newLambdaParameterNode.setParent(newLambdaNode);
+
+        const parent = letLexerNode.getParent();
+
+        parent?.replaceChild(letLexerNode, newLambdaNode);
+
+        return newLambdaNode;
+    }
+
     private _getTopParent(node: BaseAstNode) {
         let parent: Nullable<BaseAstNode> = node;
         while (parent?.getParent()) {
@@ -114,10 +161,36 @@ export class AstTreeBuilder extends Disposable {
         const calculateStack: BaseAstNode[] = [];
         let currentAstNode: Nullable<BaseAstNode> = null;
         // console.log('lexerNode', lexerNode, children);
-        if (lexerNode.getToken() === DEFAULT_TOKEN_TYPE_PARAMETER) {
+        const token = lexerNode.getToken().trim().toUpperCase();
+        if (token === DEFAULT_TOKEN_LET_FUNCTION_NAME) {
+            /**
+             * Since the let function performs the same as lambda expressions,
+             * here we make a conversion to use only lambda expressions for calculations.
+             */
+            const resultNode: Nullable<LexerNode> = this._changeLetToLambda(lexerNode);
+            if (resultNode != null) {
+                return this._parse(resultNode, parent);
+            }
+
+            console.log('errorLet', resultNode, currentAstNode, lexerNode);
+            return ErrorNode.create(ErrorType.ERROR);
+        }
+        if (token === DEFAULT_TOKEN_TYPE_PARAMETER) {
             currentAstNode = parent;
+
+            if (childrenCount === 0) {
+                const nullNode = new NullNode(DEFAULT_TOKEN_TYPE_ROOT);
+
+                nullNode.setParent(parent);
+
+                return currentAstNode;
+            }
         } else {
-            if (lexerNode.getToken() === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
+            /**
+             * Process the parameters of the lambda expression, create an execution environment,
+             * allowing parameters to correspond to variables.
+             */
+            if (token === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
                 let resultNode: BaseAstNode | false = this._lambdaParameterHandler(lexerNode, parent as LambdaNode);
                 if (resultNode === false) {
                     console.log('error1', resultNode, currentAstNode, lexerNode);
@@ -137,17 +210,31 @@ export class AstTreeBuilder extends Disposable {
             // parent.addChildren(currentAstNode);
         }
         console.log('currentAstNode', currentAstNode.nodeType, currentAstNode, lexerNode);
+        const firstChild = children[0];
+        // let isSkipFirstInLambda = false;
+        // if (
+        //     currentAstNode.getToken().trim().toUpperCase() === DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME &&
+        //     !isFirstChildParameter(firstChild)
+        // ) {
+        //     isSkipFirstInLambda = true;
+        // }
         for (let i = 0; i < childrenCount; i++) {
-            if (
-                currentAstNode.nodeType === NodeType.LAMBDA &&
-                parent.nodeType !== NodeType.LAMBDA &&
-                i !== 0 &&
-                i !== childrenCount - 1
-            ) {
-                continue;
+            const item = children[i];
+            /**
+             *  If it is a lambda expression, by default, only the first and last child nodes are valid.
+             * The intermediate nodes have already been processed during the conversion of lambda parameters,
+             * so they need to be skipped here.
+             */
+            if (isFirstChildParameter(firstChild)) {
+                if (i !== 0 && i !== childrenCount - 1) {
+                    continue;
+                }
+            } else if (isChildRunTimeParameter(item)) {
+                if (i !== childrenCount - 1) {
+                    continue;
+                }
             }
 
-            const item = children[i];
             let astNode: Nullable<BaseAstNode> = null;
             if (item instanceof LexerNode) {
                 astNode = this._parse(item, currentAstNode);

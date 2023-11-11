@@ -1,6 +1,7 @@
 import {
     Disposable,
     getTypeFromPermissionItemList,
+    INTERCEPTOR_POINT,
     IPermissionService,
     IUniverInstanceService,
     LifecycleStages,
@@ -58,8 +59,9 @@ export class SheetPermissionService extends Disposable {
 
     private _interceptCommandPermission() {
         this.disposeWithMe(
-            this._sheetInterceptorService.interceptCommandPermission({
-                checkPermission: (commandInfo) => {
+            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.PERMISSION, {
+                priority: 99,
+                handler: (_value, commandInfo, next) => {
                     const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
                     const sheet = workbook?.getActiveSheet();
                     const workbookId = workbook?.getUnitId();
@@ -72,7 +74,7 @@ export class SheetPermissionService extends Disposable {
                             return this.getSheetEditable(workbookId, sheetId);
                         }
                     }
-                    return true;
+                    return next();
                 },
             })
         );

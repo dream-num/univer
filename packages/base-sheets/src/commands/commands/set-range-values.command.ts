@@ -3,6 +3,7 @@ import {
     ICellData,
     ICommand,
     ICommandService,
+    INTERCEPTOR_POINT,
     IRange,
     isICellData,
     IUndoRedoService,
@@ -93,7 +94,7 @@ export const SetRangeValuesCommand: ICommand = {
         );
 
         if (
-            !sheetInterceptorService.onCommandPermissionCheck({
+            !sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.PERMISSION)(null, {
                 id: SetRangeValuesCommand.id,
                 params: setRangeValuesMutationParams,
             })

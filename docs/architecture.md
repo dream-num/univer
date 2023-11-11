@@ -2,7 +2,7 @@
 
 ## Univer Architecture Introduction
 
-Univer is a web-based office collaboration and data processing SDK, mainly in the form of Office products (sheet / doc / slide). Univer organizes code in a plugin-based manner, allowing users to choose plugins according to their actual needs to form a Univer application. For example, users can add capabilities such as collaborative editing, macro recording, and AI-generated scripting languages to traditional spreadsheets in a plugin-based manner. Users can also embed Univer applications into their own applications, and integrate the capabilities of Univer and their own applications through plugin development.
+Univer is a web-based office collaboration and data processing SDK, mainly in the form of Office products (sheet / doc / slide). Univer organizes code in a plugin-based manner, allowing users to choose plugins according to their actual needs to form a Univer application. For example, users can add capabilities such as collaborative editing, macro recording, and AI-generated scripting languages to traditional spreadsheets in a plugin-based manner. Users can also embed Univer applications into their own applications, and integrate the capabilities of Univer and their own applications through plugins. And, with the help of Univer's official database connectors, user can load and process data in Univer, leveraging Univer's plugin ecosystem.
 
 ## Core Requirements for Univer Architecture Design
 

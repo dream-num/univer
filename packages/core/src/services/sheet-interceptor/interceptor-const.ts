@@ -1,6 +1,6 @@
 import { ICellData } from '../../types/interfaces/i-cell-data';
-import type { ISheetLocation } from './utils/index';
-import { createInterceptorKey } from './utils/index';
+import type { ISheetLocation } from './utils/interceptor';
+import { createInterceptorKey } from './utils/interceptor';
 
 const CELL_CONTENT = createInterceptorKey<ICellData, ISheetLocation>('CELL_CONTENT');
 const BEFORE_CELL_EDIT = createInterceptorKey<ICellData, ISheetLocation>('BEFORE_CELL_EDIT');

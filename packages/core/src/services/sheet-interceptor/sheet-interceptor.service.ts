@@ -11,7 +11,7 @@ import { IUniverInstanceService } from '../instance/instance.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
 import { IUndoRedoCommandInfos } from '../undoredo/undoredo.service';
 import { INTERCEPTOR_POINT } from './interceptor-const';
-import { composeInterceptors, IInterceptor } from './utils';
+import { composeInterceptors, IInterceptor } from './utils/interceptor';
 
 export interface ICommandInterceptor {
     priority?: number;

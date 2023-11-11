@@ -37,7 +37,7 @@ export {
 } from './services/permission';
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
 export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
-export type { IInterceptor, ISheetLocation } from './services/sheet-interceptor/utils';
+export type { IInterceptor, ISheetLocation } from './services/sheet-interceptor/utils/interceptor';
 export { type IStyleSheet, ThemeService } from './services/theme/theme.service';
 export {
     type IUndoRedoCommandInfos,

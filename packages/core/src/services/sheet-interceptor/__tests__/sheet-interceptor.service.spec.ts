@@ -8,7 +8,7 @@ import { ICellData } from '../../../types/interfaces/i-cell-data';
 import { IUniverInstanceService } from '../../instance/instance.service';
 import { INTERCEPTOR_POINT } from '../interceptor-const';
 import { SheetInterceptorService } from '../sheet-interceptor.service';
-import { createInterceptorKey, ISheetLocation } from '../utils';
+import { createInterceptorKey, ISheetLocation } from '../utils/interceptor';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('Test SheetInterceptorService', () => {

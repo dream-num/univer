@@ -88,24 +88,28 @@ export function insertTextRuns(
 
                 const pendingTextRuns = [];
 
-                const startSplitTextRun = {
-                    ...textRun,
-                    st,
-                    ed: insertTextRuns[0].st,
-                };
+                if (insertTextRuns.length) {
+                    const startSplitTextRun = {
+                        ...textRun,
+                        st,
+                        ed: insertTextRuns[0].st,
+                    };
 
-                pendingTextRuns.push(startSplitTextRun);
-                pendingTextRuns.push(...insertTextRuns);
+                    pendingTextRuns.push(startSplitTextRun);
+                    pendingTextRuns.push(...insertTextRuns);
 
-                const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
+                    const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
 
-                const endSplitTextRun = {
-                    ...textRun,
-                    st: lastInsertTextRuns.ed,
-                    ed: ed + textLength,
-                };
+                    const endSplitTextRun = {
+                        ...textRun,
+                        st: lastInsertTextRuns.ed,
+                        ed: ed + textLength,
+                    };
 
-                pendingTextRuns.push(endSplitTextRun);
+                    pendingTextRuns.push(endSplitTextRun);
+                } else {
+                    pendingTextRuns.push(textRun);
+                }
 
                 newTextRuns.push(...pendingTextRuns);
             } else {

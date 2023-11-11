@@ -352,5 +352,21 @@ describe('example', () => {
             expect(body?.textRuns[1].ts?.bl).toBe(BooleanNumber.FALSE);
             expect(body?.textRuns[2].ts?.bl).toBe(BooleanNumber.FALSE);
         });
+
+        it('it should pass the case when the insertTextRuns is empty', async () => {
+            insertTextRuns(
+                body as IDocumentBody,
+                {
+                    textRuns: [],
+                } as unknown as IDocumentBody,
+                10,
+                10
+            );
+
+            expect(body?.textRuns.length).toBe(3);
+            expect(body?.textRuns[0].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns[1].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns[2].ts?.bl).toBe(BooleanNumber.FALSE);
+        });
     });
 });

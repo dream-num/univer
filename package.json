@@ -73,6 +73,9 @@
     "lint-staged": {
         "**/*.{js,ts,tsx}": [
             "eslint --fix"
+        ],
+        "**/*.less": [
+            "stylelint --fix"
         ]
     }
 }

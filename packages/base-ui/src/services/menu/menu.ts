@@ -83,7 +83,7 @@ export interface IValueOption {
         | string
         | {
               name: string;
-              props?: Record<string, string | number>;
+              props?: Record<string, string | number | Array<{ [x: string | number]: string }>>;
           }; // custom component, send to CustomLabel label property
     icon?: string;
     tooltip?: string;

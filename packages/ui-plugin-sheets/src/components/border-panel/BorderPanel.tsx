@@ -2,7 +2,7 @@ import { ComponentManager } from '@univerjs/base-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 
 import styles from './index.module.less';
-import { IBorderPanelProps } from './interface';
+import { BorderPanelType, IBorderPanelProps } from './interface';
 
 export const BORDER_LINE_CHILDREN = [
     {
@@ -59,10 +59,17 @@ export const BORDER_LINE_CHILDREN = [
 
 export function BorderPanel(props: IBorderPanelProps) {
     const componentManager = useDependency(ComponentManager);
-    const { onChange } = props;
+    const { panelType, onChange } = props;
 
-    function handleClick(value: string) {
-        onChange?.(value);
+    function handleClick(item: { value: string; label: string }, type: BorderPanelType) {
+        const { id } = panelType.find((item) => item.type === type) ?? {};
+
+        if (id) {
+            onChange?.({
+                id,
+                value: item.value,
+            });
+        }
     }
 
     function renderIcon(icon: string) {
@@ -77,7 +84,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                 <div
                     key={item.value}
                     className={styles.uiPluginSheetsBorderPanelItem}
-                    onClick={() => handleClick(item.value)}
+                    onClick={() => handleClick(item, BorderPanelType.POSITION)}
                 >
                     {renderIcon(item.icon)}
                     <span>{item.label}</span>

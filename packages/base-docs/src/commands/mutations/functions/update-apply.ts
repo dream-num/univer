@@ -9,6 +9,7 @@ import {
     ITable,
     ITextRun,
     Nullable,
+    Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
@@ -23,6 +24,7 @@ import {
     insertParagraphs,
     insertTables,
     insertTextRuns,
+    normalizeTextRuns,
 } from './common';
 
 export function UpdateAttributeApply(
@@ -96,7 +98,7 @@ function updateTextRuns(
     const removeTextRuns = deleteTextRuns(body, textLength, currentIndex);
 
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
-        const newUpdateTextRun = coverTextRun(updateDataTextRuns, removeTextRuns, coverType);
+        const newUpdateTextRun = coverTextRuns(updateDataTextRuns, removeTextRuns, coverType);
         updateBody.textRuns = newUpdateTextRun;
     }
 
@@ -105,12 +107,36 @@ function updateTextRuns(
     return removeTextRuns;
 }
 
-function coverTextRun(updateDataTextRuns: ITextRun[], removeTextRuns: ITextRun[], coverType: UpdateDocsAttributeType) {
+export function coverTextRuns(
+    updateDataTextRuns: ITextRun[],
+    removeTextRuns: ITextRun[],
+    coverType: UpdateDocsAttributeType
+) {
+    if (removeTextRuns.length === 0) {
+        return updateDataTextRuns;
+    }
+
+    updateDataTextRuns = Tools.deepClone(updateDataTextRuns);
+    removeTextRuns = Tools.deepClone(removeTextRuns);
+
     const newUpdateTextRun: ITextRun[] = [];
+    const updateLength = updateDataTextRuns.length;
+    const removeLength = removeTextRuns.length;
     let updateIndex = 0;
     let removeIndex = 0;
+    let pending: Nullable<ITextRun> = null;
 
-    while (updateIndex !== updateDataTextRuns.length && removeIndex !== removeTextRuns.length) {
+    function pushPendingAndReturnStatus() {
+        if (pending) {
+            newUpdateTextRun.push(pending);
+            pending = null;
+            return true;
+        }
+
+        return false;
+    }
+
+    while (updateIndex < updateLength && removeIndex < removeLength) {
         const { st: updateSt, ed: updateEd, ts: updateStyle } = updateDataTextRuns[updateIndex];
         const { st: removeSt, ed: removeEd, ts: removeStyle, sId } = removeTextRuns[removeIndex];
         let newTs;
@@ -121,24 +147,66 @@ function coverTextRun(updateDataTextRuns: ITextRun[], removeTextRuns: ITextRun[]
             newTs = { ...updateStyle, ...removeStyle };
         }
 
-        newUpdateTextRun.push({
-            st: updateSt >= removeSt ? updateSt : removeSt,
-            ed: updateEd >= removeEd ? removeEd : updateEd,
-            ts: newTs,
-            sId,
-        });
+        if (updateEd < removeSt) {
+            if (!pushPendingAndReturnStatus()) {
+                newUpdateTextRun.push(updateDataTextRuns[updateIndex]);
+            }
 
-        if (updateEd > removeEd) {
-            removeIndex++;
-        } else if (updateEd === removeEd) {
             updateIndex++;
+        } else if (removeEd < updateSt) {
+            if (!pushPendingAndReturnStatus()) {
+                newUpdateTextRun.push(removeTextRuns[removeIndex]);
+            }
+
             removeIndex++;
         } else {
-            updateIndex++;
+            newUpdateTextRun.push({
+                st: Math.min(updateSt, removeSt),
+                ed: Math.max(updateSt, removeSt),
+                ts: updateSt < removeSt ? { ...updateStyle } : { ...removeStyle },
+                sId: updateSt < removeSt ? undefined : sId,
+            });
+
+            newUpdateTextRun.push({
+                st: Math.max(updateSt, removeSt),
+                ed: Math.min(updateEd, removeEd),
+                ts: newTs,
+                sId,
+            });
+
+            if (updateEd < removeEd) {
+                updateIndex++;
+                removeTextRuns[removeIndex].st = updateEd;
+            } else {
+                removeIndex++;
+                updateDataTextRuns[updateIndex].st = removeEd;
+            }
+
+            pending = {
+                st: Math.min(updateEd, removeEd),
+                ed: Math.max(updateEd, removeEd),
+                ts: updateEd < removeEd ? { ...removeStyle } : { ...updateStyle },
+                sId: updateEd < removeEd ? sId : undefined,
+            };
         }
     }
 
-    return newUpdateTextRun;
+    pushPendingAndReturnStatus();
+
+    // If the last textRun is also disjoint, then the last textRun needs to be pushed in `newUpdateTextRun`
+    const tempTopTextRun = newUpdateTextRun[newUpdateTextRun.length - 1];
+    const updateLastTextRun = updateDataTextRuns[updateLength - 1];
+    const removeLastTextRun = removeTextRuns[removeLength - 1];
+
+    if (tempTopTextRun.ed !== Math.max(updateLastTextRun.ed, removeLastTextRun.ed)) {
+        if (updateLastTextRun.ed > removeLastTextRun.ed) {
+            newUpdateTextRun.push(updateLastTextRun);
+        } else {
+            newUpdateTextRun.push(removeLastTextRun);
+        }
+    }
+
+    return normalizeTextRuns(newUpdateTextRun);
 }
 
 function updateParagraphs(

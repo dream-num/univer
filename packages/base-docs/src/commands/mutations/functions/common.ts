@@ -13,6 +13,36 @@ import {
     sortRulesFactory,
 } from '@univerjs/core';
 
+export function normalizeTextRuns(textRuns: ITextRun[]) {
+    const results: ITextRun[] = [];
+
+    for (const textRun of textRuns) {
+        const { st, ed } = textRun;
+
+        if (st === ed) {
+            continue;
+        }
+
+        if (results.length === 0) {
+            results.push(textRun);
+            continue;
+        }
+
+        const peak = results.pop()!;
+        if (isSameStyleTextRun(textRun, peak)) {
+            results.push({
+                ...textRun,
+                st: peak.st,
+                ed,
+            });
+        } else {
+            results.push(peak, textRun);
+        }
+    }
+
+    return results;
+}
+
 /**
  * Inserting styled text content into the current document model.
  * @param body The current content object of the document model.
@@ -32,92 +62,78 @@ export function insertTextRuns(
         return;
     }
 
-    let insertIndex = Infinity; // The current index of the textRun where the insertion needs to be made.
-    for (let i = 0, len = textRuns.length; i < len; i++) {
-        const textRun = textRuns[i];
-        const { st, ed } = textRun;
+    const newTextRuns: ITextRun[] = [];
+    const len = textRuns.length;
+    let hasInserted = false;
 
-        if (st >= currentIndex) {
-            // Handles the insertion of text at the beginning of a paragraph
-            if (st === currentIndex && insertBody.textRuns) {
-                textRun.st += textLength;
-            }
-
-            textRun.ed += textLength;
-
-            if (insertIndex === Infinity) {
-                insertIndex = -Infinity;
-            }
-        } else if (ed >= currentIndex) {
-            /**
-             * Inserting text at the end of a rich text content,
-             * with the newly inserted text inheriting the style of that content.
-             * So, it is necessary to set ed >= currentIndex - 1 to ensure that the new text is inserted while maintaining the style of the existing content.
-             */
-            textRun.ed += textLength;
-
-            if (!Number.isFinite(insertIndex)) {
-                insertIndex = i;
-            }
-        }
-    }
-
-    const insertTextRuns = insertBody.textRuns;
-
-    if (insertTextRuns) {
+    const insertTextRuns = insertBody.textRuns ?? [];
+    if (insertTextRuns.length) {
         for (let i = 0, len = insertTextRuns.length; i < len; i++) {
             const insertTextRun = insertTextRuns[i];
             insertTextRun.st += currentIndex;
             insertTextRun.ed += currentIndex;
         }
+    }
 
-        if (insertIndex === Infinity) {
-            textRuns.push(...insertTextRuns);
-        } else if (insertIndex === -Infinity) {
-            textRuns.unshift(...insertTextRuns);
+    for (let i = 0; i < len; i++) {
+        const textRun = textRuns[i];
+        const { st, ed } = textRun;
+
+        if (ed < currentIndex) {
+            newTextRuns.push(textRun);
+        } else if (currentIndex >= st && currentIndex <= ed) {
+            if (!hasInserted) {
+                hasInserted = true;
+                textRun.ed += textLength;
+
+                const pendingTextRuns = [];
+
+                const startSplitTextRun = {
+                    ...textRun,
+                    st,
+                    ed: insertTextRuns[0].st,
+                };
+
+                pendingTextRuns.push(startSplitTextRun);
+                pendingTextRuns.push(...insertTextRuns);
+
+                const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
+
+                const endSplitTextRun = {
+                    ...textRun,
+                    st: lastInsertTextRuns.ed,
+                    ed: ed + textLength,
+                };
+
+                pendingTextRuns.push(endSplitTextRun);
+
+                newTextRuns.push(...pendingTextRuns);
+            } else {
+                textRun.st += textLength;
+                textRun.ed += textLength;
+
+                newTextRuns.push(textRun);
+            }
         } else {
-            const splitTextRun = textRuns[insertIndex];
-            const { st, ed } = splitTextRun;
+            // currentIndex < st
+            textRun.st += textLength;
+            textRun.ed += textLength;
 
-            const startSplitTextRun = {
-                ...splitTextRun,
-                st,
-                ed: insertTextRuns[0].st,
-            };
-
-            if (isSameStyleTextRun(startSplitTextRun, insertTextRuns[0])) {
-                startSplitTextRun.ed = insertTextRuns[0].ed;
-                insertTextRuns.shift();
+            if (!hasInserted) {
+                hasInserted = true;
+                newTextRuns.push(...insertTextRuns);
             }
 
-            const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
-
-            if (!lastInsertTextRuns) {
-                textRuns.splice(insertIndex, 1, startSplitTextRun);
-
-                return;
-            }
-
-            if (lastInsertTextRuns.ed === ed) {
-                textRuns.splice(insertIndex, 1, startSplitTextRun, ...insertTextRuns);
-
-                return;
-            }
-
-            const endSplitTextRun = {
-                ...splitTextRun,
-                st: lastInsertTextRuns.ed,
-                ed,
-            };
-
-            if (isSameStyleTextRun(endSplitTextRun, lastInsertTextRuns)) {
-                endSplitTextRun.st = lastInsertTextRuns.st;
-                insertTextRuns.pop();
-            }
-
-            textRuns.splice(insertIndex, 1, startSplitTextRun, ...insertTextRuns, endSplitTextRun);
+            newTextRuns.push(textRun);
         }
     }
+
+    if (!hasInserted) {
+        hasInserted = true;
+        newTextRuns.push(...insertTextRuns);
+    }
+
+    body.textRuns = normalizeTextRuns(newTextRuns);
 }
 
 /**
@@ -334,7 +350,6 @@ export function insertCustomRanges(
 export function deleteTextRuns(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { textRuns } = body;
     const startIndex = currentIndex;
-
     const endIndex = currentIndex + textLength;
     const removeTextRuns: ITextRun[] = [];
 
@@ -365,10 +380,8 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     st: startIndex - startIndex,
                     ed: endIndex - startIndex,
                 });
-                const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex - 1);
 
-                textRun.st = segments[0];
-                textRun.ed = segments[1];
+                textRun.ed -= textLength;
             } else if (startIndex >= st && startIndex < ed) {
                 /**
                  * If the cursor start position is within the textRun,
@@ -380,6 +393,7 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     st: startIndex - startIndex,
                     ed: ed - startIndex,
                 });
+
                 textRun.ed = startIndex;
             } else if (endIndex > st && endIndex <= ed) {
                 /**
@@ -392,6 +406,7 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     st: st - startIndex,
                     ed: endIndex - startIndex,
                 });
+
                 textRun.st = endIndex - textLength;
                 textRun.ed -= textLength;
             } else if (st >= endIndex) {

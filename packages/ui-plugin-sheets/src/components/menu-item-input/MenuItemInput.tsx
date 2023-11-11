@@ -7,7 +7,7 @@ import styles from './index.module.less';
 import { IMenuItemInputProps } from './interface';
 
 export const MenuItemInput = (props: IMenuItemInputProps) => {
-    const { prefix, suffix, value, onChange, onValueChange } = props;
+    const { prefix, suffix, value, onChange } = props;
 
     const localeService = useDependency(LocaleService);
 
@@ -31,8 +31,13 @@ export const MenuItemInput = (props: IMenuItemInputProps) => {
     return (
         <div className={styles.uiPluginSheetsContextMenuInput}>
             {localeService.t(prefix)}
-            <span onClick={(e) => e.stopPropagation()}>
-                <InputNumber value={Number(inputValue)} onKeyDown={handleKeyDown} onChange={handleChange} />
+            <span className={styles.uiPluginSheetsContextMenuInputContainer} onClick={(e) => e.stopPropagation()}>
+                <InputNumber
+                    value={Number(inputValue)}
+                    precision={0}
+                    onKeyDown={handleKeyDown}
+                    onChange={handleChange}
+                />
             </span>
             {localeService.t(suffix)}
         </div>

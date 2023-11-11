@@ -65,23 +65,39 @@ import {
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
-import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import {
-    BackgroundColorSelectorMenuItemFactory,
-    BoldMenuItemFactory,
-    CellInsertMenuItemFactory,
-    ChangeColorSheetMenuItemFactory,
+    CellBorderSelectorMenuItemFactory,
+    SetBorderColorMenuItemFactory,
+    SetBorderStyleMenuItemFactory,
+} from './menu/border.menu';
+import {
     ClearSelectionAllMenuItemFactory,
     ClearSelectionContentMenuItemFactory,
     ClearSelectionFormatMenuItemFactory,
     ClearSelectionMenuItemFactory,
-    ColInsertMenuItemFactory,
-    CopyMenuItemFactory,
-    CopySheetMenuItemFactory,
+} from './menu/clear.menu';
+import {
     DeleteRangeMenuItemFactory,
     DeleteRangeMoveLeftMenuItemFactory,
     DeleteRangeMoveUpMenuItemFactory,
-    DeleteSheetMenuItemFactory,
+    RemoveColMenuItemFactory,
+    RemoveRowMenuItemFactory,
+} from './menu/delete.menu';
+import {
+    CellInsertMenuItemFactory,
+    ColInsertMenuItemFactory,
+    InsertColAfterMenuItemFactory,
+    InsertColBeforeMenuItemFactory,
+    InsertRangeMoveDownMenuItemFactory,
+    InsertRangeMoveRightMenuItemFactory,
+    InsertRowAfterMenuItemFactory,
+    InsertRowBeforeMenuItemFactory,
+    RowInsertMenuItemFactory,
+} from './menu/insert.menu';
+import {
+    BackgroundColorSelectorMenuItemFactory,
+    BoldMenuItemFactory,
+    CopyMenuItemFactory,
     FitContentMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
@@ -89,28 +105,14 @@ import {
     FrozenMenuItemFactory,
     HideColMenuItemFactory,
     HideRowMenuItemFactory,
-    HideSheetMenuItemFactory,
     HorizontalAlignMenuItemFactory,
-    InsertColAfterMenuItemFactory,
-    InsertColBeforeMenuItemFactory,
-    InsertRangeMoveDownMenuItemFactory,
-    InsertRangeMoveRightMenuItemFactory,
-    InsertRowAfterMenuItemFactory,
-    InsertRowBeforeMenuItemFactory,
     ItalicMenuItemFactory,
     PasteMenuItemFactory,
-    RemoveColMenuItemFactory,
-    RemoveRowMenuItemFactory,
-    RenameSheetMenuItemFactory,
     ResetBackgroundColorMenuItemFactory,
     ResetTextColorMenuItemFactory,
-    RowInsertMenuItemFactory,
-    SetBorderColorMenuItemFactory,
-    SetBorderStyleMenuItemFactory,
     SetColWidthMenuItemFactory,
     SetRowHeightMenuItemFactory,
     ShowColMenuItemFactory,
-    ShowMenuItemFactory,
     ShowRowMenuItemFactory,
     StrikeThroughMenuItemFactory,
     TextColorSelectorMenuItemFactory,
@@ -126,6 +128,14 @@ import {
     CellMergeMenuItemFactory,
     CellMergeVerticalMenuItemFactory,
 } from './menu/merge.menu';
+import {
+    ChangeColorSheetMenuItemFactory,
+    CopySheetMenuItemFactory,
+    DeleteSheetMenuItemFactory,
+    HideSheetMenuItemFactory,
+    RenameSheetMenuItemFactory,
+    ShowMenuItemFactory,
+} from './menu/sheet.menu';
 import {
     EditorBreakLineShortcut,
     EditorCursorEnterShortcut,

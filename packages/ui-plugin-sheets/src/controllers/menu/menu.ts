@@ -1,19 +1,4 @@
 import {
-    ClearSelectionAllCommand,
-    ClearSelectionContentCommand,
-    ClearSelectionFormatCommand,
-    CopySheetCommand,
-    DeleteRangeMoveLeftCommand,
-    DeleteRangeMoveUpCommand,
-    InsertColAfterCommand,
-    InsertColBeforeCommand,
-    InsertRangeMoveDownCommand,
-    InsertRangeMoveRightCommand,
-    InsertRowAfterCommand,
-    InsertRowBeforeCommand,
-    RemoveColCommand,
-    RemoveRowCommand,
-    RemoveSheetCommand,
     ResetBackgroundColorCommand,
     ResetTextColorCommand,
     SelectionManagerService,
@@ -31,13 +16,10 @@ import {
     SetSelectedColsVisibleCommand,
     SetSelectedRowsVisibleCommand,
     SetSelectionsOperation,
-    SetTabColorCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
-    SetWorksheetHideCommand,
     SetWorksheetRowIsAutoHeightCommand,
-    SetWorksheetShowCommand,
     SheetPermissionService,
 } from '@univerjs/base-sheets';
 import {
@@ -72,20 +54,16 @@ import {
     SetRangeTextColorCommand,
     SetRangeUnderlineCommand,
 } from '../../commands/commands/inline-format.command';
-import { RenameSheetOperation } from '../../commands/commands/rename.command';
 import {
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
 import { SetSelectionFrozenCommand } from '../../commands/commands/set-frozen.command';
-import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
-
-export { SetBorderColorMenuItemFactory, SetBorderStyleMenuItemFactory } from './border.menu';
 
 export enum SheetMenuPosition {
     ROW_HEADER_CONTEXT_MENU = 'rowHeaderContextMenu',
@@ -906,213 +884,6 @@ export function PasteMenuItemFactory(): IMenuButtonItem {
     };
 }
 
-// #endregion
-const CLEAR_SELECTION_MENU_ID = 'sheet.menu.clear-selection';
-export function ClearSelectionMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
-        id: CLEAR_SELECTION_MENU_ID,
-        group: MenuGroup.CONTEXT_MENU_FORMAT,
-        type: MenuItemType.SUBITEMS,
-        icon: 'ClearFormat',
-        title: 'rightClick.clearSelection',
-        positions: [
-            MenuPosition.CONTEXT_MENU,
-            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
-            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
-        ],
-    };
-}
-
-export function ClearSelectionContentMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: ClearSelectionContentCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.clearContent',
-        positions: [CLEAR_SELECTION_MENU_ID],
-    };
-}
-export function ClearSelectionFormatMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: ClearSelectionFormatCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.clearFormat',
-        positions: [CLEAR_SELECTION_MENU_ID],
-    };
-}
-export function ClearSelectionAllMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: ClearSelectionAllCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.clearAll',
-        positions: [CLEAR_SELECTION_MENU_ID],
-    };
-}
-
-const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
-export function ColInsertMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
-        id: COL_INSERT_MENU_ID,
-        group: MenuGroup.CONTEXT_MENU_LAYOUT,
-        type: MenuItemType.SUBITEMS,
-        title: 'rightClick.insert',
-        icon: 'ClearFormat',
-        positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
-    };
-}
-const ROW_INSERT_MENU_ID = 'sheet.menu.row-insert';
-export function RowInsertMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
-        id: ROW_INSERT_MENU_ID,
-        group: MenuGroup.CONTEXT_MENU_LAYOUT,
-        type: MenuItemType.SUBITEMS,
-        title: 'rightClick.insert',
-        icon: 'ClearFormat',
-        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
-    };
-}
-const CELL_INSERT_MENU_ID = 'sheet.menu.cell-insert';
-export function CellInsertMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
-        id: CELL_INSERT_MENU_ID,
-        group: MenuGroup.CONTEXT_MENU_LAYOUT,
-        type: MenuItemType.SUBITEMS,
-        title: 'rightClick.insert',
-        icon: 'ClearFormat',
-        positions: [MenuPosition.CONTEXT_MENU],
-    };
-}
-
-export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const selectionManager = accessor.get(SelectionManagerService);
-
-    return {
-        id: InsertRowBeforeCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.insertRowBefore',
-        positions: [ROW_INSERT_MENU_ID, CELL_INSERT_MENU_ID],
-        hidden$: new Observable((observer) => {
-            // if there are multi selections this item should be hidden
-            const selections = selectionManager.getSelections();
-            observer.next(selections?.length !== 1);
-        }),
-    };
-}
-
-export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const selectionManager = accessor.get(SelectionManagerService);
-    return {
-        id: InsertRowAfterCommand.id,
-        type: MenuItemType.BUTTON,
-        positions: [ROW_INSERT_MENU_ID],
-        title: 'rightClick.insertRow',
-        hidden$: new Observable((observer) => {
-            // if there are multi selections this item should be hidden
-            const selections = selectionManager.getSelections();
-            observer.next(selections?.length !== 1);
-        }),
-    };
-}
-
-export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const selectionManager = accessor.get(SelectionManagerService);
-    return {
-        id: InsertColBeforeCommand.id,
-        type: MenuItemType.BUTTON,
-        positions: [COL_INSERT_MENU_ID, CELL_INSERT_MENU_ID],
-        title: 'rightClick.insertColumnBefore',
-        hidden$: new Observable((observer) => {
-            // if there are multi selections this item should be hidden
-            const selections = selectionManager.getSelections();
-            observer.next(selections?.length !== 1);
-        }),
-    };
-}
-
-export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const selectionManager = accessor.get(SelectionManagerService);
-    return {
-        id: InsertColAfterCommand.id,
-        type: MenuItemType.BUTTON,
-        positions: [COL_INSERT_MENU_ID],
-        title: 'rightClick.insertColumn',
-        hidden$: new Observable((observer) => {
-            // if there are multi selections this item should be hidden
-            const selections = selectionManager.getSelections();
-            observer.next(selections?.length !== 1);
-        }),
-    };
-}
-
-export function InsertRangeMoveRightMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: InsertRangeMoveRightCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.moveRight',
-        positions: [CELL_INSERT_MENU_ID],
-    };
-}
-
-export function InsertRangeMoveDownMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: InsertRangeMoveDownCommand.id,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.moveDown',
-        positions: [CELL_INSERT_MENU_ID],
-    };
-}
-
-const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';
-export function DeleteRangeMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
-        id: DELETE_RANGE_MENU_ID,
-        group: MenuGroup.CONTEXT_MENU_LAYOUT,
-        type: MenuItemType.SUBITEMS,
-        title: 'rightClick.delete',
-        icon: 'ClearFormat',
-        positions: [MenuPosition.CONTEXT_MENU],
-    };
-}
-
-export function RemoveColMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: RemoveColCommand.id,
-        group: MenuGroup.CONTEXT_MENU_LAYOUT,
-        type: MenuItemType.BUTTON,
-        positions: [DELETE_RANGE_MENU_ID, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
-        title: 'rightClick.deleteSelectedColumn',
-    };
-}
-
-export function RemoveRowMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: RemoveRowCommand.id,
-        group: MenuGroup.CONTEXT_MENU_LAYOUT,
-        type: MenuItemType.BUTTON,
-        positions: [DELETE_RANGE_MENU_ID, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
-        title: 'rightClick.deleteSelectedRow',
-    };
-}
-
-export function DeleteRangeMoveLeftMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: DeleteRangeMoveLeftCommand.id,
-        group: MenuGroup.CONTEXT_MENU_LAYOUT,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.moveLeft',
-        positions: [DELETE_RANGE_MENU_ID],
-    };
-}
-
-export function DeleteRangeMoveUpMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: DeleteRangeMoveUpCommand.id,
-        group: MenuGroup.CONTEXT_MENU_LAYOUT,
-        type: MenuItemType.BUTTON,
-        title: 'rightClick.moveUp',
-        positions: [DELETE_RANGE_MENU_ID],
-    };
-}
-
 export function FitContentMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetWorksheetRowIsAutoHeightCommand.id,
@@ -1333,107 +1104,5 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
             update();
             return disposable.dispose;
         }),
-    };
-}
-
-// right menu in main sheet bar
-export function DeleteSheetMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: RemoveSheetCommand.id,
-        type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
-        title: 'sheetConfig.delete',
-    };
-}
-
-export function CopySheetMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: CopySheetCommand.id,
-        type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
-        title: 'sheetConfig.copy',
-    };
-}
-
-export function RenameSheetMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: RenameSheetOperation.id,
-        type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
-        title: 'sheetConfig.rename',
-    };
-}
-
-export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
-    return {
-        id: SetTabColorCommand.id,
-        title: 'sheetConfig.changeColor',
-        positions: [SheetMenuPosition.SHEET_BAR],
-        type: MenuItemType.SELECTOR,
-        selections: [
-            {
-                id: COLOR_PICKER_COMPONENT,
-            },
-        ],
-    };
-}
-
-export function HideSheetMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: SetWorksheetHideCommand.id,
-        type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
-        title: 'sheetConfig.hide',
-    };
-}
-
-export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<any> {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const commandService = accessor.get(ICommandService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-    const hiddenList = workbook.getHiddenWorksheets().map((s) => ({
-        label: workbook.getSheetBySheetId(s)?.getName() || '',
-        value: s,
-    }));
-
-    return {
-        id: SetWorksheetShowCommand.id,
-        type: MenuItemType.SELECTOR,
-        positions: [SheetMenuPosition.SHEET_BAR],
-        title: 'sheetConfig.unhide',
-        disabled$: new Observable((subscriber) => {
-            const disposable = commandService.onCommandExecuted((c) => {
-                if (c.id !== SetWorksheetHideCommand.id && c.id !== SetWorksheetShowCommand.id) {
-                    return;
-                }
-                const newList = workbook.getHiddenWorksheets();
-                subscriber.next(newList.length === 0);
-            });
-            subscriber.next(hiddenList.length === 0);
-            return disposable.dispose;
-        }),
-        selections: new Observable((subscriber) => {
-            const disposable = commandService.onCommandExecuted((c) => {
-                if (c.id !== SetWorksheetHideCommand.id && c.id !== SetWorksheetShowCommand.id) {
-                    return;
-                }
-                const newList = workbook.getHiddenWorksheets().map((s) => ({
-                    label: workbook.getSheetBySheetId(s)?.getName() || '',
-                    value: s,
-                }));
-                subscriber.next(newList);
-            });
-            subscriber.next(hiddenList);
-            return disposable.dispose;
-        }),
-    };
-}
-
-export function ShowMenuItemFactory(): IMenuButtonItem {
-    return {
-        id: ShowMenuListCommand.id,
-        type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
-        title: 'sheetConfig.unhide',
     };
 }

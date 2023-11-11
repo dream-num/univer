@@ -189,13 +189,13 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             <DesignMenuItem
                 key={item.id}
                 eventKey={item.id}
-                // disabled={disabled} // FIXME disabled is not working
+                disabled={disabled}
                 onClick={() => {
                     onClick({ value: inputValue, id: item.id }); // merge cell
                 }}
             >
                 <span className={styles.menuItemContent}>
-                    <CustomLabel value={inputValue} title={title} label={label} icon={item.icon} onChange={onChange} />
+                    <CustomLabel value={value} title={title} label={label} icon={item.icon} onChange={onChange} />
                 </span>
             </DesignMenuItem>
         );

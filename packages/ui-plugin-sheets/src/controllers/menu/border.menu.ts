@@ -12,8 +12,6 @@ import { map } from 'rxjs/operators';
 import { BORDER_LINE_COMPONENT } from '../../components/border-line';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 
-export const LINE_BOLD_LABEL = 'CONTEXT_MENU_INPUT';
-
 export const BORDER_LINE_CHILDREN = [
     {
         label: 'borderLine.borderTop',

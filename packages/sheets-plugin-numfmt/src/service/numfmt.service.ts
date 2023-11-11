@@ -1,39 +1,46 @@
 import numfmt from '@univerjs/base-numfmt-engine';
 import {
     Disposable,
-    IUniverInstanceService,
     LifecycleStages,
     Nullable,
     ObjectMatrix,
     OnLifecycle,
     SheetInterceptorService,
+    ThemeService,
+    Workbook,
+    Worksheet,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-interface NumfmtItem {
-    pattern: string;
-}
+import { NumfmtItem } from '../base/types';
+import { getPatternType } from '../utils/pattern';
 
+type NumfmtItemWithCache = NumfmtItem & {
+    // when change parameters or pattern, the cache is cleared follow mutation execute
+    _cache?: {
+        result: any;
+        parameters: number; // The parameter that was last calculated
+    };
+};
 const defaultWorkbookId = 'workbook-01';
 const defaultSheetId = 'sheet-0011';
 const defaultData = {
     2: {
         2: {
             pattern: 'yyyy-mm-dd hh:mm:ss',
+            type: 'datetime' as const,
         },
     },
-    0: { 1: { pattern: 'yyyy-mm-dd hh:mm:ss' } },
+    0: { 1: { pattern: 'yyyy-mm-dd hh:mm:ss', type: 'datetime' as const } },
 };
-/**
- * Collect side effects caused by ref range change
- */
+
 @OnLifecycle(LifecycleStages.Ready, NumfmtService)
 export class NumfmtService extends Disposable {
-    numfmtModel: Map<string, ObjectMatrix<NumfmtItem>> = new Map();
+    numfmtModel: Map<string, ObjectMatrix<NumfmtItemWithCache>> = new Map();
 
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
+        @Inject(ThemeService) private _themeService: ThemeService
     ) {
         super();
         this.numfmtModel.set(getModelKey(defaultWorkbookId, defaultSheetId), new ObjectMatrix(defaultData));
@@ -50,22 +57,119 @@ export class NumfmtService extends Disposable {
                 if (!model) {
                     return next();
                 }
-                const value = model.getValue(location.row, location.col);
-                if (!value) {
+                const numfmtValue = model.getValue(location.row, location.col);
+                if (!numfmtValue) {
                     return next();
                 }
                 const originCellValue = location.worksheet.getCellRaw(location.row, location.col);
                 if (!originCellValue) {
                     return next();
                 }
-                const numfmtRes = numfmt.format(value.pattern, Number(originCellValue.v));
+                // TODO: wait for the type attribute to start working
+                // if (typeof originCellValue.v !== 'number') {
+                //     return next();
+                // }
+
+                let numfmtRes: string = '';
+                const fmtNumber = Number(originCellValue.v);
+                if (numfmtValue._cache && numfmtValue._cache.parameters === originCellValue.v) {
+                    return numfmtValue._cache.result;
+                }
+
+                numfmtRes = numfmt.format(numfmtValue.pattern, Number(originCellValue.v), { locale: 'zh-CN' });
                 if (!numfmtRes) {
                     return next();
                 }
+
                 const res = { ...cell, v: numfmtRes };
+                if (fmtNumber < 0) {
+                    const info = numfmt.getInfo(numfmtValue.pattern);
+                    const token = info._partitions[1];
+                    if (token.color) {
+                        const color = this._themeService.getCurrentTheme()[`${token.color}500`];
+                        if (color) {
+                            res.s = { cl: { rgb: color } };
+                        }
+                    }
+                }
+
+                numfmtValue._cache = {
+                    result: res,
+                    parameters: originCellValue.v as number,
+                };
+
                 return res;
             },
         });
+    }
+
+    /**
+     * Process the initial values before entering the edit
+     * @private
+     * @memberof NumfmtService
+     */
+    private _initInterceptorEditorStart(
+        cell: any,
+        location: {
+            worksheet: Worksheet;
+            workbook: Workbook;
+            workbookId: string;
+            worksheetId: string;
+            row: number;
+            col: number;
+        },
+        next: () => any
+    ) {
+        const row = location.row;
+        const col = location.col;
+        const numfmtCell = this.getValue(location.workbookId, location.worksheetId, row, col);
+        if (numfmtCell) {
+            const type = getPatternType(numfmtCell.pattern);
+            switch (type) {
+                case 'date':
+                case 'time':
+                case 'datetime': {
+                    return location.worksheet.getCell(row, col);
+                }
+                case 'scientific':
+                case 'percent':
+                case 'currency':
+                case 'number': {
+                    return location.worksheet.getCellRaw(row, col);
+                }
+                default: {
+                    return next && next();
+                }
+            }
+        }
+    }
+
+    /**
+     * Process the  values after  edit
+     * @private
+     * @memberof NumfmtService
+     */
+    private _initInterceptorEditorEnd(
+        cell: any,
+        location: {
+            worksheet: Worksheet;
+            workbook: Workbook;
+            workbookId: string;
+            worksheetId: string;
+            row: number;
+            col: number;
+        },
+        next: () => any
+    ) {
+        if (typeof cell.v === 'number') {
+            return next && next();
+        }
+
+        const dateInfo = numfmt.parseDate(cell.v);
+        if (dateInfo) {
+            return dateInfo.v;
+        }
+        return cell.v;
     }
 
     private _getModel(workbookId: string, worksheetId: string) {

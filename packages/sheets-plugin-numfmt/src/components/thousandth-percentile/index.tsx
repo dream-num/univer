@@ -12,17 +12,21 @@ import {
 } from '../../utils/decimal';
 
 export const ThousandthPercentilePanel: FC<BusinessComponentProps> = (props) => {
+    const options = useMemo(
+        () => NUMBERFORMAT.map((item) => ({ label: item.label, value: item.suffix, color: item.color })),
+        []
+    );
     const [decimal, decimalSet] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 0));
 
     const [suffix, suffixSet] = useState(() => {
-        const item = NUMBERFORMAT.find((item) => isPatternEqualWithoutDecimal(item.suffix, props.defaultPattern || ''));
-        return item?.suffix || '';
+        const item = options.find((item) => isPatternEqualWithoutDecimal(item.value, props.defaultPattern || ''));
+        return item?.value || options[0].value;
     });
 
     const pattern = useMemo(() => setPatternDecimal(suffix, Number(decimal || 0)), [suffix, decimal]);
 
     const preview = useMemo(() => {
-        const value = numfmt.format(pattern, Number(props.defaultValue) || 0);
+        const value = numfmt.format(pattern, Number(props.defaultValue) || 0, { locale: 'zh-CN' });
         return value;
     }, [pattern, props.defaultValue]);
 
@@ -33,21 +37,9 @@ export const ThousandthPercentilePanel: FC<BusinessComponentProps> = (props) => 
         suffixSet(v);
     };
 
-    // 处理入参变化的时候
-    useEffect(() => {
-        const item = NUMBERFORMAT.find((item) => isPatternEqualWithoutDecimal(item.suffix, props.defaultPattern || ''));
-        item && suffixSet(item.suffix);
-        const decimal = isPatternHasDecimal(props.defaultPattern || '')
-            ? getDecimalFromPattern(props.defaultPattern || '', 2)
-            : 0;
-        decimalSet(decimal);
-    }, [props.defaultPattern]);
-
     useEffect(() => {
         props.onChange(pattern);
     }, [pattern]);
-
-    const options = NUMBERFORMAT.map((item) => ({ label: item.label, value: item.suffix }));
 
     return (
         <div>

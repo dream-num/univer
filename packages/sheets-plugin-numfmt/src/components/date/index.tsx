@@ -6,16 +6,26 @@ import { FC, useEffect, useMemo, useState } from 'react';
 import { DATEFMTLISG } from '../../base/const/FORMATDETAIL';
 import { BusinessComponentProps } from '../../base/types';
 
+export const isDatePanel = (pattern: string) => DATEFMTLISG.map((item) => item.suffix).includes(pattern);
+
 export const DatePanel: FC<BusinessComponentProps> = (props) => {
     const options = DATEFMTLISG.map((item) => ({ label: item.label, value: item.suffix }));
 
-    const [suffix, suffixSet] = useState(DATEFMTLISG[0].suffix);
+    const [suffix, suffixSet] = useState(() => {
+        if (props.defaultPattern) {
+            const item = options.find((item) => item.value === props.defaultPattern);
+            if (item) {
+                return item.value;
+            }
+        }
+        return options[0].value;
+    });
     const [currentDate] = useState(() => new Date().toLocaleString());
 
     const preview = useMemo(() => {
         const res = numfmt.parseDate(String(props.defaultValue) || '') || numfmt.parseDate(currentDate);
         if (res) {
-            return numfmt.format(suffix, Number(res.v));
+            return numfmt.format(suffix, Number(res.v), { locale: 'zh-CN' });
         }
         return '';
     }, [suffix, props.defaultValue]);

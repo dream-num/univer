@@ -6,6 +6,7 @@ import { IAccessor } from '@wendellhu/redi';
 import { SHEET_NUMFMT_PLUGIN } from '../../base/const/PLUGIN_NAME';
 import { SheetNumfmtPanelProps } from '../../components';
 import { NumfmtService } from '../../service/numfmt.service';
+import { getPatternType } from '../../utils/pattern';
 import { SetNumfmtMutation, SetNumfmtMutationParams } from '../mutations/set.numfmt.mutation';
 import { CloseNumfmtPanelOperator } from './close.numfmt.panel.operator';
 
@@ -28,7 +29,7 @@ export const OpenNumfmtPanelOperator: ICommand = {
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const sheet = workbook.getActiveSheet();
 
-        const cellValue = sheet.getCell(range.startRow, range.startColumn);
+        const cellValue = sheet.getCellRaw(range.startRow, range.startColumn);
         const numfmtValue = numfmtService.getValue(
             workbook.getUnitId(),
             sheet.getSheetId(),
@@ -36,7 +37,6 @@ export const OpenNumfmtPanelOperator: ICommand = {
             range.startColumn
         );
         let pattern = '';
-
         if (numfmtValue) {
             pattern = numfmtValue.pattern;
         }
@@ -45,9 +45,16 @@ export const OpenNumfmtPanelOperator: ICommand = {
                 if (config.type === 'change') {
                     const selections = selectionManagerService.getSelectionRanges() || [];
                     const params: SetNumfmtMutationParams = { values: [] };
+                    const patternType = getPatternType(config.value);
+
                     selections.forEach((rangeInfo) => {
                         Range.foreach(rangeInfo, (row, col) => {
-                            params.values.push({ row: String(row), col: String(col), pattern: config.value });
+                            params.values.push({
+                                row: String(row),
+                                col: String(col),
+                                pattern: config.value,
+                                type: patternType,
+                            });
                         });
                     });
                     commandService.executeCommand(SetNumfmtMutation.id, params);

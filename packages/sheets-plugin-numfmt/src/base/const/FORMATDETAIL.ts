@@ -1,21 +1,3 @@
-export const CURRENCYDETAIL = [
-    {
-        suffix: '¥',
-    },
-    {
-        suffix: '$',
-    },
-    {
-        suffix: '€',
-    },
-    {
-        suffix: '￡',
-    },
-    {
-        suffix: '?',
-    },
-];
-
 export const DATEFMTLISG = [
     {
         label: '1930-08-05',
@@ -47,19 +29,19 @@ export const DATEFMTLISG = [
     },
     {
         label: '下午01:30',
-        suffix: '上午/下午 hh:mm',
+        suffix: 'A/P hh:mm',
     },
     {
         label: '下午1:30',
-        suffix: '上午/下午 h:mm',
+        suffix: 'A/P h:mm',
     },
     {
         label: '下午1:30:30',
-        suffix: '上午/下午 h:mm:ss',
+        suffix: 'A/P h:mm:ss',
     },
     {
         label: '08-05 下午 01:30',
-        suffix: 'MM-dd 上午/下午 hh:mm',
+        suffix: 'MM-dd A/P hh:mm',
     },
 ];
 
@@ -69,24 +51,27 @@ export const NUMBERFORMAT = [
         suffix: '#,##0_);(#,##0)',
     },
     {
-        label: '(1,235) Red',
+        label: '(1,235) ',
         suffix: '#,##0_);[Red](#,##0)',
+        color: 'red',
     },
     {
         label: '1,234.56',
         suffix: '#,##0.00_);(#,##0.00)',
     },
     {
-        label: '1,234.56 Red',
+        label: '1,234.56',
         suffix: '#,##0.00_);[Red](#,##0.00)',
+        color: 'red',
     },
     {
         label: '-1,234.56',
         suffix: '#,##0.00_);-(#,##0.00)',
     },
     {
-        label: '-1,234.56 Red',
+        label: '-1,234.56',
         suffix: '#,##0.00_);[Red]-(#,##0.00)',
+        color: 'red',
     },
 ];
 export const CURRENCYFORMAT = [
@@ -95,23 +80,26 @@ export const CURRENCYFORMAT = [
         suffix: (suffix: string) => `"${suffix}"#,##0.00_);"${suffix}"#,##0.00`,
     },
     {
-        label: (suffix: string) => `${suffix}1,235 Red`,
+        label: (suffix: string) => `${suffix}1,235`,
         suffix: (suffix: string) => `"${suffix}"#,##0.00_);[Red]"${suffix}"#,##0.00`,
+        color: 'red',
     },
     {
         label: (suffix: string) => `(${suffix}1,235)`,
         suffix: (suffix: string) => `"${suffix}"#,##0.00_);("${suffix}"#,##0.00)`,
     },
     {
-        label: (suffix: string) => `(${suffix}1,235) Red`,
+        label: (suffix: string) => `(${suffix}1,235)`,
         suffix: (suffix: string) => `"${suffix}"#,##0.00_);[Red]("${suffix}"#,##0.00)`,
+        color: 'red',
     },
     {
         label: (suffix: string) => `-${suffix}1,235)`,
         suffix: (suffix: string) => `"${suffix}"#,##0.00_);-"${suffix}"#,##0.00`,
     },
     {
-        label: (suffix: string) => `-${suffix}1,235 Red`,
+        label: (suffix: string) => `-${suffix}1,235`,
         suffix: (suffix: string) => `"${suffix}"#,##0.00_);[Red]-"${suffix}"#,##0.00`,
+        color: 'red',
     },
 ];

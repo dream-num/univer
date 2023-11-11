@@ -4,29 +4,30 @@ import numfmt from '@univerjs/base-numfmt-engine';
 import { InputNumber, Select } from '@univerjs/design';
 import { FC, useEffect, useMemo, useState } from 'react';
 
-import { CURRENCYDETAIL } from '../../base/const/FORMATDETAIL';
+import { currencySymbols } from '../../base/const/CURRENCY-SYMBOLS';
 import { BusinessComponentProps } from '../../base/types';
 import { getCurrencyType } from '../../utils/currency';
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
 
+export const isAccountingPanel = (pattern: string) => {
+    const type = getCurrencyType(pattern);
+    return !!type && pattern.startsWith('_(');
+};
+
 export const AccountingPanel: FC<BusinessComponentProps> = (props) => {
     const [decimal, decimalSet] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 2));
-    const [suffix, suffixSet] = useState(() => getCurrencyType(props.defaultPattern || '') || CURRENCYDETAIL[0].suffix);
+    const [suffix, suffixSet] = useState(() => getCurrencyType(props.defaultPattern || '') || currencySymbols[0]);
 
     const pattern = useMemo(
-        () => setPatternDecimal(`"${suffix}"#,##0${decimal > 0 ? '.0' : ''}_)`, decimal),
+        () => setPatternDecimal(`_("${suffix}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal),
         [suffix, decimal]
     );
-
     const preview = useMemo(() => {
-        const value = numfmt.format(pattern, Number(props.defaultValue) || 0);
+        const value = numfmt.format(pattern, Number(props.defaultValue) || 0, { locale: 'zh-CN' });
         return value;
     }, [pattern, props.defaultValue]);
 
-    const currencyOptions = useMemo(
-        () => CURRENCYDETAIL.map((item) => ({ label: item.suffix, value: item.suffix })),
-        []
-    );
+    const currencyOptions = useMemo(() => currencySymbols.map((item) => ({ label: item, value: item })), []);
 
     useEffect(() => {
         props.onChange(pattern);

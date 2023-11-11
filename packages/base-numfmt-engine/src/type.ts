@@ -255,7 +255,7 @@ type ParseValue = number | boolean | DateValue | Date | null;
 export interface Numfmt {
     (value: string, opt?: Options): Formatter;
 
-    format(pattern: string, value: ParseValue, opt?: Options): string;
+    format(pattern: string, value: ParseValue, opt?: Partial<Options>): string;
 
     round(value: number, places?: number): number;
 

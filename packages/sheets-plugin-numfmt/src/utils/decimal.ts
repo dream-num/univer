@@ -1,12 +1,14 @@
 import numfmt from '@univerjs/base-numfmt-engine';
 
+/**
+ * the function decimal just use positive,negative configuration ignored
+ */
 export const getDecimalFromPattern = (pattern: string, defaultValue: number = 0) => {
     if (!pattern) {
         return defaultValue;
     }
 
     const info = numfmt.getInfo(pattern);
-
     return info.maxDecimals ?? defaultValue;
 };
 
@@ -34,16 +36,18 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
         ).result;
     const partitionsA = numfmt.getInfo(patternA)._partitions;
     const partitionsB = numfmt.getInfo(patternB)._partitions;
-    const A = getString(partitionsA[0].tokens);
-    const B = getString(partitionsB[0].tokens);
-    return A === B && partitionsA[1].color === partitionsB[1].color;
+    const A1 = getString(partitionsA[0].tokens);
+    const B1 = getString(partitionsB[0].tokens);
+    const A2 = getString(partitionsA[1].tokens);
+    const B2 = getString(partitionsB[1].tokens);
+    return A1 === B1 && A2 === B2 && partitionsA[1].color === partitionsB[1].color;
 };
 
 export const getDecimalString = (length: number) =>
     new Array(Math.min(Math.max(0, Number(length)), 30)).fill(0).join('');
 
 export const setPatternDecimal = (pattern: string, decimalLength: number) => {
-    if (/\.0+/.test(pattern)) {
+    if (/\.0?/.test(pattern)) {
         return pattern.replace(
             /\.0*/g,
             `${decimalLength > 0 ? '.' : ''}${getDecimalString(Number(decimalLength || 0))}`
@@ -52,4 +56,4 @@ export const setPatternDecimal = (pattern: string, decimalLength: number) => {
     return pattern;
 };
 
-export const isPatternHasDecimal = (pattern: string) => /\.0+/.test(pattern);
+export const isPatternHasDecimal = (pattern: string) => /\.0?/.test(pattern);

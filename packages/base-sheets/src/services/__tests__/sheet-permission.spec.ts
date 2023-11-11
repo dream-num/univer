@@ -2,8 +2,10 @@ import { ICommandService, IUniverInstanceService, Univer, UniverPermissionServic
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
+import { ISetRangeValuesCommandParams, SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
+import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SheetEditablePermission, SheetPermissionService } from '../permission';
+import { SelectionManagerService } from '../selection-manager.service';
 import { createTestBase, TEST_WORKBOOK_DATA_DEMO } from './util';
 
 describe('test sheet permission service', () => {
@@ -11,11 +13,12 @@ describe('test sheet permission service', () => {
     let commandService: ICommandService;
     let get: Injector['get'];
     beforeEach(() => {
-        const testBed = createTestBase(TEST_WORKBOOK_DATA_DEMO, [[SheetPermissionService]]);
+        const testBed = createTestBase(TEST_WORKBOOK_DATA_DEMO, [[SheetPermissionService], [SelectionManagerService]]);
         get = testBed.get;
         univer = testBed.univer;
         commandService = testBed.get(ICommandService);
         commandService.registerCommand(SetRangeValuesCommand);
+        commandService.registerCommand(SetRangeValuesMutation);
     });
     afterEach(() => {
         univer.dispose();
@@ -60,5 +63,22 @@ describe('test sheet permission service', () => {
         sheetPermissionService.setSheetEditable(true);
         expect(univerPermissionService.getEditable()).toBe(true);
         expect(sheetPermissionService.getSheetEditable(workbook.getUnitId(), sheet.getSheetId())).toBe(true);
+    });
+
+    it('test setRangeValue commands', async () => {
+        const univerPermissionService = get(UniverPermissionService);
+        const commandService = get(ICommandService);
+        univerPermissionService.setEditable(false);
+        const result = await commandService.executeCommand(SetRangeValuesCommand.id, {
+            range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
+            value: { v: 3 },
+        } as ISetRangeValuesCommandParams);
+        expect(result).toBe(false);
+        univerPermissionService.setEditable(true);
+        const result2 = await commandService.executeCommand(SetRangeValuesCommand.id, {
+            range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0 },
+            value: { v: 3 },
+        } as ISetRangeValuesCommandParams);
+        expect(result2).toBe(true);
     });
 });

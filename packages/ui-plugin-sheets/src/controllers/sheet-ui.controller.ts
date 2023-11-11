@@ -55,6 +55,8 @@ import { SetCopySelectionsOperation } from '../commands/operations/selection.ope
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { BORDER_LINE_COMPONENT, BorderLine } from '../components/border-line';
+import { BorderPanel } from '../components/border-panel/BorderPanel';
+import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import {
     FONT_FAMILY_COMPONENT,
@@ -201,6 +203,7 @@ export class SheetUIController extends Disposable {
         // FIXME: no dispose logic
         componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput);
         componentManager.register(BORDER_LINE_COMPONENT, BorderLine);
+        componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel);
         componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker);
         componentManager.register(FONT_FAMILY_COMPONENT, FontFamily);
         componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem);

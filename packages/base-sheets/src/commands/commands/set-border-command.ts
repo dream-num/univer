@@ -34,6 +34,36 @@ function forEach(range: IRange, action: (row: number, column: number) => void): 
     }
 }
 
+enum BorderCommandType {
+    POSITION,
+    STYLE,
+    COLOR,
+}
+
+export type ISetBorderStylingCommand = {
+    value: BorderType;
+    type: BorderCommandType.POSITION;
+} & {
+    value: BorderStyleTypes;
+    type: BorderCommandType.STYLE;
+} & {
+    value: string;
+    type: BorderCommandType.COLOR;
+};
+export const SetBorderBasicCommand: ICommand<ISetBorderStylingCommand> = {
+    id: 'sheet.command.set-border-basic',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor, params: ISetBorderStylingCommand) => {
+        // if (!params.value) return false;
+        // const commandService = accessor.get(ICommandService);
+        // const borderManager = accessor.get(BorderStyleManagerService);
+        // borderManager.setType(params.value);
+        // return commandService.executeCommand(SetBorderCommand.id);
+        console.log(params);
+        return true;
+    },
+};
+
 export interface ISetBorderPositionCommandParams {
     value: BorderType;
 }

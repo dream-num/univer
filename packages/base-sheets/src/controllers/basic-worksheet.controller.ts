@@ -30,6 +30,7 @@ import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-
 import { RemoveSheetCommand } from '../commands/commands/remove-sheet.command';
 import { RemoveWorksheetMergeCommand } from '../commands/commands/remove-worksheet-merge.command';
 import {
+    SetBorderBasicCommand,
     SetBorderColorCommand,
     SetBorderCommand,
     SetBorderPositionCommand,
@@ -158,6 +159,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             ResetBackgroundColorCommand,
             ResetTextColorCommand,
             SetBackgroundColorCommand,
+            SetBorderBasicCommand,
             SetBorderColorCommand,
             SetBorderCommand,
             SetBorderPositionCommand,

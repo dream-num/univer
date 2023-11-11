@@ -10,7 +10,7 @@ export interface IColorPickerProps {
 
     onClick?: (color: string, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 
-    onValueChange?: (value: string) => void;
+    onChange?: (value: string) => void;
 }
 
 enum ColorPickerMode {
@@ -19,7 +19,7 @@ enum ColorPickerMode {
 }
 
 export function ColorPicker(props: IColorPickerProps) {
-    const { onValueChange } = props;
+    const { onChange } = props;
 
     const [mode, setMode] = useState<ColorPickerMode>(ColorPickerMode.PRESET);
 
@@ -32,7 +32,7 @@ export function ColorPicker(props: IColorPickerProps) {
     function handleChange(color: Color | string) {
         const value = (typeof color === 'string' ? color : color.toHexString()) ?? '';
 
-        onValueChange && onValueChange(value);
+        onChange?.(value);
     }
 
     function handleToggleMode(e: React.MouseEvent) {

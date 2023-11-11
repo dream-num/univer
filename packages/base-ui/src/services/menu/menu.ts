@@ -78,7 +78,7 @@ export interface IMenuButtonItem<V = undefined> extends IMenuItemBase<V> {
 }
 
 export interface IValueOption {
-    value: string | number;
+    value?: string | number;
     label:
         | string
         | {
@@ -92,22 +92,9 @@ export interface IValueOption {
     id?: string; // command id
 }
 
-export function isValueOptions(v: IValueOption | ICustomComponentOption): v is IValueOption {
-    return typeof (v as IValueOption).value !== 'undefined';
-}
-
-export interface ICustomComponentOption {
-    id: string;
-    disabled?: boolean;
-}
-
 export interface ICustomComponentProps<T> {
     value: T;
     onChange: (v: T) => void;
-}
-
-export function isCustomComponentOption(v: IValueOption | ICustomComponentOption): v is ICustomComponentOption {
-    return typeof (v as ICustomComponentOption).id !== 'undefined';
 }
 
 export interface IMenuSelectorItem<V = MenuItemDefaultValueType> extends IMenuItemBase<V> {
@@ -118,9 +105,7 @@ export interface IMenuSelectorItem<V = MenuItemDefaultValueType> extends IMenuIt
     // 一个是一个特殊组件，比如 color picker，选中后直接使用其 value 触发 command
     // 一个是其他 menu 的 id，直接渲染成其他的 menu
     /** Options or IDs of registered components. */
-    selections?:
-        | Array<IValueOption | ICustomComponentOption>
-        | Observable<Array<IValueOption | ICustomComponentOption>>;
+    selections?: IValueOption[] | Observable<IValueOption[]>;
 }
 
 export function isMenuSelectorItem<T extends MenuItemDefaultValueType>(v: IMenuItem): v is IMenuSelectorItem<T> {

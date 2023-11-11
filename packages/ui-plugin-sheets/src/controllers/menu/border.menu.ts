@@ -192,7 +192,7 @@ export function SetBorderColorMenuItemFactory(accessor: IAccessor): IMenuSelecto
         type: MenuItemType.SELECTOR,
         selections: [
             {
-                id: COLOR_PICKER_COMPONENT,
+                label: COLOR_PICKER_COMPONENT,
             },
         ],
         value$: borderStyleManagerService.borderInfo$.pipe(map((info) => info.color)),

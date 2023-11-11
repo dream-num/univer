@@ -355,55 +355,55 @@ export const FONT_SIZE_CHILDREN = [
 
 export const FONT_FAMILY_CHILDREN = [
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'Times New Roman',
     },
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'Arial',
     },
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'Tahoma',
     },
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'Verdana',
     },
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'Microsoft YaHei',
     },
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'SimSun',
     },
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'SimHei',
     },
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'Kaiti',
     },
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'FangSong',
     },
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'NSimSun',
     },
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'STXinwei',
     },
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'STXingkai',
     },
     {
-        label: { name: FONT_FAMILY_ITEM_COMPONENT },
+        label: FONT_FAMILY_ITEM_COMPONENT,
         value: 'STLiti',
     },
     // The following 3 fonts do not work, temporarily delete
@@ -549,7 +549,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         positions: [MenuPosition.TOOLBAR_START],
         selections: [
             {
-                id: COLOR_PICKER_COMPONENT,
+                label: COLOR_PICKER_COMPONENT,
             },
         ],
         value$: new Observable<string>((subscriber) => {
@@ -588,7 +588,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         icon: 'PaintBucket',
         selections: [
             {
-                id: COLOR_PICKER_COMPONENT,
+                label: COLOR_PICKER_COMPONENT,
             },
         ],
         value$: new Observable<string>((subscriber) => {

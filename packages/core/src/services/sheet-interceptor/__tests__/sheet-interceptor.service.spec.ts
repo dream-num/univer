@@ -6,12 +6,16 @@ import { Univer } from '../../../basics/univer';
 import { Nullable } from '../../../common/type-utils';
 import { ICellData } from '../../../types/interfaces/i-cell-data';
 import { IUniverInstanceService } from '../../instance/instance.service';
-import { INTERCEPTOR_NAMES, ISheetLocation, SheetInterceptorService } from '../sheet-interceptor.service';
+import { INTERCEPTOR_POINT } from '../interceptor-const';
+import { SheetInterceptorService } from '../sheet-interceptor.service';
+import { createInterceptorKey, ISheetLocation } from '../utils';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('Test SheetInterceptorService', () => {
     let univer: Univer;
     let get: Injector['get'];
+    const stringIntercept = createInterceptorKey<string, null>('stringIntercept');
+    const numberIntercept = createInterceptorKey<number, { step: number }>('numberIntercept');
 
     beforeEach(() => {
         const testBed = createCoreTestBed();
@@ -29,7 +33,7 @@ describe('Test SheetInterceptorService', () => {
 
     describe('Test intercept getting cell content', () => {
         it('should intercept cells and merge result if next is called', () => {
-            get(SheetInterceptorService).intercept(INTERCEPTOR_NAMES.CELL_CONTENT, {
+            get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 priority: 100,
                 handler(_cell, location: ISheetLocation, next: (v: Nullable<ICellData>) => Nullable<ICellData>) {
                     if (location.row === 0 && location.col === 0) {
@@ -45,7 +49,7 @@ describe('Test SheetInterceptorService', () => {
         });
 
         it('interceptors should directly return result if next is not called', () => {
-            get(SheetInterceptorService).intercept(INTERCEPTOR_NAMES.CELL_CONTENT, {
+            get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 priority: 100,
                 handler(_cell, location: ISheetLocation, next: (v: Nullable<ICellData>) => Nullable<ICellData>) {
                     if (location.row === 0 && location.col === 0) {
@@ -63,89 +67,76 @@ describe('Test SheetInterceptorService', () => {
 
     describe('Test intercept in general case', () => {
         it('should intercept BEFORE_CELL_EDIT and sum the values', () => {
-            get(SheetInterceptorService).intercept(INTERCEPTOR_NAMES.BEFORE_CELL_EDIT, {
+            get(SheetInterceptorService).intercept(numberIntercept, {
                 priority: 0,
-                handler(value: number, context: { step: number }, next) {
+                handler(value, context, next) {
                     if (context.step) {
-                        return next(value + context.step);
+                        return next((value || 0) + context.step);
                     }
 
                     return next(value);
                 },
             });
 
-            get(SheetInterceptorService).intercept(INTERCEPTOR_NAMES.BEFORE_CELL_EDIT, {
+            get(SheetInterceptorService).intercept(numberIntercept, {
                 priority: 0,
-                handler(value: number, context: { step: number }, next) {
+                handler(value, context, next) {
                     if (context.step) {
-                        return next(value + context.step * 2);
+                        return next((value || 0) + context.step * 2);
                     }
 
                     return next(value);
                 },
             });
 
-            const result = get(SheetInterceptorService).fetchThroughInterceptors(
-                INTERCEPTOR_NAMES.BEFORE_CELL_EDIT,
-                100,
-                { step: 10 }
-            );
+            const result = get(SheetInterceptorService).fetchThroughInterceptors(numberIntercept)(100, { step: 10 });
 
             expect(result).toBe(130);
         });
 
         it('big priority should be executed first', () => {
-            get(SheetInterceptorService).intercept(INTERCEPTOR_NAMES.BEFORE_CELL_EDIT, {
+            get(SheetInterceptorService).intercept(stringIntercept, {
                 priority: 100,
-                handler(value: string, _, next) {
+                handler(value, _, next) {
                     return next(`${value} first`);
                 },
             });
 
-            get(SheetInterceptorService).intercept(INTERCEPTOR_NAMES.BEFORE_CELL_EDIT, {
+            get(SheetInterceptorService).intercept(stringIntercept, {
                 priority: 0,
-                handler(value: string, _, next) {
+                handler(value, _, next) {
                     return next(`${value} second`);
                 },
             });
 
-            const result = get(SheetInterceptorService).fetchThroughInterceptors(
-                INTERCEPTOR_NAMES.BEFORE_CELL_EDIT,
-                'zero'
-            );
+            const result = get(SheetInterceptorService).fetchThroughInterceptors(stringIntercept)('zero', null);
 
             expect(result).toBe('zero first second');
         });
 
         it('the second interceptor should not be executed when not call next in the first interceptor', () => {
-            get(SheetInterceptorService).intercept(INTERCEPTOR_NAMES.BEFORE_CELL_EDIT, {
+            get(SheetInterceptorService).intercept(stringIntercept, {
                 priority: 100,
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                handler(value: string, _, _next) {
+                handler(value, _, _next) {
                     return `${value} first`;
                 },
             });
 
-            get(SheetInterceptorService).intercept(INTERCEPTOR_NAMES.BEFORE_CELL_EDIT, {
+            get(SheetInterceptorService).intercept(stringIntercept, {
                 priority: 0,
-                handler(value: string, _, next) {
+                handler(value, _, next) {
                     return next(`${value} second`);
                 },
             });
 
-            const result = get(SheetInterceptorService).fetchThroughInterceptors(
-                INTERCEPTOR_NAMES.BEFORE_CELL_EDIT,
-                'zero'
-            );
+            const result = get(SheetInterceptorService).fetchThroughInterceptors(stringIntercept)('zero', null);
 
             expect(result).toBe('zero first');
         });
 
         it('should return the initial value when there is no interceptor', () => {
-            const result = get(SheetInterceptorService).fetchThroughInterceptors(
-                INTERCEPTOR_NAMES.BEFORE_CELL_EDIT,
-                'zero'
-            );
+            const result = get(SheetInterceptorService).fetchThroughInterceptors(stringIntercept)('zero', null);
 
             expect(result).toBe('zero');
         });

@@ -10,14 +10,25 @@ packages/base-sheets @wzhudev @DR-Univer
 packages/base-slides @wzhudev @DR-Univer @jikkai
 
 # ui
-packages/design @jikkai @wzhudev
 packages/base-ui @jikkai @wzhudev @Jocs
+packages/base-ui/src/services/clipboard @yuhongz
+packages/design @jikkai @wzhudev
+
+# docs
 packages/ui-plugin-docs @jikkai @Jocs
+
+# sheets
 packages/ui-plugin-sheets @jikkai @wzhudev
+packages/ui-plugin-sheets/src/controllers/clipboard @yuhongz
+packages/ui-plugin-sheets/src/controllers/editor @Jocs
+packages/ui-plugin-sheets/src/services/clipboard @yuhongz
+packages/ui-plugin-sheets/src/services/editor @Jocs
+packages/ui-plugin-sheets/src/services/editor-bridge.service.ts @Jocs
+
+# slides
 packages/ui-plugin-slides @jikkai @wzhudev
 
 # formula
 packages/base-formula-engine @DR-Univer
 packages/base-numfmt-engine @Gggpound
-
-# sheet-plugins TBD
+packages/sheets-plugin-formula @DR-Univer

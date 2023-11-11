@@ -3,7 +3,8 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univ
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
-import { SetEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
+import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
+import { SelectEditorFormluaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
@@ -45,7 +46,8 @@ export class FormulaController extends Disposable {
             MoreFunctionsOperation,
             SearchFunctionOperation,
             HelpFunctionOperation,
-            SetEditorFormulaOperation,
+            SelectEditorFormluaOperation,
+            SetFormulaDataMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

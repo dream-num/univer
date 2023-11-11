@@ -1,10 +1,9 @@
-import { Direction, LocaleService } from '@univerjs/core';
+import { Direction } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { FUNCTION_LIST } from '../../../services/function-list';
 import {
     IFormulaPromptService,
     INavigateParam,
@@ -21,7 +20,6 @@ export function SearchFunction() {
     const [searchText, setSearchText] = useState<string>('');
     const promptService = useDependency(IFormulaPromptService);
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
-    const localeService = useDependency(LocaleService);
 
     useEffect(() => {
         // TODO@Dushusir: How to get updated values in subscribe callback better
@@ -31,19 +29,17 @@ export function SearchFunction() {
             const selection = cellEditorManagerService.getState();
             if (!selection) return;
 
-            const { visible, searchText } = params;
+            const { visible, searchText, searchList } = params;
+            if (!visible) {
+                setVisible(visible);
+                return;
+            }
+
             const { startX = 0, endY = 0 } = selection;
 
-            const result: ISearchItem[] = [];
-            FUNCTION_LIST.forEach((item) => {
-                if (item.n.indexOf(searchText) > -1) {
-                    result.push({ name: item.n, desc: localeService.t(item.a) as string });
-                }
-            });
-
             setSearchText(searchText);
-            setSearchList(result);
-            updatedSearchList = result;
+            setSearchList(searchList);
+            updatedSearchList = searchList;
             setOffset([startX, endY]);
             setVisible(visible);
             setActive(0); // Reset active state

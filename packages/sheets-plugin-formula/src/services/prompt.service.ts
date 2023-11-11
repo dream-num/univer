@@ -1,3 +1,4 @@
+import { IFunctionInfo } from '@univerjs/base-formula-engine';
 import { Direction } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable, Subject } from 'rxjs';
@@ -17,6 +18,11 @@ export interface ISearchFunctionParams {
      * function search text
      */
     searchText: string;
+
+    /**
+     * function list
+     */
+    searchList: ISearchItem[];
 }
 
 export interface IHelpFunctionCommandParams {
@@ -26,14 +32,14 @@ export interface IHelpFunctionCommandParams {
     visible: boolean;
 
     /**
-     * function name
-     */
-    functionName: string;
-
-    /**
      * function param index
      */
     paramIndex: number;
+
+    /**
+     * function info
+     */
+    functionInfo: IFunctionInfo;
 }
 
 export interface INavigateParam {

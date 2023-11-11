@@ -12,9 +12,9 @@ export default {
 
         functionList: {
             SUMIF: {
-                d: '对范围中符合指定条件的值求和。',
-                a: '对范围中符合指定条件的值求和。',
-                p: {
+                description: '对范围中符合指定条件的值求和。',
+                abstract: '对范围中符合指定条件的值求和。',
+                functionParameter: {
                     range: {
                         name: '范围',
                         detail: '要根据条件进行检测的范围。',
@@ -30,25 +30,25 @@ export default {
                 },
             },
             TAN: {
-                d: '返回已知角度的正切值。',
-                a: '返回已知角度的正切值。',
-                p: {
+                description: '返回已知角度的正切值。',
+                abstract: '返回已知角度的正切值。',
+                functionParameter: {
                     angle: {
                         name: '角度',
                         detail: '要求其正切值的角度，以弧度表示。',
                     },
                 },
             },
-            TANH: {
-                d: '返回给定实数的双曲正切值。',
-                a: '返回给定实数的双曲正切值。',
-                p: {
-                    value: {
-                        name: '值',
-                        detail: '要计算其双曲正切值的实数。',
-                    },
-                },
-            },
+            // TANH: {
+            //     description: '返回给定实数的双曲正切值。',
+            //     abstract: '返回给定实数的双曲正切值。',
+            //     functionParameter: {
+            //         value: {
+            //             name: '值',
+            //             detail: '要计算其双曲正切值的实数。',
+            //         },
+            //     },
+            // },
         },
 
         formulaMore: {

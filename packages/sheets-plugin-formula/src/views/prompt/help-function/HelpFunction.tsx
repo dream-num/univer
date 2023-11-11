@@ -5,7 +5,7 @@ import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { FUNCTION_LIST, IFunctionInfo, IFunctionParam } from '../../../services/function-list';
+import { IFunctionInfo, IFunctionParam } from '../../../services/function-list';
 import { IFormulaPromptService, IHelpFunctionCommandParams } from '../../../services/prompt.service';
 import styles from './index.module.less';
 
@@ -26,17 +26,19 @@ export function HelpFunction() {
             const selection = cellEditorManagerService.getState();
             if (!selection) return;
 
-            const { visible, functionName, paramIndex } = params;
-            const info = FUNCTION_LIST.find((item) => item.n === functionName);
-            if (!info) return;
+            const { visible, paramIndex, functionInfo } = params;
+            if (!visible) {
+                setVisible(visible);
+                return;
+            }
 
             const localeInfo: IFunctionInfo = {
-                n: info.n as string,
-                t: info.t,
-                d: localeService.t(info.d) as string,
-                a: localeService.t(info.a) as string,
-                m: info.m,
-                p: info.p.map((item) => ({
+                functionName: functionInfo.functionName as string,
+                functionType: functionInfo.functionType,
+                description: localeService.t(functionInfo.description) as string,
+                abstract: localeService.t(functionInfo.abstract) as string,
+                parameterRange: functionInfo.parameterRange,
+                functionParameter: functionInfo.functionParameter.map((item) => ({
                     name: localeService.t(item.name) as string,
                     detail: localeService.t(item.detail) as string,
                     example: item.example,
@@ -49,8 +51,8 @@ export function HelpFunction() {
             setOffset([startX, endY]);
             setParamIndex(paramIndex);
             setFunctionInfo(localeInfo);
-            setVisible(visible);
             setDecoratorPosition({ left: startX, top: startY });
+            setVisible(visible);
         });
 
         return () => {
@@ -73,8 +75,8 @@ export function HelpFunction() {
                             <div className={styles.formulaHelpFunction}>
                                 <div className={styles.formulaHelpFunctionTitle}>
                                     <Help
-                                        title={functionInfo.n}
-                                        value={functionInfo.p}
+                                        title={functionInfo.functionName}
+                                        value={functionInfo.functionParameter}
                                         type="name"
                                         active={paramIndex}
                                         onClick={handleSwitchActive}
@@ -103,17 +105,17 @@ export function HelpFunction() {
                                     <div className={styles.formulaHelpFunctionContentInner}>
                                         <Params
                                             title={localeService.t('formula.formulaMore.helpExample') as string}
-                                            value={`${functionInfo.n}(${functionInfo.p
+                                            value={`${functionInfo.functionName}(${functionInfo.functionParameter
                                                 .map((item) => item.example)
                                                 .join(',')})`}
                                         />
                                         <Params
                                             title={localeService.t('formula.formulaMore.helpAbstract') as string}
-                                            value={functionInfo.d}
+                                            value={functionInfo.description}
                                         />
                                         {functionInfo &&
-                                            functionInfo.p &&
-                                            functionInfo.p.map((item: IFunctionParam, i: number) => (
+                                            functionInfo.functionParameter &&
+                                            functionInfo.functionParameter.map((item: IFunctionParam, i: number) => (
                                                 <Params
                                                     key={i}
                                                     className={paramIndex === i ? styles.formulaHelpFunctionActive : ''}
@@ -132,7 +134,7 @@ export function HelpFunction() {
                 >
                     <span></span>
                 </Dropdown>
-            ) : (
+            ) : visible ? (
                 <div
                     className={styles.formulaHelpDecorator}
                     onClick={() => setHelpVisible(!helpVisible)}
@@ -140,6 +142,8 @@ export function HelpFunction() {
                 >
                     <DetailsSingle />
                 </div>
+            ) : (
+                <></>
             )}
         </>
     );

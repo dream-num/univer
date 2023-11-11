@@ -15,7 +15,7 @@ import {
     DocumentModel,
     FOCUSING_EDITOR,
     FOCUSING_EDITOR_BUT_HIDDEN,
-    FOCUSING_EDITOR_FORMULA,
+    FOCUSING_EDITOR_INPUT_FORMULA,
     ICellData,
     ICommandInfo,
     ICommandService,
@@ -180,7 +180,7 @@ export class EndEditController extends Disposable {
     }
 
     private _exitInput(param: IEditorBridgeServiceVisibleParam) {
-        this._contextService.setContextValue(FOCUSING_EDITOR_FORMULA, false);
+        this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
         this._contextService.setContextValue(FOCUSING_EDITOR, false);
         this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
         this._cellEditorManagerService.setState({

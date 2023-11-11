@@ -6,13 +6,13 @@ import { CommandType, Direction, IOperation } from '@univerjs/core';
 
 import { IFormulaPromptService } from '../../services/prompt.service';
 
-export interface ISetEditorFormulaOperationParam {
+export interface ISelectEditorFormulaOperationParam {
     eventType: DeviceInputEventType;
     keycode?: KeyCode;
 }
 
-export const SetEditorFormulaOperation: IOperation<ISetEditorFormulaOperationParam> = {
-    id: 'formula.operation.set-editor-formula-arrow',
+export const SelectEditorFormluaOperation: IOperation<ISelectEditorFormulaOperationParam> = {
+    id: 'formula.operation.select-editor-formula',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const { keycode } = params;

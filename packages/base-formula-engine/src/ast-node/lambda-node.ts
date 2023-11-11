@@ -2,7 +2,12 @@ import { Nullable, Tools } from '@univerjs/core';
 
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorType } from '../basics/error-type';
-import { DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../basics/token-type';
+import { isFirstChildParameter } from '../basics/function-definition';
+import {
+    DEFAULT_TOKEN_TYPE_LAMBDA_OMIT_PARAMETER,
+    DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
+    DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER,
+} from '../basics/token-type';
 import { IFormulaRuntimeService } from '../services/runtime.service';
 import { BaseAstNode, ErrorNode, LambdaPrivacyVarType } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
@@ -20,6 +25,10 @@ export class LambdaNode extends BaseAstNode {
 
     override get nodeType() {
         return NodeType.LAMBDA;
+    }
+
+    isFunctionParameter() {
+        return this._lambdaId === null;
     }
 
     getLambdaId() {
@@ -45,20 +54,20 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
     override create(param: LexerNode): BaseAstNode {
         const children = param.getChildren();
         const lambdaVar = children[0];
-        const parameterArray = children.slice(1, -1);
+        let parameterArray = children.slice(1, -1);
         const functionStatementNode = children[children.length - 1];
         if (!(lambdaVar instanceof LexerNode && functionStatementNode instanceof LexerNode)) {
             return ErrorNode.create(ErrorType.NAME);
         }
 
-        if (lambdaVar.getToken() !== DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
-            return ErrorNode.create(ErrorType.NAME);
-        }
+        if (lambdaVar.getToken() === DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER) {
+            const lambdaVarChildren = lambdaVar.getChildren();
 
-        const lambdaVarChildren = lambdaVar.getChildren();
-
-        if (parameterArray.length !== lambdaVarChildren.length) {
-            return ErrorNode.create(ErrorType.VALUE);
+            if (parameterArray.length !== lambdaVarChildren.length) {
+                return ErrorNode.create(ErrorType.VALUE);
+            }
+        } else {
+            parameterArray = children.slice(0, -1);
         }
 
         // const lambdaId = nanoid(8);
@@ -71,13 +80,14 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
             const parameter = parameterArray[i];
             if (parameter instanceof LexerNode) {
                 const variant = parameter.getChildren()[0] as string;
-                currentLambdaPrivacyVar.set(variant, null);
+                parameter.setToken(DEFAULT_TOKEN_TYPE_LAMBDA_OMIT_PARAMETER);
+                currentLambdaPrivacyVar.set(variant.trim(), undefined);
             } else {
                 return ErrorNode.create(ErrorType.VALUE);
             }
         }
 
-        this._runtimeService.registerLambdaPrivacyVar(lambdaId, currentLambdaPrivacyVar);
+        this._runtimeService.registerFunctionDefinitionPrivacyVar(lambdaId, currentLambdaPrivacyVar);
 
         this._updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
 
@@ -112,8 +122,12 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
     ) {
         const children = functionStatementNode.getChildren();
         const childrenCount = children.length;
+        const firstChild = children[0];
         for (let i = 0; i < childrenCount; i++) {
             const node = children[i];
+            if (isFirstChildParameter(firstChild) && i !== 0) {
+                continue;
+            }
             if (node instanceof LexerNode) {
                 this._updateTree(node, lambdaId, currentLambdaPrivacyVar);
             } else {

@@ -5,6 +5,78 @@ import { compareToken } from '../basics/token';
 import { ErrorValueObject } from '../other-object/error-value-object';
 import { BaseValueObject, CalculateValueType } from './base-value-object';
 
+export class NullValueObject extends BaseValueObject {
+    override isNull(): boolean {
+        return true;
+    }
+
+    override plus(valueObject: BaseValueObject): CalculateValueType {
+        return new NumberValueObject(0, true).plus(valueObject);
+    }
+
+    override minus(valueObject: BaseValueObject): CalculateValueType {
+        return new NumberValueObject(0, true).minus(valueObject);
+    }
+
+    override multiply(valueObject: BaseValueObject): CalculateValueType {
+        return new NumberValueObject(0, true).multiply(valueObject);
+    }
+
+    override divided(valueObject: BaseValueObject): CalculateValueType {
+        return new NumberValueObject(0, true).divided(valueObject);
+    }
+
+    override compare(valueObject: BaseValueObject, operator: compareToken): CalculateValueType {
+        if (valueObject.isString()) {
+            return new StringValueObject('').compare(valueObject, operator);
+        }
+        if (valueObject.isBoolean()) {
+            return new BooleanValueObject(false).compare(valueObject, operator);
+        }
+        return new NumberValueObject(0, true).compare(valueObject, operator);
+    }
+
+    override concatenateFront(valueObject: BaseValueObject): CalculateValueType {
+        if (valueObject.isArray()) {
+            return valueObject.concatenateBack(new StringValueObject(''));
+        }
+        return new StringValueObject('').concatenate(valueObject.getValue(), ConcatenateType.FRONT);
+    }
+
+    override concatenateBack(valueObject: BaseValueObject): CalculateValueType {
+        if (valueObject.isArray()) {
+            return valueObject.concatenateFront(new StringValueObject(''));
+        }
+        return new StringValueObject('').concatenate(valueObject.getValue(), ConcatenateType.BACK);
+    }
+
+    override plusBy(value: string | number | boolean): CalculateValueType {
+        return new NumberValueObject(0).plusBy(value);
+    }
+
+    override minusBy(value: string | number | boolean): CalculateValueType {
+        return new NumberValueObject(0).minusBy(value);
+    }
+
+    override multiplyBy(value: string | number | boolean): CalculateValueType {
+        return new NumberValueObject(0).multiplyBy(value);
+    }
+
+    override dividedBy(value: string | number | boolean): CalculateValueType {
+        return new NumberValueObject(0).dividedBy(value);
+    }
+
+    override compareBy(value: string | number | boolean, operator: compareToken): CalculateValueType {
+        if (typeof value === 'string') {
+            return new StringValueObject('').compareBy(value, operator);
+        }
+        if (typeof value === 'boolean') {
+            return new BooleanValueObject(false).compareBy(value, operator);
+        }
+        return new NumberValueObject(0, true).compareBy(value, operator);
+    }
+}
+
 export class BooleanValueObject extends BaseValueObject {
     private _value: boolean = false;
 

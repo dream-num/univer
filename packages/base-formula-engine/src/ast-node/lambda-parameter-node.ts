@@ -1,3 +1,5 @@
+import { Nullable } from '@univerjs/core';
+
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorType } from '../basics/error-type';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../basics/token-type';
@@ -15,17 +17,44 @@ export class LambdaParameterNode extends BaseAstNode {
         super(token);
     }
 
+    getLambdaParameter() {
+        return this._lambdaParameter;
+    }
+
+    getCurrentLambdaPrivacyVar() {
+        return this._currentLambdaPrivacyVar;
+    }
+
     override get nodeType() {
         return NodeType.LAMBDA_PARAMETER;
     }
 
     override execute() {
-        const node = this._currentLambdaPrivacyVar.get(this._lambdaParameter);
+        const node = this._getRootLexerNode(this._currentLambdaPrivacyVar.get(this._lambdaParameter));
         if (!node) {
             this.setValue(ErrorValueObject.create(ErrorType.SPILL));
         } else {
             this.setValue(node.getValue());
         }
+    }
+
+    private _getRootLexerNode(node: Nullable<BaseAstNode>): Nullable<BaseAstNode> {
+        if (!node) {
+            return;
+        }
+        if (node.getToken() !== DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER) {
+            return node;
+        }
+
+        const parameterNode = node as LambdaParameterNode;
+        const currentLambdaPrivacyVar = parameterNode.getCurrentLambdaPrivacyVar();
+        const lambdaParameter = parameterNode.getLambdaParameter();
+
+        if (!currentLambdaPrivacyVar) {
+            return;
+        }
+
+        return this._getRootLexerNode(currentLambdaPrivacyVar.get(lambdaParameter));
     }
 }
 
@@ -36,7 +65,7 @@ export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
 
     override create(param: LexerNode): BaseAstNode {
         // const lambdaId = param.getLambdaId();
-        const currentLambdaPrivacyVar = param.getLambdaPrivacyVar();
+        const currentLambdaPrivacyVar = param.getFunctionDefinitionPrivacyVar();
         const lambdaParameter = param.getLambdaParameter();
 
         if (!currentLambdaPrivacyVar) {

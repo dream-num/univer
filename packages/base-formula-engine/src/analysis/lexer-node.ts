@@ -22,9 +22,13 @@ export class LexerNode {
 
     private _lambdaId: Nullable<string>;
 
-    private _lambdaPrivacyVar: Nullable<LambdaPrivacyVarType>;
+    private _functionDefinitionPrivacyVar: Nullable<LambdaPrivacyVarType>;
 
     private _lambdaParameter: string = '';
+
+    private _startIndex: number = -1;
+
+    private _endIndex: number = -1;
 
     dispose() {
         this._children.forEach((node) => {
@@ -32,7 +36,7 @@ export class LexerNode {
                 node.dispose();
             }
         });
-        this._lambdaPrivacyVar?.clear();
+        this._functionDefinitionPrivacyVar?.clear();
 
         this._parent = null;
     }
@@ -45,12 +49,12 @@ export class LexerNode {
         this._lambdaId = lambdaId;
     }
 
-    getLambdaPrivacyVar() {
-        return this._lambdaPrivacyVar;
+    getFunctionDefinitionPrivacyVar() {
+        return this._functionDefinitionPrivacyVar;
     }
 
     setLambdaPrivacyVar(lambdaPrivacyVar: LambdaPrivacyVarType) {
-        this._lambdaPrivacyVar = lambdaPrivacyVar;
+        this._functionDefinitionPrivacyVar = lambdaPrivacyVar;
     }
 
     getLambdaParameter() {
@@ -81,12 +85,33 @@ export class LexerNode {
         this._children.push(children);
     }
 
+    addChildrenFirst(children: LexerNode | string) {
+        this._children.unshift(children);
+    }
+
     getToken() {
         return this._token;
     }
 
     setToken(token: string) {
         this._token = token;
+    }
+
+    setIndex(st: number, ed: number) {
+        this._startIndex = st;
+        this._endIndex = ed;
+    }
+
+    replaceChild(lexerNode: LexerNode, newLexerNode: LexerNode) {
+        const i = this._getIndexInParent(lexerNode);
+
+        if (i == null) {
+            return;
+        }
+
+        this.getChildren().splice(i, 1, newLexerNode);
+
+        newLexerNode.setParent(this);
     }
 
     changeToParent(newParentLexerNode: LexerNode) {
@@ -100,15 +125,21 @@ export class LexerNode {
     }
 
     removeChild(lexerNode: LexerNode) {
-        const childrenNode = this.getChildren();
-        const childrenCount = childrenNode.length;
-        for (let i = 0; i < childrenCount; i++) {
-            const child = childrenNode[i];
-            if (child === lexerNode) {
-                childrenNode.splice(i, 1);
-                return;
-            }
+        const i = this._getIndexInParent(lexerNode);
+
+        if (i == null) {
+            return;
         }
+
+        this.getChildren().splice(i, 1);
+        // const childrenCount = childrenNode.length;
+        // for (let i = 0; i < childrenCount; i++) {
+        //     const child = childrenNode[i];
+        //     if (child === lexerNode) {
+        //         childrenNode.splice(i, 1);
+        //         return;
+        //     }
+        // }
     }
 
     serialize() {
@@ -127,7 +158,20 @@ export class LexerNode {
         }
         return {
             token,
+            st: this._startIndex,
+            ed: this._endIndex,
             children: childrenSerialization,
         };
+    }
+
+    private _getIndexInParent(lexerNode: LexerNode) {
+        const childrenNode = this.getChildren();
+        const childrenCount = childrenNode.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const child = childrenNode[i];
+            if (child === lexerNode) {
+                return i;
+            }
+        }
     }
 }

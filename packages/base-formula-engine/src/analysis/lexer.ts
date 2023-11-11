@@ -86,7 +86,7 @@ export class LexerTreeBuilder extends Disposable {
         return this._currentLexerNode;
     }
 
-    treeBuilder(formulaString: string) {
+    treeBuilder(formulaString: string, transformSuffix = true) {
         this._resetCurrentLexerNode();
 
         this._currentLexerNode.setToken(DEFAULT_TOKEN_TYPE_ROOT);
@@ -100,7 +100,9 @@ export class LexerTreeBuilder extends Disposable {
             this._currentLexerNode = node;
         }
 
-        this._suffixExpressionHandler(this._currentLexerNode);
+        if (transformSuffix) {
+            this._suffixExpressionHandler(this._currentLexerNode);
+        }
 
         return this._currentLexerNode;
     }
@@ -340,9 +342,10 @@ export class LexerTreeBuilder extends Disposable {
         this._currentLexerNode = subLexerNode;
     }
 
-    private _newAndPushCurrentLexerNode(token: string, isUnshift = false) {
+    private _newAndPushCurrentLexerNode(token: string, current: number, isUnshift = false) {
         const subLexerNode = new LexerNode();
         subLexerNode.setToken(token);
+        subLexerNode.setIndex(current - token.length + 1, current);
         this._setCurrentLexerNode(subLexerNode, isUnshift);
     }
 
@@ -401,7 +404,7 @@ export class LexerTreeBuilder extends Disposable {
                         // const subLexerNode = new LexerNode();
                         // subLexerNode.token = this._segment;
                         // this.setCurrentLexerNode(subLexerNode);
-                        this._newAndPushCurrentLexerNode(this._segment);
+                        this._newAndPushCurrentLexerNode(this._segment, cur);
                         this._resetSegment();
                     }
 
@@ -419,7 +422,7 @@ export class LexerTreeBuilder extends Disposable {
                         // const subLexerNode = new LexerNode();
                         // subLexerNode.token = DEFAULT_TOKEN_TYPE_PARAMETER;
                         // this.setCurrentLexerNode(subLexerNode);
-                        this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER);
+                        this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
                     }
                 } else {
                     this._pushNodeToChildren(currentString);
@@ -446,7 +449,7 @@ export class LexerTreeBuilder extends Disposable {
                         // const subLexerNode = new LexerNode();
                         // subLexerNode.token = DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER;
                         // this.setCurrentLexerNode(subLexerNode);
-                        this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, true);
+                        this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER, cur, true);
                         this._openLambda();
                     } else {
                         if (!this._setAncestorCurrentLexerNode() && cur !== formulaStringArrayCount - 1) {
@@ -519,7 +522,7 @@ export class LexerTreeBuilder extends Disposable {
                     // const subLexerNode = new LexerNode();
                     // subLexerNode.token = DEFAULT_TOKEN_TYPE_PARAMETER;
                     // this.setCurrentLexerNode(subLexerNode);
-                    this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER);
+                    this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
                 } else {
                     return ErrorType.VALUE;
                 }

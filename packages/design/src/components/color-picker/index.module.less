@@ -6,9 +6,12 @@
 .color-picker {
     position: absolute;
     z-index: 1;
+
     display: block;
+
     width: max-content;
     min-width: 272px;
+
     visibility: visible;
 
     &-hidden {
@@ -18,9 +21,12 @@
     &-panel {
         display: flex;
         flex-direction: column;
+
         width: 272px;
+
         background-color: #fff;
         border-radius: @outer-border-radius;
+
         &-disabled {
             cursor: not-allowed;
         }
@@ -30,9 +36,10 @@
         margin-bottom: var(--margin-xs);
 
         .color-picker-palette {
-            min-height: 160px;
             overflow: hidden;
+            min-height: 160px;
             border-radius: @inner-border-radius;
+
             & > .color-picker-gradient {
                 border-top-left-radius: 5px;
             }
@@ -41,69 +48,78 @@
 
     &-saturation {
         position: absolute;
-        border-radius: inherit;
         inset: 0;
+        border-radius: inherit;
     }
 
     &-handler {
         box-sizing: border-box;
         width: @default-handler-size;
         height: @default-handler-size;
+
         border: @handler-border-size solid #fff;
         border-radius: 50%;
-        box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.06);
+        box-shadow: 0 0 1px 1px rgb(0 0 0 / 6%);
     }
 
     &-slider {
         width: 100%;
+
         .color-picker-palette {
             height: 8px;
         }
+
         .color-picker-gradient {
             border-radius: @inner-border-radius;
         }
     }
 
     &-custom-btn {
-        color: rgb(var(--text-color));
-        font-size: var(--font-size-base);
         cursor: pointer;
+        font-size: var(--font-size-base);
+        color: rgb(var(--text-color));
     }
 
     &-cancel-btn {
-        color: rgb(var(--text-color));
-        font-size: var(--font-size-base);
         cursor: pointer;
+        font-size: var(--font-size-base);
+        color: rgb(var(--text-color));
     }
 
     &-color-blocks {
-        margin-bottom: var(--margin-xs);
         display: grid;
         grid-template-columns: repeat(10, 1fr);
         grid-template-rows: repeat(9, 1fr);
         gap: var(--margin-xs);
+
+        margin-bottom: var(--margin-xs);
     }
 
     &-color-block {
-        position: relative;
-        width: 20px;
-        height: 20px;
-        overflow: hidden;
-        border-radius: @inner-border-radius;
         cursor: pointer;
 
+        position: relative;
+
+        overflow: hidden;
+
+        width: 20px;
+        height: 20px;
+
+        border-radius: @inner-border-radius;
+
         &-inner {
+            box-sizing: border-box;
             width: 100%;
             height: 100%;
+
             border: 1px solid rgb(var(--grey-600));
             border-radius: @inner-border-radius;
-            box-sizing: border-box;
         }
     }
 
     &-slider-container {
-        margin-bottom: var(--margin-xs);
         display: flex;
+        margin-bottom: var(--margin-xs);
 
         .color-picker-slider-group {
             flex: 1;

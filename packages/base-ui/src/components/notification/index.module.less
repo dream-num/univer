@@ -2,23 +2,28 @@
 
 .notification {
     position: fixed;
+
     display: flex;
-    align-items: flex-end;
     flex-direction: column;
-    box-sizing: border-box;
+    align-items: flex-end;
     justify-content: center;
+
+    box-sizing: border-box;
     margin: var(--margin-xs) 0;
 
     &-notice {
         display: flex;
+        gap: var(--margin-xs);
         justify-content: space-between;
+
+        width: @width;
         padding: var(--padding-lg);
+
         font-size: var(--font-size-lg);
+
         background-color: rgb(var(--color-white));
         border-radius: var(--border-radius-base);
         box-shadow: var(--box-shadow-lg);
-        gap: var(--margin-xs);
-        width: @width;
 
         &-wrapper {
             margin: var(--margin-xs) var(--margin-base);
@@ -26,23 +31,28 @@
 
         &-content {
             display: inline-flex;
+            gap: var(--margin-xs);
             align-items: center;
             align-items: flex-start;
-            gap: var(--margin-xs);
         }
 
         &-close {
-            color: rgb(var(--text-color-secondary));
             cursor: pointer;
-            outline: none;
-            width: fit-content;
-            height: fit-content;
-            padding: var(--padding-xs);
-            border-radius: var(--border-radius-base);
-            transition: background-color .2s;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
+            width: fit-content;
+            height: fit-content;
+            padding: var(--padding-xs);
+
+            color: rgb(var(--text-color-secondary));
+
+            border-radius: var(--border-radius-base);
+            outline: none;
+
+            transition: background-color .2s;
 
             &:hover {
                 background-color: rgb(var(--bg-color-hover));
@@ -71,11 +81,11 @@
     }
 
     &-content-container {
-
         display: inline-flex;
-        align-items: flex-start;
         flex-direction: column;
         gap: var(--margin-xs);
+        align-items: flex-start;
+
         padding-top: var(--padding-xs);
     }
 
@@ -87,11 +97,12 @@
         color: rgb(var(--text-color-secondary));
 
         &-ellipsis {
+            overflow: hidden;
             // Omit beyond the specified number of lines
             display: -webkit-box;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
             text-overflow: ellipsis;
+
+            -webkit-box-orient: vertical;
         }
     }
 
@@ -148,33 +159,36 @@
 
       &-fade-leave {
         .fade-effect();
+
         animation-play-state: paused;
       }
 
       &-fade-appear&-fade-appear-active,
       &-fade-enter&-fade-enter-active {
-        animation-name: notificationFadeIn;
+        animation-name: notification-fade-in;
         animation-play-state: running;
       }
 
       &-fade-leave&-fade-leave-active {
-        animation-name: notificationFadeOut;
+        animation-name: notification-fade-out;
         animation-play-state: running;
       }
 
-      @keyframes notificationFadeIn {
+      @keyframes notification-fade-in {
         0% {
           opacity: 0;
         }
+
         100% {
           opacity: 1;
         }
       }
 
-      @keyframes notificationFadeOut {
+      @keyframes notification-fade-out {
         0% {
           opacity: 1;
         }
+
         100% {
           opacity: 0;
         }

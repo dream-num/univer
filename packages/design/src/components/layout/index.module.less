@@ -1,9 +1,10 @@
 .layout-wrapper {
-    height: 100%;
+    overflow: hidden;
     display: flex;
     flex: auto;
     flex-direction: column;
-    overflow: hidden;
+
+    height: 100%;
     min-height: 0;
 
     &&-has-sider {
@@ -12,8 +13,8 @@
 }
 
 .header-wrapper {
-    flex: 0 0 auto;
     user-select: none;
+    flex: 0 0 auto;
 }
 
 .footer-wrapper {

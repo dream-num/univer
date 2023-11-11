@@ -1,29 +1,37 @@
-@padding-right:28px;
+@padding-right: 28px;
 
 .sheet-bar-menu {
+    display: grid;
+    gap: var(--margin-xxs);
+    align-items: center;
+
+    box-sizing: border-box;
     padding: var(--padding-lg) var(--padding-base);
+
     font-size: var(--font-size-xs);
     font-weight: 500;
+
     background-color: rgb(var(--bg-color-secondary));
     border: 1px solid rgb(var(--border-color));
     border-radius: var(--border-radius-lg);
     box-shadow: var(--box-shadow-lg);
-    box-sizing: border-box;
-    display: grid;
-    align-items: center;
-    gap: var(--margin-xxs);
 
     li {
         list-style: none;
     }
 
     &-item {
-        display: flex;
-        padding: var(--padding-xs) @padding-right var(--padding-xs) var(--padding-xs);
-        color: rgb(var(--text-color));
-        border-radius: var(--border-radius-base);
-        box-sizing: border-box;
         cursor: pointer;
+
+        display: flex;
+
+        box-sizing: border-box;
+        padding: var(--padding-xs) @padding-right var(--padding-xs) var(--padding-xs);
+
+        color: rgb(var(--text-color));
+
+        border-radius: var(--border-radius-base);
+
         transition: background .2s;
 
         &:hover {
@@ -32,8 +40,8 @@
 
         &-icon {
             display: flex;
-            color: transparent;
             margin-right: var(--margin-xs);
+            color: transparent;
         }
 
         &-hide &-icon {
@@ -43,6 +51,6 @@
         &-select &-icon, &-select{
             color: rgb(var(--primary-color));
         }
-        
+
     }
 }

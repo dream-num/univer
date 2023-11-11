@@ -1,4 +1,4 @@
-@tab-shadow:0px 0px 8px rgba(0, 0, 0, 0.08);
+@tab-shadow: 0px 0 8px rgba(0, 0, 0, 0.08);
 @padding-left-right: 6px;
 
 .slide-tab-bar-container {
@@ -6,11 +6,13 @@
 
     .slide-tab-bar {
         user-select: none;
-        padding: var(--padding-xs) @padding-left-right;
+
+        overflow: hidden;
         display: flex;
         flex-direction: row;
         align-items: center;
-        overflow: hidden;
+
+        padding: var(--padding-xs) @padding-left-right;
     }
 }
 
@@ -18,43 +20,48 @@
 Tab Item, Put outside to be compatible with drag styles
 */
 .slide-tab-item {
+    cursor: pointer;
     user-select: none;
+
     display: flex;
     flex-direction: row;
-    align-items: center;
     flex-grow: 1;
+    align-items: center;
+
     box-sizing: border-box;
-    border-radius: var(--border-radius-base);
-    font-size: var(--font-size-xs);
-    cursor: pointer;
     margin: 0 var(--margin-xxs);
+
+    font-size: var(--font-size-xs);
     color: rgb(var(--grey-1000));
 
-        .slide-tab-span {
-            white-space: nowrap;
-            box-sizing: border-box;
-            padding: var(--padding-xs) var(--padding-sm);
-            border: 2px solid transparent;
-            border-radius: var(--border-radius-base);
-            
-            &-edit {
-                outline: none;
-                cursor: text;
-                border-color: rgb(var(--primary-color));
+    border-radius: var(--border-radius-base);
 
-                &::selection{
-                    background-color: rgb(var(--primary-color));
-                    color: rgb(var(--color-white));
-                }
+    .slide-tab-span {
+        box-sizing: border-box;
+        padding: var(--padding-xs) var(--padding-sm);
+
+        white-space: nowrap;
+
+        border: 2px solid transparent;
+        border-radius: var(--border-radius-base);
+
+        &-edit {
+            cursor: text;
+            border-color: rgb(var(--primary-color));
+            outline: none;
+
+            &::selection {
+                color: rgb(var(--color-white));
+                background-color: rgb(var(--primary-color));
             }
-
         }
+
+    }
 }
 
-
 .slide-tab-active {
-        color: rgb(var(--primary-color));
-        background-color: rgb(var(--bg-color-secondary));
-        font-weight: 700;
-        box-shadow: @tab-shadow;
+    font-weight: 700;
+    color: rgb(var(--primary-color));
+    background-color: rgb(var(--bg-color-secondary));
+    box-shadow: @tab-shadow;
 }

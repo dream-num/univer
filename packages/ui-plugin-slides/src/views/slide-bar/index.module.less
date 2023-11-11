@@ -1,22 +1,24 @@
 .slide-bar {
-    height: 100%;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid #eaecf0;
+
+    height: 100%;
+
     background: #f5f7f9;
+    border-right: 1px solid #eaecf0;
 
     .slide-bar-content {
+        overflow: auto;
         height: 100%;
         padding: 0 15px;
-        overflow: auto;
 
         &::-webkit-scrollbar {
             width: 5px;
         }
 
         &::-webkit-scrollbar-thumb {
-            border-radius: 5px;
             background: #eaecf0;
+            border-radius: 5px;
         }
 
         &::-webkit-scrollbar-track {
@@ -28,17 +30,19 @@
             margin: 10px 0;
 
             span {
-                font-size: 12px;
                 width: 15px;
+                font-size: 12px;
             }
 
             .slide-bar-box {
-                margin-left: 5px;
+                position: relative;
+
                 width: 100%;
                 height: 150px;
+                margin-left: 5px;
+
                 background: #fff;
                 border: 2px solid #c0c0c0;
-                position: relative;
             }
 
             &-active {
@@ -58,10 +62,12 @@
         text-align: center;
 
         button {
-            line-height: 1;
-            font-size: 24px;
-            height: auto;
             width: 45px;
+            height: auto;
+
+            font-size: 24px;
+            line-height: 1;
+
             border-radius: 10px;
         }
     }

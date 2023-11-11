@@ -15,16 +15,19 @@
     }
 
     p {
-        text-align: center;
         cursor: pointer;
+        text-align: center;
     }
 
     .box {
-        display: flex;
-        font-size: 14px;
-        align-items: center;
-        margin-bottom: 1.5rem;
         position: relative;
+
+        display: flex;
+        align-items: center;
+
+        margin-bottom: 1.5rem;
+
+        font-size: 14px;
 
         &:first-of-type {
             margin-top: .5rem;
@@ -32,26 +35,28 @@
 
         .count {
             position: absolute;
+            z-index: 1;
             top: 0;
             right: 0;
-            z-index: 1;
+
             height: 36px;
+
             line-height: 36px;
 
             >span {
-                padding: 0 5px;
                 cursor: pointer;
+                padding: 0 5px;
             }
         }
 
         >span {
-            width: 60px;
-            flex-shrink: 0
+            flex-shrink: 0;
+            width: 60px
         }
 
         .select-component {
-            height: 36px;
             cursor: pointer;
+            height: 36px;
             border: 1px solid #dadce0;
         }
 
@@ -69,18 +74,20 @@
         }
     }
 
-    .buttonGroup {
-        margin-top: 2rem;
+    .button-group {
         display: flex;
         flex-direction: row-reverse;
+        margin-top: 2rem;
 
         button {
-            margin-left: .5rem;
-            border-radius: 4px;
             height: 36px;
+            margin-left: .5rem;
+            padding: 9px 24px 11px;
+
             line-height: 16px;
             letter-spacing: 0.25px;
-            padding: 9px 24px 11px 24px;
+
+            border-radius: 4px;
         }
     }
 }

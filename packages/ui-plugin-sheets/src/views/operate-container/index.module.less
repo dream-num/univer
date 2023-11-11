@@ -1,59 +1,65 @@
 .operate-container {
-    left: 0px;
-    right: 0px;
-    width: 0px;
-    height: 0px;
     position: absolute;
     z-index: 10;
+    right: 0;
+    left: 0;
+
+    width: 0;
+    height: 0;
 
 }
-@item-padding-left:36px;
-@smart-button-menu-min-width:128px;
+@item-padding-left: 36px;
+@smart-button-menu-min-width: 128px;
 
 .smart-button-menu {
+    display: grid;
+    gap: var(--margin-xxs);
+    align-items: center;
+
+    box-sizing: border-box;
     min-width: @smart-button-menu-min-width;
     padding: var(--padding-sm);
+
     font-size: var(--font-size-base);
+
     background-color: rgb(var(--bg-color-secondary));
     border: 1px solid rgb(var(--border-color));
     border-radius: var(--border-radius-lg);
     box-shadow: var(--box-shadow-lg);
-    box-sizing: border-box;
-    display: grid;
-    align-items: center;
-    gap: var(--margin-xxs);
 
     li {
         list-style: none;
     }
 
     &-item {
-        position: relative;
-        text-align: left;
+        cursor: pointer;
 
         position: relative;
-        padding: var(--padding-xs) 0 var(--padding-xs) @item-padding-left;
-        color: rgb(var(--text-color));
-        border-radius: var(--border-radius-base);
+
         box-sizing: border-box;
-        cursor: pointer;
+        padding: var(--padding-xs) 0 var(--padding-xs) @item-padding-left;
+
+        color: rgb(var(--text-color));
+        text-align: left;
+
+        border-radius: var(--border-radius-base);
+
         transition: background .2s;
 
         &:hover {
             background-color: rgb(var(--bg-color-hover));
         }
 
-
         &-icon {
             position: absolute;
-            left: var(--padding-xs);
             top: 50%;
+            left: var(--padding-xs);
             transform: translateY(-50%);
         }
 
         &-title {
-            vertical-align: middle;
             padding: var(--padding-xs) var(--padding-xs) var(--padding-xs) 0;
+            vertical-align: middle;
         }
 
         &-hide {

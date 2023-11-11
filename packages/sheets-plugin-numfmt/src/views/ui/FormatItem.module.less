@@ -1,17 +1,20 @@
 .format-item {
-    padding: 0 14px 0 25px;
+    position: relative;
+
     display: flex;
     align-items: center;
-    position: relative;
     justify-content: space-between;
 
+    padding: 0 14px 0 25px;
+
     .format-item-selected {
+        position: absolute;
+        top: 50%;
+        left: 5px;
+        transform: translateY(-50%) scale(1.5);
+
         display: flex;
         align-items: center;
-        position: absolute;
-        left: 5px;
-        top: 50%;
-        transform: translateY(-50%) scale(1.5);
     }
 
     .format-item-content {

@@ -10,8 +10,8 @@
 }
 
 .@{select-prefix} {
-    display: inline-block;
     position: relative;
+    display: inline-block;
 
     &-disabled {
         &,
@@ -27,31 +27,33 @@
     &-show-arrow&-loading {
         .@{select-prefix}-arrow {
             &-icon::after {
+                transform: none;
+
                 box-sizing: border-box;
                 width: 12px;
                 height: 12px;
-                border-radius: 100%;
+                margin-top: 4px;
+
                 border: 2px solid #999;
                 border-top-color: transparent;
                 border-bottom-color: transparent;
-                transform: none;
-                margin-top: 4px;
+                border-radius: 100%;
 
-                animation: rcSelectLoadingIcon 0.5s infinite;
+                animation: select-loading-icon 0.5s infinite;
             }
         }
     }
 
     // ============== Selector ===============
     .@{select-prefix}-selection-placeholder {
-        opacity: 0.4;
         pointer-events: none;
+        opacity: 0.4;
     }
 
     // ============== Search ===============
     .@{select-prefix}-selection-search-input {
-        color: rgb(var(--text-color));
         font-size: var(--font-size-sm);
+        color: rgb(var(--text-color));
         appearance: none;
 
         &::-webkit-search-cancel-button {
@@ -64,9 +66,12 @@
     &-single {
         .@{select-prefix}-selector {
             position: relative;
-            padding: var(--padding-sm) var(--padding-lg);
-            box-sizing: border-box;
+
             display: flex;
+
+            box-sizing: border-box;
+            padding: var(--padding-sm) var(--padding-lg);
+
             transition: all .15s;
 
             .@{select-prefix}-selection-search {
@@ -80,11 +85,13 @@
 
             .@{select-prefix}-selection-item,
             .@{select-prefix}-selection-placeholder {
+                pointer-events: none;
+
                 position: absolute;
                 top: 6px;
                 left: 16px;
+
                 font-size: var(--font-size-sm);
-                pointer-events: none;
             }
         }
 
@@ -108,10 +115,12 @@
 
         .@{select-prefix}-selection-item {
             flex: none;
-            background: #bbb;
-            border-radius: 4px;
+
             margin-right: 2px;
             padding: 0 8px;
+
+            background: #bbb;
+            border-radius: 4px;
 
             &-disabled {
                 cursor: not-allowed;
@@ -136,17 +145,18 @@
 
             &-input,
             &-mirror {
-                padding: var(--padding-xs) var(--padding-sm);
                 box-sizing: border-box;
+                padding: var(--padding-xs) var(--padding-sm);
             }
 
             &-mirror {
-                position: absolute;
-                z-index: 999;
-                white-space: nowrap;
                 position: none;
-                left: 0;
+                z-index: 999;
                 top: 0;
+                left: 0;
+
+                white-space: nowrap;
+
                 visibility: hidden;
             }
         }
@@ -162,8 +172,8 @@
 
         .@{select-prefix}-clear {
             position: absolute;
-            right: 20px;
             top: 0;
+            right: 20px;
         }
     }
 
@@ -175,17 +185,21 @@
         .@{select-prefix}-arrow {
             pointer-events: none;
             position: absolute;
-            right: 5px;
             top: 0;
+            right: 5px;
 
             &-icon::after {
                 content: '';
-                border: 5px solid transparent;
+
+                transform: translateY(5px);
+
+                display: inline-block;
+
                 width: 0;
                 height: 0;
-                display: inline-block;
+
+                border: 5px solid transparent;
                 border-top-color: #999;
-                transform: translateY(5px);
             }
         }
     }
@@ -201,7 +215,9 @@
     // ============== Dropdown ===============
     &-dropdown {
         position: absolute;
+
         min-height: 100px;
+
         background: rgb(var(--bg-color-secondary));
         border: 1px solid rgb(var(--border-color));
         border-radius: var(--border-radius-base);
@@ -219,9 +235,9 @@
 
         // >>> Group
         &-group {
-            color: #999;
-            font-weight: bold;
             font-size: 80%;
+            font-weight: bold;
+            color: #999;
         }
 
         // >>> Option
@@ -233,10 +249,10 @@
             }
 
             .@{select-prefix}-item-option-state {
-                position: absolute;
-                right: 0;
-                top: 4px;
                 pointer-events: none;
+                position: absolute;
+                top: 4px;
+                right: 0;
             }
 
             // ------- Active -------
@@ -252,8 +268,8 @@
 
         // >>> Empty
         &-empty {
-            text-align: center;
             color: #999;
+            text-align: center;
         }
     }
 }
@@ -263,57 +279,59 @@
 }
 
 .@{select-prefix}-selection__choice-zoom-appear {
-    opacity: 0;
     transform: scale(0.5);
+    opacity: 0;
 
     &&-active {
-        opacity: 1;
         transform: scale(1);
+        opacity: 1;
     }
 }
 .@{select-prefix}-selection__choice-zoom-leave {
-    opacity: 1;
     transform: scale(1);
+    opacity: 1;
 
     &&-active {
-        opacity: 0;
         transform: scale(0.5);
+        opacity: 0;
     }
 }
 
 .effect() {
+    transform-origin: 0 0;
     animation-duration: 0.3s;
     animation-fill-mode: both;
-    transform-origin: 0 0;
 }
 
 .@{select-prefix}-dropdown {
     &-slide-up-enter,
     &-slide-up-appear {
         .effect();
+
         opacity: 0;
-        animation-timing-function: cubic-bezier(0.08, 0.82, 0.17, 1);
         animation-play-state: paused;
+        animation-timing-function: cubic-bezier(0.08, 0.82, 0.17, 1);
     }
 
     &-slide-up-leave {
         .effect();
+
         opacity: 1;
-        animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.34);
         animation-play-state: paused;
+        animation-timing-function: cubic-bezier(0.6, 0.04, 0.98, 0.34);
     }
 
     &-slide-up-enter&-slide-up-enter-active&-placement-bottomLeft,
     &-slide-up-appear&-slide-up-appear-active&-placement-bottomLeft,
     &-slide-up-enter&-slide-up-enter-active&-placement-bottomRight,
     &-slide-up-appear&-slide-up-appear-active&-placement-bottomRight {
-        animation-name: rcSelectDropdownSlideUpIn;
+        animation-name: select-dropdown-slide-up-in;
         animation-play-state: running;
     }
 
     &-slide-up-leave&-slide-up-leave-active&-placement-bottomLeft,
     &-slide-up-leave&-slide-up-leave-active&-placement-bottomRight {
-        animation-name: rcSelectDropdownSlideUpOut;
+        animation-name: select-dropdown-slide-up-out;
         animation-play-state: running;
     }
 
@@ -321,74 +339,78 @@
     &-slide-up-appear&-slide-up-appear-active&-placement-topLeft,
     &-slide-up-enter&-slide-up-enter-active&-placement-topRight,
     &-slide-up-appear&-slide-up-appear-active&-placement-topRight {
-        animation-name: rcSelectDropdownSlideDownIn;
+        animation-name: select-dropdown-slide-down-in;
         animation-play-state: running;
     }
 
     &-slide-up-leave&-slide-up-leave-active&-placement-topLeft,
     &-slide-up-leave&-slide-up-leave-active&-placement-topRight {
-        animation-name: rcSelectDropdownSlideDownOut;
+        animation-name: select-dropdown-slide-down-out;
         animation-play-state: running;
     }
 }
 
-@keyframes rcSelectDropdownSlideUpIn {
+@keyframes select-dropdown-slide-up-in {
     0% {
-        opacity: 0;
         transform-origin: 0% 0%;
         transform: scaleY(0);
-    }
-    100% {
-        opacity: 1;
-        transform-origin: 0% 0%;
-        transform: scaleY(1);
-    }
-}
-@keyframes rcSelectDropdownSlideUpOut {
-    0% {
-        opacity: 1;
-        transform-origin: 0% 0%;
-        transform: scaleY(1);
-    }
-    100% {
-        opacity: 0;
-        transform-origin: 0% 0%;
-        transform: scaleY(0);
-    }
-}
-
-@keyframes rcSelectDropdownSlideDownIn {
-    0% {
-        transform: scaleY(0);
-        transform-origin: 100% 100%;
         opacity: 0;
     }
 
     100% {
+        transform-origin: 0% 0%;
         transform: scaleY(1);
-        transform-origin: 100% 100%;
         opacity: 1;
     }
 }
 
-@keyframes rcSelectDropdownSlideDownOut {
+@keyframes select-dropdown-slide-up-out {
     0% {
+        transform-origin: 0% 0%;
         transform: scaleY(1);
-        transform-origin: 100% 100%;
         opacity: 1;
     }
 
     100% {
+        transform-origin: 0% 0%;
         transform: scaleY(0);
-        transform-origin: 100% 100%;
         opacity: 0;
     }
 }
 
-@keyframes rcSelectLoadingIcon {
+@keyframes select-dropdown-slide-down-in {
+    0% {
+        transform-origin: 100% 100%;
+        transform: scaleY(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform-origin: 100% 100%;
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+@keyframes select-dropdown-slide-down-out {
+    0% {
+        transform-origin: 100% 100%;
+        transform: scaleY(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform-origin: 100% 100%;
+        transform: scaleY(0);
+        opacity: 0;
+    }
+}
+
+@keyframes select-loading-icon {
     0% {
         transform: rotate(0);
     }
+
     100% {
         transform: rotate(360deg);
     }

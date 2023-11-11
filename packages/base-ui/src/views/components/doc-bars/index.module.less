@@ -1,19 +1,25 @@
 @toolbar-btn-size: 24px;
 
 .menubar {
-    height: 32px;
     display: flex;
-    justify-content: center;
-    align-items: center;
     gap: var(--margin-xs);
+    align-items: center;
+    justify-content: center;
+
+    height: 32px;
 
     &-item {
+        cursor: pointer;
+
+        display: block;
+
         padding: var(--padding-xs) var(--padding-sm);
+
         font-size: var(--font-size-xs);
         font-weight: 400;
+
         border-radius: var(--border-radius-base);
-        display: block;
-        cursor: pointer;
+
         transition: all 0.1s ease-in-out;
 
         &:hover:not(&-active) {
@@ -29,53 +35,65 @@
 
 .toolbar {
     position: relative;
-    height: 32px;
-    padding: 0 var(--padding-xl);
 
-    color: rgb(var(--text-color));
-    font-size: var(--font-size-base);
-    background-color: rgb(var(--bg-color-secondary));
-    box-sizing: border-box;
     display: flex;
     align-items: center;
 
+    box-sizing: border-box;
+    height: 32px;
+    padding: 0 var(--padding-xl);
+
+    font-size: var(--font-size-base);
+    color: rgb(var(--text-color));
+
+    background-color: rgb(var(--bg-color-secondary));
+
     &-container {
-        width: 100%;
-        height: 100%;
         display: flex;
+        gap: var(--margin-xs);
         align-items: center;
         justify-content: center;
-        border-bottom: 1px solid rgb(var(--border-color));
+
         box-sizing: border-box;
-        gap: var(--margin-xs);
+        width: 100%;
+        height: 100%;
+
+        border-bottom: 1px solid rgb(var(--border-color));
     }
 
     &-group {
         display: flex;
-        align-items: center;
         gap: var(--margin-xs);
+        align-items: center;
 
         &:not(:last-child) {
             &::after {
                 content: '';
+
+                display: block;
+
                 width: 1px;
                 height: 20px;
+
                 background-color: rgb(var(--border-color));
-                display: block;
             }
         }
     }
 
     &-item {
         &-select-button {
+            cursor: pointer;
+
             position: relative;
+
+            display: flex;
+            gap: var(--margin-xs);
+            align-items: center;
+
             height: @toolbar-btn-size;
             padding: 0 var(--padding-xs);
+
             border-radius: var(--border-radius-base);
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            gap: var(--margin-xs);
 
             &:hover {
                 background-color: rgb(var(--grey-100));
@@ -83,11 +101,13 @@
             }
 
             &-arrow {
-                height: 100%;
-                color: rgb(var(--grey-400));
-                font-size: 10px;
                 display: flex;
                 align-items: center;
+
+                height: 100%;
+
+                font-size: 10px;
+                color: rgb(var(--grey-400));
             }
         }
     }

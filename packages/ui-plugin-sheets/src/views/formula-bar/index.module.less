@@ -1,12 +1,14 @@
 .formula-box {
-    height: 28px;
-    padding: 0 var(--padding-xl);
-    background: rgb(var(--bg-color-secondary));
-    border-bottom: 1px solid rgb(var(--border-color));
-    box-sizing: border-box;
     display: flex;
 
-    .select-button .tooltip-Group .tooltip-body {
+    box-sizing: border-box;
+    height: 28px;
+    padding: 0 var(--padding-xl);
+
+    background: rgb(var(--bg-color-secondary));
+    border-bottom: 1px solid rgb(var(--border-color));
+
+    .select-button .tooltip-group .tooltip-body {
         display: flex;
 
         input {
@@ -20,14 +22,14 @@
     }
 
     .formula-bar {
-        width: 100%;
         display: flex;
+        width: 100%;
 
         .formula-icon {
-            border-right: 1px solid var(--gray-15);
             display: flex;
             align-items: center;
             font-size: var(--font-size-xs);
+            border-right: 1px solid var(--gray-15);
 
             span[role='img'] {
                 font-size: 24px;
@@ -43,16 +45,17 @@
         }
 
         .formula-input {
-            width: 100%;
-            padding: 0 10px;
             overflow: hidden;
             display: flex;
             align-items: center;
 
+            width: 100%;
+            padding: 0 10px;
+
             .formula-content {
                 width: 100%;
-                outline: none;
                 word-wrap: break-word;
+                outline: none;
             }
         }
     }

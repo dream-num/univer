@@ -1,24 +1,30 @@
 @width: 340px;
 
 .formula-search-function {
+    box-sizing: border-box;
     width: @width;
-    padding: var(--padding-base);
     margin: 0;
+    padding: var(--padding-base);
+
     font-size: var(--font-size-sm);
     list-style: none;
+
     background-color: rgb(var(--bg-color-secondary));
     border: 1px solid rgb(var(--border-color));
     border-radius: var(--border-radius-lg);
-    box-shadow: var(--box-shadow-base);
-    box-sizing: border-box;
     outline: none;
+    box-shadow: var(--box-shadow-base);
 
     &-item {
-        padding: var(--padding-sm);
-        color: rgb(var(--text-color));
-        border-radius: var(--border-radius-base);
-        box-sizing: border-box;
         cursor: pointer;
+
+        box-sizing: border-box;
+        padding: var(--padding-sm);
+
+        color: rgb(var(--text-color));
+
+        border-radius: var(--border-radius-base);
+
         transition: background .2s;
 
         &-name {

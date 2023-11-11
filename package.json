@@ -13,6 +13,7 @@
         "prepare": "husky install",
         "pre-commit": "lint-staged",
         "lint": "eslint --cache packages/**/src/**/*.{tsx,ts}",
+        "lint:style": "stylelint **/*.less",
         "lint:fix": "eslint packages/**/src/**/*.{tsx,ts} --fix",
         "storybook": "storybook dev -p 6006 --no-open",
         "build:storybook": "storybook build"
@@ -60,6 +61,11 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "storybook": "^7.5.3",
+        "stylelint": "^15.11.0",
+        "stylelint-config-clean-order": "^5.2.0",
+        "stylelint-config-prettier": "^9.0.5",
+        "stylelint-config-standard": "^34.0.0",
+        "stylelint-config-standard-less": "^2.0.0",
         "ts-node": "^10.9.1",
         "turbo": "^1.10.16",
         "typescript": "^5.2.2"

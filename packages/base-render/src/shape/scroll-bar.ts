@@ -46,9 +46,9 @@ export class ScrollBar extends BaseScrollBar {
 
     thumbActiveBackgroundColor = '#999999';
 
-    barBackgroundColor = '#fff';
+    barBackgroundColor = 'rgba(255,255,255,0.5)';
 
-    barBorderColor = '#fff';
+    barBorderColor = 'rgba(255,255,255,0.7)';
 
     constructor(view: Viewport, props?: IScrollBarProps) {
         super();

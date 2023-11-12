@@ -4,6 +4,7 @@ import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';
 import { OperateContainer } from '../operate-container/OperateContainer';
 import { SheetBar } from '../sheet-bar/SheetBar';
+import { StatusBar } from '../status-bar/StatusBar';
 import styles from './index.module.less';
 
 export interface BaseSheetContainerProps {
@@ -16,6 +17,7 @@ export function RenderSheetFooter() {
     return (
         <section className={styles.sheetContainer}>
             <SheetBar />
+            <StatusBar />
             <CountBar />
         </section>
     );

@@ -1,6 +1,6 @@
 import { IScale, numberToABC } from '@univerjs/core';
 
-import { MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
+import { DEFAULT_FONTFACE_PLANE, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
 import { fixLineWidthByScale, getColor } from '../../../basics/tools';
 import { SheetColumnHeaderExtensionRegistry } from '../../extension';
 import { SpreadsheetSkeleton } from '../sheet-skeleton';
@@ -45,6 +45,7 @@ export class ColumnHeaderLayout extends SheetExtension {
         ctx.beginPath();
         ctx.lineWidth = 1 / scale;
         ctx.strokeStyle = getColor([217, 217, 217])!;
+        ctx.font = `13px ${DEFAULT_FONTFACE_PLANE}`;
         let preColumnPosition = 0;
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         for (let c = startColumn - 1; c <= endColumn; c++) {
@@ -54,7 +55,7 @@ export class ColumnHeaderLayout extends SheetExtension {
 
             const columnEndPosition = fixLineWidthByScale(columnWidthAccumulation[c], scale);
             if (preColumnPosition === columnEndPosition) {
-                // 跳过隐藏行
+                // Skip hidden rows
                 continue;
             }
 
@@ -64,7 +65,7 @@ export class ColumnHeaderLayout extends SheetExtension {
 
             // painting column header text
             const middleCellPos = preColumnPosition + (columnEndPosition - preColumnPosition) / 2;
-            ctx.fillText(numberToABC(c), middleCellPos, columnHeaderHeight / 2 + MIDDLE_CELL_POS_MAGIC_NUMBER); // 魔法数字1，因为垂直对齐看起来差1像素
+            ctx.fillText(numberToABC(c), middleCellPos, columnHeaderHeight / 2 + MIDDLE_CELL_POS_MAGIC_NUMBER); // Magic number 1, because the vertical alignment appears to be off by 1 pixel
             preColumnPosition = columnEndPosition;
         }
 

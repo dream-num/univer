@@ -86,6 +86,7 @@ export class DisposableCollection implements IDisposable {
 }
 
 export class Disposable implements IDisposable {
+    protected _disposed = false;
     private readonly _collection = new DisposableCollection();
 
     protected disposeWithMe(disposable: IDisposable): IDisposable {
@@ -93,6 +94,11 @@ export class Disposable implements IDisposable {
     }
 
     dispose(): void {
+        if (this._disposed) {
+            return;
+        }
+
+        this._disposed = true;
         this._collection.dispose();
     }
 }

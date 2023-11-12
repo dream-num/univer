@@ -48,6 +48,13 @@ univer.registerPlugin(FormulaPlugin);
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 
+const univerWorker = new Worker('./worker.js');
+
+function disposeUniver(): void {
+    univer.dispose();
+    univerWorker.terminate();
+}
+
 // use for console test
 declare global {
     interface Window {

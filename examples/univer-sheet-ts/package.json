@@ -16,6 +16,7 @@
     },
     "dependencies": {
         "@univerjs/base-docs": "workspace:*",
+        "@univerjs/base-formula-engine": "workspace:*",
         "@univerjs/base-render": "workspace:*",
         "@univerjs/base-sheets": "workspace:*",
         "@univerjs/base-ui": "workspace:*",

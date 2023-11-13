@@ -64,6 +64,11 @@ export function isICellData(value: any): value is ICellData {
     );
 }
 
+export interface ITempCellData extends ICellData {
+    style: IStyleData;
+    prefix: string[];
+}
+
 /**
  * Format of cell data
  */

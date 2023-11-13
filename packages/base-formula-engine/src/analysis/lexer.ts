@@ -425,6 +425,8 @@ export class LexerTreeBuilder extends Disposable {
                         // subLexerNode.token = DEFAULT_TOKEN_TYPE_PARAMETER;
                         // this.setCurrentLexerNode(subLexerNode);
                         this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
+
+                        this._pushNodeToChildren(matchToken.OPEN_BRACKET);
                     }
                 } else {
                     this._pushNodeToChildren(currentString);
@@ -442,6 +444,7 @@ export class LexerTreeBuilder extends Disposable {
                     this._pushNodeToChildren(currentString);
                 } else if (currentBracket === bracketType.FUNCTION) {
                     // function close
+                    this._pushNodeToChildren(currentString);
                     const nextCurrentString = formulaStringArray[cur + 1];
                     if (nextCurrentString && nextCurrentString === matchToken.OPEN_BRACKET) {
                         // lambda handler, e.g. =lambda(x,y, x*y*x)(1,2)
@@ -655,6 +658,12 @@ export class LexerTreeBuilder extends Disposable {
                     const prevString = this._findPreviousToken(formulaStringArray, cur - 1) || '';
                     if (this._negativeCondition(prevString)) {
                         this._pushSegment(operatorToken.MINUS);
+                        console.log('func', {
+                            segment: this._segment,
+                            currentString,
+                            cur,
+                            currentLexerNode: this._currentLexerNode,
+                        });
                         cur++;
                         continue;
                     }
@@ -680,7 +689,12 @@ export class LexerTreeBuilder extends Disposable {
             } else {
                 this._pushSegment(currentString);
             }
-            // console.log('func', { segment: this._segment, currentString, cur, currentLexerNode: this._currentLexerNode });
+            console.log('func', {
+                segment: this._segment,
+                currentString,
+                cur,
+                currentLexerNode: this._currentLexerNode,
+            });
             cur++;
         }
 

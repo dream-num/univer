@@ -28,7 +28,6 @@ import {
     searchArray,
     Styles,
     TextDirection,
-    TextDirectionType,
     Tools,
     VerticalAlign,
     Worksheet,
@@ -116,13 +115,6 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
         width: allRotatedWidth,
         height: allRotatedHeight,
     };
-}
-
-interface ISetCellCache {
-    cache: IStylesCache;
-    skipBackgroundAndBorder: boolean;
-    styles?: Styles;
-    cellData?: ObjectMatrix<ICellData>;
 }
 
 export interface IRowAutoHeightInfo {
@@ -594,7 +586,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         column: number,
         columnCount: number
     ) {
-        const { width: contentWidth, height: contentHeight } = contentSize;
+        const { width: contentWidth } = contentSize;
 
         let startColumn = column;
         let endColumn = column;
@@ -1555,7 +1547,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         const contentLength = content.length;
         const {
             textRotation = { a: 0, v: BooleanNumber.FALSE },
-            textDirection = TextDirection.UNSPECIFIED,
             paddingData = {
                 t: 0,
                 r: 2,
@@ -1569,13 +1560,12 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
         const { t: marginTop, r: marginRight, b: marginBottom, l: marginLeft } = paddingData;
-        let textDirectionDocument = TextDirectionType.NORMAL;
+
         let centerAngle = 0;
         let vertexAngle = angle;
         if (isVertical === BooleanNumber.TRUE) {
             centerAngle = DEFAULT_ROTATE_ANGLE;
             vertexAngle = DEFAULT_ROTATE_ANGLE;
-            textDirectionDocument = TextDirectionType.TBRL;
         }
         const documentData: IDocumentData = {
             id: 'd',
@@ -1646,7 +1636,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (!format) {
             return {};
         }
-        const { ff, fs, it, bl, ul, st, ol, cl, bg, bd } = format;
+        const { ff, fs, it, bl, ul, st, ol, cl } = format;
         const style: IStyleBase = {};
         ff && (style.ff = ff);
         fs && (style.fs = fs);

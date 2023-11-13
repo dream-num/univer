@@ -194,7 +194,50 @@ export class PromptController extends Disposable {
         this._refreshEditorObject();
     }
 
-    private _buildTextRuns(lexerNode: LexerNode, textRuns: ITextRun[] = []) {
+    /**
+     * :
+     * #
+     *
+     * @returns
+     */
+    private _buildTextRuns(lexerNode: LexerNode, textRuns: ITextRun[] = [], index = 0) {
+        const sum = [];
+        // function treeWalker(tree, sum) {
+        //     if (typeof tree === 'string') {
+        //         sum.push(tree);
+        //         return;
+        //     }
+        //     if (!['R_1', 'P_1', 'L_1'].includes(tree.token)) {
+        //         sum.push(tree.token);
+        //     }
+        //     const children = tree.children;
+        //     for (child of children) {
+        //         treeWalker(child, sum);
+        //     }
+        // }
+
+        // function staticSum(sum) {
+        //     let count = 0;
+        //     for (const item of sum) {
+        //         console.log(item, item.length);
+        //         count += item.length;
+        //     }
+        //     return count;
+        // }
+
+        // function coSum(sum) {
+        //     let co = '';
+        //     for (const item of sum) {
+        //         co += item;
+        //     }
+        //     return co;
+        // }
+
+        // treeWalker(temp1, sum);
+
+        // staticSum(sum);
+
+        // coSum(sum);
         return [];
     }
 

@@ -121,7 +121,7 @@ export enum BooleanNumber {
  * General Boolean Enum
  */
 export enum CellValueType {
-    STRING,
+    STRING = 1,
     NUMBER,
     BOOLEAN,
     FORCE_STRING,

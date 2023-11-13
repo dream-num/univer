@@ -15,6 +15,7 @@ import {
     ICommandInfo,
     ICommandService,
     IContextService,
+    INTERCEPTOR_POINT,
     isFormulaString,
     IUndoRedoService,
     IUniverInstanceService,
@@ -22,6 +23,7 @@ import {
     Nullable,
     Observer,
     OnLifecycle,
+    SheetInterceptorService,
     Tools,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
@@ -61,7 +63,8 @@ export class EndEditController extends Disposable {
         @IContextService private readonly _contextService: IContextService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
-        @IUndoRedoService private _undoRedoService: IUndoRedoService
+        @IUndoRedoService private _undoRedoService: IUndoRedoService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
     ) {
         super();
 
@@ -172,6 +175,18 @@ export class EndEditController extends Disposable {
                 cellData.p = null;
             }
 
+            const context = {
+                worksheetId: sheetId,
+                workbookId: unitId,
+                workbook: workbook!,
+                worksheet,
+                row,
+                col: column,
+            };
+            const cell = this._sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.AFTER_CELL_EDIT)(
+                cellData,
+                context
+            );
             this._commandService.executeCommand(SetRangeValuesCommand.id, {
                 worksheetId: sheetId,
                 workbookId: unitId,
@@ -181,7 +196,7 @@ export class EndEditController extends Disposable {
                     endRow: row,
                     endColumn: column,
                 },
-                value: cellData,
+                value: cell,
             });
         });
     }

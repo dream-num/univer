@@ -1,4 +1,4 @@
-import { BooleanNumber } from '@univerjs/core';
+import { IFunctionInfo } from '@univerjs/base-formula-engine';
 
 export enum FunctionType {
     Math,
@@ -16,85 +16,6 @@ export enum FunctionType {
     Parser,
     Array,
     Other,
-}
-
-export interface IFunctionParam {
-    /**
-     * Function name, with internationalization
-     */
-    name: string;
-
-    /**
-     * Detailed description of function, with internationalization
-     */
-    detail: string;
-
-    /**
-     * Function example
-     */
-    example: string;
-
-    /**
-     * Is it optional
-     *
-     * true: required
-     * false: optional
-     */
-    require: BooleanNumber;
-
-    /**
-     * Whether it is repeatable, in the case of repeatability, the maximum parameter of m is generally set to 255, such as [1,255]
-     *
-     * true: repeatable
-     * false: not repeatable
-     */
-    repeat: BooleanNumber;
-
-    /**
-     * Parameter types
-     *
-     * include ['range', 'rangeall', 'rangenumber', 'rangestring', 'rangedatetime', 'rangedate', 'string']
-     * Detected before each calculation
-     */
-    type: string;
-}
-
-export interface IFunctionInfo {
-    /**
-     * Function name
-     */
-    functionName: string;
-
-    /**
-     * Alias Function name
-     */
-    aliasFunctionName?: string;
-
-    /**
-     * Function type
-     */
-    functionType: FunctionType;
-
-    /**
-     * Detailed description
-     */
-    description: string;
-
-    /**
-     * Concise abstract
-     */
-    abstract: string;
-
-    /**
-     * [Minimum number of parameters, maximum number of parameters]
-     * Detected before each calculation of the function
-     */
-    parameterRange: [min: number, max: number];
-
-    /**
-     * Function params
-     */
-    functionParameter: IFunctionParam[];
 }
 
 // TODO@Dushusir: register custom function

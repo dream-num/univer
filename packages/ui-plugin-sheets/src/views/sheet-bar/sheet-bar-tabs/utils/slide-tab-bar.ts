@@ -324,6 +324,8 @@ export class SlideTabItem {
     }
 }
 
+// TODO@Dushusir: resize container trigger scroll box-shadow
+// init container, no box-shadow, no scroll button
 export class SlideScrollbar {
     protected _slideTabBar: SlideTabBar;
 

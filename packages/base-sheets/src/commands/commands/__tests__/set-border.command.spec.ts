@@ -11,10 +11,10 @@ import {
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { SetRangeValuesMutation } from '../../..';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../../services/selection-manager.service';
 import { AddWorksheetMergeMutation } from '../../mutations/add-worksheet-merge.mutation';
 import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-merge.mutation';
-import { SetBorderStylesMutation } from '../../mutations/set-border-styles.mutation';
 import { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand } from '../add-worksheet-merge.command';
 import { RemoveWorksheetMergeCommand } from '../remove-worksheet-merge.command';
 import {
@@ -46,7 +46,7 @@ describe('Test style commands', () => {
             RemoveWorksheetMergeCommand,
             AddWorksheetMergeMutation,
             RemoveWorksheetMergeMutation,
-            SetBorderStylesMutation,
+            SetRangeValuesMutation,
         ].forEach((c) => commandService.registerCommand(c));
     });
 

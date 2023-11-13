@@ -417,7 +417,6 @@ export class SheetClipboardController extends Disposable {
         // clear style
         if (clearStyleMatrix.getLength() > 0) {
             const clearMutation: ISetRangeValuesMutationParams = {
-                range: [range],
                 worksheetId,
                 workbookId,
                 cellValue: clearStyleMatrix.getData(),
@@ -443,7 +442,6 @@ export class SheetClipboardController extends Disposable {
         const setValuesMutation: ISetRangeValuesMutationParams = {
             workbookId,
             worksheetId,
-            range: [range],
             cellValue: valueMatrix.getData(),
         };
 

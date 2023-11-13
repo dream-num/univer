@@ -83,11 +83,9 @@ import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-r
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
-import { SetBorderStylesMutation } from '../commands/mutations/set-border-styles.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetRangeFormattedValueMutation } from '../commands/mutations/set-range-formatted-value.mutation';
-import { SetRangeStyleMutation } from '../commands/mutations/set-range-styles.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
@@ -164,7 +162,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetBorderCommand,
             SetBorderPositionCommand,
             SetBorderStyleCommand,
-            SetBorderStylesMutation,
             SetColHiddenCommand,
             SetColHiddenMutation,
             SetColVisibleMutation,
@@ -175,7 +172,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetHorizontalTextAlignCommand,
             SetRangeFormattedValueCommand,
             SetRangeFormattedValueMutation,
-            SetRangeStyleMutation,
             SetRangeValuesCommand,
             SetRangeValuesMutation,
             SetRowHeightCommand,

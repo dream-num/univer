@@ -23,7 +23,6 @@ import {
     SetColVisibleMutation,
     SetColWidthCommand,
     SetHorizontalTextAlignCommand,
-    SetRangeStyleMutation,
     SetRangeValuesMutation,
     SetRowHeightCommand,
     SetRowHiddenCommand,
@@ -148,11 +147,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (
-                    id !== SetRangeStyleMutation.id &&
-                    id !== SetRangeValuesMutation.id &&
-                    id !== SetSelectionsOperation.id
-                ) {
+                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
                     return;
                 }
 
@@ -201,11 +196,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (
-                    id !== SetRangeStyleMutation.id &&
-                    id !== SetRangeValuesMutation.id &&
-                    id !== SetSelectionsOperation.id
-                ) {
+                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
                     return;
                 }
 
@@ -252,11 +243,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (
-                    id !== SetRangeStyleMutation.id &&
-                    id !== SetRangeValuesMutation.id &&
-                    id !== SetSelectionsOperation.id
-                ) {
+                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
                     return;
                 }
 
@@ -303,11 +290,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (
-                    id !== SetRangeStyleMutation.id &&
-                    id !== SetRangeValuesMutation.id &&
-                    id !== SetSelectionsOperation.id
-                ) {
+                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
                     return;
                 }
 
@@ -491,11 +474,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (
-                    id !== SetRangeStyleMutation.id &&
-                    id !== SetRangeValuesMutation.id &&
-                    id !== SetSelectionsOperation.id
-                ) {
+                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
                     return;
                 }
 
@@ -549,11 +528,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
             const DEFAULT_SIZE = 14;
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (
-                    id !== SetRangeStyleMutation.id &&
-                    id !== SetRangeValuesMutation.id &&
-                    id !== SetSelectionsOperation.id
-                ) {
+                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
                     return;
                 }
 
@@ -1307,11 +1282,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (
-                    id === SetRangeStyleMutation.id ||
-                    id === SetRangeValuesMutation.id ||
-                    id === SetSelectionsOperation.id
-                ) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
                     return update();
                 }
             });
@@ -1354,11 +1325,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (
-                    id === SetRangeStyleMutation.id ||
-                    id === SetRangeValuesMutation.id ||
-                    id === SetSelectionsOperation.id
-                ) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
                     return update();
                 }
             });

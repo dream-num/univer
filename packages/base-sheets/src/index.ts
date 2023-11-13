@@ -147,7 +147,6 @@ export { RemoveColMutation, RemoveRowMutation } from './commands/mutations/remov
 export { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from './commands/mutations/remove-sheet.mutation';
 export { RemoveWorksheetMergeMutation } from './commands/mutations/remove-worksheet-merge.mutation';
 export { RemoveMergeUndoMutationFactory } from './commands/mutations/remove-worksheet-merge.mutation';
-export { SetBorderStylesMutation } from './commands/mutations/set-border-styles.mutation';
 export {
     type ISetColHiddenMutationParams,
     type ISetColVisibleMutationParams,
@@ -159,11 +158,10 @@ export {
     SetFrozenMutation,
     SetFrozenMutationFactory,
 } from './commands/mutations/set-frozen.mutation';
-export type { ISetRangeStyleMutationParams } from './commands/mutations/set-range-styles.mutation';
-export { SetRangeStyleMutation } from './commands/mutations/set-range-styles.mutation';
 export type { ISetRangeValuesMutationParams } from './commands/mutations/set-range-values.mutation';
 export { SetRangeValuesMutation } from './commands/mutations/set-range-values.mutation';
 export { SetRangeValuesUndoMutationFactory } from './commands/mutations/set-range-values.mutation';
+export { type ISetRangeValuesRangeMutationParams } from './commands/mutations/set-range-values.mutation';
 export { SetRowHiddenMutation, SetRowVisibleMutation } from './commands/mutations/set-row-visible.mutation';
 export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
 export { type ISetTabColorMutationParams } from './commands/mutations/set-tab-color.mutation';

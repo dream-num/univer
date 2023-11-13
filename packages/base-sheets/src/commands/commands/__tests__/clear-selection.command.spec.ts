@@ -149,6 +149,7 @@ describe('Test clear selection content commands', () => {
                 expect(await commandService.executeCommand(ClearSelectionFormatCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual({
                     v: 'A1',
+                    t: 0,
                 });
 
                 // undo
@@ -160,6 +161,7 @@ describe('Test clear selection content commands', () => {
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual({
                     v: 'A1',
+                    t: 0,
                 });
             });
             it('clear formats with merged cells', async () => {
@@ -226,6 +228,7 @@ describe('Test clear selection content commands', () => {
                 // clear formats
                 expect(getValue()).toStrictEqual({
                     v: 'A1',
+                    t: 0,
                 });
                 // remove merge
                 expect(getMerge()).toStrictEqual([]);
@@ -242,6 +245,7 @@ describe('Test clear selection content commands', () => {
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual({
                     v: 'A1',
+                    t: 0,
                 });
                 expect(getMerge()).toStrictEqual([]);
             });

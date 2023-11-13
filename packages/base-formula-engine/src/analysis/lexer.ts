@@ -1,6 +1,12 @@
-import { Disposable, Nullable } from '@univerjs/core';
+import { Disposable, Nullable, Tools } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
+import {
+    REFERENCE_MULTIPLE_RANGE_REGEX,
+    REFERENCE_REGEX_SINGLE_COLUMN,
+    REFERENCE_REGEX_SINGLE_ROW,
+    REFERENCE_SINGLE_RANGE_REGEX,
+} from '../basics/regex';
 import {
     matchToken,
     OPERATOR_TOKEN_PRIORITY,
@@ -20,6 +26,28 @@ enum bracketType {
     NORMAL,
     FUNCTION,
     LAMBDA,
+}
+
+enum sequenceNodeType {
+    NORMAL,
+    NUMBER,
+    STRING,
+    FUNCTION,
+    REFERENCE,
+}
+
+interface ISequenceNode {
+    nodeType: sequenceNodeType;
+    token: string;
+    startIndex: number;
+    endIndex: number;
+}
+
+interface ISequenceArray {
+    segment: string;
+    currentString: string;
+    cur: number;
+    currentLexerNode: LexerNode;
 }
 
 export class LexerTreeBuilder extends Disposable {
@@ -84,6 +112,80 @@ export class LexerTreeBuilder extends Disposable {
 
     getCurrentLexerNode() {
         return this._currentLexerNode;
+    }
+
+    sequenceNodeBuilder(formulaString: string) {
+        const sequenceArray = this._getSequenceArray(formulaString);
+        if (sequenceArray.length === 0) {
+            return;
+        }
+
+        const sequenceNodes: ISequenceNode[] = [];
+
+        let maybeRange = false;
+
+        let maybeString = false;
+        for (let i = 0, len = sequenceArray.length; i < len; i++) {
+            const item = sequenceArray[i];
+            const preItem = sequenceArray[i - 1];
+
+            const { segment, currentString, cur } = item;
+
+            if (currentString === matchToken.DOUBLE_QUOTATION) {
+                maybeString = true;
+            }
+
+            if ((segment !== '' || i === 0) && i !== len - 1) {
+                continue;
+            }
+
+            const preSegment = preItem.segment;
+
+            if (
+                maybeString === true &&
+                preSegment.trim()[preSegment.trim().length - 1] === matchToken.DOUBLE_QUOTATION
+            ) {
+                maybeString = false;
+                sequenceNodes.push({
+                    nodeType: sequenceNodeType.STRING,
+                    token: preSegment,
+                    startIndex: i - preSegment.length,
+                    endIndex: i,
+                });
+            } else if (currentString !== matchToken.COLON && maybeRange === true) {
+                maybeRange = false;
+            } else if (
+                new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(preSegment) ||
+                new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(preSegment) ||
+                new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(preSegment)
+            ) {
+                if (maybeRange === false) {
+                    sequenceNodes.push({
+                        nodeType: sequenceNodeType.REFERENCE,
+                        token: preSegment,
+                        startIndex: i - preSegment.length,
+                        endIndex: i,
+                    });
+                    maybeRange = true;
+                } else {
+                    const lastNode = sequenceNodes[sequenceNodes.length - 1];
+                    const refString = lastNode.token + matchToken.COLON + preSegment;
+                    if (new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test(refString)) {
+                        lastNode.token = refString;
+                        lastNode.startIndex = i - refString.length;
+                        lastNode.endIndex = i;
+                    }
+                    maybeRange = false;
+                }
+            } else if (Tools.isStringNumber(preSegment)) {
+                sequenceNodes.push({
+                    nodeType: sequenceNodeType.NUMBER,
+                    token: preSegment,
+                    startIndex: i - preSegment.length,
+                    endIndex: i,
+                });
+            }
+        }
     }
 
     treeBuilder(formulaString: string, transformSuffix = true) {
@@ -385,8 +487,16 @@ export class LexerTreeBuilder extends Disposable {
         return false;
     }
 
+    private _getSequenceArray(formulaString: string) {
+        const sequenceArray: ISequenceArray[] = [];
+
+        this._nodeMaker(formulaString, sequenceArray);
+
+        return sequenceArray;
+    }
+
     // eslint-disable-next-line max-lines-per-function
-    private _nodeMaker(formulaString: string) {
+    private _nodeMaker(formulaString: string, sequenceArray?: ISequenceArray[]) {
         if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
             formulaString = formulaString.substring(1);
         }
@@ -664,6 +774,13 @@ export class LexerTreeBuilder extends Disposable {
                             cur,
                             currentLexerNode: this._currentLexerNode,
                         });
+
+                        sequenceArray?.push({
+                            segment: this._segment,
+                            currentString,
+                            cur,
+                            currentLexerNode: this._currentLexerNode,
+                        });
                         cur++;
                         continue;
                     }
@@ -690,6 +807,12 @@ export class LexerTreeBuilder extends Disposable {
                 this._pushSegment(currentString);
             }
             console.log('func', {
+                segment: this._segment,
+                currentString,
+                cur,
+                currentLexerNode: this._currentLexerNode,
+            });
+            sequenceArray?.push({
                 segment: this._segment,
                 currentString,
                 cur,

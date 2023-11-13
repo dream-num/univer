@@ -77,25 +77,21 @@ export class EditingController extends Disposable {
                     9: {
                         8: {
                             f: '=sum(A1:C3)',
-                            si: '',
                         },
                     },
                     20: {
                         8: {
                             f: '=1+(3*4=4)*5+1',
-                            si: '',
                         },
                     },
                     22: {
                         8: {
                             f: '=1--1',
-                            si: '',
                         },
                     },
                     23: {
                         8: {
                             f: '=1--1%',
-                            si: '',
                         },
                     },
                 },

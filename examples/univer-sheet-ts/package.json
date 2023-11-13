@@ -28,6 +28,7 @@
         "@univerjs/sheets-plugin-debugger": "workspace:*",
         "@univerjs/sheets-plugin-find": "workspace:*",
         "@univerjs/sheets-plugin-formula": "workspace:*",
+        "@univerjs/sheets-plugin-formula-ui": "workspace:*",
         "@univerjs/sheets-plugin-import-xlsx": "workspace:*",
         "@univerjs/sheets-plugin-numfmt": "workspace:*",
         "@univerjs/ui-plugin-docs": "workspace:*",

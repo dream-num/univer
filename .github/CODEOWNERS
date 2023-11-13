@@ -31,4 +31,4 @@ packages/ui-plugin-slides @jikkai @wzhudev
 # formula
 packages/base-formula-engine @DR-Univer
 packages/base-numfmt-engine @Gggpound
-packages/sheets-plugin-formula @DR-Univer
+packages/sheets-plugin-formula-ui @DR-Univer

@@ -58,7 +58,7 @@ export interface IUnitSheetNameMap {
  */
 export interface IFormulaDataItem {
     f: string; // formulaString
-    si: string; // formulaId,
+    // si: string; // formulaId,
     // row: number;
     // column: number;
     // sheetId: string;

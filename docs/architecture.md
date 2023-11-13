@@ -29,7 +29,7 @@ import { SheetPlugin } from '@univerjs/base-sheets';
 import { UIPlugin } from '@univerjs/base-ui';
 import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
-import { FormulaPlugin } from '@univerjs/sheets-plugin-formula';
+import { FormulaPlugin } from '@univerjs/sheets-plugin-formula-ui';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 
 const univer = new Univer({

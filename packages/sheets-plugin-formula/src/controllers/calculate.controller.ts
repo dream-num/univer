@@ -5,6 +5,7 @@ import {
     ICommandInfo,
     ICommandService,
     IRange,
+    isFormulaId,
     isFormulaString,
     IUnitRange,
     IUniverInstanceService,
@@ -16,7 +17,6 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { ISetFormulaDataMutationParams, SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 
 @OnLifecycle(LifecycleStages.Starting, CalculateController)
@@ -58,7 +58,7 @@ export class CalculateController extends Disposable {
         const { worksheetId: sheetId, workbookId: unitId, cellValue } = params;
         if (cellValue == null) return;
 
-        const formulaData = Tools.deepClone(this._formulaDataModel.getFormulaData());
+        const formulaData = this._formulaDataModel.getFormulaData();
 
         const unitRange: IUnitRange[] = [];
         let isCalculate = false;
@@ -72,13 +72,19 @@ export class CalculateController extends Disposable {
 
         const cellData = new ObjectMatrix(formulaData[unitId][sheetId]);
         const rangeMatrix = new ObjectMatrix(cellValue);
+        const formulaIdMap = new Map<string, string>(); // Connect the formula and ID
 
         let isArrayFormula = false;
         // update formula string，Any modification to cellData will be linked to formulaData
         rangeMatrix.forValue((r, c, cell) => {
             const arrayFormCellRangeData = this._checkArrayFormulaValue(r, c);
-            const formulaString = cell?.m;
-            if (arrayFormCellRangeData && formulaString === '') {
+
+            const formulaString = cell?.f || '';
+            const formulaId = cell?.si || '';
+            if (!formulaString && formulaId) {
+                isCalculate = true;
+                cellData.setValue(r, c, { f: formulaId });
+            } else if (arrayFormCellRangeData && formulaString === '') {
                 isArrayFormula = true;
                 isCalculate = true;
 
@@ -93,7 +99,19 @@ export class CalculateController extends Disposable {
                 }
             } else if (isFormulaString(formulaString)) {
                 isCalculate = true;
-                cellData.setValue(r, c, { f: formulaString as string, si: '' });
+                cellData.setValue(r, c, { f: formulaString });
+
+                if (isFormulaId(formulaId)) {
+                    formulaIdMap.set(formulaId, formulaString);
+                }
+            }
+        });
+
+        // Convert the formula ID to formula string
+        cellData.forValue((r, c, cell) => {
+            const formulaId = cell?.f || '';
+            if (formulaIdMap.has(formulaId)) {
+                cellData.setValue(r, c, { f: formulaIdMap.get(formulaId) as string });
             }
         });
 
@@ -137,7 +155,7 @@ export class CalculateController extends Disposable {
 
                 const sheetIds = Object.keys(sheetData);
 
-                // 1. Update each calculated value, possibly involving all cells
+                // Update each calculated value, possibly involving all cells
                 const redoMutationsInfo: ICommandInfo[] = [];
                 sheetIds.forEach((sheetId) => {
                     const cellData = sheetData[sheetId];
@@ -151,16 +169,6 @@ export class CalculateController extends Disposable {
                         id: SetRangeValuesMutation.id,
                         params: setRangeValuesMutation,
                     });
-                });
-
-                // 2. Update formula data
-                const setFormulaDataMutation: ISetFormulaDataMutationParams = {
-                    formulaData,
-                };
-
-                redoMutationsInfo.push({
-                    id: SetFormulaDataMutation.id,
-                    params: setFormulaDataMutation,
                 });
 
                 const result = redoMutationsInfo.every((m) => this._commandService.executeCommand(m.id, m.params));

@@ -2,7 +2,6 @@ import numfmt from '@univerjs/base-numfmt-engine';
 import { LocaleService } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-// import * as all from 'numfmt';
 import { FC, useEffect, useMemo, useState } from 'react';
 
 import { DATEFMTLISG } from '../../base/const/FORMATDETAIL';

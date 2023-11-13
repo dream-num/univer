@@ -1,4 +1,3 @@
-// import * as all from 'numfmt';
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { FC, useEffect } from 'react';

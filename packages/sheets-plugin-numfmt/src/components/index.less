@@ -1,17 +1,19 @@
 .numfmt-panel {
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
     height: 100%;
-    overflow-y: auto;
+
     .group-title {
-        color: rgba(var(--color-black));
         font-size: 16px;
+        color: rgba(var(--color-black));
     }
 
     .label {
-        color: rgba(var(--grey-400));
         font-size: 15px;
+        color: rgba(var(--grey-400));
     }
 
     .describe {
@@ -22,12 +24,14 @@
 
     .preview {
         height: 36px;
-        line-height: 36px;
-        border-radius: 4px;
-        border: 1px solid rgb(var(--grey-200));
         padding: 0 16px;
+
         font-size: 14px;
+        line-height: 36px;
         color: var(--color-black);
+
+        border: 1px solid rgb(var(--grey-200));
+        border-radius: 4px;
     }
 
     .btn-list {
@@ -51,7 +55,7 @@
         margin-top: 8px;
     }
 
-    .m-b-20{
-        margin-bottom:20px
+    .m-b-20 {
+        margin-bottom: 20px;
     }
 }

@@ -1,5 +1,3 @@
-import './index.less';
-
 import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';

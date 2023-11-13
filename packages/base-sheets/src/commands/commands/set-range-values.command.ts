@@ -42,7 +42,7 @@ export interface ISetRangeValuesCommandParams {
 export const SetRangeValuesCommand: ICommand = {
     id: 'sheet.command.set-range-values',
     type: CommandType.COMMAND,
-    handler: (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
+    handler: async (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -111,7 +111,7 @@ export const SetRangeValuesCommand: ICommand = {
             params: { ...setRangeValuesMutationParams, range: currentSelections },
         });
 
-        const result = sequenceExecute([...redos], commandService);
+        const result = await sequenceExecute([...redos], commandService);
 
         if (setValueMutationResult && result.result) {
             undoRedoService.pushUndoRedo({

@@ -29,9 +29,6 @@ type NumfmtItemWithCache = NumfmtItem & {
         parameters: number; // The parameter that was last calculated
     };
 };
-const defaultWorkbookId = 'workbook-01';
-const defaultSheetId = 'sheet-0011';
-const defaultData = {};
 
 const createCollectEffectMutation = () => {
     type Config = { workbookId: string; worksheetId: string; row: number; col: number; value: Nullable<NumfmtItem> };
@@ -61,7 +58,6 @@ export class NumfmtService extends Disposable {
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
     ) {
         super();
-        this.numfmtModel.set(getModelKey(defaultWorkbookId, defaultSheetId), new ObjectMatrix(defaultData));
         this._initInterceptorCellContent();
         this._initInterceptorEditorStart();
         this._initInterceptorEditorEnd();

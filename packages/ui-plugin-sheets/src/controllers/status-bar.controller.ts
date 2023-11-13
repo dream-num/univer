@@ -1,4 +1,4 @@
-import { BaseValueObject, IFunctionService, ISheetData } from '@univerjs/base-formula-engine';
+import { BaseValueObject, FormulaEngineService, ISheetData } from '@univerjs/base-formula-engine';
 import { RangeReferenceObject } from '@univerjs/base-formula-engine/reference-object/range-reference-object.js';
 import { ISelectionWithStyle, SelectionManagerService } from '@univerjs/base-sheets';
 import { Disposable, IRange, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
@@ -11,7 +11,7 @@ export class StatusBarController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @IFunctionService private readonly _functionService: IFunctionService,
+        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
         @IStatusBarService private readonly _statusBarService: IStatusBarService
     ) {
         super();
@@ -57,7 +57,7 @@ export class StatusBarController extends Disposable {
 
             const functions = this._statusBarService.getFunctions();
             const calcResult = functions.map((f) => {
-                const executor = this._functionService.getExecutor(f);
+                const executor = this._formulaEngineService.getExecutor(f);
                 if (!executor) {
                     return undefined;
                 }

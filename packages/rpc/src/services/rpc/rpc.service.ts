@@ -1,19 +1,16 @@
 /* eslint-disable no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { RxDisposable } from '@univerjs/core';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { filter, take, takeUntil } from 'rxjs/operators';
 
-import { IMessageProtocol } from './message-port';
-
-/// CREDIT
-/// This module is heavily inspired by the RPC implementation in VSCode.
-/// We have made some changes to make it more suitable for our use cases, e.g.
-/// `Event` is replaced by RxJS.
-
-// TODO: implement
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/** This protocol is for transferring data from the two peer univer instance running in different locations. */
+export interface IMessageProtocol {
+    send(message: any): void;
+    onMessage: Observable<any>;
+}
 
 /**
  * Channel is a combination of methods and event sources. These methods and
@@ -223,6 +220,9 @@ export class ChannelClient extends RxDisposable implements IChannelClient {
 
     private _onResponse(response: IRPCResponse): void {
         switch (response.type) {
+            case ResponseType.INITIALIZE:
+                this._initialized.next(true);
+                break;
             case ResponseType.CALL_SUCCESS:
             case ResponseType.CALL_FAILURE:
                 this._pendingRequests.get(response.seq)?.handle(response);

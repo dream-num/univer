@@ -8,6 +8,7 @@ import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { currencySymbols } from '../../base/const/CURRENCY-SYMBOLS';
 import { CURRENCYFORMAT } from '../../base/const/FORMATDETAIL';
 import { BusinessComponentProps } from '../../base/types';
+import { usePatternPreview } from '../../hooks/usePatternPreview';
 import { getCurrencyType } from '../../utils/currency';
 import { getDecimalFromPattern, isPatternEqualWithoutDecimal, setPatternDecimal } from '../../utils/decimal';
 
@@ -55,10 +56,7 @@ export const CurrencyPanel: FC<BusinessComponentProps> = (props) => {
 
     const resultPattern = useMemo(() => setPatternDecimal(pattern, decimal), [pattern, decimal]);
 
-    const preview = useMemo(() => {
-        const value = numfmt.format(resultPattern, Number(props.defaultValue) || 0, { locale: 'zh-CN' });
-        return value;
-    }, [resultPattern, props.defaultValue]);
+    const preview = usePatternPreview(resultPattern, props.defaultValue);
 
     const currencyOptions = useMemo(() => currencySymbols.map((item) => ({ label: item, value: item })), []);
 

@@ -3,6 +3,7 @@ import { FC, useEffect, useMemo, useState } from 'react';
 
 import { NUMBERFORMAT } from '../../base/const/FORMATDETAIL';
 import { BusinessComponentProps } from '../../base/types';
+import { usePatternPreview } from '../../hooks/usePatternPreview';
 import {
     getDecimalFromPattern,
     isPatternEqualWithoutDecimal,
@@ -24,10 +25,7 @@ export const ThousandthPercentilePanel: FC<BusinessComponentProps> = (props) => 
 
     const pattern = useMemo(() => setPatternDecimal(suffix, Number(decimal || 0)), [suffix, decimal]);
 
-    const preview = useMemo(() => {
-        const value = numfmt.format(pattern, Number(props.defaultValue) || 0, { locale: 'zh-CN' });
-        return value;
-    }, [pattern, props.defaultValue]);
+    const preview = usePatternPreview(pattern, props.defaultValue);
 
     const isInputDisable = useMemo(() => !isPatternHasDecimal(suffix), [suffix]);
 

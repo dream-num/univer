@@ -7,6 +7,7 @@ import { FC, useEffect, useMemo, useState } from 'react';
 
 import { currencySymbols } from '../../base/const/CURRENCY-SYMBOLS';
 import { BusinessComponentProps } from '../../base/types';
+import { usePatternPreview } from '../../hooks/usePatternPreview';
 import { getCurrencyType } from '../../utils/currency';
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
 
@@ -24,10 +25,7 @@ export const AccountingPanel: FC<BusinessComponentProps> = (props) => {
         () => setPatternDecimal(`_("${suffix}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal),
         [suffix, decimal]
     );
-    const preview = useMemo(() => {
-        const value = numfmt.format(pattern, Number(props.defaultValue) || 0, { locale: 'zh-CN' });
-        return value;
-    }, [pattern, props.defaultValue]);
+    const preview = usePatternPreview(pattern, props.defaultValue);
 
     const currencyOptions = useMemo(() => currencySymbols.map((item) => ({ label: item, value: item })), []);
 

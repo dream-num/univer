@@ -11,10 +11,8 @@ import {
     OnLifecycle,
     SheetInterceptorService,
     ThemeService,
-    Workbook,
-    Worksheet,
 } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { NumfmtItem } from '../base/types';
 import {
@@ -58,6 +56,7 @@ export class NumfmtService extends Disposable {
 
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
+        @Inject(ThemeService) private _themeService: ThemeService,
         @Inject(Injector) private _injector: Injector,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
     ) {
@@ -68,6 +67,7 @@ export class NumfmtService extends Disposable {
         this._initInterceptorEditorEnd();
         this._initInterceptorCommands();
     }
+
     private _initInterceptorCommands() {
         const self = this;
         this._sheetInterceptorService.interceptCommand({
@@ -112,48 +112,48 @@ export class NumfmtService extends Disposable {
     }
 
     private _initInterceptorCellContent() {
-        this._sheetInterceptorService.interceptCellContent({
-            getCell: (cell = {}, location, next) => {
+        this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            handler: (cell, location, next) => {
                 const workbookId = location.workbookId;
                 const sheetId = location.worksheetId;
                 const key = getModelKey(workbookId, sheetId);
                 const model = this.numfmtModel.get(key);
                 if (!model) {
-                    return next();
+                    return next(cell);
                 }
                 const numfmtValue = model.getValue(location.row, location.col);
                 if (!numfmtValue) {
-                    return next();
+                    return next(cell);
                 }
                 const originCellValue = location.worksheet.getCellRaw(location.row, location.col);
                 if (!originCellValue) {
-                    return next();
+                    return next(cell);
                 }
-                // TODO: wait for the type attribute to start working
-                // if (typeof originCellValue.v !== 'number') {
-                //     return next();
-                // }
+                // just handle number
+                if (originCellValue.t !== CellValueType.NUMBER) {
+                    return next(cell);
+                }
 
                 let numfmtRes: string = '';
-                const fmtNumber = Number(originCellValue.v);
                 if (numfmtValue._cache && numfmtValue._cache.parameters === originCellValue.v) {
                     return numfmtValue._cache.result;
                 }
 
-                numfmtRes = numfmt.format(numfmtValue.pattern, Number(originCellValue.v), { locale: 'zh-CN' });
+                const info = getPatternPreview(numfmtValue.pattern, Number(originCellValue.v));
+
+                numfmtRes = info.result;
+
                 if (!numfmtRes) {
-                    return next();
+                    return next(cell);
                 }
 
                 const res = { ...cell, v: numfmtRes };
-                if (fmtNumber < 0) {
-                    const info = numfmt.getInfo(numfmtValue.pattern);
-                    const token = info._partitions[1];
-                    if (token.color) {
-                        const color = this._themeService.getCurrentTheme()[`${token.color}500`];
-                        if (color) {
-                            res.s = { cl: { rgb: color } };
-                        }
+
+                if (info.color) {
+                    const color = this._themeService.getCurrentTheme()[`${info.color}500`];
+
+                    if (color) {
+                        res.s = { cl: { rgb: color } };
                     }
                 }
 
@@ -178,26 +178,26 @@ export class NumfmtService extends Disposable {
                 const row = context.row;
                 const col = context.col;
                 const numfmtCell = this.getValue(context.workbookId, context.worksheetId, row, col);
-        if (numfmtCell) {
-            const type = getPatternType(numfmtCell.pattern);
-            switch (type) {
-                case 'scientific':
-                case 'percent':
-                case 'currency':
+                if (numfmtCell) {
+                    const type = getPatternType(numfmtCell.pattern);
+                    switch (type) {
+                        case 'scientific':
+                        case 'percent':
+                        case 'currency':
                         case 'grouped':
-                case 'number': {
+                        case 'number': {
                             // remove the style atr
                             const cell = context.worksheet.getCellRaw(row, col);
                             return cell ? filterAtr(cell, ['s']) : cell;
-                }
+                        }
                         case 'date':
                         case 'time':
                         case 'datetime':
-                default: {
+                        default: {
                             return next && next(value);
+                        }
+                    }
                 }
-            }
-        }
                 return next(value);
             },
         });
@@ -269,11 +269,6 @@ export class NumfmtService extends Disposable {
         return this.numfmtModel.get(key);
     }
 
-    private _deleteModel(workbookId: string, worksheetId: string) {
-        const key = getModelKey(workbookId, worksheetId);
-        this.numfmtModel.delete(key);
-    }
-
     getValue(workbookId: string, worksheetId: string, row: number, col: number) {
         const model = this._getModel(workbookId, worksheetId);
         if (!model) {
@@ -293,9 +288,6 @@ export class NumfmtService extends Disposable {
             model.setValue(row, col, value);
         } else {
             model.deleteValue(row, col);
-            if (!model.getSizeOf()) {
-                this._deleteModel(workbookId, worksheetId);
-            }
         }
     }
 }

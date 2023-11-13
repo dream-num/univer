@@ -1,13 +1,21 @@
 import { SelectionManagerService } from '@univerjs/base-sheets';
 import { ISidebarService } from '@univerjs/base-ui';
-import { CommandType, ICommand, ICommandService, IUniverInstanceService, Range } from '@univerjs/core';
+import {
+    CellValueType,
+    CommandType,
+    ICommand,
+    ICommandService,
+    IUniverInstanceService,
+    LocaleService,
+    Range,
+} from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 import { SHEET_NUMFMT_PLUGIN } from '../../base/const/PLUGIN_NAME';
 import { SheetNumfmtPanelProps } from '../../components';
 import { NumfmtService } from '../../service/numfmt.service';
 import { getPatternType } from '../../utils/pattern';
-import { SetNumfmtMutation, SetNumfmtMutationParams } from '../mutations/set.numfmt.mutation';
+import { SetNumfmtCommand, SetNumfmtCommandParams } from '../commands/set.numfmt.command';
 import { CloseNumfmtPanelOperator } from './close.numfmt.panel.operator';
 
 export const OpenNumfmtPanelOperator: ICommand = {
@@ -19,6 +27,7 @@ export const OpenNumfmtPanelOperator: ICommand = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const numfmtService = accessor.get(NumfmtService);
+        const localeService = accessor.get(LocaleService);
 
         const selections = selectionManagerService.getSelectionRanges() || [];
         const range = selections[0];
@@ -40,28 +49,31 @@ export const OpenNumfmtPanelOperator: ICommand = {
         if (numfmtValue) {
             pattern = numfmtValue.pattern;
         }
+        // eslint-disable-next-line no-magic-numbers
+        const defaultValue = (cellValue?.t === CellValueType.NUMBER ? cellValue.v : 12345678) as number;
+
         const props: SheetNumfmtPanelProps = {
             onChange: (config) => {
                 if (config.type === 'change') {
                     const selections = selectionManagerService.getSelectionRanges() || [];
-                    const params: SetNumfmtMutationParams = { values: [] };
+                    const params: SetNumfmtCommandParams = { values: [] };
                     const patternType = getPatternType(config.value);
 
                     selections.forEach((rangeInfo) => {
                         Range.foreach(rangeInfo, (row, col) => {
                             params.values.push({
-                                row: String(row),
-                                col: String(col),
+                                row,
+                                col,
                                 pattern: config.value,
                                 type: patternType,
                             });
                         });
                     });
-                    commandService.executeCommand(SetNumfmtMutation.id, params);
+                    commandService.executeCommand(SetNumfmtCommand.id, params);
                 }
                 commandService.executeCommand(CloseNumfmtPanelOperator.id);
             },
-            value: { defaultPattern: pattern, defaultValue: Number(cellValue?.v || '12345678') },
+            value: { defaultPattern: pattern, defaultValue },
         };
 
         sidebarService.open({

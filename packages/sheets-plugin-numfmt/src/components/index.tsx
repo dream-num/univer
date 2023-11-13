@@ -1,6 +1,8 @@
 import './index.less';
 
+import { LocaleService } from '@univerjs/core';
 import { Button, ISelectProps, Select } from '@univerjs/design';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 import { FC, useMemo, useRef, useState } from 'react';
 
 import { BusinessComponentProps } from '../base/types';
@@ -10,20 +12,25 @@ import { DatePanel, isDatePanel } from './date';
 import { GeneralPanel, isGeneralPanel } from './general';
 import { ThousandthPercentilePanel } from './thousandth-percentile';
 
-const options = [
-    { label: '常规', component: GeneralPanel },
-    { label: '会计', component: AccountingPanel },
-    { label: '货币', component: CurrencyPanel },
-    { label: '日期', component: DatePanel },
-    { label: '千分位符', component: ThousandthPercentilePanel },
-];
-
 export type SheetNumfmtPanelProps = {
     value: { defaultValue: number; defaultPattern: string };
     onChange: (config: { type: 'change' | 'cancel'; value: string }) => void;
 };
 export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
     const { defaultValue, defaultPattern } = props.value;
+    const localeService = useDependency(LocaleService);
+    const t = localeService.t;
+    const options = useMemo(
+        () =>
+            [
+                { label: 'sheet.numfmt.general', component: GeneralPanel },
+                { label: 'sheet.numfmt.accounting', component: AccountingPanel },
+                { label: 'sheet.numfmt.currency', component: CurrencyPanel },
+                { label: 'sheet.numfmt.date', component: DatePanel },
+                { label: 'sheet.numfmt.thousandthPercentile', component: ThousandthPercentilePanel },
+            ].map((item) => ({ ...item, label: t(item.label) })),
+        []
+    );
     const [type, typeSet] = useState(() => {
         const list = [isGeneralPanel, isAccountingPanel, isCurrencyPanel, isDatePanel];
         return (
@@ -56,7 +63,7 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
     return (
         <div className="numfmt-panel p-b-20">
             <div>
-                <div className="label m-t-14">格式类型</div>
+                <div className="label m-t-14">{t('sheet.numfmt.numfmtType')}</div>
                 <div className="m-t-8">
                     <Select onChange={handleSelect} options={selectOptions} value={type}></Select>
                 </div>
@@ -65,10 +72,10 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
 
             <div className="btn-list m-t-14 m-b-20">
                 <Button size="small" onClick={handleCancel} className="m-r-12">
-                    取消
+                    {t('sheet.numfmt.cancel')}
                 </Button>
                 <Button type="primary" size="small" onClick={handleConfirm}>
-                    确认
+                    {t('sheet.numfmt.confirm')}
                 </Button>
             </div>
         </div>

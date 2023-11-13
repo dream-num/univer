@@ -65,7 +65,7 @@ export const OpenNumfmtPanelOperator: ICommand = {
         };
 
         sidebarService.open({
-            header: { title: '数据格式' },
+            header: { title: localeService.t('sheet.numfmt.title') },
             children: {
                 label: SHEET_NUMFMT_PLUGIN,
                 ...(props as any),

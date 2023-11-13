@@ -55,11 +55,11 @@ export class LocaleService extends Disposable {
         this.locales = Tools.deepMerge(this.locales ?? {}, locales);
     }
 
-    t(key: string): string {
+    t = (key: string): string => {
         if (!this.locales) throw new Error('Locale not initialized');
 
         return getValue(this.locales[this.currentLocale], key) ?? key;
-    }
+    };
 
     setLocale(locale: LocaleType): void {
         this.currentLocale = locale;

@@ -1,16 +1,22 @@
 import numfmt from '@univerjs/base-numfmt-engine';
+import { LocaleService } from '@univerjs/core';
 import { SelectList } from '@univerjs/design';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 // import * as all from 'numfmt';
 import { FC, useEffect, useMemo, useState } from 'react';
 
 import { DATEFMTLISG } from '../../base/const/FORMATDETAIL';
 import { BusinessComponentProps } from '../../base/types';
 
-export const isDatePanel = (pattern: string) => DATEFMTLISG.map((item) => item.suffix).includes(pattern);
+export const isDatePanel = (pattern: string) => {
+    const info = numfmt.getInfo(pattern);
+    return DATEFMTLISG.map((item) => item.suffix).includes(pattern) || ['date', 'datetime', 'time'].includes(info.type);
+};
 
 export const DatePanel: FC<BusinessComponentProps> = (props) => {
     const options = DATEFMTLISG.map((item) => ({ label: item.label, value: item.suffix }));
-
+    const localeService = useDependency(LocaleService);
+    const t = localeService.t;
     const [suffix, suffixSet] = useState(() => {
         if (props.defaultPattern) {
             const item = options.find((item) => item.value === props.defaultPattern);
@@ -35,16 +41,13 @@ export const DatePanel: FC<BusinessComponentProps> = (props) => {
     }, [suffix]);
     return (
         <div>
-            <div className="m-t-16 label">示例</div>
+            <div className="m-t-16 label">{t('sheet.numfmt.preview')}</div>
             <div className="m-t-8 preview"> {preview} </div>
-            <div className="m-t-16 label">日期类型</div>
+            <div className="m-t-16 label">{t('sheet.numfmt.dateType')}</div>
             <div className="m-t-8">
                 <SelectList value={suffix} options={options} onChange={suffixSet}></SelectList>
             </div>
-            <div className="describe m-t-14">
-                日期格式将日期和时间系列数值品示为日期值。以星号（*）
-                开头的日期格式导出后响应操作系统特定的区域日期和时间。不带星号的格式导出后不受操作系统设置影响。
-            </div>
+            <div className="describe m-t-14">{t('sheet.numfmt.dateDes')}</div>
         </div>
     );
 };

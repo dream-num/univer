@@ -1,4 +1,3 @@
-import numfmt from '@univerjs/base-numfmt-engine';
 import { InputNumber, SelectList } from '@univerjs/design';
 import { FC, useEffect, useMemo, useState } from 'react';
 
@@ -44,7 +43,9 @@ export const ThousandthPercentilePanel: FC<BusinessComponentProps> = (props) => 
     return (
         <div>
             <div className="m-t-16 label">示例</div>
-            <div className="m-t-8 preview">{preview}</div>
+            <div className="m-t-8 preview" style={{ color: preview.color }}>
+                {preview.result}
+            </div>
             <div className="m-t-16 label">小数位数</div>
             <div className="m-t-8">
                 <InputNumber

@@ -147,7 +147,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                 <div>
                     <Dropdown
                         align={{
-                            points: ['tl', 'bl'],
+                            offset: [0, 18],
                         }}
                         overlay={
                             <section className={styles.uiPluginSheetsBorderPanelBoard}>
@@ -166,6 +166,9 @@ export function BorderPanel(props: IBorderPanelProps) {
 
                 <div>
                     <Dropdown
+                        align={{
+                            offset: [0, 18],
+                        }}
                         overlay={
                             <Menu>
                                 {BORDER_SIZE_CHILDREN.map((item) => (

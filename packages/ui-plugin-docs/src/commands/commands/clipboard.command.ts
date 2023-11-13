@@ -1,7 +1,27 @@
-import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/base-ui';
-import { CommandType, FOCUSING_DOC, ILogService, IMultiCommand } from '@univerjs/core';
+import {
+    getRetainAndDeleteFromReplace,
+    IRichTextEditingMutationParams,
+    MemoryCursor,
+    RichTextEditingMutation,
+    TextSelectionManagerService,
+} from '@univerjs/base-docs';
+import { CopyCommand, CutCommand, PasteCommand } from '@univerjs/base-ui';
+import {
+    CommandType,
+    FOCUSING_DOC,
+    ICommand,
+    ICommandInfo,
+    ICommandService,
+    IDocumentBody,
+    IMultiCommand,
+    IUndoRedoService,
+    IUniverInstanceService,
+} from '@univerjs/core';
 
-import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
+interface IInnerPasteCommandParams {
+    segmentId: string;
+    body: IDocumentBody;
+}
 
 export const DocCopyCommand: IMultiCommand = {
     id: CopyCommand.id,
@@ -10,10 +30,7 @@ export const DocCopyCommand: IMultiCommand = {
     multi: true,
     priority: 1100,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
-    handler: async (accessor, params) => {
-        const docClipboardService = accessor.get(IDocClipboardService);
-        return docClipboardService.copy();
-    },
+    handler: async () => true,
 };
 
 export const DocCutCommand: IMultiCommand = {
@@ -23,10 +40,7 @@ export const DocCutCommand: IMultiCommand = {
     multi: true,
     priority: 1100,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
-    handler: async (accessor, params) => {
-        const docClipboardService = accessor.get(IDocClipboardService);
-        return docClipboardService.cut();
-    },
+    handler: async () => true,
 };
 
 export const DocPasteCommand: IMultiCommand = {
@@ -36,31 +50,82 @@ export const DocPasteCommand: IMultiCommand = {
     multi: true,
     priority: 1100,
     preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
-    handler: async (accessor, params) => {
-        const logService = accessor.get(ILogService);
+    handler: async () => true,
+};
 
-        // use cell editor to get ClipboardData first
-        // if that doesn't work, use the browser's clipboard API
-        // this clipboard API would ask user for permission, so we may need to notify user (and retry perhaps)
-        logService.log('[DocPasteCommand]', 'the focusing element is', document.activeElement);
+export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
+    id: 'doc.command.inner-paste',
+    type: CommandType.COMMAND,
+    handler: async (accessor, params: IInnerPasteCommandParams) => {
+        const { segmentId, body } = params;
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const currentUniverService = accessor.get(IUniverInstanceService);
 
-        const result = document.execCommand('paste');
+        const selections = textSelectionManagerService.getSelections();
 
-        if (!result) {
-            logService.log(
-                '[DocPasteCommand]',
-                'failed to execute paste command on the activeElement, trying to use clipboard API.'
-            );
+        if (!Array.isArray(selections) || selections.length === 0) {
+            return false;
+        }
 
-            const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
-            const clipboardItems = await clipboardInterfaceService.read();
-            const sheetClipboardService = accessor.get(IDocClipboardService);
+        const docsModel = currentUniverService.getCurrentUniverDocInstance();
+        const unitId = docsModel.getUnitId();
 
-            if (clipboardItems.length !== 0) {
-                return sheetClipboardService.paste(clipboardItems[0]);
+        const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
+            id: RichTextEditingMutation.id,
+            params: {
+                unitId,
+                mutations: [],
+            },
+        };
+
+        const memoryCursor = new MemoryCursor();
+
+        memoryCursor.reset();
+
+        for (const selection of selections) {
+            const { startOffset, endOffset, collapsed } = selection;
+
+            const len = startOffset - memoryCursor.cursor;
+
+            if (collapsed) {
+                doMutation.params!.mutations.push({
+                    t: 'r',
+                    len,
+                    segmentId,
+                });
+            } else {
+                doMutation.params!.mutations.push(
+                    ...getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor)
+                );
             }
 
-            return false;
+            doMutation.params!.mutations.push({
+                t: 'i',
+                body,
+                len: body.dataStream.length,
+                line: 0,
+                segmentId,
+            });
+
+            memoryCursor.reset();
+            memoryCursor.moveCursor(endOffset);
+        }
+
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        if (result) {
+            undoRedoService.pushUndoRedo({
+                unitID: unitId,
+                undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
+                redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
+            });
+
+            return true;
         }
 
         return false;

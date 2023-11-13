@@ -1,8 +1,10 @@
 export * from './basics/component-tools';
 export * from './basics/docs-view-key';
+export { MemoryCursor } from './basics/memory-cursor';
 export {
     CoverCommand,
     DeleteCommand,
+    getRetainAndDeleteFromReplace,
     type ICoverCommandParams,
     type IDeleteCommandParams,
     type IIMEInputCommandParams,

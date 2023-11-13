@@ -1,4 +1,4 @@
-export * from './basics/component-tools';
+export { getDocObject } from './basics/component-tools';
 export * from './basics/docs-view-key';
 export { MemoryCursor } from './basics/memory-cursor';
 export {

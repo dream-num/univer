@@ -2,11 +2,13 @@ import { Disposable, IRange, IUnitRange, LifecycleStages, Nullable, ObjectMatrix
 import { Inject } from '@wendellhu/redi';
 
 import { LexerTreeBuilder } from '../analysis/lexer';
+import { LexerNode } from '../analysis/lexer-node';
 import { AstTreeBuilder } from '../analysis/parser';
 import { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
-import { BaseAstNode } from '../ast-node/base-ast-node';
+import { BaseAstNode, ErrorNode } from '../ast-node/base-ast-node';
 import { FormulaASTCache } from '../ast-node/cache-lru';
 import { NodeType } from '../ast-node/node-type';
+import { ErrorType } from '../basics/error-type';
 import { PreCalculateNodeType } from '../basics/node-type';
 import { prefixToken, suffixToken } from '../basics/token';
 import { Interpreter } from '../interpreter/interpreter';
@@ -117,9 +119,14 @@ export class FormulaDependencyGenerator extends Disposable {
         }
 
         const lexerNode = this._lexerTreeBuilder.treeBuilder(formulaString);
+
+        if ((lexerNode as ErrorType) in ErrorType) {
+            return ErrorNode.create(lexerNode as ErrorType);
+        }
+
         // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
 
-        astNode = this._astTreeBuilder.parse(lexerNode);
+        astNode = this._astTreeBuilder.parse(lexerNode as LexerNode);
 
         if (astNode == null) {
             throw new Error('astNode is null');

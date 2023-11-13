@@ -2,8 +2,10 @@ import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Ctor, Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { LexerTreeBuilder } from '../analysis/lexer';
+import { LexerNode } from '../analysis/lexer-node';
 import { AstTreeBuilder } from '../analysis/parser';
 import { AstRootNodeFactory } from '../ast-node/ast-root-node';
+import { ErrorNode } from '../ast-node/base-ast-node';
 import { FunctionNodeFactory } from '../ast-node/function-node';
 import { LambdaNodeFactory } from '../ast-node/lambda-node';
 import { LambdaParameterNodeFactory } from '../ast-node/lambda-parameter-node';
@@ -14,6 +16,7 @@ import { SuffixNodeFactory } from '../ast-node/suffix-node';
 import { UnionNodeFactory } from '../ast-node/union-node';
 import { ValueNodeFactory } from '../ast-node/value-node';
 import { IFormulaDatasetConfig } from '../basics/common';
+import { ErrorType } from '../basics/error-type';
 import { FUNCTION_NAMES } from '../basics/function';
 import { FormulaDependencyGenerator } from '../dependency/formula-dependency';
 import {
@@ -118,6 +121,23 @@ export class FormulaEngineService extends Disposable {
         return this.functionService.getDescriptions();
     }
 
+    getRunTimeData(unitId: string) {
+        return {
+            sheetData: this.runtimeService.getSheetData(unitId),
+            arrayFormulaData: this.runtimeService.getSheetArrayFormula(unitId),
+        };
+    }
+
+    builderLexerTree(formulaString: string) {
+        const lexerNode = this.lexerTreeBuilder.treeBuilder(formulaString, false);
+
+        if ((lexerNode as ErrorType) in ErrorType) {
+            return;
+        }
+
+        return lexerNode as LexerNode;
+    }
+
     /**
      *
      * @param unitId
@@ -167,14 +187,19 @@ export class FormulaEngineService extends Disposable {
         // TODO how to observe @alex
         // this.getObserver('onBeforeFormulaCalculateObservable')?.notifyObservers(formulaString);
         const lexerNode = this.lexerTreeBuilder.treeBuilder(formulaString);
+
+        if ((lexerNode as ErrorType) in ErrorType) {
+            return ErrorNode.create(lexerNode as ErrorType);
+        }
+
         // this.lexerTreeBuilder.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
-        console.log('lexerNode', lexerNode.serialize());
+        console.log('lexerNode', (lexerNode as LexerNode).serialize());
 
         // this.getObserver('onAfterFormulaLexerObservable')?.notifyObservers(lexerNode);
 
         // const astTreeBuilder = new AstTreeBuilder();
 
-        const astNode = this.astTreeBuilder.parse(lexerNode);
+        const astNode = this.astTreeBuilder.parse(lexerNode as LexerNode);
 
         console.log('astNode', astNode?.serialize());
 

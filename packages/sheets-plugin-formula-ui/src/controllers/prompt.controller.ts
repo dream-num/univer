@@ -1,15 +1,24 @@
-import { TextSelectionManagerService } from '@univerjs/base-docs';
+import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/base-docs';
+import { FormulaEngineService, IFunctionInfo, LexerNode } from '@univerjs/base-formula-engine';
+import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    IRenderManagerService,
+} from '@univerjs/base-render';
 import {
     Disposable,
     FOCUSING_EDITOR_INPUT_FORMULA,
     ICommandService,
     IContextService,
+    IDocumentBody,
     isFormulaString,
+    ITextRun,
     LifecycleStages,
     LocaleService,
+    Nullable,
     OnLifecycle,
 } from '@univerjs/core';
-import { EditorBridgeService, IEditorBridgeService } from '@univerjs/ui-plugin-sheets';
+import { EditorBridgeService, getEditorObject, IEditorBridgeService } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
@@ -17,6 +26,15 @@ import { SearchFunctionOperation } from '../commands/operations/search-function.
 import { FUNCTION_LIST } from '../services/function-list';
 import { IFormulaPromptService, ISearchItem } from '../services/prompt.service';
 import { getFunctionName } from './util';
+
+interface IFunctionPanelParam {
+    visibleSearch: boolean;
+    visibleHelp: boolean;
+    searchText: string;
+    paramIndex: number;
+    functionInfo?: IFunctionInfo;
+    searchList?: ISearchItem[];
+}
 
 @OnLifecycle(LifecycleStages.Starting, PromptController)
 export class PromptController extends Disposable {
@@ -26,7 +44,10 @@ export class PromptController extends Disposable {
         @IContextService private readonly _contextService: IContextService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @Inject(IEditorBridgeService) private readonly _editorBridgeService: EditorBridgeService,
-        @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService
+        @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService,
+        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
     ) {
         super();
 
@@ -40,49 +61,50 @@ export class PromptController extends Disposable {
 
     private _initialCursorSync() {
         this._textSelectionManagerService.textSelectionInfo$.subscribe(() => {
-            const currentInputValue = this._getCurrentCellValue();
+            const currentBody = this._getCurrentBody();
+
+            const dataStream = currentBody?.dataStream || '';
+
+            this._contextSwitch(dataStream);
 
             // TODO@Dushusir: use real text info
-            const input = this._getCellEditInput(currentInputValue || '');
-            if (!input) return;
+            this._setFunctionPanel(dataStream);
 
-            const { visibleSearch, visibleHelp, searchText, paramIndex, searchList, functionInfo } = input;
-
-            if (visibleSearch) {
-                this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
-            } else if (visibleHelp) {
-                this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-            } else {
-                this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-            }
-
-            this._commandService.executeCommand(SearchFunctionOperation.id, {
-                visible: visibleSearch,
-                searchText,
-                searchList,
-            });
-            this._commandService.executeCommand(HelpFunctionOperation.id, {
-                visible: visibleHelp,
-                paramIndex,
-                functionInfo,
-            });
+            this._highlightFormula(currentBody);
         });
     }
 
-    private _getCurrentCellValue() {
+    private _getCurrentBody() {
         const state = this._editorBridgeService.getState();
-        let currentInputValue = state?.documentLayoutObject?.documentModel?.snapshot?.body?.dataStream;
+        return state?.documentLayoutObject?.documentModel?.snapshot?.body;
+    }
 
-        if (currentInputValue) {
-            currentInputValue = currentInputValue.split('\r\n')[0].toLocaleUpperCase();
+    private _contextSwitch(currentInputValue: string) {
+        if (isFormulaString(currentInputValue)) {
+            this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
+        } else {
+            this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
         }
+    }
 
-        return currentInputValue;
+    private _getContextState() {
+        return this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA);
     }
 
     // TODO@Dushusir: remove after use real text info
-    private _getCellEditInput(currentInputValue: string) {
-        if (isFormulaString(currentInputValue)) {
+    private _setFunctionPanel(currentInputValue: string) {
+        let param: IFunctionPanelParam = {
+            visibleSearch: false,
+            visibleHelp: false,
+            searchText: '',
+            paramIndex: 0,
+            functionInfo: {} as IFunctionInfo,
+            searchList: [],
+        };
+
+        if (this._getContextState()) {
+            currentInputValue = currentInputValue.split('\r\n')[0].toLocaleUpperCase();
+
             const searchText = currentInputValue.substring(1);
 
             // TODO@Dushusir: remove after use real text info
@@ -94,7 +116,7 @@ export class PromptController extends Disposable {
 
                 const functionInfo = this._getFunctionInfo(searchText);
 
-                return {
+                param = {
                     visibleSearch: false,
                     visibleHelp: !!functionInfo,
                     searchText,
@@ -104,7 +126,7 @@ export class PromptController extends Disposable {
             }
 
             const searchList = this._getSearchList(searchText);
-            return {
+            param = {
                 visibleSearch: searchList.length > 0,
                 visibleHelp: false,
                 searchText,
@@ -113,12 +135,16 @@ export class PromptController extends Disposable {
             };
         }
 
-        return {
-            visibleSearch: false,
-            visibleHelp: false,
-            searchText: '',
-            paramIndex: 0,
-        };
+        this._commandService.executeCommand(SearchFunctionOperation.id, {
+            visible: param.visibleSearch,
+            searchText: param.searchText,
+            searchList: param.searchList,
+        });
+        this._commandService.executeCommand(HelpFunctionOperation.id, {
+            visible: param.visibleHelp,
+            paramIndex: param.paramIndex,
+            functionInfo: param.functionInfo,
+        });
     }
 
     private _initAcceptFormula() {
@@ -141,5 +167,62 @@ export class PromptController extends Disposable {
 
     private _getFunctionInfo(searchText: string) {
         return FUNCTION_LIST.find((item) => getFunctionName(item, this._localeService) === searchText);
+    }
+
+    /**
+     *
+     * @param body the body object of the current input box
+     * @returns
+     */
+    private _highlightFormula(body: Nullable<IDocumentBody>) {
+        if (body == null || this._getContextState() === false) {
+            return;
+        }
+
+        const dataStream = body.dataStream;
+
+        const lexerNode = this._formulaEngineService.builderLexerTree(dataStream);
+
+        if (lexerNode == null) {
+            body.textRuns = [];
+        } else {
+            const textRuns: ITextRun[] = [];
+            this._buildTextRuns(lexerNode, textRuns);
+            body.textRuns = textRuns;
+        }
+
+        this._refreshEditorObject();
+    }
+
+    private _buildTextRuns(lexerNode: LexerNode, textRuns: ITextRun[] = []) {
+        return [];
+    }
+
+    private _refreshEditorObject() {
+        const editorObject = this._getEditorObject();
+
+        const documentComponent = editorObject?.document;
+
+        documentComponent?.getSkeleton()?.calculate();
+
+        documentComponent?.makeDirty();
+    }
+
+    private _refreshFormulaBarEditorObject() {
+        const editorObject = this._getEditorObject();
+
+        const documentComponent = editorObject?.document;
+
+        documentComponent?.getSkeleton()?.calculate();
+
+        documentComponent?.makeDirty();
+    }
+
+    private _getEditorObject() {
+        return getEditorObject(DOCS_NORMAL_EDITOR_UNIT_ID_KEY, this._renderManagerService);
+    }
+
+    private _getFormulaBarEditorObject() {
+        return getEditorObject(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, this._renderManagerService);
     }
 }

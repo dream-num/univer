@@ -91,6 +91,14 @@ export default function extractNodeStyle(node: HTMLElement): ITextStyle {
                 break;
             }
 
+            case 'background-color': {
+                docStyles.bg = {
+                    rgb: cssValue,
+                };
+
+                break;
+            }
+
             default: {
                 // console.log(`Unhandled css rule ${cssRule}`);
                 break;

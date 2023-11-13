@@ -1486,7 +1486,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
         }
 
-        const modelObject = this._getCellDocumentModel(cell);
+        const modelObject = cell && this.getCellDocumentModel(cell);
 
         if (modelObject == null) {
             return;

@@ -533,6 +533,7 @@ export function ResetTextColorMenuItemFactory(): IMenuButtonItem {
         id: ResetTextColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
+        icon: 'NoColor',
         positions: SetRangeTextColorCommand.id,
     };
 }
@@ -549,7 +550,10 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         positions: [MenuPosition.TOOLBAR_START],
         selections: [
             {
-                label: COLOR_PICKER_COMPONENT,
+                label: {
+                    name: COLOR_PICKER_COMPONENT,
+                    hoverable: false,
+                },
             },
         ],
         value$: new Observable<string>((subscriber) => {
@@ -588,7 +592,10 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
         icon: 'PaintBucket',
         selections: [
             {
-                label: COLOR_PICKER_COMPONENT,
+                label: {
+                    name: COLOR_PICKER_COMPONENT,
+                    hoverable: false,
+                },
             },
         ],
         value$: new Observable<string>((subscriber) => {

@@ -7,6 +7,7 @@ import {
 } from '@univerjs/design';
 import { MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import clsx from 'clsx';
 import { useState } from 'react';
 import { isObservable, of } from 'rxjs';
 
@@ -114,8 +115,12 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
             });
         };
 
+        const _className = clsx({
+            [styles.menuItemNoHover]: typeof option.label !== 'string' && !option.label?.hoverable,
+        });
+
         return (
-            <DesignMenuItem key={key} eventKey={key} onClick={handleClick}>
+            <DesignMenuItem key={key} eventKey={key} className={_className} onClick={handleClick}>
                 <span className={styles.menuItemContent}>
                     <CustomLabel
                         selected={typeof value !== 'undefined' && value === option.value}

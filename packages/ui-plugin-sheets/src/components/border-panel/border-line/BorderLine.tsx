@@ -10,7 +10,10 @@ import { BorderMediumDashDotDot } from './icons/BorderMediumDashDotDot';
 import { BorderMediumDashed } from './icons/BorderMediumDashed';
 import { BorderThick } from './icons/BorderThick';
 import { BorderThin } from './icons/BorderThin';
-import { IBorderLineProps } from './interface';
+
+interface IBorderLineProps {
+    type: BorderStyleTypes;
+}
 
 export function BorderLine(props: IBorderLineProps) {
     const { type = BorderStyleTypes.THIN } = props;

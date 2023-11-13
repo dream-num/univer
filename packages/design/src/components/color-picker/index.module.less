@@ -10,7 +10,7 @@
     display: block;
 
     width: max-content;
-    min-width: 272px;
+    min-width: 232px;
 
     visibility: visible;
 
@@ -22,9 +22,9 @@
         display: flex;
         flex-direction: column;
 
-        width: 272px;
+        width: 232px;
 
-        background-color: #fff;
+        background-color: rgb(var(--white-color));
         border-radius: @outer-border-radius;
 
         &-disabled {
@@ -37,7 +37,7 @@
 
         .color-picker-palette {
             overflow: hidden;
-            min-height: 160px;
+            min-height: 100px;
             border-radius: @inner-border-radius;
 
             & > .color-picker-gradient {
@@ -74,24 +74,14 @@
         }
     }
 
-    &-custom-btn {
-        cursor: pointer;
-        font-size: var(--font-size-base);
-        color: rgb(var(--text-color));
-    }
-
-    &-cancel-btn {
-        cursor: pointer;
-        font-size: var(--font-size-base);
-        color: rgb(var(--text-color));
-    }
 
     &-color-blocks {
         display: grid;
         grid-template-columns: repeat(10, 1fr);
         grid-template-rows: repeat(9, 1fr);
-        gap: var(--margin-xs);
+        gap: var(--margin-xxs);
 
+        width: 232px;
         margin-bottom: var(--margin-xs);
     }
 
@@ -102,8 +92,8 @@
 
         overflow: hidden;
 
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
 
         border-radius: @inner-border-radius;
 
@@ -119,7 +109,8 @@
 
     &-slider-container {
         display: flex;
-        margin-bottom: var(--margin-xs);
+        flex-direction: row-reverse;
+        gap: var(--margin-xs);
 
         .color-picker-slider-group {
             flex: 1;

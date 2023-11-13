@@ -50,7 +50,10 @@ export function ChangeColorSheetMenuItemFactory(): IMenuSelectorItem<string> {
         type: MenuItemType.SELECTOR,
         selections: [
             {
-                label: COLOR_PICKER_COMPONENT,
+                label: {
+                    name: COLOR_PICKER_COMPONENT,
+                    hoverable: false,
+                },
             },
         ],
     };

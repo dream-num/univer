@@ -994,8 +994,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.12
-        version: 0.1.12(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.7
+        version: 0.1.7(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets
@@ -5816,6 +5816,16 @@ packages:
 
   /@univerjs/icons@0.1.12(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-1EN0Ce85NIFQCycT/3BmLUzIdQKRz7nLYLyjb6IYXlLf7tlDp478GhqRiE7jVZNHsfziLt7VeKY7kIqdTixsaA==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@univerjs/icons@0.1.7(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-jFzcqluGXPrNmbQ0GaB/aXrDtis+bV5igyWcYvx8/3ZIuwddQ0MVy//O4DulhV42Tc5XJMdRKeN41+iBHLiYXQ==}
     peerDependencies:
       react: '*'
       react-dom: '*'

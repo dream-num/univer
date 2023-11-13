@@ -42,7 +42,7 @@ export interface ISetRangeValuesCommandParams {
 export const SetRangeValuesCommand: ICommand = {
     id: 'sheet.command.set-range-values',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

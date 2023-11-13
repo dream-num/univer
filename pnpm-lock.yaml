@@ -234,6 +234,9 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../../packages/design
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../../packages/rpc
       '@univerjs/sheets-plugin-debugger':
         specifier: workspace:*
         version: link:../../packages/sheets-plugin-debugger
@@ -372,8 +375,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -403,8 +406,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
     devDependencies:
       '@types/node':
         specifier: ^20.9.0
@@ -456,8 +459,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -493,8 +496,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -533,8 +536,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
     devDependencies:
       '@types/node':
         specifier: ^20.9.0
@@ -570,8 +573,8 @@ importers:
         specifier: ^0.1.7
         version: 0.1.7(react-dom@18.2.0)(react@18.2.0)
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       clsx:
         specifier: ^2.0.0
         version: 2.0.0
@@ -695,8 +698,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -723,8 +726,8 @@ importers:
   packages/core:
     dependencies:
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
@@ -848,8 +851,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -891,8 +894,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
 
   packages/sheets-plugin-find:
     dependencies:
@@ -918,8 +921,8 @@ importers:
         specifier: workspace:*
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -982,8 +985,8 @@ importers:
         specifier: workspace:*
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1043,8 +1046,8 @@ importers:
         specifier: workspace:*
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       luckyexcel:
         specifier: ^1.0.1
         version: 1.0.1
@@ -1095,8 +1098,8 @@ importers:
         specifier: workspace:*
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1147,8 +1150,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1208,8 +1211,8 @@ importers:
         specifier: ^0.1.7
         version: 0.1.7(react-dom@18.2.0)(react@18.2.0)
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -1266,8 +1269,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@wendellhu/redi':
-        specifier: ^0.12.10
-        version: 0.12.10
+        specifier: ^0.12.11
+        version: 0.12.11
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -5893,8 +5896,8 @@ packages:
       pretty-format: 29.7.0
     dev: true
 
-  /@wendellhu/redi@0.12.10:
-    resolution: {integrity: sha512-24XDJV301XAqYOfG5gMScFignkuprC04MgmTrNNjmRJLP+eV3GbNkm9QvuV6QP6XQFhJDoQG4V4krL2iEhZLjg==}
+  /@wendellhu/redi@0.12.11:
+    resolution: {integrity: sha512-alOLRtosmlklEMp0/s6L0aTENKEShwQAfUk0Qu4DDCfZvAILf4nV0v4glIpj835MmPblX9VfDFsYT/7MiX+FFg==}
     dev: false
 
   /@yarnpkg/esbuild-plugin-pnp@3.0.0-rc.15(esbuild@0.18.20):

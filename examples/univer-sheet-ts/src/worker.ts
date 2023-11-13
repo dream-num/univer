@@ -2,6 +2,7 @@
 
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { LocaleType, Univer } from '@univerjs/core';
+import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
 
 // Univer web worker is also a univer application.
 const univer = new Univer({
@@ -9,3 +10,4 @@ const univer = new Univer({
 });
 
 univer.registerPlugin(SheetPlugin);
+univer.registerPlugin(UniverRPCWorkerThreadPlugin);

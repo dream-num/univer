@@ -1,6 +1,7 @@
 import { IFunctionInfo } from '@univerjs/base-formula-engine';
 import { LocaleService } from '@univerjs/core';
 
+// TODO@Dushusir: merged to service/utils
 export function getFunctionName(item: IFunctionInfo, localeService: LocaleService) {
     let functionName = '';
     if (item.aliasFunctionName) {

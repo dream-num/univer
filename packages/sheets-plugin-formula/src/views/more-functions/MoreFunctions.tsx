@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 import styles from './index.module.less';
 import { InputParams } from './InputParams';
-import { SelectFunction } from './SelectFunction';
+import { SelectFunction } from './select-function/SelectFunction';
 
 export function MoreFunctions() {
     const [selectFunction, setSelectFunction] = useState<boolean>(true);

@@ -16,8 +16,8 @@ import { InsertFunctionOperation } from '../commands/operations/insert-function.
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { RenderFormulaPromptContent } from '../views/FormulaPromptContainer';
-import { MORE_FUNCTIONS_COMPONENT } from '../views/MoreFunctions/interface';
-import { MoreFunctions } from '../views/MoreFunctions/MoreFunctions';
+import { MORE_FUNCTIONS_COMPONENT } from '../views/more-functions/interface';
+import { MoreFunctions } from '../views/more-functions/MoreFunctions';
 import { InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory } from './menu';
 import { promptSelectionShortcutItem } from './shortcuts/prompt.shortcut';
 

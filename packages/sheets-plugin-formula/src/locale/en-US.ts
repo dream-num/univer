@@ -52,6 +52,24 @@ export default {
         formulaMore: {
             helpExample: 'EXAMPLE',
             helpAbstract: 'ABOUT',
+
+            financial: 'Financial',
+            date: 'Date & Time',
+            math: 'Math & Trig',
+            statistical: 'Statistical',
+            lookup: 'Lookup & Reference',
+            database: 'Database',
+            text: 'Text',
+            logical: 'Logical',
+            information: 'Information',
+            engineering: 'Engineering',
+            cube: 'Cube',
+            compatibility: 'Compatibility',
+            web: 'Web',
+            array: 'Array',
+            univer: 'Univer',
+
+            searchFunctionPlaceholder: 'Search function',
         },
         moreFunctions: {
             confirm: 'Confirm',

@@ -1,21 +1,83 @@
 import { BooleanNumber } from '@univerjs/core';
 
+/**
+ * Function type, refer to https://support.microsoft.com/en-us/office/excel-functions-by-category-5f91f4e9-7b42-46d2-9bd1-63f26a86c0eb
+ */
 export enum FunctionType {
-    Math,
-    Statistical,
-    Lookup,
-    DataMining,
-    Database,
-    Date,
-    Filter,
+    /**
+     * Financial Functions
+     */
+
     Financial,
-    Engineering,
-    Logical,
-    Operator,
+    /**
+     * Date and Time Functions
+     */
+    Date,
+
+    /**
+     * Math and Trigonometry Functions
+     */
+    Math,
+
+    /**
+     * Statistical Functions
+     */
+    Statistical,
+
+    /**
+     * Lookup and Reference Functions
+     */
+    Lookup,
+
+    /**
+     * Database Functions
+     */
+    Database,
+
+    /**
+     * Text Functions
+     */
     Text,
-    Parser,
+
+    /**
+     * Logical Functions
+     */
+    Logical,
+
+    /**
+     * Information Functions
+     */
+    Information,
+
+    /**
+     * Engineering Functions
+     */
+    Engineering,
+
+    /**
+     * Cube Functions
+     */
+    Cube,
+
+    /**
+     * Compatibility Functions
+     */
+    Compatibility,
+
+    /**
+     * Web Functions
+     */
+    Web,
+
+    /**
+     * Array Functions
+     */
     Array,
-    Other,
+
+    /**
+     * Univer-specific functions
+     */
+    Univer,
 }
 
 export interface IFunctionParam {

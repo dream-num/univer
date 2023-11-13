@@ -1,0 +1,31 @@
+.formula-select-function {
+    &-result {
+        box-sizing: border-box;
+        width: 100%;
+        margin: 0;
+        padding: var(--padding-base);
+        font-size: var(--font-size-sm);
+        list-style: none;
+        outline: none;
+
+        &-item {
+            cursor: pointer;
+            box-sizing: border-box;
+            padding: var(--padding-sm);
+            color: rgb(var(--text-color));
+            border-radius: var(--border-radius-base);
+            transition: background .2s;
+
+            &-name {
+                &-light {
+                    color: rgb(var(--error-color));
+                }
+            }
+
+            &-active {
+                background-color: rgb(var(--bg-color-hover));
+            }
+        }
+    }
+
+}

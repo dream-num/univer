@@ -2,7 +2,7 @@ import { ISidebarService } from '@univerjs/base-ui';
 import { CommandType, ICommand } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
-import { MORE_FUNCTIONS_COMPONENT } from '../../views/MoreFunctions/interface';
+import { MORE_FUNCTIONS_COMPONENT } from '../../views/more-functions/interface';
 
 export const MoreFunctionsOperation: ICommand = {
     id: 'formula.operation.more-functions',

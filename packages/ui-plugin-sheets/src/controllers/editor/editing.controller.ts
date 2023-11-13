@@ -116,7 +116,13 @@ export class EditingController extends Disposable {
         //         console.log(res.sheetData, res.arrayFormulaData);
         //     });
 
-        console.log('calculate', this._formulaEngineService.calculate('=sum(, A1:B1)'));
+        console.log(
+            'calculate',
+            this._formulaEngineService.calculate(
+                '=(-(1+2)--@A1:B2 + 5)/2 + -sum(indirect("A5"):B10# + B6# + A1:offset("C5", 1, 1)  ,  100) + {1,2,3;4,5,6;7,8,10} + lambda(x,y,z, x*y*z)(sum(1,(1+2)*3),2,lambda(x,y, @offset(A1:B0,x#*y#))(1,2):C20) & "美国人才" + sum((1+2%)*30%, 1+2)%',
+                false
+            )
+        );
     }
 
     private _commandExecutedListener() {}

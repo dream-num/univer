@@ -183,10 +183,10 @@ export class FormulaEngineService extends Disposable {
         };
     }
 
-    calculate(formulaString: string) {
+    calculate(formulaString: string, transformSuffix: boolean = true) {
         // TODO how to observe @alex
         // this.getObserver('onBeforeFormulaCalculateObservable')?.notifyObservers(formulaString);
-        const lexerNode = this.lexerTreeBuilder.treeBuilder(formulaString);
+        const lexerNode = this.lexerTreeBuilder.treeBuilder(formulaString, transformSuffix);
 
         if ((lexerNode as ErrorType) in ErrorType) {
             return ErrorNode.create(lexerNode as ErrorType);

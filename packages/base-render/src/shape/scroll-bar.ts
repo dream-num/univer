@@ -40,6 +40,9 @@ export class ScrollBar extends BaseScrollBar {
 
     thumbLengthRatio = 1;
 
+    /**
+     * todo: @DR-univer。 Mainly inject themeService in order to obtain colors.
+     */
     thumbBackgroundColor = '#cccccc';
 
     thumbHoverBackgroundColor = '#b2b2b2';

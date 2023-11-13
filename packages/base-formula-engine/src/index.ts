@@ -1,3 +1,4 @@
+export { LexerNode } from './analysis/lexer-node';
 export type {
     ArrayFormulaDataType,
     IFormulaData,

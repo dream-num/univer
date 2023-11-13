@@ -93,7 +93,9 @@ export class LexerTreeBuilder extends Disposable {
 
         const state = this._nodeMaker(formulaString);
 
-        console.log('error', state);
+        if (state === ErrorType.VALUE) {
+            return state;
+        }
 
         const node = this._getTopNode(this._currentLexerNode);
         if (node) {

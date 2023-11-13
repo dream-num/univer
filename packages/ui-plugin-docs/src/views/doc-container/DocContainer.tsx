@@ -1,5 +1,4 @@
 import { BaseComponentProps } from '@univerjs/base-ui';
-import { Container, Content, Footer, Layout, Sider } from '@univerjs/design';
 import { Component, createRef } from 'react';
 
 import { IDocUIPluginConfig } from '../../basics';
@@ -152,19 +151,19 @@ export class DocContainer extends Component<BaseDocContainerProps> {
         const config = layout?.docContainerConfig!;
         // Set Provider for entire Container
         return (
-            <Container className={style.layoutContainer}>
-                <Layout>
-                    <Sider style={{ display: config.outerLeft ? 'block' : 'none' }}></Sider>
-                    <Layout className={style.mainContent} style={{ position: 'relative' }}>
-                        <Layout>
-                            <Sider
+            <section className={style.layoutContainer}>
+                <div>
+                    <aside style={{ display: config.outerLeft ? 'block' : 'none' }}></aside>
+                    <div className={style.mainContent} style={{ position: 'relative' }}>
+                        <div>
+                            <aside
                                 style={{
                                     display: config.innerLeft ? 'block' : 'none',
                                 }}
                             >
                                 {/* innerLeft */}
-                            </Sider>
-                            <Content
+                            </aside>
+                            <div
                                 className={
                                     config.contentSplit === 'vertical'
                                         ? style.contentContainerVertical
@@ -172,44 +171,44 @@ export class DocContainer extends Component<BaseDocContainerProps> {
                                 }
                             >
                                 {!!config.contentSplit && (
-                                    <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
+                                    <div ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
                                         <div
                                             className={style.hoverCursor}
                                             onMouseDown={this.handleSplitBarMouseDown}
                                         ></div>
-                                    </Container>
+                                    </div>
                                 )}
-                                <Container
+                                <div
                                     onContextMenu={(e) => e.preventDefault()}
                                     ref={this.contentRef}
                                     className={style.contentInnerRightContainer}
-                                ></Container>
+                                ></div>
                                 {/* extend main content */}
-                            </Content>
+                            </div>
 
-                            <Sider
+                            <aside
                                 style={{
                                     display: config.innerRight ? 'block' : 'none',
                                 }}
                             >
                                 {/* innerRight */}
                                 {/* <SideGroup></SideGroup> */}
-                            </Sider>
-                        </Layout>
-                        <Footer
+                            </aside>
+                        </div>
+                        <footer
                             style={{
                                 display: config.footer ? 'block' : 'none',
                             }}
-                        ></Footer>
-                    </Layout>
-                    <Sider
+                        ></footer>
+                    </div>
+                    <aside
                         style={{
                             display: config.outerRight ? 'block' : 'none',
                         }}
                         className={style.outerRightContainer}
-                    ></Sider>
-                </Layout>
-            </Container>
+                    ></aside>
+                </div>
+            </section>
         );
     }
 }

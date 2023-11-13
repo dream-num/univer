@@ -14,4 +14,10 @@ describe('Avatar', () => {
         const childrenElement = getByText('Test');
         expect(childrenElement).not.toBeNull();
     });
+
+    test('renders the image', () => {
+        const { container } = render(<Avatar src="test.png" />);
+
+        expect(container.querySelector('img')).not.toBeNull();
+    });
 });

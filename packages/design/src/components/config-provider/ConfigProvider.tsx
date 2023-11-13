@@ -14,7 +14,7 @@ export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'
 });
 
 export function ConfigProvider(props: IConfigProviderProps) {
-    const { children, locale = {}, mountContainer } = props;
+    const { children, locale, mountContainer } = props;
 
     // set default locale to enUS
     let _locale: ILocale;

@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
+import { useState } from 'react';
 import { describe, expect, test } from 'vitest';
 
 import { Checkbox } from '../../checkbox/Checkbox';
@@ -21,8 +22,30 @@ describe('CheckboxGroup', () => {
     test('click Checkbox', async () => {
         render(group);
 
-        fireEvent.click(screen.getByText('1'));
+        let result = ['0'];
+        function Demo() {
+            const [active, setActive] = useState(result);
 
-        expect(active).toEqual(['0', '1']);
+            return (
+                <CheckboxGroup
+                    value={active}
+                    onChange={(value) => {
+                        setActive(value as string[]);
+                        result = value as string[];
+                    }}
+                >
+                    <Checkbox value="0">x</Checkbox>
+                    <Checkbox value="1">y</Checkbox>
+                </CheckboxGroup>
+            );
+        }
+
+        const { getByText } = render(<Demo />);
+
+        fireEvent.click(getByText('y'));
+        fireEvent.click(getByText('y'));
+        fireEvent.click(getByText('y'));
+
+        expect(result).toEqual(['0', '1']);
     });
 });

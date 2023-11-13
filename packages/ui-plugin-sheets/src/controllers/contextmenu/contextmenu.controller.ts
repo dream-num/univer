@@ -1,6 +1,15 @@
 import { IRenderManagerService } from '@univerjs/base-render';
+import { SelectionManagerService } from '@univerjs/base-sheets';
 import { IContextMenuService, MenuPosition } from '@univerjs/base-ui';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import {
+    Disposable,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    RANGE_TYPE,
+    toDisposable,
+} from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
 import { SheetMenuPosition } from '../menu/menu';
 import { getSheetObject } from '../utils/component-tools';
@@ -15,7 +24,9 @@ export class SheetContextMenuController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(SelectionManagerService)
+        private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
         this._currentUniverService.currentSheet$.subscribe((workbook) => {
@@ -58,7 +69,17 @@ export class SheetContextMenuController extends Disposable {
         const spreadsheetPointerDownObserver = objects.spreadsheet.onPointerDownObserver;
         const spreadsheetObserver = spreadsheetPointerDownObserver.add((event) => {
             if (event.button === 2) {
-                this._contextMenuService.triggerContextMenu(event, MenuPosition.CONTEXT_MENU);
+                const selections = this._selectionManagerService.getSelections();
+                if (selections) {
+                    const currentSelection = selections[0];
+                    if (currentSelection.range.rangeType === RANGE_TYPE.COLUMN) {
+                        this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
+                    } else if (currentSelection.range.rangeType === RANGE_TYPE.ROW) {
+                        this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU);
+                    } else {
+                        this._contextMenuService.triggerContextMenu(event, MenuPosition.CONTEXT_MENU);
+                    }
+                }
             }
         });
         this.disposeWithMe(toDisposable(() => spreadsheetPointerDownObserver.remove(spreadsheetObserver)));

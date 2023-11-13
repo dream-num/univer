@@ -51,7 +51,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/icons": "^0.1.7",
-        "@wendellhu/redi": "^0.12.10",
+        "@wendellhu/redi": "^0.12.11",
         "clsx": "^2.0.0",
         "localforage": "^1.10.0",
         "rc-notification": "^5.3.0",

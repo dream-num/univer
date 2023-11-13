@@ -25,7 +25,7 @@ export abstract class Plugin {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onStarting(_injector: Injector): void {}
+    onStarting(injector: Injector): void {}
 
     onReady(): void {}
 

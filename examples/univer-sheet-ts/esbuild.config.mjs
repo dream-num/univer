@@ -38,7 +38,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
             },
         }),
     ],
-    entryPoints: ['./src/main.tsx'],
+    entryPoints: ['./src/main.tsx', './src/worker.ts'],
     outdir: './local',
 });
 

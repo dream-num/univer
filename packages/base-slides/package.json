@@ -40,7 +40,7 @@
         "@univerjs/base-render": "workspace:*",
         "@univerjs/base-ui": "workspace:*",
         "@univerjs/core": "workspace:*",
-        "@wendellhu/redi": "^0.12.10"
+        "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {
         "@types/node": "^20.9.0",

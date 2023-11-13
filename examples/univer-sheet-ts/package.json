@@ -16,6 +16,7 @@
     },
     "dependencies": {
         "@univerjs/base-docs": "workspace:*",
+        "@univerjs/base-formula-engine": "workspace:*",
         "@univerjs/base-render": "workspace:*",
         "@univerjs/base-sheets": "workspace:*",
         "@univerjs/base-ui": "workspace:*",
@@ -23,6 +24,7 @@
         "@univerjs/common-plugin-image": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets-plugin-debugger": "workspace:*",
         "@univerjs/sheets-plugin-find": "workspace:*",
         "@univerjs/sheets-plugin-formula": "workspace:*",

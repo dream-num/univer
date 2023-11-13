@@ -70,15 +70,13 @@ export class SheetContextMenuController extends Disposable {
         const spreadsheetObserver = spreadsheetPointerDownObserver.add((event) => {
             if (event.button === 2) {
                 const selections = this._selectionManagerService.getSelections();
-                if (selections) {
-                    const currentSelection = selections[0];
-                    if (currentSelection.range.rangeType === RANGE_TYPE.COLUMN) {
-                        this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
-                    } else if (currentSelection.range.rangeType === RANGE_TYPE.ROW) {
-                        this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU);
-                    } else {
-                        this._contextMenuService.triggerContextMenu(event, MenuPosition.CONTEXT_MENU);
-                    }
+                const rangeType = selections?.length ? selections[0].range.rangeType : undefined;
+                if (rangeType === RANGE_TYPE.COLUMN) {
+                    this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
+                } else if (rangeType === RANGE_TYPE.ROW) {
+                    this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU);
+                } else {
+                    this._contextMenuService.triggerContextMenu(event, MenuPosition.CONTEXT_MENU);
                 }
             }
         });

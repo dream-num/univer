@@ -1,6 +1,7 @@
 import numfmt from '@univerjs/base-numfmt-engine';
 import {
     Disposable,
+    INTERCEPTOR_POINT,
     LifecycleStages,
     Nullable,
     ObjectMatrix,
@@ -108,40 +109,35 @@ export class NumfmtService extends Disposable {
      * @private
      * @memberof NumfmtService
      */
-    private _initInterceptorEditorStart(
-        cell: any,
-        location: {
-            worksheet: Worksheet;
-            workbook: Workbook;
-            workbookId: string;
-            worksheetId: string;
-            row: number;
-            col: number;
-        },
-        next: () => any
-    ) {
-        const row = location.row;
-        const col = location.col;
-        const numfmtCell = this.getValue(location.workbookId, location.worksheetId, row, col);
+    private _initInterceptorEditorStart() {
+        this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.BEFORE_CELL_EDIT, {
+            handler: (value, context, next) => {
+                const row = context.row;
+                const col = context.col;
+                const numfmtCell = this.getValue(context.workbookId, context.worksheetId, row, col);
         if (numfmtCell) {
             const type = getPatternType(numfmtCell.pattern);
             switch (type) {
-                case 'date':
-                case 'time':
-                case 'datetime': {
-                    return location.worksheet.getCell(row, col);
-                }
                 case 'scientific':
                 case 'percent':
                 case 'currency':
+                        case 'grouped':
                 case 'number': {
-                    return location.worksheet.getCellRaw(row, col);
+                            // remove the style atr
+                            const cell = context.worksheet.getCellRaw(row, col);
+                            return cell ? filterAtr(cell, ['s']) : cell;
                 }
+                        case 'date':
+                        case 'time':
+                        case 'datetime':
                 default: {
-                    return next && next();
+                            return next && next(value);
                 }
             }
         }
+                return next(value);
+            },
+        });
     }
 
     /**
@@ -209,3 +205,17 @@ export class NumfmtService extends Disposable {
 }
 
 const getModelKey = (workbookId: string, worksheetId: string) => `${workbookId}_${worksheetId}`;
+const filterAtr = (obj: Record<any, any>, filterKey: string[]) => {
+    const keys = Object.keys(obj).filter((key) => !filterKey.includes(key));
+    return keys.reduce(
+        (pre, cur) => {
+            pre[cur] = obj[cur];
+            return pre;
+        },
+        {} as Record<any, any>
+    );
+};
+
+function isNumeric(str: string) {
+    return /^-?\d+(\.\d+)?$/.test(str);
+}

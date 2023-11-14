@@ -48,6 +48,7 @@ export function DeleteRangeMoveLeftMenuItemFactory(): IMenuButtonItem {
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveLeft',
+        icon: 'DeleteCellShiftLeft',
         positions: [DELETE_RANGE_MENU_ID],
     };
 }
@@ -58,6 +59,7 @@ export function DeleteRangeMoveUpMenuItemFactory(): IMenuButtonItem {
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveUp',
+        icon: 'DeleteCellShiftUp',
         positions: [DELETE_RANGE_MENU_ID],
     };
 }

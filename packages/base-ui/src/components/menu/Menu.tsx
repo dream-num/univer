@@ -248,7 +248,6 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
 
     const renderSubItemsType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
-        console.log(item);
 
         return (
             <DesignSubMenu

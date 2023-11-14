@@ -70,6 +70,27 @@ export function Palette(props: IProps) {
             colors: ['boxShadowBase', 'boxShadowLg'],
         },
         {
+            title: 'Breakpoint',
+            colors: ['breakpointXs', 'breakpointSm', 'breakpointBase', 'breakpointLg'],
+        },
+        {
+            title: 'Loop Color',
+            colors: [
+                'loopColor1',
+                'loopColor2',
+                'loopColor3',
+                'loopColor4',
+                'loopColor5',
+                'loopColor6',
+                'loopColor7',
+                'loopColor8',
+                'loopColor9',
+                'loopColor10',
+                'loopColor11',
+                'loopColor12',
+            ],
+        },
+        {
             title: 'Ramu / 瑞木 / Red',
             colors: generateColors('red', 9),
         },

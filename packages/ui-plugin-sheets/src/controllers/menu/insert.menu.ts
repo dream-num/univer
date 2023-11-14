@@ -20,7 +20,7 @@ export function ColInsertMenuItemFactory(): IMenuSelectorItem<string> {
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
-        icon: 'ClearFormat',
+        icon: 'Insert',
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
     };
 }
@@ -31,7 +31,7 @@ export function RowInsertMenuItemFactory(): IMenuSelectorItem<string> {
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
-        icon: 'ClearFormat',
+        icon: 'Insert',
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
     };
 }
@@ -42,7 +42,7 @@ export function CellInsertMenuItemFactory(): IMenuSelectorItem<string> {
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
-        icon: 'ClearFormat',
+        icon: 'Insert',
         positions: [MenuPosition.CONTEXT_MENU],
     };
 }
@@ -54,6 +54,7 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
         id: InsertRowBeforeCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertRowBefore',
+        icon: 'InsertRowAbove',
         positions: [ROW_INSERT_MENU_ID, CELL_INSERT_MENU_ID],
         hidden$: new Observable((observer) => {
             // if there are multi selections this item should be hidden
@@ -70,6 +71,7 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
         type: MenuItemType.BUTTON,
         positions: [ROW_INSERT_MENU_ID],
         title: 'rightClick.insertRow',
+        icon: 'InsertRowBelow',
         hidden$: new Observable((observer) => {
             // if there are multi selections this item should be hidden
             const selections = selectionManager.getSelections();
@@ -85,6 +87,7 @@ export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
         type: MenuItemType.BUTTON,
         positions: [COL_INSERT_MENU_ID, CELL_INSERT_MENU_ID],
         title: 'rightClick.insertColumnBefore',
+        icon: 'LeftInsertColumn',
         hidden$: new Observable((observer) => {
             // if there are multi selections this item should be hidden
             const selections = selectionManager.getSelections();
@@ -100,6 +103,7 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
         type: MenuItemType.BUTTON,
         positions: [COL_INSERT_MENU_ID],
         title: 'rightClick.insertColumn',
+        icon: 'RightInsertColumn',
         hidden$: new Observable((observer) => {
             // if there are multi selections this item should be hidden
             const selections = selectionManager.getSelections();
@@ -113,6 +117,7 @@ export function InsertRangeMoveRightMenuItemFactory(): IMenuButtonItem {
         id: InsertRangeMoveRightCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveRight',
+        icon: 'InsertCellShiftRight',
         positions: [CELL_INSERT_MENU_ID],
     };
 }
@@ -122,6 +127,7 @@ export function InsertRangeMoveDownMenuItemFactory(): IMenuButtonItem {
         id: InsertRangeMoveDownCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.moveDown',
+        icon: 'InsertCellDown',
         positions: [CELL_INSERT_MENU_ID],
     };
 }

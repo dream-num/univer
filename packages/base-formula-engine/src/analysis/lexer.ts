@@ -97,7 +97,7 @@ export class LexerTreeBuilder extends Disposable {
         return this._nodeMaker(formulaString, undefined, index);
     }
 
-    sequenceNodeBuilder(formulaString: string) {
+    sequenceNodesBuilder(formulaString: string) {
         const sequenceArray = this._getSequenceArray(formulaString);
         if (sequenceArray.length === 0) {
             return;

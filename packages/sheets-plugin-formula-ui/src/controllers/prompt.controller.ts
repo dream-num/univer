@@ -1,5 +1,5 @@
-import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/base-docs';
-import { FormulaEngineService, IFunctionInfo, LexerNode } from '@univerjs/base-formula-engine';
+import { TextSelectionManagerService } from '@univerjs/base-docs';
+import { FormulaEngineService, IFunctionInfo, ISequenceNode, sequenceNodeType } from '@univerjs/base-formula-engine';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -17,6 +17,7 @@ import {
     LocaleService,
     Nullable,
     OnLifecycle,
+    ThemeService,
 } from '@univerjs/core';
 import { EditorBridgeService, getEditorObject, IEditorBridgeService } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
@@ -38,6 +39,18 @@ interface IFunctionPanelParam {
 
 @OnLifecycle(LifecycleStages.Starting, PromptController)
 export class PromptController extends Disposable {
+    private _formulaRefColors: string[] = [];
+
+    private _formulaRefColorIndex: number = 0;
+
+    private _currentRefIndex: number = -1;
+
+    private _stringColor = '';
+
+    private _numberColor = '';
+
+    private _arrayColor = '';
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
@@ -47,7 +60,7 @@ export class PromptController extends Disposable {
         @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -57,6 +70,31 @@ export class PromptController extends Disposable {
     private _initialize(): void {
         this._initialCursorSync();
         this._initAcceptFormula();
+
+        this._initialFormulaTheme();
+    }
+
+    private _initialFormulaTheme() {
+        const style = this._themeService.getCurrentTheme();
+
+        this._formulaRefColors = [
+            style.purple400,
+            style.gold400,
+            style.magenta300,
+            style.jiqing600,
+            style.orange400,
+            style.grey800,
+            style.hyacinth700,
+            style.red700,
+            style.verdancy800,
+            style.yellow800,
+        ];
+
+        this._numberColor = style.blue500;
+
+        this._stringColor = style.green600;
+
+        this._arrayColor = style.magenta600;
     }
 
     private _initialCursorSync() {
@@ -181,13 +219,12 @@ export class PromptController extends Disposable {
 
         const dataStream = body.dataStream;
 
-        const lexerNode = this._formulaEngineService.builderLexerTree(dataStream);
+        const sequenceNodes = this._formulaEngineService.buildSequenceNodes(dataStream);
 
-        if (lexerNode == null) {
+        if (sequenceNodes == null || sequenceNodes.length === 0) {
             body.textRuns = [];
         } else {
-            const textRuns: ITextRun[] = [];
-            this._buildTextRuns(lexerNode, textRuns);
+            const textRuns: ITextRun[] = this._buildTextRuns(sequenceNodes);
             body.textRuns = textRuns;
         }
 
@@ -200,45 +237,42 @@ export class PromptController extends Disposable {
      *
      * @returns
      */
-    private _buildTextRuns(lexerNode: LexerNode, textRuns: ITextRun[] = [], index = 0) {
-        const sum = [];
-        // function treeWalker(tree, sum) {
-        //     if (typeof tree === 'string') {
-        //         sum.push(tree);
-        //         return;
-        //     }
-        //     if (!['R_1', 'P_1', 'L_1'].includes(tree.token)) {
-        //         sum.push(tree.token);
-        //     }
-        //     const children = tree.children;
-        //     for (child of children) {
-        //         treeWalker(child, sum);
-        //     }
-        // }
+    private _buildTextRuns(sequenceNodes: Array<ISequenceNode | string>) {
+        const textRuns: ITextRun[] = [];
+        let refIndex = 0;
+        for (const node of sequenceNodes) {
+            if (typeof node === 'string') {
+                continue;
+            }
 
-        // function staticSum(sum) {
-        //     let count = 0;
-        //     for (const item of sum) {
-        //         console.log(item, item.length);
-        //         count += item.length;
-        //     }
-        //     return count;
-        // }
+            const { startIndex, endIndex, nodeType } = node;
+            let themeColor = '';
+            if (nodeType === sequenceNodeType.REFERENCE) {
+                const colorIndex = refIndex % this._formulaRefColors.length;
+                themeColor = this._formulaRefColors[colorIndex];
+                refIndex++;
+            } else if (nodeType === sequenceNodeType.NUMBER) {
+                themeColor = this._numberColor;
+            } else if (nodeType === sequenceNodeType.STRING) {
+                themeColor = this._stringColor;
+            } else if (nodeType === sequenceNodeType.ARRAY) {
+                themeColor = this._arrayColor;
+            }
 
-        // function coSum(sum) {
-        //     let co = '';
-        //     for (const item of sum) {
-        //         co += item;
-        //     }
-        //     return co;
-        // }
+            if (themeColor.length > 0) {
+                textRuns.push({
+                    st: startIndex + 1,
+                    ed: endIndex + 1,
+                    ts: {
+                        cl: {
+                            rgb: themeColor,
+                        },
+                    },
+                });
+            }
+        }
 
-        // treeWalker(temp1, sum);
-
-        // staticSum(sum);
-
-        // coSum(sum);
-        return [];
+        return textRuns;
     }
 
     private _refreshEditorObject() {

@@ -138,6 +138,14 @@ export class FormulaEngineService extends Disposable {
         return lexerNode as LexerNode;
     }
 
+    buildSequenceNodes(formulaString: string) {
+        return this.lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+    }
+
+    getCurrentParamIndex(formulaString: string, index: number) {
+        return this.lexerTreeBuilder.getCurrentParamIndex(formulaString, index);
+    }
+
     /**
      *
      * @param unitId
@@ -195,7 +203,7 @@ export class FormulaEngineService extends Disposable {
         // this.lexerTreeBuilder.suffixExpressionHandler(lexerNode); // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
         console.log('lexerNode', (lexerNode as LexerNode).serialize());
 
-        console.log('sequence', this.lexerTreeBuilder.sequenceNodeBuilder(formulaString));
+        console.log('sequence', this.lexerTreeBuilder.sequenceNodesBuilder(formulaString));
 
         console.log('index', this.lexerTreeBuilder.getCurrentParamIndex(formulaString, 73));
 

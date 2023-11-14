@@ -54,35 +54,35 @@ export const StatusBar = () => {
         return () => {
             subscription.unsubscribe();
         };
-    }, [statusBarService, statistics]);
+    }, [statusBarService]);
+
+    const handleResize = () => {
+        const newSingleState = window.innerWidth < SINGLE_MODE_WIDTH;
+        if (isSingle !== newSingleState) {
+            if (newSingleState) {
+                // keep the items hide except the first show item
+                const firstIndex = statistics.findIndex((item) => item.show);
+                const newStatistics = statistics.map((stat, index) => {
+                    if (index === firstIndex) {
+                        stat.show = true;
+                    } else {
+                        stat.show = false;
+                    }
+                    return stat;
+                });
+                setStatistics(newStatistics);
+            }
+            setIsSingle(newSingleState);
+        }
+    };
 
     useEffect(() => {
-        const handleResize = () => {
-            const newSingleState = window.innerWidth < SINGLE_MODE_WIDTH;
-            if (isSingle !== newSingleState) {
-                if (newSingleState) {
-                    // keep the items hide except the first show item
-                    const firstIndex = statistics.findIndex((item) => item.show);
-                    const newStatistics = statistics.map((stat, index) => {
-                        if (index === firstIndex) {
-                            stat.show = true;
-                        } else {
-                            stat.show = false;
-                        }
-                        return stat;
-                    });
-                    setStatistics(newStatistics);
-                }
-                setIsSingle(newSingleState);
-            }
-        };
-
         window.addEventListener('resize', handleResize);
 
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, [isSingle, statistics]);
+    }, []);
 
     return (
         show && (
@@ -100,17 +100,17 @@ export const StatusBar = () => {
                         <>
                             <div className={styles.statisticListRow}>
                                 {showList.slice(0, 3).map((item) => (
-                                    <CopyableStatisticItem {...item} />
+                                    <CopyableStatisticItem key={item.name} {...item} />
                                 ))}
                             </div>
                             <div className={styles.statisticListRow}>
                                 {showList.slice(3).map((item) => (
-                                    <CopyableStatisticItem {...item} />
+                                    <CopyableStatisticItem key={item.name} {...item} />
                                 ))}
                             </div>
                         </>
                     ) : (
-                        showList.map((item) => <CopyableStatisticItem {...item} />)
+                        showList.map((item) => <CopyableStatisticItem key={item.name} {...item} />)
                     )}
                 </div>
                 <Dropdown

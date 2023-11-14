@@ -21,7 +21,6 @@ export class StatusBarController extends Disposable {
 
     private _init(): void {
         this._registerSelectionListener();
-        this._listenStatusChange();
     }
 
     private _registerSelectionListener(): void {
@@ -61,24 +60,23 @@ export class StatusBarController extends Disposable {
                 if (!executor) {
                     return undefined;
                 }
+                const res = executor?.calculate(...refs) as BaseValueObject;
+                if (!res.getValue) {
+                    return undefined;
+                }
                 return {
                     func: f,
                     value: (executor?.calculate(...refs) as BaseValueObject).getValue(),
                 };
             });
-            if (calcResult.some((r) => r === undefined)) {
+            if (calcResult.every((r) => r === undefined)) {
                 return;
             }
-            this._statusBarService.setState(calcResult as IStatusBarServiceStatus);
+            const availableResult = calcResult.filter((r) => r !== undefined);
+            this._statusBarService.setState(availableResult as IStatusBarServiceStatus);
         } else {
             this._statusBarService.setState(null);
         }
-    }
-
-    private _listenStatusChange() {
-        this._statusBarService.state$.subscribe((status) => {
-            console.error(status);
-        });
     }
 
     private _isSingleCell(range: IRange) {

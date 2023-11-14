@@ -1,12 +1,15 @@
 @statistic-menu-value-width: 55px;
-.statusBar {
+
+.status-bar {
     display: flex;
     align-items: center;
     max-width: 332px;
+
     &.single-mode {
         max-width: 136px;
     }
 }
+
 .statistic {
     &-list {
         display: flex;
@@ -29,7 +32,6 @@
     &-item {
         color: rgb(var(--grey-600));
         text-align: center;
-        font-family: Source Han Sans CN;
         font-size: 12px;
         font-style: normal;
         font-weight: 400;
@@ -40,6 +42,7 @@
         justify-content: start;
         cursor: default;
     }
+
     &-picker {
         width: 196px;
         padding: var(--padding-base);
@@ -53,11 +56,13 @@
         align-items: center;
         gap: var(--margin-sm);
     }
+
     &-picker-item {
         display: flex;
         align-items: center;
         justify-content: start;
     }
+
     &-more {
         width: 24px;
         height: 24px;
@@ -67,6 +72,7 @@
         justify-content: center;
         border-radius: 4px;
         transform: rotate(90deg);
+
         &:hover {
             background: rgb(var(--grey-300, #E8E8E8));
         }

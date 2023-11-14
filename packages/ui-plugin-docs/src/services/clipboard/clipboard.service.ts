@@ -49,8 +49,8 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const text = await clipboardItem.getType(PLAIN_TEXT_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text());
         const html = await clipboardItem.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text());
 
-        console.log(text);
-        console.log(html);
+        // console.log(text);
+        // console.log(html);
         if (!html) {
             // TODO: @JOCS, Parsing paragraphs and sections
             return {

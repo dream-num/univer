@@ -7,11 +7,11 @@ import { Disposable, IDocumentBody, IUniverInstanceService, toDisposable } from 
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
 import HtmlToUDMService from './html-to-udm/converter';
-import PastePluginFeishu from './html-to-udm/paste-plugins/plugin-feishu';
+import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';
 import PastePluginWord from './html-to-udm/paste-plugins/plugin-word';
 
 HtmlToUDMService.use(PastePluginWord);
-HtmlToUDMService.use(PastePluginFeishu);
+HtmlToUDMService.use(PastePluginLark);
 
 export interface IClipboardPropertyItem {}
 
@@ -48,6 +48,8 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const clipboardItem = clipboardItems[0];
         const text = await clipboardItem.getType(PLAIN_TEXT_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text());
         const html = await clipboardItem.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text());
+
+        console.log(text);
         console.log(html);
         if (!html) {
             // TODO: @JOCS, Parsing paragraphs and sections

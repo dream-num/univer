@@ -103,7 +103,7 @@ export interface IDeleteCommandParams {
 }
 
 /**
- * The command to delete text.
+ * The command to delete text. mainly used in BACKSPACE.
  */
 export const DeleteCommand: ICommand<IDeleteCommandParams> = {
     id: 'doc.command.delete-text',
@@ -131,6 +131,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,

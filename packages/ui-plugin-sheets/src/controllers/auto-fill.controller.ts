@@ -21,6 +21,7 @@ import {
     APPLY_FUNCTIONS,
     APPLY_TYPE,
     APPLY_TYPE_IN_USE,
+    DATA_TYPE,
     ICopyDataPiece,
     IRuleConfirmedData,
 } from '../services/auto-fill/type';
@@ -32,6 +33,7 @@ export class AutoFillController extends Disposable {
     private _beforeApplyData: Array<Array<Nullable<ICellData>>> = [];
     private _applyType: APPLY_TYPE_IN_USE = APPLY_TYPE.SERIES;
     private _hasFillingStyle: boolean = true;
+    private _copyData: ICopyDataPiece[] = [];
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
@@ -378,6 +380,8 @@ export class AutoFillController extends Disposable {
         } else if (destRange.endColumn > sourceRange.endColumn) {
             direction = Direction.RIGHT;
             applyRange.startColumn = sourceRange.endColumn + 1;
+        } else {
+            return;
         }
         this._direction = direction;
 
@@ -397,7 +401,14 @@ export class AutoFillController extends Disposable {
         }
         this._beforeApplyData = applyData;
         this._autoFillService.setRanges(destRange, sourceRange, applyRange);
-        this._autoFillService.setApplyType(APPLY_TYPE.SERIES);
+        this._copyData = this._getCopyData(sourceRange, direction);
+        if (this._hasSeries(this._copyData)) {
+            this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, false);
+            this._autoFillService.setApplyType(APPLY_TYPE.SERIES);
+        } else {
+            this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, true);
+            this._autoFillService.setApplyType(APPLY_TYPE.COPY);
+        }
     }
 
     // auto fill entry
@@ -425,7 +436,7 @@ export class AutoFillController extends Disposable {
             endColumn: applyEndColumn,
         } = applyRange;
 
-        const copyData = this._getCopyData(sourceRange, direction);
+        const copyData = this._copyData;
 
         let csLen;
         if (direction === Direction.DOWN || direction === Direction.UP) {
@@ -508,6 +519,18 @@ export class AutoFillController extends Disposable {
             workbookId: this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
             worksheetId: this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
             applyMergeRanges,
+        });
+    }
+
+    private _hasSeries(copyData: ICopyDataPiece[]) {
+        return copyData.some((copyDataPiece) => {
+            const res = Object.keys(copyDataPiece).some((type) => {
+                if (copyDataPiece[type as DATA_TYPE]?.length && type !== DATA_TYPE.OTHER) {
+                    return true;
+                }
+                return false;
+            });
+            return res;
         });
     }
 }

@@ -13,6 +13,13 @@ import {
     sortRulesFactory,
 } from '@univerjs/core';
 
+function hasIntersectionBetweenTextRuns(textRun1: ITextRun, textRun2: ITextRun) {
+    const { st: firstSt, ed: firstEd } = textRun1;
+    const { st: secondSt, ed: secondEd } = textRun2;
+
+    return firstEd >= secondSt && secondEd >= firstSt;
+}
+
 export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
 
@@ -29,7 +36,7 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
         }
 
         const peak = results.pop()!;
-        if (isSameStyleTextRun(textRun, peak)) {
+        if (isSameStyleTextRun(textRun, peak) && hasIntersectionBetweenTextRuns(peak, textRun)) {
             results.push({
                 ...textRun,
                 st: peak.st,

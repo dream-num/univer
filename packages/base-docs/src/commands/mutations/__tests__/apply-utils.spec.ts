@@ -368,5 +368,31 @@ describe('example', () => {
             expect(body?.textRuns[1].ts?.bl).toBe(BooleanNumber.FALSE);
             expect(body?.textRuns[2].ts?.bl).toBe(BooleanNumber.FALSE);
         });
+
+        it(`If textRuns doesn't intersect, they shouldn't be merged`, async () => {
+            const updateTextRuns = [
+                {
+                    st: 0,
+                    ed: 10,
+                    ts: {
+                        bl: BooleanNumber.FALSE,
+                    },
+                },
+            ];
+            insertTextRuns(
+                body as IDocumentBody,
+                {
+                    textRuns: updateTextRuns,
+                } as unknown as IDocumentBody,
+                10,
+                25
+            );
+
+            expect(body?.textRuns.length).toBe(4);
+            expect(body?.textRuns[0].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns[1].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns[2].ts?.bl).toBe(BooleanNumber.FALSE);
+            expect(body?.textRuns[3].ts?.bl).toBe(BooleanNumber.FALSE);
+        });
     });
 });

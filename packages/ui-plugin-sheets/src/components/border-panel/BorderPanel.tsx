@@ -129,6 +129,10 @@ export function BorderPanel(props: IBorderPanelProps) {
         return Icon && <Icon extend={{ colorChannel1: 'rgb(var(--primary-color))' }} />;
     }
 
+    function stopPropagation(e: React.MouseEvent) {
+        e.stopPropagation();
+    }
+
     return (
         <section className={styles.uiPluginSheetsBorderPanel}>
             <div className={styles.uiPluginSheetsBorderPanelPosition}>
@@ -150,12 +154,12 @@ export function BorderPanel(props: IBorderPanelProps) {
                             offset: [0, 18],
                         }}
                         overlay={
-                            <section className={styles.uiPluginSheetsBorderPanelBoard}>
+                            <section className={styles.uiPluginSheetsBorderPanelBoard} onClick={stopPropagation}>
                                 <ColorPicker onChange={(value) => handleClick({ value }, BorderPanelType.COLOR)} />
                             </section>
                         }
                     >
-                        <a className={styles.uiPluginSheetsBorderPanelButton} onClick={(e) => e.stopPropagation()}>
+                        <a className={styles.uiPluginSheetsBorderPanelButton} onClick={stopPropagation}>
                             <PaintBucket extend={{ colorChannel1: 'rgb(var(--primary-color))' }} />
                             <span className={styles.uiPluginSheetsBorderPanelMoreIcon}>
                                 <MoreDownSingle />
@@ -170,20 +174,22 @@ export function BorderPanel(props: IBorderPanelProps) {
                             offset: [0, 18],
                         }}
                         overlay={
-                            <Menu>
-                                {BORDER_SIZE_CHILDREN.map((item) => (
-                                    <MenuItem
-                                        key={item.value}
-                                        eventKey={item.value.toString()}
-                                        onClick={() => handleClick({ value: item.value }, BorderPanelType.STYLE)}
-                                    >
-                                        <BorderLine type={item.value} />
-                                    </MenuItem>
-                                ))}
-                            </Menu>
+                            <section onClick={stopPropagation}>
+                                <Menu>
+                                    {BORDER_SIZE_CHILDREN.map((item) => (
+                                        <MenuItem
+                                            key={item.value}
+                                            eventKey={item.value.toString()}
+                                            onClick={() => handleClick({ value: item.value }, BorderPanelType.STYLE)}
+                                        >
+                                            <BorderLine type={item.value} />
+                                        </MenuItem>
+                                    ))}
+                                </Menu>
+                            </section>
                         }
                     >
-                        <a className={styles.uiPluginSheetsBorderPanelButton} onClick={(e) => e.stopPropagation()}>
+                        <a className={styles.uiPluginSheetsBorderPanelButton} onClick={stopPropagation}>
                             <BorderLine type={BorderStyleTypes.THIN} />
                             <span className={styles.uiPluginSheetsBorderPanelMoreIcon}>
                                 <MoreDownSingle />

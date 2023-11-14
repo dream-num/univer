@@ -557,9 +557,6 @@ importers:
 
   packages/base-ui:
     dependencies:
-      '@rc-component/trigger':
-        specifier: ^1.18.1
-        version: 1.18.1(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/base-render':
         specifier: workspace:*
         version: link:../base-render

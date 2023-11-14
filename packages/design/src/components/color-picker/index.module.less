@@ -53,6 +53,8 @@
     }
 
     &-handler {
+        transform: translateY(-1px);
+
         box-sizing: border-box;
         width: @default-handler-size;
         height: @default-handler-size;
@@ -110,7 +112,7 @@
     &-slider-container {
         display: flex;
         flex-direction: row-reverse;
-        gap: var(--margin-xs);
+        gap: var(--margin-sm);
 
         .color-picker-slider-group {
             flex: 1;

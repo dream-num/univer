@@ -1,4 +1,3 @@
-import { ptToPx } from '@univerjs/base-render';
 import { BooleanNumber, ITextStyle } from '@univerjs/core';
 
 export default function extractNodeStyle(node: HTMLElement): ITextStyle {
@@ -41,7 +40,9 @@ export default function extractNodeStyle(node: HTMLElement): ITextStyle {
             case 'font-size': {
                 const fontSize = parseInt(cssValue);
                 // TODO: @JOCS, hand other CSS value unit, rem, em, pt, %
-                docStyles.fs = /pt$/.test(cssValue) ? ptToPx(fontSize) : fontSize;
+                // 1 pixel * 0.75 = 1 pt
+                const PX_TO_PT_RATIO = 0.75;
+                docStyles.fs = /pt$/.test(cssValue) ? fontSize / PX_TO_PT_RATIO : fontSize;
 
                 break;
             }

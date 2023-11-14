@@ -135,7 +135,7 @@ describe('Test set frozen commands', () => {
                     ySplit: 1,
                 });
 
-                // undo;
+                // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(workbook.getSheetBySheetId(targetSheetId)?.getConfig().freeze).toEqual(originFreeze);
                 // redo

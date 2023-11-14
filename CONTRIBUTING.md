@@ -8,7 +8,7 @@ Welcome, and thank you for your interest in contributing to Univer!
 
 ## Contributing Code
 
-### Install Dependencies
+### Install dependencies
 
 Univer requires Node.js >= 18.17.0. We recommend using nvm or fnm to switch between different versions of Node.js.
 
@@ -24,7 +24,7 @@ pnmp install
 
 ```
 
-### Start Dev Server
+### Start dev server
 
 ```shell
 pnpm dev:sheet # start sheet dev server
@@ -36,15 +36,7 @@ pnpm dev:slide # start slide dev server
 
 Please refer to the architecture doc. The [Chinese version](./docs/zh/achitecture.md).
 
-### Debugging
-
-We provided some Visual Studio Code (vscode) tasks to help you debug in vscode.
-
-After stating dev server, you can launch Edge or Chrome instance and debug in vscode.
-
-![image](https://github.com/dream-num/univer/assets/12122021/25da436c-2155-4ea0-8646-ff3b3dc23112)
-
-### Source Code Organization
+### Source code organization
 
 The file structure of a plugin should be organized as follows:
 
@@ -75,7 +67,7 @@ During the refactoring process, it is recommended to remove legacy folders such 
 
 Avoid creating barrel imports (index.ts) unless it is the main root index.ts file of a plugin.
 
-### Naming Conventions
+### Naming conventions
 
 To ensure code quality and consistency, please adhere to the following guidelines:
 
@@ -85,7 +77,7 @@ To ensure code quality and consistency, please adhere to the following guideline
 - Resolve all ESLint issues that are identified in the code.
 - Do use conventional type names including .service, .controller, .menu, .command, .mutation, and .operation. Invent additional type names if you must but take care not to create too many.
 
-### Submitting Pull Requests
+### Submitting pull requests
 
 Before merging a pull request, please make sure the following requirements are met:
 
@@ -104,7 +96,27 @@ pnpm storybook
 
 When a new pull request is submitted, a Storybook deployment will be automatically generated. You can view the Storybook deployment by clicking the "Preview" link in the "View Storybook" section.
 
-### Clean Code
+### Debugging
+
+We provided some Visual Studio Code (vscode) tasks to help you debug in vscode.
+
+After stating dev server, you can launch Edge or Chrome instance and debug in vscode, and you can debug directly in vscode!
+
+![image](https://github.com/dream-num/univer/assets/12122021/25da436c-2155-4ea0-8646-ff3b3dc23112)
+
+### Unit test
+
+To ensure the quality of the code, we require that all code must be covered by unit tests. We use vitest as the unit test framework. You can use the following command to run unit tests:
+
+```shell
+pnpm test
+```
+
+With the help of vscode and its rich ecosystem, you could directly debug unit tests in vscode. Please install the extension we recommend, and you will see the debug button in the codelens.
+
+![](./docs/img/debug-unit-test.png)
+
+### Clean code
 
 > Programs are meant to be ready by humans and only icidentally for computers to execute.
 

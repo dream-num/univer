@@ -41,30 +41,7 @@ export class SheetContextMenuController extends Disposable {
         const objects = getSheetObject(this._currentUniverService, this._renderManagerService);
         if (!objects) {
             return;
-            // throw new Error('Rendering should be done when SheetContextMenuController initialized.');
         }
-
-        // const scene = objects.scene;
-
-        // const sceneObserver = scene.onPointerDownObserver.add((event) => {
-        //     if (event.button !== 2) {
-        //         return;
-        //     }
-
-        //     const { offsetX, offsetY } = event;
-
-        //     const object = scene.pick(Vector2.FromArray([offsetX, offsetY])) as BaseObject;
-
-        //     if (object.oKey === SHEET_VIEW_KEY.MAIN) {
-        //         this._contextMenuService.triggerContextMenu(event, MenuPosition.CONTEXT_MENU);
-        //     } else if (object.oKey === SHEET_VIEW_KEY.ROW) {
-        //         this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU);
-        //     } else if (object.oKey === SHEET_VIEW_KEY.COLUMN) {
-        //         this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
-        //     }
-        // });
-
-        // this.disposeWithMe(toDisposable(() => scene.onPointerDownObserver.remove(sceneObserver)));
 
         const spreadsheetPointerDownObserver = objects.spreadsheet.onPointerDownObserver;
         const spreadsheetObserver = spreadsheetPointerDownObserver.add((event) => {

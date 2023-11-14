@@ -7,7 +7,7 @@ import { MoreFunctionsOperation } from '../commands/operations/more-functions.op
 export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: InsertFunctionOperation.id,
-        icon: 'UnderlineSingle',
+        icon: 'FunctionSingle',
         tooltip: 'formula.insert.tooltip',
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         type: MenuItemType.SELECTOR,

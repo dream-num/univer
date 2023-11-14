@@ -31,6 +31,7 @@ export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         id: AddWorksheetMergeAllCommand.id,
         type: MenuItemType.BUTTON,
         title: 'merge.all',
+        icon: 'MergeAllSingle',
         positions: [AddWorksheetMergeCommand.id],
     };
 }
@@ -42,6 +43,7 @@ export function CellMergeVerticalMenuItemFactory(accessor: IAccessor): IMenuButt
         id: AddWorksheetMergeVerticalCommand.id,
         type: MenuItemType.BUTTON,
         title: 'merge.vertical',
+        icon: 'VerticalIntegrationSingle',
         positions: [AddWorksheetMergeCommand.id],
     };
 }
@@ -53,6 +55,7 @@ export function CellMergeHorizontalMenuItemFactory(accessor: IAccessor): IMenuBu
         id: AddWorksheetMergeHorizontalCommand.id,
         type: MenuItemType.BUTTON,
         title: 'merge.horizontal',
+        icon: 'HorizontalMergeSingle',
         positions: [AddWorksheetMergeCommand.id],
     };
 }
@@ -64,6 +67,7 @@ export function CellMergeCancelMenuItemFactory(accessor: IAccessor): IMenuButton
         id: RemoveWorksheetMergeCommand.id,
         type: MenuItemType.BUTTON,
         title: 'merge.cancel',
+        icon: 'CancelMergeSingle',
         positions: [AddWorksheetMergeCommand.id],
     };
 }

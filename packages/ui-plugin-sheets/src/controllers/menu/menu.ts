@@ -576,6 +576,7 @@ export function ResetBackgroundColorMenuItemFactory(): IMenuButtonItem {
         id: ResetBackgroundColorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
+        icon: 'NoColor',
         positions: SetBackgroundColorCommand.id,
     };
 }
@@ -897,6 +898,7 @@ export function FitContentMenuItemFactory(): IMenuButtonItem {
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
+        icon: 'AutoHeight',
         title: 'rightClick.fitContent',
     };
 }
@@ -920,6 +922,7 @@ export function HideRowMenuItemFactory(): IMenuButtonItem {
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
+        icon: 'Hide',
         title: 'rightClick.hideSelectedRow',
     };
 }
@@ -930,6 +933,7 @@ export function HideColMenuItemFactory(): IMenuButtonItem {
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
+        icon: 'Hide',
         title: 'rightClick.hideSelectedColumn',
     };
 }
@@ -1038,6 +1042,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         id: SetRowHeightCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
+        icon: 'AdjustHeight',
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         label: {
             name: MENU_ITEM_INPUT_COMPONENT,
@@ -1080,6 +1085,7 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         id: SetColWidthCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
+        icon: 'AdjustWidth',
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         label: {
             name: MENU_ITEM_INPUT_COMPONENT,

@@ -88,28 +88,28 @@ export const BORDER_LINE_CHILDREN = [
     {
         label: 'borderLine.borderTop',
         suffix: {
-            name: 'UpBorderSingle',
+            name: 'UpBorder',
         },
         value: 'top',
     },
     {
         label: 'borderLine.borderBottom',
         suffix: {
-            name: 'DownBorderSingle',
+            name: 'DownBorder',
         },
         value: 'bottom',
     },
     {
         label: 'borderLine.borderLeft',
         suffix: {
-            name: 'LeftBorderSingle',
+            name: 'LeftBorder',
         },
         value: 'left',
     },
     {
         label: 'borderLine.borderRight',
         suffix: {
-            name: 'RightBorderSingle',
+            name: 'RightBorder',
         },
         value: 'right',
         border: true,
@@ -132,28 +132,28 @@ export const BORDER_LINE_CHILDREN = [
     {
         label: 'borderLine.borderOutside',
         suffix: {
-            name: 'OuterBorderSingle',
+            name: 'OuterBorder',
         },
         value: 'outside',
     },
     {
         label: 'borderLine.borderInside',
         suffix: {
-            name: 'InnerBorderSingle',
+            name: 'InnerBorder',
         },
         value: 'inside',
     },
     {
         label: 'borderLine.borderHorizontal',
         suffix: {
-            name: 'InnerBorderSingle',
+            name: 'InnerBorder',
         },
         value: 'horizontal',
     },
     {
         label: 'borderLine.borderVertical',
         suffix: {
-            name: 'InnerBorderSingle',
+            name: 'InnerBorder',
         },
         value: 'vertical',
     },

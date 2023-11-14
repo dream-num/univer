@@ -11,22 +11,22 @@ import { BorderPanelType, IBorderPanelProps } from './interface';
 const BORDER_LINE_CHILDREN = [
     {
         label: 'borderLine.borderTop',
-        icon: 'UpBorderSingle',
+        icon: 'UpBorder',
         value: 'top',
     },
     {
         label: 'borderLine.borderBottom',
-        icon: 'DownBorderSingle',
+        icon: 'DownBorder',
         value: 'bottom',
     },
     {
         label: 'borderLine.borderLeft',
-        icon: 'LeftBorderSingle',
+        icon: 'LeftBorder',
         value: 'left',
     },
     {
         label: 'borderLine.borderRight',
-        icon: 'RightBorderSingle',
+        icon: 'RightBorder',
         value: 'right',
     },
     {
@@ -41,22 +41,22 @@ const BORDER_LINE_CHILDREN = [
     },
     {
         label: 'borderLine.borderOutside',
-        icon: 'OuterBorderSingle',
+        icon: 'OuterBorder',
         value: 'outside',
     },
     {
         label: 'borderLine.borderInside',
-        icon: 'InnerBorderSingle',
+        icon: 'InnerBorder',
         value: 'inside',
     },
     {
         label: 'borderLine.borderHorizontal',
-        icon: 'InnerBorderSingle',
+        icon: 'InnerBorder',
         value: 'horizontal',
     },
     {
         label: 'borderLine.borderVertical',
-        icon: 'InnerBorderSingle',
+        icon: 'InnerBorder',
         value: 'vertical',
     },
 ];

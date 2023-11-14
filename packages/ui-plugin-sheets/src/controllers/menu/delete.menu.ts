@@ -15,7 +15,7 @@ export function DeleteRangeMenuItemFactory(): IMenuSelectorItem<string> {
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.delete',
-        icon: 'ClearFormat',
+        icon: 'Reduce',
         positions: [MenuPosition.CONTEXT_MENU],
     };
 }
@@ -25,6 +25,7 @@ export function RemoveColMenuItemFactory(): IMenuButtonItem {
         id: RemoveColCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
+        icon: 'DeleteColumn',
         positions: [DELETE_RANGE_MENU_ID, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.deleteSelectedColumn',
     };
@@ -35,6 +36,7 @@ export function RemoveRowMenuItemFactory(): IMenuButtonItem {
         id: RemoveRowCommand.id,
         group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.BUTTON,
+        icon: 'DeleteRow',
         positions: [DELETE_RANGE_MENU_ID, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.deleteSelectedRow',
     };

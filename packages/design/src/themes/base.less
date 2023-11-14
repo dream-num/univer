@@ -354,6 +354,12 @@
 @color-black: #35322b;
 @color-white: #ffffff;
 
+:export {
+    // 黑 / 白 / Black / White
+    --color-black: @color-black;
+    --color-white: @color-white;
+}
+
 // Box Shadow
 @box-shadow-base: 0 4px 12px rgba(@color-black, 0.08);
 @box-shadow-lg: 0 4px 24px 0 rgba(@color-black, 0.08);
@@ -402,10 +408,6 @@
 @font-size-xxs: 12px;
 
 :export {
-    // 黑 / 白 / Black / White
-    --color-black: @color-black;
-    --color-white: @color-white;
-
     // Box Shadow
     --box-shadow-base: @box-shadow-base;
     --box-shadow-lg: @box-shadow-lg;
@@ -451,4 +453,17 @@
     --font-size-sm: @font-size-sm;
     --font-size-xs: @font-size-xs;
     --font-size-xxs: @font-size-xxs;
+}
+
+// Breakpoint
+@breakpoint-xs: 768px;
+@breakpoint-sm: 1024px;
+@breakpoint-base: 1280px;
+@breakpoint-lg: 1536px;
+
+:export {
+    --breakpoint-xs: @breakpoint-xs;
+    --breakpoint-sm: @breakpoint-sm;
+    --breakpoint-base: @breakpoint-base;
+    --breakpoint-lg: @breakpoint-lg;
 }

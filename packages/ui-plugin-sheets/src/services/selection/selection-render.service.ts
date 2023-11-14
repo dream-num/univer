@@ -13,6 +13,7 @@ import {
     ISelectionWithCoordAndStyle,
     ISelectionWithStyle,
 } from '@univerjs/base-sheets';
+import { IPlatformService } from '@univerjs/base-ui';
 import {
     IRange,
     IRangeWithCoord,
@@ -138,7 +139,10 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     private _activeViewport!: Viewport;
 
-    constructor(@Inject(ThemeService) private readonly _themeService: ThemeService) {
+    constructor(
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @Inject(IPlatformService) private readonly _platformService: IPlatformService
+    ) {
         this._selectionStyle = getNormalSelectionStyle(this._themeService);
     }
 
@@ -473,7 +477,8 @@ export class SelectionRenderService implements ISelectionRenderService {
         }
 
         // In addition to pressing the ctrl or shift key, we must clear the previous selection
-        if (curControls.length > 0 && !evt.ctrlKey && !evt.shiftKey && !this._isShowPreviousEnable) {
+        const ctrlKey = this._platformService.isMac ? evt.metaKey : evt.ctrlKey;
+        if (curControls.length > 0 && !ctrlKey && !evt.shiftKey && !this._isShowPreviousEnable) {
             for (const control of curControls) {
                 control.dispose();
             }

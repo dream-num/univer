@@ -59,14 +59,18 @@ export function ContextMenu(props: IProps) {
             trigger={['contextMenu']}
             alignPoint
             overlay={
-                <Menu
-                    menuType={[menuType]}
-                    onOptionSelect={(params) => {
-                        const { label: commandId, value } = params;
-                        commandService && commandService.executeCommand(commandId as string, { value });
-                        setVisible(false);
-                    }}
-                />
+                menuType ? (
+                    <Menu
+                        menuType={[menuType]}
+                        onOptionSelect={(params) => {
+                            const { label: commandId, value } = params;
+                            commandService && commandService.executeCommand(commandId as string, { value });
+                            setVisible(false);
+                        }}
+                    />
+                ) : (
+                    <></>
+                )
             }
             onVisibleChange={handleVisibleChange}
         >

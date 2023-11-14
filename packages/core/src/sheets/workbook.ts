@@ -86,6 +86,10 @@ export class Workbook extends Disposable {
         return typeof range === 'string' || 'startRow' in range || 'row' in range;
     }
 
+    getSnapshot(): IWorkbookConfig {
+        return this._snapshot;
+    }
+
     getUnitId() {
         return this._unitId;
     }

@@ -1,10 +1,20 @@
 import { Plugin, PluginType } from '@univerjs/core';
-import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
+import { createIdentifier, Dependency, Inject, Injector } from '@wendellhu/redi';
 
+import { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
+import { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';
 import {
     createWebWorkerMessagePortOnMain,
     createWebWorkerMessagePortOnWorker,
-} from './services/implementations/web-worker-message-port';
+} from './services/implementations/web-worker-rpc.service';
+import {
+    IRemoteInstanceService,
+    IRemoteSyncService,
+    RemoteInstanceReplicaService,
+    RemoteInstanceServiceName,
+    RemoteSyncPrimaryService,
+    RemoteSyncServiceName,
+} from './services/remote-instance/remote-instance.service';
 import { ChannelClient, ChannelServer, fromModule, toModule } from './services/rpc/rpc.service';
 
 export interface IUniverRPCMainThreadPluginConfig {
@@ -34,11 +44,19 @@ export class UniverRPCMainThreadPlugin extends Plugin {
         const worker = new Worker(this._config.workerURL);
         const messageProtocol = createWebWorkerMessagePortOnMain(worker);
         const client = new ChannelClient(messageProtocol);
+        const server = new ChannelServer(messageProtocol);
 
-        // Register services / controllers here over RPC.
-        injector.add([ITestService, { useValue: toModule<ITestService>(client.getChannel('test')) }]);
-        const name = await this._injector.get<ITestService>(ITestService).getName();
-        console.log('debug', name);
+        const dependencies: Dependency[] = [
+            [DataSyncPrimaryController],
+            [
+                IRemoteInstanceService,
+                { useFactory: () => toModule<IRemoteInstanceService>(client.getChannel(RemoteInstanceServiceName)) },
+            ],
+            [IRemoteSyncService, { useClass: RemoteSyncPrimaryService }],
+        ];
+        dependencies.forEach((dependency) => injector.add(dependency));
+
+        server.registerChannel(RemoteSyncServiceName, fromModule(injector.get(IRemoteSyncService)));
     }
 }
 
@@ -57,17 +75,21 @@ export class UniverRPCWorkerThreadPlugin extends Plugin {
         super('UNIVER_RPC_WORKER_THREAD_PLUGIN');
     }
 
-    override onStarting(): void {
+    override onStarting(injector: Injector): void {
         const messageProtocol = createWebWorkerMessagePortOnWorker();
+        const client = new ChannelClient(messageProtocol);
         const server = new ChannelServer(messageProtocol);
 
-        server.registerChannel(
-            'test',
-            fromModule({
-                getName(): Promise<string> {
-                    return Promise.resolve('Univer');
-                },
-            })
-        );
+        const dependencies: Dependency[] = [
+            [DataSyncReplicaController],
+            [
+                IRemoteSyncService,
+                { useFactory: () => toModule<IRemoteSyncService>(client.getChannel(RemoteSyncServiceName)) },
+            ],
+            [IRemoteInstanceService, { useClass: RemoteInstanceReplicaService }],
+        ];
+        dependencies.forEach((dependency) => injector.add(dependency));
+
+        server.registerChannel(RemoteInstanceServiceName, fromModule(injector.get(IRemoteInstanceService)));
     }
 }

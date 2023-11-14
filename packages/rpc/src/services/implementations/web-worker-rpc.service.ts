@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Observable, shareReplay } from 'rxjs';
 
-import { IMessageProtocol } from '../rpc/rpc.service';
+import { IMessageProtocol, IRPCService } from '../rpc/rpc.service';
 
 /**
  * Generate an `IMessageProtocol` on the web worker.
@@ -40,3 +40,7 @@ export function createWebWorkerMessagePortOnMain(worker: Worker): IMessageProtoc
         }).pipe(shareReplay(1)),
     };
 }
+
+export class WebWorkerMainThreadRPCService implements IRPCService {}
+
+export class WebWorkerThreadRPCService implements IRPCService {}

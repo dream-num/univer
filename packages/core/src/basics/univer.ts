@@ -42,7 +42,7 @@ export class Univer {
     private _univerDoc: UniverDoc | null = null;
     private _univerSlide: UniverSlide | null = null;
 
-    private get _currentUniverService(): IUniverInstanceService {
+    private get _univerInstanceService(): IUniverInstanceService {
         return this._rootInjector.get(IUniverInstanceService);
     }
 
@@ -89,7 +89,7 @@ export class Univer {
         let workbook: Workbook;
         const addSheet = () => {
             workbook = this._univerSheet!.createSheet(config);
-            this._currentUniverService.addSheet(workbook);
+            this._univerInstanceService.addSheet(workbook);
         };
 
         if (!this._univerSheet) {
@@ -115,7 +115,7 @@ export class Univer {
         let doc: DocumentModel;
         const addDoc = () => {
             doc = this._univerDoc!.createDoc(config);
-            this._currentUniverService.addDoc(doc);
+            this._univerInstanceService.addDoc(doc);
         };
 
         if (!this._univerDoc) {
@@ -141,7 +141,7 @@ export class Univer {
         let slide: Slide;
         const addSlide = () => {
             slide = this._univerSlide!.createSlide(config);
-            this._currentUniverService.addSlide(slide);
+            this._univerInstanceService.addSlide(slide);
         };
 
         if (!this._univerSlide) {

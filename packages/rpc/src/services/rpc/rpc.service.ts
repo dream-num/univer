@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { RxDisposable } from '@univerjs/core';
+import { createIdentifier } from '@wendellhu/redi';
 import { BehaviorSubject, firstValueFrom, isObservable, Observable, of, Subscriber, Subscription } from 'rxjs';
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { filter, take, takeUntil } from 'rxjs/operators';
 
 /** This protocol is for transferring data from the two peer univer instance running in different locations. */
@@ -39,7 +39,7 @@ export function fromModule(module: unknown): IChannel {
         call<T>(method: string, args?: any): Promise<T> {
             const target = handler[method];
             if (typeof target === 'function') {
-                let res = target.apply(handler, args);
+                let res = target.apply(handler, [args]);
                 if (!(res instanceof Promise)) {
                     res = Promise.resolve(res);
                 }
@@ -401,3 +401,9 @@ export class ChannelServer extends RxDisposable implements IChannelServer {
         this._protocol.send(response);
     }
 }
+
+/**
+ * This service is for other service to register channels to the RPC framework.
+ */
+export interface IRPCService {}
+export const IRPCService = createIdentifier<IRPCService>('IRPCService');

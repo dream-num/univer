@@ -88,6 +88,8 @@ export interface IMutationInfo<T extends object = object> {
 
 export interface IExecutionOptions {
     local?: boolean;
+
+    [key: PropertyKey]: string | number | boolean | undefined;
 }
 
 export type CommandListener = (commandInfo: Readonly<ICommandInfo>, options?: IExecutionOptions) => void;

@@ -230,6 +230,7 @@ export class DocumentModel extends DocumentModelSimple {
 
     override updateDocumentId(unitId: string) {
         super.updateDocumentId(unitId);
+
         this._unitId = unitId;
     }
 

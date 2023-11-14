@@ -30,10 +30,11 @@ export function InsertApply(
         throw new Error('no body has changed');
     }
 
-    bodyModel.insert(insertBody, currentIndex);
+    // bodyModel.insert(insertBody, currentIndex);
 
     updateAttributeByInsert(body, insertBody, textLength, currentIndex);
 
+    bodyModel.reset(body);
     console.log('插入的model打印', bodyModel, textLength, currentIndex);
 }
 

@@ -93,12 +93,14 @@ export class RenderManagerService implements IRenderManagerService {
     private _createRender(unitId: string, engine: Engine, isMainScene: boolean = true): IRender {
         const existItem = this.getRenderById(unitId);
         let shouldDestroyEngine = true;
+
         if (existItem != null) {
             const existEngine = existItem.engine;
             if (existEngine === engine) {
                 shouldDestroyEngine = false;
             }
         }
+
         this._disposeItem(existItem, shouldDestroyEngine);
 
         const { width, height } = DEFAULT_SCENE_SIZE;

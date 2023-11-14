@@ -84,7 +84,7 @@ export class DataStreamTreeNode {
     }
 
     split(index: number) {
-        const { children, parent, startIndex, endIndex, nodeType, content = '' } = this.getProps();
+        const { children, parent, startIndex, nodeType, content = '' } = this.getProps();
 
         if (this.exclude(index)) {
             return;
@@ -152,14 +152,17 @@ export class DataStreamTreeNode {
         if (index == null) {
             return -1;
         }
+
         return index;
     }
 
     remove() {
         this.children = [];
+
         if (this.parent == null) {
             return;
         }
+
         this.parent.children.splice(this.getPositionInParent(), 1);
         this.parent = null;
     }
@@ -220,6 +223,7 @@ export class DataStreamTreeNode {
 
         for (let i = 0, len = this.content.length; i < len; i++) {
             const char = this.content[i];
+
             if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
                 this.blocks.push(this.startIndex + i);
             }

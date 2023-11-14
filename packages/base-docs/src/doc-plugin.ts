@@ -106,7 +106,7 @@ export class DocPlugin extends Plugin {
         // this._markDocAsFocused();
     }
 
-    initializeCommands(): void {
+    private initializeCommands(): void {
         (
             [
                 MoveCursorOperation,
@@ -151,7 +151,7 @@ export class DocPlugin extends Plugin {
         });
     }
 
-    initialConfig(config: IDocPluginConfig) {
+    private initialConfig(config: IDocPluginConfig) {
         this._currentUniverService.docAdded$.subscribe((documentModel) => {
             if (documentModel == null) {
                 throw new Error('documentModel is null');

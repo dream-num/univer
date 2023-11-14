@@ -7,6 +7,11 @@ import { Disposable, IDocumentBody, IUniverInstanceService, toDisposable } from 
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
 import HtmlToUDMService from './html-to-udm/converter';
+import PastePluginFeishu from './html-to-udm/paste-plugins/plugin-feishu';
+import PastePluginWord from './html-to-udm/paste-plugins/plugin-word';
+
+HtmlToUDMService.use(PastePluginWord);
+HtmlToUDMService.use(PastePluginFeishu);
 
 export interface IClipboardPropertyItem {}
 

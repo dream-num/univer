@@ -501,6 +501,7 @@ export class DocumentSkeleton extends Skeleton {
                 wrapStrategy: WrapStrategy.UNSPECIFIED,
             },
         } = documentStyle;
+
         const skeleton = this.__getNullSke();
 
         const docsConfig: IDocsConfig = {

@@ -85,11 +85,13 @@ export class DocSkeletonManagerService implements IDisposable {
 
     setCurrent(searchParm: IDocSkeletonManagerSearch): Nullable<IDocSkeletonManagerParam> {
         const param = this._getCurrentBySearch(searchParm);
+
         if (param != null) {
             if (param.dirty) {
                 param.skeleton.makeDirty(true);
                 param.dirty = false;
             }
+
             param.skeleton.calculate();
         } else {
             const { unitId } = searchParm;

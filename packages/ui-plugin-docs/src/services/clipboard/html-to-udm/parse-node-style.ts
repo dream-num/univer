@@ -1,15 +1,22 @@
-import { BooleanNumber, ITextStyle } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, ITextStyle } from '@univerjs/core';
 
 export default function extractNodeStyle(node: HTMLElement): ITextStyle {
     const styles = node.style;
     const docStyles: ITextStyle = {};
-    const tagName = node.tagName;
+    const tagName = node.tagName.toLowerCase();
 
-    switch (tagName.toLocaleLowerCase()) {
+    switch (tagName) {
         case 'b':
         case 'em':
         case 'strong': {
             docStyles.bl = BooleanNumber.TRUE;
+            break;
+        }
+
+        case 's': {
+            docStyles.st = {
+                s: BooleanNumber.TRUE,
+            };
             break;
         }
 
@@ -22,6 +29,12 @@ export default function extractNodeStyle(node: HTMLElement): ITextStyle {
 
         case 'i': {
             docStyles.it = BooleanNumber.TRUE;
+            break;
+        }
+
+        case 'sub':
+        case 'sup': {
+            docStyles.va = tagName === 'sup' ? BaselineOffset.SUPERSCRIPT : BaselineOffset.SUBSCRIPT;
             break;
         }
     }

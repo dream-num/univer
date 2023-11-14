@@ -106,7 +106,7 @@ After stating dev server, you can launch Edge or Chrome instance and debug in vs
 
 ### Unit test
 
-To ensure the quality of the code, we require that all code must be covered by unit tests. We use vitest as the unit test framework. You can use the following command to run unit tests:
+To ensure the quality of the code and move with confidence, we require that all code must be covered by unit tests. We use vitest as the unit test framework. You can use the following command to run unit tests:
 
 ```shell
 pnpm test

@@ -69,6 +69,7 @@ export type {
     ISetBorderStyleCommandParams,
 } from './commands/commands/set-border-command';
 export {
+    SetBorderBasicCommand,
     SetBorderColorCommand,
     SetBorderCommand,
     SetBorderPositionCommand,

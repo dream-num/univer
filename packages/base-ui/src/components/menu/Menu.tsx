@@ -8,17 +8,14 @@ import {
 import { MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { isObservable, of } from 'rxjs';
 
-import { ComponentManager } from '../../Common';
 import {
-    ICustomComponentOption,
     IDisplayMenuItem,
     IMenuButtonItem,
     IMenuItem,
     IMenuSelectorItem,
-    isValueOptions,
     IValueOption,
     MenuGroup,
     MenuItemDefaultValueType,
@@ -36,7 +33,7 @@ export interface IBaseMenuProps {
     menuType?: string | string[];
 
     value?: string | number;
-    options?: Array<IValueOption | ICustomComponentOption>;
+    options?: IValueOption[];
 
     onOptionSelect?: (option: IValueOption) => void;
 }
@@ -103,48 +100,36 @@ function MenuWrapper(props: IBaseMenuProps) {
 function MenuOptionsWrapper(props: IBaseMenuProps) {
     const { options, value, onOptionSelect, parentKey } = props;
 
-    const componentManager = useDependency(ComponentManager);
+    return options?.map((option: IValueOption, index: number) => {
+        const key = `${parentKey}-${option.label ?? option.id}-${index}`;
 
-    return options?.map((option: IValueOption | ICustomComponentOption, index: number) => {
-        const isValueOption = isValueOptions(option);
-        const key = `${parentKey}-${isValueOption ? option.label : option.id}-${index}`;
+        const onChange = (v: string | number) => {
+            onOptionSelect?.({ value: v, label: option?.label });
+        };
 
-        if (isValueOption) {
-            return (
-                <DesignMenuItem
-                    key={key}
-                    eventKey={key}
-                    onClick={() => {
-                        onOptionSelect?.({
-                            ...option,
-                        });
-                    }}
-                >
-                    <span className={styles.menuItemContent}>
-                        <CustomLabel
-                            selected={String(value) === String(option.value)} // use √ for select
-                            value={String(option.value)}
-                            label={option.label}
-                            title={typeof option.label === 'string' ? option.label : ''}
-                            icon={option.icon}
-                        />
-                    </span>
-                </DesignMenuItem>
-            );
-        }
+        const handleClick = () => {
+            if (typeof option.value === 'undefined') return;
 
-        const CustomComponent = componentManager.get(option.id) as React.ComponentType<any>;
+            onOptionSelect?.({
+                ...option,
+            });
+        };
+
+        const _className = clsx({
+            [styles.menuItemNoHover]: typeof option.label !== 'string' && !option.label?.hoverable,
+        });
 
         return (
-            <DesignMenuItem key={key} eventKey={key} className={clsx(styles.menuItemCustom)}>
-                <CustomComponent
-                    onValueChange={(v: string | number) => {
-                        onOptionSelect?.({
-                            value: v,
-                            label: option.id,
-                        });
-                    }}
-                />
+            <DesignMenuItem key={key} eventKey={key} className={_className} onClick={handleClick}>
+                <span className={styles.menuItemContent}>
+                    <CustomLabel
+                        selected={typeof value !== 'undefined' && value === option.value}
+                        value={option.value}
+                        label={option.label}
+                        icon={option.icon}
+                        onChange={onChange}
+                    />
+                </span>
             </DesignMenuItem>
         );
     });
@@ -189,13 +174,13 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
             <DesignMenuItem
                 key={item.id}
                 eventKey={item.id}
-                // disabled={disabled} // FIXME disabled is not working
+                disabled={disabled}
                 onClick={() => {
                     onClick({ value: inputValue, id: item.id }); // merge cell
                 }}
             >
                 <span className={styles.menuItemContent}>
-                    <CustomLabel value={inputValue} title={title} label={label} icon={item.icon} onChange={onChange} />
+                    <CustomLabel value={value} title={title} label={label} icon={item.icon} onChange={onChange} />
                 </span>
             </DesignMenuItem>
         );
@@ -204,13 +189,9 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const renderSelectorType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
 
-        let selections: Array<IValueOption | ICustomComponentOption>;
+        let selections: IValueOption[];
         if (isObservable(item.selections)) {
-            selections = useObservable<Array<IValueOption | ICustomComponentOption>>(
-                item.selections || of([]),
-                [],
-                true
-            );
+            selections = useObservable<IValueOption[]>(item.selections || of([]), [], true);
         } else {
             selections = item.selections || [];
         }
@@ -241,7 +222,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                             menuType={item.id}
                             options={selections}
                             onOptionSelect={(v) => {
-                                onClick({ value: v.value, id: item.id }); // border style don't trigger hide menu, set show true
+                                onClick({ value: v.value, id: item.id });
                             }}
                         />
                     )}
@@ -255,9 +236,9 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                     <CustomLabel
                         title={item.title}
                         value={inputValue}
-                        onChange={onChange}
                         icon={item.icon}
                         label={item.label}
+                        onChange={onChange}
                     />
                     {item.shortcut && ` (${item.shortcut})`}
                 </span>
@@ -267,6 +248,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
 
     const renderSubItemsType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
+        console.log(item);
 
         return (
             <DesignSubMenu
@@ -275,7 +257,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 popupOffset={[18, 0]}
                 title={
                     <span className={styles.menuItemContent}>
-                        <CustomLabel title={item.title} value={item.title} icon={item.icon} label={item.label} />
+                        <CustomLabel title={item.title} icon={item.icon} label={item.label} onChange={onChange} />
                     </span>
                 }
                 expandIcon={<MoreSingle className={styles.menuItemMoreIcon} />}

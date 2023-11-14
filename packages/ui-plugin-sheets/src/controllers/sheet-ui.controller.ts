@@ -54,7 +54,8 @@ import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetCopySelectionsOperation } from '../commands/operations/selection.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
-import { BORDER_LINE_COMPONENT, BorderLine } from '../components/border-line';
+import { BorderPanel } from '../components/border-panel/BorderPanel';
+import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import {
     FONT_FAMILY_COMPONENT,
@@ -67,21 +68,33 @@ import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-ite
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import {
-    BackgroundColorSelectorMenuItemFactory,
-    BoldMenuItemFactory,
-    CellInsertMenuItemFactory,
-    ChangeColorSheetMenuItemFactory,
     ClearSelectionAllMenuItemFactory,
     ClearSelectionContentMenuItemFactory,
     ClearSelectionFormatMenuItemFactory,
     ClearSelectionMenuItemFactory,
-    ColInsertMenuItemFactory,
-    CopyMenuItemFactory,
-    CopySheetMenuItemFactory,
+} from './menu/clear.menu';
+import {
     DeleteRangeMenuItemFactory,
     DeleteRangeMoveLeftMenuItemFactory,
     DeleteRangeMoveUpMenuItemFactory,
-    DeleteSheetMenuItemFactory,
+    RemoveColMenuItemFactory,
+    RemoveRowMenuItemFactory,
+} from './menu/delete.menu';
+import {
+    CellInsertMenuItemFactory,
+    ColInsertMenuItemFactory,
+    InsertColAfterMenuItemFactory,
+    InsertColBeforeMenuItemFactory,
+    InsertRangeMoveDownMenuItemFactory,
+    InsertRangeMoveRightMenuItemFactory,
+    InsertRowAfterMenuItemFactory,
+    InsertRowBeforeMenuItemFactory,
+    RowInsertMenuItemFactory,
+} from './menu/insert.menu';
+import {
+    BackgroundColorSelectorMenuItemFactory,
+    BoldMenuItemFactory,
+    CopyMenuItemFactory,
     FitContentMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
@@ -89,28 +102,14 @@ import {
     FrozenMenuItemFactory,
     HideColMenuItemFactory,
     HideRowMenuItemFactory,
-    HideSheetMenuItemFactory,
     HorizontalAlignMenuItemFactory,
-    InsertColAfterMenuItemFactory,
-    InsertColBeforeMenuItemFactory,
-    InsertRangeMoveDownMenuItemFactory,
-    InsertRangeMoveRightMenuItemFactory,
-    InsertRowAfterMenuItemFactory,
-    InsertRowBeforeMenuItemFactory,
     ItalicMenuItemFactory,
     PasteMenuItemFactory,
-    RemoveColMenuItemFactory,
-    RemoveRowMenuItemFactory,
-    RenameSheetMenuItemFactory,
     ResetBackgroundColorMenuItemFactory,
     ResetTextColorMenuItemFactory,
-    RowInsertMenuItemFactory,
-    SetBorderColorMenuItemFactory,
-    SetBorderStyleMenuItemFactory,
     SetColWidthMenuItemFactory,
     SetRowHeightMenuItemFactory,
     ShowColMenuItemFactory,
-    ShowMenuItemFactory,
     ShowRowMenuItemFactory,
     StrikeThroughMenuItemFactory,
     TextColorSelectorMenuItemFactory,
@@ -126,6 +125,14 @@ import {
     CellMergeMenuItemFactory,
     CellMergeVerticalMenuItemFactory,
 } from './menu/merge.menu';
+import {
+    ChangeColorSheetMenuItemFactory,
+    CopySheetMenuItemFactory,
+    DeleteSheetMenuItemFactory,
+    HideSheetMenuItemFactory,
+    RenameSheetMenuItemFactory,
+    ShowMenuItemFactory,
+} from './menu/sheet.menu';
 import {
     EditorBreakLineShortcut,
     EditorCursorEnterShortcut,
@@ -190,7 +197,7 @@ export class SheetUIController extends Disposable {
 
         // FIXME: no dispose logic
         componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput);
-        componentManager.register(BORDER_LINE_COMPONENT, BorderLine);
+        componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel);
         componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker);
         componentManager.register(FONT_FAMILY_COMPONENT, FontFamily);
         componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem);
@@ -281,11 +288,9 @@ export class SheetUIController extends Disposable {
                 FontSizeSelectorMenuItemFactory,
                 ResetTextColorMenuItemFactory,
                 TextColorSelectorMenuItemFactory,
-                BackgroundColorSelectorMenuItemFactory,
                 ResetBackgroundColorMenuItemFactory,
+                BackgroundColorSelectorMenuItemFactory,
                 CellBorderSelectorMenuItemFactory,
-                SetBorderColorMenuItemFactory,
-                SetBorderStyleMenuItemFactory,
                 CellMergeMenuItemFactory,
                 CellMergeAllMenuItemFactory,
                 CellMergeVerticalMenuItemFactory,

@@ -26,15 +26,12 @@ export {
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
 export {
-    type ICustomComponentOption,
     type ICustomComponentProps,
     type IDisplayMenuItem,
     type IMenuButtonItem,
     type IMenuItem,
     type IMenuItemFactory,
     type IMenuSelectorItem,
-    isCustomComponentOption,
-    isValueOptions,
     type IValueOption,
     MenuGroup,
     MenuItemType,

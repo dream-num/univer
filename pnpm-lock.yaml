@@ -557,9 +557,6 @@ importers:
 
   packages/base-ui:
     dependencies:
-      '@rc-component/trigger':
-        specifier: ^1.18.1
-        version: 1.18.1(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/base-render':
         specifier: workspace:*
         version: link:../base-render
@@ -570,8 +567,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.7
-        version: 0.1.7(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.8
+        version: 0.1.8(react-dom@18.2.0)(react@18.2.0)
       '@wendellhu/redi':
         specifier: ^0.12.11
         version: 0.12.11
@@ -772,8 +769,8 @@ importers:
         specifier: ^1.18.1
         version: 1.18.1(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/icons':
-        specifier: ^0.1.7
-        version: 0.1.7(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.8
+        version: 0.1.8(react-dom@18.2.0)(react@18.2.0)
       clsx:
         specifier: ^2.0.0
         version: 2.0.0
@@ -979,8 +976,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.7
-        version: 0.1.7(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.8
+        version: 0.1.8(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets
@@ -1208,8 +1205,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.7
-        version: 0.1.7(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.8
+        version: 0.1.8(react-dom@18.2.0)(react@18.2.0)
       '@wendellhu/redi':
         specifier: ^0.12.11
         version: 0.12.11
@@ -5799,8 +5796,8 @@ packages:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: true
 
-  /@univerjs/icons@0.1.7(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-jFzcqluGXPrNmbQ0GaB/aXrDtis+bV5igyWcYvx8/3ZIuwddQ0MVy//O4DulhV42Tc5XJMdRKeN41+iBHLiYXQ==}
+  /@univerjs/icons@0.1.8(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-E4wxcg/rHsdqzTlvQyRLSuBE/lH1cPFr/xOCRZk4/nlxnnmnt7iN/4fAIrHRqgCJOarAmFV8D6okv1POBEurIA==}
     peerDependencies:
       react: '*'
       react-dom: '*'

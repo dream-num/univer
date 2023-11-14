@@ -9,11 +9,6 @@ import { Dropdown } from '../dropdown/Dropdown';
 import { Tooltip } from '../tooltip/Tooltip';
 import styles from './index.module.less';
 
-/**
- * TODO:
- * 2. Localization '恢复至 100%'
- */
-
 export interface ISliderProps {
     /** The value of slider. When range is false, use number, otherwise, use [number, number] */
     value: number;
@@ -128,14 +123,14 @@ export function Slider(props: ISliderProps) {
             </Button>
 
             <div className={styles.sliderRail}>
-                <div ref={sliderInnerRailRef} className={styles.sliderInnerRail}>
+                <div ref={sliderInnerRailRef} role="track" className={styles.sliderInnerRail}>
                     <Tooltip title={`${locale.design.Slider.resetTo} ${resetPoint}%`}>
-                        <a className={styles.sliderResetPoint} onClick={handleReset} />
+                        <a className={styles.sliderResetPoint} role="reset button" onClick={handleReset} />
                     </Tooltip>
 
                     <div
                         className={styles.sliderHandle}
-                        role="slider"
+                        role="handle"
                         style={{
                             left: `${offset}%`,
                         }}

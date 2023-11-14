@@ -34,6 +34,26 @@ function forEach(range: IRange, action: (row: number, column: number) => void): 
     }
 }
 
+export interface ISetBorderBasicCommand {
+    value: {
+        id: string;
+        value: string;
+    };
+}
+export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommand> = {
+    id: 'sheet.command.set-border-basic',
+    type: CommandType.COMMAND,
+    handler: async (accessor: IAccessor, params: ISetBorderBasicCommand) => {
+        const { value, id } = params.value;
+
+        if (!value || !id) return false;
+
+        const commandService = accessor.get(ICommandService);
+
+        return commandService.executeCommand(id, { value });
+    },
+};
+
 export interface ISetBorderPositionCommandParams {
     value: BorderType;
 }

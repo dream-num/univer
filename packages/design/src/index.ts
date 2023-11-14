@@ -10,7 +10,6 @@ export { Dialog, type IDialogProps } from './components/dialog';
 export { Dropdown, type IDropdownProps } from './components/dropdown';
 export { type IInputProps, Input } from './components/input';
 export { type IInputNumberProps, InputNumber } from './components/input-number';
-export { Content, Footer, Header, type ILayoutProps, Layout, Sider } from './components/layout';
 export { Menu, MenuItem, MenuItemGroup, SubMenu } from './components/menu';
 export { type IMessageMethodOptions, type IMessageProps, Message, MessageType } from './components/message';
 export { type IRadioProps, Radio } from './components/radio';

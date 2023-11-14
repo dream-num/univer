@@ -1,5 +1,4 @@
 import { BaseComponentProps } from '@univerjs/base-ui';
-import { Container, Content, Footer, Header, Layout, Sider } from '@univerjs/design';
 import { Component, createRef } from 'react';
 
 import { ISlideUIPluginConfig } from '../../basics';
@@ -155,24 +154,24 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
         const config = layout?.slideContainerConfig!;
         // Set Provider for entire Container
         return (
-            <Container className={style.layoutContainer}>
-                <Layout>
-                    <Sider style={{ display: config.outerLeft ? 'block' : 'none' }}></Sider>
-                    <Layout className={style.mainContent} style={{ position: 'relative' }}>
-                        <Header style={{ display: config.header ? 'block' : 'none' }}>
+            <section className={style.layoutContainer}>
+                <div>
+                    <aside style={{ display: config.outerLeft ? 'block' : 'none' }}></aside>
+                    <div className={style.mainContent} style={{ position: 'relative' }}>
+                        <header style={{ display: config.header ? 'block' : 'none' }}>
                             {config.infoBar && <InfoBar {...methods.infoBar}></InfoBar>}
                             {config.toolbar && <Toolbar {...methods.toolbar}></Toolbar>}
-                        </Header>
-                        <Layout>
-                            <Sider
+                        </header>
+                        <div>
+                            <aside
                                 style={{
                                     width: '300px',
                                     display: config.innerLeft ? 'block' : 'none',
                                 }}
                             >
                                 <SlideBar {...methods.slideBar}></SlideBar>
-                            </Sider>
-                            <Content
+                            </aside>
+                            <div
                                 className={
                                     config.contentSplit === 'vertical'
                                         ? style.contentContainerVertical
@@ -180,48 +179,48 @@ export class SlideContainer extends Component<BaseSlideContainerProps> {
                                 }
                             >
                                 {!!config.contentSplit && (
-                                    <Container ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
+                                    <div ref={this.splitLeftRef} className={style.contentInnerLeftContainer}>
                                         <div
                                             className={style.hoverCursor}
                                             onMouseDown={this.handleSplitBarMouseDown}
                                         ></div>
-                                    </Container>
+                                    </div>
                                 )}
-                                <Container
+                                <div
                                     onContextMenu={(e: React.MouseEvent) => e.preventDefault()}
                                     ref={this.contentRef}
                                     className={style.contentInnerRightContainer}
                                 >
                                     {/* {config.rightMenu && <RightMenu {...methods.rightMenu}></RightMenu>} */}
-                                </Container>
+                                </div>
                                 {/* extend main content */}
-                            </Content>
+                            </div>
 
-                            <Sider
+                            <aside
                                 style={{
                                     display: config.innerRight ? 'block' : 'none',
                                 }}
                             >
                                 {/* innerRight */}
                                 {/* <SideGroup></SideGroup> */}
-                            </Sider>
-                        </Layout>
-                        <Footer
+                            </aside>
+                        </div>
+                        <footer
                             style={{
                                 display: config.footer ? 'block' : 'none',
                             }}
                         >
                             {/* {config.countBar && <CountBar {...methods.countBar}></CountBar>} */}
-                        </Footer>
-                    </Layout>
-                    <Sider
+                        </footer>
+                    </div>
+                    <aside
                         style={{
                             display: config.outerRight ? 'block' : 'none',
                         }}
                         className={style.outerRightContainer}
-                    ></Sider>
-                </Layout>
-            </Container>
+                    ></aside>
+                </div>
+            </section>
         );
     }
 }

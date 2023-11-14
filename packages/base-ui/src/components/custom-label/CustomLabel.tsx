@@ -43,7 +43,12 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
         const labelName = isStringLabel ? label : label?.name;
 
         const CustomComponent = componentManager.get(labelName);
-        CustomComponent && nodes.push(<CustomComponent key={index++} {...customProps} />);
+
+        if (CustomComponent) {
+            nodes.push(<CustomComponent key={index++} {...customProps} />);
+        } else {
+            nodes.push(<span key={index++}>{localeService.t(labelName)}</span>);
+        }
     }
     if (title) {
         nodes.push(<span key={index++}>{localeService.t(title)}</span>);

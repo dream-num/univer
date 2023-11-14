@@ -1,5 +1,7 @@
-import { BooleanNumber } from '@univerjs/core';
+import { BooleanNumber, IParagraph } from '@univerjs/core';
 
+import getInlineStyle from '../parse-node-style';
+import { getParagraphStyle } from '../utils';
 import { IPastePlugin } from './type';
 
 const wordPastePlugin: IPastePlugin = {
@@ -11,7 +13,7 @@ const wordPastePlugin: IPastePlugin = {
     stylesRules: [
         {
             filter: ['b'],
-            getStyle(node, getInlineStyle) {
+            getStyle(node) {
                 const inlineStyle = getInlineStyle(node);
 
                 return { bl: BooleanNumber.TRUE, ...inlineStyle };
@@ -24,14 +26,22 @@ const wordPastePlugin: IPastePlugin = {
             filter(el: HTMLElement) {
                 return el.tagName === 'P' && /mso/i.test(el.className);
             },
-            handler(doc) {
+            handler(doc, el) {
                 if (doc.paragraphs == null) {
                     doc.paragraphs = [];
                 }
 
-                doc.paragraphs.push({
+                const paragraph: IParagraph = {
                     startIndex: doc.dataStream.length,
-                });
+                };
+
+                const paragraphStyle = getParagraphStyle(el);
+
+                if (paragraphStyle) {
+                    paragraph.paragraphStyle = paragraphStyle;
+                }
+
+                doc.paragraphs.push(paragraph);
                 doc.dataStream += '\r';
             },
         },

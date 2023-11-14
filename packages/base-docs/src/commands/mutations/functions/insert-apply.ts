@@ -30,11 +30,17 @@ export function InsertApply(
         throw new Error('no body has changed');
     }
 
-    // bodyModel.insert(insertBody, currentIndex);
-
     updateAttributeByInsert(body, insertBody, textLength, currentIndex);
 
-    bodyModel.reset(body);
+    if (insertBody.dataStream.length > 1 && /\r/.test(insertBody.dataStream)) {
+        // TODO: @JOCS, The DocumentModel needs to be rewritten to better support the
+        // large area of updates that are brought about by the paste, abstract the
+        // methods associated with the DocumentModel insertion, and support atomic operations
+        bodyModel.reset(body);
+    } else {
+        bodyModel.insert(insertBody, currentIndex);
+    }
+
     console.log('插入的model打印', bodyModel, textLength, currentIndex);
 }
 

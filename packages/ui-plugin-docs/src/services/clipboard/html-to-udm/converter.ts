@@ -87,7 +87,7 @@ class HtmlToUDMService {
                 const parentStyles = parent ? this.styleCache.get(parent) : {};
                 const styleRule = this.styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));
                 const nodeStyles = styleRule
-                    ? styleRule.getStyle(node as HTMLElement, extractNodeStyle)
+                    ? styleRule.getStyle(node as HTMLElement)
                     : extractNodeStyle(node as HTMLElement);
 
                 this.styleCache.set(node, { ...parentStyles, ...nodeStyles });
@@ -101,7 +101,7 @@ class HtmlToUDMService {
                 );
 
                 if (afterProcessRule) {
-                    afterProcessRule.handler(doc);
+                    afterProcessRule.handler(doc, node as HTMLElement);
                 }
             }
         }

@@ -57,20 +57,6 @@ export interface IBorderData {
     l?: Nullable<IBorderStyleData>;
 }
 
-// export interface IFormatData {
-//     /**
-//      * format
-//      */
-//     f: string;
-//     /**
-//      * 数字     n
-//      * 字符串   g
-//      * 时间     d
-//      * 富文本   r
-//      */
-//     t: string;
-// }
-
 export interface ITextRotation {
     /**
      * angle

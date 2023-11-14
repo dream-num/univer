@@ -1,5 +1,4 @@
 import { Nullable } from '../../shared/types';
-import { FormatType } from '../enum/format-type';
 import { CellValueType } from '../enum/text-style';
 import { IDocumentData } from './i-document-data';
 import { IStyleData } from './i-style-data';
@@ -63,37 +62,3 @@ export function isICellData(value: any): value is ICellData {
         (value as ICellData).f !== undefined
     );
 }
-
-export interface ITempCellData extends ICellData {
-    style: IStyleData;
-    prefix: string[];
-}
-
-/**
- * Format of cell data
- */
-export interface IFormatData {
-    /**
-     * format
-     */
-    f: string;
-    /**
-     * 数字     n
-     * 字符串   g
-     * 时间     d
-     * 富文本   r
-     */
-    t: FormatType;
-}
-
-/**
- * Cell data type
- */
-export type ICellDataType = Nullable<ICellData> | Nullable<IStyleData> | string | number | boolean;
-
-// WTF: other matrix are number indexed objects, but this is an array?
-
-/**
- * Cell data matrix type
- */
-export type ICellDataMatrix = ICellDataType[][];

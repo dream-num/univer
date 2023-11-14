@@ -1,3 +1,4 @@
+export * from './cell-data';
 export * from './const';
 export * from './document-node-tools';
 export * from './draw';

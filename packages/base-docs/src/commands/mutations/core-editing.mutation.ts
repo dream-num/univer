@@ -71,8 +71,6 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         memoryCursor.reset();
 
-        console.log(JSON.stringify(mutations, null, 2));
-
         mutations.forEach((mutation) => {
             // FIXME: @jocs Since UpdateAttributeApply modifies the mutation(used in undo/redo),
             // so make a deep copy here, does UpdateAttributeApply need to

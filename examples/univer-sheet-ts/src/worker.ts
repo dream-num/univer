@@ -11,3 +11,6 @@ const univer = new Univer({
 
 univer.registerPlugin(SheetPlugin);
 univer.registerPlugin(UniverRPCWorkerThreadPlugin);
+
+declare let self: WorkerGlobalScope & typeof globalThis & { univer: Univer };
+self.univer = univer;

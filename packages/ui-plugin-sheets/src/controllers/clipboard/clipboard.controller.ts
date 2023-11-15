@@ -1,4 +1,5 @@
 import {
+    AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
     getPrimaryForRange,
     IAddWorksheetMergeMutationParams,
@@ -20,7 +21,6 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/base-sheets';
-import { AddMergeUndoMutationFactory } from '@univerjs/base-sheets/commands/mutations/add-worksheet-merge.mutation.js';
 import { handleStringToStyle, IMessageService, textTrim } from '@univerjs/base-ui';
 import {
     BooleanNumber,

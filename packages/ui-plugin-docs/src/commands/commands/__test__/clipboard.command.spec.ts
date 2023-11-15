@@ -9,7 +9,7 @@ import { BooleanNumber, ICommand, ICommandService, IStyleBase, IUniverInstanceSe
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { IInnerPasteCommandParams, InnerPasteCommand } from '../inner.clipboard.command';
+import { IInnerPasteCommandParams, InnerPasteCommand } from '../clipboard.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('test cases in clipboard', () => {

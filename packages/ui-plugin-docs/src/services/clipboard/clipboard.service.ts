@@ -70,8 +70,6 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 : documentBodyList[0].dataStream;
         const html = this.UDMToHtml.convert(documentBodyList);
 
-        console.log(text, html);
-
         return this._clipboardInterfaceService.write(text, html);
     }
 

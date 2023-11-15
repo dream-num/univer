@@ -9,6 +9,7 @@ import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { HtmlToUDMService } from './html-to-udm/converter';
 import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';
 import PastePluginWord from './html-to-udm/paste-plugins/plugin-word';
+import { UDMToHtmlService } from './udm-to-html/convertor';
 
 HtmlToUDMService.use(PastePluginWord);
 HtmlToUDMService.use(PastePluginLark);
@@ -23,6 +24,8 @@ export interface IDocClipboardHook {
 export interface IDocClipboardService {
     queryClipboardData(): Promise<IDocumentBody>;
 
+    setClipboardData(documentBodyList: IDocumentBody[]): Promise<void>;
+
     addClipboardHook(hook: IDocClipboardHook): IDisposable;
 }
 
@@ -31,6 +34,7 @@ export const IDocClipboardService = createIdentifier<IDocClipboardService>('doc.
 export class DocClipboardService extends Disposable implements IDocClipboardService {
     private _clipboardHooks: IDocClipboardHook[] = [];
     private htmlToUDM = new HtmlToUDMService();
+    private UDMToHtml = new UDMToHtmlService();
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -49,8 +53,6 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         const text = await clipboardItem.getType(PLAIN_TEXT_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text());
         const html = await clipboardItem.getType(HTML_CLIPBOARD_MIME_TYPE).then((blob) => blob && blob.text());
 
-        // console.log(text);
-        // console.log(html);
         if (!html) {
             // TODO: @JOCS, Parsing paragraphs and sections
             return {
@@ -59,6 +61,18 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         return this.htmlToUDM.convert(html);
+    }
+
+    async setClipboardData(documentBodyList: IDocumentBody[]): Promise<void> {
+        const text =
+            documentBodyList.length > 1
+                ? documentBodyList.map((body) => body.dataStream).join('\n')
+                : documentBodyList[0].dataStream;
+        const html = this.UDMToHtml.convert(documentBodyList);
+
+        console.log(text, html);
+
+        return this._clipboardInterfaceService.write(text, html);
     }
 
     addClipboardHook(hook: IDocClipboardHook): IDisposable {

@@ -210,9 +210,14 @@ export class DocClipboardController extends Disposable {
     }
 
     private async _handleCopy() {
-        console.log('copy');
-        const bodys = this._getDocumentBodyInRanges();
-        console.log(bodys);
+        const { _docClipboardService: clipboard } = this;
+        const documentBodyList = this._getDocumentBodyInRanges();
+
+        try {
+            clipboard.setClipboardData(documentBodyList);
+        } catch (_e) {
+            this._logService.error('[DocClipboardController] set clipboard failed');
+        }
     }
 
     private async _handleCut() {

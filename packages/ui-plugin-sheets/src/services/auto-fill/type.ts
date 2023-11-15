@@ -7,6 +7,7 @@ export enum DATA_TYPE {
     CHN_NUMBER = 'chnNumber',
     CHN_WEEK2 = 'chnWeek2',
     CHN_WEEK3 = 'chnWeek3',
+    LOOP_SERIES = 'loopSeries',
     OTHER = 'other',
 }
 

@@ -1,7 +1,7 @@
 import { IRenderManagerService } from '@univerjs/base-render';
-import { ICommandInfo, ICommandService, IUniverInstanceService, toDisposable } from '@univerjs/core';
-import { Button, Dropdown } from '@univerjs/design';
-import { CheckMarkSingle, Paste } from '@univerjs/icons';
+import { ICommandInfo, ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
+import { Dropdown } from '@univerjs/design';
+import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -25,52 +25,31 @@ export interface IAnchorPoint {
     col: number;
 }
 
-export interface ISmartButtonMenuItem {
+export interface IAutoFillPopupMenuItem {
     label: string;
-    value?: any;
-    selected?: boolean;
+    value?: APPLY_TYPE;
     index: number;
+    disable: boolean;
 }
 
 const useUpdate = () => {
-    const [_, setState] = useState({});
+    const [, setState] = useState({});
     return useCallback(() => setState({}), []);
 };
 
-const menu = [
-    {
-        index: 0,
-        label: 'copy',
-        value: APPLY_TYPE.COPY,
-    },
-    {
-        index: 1,
-        label: 'series',
-        value: APPLY_TYPE.SERIES,
-    },
-    {
-        index: 2,
-        label: 'format only',
-        value: APPLY_TYPE.ONLY_FORMAT,
-    },
-    {
-        index: 3,
-        label: 'no format',
-        value: APPLY_TYPE.NO_FORMAT,
-    },
-];
-
-export const SmartButton: React.FC<{}> = () => {
+export const AutoFillPopupMenu: React.FC<{}> = () => {
     const commandService = useDependency(ICommandService);
     const sheetSkeletonManagerService = useDependency(SheetSkeletonManagerService);
     const currentUniverService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
     const selectionRenderService = useDependency(ISelectionRenderService);
     const autoFillService = useDependency(IAutoFillService);
+    const localeService = useDependency(LocaleService);
+    const [menu, setMenu] = useState<IAutoFillPopupMenuItem[]>([]);
 
     const [visible, setVisible] = useState(false);
     const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
-    const [selected, setSelected] = useState<number>(1);
+    const [selected, setSelected] = useState<APPLY_TYPE>(APPLY_TYPE.SERIES);
     const forceUpdate = useUpdate();
 
     const sheetObject = getSheetObject(currentUniverService, renderManagerService);
@@ -98,8 +77,17 @@ export const SmartButton: React.FC<{}> = () => {
 
     useEffect(() => {
         const disposable = toDisposable(
+            autoFillService.menu$.subscribe((menu) => {
+                setMenu(menu.map((i) => ({ ...i, index: menu.indexOf(i) })));
+            })
+        );
+        return disposable.dispose;
+    }, [autoFillService]);
+
+    useEffect(() => {
+        const disposable = toDisposable(
             autoFillService.applyType$.subscribe((type) => {
-                setSelected(menu.find((i) => i.value === type)?.index ?? 0);
+                setSelected(type);
             })
         );
         return disposable.dispose;
@@ -123,26 +111,32 @@ export const SmartButton: React.FC<{}> = () => {
         setVisible(visible);
     };
 
-    const handleClick = (item: ISmartButtonMenuItem) => {
+    const handleClick = (item: IAutoFillPopupMenuItem) => {
         commandService.executeCommand(RefillCommand.id, { type: item.value });
     };
+
+    const availableMenu = menu.filter((item) => !item.disable);
     return (
         <div style={{ left: `${relativeX}px`, top: `${relativeY}px`, position: 'absolute' }}>
             <Dropdown
-                placement="bottomRight"
+                placement="bottomLeft"
                 trigger={['click']}
                 overlay={
-                    <ul className={styles.smartButtonMenu} style={{ ...styles }}>
-                        {menu.map((item) => (
+                    <ul className={styles.AutoFillPopupMenu} style={{ ...styles }}>
+                        {availableMenu.map((item) => (
                             <li
                                 key={item.index}
-                                onClick={(e) => handleClick(item)}
-                                className={styles.smartButtonMenuItem}
+                                onClick={() => handleClick(item)}
+                                className={styles.AutoFillPopupMenuItem}
                             >
-                                <span className={styles.smartButtonMenuItemIcon}>
-                                    {item.index === selected ? <CheckMarkSingle /> : ''}
+                                <span className={styles.AutoFillPopupMenuItemIcon}>
+                                    {item.value === selected ? (
+                                        <CheckMarkSingle style={{ color: 'rgb(var(--green-700, #409f11))' }} />
+                                    ) : (
+                                        ''
+                                    )}
                                 </span>
-                                <span className={styles.smartButtonMenuItemTitle}>{item.label}</span>
+                                <span className={styles.AutoFillPopupMenuItemTitle}>{localeService.t(item.label)}</span>
                             </li>
                         ))}
                     </ul>
@@ -150,9 +144,13 @@ export const SmartButton: React.FC<{}> = () => {
                 visible={visible}
                 onVisibleChange={onVisibleChange}
             >
-                <Button size="small">
-                    <Paste style={{ color: 'green' }}></Paste>
-                </Button>
+                <div className={styles.btnContainer}>
+                    <Autofill
+                        style={{ color: '#35322B', marginRight: '8px' }}
+                        extend={{ colorChannel1: 'rgb(var(--green-700, #409f11))' }}
+                    ></Autofill>
+                    <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px' }}></MoreDownSingle>
+                </div>
             </Dropdown>
         </div>
     );

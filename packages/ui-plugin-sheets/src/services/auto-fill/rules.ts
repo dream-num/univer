@@ -6,17 +6,22 @@ import {
     fillChnWeek,
     fillCopy,
     fillExtendNumber,
+    fillLoopSeries,
     fillSeries,
+    getLoopSeriesInfo,
     isChnNumber,
     isChnWeek2,
+    isChnWeek3,
     isEqualDiff,
+    isLoopSeries,
     matchExtendNumber,
 } from './tools';
 import { APPLY_TYPE, DATA_TYPE, IAutoFillRule } from './type';
 
 export const numberRule: IAutoFillRule = {
     type: DATA_TYPE.NUMBER,
-    match: (cellData) => typeof cellData?.v === 'number',
+    match: (cellData) => typeof cellData?.v === 'number' || !isNaN(Number(cellData?.v)),
+    // TODO@yuhongz: not the good way to match number, will be changed after cell type is supported
     isContinue: (prev, cur) => {
         if (prev.type === DATA_TYPE.NUMBER) {
             return true;
@@ -225,7 +230,7 @@ export const chnWeek2Rule: IAutoFillRule = {
 
 export const chnWeek3Rule: IAutoFillRule = {
     type: DATA_TYPE.CHN_WEEK3,
-    match: (cellData) => isChnWeek2(cellData?.m || ''),
+    match: (cellData) => isChnWeek3(cellData?.m || ''),
     isContinue: (prev, cur) => prev.type === DATA_TYPE.CHN_WEEK3,
     applyFunctions: {
         [APPLY_TYPE.SERIES]: (data, len, direction) => {
@@ -268,6 +273,54 @@ export const chnWeek3Rule: IAutoFillRule = {
             if (isEqualDiff(dataNumArr)) {
                 const step = dataNumArr[1] - dataNumArr[0];
                 return fillChnWeek(data, len, step, 2);
+            }
+            return fillCopy(data, len);
+        },
+    },
+};
+
+export const loopSeriesRule: IAutoFillRule = {
+    type: DATA_TYPE.LOOP_SERIES,
+    match: (cellData) => isLoopSeries(cellData?.m || ''),
+    isContinue: (prev, cur) => {
+        if (prev.type === DATA_TYPE.LOOP_SERIES) {
+            return getLoopSeriesInfo(prev.cellData?.m || '').name === getLoopSeriesInfo(cur?.m || '').name;
+        }
+        return false;
+    },
+    applyFunctions: {
+        [APPLY_TYPE.SERIES]: (data, len, direction) => {
+            const isReverse = direction === Direction.LEFT || direction === Direction.UP;
+            const { series } = getLoopSeriesInfo(data[0]?.m || '');
+            if (data.length === 1) {
+                return fillCopy(data, len);
+            }
+            const dataNumArr = [];
+            let cycleIndex = 0;
+            for (let i = 0; i < data.length; i++) {
+                const formattedValue = data[i]?.m;
+                if (formattedValue) {
+                    if (formattedValue === series[0]) {
+                        if (i === 0) {
+                            dataNumArr.push(0);
+                        } else {
+                            cycleIndex++;
+                            dataNumArr.push(cycleIndex * series.length);
+                        }
+                    } else {
+                        dataNumArr.push(series.indexOf(formattedValue) + cycleIndex * 7);
+                    }
+                }
+            }
+
+            if (isReverse) {
+                data.reverse();
+                dataNumArr.reverse();
+            }
+
+            if (isEqualDiff(dataNumArr)) {
+                const step = dataNumArr[1] - dataNumArr[0];
+                return fillLoopSeries(data, len, step, series);
             }
             return fillCopy(data, len);
         },

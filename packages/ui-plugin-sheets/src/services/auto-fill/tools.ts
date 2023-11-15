@@ -498,7 +498,7 @@ export function fillChnWeek(data: Array<Nullable<ICellData>>, len: number, step:
     const keywordMap = [
         ['日', '一', '二', '三', '四', '五', '六'],
         ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
-        ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五'],
+        ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
     ];
     if (weekType >= keywordMap.length) return [];
     const keyword = keywordMap[weekType];
@@ -554,6 +554,78 @@ export function fillChnNumber(data: Array<Nullable<ICellData>>, len: number, ste
         if (d) {
             d.v = txt;
             d.m = txt.toString();
+            applyData.push(d);
+        }
+    }
+
+    return applyData;
+}
+
+const LOOP_SERIES: { [key: string]: string[] } = {
+    enWeek1: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    enWeek2: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    enMonth1: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    enMonth2: [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+    ],
+    chnMonth1: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+    chnMonth2: ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '腊月'],
+    chHour1: ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'],
+    chHour2: ['子时', '丑时', '寅时', '卯时', '辰时', '巳时', '午时', '未时', '申时', '酉时', '戌时', '亥时'],
+    chYear1: ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'],
+    chSeason1: ['春', '夏', '秋', '冬'],
+    chSeason2: ['春季', '夏季', '秋季', '冬季'],
+};
+
+export function isLoopSeries(txt: string) {
+    let isLoopSeries = false;
+    Object.keys(LOOP_SERIES).forEach((key) => {
+        if (LOOP_SERIES[key].includes(txt)) {
+            isLoopSeries = true;
+        }
+    });
+    return isLoopSeries;
+}
+
+export function getLoopSeriesInfo(txt: string) {
+    let name = '';
+    const series: string[] = [];
+    Object.keys(LOOP_SERIES).forEach((key) => {
+        if (LOOP_SERIES[key].includes(txt)) {
+            name = key;
+            series.push(...LOOP_SERIES[key]);
+        }
+    });
+    return { name, series };
+}
+
+export function fillLoopSeries(data: Array<Nullable<ICellData>>, len: number, step: number, series: string[]) {
+    const seriesLen = series.length;
+    const applyData = [];
+
+    for (let i = 1; i <= len; i++) {
+        const index = (i - 1) % data.length;
+        const d = Tools.deepClone(data[index]);
+
+        const last = data[data.length - 1]?.m;
+        const num = series.indexOf(last as string) + step * i;
+
+        const rsd = num % seriesLen;
+        if (d) {
+            d.m = series[rsd];
+            d.v = series[rsd];
+
             applyData.push(d);
         }
     }

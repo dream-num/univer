@@ -410,4 +410,10 @@ export default {
         clickToCopy: '点击复制数值',
         copied: '数据复制成功，快去粘贴数据吧！',
     },
+    autoFill: {
+        copy: '复制单元格',
+        series: '填充序列',
+        formatOnly: '仅填充格式',
+        noFormat: '不带格式填充',
+    },
 };

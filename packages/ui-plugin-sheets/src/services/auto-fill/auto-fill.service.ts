@@ -10,7 +10,15 @@ import {
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { chnNumberRule, chnWeek2Rule, chnWeek3Rule, extendNumberRule, numberRule, otherRule } from './rules';
+import {
+    chnNumberRule,
+    chnWeek2Rule,
+    chnWeek3Rule,
+    extendNumberRule,
+    loopSeriesRule,
+    numberRule,
+    otherRule,
+} from './rules';
 import { APPLY_TYPE, IAutoFillRule } from './type';
 
 export interface IAutoFillService {
@@ -22,7 +30,16 @@ export interface IAutoFillService {
     getRanges(): { sourceRange: IRange | null; destRange: IRange | null; applyRange: IRange | null };
     setFillingStyle(isFillingStyle: boolean): void;
     applyType$: Observable<APPLY_TYPE>;
+    menu$: Observable<IApplyMenuItem[]>;
+    setDisableApplyType: (type: APPLY_TYPE, disable: boolean) => void;
 }
+
+export interface IApplyMenuItem {
+    label: string;
+    value: APPLY_TYPE;
+    disable: boolean;
+}
+
 @OnLifecycle(LifecycleStages.Rendered, AutoFillService)
 export class AutoFillService extends Disposable implements IAutoFillService {
     private _rules: IAutoFillRule[] = [];
@@ -32,6 +49,30 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     private _destRange: IRange | null = null;
     private _applyRange: IRange | null = null;
     readonly applyType$ = this._applyType$.asObservable();
+
+    private readonly _menu$: BehaviorSubject<IApplyMenuItem[]> = new BehaviorSubject<IApplyMenuItem[]>([
+        {
+            label: 'autoFill.copy',
+            value: APPLY_TYPE.COPY,
+            disable: false,
+        },
+        {
+            label: 'autoFill.series',
+            value: APPLY_TYPE.SERIES,
+            disable: false,
+        },
+        {
+            label: 'autoFill.formatOnly',
+            value: APPLY_TYPE.ONLY_FORMAT,
+            disable: false,
+        },
+        {
+            label: 'autoFill.noFormat',
+            value: APPLY_TYPE.NO_FORMAT,
+            disable: false,
+        },
+    ]);
+    readonly menu$ = this._menu$.asObservable();
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
@@ -42,7 +83,15 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     }
 
     private _init() {
-        this._rules = [numberRule, extendNumberRule, chnNumberRule, chnWeek2Rule, chnWeek3Rule, otherRule];
+        this._rules = [
+            numberRule,
+            extendNumberRule,
+            chnNumberRule,
+            chnWeek2Rule,
+            chnWeek3Rule,
+            loopSeriesRule,
+            otherRule,
+        ];
         // this._applyType = APPLY_TYPE.SERIES;
         this._isFillingStyle = true;
     }
@@ -79,6 +128,20 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             destRange: this._destRange,
             applyRange: this._applyRange,
         };
+    }
+
+    setDisableApplyType(type: APPLY_TYPE, disable: boolean) {
+        this._menu$.next(
+            this._menu$.getValue().map((item) => {
+                if (item.value === type) {
+                    return {
+                        ...item,
+                        disable,
+                    };
+                }
+                return item;
+            })
+        );
     }
 }
 

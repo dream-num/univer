@@ -227,43 +227,6 @@ export class SelectionRenderService implements ISelectionRenderService {
         } else {
             control.disableHeaderHighlight();
         }
-        // update drag observer
-        control.selectionFilled$.subscribe((filled) => {
-            if (filled == null) {
-                return;
-            }
-            const { startColumn, endColumn, startRow, endRow } = control.model;
-            const {
-                startColumn: newStartColumn,
-                endColumn: newEndColumn,
-                startRow: newStartRow,
-                endRow: newEndRow,
-            } = filled || {};
-            // if no change happened, return
-            if (
-                startColumn === newStartColumn &&
-                endColumn === newEndColumn &&
-                startRow === newStartRow &&
-                endRow === newEndRow
-            ) {
-                return;
-            }
-            this._controlFillConfig$.next({
-                oldRange: {
-                    startColumn,
-                    endColumn,
-                    startRow,
-                    endRow,
-                },
-                newRange: {
-                    startColumn: newStartColumn || startColumn,
-                    endColumn: newEndColumn || endColumn,
-                    startRow: newStartRow || startRow,
-                    endRow: newEndRow || endRow,
-                },
-            });
-        });
-
         currentControls.push(control);
     }
 

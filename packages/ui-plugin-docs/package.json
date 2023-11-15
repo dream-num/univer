@@ -39,7 +39,8 @@
         "@univerjs/design": "*",
         "@wendellhu/redi": "^0.12.11",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0"
+        "react-dom": "^18.2.0",
+        "tinycolor2": "^1.6.0"
     },
     "devDependencies": {
         "@types/node": "^20.9.0",

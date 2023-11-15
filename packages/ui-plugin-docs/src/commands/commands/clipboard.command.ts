@@ -86,7 +86,6 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
         for (const selection of selections) {
             const { startOffset, endOffset, collapsed } = selection;
-            console.log(startOffset, endOffset);
 
             const len = startOffset - memoryCursor.cursor;
 

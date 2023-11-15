@@ -1,33 +1,24 @@
 import { SelectionManagerService } from '@univerjs/base-sheets';
-import {
-    ComponentManager,
-    IMenuItem,
-    IMenuService,
-    IValueOption,
-    MenuGroup,
-    MenuItemType,
-    MenuPosition,
-} from '@univerjs/base-ui';
+import { ComponentManager, IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { IUniverInstanceService } from '@univerjs/core';
-import { AddDigitsSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
+import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
 import { AddDecimalCommand } from '../commands/commands/add.decimal.command';
-import { PreviewCommand } from '../commands/commands/preview.command';
 import { SetCurrencyOperator } from '../commands/commands/set.currency.command';
 import { SubtractDecimalCommand } from '../commands/commands/subtract.decimal.command';
+import { OpenNumfmtPanelOperator } from '../commands/operators/open.numfmt.panel.operator';
 import { isAccountingPanel } from '../components/accounting';
 import { isCurrencyPanel } from '../components/currency';
 import { isDatePanel } from '../components/date';
-import { isGeneralPanel } from '../components/general';
+import { isThousandthPercentilePanel } from '../components/thousandth-percentile';
 import { NumfmtService } from '../service/numfmt.service';
-import { getCurrencyType } from '../utils/currency';
-import { getCurrencyFormatOptions, getDateFormatOptions, getNumberFormatOptions } from '../utils/options';
 
 export const CurrencyMenuItem = (componentManager: ComponentManager) => {
     const iconKey = 'icon-rmbSingle';
     componentManager.register(iconKey, RmbSingle);
+    componentManager.register('MoreDownSingle', MoreDownSingle);
     return (_accessor: IAccessor) => ({
         icon: iconKey,
         id: SetCurrencyOperator.id,
@@ -67,12 +58,11 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
 };
 
 export const FactoryOtherMenuItem = (_accessor: IAccessor) => {
-    const menuService = _accessor.get(IMenuService);
     const numfmtService = _accessor.get(NumfmtService);
     const univerInstanceService = _accessor.get(IUniverInstanceService);
 
     const selectionManagerService = _accessor.get(SelectionManagerService);
-    const selection$ = new Observable((subscribe) => {
+    const value$ = new Observable((subscribe) =>
         selectionManagerService.selectionInfo$.subscribe((selections) => {
             if (selections && selections[0]) {
                 const workbook = univerInstanceService.getCurrentUniverSheetInstance();
@@ -81,34 +71,37 @@ export const FactoryOtherMenuItem = (_accessor: IAccessor) => {
                 const row = range.startRow;
                 const col = range.startColumn;
                 const numfmtValue = numfmtService.getValue(workbook.getUnitId(), worksheet.getSheetId(), row, col);
+                let value: string = '常规';
+
                 if (numfmtValue) {
                     const pattern = numfmtValue.pattern;
-                    let selection: IValueOption[] = [];
-                    if (isAccountingPanel(pattern) || isCurrencyPanel(pattern)) {
-                        const currencyType = getCurrencyType(pattern);
-                        selection = getCurrencyFormatOptions(currencyType!);
+                    if (isAccountingPanel(pattern)) {
+                        value = '会计';
+                    }
+
+                    if (isCurrencyPanel(pattern)) {
+                        value = '货币';
                     }
 
                     if (isDatePanel(pattern)) {
-                        selection = getDateFormatOptions();
+                        value = '日期';
                     }
-                    if (isGeneralPanel(pattern)) {
-                        selection = getNumberFormatOptions();
+                    if (isThousandthPercentilePanel(pattern)) {
+                        value = '千分位';
                     }
-                    subscribe.next(selection);
                 }
-                subscribe.next([]);
+                subscribe.next(value);
             }
-        });
-        subscribe.next([]);
-    });
+        })
+    );
     return {
-        id: PreviewCommand.id,
+        icon: 'MoreDownSingle',
+        id: OpenNumfmtPanelOperator.id,
         title: 'numfmt.menu.preview',
         tooltip: 'numfmt.menu.preview',
-        type: MenuItemType.SELECTOR,
+        type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         positions: [MenuPosition.TOOLBAR_START],
-        selections: selection$,
+        value$,
     } as IMenuItem;
 };

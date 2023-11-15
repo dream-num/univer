@@ -4,6 +4,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { SHEET_NUMFMT_PLUGIN } from './base/const/PLUGIN_NAME';
 import { AddDecimalCommand } from './commands/commands/add.decimal.command';
+import { PreviewCommand } from './commands/commands/preview.command';
 import { SetCurrencyOperator } from './commands/commands/set.currency.command';
 import { SetNumfmtCommand } from './commands/commands/set.numfmt.command';
 import { SubtractDecimalCommand } from './commands/commands/subtract.decimal.command';
@@ -39,6 +40,7 @@ export class NumfmtPlugin extends Plugin {
             CloseNumfmtPanelOperator,
             SetNumfmtMutation,
             SetNumfmtCommand,
+            PreviewCommand,
         ].forEach((config) => this._commandService.registerCommand(config));
     }
 

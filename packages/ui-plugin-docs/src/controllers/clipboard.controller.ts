@@ -32,7 +32,7 @@ export class DocClipboardController extends Disposable {
         @Inject(DocSkeletonManagerService) private _docSkeletonManagerService: DocSkeletonManagerService
     ) {
         super();
-        this.commandExecutedListener();
+        this._commandExecutedListener();
     }
 
     initialize() {
@@ -42,7 +42,7 @@ export class DocClipboardController extends Disposable {
         [InnerPasteCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
-    private commandExecutedListener() {
+    private _commandExecutedListener() {
         const updateCommandList = [DocCutCommand.id, DocCopyCommand.id, DocPasteCommand.id];
 
         this.disposeWithMe(
@@ -53,17 +53,17 @@ export class DocClipboardController extends Disposable {
 
                 switch (command.id) {
                     case DocPasteCommand.id: {
-                        this.handlePaste();
+                        this._handlePaste();
                         break;
                     }
 
                     case DocCopyCommand.id: {
-                        this.handleCopy();
+                        this._handleCopy();
                         break;
                     }
 
                     case DocCutCommand.id: {
-                        this.handleCut();
+                        this._handleCut();
                         break;
                     }
 
@@ -74,7 +74,7 @@ export class DocClipboardController extends Disposable {
         );
     }
 
-    private async handlePaste() {
+    private async _handlePaste() {
         const { _docClipboardService: clipboard } = this;
         const {
             segmentId,
@@ -124,7 +124,7 @@ export class DocClipboardController extends Disposable {
         }
     }
 
-    private getDocumentBodyInRanges(): IDocumentBody[] {
+    private _getDocumentBodyInRanges(): IDocumentBody[] {
         const ranges = this._textSelectionRenderManager.getAllTextRanges();
         const skeletonObject = this._docSkeletonManagerService.getCurrent();
 
@@ -209,13 +209,13 @@ export class DocClipboardController extends Disposable {
         return results;
     }
 
-    private async handleCopy() {
+    private async _handleCopy() {
         console.log('copy');
-        const bodys = this.getDocumentBodyInRanges();
+        const bodys = this._getDocumentBodyInRanges();
         console.log(bodys);
     }
 
-    private async handleCut() {
+    private async _handleCut() {
         console.log('cut');
     }
 }

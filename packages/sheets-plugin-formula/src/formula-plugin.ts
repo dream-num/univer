@@ -29,13 +29,7 @@ export class FormulaPlugin extends Plugin {
         dependencies.forEach((dependency) => this._injector.add(dependency));
     }
 
-    override onStarting(_injector: Injector): void {}
-
-    override onRendered(): void {}
-
     override onReady(): void {
         this.initialize();
     }
-
-    override onDestroy(): void {}
 }

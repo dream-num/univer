@@ -17,7 +17,7 @@ export type IStatusBarServiceStatus = Array<{
 }>;
 
 export class StatusBarService implements IStatusBarService, IDisposable {
-    private readonly functions = [
+    private readonly _functions = [
         FUNCTION_NAMES.SUM,
         FUNCTION_NAMES.MAX,
         FUNCTION_NAMES.MIN,
@@ -40,7 +40,7 @@ export class StatusBarService implements IStatusBarService, IDisposable {
     }
 
     getFunctions(): Readonly<FUNCTION_NAMES[]> {
-        return this.functions;
+        return this._functions;
     }
 }
 

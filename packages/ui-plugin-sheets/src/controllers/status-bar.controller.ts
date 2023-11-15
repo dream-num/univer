@@ -1,5 +1,4 @@
-import { BaseValueObject, FormulaEngineService, ISheetData } from '@univerjs/base-formula-engine';
-import { RangeReferenceObject } from '@univerjs/base-formula-engine/reference-object/range-reference-object.js';
+import { BaseValueObject, FormulaEngineService, ISheetData, RangeReferenceObject } from '@univerjs/base-formula-engine';
 import { ISelectionWithStyle, SelectionManagerService } from '@univerjs/base-sheets';
 import { Disposable, IRange, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
@@ -32,8 +31,9 @@ export class StatusBarController extends Disposable {
     }
 
     private _calculateSelection(selections: ISelectionWithStyle[]) {
-        const unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const sheetId = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const unitId = workbook.getUnitId();
+        const sheetId = workbook.getActiveSheet().getSheetId();
         const sheetData: ISheetData = {};
         this._univerInstanceService
             .getCurrentUniverSheetInstance()

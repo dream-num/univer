@@ -1,5 +1,5 @@
 import { FUNCTION_NAMES } from '@univerjs/base-formula-engine';
-import { IMessageService } from '@univerjs/base-ui';
+import { IClipboardInterfaceService, IMessageService } from '@univerjs/base-ui';
 import { LocaleService } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -27,17 +27,15 @@ type FunctionNameMap = {
 export const CopyableStatisticItem: React.FC<IStatisticItem> = (item: IStatisticItem) => {
     const localeService = useDependency(LocaleService);
     const messageService = useDependency(IMessageService);
+    const clipboardService = useDependency(IClipboardInterfaceService);
+
     const formateValue = formatNumber(item.value);
     const copyToClipboard = async () => {
-        try {
-            await navigator.clipboard.writeText(item.value.toString());
-            messageService.show({
-                type: MessageType.Success,
-                content: localeService.t('statusbar.copied'),
-            });
-        } catch (err) {
-            console.error('Unable to copy to clipboard', err);
-        }
+        await clipboardService.writeText(item.value.toString());
+        messageService.show({
+            type: MessageType.Success,
+            content: localeService.t('statusbar.copied'),
+        });
     };
     return (
         <Tooltip title={localeService.t('statusbar.clickToCopy')} placement="top">

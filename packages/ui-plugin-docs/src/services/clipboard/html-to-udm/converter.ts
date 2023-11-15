@@ -22,7 +22,7 @@ function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
  * Convert html strings into data structures in univer, IDocumentBody.
  * Support plug-in, add custom rules,
  */
-class HtmlToUDMService {
+export class HtmlToUDMService {
     private static pluginList: IPastePlugin[] = [];
 
     static use(plugin: IPastePlugin) {
@@ -107,5 +107,3 @@ class HtmlToUDMService {
         }
     }
 }
-
-export default HtmlToUDMService;

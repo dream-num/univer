@@ -103,7 +103,7 @@ export interface IDeleteCommandParams {
 }
 
 /**
- * The command to delete text. mainly used in BACKSPACE.
+ * The command to delete text, mainly used in BACKSPACE.
  */
 export const DeleteCommand: ICommand<IDeleteCommandParams> = {
     id: 'doc.command.delete-text',

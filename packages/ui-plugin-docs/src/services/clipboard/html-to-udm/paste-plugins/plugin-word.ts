@@ -45,21 +45,6 @@ const wordPastePlugin: IPastePlugin = {
                 doc.dataStream += '\r';
             },
         },
-        {
-            filter(el: HTMLElement) {
-                return el.tagName === 'DIV' && /word/i.test(el.className);
-            },
-            handler(doc) {
-                if (doc.sectionBreaks == null) {
-                    doc.sectionBreaks = [];
-                }
-
-                doc.sectionBreaks.push({
-                    startIndex: doc.dataStream.length,
-                });
-                doc.dataStream += '\n';
-            },
-        },
     ],
 };
 

@@ -6,7 +6,7 @@ import {
 import { Disposable, IDocumentBody, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
-import HtmlToUDMService from './html-to-udm/converter';
+import { HtmlToUDMService } from './html-to-udm/converter';
 import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';
 import PastePluginWord from './html-to-udm/paste-plugins/plugin-word';
 

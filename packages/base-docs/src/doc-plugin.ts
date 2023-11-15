@@ -91,7 +91,7 @@ export class DocPlugin extends Plugin {
 
         this._initializeDependencies(_injector);
 
-        this.initializeCommands();
+        this._initializeCommands();
     }
 
     initialize(): void {
@@ -106,7 +106,7 @@ export class DocPlugin extends Plugin {
         // this._markDocAsFocused();
     }
 
-    private initializeCommands(): void {
+    private _initializeCommands(): void {
         (
             [
                 MoveCursorOperation,

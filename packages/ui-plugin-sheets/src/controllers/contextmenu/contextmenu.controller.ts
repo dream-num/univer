@@ -1,7 +1,17 @@
 import { IRenderManagerService } from '@univerjs/base-render';
+import { SelectionManagerService } from '@univerjs/base-sheets';
 import { IContextMenuService, MenuPosition } from '@univerjs/base-ui';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import {
+    Disposable,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    RANGE_TYPE,
+    toDisposable,
+} from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
+import { ISelectionRenderService } from '../../services/selection/selection-render.service';
 import { SheetMenuPosition } from '../menu/menu';
 import { getSheetObject } from '../utils/component-tools';
 
@@ -15,7 +25,10 @@ export class SheetContextMenuController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(SelectionManagerService)
+        private readonly _selectionManagerService: SelectionManagerService,
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
         this._currentUniverService.currentSheet$.subscribe((workbook) => {
@@ -30,35 +43,46 @@ export class SheetContextMenuController extends Disposable {
         const objects = getSheetObject(this._currentUniverService, this._renderManagerService);
         if (!objects) {
             return;
-            // throw new Error('Rendering should be done when SheetContextMenuController initialized.');
         }
-
-        // const scene = objects.scene;
-
-        // const sceneObserver = scene.onPointerDownObserver.add((event) => {
-        //     if (event.button !== 2) {
-        //         return;
-        //     }
-
-        //     const { offsetX, offsetY } = event;
-
-        //     const object = scene.pick(Vector2.FromArray([offsetX, offsetY])) as BaseObject;
-
-        //     if (object.oKey === SHEET_VIEW_KEY.MAIN) {
-        //         this._contextMenuService.triggerContextMenu(event, MenuPosition.CONTEXT_MENU);
-        //     } else if (object.oKey === SHEET_VIEW_KEY.ROW) {
-        //         this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU);
-        //     } else if (object.oKey === SHEET_VIEW_KEY.COLUMN) {
-        //         this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
-        //     }
-        // });
-
-        // this.disposeWithMe(toDisposable(() => scene.onPointerDownObserver.remove(sceneObserver)));
 
         const spreadsheetPointerDownObserver = objects.spreadsheet.onPointerDownObserver;
         const spreadsheetObserver = spreadsheetPointerDownObserver.add((event) => {
             if (event.button === 2) {
-                this._contextMenuService.triggerContextMenu(event, MenuPosition.CONTEXT_MENU);
+                const selections = this._selectionManagerService.getSelections();
+                const currentSelection = selections?.[0];
+                if (!currentSelection) {
+                    return;
+                }
+                const rangeType = currentSelection.range.rangeType;
+                const range = this._selectionRenderService.convertSelectionRangeToData(currentSelection).rangeWithCoord;
+                const isPointerInRange = () => {
+                    if (!range) {
+                        return false;
+                    }
+                    const x = event.offsetX;
+                    const y = event.offsetY;
+                    switch (rangeType) {
+                        case RANGE_TYPE.ROW:
+                            return range.startY <= y && range.endY >= y;
+                        case RANGE_TYPE.COLUMN:
+                            return range.startX <= x && range.endX >= x;
+                        default:
+                            return range.startX <= x && range.endX >= x && range.startY <= y && range.endY >= y;
+                    }
+                };
+
+                const triggerMenu = (position: string) => {
+                    this._contextMenuService.triggerContextMenu(event, position);
+                };
+                if (!isPointerInRange()) {
+                    triggerMenu(MenuPosition.CONTEXT_MENU);
+                } else if (rangeType === RANGE_TYPE.COLUMN) {
+                    triggerMenu(SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
+                } else if (rangeType === RANGE_TYPE.ROW) {
+                    triggerMenu(SheetMenuPosition.ROW_HEADER_CONTEXT_MENU);
+                } else {
+                    triggerMenu(MenuPosition.CONTEXT_MENU);
+                }
             }
         });
         this.disposeWithMe(toDisposable(() => spreadsheetPointerDownObserver.remove(spreadsheetObserver)));

@@ -1,7 +1,9 @@
 import { getCellInfoInMergeData } from '@univerjs/base-render';
+import { SelectionManagerService } from '@univerjs/base-sheets';
 import {
     Direction,
     Disposable,
+    DisposableCollection,
     ICellData,
     ICommandService,
     IRange,
@@ -12,6 +14,7 @@ import {
     toDisposable,
     Tools,
 } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
 import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
 import { IAutoFillService } from '../services/auto-fill/auto-fill.service';
@@ -25,9 +28,9 @@ import {
     ICopyDataPiece,
     IRuleConfirmedData,
 } from '../services/auto-fill/type';
-import { IControlFillConfig, ISelectionRenderService } from '../services/selection/selection-render.service';
+import { ISelectionRenderService } from '../services/selection/selection-render.service';
 
-@OnLifecycle(LifecycleStages.Ready, AutoFillController)
+@OnLifecycle(LifecycleStages.Steady, AutoFillController)
 export class AutoFillController extends Disposable {
     private _direction: Direction | null = null;
     private _beforeApplyData: Array<Array<Nullable<ICellData>>> = [];
@@ -38,7 +41,8 @@ export class AutoFillController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IAutoFillService private readonly _autoFillService: IAutoFillService
+        @IAutoFillService private readonly _autoFillService: IAutoFillService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
         this._init();
@@ -53,13 +57,55 @@ export class AutoFillController extends Disposable {
     }
 
     private _onSelectionControlFillChanged() {
+        const disposableCollection = new DisposableCollection();
         this.disposeWithMe(
             toDisposable(
-                this._selectionRenderService.controlFillConfig$.subscribe((config: IControlFillConfig | null) => {
-                    if (!config) {
-                        return;
-                    }
-                    this._handleFillDrag(config.oldRange, config.newRange);
+                this._selectionManagerService.selectionInfo$.subscribe(() => {
+                    // Each range change requires re-listening
+                    disposableCollection.dispose();
+
+                    const selectionControls = this._selectionRenderService.getCurrentControls();
+                    selectionControls.forEach((controlSelection) => {
+                        disposableCollection.add(
+                            toDisposable(
+                                controlSelection.selectionFilled$.subscribe((filled) => {
+                                    if (filled == null) {
+                                        return;
+                                    }
+                                    const { startColumn, endColumn, startRow, endRow } = controlSelection.model;
+                                    const {
+                                        startColumn: newStartColumn,
+                                        endColumn: newEndColumn,
+                                        startRow: newStartRow,
+                                        endRow: newEndRow,
+                                    } = filled || {};
+                                    // if no change happened, return
+                                    if (
+                                        startColumn === newStartColumn &&
+                                        endColumn === newEndColumn &&
+                                        startRow === newStartRow &&
+                                        endRow === newEndRow
+                                    ) {
+                                        return;
+                                    }
+
+                                    const sourceRange = {
+                                        startColumn,
+                                        endColumn,
+                                        startRow,
+                                        endRow,
+                                    };
+                                    const destRange = {
+                                        startColumn: newStartColumn || startColumn,
+                                        endColumn: newEndColumn || endColumn,
+                                        startRow: newStartRow || startRow,
+                                        endRow: newEndRow || endRow,
+                                    };
+                                    this._handleFillDrag(sourceRange, destRange);
+                                })
+                            )
+                        );
+                    });
                 })
             )
         );

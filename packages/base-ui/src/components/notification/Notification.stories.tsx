@@ -1,4 +1,4 @@
-import type { Meta } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from '@univerjs/design';
 
 import { Notification, notification } from './Notification';
@@ -15,7 +15,7 @@ const meta: Meta<typeof Notification> = {
 
 export default meta;
 
-export const Playground = {
+export const Playground: StoryObj = {
     render: () => (
         <>
             <Notification />
@@ -53,7 +53,11 @@ export const Playground = {
             <Button
                 type="primary"
                 onClick={() =>
-                    notification.show({ type: 'error', title: 'Notification Error', content: 'Notification content' })
+                    notification.show({
+                        type: 'error',
+                        title: 'Notification Error',
+                        content: 'Notification content',
+                    })
                 }
             >
                 Notification Error

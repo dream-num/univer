@@ -2,7 +2,7 @@ import { BaselineOffset, BooleanNumber, ITextStyle } from '@univerjs/core';
 
 import { ptToPixel } from './utils';
 
-export default function extractNodeStyle(node: HTMLElement): ITextStyle {
+export function extractNodeStyle(node: HTMLElement): ITextStyle {
     const styles = node.style;
     const docStyles: ITextStyle = {};
     const tagName = node.tagName.toLowerCase();

@@ -1,6 +1,6 @@
 import { IDocumentBody, ITextStyle, Nullable } from '@univerjs/core';
 
-import extractNodeStyle from './parse-node-style';
+import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';
 import { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
 

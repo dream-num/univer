@@ -1,6 +1,6 @@
 import { BooleanNumber, IParagraph } from '@univerjs/core';
 
-import getInlineStyle from '../parse-node-style';
+import { extractNodeStyle as getInlineStyle } from '../parse-node-style';
 import { getParagraphStyle } from '../utils';
 import { IPastePlugin } from './type';
 

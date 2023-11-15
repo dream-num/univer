@@ -175,6 +175,7 @@ export class Documents extends DocComponent {
 
     override draw(ctx: CanvasRenderingContext2D, bounds?: IBoundRect) {
         const documentSkeleton = this.getSkeleton();
+
         if (!documentSkeleton) {
             return;
         }
@@ -195,6 +196,7 @@ export class Documents extends DocComponent {
         const parentScale = this.getParentScale();
         const extensions = this.getExtensionsByOrder();
         const scale = getScale(parentScale);
+
         for (const extension of extensions) {
             extension.clearCache();
         }
@@ -267,6 +269,7 @@ export class Documents extends DocComponent {
 
                     let alignOffset;
                     let rotateTranslateXListApply = null;
+
                     if (vertexAngle !== 0) {
                         const {
                             rotateTranslateXList,

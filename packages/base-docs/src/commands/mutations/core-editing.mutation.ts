@@ -7,7 +7,7 @@ import {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
-import MemoryCursor from '../../basics/memory-cursor';
+import { MemoryCursor } from '../../basics/memory-cursor';
 import { DeleteApply } from './functions/delete-apply';
 import { InsertApply } from './functions/insert-apply';
 import { UpdateAttributeApply } from './functions/update-apply';

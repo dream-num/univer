@@ -240,7 +240,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
     insert(insertBody: IDocumentBody, insertIndex = 0) {
         const dataStream = insertBody.dataStream;
         let dataStreamLen = dataStream.length;
-        const insertedNode = this.getParagraphByTree(this.children, insertIndex);
+        const insertedNode = this.getParagraphByIndex(this.children, insertIndex);
 
         if (insertedNode == null) {
             return;
@@ -279,6 +279,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                 currentNode.selfPlus(dataStreamLen, currentNode.getPositionInParent());
                 const children = currentNode.children;
                 let isStartFix = false;
+
                 for (const node of children) {
                     if (node === insertedLastNode) {
                         isStartFix = true;
@@ -328,7 +329,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
         this.deleteTree(nodes, currentIndex, textLength);
     }
 
-    private getParagraphByTree(nodes: DataStreamTreeNode[], insertIndex: number): Nullable<DataStreamTreeNode> {
+    private getParagraphByIndex(nodes: DataStreamTreeNode[], insertIndex: number): Nullable<DataStreamTreeNode> {
         for (const node of nodes) {
             const { children } = node;
 
@@ -340,7 +341,7 @@ export class DocumentBodyModel extends DocumentBodyModelSimple {
                 return node;
             }
 
-            return this.getParagraphByTree(children, insertIndex);
+            return this.getParagraphByIndex(children, insertIndex);
         }
 
         return null;

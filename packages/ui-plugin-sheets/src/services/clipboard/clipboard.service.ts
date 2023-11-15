@@ -185,6 +185,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const colStyles = getColStyle(getArrayFromTo(startColumn, endColumn), hooks);
         // row styles and table contents
         const rowContents: string[] = [];
+
         matrix.forRow((row, cols) => {
             // TODO: cols here should filtered out those in span cells
             rowContents.push(getRowContent(row, cols, hooks, matrix));
@@ -736,6 +737,7 @@ function getTDContent(
     const mergedProperties = mergeProperties(properties);
     const str = zipClipboardPropertyItemToString(mergedProperties);
     const content = hooks.reduce((acc, hook) => acc || hook.onCopyCellContent?.(row, col) || '', '');
+
     return `<td${str}>${content}</td>`;
 }
 

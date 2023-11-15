@@ -46,6 +46,7 @@ export const SheetPasteCommand: IMultiCommand = {
         logService.log('[SheetPasteCommand]', 'the focusing element is', document.activeElement);
 
         const result = document.execCommand('paste');
+
         if (!result) {
             logService.log(
                 '[SheetPasteCommand]',

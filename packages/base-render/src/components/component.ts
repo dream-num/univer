@@ -27,6 +27,7 @@ export class RenderComponent<T, U> extends BaseObject {
     getExtensionsByOrder() {
         const extensionArray = Array.from(this._extensions.values());
         extensionArray.sort(sortRules);
+
         return extensionArray;
     }
 

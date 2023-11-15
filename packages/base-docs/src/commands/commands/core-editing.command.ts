@@ -103,7 +103,7 @@ export interface IDeleteCommandParams {
 }
 
 /**
- * The command to delete text.
+ * The command to delete text, mainly used in BACKSPACE.
  */
 export const DeleteCommand: ICommand<IDeleteCommandParams> = {
     id: 'doc.command.delete-text',
@@ -131,6 +131,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             IRichTextEditingMutationParams,
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
@@ -301,15 +302,16 @@ export const CoverCommand: ICommand<ICoverCommandParams> = {
     },
 };
 
-function getRetainAndDeleteFromReplace(
+export function getRetainAndDeleteFromReplace(
     range: ITextRange,
-    segmentId?: string
+    segmentId: string = '',
+    memoryCursor: number = 0
 ): Array<IRetainMutationParams | IDeleteMutationParams> {
     const { startOffset, endOffset, collapsed } = range;
     const dos: Array<IRetainMutationParams | IDeleteMutationParams> = [];
 
-    const textStart = startOffset + (collapsed ? -1 : 0);
-    const textEnd = endOffset - 1;
+    const textStart = startOffset + (collapsed ? -1 : 0) - memoryCursor;
+    const textEnd = endOffset - 1 - memoryCursor;
 
     if (textStart > 0) {
         dos.push({

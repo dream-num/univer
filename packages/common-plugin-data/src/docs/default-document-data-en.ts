@@ -254,6 +254,9 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     nestingLevel: 0,
                     textStyle: {
                         fs: 20,
+                        cl: {
+                            rgb: 'rgb(0, 255, 0)',
+                        },
                     },
                 },
                 paragraphStyle: {

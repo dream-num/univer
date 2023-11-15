@@ -230,6 +230,7 @@ export class FontCache {
         }
 
         this.setFontMeasureCache(fontString, content, cache);
+
         return cache;
     }
 

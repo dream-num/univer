@@ -1,20 +1,221 @@
-import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/base-docs';
+import { ITextSelectionRenderManager } from '@univerjs/base-render';
+import {
+    Disposable,
+    ICommandInfo,
+    ICommandService,
+    IDocumentBody,
+    ILogService,
+    IParagraph,
+    ITextRun,
+    IUniverInstanceService,
+    Tools,
+} from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 
-import { DocCopyCommand } from '../commands/commands/clipboard.command';
+import {
+    DocCopyCommand,
+    DocCutCommand,
+    DocPasteCommand,
+    InnerPasteCommand,
+} from '../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 
 export class DocClipboardController extends Disposable {
     constructor(
+        @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @IDocClipboardService private readonly _docClipboardService: IDocClipboardService
+        @IDocClipboardService private readonly _docClipboardService: IDocClipboardService,
+        @ITextSelectionRenderManager private _textSelectionRenderManager: ITextSelectionRenderManager,
+        @Inject(TextSelectionManagerService) private _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocSkeletonManagerService) private _docSkeletonManagerService: DocSkeletonManagerService
     ) {
         super();
+        this._commandExecutedListener();
     }
 
     initialize() {
-        [DocCopyCommand, DocCopyCommand, DocCopyCommand].forEach((command) =>
+        [DocCopyCommand, DocCutCommand, DocPasteCommand].forEach((command) =>
             this.disposeWithMe(this._commandService.registerAsMultipleCommand(command))
         );
+        [InnerPasteCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+    }
+
+    private _commandExecutedListener() {
+        const updateCommandList = [DocCutCommand.id, DocCopyCommand.id, DocPasteCommand.id];
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (!updateCommandList.includes(command.id)) {
+                    return;
+                }
+
+                switch (command.id) {
+                    case DocPasteCommand.id: {
+                        this._handlePaste();
+                        break;
+                    }
+
+                    case DocCopyCommand.id: {
+                        this._handleCopy();
+                        break;
+                    }
+
+                    case DocCutCommand.id: {
+                        this._handleCut();
+                        break;
+                    }
+
+                    default:
+                        throw new Error(`Unhandled command ${command.id}`);
+                }
+            })
+        );
+    }
+
+    private async _handlePaste() {
+        const { _docClipboardService: clipboard } = this;
+        const {
+            segmentId,
+            endOffset: activeEndOffset,
+            style,
+        } = this._textSelectionRenderManager.getActiveRange() ?? {};
+        const ranges = this._textSelectionRenderManager.getAllTextRanges();
+
+        if (segmentId == null) {
+            this._logService.error('[DocClipboardController] segmentId is not existed');
+        }
+
+        if (activeEndOffset == null) {
+            return;
+        }
+
+        try {
+            const body = await clipboard.queryClipboardData();
+
+            this._commandService.executeCommand(InnerPasteCommand.id, { body, segmentId });
+
+            // When doc has multiple selections, the cursor moves to the last pasted content's end.
+            let cursor = activeEndOffset;
+            for (const range of ranges) {
+                const { startOffset, endOffset } = range;
+
+                if (startOffset == null || endOffset == null) {
+                    continue;
+                }
+
+                if (endOffset <= activeEndOffset) {
+                    cursor += body.dataStream.length - (endOffset - startOffset);
+                }
+            }
+
+            // move selection
+            this._textSelectionManagerService.replace([
+                {
+                    startOffset: cursor,
+                    endOffset: cursor,
+                    collapsed: true,
+                    style,
+                },
+            ]);
+        } catch (_e) {
+            this._logService.error('[DocClipboardController] clipboard is empty');
+        }
+    }
+
+    private _getDocumentBodyInRanges(): IDocumentBody[] {
+        const ranges = this._textSelectionRenderManager.getAllTextRanges();
+        const skeletonObject = this._docSkeletonManagerService.getCurrent();
+
+        if (skeletonObject == null) {
+            return [];
+        }
+
+        const { skeleton } = skeletonObject;
+        const { dataStream, textRuns = [], paragraphs = [] } = skeleton.getModel().getBodyModel().getBody();
+
+        const results: IDocumentBody[] = [];
+
+        for (const range of ranges) {
+            const { startOffset, endOffset, collapsed } = range;
+
+            if (collapsed) {
+                continue;
+            }
+
+            if (startOffset == null || endOffset == null) {
+                continue;
+            }
+
+            const docBody: IDocumentBody = {
+                dataStream: dataStream.slice(startOffset, endOffset),
+            };
+
+            const newTextRuns: ITextRun[] = [];
+
+            for (const textRun of textRuns) {
+                const clonedTextRun = Tools.deepClone(textRun);
+                const { st, ed } = clonedTextRun;
+                if (Tools.hasIntersectionBetweenTwoRanges(st, ed, startOffset, endOffset)) {
+                    if (startOffset >= st && startOffset <= ed) {
+                        newTextRuns.push({
+                            ...clonedTextRun,
+                            st: startOffset,
+                            ed: Math.min(endOffset, ed),
+                        });
+                    } else if (endOffset >= st && endOffset <= ed) {
+                        newTextRuns.push({
+                            ...clonedTextRun,
+                            st: Math.max(startOffset, st),
+                            ed: endOffset,
+                        });
+                    } else {
+                        newTextRuns.push(clonedTextRun);
+                    }
+                }
+            }
+
+            if (newTextRuns.length) {
+                docBody.textRuns = newTextRuns.map((tr) => {
+                    const { st, ed } = tr;
+                    return {
+                        ...tr,
+                        st: st - startOffset,
+                        ed: ed - startOffset,
+                    };
+                });
+            }
+
+            const newParagraphs: IParagraph[] = [];
+
+            for (const paragraph of paragraphs) {
+                const { startIndex } = paragraph;
+                if (startIndex >= startOffset && startIndex <= endOffset) {
+                    newParagraphs.push(Tools.deepClone(paragraph));
+                }
+            }
+
+            if (newParagraphs.length) {
+                docBody.paragraphs = newParagraphs.map((p) => ({
+                    ...p,
+                    startIndex: p.startIndex - startOffset,
+                }));
+            }
+
+            results.push(docBody);
+        }
+
+        return results;
+    }
+
+    private async _handleCopy() {
+        console.log('copy');
+        const bodys = this._getDocumentBodyInRanges();
+        console.log(bodys);
+    }
+
+    private async _handleCut() {
+        console.log('cut');
     }
 }

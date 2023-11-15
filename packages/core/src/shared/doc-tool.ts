@@ -81,9 +81,5 @@ export function deleteContent(content: string, start: number, end: number) {
         return content;
     }
 
-    // if (start === end) {
-    //     start -= 1;
-    // }
-
     return content.slice(0, start) + content.slice(end);
 }

@@ -1,4 +1,4 @@
-class MemoryCursor {
+export class MemoryCursor {
     cursor: number = 0;
 
     reset() {
@@ -10,5 +10,3 @@ class MemoryCursor {
         this.cursor += pos;
     }
 }
-
-export default MemoryCursor;

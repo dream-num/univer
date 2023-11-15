@@ -633,4 +633,13 @@ export class Tools {
         }
         return new ObjectArray<T>(array);
     }
+
+    static hasIntersectionBetweenTwoRanges(
+        range1Start: number,
+        range1End: number,
+        range2Start: number,
+        range2End: number
+    ) {
+        return range1End >= range2Start && range2End >= range1Start;
+    }
 }

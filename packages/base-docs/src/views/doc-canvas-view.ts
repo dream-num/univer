@@ -43,7 +43,6 @@ export class DocCanvasView {
         @IConfigService private readonly _configService: IConfigService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        // @IRenderingEngine private readonly _engine: Engine,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._currentUniverService.currentDoc$.subscribe((documentModel) => {
@@ -52,6 +51,7 @@ export class DocCanvasView {
             }
 
             const unitId = documentModel.getUnitId();
+
             if (!this._loadedMap.has(unitId)) {
                 this._currentDocumentModel = documentModel;
                 this._addNewRender();
@@ -103,6 +103,7 @@ export class DocCanvasView {
 
         scene.on(EVENT_TYPE.wheel, (evt: unknown, state: EventState) => {
             const e = evt as IWheelEvent;
+
             if (e.ctrlKey) {
                 const deltaFactor = Math.abs(e.deltaX);
                 let scrollNum = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
@@ -141,6 +142,7 @@ export class DocCanvasView {
         this._addComponent(currentRender);
 
         const should = this._currentDocumentModel.getShouldRenderLoopImmediately();
+
         if (should) {
             engine.runRenderLoop(() => {
                 scene.render();

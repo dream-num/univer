@@ -506,6 +506,7 @@ export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
 
     if (segmentId) {
         const { headers, footers } = model;
+
         if (headers?.[segmentId]) {
             body = headers[segmentId].body;
         } else if (footers?.[segmentId]) {

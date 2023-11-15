@@ -13,12 +13,8 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import {
-    DocCopyCommand,
-    DocCutCommand,
-    DocPasteCommand,
-    InnerPasteCommand,
-} from '../commands/commands/clipboard.command';
+import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
+import { InnerPasteCommand } from '../commands/commands/inner.clipboard.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 
 export class DocClipboardController extends Disposable {

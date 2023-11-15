@@ -545,6 +545,7 @@ export default {
         count: 'count',
         clickToCopy: 'click to copy',
         copied: 'copied!',
+    },
     autoFill: {
         copy: 'Copy Cell',
         series: 'Fill Series',

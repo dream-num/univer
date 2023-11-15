@@ -25,7 +25,7 @@ export interface IAnchorPoint {
     col: number;
 }
 
-export interface ISmartButtonMenuItem {
+export interface IAutoFillPopupMenuItem {
     label: string;
     value?: APPLY_TYPE;
     index: number;
@@ -33,11 +33,11 @@ export interface ISmartButtonMenuItem {
 }
 
 const useUpdate = () => {
-    const [_, setState] = useState({});
+    const [, setState] = useState({});
     return useCallback(() => setState({}), []);
 };
 
-export const SmartButton: React.FC<{}> = () => {
+export const AutoFillPopupMenu: React.FC<{}> = () => {
     const commandService = useDependency(ICommandService);
     const sheetSkeletonManagerService = useDependency(SheetSkeletonManagerService);
     const currentUniverService = useDependency(IUniverInstanceService);
@@ -45,7 +45,7 @@ export const SmartButton: React.FC<{}> = () => {
     const selectionRenderService = useDependency(ISelectionRenderService);
     const autoFillService = useDependency(IAutoFillService);
     const localeService = useDependency(LocaleService);
-    const [menu, setMenu] = useState<ISmartButtonMenuItem[]>([]);
+    const [menu, setMenu] = useState<IAutoFillPopupMenuItem[]>([]);
 
     const [visible, setVisible] = useState(false);
     const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
@@ -111,7 +111,7 @@ export const SmartButton: React.FC<{}> = () => {
         setVisible(visible);
     };
 
-    const handleClick = (item: ISmartButtonMenuItem) => {
+    const handleClick = (item: IAutoFillPopupMenuItem) => {
         commandService.executeCommand(RefillCommand.id, { type: item.value });
     };
 
@@ -122,21 +122,21 @@ export const SmartButton: React.FC<{}> = () => {
                 placement="bottomLeft"
                 trigger={['click']}
                 overlay={
-                    <ul className={styles.smartButtonMenu} style={{ ...styles }}>
+                    <ul className={styles.AutoFillPopupMenu} style={{ ...styles }}>
                         {availableMenu.map((item) => (
                             <li
                                 key={item.index}
-                                onClick={(e) => handleClick(item)}
-                                className={styles.smartButtonMenuItem}
+                                onClick={() => handleClick(item)}
+                                className={styles.AutoFillPopupMenuItem}
                             >
-                                <span className={styles.smartButtonMenuItemIcon}>
+                                <span className={styles.AutoFillPopupMenuItemIcon}>
                                     {item.value === selected ? (
                                         <CheckMarkSingle style={{ color: 'rgb(var(--green-700, #409f11))' }} />
                                     ) : (
                                         ''
                                     )}
                                 </span>
-                                <span className={styles.smartButtonMenuItemTitle}>{localeService.t(item.label)}</span>
+                                <span className={styles.AutoFillPopupMenuItemTitle}>{localeService.t(item.label)}</span>
                             </li>
                         ))}
                     </ul>

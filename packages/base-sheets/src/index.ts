@@ -1,7 +1,6 @@
 export * from './base-sheets-plugin';
 
 // #region services
-
 export { COMMAND_LISTENER_SKELETON_CHANGE } from './basics/const/command-listener-const';
 export {
     convertSelectionDataToRange,
@@ -14,6 +13,15 @@ export {
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
     transformCellDataToSelectionData,
 } from './basics/selection';
+export {
+    checkIfShrink,
+    expandToContinuousRange,
+    expandToNextCell,
+    expandToNextGapRange,
+    expandToWholeSheet,
+    shrinkToNextCell,
+    shrinkToNextGapRange,
+} from './commands/commands/utils/selection-util';
 export { BorderStyleManagerService } from './services/border-style-manager.service';
 export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './services/selection-manager.service';
 

@@ -1,5 +1,11 @@
-import { Disposable, IContextService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
-import { ContextService } from '@univerjs/core/services/context/context.service.js';
+import {
+    ContextService,
+    Disposable,
+    IContextService,
+    LifecycleStages,
+    OnLifecycle,
+    toDisposable,
+} from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import { fromEvent } from 'rxjs';
 import { Nullable } from 'vitest';

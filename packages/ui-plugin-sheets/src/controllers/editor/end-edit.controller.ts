@@ -20,6 +20,7 @@ import {
     ICommandInfo,
     ICommandService,
     IContextService,
+    isFormulaString,
     IUniverInstanceService,
     LifecycleStages,
     Nullable,
@@ -161,8 +162,12 @@ export class EndEditController extends Disposable {
                     return;
                 }
 
-                cellData.v = newDataStream;
-                cellData.m = newDataStream;
+                if (isFormulaString(newDataStream)) {
+                    cellData.f = newDataStream;
+                } else {
+                    cellData.v = newDataStream;
+                    cellData.m = newDataStream;
+                }
             }
 
             this._commandService.executeCommand(SetRangeValuesCommand.id, {

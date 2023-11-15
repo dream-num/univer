@@ -54,6 +54,30 @@ export default {
         formulaMore: {
             helpExample: '示例',
             helpAbstract: '简介',
+
+            financial: '财务',
+            date: '日期与时间',
+            math: '数学与三角函数',
+            statistical: '统计',
+            lookup: '查找与引用',
+            database: '数据库',
+            text: '文本',
+            logical: '逻辑',
+            information: '信息',
+            engineering: '工程',
+            cube: '多维数据集',
+            compatibility: '兼容性',
+            web: 'Web',
+            array: '数组',
+            univer: 'Univer',
+
+            searchFunctionPlaceholder: '搜索函数',
+        },
+
+        moreFunctions: {
+            confirm: '确定',
+            prev: '上一步',
+            next: '下一步',
         },
     },
 };

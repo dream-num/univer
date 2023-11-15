@@ -60,9 +60,9 @@ export function HelpFunction() {
         };
     }, []);
 
-    const handleSwitchActive = (paramIndex: number) => {
+    function handleSwitchActive(paramIndex: number) {
         setParamIndex(paramIndex);
-    };
+    }
 
     return (
         <>

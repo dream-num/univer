@@ -94,6 +94,14 @@ export const SetRangeValuesUndoMutationFactory = (
 function setNull(value: Nullable<ICellData>) {
     if (value == null) return null;
 
+    if (value.f === undefined) {
+        value.f = null;
+    }
+
+    if (value.si === undefined) {
+        value.si = null;
+    }
+
     if (value.p === undefined) {
         value.p = null;
     }
@@ -140,6 +148,14 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 cellMatrix?.setValue(row, col, {});
             } else {
                 const oldVal = cellMatrix.getValue(row, col) || {};
+
+                if (newVal.f !== undefined) {
+                    oldVal.f = newVal.f;
+                }
+
+                if (newVal.si !== undefined) {
+                    oldVal.si = newVal.si;
+                }
 
                 if (newVal.p !== undefined) {
                     oldVal.p = newVal.p;

@@ -246,6 +246,9 @@ importers:
       '@univerjs/sheets-plugin-formula':
         specifier: workspace:*
         version: link:../../packages/sheets-plugin-formula
+      '@univerjs/sheets-plugin-formula-ui':
+        specifier: workspace:*
+        version: link:../../packages/sheets-plugin-formula-ui
       '@univerjs/sheets-plugin-import-xlsx':
         specifier: workspace:*
         version: link:../../packages/sheets-plugin-import-xlsx
@@ -954,6 +957,21 @@ importers:
 
   packages/sheets-plugin-formula:
     dependencies:
+      '@univerjs/base-formula-engine':
+        specifier: workspace:*
+        version: link:../base-formula-engine
+      '@univerjs/base-sheets':
+        specifier: workspace:*
+        version: link:../base-sheets
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@wendellhu/redi':
+        specifier: ^0.12.11
+        version: 0.12.11
+
+  packages/sheets-plugin-formula-ui:
+    dependencies:
       '@univerjs/base-docs':
         specifier: workspace:*
         version: link:../base-docs
@@ -976,8 +994,8 @@ importers:
         specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
-        specifier: ^0.1.12
-        version: 0.1.12(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.1.7
+        version: 0.1.7(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/ui-plugin-sheets':
         specifier: workspace:*
         version: link:../ui-plugin-sheets
@@ -5798,6 +5816,16 @@ packages:
 
   /@univerjs/icons@0.1.12(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-1EN0Ce85NIFQCycT/3BmLUzIdQKRz7nLYLyjb6IYXlLf7tlDp478GhqRiE7jVZNHsfziLt7VeKY7kIqdTixsaA==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@univerjs/icons@0.1.7(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-jFzcqluGXPrNmbQ0GaB/aXrDtis+bV5igyWcYvx8/3ZIuwddQ0MVy//O4DulhV42Tc5XJMdRKeN41+iBHLiYXQ==}
     peerDependencies:
       react: '*'
       react-dom: '*'

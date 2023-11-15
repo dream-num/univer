@@ -16,22 +16,27 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
             {
                 label: 'SUM',
                 value: 'SUM',
+                icon: 'SumSingle',
             },
             {
                 label: 'AVERAGE',
                 value: 'AVERAGE',
+                icon: 'AvgSingle',
             },
             {
                 label: 'COUNT',
                 value: 'COUNT',
+                icon: 'CntSingle',
             },
             {
                 label: 'MAX',
                 value: 'MAX',
+                icon: 'MaxSingle',
             },
             {
                 label: 'MIN',
                 value: 'MIN',
+                icon: 'MinSingle',
             },
         ],
     };

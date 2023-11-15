@@ -27,7 +27,8 @@ export interface ICellData {
     m?: Nullable<string>; // formatted value
     // Usually the type is automatically determined based on the data, or the user directly specifies
     t?: Nullable<CellValueType>; // 0 string, 1 number, 2 boolean, 3 force string, green icon, set null for cell clear all
-    // f?: string; // formula '=SUM(1)'
+    f?: Nullable<string>; // formula '=SUM(1)'
+    si?: Nullable<string>; // formula id
     /**
      * format
      */
@@ -55,10 +56,11 @@ export interface ICellData {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isICellData(value: any): value is ICellData {
     return (
-        value &&
-        ((value as ICellData).s !== undefined ||
-            (value as ICellData).p !== undefined ||
-            (value as ICellData).v !== undefined)
+        (value &&
+            ((value as ICellData).s !== undefined ||
+                (value as ICellData).p !== undefined ||
+                (value as ICellData).v !== undefined)) ||
+        (value as ICellData).f !== undefined
     );
 }
 

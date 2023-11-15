@@ -1,23 +1,5 @@
 import { IFunctionInfo } from '@univerjs/base-formula-engine';
 
-export enum FunctionType {
-    Math,
-    Statistical,
-    Lookup,
-    DataMining,
-    Database,
-    Date,
-    Filter,
-    Financial,
-    Engineering,
-    Logical,
-    Operator,
-    Text,
-    Parser,
-    Array,
-    Other,
-}
-
 // TODO@Dushusir: register custom function
 // TODO@Dushusir: register custom locale file
 export interface IFunctionDescription {

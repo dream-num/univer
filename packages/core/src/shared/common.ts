@@ -130,6 +130,10 @@ export function isFormulaString(value: any): boolean {
     return Tools.isString(value) && value.indexOf('=') === 0 && value.length > 1;
 }
 
+export function isFormulaId(value: any): boolean {
+    return Tools.isString(value) && value.indexOf('=') === -1 && value.length === 6;
+}
+
 /**
  * move to Styles.getStyleByCell
  */

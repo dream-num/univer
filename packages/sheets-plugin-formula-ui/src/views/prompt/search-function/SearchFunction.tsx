@@ -72,13 +72,13 @@ export function SearchFunction() {
         };
     }, []);
 
-    const handleLiMouseEnter = (index: number) => {
+    function handleLiMouseEnter(index: number) {
         setActive(index);
-    };
+    }
 
-    const handleLiMouseLeave = () => {
+    function handleLiMouseLeave() {
         setActive(-1);
-    };
+    }
 
     return (
         <Dropdown

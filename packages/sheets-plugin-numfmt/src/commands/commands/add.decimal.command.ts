@@ -50,16 +50,20 @@ export const AddDecimalCommand: ICommand = {
                     });
                 } else {
                     const decimals = getDecimalFromPattern(numfmtValue.pattern);
-                    values.push({
-                        row,
-                        col,
-                        pattern: setPatternDecimal(numfmtValue.pattern, decimals + 1),
-                    });
+                    const pattern = setPatternDecimal(numfmtValue.pattern, decimals + 1);
+                    pattern !== numfmtValue.pattern &&
+                        values.push({
+                            row,
+                            col,
+                            pattern,
+                        });
                 }
             });
         });
-
-        const result = await commandService.executeCommand(SetNumfmtCommand.id, { values });
-        return result;
+        if (values.length) {
+            const result = await commandService.executeCommand(SetNumfmtCommand.id, { values });
+            return result;
+        }
+        return false;
     },
 };

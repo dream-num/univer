@@ -10,7 +10,15 @@ import {
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { chnNumberRule, chnWeek2Rule, chnWeek3Rule, extendNumberRule, numberRule, otherRule } from './rules';
+import {
+    chnNumberRule,
+    chnWeek2Rule,
+    chnWeek3Rule,
+    extendNumberRule,
+    loopSeriesRule,
+    numberRule,
+    otherRule,
+} from './rules';
 import { APPLY_TYPE, IAutoFillRule } from './type';
 
 export interface IAutoFillService {
@@ -75,7 +83,15 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     }
 
     private _init() {
-        this._rules = [numberRule, extendNumberRule, chnNumberRule, chnWeek2Rule, chnWeek3Rule, otherRule];
+        this._rules = [
+            numberRule,
+            extendNumberRule,
+            chnNumberRule,
+            chnWeek2Rule,
+            chnWeek3Rule,
+            loopSeriesRule,
+            otherRule,
+        ];
         // this._applyType = APPLY_TYPE.SERIES;
         this._isFillingStyle = true;
     }

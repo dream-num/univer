@@ -1,5 +1,6 @@
 import { BreakLineCommand, DeleteLeftCommand } from '@univerjs/base-docs';
 import { DeviceInputEventType } from '@univerjs/base-render';
+import { ClearSelectionContentCommand } from '@univerjs/base-sheets';
 import { IShortcutItem, KeyCode, MetaKeys } from '@univerjs/base-ui';
 import { FOCUSING_EDITOR } from '@univerjs/core';
 
@@ -81,12 +82,7 @@ export const EditorDeleteLeftShortcut: IShortcutItem = {
 };
 
 export const EditorDeleteLeftShortcutInActive: IShortcutItem = {
-    id: SetCellEditVisibleOperation.id,
+    id: ClearSelectionContentCommand.id,
     preconditions: (contextService) => whenEditorFocusIsHidden(contextService),
     binding: KeyCode.BACKSPACE,
-    staticParameters: {
-        visible: true,
-        eventType: DeviceInputEventType.Keyboard,
-        keycode: KeyCode.BACKSPACE,
-    },
 };

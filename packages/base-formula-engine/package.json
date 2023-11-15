@@ -6,20 +6,12 @@
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
-    "module": "./src/index.ts",
-    "types": "./src/Types/index.d.ts",
     "publishConfig": {
-        "main": "./lib/univer-base-formula-engine.cjs.js",
-        "module": "./lib/univer-base-formula-engine.js",
-        "types": "./lib/index.d.ts",
+        "access": "public",
         "exports": {
-            ".": {
-                "require": "./lib/univer-base-formula-engine.cjs.js",
-                "default": "./lib/univer-base-formula-engine.js"
-            },
+            ".": "./lib/index.ts",
             "./*": "./lib/*"
-        },
-        "access": "public"
+        }
     },
     "exports": {
         ".": "./src/index.ts",
@@ -40,7 +32,7 @@
         "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
+        "@univerjs/core": "*",
         "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {

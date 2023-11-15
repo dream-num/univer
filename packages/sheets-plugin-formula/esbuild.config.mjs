@@ -5,6 +5,9 @@ import baseConfig from '../../esbuild.config.mjs';
 
 esbuild.build({
     ...baseConfig,
-    globalName: 'UniverBaseRender',
-    outfile: './lib/univer-base-render.js',
+    globalName: 'UniverPluginFormula',
+    entryPoints: {
+        index: './src/index.ts',
+    },
+    outdir: './lib',
 });

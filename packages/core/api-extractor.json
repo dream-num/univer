@@ -1,4 +1,0 @@
-{
-    "extends": "../../api-extractor.json"
-    // "mainEntryPointFilePath": "<unscopedPackageName>/lib/index.d.ts"
-}

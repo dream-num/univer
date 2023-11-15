@@ -6,20 +6,12 @@
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
-    "module": "./src/index.ts",
-    "types": "./src/Types/index.d.ts",
     "publishConfig": {
-        "main": "./lib/univer-base-slides.cjs.js",
-        "module": "./lib/univer-base-slides.js",
-        "types": "./lib/index.d.ts",
+        "access": "public",
         "exports": {
-            ".": {
-                "require": "./lib/univer-base-slides.cjs.js",
-                "default": "./lib/univer-base-slides.js"
-            },
+            ".": "./lib/index.ts",
             "./*": "./lib/*"
-        },
-        "access": "public"
+        }
     },
     "exports": {
         ".": "./src/index.ts",
@@ -34,12 +26,11 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "vitest run"
     },
     "dependencies": {
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/base-ui": "workspace:*",
-        "@univerjs/core": "workspace:*",
+        "@univerjs/base-render": "*",
+        "@univerjs/base-ui": "*",
+        "@univerjs/core": "*",
         "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {

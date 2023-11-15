@@ -16,10 +16,10 @@ export const NotificationOperation: ICommand = {
             value.indexOf('Success') > -1
                 ? 'success'
                 : value.indexOf('Info') > -1
-                ? 'info'
-                : value.indexOf('Warning') > -1
-                ? 'warning'
-                : 'error';
+                  ? 'info'
+                  : value.indexOf('Warning') > -1
+                    ? 'warning'
+                    : 'error';
         notificationService.show({
             type,
             content: value || 'Notification Content',

@@ -10,20 +10,13 @@
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
-    "module": "./src/index.ts",
     "publishConfig": {
-        "main": "./lib/univer-design.cjs.js",
-        "module": "./lib/univer-design.js",
-        "types": "./lib/index.d.ts",
+        "access": "public",
         "exports": {
-            ".": {
-                "require": "./lib/univer-design.cjs.js",
-                "default": "./lib/univer-design.js"
-            },
+            ".": "./lib/index.ts",
             "./*": "./lib/*",
             "./locale/*": "./lib/locale/*.ts"
-        },
-        "access": "public"
+        }
     },
     "exports": {
         ".": "./src/index.ts",

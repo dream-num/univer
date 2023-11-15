@@ -8,7 +8,6 @@
         "strictPropertyInitialization": false
     },
     "include": [
-        "src/**/*",
-        "test/**/*.test.(ts|tsx|js)"
+        "src/**/*"
     ]
 }

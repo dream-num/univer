@@ -18,14 +18,14 @@
         "dev:demo": "node ./esbuild.config.mjs --watch"
     },
     "dependencies": {
-        "@univerjs/base-docs": "workspace:*",
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/base-ui": "workspace:*",
-        "@univerjs/common-plugin-data": "workspace:*",
-        "@univerjs/common-plugin-image": "workspace:*",
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/ui-plugin-docs": "workspace:*",
+        "@univerjs/base-docs": "*",
+        "@univerjs/base-render": "*",
+        "@univerjs/base-ui": "*",
+        "@univerjs/common-plugin-data": "*",
+        "@univerjs/common-plugin-image": "*",
+        "@univerjs/core": "*",
+        "@univerjs/design": "*",
+        "@univerjs/ui-plugin-docs": "*",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },

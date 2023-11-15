@@ -6,21 +6,13 @@
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
-    "module": "./src/index.ts",
-    "types": "./src/Types/index.d.ts",
     "publishConfig": {
-        "main": "./lib/univer-sheets-plugin-find.cjs.js",
-        "module": "./lib/univer-sheets-plugin-find.js",
-        "types": "./lib/index.d.ts",
+        "access": "public",
         "exports": {
-            ".": {
-                "require": "./lib/univer-sheets-plugin-find.cjs.js",
-                "default": "./lib/univer-sheets-plugin-find.js"
-            },
+            ".": "./lib/index.ts",
             "./*": "./lib/*",
-            "./locale/*": "./lib/locale/*.js"
-        },
-        "access": "public"
+            "./locale/*": "./lib/locale/*.ts"
+        }
     },
     "exports": {
         ".": "./src/index.ts",
@@ -33,22 +25,18 @@
     "files": [
         "lib"
     ],
-    "private": false,
+    "private": true,
     "type": "module",
     "scripts": {
-        "test": "vitest run",
-        "test:watch": "vitest",
-        "coverage": "vitest run --coverage",
-        "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/base-sheets": "workspace:*",
-        "@univerjs/base-ui": "workspace:*",
-        "@univerjs/common-plugin-data": "workspace:*",
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/ui-plugin-sheets": "workspace:*",
+        "@univerjs/base-render": "*",
+        "@univerjs/base-sheets": "*",
+        "@univerjs/base-ui": "*",
+        "@univerjs/common-plugin-data": "*",
+        "@univerjs/core": "*",
+        "@univerjs/design": "*",
+        "@univerjs/ui-plugin-sheets": "*",
         "@wendellhu/redi": "^0.12.11",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
@@ -58,7 +46,6 @@
         "@types/react": "^18.2.37",
         "@types/react-dom": "^18.2.15",
         "@vitest/coverage-istanbul": "^0.34.6",
-        "esbuild": "^0.19.5",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
         "vitest": "^0.34.6"

@@ -1,22 +1,45 @@
 {
-  "name": "@univerjs/rpc",
-  "private": true,
-  "author": "DreamNum Inc. <developer@univer.ai>",
-  "main": "./src/index.ts",
-  "module": "./src/index.ts",
-  "dependencies": {
-    "@univerjs/core": "workspace:*",
-    "@wendellhu/redi": "^0.12.11",
-    "rxjs": "^7.8.1"
-
-  },
-  "devDependencies": {
-    "@types/node": "^20.9.0",
-    "@types/numeral": "^2.0.5",
-    "@vitest/coverage-istanbul": "^0.34.6",
-    "esbuild": "^0.19.5",
-    "less": "^4.2.0",
-    "ts-node": "^10.9.1",
-    "vitest": "^0.34.6"
-  }
+    "name": "@univerjs/rpc",
+    "version": "0.0.1",
+    "keywords": [],
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "MIT",
+    "main": "./src/index.ts",
+    "publishConfig": {
+        "access": "public",
+        "exports": {
+            ".": "./lib/index.ts",
+            "./*": "./lib/*",
+            "./locale/*": "./lib/locale/*.ts"
+        }
+    },
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "private": false,
+    "type": "module",
+    "scripts": {
+        "esbuild": "node ./esbuild.config.mjs"
+    },
+    "dependencies": {
+        "@univerjs/core": "*",
+        "@wendellhu/redi": "^0.12.11",
+        "rxjs": "^7.8.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20.9.0",
+        "@types/numeral": "^2.0.5",
+        "@vitest/coverage-istanbul": "^0.34.6",
+        "esbuild": "^0.19.5",
+        "ts-node": "^10.9.1",
+        "vitest": "^0.34.6"
+    }
 }

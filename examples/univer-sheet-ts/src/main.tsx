@@ -6,7 +6,6 @@ import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/common-plugin-data';
 import { LocaleType, Univer } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
 import { IUniverRPCMainThreadPluginConfig, UniverRPCMainThreadPlugin } from '@univerjs/rpc';
-import { DebuggerPlugin } from '@univerjs/sheets-plugin-debugger';
 // import { FindPlugin } from '@univerjs/sheets-plugin-find';
 import { FormulaPlugin } from '@univerjs/sheets-plugin-formula';
 import { FormulaUIPlugin } from '@univerjs/sheets-plugin-formula-ui';
@@ -16,6 +15,7 @@ import { FormulaUIPlugin } from '@univerjs/sheets-plugin-formula-ui';
 import { SheetUIPlugin } from '@univerjs/ui-plugin-sheets';
 
 import { locales } from './locales';
+import { DebuggerPlugin } from './sheets-plugin-debugger';
 
 // univer
 const univer = new Univer({

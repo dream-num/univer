@@ -6,19 +6,6 @@
     "main": "./src/index.ts",
     "module": "./src/index.ts",
     "types": "./src/Types/index.d.ts",
-    "publishConfig": {
-        "main": "./lib/univer-common-plugin-data.cjs.js",
-        "module": "./lib/univer-common-plugin-data.js",
-        "types": "./lib/index.d.ts",
-        "exports": {
-            ".": {
-                "require": "./lib/univer-common-plugin-data.cjs.js",
-                "default": "./lib/univer-common-plugin-data.js"
-            },
-            "./*": "./lib/*"
-        },
-        "access": "public"
-    },
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
@@ -29,19 +16,15 @@
     "files": [
         "lib"
     ],
-    "private": false,
+    "private": true,
     "type": "module",
-    "scripts": {
-        "esbuild": "node ./esbuild.config.mjs"
-    },
     "license": "MIT",
     "dependencies": {
-        "@univerjs/core": "workspace:*"
+        "@univerjs/core": "*"
     },
     "devDependencies": {
         "@types/node": "^20.9.0",
         "@vitest/coverage-istanbul": "^0.34.6",
-        "esbuild": "^0.19.5",
         "vitest": "^0.34.6"
     }
 }

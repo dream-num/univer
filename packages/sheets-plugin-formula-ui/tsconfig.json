@@ -9,5 +9,5 @@
     },
     "include": [
         "src/**/*"
-, "../sheets-plugin-formula/src/controllers/calculate.controller.ts", "../sheets-plugin-formula/src/commands/mutations/set-formula-data.mutation.ts", "../sheets-plugin-formula/src/controllers/formula.controller.ts"    ]
+    ]
 }

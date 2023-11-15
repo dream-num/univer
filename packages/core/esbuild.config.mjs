@@ -6,5 +6,8 @@ import baseConfig from '../../esbuild.config.mjs';
 esbuild.build({
     ...baseConfig,
     globalName: 'UniverCore',
-    outfile: './lib/univer-core.js',
+    entryPoints: {
+        index: './src/index.ts',
+    },
+    outdir: './lib',
 });

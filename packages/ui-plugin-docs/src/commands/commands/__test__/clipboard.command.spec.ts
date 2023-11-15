@@ -5,11 +5,24 @@ import {
     RichTextEditingMutation,
     TextSelectionManagerService,
 } from '@univerjs/base-docs';
-import { BooleanNumber, ICommand, ICommandService, IStyleBase, IUniverInstanceService, Univer } from '@univerjs/core';
+import {
+    BooleanNumber,
+    ICommand,
+    ICommandService,
+    IStyleBase,
+    IUniverInstanceService,
+    UndoCommand,
+    Univer,
+} from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { IInnerPasteCommandParams, InnerPasteCommand } from '../clipboard.command';
+import {
+    IInnerCutCommandParams,
+    IInnerPasteCommandParams,
+    InnerCutCommand,
+    InnerPasteCommand,
+} from '../clipboard.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('test cases in clipboard', () => {
@@ -48,6 +61,7 @@ describe('test cases in clipboard', () => {
 
         commandService = get(ICommandService);
         commandService.registerCommand(InnerPasteCommand);
+        commandService.registerCommand(InnerCutCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
         const selectionManager = get(TextSelectionManagerService);
@@ -104,6 +118,25 @@ describe('test cases in clipboard', () => {
             expect(getTextByPosition(0, 6)).toBe(`univer`);
             expect(getTextByPosition(11, 17)).toBe('univer');
             expect(getFormatValueAt('bl', 0)).toBe(BooleanNumber.TRUE);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+        });
+    });
+
+    describe('Test cut in multiple ranges', () => {
+        it('Should cut content to each selection ranges', async () => {
+            expect(getTextByPosition(0, 5)).toBe(`What’`);
+            expect(getFormatValueAt('bl', 0)).toBe(BooleanNumber.FALSE);
+
+            const commandParams: IInnerCutCommandParams = {
+                segmentId: '',
+            };
+
+            await commandService.executeCommand(InnerCutCommand.id, commandParams);
+
+            expect(getTextByPosition(0, 5)).toBe(`s New`);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
         });
     });
 });

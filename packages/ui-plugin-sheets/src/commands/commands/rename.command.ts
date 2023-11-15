@@ -13,6 +13,7 @@ export const RenameSheetOperation: ICommand = {
     handler: async (accessor: IAccessor, params?: IRenameCommandParams) => {
         const sheetBarService = accessor.get(ISheetBarService);
         if (params) {
+            console.info('rename ===params', params);
             sheetBarService.setRenameId(params.worksheetId);
         }
         return true;

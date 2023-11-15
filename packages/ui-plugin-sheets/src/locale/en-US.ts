@@ -414,7 +414,7 @@ export default {
         noHide: "Can't hide, at least keep one sheet tag",
         chartEditNoOpt: 'This operation is not allowed in chart editing mode!',
         sheetNameSpecCharError: 'The name cannot contain:[ ] :  ? * / \' "',
-        sheetNameCannotIsEmptyError: 'Sheet name cannot be empty',
+        sheetNameCannotIsEmptyError: 'The sheet name cannot be empty',
     },
     rightClick: {
         copy: 'Copy',

@@ -8,6 +8,7 @@ const $ROW_REGEX = /[^0-9]/g;
 const $COLUMN_REGEX = /[^A-Za-z]/g;
 
 export interface IGridRangeName {
+    unitId: string;
     sheetName: string;
     range: IRange;
 }
@@ -43,6 +44,14 @@ export function serializeRangeWithSheet(sheetName: string, range: IRange): strin
 }
 
 export function deserializeRangeWithSheet(refString: string): IGridRangeName {
+    const unitIdMatch = new RegExp('\'?\\[((?![\\/?:"<>|*\\\\]).)*\\]').exec(refString);
+    let unitId = '';
+
+    if (unitIdMatch != null) {
+        unitId = unitIdMatch[0];
+        refString = refString.replace(new RegExp('\'?\\[((?![\\/?:"<>|*\\\\]).)*\\]', 'g'), '');
+    }
+
     const sheetNameIndex = refString.indexOf('!');
     let sheetName: string = '';
     let refBody: string = '';
@@ -67,6 +76,7 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
         };
 
         return {
+            unitId,
             sheetName,
             range,
         };
@@ -82,6 +92,7 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
     const endColumn = endGrid.column;
 
     return {
+        unitId,
         sheetName,
         range: {
             startRow,

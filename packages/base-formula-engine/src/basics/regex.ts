@@ -41,3 +41,12 @@ export const REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX = `^(${UNIT_NAME_REGEX})?${TA
 export const $SUPER_TABLE_COLUMN_REGEX = /[.*?]/g;
 
 export const $ARRAY_VALUE_REGEX = /{.*?}/g;
+
+export function isReferenceString(refString: string) {
+    return (
+        new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(refString) ||
+        new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test(refString) ||
+        new RegExp(REFERENCE_REGEX_ROW).test(refString) ||
+        new RegExp(REFERENCE_REGEX_COLUMN).test(refString)
+    );
+}

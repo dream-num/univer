@@ -5,25 +5,37 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IRenderManagerService,
 } from '@univerjs/base-render';
+import { ISelectionWithStyle, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/base-sheets';
 import {
+    deserializeRangeWithSheet,
     Disposable,
+    DisposableCollection,
     FOCUSING_EDITOR_INPUT_FORMULA,
     ICommandService,
     IContextService,
     IDocumentBody,
     isFormulaString,
     ITextRun,
+    IUniverInstanceService,
     LifecycleStages,
     LocaleService,
     Nullable,
     OnLifecycle,
     ThemeService,
+    toDisposable,
 } from '@univerjs/core';
-import { EditorBridgeService, getEditorObject, IEditorBridgeService } from '@univerjs/ui-plugin-sheets';
+import {
+    EditorBridgeService,
+    getEditorObject,
+    IEditorBridgeService,
+    ISelectionRenderService,
+    SheetSkeletonManagerService,
+} from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
+import { FORMULA_REF_SELECTION_PLUGIN_NAME, getFormulaRefSelectionStyle } from '../common/selection';
 import { FUNCTION_LIST } from '../services/function-list';
 import { IFormulaPromptService, ISearchItem } from '../services/prompt.service';
 import { getFunctionName } from './util';
@@ -37,19 +49,21 @@ interface IFunctionPanelParam {
     searchList?: ISearchItem[];
 }
 
+interface IRefSelection {
+    refIndex: number;
+    themeColor: string;
+    token: string;
+}
+
 @OnLifecycle(LifecycleStages.Starting, PromptController)
 export class PromptController extends Disposable {
     private _formulaRefColors: string[] = [];
-
-    private _formulaRefColorIndex: number = 0;
 
     private _currentRefIndex: number = -1;
 
     private _stringColor = '';
 
     private _numberColor = '';
-
-    private _arrayColor = '';
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -60,11 +74,19 @@ export class PromptController extends Disposable {
         @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @Inject(ThemeService) private readonly _themeService: ThemeService,
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
 
         this._initialize();
+    }
+
+    override dispose(): void {
+        this._formulaRefColors = [];
     }
 
     private _initialize(): void {
@@ -72,44 +94,70 @@ export class PromptController extends Disposable {
         this._initAcceptFormula();
 
         this._initialFormulaTheme();
+
+        this._initialRefSelectionEvent();
+
+        this._initialExitEditor();
     }
 
     private _initialFormulaTheme() {
         const style = this._themeService.getCurrentTheme();
 
         this._formulaRefColors = [
-            style.purple400,
-            style.gold400,
-            style.magenta300,
-            style.jiqing600,
-            style.orange400,
-            style.grey800,
-            style.hyacinth700,
-            style.red700,
-            style.verdancy800,
-            style.yellow800,
+            style.loopColor1,
+            style.loopColor2,
+            style.loopColor3,
+            style.loopColor4,
+            style.loopColor5,
+            style.loopColor6,
+            style.loopColor7,
+            style.loopColor8,
+            style.loopColor9,
+            style.loopColor10,
+            style.loopColor11,
+            style.loopColor12,
         ];
 
-        this._numberColor = style.blue500;
+        this._numberColor = style.hyacinth700;
 
-        this._stringColor = style.green600;
-
-        this._arrayColor = style.magenta600;
+        this._stringColor = style.verdancy800;
     }
 
     private _initialCursorSync() {
-        this._textSelectionManagerService.textSelectionInfo$.subscribe(() => {
-            const currentBody = this._getCurrentBody();
+        this.disposeWithMe(
+            toDisposable(
+                this._textSelectionManagerService.textSelectionInfo$.subscribe(() => {
+                    if (this._editorBridgeService.isVisible().visible === false) {
+                        return;
+                    }
 
-            const dataStream = currentBody?.dataStream || '';
+                    const currentBody = this._getCurrentBody();
 
-            this._contextSwitch(dataStream);
+                    const dataStream = currentBody?.dataStream || '';
 
-            // TODO@Dushusir: use real text info
-            this._setFunctionPanel(dataStream);
+                    this._contextSwitch(dataStream);
 
-            this._highlightFormula(currentBody);
-        });
+                    // TODO@Dushusir: use real text info
+                    this._setFunctionPanel(dataStream);
+
+                    this._highlightFormula(currentBody);
+                })
+            )
+        );
+    }
+
+    private _initialExitEditor() {
+        this.disposeWithMe(
+            toDisposable(
+                this._editorBridgeService.visible$.subscribe((visibleParam) => {
+                    if (visibleParam.visible === true) {
+                        return;
+                    }
+
+                    this._switchSelectionPlugin(NORMAL_SELECTION_PLUGIN_NAME);
+                })
+            )
+        );
     }
 
     private _getCurrentBody() {
@@ -219,7 +267,13 @@ export class PromptController extends Disposable {
 
         const dataStream = body.dataStream;
 
-        const sequenceNodes = this._formulaEngineService.buildSequenceNodes(dataStream);
+        const sequenceNodes = this._formulaEngineService.buildSequenceNodes(
+            dataStream.replace(/\r/g, '').replace(/\n/g, '')
+        );
+
+        this._switchSelectionPlugin(FORMULA_REF_SELECTION_PLUGIN_NAME);
+
+        this._selectionManagerService.clear();
 
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             body.textRuns = [];
@@ -239,30 +293,39 @@ export class PromptController extends Disposable {
      */
     private _buildTextRuns(sequenceNodes: Array<ISequenceNode | string>) {
         const textRuns: ITextRun[] = [];
+        const refSelections: IRefSelection[] = [];
         let refIndex = 0;
+
         for (const node of sequenceNodes) {
             if (typeof node === 'string') {
                 continue;
             }
 
-            const { startIndex, endIndex, nodeType } = node;
+            const { startIndex, endIndex, nodeType, token } = node;
             let themeColor = '';
             if (nodeType === sequenceNodeType.REFERENCE) {
                 const colorIndex = refIndex % this._formulaRefColors.length;
                 themeColor = this._formulaRefColors[colorIndex];
+
+                refSelections.push({
+                    refIndex,
+                    themeColor,
+                    token,
+                });
+
                 refIndex++;
             } else if (nodeType === sequenceNodeType.NUMBER) {
                 themeColor = this._numberColor;
             } else if (nodeType === sequenceNodeType.STRING) {
                 themeColor = this._stringColor;
             } else if (nodeType === sequenceNodeType.ARRAY) {
-                themeColor = this._arrayColor;
+                themeColor = this._stringColor;
             }
 
             if (themeColor.length > 0) {
                 textRuns.push({
                     st: startIndex + 1,
-                    ed: endIndex + 1,
+                    ed: endIndex + 2,
                     ts: {
                         cl: {
                             rgb: themeColor,
@@ -272,7 +335,121 @@ export class PromptController extends Disposable {
             }
         }
 
+        this._refreshSelectionForReference(refSelections);
+
+        console.log('sequenceNodes', sequenceNodes, textRuns);
+
         return textRuns;
+    }
+
+    private _refreshSelectionForReference(refSelections: IRefSelection[]) {
+        const current = this._sheetSkeletonManagerService.getCurrent();
+
+        if (current == null) {
+            return;
+        }
+
+        const { unitId, sheetId } = current;
+
+        const selectionWithStyle: ISelectionWithStyle[] = [];
+
+        for (const refSelection of refSelections) {
+            const { refIndex, themeColor, token } = refSelection;
+
+            const gridRange = deserializeRangeWithSheet(token);
+
+            const { unitId: refUnitId, sheetName, range } = gridRange;
+
+            if (refUnitId != null && refUnitId.length > 0 && unitId !== refUnitId) {
+                continue;
+            }
+
+            const refSheetId = this._getSheetIdByName(unitId, sheetName.trim());
+
+            if (refSheetId != null && refSheetId !== sheetId) {
+                continue;
+            }
+
+            selectionWithStyle.push({
+                range,
+                primary: null,
+                style: getFormulaRefSelectionStyle(this._themeService, themeColor),
+            });
+        }
+
+        if (selectionWithStyle.length === 0) {
+            return;
+        }
+
+        this._selectionManagerService.add(selectionWithStyle);
+    }
+
+    private _switchSelectionPlugin(pluginName: string) {
+        const current = this._sheetSkeletonManagerService.getCurrent();
+
+        if (current == null) {
+            return;
+        }
+
+        const { unitId, sheetId } = current;
+
+        this._selectionManagerService.setCurrentSelection({
+            pluginName,
+            unitId,
+            sheetId,
+        });
+    }
+
+    private _getSheetIdByName(unitId: string, sheetName: string) {
+        const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+
+        return workbook?.getSheetBySheetName(sheetName)?.getSheetId();
+    }
+
+    private _initialRefSelectionEvent() {
+        const disposableCollection = new DisposableCollection();
+
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionInfo$.subscribe(() => {
+                    // Each range change requires re-listening
+                    disposableCollection.dispose();
+
+                    const current = this._selectionManagerService.getCurrent();
+
+                    if (current?.pluginName !== FORMULA_REF_SELECTION_PLUGIN_NAME) {
+                        return;
+                    }
+
+                    const selectionControls = this._selectionRenderService.getCurrentControls();
+                    selectionControls.forEach((controlSelection) => {
+                        disposableCollection.add(
+                            toDisposable(
+                                controlSelection.selectionMoving$.subscribe((toRange) => {
+                                    if (!toRange) {
+                                        return;
+                                    }
+
+                                    console.log('formulaRefSelections', toRange);
+                                })
+                            )
+                        );
+
+                        disposableCollection.add(
+                            toDisposable(
+                                controlSelection.selectionScaling$.subscribe((toRange) => {
+                                    if (!toRange) {
+                                        return;
+                                    }
+
+                                    console.log('formulaRefSelections', toRange);
+                                })
+                            )
+                        );
+                    });
+                })
+            )
+        );
     }
 
     private _refreshEditorObject() {

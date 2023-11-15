@@ -131,10 +131,9 @@ export class FormulaEngineService extends Disposable {
     builderLexerTree(formulaString: string) {
         const lexerNode = this.lexerTreeBuilder.treeBuilder(formulaString, false);
 
-        if ((lexerNode as ErrorType) in ErrorType) {
-            return;
+        if (Object.values(ErrorType).includes(lexerNode as ErrorType)) {
+            return ErrorNode.create(lexerNode as ErrorType);
         }
-
         return lexerNode as LexerNode;
     }
 
@@ -196,7 +195,7 @@ export class FormulaEngineService extends Disposable {
         // this.getObserver('onBeforeFormulaCalculateObservable')?.notifyObservers(formulaString);
         const lexerNode = this.lexerTreeBuilder.treeBuilder(formulaString, transformSuffix);
 
-        if ((lexerNode as ErrorType) in ErrorType) {
+        if (Object.values(ErrorType).includes(lexerNode as ErrorType)) {
             return ErrorNode.create(lexerNode as ErrorType);
         }
 

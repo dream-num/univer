@@ -1,5 +1,13 @@
 import { SelectionManagerService } from '@univerjs/base-sheets';
-import { ComponentManager, IMenuItem, IMenuService, IValueOption, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import {
+    ComponentManager,
+    IMenuItem,
+    IMenuService,
+    IValueOption,
+    MenuGroup,
+    MenuItemType,
+    MenuPosition,
+} from '@univerjs/base-ui';
 import { IUniverInstanceService } from '@univerjs/core';
 import { AddDigitsSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
 import { IAccessor } from '@wendellhu/redi';
@@ -26,7 +34,8 @@ export const CurrencyMenuItem = (componentManager: ComponentManager) => {
         title: 'numfmt.menu.currency',
         tooltip: 'numfmt.menu.currency',
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.TOOLBAR_FORMULAS],
+        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+        positions: [MenuPosition.TOOLBAR_START],
     });
 };
 
@@ -39,7 +48,8 @@ export const AddDecimalMenuItem = (componentManager: ComponentManager) => {
         title: 'numfmt.menu.add.decimal',
         tooltip: 'numfmt.menu.add.decimal',
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.TOOLBAR_FORMULAS],
+        positions: [MenuPosition.TOOLBAR_START],
+        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
     });
 };
 export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
@@ -51,7 +61,8 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
         title: 'numfmt.menu.subtract.decimal',
         tooltip: 'numfmt.menu.subtract.decimal',
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.TOOLBAR_FORMULAS],
+        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+        positions: [MenuPosition.TOOLBAR_START],
     });
 };
 
@@ -96,7 +107,8 @@ export const FactoryOtherMenuItem = (_accessor: IAccessor) => {
         title: 'numfmt.menu.preview',
         tooltip: 'numfmt.menu.preview',
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR_FORMULAS],
+        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+        positions: [MenuPosition.TOOLBAR_START],
         selections: selection$,
     } as IMenuItem;
 };

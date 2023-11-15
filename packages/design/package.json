@@ -13,9 +13,9 @@
     "publishConfig": {
         "access": "public",
         "exports": {
-            ".": "./lib/index.ts",
+            ".": "./lib/index.js",
             "./*": "./lib/*",
-            "./locale/*": "./lib/locale/*.ts"
+            "./locale/*": "./lib/locale/*.js"
         }
     },
     "exports": {

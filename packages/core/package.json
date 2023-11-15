@@ -8,7 +8,7 @@
     "publishConfig": {
         "access": "public",
         "exports": {
-            ".": "./lib/index.ts",
+            ".": "./lib/index.js",
             "./*": "./lib/*"
         }
     },

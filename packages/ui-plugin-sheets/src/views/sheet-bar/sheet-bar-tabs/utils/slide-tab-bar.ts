@@ -10,7 +10,6 @@ export interface SlideTabBarConfig {
     slideTabBarItemClassName: string;
     slideTabBarSpanEditClassName: string;
     slideTabRootClassName: string;
-    activeClassNameAutoController: boolean;
     slideTabBarItemAutoSort: boolean;
     currentIndex: number;
     onSlideEnd: (event: MouseEvent, compareIndex: number) => void;
@@ -324,8 +323,6 @@ export class SlideTabItem {
     }
 }
 
-// TODO@Dushusir: resize container trigger scroll box-shadow
-// init container, no box-shadow, no scroll button
 export class SlideScrollbar {
     protected _slideTabBar: SlideTabBar;
 
@@ -423,25 +420,15 @@ export class SlideTabBar {
         const slideTabBar = document.querySelector(
             `.${config.slideTabRootClassName} .${config.slideTabBarClassName ?? 'slide-tab-bar'}`
         );
-        const slideTabItems = document.querySelectorAll(
-            `.${config.slideTabRootClassName} .${config.slideTabBarItemClassName ?? 'slide-tab-item'}`
-        );
-
         if (slideTabBar == null) {
             throw new Error('not found slide-tab-bar');
         }
 
-        this._config = config as SlideTabBarConfig;
-        this._downActionX = 0;
-        this._moveActionX = 0;
-        this._compareDirection = 0;
-        this._compareIndex = 0;
         this._slideTabBar = slideTabBar as HTMLElement;
-
         this._slideScrollbar = new SlideScrollbar(this);
-        this._slideTabItems = SlideTabItem.make(slideTabItems, this);
-        this._activeTabItemIndex = this._config.currentIndex;
-        this._activeTabItem = this._slideTabItems[this._activeTabItemIndex];
+        this._config = config as SlideTabBarConfig;
+
+        this._initConfig();
 
         let lastPageX = 0;
         let lastPageY = 0;
@@ -509,21 +496,12 @@ export class SlideTabBar {
 
             // Set a timer to delay dragging for 300 milliseconds
             this._longPressTimer = window.setTimeout(() => {
-                if (this._config.activeClassNameAutoController) {
-                    this._slideTabItems.forEach((item) => {
-                        item.classList().remove(this._config.slideTabBarItemActiveClassName);
-                    });
-                    this._activeTabItem?.classList().add(this._config.slideTabBarItemActiveClassName);
-                }
                 this._activeTabItem?.enableFixed();
-
-                //
                 this._startAutoScroll();
                 if (!activeSlideItemElement) return;
                 // Set the mouse cursor to drag
                 activeSlideItemElement.setPointerCapture((downEvent as PointerEvent).pointerId);
                 activeSlideItemElement.style.cursor = 'move';
-
                 this._activeTabItem?.addEventListener('pointermove', this._moveAction);
             }, SlideTabBar.LongPressDelay);
         };
@@ -553,7 +531,6 @@ export class SlideTabBar {
             this._activeTabItem?.removeEventListener('pointerup', this._upAction);
             if (this._config.onSlideEnd && this._activeTabItemIndex !== this._compareIndex) {
                 this.destroy();
-
                 this._config.onSlideEnd(upEvent, this._compareIndex || 0);
             }
 
@@ -581,7 +558,7 @@ export class SlideTabBar {
             this.setScroll(wheelEvent.deltaY);
         };
 
-        this._initialize();
+        this._initListener();
     }
 
     static checkedSkipSlide(event: MouseEvent): boolean {
@@ -616,6 +593,17 @@ export class SlideTabBar {
             selection.removeAllRanges();
             selection.addRange(range);
         });
+    }
+
+    /**
+     * The current instance is persistent, but some parameters need to be updated after refreshing
+     * @param currentIndex
+     */
+    update(currentIndex: number) {
+        this._config.currentIndex = currentIndex;
+        this._initConfig();
+        this.destroy();
+        this._initListener();
     }
 
     primeval(): HTMLElement {
@@ -829,7 +817,22 @@ export class SlideTabBar {
         }
     }
 
-    protected _initialize(): void {
+    protected _initConfig(): void {
+        const slideTabItems = this._slideTabBar.querySelectorAll(
+            `.${this._config.slideTabBarItemClassName ?? 'slide-tab-item'}`
+        );
+
+        this._downActionX = 0;
+        this._moveActionX = 0;
+        this._compareDirection = 0;
+        this._compareIndex = 0;
+
+        this._slideTabItems = SlideTabItem.make(slideTabItems, this);
+        this._activeTabItemIndex = this._config.currentIndex;
+        this._activeTabItem = this._slideTabItems[this._activeTabItemIndex];
+    }
+
+    protected _initListener() {
         this._slideTabBar.addEventListener('wheel', this._wheelAction);
         this._slideTabItems.forEach((item) => {
             item.addEventListener('pointerdown', this._downAction);

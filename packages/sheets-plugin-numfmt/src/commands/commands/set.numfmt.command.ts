@@ -9,7 +9,7 @@ export type SetNumfmtCommandParams = {
 };
 
 export const SetNumfmtCommand: ICommand<SetNumfmtCommandParams> = {
-    id: 'sheet.command.set-numfmt',
+    id: 'sheet.numfmt.set.numfmt',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params) => {
         if (!params) {

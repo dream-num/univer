@@ -46,14 +46,24 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
 export const getDecimalString = (length: number) =>
     new Array(Math.min(Math.max(0, Number(length)), 30)).fill(0).join('');
 
-export const setPatternDecimal = (pattern: string, decimalLength: number) => {
-    if (/\.0?/.test(pattern)) {
-        return pattern.replace(
-            /\.0*/g,
-            `${decimalLength > 0 ? '.' : ''}${getDecimalString(Number(decimalLength || 0))}`
-        );
-    }
-    return pattern;
+export const setPatternDecimal = (patterns: string, decimalLength: number) => {
+    const tokens = patterns.split(';').map((pattern) => {
+        if (/\.0+/.test(pattern)) {
+            return pattern.replace(
+                /\.0*/g,
+                `${decimalLength > 0 ? '.' : ''}${getDecimalString(Number(decimalLength || 0))}`
+            );
+        }
+        if (/0([^0]+)|0$/.test(pattern)) {
+            return pattern.replace(
+                /0([^0]+)|0$/,
+                `0${decimalLength > 0 ? '.' : ''}${getDecimalString(Number(decimalLength || 0))}`
+            );
+        }
+
+        return pattern;
+    });
+    return tokens.join(';');
 };
 
-export const isPatternHasDecimal = (pattern: string) => /\.0?/.test(pattern);
+export const isPatternHasDecimal = (pattern: string) => /\.0+/.test(pattern) || /0([^0]+)|0$/.test(pattern);

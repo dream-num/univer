@@ -57,7 +57,9 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/ui-plugin-sheets": "workspace:*",
-        "@wendellhu/redi": "^0.12.11"
+        "@wendellhu/redi": "^0.12.11",
+        "react": "^18.2.0",
+         "rxjs": "^7.8.1"
     },
     "devDependencies": {
         "@types/react": "^18.2.38",

@@ -30,6 +30,6 @@ export {
     RichTextEditingMutation,
 } from './commands/mutations/core-editing.mutation';
 export { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
-export * from './doc-plugin';
+export { DocPlugin, type IDocPluginConfig } from './doc-plugin';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { TextSelectionManagerService } from './services/text-selection-manager.service';

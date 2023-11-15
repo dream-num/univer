@@ -6,6 +6,7 @@ import {
 import { Disposable, IDocumentBody, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
+import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
 import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';
 import PastePluginWord from './html-to-udm/paste-plugins/plugin-word';
@@ -60,15 +61,32 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             };
         }
 
+        const copyId = extractId(html);
+
+        if (copyId) {
+            const copyCache = copyContentCache.get(copyId);
+
+            if (copyCache) {
+                return copyCache;
+            }
+        }
+
         return this.htmlToUDM.convert(html);
     }
 
     async setClipboardData(documentBodyList: IDocumentBody[]): Promise<void> {
+        const copyId = genId();
         const text =
             documentBodyList.length > 1
                 ? documentBodyList.map((body) => body.dataStream).join('\n')
                 : documentBodyList[0].dataStream;
-        const html = this.UDMToHtml.convert(documentBodyList);
+        let html = this.UDMToHtml.convert(documentBodyList);
+
+        // Only cache copy content when the range is 1.
+        if (documentBodyList.length === 1) {
+            html = html.replace(/(<[a-z]+)/, (_p0, p1) => `${p1} data-copy-id="${copyId}"`);
+            copyContentCache.set(copyId, documentBodyList[0]);
+        }
 
         return this._clipboardInterfaceService.write(text, html);
     }

@@ -262,7 +262,7 @@ export class MoveCursorController extends Disposable {
             return;
         }
 
-        // TODO: @jocs, hardcode isBack to true, `_getTopOrBottomPosition` need to rewrite.
+        // TODO: @JOCS, hardcode isBack to true, `_getTopOrBottomPosition` need to rewrite.
         return { ...position, isBack: true };
     }
 

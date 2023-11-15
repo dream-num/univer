@@ -117,10 +117,12 @@ export class TextSelectionManagerService implements IDisposable {
         if (this._currentSelection == null) {
             return;
         }
+
         this._replaceByParam({
             ...this._currentSelection,
             textRanges,
         });
+
         this.refresh(this._currentSelection);
     }
 

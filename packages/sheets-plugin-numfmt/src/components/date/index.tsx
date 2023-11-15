@@ -4,16 +4,20 @@ import { SelectList } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { FC, useEffect, useMemo, useState } from 'react';
 
-import { DATEFMTLISG } from '../../base/const/FORMATDETAIL';
 import { BusinessComponentProps } from '../../base/types';
+import { getDateFormatOptions } from '../../utils/options';
 
 export const isDatePanel = (pattern: string) => {
     const info = numfmt.getInfo(pattern);
-    return DATEFMTLISG.map((item) => item.suffix).includes(pattern) || ['date', 'datetime', 'time'].includes(info.type);
+    return (
+        getDateFormatOptions()
+            .map((item) => item.value)
+            .includes(pattern) || ['date', 'datetime', 'time'].includes(info.type)
+    );
 };
 
 export const DatePanel: FC<BusinessComponentProps> = (props) => {
-    const options = DATEFMTLISG.map((item) => ({ label: item.label, value: item.suffix }));
+    const options = useMemo(getDateFormatOptions, []);
     const localeService = useDependency(LocaleService);
     const t = localeService.t;
     const [suffix, suffixSet] = useState(() => {

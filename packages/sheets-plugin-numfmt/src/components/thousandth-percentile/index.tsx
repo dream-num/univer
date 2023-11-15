@@ -1,7 +1,6 @@
 import { InputNumber, SelectList } from '@univerjs/design';
 import { FC, useEffect, useMemo, useState } from 'react';
 
-import { NUMBERFORMAT } from '../../base/const/FORMATDETAIL';
 import { BusinessComponentProps } from '../../base/types';
 import { usePatternPreview } from '../../hooks/usePatternPreview';
 import {
@@ -10,12 +9,13 @@ import {
     isPatternHasDecimal,
     setPatternDecimal,
 } from '../../utils/decimal';
+import { getNumberFormatOptions } from '../../utils/options';
+
+export const isThousandthPercentilePanel = (pattern: string) =>
+    getNumberFormatOptions().some((item) => isPatternEqualWithoutDecimal(item.value, pattern));
 
 export const ThousandthPercentilePanel: FC<BusinessComponentProps> = (props) => {
-    const options = useMemo(
-        () => NUMBERFORMAT.map((item) => ({ label: item.label, value: item.suffix, color: item.color })),
-        []
-    );
+    const options = useMemo(getNumberFormatOptions, []);
     const [decimal, decimalSet] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 0));
 
     const [suffix, suffixSet] = useState(() => {

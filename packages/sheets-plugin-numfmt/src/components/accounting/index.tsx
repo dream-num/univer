@@ -3,11 +3,11 @@ import { InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { FC, useEffect, useMemo, useState } from 'react';
 
-import { currencySymbols } from '../../base/const/CURRENCY-SYMBOLS';
 import { BusinessComponentProps } from '../../base/types';
 import { usePatternPreview } from '../../hooks/usePatternPreview';
 import { getCurrencyType } from '../../utils/currency';
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
+import { getCurrencyOptions } from '../../utils/options';
 
 export const isAccountingPanel = (pattern: string) => {
     const type = getCurrencyType(pattern);
@@ -16,7 +16,9 @@ export const isAccountingPanel = (pattern: string) => {
 
 export const AccountingPanel: FC<BusinessComponentProps> = (props) => {
     const [decimal, decimalSet] = useState(() => getDecimalFromPattern(props.defaultPattern || '', 2));
-    const [suffix, suffixSet] = useState(() => getCurrencyType(props.defaultPattern || '') || currencySymbols[0]);
+    const [suffix, suffixSet] = useState(
+        () => getCurrencyType(props.defaultPattern || '') || getCurrencyOptions()[0].value
+    );
     const localeService = useDependency(LocaleService);
     const t = localeService.t;
     const pattern = useMemo(
@@ -25,7 +27,7 @@ export const AccountingPanel: FC<BusinessComponentProps> = (props) => {
     );
     const preview = usePatternPreview(pattern, props.defaultValue);
 
-    const currencyOptions = useMemo(() => currencySymbols.map((item) => ({ label: item, value: item })), []);
+    const currencyOptions = useMemo(getCurrencyOptions, []);
 
     useEffect(() => {
         props.onChange(pattern);

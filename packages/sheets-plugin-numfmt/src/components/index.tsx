@@ -10,7 +10,7 @@ import { AccountingPanel, isAccountingPanel } from './accounting';
 import { CurrencyPanel, isCurrencyPanel } from './currency';
 import { DatePanel, isDatePanel } from './date';
 import { GeneralPanel, isGeneralPanel } from './general';
-import { ThousandthPercentilePanel } from './thousandth-percentile';
+import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './thousandth-percentile';
 
 export type SheetNumfmtPanelProps = {
     value: { defaultValue: number; defaultPattern: string };
@@ -32,10 +32,10 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
         []
     );
     const [type, typeSet] = useState(() => {
-        const list = [isGeneralPanel, isAccountingPanel, isCurrencyPanel, isDatePanel];
+        const list = [isGeneralPanel, isAccountingPanel, isCurrencyPanel, isDatePanel, isThousandthPercentilePanel];
         return (
             list.reduce((pre, curFn, index) => pre || (curFn(defaultPattern) ? options[index].label : ''), '') ||
-            options[list.length].label
+            options[0].label
         );
     });
     const pattern = useRef('');

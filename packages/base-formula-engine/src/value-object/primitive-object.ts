@@ -204,7 +204,12 @@ export class NumberValueObject extends BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.plus(this);
         }
-        return this.plusBy(valueObject.getValue());
+        const object = this.plusBy(valueObject.getValue());
+        if (object.isErrorObject()) {
+            return this;
+        }
+
+        return object;
     }
 
     equalZero() {
@@ -219,7 +224,12 @@ export class NumberValueObject extends BaseValueObject {
             }
             return (o as BaseValueObject).plus(this);
         }
-        return this.minusBy(valueObject.getValue());
+        const object = this.minusBy(valueObject.getValue());
+        if (object.isErrorObject()) {
+            return this;
+        }
+
+        return object;
     }
 
     override multiply(valueObject: BaseValueObject): CalculateValueType {

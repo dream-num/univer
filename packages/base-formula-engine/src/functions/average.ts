@@ -12,6 +12,7 @@ export class Average extends BaseFunction {
 
         const accumulatorSum = functionService.getExecutor(FUNCTION_NAMES.SUM)?.calculate(...variants);
         const accumulatorCount = functionService.getExecutor(FUNCTION_NAMES.COUNT)?.calculate(...variants);
+        //TODO@DR-Univer: accumulatorCount should be calculated by numeric type count instead of all counts
 
         if (
             accumulatorSum == null ||

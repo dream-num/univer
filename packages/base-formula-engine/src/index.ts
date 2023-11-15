@@ -8,4 +8,7 @@ export type {
     IUnitSheetNameMap,
 } from './basics/common';
 export { FUNCTION_NAMES, FunctionType, type IFunctionInfo, type IFunctionParam } from './basics/function';
+export { RangeReferenceObject } from './reference-object/range-reference-object';
 export { FormulaEngineService } from './services/formula-engine.service';
+export { IFunctionService } from './services/function.service';
+export type { BaseValueObject } from './value-object/base-value-object';

@@ -25,6 +25,7 @@ import { ScrollController } from './controllers/scroll.controller';
 import { SelectionController } from './controllers/selection.controller';
 import { SheetRenderController } from './controllers/sheet-render.controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
+import { StatusBarController } from './controllers/status-bar.controller';
 import { ZoomController } from './controllers/zoom.controller';
 import { enUS } from './locale';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
@@ -36,6 +37,7 @@ import { ScrollManagerService } from './services/scroll-manager.service';
 import { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 import { ISheetBarService, SheetBarService } from './services/sheetbar/sheetbar.service';
+import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 import { SheetCanvasView } from './views/sheet-canvas-view';
 
 export class SheetUIPlugin extends Plugin {
@@ -76,6 +78,7 @@ export class SheetUIPlugin extends Plugin {
                     },
                 ],
                 [FormulaEngineService],
+                [IStatusBarService, { useClass: StatusBarService }],
 
                 // controllers
                 [AutoHeightController],
@@ -100,6 +103,7 @@ export class SheetUIPlugin extends Plugin {
                 [StartEditController],
                 [ZoomController],
                 [AutoFillController],
+                [StatusBarController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

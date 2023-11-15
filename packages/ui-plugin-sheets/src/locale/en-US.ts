@@ -537,4 +537,13 @@ export default {
             exceedMaxCells: 'The number of cells pasted exceeds the maximum number of cells',
         },
     },
+    statusbar: {
+        sum: 'sum',
+        average: 'average',
+        min: 'min',
+        max: 'max',
+        count: 'count',
+        clickToCopy: 'click to copy',
+        copied: 'copied!',
+    },
 };

@@ -401,4 +401,13 @@ export default {
             exceedMaxCells: '粘贴区域超出最大单元格数',
         },
     },
+    statusbar: {
+        sum: '求和',
+        average: '平均值',
+        min: '最小值',
+        max: '最大值',
+        count: '计数',
+        clickToCopy: '点击复制数值',
+        copied: '数据复制成功，快去粘贴数据吧！',
+    },
 };

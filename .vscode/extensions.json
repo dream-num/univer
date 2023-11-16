@@ -7,6 +7,7 @@
         "intellsmi.comment-translate",
         "streetsidesoftware.code-spell-checker",
         "tldraw-org.tldraw-vscode",
-        "kingwl.vscode-vitest-runner"
+        "kingwl.vscode-vitest-runner",
+        "usernamehw.errorlens"
     ]
 }

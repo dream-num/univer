@@ -62,7 +62,7 @@ module.exports = {
                 selector: 'interface',
                 format: ['PascalCase'],
                 custom: {
-                    regex: '^I[A-Z]',
+                    regex: '^I[A-Z0-9]',
                     match: true,
                 },
             },

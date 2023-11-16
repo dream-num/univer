@@ -59,7 +59,7 @@ export class HtmlToUDMService {
         this.styleCache.clear();
         this.styleRules = [];
         this.afterProcessRules = [];
-        console.log(newDocBody);
+
         return newDocBody;
     }
 

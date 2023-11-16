@@ -80,7 +80,7 @@ export class NormalInputController extends Disposable {
             const len = content.length;
 
             // move selection
-            this._textSelectionManagerService.replace([
+            this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: startOffset + len,
                     endOffset: startOffset + len,

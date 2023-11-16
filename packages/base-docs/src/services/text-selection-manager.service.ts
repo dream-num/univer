@@ -1,4 +1,4 @@
-import { ITextRangeWithStyle } from '@univerjs/base-render';
+import { ITextRangeWithStyle, TextRange } from '@univerjs/base-render';
 import { ISelectionCell, Nullable } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
@@ -11,11 +11,10 @@ export interface ITextSelectionManagerSearchParam {
 }
 
 export interface ITextSelectionManagerInsertParam extends ITextSelectionManagerSearchParam {
-    textRanges: ITextRangeWithStyle[];
+    textRanges: TextRange[];
 }
 
-//{ [pluginName: string]: { [unitId: string]: ITextRangeWithStyle[] } }
-export type ITextSelectionInfo = Map<string, Map<string, ITextRangeWithStyle[]>>;
+export type ITextSelectionInfo = Map<string, Map<string, TextRange[]>>;
 
 /**
  * This service is for selection.
@@ -31,31 +30,6 @@ export class TextSelectionManagerService implements IDisposable {
 
     getCurrentSelection() {
         return this._currentSelection;
-    }
-
-    reset() {
-        if (this._currentSelection == null) {
-            return;
-        }
-
-        this._currentSelection = {
-            pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
-            unitId: this._currentSelection?.unitId,
-        };
-
-        this._textSelectionInfo.clear();
-
-        this._refresh(this._currentSelection);
-    }
-
-    resetPlugin() {
-        if (this._currentSelection == null) {
-            return;
-        }
-
-        this._currentSelection.pluginName = NORMAL_TEXT_SELECTION_PLUGIN_NAME;
-
-        this._refresh(this._currentSelection);
     }
 
     dispose(): void {
@@ -84,49 +58,34 @@ export class TextSelectionManagerService implements IDisposable {
         return this._textSelectionInfo;
     }
 
-    getTextRangesByParam(param: Nullable<ITextSelectionManagerSearchParam>): Readonly<Nullable<ITextRangeWithStyle[]>> {
+    getTextRangesByParam(param: Nullable<ITextSelectionManagerSearchParam>): Readonly<Nullable<TextRange[]>> {
         return this._getTextRanges(param);
     }
 
-    getSelections(): Readonly<Nullable<ITextRangeWithStyle[]>> {
+    getSelections(): Readonly<Nullable<TextRange[]>> {
         return this._getTextRanges(this._currentSelection);
     }
 
-    getFirst(): Readonly<Nullable<ITextRangeWithStyle>> {
+    getFirst(): Readonly<Nullable<TextRange>> {
         return this._getFirstByParam(this._currentSelection);
     }
 
-    getLast(): Readonly<Nullable<ITextRangeWithStyle & { primary: ISelectionCell }>> {
+    getLast(): Readonly<Nullable<TextRange & { primary: ISelectionCell }>> {
         // The last selection position must have a primary.
         return this._getLastByParam(this._currentSelection) as Readonly<
-            Nullable<ITextRangeWithStyle & { primary: ISelectionCell }>
+            Nullable<TextRange & { primary: ISelectionCell }>
         >;
     }
 
-    add(textRanges: ITextRangeWithStyle[]) {
-        if (this._currentSelection == null) {
-            return;
-        }
-        this._addByParam({
-            ...this._currentSelection,
-            textRanges,
-        });
-    }
-
-    replace(textRanges: ITextRangeWithStyle[]) {
+    replaceTextRanges(textRanges: ITextRangeWithStyle[]) {
         if (this._currentSelection == null) {
             return;
         }
 
-        this._replaceByParam({
-            ...this._currentSelection,
-            textRanges,
-        });
-
-        this._refresh(this._currentSelection);
+        this._textSelectionInfo$.next(textRanges);
     }
 
-    replaceWithNoRefresh(textRanges: ITextRangeWithStyle[]) {
+    replaceTextRangesWithNoRefresh(textRanges: TextRange[]) {
         if (this._currentSelection == null) {
             return;
         }
@@ -137,7 +96,8 @@ export class TextSelectionManagerService implements IDisposable {
         });
     }
 
-    clear(): void {
+    // It is will being opened when it needs to be used
+    private clear(): void {
         if (this._currentSelection == null) {
             return;
         }
@@ -145,12 +105,40 @@ export class TextSelectionManagerService implements IDisposable {
         this._clearByParam(this._currentSelection);
     }
 
-    remove(index: number): void {
+    // It is will being opened when it needs to be used
+    private remove(index: number): void {
         if (this._currentSelection == null) {
             return;
         }
 
         this._removeByParam(index, this._currentSelection);
+    }
+
+    // It is will being opened when it needs to be used
+    private reset() {
+        if (this._currentSelection == null) {
+            return;
+        }
+
+        this._currentSelection = {
+            pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
+            unitId: this._currentSelection?.unitId,
+        };
+
+        this._textSelectionInfo.clear();
+
+        this._refresh(this._currentSelection);
+    }
+
+    // It is will being opened when it needs to be used
+    private resetPlugin() {
+        if (this._currentSelection == null) {
+            return;
+        }
+
+        this._currentSelection.pluginName = NORMAL_TEXT_SELECTION_PLUGIN_NAME;
+
+        this._refresh(this._currentSelection);
     }
 
     private _getTextRanges(param: Nullable<ITextSelectionManagerSearchParam>) {
@@ -164,42 +152,35 @@ export class TextSelectionManagerService implements IDisposable {
     }
 
     private _refresh(param: ITextSelectionManagerSearchParam): void {
-        this._textSelectionInfo$.next(this._getTextRanges(param));
+        const allTextRanges = this._getTextRanges(param) ?? [];
+
+        this._textSelectionInfo$.next(
+            allTextRanges.map((textRange) => {
+                const startOffset = textRange.startOffset!;
+                const endOffset = textRange.endOffset!;
+                const collapsed = textRange.collapsed!;
+                const style = textRange.style!;
+
+                return {
+                    startOffset,
+                    endOffset,
+                    collapsed,
+                    style,
+                };
+            })
+        );
     }
 
-    private _getFirstByParam(
-        param: Nullable<ITextSelectionManagerSearchParam>
-    ): Readonly<Nullable<ITextRangeWithStyle>> {
+    private _getFirstByParam(param: Nullable<ITextSelectionManagerSearchParam>): Readonly<Nullable<TextRange>> {
         const textRange = this._getTextRanges(param);
 
         return textRange?.[0];
     }
 
-    private _getLastByParam(
-        param: Nullable<ITextSelectionManagerSearchParam>
-    ): Readonly<Nullable<ITextRangeWithStyle>> {
+    private _getLastByParam(param: Nullable<ITextSelectionManagerSearchParam>): Readonly<Nullable<TextRange>> {
         const textRange = this._getTextRanges(param);
 
         return textRange?.[textRange.length - 1];
-    }
-
-    private _addByParam(insertParam: ITextSelectionManagerInsertParam): void {
-        const { pluginName, unitId, textRanges } = insertParam;
-
-        if (!this._textSelectionInfo.has(pluginName)) {
-            this._textSelectionInfo.set(pluginName, new Map());
-        }
-
-        const unitTextRange = this._textSelectionInfo.get(pluginName)!;
-
-        if (!unitTextRange.has(unitId)) {
-            unitTextRange.set(unitId, [...textRanges]);
-        } else {
-            const OldTextRanges = unitTextRange.get(unitId)!;
-            OldTextRanges.push(...textRanges);
-        }
-
-        this._refresh({ pluginName, unitId });
     }
 
     private _replaceByParam(insertParam: ITextSelectionManagerInsertParam) {

@@ -161,7 +161,7 @@ export class StartEditController extends Disposable {
 
             this._textSelectionRenderManager.changeRuntime(documentSkeleton, scene);
 
-            this._textSelectionManagerService.replace([
+            this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: 0,
                     endOffset: 0,
@@ -454,7 +454,7 @@ export class StartEditController extends Disposable {
                     skeleton.calculate();
                 }
 
-                this._textSelectionManagerService.replace([
+                this._textSelectionManagerService.replaceTextRanges([
                     {
                         startOffset: 0,
                         endOffset: 0,
@@ -469,7 +469,7 @@ export class StartEditController extends Disposable {
                     y: Infinity,
                 });
 
-                this._textSelectionManagerService.replace([
+                this._textSelectionManagerService.replaceTextRanges([
                     {
                         startOffset: cursor,
                         endOffset: cursor,

@@ -71,7 +71,7 @@ export class TextRange {
         private _docSkeleton: DocumentSkeleton,
         public anchorNodePosition?: Nullable<INodePosition>,
         public focusNodePosition?: Nullable<INodePosition>,
-        private _style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE
+        public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE
     ) {}
 
     // The start position of the range
@@ -140,13 +140,13 @@ export class TextRange {
 
     activeStatic() {
         this._anchorShape?.setProps({
-            stroke: this._style?.strokeActive || getColor(COLORS.black, 1),
+            stroke: this.style?.strokeActive || getColor(COLORS.black, 1),
         });
     }
 
     deactivateStatic() {
         this._anchorShape?.setProps({
-            stroke: this._style?.stroke || getColor(COLORS.black, 0),
+            stroke: this.style?.stroke || getColor(COLORS.black, 0),
         });
     }
 
@@ -258,7 +258,7 @@ export class TextRange {
         const OPACITY = 0.2;
         const polygon = new RegularPolygon(TEXT_RANGE_KEY_PREFIX + Tools.generateRandomId(ID_LENGTH), {
             pointsGroup,
-            fill: this._style?.fill || getColor(COLORS.black, OPACITY),
+            fill: this.style?.fill || getColor(COLORS.black, OPACITY),
             left,
             top,
             evented: false,
@@ -302,8 +302,8 @@ export class TextRange {
             left: left + docsLeft,
             top: top + docsTop,
             height,
-            strokeWidth: this._style?.strokeWidth || 1,
-            stroke: this._style?.stroke || getColor(COLORS.black, 0),
+            strokeWidth: this.style?.strokeWidth || 1,
+            stroke: this.style?.stroke || getColor(COLORS.black, 0),
             evented: false,
         });
 

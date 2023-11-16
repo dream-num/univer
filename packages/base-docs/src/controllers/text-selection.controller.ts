@@ -1,13 +1,10 @@
 import {
     CURSOR_TYPE,
     Documents,
-    getOneTextSelectionRange,
     IMouseEvent,
     IPointerEvent,
     IRenderManagerService,
-    ITextRangeWithStyle,
     ITextSelectionRenderManager,
-    NodePositionConvertToCursor,
 } from '@univerjs/base-render';
 import {
     Disposable,
@@ -161,33 +158,12 @@ export class TextSelectionController extends Disposable {
                 return;
             }
 
-            const { skeleton: docSkeleton, unitId } = docsObject;
-
-            const document = this._getDocObjectById(unitId)?.document;
-
-            if (document == null) {
-                return;
-            }
-
-            const convert = new NodePositionConvertToCursor(document.getOffsetConfig(), docSkeleton);
+            const { unitId } = docsObject;
 
             this._commandService.executeCommand(SetTextSelectionsOperation.id, {
                 unitId,
                 pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
-                ranges: textRanges
-                    .map((textRange) => {
-                        let { focusNodePosition } = textRange;
-                        const { anchorNodePosition } = textRange;
-
-                        if (focusNodePosition == null) {
-                            focusNodePosition = anchorNodePosition;
-                        }
-
-                        const rangeList = convert.getRangePointData(anchorNodePosition, focusNodePosition).cursorList;
-
-                        return getOneTextSelectionRange(rangeList);
-                    })
-                    .filter((x) => x !== null) as ITextRangeWithStyle[],
+                ranges: textRanges,
             });
         });
     }

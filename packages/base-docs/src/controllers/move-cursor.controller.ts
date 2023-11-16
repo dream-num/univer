@@ -107,7 +107,7 @@ export class MoveCursorController extends Disposable {
                 max = Math.max(max, range.endOffset!);
             }
 
-            this._textSelectionManagerService.replace([
+            this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: direction === Direction.LEFT || direction === Direction.UP ? max : min,
                     endOffset: direction === Direction.LEFT || direction === Direction.UP ? min : max,
@@ -134,7 +134,7 @@ export class MoveCursorController extends Disposable {
 
             focusOffset = Math.min(dataStreamLength - 2, Math.max(0, focusOffset));
 
-            this._textSelectionManagerService.replace([
+            this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: anchorOffset,
                     endOffset: focusOffset,
@@ -158,7 +158,7 @@ export class MoveCursorController extends Disposable {
             ).cursorList[0];
 
             // move selection
-            this._textSelectionManagerService.replace([
+            this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: anchorOffset,
                     endOffset: newActiveRange.endOffset,
@@ -206,7 +206,7 @@ export class MoveCursorController extends Disposable {
                 }
             }
 
-            this._textSelectionManagerService.replace([
+            this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: cursor,
                     endOffset: cursor,
@@ -230,7 +230,7 @@ export class MoveCursorController extends Disposable {
             ).cursorList[0];
 
             // move selection
-            this._textSelectionManagerService.replace([
+            this._textSelectionManagerService.replaceTextRanges([
                 {
                     ...newActiveRange,
                     style,

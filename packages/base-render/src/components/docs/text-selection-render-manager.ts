@@ -75,13 +75,11 @@ export interface ITextSelectionRenderManager {
 
     getAllTextRanges(): TextRange[];
 
+    removeAllTextRanges(): void;
+
     addTextRanges(ranges: ITextRangeWithStyle[], config?: IAddTextRangesConfig): void;
 
-    add(textSelection: Nullable<TextRange>): void;
-
     sync(): void;
-
-    scroll(): void;
 
     activate(x: number, y: number): void;
 
@@ -94,8 +92,6 @@ export interface ITextSelectionRenderManager {
     changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene): void;
 
     dispose(): void;
-
-    removeAllTextRanges(): void;
 
     getActiveRange(): Nullable<
         ITextRangeWithStyle & {
@@ -302,6 +298,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             this._add(textSelection);
         }
 
+        this._textSelection$.next(this.getAllTextRanges());
+
         this._syncDomToSelection();
 
         this._scrollToSelection();
@@ -309,10 +307,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     sync() {
         this._syncDomToSelection();
-    }
-
-    scroll() {
-        this._scrollToSelection();
     }
 
     activate(x: number, y: number) {

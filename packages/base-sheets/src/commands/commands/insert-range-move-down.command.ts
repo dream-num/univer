@@ -34,6 +34,8 @@ import { calculateTotalLength, IInterval } from './utils/selection-util';
 export interface InsertRangeMoveDownCommandParams {
     ranges: IRange[];
 }
+
+export const InsertRangeMoveDownCommandId = 'sheet.command.insert-range-move-down';
 /**
  * The command to insert range.
  */

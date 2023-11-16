@@ -54,7 +54,7 @@ export interface IInsertRowCommandParams {
      */
     range: IRange;
 }
-
+export const InsertRowCommandId = 'sheet.command.insert-row';
 /**
  * @internal use `InsertRowBeforeCommand` or `InsertRowAfterCommand` as an external user
  *
@@ -62,7 +62,7 @@ export interface IInsertRowCommandParams {
  */
 export const InsertRowCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.insert-row',
+    id: InsertRowCommandId,
     handler: async (accessor: IAccessor, params: IInsertRowCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -252,10 +252,10 @@ export interface IInsertColCommandParams {
     range: IRange;
     direction: Direction.LEFT | Direction.RIGHT;
 }
-
+export const InsertColCommandId = 'sheet.command.insert-col';
 export const InsertColCommand: ICommand<IInsertColCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.insert-col',
+    id: InsertColCommandId,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params: IInsertColCommandParams) => {
         const commandService = accessor.get(ICommandService);

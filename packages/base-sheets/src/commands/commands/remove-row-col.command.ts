@@ -35,12 +35,13 @@ import {
 export interface RemoveRowColCommandParams {
     ranges: IRange[];
 }
+export const RemoveRowCommandId = 'sheet.command.remove-row';
 /**
  * This command would remove the selected rows. These selected rows can be non-continuous.
  */
 export const RemoveRowCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.remove-row',
+    id: RemoveRowCommandId,
     handler: async (accessor: IAccessor, params?: RemoveRowColCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
@@ -126,13 +127,13 @@ export const RemoveRowCommand: ICommand = {
         return false;
     },
 };
-
+export const RemoveColCommandId = 'sheet.command.remove-col';
 /**
  * This command would remove the selected columns. These selected rows can be non-continuous.
  */
 export const RemoveColCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.remove-col',
+    id: RemoveColCommandId,
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params?: RemoveRowColCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);

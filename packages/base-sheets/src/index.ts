@@ -36,7 +36,6 @@ export {
 } from './commands/commands/utils/selection-util';
 export { BorderStyleManagerService } from './services/border-style-manager.service';
 export { SheetEditablePermission, SheetPermissionService } from './services/permission';
-export { RefRangeService } from './services/ref-range.service';
 export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './services/selection-manager.service';
 
 // #region commands
@@ -205,3 +204,6 @@ export {
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
+export { RefRangeService } from './services/ref-range/ref-range.service';
+export type { EffectRefRangeParams } from './services/ref-range/type';
+export { EffectRefRangId, OperatorType } from './services/ref-range/type';

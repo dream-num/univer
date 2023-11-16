@@ -34,12 +34,13 @@ import { calculateTotalLength, IInterval } from './utils/selection-util';
 export interface InsertRangeMoveRightCommandParams {
     ranges: IRange[];
 }
+export const InsertRangeMoveRightCommandId = 'sheet.command.insert-range-move-right';
 /**
  * The command to insert range.
  */
 export const InsertRangeMoveRightCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.insert-range-move-right',
+    id: InsertRangeMoveRightCommandId,
 
     handler: async (accessor: IAccessor, params?: InsertRangeMoveRightCommandParams) => {
         const commandService = accessor.get(ICommandService);

@@ -1,7 +1,7 @@
 export default {
     SUM: {
         description: 'You can add individual values, cell references or ranges or a mix of all three.',
-        abstract: 'You can add individual values, cell references or ranges or a mix of all three.',
+        abstract: 'Adds its arguments',
         functionParameter: {
             number1: {
                 name: 'number1',

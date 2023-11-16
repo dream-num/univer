@@ -20,6 +20,8 @@ export function HelpFunction() {
     const promptService = useDependency(IFormulaPromptService);
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
     const localeService = useDependency(LocaleService);
+    const required = localeService.t('formula.prompt.required');
+    const optional = localeService.t('formula.prompt.optional');
 
     useEffect(() => {
         const subscription = promptService.help$.subscribe((params: IHelpFunctionCommandParams) => {
@@ -37,7 +39,6 @@ export function HelpFunction() {
                 functionType: functionInfo.functionType,
                 description: localeService.t(functionInfo.description),
                 abstract: localeService.t(functionInfo.abstract),
-                parameterRange: functionInfo.parameterRange,
                 functionParameter: functionInfo.functionParameter.map((item) => ({
                     name: localeService.t(item.name),
                     detail: localeService.t(item.detail),
@@ -74,9 +75,8 @@ export function HelpFunction() {
                             <div className={styles.formulaHelpFunction}>
                                 <div className={styles.formulaHelpFunctionTitle}>
                                     <Help
-                                        title={functionInfo.functionName}
+                                        prefix={functionInfo.functionName}
                                         value={functionInfo.functionParameter}
-                                        type="name"
                                         active={paramIndex}
                                         onClick={handleSwitchActive}
                                     />
@@ -103,13 +103,13 @@ export function HelpFunction() {
                                 >
                                     <div className={styles.formulaHelpFunctionContentInner}>
                                         <Params
-                                            title={localeService.t('formula.formulaMore.helpExample') as string}
+                                            title={localeService.t('formula.prompt.helpExample')}
                                             value={`${functionInfo.functionName}(${functionInfo.functionParameter
                                                 .map((item) => item.example)
                                                 .join(',')})`}
                                         />
                                         <Params
-                                            title={localeService.t('formula.formulaMore.helpAbstract') as string}
+                                            title={localeService.t('formula.prompt.helpAbstract')}
                                             value={functionInfo.description}
                                         />
                                         {functionInfo &&
@@ -119,8 +119,7 @@ export function HelpFunction() {
                                                     key={i}
                                                     className={paramIndex === i ? styles.formulaHelpFunctionActive : ''}
                                                     title={item.name}
-                                                    value={item.detail}
-                                                    active={paramIndex}
+                                                    value={`${item.require ? required : optional} ${item.detail}`}
                                                 />
                                             ))}
                                     </div>
@@ -152,7 +151,6 @@ interface IParamsProps {
     className?: string;
     title?: string;
     value?: string;
-    active?: number;
 }
 
 const Params = (props: IParamsProps) => (
@@ -163,19 +161,18 @@ const Params = (props: IParamsProps) => (
 );
 
 interface IHelpProps {
-    title?: string;
+    prefix?: string;
     value?: IFunctionParam[];
-    type: string;
     active: number;
     onClick: (paramIndex: number) => void;
 }
 
 const Help = (props: IHelpProps) => {
-    const { title, value, type, active, onClick } = props;
+    const { prefix, value, active, onClick } = props;
     return (
         <div>
             <span>
-                {title}
+                {prefix}
                 {'('}
             </span>
             {value &&
@@ -186,7 +183,7 @@ const Help = (props: IHelpProps) => {
                             className={active === i ? styles.formulaHelpFunctionActive : ''}
                             onClick={() => onClick(i)}
                         >
-                            {(item as any)[`${type}`]}
+                            {item.repeat ? `[${item.name},...]` : item.name}
                         </span>
                         {i === value.length - 1 ? '' : ','}
                     </span>

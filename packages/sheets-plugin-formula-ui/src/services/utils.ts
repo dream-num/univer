@@ -8,13 +8,12 @@ export function getFunctionTypeValues(
     return Object.keys(enumObj)
         .filter((key) => isNaN(Number(key)))
         .map((key) => ({
-            label: localeService.t(`formula.formulaMore.${key.toLocaleLowerCase()}`),
+            label: localeService.t(`formula.functionType.${key.toLocaleLowerCase()}`),
             value: `${enumObj[key]}`,
         }));
 }
 
-// TODO@Dushusir:  merge getFunctionName to here
-export function getRealFunctionName(item: IFunctionInfo, localeService: LocaleService) {
+export function getFunctionName(item: IFunctionInfo, localeService: LocaleService) {
     let functionName = '';
     if (item.aliasFunctionName) {
         functionName = localeService.t(item.aliasFunctionName);

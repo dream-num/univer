@@ -1,9 +1,9 @@
-import { TextSelectionManagerService } from '@univerjs/base-docs';
 import { FormulaEngineService, IFunctionInfo, ISequenceNode, sequenceNodeType } from '@univerjs/base-formula-engine';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IRenderManagerService,
+    ITextSelectionRenderManager,
 } from '@univerjs/base-render';
 import { ISelectionWithStyle, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/base-sheets';
 import {
@@ -36,9 +36,8 @@ import { Inject } from '@wendellhu/redi';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { FORMULA_REF_SELECTION_PLUGIN_NAME, getFormulaRefSelectionStyle } from '../common/selection';
-import { FUNCTION_LIST } from '../services/function-list/function-list';
-import { IFormulaPromptService, ISearchItem } from '../services/prompt.service';
-import { getFunctionName } from './util';
+import { IDescriptionService, ISearchItem } from '../services/description.service';
+import { IFormulaPromptService } from '../services/prompt.service';
 
 interface IFunctionPanelParam {
     visibleSearch: boolean;
@@ -69,7 +68,7 @@ export class PromptController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(IEditorBridgeService) private readonly _editorBridgeService: EditorBridgeService,
         @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
@@ -78,7 +77,8 @@ export class PromptController extends Disposable {
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService
+        @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService,
+        @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService
     ) {
         super();
 
@@ -126,7 +126,7 @@ export class PromptController extends Disposable {
     private _initialCursorSync() {
         this.disposeWithMe(
             toDisposable(
-                this._textSelectionManagerService.textSelectionInfo$.subscribe(() => {
+                this._textSelectionRenderManager.textSelection$.subscribe(() => {
                     if (this._editorBridgeService.isVisible().visible === false) {
                         return;
                     }
@@ -194,14 +194,13 @@ export class PromptController extends Disposable {
             const searchText = currentInputValue.substring(1);
 
             // TODO@Dushusir: remove after use real text info
-            const matchList = ['SUMIF', 'TAN', 'TANH'];
+            const matchList = ['SUM', 'AVERAGE'];
 
             // help function
             if (matchList.includes(searchText)) {
                 const paramIndex = Math.random() > 0.5 ? 0 : 1;
 
-                const functionInfo = this._getFunctionInfo(searchText);
-
+                const functionInfo = this._descriptionService.getFunctionInfo(searchText);
                 param = {
                     visibleSearch: false,
                     visibleHelp: !!functionInfo,
@@ -209,16 +208,16 @@ export class PromptController extends Disposable {
                     paramIndex,
                     functionInfo,
                 };
+            } else {
+                const searchList = this._descriptionService.getSearchListByName(searchText);
+                param = {
+                    visibleSearch: searchList.length > 0,
+                    visibleHelp: false,
+                    searchText,
+                    paramIndex: 0,
+                    searchList,
+                };
             }
-
-            const searchList = this._getSearchList(searchText);
-            param = {
-                visibleSearch: searchList.length > 0,
-                visibleHelp: false,
-                searchText,
-                paramIndex: 0,
-                searchList,
-            };
         }
 
         this._commandService.executeCommand(SearchFunctionOperation.id, {
@@ -237,22 +236,6 @@ export class PromptController extends Disposable {
         this._formulaPromptService.acceptFormulaName$.subscribe((name: string) => {
             console.log(`TODO: set ${name} to cell editor`);
         });
-    }
-
-    private _getSearchList(searchText: string) {
-        const searchList: ISearchItem[] = [];
-        FUNCTION_LIST.forEach((item) => {
-            const functionName = getFunctionName(item, this._localeService);
-            if (functionName.indexOf(searchText) > -1) {
-                searchList.push({ name: functionName, desc: this._localeService.t(item.abstract) as string });
-            }
-        });
-
-        return searchList;
-    }
-
-    private _getFunctionInfo(searchText: string) {
-        return FUNCTION_LIST.find((item) => getFunctionName(item, this._localeService) === searchText);
     }
 
     /**

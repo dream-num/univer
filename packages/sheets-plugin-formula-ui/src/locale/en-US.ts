@@ -1,4 +1,18 @@
+import arrayEnUS from './function-list/array/en-US';
+import compatibilityEnUS from './function-list/compatibility/en-US';
+import cubeEnUS from './function-list/cube/en-US';
+import databaseEnUS from './function-list/database/en-US';
+import dateEnUS from './function-list/date/en-US';
+import engineeringEnUS from './function-list/engineering/en-US';
+import financialEnUS from './function-list/financial/en-US';
+import informationEnUS from './function-list/information/en-US';
+import logicalEnUS from './function-list/logical/en-US';
+import lookupEnUS from './function-list/lookup/en-US';
 import mathEnUS from './function-list/math/en-US';
+import statisticalEnUS from './function-list/statistical/en-US';
+import textEnUS from './function-list/text/en-US';
+import univerEnUS from './function-list/univer/en-US';
+import webEnUS from './function-list/web/en-US';
 
 export default {
     formula: {
@@ -12,26 +26,29 @@ export default {
             more: 'More Functions...',
         },
         functionList: {
-            AVERAGE: {
-                description: 'Returns the average (arithmetic mean) of the arguments.',
-                abstract: 'Returns the average of the arguments.',
-                functionParameter: {
-                    number1: {
-                        name: 'number1',
-                        detail: 'The first number, cell reference, or range for which you want the average.',
-                    },
-                    number2: {
-                        name: 'number2',
-                        detail: 'Additional numbers, cell references or ranges for which you want the average, up to a maximum of 255.',
-                    },
-                },
-            },
+            ...financialEnUS,
+            ...dateEnUS,
             ...mathEnUS,
+            ...statisticalEnUS,
+            ...lookupEnUS,
+            ...databaseEnUS,
+            ...textEnUS,
+            ...logicalEnUS,
+            ...informationEnUS,
+            ...engineeringEnUS,
+            ...cubeEnUS,
+            ...compatibilityEnUS,
+            ...webEnUS,
+            ...arrayEnUS,
+            ...univerEnUS,
         },
-        formulaMore: {
+        prompt: {
             helpExample: 'EXAMPLE',
             helpAbstract: 'ABOUT',
-
+            required: 'Required.',
+            optional: 'Optional.',
+        },
+        functionType: {
             financial: 'Financial',
             date: 'Date & Time',
             math: 'Math & Trig',
@@ -47,13 +64,14 @@ export default {
             web: 'Web',
             array: 'Array',
             univer: 'Univer',
-
-            searchFunctionPlaceholder: 'Search function',
         },
         moreFunctions: {
             confirm: 'Confirm',
             prev: 'Previous',
             next: 'Next',
+            searchFunctionPlaceholder: 'Search function',
+            allFunctions: 'All Functions',
+            syntax: 'SYNTAX',
         },
     },
 };

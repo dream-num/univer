@@ -3,10 +3,38 @@ import { LocaleService } from '@univerjs/core';
 import { createIdentifier, IDisposable, Inject } from '@wendellhu/redi';
 
 import { FUNCTION_LIST } from './function-list/function-list';
-import { getRealFunctionName } from './utils';
+import { getFunctionName } from './utils';
+
+export interface ISearchItem {
+    name: string;
+    desc: string;
+}
 
 export interface IDescriptionService {
+    /**
+     * get all descriptions
+     */
     getDescriptions(): Map<string, IFunctionInfo>;
+
+    /**
+     * get function info by name
+     * @param searchText
+     */
+    getFunctionInfo(searchText: string): IFunctionInfo | undefined;
+
+    /**
+     * get search list by name
+     * @param searchText
+     * @returns
+     */
+    getSearchListByName(searchText: string): ISearchItem[];
+
+    /**
+     * get search list by type, if type is -1, return all
+     * @param type
+     * @returns
+     */
+    getSearchListByType(type: number): ISearchItem[];
 }
 
 export const IDescriptionService = createIdentifier<IDescriptionService>('formula-ui.description-service');
@@ -21,6 +49,46 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         this._registerDescription();
     }
 
+    dispose(): void {
+        this._localeService.localeChanged$.complete();
+    }
+
+    getDescriptions() {
+        return this._formulaEngineService.getDescriptions();
+    }
+
+    getFunctionInfo(searchText: string) {
+        const functionList = this._formulaEngineService.getDescriptions();
+        return functionList.get(searchText.toLocaleUpperCase());
+    }
+
+    getSearchListByName(searchText: string) {
+        const searchList: ISearchItem[] = [];
+        const functionList = this._formulaEngineService.getDescriptions();
+        searchText = searchText.toLocaleUpperCase();
+        functionList.forEach((item) => {
+            const { functionName, abstract } = item;
+            if (functionName.indexOf(searchText) > -1) {
+                searchList.push({ name: functionName, desc: abstract });
+            }
+        });
+
+        return searchList;
+    }
+
+    getSearchListByType(type: number) {
+        const searchList: ISearchItem[] = [];
+        const functionList = this._formulaEngineService.getDescriptions();
+        functionList.forEach((item) => {
+            const { functionName, functionType, abstract } = item;
+            if (functionType === type || type === -1) {
+                searchList.push({ name: functionName, desc: abstract });
+            }
+        });
+
+        return searchList;
+    }
+
     private _initialize() {
         this._localeService.localeChanged$.subscribe(() => {
             this._registerDescription();
@@ -31,11 +99,10 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         const localeService = this._localeService;
         const functionList = FUNCTION_LIST.concat(this._description || []);
         const functionListLocale = functionList.map((functionInfo) => ({
-            functionName: getRealFunctionName(functionInfo, localeService),
+            functionName: getFunctionName(functionInfo, localeService),
             functionType: functionInfo.functionType,
             description: localeService.t(functionInfo.description),
             abstract: localeService.t(functionInfo.abstract),
-            parameterRange: functionInfo.parameterRange,
             functionParameter: functionInfo.functionParameter.map((item) => ({
                 name: localeService.t(item.name),
                 detail: localeService.t(item.detail),
@@ -45,13 +112,5 @@ export class DescriptionService implements IDescriptionService, IDisposable {
             })),
         }));
         this._formulaEngineService.registerDescription(...functionListLocale);
-    }
-
-    dispose(): void {
-        this._localeService.localeChanged$.complete();
-    }
-
-    getDescriptions() {
-        return this._formulaEngineService.getDescriptions();
     }
 }

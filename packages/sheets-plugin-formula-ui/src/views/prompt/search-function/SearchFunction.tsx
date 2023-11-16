@@ -4,12 +4,8 @@ import { ICellEditorManagerService } from '@univerjs/ui-plugin-sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import {
-    IFormulaPromptService,
-    INavigateParam,
-    ISearchFunctionParams,
-    ISearchItem,
-} from '../../../services/prompt.service';
+import { ISearchItem } from '../../../services/description.service';
+import { IFormulaPromptService, INavigateParam, ISearchFunctionParams } from '../../../services/prompt.service';
 import styles from './index.module.less';
 
 export function SearchFunction() {

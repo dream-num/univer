@@ -4,7 +4,7 @@ import { IAccessor } from '@wendellhu/redi';
 import { IFormulaPromptService, IHelpFunctionCommandParams } from '../../services/prompt.service';
 
 export const HelpFunctionOperation: ICommand = {
-    id: 'formula.operation.help-function',
+    id: 'formula-ui.operation.help-function',
     type: CommandType.OPERATION,
     handler: async (accessor: IAccessor, params: IHelpFunctionCommandParams) => {
         const promptService = accessor.get(IFormulaPromptService);

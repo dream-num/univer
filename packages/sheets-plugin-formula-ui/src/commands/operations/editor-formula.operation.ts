@@ -13,7 +13,7 @@ export interface ISelectEditorFormulaOperationParam {
 }
 
 export const SelectEditorFormluaOperation: IOperation<ISelectEditorFormulaOperationParam> = {
-    id: 'formula.operation.select-editor-formula',
+    id: 'formula-ui.operation.select-editor-formula',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const { eventType, keycode } = params;

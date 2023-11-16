@@ -140,12 +140,6 @@ export interface IFunctionInfo {
     abstract: string;
 
     /**
-     * [Minimum number of parameters, maximum number of parameters]
-     * Detected before each calculation of the function
-     */
-    parameterRange: [min: number, max: number];
-
-    /**
      * Function params
      */
     functionParameter: IFunctionParam[];

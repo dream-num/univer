@@ -1,7 +1,7 @@
 export default {
     SUM: {
         description: '将单个值、单元格引用或是区域相加，或者将三者的组合相加。',
-        abstract: '将单个值、单元格引用或是区域相加。',
+        abstract: '求参数的和',
         functionParameter: {
             number1: {
                 name: '数值1',

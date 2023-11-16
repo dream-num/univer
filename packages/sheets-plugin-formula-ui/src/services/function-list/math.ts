@@ -7,7 +7,6 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         functionType: FunctionType.Math,
         description: 'formula.functionList.SUM.description',
         abstract: 'formula.functionList.SUM.abstract',
-        parameterRange: [1, 255],
         functionParameter: [
             {
                 name: 'formula.functionList.SUM.functionParameter.number1.name',

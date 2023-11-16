@@ -1,4 +1,17 @@
 .formula-select-function {
+    &-select {
+        display: flex;
+        align-items: center;
+
+        .input-affix-wrapper{
+            display: flex;
+
+            .input{
+                width: 100%;
+            }
+        }
+    }
+    
     &-result {
         box-sizing: border-box;
         width: 100%;
@@ -28,8 +41,35 @@
                 }
             }
 
+            &-selected {
+                color: rgb(var(--primary-color));
+            }
+
             &-active {
                 background-color: rgb(var(--bg-color-hover));
+            }
+        }
+    }
+
+    &-content {
+        overflow-y: auto;
+        margin-top: var(--padding-xl);
+        padding: var(--padding-base) 0;
+
+        &-params {
+            margin: var(--margin-xs) 0;
+
+            &-title {
+                margin-bottom: var(--margin-xs);
+                font-size: var(--font-size-xs);
+                font-weight: 500;
+                color: rgb(var(--text-color));
+            }
+
+            &-detail {
+                font-size: var(--font-size-xxs);
+                font-weight: 400;
+                color: rgb(var(--text-color-secondary));
             }
         }
     }

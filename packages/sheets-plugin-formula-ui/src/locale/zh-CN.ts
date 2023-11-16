@@ -1,4 +1,18 @@
+import arrayZhCN from './function-list/array/zh-CN';
+import compatibilityZhCN from './function-list/compatibility/zh-CN';
+import cubeZhCN from './function-list/cube/zh-CN';
+import databaseZhCN from './function-list/database/zh-CN';
+import dateZhCN from './function-list/date/zh-CN';
+import engineeringZhCN from './function-list/engineering/zh-CN';
+import financialZhCN from './function-list/financial/zh-CN';
+import informationZhCN from './function-list/information/zh-CN';
+import logicalZhCN from './function-list/logical/zh-CN';
+import lookupZhCN from './function-list/lookup/zh-CN';
 import mathZhCN from './function-list/math/zh-CN';
+import statisticalZhCN from './function-list/statistical/zh-CN';
+import textZhCN from './function-list/text/zh-CN';
+import univerZhCN from './function-list/univer/zh-CN';
+import webZhCN from './function-list/web/zh-CN';
 
 export default {
     formula: {
@@ -11,29 +25,32 @@ export default {
             min: '最小值',
             more: '更多函数...',
         },
-
         functionList: {
-            AVERAGE: {
-                description: '返回参数的平均值（算术平均值）。',
-                abstract: '返回参数平均值。',
-                functionParameter: {
-                    number1: {
-                        name: '数值1',
-                        detail: '要计算平均值的第一个数字、单元格引用或单元格区域。',
-                    },
-                    number2: {
-                        name: '数值2',
-                        detail: '要计算平均值的其他数字、单元格引用或单元格区域，最多可包含 255 个。',
-                    },
-                },
-            },
+            ...financialZhCN,
+            ...dateZhCN,
             ...mathZhCN,
+            ...statisticalZhCN,
+            ...lookupZhCN,
+            ...databaseZhCN,
+            ...textZhCN,
+            ...logicalZhCN,
+            ...informationZhCN,
+            ...engineeringZhCN,
+            ...cubeZhCN,
+            ...compatibilityZhCN,
+            ...webZhCN,
+            ...arrayZhCN,
+            ...univerZhCN,
         },
 
-        formulaMore: {
+        prompt: {
             helpExample: '示例',
             helpAbstract: '简介',
+            required: '必需。',
+            optional: '可选。',
+        },
 
+        functionType: {
             financial: '财务',
             date: '日期与时间',
             math: '数学与三角函数',
@@ -49,14 +66,15 @@ export default {
             web: 'Web',
             array: '数组',
             univer: 'Univer',
-
-            searchFunctionPlaceholder: '搜索函数',
         },
 
         moreFunctions: {
             confirm: '确定',
             prev: '上一步',
             next: '下一步',
+            searchFunctionPlaceholder: '搜索函数',
+            allFunctions: '全部函数',
+            syntax: '语法',
         },
     },
 };

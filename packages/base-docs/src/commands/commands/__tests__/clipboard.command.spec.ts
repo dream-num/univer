@@ -1,17 +1,6 @@
 /* eslint-disable no-magic-numbers */
 
 import {
-    NORMAL_TEXT_SELECTION_PLUGIN_NAME,
-    RichTextEditingMutation,
-    TextSelectionManagerService,
-} from '@univerjs/base-docs';
-import {
-    IInnerCutCommandParams,
-    IInnerPasteCommandParams,
-    InnerCutCommand,
-    InnerPasteCommand,
-} from '@univerjs/base-docs/commands/commands/clipboard.inner.command.js';
-import {
     BooleanNumber,
     ICommand,
     ICommandService,
@@ -24,6 +13,14 @@ import {
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { NORMAL_TEXT_SELECTION_PLUGIN_NAME, TextSelectionManagerService } from '../../../types';
+import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
+import {
+    IInnerCutCommandParams,
+    IInnerPasteCommandParams,
+    InnerCutCommand,
+    InnerPasteCommand,
+} from '../clipboard.inner.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const TEST_DOCUMENT_DATA_EN: IDocumentData = {

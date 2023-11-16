@@ -16,7 +16,7 @@ export interface SlideTabBarConfig {
     onChangeName: (id: string, name: string) => void;
     onChangeTab: (event: FocusEvent, id: string) => void;
     onScroll: (state: IScrollState) => void;
-    onEmptyAlert: (message: string) => void;
+    onEmptyAlert: () => void;
 }
 
 export interface SlideTabItemAnimate {
@@ -177,7 +177,7 @@ export class SlideTabItem {
         if (!input) return false;
         const text = input.innerText;
         if (text.trim() === '') {
-            this._slideTabBar.getConfig().onEmptyAlert('The sheet name cannot be empty.');
+            this._slideTabBar.getConfig().onEmptyAlert();
             return true;
         }
         return false;

@@ -85,17 +85,18 @@ export function SheetBarTabs() {
             onScroll: (state: IScrollState) => {
                 sheetbarService.setScroll(state);
             },
-            onEmptyAlert: (message: string) => {
+            onEmptyAlert: () => {
+                const id = 'slideTabBarAlert';
                 confirmService.open({
-                    id: 'slideTabBarAlert',
+                    id,
                     children: { title: localeService.t('sheetConfig.sheetNameCannotIsEmptyError') },
                     // TODO@Dushusir: i18n
                     title: { title: 'There was a problem' },
                     onClose() {
-                        confirmService.close('slideTabBarAlert');
+                        confirmService.close(id);
                     },
                     onConfirm() {
-                        confirmService.close('slideTabBarAlert');
+                        confirmService.close(id);
                     },
                 });
             },

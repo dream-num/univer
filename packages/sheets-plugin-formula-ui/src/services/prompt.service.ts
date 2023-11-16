@@ -124,6 +124,10 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
     readonly acceptFormulaName$ = this._acceptFormulaName$.asObservable();
 
+    private _searching: boolean;
+
+    private _helping: boolean;
+
     dispose(): void {
         this._search$.complete();
         this._help$.complete();
@@ -133,11 +137,21 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
     }
 
     search(param: ISearchFunctionParams) {
+        this._searching = param.visible;
         this._search$.next(param);
     }
 
+    isSearching() {
+        return this._searching;
+    }
+
     help(param: IHelpFunctionCommandParams) {
+        this._helping = param.visible;
         this._help$.next(param);
+    }
+
+    isHelping() {
+        return this._helping;
     }
 
     navigate(param: INavigateParam) {

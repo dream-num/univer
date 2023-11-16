@@ -111,14 +111,6 @@ export interface IFunctionParam {
      * false: not repeatable
      */
     repeat: BooleanNumber;
-
-    /**
-     * Parameter types
-     *
-     * include ['range', 'rangeall', 'rangenumber', 'rangestring', 'rangedatetime', 'rangedate', 'string']
-     * Detected before each calculation
-     */
-    type: string;
 }
 
 export interface IFunctionInfo {

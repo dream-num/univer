@@ -17,7 +17,7 @@ import { UnionNodeFactory } from '../ast-node/union-node';
 import { ValueNodeFactory } from '../ast-node/value-node';
 import { IFormulaDatasetConfig } from '../basics/common';
 import { ErrorType } from '../basics/error-type';
-import { FUNCTION_NAMES } from '../basics/function';
+import { FUNCTION_NAMES, IFunctionInfo } from '../basics/function';
 import { FormulaDependencyGenerator } from '../dependency/formula-dependency';
 import {
     Average,
@@ -50,8 +50,7 @@ export class FormulaEngineService extends Disposable {
     constructor(@Inject(Injector) private readonly _injector: Injector) {
         super();
         this._initializeDependencies();
-
-        this.initializeFunctions();
+        this._initializeFunctions();
     }
 
     override dispose(): void {}
@@ -111,6 +110,13 @@ export class FormulaEngineService extends Disposable {
      */
     getExecutor(functionName: FUNCTION_NAMES) {
         return this.functionService.getExecutor(functionName);
+    }
+
+    /**
+     * Use register to register function description
+     */
+    registerDescription(...descriptions: IFunctionInfo[]) {
+        this.functionService.registerDescriptions(...descriptions);
     }
 
     /**
@@ -265,7 +271,7 @@ export class FormulaEngineService extends Disposable {
         });
     }
 
-    private initializeFunctions() {
+    private _initializeFunctions() {
         // new Sum(this._injector, FUNCTION_NAMES.SUM)
         const functions: BaseFunction[] = [
             // base function

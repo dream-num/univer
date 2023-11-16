@@ -1,3 +1,5 @@
+import mathEnUS from './function-list/math/en-US';
+
 export default {
     formula: {
         insert: {
@@ -10,44 +12,21 @@ export default {
             more: 'More Functions...',
         },
         functionList: {
-            SUMIF: {
-                description: 'Returns a conditional sum across a range.',
-                abstract: 'A conditional sum across a range.',
+            AVERAGE: {
+                description: 'Returns the average (arithmetic mean) of the arguments.',
+                abstract: 'Returns the average of the arguments.',
                 functionParameter: {
-                    range: {
-                        name: 'range',
-                        detail: 'The range which is tested against `criterion`.',
+                    number1: {
+                        name: 'number1',
+                        detail: 'The first number, cell reference, or range for which you want the average.',
                     },
-                    criterion: {
-                        name: 'criterion',
-                        detail: 'The pattern or test to apply to `range`.',
-                    },
-                    sum_range: {
-                        name: 'sum_range',
-                        detail: 'The range to be summed, if different from `range`.',
+                    number2: {
+                        name: 'number2',
+                        detail: 'Additional numbers, cell references or ranges for which you want the average, up to a maximum of 255.',
                     },
                 },
             },
-            TAN: {
-                description: 'Returns the tangent of an angle provided in radians.',
-                abstract: 'Tangent of an angle provided in radians.',
-                functionParameter: {
-                    angle: {
-                        name: 'angle',
-                        detail: 'The angle to find the tangent of, in radians.',
-                    },
-                },
-            },
-            // TANH: {
-            //     description: 'Returns the hyperbolic tangent of any real number.',
-            //     abstract: 'Hyperbolic tangent of any real number.',
-            //     functionParameter: {
-            //         value: {
-            //             name: 'value',
-            //             detail: 'Any real value to calculate the hyperbolic tangent of.',
-            //         },
-            //     },
-            // },
+            ...mathEnUS,
         },
         formulaMore: {
             helpExample: 'EXAMPLE',

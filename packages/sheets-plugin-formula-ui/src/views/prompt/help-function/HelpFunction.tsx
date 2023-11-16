@@ -33,18 +33,17 @@ export function HelpFunction() {
             }
 
             const localeInfo: IFunctionInfo = {
-                functionName: functionInfo.functionName as string,
+                functionName: functionInfo.functionName,
                 functionType: functionInfo.functionType,
-                description: localeService.t(functionInfo.description) as string,
-                abstract: localeService.t(functionInfo.abstract) as string,
+                description: localeService.t(functionInfo.description),
+                abstract: localeService.t(functionInfo.abstract),
                 parameterRange: functionInfo.parameterRange,
                 functionParameter: functionInfo.functionParameter.map((item) => ({
-                    name: localeService.t(item.name) as string,
-                    detail: localeService.t(item.detail) as string,
+                    name: localeService.t(item.name),
+                    detail: localeService.t(item.detail),
                     example: item.example,
                     require: item.require,
                     repeat: item.repeat,
-                    type: item.type,
                 })),
             };
             const { startX = 0, startY = 0, endY = 0 } = selection;

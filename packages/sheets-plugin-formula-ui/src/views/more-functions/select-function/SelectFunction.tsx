@@ -4,15 +4,15 @@ import { Input, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useState } from 'react';
 
-import { getFunctionName } from '../../../controllers/util';
-import { FUNCTION_LIST } from '../../../services/function-list';
+import { IDescriptionService } from '../../../services/description.service';
 import { getFunctionTypeValues } from '../../../services/utils';
 import styles from './index.module.less';
 
-export function getSearchList(searchText: string, localeService: LocaleService) {
+export function getSearchList(searchText: string, descriptionService: IDescriptionService) {
     const searchList: string[] = [];
-    FUNCTION_LIST.forEach((item) => {
-        const functionName = getFunctionName(item, localeService);
+    const functionList = descriptionService.getDescriptions();
+    functionList.forEach((item) => {
+        const { functionName } = item;
         if (functionName.indexOf(searchText.toLocaleUpperCase()) > -1) {
             searchList.push(functionName);
         }
@@ -21,8 +21,9 @@ export function getSearchList(searchText: string, localeService: LocaleService) 
     return searchList;
 }
 
-function getFunctionInfo(functionName: string, localeService: LocaleService) {
-    return FUNCTION_LIST.find((item) => getFunctionName(item, localeService) === functionName);
+function getFunctionInfo(functionName: string, descriptionService: IDescriptionService) {
+    const functionList = descriptionService.getDescriptions();
+    return functionList.get(functionName) || null;
 }
 
 export function SelectFunction() {
@@ -30,11 +31,12 @@ export function SelectFunction() {
     const [searchText, setSearchText] = useState<string>('');
     const [active, setActive] = useState(0);
     const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
+    const descriptionService = useDependency(IDescriptionService);
     const localeService = useDependency(LocaleService);
     const options = getFunctionTypeValues(FunctionType, localeService);
 
     const highlightSearchText = (text: string) => {
-        const regex = new RegExp(`(${searchText})`);
+        const regex = new RegExp(`(${searchText.toLocaleUpperCase()})`);
         const parts = text.split(regex).filter(Boolean);
         console.info('parts', parts, searchText);
 
@@ -56,11 +58,11 @@ export function SelectFunction() {
 
     function handleSearchInputChange(value: string) {
         setSearchText(value);
-        const selectList = getSearchList(value, localeService);
+        const selectList = getSearchList(value, descriptionService);
         // console.info('搜索===', selectList, searchText);
         setSelectList(selectList);
         setActive(0);
-        const functionInfo = getFunctionInfo(selectList[active], localeService);
+        const functionInfo = getFunctionInfo(selectList[active], descriptionService);
         if (!functionInfo) return;
         setFunctionInfo(functionInfo);
     }

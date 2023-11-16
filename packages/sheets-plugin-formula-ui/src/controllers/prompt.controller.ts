@@ -36,7 +36,7 @@ import { Inject } from '@wendellhu/redi';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { FORMULA_REF_SELECTION_PLUGIN_NAME, getFormulaRefSelectionStyle } from '../common/selection';
-import { FUNCTION_LIST } from '../services/function-list';
+import { FUNCTION_LIST } from '../services/function-list/function-list';
 import { IFormulaPromptService, ISearchItem } from '../services/prompt.service';
 import { getFunctionName } from './util';
 

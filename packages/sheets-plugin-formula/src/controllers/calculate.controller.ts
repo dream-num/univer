@@ -128,7 +128,6 @@ export class CalculateController extends Disposable {
         const engine = this._formulaEngineService;
         const { sheetData, sheetNameMap } = this._getSheetData();
         // Add mutation after calculating the formula
-        // TODO@Dushusir: use new service after engine refactor
         engine
             .execute(unitId, {
                 unitData: {

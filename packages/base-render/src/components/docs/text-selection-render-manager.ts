@@ -464,7 +464,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._addTextRange(textRange);
 
-        // FIXME: @jocs, why I need to refresh textRange? it already refreshed when create.
+        // FIXME: @JOCS, why I need to refresh textRange? it already refreshed when create.
         textRange.refresh();
     }
 
@@ -926,10 +926,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             activeRange,
             rangeList,
         });
-    }
-
-    private _handlePaste(e: ClipboardEvent) {
-        // TODO: emit the paste event to subscribers
     }
 
     private _getTransformCoordForDocumentOffset(evtOffsetX: number, evtOffsetY: number) {

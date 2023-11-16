@@ -30,12 +30,12 @@
     "scripts": {
     },
     "dependencies": {
-        "@univerjs/base-render": "*",
-        "@univerjs/base-sheets": "*",
-        "@univerjs/base-ui": "*",
-        "@univerjs/common-plugin-data": "*",
-        "@univerjs/core": "*",
-        "@univerjs/ui-plugin-sheets": "*",
+        "@univerjs/base-render": "workspace:*",
+        "@univerjs/base-sheets": "workspace:*",
+        "@univerjs/base-ui": "workspace:*",
+        "@univerjs/common-plugin-data": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/ui-plugin-sheets": "workspace:*",
         "@wendellhu/redi": "^0.12.11",
         "luckyexcel": "^1.0.1"
     },

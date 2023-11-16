@@ -20,7 +20,6 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     },
     createdTime: '',
     creator: '',
-    extensions: [],
     lastModifiedBy: '',
     locale: LocaleType.EN_US,
     modifiedTime: '',

@@ -39,9 +39,9 @@
         "build:doc": "storybook build"
     },
     "dependencies": {
-        "@univerjs/base-render": "*",
-        "@univerjs/core": "*",
-        "@univerjs/design": "*",
+        "@univerjs/base-render": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
         "@univerjs/icons": "^0.1.12",
         "@wendellhu/redi": "^0.12.11",
         "clsx": "^2.0.0",

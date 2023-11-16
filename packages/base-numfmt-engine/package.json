@@ -32,7 +32,7 @@
         "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {
-        "@univerjs/core": "*"
+        "@univerjs/core": "workspace:*"
     },
     "devDependencies": {
         "@types/node": "^20.9.0",

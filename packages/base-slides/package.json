@@ -28,9 +28,9 @@
     "scripts": {
     },
     "dependencies": {
-        "@univerjs/base-render": "*",
-        "@univerjs/base-ui": "*",
-        "@univerjs/core": "*",
+        "@univerjs/base-render": "workspace:*",
+        "@univerjs/base-ui": "workspace:*",
+        "@univerjs/core": "workspace:*",
         "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {

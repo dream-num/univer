@@ -1,6 +1,6 @@
 import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
-import { debounceTime, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import { IShortcutService } from '../shortcut/shortcut.service';
 import { IDisplayMenuItem, IMenuItem, MenuPosition } from './menu';
@@ -22,9 +22,9 @@ export class DesktopMenuService extends Disposable implements IMenuService {
 
     private readonly _menuByPositions = new Map<MenuPosition | string, Array<[string, IMenuItem]>>();
 
-    private _menuChanged$ = new Subject<void>();
+    private _menuChanged$ = new BehaviorSubject<void>(undefined);
 
-    menuChanged$ = this._menuChanged$.asObservable().pipe(debounceTime(0));
+    menuChanged$: Observable<void> = this._menuChanged$.asObservable();
 
     constructor(@IShortcutService private readonly _shortcutService: IShortcutService) {
         super();

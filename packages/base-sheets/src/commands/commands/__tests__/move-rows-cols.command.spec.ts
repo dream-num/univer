@@ -379,7 +379,6 @@ const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookConfig = {
     },
     createdTime: '',
     creator: '',
-    extensions: [],
     lastModifiedBy: '',
     locale: LocaleType.EN_US,
     modifiedTime: '',

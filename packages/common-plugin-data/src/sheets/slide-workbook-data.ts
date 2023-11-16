@@ -7,7 +7,6 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookConfig = {
     locale: LocaleType.EN_US,
     creator: 'univer',
     name: 'universheet',
-    extensions: [],
     sheetOrder: ['sheet-0001'],
     styles: {
         '1': {

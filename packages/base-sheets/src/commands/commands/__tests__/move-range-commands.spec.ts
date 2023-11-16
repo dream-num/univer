@@ -187,7 +187,6 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookConfig = {
     },
     createdTime: '',
     creator: '',
-    extensions: [],
     lastModifiedBy: '',
     locale: LocaleType.EN_US,
     modifiedTime: '',

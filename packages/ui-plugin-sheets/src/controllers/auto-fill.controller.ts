@@ -48,6 +48,37 @@ export class AutoFillController extends Disposable {
         this._init();
     }
 
+    handleFillDrag(sourceRange: IRange, destRange: IRange) {
+        // situation 1: drag to smaller range, horizontally.
+        if (destRange.endColumn < sourceRange.endColumn && destRange.endColumn > sourceRange.startColumn) {
+            this._commandService.executeCommand(AutoClearContentCommand.id, {
+                clearRange: {
+                    startRow: destRange.startRow,
+                    endRow: destRange.endRow,
+                    startColumn: destRange.endColumn + 1,
+                    endColumn: sourceRange.endColumn,
+                },
+                selectionRange: destRange,
+            });
+            return;
+        }
+        // situation 2: drag to smaller range, vertically.
+        if (destRange.endRow < sourceRange.endRow && destRange.endRow > sourceRange.startRow) {
+            this._commandService.executeCommand(AutoClearContentCommand.id, {
+                clearRange: {
+                    startRow: destRange.endRow + 1,
+                    endRow: sourceRange.endRow,
+                    startColumn: destRange.startColumn,
+                    endColumn: destRange.endColumn,
+                },
+                selectionRange: destRange,
+            });
+            return;
+        }
+        // situation 3: drag to larger range, expand to fill
+        this._presetAndCacheData(sourceRange, destRange);
+    }
+
     private _init() {
         this._onSelectionControlFillChanged();
         this._onApplyTypeChanged();
@@ -101,7 +132,7 @@ export class AutoFillController extends Disposable {
                                         startRow: newStartRow || startRow,
                                         endRow: newEndRow || endRow,
                                     };
-                                    this._handleFillDrag(sourceRange, destRange);
+                                    this.handleFillDrag(sourceRange, destRange);
                                 })
                             )
                         );
@@ -109,37 +140,6 @@ export class AutoFillController extends Disposable {
                 })
             )
         );
-    }
-
-    private _handleFillDrag(sourceRange: IRange, destRange: IRange) {
-        // situation 1: drag to smaller range, horizontally.
-        if (destRange.endColumn < sourceRange.endColumn && destRange.endColumn > sourceRange.startColumn) {
-            this._commandService.executeCommand(AutoClearContentCommand.id, {
-                clearRange: {
-                    startRow: destRange.startRow,
-                    endRow: destRange.endRow,
-                    startColumn: destRange.endColumn + 1,
-                    endColumn: sourceRange.endColumn,
-                },
-                selectionRange: destRange,
-            });
-            return;
-        }
-        // situation 2: drag to smaller range, vertically.
-        if (destRange.endRow < sourceRange.endRow && destRange.endRow > sourceRange.startRow) {
-            this._commandService.executeCommand(AutoClearContentCommand.id, {
-                clearRange: {
-                    startRow: destRange.endRow + 1,
-                    endRow: sourceRange.endRow,
-                    startColumn: destRange.startColumn,
-                    endColumn: destRange.endColumn,
-                },
-                selectionRange: destRange,
-            });
-            return;
-        }
-        // situation 3: drag to larger range, expand to fill
-        this._presetAndCacheData(sourceRange, destRange);
     }
 
     // refill when apply type changed

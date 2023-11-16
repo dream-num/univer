@@ -27,9 +27,9 @@
         "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {
-        "@univerjs/base-formula-engine": "*",
-        "@univerjs/base-sheets": "*",
-        "@univerjs/core": "*",
+        "@univerjs/base-formula-engine": "workspace:*",
+        "@univerjs/base-sheets": "workspace:*",
+        "@univerjs/core": "workspace:*",
         "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {

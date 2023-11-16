@@ -34,10 +34,10 @@
         "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {
-        "@univerjs/base-render": "*",
-        "@univerjs/base-sheets": "*",
-        "@univerjs/base-ui": "*",
-        "@univerjs/core": "*",
+        "@univerjs/base-render": "workspace:*",
+        "@univerjs/base-sheets": "workspace:*",
+        "@univerjs/base-ui": "workspace:*",
+        "@univerjs/core": "workspace:*",
         "@wendellhu/redi": "^0.12.11",
         "rxjs": "^7.8.1"
     },

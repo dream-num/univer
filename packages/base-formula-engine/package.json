@@ -32,7 +32,7 @@
         "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {
-        "@univerjs/core": "*",
+        "@univerjs/core": "workspace:*",
         "@wendellhu/redi": "^0.12.11"
     },
     "devDependencies": {

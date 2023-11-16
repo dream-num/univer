@@ -57,7 +57,7 @@ importers:
         specifier: ^6.11.0
         version: 6.11.0(eslint@8.53.0)(typescript@5.2.2)
       '@univerjs/design':
-        specifier: '*'
+        specifier: workspace:*
         version: link:packages/design
       '@vitejs/plugin-react':
         specifier: ^4.1.1
@@ -144,28 +144,28 @@ importers:
   examples/univer-doc-ts:
     dependencies:
       '@univerjs/base-docs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/base-docs
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/base-render
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/base-ui
       '@univerjs/common-plugin-data':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/common-plugin-data
       '@univerjs/common-plugin-image':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/common-plugin-image
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/core
       '@univerjs/design':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/design
       '@univerjs/ui-plugin-docs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/ui-plugin-docs
       react:
         specifier: ^18.2.0
@@ -208,55 +208,55 @@ importers:
   examples/univer-sheet-ts:
     dependencies:
       '@univerjs/base-docs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/base-docs
       '@univerjs/base-formula-engine':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/base-formula-engine
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/base-render
       '@univerjs/base-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/base-sheets
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/base-ui
       '@univerjs/common-plugin-data':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/common-plugin-data
       '@univerjs/common-plugin-image':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/common-plugin-image
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/core
       '@univerjs/design':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/design
       '@univerjs/rpc':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/rpc
       '@univerjs/sheets-plugin-find':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/sheets-plugin-find
       '@univerjs/sheets-plugin-formula':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/sheets-plugin-formula
       '@univerjs/sheets-plugin-formula-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/sheets-plugin-formula-ui
       '@univerjs/sheets-plugin-import-xlsx':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/sheets-plugin-import-xlsx
       '@univerjs/sheets-plugin-numfmt':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/sheets-plugin-numfmt
       '@univerjs/ui-plugin-docs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/ui-plugin-docs
       '@univerjs/ui-plugin-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/ui-plugin-sheets
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -302,25 +302,25 @@ importers:
   examples/univer-slide-ts:
     dependencies:
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/base-render
       '@univerjs/base-slides':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/base-slides
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/base-ui
       '@univerjs/common-plugin-data':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/common-plugin-data
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/core
       '@univerjs/design':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/design
       '@univerjs/ui-plugin-slides':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../../packages/ui-plugin-slides
       react:
         specifier: ^18.2.0
@@ -363,16 +363,16 @@ importers:
   packages/base-docs:
     dependencies:
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-render
       '@univerjs/base-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-sheets
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-ui
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -403,7 +403,7 @@ importers:
   packages/base-formula-engine:
     dependencies:
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -431,7 +431,7 @@ importers:
   packages/base-numfmt-engine:
     dependencies:
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
     devDependencies:
       '@types/node':
@@ -453,7 +453,7 @@ importers:
   packages/base-render:
     dependencies:
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -487,10 +487,10 @@ importers:
         specifier: ^4.0.2
         version: 4.0.2
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-render
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -524,13 +524,13 @@ importers:
   packages/base-slides:
     dependencies:
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-render
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-ui
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -555,13 +555,13 @@ importers:
   packages/base-ui:
     dependencies:
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-render
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@univerjs/design':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
         specifier: ^0.1.12
@@ -658,7 +658,7 @@ importers:
   packages/common-plugin-data:
     dependencies:
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
     devDependencies:
       '@types/node':
@@ -674,16 +674,16 @@ importers:
   packages/common-plugin-image:
     dependencies:
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-render
       '@univerjs/base-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-sheets
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-ui
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -830,7 +830,7 @@ importers:
   packages/rpc:
     dependencies:
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -861,25 +861,25 @@ importers:
   packages/sheets-plugin-find:
     dependencies:
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-render
       '@univerjs/base-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-sheets
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-ui
       '@univerjs/common-plugin-data':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../common-plugin-data
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@univerjs/design':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../design
       '@univerjs/ui-plugin-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -916,13 +916,13 @@ importers:
   packages/sheets-plugin-formula:
     dependencies:
       '@univerjs/base-formula-engine':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-formula-engine
       '@univerjs/base-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-sheets
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -938,31 +938,31 @@ importers:
         specifier: ^4.0.2
         version: 4.0.2
       '@univerjs/base-docs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-docs
       '@univerjs/base-formula-engine':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-formula-engine
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-render
       '@univerjs/base-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-sheets
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-ui
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@univerjs/design':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
         specifier: ^0.1.12
         version: 0.1.12(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/ui-plugin-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -1008,22 +1008,22 @@ importers:
   packages/sheets-plugin-import-xlsx:
     dependencies:
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-render
       '@univerjs/base-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-sheets
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-ui
       '@univerjs/common-plugin-data':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../common-plugin-data
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@univerjs/ui-plugin-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -1051,25 +1051,25 @@ importers:
   packages/sheets-plugin-numfmt:
     dependencies:
       '@univerjs/base-numfmt-engine':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-numfmt-engine
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-render
       '@univerjs/base-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-sheets
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-ui
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@univerjs/design':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../design
       '@univerjs/ui-plugin-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../ui-plugin-sheets
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -1112,19 +1112,19 @@ importers:
         specifier: ^4.0.2
         version: 4.0.2
       '@univerjs/base-docs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-docs
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-render
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-ui
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@univerjs/design':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../design
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -1170,25 +1170,25 @@ importers:
         specifier: ^4.0.2
         version: 4.0.2
       '@univerjs/base-docs':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-docs
       '@univerjs/base-formula-engine':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-formula-engine
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-render
       '@univerjs/base-sheets':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-sheets
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-ui
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@univerjs/design':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../design
       '@univerjs/icons':
         specifier: ^0.1.12
@@ -1240,19 +1240,19 @@ importers:
   packages/ui-plugin-slides:
     dependencies:
       '@univerjs/base-render':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-render
       '@univerjs/base-slides':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-slides
       '@univerjs/base-ui':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../base-ui
       '@univerjs/core':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../core
       '@univerjs/design':
-        specifier: '*'
+        specifier: workspace:*
         version: link:../design
       '@wendellhu/redi':
         specifier: ^0.12.11
@@ -7364,10 +7364,6 @@ packages:
       is-symbol: 1.0.4
     dev: true
 
-  /es6-proxy-polyfill@2.1.1:
-    resolution: {integrity: sha512-xSFe1PWX+8mTuRSuM6B2sykUBuxFFBjQqdIH1gLWs0fPTLMlu4uX6v63fQFvN4m+f++CKudax8MzxbR8+BoB3g==}
-    dev: false
-
   /esbuild-plugin-alias@0.2.1:
     resolution: {integrity: sha512-jyfL/pwPqaFXyKnj8lP8iLk6Z0m099uXR45aSN8Av1XD4vhvQutxxPzgA2bTcAwQpa1zCXDcWOlhFgyP3GKqhQ==}
     dev: true
@@ -9907,12 +9903,6 @@ packages:
     hasBin: true
     dev: true
 
-  /nanoid@4.0.0:
-    resolution: {integrity: sha512-IgBP8piMxe/gf73RTQx7hmnhwz0aaEXYakvqZyE302IXW3HyVNhdNGC+O2MwMAVhLEnvXlvKtGbtJf6wvHihCg==}
-    engines: {node: ^14 || ^16 || >=18}
-    hasBin: true
-    dev: false
-
   /nanoid@5.0.2:
     resolution: {integrity: sha512-2ustYUX1R2rL/Br5B/FMhi8d5/QzvkJ912rBYxskcpu0myTHzSZfTr1LAS2Sm7jxRUObRrSBFoyzwAhL49aVSg==}
     engines: {node: ^18 || >=20}
@@ -11177,10 +11167,6 @@ packages:
       indent-string: 5.0.0
       strip-indent: 4.0.0
     dev: true
-
-  /reflect-metadata@0.1.13:
-    resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
-    dev: false
 
   /regenerate-unicode-properties@10.1.1:
     resolution: {integrity: sha512-X007RyZLsCJVVrjgEFVpLUTZwyOZk3oiL75ZcuYjlIWd6rNJtOjkBwQc5AsRrpbKVkxN6sklw/k/9m2jJYOf8Q==}

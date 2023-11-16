@@ -1,13 +1,17 @@
-import { Disposable, Nullable } from '@univerjs/core';
+import { Disposable, Nullable, Tools } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
+import { isReferenceString, REFERENCE_SINGLE_RANGE_REGEX } from '../basics/regex';
+import { ISequenceArray, ISequenceNode, sequenceNodeType } from '../basics/sequence';
 import {
+    compareToken,
     matchToken,
     OPERATOR_TOKEN_PRIORITY,
     OPERATOR_TOKEN_SET,
     operatorToken,
     prefixToken,
     SUFFIX_TOKEN_SET,
+    suffixToken,
 } from '../basics/token';
 import {
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
@@ -42,8 +46,8 @@ export class LexerTreeBuilder extends Disposable {
     private _colonState = false; // :
 
     override dispose(): void {
+        this.resetTemp();
         this._currentLexerNode.dispose();
-        this._bracketState = [];
     }
 
     getUpLevel() {
@@ -86,6 +90,213 @@ export class LexerTreeBuilder extends Disposable {
         return this._currentLexerNode;
     }
 
+    getCurrentParamIndex(formulaString: string, index: number) {
+        return this._nodeMaker(formulaString, undefined, index);
+    }
+
+    sequenceNodesBuilder(formulaString: string) {
+        const sequenceArray = this._getSequenceArray(formulaString);
+        if (sequenceArray.length === 0) {
+            return;
+        }
+
+        const sequenceNodes: Array<ISequenceNode | string> = [];
+
+        let maybeString = false;
+
+        for (let i = 0, len = sequenceArray.length; i < len; i++) {
+            const item = sequenceArray[i];
+            console.log('item', item);
+            const preItem = sequenceArray[i - 1];
+
+            const { segment, currentString, cur } = item;
+
+            if (currentString === matchToken.DOUBLE_QUOTATION) {
+                maybeString = true;
+            }
+
+            if ((segment !== '' || i === 0) && i !== len - 1) {
+                sequenceNodes.push(currentString);
+                continue;
+            }
+
+            let preSegment = preItem?.segment || '';
+
+            const startIndex = i - preSegment.length;
+
+            let endIndex = i - 1;
+
+            const deleteEndIndex = i - 1;
+
+            if (i === len - 1 && this._isLastMergeString(currentString)) {
+                preSegment += currentString;
+
+                endIndex += 1;
+            }
+
+            if (preSegment === '' || OPERATOR_TOKEN_PRIORITY.has(preSegment)) {
+                sequenceNodes.push(currentString);
+                continue;
+            }
+
+            const preSegmentTrim = preSegment.trim();
+
+            const preSegmentNotPrefixToken = this._replacePrefixString(preSegmentTrim);
+
+            if (maybeString === true && preSegmentTrim[preSegmentTrim.length - 1] === matchToken.DOUBLE_QUOTATION) {
+                maybeString = false;
+                this._pushSequenceNode(
+                    sequenceNodes,
+                    {
+                        nodeType: sequenceNodeType.STRING,
+                        token: preSegment,
+                        startIndex,
+                        endIndex,
+                    },
+                    deleteEndIndex
+                );
+            } else if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(preSegmentNotPrefixToken)) {
+                this._pushSequenceNode(
+                    sequenceNodes,
+                    {
+                        nodeType: sequenceNodeType.REFERENCE,
+                        token: preSegment,
+                        startIndex,
+                        endIndex,
+                    },
+                    deleteEndIndex
+                );
+            } else if (Tools.isStringNumber(preSegmentTrim)) {
+                this._pushSequenceNode(
+                    sequenceNodes,
+                    {
+                        nodeType: sequenceNodeType.NUMBER,
+                        token: preSegment,
+                        startIndex,
+                        endIndex,
+                    },
+                    deleteEndIndex
+                );
+            } else if (preSegmentTrim.length > 0) {
+                this._pushSequenceNode(
+                    sequenceNodes,
+                    {
+                        nodeType: sequenceNodeType.FUNCTION,
+                        token: preSegment,
+                        startIndex,
+                        endIndex,
+                    },
+                    deleteEndIndex
+                );
+            }
+
+            if (i !== len - 1 || !this._isLastMergeString(currentString)) {
+                sequenceNodes.push(currentString);
+            }
+        }
+
+        const newSequenceNodes = this._mergeSequenceNodeReference(sequenceNodes);
+
+        let sequenceString = '';
+        for (const node of newSequenceNodes) {
+            if (typeof node === 'string') {
+                sequenceString += node;
+            } else {
+                sequenceString += node.token;
+            }
+        }
+        console.log('sequenceString', sequenceString);
+
+        return newSequenceNodes;
+    }
+
+    private _isLastMergeString(str: string) {
+        return (
+            str === matchToken.DOUBLE_QUOTATION ||
+            Tools.isStringNumber(str) ||
+            (!Object.values(compareToken).includes(str as compareToken) &&
+                !Object.values(operatorToken).includes(str as operatorToken) &&
+                !Object.values(matchToken).includes(str as matchToken) &&
+                !Object.values(suffixToken).includes(str as suffixToken) &&
+                !Object.values(prefixToken).includes(str as prefixToken))
+        );
+    }
+
+    /**
+     * Merge array and handle ref operations
+     *
+     */
+    private _mergeSequenceNodeReference(sequenceNodes: Array<string | ISequenceNode>) {
+        const newSequenceNodes: Array<string | ISequenceNode> = [];
+
+        const sequenceNodesCount = sequenceNodes.length;
+
+        let i = 0;
+        while (i < sequenceNodesCount) {
+            const node = sequenceNodes[i];
+
+            if (typeof node === 'string') {
+                const preNode = sequenceNodes[i - 1];
+                if (
+                    node.trim() === matchToken.CLOSE_BRACES &&
+                    preNode != null &&
+                    typeof preNode !== 'string' &&
+                    preNode.nodeType === sequenceNodeType.FUNCTION
+                ) {
+                    /**
+                     * Solving the merging issue of ['{1,2,3;4,5,6;7,8,10', '}']
+                     */
+                    const firstChar = preNode.token.trim().substring(0, 1);
+
+                    if (firstChar === matchToken.OPEN_BRACES) {
+                        preNode.nodeType = sequenceNodeType.ARRAY;
+                        preNode.token += node;
+                        preNode.endIndex += node.length;
+                        i++;
+                        continue;
+                    }
+                }
+                newSequenceNodes.push(node);
+            } else {
+                const nextOneNode = sequenceNodes[i + 1];
+
+                const nextTwoNode = sequenceNodes[i + 2];
+
+                if (
+                    nextOneNode === matchToken.COLON &&
+                    typeof node !== 'string' &&
+                    nextTwoNode != null &&
+                    typeof nextTwoNode !== 'string' &&
+                    isReferenceString((node.token + nextOneNode + nextTwoNode.token).trim())
+                ) {
+                    node.nodeType = sequenceNodeType.REFERENCE;
+                    node.token += nextOneNode + nextTwoNode.token;
+                    node.endIndex = nextTwoNode.endIndex;
+                    i += 2;
+                }
+
+                newSequenceNodes.push(node);
+            }
+
+            i++;
+        }
+
+        return newSequenceNodes;
+    }
+
+    private _pushSequenceNode(
+        sequenceNodes: Array<ISequenceNode | string>,
+        node: ISequenceNode,
+        deleteEndIndex: number
+    ) {
+        const segmentCount = deleteEndIndex - node.startIndex + 1;
+        sequenceNodes.splice(sequenceNodes.length - segmentCount, segmentCount, node);
+    }
+
+    private _replacePrefixString(token: string) {
+        return token.replace(new RegExp(prefixToken.AT, 'g'), '').replace(new RegExp(prefixToken.MINUS, 'g'), '');
+    }
+
     treeBuilder(formulaString: string, transformSuffix = true) {
         this._resetCurrentLexerNode();
 
@@ -93,7 +304,9 @@ export class LexerTreeBuilder extends Disposable {
 
         const state = this._nodeMaker(formulaString);
 
-        console.log('error', state);
+        if (state === ErrorType.VALUE) {
+            return state;
+        }
 
         const node = this._getTopNode(this._currentLexerNode);
         if (node) {
@@ -181,29 +394,6 @@ export class LexerTreeBuilder extends Disposable {
 
     private _resetSegment() {
         this._segment = '';
-    }
-
-    private _pushNodeToChildren(value: LexerNode | string, isUnshift = false) {
-        if (value !== '') {
-            const children = this._currentLexerNode.getChildren();
-            if (!(value instanceof LexerNode) && this.isColonOpen()) {
-                const subLexerNode_ref = new LexerNode();
-                subLexerNode_ref.setToken(value);
-                subLexerNode_ref.setParent(this._currentLexerNode);
-
-                value = subLexerNode_ref;
-            }
-            if (isUnshift) {
-                children.unshift(value);
-            } else {
-                children.push(value);
-            }
-        }
-
-        if (this.isColonOpen()) {
-            this._setAncestorCurrentLexerNode();
-            this._closeColon(); /*  */
-        }
     }
 
     private _openBracket(type: bracketType = bracketType.NORMAL) {
@@ -336,6 +526,29 @@ export class LexerTreeBuilder extends Disposable {
         this._segment += value;
     }
 
+    private _pushNodeToChildren(value: LexerNode | string, isUnshift = false) {
+        if (value !== '') {
+            const children = this._currentLexerNode.getChildren();
+            if (!(value instanceof LexerNode) && this.isColonOpen()) {
+                const subLexerNode_ref = new LexerNode();
+                subLexerNode_ref.setToken(value);
+                subLexerNode_ref.setParent(this._currentLexerNode);
+
+                value = subLexerNode_ref;
+            }
+            if (isUnshift) {
+                children.unshift(value);
+            } else {
+                children.push(value);
+            }
+        }
+
+        if (this.isColonOpen()) {
+            this._setAncestorCurrentLexerNode();
+            this._closeColon(); /*  */
+        }
+    }
+
     private _setCurrentLexerNode(subLexerNode: LexerNode, isUnshift = false) {
         this._pushNodeToChildren(subLexerNode, isUnshift);
         subLexerNode.setParent(this._currentLexerNode);
@@ -345,7 +558,7 @@ export class LexerTreeBuilder extends Disposable {
     private _newAndPushCurrentLexerNode(token: string, current: number, isUnshift = false) {
         const subLexerNode = new LexerNode();
         subLexerNode.setToken(token);
-        subLexerNode.setIndex(current - token.length + 1, current);
+        subLexerNode.setIndex(current - token.length, current - 1);
         this._setCurrentLexerNode(subLexerNode, isUnshift);
     }
 
@@ -383,17 +596,50 @@ export class LexerTreeBuilder extends Disposable {
         return false;
     }
 
+    private _getSequenceArray(formulaString: string) {
+        const sequenceArray: ISequenceArray[] = [];
+
+        this._nodeMaker(formulaString, sequenceArray);
+
+        return sequenceArray;
+    }
+
+    private resetTemp() {
+        this._currentLexerNode = new LexerNode();
+
+        this._upLevel = 0;
+
+        this._segment = '';
+
+        this._bracketState = []; // ()
+
+        this._bracesState = 0; // {}
+
+        this._singleQuotationState = 0; // ''
+
+        this._doubleQuotationState = 0; // ""
+
+        this._lambdaState = false; // Lambda
+
+        this._colonState = false; // :
+    }
+
     // eslint-disable-next-line max-lines-per-function
-    private _nodeMaker(formulaString: string) {
+    private _nodeMaker(formulaString: string, sequenceArray?: ISequenceArray[], matchCurrentNodeIndex?: number) {
         if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
             formulaString = formulaString.substring(1);
         }
         const formulaStringArray = formulaString.split('');
         const formulaStringArrayCount = formulaStringArray.length;
         let cur = 0;
-        this._resetSegment();
+        this.resetTemp();
         while (cur < formulaStringArrayCount) {
             const currentString = formulaStringArray[cur];
+
+            if (matchCurrentNodeIndex === cur) {
+                return [this._currentLexerNode, currentString];
+            }
+
             if (
                 currentString === matchToken.OPEN_BRACKET &&
                 this.isSingleQuotationClose() &&
@@ -423,6 +669,8 @@ export class LexerTreeBuilder extends Disposable {
                         // subLexerNode.token = DEFAULT_TOKEN_TYPE_PARAMETER;
                         // this.setCurrentLexerNode(subLexerNode);
                         this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
+
+                        // this._pushNodeToChildren(matchToken.OPEN_BRACKET);
                     }
                 } else {
                     this._pushNodeToChildren(currentString);
@@ -513,10 +761,19 @@ export class LexerTreeBuilder extends Disposable {
                 this.isBracesClose()
             ) {
                 const currentBracket = this._getCurrentBracket();
-                if (currentBracket === bracketType.FUNCTION) {
+                /**
+                 * Handle the occurrence of commas, where in the formula,
+                 * the comma represents the parameters of the function
+                 * [currentBracket == null] is for the situation where [=A1:B1, B5:A10] occurs
+                 */
+                if (currentBracket === bracketType.FUNCTION || currentBracket == null) {
                     this._pushNodeToChildren(this._segment);
                     this._resetSegment();
-                    if (!this._setParentCurrentLexerNode() && cur !== formulaStringArrayCount - 1) {
+                    if (
+                        !this._setParentCurrentLexerNode() &&
+                        cur !== formulaStringArrayCount - 1 &&
+                        currentBracket != null
+                    ) {
                         return ErrorType.VALUE;
                     }
                     // const subLexerNode = new LexerNode();
@@ -653,6 +910,13 @@ export class LexerTreeBuilder extends Disposable {
                     const prevString = this._findPreviousToken(formulaStringArray, cur - 1) || '';
                     if (this._negativeCondition(prevString)) {
                         this._pushSegment(operatorToken.MINUS);
+
+                        sequenceArray?.push({
+                            segment: this._segment,
+                            currentString,
+                            cur,
+                            currentLexerNode: this._currentLexerNode,
+                        });
                         cur++;
                         continue;
                     }
@@ -678,7 +942,13 @@ export class LexerTreeBuilder extends Disposable {
             } else {
                 this._pushSegment(currentString);
             }
-            // console.log('func', { segment: this._segment, currentString, cur, currentLexerNode: this._currentLexerNode });
+
+            sequenceArray?.push({
+                segment: this._segment,
+                currentString,
+                cur,
+                currentLexerNode: this._currentLexerNode,
+            });
             cur++;
         }
 

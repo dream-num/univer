@@ -1,4 +1,5 @@
 export * from './basics';
+export { getEditorObject } from './basics/editor/get-editor-object';
 export { SetCellEditVisibleArrowOperation } from './commands/operations/cell-edit.operation';
 export { whenEditorInputFormulaActivated } from './controllers/shortcuts/utils';
 export {

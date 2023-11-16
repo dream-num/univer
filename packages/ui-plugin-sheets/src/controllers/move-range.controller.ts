@@ -1,4 +1,9 @@
-import { IMoveRangeCommandParams, MoveRangeCommand, SelectionManagerService } from '@univerjs/base-sheets';
+import {
+    IMoveRangeCommandParams,
+    MoveRangeCommand,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+} from '@univerjs/base-sheets';
 import {
     Disposable,
     DisposableCollection,
@@ -30,6 +35,12 @@ export class MoveRangeController extends Disposable {
                 this._selectionManagerService.selectionInfo$.subscribe(() => {
                     // Each range change requires re-listening
                     disposableCollection.dispose();
+
+                    const current = this._selectionManagerService.getCurrent();
+
+                    if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                        return;
+                    }
 
                     const selectionControls = this._selectionRenderService.getCurrentControls();
                     selectionControls.forEach((controlSelection) => {

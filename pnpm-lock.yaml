@@ -934,6 +934,9 @@ importers:
 
   packages/sheets-plugin-formula-ui:
     dependencies:
+      '@ctrl/tinycolor':
+        specifier: ^4.0.2
+        version: 4.0.2
       '@univerjs/base-docs':
         specifier: '*'
         version: link:../base-docs

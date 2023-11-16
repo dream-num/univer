@@ -4,7 +4,8 @@
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
-    "main": "./src/index.ts",
+    "main": "./lib/index.ts",
+    "types": "./lib/index.d.ts",
     "publishConfig": {
         "access": "public",
         "exports": {
@@ -27,7 +28,7 @@
     "private": false,
     "type": "module",
     "scripts": {
-        "esbuild": "node ./esbuild.config.mjs"
+        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",

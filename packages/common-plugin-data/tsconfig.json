@@ -4,7 +4,7 @@
         "rootDir": "./",
         "outDir": "lib",
         "baseUrl": "./",
-        "esModuleInterop": true, // auto allowSyntheticDefaultImports true
+        "esModuleInterop": true,
         "jsx": "preserve",
         "strictPropertyInitialization": false
     },

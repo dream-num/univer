@@ -5,7 +5,8 @@
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
-    "main": "./src/index.ts",
+    "main": "./lib/index.ts",
+    "types": "./lib/index.d.ts",
     "publishConfig": {
         "access": "public",
         "exports": {
@@ -29,7 +30,7 @@
     "type": "module",
     "scripts": {
         "test": "vitest run",
-        "esbuild": "node ./esbuild.config.mjs"
+        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"
     },
     "dependencies": {
         "@ctrl/tinycolor": "^4.0.2",
@@ -47,8 +48,8 @@
         "@types/react": "^18.2.37",
         "@types/react-dom": "^18.2.15",
         "@vitest/coverage-istanbul": "^0.34.6",
-        "happy-dom": "^12.10.3",
         "esbuild": "^0.19.5",
+        "happy-dom": "^12.10.3",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
         "vitest": "^0.34.6"

@@ -3,6 +3,18 @@ export * from './base-sheets-plugin';
 // #region services
 export { COMMAND_LISTENER_SKELETON_CHANGE } from './basics/const/command-listener-const';
 export {
+    type IAddWorksheetMergeMutationParams,
+    type IDeleteRangeMutationParams,
+    type IInsertColMutationParams,
+    type IInsertRangeMutationParams,
+    type IInsertRowMutationParams,
+    type IInsertSheetMutationParams,
+    type IRemoveColMutationParams,
+    type IRemoveRowsMutationParams,
+    type IRemoveSheetMutationParams,
+    type IRemoveWorksheetMergeMutationParams,
+} from './basics/interfaces/mutation-interface';
+export {
     convertSelectionDataToRange,
     getNormalSelectionStyle,
     type ISelectionStyle,
@@ -23,19 +35,12 @@ export {
     shrinkToNextGapRange,
 } from './commands/commands/utils/selection-util';
 export { BorderStyleManagerService } from './services/border-style-manager.service';
+export { SheetEditablePermission, SheetPermissionService } from './services/permission';
+export { RefRangeService } from './services/ref-range.service';
 export { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from './services/selection-manager.service';
-
-// #endregion
 
 // #region commands
 
-export { type IInsertColMutationParams, type IInsertRowMutationParams } from './basics/interfaces/mutation-interface';
-export {
-    type IAddWorksheetMergeMutationParams,
-    type IRemoveWorksheetMergeMutationParams,
-} from './basics/interfaces/mutation-interface';
-export { type IRemoveSheetMutationParams } from './basics/interfaces/mutation-interface';
-export { type IInsertSheetMutationParams } from './basics/interfaces/mutation-interface';
 export {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -200,5 +205,3 @@ export {
 } from './commands/mutations/set-worksheet-row-height.mutation';
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISheetCommandSharedParams } from './commands/utils/interface';
-export { SheetEditablePermission, SheetPermissionService } from './services/permission';
-export { RefRangeService } from './services/ref-range.service';

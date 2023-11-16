@@ -9,20 +9,13 @@
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
-    "module": "./src/index.ts",
     "publishConfig": {
-        "main": "./lib/univer-base-ui.cjs.js",
-        "module": "./lib/univer-base-ui.js",
-        "types": "./lib/index.d.ts",
+        "access": "public",
         "exports": {
-            ".": {
-                "require": "./lib/univer-base-ui.cjs.js",
-                "default": "./lib/univer-base-ui.js"
-            },
+            ".": "./lib/index.js",
             "./*": "./lib/*",
             "./locale/*": "./lib/locale/*.js"
-        },
-        "access": "public"
+        }
     },
     "exports": {
         ".": "./src/index.ts",
@@ -46,9 +39,9 @@
         "build:doc": "storybook build"
     },
     "dependencies": {
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
+        "@univerjs/base-render": "*",
+        "@univerjs/core": "*",
+        "@univerjs/design": "*",
         "@univerjs/icons": "^0.1.12",
         "@wendellhu/redi": "^0.12.11",
         "clsx": "^2.0.0",
@@ -80,7 +73,6 @@
         "less": "^4.2.0",
         "storybook": "^7.5.3",
         "ts-node": "^10.9.1",
-        "vitest": "^0.34.6",
-        "vitest-canvas-mock": "^0.3.3"
+        "vitest": "^0.34.6"
     }
 }

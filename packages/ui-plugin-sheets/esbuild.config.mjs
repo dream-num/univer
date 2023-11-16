@@ -7,7 +7,7 @@ esbuild.build({
     ...baseConfig,
     globalName: 'UniverUiPluginSheets',
     entryPoints: {
-        'univer-ui-plugin-sheets': './src/index.ts',
+        index: './src/index.ts',
         'locale/en-US': './src/locale/en-US.ts',
         'locale/zh-CN': './src/locale/zh-CN.ts',
     },

@@ -16,6 +16,25 @@ We provide JavaScript part of code in the repository, including a canvas-based f
 
 -   [Univer Demo](https://dream-num.github.io/univer-demo/)
 
+## Packages
+
+| Name | Description | Version |
+| :--- | :---------- | :------ |
+| [base-doc](./packages/base-doc) | - | - |
+| [base-formula-engine](./packages/base-formula-engine) | - | - |
+| [base-numfmt-engine](./packages/base-numfmt-engine) | - | - |
+| [base-render](./packages/base-render) | - | - |
+| [base-sheets](./packages/base-sheets) | - | - |
+| [base-ui](./packages/base-ui) | - | - |
+| [core](./packages/core) | - | - |
+| [design](./packages/design) | - | - |
+| [rpc](./packages/rpc) | - | - |
+| [sheets-plugin-formula](./packages/sheets-plugin-formula) | - | - |
+| [sheets-plugin-formula-ui](./packages/sheets-plugin-formula-ui) | - | - |
+| [sheets-plugin-numfmt](./packages/sheets-plugin-numfmt) | - | - |
+| [ui-plugin-docs](./packages/ui-plugin-docs) | - | - |
+| [ui-plugin-sheets](./packages/ui-plugin-sheets) | - | - |
+
 ## Contribution
 
 Please refer to [Contribution Guide](./CONTRIBUTING.md).

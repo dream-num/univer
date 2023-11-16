@@ -1,4 +1,9 @@
 import {
+    checkIfShrink,
+    expandToContinuousRange,
+    expandToNextCell,
+    expandToNextGapRange,
+    expandToWholeSheet,
     findNextGapRange,
     findNextRange,
     getCellAtRowCol,
@@ -6,16 +11,9 @@ import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetSelectionsOperation,
-} from '@univerjs/base-sheets';
-import {
-    checkIfShrink,
-    expandToContinuousRange,
-    expandToNextCell,
-    expandToNextGapRange,
-    expandToWholeSheet,
     shrinkToNextCell,
     shrinkToNextGapRange,
-} from '@univerjs/base-sheets/commands/commands/utils/selection-util.js';
+} from '@univerjs/base-sheets';
 import { KeyCode, ShortcutExperienceService } from '@univerjs/base-ui';
 import {
     CommandType,
@@ -292,14 +290,14 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
                 ? expandToNextGapRange(startRange, direction, currentWorksheet)
                 : expandToNextCell(startRange, direction, currentWorksheet)
             : jumpOver === JumpOver.moveGap
-            ? shrinkToNextGapRange(
-                  startRange,
-                  // TODO: should fix on SelectionManagerService's side
-                  { ...Rectangle.clone(primary), rangeType: RANGE_TYPE.NORMAL },
-                  direction,
-                  currentWorksheet
-              )
-            : shrinkToNextCell(startRange, direction, currentWorksheet);
+              ? shrinkToNextGapRange(
+                    startRange,
+                    // TODO: should fix on SelectionManagerService's side
+                    { ...Rectangle.clone(primary), rangeType: RANGE_TYPE.NORMAL },
+                    direction,
+                    currentWorksheet
+                )
+              : shrinkToNextCell(startRange, direction, currentWorksheet);
 
         if (Rectangle.equals(destRange, startRange)) {
             return false;

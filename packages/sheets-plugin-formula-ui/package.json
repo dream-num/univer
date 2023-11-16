@@ -4,7 +4,14 @@
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
-    "module": "./src/index.ts",
+    "publishConfig": {
+        "access": "public",
+        "exports": {
+            ".": "./lib/index.js",
+            "./*": "./lib/*",
+            "./locale/*": "./lib/locale/*.js"
+        }
+    },
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
@@ -16,19 +23,21 @@
     "files": [
         "lib"
     ],
-    "private": true,
+    "private": false,
     "type": "module",
-    "scripts": {},
+    "scripts": {
+        "esbuild": "node ./esbuild.config.mjs"
+    },
     "dependencies": {
-        "@univerjs/base-docs": "workspace:*",
-        "@univerjs/base-formula-engine": "workspace:*",
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/base-sheets": "workspace:*",
-        "@univerjs/base-ui": "workspace:*",
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/icons": "^0.1.7",
-        "@univerjs/ui-plugin-sheets": "workspace:*",
+        "@univerjs/base-docs": "*",
+        "@univerjs/base-formula-engine": "*",
+        "@univerjs/base-render": "*",
+        "@univerjs/base-sheets": "*",
+        "@univerjs/base-ui": "*",
+        "@univerjs/core": "*",
+        "@univerjs/design": "*",
+        "@univerjs/icons": "^0.1.12",
+        "@univerjs/ui-plugin-sheets": "*",
         "@wendellhu/redi": "^0.12.11",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",

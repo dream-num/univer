@@ -15,8 +15,8 @@ import { ThemeOperation } from '../commands/operations/theme.operation';
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: LocaleOperation.id,
-        title: 'debugger.locale.title',
-        tooltip: 'debugger.locale.tooltip',
+        title: 'debugger.locale',
+        tooltip: 'debugger.locale',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
@@ -35,8 +35,8 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: ThemeOperation.id,
-        title: 'debugger.theme.title',
-        tooltip: 'debugger.theme.tooltip',
+        title: 'debugger.theme',
+        tooltip: 'debugger.theme',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
@@ -55,8 +55,8 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function NotificationMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: NotificationOperation.id,
-        title: 'debugger.notification.title',
-        tooltip: 'debugger.notification.tooltip',
+        title: 'debugger.notification',
+        tooltip: 'debugger.notification',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
@@ -83,8 +83,8 @@ export function NotificationMenuItemFactory(accessor: IAccessor): IMenuSelectorI
 export function DialogMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: DialogOperation.id,
-        title: 'debugger.dialog.title',
-        tooltip: 'debugger.dialog.tooltip',
+        title: 'debugger.dialog',
+        tooltip: 'debugger.dialog',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
@@ -99,8 +99,8 @@ export function DialogMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function ConfirmMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: ConfirmOperation.id,
-        title: 'debugger.confirm.title',
-        tooltip: 'debugger.confirm.tooltip',
+        title: 'debugger.confirm',
+        tooltip: 'debugger.confirm',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
@@ -131,8 +131,8 @@ export function MessageMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
 export function SidebarMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: SidebarOperation.id,
-        title: 'debugger.sidebar.title',
-        tooltip: 'debugger.sidebar.tooltip',
+        title: 'debugger.sidebar',
+        tooltip: 'debugger.sidebar',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [

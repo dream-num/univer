@@ -9,8 +9,8 @@ import {
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
+    SetSelectionsOperation,
 } from '@univerjs/base-sheets';
-import { SetSelectionsOperation } from '@univerjs/base-sheets/commands/operations/selection.operation.js';
 import {
     CommandType,
     ICellData,

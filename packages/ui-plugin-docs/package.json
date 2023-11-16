@@ -6,21 +6,13 @@
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
-    "module": "./src/index.ts",
-    "types": "./src/Types/index.d.ts",
     "publishConfig": {
-        "main": "./lib/univer-ui-plugin-docs.cjs.js",
-        "module": "./lib/univer-ui-plugin-docs.js",
-        "types": "./lib/index.d.ts",
+        "access": "public",
         "exports": {
-            ".": {
-                "require": "./lib/univer-ui-plugin-docs.cjs.js",
-                "default": "./lib/univer-ui-plugin-docs.js"
-            },
+            ".": "./lib/index.js",
             "./*": "./lib/*",
             "./locale/*": "./lib/locale/*.js"
-        },
-        "access": "public"
+        }
     },
     "exports": {
         ".": "./src/index.ts",
@@ -40,11 +32,11 @@
         "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {
-        "@univerjs/base-docs": "workspace:*",
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/base-ui": "workspace:*",
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
+        "@univerjs/base-docs": "*",
+        "@univerjs/base-render": "*",
+        "@univerjs/base-ui": "*",
+        "@univerjs/core": "*",
+        "@univerjs/design": "*",
         "@wendellhu/redi": "^0.12.11",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
@@ -55,6 +47,7 @@
         "@types/react-dom": "^18.2.15",
         "@vitest/coverage-istanbul": "^0.34.6",
         "happy-dom": "^12.10.3",
+        "esbuild": "^0.19.5",
         "less": "^4.2.0",
         "ts-node": "^10.9.1",
         "vitest": "^0.34.6"

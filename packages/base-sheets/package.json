@@ -10,20 +10,13 @@
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
-    "module": "./src/index.ts",
     "publishConfig": {
-        "main": "./lib/univer-base-sheets.cjs.js",
-        "module": "./lib/univer-base-sheets.js",
-        "types": "./lib/index.d.ts",
+        "access": "public",
         "exports": {
-            ".": {
-                "require": "./lib/univer-base-sheets.cjs.js",
-                "default": "./lib/univer-base-sheets.js"
-            },
+            ".": "./lib/index.js",
             "./*": "./lib/*",
             "./locale/*": "./lib/locale/*.js"
-        },
-        "access": "public"
+        }
     },
     "exports": {
         ".": "./src/index.ts",
@@ -46,8 +39,8 @@
     },
     "dependencies": {
         "@ctrl/tinycolor": "^4.0.2",
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/core": "workspace:*",
+        "@univerjs/base-render": "*",
+        "@univerjs/core": "*",
         "@wendellhu/redi": "^0.12.11",
         "rxjs": "^7.8.1"
     },

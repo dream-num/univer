@@ -8,12 +8,12 @@ import {
     Rect,
 } from '@univerjs/base-render';
 import {
+    ISetFrozenMutationParams,
     SelectionManagerService,
     SetFrozenCommand,
     SetFrozenMutation,
     SetWorksheetActivateMutation,
 } from '@univerjs/base-sheets';
-import { ISetFrozenMutationParams } from '@univerjs/base-sheets/commands/mutations/set-frozen.mutation.js';
 import {
     Disposable,
     ICommandInfo,

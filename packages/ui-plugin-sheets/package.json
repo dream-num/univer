@@ -2,28 +2,17 @@
     "name": "@univerjs/ui-plugin-sheets",
     "version": "0.0.1",
     "description": "UniverSheet normal ui-plugin-sheets",
-    "keywords": [
-        "univer",
-        "ui",
-        "sheets"
-    ],
+    "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
-    "module": "./src/index.ts",
     "publishConfig": {
-        "main": "./lib/univer-ui-plugin-sheets.cjs.js",
-        "module": "./lib/univer-ui-plugin-sheets.js",
-        "types": "./lib/index.d.ts",
+        "access": "public",
         "exports": {
-            ".": {
-                "require": "./lib/univer-ui-plugin-sheets.cjs.js",
-                "default": "./lib/univer-ui-plugin-sheets.js"
-            },
+            ".": "./lib/index.js",
             "./*": "./lib/*",
             "./locale/*": "./lib/locale/*.js"
-        },
-        "access": "public"
+        }
     },
     "exports": {
         ".": "./src/index.ts",
@@ -46,13 +35,13 @@
     },
     "dependencies": {
         "@ctrl/tinycolor": "^4.0.2",
-        "@univerjs/base-docs": "workspace:*",
-        "@univerjs/base-formula-engine": "workspace:*",
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/base-sheets": "workspace:*",
-        "@univerjs/base-ui": "workspace:*",
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
+        "@univerjs/base-docs": "*",
+        "@univerjs/base-formula-engine": "*",
+        "@univerjs/base-render": "*",
+        "@univerjs/base-sheets": "*",
+        "@univerjs/base-ui": "*",
+        "@univerjs/core": "*",
+        "@univerjs/design": "*",
         "@univerjs/icons": "^0.1.12",
         "@wendellhu/redi": "^0.12.11",
         "react": "^18.2.0",

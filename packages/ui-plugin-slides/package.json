@@ -6,20 +6,12 @@
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
-    "module": "./src/index.ts",
-    "types": "./src/Types/index.d.ts",
     "publishConfig": {
-        "main": "./lib/univer-ui-plugin-slides.cjs.js",
-        "module": "./lib/univer-ui-plugin-slides.js",
-        "types": "./lib/index.d.ts",
+        "access": "public",
         "exports": {
-            ".": {
-                "require": "./lib/univer-ui-plugin-slides.cjs.js",
-                "default": "./lib/univer-ui-plugin-slides.js"
-            },
+            ".": "./lib/index.js",
             "./*": "./lib/*"
-        },
-        "access": "public"
+        }
     },
     "exports": {
         ".": "./src/index.ts",
@@ -34,14 +26,13 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "vitest run"
     },
     "dependencies": {
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/base-slides": "workspace:*",
-        "@univerjs/base-ui": "workspace:*",
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
+        "@univerjs/base-render": "*",
+        "@univerjs/base-slides": "*",
+        "@univerjs/base-ui": "*",
+        "@univerjs/core": "*",
+        "@univerjs/design": "*",
         "@wendellhu/redi": "^0.12.11",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"

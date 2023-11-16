@@ -6,5 +6,8 @@ import baseConfig from '../../esbuild.config.mjs';
 esbuild.build({
     ...baseConfig,
     globalName: 'UniverBaseNumfmtEngine',
-    outfile: './lib/univer-base-numfmt-engine.js',
+    entryPoints: {
+        index: './src/index.ts',
+    },
+    outdir: './lib',
 });

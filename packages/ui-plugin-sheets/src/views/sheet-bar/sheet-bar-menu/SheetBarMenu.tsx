@@ -134,8 +134,8 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                                 item.selected
                                     ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemSelect}`
                                     : item.hidden
-                                    ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemHide}`
-                                    : styles.sheetBarMenuItem
+                                      ? `${styles.sheetBarMenuItem} ${styles.sheetBarMenuItemHide}`
+                                      : styles.sheetBarMenuItem
                             }
                         >
                             <span className={styles.sheetBarMenuItemIcon}>

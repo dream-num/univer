@@ -2,31 +2,15 @@
     "name": "@univerjs/core",
     "version": "0.0.1",
     "description": "Univer core",
-    "keywords": [
-        "univer",
-        "core",
-        "sheets",
-        "docs",
-        "slides",
-        "excel",
-        "word",
-        "ppt"
-    ],
+    "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "main": "./src/index.ts",
-    "module": "./src/index.ts",
     "publishConfig": {
-        "main": "./lib/univer-core.cjs.js",
-        "module": "./lib/univer-core.js",
-        "types": "./lib/index.d.ts",
+        "access": "public",
         "exports": {
-            ".": {
-                "require": "./lib/univer-core.cjs.js",
-                "default": "./lib/univer-core.js"
-            },
+            ".": "./lib/index.js",
             "./*": "./lib/*"
-        },
-        "access": "public"
+        }
     },
     "exports": {
         ".": "./src/index.ts",
@@ -44,10 +28,7 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "esbuild": "node ./esbuild.config.mjs",
-        "api": "node ./api.js",
-        "tsc": "tsc",
-        "serve": "node test/Server/server.js"
+        "esbuild": "node ./esbuild.config.mjs"
     },
     "license": "MIT",
     "homepage": "https://github.com/dream-num/univer",
@@ -67,7 +48,6 @@
         "@types/numeral": "^2.0.5",
         "@vitest/coverage-istanbul": "^0.34.6",
         "esbuild": "^0.19.5",
-        "less": "^4.2.0",
         "ts-node": "^10.9.1",
         "vitest": "^0.34.6"
     }

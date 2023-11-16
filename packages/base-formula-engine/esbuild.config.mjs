@@ -6,5 +6,8 @@ import baseConfig from '../../esbuild.config.mjs';
 esbuild.build({
     ...baseConfig,
     globalName: 'UniverBaseFormulaEngine',
-    outfile: './lib/univer-base-formula-engine.js',
+    entryPoints: {
+        index: './src/index.ts',
+    },
+    outdir: './lib',
 });

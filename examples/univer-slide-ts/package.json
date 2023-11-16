@@ -15,13 +15,13 @@
         "dev:demo": "node ./esbuild.config.mjs --watch"
     },
     "dependencies": {
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/base-slides": "workspace:*",
-        "@univerjs/base-ui": "workspace:*",
-        "@univerjs/common-plugin-data": "workspace:*",
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/ui-plugin-slides": "workspace:*",
+        "@univerjs/base-render": "*",
+        "@univerjs/base-slides": "*",
+        "@univerjs/base-ui": "*",
+        "@univerjs/common-plugin-data": "*",
+        "@univerjs/core": "*",
+        "@univerjs/design": "*",
+        "@univerjs/ui-plugin-slides": "*",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },

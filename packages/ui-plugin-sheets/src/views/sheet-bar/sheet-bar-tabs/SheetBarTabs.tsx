@@ -10,9 +10,10 @@ import {
     SetWorksheetOrderCommand,
     SetWorksheetOrderMutation,
 } from '@univerjs/base-sheets';
-import { BooleanNumber, ICommandInfo, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { IConfirmService } from '@univerjs/base-ui';
+import { BooleanNumber, ICommandInfo, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { ISheetBarService } from '../../../services/sheetbar/sheetbar.service';
 import sheetBarStyles from '../index.module.less';
@@ -24,25 +25,33 @@ export interface ISheetBarTabsProps {}
 
 export function SheetBarTabs() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
-    const [activeKey, setActiveKey] = useState<string>('');
-    const [subscribe, setSubscribe] = useState(false);
+    const [activeKey, setActiveKey] = useState('');
     const [boxShadow, setBoxShadow] = useState('');
+    const slideTabBarRef = useRef<{ slideTabBar: SlideTabBar | null }>({ slideTabBar: null });
 
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const sheetbarService = useDependency(ISheetBarService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const localeService = useDependency(LocaleService);
+    const confirmService = useDependency(IConfirmService);
 
-    let slideTabBar: SlideTabBar;
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
 
     useEffect(() => {
         statusInit();
+        const slideTabBar = setupSlideTabBarInit();
         const disposable = setupStatusUpdate();
-        const subscription = setupSubscribeScroll();
+        const subscribeList = [
+            setupSubscribeScroll(),
+            setupSubscribeScrollX(),
+            setupSubscribeRenameId(),
+            setupSubscribeAddSheet(),
+        ];
 
         return () => {
             disposable.dispose();
-            subscription.unsubscribe();
+            slideTabBar.destroy();
+            subscribeList.forEach((subscribe) => subscribe.unsubscribe());
         };
     }, []);
 
@@ -52,18 +61,15 @@ export function SheetBarTabs() {
         }
     }, [sheetList]);
 
-    const setupSlideTabBarUpdate = () => {
-        const currentIndex = sheetList.findIndex((item) => item.selected);
-
-        // TODO@Dushusir: There may not be initialization each time
-        slideTabBar = new SlideTabBar({
+    const setupSlideTabBarInit = () => {
+        const slideTabBar = new SlideTabBar({
             slideTabBarClassName: styles.slideTabBar,
             slideTabBarItemActiveClassName: styles.slideTabActive,
             slideTabBarItemClassName: styles.slideTabItem,
             slideTabBarSpanEditClassName: styles.slideTabSpanEdit,
             slideTabBarItemAutoSort: true,
             slideTabRootClassName: sheetBarStyles.sheetBar,
-            currentIndex,
+            currentIndex: 0,
             onChangeName: (worksheetId: string, worksheetName: string) => {
                 commandService.executeCommand(SetWorksheetNameCommand.id, {
                     worksheetId,
@@ -79,26 +85,34 @@ export function SheetBarTabs() {
             onScroll: (state: IScrollState) => {
                 sheetbarService.setScroll(state);
             },
+            onEmptyAlert: () => {
+                const id = 'slideTabBarAlert';
+                confirmService.open({
+                    id,
+                    children: { title: localeService.t('sheetConfig.sheetNameCannotIsEmptyError') },
+                    // TODO@Dushusir: i18n
+                    title: { title: 'There was a problem' },
+                    onClose() {
+                        confirmService.close(id);
+                    },
+                    onConfirm() {
+                        confirmService.close(id);
+                    },
+                });
+            },
         });
 
-        // TODO@Dushusir: Can you initialize it once without using the `subscribe` label?
-        if (!subscribe) {
-            sheetbarService.scrollX$.subscribe((x: number) => {
-                // update scrollX
-                slideTabBar.setScroll(x);
-            });
+        slideTabBarRef.current.slideTabBar = slideTabBar;
 
-            sheetbarService.renameId$.subscribe((renameId: string) => {
-                const index = sheetList.findIndex((item) => item.sheetId === renameId);
-                slideTabBar.getSlideTabItems()[index].editor();
-            });
+        // FIXME@Dushusir: First time asynchronous rendering will cause flickering problems
+        resizeInit(slideTabBar);
 
-            sheetbarService.addSheet$.subscribe((addSheet: number) => {
-                slideTabBar.getScrollbar().scrollRight();
-            });
+        return slideTabBar;
+    };
 
-            setSubscribe(true);
-        }
+    const setupSlideTabBarUpdate = () => {
+        const currentIndex = sheetList.findIndex((item) => item.selected);
+        slideTabBarRef.current.slideTabBar?.update(currentIndex);
     };
 
     const setupStatusUpdate = () =>
@@ -140,6 +154,21 @@ export function SheetBarTabs() {
             updateScrollButtonState(state);
         });
 
+    const setupSubscribeScrollX = () =>
+        sheetbarService.scrollX$.subscribe((x: number) => {
+            slideTabBarRef.current.slideTabBar?.setScroll(x);
+        });
+
+    const setupSubscribeRenameId = () =>
+        sheetbarService.renameId$.subscribe(() => {
+            slideTabBarRef.current.slideTabBar?.getActiveItem()?.editor();
+        });
+
+    const setupSubscribeAddSheet = () =>
+        sheetbarService.addSheet$.subscribe(() => {
+            slideTabBarRef.current.slideTabBar?.getScrollbar().scrollRight();
+        });
+
     const updateScrollButtonState = (state: IScrollState) => {
         const { leftEnd, rightEnd } = state;
         // box-shadow: inset 10px 0px 10px -10px rgba(0, 0, 0, 0.2), inset -10px 0px 10px -10px rgba(0, 0, 0, 0.2);
@@ -155,6 +184,27 @@ export function SheetBarTabs() {
         }
 
         setBoxShadow(boxShadow);
+    };
+
+    const buttonScroll = (slideTabBar: SlideTabBar) => {
+        sheetbarService.setScroll({
+            leftEnd: slideTabBar.isLeftEnd(),
+            rightEnd: slideTabBar.isRightEnd(),
+        });
+    };
+
+    const resizeInit = (slideTabBar: SlideTabBar) => {
+        // Target element
+        const slideTabBarContainer = document.querySelector(`.${styles.slideTabBar}`);
+        if (!slideTabBarContainer) return;
+
+        // Create a Resizeobserver
+        const observer = new ResizeObserver(() => {
+            buttonScroll(slideTabBar);
+        });
+
+        // Start the observer
+        observer.observe(slideTabBarContainer);
     };
 
     return (

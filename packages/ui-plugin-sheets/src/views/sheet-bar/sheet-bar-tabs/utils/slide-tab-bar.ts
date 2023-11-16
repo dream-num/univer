@@ -10,13 +10,13 @@ export interface SlideTabBarConfig {
     slideTabBarItemClassName: string;
     slideTabBarSpanEditClassName: string;
     slideTabRootClassName: string;
-    activeClassNameAutoController: boolean;
     slideTabBarItemAutoSort: boolean;
     currentIndex: number;
     onSlideEnd: (event: MouseEvent, compareIndex: number) => void;
     onChangeName: (id: string, name: string) => void;
     onChangeTab: (event: FocusEvent, id: string) => void;
     onScroll: (state: IScrollState) => void;
+    onEmptyAlert: () => void;
 }
 
 export interface SlideTabItemAnimate {
@@ -113,7 +113,7 @@ export class SlideTabItem {
                 }
 
                 // Event must be removed before updateItems
-                this._slideTabBar.destroy();
+                this._slideTabBar.removeListener();
                 this._slideTabBar.updateItems();
                 if (this._slideTabBar.getConfig().onChangeName) {
                     const text = input?.innerText || '';
@@ -177,8 +177,7 @@ export class SlideTabItem {
         if (!input) return false;
         const text = input.innerText;
         if (text.trim() === '') {
-            // TODO@Dushusir: i18n and dialog service
-            alert('The sheet name cannot be empty.');
+            this._slideTabBar.getConfig().onEmptyAlert();
             return true;
         }
         return false;
@@ -324,8 +323,6 @@ export class SlideTabItem {
     }
 }
 
-// TODO@Dushusir: resize container trigger scroll box-shadow
-// init container, no box-shadow, no scroll button
 export class SlideScrollbar {
     protected _slideTabBar: SlideTabBar;
 
@@ -361,21 +358,21 @@ export class SlideTabBar {
     /** Time in milliseconds with two consecutive clicks will be considered as a double click */
     static DoubleClickDelay = 300; // in milliseconds
 
-    protected _activeTabItemIndex: number | null;
+    protected _activeTabItemIndex: number = 0;
 
     protected _slideTabBar: HTMLElement;
 
-    protected _slideTabItems: SlideTabItem[];
+    protected _slideTabItems: SlideTabItem[] = [];
 
     protected _config: SlideTabBarConfig;
 
-    protected _downActionX: number;
+    protected _downActionX: number = 0;
 
-    protected _moveActionX: number;
+    protected _moveActionX: number = 0;
 
-    protected _compareIndex: number | null;
+    protected _compareIndex: number = 0;
 
-    protected _activeTabItem: SlideTabItem | null;
+    protected _activeTabItem: SlideTabItem | null = null;
 
     protected _moveAction: (e: MouseEvent) => void;
 
@@ -423,25 +420,15 @@ export class SlideTabBar {
         const slideTabBar = document.querySelector(
             `.${config.slideTabRootClassName} .${config.slideTabBarClassName ?? 'slide-tab-bar'}`
         );
-        const slideTabItems = document.querySelectorAll(
-            `.${config.slideTabRootClassName} .${config.slideTabBarItemClassName ?? 'slide-tab-item'}`
-        );
-
         if (slideTabBar == null) {
             throw new Error('not found slide-tab-bar');
         }
 
-        this._config = config as SlideTabBarConfig;
-        this._downActionX = 0;
-        this._moveActionX = 0;
-        this._compareDirection = 0;
-        this._compareIndex = 0;
         this._slideTabBar = slideTabBar as HTMLElement;
-
         this._slideScrollbar = new SlideScrollbar(this);
-        this._slideTabItems = SlideTabItem.make(slideTabItems, this);
-        this._activeTabItemIndex = this._config.currentIndex;
-        this._activeTabItem = this._slideTabItems[this._activeTabItemIndex];
+        this._config = config as SlideTabBarConfig;
+
+        this._initConfig();
 
         let lastPageX = 0;
         let lastPageY = 0;
@@ -458,7 +445,7 @@ export class SlideTabBar {
             if (this._activeTabItemIndex !== slideItemIndex) {
                 this._activeTabItem?.removeEventListener('pointermove', this._moveAction);
                 this._activeTabItem?.removeEventListener('pointerup', this._upAction);
-                this.destroy();
+                this.removeListener();
                 this._config.onChangeTab(downEvent, slideItemId);
                 return;
             }
@@ -497,10 +484,8 @@ export class SlideTabBar {
 
             // double click
             if (diffTime && diffPageX && diffPageY) {
-                if (this._activeTabItem) {
-                    // user editor
-                    this._activeTabItem.editor();
-                }
+                // user editor
+                this._activeTabItem.editor();
             }
 
             lastPageX = pageX;
@@ -509,21 +494,12 @@ export class SlideTabBar {
 
             // Set a timer to delay dragging for 300 milliseconds
             this._longPressTimer = window.setTimeout(() => {
-                if (this._config.activeClassNameAutoController) {
-                    this._slideTabItems.forEach((item) => {
-                        item.classList().remove(this._config.slideTabBarItemActiveClassName);
-                    });
-                    this._activeTabItem?.classList().add(this._config.slideTabBarItemActiveClassName);
-                }
                 this._activeTabItem?.enableFixed();
-
-                //
                 this._startAutoScroll();
                 if (!activeSlideItemElement) return;
                 // Set the mouse cursor to drag
                 activeSlideItemElement.setPointerCapture((downEvent as PointerEvent).pointerId);
                 activeSlideItemElement.style.cursor = 'move';
-
                 this._activeTabItem?.addEventListener('pointermove', this._moveAction);
             }, SlideTabBar.LongPressDelay);
         };
@@ -552,8 +528,7 @@ export class SlideTabBar {
             this._activeTabItem?.removeEventListener('pointermove', this._moveAction);
             this._activeTabItem?.removeEventListener('pointerup', this._upAction);
             if (this._config.onSlideEnd && this._activeTabItemIndex !== this._compareIndex) {
-                this.destroy();
-
+                this.removeListener();
                 this._config.onSlideEnd(upEvent, this._compareIndex || 0);
             }
 
@@ -581,7 +556,7 @@ export class SlideTabBar {
             this.setScroll(wheelEvent.deltaY);
         };
 
-        this._initialize();
+        this.addListener();
     }
 
     static checkedSkipSlide(event: MouseEvent): boolean {
@@ -618,6 +593,17 @@ export class SlideTabBar {
         });
     }
 
+    /**
+     * The current instance is persistent, but some parameters need to be updated after refreshing
+     * @param currentIndex
+     */
+    update(currentIndex: number) {
+        this._config.currentIndex = currentIndex;
+        this._initConfig();
+        this.removeListener();
+        this.addListener();
+    }
+
     primeval(): HTMLElement {
         return this._slideTabBar;
     }
@@ -646,6 +632,10 @@ export class SlideTabBar {
         return this._slideTabItems;
     }
 
+    getActiveItem() {
+        return this._activeTabItem;
+    }
+
     isLeftEnd(): boolean {
         return this._slideTabBar.scrollLeft === 0;
     }
@@ -656,7 +646,14 @@ export class SlideTabBar {
         return this._slideTabBar.scrollWidth - parent.clientWidth === this._slideTabBar.scrollLeft;
     }
 
-    destroy(): void {
+    addListener() {
+        this._slideTabBar.addEventListener('wheel', this._wheelAction);
+        this._slideTabItems.forEach((item) => {
+            item.addEventListener('pointerdown', this._downAction);
+        });
+    }
+
+    removeListener(): void {
         this._slideTabBar.removeEventListener('wheel', this._wheelAction);
         this._slideTabItems.forEach((item) => {
             item.removeEventListener('pointerdown', this._downAction);
@@ -670,6 +667,25 @@ export class SlideTabBar {
             leftEnd: this.isLeftEnd(),
             rightEnd: this.isRightEnd(),
         });
+    }
+
+    destroy() {
+        this._downActionX = 0;
+        this._moveActionX = 0;
+        this._compareDirection = 0;
+        this._compareIndex = 0;
+        this._slideTabItems = [];
+        this._activeTabItem = null;
+        this.removeListener();
+
+        // TODO@Dushusir: If set to null, the types in other places need to be judged
+        // this._slideTabBar = null;
+        // this._slideScrollbar = null;
+        // this._config = null;
+        // this._downAction = null;
+        // this._upAction = null;
+        // this._moveAction = null;
+        // this._wheelAction = null;
     }
 
     protected _hasEditItem(): boolean {
@@ -829,10 +845,18 @@ export class SlideTabBar {
         }
     }
 
-    protected _initialize(): void {
-        this._slideTabBar.addEventListener('wheel', this._wheelAction);
-        this._slideTabItems.forEach((item) => {
-            item.addEventListener('pointerdown', this._downAction);
-        });
+    protected _initConfig(): void {
+        const slideTabItems = this._slideTabBar.querySelectorAll(
+            `.${this._config.slideTabBarItemClassName ?? 'slide-tab-item'}`
+        );
+
+        this._downActionX = 0;
+        this._moveActionX = 0;
+        this._compareDirection = 0;
+        this._compareIndex = 0;
+
+        this._slideTabItems = SlideTabItem.make(slideTabItems, this);
+        this._activeTabItemIndex = this._config.currentIndex;
+        this._activeTabItem = this._slideTabItems[this._activeTabItemIndex];
     }
 }

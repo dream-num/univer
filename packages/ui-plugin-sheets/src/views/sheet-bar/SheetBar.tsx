@@ -14,8 +14,8 @@ import { IScrollState } from './sheet-bar-tabs/utils/slide-tab-bar';
 const SCROLL_WIDTH = 100;
 
 export const SheetBar = () => {
-    const [leftScrollState, setLeftScrollState] = useState(false);
-    const [rightScrollState, setRightScrollState] = useState(false);
+    const [leftScrollState, setLeftScrollState] = useState(true);
+    const [rightScrollState, setRightScrollState] = useState(true);
 
     const commandService = useDependency(ICommandService);
     const sheetbarService = useDependency(ISheetBarService);
@@ -67,14 +67,16 @@ export const SheetBar = () => {
             <SheetBarTabs />
 
             {/* Scroll arrows */}
-            <div className={styles.sheetBarOptions}>
-                <SheetBarButton disabled={leftScrollState} onClick={handleScrollLeft}>
-                    <MoreSingle style={{ transform: 'rotateZ(180deg)' }} />
-                </SheetBarButton>
-                <SheetBarButton disabled={rightScrollState} onClick={handleScrollRight}>
-                    <MoreSingle />
-                </SheetBarButton>
-            </div>
+            {(!leftScrollState || !rightScrollState) && (
+                <div className={styles.sheetBarOptions}>
+                    <SheetBarButton disabled={leftScrollState} onClick={handleScrollLeft}>
+                        <MoreSingle style={{ transform: 'rotateZ(180deg)' }} />
+                    </SheetBarButton>
+                    <SheetBarButton disabled={rightScrollState} onClick={handleScrollRight}>
+                        <MoreSingle />
+                    </SheetBarButton>
+                </div>
+            )}
         </div>
     );
 };

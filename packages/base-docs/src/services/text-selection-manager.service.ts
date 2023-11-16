@@ -77,6 +77,17 @@ export class TextSelectionManagerService implements IDisposable {
         >;
     }
 
+    // Only used in tests.
+    add(textRanges: ITextRangeWithStyle[]) {
+        if (this._currentSelection == null) {
+            return;
+        }
+        this._addByParam({
+            ...this._currentSelection,
+            textRanges: textRanges as TextRange[],
+        });
+    }
+
     replaceTextRanges(textRanges: ITextRangeWithStyle[]) {
         if (this._currentSelection == null) {
             return;
@@ -94,6 +105,25 @@ export class TextSelectionManagerService implements IDisposable {
             ...this._currentSelection,
             textRanges,
         });
+    }
+
+    private _addByParam(insertParam: ITextSelectionManagerInsertParam): void {
+        const { pluginName, unitId, textRanges } = insertParam;
+
+        if (!this._textSelectionInfo.has(pluginName)) {
+            this._textSelectionInfo.set(pluginName, new Map());
+        }
+
+        const unitTextRange = this._textSelectionInfo.get(pluginName)!;
+
+        if (!unitTextRange.has(unitId)) {
+            unitTextRange.set(unitId, [...textRanges]);
+        } else {
+            const OldTextRanges = unitTextRange.get(unitId)!;
+            OldTextRanges.push(...textRanges);
+        }
+
+        this._refresh({ pluginName, unitId });
     }
 
     // It is will being opened when it needs to be used

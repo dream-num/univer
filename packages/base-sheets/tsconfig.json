@@ -9,7 +9,7 @@
                 "src/*"
             ]
         },
-        "esModuleInterop": true, // auto allowSyntheticDefaultImports true
+        "esModuleInterop": true,
         "strictPropertyInitialization": false
     },
     "include": ["src/**/*"]

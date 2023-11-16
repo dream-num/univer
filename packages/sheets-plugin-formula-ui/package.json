@@ -3,7 +3,8 @@
     "version": "0.0.1",
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
-    "main": "./src/index.ts",
+    "main": "./lib/index.ts",
+    "types": "./lib/index.d.ts",
     "publishConfig": {
         "access": "public",
         "exports": {
@@ -26,9 +27,10 @@
     "private": false,
     "type": "module",
     "scripts": {
-        "esbuild": "node ./esbuild.config.mjs"
+        "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"
     },
     "dependencies": {
+        "@ctrl/tinycolor": "^4.0.2",
         "@univerjs/base-docs": "workspace:*",
         "@univerjs/base-formula-engine": "workspace:*",
         "@univerjs/base-render": "workspace:*",
@@ -41,8 +43,7 @@
         "@wendellhu/redi": "^0.12.11",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
-        "rxjs": "^7.8.1",
-        "@ctrl/tinycolor": "^4.0.2"
+        "rxjs": "^7.8.1"
     },
     "devDependencies": {
         "@types/node": "^20.9.0",

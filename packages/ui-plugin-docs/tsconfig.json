@@ -10,5 +10,5 @@
     "include": [
         "src/**/*",
         "test/**/*.test.(ts|tsx|js)"
-    ]
+, "../base-docs/src/commands/commands/clipboard.inner.command.ts", "../base-docs/src/commands/commands/__tests__/clipboard.command.spec.ts", "../base-docs/src/controllers/clipboard.controller.ts", "../base-docs/src/services/clipboard"    ]
 }

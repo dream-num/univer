@@ -36,6 +36,7 @@ import { RichTextEditingMutation } from './commands/mutations/core-editing.mutat
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
+import { DocClipboardController } from './controllers/clipboard.controller';
 import { DeleteLeftInputController } from './controllers/delete-left-input.controller';
 import { DocRenderController } from './controllers/doc-render.controller';
 import { FloatingObjectController } from './controllers/floating-object.controller';
@@ -48,6 +49,7 @@ import { PageRenderController } from './controllers/page-render.controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
 import { ZoomController } from './controllers/zoom.cotroller';
 import { enUS } from './locale';
+import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
@@ -87,7 +89,7 @@ export class DocPlugin extends Plugin {
 
         this._config = Object.assign(DEFAULT_DOCUMENT_PLUGIN_DATA, config);
 
-        this.initialConfig(config);
+        this._initialConfig(config);
 
         this._initializeDependencies(_injector);
 
@@ -151,7 +153,7 @@ export class DocPlugin extends Plugin {
         });
     }
 
-    private initialConfig(config: IDocPluginConfig) {
+    private _initialConfig(config: IDocPluginConfig) {
         this._currentUniverService.docAdded$.subscribe((documentModel) => {
             if (documentModel == null) {
                 throw new Error('documentModel is null');
@@ -187,6 +189,12 @@ export class DocPlugin extends Plugin {
                 // services
                 [DocSkeletonManagerService],
                 [
+                    IDocClipboardService,
+                    {
+                        useClass: DocClipboardService,
+                    },
+                ],
+                [
                     ITextSelectionRenderManager,
                     {
                         useClass: TextSelectionRenderManager,
@@ -201,6 +209,7 @@ export class DocPlugin extends Plugin {
                 [IMEInputController],
                 [DeleteLeftInputController],
                 [InlineFormatController],
+                [DocClipboardController],
                 [LineBreakInputController],
                 [MoveCursorController],
                 [ZoomController],

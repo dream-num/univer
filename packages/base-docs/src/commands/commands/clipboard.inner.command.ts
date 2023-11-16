@@ -1,52 +1,17 @@
 import {
-    getRetainAndDeleteFromReplace,
-    IRichTextEditingMutationParams,
-    MemoryCursor,
-    RichTextEditingMutation,
-    TextSelectionManagerService,
-} from '@univerjs/base-docs';
-import { CopyCommand, CutCommand, PasteCommand } from '@univerjs/base-ui';
-import {
     CommandType,
-    FOCUSING_DOC,
     ICommand,
     ICommandInfo,
     ICommandService,
     IDocumentBody,
-    IMultiCommand,
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
 
-export const DocCopyCommand: IMultiCommand = {
-    id: CopyCommand.id,
-    name: 'doc.command.copy',
-    type: CommandType.COMMAND,
-    multi: true,
-    priority: 1100,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
-    handler: async () => true,
-};
-
-export const DocCutCommand: IMultiCommand = {
-    id: CutCommand.id,
-    name: 'doc.command.cut',
-    type: CommandType.COMMAND,
-    multi: true,
-    priority: 1100,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
-    handler: async () => true,
-};
-
-export const DocPasteCommand: IMultiCommand = {
-    id: PasteCommand.id,
-    name: 'doc.command.paste',
-    type: CommandType.COMMAND,
-    multi: true,
-    priority: 1100,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
-    handler: async () => true,
-};
+import { MemoryCursor } from '../../basics/memory-cursor';
+import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { getRetainAndDeleteFromReplace } from './core-editing.command';
 
 export interface IInnerPasteCommandParams {
     segmentId: string;

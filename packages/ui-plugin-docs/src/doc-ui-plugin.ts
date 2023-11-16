@@ -5,10 +5,8 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { DefaultDocUiConfig, IDocUIPluginConfig } from './basics';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AppUIController } from './controllers';
-import { DocClipboardController } from './controllers/clipboard.controller';
 import { DocUIController } from './controllers/doc-ui.controller';
 import { enUS } from './locale';
-import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 
 export class DocUIPlugin extends Plugin {
     static override type = PluginType.Doc;
@@ -37,8 +35,6 @@ export class DocUIPlugin extends Plugin {
 
     private _initDependencies(injector: Injector) {
         const dependencies: Dependency[] = [
-            [IDocClipboardService, { useClass: DocClipboardService }],
-            [DocClipboardController],
             [DocUIController],
             [
                 // controllers
@@ -66,6 +62,5 @@ export class DocUIPlugin extends Plugin {
 
     private _initModules(): void {
         this._injector.get(AppUIController);
-        this._injector.get(DocClipboardController).initialize();
     }
 }

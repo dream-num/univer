@@ -13,7 +13,8 @@ import {
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { NORMAL_TEXT_SELECTION_PLUGIN_NAME, TextSelectionManagerService } from '../../../types';
+import { NORMAL_TEXT_SELECTION_PLUGIN_NAME } from '../../../basics/docs-view-key';
+import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';
 import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
 import {
     IInnerCutCommandParams,

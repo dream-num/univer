@@ -17,6 +17,7 @@ import {
     DocCopyCommand,
     DocCutCommand,
     DocPasteCommand,
+    InnerCutCommand,
     InnerPasteCommand,
 } from '../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
@@ -39,7 +40,9 @@ export class DocClipboardController extends Disposable {
         [DocCopyCommand, DocCutCommand, DocPasteCommand].forEach((command) =>
             this.disposeWithMe(this._commandService.registerAsMultipleCommand(command))
         );
-        [InnerPasteCommand].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+        [InnerPasteCommand, InnerCutCommand].forEach((command) =>
+            this.disposeWithMe(this._commandService.registerCommand(command))
+        );
     }
 
     private _commandExecutedListener() {
@@ -210,12 +213,62 @@ export class DocClipboardController extends Disposable {
     }
 
     private async _handleCopy() {
-        console.log('copy');
-        const bodys = this._getDocumentBodyInRanges();
-        console.log(bodys);
+        const { _docClipboardService: clipboard } = this;
+        const documentBodyList = this._getDocumentBodyInRanges();
+
+        try {
+            clipboard.setClipboardData(documentBodyList);
+        } catch (_e) {
+            this._logService.error('[DocClipboardController] set clipboard failed');
+        }
     }
 
     private async _handleCut() {
-        console.log('cut');
+        const {
+            segmentId,
+            endOffset: activeEndOffset,
+            style,
+        } = this._textSelectionRenderManager.getActiveRange() ?? {};
+        const ranges = this._textSelectionRenderManager.getAllTextRanges();
+
+        if (segmentId == null) {
+            this._logService.error('[DocClipboardController] segmentId is not existed');
+        }
+
+        if (activeEndOffset == null) {
+            return;
+        }
+
+        // Set content to clipboard.
+        this._handleCopy();
+
+        try {
+            this._commandService.executeCommand(InnerCutCommand.id, { segmentId });
+
+            let cursor = activeEndOffset;
+            for (const range of ranges) {
+                const { startOffset, endOffset } = range;
+
+                if (startOffset == null || endOffset == null) {
+                    continue;
+                }
+
+                if (endOffset <= activeEndOffset) {
+                    cursor -= endOffset - startOffset;
+                }
+            }
+
+            // move selection
+            this._textSelectionManagerService.replace([
+                {
+                    startOffset: cursor,
+                    endOffset: cursor,
+                    collapsed: true,
+                    style,
+                },
+            ]);
+        } catch (e) {
+            this._logService.error('[DocClipboardController] cut content failed');
+        }
     }
 }

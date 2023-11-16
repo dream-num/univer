@@ -1108,6 +1108,9 @@ importers:
 
   packages/ui-plugin-docs:
     dependencies:
+      '@ctrl/tinycolor':
+        specifier: ^4.0.2
+        version: 4.0.2
       '@univerjs/base-docs':
         specifier: '*'
         version: link:../base-docs

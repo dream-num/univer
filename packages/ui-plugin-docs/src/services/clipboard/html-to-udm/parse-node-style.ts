@@ -1,8 +1,9 @@
+import { TinyColor } from '@ctrl/tinycolor';
 import { BaselineOffset, BooleanNumber, ITextStyle } from '@univerjs/core';
 
 import { ptToPixel } from './utils';
 
-export default function extractNodeStyle(node: HTMLElement): ITextStyle {
+export function extractNodeStyle(node: HTMLElement): ITextStyle {
     const styles = node.style;
     const docStyles: ITextStyle = {};
     const tagName = node.tagName.toLowerCase();
@@ -54,8 +55,11 @@ export default function extractNodeStyle(node: HTMLElement): ITextStyle {
 
             case 'font-size': {
                 const fontSize = parseInt(cssValue);
-                // TODO: @JOCS, hand other CSS value unit, rem, em, pt, %
-                docStyles.fs = /pt$/.test(cssValue) ? ptToPixel(fontSize) : fontSize;
+
+                if (!Number.isNaN(fontSize)) {
+                    // TODO: @JOCS, hand other CSS value unit, rem, em, pt, %
+                    docStyles.fs = /pt$/.test(cssValue) ? ptToPixel(fontSize) : fontSize;
+                }
 
                 break;
             }
@@ -98,17 +102,25 @@ export default function extractNodeStyle(node: HTMLElement): ITextStyle {
             }
 
             case 'color': {
-                docStyles.cl = {
-                    rgb: cssValue,
-                };
+                const color = new TinyColor(cssValue);
+
+                if (color.isValid) {
+                    docStyles.cl = {
+                        rgb: color.toRgbString(),
+                    };
+                }
 
                 break;
             }
 
             case 'background-color': {
-                docStyles.bg = {
-                    rgb: cssValue,
-                };
+                const color = new TinyColor(cssValue);
+
+                if (color.isValid) {
+                    docStyles.bg = {
+                        rgb: color.toRgbString(),
+                    };
+                }
 
                 break;
             }

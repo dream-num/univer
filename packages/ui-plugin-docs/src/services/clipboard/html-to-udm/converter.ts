@@ -1,6 +1,6 @@
 import { IDocumentBody, ITextStyle, Nullable } from '@univerjs/core';
 
-import extractNodeStyle from './parse-node-style';
+import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';
 import { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
 
@@ -67,7 +67,7 @@ export class HtmlToUDMService {
         for (const node of nodes) {
             if (node.nodeType === Node.TEXT_NODE) {
                 // TODO: @JOCS, More characters need to be replaced, like `\b`
-                const text = node.nodeValue?.replace(/\r\n/g, '');
+                const text = node.nodeValue?.replace(/[\r\n]/g, '');
                 let style;
 
                 if (parent && this.styleCache.has(parent)) {

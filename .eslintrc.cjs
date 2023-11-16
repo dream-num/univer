@@ -55,7 +55,25 @@ module.exports = {
         'no-return-assign': 'off',
         'no-continue': 'off',
         'no-loop-func': 'off',
-        '@typescript-eslint/naming-convention': 'off',
+        '@typescript-eslint/naming-convention': [
+            'warn',
+            // Interfaces' names should start with a capital 'I'.
+            {
+                selector: 'interface',
+                format: ['PascalCase'],
+                custom: {
+                    regex: '^I[A-Z]',
+                    match: true,
+                },
+            },
+            // Private fields of a class should start with an underscore '_'.
+            {
+                selector: ['classMethod', 'classProperty'],
+                modifiers: ['private'],
+                format: ['camelCase'],
+                leadingUnderscore: 'require',
+            },
+        ],
         '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/no-shadow': 'off',
         '@typescript-eslint/no-loop-func': 'off',

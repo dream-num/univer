@@ -3,6 +3,7 @@ import { Disposable, toDisposable } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 
 export interface IContextMenuHandler {
+    /** A callback to open context menu with given position and menu type. */
     handleContextMenu(event: IPointerEvent | IMouseEvent, menuType: string): void;
 }
 

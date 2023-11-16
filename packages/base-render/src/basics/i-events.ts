@@ -41,8 +41,8 @@ type Primitive = undefined | null | boolean | string | number | Function;
 export type Immutable<T> = T extends Primitive
     ? T
     : T extends Array<infer U>
-    ? readonly U[]
-    : DeepImmutable<T>; /* T extends Map<infer K, infer V> ? ReadonlyMap<K, V> : // es2015+ only */
+      ? readonly U[]
+      : DeepImmutable<T>; /* T extends Map<infer K, infer V> ? ReadonlyMap<K, V> : // es2015+ only */
 
 /**
  * Type modifier to make all the properties of an object Readonly recursively
@@ -50,9 +50,9 @@ export type Immutable<T> = T extends Primitive
 export type DeepImmutable<T> = T extends Primitive
     ? T
     : T extends Array<infer U>
-    ? DeepImmutableArray<U>
-    : /* T extends Map<infer K, infer V> ? DeepImmutableMap<K, V> : // es2015+ only */
-      DeepImmutableObject<T>;
+      ? DeepImmutableArray<U>
+      : /* T extends Map<infer K, infer V> ? DeepImmutableMap<K, V> : // es2015+ only */
+        DeepImmutableObject<T>;
 
 /**
  * Type modifier to make object properties readonly.

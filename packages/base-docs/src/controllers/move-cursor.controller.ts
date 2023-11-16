@@ -122,8 +122,8 @@ export class MoveCursorController extends Disposable {
         const anchorOffset = collapsed
             ? startOffset
             : rangeDirection === RANGE_DIRECTION.FORWARD
-            ? startOffset
-            : endOffset;
+              ? startOffset
+              : endOffset;
 
         let focusOffset = collapsed ? endOffset : rangeDirection === RANGE_DIRECTION.FORWARD ? endOffset : startOffset;
 

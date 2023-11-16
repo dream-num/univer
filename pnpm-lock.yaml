@@ -1145,6 +1145,9 @@ importers:
       '@types/react-dom':
         specifier: ^18.2.15
         version: 18.2.15
+      '@types/tinycolor2':
+        specifier: ^1.4.6
+        version: 1.4.6
       '@vitest/coverage-istanbul':
         specifier: ^0.34.6
         version: 0.34.6(vitest@0.34.6)
@@ -5628,6 +5631,10 @@ packages:
     resolution: {integrity: sha512-CPGlr5teL4sqdap+EOowMifLuNGeIoLwc0VQ7u/BPxo+ocqiNa5jeVt0H0IVBblEh6ZwX1sGpIQIFnSSr8NBQA==}
     dependencies:
       '@types/node': 20.9.0
+    dev: true
+
+  /@types/tinycolor2@1.4.6:
+    resolution: {integrity: sha512-iEN8J0BoMnsWBqjVbWH/c0G0Hh7O21lpR2/+PrvAVgWdzL7eexIFm4JN/Wn10PTcmNdtS6U67r499mlWMXOxNw==}
     dev: true
 
   /@types/unist@2.0.10:

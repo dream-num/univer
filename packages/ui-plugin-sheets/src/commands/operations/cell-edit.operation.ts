@@ -20,6 +20,10 @@ export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisible
     },
 };
 
+/**
+ * When the editor is not clicked to change the cursor,
+ * the arrow keys will exit editing and move the cell.
+ */
 export const SetCellEditVisibleArrowOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible-arrow',
     type: CommandType.OPERATION,

@@ -30,10 +30,15 @@ export interface IEditorBridgeService {
     getState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     isVisible(): IEditorBridgeServiceVisibleParam;
+    enableForceKeepVisible(): void;
+    disableForceKeepVisible(): void;
+    isForceKeepVisible(): boolean;
 }
 
 export class EditorBridgeService implements IEditorBridgeService, IDisposable {
     private _state: Nullable<IEditorBridgeServiceParam> = null;
+
+    private _isForceKeepVisible: boolean = false;
 
     private _visible: IEditorBridgeServiceVisibleParam = {
         visible: false,
@@ -68,6 +73,18 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
 
     isVisible() {
         return this._visible;
+    }
+
+    enableForceKeepVisible(): void {
+        this._isForceKeepVisible = true;
+    }
+
+    disableForceKeepVisible(): void {
+        this._isForceKeepVisible = true;
+    }
+
+    isForceKeepVisible(): boolean {
+        return this._isForceKeepVisible;
     }
 }
 

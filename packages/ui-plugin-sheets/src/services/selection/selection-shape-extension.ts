@@ -41,7 +41,7 @@ export class SelectionShapeExtension {
 
     private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 
-    private _helperSelection!: Rect;
+    private _helperSelection: Nullable<Rect>;
 
     private _scrollTimer!: ScrollTimer;
 
@@ -75,6 +75,10 @@ export class SelectionShapeExtension {
         this._control.dispose$.subscribe(() => {
             this.dispose();
         });
+    }
+
+    get isHelperSelection() {
+        return this._control.isHelperSelection;
     }
 
     dispose() {
@@ -168,7 +172,7 @@ export class SelectionShapeExtension {
         const startX = startCell?.startX || 0;
         const endX = endCell?.endX || 0;
 
-        this._helperSelection.transformByState({
+        this._helperSelection?.transformByState({
             left: startX,
             top: startY,
             width: endX - startX,
@@ -249,11 +253,14 @@ export class SelectionShapeExtension {
 
         const style = this._control.selectionStyle!;
         const scale = this._getScale();
-        this._helperSelection = new Rect(HELPER_SELECTION_TEMP_NAME, {
-            stroke: style.stroke,
-            strokeWidth: style.strokeWidth / scale,
-        });
-        scene.addObject(this._helperSelection);
+
+        if (this.isHelperSelection) {
+            this._helperSelection = new Rect(HELPER_SELECTION_TEMP_NAME, {
+                stroke: style.stroke,
+                strokeWidth: style.strokeWidth / scale,
+            });
+            scene.addObject(this._helperSelection);
+        }
 
         // const relativeCoords = scene.getRelativeCoord(Vector2.FromArray([evtOffsetX, evtOffsetY]));
 
@@ -284,7 +291,7 @@ export class SelectionShapeExtension {
         });
 
         this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-            this._helperSelection.dispose();
+            this._helperSelection?.dispose();
             const scene = this._scene;
             scene.resetCursor();
             this._clearObserverEvent();
@@ -642,16 +649,16 @@ export class SelectionShapeExtension {
         const SELECTION_CONTROL_BORDER_BUFFER_WIDTH_SCALE = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / this._getScale();
 
         if ((startRow === endRow && isRowDropping === true) || (startColumn === endColumn && isRowDropping === false)) {
-            this._helperSelection.hide();
+            this._helperSelection?.hide();
         } else {
-            this._helperSelection.transformByState({
+            this._helperSelection?.transformByState({
                 left: startX - SELECTION_CONTROL_BORDER_BUFFER_WIDTH_SCALE / 2,
                 top: startY - SELECTION_CONTROL_BORDER_BUFFER_WIDTH_SCALE / 2,
                 width: endX - startX,
                 height: endY - startY,
             });
 
-            this._helperSelection.show();
+            this._helperSelection?.show();
         }
 
         this._targetSelection = {
@@ -718,11 +725,13 @@ export class SelectionShapeExtension {
 
         const darkenColor = new TinyColor(stroke).darken(2).toString();
 
-        this._helperSelection = new Rect(HELPER_SELECTION_TEMP_NAME, {
-            stroke: darkenColor,
-            strokeWidth: strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH_SCALE / 2,
-        });
-        scene.addObject(this._helperSelection);
+        if (this.isHelperSelection) {
+            this._helperSelection = new Rect(HELPER_SELECTION_TEMP_NAME, {
+                stroke: darkenColor,
+                strokeWidth: strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH_SCALE / 2,
+            });
+            scene.addObject(this._helperSelection);
+        }
 
         const scrollTimer = ScrollTimer.create(scene);
 
@@ -753,7 +762,7 @@ export class SelectionShapeExtension {
         });
 
         this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-            this._helperSelection.dispose();
+            this._helperSelection?.dispose();
             const scene = this._scene;
             scene.resetCursor();
             this._clearObserverEvent();

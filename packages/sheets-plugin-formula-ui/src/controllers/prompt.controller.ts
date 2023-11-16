@@ -1,4 +1,12 @@
-import { FormulaEngineService, IFunctionInfo, ISequenceNode, sequenceNodeType } from '@univerjs/base-formula-engine';
+import {
+    deserializeRangeWithSheet,
+    FormulaEngineService,
+    IFunctionInfo,
+    ISequenceNode,
+    isFormulaLexerToken,
+    sequenceNodeType,
+    serializeRangeToRefString,
+} from '@univerjs/base-formula-engine';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -7,13 +15,13 @@ import {
 } from '@univerjs/base-render';
 import { ISelectionWithStyle, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/base-sheets';
 import {
-    deserializeRangeWithSheet,
     Disposable,
     DisposableCollection,
     FOCUSING_EDITOR_INPUT_FORMULA,
     ICommandService,
     IContextService,
     IDocumentBody,
+    IRangeWithCoord,
     isFormulaString,
     ITextRun,
     IUniverInstanceService,
@@ -23,12 +31,15 @@ import {
     OnLifecycle,
     ThemeService,
     toDisposable,
+    Tools,
 } from '@univerjs/core';
 import {
     EditorBridgeService,
     getEditorObject,
     IEditorBridgeService,
     ISelectionRenderService,
+    SelectionShape,
+    SetEditorResizeOperation,
     SheetSkeletonManagerService,
 } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
@@ -58,7 +69,9 @@ interface IRefSelection {
 export class PromptController extends Disposable {
     private _formulaRefColors: string[] = [];
 
-    private _currentRefIndex: number = -1;
+    private _lastSequenceNodes: Array<string | ISequenceNode> = [];
+
+    private _isLockedOnSelectionChangeRefString: boolean = false;
 
     private _stringColor = '';
 
@@ -126,8 +139,12 @@ export class PromptController extends Disposable {
     private _initialCursorSync() {
         this.disposeWithMe(
             toDisposable(
-                this._textSelectionRenderManager.textSelection$.subscribe(() => {
-                    if (this._editorBridgeService.isVisible().visible === false) {
+                this._textSelectionManagerService.textSelectionInfo$.subscribe(() => {
+                    this._changeKeepVisibleHideState();
+                    if (
+                        this._editorBridgeService.isVisible().visible === false ||
+                        this._isLockedOnSelectionChangeRefString === true
+                    ) {
                         return;
                     }
 
@@ -144,6 +161,39 @@ export class PromptController extends Disposable {
                 })
             )
         );
+    }
+
+    /**
+     * If the cursor is located at a formula token,
+     * it is necessary to prohibit the behavior of closing the editor by clicking on the canvas,
+     * in order to generate reference text for the formula.
+     */
+    private _changeKeepVisibleHideState() {
+        const activeRange = this._textSelectionManagerService.getLast();
+
+        if (activeRange == null) {
+            this._editorBridgeService.disableForceKeepVisible();
+            return;
+        }
+
+        const { startOffset } = activeRange;
+
+        const body = this._getCurrentBody();
+
+        if (body == null) {
+            this._editorBridgeService.disableForceKeepVisible();
+            return;
+        }
+
+        const dataStream = body.dataStream;
+
+        const char = dataStream[startOffset];
+
+        if (isFormulaLexerToken(char)) {
+            this._editorBridgeService.enableForceKeepVisible();
+        } else {
+            this._editorBridgeService.disableForceKeepVisible();
+        }
     }
 
     private _initialExitEditor() {
@@ -261,8 +311,11 @@ export class PromptController extends Disposable {
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             body.textRuns = [];
         } else {
-            const textRuns: ITextRun[] = this._buildTextRuns(sequenceNodes);
+            this._lastSequenceNodes = sequenceNodes;
+            const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
             body.textRuns = textRuns;
+
+            this._refreshSelectionForReference(refSelections);
         }
 
         this._refreshEditorObject();
@@ -271,15 +324,16 @@ export class PromptController extends Disposable {
     /**
      * :
      * #
-     *
+     * Generate styles for formula text, highlighting references, text, numbers, and arrays.
      * @returns
      */
     private _buildTextRuns(sequenceNodes: Array<ISequenceNode | string>) {
         const textRuns: ITextRun[] = [];
         const refSelections: IRefSelection[] = [];
-        let refIndex = 0;
+        let refColorIndex = 0;
 
-        for (const node of sequenceNodes) {
+        for (let i = 0, len = sequenceNodes.length; i < len; i++) {
+            const node = sequenceNodes[i];
             if (typeof node === 'string') {
                 continue;
             }
@@ -287,16 +341,16 @@ export class PromptController extends Disposable {
             const { startIndex, endIndex, nodeType, token } = node;
             let themeColor = '';
             if (nodeType === sequenceNodeType.REFERENCE) {
-                const colorIndex = refIndex % this._formulaRefColors.length;
+                const colorIndex = refColorIndex % this._formulaRefColors.length;
                 themeColor = this._formulaRefColors[colorIndex];
 
                 refSelections.push({
-                    refIndex,
+                    refIndex: i,
                     themeColor,
                     token,
                 });
 
-                refIndex++;
+                refColorIndex++;
             } else if (nodeType === sequenceNodeType.NUMBER) {
                 themeColor = this._numberColor;
             } else if (nodeType === sequenceNodeType.STRING) {
@@ -318,13 +372,16 @@ export class PromptController extends Disposable {
             }
         }
 
-        this._refreshSelectionForReference(refSelections);
+        // console.log('sequenceNodes', sequenceNodes, textRuns);
 
-        console.log('sequenceNodes', sequenceNodes, textRuns);
-
-        return textRuns;
+        return { textRuns, refSelections };
     }
 
+    /**
+     * Draw the referenced selection text based on the style and token.
+     * @param refSelections
+     * @returns
+     */
     private _refreshSelectionForReference(refSelections: IRefSelection[]) {
         const current = this._sheetSkeletonManagerService.getCurrent();
 
@@ -356,7 +413,7 @@ export class PromptController extends Disposable {
             selectionWithStyle.push({
                 range,
                 primary: null,
-                style: getFormulaRefSelectionStyle(this._themeService, themeColor),
+                style: getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
             });
         }
 
@@ -367,6 +424,9 @@ export class PromptController extends Disposable {
         this._selectionManagerService.add(selectionWithStyle);
     }
 
+    /**
+     * Switch from formula selection state to regular selection state.
+     */
     private _switchSelectionPlugin(pluginName: string) {
         const current = this._sheetSkeletonManagerService.getCurrent();
 
@@ -389,6 +449,131 @@ export class PromptController extends Disposable {
         return workbook?.getSheetBySheetName(sheetName)?.getSheetId();
     }
 
+    /**
+     * Synchronize the reference text based on the changes of the selection.
+     * @param refIndex
+     * @param rangeWithCoord
+     * @returns
+     */
+    private _updateSequenceRef(refIndex: number, rangeWithCoord: Nullable<IRangeWithCoord>) {
+        if (rangeWithCoord == null) {
+            return;
+        }
+        const { startRow, endRow, startColumn, endColumn } = rangeWithCoord;
+        const refString = serializeRangeToRefString({
+            sheetName: '',
+            unitId: '',
+            range: {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+            },
+        });
+
+        const node = this._lastSequenceNodes[refIndex];
+
+        if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
+            return;
+        }
+
+        const difference = refString.length - node.token.length;
+
+        node.token = refString;
+
+        node.endIndex += difference;
+
+        for (let i = refIndex + 1, len = this._lastSequenceNodes.length; i < len; i++) {
+            const node = this._lastSequenceNodes[i];
+            if (typeof node === 'string') {
+                continue;
+            }
+
+            node.startIndex += difference;
+            node.endIndex += difference;
+        }
+
+        const dataStream = this._generateStringWithSequence(this._lastSequenceNodes);
+
+        const { textRuns } = this._buildTextRuns(this._lastSequenceNodes);
+
+        this._updateEditorModel(`=${dataStream}\r\n`, textRuns);
+
+        const activeRange = this._textSelectionManagerService.getLast();
+
+        if (activeRange == null) {
+            return;
+        }
+
+        const { collapsed, style } = activeRange;
+
+        this._textSelectionManagerService.replace([
+            {
+                startOffset: node.endIndex + 2,
+                endOffset: node.endIndex + 2,
+                collapsed,
+                style,
+            },
+        ]);
+
+        this._commandService.executeCommand(SetEditorResizeOperation.id, {
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+        });
+    }
+
+    /**
+     * When the cursor is on the right side of a formula token, you can add reference text to the formula by drawing a selection.
+     * @param index
+     * @param range
+     */
+    private _insertSequenceRef(index: number, range: Nullable<IRangeWithCoord>) {}
+
+    /**
+     * Deserialize Sequence to text.
+     * @param newSequenceNodes
+     * @returns
+     */
+    private _generateStringWithSequence(newSequenceNodes: Array<string | ISequenceNode>) {
+        let sequenceString = '';
+        for (const node of newSequenceNodes) {
+            if (typeof node === 'string') {
+                sequenceString += node;
+            } else {
+                sequenceString += node.token;
+            }
+        }
+        return sequenceString;
+    }
+
+    /**
+     * Update the editor's model value to facilitate formula updates.
+     * @param dataStream
+     * @param textRuns
+     * @returns
+     */
+    private _updateEditorModel(dataStream: string, textRuns: ITextRun[]) {
+        const state = this._editorBridgeService.getState();
+        const bodyModel = state?.documentLayoutObject.documentModel?.getBodyModel();
+        if (bodyModel == null) {
+            return;
+        }
+
+        const snapshot = state?.documentLayoutObject?.documentModel?.snapshot;
+
+        if (snapshot == null) {
+            return;
+        }
+
+        const newBody = {
+            dataStream,
+            textRuns,
+        };
+
+        bodyModel.reset(newBody);
+
+        snapshot.body = newBody;
+    }
+
     private _initialRefSelectionEvent() {
         const disposableCollection = new DisposableCollection();
 
@@ -406,14 +591,12 @@ export class PromptController extends Disposable {
 
                     const selectionControls = this._selectionRenderService.getCurrentControls();
                     selectionControls.forEach((controlSelection) => {
+                        controlSelection.disableHelperSelection();
+
                         disposableCollection.add(
                             toDisposable(
                                 controlSelection.selectionMoving$.subscribe((toRange) => {
-                                    if (!toRange) {
-                                        return;
-                                    }
-
-                                    console.log('formulaRefSelections', toRange);
+                                    this._changeControlSelection(toRange, controlSelection);
                                 })
                             )
                         );
@@ -421,11 +604,23 @@ export class PromptController extends Disposable {
                         disposableCollection.add(
                             toDisposable(
                                 controlSelection.selectionScaling$.subscribe((toRange) => {
-                                    if (!toRange) {
-                                        return;
-                                    }
+                                    this._changeControlSelection(toRange, controlSelection);
+                                })
+                            )
+                        );
 
-                                    console.log('formulaRefSelections', toRange);
+                        disposableCollection.add(
+                            toDisposable(
+                                controlSelection.selectionMoved$.subscribe(() => {
+                                    this._isLockedOnSelectionChangeRefString = false;
+                                })
+                            )
+                        );
+
+                        disposableCollection.add(
+                            toDisposable(
+                                controlSelection.selectionScaled$.subscribe(() => {
+                                    this._isLockedOnSelectionChangeRefString = false;
                                 })
                             )
                         );
@@ -433,6 +628,24 @@ export class PromptController extends Disposable {
                 })
             )
         );
+    }
+
+    private _changeControlSelection(toRange: Nullable<IRangeWithCoord>, controlSelection: SelectionShape) {
+        if (!toRange) {
+            return;
+        }
+
+        this._isLockedOnSelectionChangeRefString = true;
+
+        const id = controlSelection.selectionStyle?.id;
+
+        if (id == null || !Tools.isStringNumber(id)) {
+            return;
+        }
+
+        this._updateSequenceRef(Number(id), toRange);
+
+        controlSelection.update(toRange);
     }
 
     private _refreshEditorObject() {

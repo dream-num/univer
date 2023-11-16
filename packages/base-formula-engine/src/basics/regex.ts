@@ -1,20 +1,18 @@
-const UNIT_NAME_REGEX = '\'?\\[((?![\\/?:"<>|*\\\\]).)*\\]';
+import { prefixToken, suffixToken } from './token';
 
-const SHEET_NAME_REGEX = '((?![\\[\\]\\/?*\\\\]).)*!';
+export const UNIT_NAME_REGEX = '\'?\\[((?![\\/?:"<>|*\\\\]).)*\\]';
 
-const ABSOLUTE_SYMBOL = '$';
+export const SHEET_NAME_REGEX = '((?![\\[\\]\\/?*\\\\]).)*!';
 
-const RANGE_SYMBOL = '\\s*?:\\s*?';
+export const ABSOLUTE_SYMBOL = '$';
 
-const PROJECTION_SYMBOL = '@';
+export const RANGE_SYMBOL = '\\s*?:\\s*?';
 
-const ARRAY_SYMBOL = '#';
+export const SIMPLE_SINGLE_RANGE_REGEX = `\\${ABSOLUTE_SYMBOL}?[A-Za-z]+\\${ABSOLUTE_SYMBOL}?[0-9]+`;
 
-const SIMPLE_SINGLE_RANGE_REGEX = `\\${ABSOLUTE_SYMBOL}?[A-Za-z]+\\${ABSOLUTE_SYMBOL}?[0-9]+`;
+export const REFERENCE_MULTIPLE_RANGE_REGEX = `^(${prefixToken.AT})?(${UNIT_NAME_REGEX})?(${SHEET_NAME_REGEX})?${SIMPLE_SINGLE_RANGE_REGEX}${RANGE_SYMBOL}${SIMPLE_SINGLE_RANGE_REGEX}$`;
 
-export const REFERENCE_MULTIPLE_RANGE_REGEX = `^(${PROJECTION_SYMBOL})?(${UNIT_NAME_REGEX})?(${SHEET_NAME_REGEX})?${SIMPLE_SINGLE_RANGE_REGEX}${RANGE_SYMBOL}${SIMPLE_SINGLE_RANGE_REGEX}$`;
-
-export const REFERENCE_SINGLE_RANGE_REGEX = `^(${UNIT_NAME_REGEX})?(${SHEET_NAME_REGEX})?\\s*?${SIMPLE_SINGLE_RANGE_REGEX}(${ARRAY_SYMBOL})?$`;
+export const REFERENCE_SINGLE_RANGE_REGEX = `^(${UNIT_NAME_REGEX})?(${SHEET_NAME_REGEX})?\\s*?${SIMPLE_SINGLE_RANGE_REGEX}(${suffixToken.POUND})?$`;
 
 export const REFERENCE_REGEX_ROW = `^(${UNIT_NAME_REGEX})?(${SHEET_NAME_REGEX})?\\${ABSOLUTE_SYMBOL}?[0-9]+${RANGE_SYMBOL}\\${ABSOLUTE_SYMBOL}?[0-9]+$`;
 

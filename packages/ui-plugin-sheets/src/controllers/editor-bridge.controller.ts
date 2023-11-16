@@ -1,5 +1,9 @@
 import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/base-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, SelectionManagerService } from '@univerjs/base-sheets';
+import {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    SelectionManagerService,
+    SetWorksheetActivateMutation,
+} from '@univerjs/base-sheets';
 import {
     Disposable,
     ICommandInfo,
@@ -146,34 +150,47 @@ export class EditorBridgeController extends Disposable {
             });
         });
 
-        spreadsheet.onPointerDownObserver.add(this._hideEditor.bind(this));
-        spreadsheetColumnHeader.onPointerDownObserver.add(this._hideEditor.bind(this));
-        spreadsheetLeftTopPlaceholder.onPointerDownObserver.add(this._hideEditor.bind(this));
-        spreadsheetRowHeader.onPointerDownObserver.add(this._hideEditor.bind(this));
+        spreadsheet.onPointerDownObserver.add(this._KeepVisibleHideEditor.bind(this));
+        spreadsheetColumnHeader.onPointerDownObserver.add(this._KeepVisibleHideEditor.bind(this));
+        spreadsheetLeftTopPlaceholder.onPointerDownObserver.add(this._KeepVisibleHideEditor.bind(this));
+        spreadsheetRowHeader.onPointerDownObserver.add(this._KeepVisibleHideEditor.bind(this));
+    }
+
+    /**
+     * In the activated state of formula editing,
+     * prohibit closing the editor according to the state to facilitate generating selection reference text.
+     */
+    private _KeepVisibleHideEditor() {
+        if (this._editorBridgeService.isForceKeepVisible()) {
+            return;
+        }
+        this._hideEditor();
     }
 
     private _hideEditor() {
-        if (this._editorBridgeService.isVisible().visible === true) {
-            this._selectionManagerService.makeDirty(false);
-            this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
-                visible: false,
-                eventType: DeviceInputEventType.PointerDown,
-            });
-
-            /**
-             * Hiding the editor triggers a SetRangeValuesMutation which saves the content.
-             * This mutation, in turn, triggers a refresh of the skeleton,
-             * causing the selection to update. In most scenarios,
-             * this update is reasonable. However, when clicking on another cell and exiting the edit,
-             * this causes the selection to be reset. Therefore,
-             * a makeDirty method has been added here to block the refresh of selection.
-             * The reason for using setTimeout is that it needs to wait for the process
-             * to finish before allowing the refresh of the selection.
-             */
-            setTimeout(() => {
-                this._selectionManagerService.makeDirty(true);
-            }, 0);
+        if (this._editorBridgeService.isVisible().visible !== true) {
+            return;
         }
+
+        this._selectionManagerService.makeDirty(false);
+        this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
+            visible: false,
+            eventType: DeviceInputEventType.PointerDown,
+        });
+
+        /**
+         * Hiding the editor triggers a SetRangeValuesMutation which saves the content.
+         * This mutation, in turn, triggers a refresh of the skeleton,
+         * causing the selection to update. In most scenarios,
+         * this update is reasonable. However, when clicking on another cell and exiting the edit,
+         * this causes the selection to be reset. Therefore,
+         * a makeDirty method has been added here to block the refresh of selection.
+         * The reason for using setTimeout is that it needs to wait for the process
+         * to finish before allowing the refresh of the selection.
+         */
+        setTimeout(() => {
+            this._selectionManagerService.makeDirty(true);
+        }, 0);
     }
 
     private _getSheetObject() {
@@ -185,7 +202,9 @@ export class EditorBridgeController extends Disposable {
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (updateCommandList.includes(command.id)) {
+                if (command.id === SetWorksheetActivateMutation.id) {
+                    this._KeepVisibleHideEditor();
+                } else if (updateCommandList.includes(command.id)) {
                     this._hideEditor();
                 }
             })

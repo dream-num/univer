@@ -9,6 +9,14 @@ export type {
     IUnitSheetNameMap,
 } from './basics/common';
 export { FUNCTION_NAMES, FunctionType, type IFunctionInfo, type IFunctionParam } from './basics/function';
+export { isFormulaLexerToken } from './basics/match-token';
+export {
+    deserializeRangeWithSheet,
+    serializeRange,
+    serializeRangeToRefString,
+    serializeRangeWithSheet,
+    serializeRangeWithSpreadsheet,
+} from './basics/reference';
 export { type ISequenceNode, sequenceNodeType } from './basics/sequence';
 export { BaseFormulaEnginePlugin } from './plugin';
 export { RangeReferenceObject } from './reference-object/range-reference-object';

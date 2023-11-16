@@ -49,6 +49,7 @@ import { Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
+import { SetEditorResizeOperation } from '../../commands/operations/set-editor-resize.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import styles from '../../views/sheet-container/index.module.less';
@@ -348,7 +349,9 @@ export class StartEditController extends Disposable {
         this._addBackground(scene, editorWidth, editorHeight, fill);
 
         // resize canvas
-        engine.resizeBySize(editorWidth, physicHeight);
+        setTimeout(() => {
+            engine.resizeBySize(editorWidth, physicHeight);
+        }, 0);
 
         this._cellEditorManagerService.setState({
             startX,
@@ -544,7 +547,7 @@ export class StartEditController extends Disposable {
 
     private _commandExecutedListener() {
         // Listen to document edits to refresh the size of the editor.
-        const updateCommandList = [RichTextEditingMutation.id];
+        const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
 
         const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
 

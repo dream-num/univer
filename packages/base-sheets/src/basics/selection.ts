@@ -40,6 +40,11 @@ export interface ISelectionWidgetConfig {
  */
 export interface ISelectionStyle {
     /**
+     * Assign an ID to a selection area.
+     * The current scenario is to identify the formula string corresponding to the selection area
+     */
+    id?: string;
+    /**
      * The volume of the selection border determines the thickness of the selection border
      */
     strokeWidth: number;

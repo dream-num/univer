@@ -111,6 +111,8 @@ export class SelectionShape {
 
     private _defaultStyle!: ISelectionStyle;
 
+    private _isHelperSelection: boolean = true;
+
     constructor(
         private _scene: Scene,
         private _zIndex: number,
@@ -208,8 +210,12 @@ export class SelectionShape {
         return this._dashRect;
     }
 
+    get isHelperSelection() {
+        return this._isHelperSelection;
+    }
+
     enableHeaderHighlight() {
-        this._isHeaderHighlight = true;
+        this._isHelperSelection = true;
     }
 
     disableHeaderHighlight() {
@@ -363,10 +369,10 @@ export class SelectionShape {
 
     update(
         newSelectionRange: IRangeWithCoord,
-        rowHeaderWidth: number,
-        columnHeaderHeight: number,
-        style: Nullable<ISelectionStyle>,
-        highlight: Nullable<ISelectionCellWithCoord>
+        rowHeaderWidth: number = 0,
+        columnHeaderHeight: number = 0,
+        style?: Nullable<ISelectionStyle>,
+        highlight?: Nullable<ISelectionCellWithCoord>
     ) {
         this._selectionModel.setValue(newSelectionRange, highlight);
         if (style == null) {
@@ -461,6 +467,14 @@ export class SelectionShape {
             ...this._selectionModel.getValue(),
             style: this._selectionStyle,
         };
+    }
+
+    enableHelperSelection() {
+        this._isHelperSelection = true;
+    }
+
+    disableHelperSelection() {
+        this._isHelperSelection = false;
     }
 
     private _initialize() {

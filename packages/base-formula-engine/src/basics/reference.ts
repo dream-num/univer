@@ -1,7 +1,7 @@
-import { IRange } from '../types/interfaces/i-range';
-import { Tools } from './tools';
+import { IRange, Tools } from '@univerjs/core';
 
-const COLON_SYMBOL = ':';
+import { UNIT_NAME_REGEX } from './regex';
+import { matchToken } from './token';
 
 const $ROW_REGEX = /[^0-9]/g;
 
@@ -25,7 +25,6 @@ function singleReferenceToGrid(refBody: string) {
 
 /**
  * Serialize an `IRange` into a string.
- * @param sheetID ID of the Worksheet
  * @param range The `IRange` to be serialized
  */
 export function serializeRange(range: IRange): string {
@@ -43,13 +42,38 @@ export function serializeRangeWithSheet(sheetName: string, range: IRange): strin
     return `${sheetName}!${serializeRange(range)}`;
 }
 
+/**
+ * Serialize an `IRange` and a sheetID into a string.
+ * @param unit unitId or unitName
+ * @param sheetName
+ * @param range
+ * @returns
+ */
+export function serializeRangeWithSpreadsheet(unit: string, sheetName: string, range: IRange): string {
+    return `[${unit}]${sheetName}!${serializeRange(range)}`;
+}
+
+export function serializeRangeToRefString(gridRangeName: IGridRangeName) {
+    const { unitId, sheetName, range } = gridRangeName;
+
+    if (unitId != null && unitId.length > 0 && sheetName != null && sheetName.length > 0) {
+        return serializeRangeWithSpreadsheet(unitId, sheetName, range);
+    }
+
+    if (sheetName != null && sheetName.length > 0) {
+        return serializeRangeWithSheet(sheetName, range);
+    }
+
+    return serializeRange(range);
+}
+
 export function deserializeRangeWithSheet(refString: string): IGridRangeName {
-    const unitIdMatch = new RegExp('\'?\\[((?![\\/?:"<>|*\\\\]).)*\\]').exec(refString);
+    const unitIdMatch = new RegExp(UNIT_NAME_REGEX).exec(refString);
     let unitId = '';
 
     if (unitIdMatch != null) {
         unitId = unitIdMatch[0];
-        refString = refString.replace(new RegExp('\'?\\[((?![\\/?:"<>|*\\\\]).)*\\]', 'g'), '');
+        refString = refString.replace(new RegExp(UNIT_NAME_REGEX, 'g'), '');
     }
 
     const sheetNameIndex = refString.indexOf('!');
@@ -62,7 +86,7 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
         refBody = refString;
     }
 
-    const colonIndex = refBody.indexOf(COLON_SYMBOL);
+    const colonIndex = refBody.indexOf(matchToken.COLON);
 
     if (colonIndex === -1) {
         const grid = singleReferenceToGrid(refBody);

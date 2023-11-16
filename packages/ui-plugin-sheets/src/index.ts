@@ -2,6 +2,7 @@ export * from './basics';
 export { getEditorObject } from './basics/editor/get-editor-object';
 export { SetCellEditVisibleArrowOperation } from './commands/operations/cell-edit.operation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
+export { SetEditorResizeOperation } from './commands/operations/set-editor-resize.operation';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export { RangeSelector } from './components/range-selector/RangeSelector';
 export { whenEditorInputFormulaActivated } from './controllers/shortcuts/utils';
@@ -18,5 +19,6 @@ export {
     type IEditorBridgeServiceVisibleParam,
 } from './services/editor-bridge.service';
 export { ISelectionRenderService } from './services/selection/selection-render.service';
+export { SelectionShape } from './services/selection/selection-shape';
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { SheetUIPlugin } from './sheet-ui-plugin';

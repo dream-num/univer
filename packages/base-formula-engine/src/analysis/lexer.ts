@@ -1,17 +1,16 @@
 import { Disposable, Nullable, Tools } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
+import { isFormulaLexerToken } from '../basics/match-token';
 import { isReferenceString, REFERENCE_SINGLE_RANGE_REGEX } from '../basics/regex';
 import { ISequenceArray, ISequenceNode, sequenceNodeType } from '../basics/sequence';
 import {
-    compareToken,
     matchToken,
     OPERATOR_TOKEN_PRIORITY,
     OPERATOR_TOKEN_SET,
     operatorToken,
     prefixToken,
     SUFFIX_TOKEN_SET,
-    suffixToken,
 } from '../basics/token';
 import {
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
@@ -211,15 +210,7 @@ export class LexerTreeBuilder extends Disposable {
     }
 
     private _isLastMergeString(str: string) {
-        return (
-            str === matchToken.DOUBLE_QUOTATION ||
-            Tools.isStringNumber(str) ||
-            (!Object.values(compareToken).includes(str as compareToken) &&
-                !Object.values(operatorToken).includes(str as operatorToken) &&
-                !Object.values(matchToken).includes(str as matchToken) &&
-                !Object.values(suffixToken).includes(str as suffixToken) &&
-                !Object.values(prefixToken).includes(str as prefixToken))
-        );
+        return str === matchToken.DOUBLE_QUOTATION || Tools.isStringNumber(str) || !isFormulaLexerToken(str);
     }
 
     /**

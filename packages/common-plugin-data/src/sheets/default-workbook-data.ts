@@ -306,7 +306,6 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
     locale: LocaleType.EN_US,
     creator: 'univer',
     name: 'universheet',
-    extensions: [],
     sheetOrder: ['sheet-01', 'sheet-02', 'sheet-03', 'sheet-04', 'sheet-05', 'sheet-06'],
     styles: {
         '1': {
@@ -741,7 +740,6 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookConfig = {
     locale: LocaleType.EN_US,
     creator: 'univer',
     name: 'universheet',
-    extensions: [],
     sheetOrder: [],
     styles: {
         '1': {

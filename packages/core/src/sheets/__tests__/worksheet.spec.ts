@@ -35,7 +35,6 @@ const WORKBOOK_DATA: IWorkbookConfig = {
     },
     createdTime: '',
     creator: '',
-    extensions: [],
     lastModifiedBy: '',
     locale: LocaleType.EN_US,
     modifiedTime: '',

@@ -49,7 +49,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookConfig = {
     locale: LocaleType.EN_US,
     creator: 'univer',
     name: 'universheet',
-    extensions: [],
     sheetOrder: ['sheet-0001'],
     styles: {
         '1': {

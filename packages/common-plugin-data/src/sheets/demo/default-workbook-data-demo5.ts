@@ -5,7 +5,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO5: IWorkbookConfig = {
     locale: LocaleType.EN_US,
     creator: 'univer',
     name: 'universheet',
-    extensions: [],
+
     sheetOrder: ['sheet-0005'],
     styles: {
         idtqdi: {

@@ -53,7 +53,6 @@ export const DEFAULT_CELL = {
  * Used as an init workbook return value
  */
 export const DEFAULT_WORKBOOK: IWorkbookConfig = {
-    extensions: [],
     id: '',
     sheetOrder: [],
     name: '',

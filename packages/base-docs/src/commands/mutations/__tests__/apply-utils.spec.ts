@@ -9,7 +9,7 @@ interface IMockBody {
     textRuns: ITextRun[];
 }
 
-describe('example', () => {
+describe('test case in apply utils', () => {
     let body: Nullable<IMockBody> = null;
     let updateTextRuns: ITextRun[] = [];
 

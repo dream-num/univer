@@ -67,7 +67,7 @@ export class HtmlToUDMService {
         for (const node of nodes) {
             if (node.nodeType === Node.TEXT_NODE) {
                 // TODO: @JOCS, More characters need to be replaced, like `\b`
-                const text = node.nodeValue?.replace(/\r\n/g, '');
+                const text = node.nodeValue?.replace(/[\r\n]/g, '');
                 let style;
 
                 if (parent && this.styleCache.has(parent)) {

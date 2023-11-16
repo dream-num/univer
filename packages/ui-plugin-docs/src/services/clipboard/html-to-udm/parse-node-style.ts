@@ -1,5 +1,5 @@
+import { TinyColor } from '@ctrl/tinycolor';
 import { BaselineOffset, BooleanNumber, ITextStyle } from '@univerjs/core';
-import tinycolor from 'tinycolor2';
 
 import { ptToPixel } from './utils';
 
@@ -102,9 +102,9 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
             }
 
             case 'color': {
-                const color = tinycolor(cssValue);
+                const color = new TinyColor(cssValue);
 
-                if (color.isValid()) {
+                if (color.isValid) {
                     docStyles.cl = {
                         rgb: color.toRgbString(),
                     };
@@ -114,9 +114,9 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
             }
 
             case 'background-color': {
-                const color = tinycolor(cssValue);
+                const color = new TinyColor(cssValue);
 
-                if (color.isValid()) {
+                if (color.isValid) {
                     docStyles.bg = {
                         rgb: color.toRgbString(),
                     };

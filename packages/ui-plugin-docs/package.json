@@ -32,21 +32,20 @@
         "esbuild": "node ./esbuild.config.mjs"
     },
     "dependencies": {
-        "@univerjs/base-docs": "*",
-        "@univerjs/base-render": "*",
-        "@univerjs/base-ui": "*",
-        "@univerjs/core": "*",
-        "@univerjs/design": "*",
+        "@ctrl/tinycolor": "^4.0.2",
+        "@univerjs/base-docs": "workspace:*",
+        "@univerjs/base-render": "workspace:*",
+        "@univerjs/base-ui": "workspace:*",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
         "@wendellhu/redi": "^0.12.11",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "tinycolor2": "^1.6.0"
+        "react-dom": "^18.2.0"
     },
     "devDependencies": {
         "@types/node": "^20.9.0",
         "@types/react": "^18.2.37",
         "@types/react-dom": "^18.2.15",
-        "@types/tinycolor2": "^1.4.6",
         "@vitest/coverage-istanbul": "^0.34.6",
         "happy-dom": "^12.10.3",
         "esbuild": "^0.19.5",

@@ -1,6 +1,5 @@
 import {
     CURSOR_TYPE,
-    cursorConvertToTextRange,
     Documents,
     getOneTextSelectionRange,
     IMouseEvent,
@@ -130,7 +129,7 @@ export class TextSelectionController extends Disposable {
         this._textSelectionManagerService.textSelectionInfo$.subscribe((param) => {
             const unitId = this._textSelectionManagerService.getCurrentSelection()?.unitId;
             // Remove all textRanges.
-            this._textSelectionRenderManager.reset();
+            this._textSelectionRenderManager.removeAllTextRanges();
 
             if (param == null || unitId == null) {
                 return;
@@ -146,19 +145,11 @@ export class TextSelectionController extends Disposable {
 
             const { scene, document } = currentRender;
 
-            for (const selectionWithStyle of param) {
-                const textSelection = cursorConvertToTextRange(
-                    scene,
-                    selectionWithStyle,
-                    docSkeleton,
-                    document.getOffsetConfig()
-                );
-                this._textSelectionRenderManager.add(textSelection);
-            }
-
-            this._textSelectionRenderManager.sync();
-
-            this._textSelectionRenderManager.scroll();
+            this._textSelectionRenderManager.addTextRanges(param, {
+                scene,
+                skeleton: docSkeleton,
+                documentOffsetConfig: document.getOffsetConfig(),
+            });
         });
     }
 

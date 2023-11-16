@@ -45,7 +45,7 @@ export class TextSelectionManagerService implements IDisposable {
 
         this._textSelectionInfo.clear();
 
-        this.refresh(this._currentSelection);
+        this._refresh(this._currentSelection);
     }
 
     resetPlugin() {
@@ -55,7 +55,7 @@ export class TextSelectionManagerService implements IDisposable {
 
         this._currentSelection.pluginName = NORMAL_TEXT_SELECTION_PLUGIN_NAME;
 
-        this.refresh(this._currentSelection);
+        this._refresh(this._currentSelection);
     }
 
     dispose(): void {
@@ -67,13 +67,13 @@ export class TextSelectionManagerService implements IDisposable {
             return;
         }
 
-        this.refresh(this._currentSelection);
+        this._refresh(this._currentSelection);
     }
 
     setCurrentSelection(param: ITextSelectionManagerSearchParam) {
         this._currentSelection = param;
 
-        this.refresh(param);
+        this._refresh(param);
     }
 
     setCurrentSelectionNotRefresh(param: ITextSelectionManagerSearchParam) {
@@ -123,7 +123,7 @@ export class TextSelectionManagerService implements IDisposable {
             textRanges,
         });
 
-        this.refresh(this._currentSelection);
+        this._refresh(this._currentSelection);
     }
 
     replaceWithNoRefresh(textRanges: ITextRangeWithStyle[]) {
@@ -163,7 +163,7 @@ export class TextSelectionManagerService implements IDisposable {
         return this._textSelectionInfo.get(pluginName)?.get(unitId);
     }
 
-    private refresh(param: ITextSelectionManagerSearchParam): void {
+    private _refresh(param: ITextSelectionManagerSearchParam): void {
         this._textSelectionInfo$.next(this._getTextRanges(param));
     }
 
@@ -199,7 +199,7 @@ export class TextSelectionManagerService implements IDisposable {
             OldTextRanges.push(...textRanges);
         }
 
-        this.refresh({ pluginName, unitId });
+        this._refresh({ pluginName, unitId });
     }
 
     private _replaceByParam(insertParam: ITextSelectionManagerInsertParam) {
@@ -217,8 +217,6 @@ export class TextSelectionManagerService implements IDisposable {
             const OldTextRanges = unitTextRange.get(unitId)!;
             OldTextRanges.splice(0, OldTextRanges.length, ...textRanges);
         }
-
-        // this.refresh({ pluginName, unitId, sheetId });
     }
 
     private _clearByParam(param: ITextSelectionManagerSearchParam): void {
@@ -226,7 +224,7 @@ export class TextSelectionManagerService implements IDisposable {
 
         textRange?.splice(0);
 
-        this.refresh(param);
+        this._refresh(param);
     }
 
     private _removeByParam(index: number, param: ITextSelectionManagerSearchParam): void {
@@ -234,6 +232,6 @@ export class TextSelectionManagerService implements IDisposable {
 
         textRange?.splice(index, 1);
 
-        this.refresh(param);
+        this._refresh(param);
     }
 }

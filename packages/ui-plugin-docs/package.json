@@ -33,11 +33,11 @@
     },
     "dependencies": {
         "@ctrl/tinycolor": "^4.0.2",
-        "@univerjs/base-docs": "workspace:*",
-        "@univerjs/base-render": "workspace:*",
-        "@univerjs/base-ui": "workspace:*",
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
+        "@univerjs/base-docs": "*",
+        "@univerjs/base-render": "*",
+        "@univerjs/base-ui": "*",
+        "@univerjs/core": "*",
+        "@univerjs/design": "*",
         "@wendellhu/redi": "^0.12.11",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"

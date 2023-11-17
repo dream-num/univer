@@ -338,10 +338,10 @@ export function getRetainAndDeleteFromReplace(
     segmentId: string = '',
     memoryCursor: number = 0
 ): Array<IRetainMutationParams | IDeleteMutationParams> {
-    const { startOffset, endOffset, collapsed } = range;
+    const { startOffset, endOffset } = range;
     const dos: Array<IRetainMutationParams | IDeleteMutationParams> = [];
 
-    const textStart = startOffset + (collapsed ? -1 : 0) - memoryCursor;
+    const textStart = startOffset - memoryCursor;
     const textEnd = endOffset - memoryCursor;
 
     if (textStart > 0) {

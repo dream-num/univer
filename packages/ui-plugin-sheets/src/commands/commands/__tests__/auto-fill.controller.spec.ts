@@ -13,6 +13,7 @@ import {
     IUniverInstanceService,
     IWorkbookConfig,
     LocaleType,
+    RedoCommand,
     ThemeService,
     UndoCommand,
     Univer,
@@ -384,6 +385,12 @@ describe('Test auto fill rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 5)?.v).toBe(undefined);
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 6)?.v).toBe(undefined);
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 7)?.v).toBe(undefined);
+
+                await commandService.executeCommand(RedoCommand.id);
+                expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 4)?.v).toBe(3);
+                expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 5)?.v).toBe(4);
+                expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 6)?.v).toBe('第3');
+                expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 7)?.v).toBe('第4');
             });
         });
     });

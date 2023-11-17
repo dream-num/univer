@@ -25,6 +25,7 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
         // }
 
         selectionManagerService.replace(selections);
+
         return true;
     },
 };

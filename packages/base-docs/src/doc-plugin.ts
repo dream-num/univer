@@ -100,12 +100,6 @@ export class DocPlugin extends Plugin {
         this._localeService.load({
             enUS,
         });
-
-        // if (this._config.standalone) {
-        //     this.initCanvasView();
-        // }
-
-        // this._markDocAsFocused();
     }
 
     private _initializeCommands(): void {
@@ -217,11 +211,4 @@ export class DocPlugin extends Plugin {
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
     }
-
-    // private _markDocAsFocused() {
-    //     if (this._config.standalone) {
-    //         const c = this._currentUniverService.getCurrentUniverDocInstance();
-    //         this._currentUniverService.focusUniverInstance(c.getUnitId());
-    //     }
-    // }
 }

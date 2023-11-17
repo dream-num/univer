@@ -116,7 +116,7 @@ export class StartEditController extends Disposable {
                 return;
             }
 
-            const { position, documentLayoutObject, scaleX, scaleY } = param;
+            const { position, documentLayoutObject, scaleX } = param;
 
             const editorObject = this._getEditorObject();
 

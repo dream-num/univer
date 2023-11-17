@@ -135,7 +135,7 @@ export class EditorBridgeController extends Disposable {
             return;
         }
 
-        const { spreadsheet, scene, spreadsheetColumnHeader, spreadsheetLeftTopPlaceholder, spreadsheetRowHeader } =
+        const { spreadsheet, spreadsheetColumnHeader, spreadsheetLeftTopPlaceholder, spreadsheetRowHeader } =
             sheetObject;
 
         spreadsheet.onDblclickObserver.add(() => {

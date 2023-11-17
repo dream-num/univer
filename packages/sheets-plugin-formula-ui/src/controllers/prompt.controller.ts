@@ -354,7 +354,7 @@ export class PromptController extends Disposable {
         const selectionWithStyle: ISelectionWithStyle[] = [];
 
         for (const refSelection of refSelections) {
-            const { refIndex, themeColor, token } = refSelection;
+            const { themeColor, token } = refSelection;
 
             const gridRange = deserializeRangeWithSheet(token);
 
@@ -393,7 +393,7 @@ export class PromptController extends Disposable {
 
         const { unitId, sheetId } = current;
 
-        this._selectionManagerService.setCurrentSelection({
+        this._selectionManagerService.setCurrentSelectionNotRefresh({
             pluginName,
             unitId,
             sheetId,

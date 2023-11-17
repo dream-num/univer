@@ -207,3 +207,15 @@ export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { RefRangeService } from './services/ref-range/ref-range.service';
 export type { EffectRefRangeParams } from './services/ref-range/type';
 export { EffectRefRangId, OperatorType } from './services/ref-range/type';
+export {
+    handleDeleteRangeMoveLeft,
+    handleDeleteRangeMoveUp,
+    handleInsertCol,
+    handleInsertRangeMoveDown,
+    handleInsertRangeMoveRight,
+    handleInsertRow,
+    handleIRemoveCol,
+    handleIRemoveRow,
+    handleMoveRange,
+    runRefRangeMutations,
+} from './services/ref-range/util';

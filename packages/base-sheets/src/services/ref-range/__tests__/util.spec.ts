@@ -501,10 +501,10 @@ describe('test ref-range move', () => {
         let range: IRange;
         describe('the range contain targetRange', () => {
             beforeEach(() => {
-                range = { startRow: 5, endColumn: 99, startColumn: 0, endRow: 10 };
+                range = { startRow: 5, endRow: 10, startColumn: 0, endColumn: 99 };
             });
             it('the targetRange is single row', () => {
-                const targetRange = { startRow: 5, endColumn: 0, startColumn: 99, endRow: 5 };
+                const targetRange = { startRow: 5, endRow: 5, startColumn: 0, endColumn: 99 };
                 const operators = handleIRemoveRow(
                     { params: { ranges: [range] }, id: EffectRefRangId.RemoveColCommandId },
                     targetRange
@@ -513,22 +513,27 @@ describe('test ref-range move', () => {
                 expect(result).toBe(null);
             });
             it('the targetRange is multiple row ', () => {
-                const targetRange = { startRow: 0, endColumn: 5, startColumn: 6, endRow: 99 };
+                const targetRange = { startRow: 0, endRow: 5, startColumn: 0, endColumn: 99 };
                 const operators = handleIRemoveRow(
                     { params: { ranges: [range] }, id: EffectRefRangId.RemoveColCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
-                expect(result).toBe(null);
+                expect(result).toEqual({
+                    endColumn: 99,
+                    endRow: 4,
+                    startColumn: 0,
+                    startRow: 0,
+                });
             });
-            it('the targetRange is equal range', () => {
-                const targetRange = { startRow: 0, endColumn: 5, startColumn: 10, endRow: 99 };
+            it('the targetRange is split', () => {
+                const targetRange = { startRow: 0, endRow: 99, startColumn: 0, endColumn: 99 };
                 const operators = handleIRemoveRow(
                     { params: { ranges: [range] }, id: EffectRefRangId.RemoveColCommandId },
                     targetRange
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
-                expect(result).toBe(null);
+                expect(result).toEqual(null);
             });
         });
         describe('the targetRange in the range top', () => {

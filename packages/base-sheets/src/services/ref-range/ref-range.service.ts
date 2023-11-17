@@ -119,7 +119,7 @@ export class RefRangeService extends Disposable {
                                 startRow: range.startRow,
                                 startColumn: range.startColumn,
                                 endColumn: workSheet.getColumnCount() - 1,
-                                endRow: range.endColumn,
+                                endRow: range.endRow,
                             }));
                             return this._checkRange(effectRanges, workbookId, worksheetId);
                         }

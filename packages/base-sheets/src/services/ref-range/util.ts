@@ -21,7 +21,7 @@ export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) =
     const toRange = param.params?.toRange;
     const fromRange = param.params?.fromRange;
     if (!toRange || !fromRange) {
-        return;
+        return [];
     }
     const operators: IOperator[] = [];
 
@@ -53,7 +53,7 @@ export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) =
 export const handleIRemoveCol = (param: IRemoveRowColCommand, targetRange: IRange) => {
     const ranges = param.params?.ranges;
     if (!ranges) {
-        return;
+        return [];
     }
     const operators: IOperator[] = [];
     for (let index = 0; index < ranges.length; index++) {
@@ -64,7 +64,10 @@ export const handleIRemoveCol = (param: IRemoveRowColCommand, targetRange: IRang
                 step: -(range.endColumn - range.startColumn + 1),
             };
             operators.push(result);
-        } else if (range.startColumn <= targetRange.startColumn && range.endColumn >= targetRange.endColumn) {
+        } else if (
+            (range.startColumn <= targetRange.startColumn && range.endColumn >= targetRange.endColumn) ||
+            (range.startColumn >= targetRange.startColumn && range.endColumn <= targetRange.endColumn)
+        ) {
             const result: IDeleteOperator = {
                 type: OperatorType.delete,
             };
@@ -77,7 +80,7 @@ export const handleIRemoveCol = (param: IRemoveRowColCommand, targetRange: IRang
             // the targetRange in the range right
             const result: IHorizontalMoveOperator = {
                 type: OperatorType.horizontalMove,
-                step: -(targetRange.startColumn - range.startColumn), // why don't need +1?
+                step: -(targetRange.startColumn - range.startColumn),
                 length: -(range.endColumn - targetRange.startColumn + 1),
             };
             operators.push(result);
@@ -103,7 +106,7 @@ export const handleIRemoveCol = (param: IRemoveRowColCommand, targetRange: IRang
 export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRange) => {
     const ranges = param.params?.ranges;
     if (!ranges) {
-        return;
+        return [];
     }
     const operators: IOperator[] = [];
     for (let index = 0; index < ranges.length; index++) {
@@ -114,7 +117,10 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
                 step: -(range.endRow - range.startRow + 1),
             };
             operators.push(result);
-        } else if (range.startRow <= targetRange.startRow && range.endRow >= targetRange.endRow) {
+        } else if (
+            (range.startRow <= targetRange.startRow && range.endRow >= targetRange.endRow) ||
+            (range.startRow >= targetRange.startRow && range.endRow <= targetRange.endRow)
+        ) {
             const result: IDeleteOperator = {
                 type: OperatorType.delete,
             };
@@ -124,10 +130,10 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
             range.endRow >= targetRange.startRow &&
             range.endRow <= targetRange.endRow
         ) {
-            // the range in the originRange top
+            // the range in the targetRange top
             const result: IVerticalMoveOperator = {
                 type: OperatorType.verticalMove,
-                step: -(targetRange.startRow - range.startRow), // why don't need +1?
+                step: -(targetRange.startRow - range.startRow),
                 length: -(range.endRow - targetRange.startRow + 1),
             };
             operators.push(result);
@@ -136,7 +142,7 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
             range.startRow <= targetRange.endRow &&
             range.endRow >= targetRange.endRow
         ) {
-            // the range in the originRange bottom
+            // the range in the targetRange bottom
             const result: IVerticalMoveOperator = {
                 type: OperatorType.verticalMove,
                 step: 0,
@@ -151,7 +157,7 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
 export const handleInsertRow = (param: IInsertRowCommand, targetRange: IRange) => {
     const range = param.params?.range;
     if (!range) {
-        return;
+        return [];
     }
     if (
         range.endRow <= targetRange.startRow ||
@@ -249,7 +255,7 @@ export const handleInsertRangeMoveRight = (param: IInsertRangeMoveRightCommand, 
     }
     const range = ranges[0];
     if (range.startRow <= targetRange.startRow && range.endRow >= targetRange.endRow) {
-        if (range.startRow <= targetRange.startColumn) {
+        if (range.startColumn <= targetRange.startColumn) {
             const result: IHorizontalMoveOperator = {
                 type: OperatorType.horizontalMove,
                 step: range.endColumn - range.startColumn + 1,
@@ -296,7 +302,7 @@ export const handleDeleteRangeMoveUp = (param: IDeleteRangeMoveUpCommand, target
     const ranges = param.params?.ranges;
 
     if (!ranges || ranges.length !== 1) {
-        return;
+        return [];
     }
     const range = ranges[0];
 

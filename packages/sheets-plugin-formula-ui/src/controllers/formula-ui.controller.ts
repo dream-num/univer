@@ -18,7 +18,12 @@ import { RenderFormulaPromptContent } from '../views/FormulaPromptContainer';
 import { MORE_FUNCTIONS_COMPONENT } from '../views/more-functions/interface';
 import { MoreFunctions } from '../views/more-functions/MoreFunctions';
 import { InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory } from './menu';
-import { promptSelectionShortcutItem } from './shortcuts/prompt.shortcut';
+import {
+    promptSelectionShortcutItem,
+    promptSelectionShortcutItemCtrl,
+    promptSelectionShortcutItemCtrlAndShift,
+    promptSelectionShortcutItemShift,
+} from './shortcuts/prompt.shortcut';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaUIController)
 export class FormulaUIController extends Disposable {
@@ -59,7 +64,12 @@ export class FormulaUIController extends Disposable {
     }
 
     private _registerShortcuts(): void {
-        [...promptSelectionShortcutItem()].forEach((item) => {
+        [
+            ...promptSelectionShortcutItem(),
+            ...promptSelectionShortcutItemShift(),
+            ...promptSelectionShortcutItemCtrl(),
+            ...promptSelectionShortcutItemCtrlAndShift(),
+        ].forEach((item) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(item));
         });
     }

@@ -15,10 +15,13 @@ import {
     ITextSelectionRenderManager,
 } from '@univerjs/base-render';
 import { ISelectionWithStyle, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/base-sheets';
+import { KeyCode, MetaKeys } from '@univerjs/base-ui';
 import {
+    Direction,
     Disposable,
     DisposableCollection,
     FOCUSING_EDITOR_INPUT_FORMULA,
+    ICommandInfo,
     ICommandService,
     IContextService,
     IDocumentBody,
@@ -36,17 +39,25 @@ import {
 } from '@univerjs/core';
 import {
     EditorBridgeService,
+    ExpandSelectionCommand,
     getEditorObject,
     IEditorBridgeService,
     ISelectionRenderService,
+    JumpOver,
+    MoveSelectionCommand,
     SelectionShape,
     SetEditorResizeOperation,
     SheetSkeletonManagerService,
 } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
 
+import {
+    ISelectEditorFormulaOperationParam,
+    SelectEditorFormluaOperation,
+} from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
+import { META_KEY_CTRL_AND_SHIFT } from '../common/prompt';
 import { FORMULA_REF_SELECTION_PLUGIN_NAME, getFormulaRefSelectionStyle } from '../common/selection';
 import { IDescriptionService, ISearchItem } from '../services/description.service';
 import { IFormulaPromptService } from '../services/prompt.service';
@@ -73,6 +84,10 @@ export class PromptController extends Disposable {
     private _lastSequenceNodes: Array<string | ISequenceNode> = [];
 
     private _isLockedOnSelectionChangeRefString: boolean = false;
+
+    private _previousControl: Nullable<SelectionShape>;
+
+    private _currentInsertRefStringIndex: number = -1;
 
     private _stringColor = '';
 
@@ -105,13 +120,18 @@ export class PromptController extends Disposable {
 
     private _initialize(): void {
         this._initialCursorSync();
+
         this._initAcceptFormula();
 
         this._initialFormulaTheme();
 
-        this._initialRefSelectionEvent();
+        this._initialRefSelectionUpdateEvent();
+
+        this._initialRefSelectionInsertEvent();
 
         this._initialExitEditor();
+
+        this._commandExecutedListener();
     }
 
     private _initialFormulaTheme() {
@@ -141,10 +161,7 @@ export class PromptController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._textSelectionManagerService.textSelectionInfo$.subscribe(() => {
-                    if (
-                        this._editorBridgeService.isVisible().visible === false ||
-                        this._isLockedOnSelectionChangeRefString === true
-                    ) {
+                    if (this._editorBridgeService.isVisible().visible === false) {
                         return;
                     }
 
@@ -156,23 +173,15 @@ export class PromptController extends Disposable {
 
                     this._changeKeepVisibleHideState();
 
+                    this._switchSelectionPlugin();
+
+                    if (this._isLockedOnSelectionChangeRefString || this._formulaPromptService.isInsertRefString()) {
+                        return;
+                    }
                     // TODO@Dushusir: use real text info
                     this._setFunctionPanel(dataStream);
 
                     this._highlightFormula(currentBody);
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            toDisposable(
-                this._editorBridgeService.visible$.subscribe((param) => {
-                    if (param.visible === true) {
-                        return;
-                    }
-                    this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-
-                    this._changeKeepVisibleHideState();
                 })
             )
         );
@@ -184,14 +193,15 @@ export class PromptController extends Disposable {
      * in order to generate reference text for the formula.
      */
     private _changeKeepVisibleHideState() {
-        if (this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA) === false) {
-            this._editorBridgeService.disableForceKeepVisible();
+        if (this._getContextState() === false) {
+            this._disableForceKeepVisible();
+            return;
         }
 
         const activeRange = this._textSelectionManagerService.getLast();
 
         if (activeRange == null) {
-            this._editorBridgeService.disableForceKeepVisible();
+            this._disableForceKeepVisible();
             return;
         }
 
@@ -200,7 +210,7 @@ export class PromptController extends Disposable {
         const body = this._getCurrentBody();
 
         if (body == null) {
-            this._editorBridgeService.disableForceKeepVisible();
+            this._disableForceKeepVisible();
             return;
         }
 
@@ -216,9 +226,21 @@ export class PromptController extends Disposable {
             char !== matchToken.DOUBLE_QUOTATION
         ) {
             this._editorBridgeService.enableForceKeepVisible();
+
+            this._formulaPromptService.enableInsertRefString();
+            this._currentInsertRefStringIndex = startOffset;
+
+            this._selectionRenderService.enableRemainLast();
         } else {
-            this._editorBridgeService.disableForceKeepVisible();
+            this._disableForceKeepVisible();
         }
+    }
+
+    private _disableForceKeepVisible() {
+        this._editorBridgeService.disableForceKeepVisible();
+        this._formulaPromptService.disableInsertRefString();
+        this._currentInsertRefStringIndex = -1;
+        this._selectionRenderService.disableRemainLast();
     }
 
     private _initialExitEditor() {
@@ -229,15 +251,28 @@ export class PromptController extends Disposable {
                         return;
                     }
 
-                    this._switchSelectionPlugin(NORMAL_SELECTION_PLUGIN_NAME);
+                    /**
+                     * Switching the selection of PluginName causes a refresh.
+                     * Here, a delay is added to prevent the loss of content when pressing enter.
+                     */
+                    if (this._getContextState() === true) {
+                        setTimeout(() => {
+                            this._selectionManagerService.clear();
+                            this._selectionManagerService.changePlugin(NORMAL_SELECTION_PLUGIN_NAME);
+                        }, 0);
+                    }
+
+                    this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+
+                    this._changeKeepVisibleHideState();
                 })
             )
         );
     }
 
     private _getCurrentBody() {
-        const state = this._editorBridgeService.getState();
-        return state?.documentLayoutObject?.documentModel?.snapshot?.body;
+        const documentModel = this._currentUniverService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        return documentModel?.snapshot?.body;
     }
 
     private _contextSwitch(currentInputValue: string) {
@@ -245,6 +280,8 @@ export class PromptController extends Disposable {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
         } else {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+            this._isLockedOnSelectionChangeRefString = false;
+            this._formulaPromptService.disableInsertRefString();
         }
     }
 
@@ -314,6 +351,24 @@ export class PromptController extends Disposable {
     }
 
     /**
+     * Switch from formula selection state to regular selection state.
+     */
+    private _switchSelectionPlugin() {
+        if (this._getContextState() === true) {
+            this._selectionManagerService.changePluginNoRefresh(FORMULA_REF_SELECTION_PLUGIN_NAME);
+            const selections = this._selectionManagerService.getSelections();
+            if (selections == null || selections.length === 0) {
+                const selectionData = this._selectionManagerService.getLastByPlugin(NORMAL_SELECTION_PLUGIN_NAME);
+                if (selectionData != null) {
+                    this._selectionManagerService.addNoRefresh([Tools.deepClone(selectionData)]);
+                }
+            }
+        } else {
+            this._selectionManagerService.changePluginNoRefresh(NORMAL_SELECTION_PLUGIN_NAME);
+        }
+    }
+
+    /**
      *
      * @param body the body object of the current input box
      * @returns
@@ -328,8 +383,6 @@ export class PromptController extends Disposable {
         const sequenceNodes = this._formulaEngineService.buildSequenceNodes(
             dataStream.replace(/\r/g, '').replace(/\n/g, '')
         );
-
-        this._switchSelectionPlugin(FORMULA_REF_SELECTION_PLUGIN_NAME);
 
         this._selectionManagerService.clear();
 
@@ -449,25 +502,6 @@ export class PromptController extends Disposable {
         this._selectionManagerService.add(selectionWithStyle);
     }
 
-    /**
-     * Switch from formula selection state to regular selection state.
-     */
-    private _switchSelectionPlugin(pluginName: string) {
-        const current = this._sheetSkeletonManagerService.getCurrent();
-
-        if (current == null) {
-            return;
-        }
-
-        const { unitId, sheetId } = current;
-
-        this._selectionManagerService.setCurrentSelectionNotRefresh({
-            pluginName,
-            unitId,
-            sheetId,
-        });
-    }
-
     private _getSheetIdByName(unitId: string, sheetName: string) {
         const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
 
@@ -577,13 +611,13 @@ export class PromptController extends Disposable {
      * @returns
      */
     private _updateEditorModel(dataStream: string, textRuns: ITextRun[]) {
-        const state = this._editorBridgeService.getState();
-        const bodyModel = state?.documentLayoutObject.documentModel?.getBodyModel();
+        const documentModel = this._currentUniverService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        const bodyModel = documentModel?.getBodyModel();
         if (bodyModel == null) {
             return;
         }
 
-        const snapshot = state?.documentLayoutObject?.documentModel?.snapshot;
+        const snapshot = documentModel?.snapshot;
 
         if (snapshot == null) {
             return;
@@ -599,7 +633,30 @@ export class PromptController extends Disposable {
         snapshot.body = newBody;
     }
 
-    private _initialRefSelectionEvent() {
+    private _initialRefSelectionInsertEvent() {
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionRenderService.selectionMoving$.subscribe((control) => {
+                    if (!this._formulaPromptService.isInsertRefString()) {
+                        return;
+                    }
+
+                    if (control === this._previousControl) {
+                        // No new control is added, the current ref string is still modified.
+                    } else {
+                        // Holding down ctrl causes an addition, requiring the ref string to be increased.
+
+                        this._previousControl = control;
+                    }
+
+                    // const style = getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString());
+                    // control.updateStyle(style);
+                })
+            )
+        );
+    }
+
+    private _initialRefSelectionUpdateEvent() {
         const disposableCollection = new DisposableCollection();
 
         this.disposeWithMe(
@@ -691,6 +748,60 @@ export class PromptController extends Disposable {
         documentComponent?.getSkeleton()?.calculate();
 
         documentComponent?.makeDirty();
+    }
+
+    private _commandExecutedListener() {
+        // Listen to document edits to refresh the size of the editor.
+        const updateCommandList = [SelectEditorFormluaOperation.id];
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (updateCommandList.includes(command.id)) {
+                    const params = command.params as ISelectEditorFormulaOperationParam;
+                    const { keycode, metaKey } = params;
+
+                    if (keycode === KeyCode.ENTER) {
+                        console.log('ENTER');
+                        return;
+                    }
+                    if (keycode === KeyCode.TAB) {
+                        console.log('TAB');
+                        return;
+                    }
+
+                    let direction = Direction.DOWN;
+                    if (keycode === KeyCode.ARROW_DOWN) {
+                        direction = Direction.DOWN;
+                    } else if (keycode === KeyCode.ARROW_UP) {
+                        direction = Direction.UP;
+                    } else if (keycode === KeyCode.ARROW_LEFT) {
+                        direction = Direction.LEFT;
+                    } else if (keycode === KeyCode.ARROW_RIGHT) {
+                        direction = Direction.RIGHT;
+                    }
+
+                    if (metaKey === MetaKeys.CTRL_COMMAND) {
+                        this._commandService.executeCommand(MoveSelectionCommand.id, {
+                            direction,
+                            jumpOver: JumpOver.moveGap,
+                        });
+                    } else if (metaKey === MetaKeys.SHIFT) {
+                        this._commandService.executeCommand(ExpandSelectionCommand.id, {
+                            direction,
+                        });
+                    } else if (metaKey === META_KEY_CTRL_AND_SHIFT) {
+                        this._commandService.executeCommand(ExpandSelectionCommand.id, {
+                            direction,
+                            jumpOver: JumpOver.moveGap,
+                        });
+                    } else {
+                        this._commandService.executeCommand(MoveSelectionCommand.id, {
+                            direction,
+                        });
+                    }
+                }
+            })
+        );
     }
 
     private _getEditorObject() {

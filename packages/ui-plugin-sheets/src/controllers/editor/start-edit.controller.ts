@@ -113,7 +113,7 @@ export class StartEditController extends Disposable {
 
     private _initialEditFocusListener() {
         this._onInputSubscription = this._editorBridgeService.state$.subscribe((param) => {
-            if (param == null) {
+            if (param == null || this._editorBridgeService.isForceKeepVisible()) {
                 return;
             }
 

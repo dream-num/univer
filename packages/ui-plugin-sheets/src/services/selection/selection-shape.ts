@@ -9,7 +9,7 @@ import {
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
 } from '@univerjs/base-sheets';
 import { IRangeWithCoord, ISelectionCellWithCoord, Nullable, RANGE_TYPE, ThemeService } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SelectionRenderModel } from './selection-render-model';
 
@@ -99,13 +99,13 @@ export class SelectionShape {
     private _dispose$ = new BehaviorSubject<SelectionShape>(this);
     readonly dispose$ = this._dispose$.asObservable();
 
-    readonly selectionMoving$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
-    readonly selectionMoved$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
-    readonly selectionScaling$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
-    readonly selectionScaled$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
-    readonly selectionFilling$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
+    readonly selectionMoving$ = new Subject<Nullable<IRangeWithCoord>>();
+    readonly selectionMoved$ = new Subject<Nullable<IRangeWithCoord>>();
+    readonly selectionScaling$ = new Subject<Nullable<IRangeWithCoord>>();
+    readonly selectionScaled$ = new Subject<Nullable<IRangeWithCoord>>();
+    readonly selectionFilling$ = new Subject<Nullable<IRangeWithCoord>>();
 
-    private readonly _selectionFilled$ = new BehaviorSubject<Nullable<IRangeWithCoord>>(null);
+    private readonly _selectionFilled$ = new Subject<Nullable<IRangeWithCoord>>();
 
     readonly selectionFilled$ = this._selectionFilled$.asObservable();
 
@@ -224,6 +224,127 @@ export class SelectionShape {
 
     refreshSelectionFilled(val: IRangeWithCoord) {
         this._selectionFilled$.next(val);
+    }
+
+    updateStyle(style: ISelectionStyle) {
+        this._updateControl(style, this._rowHeaderWidth, this._columnHeaderHeight);
+    }
+
+    update(
+        newSelectionRange: IRangeWithCoord,
+        rowHeaderWidth: number = 0,
+        columnHeaderHeight: number = 0,
+        style?: Nullable<ISelectionStyle>,
+        highlight?: Nullable<ISelectionCellWithCoord>
+    ) {
+        this._selectionModel.setValue(newSelectionRange, highlight);
+        if (style == null) {
+            style = this._selectionStyle;
+        }
+        this._updateControl(style, rowHeaderWidth, columnHeaderHeight);
+    }
+
+    clearHighlight() {
+        this._selectionModel.clearCurrentCell();
+        this._updateControl(this._selectionStyle, this._rowHeaderWidth, this._columnHeaderHeight);
+    }
+
+    getScene() {
+        return this._scene;
+    }
+
+    dispose() {
+        this._leftControl?.dispose();
+        this._rightControl?.dispose();
+        this._topControl?.dispose();
+        this._bottomControl?.dispose();
+        this._backgroundControlTop?.dispose();
+        this._backgroundControlMiddleLeft?.dispose();
+        this._backgroundControlMiddleRight?.dispose();
+        this._backgroundControlBottom?.dispose();
+        this._fillControl?.dispose();
+        this._selectionShape?.dispose();
+
+        this._rowHeaderBackground?.dispose();
+        this._rowHeaderBorder?.dispose();
+        this._rowHeaderGroup?.dispose();
+        this._rowHeaderBackground?.dispose();
+        this._columnHeaderBackground?.dispose();
+        this._columnHeaderBorder?.dispose();
+        this._columnHeaderGroup?.dispose();
+
+        this._topLeftWidget?.dispose();
+        this._topCenterWidget?.dispose();
+        this._topRightWidget?.dispose();
+        this._middleLeftWidget?.dispose();
+        this._middleRightWidget?.dispose();
+        this._bottomLeftWidget?.dispose();
+        this._bottomCenterWidget?.dispose();
+        this._bottomRightWidget?.dispose();
+        this._dispose$.next(this);
+        this._dispose$.complete();
+    }
+
+    /**
+     * Get the cell information of the current selection, considering the case of merging cells
+     */
+    getCurrentCellInfo(): Nullable<IRangeWithCoord> {
+        const currentCell = this.model.currentCell;
+
+        if (currentCell) {
+            let currentRangeData: IRangeWithCoord;
+
+            if (currentCell.isMerged) {
+                const mergeInfo = currentCell.mergeInfo;
+
+                currentRangeData = {
+                    startRow: mergeInfo.startRow,
+                    endRow: mergeInfo.endRow,
+                    startColumn: mergeInfo.startColumn,
+                    endColumn: mergeInfo.endColumn,
+                    startX: mergeInfo.startX,
+                    endX: mergeInfo.endX,
+                    startY: mergeInfo.startY,
+                    endY: mergeInfo.endY,
+                };
+            } else {
+                const { actualRow, actualColumn, startX, endX, startY, endY } = currentCell;
+                currentRangeData = {
+                    startRow: actualRow,
+                    endRow: actualRow,
+                    startColumn: actualColumn,
+                    endColumn: actualColumn,
+                    startX,
+                    endX,
+                    startY,
+                    endY,
+                };
+            }
+
+            return currentRangeData;
+        }
+    }
+
+    getValue(): ISelectionWithCoordAndStyle {
+        return {
+            ...this._selectionModel.getValue(),
+            style: this._selectionStyle,
+        };
+    }
+
+    enableHelperSelection() {
+        this._isHelperSelection = true;
+    }
+
+    disableHelperSelection() {
+        this._isHelperSelection = false;
+    }
+
+    updateStyleId(id: string) {
+        if (this._selectionStyle == null) {
+            return;
+        }
+        this._selectionStyle.id = id;
     }
 
     /**
@@ -365,116 +486,6 @@ export class SelectionShape {
         this._columnHeaderHeight = columnHeaderHeight || 0;
 
         this.selectionShape.makeDirtyNoDebounce(true);
-    }
-
-    update(
-        newSelectionRange: IRangeWithCoord,
-        rowHeaderWidth: number = 0,
-        columnHeaderHeight: number = 0,
-        style?: Nullable<ISelectionStyle>,
-        highlight?: Nullable<ISelectionCellWithCoord>
-    ) {
-        this._selectionModel.setValue(newSelectionRange, highlight);
-        if (style == null) {
-            style = this._selectionStyle;
-        }
-        this._updateControl(style, rowHeaderWidth, columnHeaderHeight);
-    }
-
-    clearHighlight() {
-        this._selectionModel.clearCurrentCell();
-        this._updateControl(this._selectionStyle, this._rowHeaderWidth, this._columnHeaderHeight);
-    }
-
-    getScene() {
-        return this._scene;
-    }
-
-    dispose() {
-        this._leftControl?.dispose();
-        this._rightControl?.dispose();
-        this._topControl?.dispose();
-        this._bottomControl?.dispose();
-        this._backgroundControlTop?.dispose();
-        this._backgroundControlMiddleLeft?.dispose();
-        this._backgroundControlMiddleRight?.dispose();
-        this._backgroundControlBottom?.dispose();
-        this._fillControl?.dispose();
-        this._selectionShape?.dispose();
-
-        this._rowHeaderBackground?.dispose();
-        this._rowHeaderBorder?.dispose();
-        this._rowHeaderGroup?.dispose();
-        this._rowHeaderBackground?.dispose();
-        this._columnHeaderBackground?.dispose();
-        this._columnHeaderBorder?.dispose();
-        this._columnHeaderGroup?.dispose();
-
-        this._topLeftWidget?.dispose();
-        this._topCenterWidget?.dispose();
-        this._topRightWidget?.dispose();
-        this._middleLeftWidget?.dispose();
-        this._middleRightWidget?.dispose();
-        this._bottomLeftWidget?.dispose();
-        this._bottomCenterWidget?.dispose();
-        this._bottomRightWidget?.dispose();
-        this._dispose$.next(this);
-        this._dispose$.complete();
-    }
-
-    /**
-     * Get the cell information of the current selection, considering the case of merging cells
-     */
-    getCurrentCellInfo(): Nullable<IRangeWithCoord> {
-        const currentCell = this.model.currentCell;
-
-        if (currentCell) {
-            let currentRangeData: IRangeWithCoord;
-
-            if (currentCell.isMerged) {
-                const mergeInfo = currentCell.mergeInfo;
-
-                currentRangeData = {
-                    startRow: mergeInfo.startRow,
-                    endRow: mergeInfo.endRow,
-                    startColumn: mergeInfo.startColumn,
-                    endColumn: mergeInfo.endColumn,
-                    startX: mergeInfo.startX,
-                    endX: mergeInfo.endX,
-                    startY: mergeInfo.startY,
-                    endY: mergeInfo.endY,
-                };
-            } else {
-                const { actualRow, actualColumn, startX, endX, startY, endY } = currentCell;
-                currentRangeData = {
-                    startRow: actualRow,
-                    endRow: actualRow,
-                    startColumn: actualColumn,
-                    endColumn: actualColumn,
-                    startX,
-                    endX,
-                    startY,
-                    endY,
-                };
-            }
-
-            return currentRangeData;
-        }
-    }
-
-    getValue(): ISelectionWithCoordAndStyle {
-        return {
-            ...this._selectionModel.getValue(),
-            style: this._selectionStyle,
-        };
-    }
-
-    enableHelperSelection() {
-        this._isHelperSelection = true;
-    }
-
-    disableHelperSelection() {
-        this._isHelperSelection = false;
     }
 
     private _initialize() {

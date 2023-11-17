@@ -38,6 +38,10 @@ export class MoveRangeController extends Disposable {
 
                     const current = this._selectionManagerService.getCurrent();
 
+                    /**
+                     * Moving the selection only responds to regular selections;
+                     * it does not apply to selections for features like formulas or charts.
+                     */
                     if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
                         return;
                     }

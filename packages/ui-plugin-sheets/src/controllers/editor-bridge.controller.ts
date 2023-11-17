@@ -1,6 +1,7 @@
 import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/base-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
+    NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetWorksheetActivateMutation,
 } from '@univerjs/base-sheets';
@@ -55,6 +56,15 @@ export class EditorBridgeController extends Disposable {
 
     private _initialSelectionListener() {
         this._selectionManagerService.selectionInfo$.subscribe((params) => {
+            const current = this._selectionManagerService.getCurrent();
+
+            /**
+             * The editor only responds to regular selections.
+             */
+            if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                return;
+            }
+
             const currentSkeletonManager = this._sheetSkeletonManagerService.getCurrent();
 
             const sheetObject = this._getSheetObject();

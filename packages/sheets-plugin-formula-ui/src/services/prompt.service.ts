@@ -96,6 +96,12 @@ export interface IFormulaPromptService {
     acceptFormulaName(param: string): void;
 
     dispose(): void;
+
+    enableInsertRefString(): void;
+
+    disableInsertRefString(): void;
+
+    isInsertRefString(): boolean;
 }
 
 export const IFormulaPromptService = createIdentifier<FormulaPromptService>('formula-ui.prompt-service');
@@ -124,6 +130,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
     private _searching: boolean = false;
 
     private _helping: boolean = false;
+    private _isInsertRefString: boolean = false;
 
     dispose(): void {
         this._search$.complete();
@@ -161,5 +168,17 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
     acceptFormulaName(param: string) {
         this._acceptFormulaName$.next(param);
+    }
+
+    enableInsertRefString() {
+        this._isInsertRefString = true;
+    }
+
+    disableInsertRefString() {
+        this._isInsertRefString = false;
+    }
+
+    isInsertRefString() {
+        return this._isInsertRefString;
     }
 }

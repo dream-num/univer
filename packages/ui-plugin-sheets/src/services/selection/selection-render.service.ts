@@ -26,7 +26,7 @@ import {
     ThemeService,
 } from '@univerjs/core';
 import { createIdentifier, Inject } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 import { SelectionRenderModel } from './selection-render-model';
 import { SelectionShape } from './selection-shape';
@@ -40,6 +40,7 @@ export interface IControlFillConfig {
 export interface ISelectionRenderService {
     readonly selectionRangeWithStyle$: Observable<ISelectionWithCoordAndStyle[]>;
     readonly controlFillConfig$: Observable<IControlFillConfig | null>;
+    readonly selectionMoving$: Observable<SelectionShape>;
 
     enableHeaderHighlight(): void;
     disableHeaderHighlight(): void;
@@ -49,6 +50,10 @@ export interface ISelectionRenderService {
     resetStyle(): void;
     enableSelection(): void;
     disableSelection(): void;
+    enableShowPrevious(): void;
+    disableShowPrevious(): void;
+    enableRemainLast(): void;
+    disableRemainLast(): void;
 
     addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle): void;
     changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport): void;
@@ -129,12 +134,23 @@ export class SelectionRenderService implements ISelectionRenderService {
     // Whether to enable the selection area. If set to false, the user cannot draw a selection area in the content area by clicking with the mouse.
     private _isSelectionEnabled: boolean = true;
 
+    // Used in the format painter feature, similar to ctrl, it can retain the previous selection.
     private _isShowPreviousEnable: boolean | number = 0;
+
+    //Used in the formula selection feature, a new selection string is added by drawing a box with the mouse.
+    private _isRemainLastEnable: boolean = true;
 
     private readonly _selectionRangeWithStyle$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
 
     // When the user draws a selection area in the canvas content area, this event is broadcasted when the drawing ends.
     readonly selectionRangeWithStyle$ = this._selectionRangeWithStyle$.asObservable();
+
+    private readonly _selectionMoving$ = new Subject<SelectionShape>();
+
+    /**
+     * Triggered during the drawing of the selection area.
+     */
+    readonly selectionMoving$ = this._selectionMoving$.asObservable();
 
     private _activeViewport!: Viewport;
 
@@ -180,6 +196,14 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     disableShowPrevious() {
         this._isShowPreviousEnable = false;
+    }
+
+    enableRemainLast() {
+        this._isRemainLastEnable = true;
+    }
+
+    disableRemainLast() {
+        this._isRemainLastEnable = false;
     }
 
     getViewPort() {
@@ -436,7 +460,13 @@ export class SelectionRenderService implements ISelectionRenderService {
         }
 
         // In addition to pressing the ctrl or shift key, we must clear the previous selection
-        if (curControls.length > 0 && !evt.ctrlKey && !evt.shiftKey && !this._isShowPreviousEnable) {
+        if (
+            curControls.length > 0 &&
+            !evt.ctrlKey &&
+            !evt.shiftKey &&
+            !this._isShowPreviousEnable &&
+            !this._isRemainLastEnable
+        ) {
             for (const control of curControls) {
                 control.dispose();
             }
@@ -471,7 +501,22 @@ export class SelectionRenderService implements ISelectionRenderService {
                 this._selectionStyle,
                 currentCell
             );
+        } else if (this._isRemainLastEnable && selectionControl && !evt.ctrlKey && !evt.shiftKey) {
+            /**
+             * Supports the formula ref text selection feature,
+             * under the condition of preserving all previous selections, it modifies the position of the latest selection.
+             */
+            selectionControl.update(
+                startSelectionRange,
+                rowHeaderWidth,
+                columnHeaderHeight,
+                this._selectionStyle,
+                primaryWithCoord
+            );
         } else {
+            /**
+             * The default behavior is to clear previous selections and always create new selections.
+             */
             selectionControl = new SelectionShape(
                 scene,
                 curControls.length + zIndex,
@@ -717,12 +762,15 @@ export class SelectionRenderService implements ISelectionRenderService {
         } = selectionControl?.model || { startRow: -1, endRow: -1, startColumn: -1, endColumn: -1 };
 
         if (
-            oldStartColumn !== finalStartColumn ||
-            oldStartRow !== finalStartRow ||
-            oldEndColumn !== finalEndColumn ||
-            oldEndRow !== finalEndRow
+            (oldStartColumn !== finalStartColumn ||
+                oldStartRow !== finalStartRow ||
+                oldEndColumn !== finalEndColumn ||
+                oldEndRow !== finalEndRow) &&
+            selectionControl != null
         ) {
-            selectionControl && selectionControl.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight);
+            selectionControl.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight);
+
+            this._selectionMoving$.next(selectionControl);
         }
     }
 

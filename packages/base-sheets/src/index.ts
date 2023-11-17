@@ -34,6 +34,7 @@ export {
     shrinkToNextCell,
     shrinkToNextGapRange,
 } from './commands/commands/utils/selection-util';
+export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService } from './services/border-style-manager.service';
 export { SheetEditablePermission, SheetPermissionService } from './services/permission';
 export { RefRangeService } from './services/ref-range.service';

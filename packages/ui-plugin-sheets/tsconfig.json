@@ -10,5 +10,5 @@
     "include": [
         "src/**/*",
         "test/**/*.test.(ts|tsx|js)"
-    ]
+, "../base-sheets/src/controllers/config"    ]
 }

@@ -80,7 +80,7 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
     }
 
     disableForceKeepVisible(): void {
-        this._isForceKeepVisible = true;
+        this._isForceKeepVisible = false;
     }
 
     isForceKeepVisible(): boolean {

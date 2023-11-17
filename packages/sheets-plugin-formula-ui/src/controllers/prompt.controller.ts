@@ -7,6 +7,7 @@ import {
     sequenceNodeType,
     serializeRangeToRefString,
 } from '@univerjs/base-formula-engine';
+import { matchToken } from '@univerjs/base-formula-engine/basics/token.js';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -140,7 +141,6 @@ export class PromptController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._textSelectionManagerService.textSelectionInfo$.subscribe(() => {
-                    this._changeKeepVisibleHideState();
                     if (
                         this._editorBridgeService.isVisible().visible === false ||
                         this._isLockedOnSelectionChangeRefString === true
@@ -154,10 +154,25 @@ export class PromptController extends Disposable {
 
                     this._contextSwitch(dataStream);
 
+                    this._changeKeepVisibleHideState();
+
                     // TODO@Dushusir: use real text info
                     this._setFunctionPanel(dataStream);
 
                     this._highlightFormula(currentBody);
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                this._editorBridgeService.visible$.subscribe((param) => {
+                    if (param.visible === true) {
+                        return;
+                    }
+                    this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+
+                    this._changeKeepVisibleHideState();
                 })
             )
         );
@@ -169,6 +184,10 @@ export class PromptController extends Disposable {
      * in order to generate reference text for the formula.
      */
     private _changeKeepVisibleHideState() {
+        if (this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA) === false) {
+            this._editorBridgeService.disableForceKeepVisible();
+        }
+
         const activeRange = this._textSelectionManagerService.getLast();
 
         if (activeRange == null) {
@@ -187,9 +206,15 @@ export class PromptController extends Disposable {
 
         const dataStream = body.dataStream;
 
-        const char = dataStream[startOffset];
+        const char = dataStream[startOffset - 1];
 
-        if (isFormulaLexerToken(char)) {
+        if (
+            isFormulaLexerToken(char) &&
+            char !== matchToken.CLOSE_BRACES &&
+            char !== matchToken.CLOSE_BRACKET &&
+            char !== matchToken.SINGLE_QUOTATION &&
+            char !== matchToken.DOUBLE_QUOTATION
+        ) {
             this._editorBridgeService.enableForceKeepVisible();
         } else {
             this._editorBridgeService.disableForceKeepVisible();

@@ -7,8 +7,5 @@
         "esModuleInterop": true,
         "strictPropertyInitialization": false
     },
-    "include": [
-        "src/**/*",
-        "test/**/*.test.(ts|tsx|js)"
-, "../base-sheets/src/controllers/config"    ]
+    "include": ["src/**/*", "test/**/*.test.(ts|tsx|js)"]
 }

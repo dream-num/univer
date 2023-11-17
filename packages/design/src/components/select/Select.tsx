@@ -10,6 +10,9 @@ export interface ISelectProps {
      */
     value: string;
 
+    /** Semantic DOM class */
+    className?: string;
+
     /**
      * The options of select
      * @default []
@@ -26,12 +29,13 @@ export interface ISelectProps {
 }
 
 export function Select(props: ISelectProps) {
-    const { value, options = [], onChange } = props;
+    const { value, className = '', options = [], onChange } = props;
 
     const { mountContainer } = useContext(ConfigContext);
 
     return (
         <RcSelect
+            className={className}
             prefixCls={styles.select}
             getPopupContainer={() => mountContainer}
             options={options}

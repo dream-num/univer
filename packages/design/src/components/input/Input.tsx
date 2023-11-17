@@ -5,6 +5,9 @@ import RcInput from 'rc-input';
 import styles from './index.module.less';
 
 export interface IInputProps {
+    /** Semantic DOM class */
+    className?: string;
+
     /**
      * The input affix wrapper style
      */
@@ -65,6 +68,7 @@ export interface IInputProps {
 
 export function Input(props: IInputProps) {
     const {
+        className,
         affixWrapperStyle,
         type = 'text',
         placeholder,
@@ -82,12 +86,15 @@ export function Input(props: IInputProps) {
         onChange?.(value);
     }
 
-    const _className = clsx({
-        [styles.inputAffixWrapperMini]: size === 'mini',
-        [styles.inputAffixWrapperSmall]: size === 'small',
-        [styles.inputAffixWrapperMiddle]: size === 'middle',
-        [styles.inputAffixWrapperLarge]: size === 'large',
-    });
+    const _className = clsx(
+        {
+            [styles.inputAffixWrapperMini]: size === 'mini',
+            [styles.inputAffixWrapperSmall]: size === 'small',
+            [styles.inputAffixWrapperMiddle]: size === 'middle',
+            [styles.inputAffixWrapperLarge]: size === 'large',
+        },
+        className
+    );
 
     return (
         <RcInput

@@ -2,7 +2,7 @@ import { DeviceInputEventType } from '@univerjs/base-render';
 import { IShortcutItem, KeyCode } from '@univerjs/base-ui';
 import { whenEditorInputFormulaActivated } from '@univerjs/ui-plugin-sheets';
 
-import { SelectEditorFormluaOperation } from '../../commands/operations/editor-formula.operation';
+import { SelectEditorFormulaOperation } from '../../commands/operations/editor-formula.operation';
 
 export const PROMPT_SELECTION_KEYCODE_LIST = [
     KeyCode.ARROW_DOWN,
@@ -17,7 +17,7 @@ export function promptSelectionShortcutItem() {
     const shortcutList: IShortcutItem[] = [];
     for (const keycode of PROMPT_SELECTION_KEYCODE_LIST) {
         shortcutList.push({
-            id: SelectEditorFormluaOperation.id,
+            id: SelectEditorFormulaOperation.id,
             binding: keycode,
             preconditions: (contextService) => whenEditorInputFormulaActivated(contextService),
             staticParameters: {

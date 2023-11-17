@@ -1,5 +1,4 @@
 import { FunctionType, IFunctionInfo, IFunctionParam } from '@univerjs/base-formula-engine';
-import { KeyCode } from '@univerjs/base-ui';
 import { LocaleService } from '@univerjs/core';
 import { Input, Select } from '@univerjs/design';
 import { CheckMarkSingle } from '@univerjs/icons';
@@ -8,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 
 import { IDescriptionService, ISearchItem } from '../../../services/description.service';
 import { getFunctionTypeValues } from '../../../services/utils';
+import { FunctionParams } from '../function-params/FunctionParams';
 import styles from './index.module.less';
 
 export interface ISelectFunctionProps {
@@ -39,6 +39,10 @@ export function SelectFunction(props: ISelectFunctionProps) {
         handleSelectChange(allTypeValue);
     }, []);
 
+    useEffect(() => {
+        setCurrentFunctionInfo(0);
+    }, [selectList]);
+
     const highlightSearchText = (text: string) => {
         const regex = new RegExp(`(${searchText.toLocaleUpperCase()})`);
         const parts = text.split(regex).filter(Boolean);
@@ -55,14 +59,14 @@ export function SelectFunction(props: ISelectFunctionProps) {
         });
     };
 
-    const setCurrentFunctionInfo = () => {
+    const setCurrentFunctionInfo = (selectedIndex: number) => {
         if (selectList.length === 0) {
             setFunctionInfo(null);
             return;
         }
 
-        setNameSelected(active);
-        const functionInfo = descriptionService.getFunctionInfo(selectList[active].name);
+        setNameSelected(selectedIndex);
+        const functionInfo = descriptionService.getFunctionInfo(selectList[selectedIndex].name);
         if (!functionInfo) {
             setFunctionInfo(null);
             return;
@@ -87,14 +91,14 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
     function handleSelectListKeyDown(e: React.KeyboardEvent<HTMLUListElement> | React.KeyboardEvent<HTMLInputElement>) {
         e.stopPropagation();
-        if (e.keyCode === KeyCode.ARROW_DOWN) {
+        if (e.key === 'ArrowDown') {
             const nextActive = active + 1;
             setActive(nextActive === selectList.length ? 0 : nextActive);
-        } else if (e.keyCode === KeyCode.ARROW_UP) {
+        } else if (e.key === 'ArrowUp') {
             const nextActive = active - 1;
             setActive(nextActive === -1 ? selectList.length - 1 : nextActive);
-        } else if (e.keyCode === KeyCode.ENTER) {
-            setCurrentFunctionInfo();
+        } else if (e.key === 'Enter') {
+            setCurrentFunctionInfo(active);
         }
     }
 
@@ -109,9 +113,15 @@ export function SelectFunction(props: ISelectFunctionProps) {
     return (
         <div>
             <div className={styles.formulaSelectFunctionSelect}>
-                <Select value={typeSelected} options={options} onChange={handleSelectChange}></Select>
+                <Select
+                    className={styles.formulaSelectFunctionSelectType}
+                    value={typeSelected}
+                    options={options}
+                    onChange={handleSelectChange}
+                ></Select>
 
                 <Input
+                    className={styles.formulaSelectFunctionSelectText}
                     placeholder={localeService.t(`formula.moreFunctions.searchFunctionPlaceholder`)}
                     onKeyDown={handleSelectListKeyDown}
                     value={searchText}
@@ -132,7 +142,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
                         }
                         onMouseEnter={() => handleLiMouseEnter(index)}
                         onMouseLeave={handleLiMouseLeave}
-                        onClick={() => setCurrentFunctionInfo()}
+                        onClick={() => setCurrentFunctionInfo(index)}
                     >
                         {nameSelected === index && (
                             <CheckMarkSingle className={styles.formulaSelectFunctionResultItemSelected} />
@@ -144,14 +154,14 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
             {functionInfo && (
                 <div className={styles.formulaSelectFunctionContent}>
-                    <Params title={functionInfo.functionName} value={functionInfo.description} />
+                    <FunctionParams title={functionInfo.functionName} value={functionInfo.description} />
 
-                    <Params
+                    <FunctionParams
                         title={localeService.t('formula.moreFunctions.syntax')}
                         value={<Help prefix={functionInfo.functionName} value={functionInfo.functionParameter} />}
                     />
 
-                    <Params
+                    <FunctionParams
                         title={localeService.t('formula.prompt.helpExample')}
                         value={`${functionInfo.functionName}(${functionInfo.functionParameter
                             .map((item) => item.example)
@@ -160,7 +170,7 @@ export function SelectFunction(props: ISelectFunctionProps) {
 
                     {functionInfo.functionParameter &&
                         functionInfo.functionParameter.map((item: IFunctionParam, i: number) => (
-                            <Params
+                            <FunctionParams
                                 key={i}
                                 title={item.name}
                                 value={`${item.require ? required : optional} ${item.detail}`}
@@ -171,19 +181,6 @@ export function SelectFunction(props: ISelectFunctionProps) {
         </div>
     );
 }
-
-interface IParamsProps {
-    className?: string;
-    title?: string;
-    value?: string | React.ReactElement;
-}
-
-const Params = (props: IParamsProps) => (
-    <div className={styles.formulaSelectFunctionContentParams}>
-        <div className={`${styles.formulaSelectFunctionContentParamsTitle} ${props.className}`}>{props.title}</div>
-        <div className={styles.formulaSelectFunctionContentParamsDetail}>{props.value}</div>
-    </div>
-);
 
 interface IHelpProps {
     prefix?: string;

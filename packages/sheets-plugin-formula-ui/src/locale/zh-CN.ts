@@ -69,7 +69,7 @@ export default {
         },
 
         moreFunctions: {
-            confirm: '确定',
+            confirm: '应用',
             prev: '上一步',
             next: '下一步',
             searchFunctionPlaceholder: '搜索函数',

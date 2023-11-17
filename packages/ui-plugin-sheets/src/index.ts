@@ -1,6 +1,7 @@
 export * from './basics';
 export { getEditorObject } from './basics/editor/get-editor-object';
 export { SetCellEditVisibleArrowOperation } from './commands/operations/cell-edit.operation';
+export { RangeSelector } from './components/range-selector/RangeSelector';
 export { whenEditorInputFormulaActivated } from './controllers/shortcuts/utils';
 export {
     getCoordByCell,

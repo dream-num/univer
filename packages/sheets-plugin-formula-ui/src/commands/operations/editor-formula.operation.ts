@@ -12,7 +12,7 @@ export interface ISelectEditorFormulaOperationParam {
     keycode?: KeyCode;
 }
 
-export const SelectEditorFormluaOperation: IOperation<ISelectEditorFormulaOperationParam> = {
+export const SelectEditorFormulaOperation: IOperation<ISelectEditorFormulaOperationParam> = {
     id: 'formula-ui.operation.select-editor-formula',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {

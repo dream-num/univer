@@ -1,10 +1,22 @@
+@result-height: 364px;
+@select-width: 45%;
+@result-item-padding-left: 28px;
+@selected-icon-left: 6px;
+
 .formula-select-function {
     &-select {
         display: flex;
         align-items: center;
+        justify-content: space-between;
+        
+        &-type {
+            width: @select-width;
+        }
 
-        .input-affix-wrapper{
+        // FIXME: Need input components to repair width and central problem
+        &-text{
             display: flex;
+            width: @select-width;
 
             .input{
                 width: 100%;
@@ -13,22 +25,30 @@
     }
     
     &-result {
+        user-select: none;
+
         box-sizing: border-box;
         width: 100%;
+        height: @result-height;
         margin: 0;
+        margin-top: var(--margin-xs);
         padding: var(--padding-base);
 
-        font-size: var(--font-size-sm);
         list-style: none;
 
+        border: 1px solid rgb(var(--border-color));
+        border-radius: var(--border-radius-base);
         outline: none;
 
         &-item {
             cursor: pointer;
 
-            box-sizing: border-box;
-            padding: var(--padding-sm);
+            position: relative;
 
+            box-sizing: border-box;
+            padding: var(--padding-sm) @result-item-padding-left;
+
+            font-size: var(--font-size-xs);
             color: rgb(var(--text-color));
 
             border-radius: var(--border-radius-base);
@@ -42,7 +62,15 @@
             }
 
             &-selected {
-                color: rgb(var(--primary-color));
+                position: absolute;
+                top: 50%;
+                left: @selected-icon-left;
+                transform: translateY(-50%);
+
+                display: inline-flex;
+
+                font-size: var(--font-size-lg);
+                color: rgb(var(--success-color));
             }
 
             &-active {
@@ -53,25 +81,6 @@
 
     &-content {
         overflow-y: auto;
-        margin-top: var(--padding-xl);
-        padding: var(--padding-base) 0;
-
-        &-params {
-            margin: var(--margin-xs) 0;
-
-            &-title {
-                margin-bottom: var(--margin-xs);
-                font-size: var(--font-size-xs);
-                font-weight: 500;
-                color: rgb(var(--text-color));
-            }
-
-            &-detail {
-                font-size: var(--font-size-xxs);
-                font-weight: 400;
-                color: rgb(var(--text-color-secondary));
-            }
-        }
     }
 
 }

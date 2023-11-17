@@ -126,8 +126,7 @@ export class DocCanvasView {
             }
         });
 
-        const hasScroll = this._configService.getConfig(unitId, 'hasScroll') as Nullable<boolean>;
-
+        const hasScroll = this._configService.getConfig('hasScroll') as Nullable<boolean>;
         if (hasScroll !== false) {
             new ScrollBar(viewMain);
         }

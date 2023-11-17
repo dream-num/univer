@@ -1,51 +1,33 @@
 import { createIdentifier } from '@wendellhu/redi';
 
-import { IKeyValue, Nullable } from '../../shared/types';
+import { Nullable } from '../../shared/types';
 
+// NOTE: WARNING!! Do not set per unit config here! You can definitely find a better place to do that.
+
+/**
+ * IConfig provides universal configuration for the whole application.
+ */
 export const IConfigService = createIdentifier<IConfigService>('univer.config-service');
-
 export interface IConfigService {
-    getConfig<T>(unitId: string, id: string): Nullable<T>;
-    setConfig(unitId: string, id: string, value: any): void;
-    batchSettings(unitId: string, config: { [key: string]: any }): void;
+    getConfig<T>(id: string, defaultValue: T): T;
+    getConfig<T>(id: string): Nullable<T>;
+    setConfig(id: string, value: any): void;
+    deleteConfig(id: string): void;
 }
-
-const BUILT_IN_CONFIG: IKeyValue = {
-    maxCellsPerSheet: 1_000_000,
-};
 
 export class ConfigService implements IConfigService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private readonly _config: Map<string, Map<string, any>> = new Map();
+    private readonly _config: Map<string, any> = new Map();
 
-    constructor() {
-        this._initBuiltInConfig();
+    getConfig<T>(id: string): Nullable<T> {
+        return this._config.get(id) as T;
     }
 
-    getConfig<T>(unitId: string, id: string): Nullable<T> {
-        return this._config.get(unitId)?.get(id) as T;
+    setConfig(id: string, value: any) {
+        this._config.set(id, value);
     }
 
-    setConfig(unitId: string, id: string, value: any) {
-        let unit = this._config.get(unitId);
-        if (unit == null) {
-            this._config.set(unitId, new Map());
-            unit = this._config.get(unitId);
-        }
-
-        unit!.set(id, value);
-    }
-
-    batchSettings(unitId: string, config: { [key: string]: any }) {
-        const keys = Object.keys(config);
-        keys.forEach((key: string) => {
-            this.setConfig(unitId, key, config[key]);
-        });
-    }
-
-    private _initBuiltInConfig(): void {
-        Object.keys(BUILT_IN_CONFIG).forEach((key) => {
-            this._config.set(key, BUILT_IN_CONFIG[key]);
-        });
+    deleteConfig(id: string): void {
+        this._config.delete(id);
     }
 }

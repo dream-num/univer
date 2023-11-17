@@ -1,4 +1,4 @@
-import { Disposable, ICommandService, IStyleData, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, IStyleData, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { IDisposable } from '@wendellhu/redi';
 
 import {
@@ -100,6 +100,7 @@ import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
+import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -111,7 +112,10 @@ export interface IStyleTypeValue<T> {
  */
 @OnLifecycle(LifecycleStages.Starting, BasicWorksheetController)
 export class BasicWorksheetController extends Disposable implements IDisposable {
-    constructor(@ICommandService private readonly _commandService: ICommandService) {
+    constructor(
+        @ICommandService private readonly _commandService: ICommandService,
+        @IConfigService private readonly _configService: IConfigService
+    ) {
         super();
 
         [
@@ -207,5 +211,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetWorksheetShowCommand,
             TrimWhitespaceCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+
+        this._configService.setConfig(MAX_CELL_PER_SHEET_KEY, MAX_CELL_PER_SHEET_DEFAULT);
     }
 }

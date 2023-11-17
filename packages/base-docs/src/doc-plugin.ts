@@ -17,6 +17,7 @@ import {
     CoverCommand,
     DeleteCommand,
     DeleteLeftCommand,
+    DeleteRightCommand,
     IMEInputCommand,
     InsertCommand,
     UpdateCommand,
@@ -52,7 +53,7 @@ import { enUS } from './locale';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
-import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
+import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
 import {
     MoveCursorDownShortcut,
     MoveCursorLeftShortcut,
@@ -106,6 +107,7 @@ export class DocPlugin extends Plugin {
                 MoveCursorOperation,
                 MoveSelectionOperation,
                 DeleteLeftCommand,
+                DeleteRightCommand,
                 SetInlineFormatBoldCommand,
                 SetInlineFormatItalicCommand,
                 SetInlineFormatUnderlineCommand,
@@ -139,6 +141,7 @@ export class DocPlugin extends Plugin {
             MoveSelectionLeftShortcut,
             MoveSelectionRightShortcut,
             DeleteLeftShortcut,
+            DeleteRightShortcut,
             BreakLineShortcut,
         ].forEach((shortcut) => {
             this._injector.get(IShortcutService).registerShortcut(shortcut);

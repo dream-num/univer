@@ -77,6 +77,8 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             // be modified to have no side effects in the future?
             mutation = Tools.deepClone(mutation);
 
+            console.log(JSON.stringify(mutation, null, 2));
+
             if (mutation.t === 'r') {
                 const { coverType, body, len, segmentId } = mutation;
 

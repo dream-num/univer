@@ -21,7 +21,13 @@ import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
 
 import { getDocObject } from '../basics/component-tools';
-import { DeleteCommand, DeleteLeftCommand, UpdateCommand } from '../commands/commands/core-editing.command';
+import {
+    DeleteCommand,
+    DeleteDirection,
+    DeleteLeftCommand,
+    DeleteRightCommand,
+    UpdateCommand,
+} from '../commands/commands/core-editing.command';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
@@ -51,7 +57,7 @@ export class DeleteLeftInputController extends Disposable {
     private _initialize() {}
 
     private _commandExecutedListener() {
-        const updateCommandList = [DeleteLeftCommand.id];
+        const updateCommandList = [DeleteLeftCommand.id, DeleteRightCommand.id];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -59,12 +65,21 @@ export class DeleteLeftInputController extends Disposable {
                     return;
                 }
 
-                this._deleteFunction();
+                switch (command.id) {
+                    case DeleteLeftCommand.id:
+                        this._deleteLeftFunction();
+                        break;
+                    case DeleteRightCommand.id:
+                        this._deleteRightFunction();
+                        break;
+                    default:
+                        throw new Error('Unknown command');
+                }
             })
         );
     }
 
-    private _deleteFunction() {
+    private _deleteLeftFunction() {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
 
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
@@ -75,20 +90,24 @@ export class DeleteLeftInputController extends Disposable {
 
         const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
 
-        const { startOffset, collapsed, segmentId, style, startNodePosition } = activeRange;
+        const { startOffset, collapsed, segmentId, style } = activeRange;
 
-        const preSpan = skeleton.findSpanByPosition(startNodePosition);
+        // No need to delete when the cursor is at the first position of the first paragraph.
+        if (startOffset === 0 && collapsed) {
+            return;
+        }
 
+        const preSpan = skeleton.findNodeByCharIndex(startOffset);
+
+        // is in bullet list?
         const preIsBullet = hasListSpan(preSpan);
-
+        // is in indented paragraph?
         const preIsIndent = isIndentBySpan(preSpan, docsModel.body);
 
         let cursor = startOffset;
 
-        cursor--;
-
-        if (collapsed === false) {
-            cursor += 1;
+        if (collapsed === true) {
+            cursor--;
         }
 
         const span = skeleton.findNodeByCharIndex(cursor);
@@ -111,6 +130,7 @@ export class DeleteLeftInputController extends Disposable {
 
             if (preIsBullet === true) {
                 const paragraphStyle = paragraph.paragraphStyle;
+
                 if (paragraphStyle) {
                     updateParagraph.paragraphStyle = paragraphStyle;
                 }
@@ -128,7 +148,7 @@ export class DeleteLeftInputController extends Disposable {
 
             this._commandService.executeCommand(UpdateCommand.id, {
                 unitId: docsModel.getUnitId(),
-                body: {
+                updateBody: {
                     dataStream: '',
                     paragraphs: [{ ...updateParagraph }],
                 },
@@ -153,6 +173,7 @@ export class DeleteLeftInputController extends Disposable {
                 unitId: docsModel.getUnitId(),
                 range: activeRange,
                 segmentId,
+                direction: DeleteDirection.LEFT,
             });
         }
 
@@ -167,6 +188,44 @@ export class DeleteLeftInputController extends Disposable {
             {
                 startOffset: cursor,
                 endOffset: cursor,
+                collapsed: true,
+                style,
+            },
+        ]);
+    }
+
+    private _deleteRightFunction() {
+        const activeRange = this._textSelectionRenderManager.getActiveRange();
+
+        const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
+
+        if (activeRange == null || skeleton == null) {
+            return;
+        }
+
+        const docsModel = this._currentUniverService.getCurrentUniverDocInstance();
+
+        const { startOffset, collapsed, segmentId, style } = activeRange;
+
+        // No need to delete when the cursor is at the last position of the last paragraph.
+        if (startOffset === docsModel.getBodyModel().getBody().dataStream.length - 2 && collapsed) {
+            return;
+        }
+
+        this._commandService.executeCommand(DeleteCommand.id, {
+            unitId: docsModel.getUnitId(),
+            range: activeRange,
+            segmentId,
+            direction: DeleteDirection.RIGHT,
+        });
+
+        skeleton?.calculate();
+
+        // move selection
+        this._textSelectionManagerService.replaceTextRanges([
+            {
+                startOffset,
+                endOffset: startOffset,
                 collapsed: true,
                 style,
             },

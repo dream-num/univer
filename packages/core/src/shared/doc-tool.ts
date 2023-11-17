@@ -62,9 +62,8 @@ export function checkParagraphHasIndentByStyle(paragraphStyle?: IParagraphStyle)
     }
 
     if (
-        ((paragraphStyle?.indentStart == null || paragraphStyle?.indentStart === 0) &&
-            paragraphStyle?.hanging == null) ||
-        paragraphStyle?.hanging === 0
+        ((paragraphStyle.indentStart == null || paragraphStyle.indentStart === 0) && paragraphStyle.hanging == null) ||
+        paragraphStyle.hanging === 0
     ) {
         return false;
     }

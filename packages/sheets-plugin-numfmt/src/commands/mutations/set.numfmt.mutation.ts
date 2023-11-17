@@ -11,11 +11,13 @@ export const factorySetNumfmtUndoMutation = (
     const numfmtService = accessor.get(NumfmtService);
     const undos: SetNumfmtMutationParams = {
         ...option,
-        values: option.values.map((item) => {
-            const { row, col } = item;
-            const oldValue = numfmtService.getValue(option.workbookId, option.worksheetId, row, col);
-            return { pattern: oldValue?.pattern, type: oldValue?.type, row, col };
-        }),
+        values: option.values
+            .map((item) => {
+                const { row, col } = item;
+                const oldValue = numfmtService.getValue(option.workbookId, option.worksheetId, row, col);
+                return { pattern: oldValue?.pattern, type: oldValue?.type, row, col };
+            })
+            .reverse(),
     };
     return undos;
 };

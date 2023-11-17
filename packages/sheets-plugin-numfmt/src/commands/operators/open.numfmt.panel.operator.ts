@@ -19,9 +19,9 @@ import { SetNumfmtCommand, SetNumfmtCommandParams } from '../commands/set.numfmt
 import { CloseNumfmtPanelOperator } from './close.numfmt.panel.operator';
 
 export const OpenNumfmtPanelOperator: ICommand = {
-    id: 'sheet.open.numfmt.panel.operator',
-    type: CommandType.MUTATION,
-    handler: async (accessor: IAccessor) => {
+    id: 'sheet.operation.open.numfmt.panel',
+    type: CommandType.OPERATION,
+    handler: (accessor: IAccessor) => {
         const sidebarService = accessor.get(ISidebarService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);

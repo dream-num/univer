@@ -1,8 +1,25 @@
 import numfmt from '@univerjs/base-numfmt-engine';
-import { SetRangeValuesCommand } from '@univerjs/base-sheets';
+import {
+    EffectRefRangeParams,
+    EffectRefRangId,
+    handleDeleteRangeMoveLeft,
+    handleDeleteRangeMoveUp,
+    handleInsertCol,
+    handleInsertRangeMoveDown,
+    handleInsertRangeMoveRight,
+    handleInsertRow,
+    handleIRemoveCol,
+    handleIRemoveRow,
+    handleMoveRange,
+    RefRangeService,
+    runRefRangeMutations,
+    SetRangeValuesCommand,
+} from '@univerjs/base-sheets';
 import {
     CellValueType,
     Disposable,
+    DisposableCollection,
+    ICommandService,
     INTERCEPTOR_POINT,
     IUniverInstanceService,
     LifecycleStages,
@@ -11,8 +28,12 @@ import {
     OnLifecycle,
     SheetInterceptorService,
     ThemeService,
+    toDisposable,
 } from '@univerjs/core';
-import { Inject, Injector } from '@wendellhu/redi';
+import { SheetSkeletonManagerService } from '@univerjs/ui-plugin-sheets';
+import { IDisposable, Inject, Injector } from '@wendellhu/redi';
+import { Observable } from 'rxjs';
+import { bufferTime, distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import { NumfmtItem } from '../base/types';
 import {
@@ -55,13 +76,39 @@ export class NumfmtService extends Disposable {
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ThemeService) private _themeService: ThemeService,
         @Inject(Injector) private _injector: Injector,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @Inject(RefRangeService) private _refRangeService: RefRangeService,
+        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
         this._initInterceptorCellContent();
         this._initInterceptorEditorStart();
         this._initInterceptorEditorEnd();
         this._initInterceptorCommands();
+        this._registerRefRange();
+    }
+
+    getValue(workbookId: string, worksheetId: string, row: number, col: number) {
+        const model = this._getModel(workbookId, worksheetId);
+        if (!model) {
+            return null;
+        }
+        return model.getValue(row, col);
+    }
+
+    setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<NumfmtItem>) {
+        let model = this._getModel(workbookId, worksheetId);
+        if (!model) {
+            const key = getModelKey(workbookId, worksheetId);
+            model = new ObjectMatrix();
+            this.numfmtModel.set(key, model);
+        }
+        if (value) {
+            model.setValue(row, col, value);
+        } else {
+            model.deleteValue(row, col);
+        }
     }
 
     private _initInterceptorCommands() {
@@ -265,26 +312,204 @@ export class NumfmtService extends Disposable {
         return this.numfmtModel.get(key);
     }
 
-    getValue(workbookId: string, worksheetId: string, row: number, col: number) {
-        const model = this._getModel(workbookId, worksheetId);
-        if (!model) {
-            return null;
-        }
-        return model.getValue(row, col);
-    }
+    private _registerRefRange() {
+        this.disposeWithMe(
+            toDisposable(
+                this._sheetSkeletonManagerService.currentSkeleton$
+                    .pipe(
+                        map((skeleton) => skeleton?.sheetId),
+                        distinctUntilChanged(),
+                        switchMap(
+                            () =>
+                                new Observable<DisposableCollection>((subscribe) => {
+                                    const disposableCollection = new DisposableCollection();
+                                    subscribe.next(disposableCollection);
+                                    return () => {
+                                        disposableCollection.dispose();
+                                    };
+                                })
+                        )
+                    )
+                    .subscribe((disposableCollection) => {
+                        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+                        const workbookId = workbook.getUnitId();
+                        const worksheetId = this._univerInstanceService
+                            .getCurrentUniverSheetInstance()
+                            .getActiveSheet()
+                            .getSheetId();
+                        const model = this._getModel(workbookId, worksheetId);
+                        const disposableMap: Map<string, IDisposable> = new Map();
+                        const register = (commandInfo: EffectRefRangeParams, row: number, col: number) => {
+                            const targetRange = {
+                                startRow: row,
+                                startColumn: col,
+                                endRow: row,
+                                endColumn: col,
+                            };
+                            const numfmtValue = this._getModel(workbookId, worksheetId)?.getValue(row, col);
+                            let operators = [];
+                            switch (commandInfo.id) {
+                                case EffectRefRangId.DeleteRangeMoveLeftCommandId: {
+                                    operators = handleDeleteRangeMoveLeft(commandInfo, targetRange);
+                                    break;
+                                }
+                                case EffectRefRangId.DeleteRangeMoveUpCommandId: {
+                                    operators = handleDeleteRangeMoveUp(commandInfo, targetRange);
+                                    break;
+                                }
+                                case EffectRefRangId.InsertColCommandId: {
+                                    operators = handleInsertCol(commandInfo, targetRange);
+                                    break;
+                                }
+                                case EffectRefRangId.InsertRangeMoveDownCommandId: {
+                                    operators = handleInsertRangeMoveDown(commandInfo, targetRange);
+                                    break;
+                                }
+                                case EffectRefRangId.InsertRangeMoveRightCommandId: {
+                                    operators = handleInsertRangeMoveRight(commandInfo, targetRange);
+                                    break;
+                                }
+                                case EffectRefRangId.InsertRowCommandId: {
+                                    operators = handleInsertRow(commandInfo, targetRange);
+                                    break;
+                                }
+                                case EffectRefRangId.MoveRangeCommandId: {
+                                    operators = handleMoveRange(commandInfo, targetRange);
+                                    break;
+                                }
+                                case EffectRefRangId.RemoveColCommandId: {
+                                    operators = handleIRemoveCol(commandInfo, targetRange);
+                                    break;
+                                }
+                                case EffectRefRangId.RemoveRowCommandId: {
+                                    operators = handleIRemoveRow(commandInfo, targetRange);
+                                    break;
+                                }
+                            }
+                            const result = runRefRangeMutations(operators, targetRange);
+                            if (!result) {
+                                // 删除
+                                const redoParams: SetNumfmtMutationParams = {
+                                    workbookId,
+                                    worksheetId,
+                                    values: [{ row, col }],
+                                };
+                                const undoParams = factorySetNumfmtUndoMutation(this._injector, redoParams);
+                                return {
+                                    redos: [
+                                        {
+                                            id: SetNumfmtMutation.id,
+                                            params: redoParams,
+                                        },
+                                    ],
+                                    undos: [
+                                        {
+                                            id: SetNumfmtMutation.id,
+                                            params: undoParams,
+                                        },
+                                    ],
+                                };
+                            }
+                            if (numfmtValue) {
+                                const redoParams: SetNumfmtMutationParams = {
+                                    workbookId,
+                                    worksheetId,
+                                    values: [
+                                        { row, col },
+                                        { ...numfmtValue, row: result.startRow, col: result.startColumn },
+                                    ],
+                                };
+                                const undoParams = factorySetNumfmtUndoMutation(this._injector, redoParams);
+                                return {
+                                    redos: [
+                                        {
+                                            id: SetNumfmtMutation.id,
+                                            params: redoParams,
+                                        },
+                                    ],
+                                    undos: [
+                                        {
+                                            id: SetNumfmtMutation.id,
+                                            params: undoParams,
+                                        },
+                                    ],
+                                };
+                            }
+                            return { redos: [], undos: [] };
+                        };
+                        if (model) {
+                            model.forValue((row, col) => {
+                                const targetRange = {
+                                    startRow: row,
+                                    startColumn: col,
+                                    endRow: row,
+                                    endColumn: col,
+                                };
+                                const disposable = this._refRangeService.registerRefRange(targetRange, (commandInfo) =>
+                                    register(commandInfo, row, col)
+                                );
+                                disposableMap.set(`${row}_${col}`, disposable);
+                                disposableCollection.add(disposable);
+                            });
+                        }
 
-    setValue(workbookId: string, worksheetId: string, row: number, col: number, value: Nullable<NumfmtItem>) {
-        let model = this._getModel(workbookId, worksheetId);
-        if (!model) {
-            const key = getModelKey(workbookId, worksheetId);
-            model = new ObjectMatrix();
-            this.numfmtModel.set(key, model);
-        }
-        if (value) {
-            model.setValue(row, col, value);
-        } else {
-            model.deleteValue(row, col);
-        }
+                        // on change
+                        disposableCollection.add(
+                            toDisposable(
+                                new Observable<SetNumfmtMutationParams>((subscribe) => {
+                                    disposableCollection.add(
+                                        this._commandService.onCommandExecuted((commandInfo) => {
+                                            if (commandInfo.id === SetNumfmtMutation.id) {
+                                                subscribe.next(commandInfo.params as SetNumfmtMutationParams);
+                                            }
+                                        })
+                                    );
+                                })
+                                    .pipe(
+                                        filter(
+                                            (commandInfo) =>
+                                                commandInfo.workbookId === workbookId &&
+                                                commandInfo.worksheetId === worksheetId
+                                        ),
+                                        map((commandInfo) => commandInfo.values),
+                                        bufferTime(300), // updating the listener moves to the next queue
+                                        map((values) =>
+                                            values.reduce((pre, cur) => {
+                                                pre.push(...cur);
+                                                return pre;
+                                            }, [])
+                                        ),
+                                        filter((values) => !!values.length)
+                                    )
+                                    .subscribe((values) => {
+                                        values.forEach((value) => {
+                                            const { row, col } = value;
+                                            const key = `${row}_${col}`;
+                                            const disposable = disposableMap.get(key);
+                                            disposableMap.delete(key);
+                                            if (!value.pattern) {
+                                                disposable && disposable.dispose();
+                                            } else {
+                                                const targetRange = {
+                                                    startRow: row,
+                                                    startColumn: col,
+                                                    endRow: row,
+                                                    endColumn: col,
+                                                };
+                                                const disposable = this._refRangeService.registerRefRange(
+                                                    targetRange,
+                                                    (commandInfo) => register(commandInfo, row, col)
+                                                );
+                                                disposableMap.set(key, disposable);
+                                                disposableCollection.add(disposable);
+                                            }
+                                        });
+                                    })
+                            )
+                        );
+                    })
+            )
+        );
     }
 }
 

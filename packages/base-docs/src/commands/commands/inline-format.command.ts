@@ -1,4 +1,4 @@
-import { ITextRangeWithStyle } from '@univerjs/base-render';
+import { TextRange } from '@univerjs/base-render';
 import {
     BooleanNumber,
     CommandType,
@@ -207,7 +207,7 @@ function isTextDecoration(value: unknown | ITextDecoration): value is ITextDecor
 function getReverseFormatValueInSelection(
     textRuns: ITextRun[],
     key: keyof IStyleBase,
-    selections: ITextRangeWithStyle[]
+    selections: TextRange[]
 ): BooleanNumber | ITextDecoration {
     let ti = 0;
     let si = 0;
@@ -218,9 +218,9 @@ function getReverseFormatValueInSelection(
         // TODO: @jocs handle sid in textRun
         const { st, ed, ts } = textRuns[ti];
 
-        if (endOffset <= st) {
+        if (endOffset! <= st) {
             si++;
-        } else if (ed <= startOffset) {
+        } else if (ed <= startOffset!) {
             ti++;
         } else {
             if (ts?.[key] == null) {

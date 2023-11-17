@@ -163,7 +163,7 @@ export class DeleteLeftInputController extends Disposable {
         }
 
         // move selection
-        this._textSelectionManagerService.replace([
+        this._textSelectionManagerService.replaceTextRanges([
             {
                 startOffset: cursor,
                 endOffset: cursor,

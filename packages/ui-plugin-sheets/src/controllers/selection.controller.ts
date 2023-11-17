@@ -101,10 +101,13 @@ export class SelectionController extends Disposable {
                     this._selectionRenderService.resetStyle();
                     const param = this._selectionManagerService.getSelections();
                     const current = this._selectionManagerService.getCurrent();
+
                     if (param == null || current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
                         return;
                     }
+
                     this._selectionRenderService.reset();
+
                     for (const selectionWithStyle of param) {
                         if (selectionWithStyle == null) {
                             continue;

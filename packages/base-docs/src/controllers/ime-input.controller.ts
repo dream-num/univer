@@ -113,7 +113,7 @@ export class IMEInputController extends Disposable {
             const len = content.length;
 
             // move selection
-            this._textSelectionManagerService.replace([
+            this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: startOffset + len,
                     endOffset: endOffset + len,

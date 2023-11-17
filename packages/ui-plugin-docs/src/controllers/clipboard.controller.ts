@@ -114,7 +114,7 @@ export class DocClipboardController extends Disposable {
             }
 
             // move selection
-            this._textSelectionManagerService.replace([
+            this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: cursor,
                     endOffset: cursor,
@@ -259,7 +259,7 @@ export class DocClipboardController extends Disposable {
             }
 
             // move selection
-            this._textSelectionManagerService.replace([
+            this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: cursor,
                     endOffset: cursor,

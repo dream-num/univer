@@ -21,7 +21,7 @@ import { Engine } from '../../engine';
 import { Scene } from '../../scene';
 import { ScrollTimer } from '../../scroll-timer';
 import { IScrollObserverParam, Viewport } from '../../viewport';
-import { TextRange } from './common/range';
+import { cursorConvertToTextRange, TextRange } from './common/range';
 import { DocumentSkeleton } from './doc-skeleton';
 import { IDocumentOffsetConfig } from './document';
 
@@ -41,6 +41,12 @@ export function getCanvasOffsetByEngine(engine: Nullable<Engine>) {
         left,
         top,
     };
+}
+
+interface IAddTextRangesConfig {
+    scene: Scene;
+    skeleton: DocumentSkeleton;
+    documentOffsetConfig: IDocumentOffsetConfig;
 }
 
 export interface ITextSelectionRenderManager {
@@ -69,11 +75,11 @@ export interface ITextSelectionRenderManager {
 
     getAllTextRanges(): TextRange[];
 
-    add(textSelection: Nullable<TextRange>): void;
+    removeAllTextRanges(): void;
+
+    addTextRanges(ranges: ITextRangeWithStyle[], config?: IAddTextRangesConfig): void;
 
     sync(): void;
-
-    scroll(): void;
 
     activate(x: number, y: number): void;
 
@@ -86,8 +92,6 @@ export interface ITextSelectionRenderManager {
     changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene): void;
 
     dispose(): void;
-
-    reset(): void;
 
     getActiveRange(): Nullable<
         ITextRangeWithStyle & {
@@ -276,23 +280,33 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         return this._rangeList;
     }
 
-    add(textRange: Nullable<TextRange>) {
-        if (textRange == null) {
-            return;
+    addTextRanges(ranges: ITextRangeWithStyle[], config?: IAddTextRangesConfig) {
+        if (config != null) {
+            const { scene, skeleton, documentOffsetConfig } = config;
+
+            this.changeRuntime(skeleton, scene, null, documentOffsetConfig);
         }
 
-        this._addTextRange(textRange);
+        for (const range of ranges) {
+            const textSelection = cursorConvertToTextRange(
+                this._scene!,
+                range,
+                this._docSkeleton!,
+                this._documentOffsetConfig
+            );
 
-        // FIXME: @jocs, why I need to refresh textRange? it already refreshed when create.
-        textRange.refresh();
+            this._add(textSelection);
+        }
+
+        this._textSelection$.next(this.getAllTextRanges());
+
+        this._syncDomToSelection();
+
+        this._scrollToSelection();
     }
 
     sync() {
         this._syncDomToSelection();
-    }
-
-    scroll() {
-        this._scrollToSelection();
     }
 
     activate(x: number, y: number) {
@@ -323,7 +337,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._cursor.style.display = 'none';
     }
 
-    changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene, viewport?: Nullable<Viewport>) {
+    changeRuntime(
+        docSkeleton: DocumentSkeleton,
+        scene: Scene,
+        viewport?: Nullable<Viewport>,
+        documentOffsetConfig?: IDocumentOffsetConfig
+    ) {
         // this._docSkeleton?.onRecalculateChangeObservable.remove(this._skeletonObserver);
 
         this._docSkeleton = docSkeleton;
@@ -332,7 +351,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._activeViewport = viewport || scene.getViewports()[0];
 
-        // this._attachSelectionEvent(this._documents);
+        if (documentOffsetConfig) {
+            this._documentOffsetConfig = documentOffsetConfig;
+        }
     }
 
     // Handle pointer down.
@@ -431,9 +452,20 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         });
     }
 
-    reset() {
+    removeAllTextRanges() {
         this._removeAllTextRanges();
         this.deactivate();
+    }
+
+    private _add(textRange: Nullable<TextRange>) {
+        if (textRange == null) {
+            return;
+        }
+
+        this._addTextRange(textRange);
+
+        // FIXME: @JOCS, why I need to refresh textRange? it already refreshed when create.
+        textRange.refresh();
     }
 
     private getActiveRangeInstance() {
@@ -894,10 +926,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             activeRange,
             rangeList,
         });
-    }
-
-    private _handlePaste(e: ClipboardEvent) {
-        // TODO: emit the paste event to subscribers
     }
 
     private _getTransformCoordForDocumentOffset(evtOffsetX: number, evtOffsetY: number) {

@@ -103,7 +103,7 @@ export class LineBreakInputController extends Disposable {
         skeleton?.calculate();
 
         // move selection
-        this._textSelectionManagerService.replace([
+        this._textSelectionManagerService.replaceTextRanges([
             {
                 startOffset: startOffset + 1,
                 endOffset: startOffset + 1,

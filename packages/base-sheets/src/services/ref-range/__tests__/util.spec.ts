@@ -226,6 +226,18 @@ describe('test ref-range move', () => {
             const result = runRefRangeMutations(operators!, targetRange);
             expect(result).toEqual({ startRow: 0, endRow: 99, startColumn: 11, endColumn: 12 });
         });
+        it('the targetRange is contain the range', () => {
+            const targetRange = { startRow: 0, endRow: 99, startColumn: 4, endColumn: 11 };
+            const operators = handleInsertCol(
+                {
+                    id: EffectRefRangId.InsertColCommandId,
+                    params: { range, workbookId: '', worksheetId: '', direction: '' as any },
+                },
+                targetRange
+            );
+            const result = runRefRangeMutations(operators!, targetRange);
+            expect(result).toEqual({ startRow: 0, endRow: 99, startColumn: 4, endColumn: 17 });
+        });
         it('the targetRange is overlap with  range', () => {
             const targetRange = { startRow: 0, endRow: 99, startColumn: 4, endColumn: 5 };
             const operators = handleInsertCol(
@@ -255,7 +267,7 @@ describe('test ref-range move', () => {
     describe('handleInsertRow', () => {
         let range: IRange;
         beforeEach(() => {
-            range = { startRow: 5, endColumn: 99, startColumn: 0, endRow: 10 };
+            range = { startRow: 5, endRow: 10, startColumn: 0, endColumn: 99 };
         });
         it('the targetRange is on the range top', () => {
             const targetRange = { startRow: 3, endColumn: 99, startColumn: 0, endRow: 4 };
@@ -270,7 +282,7 @@ describe('test ref-range move', () => {
             expect(result).toEqual({ startRow: 3, endColumn: 99, startColumn: 0, endRow: 4 });
         });
         it('the targetRange is in the range', () => {
-            const targetRange = { startRow: 5, endColumn: 99, startColumn: 0, endRow: 6 };
+            const targetRange = { startRow: 5, endRow: 6, endColumn: 99, startColumn: 0 };
             const operators = handleInsertRow(
                 {
                     id: EffectRefRangId.InsertRowCommandId,
@@ -280,6 +292,18 @@ describe('test ref-range move', () => {
             );
             const result = runRefRangeMutations(operators!, targetRange);
             expect(result).toEqual({ startRow: 11, endColumn: 99, startColumn: 0, endRow: 12 });
+        });
+        it('the targetRange is contain the range', () => {
+            const targetRange = { startRow: 4, endRow: 11, endColumn: 99, startColumn: 0 };
+            const operators = handleInsertRow(
+                {
+                    id: EffectRefRangId.InsertRowCommandId,
+                    params: { range, workbookId: '', worksheetId: '', direction: '' as any },
+                },
+                targetRange
+            );
+            const result = runRefRangeMutations(operators!, targetRange);
+            expect(result).toEqual({ startRow: 4, endRow: 17, endColumn: 99, startColumn: 0 });
         });
         it('the targetRange is overlap with  range', () => {
             const targetRange = { startRow: 4, endColumn: 99, startColumn: 0, endRow: 6 };

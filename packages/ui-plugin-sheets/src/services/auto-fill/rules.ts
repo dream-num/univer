@@ -293,7 +293,14 @@ export const loopSeriesRule: IAutoFillRule = {
             const isReverse = direction === Direction.LEFT || direction === Direction.UP;
             const { series } = getLoopSeriesInfo(data[0]?.m || '');
             if (data.length === 1) {
-                return fillCopy(data, len);
+                let step;
+                if (!isReverse) {
+                    step = 1;
+                } else {
+                    step = -1;
+                }
+
+                return fillLoopSeries(data, len, step, series);
             }
             const dataNumArr = [];
             let cycleIndex = 0;

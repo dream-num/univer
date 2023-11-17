@@ -173,11 +173,9 @@ describe('Test auto fill rules in controller', () => {
     let themeService: ThemeService;
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
-            // [SelectionManagerService],
             [ISelectionRenderService, { useClass: SelectionRenderService }],
             [IAutoFillService, { useClass: AutoFillService }],
             [AutoFillController],
-            // [ThemeService],
         ]);
         univer = testBed.univer;
         get = testBed.get;

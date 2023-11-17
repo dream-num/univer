@@ -108,7 +108,7 @@ describe('test case in html and udm convert', () => {
         it('should paste the case when convert udm to html', async () => {
             const convertor = new UDMToHtmlService();
             const html = await convertor.convert([body!]);
-            console.log(html);
+
             expect(html).toBe('<strong>hello</strong><strong><i>world</i></strong>');
         });
     });

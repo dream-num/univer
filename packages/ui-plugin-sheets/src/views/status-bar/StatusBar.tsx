@@ -136,6 +136,7 @@ export const StatusBar = () => {
                         <MoreSingle />
                     </div>
                 </Dropdown>
+                <div className={styles.statusBarDiv}></div>
             </div>
         )
     );

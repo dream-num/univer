@@ -74,7 +74,6 @@ export interface IUniverInstanceService {
 }
 
 export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
-
 export class UniverInstanceService extends Disposable implements IUniverInstanceService {
     private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);
     private _focused: DocumentModel | Workbook | Slide | null = null;

@@ -109,7 +109,7 @@ export interface IStyleTypeValue<T> {
 /**
  * The controller to provide the most basic sheet CRUD methods to other modules of sheet modules.
  */
-@OnLifecycle(LifecycleStages.Ready, BasicWorksheetController)
+@OnLifecycle(LifecycleStages.Starting, BasicWorksheetController)
 export class BasicWorksheetController extends Disposable implements IDisposable {
     constructor(@ICommandService private readonly _commandService: ICommandService) {
         super();

@@ -56,12 +56,12 @@ export class InlineFormatController extends Disposable {
                     return;
                 }
 
-                this.handleInlineFormat(command);
+                this._handleInlineFormat(command);
             })
         );
     }
 
-    private handleInlineFormat(command: ICommandInfo) {
+    private _handleInlineFormat(command: ICommandInfo) {
         const { segmentId } = this._textSelectionRenderManager.getActiveRange() ?? {};
 
         if (segmentId == null) {

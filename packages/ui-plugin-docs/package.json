@@ -33,7 +33,6 @@
         "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"
     },
     "dependencies": {
-        "@ctrl/tinycolor": "^4.0.2",
         "@univerjs/base-docs": "workspace:*",
         "@univerjs/base-render": "workspace:*",
         "@univerjs/base-ui": "workspace:*",

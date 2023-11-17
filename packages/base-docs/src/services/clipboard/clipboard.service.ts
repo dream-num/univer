@@ -34,8 +34,8 @@ export const IDocClipboardService = createIdentifier<IDocClipboardService>('doc.
 
 export class DocClipboardService extends Disposable implements IDocClipboardService {
     private _clipboardHooks: IDocClipboardHook[] = [];
-    private htmlToUDM = new HtmlToUDMService();
-    private UDMToHtml = new UDMToHtmlService();
+    private _htmlToUDM = new HtmlToUDMService();
+    private _umdToHtml = new UDMToHtmlService();
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -71,7 +71,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             }
         }
 
-        return this.htmlToUDM.convert(html);
+        return this._htmlToUDM.convert(html);
     }
 
     async setClipboardData(documentBodyList: IDocumentBody[]): Promise<void> {
@@ -80,7 +80,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             documentBodyList.length > 1
                 ? documentBodyList.map((body) => body.dataStream).join('\n')
                 : documentBodyList[0].dataStream;
-        let html = this.UDMToHtml.convert(documentBodyList);
+        let html = this._umdToHtml.convert(documentBodyList);
 
         // Only cache copy content when the range is 1.
         if (documentBodyList.length === 1) {

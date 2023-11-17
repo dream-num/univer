@@ -1,14 +1,10 @@
 /* eslint-disable no-magic-numbers */
 
 import {
-    NORMAL_TEXT_SELECTION_PLUGIN_NAME,
-    RichTextEditingMutation,
-    TextSelectionManagerService,
-} from '@univerjs/base-docs';
-import {
     BooleanNumber,
     ICommand,
     ICommandService,
+    IDocumentData,
     IStyleBase,
     IUniverInstanceService,
     UndoCommand,
@@ -17,13 +13,71 @@ import {
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { NORMAL_TEXT_SELECTION_PLUGIN_NAME } from '../../../basics/docs-view-key';
+import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';
+import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
 import {
     IInnerCutCommandParams,
     IInnerPasteCommandParams,
     InnerCutCommand,
     InnerPasteCommand,
-} from '../clipboard.command';
+} from '../clipboard.inner.command';
 import { createCommandTestBed } from './create-command-test-bed';
+
+const TEST_DOCUMENT_DATA_EN: IDocumentData = {
+    id: 'test-doc',
+    body: {
+        dataStream: 'What’s New in the 2022\r Gartner Hype Cycle for Emerging Technologies\r\n',
+        textRuns: [
+            {
+                st: 0,
+                ed: 22,
+                ts: {
+                    bl: BooleanNumber.FALSE,
+                    fs: 24,
+                    cl: {
+                        rgb: 'rgb(0, 40, 86)',
+                    },
+                },
+            },
+            {
+                st: 23,
+                ed: 68,
+                ts: {
+                    bl: BooleanNumber.TRUE,
+                    fs: 24,
+                    cl: {
+                        rgb: 'rgb(0, 40, 86)',
+                    },
+                },
+            },
+        ],
+        paragraphs: [
+            {
+                startIndex: 22,
+            },
+            {
+                startIndex: 68,
+                paragraphStyle: {
+                    spaceAbove: 20,
+                    indentFirstLine: 20,
+                },
+            },
+        ],
+        sectionBreaks: [],
+        customBlocks: [],
+    },
+    documentStyle: {
+        pageSize: {
+            width: 594.3,
+            height: 840.51,
+        },
+        marginTop: 72,
+        marginBottom: 72,
+        marginRight: 90,
+        marginLeft: 90,
+    },
+};
 
 describe('test cases in clipboard', () => {
     let univer: Univer;
@@ -55,7 +109,7 @@ describe('test cases in clipboard', () => {
     }
 
     beforeEach(() => {
-        const testBed = createCommandTestBed();
+        const testBed = createCommandTestBed(TEST_DOCUMENT_DATA_EN);
         univer = testBed.univer;
         get = testBed.get;
 

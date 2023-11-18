@@ -12,6 +12,8 @@
     // }
 
     &-affix-wrapper {
+        position: relative;
+
         overflow: hidden;
 
         box-sizing: border-box;
@@ -68,8 +70,24 @@
         }
     }
 
+    &-suffix {
+        position: absolute;
+        top: 0;
+        right: 2px;
+
+        display: flex;
+        align-items: center;
+
+        height: 100%;
+        padding: 0 var(--padding-sm);
+
+        background-color: rgb(var(--bg-color-secondary));
+    }
+
     &-clear-icon {
         cursor: pointer;
+        display: inline-flex;
+        align-items: center;
 
         &-hidden {
             display: none;

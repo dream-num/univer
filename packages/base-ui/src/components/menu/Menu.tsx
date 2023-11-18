@@ -5,7 +5,7 @@ import {
     MenuItemGroup as DesignMenuItemGroup,
     SubMenu as DesignSubMenu,
 } from '@univerjs/design';
-import { MoreSingle } from '@univerjs/icons';
+import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import { useState } from 'react';
@@ -121,14 +121,13 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
 
         return (
             <DesignMenuItem key={key} eventKey={key} className={_className} onClick={handleClick}>
-                <span className={styles.menuItemContent}>
-                    <CustomLabel
-                        selected={typeof value !== 'undefined' && value === option.value}
-                        value={option.value}
-                        label={option.label}
-                        icon={option.icon}
-                        onChange={onChange}
-                    />
+                <span className={clsx(styles.menuItemContent, styles.menuItemSelectable)}>
+                    {typeof value !== 'undefined' && String(value) === String(option.value) && (
+                        <span className={styles.menuItemSelectableIcon}>
+                            <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />
+                        </span>
+                    )}
+                    <CustomLabel value={option.value} label={option.label} icon={option.icon} onChange={onChange} />
                 </span>
             </DesignMenuItem>
         );

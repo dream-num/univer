@@ -1,6 +1,6 @@
 import { BooleanNumber, IDocumentData, TextDecoration } from '@univerjs/core';
 
-export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
+export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
     id: 'd',
     body: {
         dataStream:

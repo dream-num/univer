@@ -350,12 +350,14 @@ export class Documents extends DocComponent {
                             rotateTranslateXListApply && this._drawLiquid.translate(rotateTranslateXListApply[i]); // x axis offset
 
                             const divideLength = divides.length;
+
                             for (let i = 0; i < divideLength; i++) {
                                 const divide = divides[i];
                                 const { spanGroup } = divide;
                                 this._drawLiquid.translateSave();
 
                                 this._drawLiquid.translateDivide(divide);
+
                                 for (const span of spanGroup) {
                                     if (!span.content || span.content.length === 0) {
                                         continue;

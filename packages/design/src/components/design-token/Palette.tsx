@@ -62,6 +62,10 @@ export function Palette(props: IProps) {
             colors: ['borderColor'],
         },
         {
+            title: 'Scrollbar Color',
+            colors: ['scrollbarColor', 'scrollbarColorHover', 'scrollbarColorActive'],
+        },
+        {
             title: 'Border Radius',
             colors: ['borderRadiusBase', 'borderRadiusLg', 'borderRadiusXl'],
         },

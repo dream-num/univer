@@ -7,6 +7,7 @@ export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './comp
 export { Confirm, type IConfirmProps } from './components/confirm';
 export { Container, type IContainerProps } from './components/container';
 export { Dialog, type IDialogProps } from './components/dialog';
+export { Divider, type IDividerProps } from './components/divider';
 export { Dropdown, type IDropdownProps } from './components/dropdown';
 export { type IInputProps, Input } from './components/input';
 export { type IInputNumberProps, InputNumber } from './components/input-number';

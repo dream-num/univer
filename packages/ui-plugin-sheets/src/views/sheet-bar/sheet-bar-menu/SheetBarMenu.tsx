@@ -20,7 +20,7 @@ import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { ISheetBarService } from '../../../services/sheetbar/sheetbar.service';
+import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { SheetBarButton } from '../sheet-bar-button/SheetBarButton';
 import styles from './index.module.less';
 
@@ -147,7 +147,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                                     <CheckMarkSingle />
                                 )}
                             </span>
-                            {item.label}
+                            <span className={styles.sheetBarMenuItemLabel}>{item.label}</span>
                         </li>
                     ))}
                 </ul>

@@ -14,6 +14,8 @@
         align-items: center;
 
         padding: var(--padding-xs) @padding-left-right;
+
+        transition: box-shadow 0.2s;
     }
 }
 
@@ -36,6 +38,10 @@ Tab Item, Put outside to be compatible with drag styles
     color: rgb(var(--grey-1000));
 
     border-radius: var(--border-radius-base);
+
+    &:not(.slide-tab-active):hover {
+        background-color: rgb(var(--bg-color-hover));
+    }
 
     .slide-tab-span {
         box-sizing: border-box;
@@ -63,6 +69,9 @@ Tab Item, Put outside to be compatible with drag styles
 .slide-tab-active {
     font-weight: 700;
     color: rgb(var(--primary-color));
+
     background-color: rgb(var(--bg-color-secondary));
     box-shadow: @tab-shadow;
+
+    transition: box-shadow .2s;
 }

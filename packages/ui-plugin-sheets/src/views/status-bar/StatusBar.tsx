@@ -1,5 +1,5 @@
 import { LocaleService } from '@univerjs/core';
-import { Checkbox, Dropdown } from '@univerjs/design';
+import { Checkbox, Divider, Dropdown } from '@univerjs/design';
 import { MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
@@ -136,6 +136,7 @@ export const StatusBar = () => {
                         <MoreSingle />
                     </div>
                 </Dropdown>
+                <Divider length={16} color="rgb(var(--grey-400))" />
             </div>
         )
     );

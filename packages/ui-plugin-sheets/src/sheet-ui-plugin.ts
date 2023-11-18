@@ -35,8 +35,8 @@ import { EditorBridgeService, IEditorBridgeService } from './services/editor-bri
 import { FormatPainterService, IFormatPainterService } from './services/format-painter/format-painter.service';
 import { ScrollManagerService } from './services/scroll-manager.service';
 import { ISelectionRenderService, SelectionRenderService } from './services/selection/selection-render.service';
+import { ISheetBarService, SheetBarService } from './services/sheet-bar/sheet-bar.service';
 import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
-import { ISheetBarService, SheetBarService } from './services/sheetbar/sheetbar.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 import { SheetCanvasView } from './views/sheet-canvas-view';
 

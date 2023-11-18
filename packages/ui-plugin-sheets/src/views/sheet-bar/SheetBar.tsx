@@ -1,10 +1,11 @@
 import { InsertSheetCommand } from '@univerjs/base-sheets';
 import { ICommandService } from '@univerjs/core';
+import { Divider } from '@univerjs/design';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useEffect, useState } from 'react';
 
-import { ISheetBarService } from '../../services/sheetbar/sheetbar.service';
+import { ISheetBarService } from '../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
 import { SheetBarButton } from './sheet-bar-button/SheetBarButton';
 import { SheetBarMenu } from './sheet-bar-menu/SheetBarMenu';
@@ -75,6 +76,7 @@ export const SheetBar = () => {
                     <SheetBarButton disabled={rightScrollState} onClick={handleScrollRight}>
                         <MoreSingle />
                     </SheetBarButton>
+                    <Divider length={16} color="rgb(var(--grey-400))" />
                 </div>
             )}
         </div>

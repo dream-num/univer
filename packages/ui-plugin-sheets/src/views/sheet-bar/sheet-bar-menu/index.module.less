@@ -1,4 +1,5 @@
-@padding-right: 28px;
+@padding-left-right: 24px;
+@line-height: 20px;
 
 .sheet-bar-menu {
     display: grid;
@@ -6,10 +7,7 @@
     align-items: center;
 
     box-sizing: border-box;
-    padding: var(--padding-lg) var(--padding-base);
-
-    font-size: var(--font-size-xs);
-    font-weight: 500;
+    padding: var(--padding-sm);;
 
     background-color: rgb(var(--bg-color-secondary));
     border: 1px solid rgb(var(--border-color));
@@ -23,10 +21,12 @@
     &-item {
         cursor: pointer;
 
+        position: relative;
+
         display: flex;
 
         box-sizing: border-box;
-        padding: var(--padding-xs) @padding-right var(--padding-xs) var(--padding-xs);
+        padding: var(--padding-xs) @padding-left-right;
 
         color: rgb(var(--text-color));
 
@@ -39,8 +39,11 @@
         }
 
         &-icon {
-            display: flex;
-            margin-right: var(--margin-xs);
+            position: absolute;
+            top: 50%;
+            left: var(--margin-xxs);
+            transform: translateY(-50%);
+
             color: transparent;
         }
 
@@ -48,8 +51,19 @@
             color: rgb(var(--grey-400));
         }
 
-        &-select &-icon, &-select{
+        &-select{
+            font-weight: 500;
             color: rgb(var(--primary-color));
+        }
+
+        &-select &-icon {
+            color: rgb(var(--primary-color));
+        }
+
+        &-label {
+            font-size: var(--font-size-xs);
+            font-weight: 400;
+            line-height: @line-height;
         }
 
     }

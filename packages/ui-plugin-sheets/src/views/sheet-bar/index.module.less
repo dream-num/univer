@@ -2,6 +2,7 @@
 @sheet-bar-max-width: 1515px;
 @status-bar-max-width: 332px;
 @zoom-slider-width: 260px;
+@margin-right: -4px;
 
 .sheet-bar {
     position: relative;
@@ -10,9 +11,10 @@
     flex: 1 1 0px;
     flex-direction: row;
 
-    max-width: calc(100% - @zoom-slider-width);
     min-width: calc(100% - @zoom-slider-width - @status-bar-max-width);
+    max-width: calc(100% - @zoom-slider-width);
     height: 100%;
+    margin-right: @margin-right;
 
     background-color: rgb(var(--bg-color));
 }

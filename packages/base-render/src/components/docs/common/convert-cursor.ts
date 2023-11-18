@@ -135,7 +135,7 @@ export function getOneTextSelectionRange(rangeList: ITextRange[]): Nullable<ITex
 }
 
 export class NodePositionConvertToCursor {
-    private _Liquid = new Liquid();
+    private _liquid = new Liquid();
 
     private _documentOffsetConfig: Nullable<IDocumentOffsetConfig>;
 
@@ -166,28 +166,30 @@ export class NodePositionConvertToCursor {
     }
 
     getRangePointData(startOrigin: Nullable<INodePosition>, endOrigin: Nullable<INodePosition>) {
-        const pointGroup: IPoint[][] = [];
+        const borderBoxPointGroup: IPoint[][] = [];
+        const contentBoxPointGroup: IPoint[][] = [];
 
         const cursorList: ITextRange[] = [];
 
         if (startOrigin == null || endOrigin == null) {
             return {
-                pointGroup,
+                borderBoxPointGroup,
+                contentBoxPointGroup,
                 cursorList,
             };
         }
 
         const { start, end } = compareNodePosition(startOrigin, endOrigin);
 
-        // eslint-disable-next-line max-lines-per-function
         this._selectionIterator(start!, end!, (start_sp, end_sp, isFirst, isLast, divide, line) => {
-            const { lineHeight } = line;
+            const { lineHeight, marginTop, paddingTop, contentHeight } = line;
 
             const { spanGroup, st } = divide;
 
-            const { x: startX, y: startY } = this._Liquid;
+            const { x: startX, y: startY } = this._liquid;
 
-            let position: IPosition;
+            let borderBoxPosition: IPosition;
+            let contentBoxPosition: IPosition;
 
             const firstSpan = spanGroup[start_sp];
             const lastSpan = spanGroup[end_sp];
@@ -215,11 +217,18 @@ export class NodePositionConvertToCursor {
             if (start_sp === 0 && end_sp === spanGroup.length - 1) {
                 endOffset -= hasList ? 1 : 0;
 
-                position = {
+                borderBoxPosition = {
                     startX: startX + firstSpanLeft + (isCurrentList ? firstSpanWidth : 0),
                     startY,
                     endX: startX + lastSpanLeft + lastSpanWidth,
                     endY: startY + lineHeight,
+                };
+
+                contentBoxPosition = {
+                    startX: startX + firstSpanLeft + (isCurrentList ? firstSpanWidth : 0),
+                    startY: startY + marginTop,
+                    endX: startX + lastSpanLeft + lastSpanWidth,
+                    endY: startY + marginTop + contentHeight,
                 };
             } else {
                 const isStartBackFin = isStartBack && !isCurrentList;
@@ -234,11 +243,18 @@ export class NodePositionConvertToCursor {
 
                 endOffset -= hasList && !isCurrentList ? 1 : 0;
 
-                position = {
+                borderBoxPosition = {
                     startX: startX + firstSpanLeft + (isStartBackFin ? 0 : firstSpanWidth),
                     startY,
                     endX: startX + lastSpanLeft + (isEndBack ? 0 : lastSpanWidth),
                     endY: startY + lineHeight,
+                };
+
+                contentBoxPosition = {
+                    startX: startX + firstSpanLeft + (isStartBackFin ? 0 : firstSpanWidth),
+                    startY: startY + marginTop,
+                    endX: startX + lastSpanLeft + (isEndBack ? 0 : lastSpanWidth),
+                    endY: startY + marginTop + contentHeight,
                 };
 
                 // for (let sp = start_sp; sp <= end_sp; sp++) {
@@ -247,7 +263,8 @@ export class NodePositionConvertToCursor {
                 // }
             }
 
-            pointGroup.push(this._pushToPoints(position));
+            borderBoxPointGroup.push(this._pushToPoints(borderBoxPosition));
+            contentBoxPointGroup.push(this._pushToPoints(contentBoxPosition));
 
             cursorList.push({
                 startOffset: isStartBack ? startOffset : startOffset + 1,
@@ -257,7 +274,8 @@ export class NodePositionConvertToCursor {
         });
 
         return {
-            pointGroup,
+            borderBoxPointGroup,
+            contentBoxPointGroup,
             cursorList,
         };
     }
@@ -372,6 +390,7 @@ export class NodePositionConvertToCursor {
     private _pushToPoints(position: IPosition) {
         const { startX, startY, endX, endY } = position;
         const points: Array<{ x: number; y: number }> = [];
+
         points.push({
             x: startX,
             y: startY,
@@ -391,14 +410,15 @@ export class NodePositionConvertToCursor {
             x: startX,
             y: endY,
         });
+
         points.push({
             x: startX,
             y: startY,
         });
+
         return points;
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _selectionIterator(
         startPosition: INodePosition,
         endPosition: INodePosition,
@@ -419,7 +439,7 @@ export class NodePositionConvertToCursor {
             return [];
         }
 
-        this._Liquid.reset();
+        this._liquid.reset();
 
         const skeletonData = skeleton.getSkeletonData();
 
@@ -443,7 +463,7 @@ export class NodePositionConvertToCursor {
 
         for (let p = 0; p <= pageIndex - 1; p++) {
             const page = pages[p];
-            this._Liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+            this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
         for (let p = pageIndex; p <= endPageIndex; p++) {
@@ -457,8 +477,8 @@ export class NodePositionConvertToCursor {
                 sections.length - 1,
                 p
             );
-            this._Liquid.translateSave();
-            this._Liquid.translatePagePadding(page);
+            this._liquid.translateSave();
+            this._liquid.translatePagePadding(page);
 
             for (let s = start_s; s <= end_s; s++) {
                 const section = sections[s];
@@ -471,7 +491,7 @@ export class NodePositionConvertToCursor {
                     s
                 );
 
-                this._Liquid.translateSection(section);
+                this._liquid.translateSection(section);
 
                 for (let c = start_c; c <= end_c; c++) {
                     const column = columns[c];
@@ -484,7 +504,7 @@ export class NodePositionConvertToCursor {
                         c
                     );
 
-                    this._Liquid.translateColumn(column);
+                    this._liquid.translateColumn(column);
 
                     for (let l = start_l; l <= end_l; l++) {
                         const line = lines[l];
@@ -496,16 +516,16 @@ export class NodePositionConvertToCursor {
                             divides.length - 1,
                             l
                         );
-                        this._Liquid.translateSave();
-                        this._Liquid.translateLine(line);
+                        this._liquid.translateSave();
+                        this._liquid.translateLine(line);
 
                         for (let d = start_d; d <= end_d; d++) {
                             const divide = divides[d];
 
                             // console.log('div', divides, divide, startPosition, endPosition, start_d, end_d, d);
 
-                            this._Liquid.translateSave();
-                            this._Liquid.translateDivide(divide);
+                            this._liquid.translateSave();
+                            this._liquid.translateDivide(divide);
 
                             const spanGroup = divide.spanGroup;
 
@@ -531,16 +551,16 @@ export class NodePositionConvertToCursor {
 
                             func && func(start_sp, end_sp, isFirst, isLast, divide, line, column, section, page);
 
-                            this._Liquid.translateRestore();
+                            this._liquid.translateRestore();
                         }
 
-                        this._Liquid.translateRestore();
+                        this._liquid.translateRestore();
                     }
                 }
             }
 
-            this._Liquid.translateRestore();
-            this._Liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
+            this._liquid.translateRestore();
+            this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
     }
 }

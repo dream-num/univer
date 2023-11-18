@@ -1,4 +1,4 @@
-import { IDocumentData } from '@univerjs/core';
+import { BooleanNumber, IDocumentData, TextDecoration } from '@univerjs/core';
 
 export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
     id: 'd',
@@ -15,7 +15,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(255, 255, 255)',
                     },
-                    bl: 1,
+                    bl: BooleanNumber.TRUE,
                     bg: {
                         rgb: 'rgb(255, 0, 0)',
                     },
@@ -30,7 +30,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(255, 255, 255)',
                     },
-                    bl: 1,
+                    bl: BooleanNumber.TRUE,
                     bg: {
                         rgb: 'rgb(255, 0, 0)',
                     },
@@ -45,7 +45,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(255, 255, 255)',
                     },
-                    bl: 1,
+                    bl: BooleanNumber.TRUE,
                     bg: {
                         rgb: 'rgb(255, 0, 0)',
                     },
@@ -140,7 +140,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                         rgb: 'rgb(47, 85, 151)',
                     },
                     st: {
-                        s: 1,
+                        s: BooleanNumber.TRUE,
                     },
                 },
             },
@@ -165,7 +165,11 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                         rgb: 'rgb(47, 85, 151)',
                     },
                     ul: {
-                        s: 1,
+                        s: BooleanNumber.TRUE,
+                        cl: {
+                            rgb: 'rgb(255, 0, 0)',
+                        },
+                        t: TextDecoration.DASH_DOT_DOT_HEAVY,
                     },
                 },
             },
@@ -203,9 +207,9 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(255, 192, 0)',
                     },
-                    bl: 1,
+                    bl: BooleanNumber.TRUE,
                     ul: {
-                        s: 1,
+                        s: BooleanNumber.TRUE,
                     },
                 },
             },
@@ -229,9 +233,9 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(255, 192, 0)',
                     },
-                    bl: 1,
+                    bl: BooleanNumber.TRUE,
                     ul: {
-                        s: 1,
+                        s: BooleanNumber.TRUE,
                     },
                 },
             },
@@ -266,7 +270,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    bl: 1,
+                    bl: BooleanNumber.TRUE,
                 },
             },
             {
@@ -333,9 +337,9 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    bl: 1,
+                    bl: BooleanNumber.TRUE,
                     ul: {
-                        s: 1,
+                        s: BooleanNumber.TRUE,
                     },
                 },
             },
@@ -381,7 +385,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    bl: 1,
+                    bl: BooleanNumber.TRUE,
                 },
             },
             {
@@ -426,9 +430,10 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    it: 1,
+                    it: BooleanNumber.TRUE,
                     ul: {
-                        s: 1,
+                        s: BooleanNumber.TRUE,
+                        t: TextDecoration.DASHED_HEAVY,
                     },
                 },
             },
@@ -441,7 +446,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    it: 1,
+                    it: BooleanNumber.TRUE,
                 },
             },
             {
@@ -453,9 +458,10 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    it: 1,
+                    it: BooleanNumber.TRUE,
                     ul: {
-                        s: 1,
+                        s: BooleanNumber.TRUE,
+                        t: TextDecoration.DASH_DOT_DOT_HEAVY,
                     },
                 },
             },
@@ -468,7 +474,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    it: 1,
+                    it: BooleanNumber.TRUE,
                 },
             },
             {
@@ -480,9 +486,10 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    it: 1,
+                    it: BooleanNumber.TRUE,
                     ul: {
-                        s: 1,
+                        s: BooleanNumber.TRUE,
+                        t: TextDecoration.DASH_LONG,
                     },
                 },
             },
@@ -495,7 +502,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    it: 1,
+                    it: BooleanNumber.TRUE,
                 },
             },
             {
@@ -507,9 +514,10 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    it: 1,
+                    it: BooleanNumber.TRUE,
                     ul: {
-                        s: 1,
+                        s: BooleanNumber.TRUE,
+                        t: TextDecoration.DASH_LONG_HEAVY,
                     },
                 },
             },
@@ -522,7 +530,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    it: 1,
+                    it: BooleanNumber.TRUE,
                 },
             },
             {
@@ -534,9 +542,10 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    it: 1,
+                    it: BooleanNumber.TRUE,
                     ul: {
-                        s: 1,
+                        s: BooleanNumber.TRUE,
+                        t: TextDecoration.DOT_DOT_DASH,
                     },
                 },
             },
@@ -571,7 +580,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
-                    bl: 1,
+                    bl: BooleanNumber.TRUE,
                 },
             },
             {

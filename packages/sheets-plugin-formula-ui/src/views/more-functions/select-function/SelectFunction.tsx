@@ -113,15 +113,9 @@ export function SelectFunction(props: ISelectFunctionProps) {
     return (
         <div>
             <div className={styles.formulaSelectFunctionSelect}>
-                <Select
-                    className={styles.formulaSelectFunctionSelectType}
-                    value={typeSelected}
-                    options={options}
-                    onChange={handleSelectChange}
-                ></Select>
+                <Select value={typeSelected} options={options} onChange={handleSelectChange}></Select>
 
                 <Input
-                    className={styles.formulaSelectFunctionSelectText}
                     placeholder={localeService.t(`formula.moreFunctions.searchFunctionPlaceholder`)}
                     onKeyDown={handleSelectListKeyDown}
                     value={searchText}

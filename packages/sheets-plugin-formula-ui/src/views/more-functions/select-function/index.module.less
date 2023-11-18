@@ -1,27 +1,14 @@
 @result-height: 364px;
-@select-width: 45%;
 @result-item-padding-left: 28px;
 @selected-icon-left: 6px;
 
 .formula-select-function {
     &-select {
         display: flex;
+        gap: 10%;
         align-items: center;
         justify-content: space-between;
         
-        &-type {
-            width: @select-width;
-        }
-
-        // FIXME: Need input components to repair width and central problem
-        &-text{
-            display: flex;
-            width: @select-width;
-
-            .input{
-                width: 100%;
-            }
-        }
     }
     
     &-result {

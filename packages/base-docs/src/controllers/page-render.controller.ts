@@ -58,9 +58,11 @@ export class PageRenderController extends Disposable {
                 if ([DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY].includes(unitId)) {
                     return;
                 }
+                // Draw page borders
                 const { page, pageLeft, pageTop, ctx } = config;
-                const { width, height, marginBottom, marginLeft, marginRight, marginTop } = page;
+                const { width, height } = page;
                 ctx.save();
+                // eslint-disable-next-line no-magic-numbers
                 ctx.translate(pageLeft - 0.5, pageTop - 0.5);
                 Rect.drawWith(ctx, {
                     width: pageSize?.width || width,

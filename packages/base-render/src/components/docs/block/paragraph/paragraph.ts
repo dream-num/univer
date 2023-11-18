@@ -213,7 +213,7 @@ export function dealWidthParagraph(
             i = newCharIndex;
             newSpanGroup = spanGroup;
         } else {
-            const span = createSkeletonWordSpan(char, fontCreateConfig); // measureText收敛到create中执行
+            const span = createSkeletonWordSpan(char, fontCreateConfig); // measureText 收敛到 create 中执行
             newSpanGroup.push(span);
         }
 

@@ -443,7 +443,7 @@ function _getLineSke(lineType: LineType, paragraphIndex: number): IDocumentSkele
     return {
         paragraphIndex,
         type: lineType,
-        divides: [], // /divides 受到对象影响，把行切分为N部分
+        divides: [], // /divides 受到对象影响，把行切分为 N 部分
         lineHeight: 0, // lineHeight =max(span.fontBoundingBoxAscent + span.fontBoundingBoxDescent, span2.....) + space
         contentHeight: 0, // contentHeight =max(span.fontBoundingBoxAscent + span.fontBoundingBoxDescent, span2.....)
         top: 0, // top paragraph(spaceAbove, spaceBelow, lineSpacing*PreLineHeight)
@@ -451,7 +451,7 @@ function _getLineSke(lineType: LineType, paragraphIndex: number): IDocumentSkele
         paddingTop: 0, // paddingTop 内容到顶部的距离
         paddingBottom: 0, // paddingBottom 内容到底部的距离
         marginTop: 0, // marginTop 针对段落的spaceAbove
-        marginBottom: 0, // marginBottom 针对段落的spaceBlow
+        marginBottom: 0, // marginBottom 针对段落的spaceBelow
         spaceBelowApply: 0, // lineSpacingApply
         divideLen: 0, // divideLen 被对象分割为多少块
         st: -1, // startIndex 文本开始索引

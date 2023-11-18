@@ -488,6 +488,7 @@ export function pxToInch(px: number) {
 
 export function getScale(parentScale: IScale) {
     const { scaleX = 1, scaleY = 1 } = parentScale;
+
     return Math.max(scaleX, scaleY);
 }
 

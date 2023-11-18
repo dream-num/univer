@@ -74,9 +74,8 @@ export class DocumentSkeleton extends Skeleton {
         if (!this.dirty) {
             return;
         }
-        this._skeletonData = this._createSkeleton(bounds);
 
-        // this.onRecalculateChangeObservable.notifyObservers(this._skeletonData);
+        this._skeletonData = this._createSkeleton(bounds);
     }
 
     getSkeletonData() {
@@ -502,7 +501,7 @@ export class DocumentSkeleton extends Skeleton {
             },
         } = documentStyle;
 
-        const skeleton = this.__getNullSke();
+        const skeleton = this._getNullSke();
 
         const docsConfig: IDocsConfig = {
             headerTreeMap,
@@ -614,7 +613,7 @@ export class DocumentSkeleton extends Skeleton {
 
             if (sectionType === SectionType.CONTINUOUS) {
                 updateBlockIndex(allSkeletonPages);
-                this.__addNewSectionByContinuous(curSkeletonPage, columnProperties, columnSeparatorType);
+                this._addNewSectionByContinuous(curSkeletonPage, columnProperties, columnSeparatorType);
                 isContinuous = true;
             } else {
                 curSkeletonPage = createSkeletonPage(
@@ -667,7 +666,7 @@ export class DocumentSkeleton extends Skeleton {
     }
 
     // 一页存在多个section的情况，仅在SectionType.CONTINUOUS的情况下出现
-    private __addNewSectionByContinuous(
+    private _addNewSectionByContinuous(
         curSkeletonPage: IDocumentSkeletonPage,
         columnProperties: ISectionColumnProperties[],
         columnSeparatorType: ColumnSeparatorType
@@ -697,7 +696,7 @@ export class DocumentSkeleton extends Skeleton {
         sections.push(newSection);
     }
 
-    private __getNullSke(): IDocumentSkeletonCached {
+    private _getNullSke(): IDocumentSkeletonCached {
         return {
             pages: [],
             left: 0,

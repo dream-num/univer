@@ -1,0 +1,11 @@
+{
+    "name": "@univerjs/network",
+    "private": true,
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
+    "dependencies": {
+        "@univerjs/core": "workspace:*",
+        "@wendellhu/redi": "^0.12.10",
+        "rxjs": "^7.8.1"
+    }
+}

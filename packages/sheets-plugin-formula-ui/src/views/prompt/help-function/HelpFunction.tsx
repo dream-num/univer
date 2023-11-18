@@ -171,10 +171,7 @@ const Help = (props: IHelpProps) => {
     const { prefix, value, active, onClick } = props;
     return (
         <div>
-            <span>
-                {prefix}
-                {'('}
-            </span>
+            <span>{prefix}(</span>
             {value &&
                 value.map((item: IFunctionParam, i: number) => (
                     // TODO@Dushusir: more params needs to be active
@@ -188,7 +185,7 @@ const Help = (props: IHelpProps) => {
                         {i === value.length - 1 ? '' : ','}
                     </span>
                 ))}
-            <span>{')'}</span>
+            )
         </div>
     );
 };

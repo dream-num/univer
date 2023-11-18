@@ -806,6 +806,18 @@ importers:
         specifier: ^0.34.6
         version: 0.34.6(happy-dom@12.10.3)(less@4.2.0)
 
+  packages/network:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@wendellhu/redi':
+        specifier: ^0.12.10
+        version: 0.12.11
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+
   packages/rpc:
     dependencies:
       '@univerjs/core':

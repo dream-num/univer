@@ -23,7 +23,7 @@ export class Line extends docExtension {
             return;
         }
 
-        const { asc: maxLineAsc = 0, lineHeight = 0 } = line;
+        const { asc: maxLineAsc = 0, lineHeight = 0, marginTop = 0 } = line;
         const { ts: textStyle, left, width, bBox } = span;
         if (!textStyle) {
             return;
@@ -46,13 +46,14 @@ export class Line extends docExtension {
 
         if (underline) {
             const { s: show, cl: colorStyle, t: lineType } = underline;
+
             if (show === BooleanNumber.TRUE) {
                 ctx.beginPath();
                 const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
                 ctx.strokeStyle = color;
                 this._setLineType(ctx, lineType || TextDecoration.SINGLE);
 
-                const startY = fixLineWidthByScale(lineHeight + DEFAULT_OFFSET_SPACING - 0.5, scale);
+                const startY = fixLineWidthByScale(lineHeight - marginTop + DEFAULT_OFFSET_SPACING - 0.5, scale);
 
                 const start = calculateRectRotate(
                     originTranslate.addByPoint(left, startY),
@@ -68,6 +69,7 @@ export class Line extends docExtension {
                     vertexAngle,
                     alignOffset
                 );
+
                 ctx.moveTo(start.x, start.y);
                 ctx.lineTo(end.x, end.y);
                 ctx.stroke();

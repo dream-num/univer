@@ -185,10 +185,7 @@ const Help = (props: IHelpProps) => {
     const { prefix, value } = props;
     return (
         <div>
-            <span>
-                {prefix}
-                {'('}
-            </span>
+            <span>{prefix}(</span>
             {value &&
                 value.map((item: IFunctionParam, i: number) => (
                     <span key={i}>
@@ -196,7 +193,7 @@ const Help = (props: IHelpProps) => {
                         {i === value.length - 1 ? '' : ','}
                     </span>
                 ))}
-            <span>{')'}</span>
+            )
         </div>
     );
 };

@@ -12,14 +12,7 @@ import {
     SetSelectedColsVisibleCommand,
     SetSelectedRowsVisibleCommand,
 } from '@univerjs/base-sheets';
-import {
-    Direction,
-    ICommandService,
-    IUniverInstanceService,
-    IWorkbookConfig,
-    RANGE_TYPE,
-    Univer,
-} from '@univerjs/core';
+import { Direction, ICommandService, IUniverInstanceService, IWorkbookData, RANGE_TYPE, Univer } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -186,7 +179,7 @@ describe('Test commands used for change selections', () => {
         univer = null;
     }
 
-    function prepareTestBed(snapshot?: IWorkbookConfig) {
+    function prepareTestBed(snapshot?: IWorkbookData) {
         const testBed = createSelectionCommandTestBed(snapshot);
         univer = testBed.univer;
         get = testBed.get;

@@ -1,13 +1,13 @@
 import { ISize } from '../../services/floating-object/floating-object-interfaces';
 import { BooleanNumber, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
-import { IExtraModelConfig } from './i-extra-model-config';
+import { IExtraModelData } from './i-extra-model-data';
 import { IColorStyle, IStyleBase } from './i-style-data';
 
 // 注意：所有的尺寸单位，若无特殊说明，都是指pt，1 pt = 1 / 72 in
 /**
  * Properties of document
  */
-export interface IDocumentData extends IReferenceSource, IExtraModelConfig {
+export interface IDocumentData extends IReferenceSource, IExtraModelData {
     /** unit ID */
     id: string;
 

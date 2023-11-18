@@ -1,4 +1,4 @@
-import { BooleanNumber, IDocumentData, IWorkbookConfig, LocaleType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, IDocumentData, IWorkbookData, LocaleType, SheetTypes } from '@univerjs/core';
 
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
@@ -78,10 +78,9 @@ const richTextDemo1: IDocumentData = {
     },
 };
 
-export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'workbook-01',
     locale: LocaleType.EN_US,
-    creator: 'univer',
     name: 'UniverSheet Demo',
     sheetOrder: [
         'sheet-0011',
@@ -13791,11 +13790,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             },
         },
     },
-    timeZone: 'GMT+8',
-    createdTime: '2021-11-28 12:10:10',
-    modifiedTime: '2021-11-29 12:10:10',
     appVersion: '3.0.0-alpha',
-    lastModifiedBy: 'univer',
     sheets: {
         'sheet-0010': {
             name: 'sheet-0010',

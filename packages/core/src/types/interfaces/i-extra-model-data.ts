@@ -1,4 +1,4 @@
-export interface IExtraModelConfig {
+export interface IExtraModelData {
     /**
      * should start renderLoop Immediately
      * default is true

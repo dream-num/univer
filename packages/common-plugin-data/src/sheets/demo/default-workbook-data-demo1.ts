@@ -1,9 +1,8 @@
-import { BooleanNumber, BorderStyleTypes, IWorkbookConfig, LocaleType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, IWorkbookData, LocaleType, SheetTypes } from '@univerjs/core';
 
-export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
     id: 'workbook-01',
     locale: LocaleType.EN_US,
-    creator: 'univer',
     name: 'universheet',
     sheetOrder: ['sheet-0003'],
     styles: {
@@ -1217,11 +1216,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookConfig = {
             },
         },
     },
-    timeZone: 'GMT+8',
-    createdTime: '2021-11-28 12:10:10',
-    modifiedTime: '2021-11-29 12:10:10',
     appVersion: '3.0.0-alpha',
-    lastModifiedBy: 'univer',
     sheets: {
         'sheet-0003': {
             type: SheetTypes.GRID,

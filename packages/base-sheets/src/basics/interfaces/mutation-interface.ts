@@ -4,7 +4,7 @@ import {
     IColumnData,
     IRange,
     IRowData,
-    IWorksheetConfig,
+    IWorksheetData,
     ObjectArray,
     ObjectMatrixPrimitiveType,
 } from '@univerjs/core';
@@ -18,7 +18,7 @@ export interface IRemoveSheetMutationParams {
 /** Params of `InsertSheetMutation` */
 export interface IInsertSheetMutationParams {
     index: number;
-    sheet: IWorksheetConfig;
+    sheet: IWorksheetData;
     workbookId: string;
 }
 

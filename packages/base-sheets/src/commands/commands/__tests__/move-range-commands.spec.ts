@@ -4,7 +4,7 @@ import {
     ICommandService,
     IRange,
     IUniverInstanceService,
-    IWorkbookConfig,
+    IWorkbookData,
     LocaleType,
     Nullable,
     Rectangle,
@@ -138,7 +138,7 @@ describe('Test move range commands', () => {
     }
 });
 
-const TEST_ROW_COL_INSERTION_DEMO: IWorkbookConfig = {
+const TEST_ROW_COL_INSERTION_DEMO: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -185,15 +185,10 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookConfig = {
             columnCount: 20,
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };
 
 function createInsertRowColTestBed() {

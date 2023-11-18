@@ -1,7 +1,7 @@
 import {
     ILogService,
     IUniverInstanceService,
-    IWorkbookConfig,
+    IWorkbookData,
     LocaleType,
     Plugin,
     PluginType,
@@ -9,7 +9,7 @@ import {
 } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
-export const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
+export const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -27,18 +27,13 @@ export const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             },
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };
 
-export function createTestBase(workbookConfig?: IWorkbookConfig, dependencies?: Dependency[]) {
+export function createTestBase(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
 
     let get: Injector['get'] | undefined;

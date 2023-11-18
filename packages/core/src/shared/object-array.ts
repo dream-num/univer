@@ -47,8 +47,6 @@ const likeArr = (value: object): number => {
 
 /**
  * Arrays in object form and provide an array-like API
- *
- * @deprecated this class is badly designed
  * @beta
  */
 export class ObjectArray<T> {

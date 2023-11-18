@@ -1,11 +1,4 @@
-import {
-    BooleanNumber,
-    BorderStyleTypes,
-    IDocumentData,
-    IWorkbookConfig,
-    LocaleType,
-    SheetTypes,
-} from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, IDocumentData, IWorkbookData, LocaleType, SheetTypes } from '@univerjs/core';
 
 const richTextDemo: IDocumentData = {
     id: 'd',
@@ -44,10 +37,9 @@ const richTextDemo: IDocumentData = {
     },
 };
 
-export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
     id: 'workbook-01',
     locale: LocaleType.EN_US,
-    creator: 'univer',
     name: 'universheet',
     sheetOrder: ['sheet-0001'],
     styles: {
@@ -1243,11 +1235,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookConfig = {
             },
         },
     },
-    timeZone: 'GMT+8',
-    createdTime: '2021-11-28 12:10:10',
-    modifiedTime: '2021-11-29 12:10:10',
     appVersion: '3.0.0-alpha',
-    lastModifiedBy: 'univer',
     sheets: {
         'sheet-0001': {
             type: SheetTypes.GRID,

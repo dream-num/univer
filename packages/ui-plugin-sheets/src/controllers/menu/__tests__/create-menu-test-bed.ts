@@ -1,9 +1,9 @@
 import { SelectionManagerService, SheetPermissionService } from '@univerjs/base-sheets';
 import { DesktopMenuService, DesktopShortcutService, IMenuService, IShortcutService } from '@univerjs/base-ui';
-import { IWorkbookConfig, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import { IWorkbookData, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
+const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -18,15 +18,10 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             },
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };
 
 export function createMenuTestBed() {

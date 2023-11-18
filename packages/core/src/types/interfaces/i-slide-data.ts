@@ -7,7 +7,7 @@ import { IImageProperties } from './i-image-properties';
 import { IPlaceholder } from './i-placeholder';
 import { IShapeProperties } from './i-shape-properties';
 import { IColorStyle, IStyleBase, IStyleData } from './i-style-data';
-import { IWorksheetConfig } from './i-worksheet-data';
+import { IWorksheetData } from './i-worksheet-data';
 
 export interface ISlideData extends IReferenceSource {
     id: string; // unit id
@@ -101,7 +101,7 @@ export interface IPageElement {
     image?: IImage;
     richText?: IRichTextProps;
     spreadsheet?: {
-        worksheet: IWorksheetConfig;
+        worksheet: IWorksheetData;
         styles: IKeyType<Nullable<IStyleData>>;
     };
     document?: IDocumentData;

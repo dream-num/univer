@@ -5,9 +5,9 @@ import { Plugin, PluginType } from '../../plugin/plugin';
 import { IUniverInstanceService } from '../../services/instance/instance.service';
 import { ILogService } from '../../services/log/log.service';
 import { LocaleType } from '../../types/enum/locale-type';
-import { IWorkbookConfig } from '../../types/interfaces/i-workbook-data';
+import { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 
-const TEST_WORKBOOK_DATA: IWorkbookConfig = {
+const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -25,18 +25,13 @@ const TEST_WORKBOOK_DATA: IWorkbookConfig = {
             },
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };
 
-export function createCoreTestBed(workbookConfig?: IWorkbookConfig, dependencies?: Dependency[]) {
+export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
 
     let get: Injector['get'] | undefined;

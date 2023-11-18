@@ -1,6 +1,6 @@
-import { IBorderData, IStyleData, IWorksheetConfig } from '../../types/interfaces';
+import { IBorderData, IStyleData, IWorksheetData } from '../../types/interfaces';
 
-export function border(newSheet: Partial<IWorksheetConfig>, sheet: any) {
+export function border(newSheet: Partial<IWorksheetData>, sheet: any) {
     newSheet.cellData = {};
     for (const borderInfo of sheet.config.borderInfo) {
         if (borderInfo.rangeType === 'cell') {

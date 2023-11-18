@@ -7,7 +7,7 @@ import {
     GlyphType,
     HorizontalAlign,
     IDocumentData,
-    IWorkbookConfig,
+    IWorkbookData,
     LocaleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
@@ -301,10 +301,9 @@ const richTextTest: IDocumentData = {
 /**
  * Default workbook data
  */
-export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
     id: 'workbook-01',
     locale: LocaleType.EN_US,
-    creator: 'univer',
     name: 'universheet',
     sheetOrder: ['sheet-01', 'sheet-02', 'sheet-03', 'sheet-04', 'sheet-05', 'sheet-06'],
     styles: {
@@ -403,11 +402,7 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
             tb: WrapStrategy.WRAP,
         },
     },
-    timeZone: 'GMT+8',
-    createdTime: '2021-11-28 12:10:10',
-    modifiedTime: '2021-11-29 12:10:10',
     appVersion: '3.0.0-alpha',
-    lastModifiedBy: 'univer',
     sheets: {
         'sheet-01': {
             type: SheetTypes.GRID,
@@ -735,10 +730,9 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
 /**
  * Default workbook data
  */
-export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
     id: 'workbook-02',
     locale: LocaleType.EN_US,
-    creator: 'univer',
     name: 'universheet',
     sheetOrder: [],
     styles: {
@@ -832,11 +826,7 @@ export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookConfig = {
             },
         },
     },
-    timeZone: 'GMT+8',
-    createdTime: '2021-11-28 12:10:10',
-    modifiedTime: '2021-11-29 12:10:10',
     appVersion: '3.0.0-alpha',
-    lastModifiedBy: 'univer',
     sheets: {
         'sheet-0001': {
             type: SheetTypes.GRID,

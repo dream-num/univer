@@ -4,7 +4,7 @@ import {
     IRange,
     IStyleData,
     IUniverInstanceService,
-    IWorkbookConfig,
+    IWorkbookData,
     LocaleType,
     Nullable,
     RANGE_TYPE,
@@ -77,7 +77,7 @@ const mergeData = [
         endColumn: 3,
     },
 ];
-const WORKBOOK_DATA_DEMO: IWorkbookConfig = {
+const WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -134,15 +134,10 @@ const WORKBOOK_DATA_DEMO: IWorkbookConfig = {
             mergeData,
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };
 
 describe('Test delete range commands', () => {

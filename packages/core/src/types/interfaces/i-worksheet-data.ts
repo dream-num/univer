@@ -24,7 +24,7 @@ import { IRowData } from './i-row-data';
  *
  * 比如 showGridlines 是sheet特有的，而如果实现如普通表格，就不需要 showGridlines
  */
-export interface IWorksheetConfig {
+export interface IWorksheetData {
     type: SheetTypes;
     id: string;
     name: string;

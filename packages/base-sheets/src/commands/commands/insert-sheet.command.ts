@@ -5,7 +5,7 @@ import {
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
-    IWorksheetConfig,
+    IWorksheetData,
     Tools,
 } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
@@ -22,7 +22,7 @@ import {
 export interface InsertSheetCommandParams {
     workbookId?: string;
     index?: number;
-    sheet?: IWorksheetConfig;
+    sheet?: IWorksheetData;
 }
 
 /**

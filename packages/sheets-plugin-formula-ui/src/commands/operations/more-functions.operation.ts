@@ -5,7 +5,7 @@ import { IAccessor } from '@wendellhu/redi';
 import { MORE_FUNCTIONS_COMPONENT } from '../../views/more-functions/interface';
 
 export const MoreFunctionsOperation: ICommand = {
-    id: 'formula.operation.more-functions',
+    id: 'formula-ui.operation.more-functions',
     type: CommandType.OPERATION,
     handler: async (accessor: IAccessor) => {
         const sidebarService = accessor.get(ISidebarService);

@@ -111,14 +111,6 @@ export interface IFunctionParam {
      * false: not repeatable
      */
     repeat: BooleanNumber;
-
-    /**
-     * Parameter types
-     *
-     * include ['range', 'rangeall', 'rangenumber', 'rangestring', 'rangedatetime', 'rangedate', 'string']
-     * Detected before each calculation
-     */
-    type: string;
 }
 
 export interface IFunctionInfo {
@@ -146,12 +138,6 @@ export interface IFunctionInfo {
      * Concise abstract
      */
     abstract: string;
-
-    /**
-     * [Minimum number of parameters, maximum number of parameters]
-     * Detected before each calculation of the function
-     */
-    parameterRange: [min: number, max: number];
 
     /**
      * Function params

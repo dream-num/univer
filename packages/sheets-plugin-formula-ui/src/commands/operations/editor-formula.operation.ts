@@ -3,6 +3,7 @@
 import { DeviceInputEventType } from '@univerjs/base-render';
 import { KeyCode } from '@univerjs/base-ui';
 import { CommandType, Direction, IOperation } from '@univerjs/core';
+import { IEditorBridgeService } from '@univerjs/ui-plugin-sheets';
 
 import { IFormulaPromptService } from '../../services/prompt.service';
 
@@ -11,12 +12,13 @@ export interface ISelectEditorFormulaOperationParam {
     keycode?: KeyCode;
 }
 
-export const SelectEditorFormluaOperation: IOperation<ISelectEditorFormulaOperationParam> = {
-    id: 'formula.operation.select-editor-formula',
+export const SelectEditorFormulaOperation: IOperation<ISelectEditorFormulaOperationParam> = {
+    id: 'formula-ui.operation.select-editor-formula',
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
-        const { keycode } = params;
+        const { eventType, keycode } = params;
         const formulaPromptService = accessor.get(IFormulaPromptService);
+        const editorBridgeService = accessor.get(IEditorBridgeService);
 
         switch (keycode) {
             case KeyCode.ARROW_DOWN:
@@ -27,7 +29,17 @@ export const SelectEditorFormluaOperation: IOperation<ISelectEditorFormulaOperat
                 break;
             case KeyCode.ENTER:
             case KeyCode.TAB:
-                formulaPromptService.accept(true);
+                if (formulaPromptService.isSearching()) {
+                    formulaPromptService.accept(true);
+                } else {
+                    const editorBridgeParameters = {
+                        visible: false,
+                        eventType,
+                        keycode,
+                    };
+
+                    editorBridgeService.changeVisible(editorBridgeParameters);
+                }
                 break;
             default:
                 break;

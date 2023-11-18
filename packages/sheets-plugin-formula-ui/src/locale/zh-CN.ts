@@ -1,3 +1,19 @@
+import arrayZhCN from './function-list/array/zh-CN';
+import compatibilityZhCN from './function-list/compatibility/zh-CN';
+import cubeZhCN from './function-list/cube/zh-CN';
+import databaseZhCN from './function-list/database/zh-CN';
+import dateZhCN from './function-list/date/zh-CN';
+import engineeringZhCN from './function-list/engineering/zh-CN';
+import financialZhCN from './function-list/financial/zh-CN';
+import informationZhCN from './function-list/information/zh-CN';
+import logicalZhCN from './function-list/logical/zh-CN';
+import lookupZhCN from './function-list/lookup/zh-CN';
+import mathZhCN from './function-list/math/zh-CN';
+import statisticalZhCN from './function-list/statistical/zh-CN';
+import textZhCN from './function-list/text/zh-CN';
+import univerZhCN from './function-list/univer/zh-CN';
+import webZhCN from './function-list/web/zh-CN';
+
 export default {
     formula: {
         insert: {
@@ -9,52 +25,32 @@ export default {
             min: '最小值',
             more: '更多函数...',
         },
-
         functionList: {
-            SUMIF: {
-                description: '对范围中符合指定条件的值求和。',
-                abstract: '对范围中符合指定条件的值求和。',
-                functionParameter: {
-                    range: {
-                        name: '范围',
-                        detail: '要根据条件进行检测的范围。',
-                    },
-                    criterion: {
-                        name: '条件',
-                        detail: '要应用于范围的模式或测试条件。\n\n如果范围包含的是要检测的文本，则条件必须为字符串。条件可以包含通配符，包括用于匹配单个字符的?或用于匹配零个或连续多个字符的*。要匹配问号星号本身，请在该字符前面加上波浪号(~)前缀（即~?和~*）。字符串条件必须用引号括起来。函数会检查范围中的每个单元格与条件是否相等或匹配（如果使用了通配符）。\n\n如果范围包含的是要检测的数字，则条件可以是字符串也可以是数字。如果给定的条件是一个数字，则检查范围中的每个单元格是否等于条件。另外，条件也可能是包含数字的字符串（也将对其进行相等检测），或者带有以下前缀的数字：=（检查是否相等）、>（检查范围单元格的值是否大于条件值）或<（检查范围单元格的值是否小于条件值）',
-                    },
-                    sum_range: {
-                        name: '求和范围',
-                        detail: '要求和的范围（如果与范围不同）。',
-                    },
-                },
-            },
-            TAN: {
-                description: '返回已知角度的正切值。',
-                abstract: '返回已知角度的正切值。',
-                functionParameter: {
-                    angle: {
-                        name: '角度',
-                        detail: '要求其正切值的角度，以弧度表示。',
-                    },
-                },
-            },
-            // TANH: {
-            //     description: '返回给定实数的双曲正切值。',
-            //     abstract: '返回给定实数的双曲正切值。',
-            //     functionParameter: {
-            //         value: {
-            //             name: '值',
-            //             detail: '要计算其双曲正切值的实数。',
-            //         },
-            //     },
-            // },
+            ...financialZhCN,
+            ...dateZhCN,
+            ...mathZhCN,
+            ...statisticalZhCN,
+            ...lookupZhCN,
+            ...databaseZhCN,
+            ...textZhCN,
+            ...logicalZhCN,
+            ...informationZhCN,
+            ...engineeringZhCN,
+            ...cubeZhCN,
+            ...compatibilityZhCN,
+            ...webZhCN,
+            ...arrayZhCN,
+            ...univerZhCN,
         },
 
-        formulaMore: {
+        prompt: {
             helpExample: '示例',
             helpAbstract: '简介',
+            required: '必需。',
+            optional: '可选。',
+        },
 
+        functionType: {
             financial: '财务',
             date: '日期与时间',
             math: '数学与三角函数',
@@ -70,14 +66,15 @@ export default {
             web: 'Web',
             array: '数组',
             univer: 'Univer',
-
-            searchFunctionPlaceholder: '搜索函数',
         },
 
         moreFunctions: {
-            confirm: '确定',
+            confirm: '应用',
             prev: '上一步',
             next: '下一步',
+            searchFunctionPlaceholder: '搜索函数',
+            allFunctions: '全部函数',
+            syntax: '语法',
         },
     },
 };

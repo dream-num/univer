@@ -9,7 +9,7 @@ export interface IInsertFunctionCommandParams {
 }
 
 export const InsertFunctionOperation: ICommand = {
-    id: 'formula.operation.insert-function',
+    id: 'formula-ui.operation.insert-function',
     type: CommandType.OPERATION,
     handler: async (accessor: IAccessor, params: IInsertFunctionCommandParams) => true,
 };

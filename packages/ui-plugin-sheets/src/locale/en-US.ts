@@ -552,4 +552,9 @@ export default {
         formatOnly: 'Format Only',
         noFormat: 'No Format',
     },
+
+    rangeSelector: {
+        placeholder: 'Select range or input value',
+        tooltip: 'Select range',
+    },
 };

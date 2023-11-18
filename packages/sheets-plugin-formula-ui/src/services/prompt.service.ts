@@ -3,10 +3,7 @@ import { Direction } from '@univerjs/core';
 import { createIdentifier, IDisposable } from '@wendellhu/redi';
 import { Observable, Subject } from 'rxjs';
 
-export interface ISearchItem {
-    name: string;
-    desc: string;
-}
+import { ISearchItem } from './description.service';
 
 export interface ISearchFunctionParams {
     /**
@@ -101,7 +98,7 @@ export interface IFormulaPromptService {
     dispose(): void;
 }
 
-export const IFormulaPromptService = createIdentifier<FormulaPromptService>('univer.formula-prompt-service');
+export const IFormulaPromptService = createIdentifier<FormulaPromptService>('formula-ui.prompt-service');
 
 export class FormulaPromptService implements IFormulaPromptService, IDisposable {
     private readonly _search$ = new Subject<ISearchFunctionParams>();
@@ -124,6 +121,10 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
     readonly acceptFormulaName$ = this._acceptFormulaName$.asObservable();
 
+    private _searching: boolean = false;
+
+    private _helping: boolean = false;
+
     dispose(): void {
         this._search$.complete();
         this._help$.complete();
@@ -133,11 +134,21 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
     }
 
     search(param: ISearchFunctionParams) {
+        this._searching = param.visible;
         this._search$.next(param);
     }
 
+    isSearching() {
+        return this._searching;
+    }
+
     help(param: IHelpFunctionCommandParams) {
+        this._helping = param.visible;
         this._help$.next(param);
+    }
+
+    isHelping() {
+        return this._helping;
     }
 
     navigate(param: INavigateParam) {

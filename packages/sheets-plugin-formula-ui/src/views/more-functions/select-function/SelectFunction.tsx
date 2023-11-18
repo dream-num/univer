@@ -1,42 +1,51 @@
-import { FunctionType, IFunctionInfo } from '@univerjs/base-formula-engine';
+import { FunctionType, IFunctionInfo, IFunctionParam } from '@univerjs/base-formula-engine';
 import { LocaleService } from '@univerjs/core';
 import { Input, Select } from '@univerjs/design';
+import { CheckMarkSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { getFunctionName } from '../../../controllers/util';
-import { FUNCTION_LIST } from '../../../services/function-list';
+import { IDescriptionService, ISearchItem } from '../../../services/description.service';
 import { getFunctionTypeValues } from '../../../services/utils';
+import { FunctionParams } from '../function-params/FunctionParams';
 import styles from './index.module.less';
 
-export function getSearchList(searchText: string, localeService: LocaleService) {
-    const searchList: string[] = [];
-    FUNCTION_LIST.forEach((item) => {
-        const functionName = getFunctionName(item, localeService);
-        if (functionName.indexOf(searchText.toLocaleUpperCase()) > -1) {
-            searchList.push(functionName);
-        }
+export interface ISelectFunctionProps {
+    onChange: (functionInfo: IFunctionInfo) => void;
+}
+
+export function SelectFunction(props: ISelectFunctionProps) {
+    const { onChange } = props;
+    const allTypeValue = '-1';
+    const [searchText, setSearchText] = useState<string>('');
+    const [selectList, setSelectList] = useState<ISearchItem[]>([]);
+    const [active, setActive] = useState(0);
+    const [typeSelected, setTypeSelected] = useState(allTypeValue);
+    const [nameSelected, setNameSelected] = useState(0);
+    const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
+    const descriptionService = useDependency(IDescriptionService);
+    const localeService = useDependency(LocaleService);
+
+    const options = getFunctionTypeValues(FunctionType, localeService);
+    options.unshift({
+        label: localeService.t(`formula.moreFunctions.allFunctions`),
+        value: allTypeValue,
     });
 
-    return searchList;
-}
+    const required = localeService.t('formula.prompt.required');
+    const optional = localeService.t('formula.prompt.optional');
 
-function getFunctionInfo(functionName: string, localeService: LocaleService) {
-    return FUNCTION_LIST.find((item) => getFunctionName(item, localeService) === functionName);
-}
+    useEffect(() => {
+        handleSelectChange(allTypeValue);
+    }, []);
 
-export function SelectFunction() {
-    const [selectList, setSelectList] = useState<string[]>([]);
-    const [searchText, setSearchText] = useState<string>('');
-    const [active, setActive] = useState(0);
-    const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
-    const localeService = useDependency(LocaleService);
-    const options = getFunctionTypeValues(FunctionType, localeService);
+    useEffect(() => {
+        setCurrentFunctionInfo(0);
+    }, [selectList]);
 
     const highlightSearchText = (text: string) => {
-        const regex = new RegExp(`(${searchText})`);
+        const regex = new RegExp(`(${searchText.toLocaleUpperCase()})`);
         const parts = text.split(regex).filter(Boolean);
-        console.info('parts', parts, searchText);
 
         return parts.map((part: string, index: number) => {
             if (part.match(regex)) {
@@ -50,23 +59,47 @@ export function SelectFunction() {
         });
     };
 
+    const setCurrentFunctionInfo = (selectedIndex: number) => {
+        if (selectList.length === 0) {
+            setFunctionInfo(null);
+            return;
+        }
+
+        setNameSelected(selectedIndex);
+        const functionInfo = descriptionService.getFunctionInfo(selectList[selectedIndex].name);
+        if (!functionInfo) {
+            setFunctionInfo(null);
+            return;
+        }
+
+        setFunctionInfo(functionInfo);
+        onChange(functionInfo);
+    };
+
     function handleSelectChange(value: string) {
-        console.info('value=====', value);
+        setTypeSelected(value);
+        const selectList = descriptionService.getSearchListByType(+value);
+        setSelectList(selectList);
     }
 
+    // TODO@Dushusir: debounce
     function handleSearchInputChange(value: string) {
         setSearchText(value);
-        const selectList = getSearchList(value, localeService);
-        // console.info('搜索===', selectList, searchText);
+        const selectList = descriptionService.getSearchListByName(value);
         setSelectList(selectList);
-        setActive(0);
-        const functionInfo = getFunctionInfo(selectList[active], localeService);
-        if (!functionInfo) return;
-        setFunctionInfo(functionInfo);
     }
 
-    function handleClickSelectItem(value: string) {
-        console.info('value=====', value);
+    function handleSelectListKeyDown(e: React.KeyboardEvent<HTMLUListElement> | React.KeyboardEvent<HTMLInputElement>) {
+        e.stopPropagation();
+        if (e.key === 'ArrowDown') {
+            const nextActive = active + 1;
+            setActive(nextActive === selectList.length ? 0 : nextActive);
+        } else if (e.key === 'ArrowUp') {
+            const nextActive = active - 1;
+            setActive(nextActive === -1 ? selectList.length - 1 : nextActive);
+        } else if (e.key === 'Enter') {
+            setCurrentFunctionInfo(active);
+        }
     }
 
     const handleLiMouseEnter = (index: number) => {
@@ -76,21 +109,24 @@ export function SelectFunction() {
     const handleLiMouseLeave = () => {
         setActive(-1);
     };
+
     return (
         <div>
-            <div>
-                <Select value="select" options={options} onChange={handleSelectChange}></Select>
+            <div className={styles.formulaSelectFunctionSelect}>
+                <Select value={typeSelected} options={options} onChange={handleSelectChange}></Select>
 
                 <Input
-                    placeholder={localeService.t(`formula.formulaMore.searchFunctionPlaceholder`)}
-                    onKeyDown={(e) => e.stopPropagation()}
+                    placeholder={localeService.t(`formula.moreFunctions.searchFunctionPlaceholder`)}
+                    onKeyDown={handleSelectListKeyDown}
                     value={searchText}
                     onChange={handleSearchInputChange}
+                    size="large"
+                    allowClear
                 ></Input>
             </div>
 
-            <ul className={styles.formulaSelectFunctionResult}>
-                {selectList.map((item, index) => (
+            <ul className={styles.formulaSelectFunctionResult} onKeyDown={handleSelectListKeyDown} tabIndex={-1}>
+                {selectList.map(({ name }, index) => (
                     <li
                         key={index}
                         className={
@@ -98,14 +134,66 @@ export function SelectFunction() {
                                 ? `${styles.formulaSelectFunctionResultItem} ${styles.formulaSelectFunctionResultItemActive}`
                                 : styles.formulaSelectFunctionResultItem
                         }
-                        // onMouseEnter={() => handleLiMouseEnter(index)}
-                        // onMouseLeave={handleLiMouseLeave}
-                        onClick={() => handleClickSelectItem(item)}
+                        onMouseEnter={() => handleLiMouseEnter(index)}
+                        onMouseLeave={handleLiMouseLeave}
+                        onClick={() => setCurrentFunctionInfo(index)}
                     >
-                        <span className={styles.formulaSelectFunctionResultItemName}>{highlightSearchText(item)}</span>
+                        {nameSelected === index && (
+                            <CheckMarkSingle className={styles.formulaSelectFunctionResultItemSelected} />
+                        )}
+                        <span className={styles.formulaSelectFunctionResultItemName}>{highlightSearchText(name)}</span>
                     </li>
                 ))}
             </ul>
+
+            {functionInfo && (
+                <div className={styles.formulaSelectFunctionContent}>
+                    <FunctionParams title={functionInfo.functionName} value={functionInfo.description} />
+
+                    <FunctionParams
+                        title={localeService.t('formula.moreFunctions.syntax')}
+                        value={<Help prefix={functionInfo.functionName} value={functionInfo.functionParameter} />}
+                    />
+
+                    <FunctionParams
+                        title={localeService.t('formula.prompt.helpExample')}
+                        value={`${functionInfo.functionName}(${functionInfo.functionParameter
+                            .map((item) => item.example)
+                            .join(',')})`}
+                    />
+
+                    {functionInfo.functionParameter &&
+                        functionInfo.functionParameter.map((item: IFunctionParam, i: number) => (
+                            <FunctionParams
+                                key={i}
+                                title={item.name}
+                                value={`${item.require ? required : optional} ${item.detail}`}
+                            />
+                        ))}
+                </div>
+            )}
         </div>
     );
 }
+
+interface IHelpProps {
+    prefix?: string;
+    value?: IFunctionParam[];
+}
+
+const Help = (props: IHelpProps) => {
+    const { prefix, value } = props;
+    return (
+        <div>
+            <span>{prefix}(</span>
+            {value &&
+                value.map((item: IFunctionParam, i: number) => (
+                    <span key={i}>
+                        <span>{item.repeat ? `[${item.name},...]` : item.name}</span>
+                        {i === value.length - 1 ? '' : ','}
+                    </span>
+                ))}
+            )
+        </div>
+    );
+};

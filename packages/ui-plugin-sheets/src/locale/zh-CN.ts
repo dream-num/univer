@@ -416,4 +416,8 @@ export default {
         formatOnly: '仅填充格式',
         noFormat: '不带格式填充',
     },
+    rangeSelector: {
+        placeholder: '选择范围或输入值',
+        tooltip: '选择范围',
+    },
 };

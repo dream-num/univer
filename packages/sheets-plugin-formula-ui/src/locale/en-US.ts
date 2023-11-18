@@ -1,3 +1,19 @@
+import arrayEnUS from './function-list/array/en-US';
+import compatibilityEnUS from './function-list/compatibility/en-US';
+import cubeEnUS from './function-list/cube/en-US';
+import databaseEnUS from './function-list/database/en-US';
+import dateEnUS from './function-list/date/en-US';
+import engineeringEnUS from './function-list/engineering/en-US';
+import financialEnUS from './function-list/financial/en-US';
+import informationEnUS from './function-list/information/en-US';
+import logicalEnUS from './function-list/logical/en-US';
+import lookupEnUS from './function-list/lookup/en-US';
+import mathEnUS from './function-list/math/en-US';
+import statisticalEnUS from './function-list/statistical/en-US';
+import textEnUS from './function-list/text/en-US';
+import univerEnUS from './function-list/univer/en-US';
+import webEnUS from './function-list/web/en-US';
+
 export default {
     formula: {
         insert: {
@@ -10,49 +26,29 @@ export default {
             more: 'More Functions...',
         },
         functionList: {
-            SUMIF: {
-                description: 'Returns a conditional sum across a range.',
-                abstract: 'A conditional sum across a range.',
-                functionParameter: {
-                    range: {
-                        name: 'range',
-                        detail: 'The range which is tested against `criterion`.',
-                    },
-                    criterion: {
-                        name: 'criterion',
-                        detail: 'The pattern or test to apply to `range`.',
-                    },
-                    sum_range: {
-                        name: 'sum_range',
-                        detail: 'The range to be summed, if different from `range`.',
-                    },
-                },
-            },
-            TAN: {
-                description: 'Returns the tangent of an angle provided in radians.',
-                abstract: 'Tangent of an angle provided in radians.',
-                functionParameter: {
-                    angle: {
-                        name: 'angle',
-                        detail: 'The angle to find the tangent of, in radians.',
-                    },
-                },
-            },
-            // TANH: {
-            //     description: 'Returns the hyperbolic tangent of any real number.',
-            //     abstract: 'Hyperbolic tangent of any real number.',
-            //     functionParameter: {
-            //         value: {
-            //             name: 'value',
-            //             detail: 'Any real value to calculate the hyperbolic tangent of.',
-            //         },
-            //     },
-            // },
+            ...financialEnUS,
+            ...dateEnUS,
+            ...mathEnUS,
+            ...statisticalEnUS,
+            ...lookupEnUS,
+            ...databaseEnUS,
+            ...textEnUS,
+            ...logicalEnUS,
+            ...informationEnUS,
+            ...engineeringEnUS,
+            ...cubeEnUS,
+            ...compatibilityEnUS,
+            ...webEnUS,
+            ...arrayEnUS,
+            ...univerEnUS,
         },
-        formulaMore: {
+        prompt: {
             helpExample: 'EXAMPLE',
             helpAbstract: 'ABOUT',
-
+            required: 'Required.',
+            optional: 'Optional.',
+        },
+        functionType: {
             financial: 'Financial',
             date: 'Date & Time',
             math: 'Math & Trig',
@@ -68,13 +64,14 @@ export default {
             web: 'Web',
             array: 'Array',
             univer: 'Univer',
-
-            searchFunctionPlaceholder: 'Search function',
         },
         moreFunctions: {
             confirm: 'Confirm',
             prev: 'Previous',
             next: 'Next',
+            searchFunctionPlaceholder: 'Search function',
+            allFunctions: 'All Functions',
+            syntax: 'SYNTAX',
         },
     },
 };

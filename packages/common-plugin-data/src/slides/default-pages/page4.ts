@@ -1,8 +1,8 @@
-import { IWorksheetConfig, PageElementType, PageType, ShapeType } from '@univerjs/core';
+import { IWorksheetData, PageElementType, PageType, ShapeType } from '@univerjs/core';
 
 import { SLIDE_WORKBOOK_DATA } from '../../sheets/slide-workbook-data';
 
-const worksheetConfig = SLIDE_WORKBOOK_DATA.sheets[SLIDE_WORKBOOK_DATA.sheetOrder[0]] as IWorksheetConfig;
+const worksheetConfig = SLIDE_WORKBOOK_DATA.sheets[SLIDE_WORKBOOK_DATA.sheetOrder[0]] as IWorksheetData;
 const spreadStyles = SLIDE_WORKBOOK_DATA.styles;
 
 export const DEFAULT_FORTH_PAGE = {

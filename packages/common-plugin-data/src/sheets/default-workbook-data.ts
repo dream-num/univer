@@ -7,7 +7,7 @@ import {
     GlyphType,
     HorizontalAlign,
     IDocumentData,
-    IWorkbookConfig,
+    IWorkbookData,
     LocaleType,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
@@ -301,7 +301,7 @@ const richTextTest: IDocumentData = {
 /**
  * Default workbook data
  */
-export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
     id: 'workbook-01',
     locale: LocaleType.EN_US,
     creator: 'univer',
@@ -735,7 +735,7 @@ export const DEFAULT_WORKBOOK_DATA: IWorkbookConfig = {
 /**
  * Default workbook data
  */
-export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA_DOWN: IWorkbookData = {
     id: 'workbook-02',
     locale: LocaleType.EN_US,
     creator: 'univer',

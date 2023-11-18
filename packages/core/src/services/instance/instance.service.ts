@@ -6,7 +6,7 @@ import { Nullable } from '../../shared';
 import { Disposable } from '../../shared/lifecycle';
 import { Workbook } from '../../sheets/workbook';
 import { Slide } from '../../slides/domain/slide-model';
-import { IDocumentData, ISlideData, IWorkbookConfig } from '../../types/interfaces';
+import { IDocumentData, ISlideData, IWorkbookData } from '../../types/interfaces';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context';
 import { IContextService } from '../context/context.service';
 
@@ -19,7 +19,7 @@ export const enum DocumentType {
 
 export interface IUniverHandler {
     createUniverDoc(data: Partial<IDocumentData>): DocumentModel;
-    createUniverSheet(data: Partial<IWorkbookConfig>): Workbook;
+    createUniverSheet(data: Partial<IWorkbookData>): Workbook;
     createUniverSlide(data: Partial<ISlideData>): Slide;
 }
 
@@ -46,7 +46,7 @@ export interface IUniverInstanceService {
     getFocusedUniverInstance(): Workbook | DocumentModel | Slide | null;
 
     createDoc(data: Partial<IDocumentData>): DocumentModel;
-    createSheet(data: Partial<IWorkbookConfig>): Workbook;
+    createSheet(data: Partial<IWorkbookData>): Workbook;
     createSlide(data: Partial<ISlideData>): Slide;
 
     changeDoc(unitId: string, doc: DocumentModel): void;
@@ -133,7 +133,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return this._handler.createUniverDoc(data);
     }
 
-    createSheet(data: Partial<IWorkbookConfig>): Workbook {
+    createSheet(data: Partial<IWorkbookData>): Workbook {
         return this._handler.createUniverSheet(data);
     }
 

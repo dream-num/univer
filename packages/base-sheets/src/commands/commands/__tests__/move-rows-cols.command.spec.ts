@@ -3,7 +3,7 @@ import {
     ICommandService,
     IRange,
     IUniverInstanceService,
-    IWorkbookConfig,
+    IWorkbookData,
     LocaleType,
     Nullable,
     RANGE_TYPE,
@@ -322,7 +322,7 @@ describe('Test move rows cols', () => {
     });
 });
 
-const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookConfig = {
+const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {

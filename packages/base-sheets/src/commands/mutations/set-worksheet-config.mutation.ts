@@ -1,11 +1,11 @@
-import { CommandType, IMutation, IUniverInstanceService, IWorksheetConfig, Tools } from '@univerjs/core';
+import { CommandType, IMutation, IUniverInstanceService, IWorksheetData, Tools } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 /** @deprecated */
 export interface ISetWorksheetConfigMutationParams {
     workbookId: string;
     worksheetId: string;
-    config: IWorksheetConfig;
+    config: IWorksheetData;
 }
 
 /** @deprecated */

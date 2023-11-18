@@ -7,7 +7,7 @@ import { LifecycleInitializerService, LifecycleService } from '../services/lifec
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import { Disposable, toDisposable } from '../shared/lifecycle';
 import { Workbook } from '../sheets/workbook';
-import { IWorkbookConfig } from '../types/interfaces/i-workbook-data';
+import { IWorkbookData } from '../types/interfaces/i-workbook-data';
 
 /**
  * Externally provided UniverSheet root instance
@@ -57,7 +57,7 @@ export class UniverSheet extends Disposable implements IDisposable {
         );
     }
 
-    createSheet(workbookConfig: Partial<IWorkbookConfig>): Workbook {
+    createSheet(workbookConfig: Partial<IWorkbookData>): Workbook {
         const workbook = this._injector.createInstance(Workbook, workbookConfig);
         return workbook;
     }

@@ -6,16 +6,16 @@ import {
     IStyleData,
     ITextRun,
     ITextStyle,
-    IWorkbookConfig,
-    IWorksheetConfig,
+    IWorkbookData,
+    IWorksheetData,
 } from '../../types/interfaces';
 import { ObjectArrayPrimitiveType } from '../object-array';
 import { Tools } from '../tools';
 import { IKeyValue } from '../types';
 import { border } from './border';
 
-export function migrate(config: any): Partial<IWorkbookConfig> {
-    const newConfig: Partial<IWorkbookConfig> = {};
+export function migrate(config: any): Partial<IWorkbookData> {
+    const newConfig: Partial<IWorkbookData> = {};
     newConfig.styles = {};
     if (config.hasOwnProperty('lang')) {
         newConfig.locale = config.lang;
@@ -23,7 +23,7 @@ export function migrate(config: any): Partial<IWorkbookConfig> {
     if (config.hasOwnProperty('data')) {
         newConfig.sheets = {};
         for (const sheet of config.data) {
-            const newSheet: Partial<IWorksheetConfig> = {};
+            const newSheet: Partial<IWorksheetData> = {};
 
             //  id
             // if (sheet.hasOwnProperty('index')) {

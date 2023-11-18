@@ -1,7 +1,7 @@
 import {
     ILogService,
     IUniverInstanceService,
-    IWorkbookConfig,
+    IWorkbookData,
     LocaleType,
     Plugin,
     PluginType,
@@ -12,7 +12,7 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../../services/selection-manager.service';
 
-const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
+const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -41,7 +41,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     timeZone: '',
 };
 
-export function createCommandTestBed(workbookConfig?: IWorkbookConfig, dependencies?: Dependency[]) {
+export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
 
     let get: Injector['get'] | undefined;

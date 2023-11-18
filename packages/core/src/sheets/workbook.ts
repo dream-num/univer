@@ -12,8 +12,8 @@ import {
     IRangeStringData,
     IRangeType,
     IRowStartEndData,
-    IWorkbookConfig,
-    IWorksheetConfig,
+    IWorkbookData,
+    IWorksheetData,
 } from '../types/interfaces';
 import { Styles } from './styles';
 import { Worksheet } from './worksheet';
@@ -50,12 +50,12 @@ export class Workbook extends Disposable {
      */
     // private _formatManage: FormatManager;
 
-    private _snapshot: IWorkbookConfig;
+    private _snapshot: IWorkbookData;
 
     private _unitId: string;
 
     constructor(
-        workbookData: Partial<IWorkbookConfig> = {},
+        workbookData: Partial<IWorkbookData> = {},
         @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
         @Inject(Injector) readonly _injector: Injector
     ) {
@@ -86,7 +86,7 @@ export class Workbook extends Disposable {
         return typeof range === 'string' || 'startRow' in range || 'row' in range;
     }
 
-    getSnapshot(): IWorkbookConfig {
+    getSnapshot(): IWorkbookData {
         return this._snapshot;
     }
 
@@ -114,7 +114,7 @@ export class Workbook extends Disposable {
     /**
      * Add a Worksheet into Workbook.
      */
-    addWorksheet(id: string, index: number, worksheetSnapshot: Partial<IWorksheetConfig>): boolean {
+    addWorksheet(id: string, index: number, worksheetSnapshot: Partial<IWorksheetData>): boolean {
         const { sheets, sheetOrder } = this._snapshot;
         if (sheets[id]) {
             return false;
@@ -145,7 +145,7 @@ export class Workbook extends Disposable {
         return this._styles;
     }
 
-    getConfig(): IWorkbookConfig {
+    getConfig(): IWorkbookData {
         return this._snapshot;
     }
 
@@ -310,12 +310,12 @@ export class Workbook extends Disposable {
         return DEFAULT_RANGE_ARRAY;
     }
 
-    load(config: IWorkbookConfig) {
+    load(config: IWorkbookData) {
         // TODO: new Command
         this._snapshot = config;
     }
 
-    save(): IWorkbookConfig {
+    save(): IWorkbookData {
         // TODO
         return this._snapshot;
     }

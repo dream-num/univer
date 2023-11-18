@@ -8,7 +8,7 @@ import {
 import {
     ILogService,
     IUniverInstanceService,
-    IWorkbookConfig,
+    IWorkbookData,
     LocaleType,
     Plugin,
     PluginType,
@@ -475,7 +475,7 @@ const mergeData = [
     },
 ];
 
-const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
+const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -496,7 +496,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookConfig = {
     timeZone: '',
 };
 
-export function clipboardTestBed(workbookConfig?: IWorkbookConfig, dependencies?: Dependency[]) {
+export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
 
     let get: Injector['get'] | undefined;

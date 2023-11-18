@@ -4,7 +4,7 @@ import {
     IExecutionOptions,
     IMutationInfo,
     IUniverInstanceService,
-    IWorkbookConfig,
+    IWorkbookData,
 } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import { type } from 'os';
@@ -35,7 +35,7 @@ export const RemoteInstanceServiceName = 'univer.remote-instance-service';
 /** This service is provided by the replica Univer. */
 export const IRemoteInstanceService = createIdentifier<IRemoteInstanceService>(RemoteInstanceServiceName);
 export interface IRemoteInstanceService {
-    createInstance(params: { unitID: string; type: DocumentType; snapshot: IWorkbookConfig }): Promise<boolean>;
+    createInstance(params: { unitID: string; type: DocumentType; snapshot: IWorkbookData }): Promise<boolean>;
     disposeInstance(params: { unitID: string }): Promise<boolean>;
     syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean>;
 }
@@ -56,7 +56,7 @@ export class RemoteInstanceReplicaService implements IRemoteInstanceService {
         });
     }
 
-    async createInstance(params: { unitID: string; type: DocumentType; snapshot: IWorkbookConfig }): Promise<boolean> {
+    async createInstance(params: { unitID: string; type: DocumentType; snapshot: IWorkbookData }): Promise<boolean> {
         const { type, snapshot } = params;
         try {
             switch (type) {

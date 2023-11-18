@@ -4,10 +4,10 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Univer } from '../../basics/univer';
 import { IUniverInstanceService } from '../../services/instance/instance.service';
 import { LocaleType } from '../../types/enum/locale-type';
-import { IWorkbookConfig } from '../../types/interfaces/i-workbook-data';
+import { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 import { createCoreTestBed } from './create-core-test-bed';
 
-const WORKBOOK_DATA: IWorkbookConfig = {
+const WORKBOOK_DATA: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {

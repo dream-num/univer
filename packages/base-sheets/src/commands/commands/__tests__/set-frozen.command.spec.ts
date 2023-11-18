@@ -2,7 +2,7 @@
 import {
     ICommandService,
     IUniverInstanceService,
-    IWorkbookConfig,
+    IWorkbookData,
     LocaleType,
     RedoCommand,
     UndoCommand,
@@ -15,7 +15,7 @@ import { SetFrozenMutation } from '../../mutations/set-frozen.mutation';
 import { SetFrozenCommand } from '../set-frozen.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
-const WORKBOOK_DATA_DEMO: IWorkbookConfig = {
+const WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {

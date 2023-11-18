@@ -3,11 +3,11 @@ import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { Univer } from '../../../basics/univer';
 import { Plugin, PluginType } from '../../../plugin/plugin';
 import { LocaleType } from '../../../types/enum/locale-type';
-import { IWorkbookConfig } from '../../../types/interfaces/i-workbook-data';
+import { IWorkbookData } from '../../../types/interfaces/i-workbook-data';
 import { IUniverInstanceService } from '../../instance/instance.service';
 import { ILogService } from '../../log/log.service';
 
-const TEST_WORKBOOK_DATA: IWorkbookConfig = {
+const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -36,7 +36,7 @@ const TEST_WORKBOOK_DATA: IWorkbookConfig = {
     timeZone: '',
 };
 
-export function createCoreTestBed(workbookConfig?: IWorkbookConfig, dependencies?: Dependency[]) {
+export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
 
     let get: Injector['get'] | undefined;

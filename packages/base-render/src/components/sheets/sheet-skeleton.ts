@@ -20,7 +20,7 @@ import {
     IStyleData,
     ITextRotation,
     ITextStyle,
-    IWorksheetConfig,
+    IWorksheetData,
     LocaleService,
     Nullable,
     ObjectArrayType,
@@ -216,7 +216,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     constructor(
         private _worksheet: Worksheet | undefined,
-        private _config: IWorksheetConfig,
+        private _config: IWorksheetData,
         private _cellData: ObjectMatrix<ICellData>,
         private _styles: Styles,
         _localeService: LocaleService
@@ -297,7 +297,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      */
     static create(
         worksheet: Worksheet | undefined,
-        config: IWorksheetConfig,
+        config: IWorksheetData,
         cellData: ObjectMatrix<ICellData>,
         styles: Styles,
         LocaleService: LocaleService

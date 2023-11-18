@@ -1,6 +1,6 @@
-import { IWorkbookConfig, LocaleType } from '@univerjs/core';
+import { IWorkbookData, LocaleType } from '@univerjs/core';
 
-export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA_DEMO7: IWorkbookData = {
     id: 'workbook-01',
     locale: LocaleType.EN_US,
     creator: 'univer',

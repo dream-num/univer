@@ -1,11 +1,11 @@
 import { SetSelectionsOperation } from '@univerjs/base-sheets';
 import { createCommandTestBed } from '@univerjs/base-sheets/commands/commands/__tests__/create-command-test-bed.js';
 import { ShortcutExperienceService } from '@univerjs/base-ui';
-import { ICommandService, IWorkbookConfig, LocaleType } from '@univerjs/core';
+import { ICommandService, IWorkbookData, LocaleType } from '@univerjs/core';
 
 import { ExpandSelectionCommand, MoveSelectionCommand, SelectAllCommand } from '../set-selection.command';
 
-export function createSelectionCommandTestBed(workbookConfig?: IWorkbookConfig) {
+export function createSelectionCommandTestBed(workbookConfig?: IWorkbookData) {
     const { univer, get, sheet } = createCommandTestBed(workbookConfig || SIMPLE_SELECTION_WORKBOOK_DATA, [
         [ShortcutExperienceService],
     ]);
@@ -22,7 +22,7 @@ export function createSelectionCommandTestBed(workbookConfig?: IWorkbookConfig) 
     };
 }
 
-export const SELECTION_WITH_EMPTY_CELLS_DATA: IWorkbookConfig = {
+export const SELECTION_WITH_EMPTY_CELLS_DATA: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -73,7 +73,7 @@ export const SELECTION_WITH_EMPTY_CELLS_DATA: IWorkbookConfig = {
     timeZone: '',
 };
 
-export const SELECTION_WITH_MERGED_CELLS_DATA: IWorkbookConfig = {
+export const SELECTION_WITH_MERGED_CELLS_DATA: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -117,7 +117,7 @@ export const SELECTION_WITH_MERGED_CELLS_DATA: IWorkbookConfig = {
     timeZone: '',
 };
 
-export const SIMPLE_SELECTION_WORKBOOK_DATA: IWorkbookConfig = {
+export const SIMPLE_SELECTION_WORKBOOK_DATA: IWorkbookData = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {

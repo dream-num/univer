@@ -1,7 +1,7 @@
 import { Nullable, Tools } from '../shared';
 import { ObjectArray, ObjectArrayType } from '../shared/object-array';
 import { BooleanNumber } from '../types/enum';
-import { IColumnData, IRange, IWorksheetConfig, RANGE_TYPE } from '../types/interfaces';
+import { IColumnData, IRange, IWorksheetData, RANGE_TYPE } from '../types/interfaces';
 
 /**
  * Manage configuration information of all columns, get column width, column length, set column width, etc.
@@ -10,7 +10,7 @@ export class ColumnManager {
     private _columnData: ObjectArray<IColumnData>;
 
     constructor(
-        private readonly _config: IWorksheetConfig,
+        private readonly _config: IWorksheetData,
         data: ObjectArrayType<Partial<IColumnData>>
     ) {
         this._columnData = Tools.createObjectArray(data) as ObjectArray<IColumnData>;

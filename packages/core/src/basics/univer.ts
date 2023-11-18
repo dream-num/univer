@@ -24,7 +24,7 @@ import { GenName } from '../shared/gen-name';
 import { Workbook } from '../sheets/workbook';
 import { Slide } from '../slides/domain/slide-model';
 import { LocaleType } from '../types/enum/locale-type';
-import { IDocumentData, ISlideData, IUniverData, IWorkbookConfig } from '../types/interfaces';
+import { IDocumentData, ISlideData, IUniverData, IWorkbookData } from '../types/interfaces';
 import { UniverDoc } from './univer-doc';
 import { UniverSheet } from './univer-sheet';
 import { UniverSlide } from './univer-slide';
@@ -85,7 +85,7 @@ export class Univer {
     /**
      * Create a univer sheet instance with internal dependency injection.
      */
-    createUniverSheet(config: Partial<IWorkbookConfig>): Workbook {
+    createUniverSheet(config: Partial<IWorkbookData>): Workbook {
         let workbook: Workbook;
         const addSheet = () => {
             workbook = this._univerSheet!.createSheet(config);

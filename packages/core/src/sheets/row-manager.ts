@@ -1,6 +1,6 @@
 import { Nullable, ObjectArray, ObjectArrayType, Tools } from '../shared';
 import { BooleanNumber } from '../types/enum';
-import { IRange, IRowData, IWorksheetConfig, RANGE_TYPE } from '../types/interfaces';
+import { IRange, IRowData, IWorksheetData, RANGE_TYPE } from '../types/interfaces';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
@@ -11,7 +11,7 @@ export class RowManager {
     private _rowData: ObjectArray<IRowData>;
 
     constructor(
-        private readonly _config: IWorksheetConfig,
+        private readonly _config: IWorksheetData,
         data: ObjectArrayType<Partial<IRowData>>
     ) {
         this._rowData = Tools.createObjectArray(data) as ObjectArray<IRowData>;

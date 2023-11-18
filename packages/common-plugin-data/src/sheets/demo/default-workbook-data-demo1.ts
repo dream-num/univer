@@ -1,6 +1,6 @@
-import { BooleanNumber, BorderStyleTypes, IWorkbookConfig, LocaleType, SheetTypes } from '@univerjs/core';
+import { BooleanNumber, BorderStyleTypes, IWorkbookData, LocaleType, SheetTypes } from '@univerjs/core';
 
-export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
     id: 'workbook-01',
     locale: LocaleType.EN_US,
     creator: 'univer',

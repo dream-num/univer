@@ -7,7 +7,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../enum';
-import { IWorkbookConfig, IWorksheetConfig } from '../interfaces';
+import { IWorkbookData, IWorksheetData } from '../interfaces';
 
 /**
  * Used as an illegal range array return value
@@ -52,7 +52,7 @@ export const DEFAULT_CELL = {
 /**
  * Used as an init workbook return value
  */
-export const DEFAULT_WORKBOOK: IWorkbookConfig = {
+export const DEFAULT_WORKBOOK: IWorkbookData = {
     id: '',
     sheetOrder: [],
     name: '',
@@ -82,7 +82,7 @@ export const DEFAULT_WORKSHEET_COLUMN_TITLE_HEIGHT = 20;
 /**
  * Used as an init worksheet return value
  */
-export const DEFAULT_WORKSHEET: IWorksheetConfig = {
+export const DEFAULT_WORKSHEET: IWorksheetData = {
     type: SheetTypes.GRID,
     name: 'Sheet1',
     id: 'sheet-01',

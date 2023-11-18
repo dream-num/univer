@@ -2,7 +2,7 @@ import { Nullable, ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_WORKSHEET } from '../types/const';
 import { BooleanNumber, SheetTypes } from '../types/enum';
-import { ICellData, IFreeze, IRange, IWorksheetConfig } from '../types/interfaces';
+import { ICellData, IFreeze, IRange, IWorksheetData } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
@@ -16,7 +16,7 @@ export class Worksheet {
     protected _initialized: boolean;
 
     protected _sheetId: string;
-    protected _snapshot: IWorksheetConfig;
+    protected _snapshot: IWorksheetData;
     protected _cellData: ObjectMatrix<ICellData>;
 
     protected _rowManager: RowManager;
@@ -25,10 +25,10 @@ export class Worksheet {
     protected readonly _viewModel: SheetViewModel;
 
     constructor(
-        snapshot: Partial<IWorksheetConfig>,
+        snapshot: Partial<IWorksheetData>,
         private readonly _styles: Styles
     ) {
-        const mergedSnapshot: IWorksheetConfig = {
+        const mergedSnapshot: IWorksheetData = {
             ...DEFAULT_WORKSHEET,
             mergeData: [],
             hideRow: [],
@@ -265,7 +265,7 @@ export class Worksheet {
      * Returns WorkSheet Configures
      * @returns WorkSheet Configures
      */
-    getConfig(): IWorksheetConfig {
+    getConfig(): IWorksheetData {
         return this._snapshot;
     }
 

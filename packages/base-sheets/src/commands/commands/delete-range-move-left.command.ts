@@ -21,12 +21,14 @@ import { InsertRangeMutation } from '../mutations/insert-range.mutation';
 export interface DeleteRangeMoveLeftCommandParams {
     ranges: IRange[];
 }
+
+export const DeleteRangeMoveLeftCommandId = 'sheet.command.delete-range-move-left';
 /**
  * The command to delete range.
  */
 export const DeleteRangeMoveLeftCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.delete-range-move-left',
+    id: DeleteRangeMoveLeftCommandId,
 
     handler: async (accessor: IAccessor, params?: DeleteRangeMoveLeftCommandParams) => {
         const commandService = accessor.get(ICommandService);

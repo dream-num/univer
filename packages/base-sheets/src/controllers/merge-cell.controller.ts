@@ -55,7 +55,8 @@ import {
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
 } from '../commands/mutations/remove-worksheet-merge.mutation';
-import { EffectParams, RefRangeService } from '../services/ref-range.service';
+import { RefRangeService } from '../services/ref-range/ref-range.service';
+import { EffectRefRangeParams } from '../services/ref-range/type';
 
 @OnLifecycle(LifecycleStages.Steady, MergeCellController)
 export class MergeCellController extends Disposable {
@@ -84,7 +85,7 @@ export class MergeCellController extends Disposable {
             disposableCollection.dispose();
             const mergeData = workSheet.getMergeData();
             // Handles all merged unit tasks,if multiple range effect and called only once.
-            const handler = (config: EffectParams) => {
+            const handler = (config: EffectRefRangeParams) => {
                 switch (config.id) {
                     case MoveRangeCommand.id: {
                         const params = config.params as IMoveRangeCommandParams;

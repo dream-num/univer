@@ -11,48 +11,10 @@ import {
 } from '@univerjs/core';
 import { IDisposable, Inject } from '@wendellhu/redi';
 
-import {} from '../basics/interfaces/mutation-interface';
-import {
-    DeleteRangeMoveLeftCommand,
-    DeleteRangeMoveLeftCommandParams,
-} from '../commands/commands/delete-range-move-left.command';
-import {
-    DeleteRangeMoveUpCommand,
-    DeleteRangeMoveUpCommandParams,
-} from '../commands/commands/delete-range-move-up.command';
-import {
-    InsertRangeMoveDownCommand,
-    InsertRangeMoveDownCommandParams,
-} from '../commands/commands/insert-range-move-down.command';
-import {
-    InsertRangeMoveRightCommand,
-    InsertRangeMoveRightCommandParams,
-} from '../commands/commands/insert-range-move-right.command';
-import {
-    IInsertColCommandParams,
-    IInsertRowCommandParams,
-    InsertColCommand,
-    InsertRowCommand,
-} from '../commands/commands/insert-row-col.command';
-import { IMoveRangeCommandParams, MoveRangeCommand } from '../commands/commands/move-range.command';
-import {
-    RemoveColCommand,
-    RemoveRowColCommandParams,
-    RemoveRowCommand,
-} from '../commands/commands/remove-row-col.command';
-import { SelectionManagerService } from './selection-manager.service';
+import { SelectionManagerService } from '../selection-manager.service';
+import { EffectRefRangeParams, EffectRefRangId } from './type';
 
-export type EffectParams =
-    | ICommandInfo<IMoveRangeCommandParams>
-    | ICommandInfo<IInsertRowCommandParams>
-    | ICommandInfo<IInsertColCommandParams>
-    | ICommandInfo<RemoveRowColCommandParams>
-    | ICommandInfo<DeleteRangeMoveLeftCommandParams>
-    | ICommandInfo<DeleteRangeMoveUpCommandParams>
-    | ICommandInfo<InsertRangeMoveDownCommandParams>
-    | ICommandInfo<InsertRangeMoveRightCommandParams>;
-
-type RefRangCallback = (params: EffectParams) => {
+type RefRangCallback = (params: EffectRefRangeParams) => {
     redos: ICommandInfo[];
     undos: ICommandInfo[];
 };
@@ -77,22 +39,22 @@ export class RefRangeService extends Disposable {
 
     private _onRefRangeChange = () => {
         this._sheetInterceptorService.interceptCommand({
-            getMutations: (command) => {
+            getMutations: (command: EffectRefRangeParams) => {
                 const workSheet = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 const workbookId = getWorkbookId(this._univerInstanceService);
                 const worksheetId = getWorksheetId(this._univerInstanceService);
                 const getEffectsCbList = () => {
                     switch (command.id) {
-                        case MoveRangeCommand.id: {
-                            const params = command as ICommandInfo<IMoveRangeCommandParams>;
+                        case EffectRefRangId.MoveRangeCommandId: {
+                            const params = command;
                             return this._checkRange(
                                 [params.params!.fromRange, params.params!.toRange],
                                 workbookId,
                                 worksheetId
                             );
                         }
-                        case InsertRowCommand.id: {
-                            const params = command as ICommandInfo<IInsertRowCommandParams>;
+                        case EffectRefRangId.InsertRowCommandId: {
+                            const params = command;
                             const rowStart = params.params!.range.startRow;
                             const range: IRange = {
                                 startRow: rowStart,
@@ -102,8 +64,8 @@ export class RefRangeService extends Disposable {
                             };
                             return this._checkRange([range], workbookId, worksheetId);
                         }
-                        case InsertColCommand.id: {
-                            const params = command as ICommandInfo<IInsertColCommandParams>;
+                        case EffectRefRangId.InsertColCommandId: {
+                            const params = command;
                             const colStart = params.params!.range.startColumn;
                             const range: IRange = {
                                 startRow: 0,
@@ -113,8 +75,8 @@ export class RefRangeService extends Disposable {
                             };
                             return this._checkRange([range], workbookId, worksheetId);
                         }
-                        case RemoveRowCommand.id: {
-                            const params = command as ICommandInfo<RemoveRowColCommandParams>;
+                        case EffectRefRangId.RemoveRowCommandId: {
+                            const params = command;
                             const ranges = params.params?.ranges || [];
                             const rowStart = Math.min(...ranges.map((range) => range.startRow));
                             const range: IRange = {
@@ -125,8 +87,8 @@ export class RefRangeService extends Disposable {
                             };
                             return this._checkRange([range], workbookId, worksheetId);
                         }
-                        case RemoveColCommand.id: {
-                            const params = command as unknown as ICommandInfo<RemoveRowColCommandParams>;
+                        case EffectRefRangId.RemoveColCommandId: {
+                            const params = command;
                             const ranges = params.params?.ranges || [];
                             const colStart = Math.min(...ranges.map((range) => range.startColumn));
                             const range: IRange = {
@@ -137,9 +99,9 @@ export class RefRangeService extends Disposable {
                             };
                             return this._checkRange([range], workbookId, worksheetId);
                         }
-                        case DeleteRangeMoveUpCommand.id:
-                        case InsertRangeMoveDownCommand.id: {
-                            const params = command as ICommandInfo<InsertRangeMoveDownCommandParams>;
+                        case EffectRefRangId.DeleteRangeMoveUpCommandId:
+                        case EffectRefRangId.InsertRangeMoveDownCommandId: {
+                            const params = command;
                             const ranges = params.params!.ranges || getSelectionRanges(this._selectionManagerService);
                             const effectRanges = ranges.map((range) => ({
                                 startRow: range.startRow,
@@ -149,24 +111,23 @@ export class RefRangeService extends Disposable {
                             }));
                             return this._checkRange(effectRanges, workbookId, worksheetId);
                         }
-                        case DeleteRangeMoveLeftCommand.id:
-                        case InsertRangeMoveRightCommand.id: {
-                            const params = command as ICommandInfo<InsertRangeMoveRightCommandParams>;
+                        case EffectRefRangId.DeleteRangeMoveLeftCommandId:
+                        case EffectRefRangId.InsertRangeMoveRightCommandId: {
+                            const params = command;
                             const ranges = params.params!.ranges || getSelectionRanges(this._selectionManagerService);
                             const effectRanges = ranges.map((range) => ({
                                 startRow: range.startRow,
                                 startColumn: range.startColumn,
                                 endColumn: workSheet.getColumnCount() - 1,
-                                endRow: range.endColumn,
+                                endRow: range.endRow,
                             }));
                             return this._checkRange(effectRanges, workbookId, worksheetId);
                         }
                     }
-                    return [];
                 };
-                const cbList = getEffectsCbList();
+                const cbList = getEffectsCbList() || [];
                 const result = cbList
-                    .map((cb) => cb(command as EffectParams))
+                    .map((cb) => cb(command))
                     .reduce(
                         (result, currentValue) => {
                             result.redos.push(...currentValue.redos);

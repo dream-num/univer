@@ -6,7 +6,7 @@ import { MergeCellController } from './controllers/merge-cell.controller';
 import { enUS } from './locale';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { SheetPermissionService } from './services/permission';
-import { RefRangeService } from './services/ref-range.service';
+import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SelectionManagerService } from './services/selection-manager.service';
 
 /**

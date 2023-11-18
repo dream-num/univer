@@ -20,9 +20,10 @@ export interface IMoveRangeCommandParams {
     toRange: IRange;
     fromRange: IRange;
 }
+export const MoveRangeCommandId = 'sheet.command.move-range';
 export const MoveRangeCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.move-range',
+    id: MoveRangeCommandId,
     handler: async (accessor: IAccessor, params: IMoveRangeCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

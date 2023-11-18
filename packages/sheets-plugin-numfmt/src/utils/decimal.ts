@@ -48,13 +48,13 @@ export const getDecimalString = (length: number) =>
 
 export const setPatternDecimal = (patterns: string, decimalLength: number) => {
     const tokens = patterns.split(';').map((pattern) => {
-        if (/\.0+/.test(pattern)) {
+        if (/\.0?/.test(pattern)) {
             return pattern.replace(
                 /\.0*/g,
                 `${decimalLength > 0 ? '.' : ''}${getDecimalString(Number(decimalLength || 0))}`
             );
         }
-        if (/0([^0]+)|0$/.test(pattern)) {
+        if (/0([^0]?)|0$/.test(pattern)) {
             return pattern.replace(
                 /0([^0]+)|0$/,
                 `0${decimalLength > 0 ? '.' : ''}${getDecimalString(Number(decimalLength || 0))}`
@@ -66,4 +66,4 @@ export const setPatternDecimal = (patterns: string, decimalLength: number) => {
     return tokens.join(';');
 };
 
-export const isPatternHasDecimal = (pattern: string) => /\.0+/.test(pattern) || /0([^0]+)|0$/.test(pattern);
+export const isPatternHasDecimal = (pattern: string) => /\.0?/.test(pattern) || /0([^0]?)|0$/.test(pattern);

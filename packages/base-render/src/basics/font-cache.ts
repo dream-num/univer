@@ -117,14 +117,18 @@ export class FontCache {
         if (this._fontDataMap.size === 0) {
             return getDefaultBaselineOffset(fontSize);
         }
+
         const fontFamilyList = fontFamily.split(',');
+
         for (let ff of fontFamilyList) {
             ff = ff.replace(/'/g, '');
             const fontData = this._fontDataMap.get(ff);
             if (!fontData) {
                 continue;
             }
+
             const { subscriptSizeRatio, subscriptOffset, superscriptSizeRatio, superscriptOffset } = fontData;
+
             return {
                 sbr: subscriptSizeRatio,
                 sbo: subscriptOffset * fontSize,

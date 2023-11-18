@@ -40,7 +40,8 @@ export interface IControlFillConfig {
 export interface ISelectionRenderService {
     readonly selectionRangeWithStyle$: Observable<ISelectionWithCoordAndStyle[]>;
     readonly controlFillConfig$: Observable<IControlFillConfig | null>;
-    readonly selectionMoving$: Observable<SelectionShape>;
+    readonly selectionMoving$: Observable<Nullable<IRange[]>>;
+    readonly selectionMoveStart$: Observable<Nullable<IRange[]>>;
 
     enableHeaderHighlight(): void;
     disableHeaderHighlight(): void;
@@ -145,12 +146,19 @@ export class SelectionRenderService implements ISelectionRenderService {
     // When the user draws a selection area in the canvas content area, this event is broadcasted when the drawing ends.
     readonly selectionRangeWithStyle$ = this._selectionRangeWithStyle$.asObservable();
 
-    private readonly _selectionMoving$ = new Subject<SelectionShape>();
+    private readonly _selectionMoving$ = new Subject<Nullable<IRange[]>>();
 
     /**
      * Triggered during the drawing of the selection area.
      */
     readonly selectionMoving$ = this._selectionMoving$.asObservable();
+
+    private readonly _selectionMoveStart$ = new Subject<Nullable<IRange[]>>();
+
+    /**
+     * Triggered during the start draw the selection area.
+     */
+    readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
     private _activeViewport!: Viewport;
 
@@ -471,7 +479,7 @@ export class SelectionRenderService implements ISelectionRenderService {
                 control.dispose();
             }
 
-            curControls.length = 0; // clear currentSelectionControls
+            curControls.length = 0;
         }
 
         const currentCell = selectionControl && selectionControl.model.currentCell;
@@ -494,6 +502,7 @@ export class SelectionRenderService implements ISelectionRenderService {
                 endX: endCell?.endX || 0,
                 rangeType,
             };
+
             selectionControl.update(
                 newSelectionRange,
                 rowHeaderWidth,
@@ -506,6 +515,7 @@ export class SelectionRenderService implements ISelectionRenderService {
              * Supports the formula ref text selection feature,
              * under the condition of preserving all previous selections, it modifies the position of the latest selection.
              */
+
             selectionControl.update(
                 startSelectionRange,
                 rowHeaderWidth,
@@ -536,6 +546,8 @@ export class SelectionRenderService implements ISelectionRenderService {
 
             curControls.push(selectionControl);
         }
+
+        this._selectionMoveStart$.next([...(this.getActiveRangeList() || [])]);
 
         this.hasSelection = true;
 
@@ -770,7 +782,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         ) {
             selectionControl.update(newSelectionRange, rowHeaderWidth, columnHeaderHeight);
 
-            this._selectionMoving$.next(selectionControl);
+            this._selectionMoving$.next(this.getActiveRangeList());
         }
     }
 

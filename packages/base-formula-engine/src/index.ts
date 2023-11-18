@@ -18,6 +18,7 @@ export {
     serializeRangeWithSpreadsheet,
 } from './basics/reference';
 export { type ISequenceNode, sequenceNodeType } from './basics/sequence';
+export { matchToken } from './basics/token';
 export { BaseFormulaEnginePlugin } from './plugin';
 export { RangeReferenceObject } from './reference-object/range-reference-object';
 export { FormulaEngineService } from './services/formula-engine.service';

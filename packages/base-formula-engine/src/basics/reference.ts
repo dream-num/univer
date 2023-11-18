@@ -29,7 +29,15 @@ function singleReferenceToGrid(refBody: string) {
  */
 export function serializeRange(range: IRange): string {
     const { startColumn, startRow, endColumn, endRow } = range;
-    return `${Tools.chatAtABC(startColumn) + (startRow + 1)}:${Tools.chatAtABC(endColumn)}${endRow + 1}`;
+    const startStr = `${Tools.chatAtABC(startColumn) + (startRow + 1)}`;
+
+    const endStr = `${Tools.chatAtABC(endColumn)}${endRow + 1}`;
+
+    if (startStr === endStr) {
+        return startStr;
+    }
+
+    return `${startStr}:${endStr}`;
 }
 
 /**

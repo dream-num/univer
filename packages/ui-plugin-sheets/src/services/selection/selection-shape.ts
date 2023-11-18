@@ -332,6 +332,10 @@ export class SelectionShape {
         };
     }
 
+    getRange() {
+        return this._selectionModel.getValue().rangeWithCoord;
+    }
+
     enableHelperSelection() {
         this._isHelperSelection = true;
     }

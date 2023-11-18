@@ -4,17 +4,22 @@ import {
     IFunctionInfo,
     ISequenceNode,
     isFormulaLexerToken,
+    matchToken,
     sequenceNodeType,
     serializeRangeToRefString,
 } from '@univerjs/base-formula-engine';
-import { matchToken } from '@univerjs/base-formula-engine/basics/token.js';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IRenderManagerService,
     ITextSelectionRenderManager,
 } from '@univerjs/base-render';
-import { ISelectionWithStyle, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/base-sheets';
+import {
+    getNormalSelectionStyle,
+    ISelectionWithStyle,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+} from '@univerjs/base-sheets';
 import { KeyCode, MetaKeys } from '@univerjs/base-ui';
 import {
     Direction,
@@ -25,6 +30,7 @@ import {
     ICommandService,
     IContextService,
     IDocumentBody,
+    IRange,
     IRangeWithCoord,
     isFormulaString,
     ITextRun,
@@ -50,6 +56,7 @@ import {
     SheetSkeletonManagerService,
 } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
+import { Subject } from 'rxjs';
 
 import {
     ISelectEditorFormulaOperationParam,
@@ -83,15 +90,31 @@ export class PromptController extends Disposable {
 
     private _lastSequenceNodes: Array<string | ISequenceNode> = [];
 
+    private _previousSequenceNodes: Nullable<Array<string | ISequenceNode>>;
+
     private _isLockedOnSelectionChangeRefString: boolean = false;
 
-    private _previousControl: Nullable<SelectionShape>;
+    private _isLockedOnSelectionInsertRefString: boolean = false;
+
+    private _previousRangesCount: number = 0;
+
+    private _previousInsertRefStringIndex: Nullable<number>;
 
     private _currentInsertRefStringIndex: number = -1;
+
+    private _currentUnitId: Nullable<string>;
+
+    private _currentSheetId: Nullable<string>;
+
+    private _isSelectionMoving: boolean = false;
+
+    private _isSelectionMovingRefSelections: IRefSelection[] = [];
 
     private _stringColor = '';
 
     private _numberColor = '';
+
+    private readonly _formulaSelectionMoving$ = new Subject<IRange[]>();
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -116,6 +139,29 @@ export class PromptController extends Disposable {
 
     override dispose(): void {
         this._formulaRefColors = [];
+        this.resetTemp();
+    }
+
+    private resetTemp() {
+        this._lastSequenceNodes = [];
+
+        this._previousSequenceNodes = null;
+
+        this._previousInsertRefStringIndex = null;
+
+        this._currentUnitId = null;
+
+        this._currentSheetId = null;
+
+        this._isSelectionMovingRefSelections = [];
+
+        this._isLockedOnSelectionChangeRefString = false;
+
+        this._previousRangesCount = 0;
+
+        this._currentInsertRefStringIndex = -1;
+
+        this._isSelectionMoving = false;
     }
 
     private _initialize(): void {
@@ -130,6 +176,8 @@ export class PromptController extends Disposable {
         this._initialRefSelectionInsertEvent();
 
         this._initialExitEditor();
+
+        this._initialEditorInputChange();
 
         this._commandExecutedListener();
     }
@@ -161,7 +209,7 @@ export class PromptController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 this._textSelectionManagerService.textSelectionInfo$.subscribe(() => {
-                    if (this._editorBridgeService.isVisible().visible === false) {
+                    if (this._editorBridgeService.isVisible().visible === false || this._isSelectionMoving === true) {
                         return;
                     }
 
@@ -175,13 +223,161 @@ export class PromptController extends Disposable {
 
                     this._switchSelectionPlugin();
 
-                    if (this._isLockedOnSelectionChangeRefString || this._formulaPromptService.isInsertRefString()) {
+                    if (this._isLockedOnSelectionChangeRefString || this._isLockedOnSelectionInsertRefString) {
                         return;
                     }
                     // TODO@Dushusir: use real text info
                     this._setFunctionPanel(dataStream);
 
                     this._highlightFormula(currentBody);
+                })
+            )
+        );
+    }
+
+    private _initialEditorInputChange() {
+        this.disposeWithMe(
+            toDisposable(
+                this._textSelectionRenderManager.onInputBefore$.subscribe(() => {
+                    this._previousSequenceNodes = null;
+                    this._previousInsertRefStringIndex = null;
+                })
+            )
+        );
+    }
+
+    private _initialExitEditor() {
+        this.disposeWithMe(
+            toDisposable(
+                this._editorBridgeService.visible$.subscribe((visibleParam) => {
+                    if (visibleParam.visible === true) {
+                        const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
+
+                        this._currentUnitId = unitId;
+
+                        this._currentSheetId = sheetId;
+
+                        return;
+                    }
+
+                    /**
+                     * Switching the selection of PluginName causes a refresh.
+                     * Here, a delay is added to prevent the loss of content when pressing enter.
+                     */
+                    if (this._getContextState() === true) {
+                        setTimeout(() => {
+                            this._selectionManagerService.clear();
+                            this._selectionManagerService.changePlugin(NORMAL_SELECTION_PLUGIN_NAME);
+                        }, 0);
+                    }
+
+                    this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+
+                    this._changeKeepVisibleHideState();
+
+                    this._selectionRenderService.resetStyle();
+
+                    this.resetTemp();
+                })
+            )
+        );
+    }
+
+    private _initialRefSelectionUpdateEvent() {
+        const disposableCollection = new DisposableCollection();
+
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionInfo$.subscribe(() => {
+                    // Each range change requires re-listening
+                    disposableCollection.dispose();
+
+                    const current = this._selectionManagerService.getCurrent();
+
+                    this._isSelectionMoving = false;
+
+                    if (current?.pluginName !== FORMULA_REF_SELECTION_PLUGIN_NAME) {
+                        return;
+                    }
+
+                    this._updateRefSelectionStyle(this._isSelectionMovingRefSelections);
+
+                    const selectionControls = this._selectionRenderService.getCurrentControls();
+                    selectionControls.forEach((controlSelection) => {
+                        controlSelection.disableHelperSelection();
+
+                        disposableCollection.add(
+                            toDisposable(
+                                controlSelection.selectionMoving$.subscribe((toRange) => {
+                                    this._changeControlSelection(toRange, controlSelection);
+                                })
+                            )
+                        );
+
+                        disposableCollection.add(
+                            toDisposable(
+                                controlSelection.selectionScaling$.subscribe((toRange) => {
+                                    this._changeControlSelection(toRange, controlSelection);
+                                })
+                            )
+                        );
+
+                        disposableCollection.add(
+                            toDisposable(
+                                controlSelection.selectionMoved$.subscribe(() => {
+                                    this._isLockedOnSelectionChangeRefString = false;
+                                })
+                            )
+                        );
+
+                        disposableCollection.add(
+                            toDisposable(
+                                controlSelection.selectionScaled$.subscribe(() => {
+                                    this._isLockedOnSelectionChangeRefString = false;
+                                })
+                            )
+                        );
+                    });
+                })
+            )
+        );
+    }
+
+    private _initialRefSelectionInsertEvent() {
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionRenderService.selectionMoving$.subscribe((ranges) => {
+                    if (ranges == null) {
+                        return;
+                    }
+
+                    this._formulaSelectionMoving$.next(ranges);
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionRenderService.selectionMoveStart$.subscribe((ranges) => {
+                    if (ranges == null) {
+                        return;
+                    }
+
+                    this._formulaSelectionMoving$.next(ranges);
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                this._formulaSelectionMoving$.subscribe((ranges) => {
+                    if (!this._isLockedOnSelectionInsertRefString) {
+                        return;
+                    }
+
+                    this._isSelectionMoving = true;
+
+                    this._inertControlSelection(ranges);
                 })
             )
         );
@@ -227,8 +423,8 @@ export class PromptController extends Disposable {
         ) {
             this._editorBridgeService.enableForceKeepVisible();
 
-            this._formulaPromptService.enableInsertRefString();
-            this._currentInsertRefStringIndex = startOffset;
+            this._isLockedOnSelectionInsertRefString = true;
+            this._currentInsertRefStringIndex = startOffset - 1;
 
             this._selectionRenderService.enableRemainLast();
         } else {
@@ -238,36 +434,11 @@ export class PromptController extends Disposable {
 
     private _disableForceKeepVisible() {
         this._editorBridgeService.disableForceKeepVisible();
-        this._formulaPromptService.disableInsertRefString();
+
+        this._isLockedOnSelectionInsertRefString = false;
+
         this._currentInsertRefStringIndex = -1;
         this._selectionRenderService.disableRemainLast();
-    }
-
-    private _initialExitEditor() {
-        this.disposeWithMe(
-            toDisposable(
-                this._editorBridgeService.visible$.subscribe((visibleParam) => {
-                    if (visibleParam.visible === true) {
-                        return;
-                    }
-
-                    /**
-                     * Switching the selection of PluginName causes a refresh.
-                     * Here, a delay is added to prevent the loss of content when pressing enter.
-                     */
-                    if (this._getContextState() === true) {
-                        setTimeout(() => {
-                            this._selectionManagerService.clear();
-                            this._selectionManagerService.changePlugin(NORMAL_SELECTION_PLUGIN_NAME);
-                        }, 0);
-                    }
-
-                    this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-
-                    this._changeKeepVisibleHideState();
-                })
-            )
-        );
     }
 
     private _getCurrentBody() {
@@ -278,10 +449,17 @@ export class PromptController extends Disposable {
     private _contextSwitch(currentInputValue: string) {
         if (isFormulaString(currentInputValue)) {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
+
+            this._lastSequenceNodes =
+                this._formulaEngineService.buildSequenceNodes(
+                    currentInputValue.replace(/\r/g, '').replace(/\n/g, '')
+                ) || [];
         } else {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
             this._isLockedOnSelectionChangeRefString = false;
-            this._formulaPromptService.disableInsertRefString();
+            this._isLockedOnSelectionInsertRefString = false;
+
+            this._lastSequenceNodes = [];
         }
     }
 
@@ -363,8 +541,16 @@ export class PromptController extends Disposable {
                     this._selectionManagerService.addNoRefresh([Tools.deepClone(selectionData)]);
                 }
             }
+
+            const style = getNormalSelectionStyle(this._themeService);
+            style.strokeDash = 8;
+            style.hasAutoFill = false;
+            style.hasRowHeader = false;
+            style.hasColumnHeader = false;
+            this._selectionRenderService.setStyle(style);
         } else {
             this._selectionManagerService.changePluginNoRefresh(NORMAL_SELECTION_PLUGIN_NAME);
+            this._selectionRenderService.resetStyle();
         }
     }
 
@@ -378,18 +564,20 @@ export class PromptController extends Disposable {
             return;
         }
 
-        const dataStream = body.dataStream;
+        // const dataStream = body.dataStream;
 
-        const sequenceNodes = this._formulaEngineService.buildSequenceNodes(
-            dataStream.replace(/\r/g, '').replace(/\n/g, '')
-        );
+        // const sequenceNodes = this._formulaEngineService.buildSequenceNodes(
+        //     dataStream.replace(/\r/g, '').replace(/\n/g, '')
+        // );
+
+        const sequenceNodes = this._lastSequenceNodes;
 
         this._selectionManagerService.clear();
 
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             body.textRuns = [];
         } else {
-            this._lastSequenceNodes = sequenceNodes;
+            // this._lastSequenceNodes = sequenceNodes;
             const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
             body.textRuns = textRuns;
 
@@ -461,13 +649,7 @@ export class PromptController extends Disposable {
      * @returns
      */
     private _refreshSelectionForReference(refSelections: IRefSelection[]) {
-        const current = this._sheetSkeletonManagerService.getCurrent();
-
-        if (current == null) {
-            return;
-        }
-
-        const { unitId, sheetId } = current;
+        const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
 
         const selectionWithStyle: ISelectionWithStyle[] = [];
 
@@ -508,13 +690,43 @@ export class PromptController extends Disposable {
         return workbook?.getSheetBySheetName(sheetName)?.getSheetId();
     }
 
+    private _getSheetNameById(unitId: string, sheetId: string) {
+        const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+
+        return workbook?.getSheetBySheetId(sheetId)?.getName() || '';
+    }
+
+    private _getCurrentUnitIdAndSheetId() {
+        const current = this._sheetSkeletonManagerService.getCurrent();
+
+        if (current == null) {
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+            const worksheet = workbook.getActiveSheet();
+            return {
+                unitId: workbook.getUnitId(),
+                sheetId: worksheet.getSheetId(),
+            };
+        }
+
+        const { unitId, sheetId } = current;
+
+        return {
+            unitId,
+            sheetId,
+        };
+    }
+
     /**
      * Synchronize the reference text based on the changes of the selection.
      * @param refIndex
      * @param rangeWithCoord
      * @returns
      */
-    private _updateSequenceRef(refIndex: number, rangeWithCoord: Nullable<IRangeWithCoord>) {
+    private _updateSequenceRef(
+        sequenceNodes: Array<string | ISequenceNode>,
+        refIndex: number,
+        rangeWithCoord: Nullable<IRangeWithCoord>
+    ) {
         if (rangeWithCoord == null) {
             return;
         }
@@ -530,7 +742,7 @@ export class PromptController extends Disposable {
             },
         });
 
-        const node = this._lastSequenceNodes[refIndex];
+        const node = sequenceNodes[refIndex];
 
         if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
             return;
@@ -542,8 +754,8 @@ export class PromptController extends Disposable {
 
         node.endIndex += difference;
 
-        for (let i = refIndex + 1, len = this._lastSequenceNodes.length; i < len; i++) {
-            const node = this._lastSequenceNodes[i];
+        for (let i = refIndex + 1, len = sequenceNodes.length; i < len; i++) {
+            const node = sequenceNodes[i];
             if (typeof node === 'string') {
                 continue;
             }
@@ -552,9 +764,117 @@ export class PromptController extends Disposable {
             node.endIndex += difference;
         }
 
-        const dataStream = this._generateStringWithSequence(this._lastSequenceNodes);
+        this._sycToEditor(sequenceNodes, node.endIndex + 1);
+    }
 
-        const { textRuns } = this._buildTextRuns(this._lastSequenceNodes);
+    /**
+     * When the cursor is on the right side of a formula token,
+     * you can add reference text to the formula by drawing a selection.
+     * @param index
+     * @param range
+     */
+    private _insertSequenceRef(sequenceNodes: Array<string | ISequenceNode>, index: number, range: Nullable<IRange>) {
+        if (range == null) {
+            return;
+        }
+
+        const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
+
+        let refUnitId = '';
+        let refSheetName = '';
+
+        if (unitId === this._currentUnitId) {
+            refUnitId = '';
+        } else {
+            refUnitId = unitId;
+        }
+
+        if (sheetId === this._currentSheetId) {
+            refSheetName = '';
+        } else {
+            refSheetName = this._getSheetNameById(unitId, sheetId);
+        }
+
+        const { startRow, endRow, startColumn, endColumn } = range;
+        const refString = serializeRangeToRefString({
+            sheetName: refSheetName,
+            unitId: refUnitId,
+            range: {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+            },
+        });
+
+        const refStringCount = refString.length;
+
+        const nodeIndex = this._searchSequenceIndex(sequenceNodes, index);
+
+        sequenceNodes.splice(nodeIndex, 0, {
+            token: refString,
+            startIndex: index,
+            endIndex: index + refStringCount - 1,
+            nodeType: sequenceNodeType.REFERENCE,
+        });
+
+        for (let i = nodeIndex + 1, len = sequenceNodes.length; i < len; i++) {
+            const node = sequenceNodes[i];
+            if (typeof node === 'string') {
+                continue;
+            }
+
+            node.startIndex += refStringCount;
+            node.endIndex += refStringCount;
+        }
+
+        this._sycToEditor(sequenceNodes, index + refStringCount);
+    }
+
+    private _insertSequenceString(sequenceNodes: Array<string | ISequenceNode>, index: number, content: string) {
+        const nodeIndex = this._searchSequenceIndex(sequenceNodes, index);
+        const str = content.split('');
+        sequenceNodes.splice(nodeIndex, 0, ...str);
+
+        const contentCount = str.length;
+
+        for (let i = nodeIndex + contentCount, len = sequenceNodes.length; i < len; i++) {
+            const node = sequenceNodes[i];
+            if (typeof node === 'string') {
+                continue;
+            }
+
+            node.startIndex += contentCount;
+            node.endIndex += contentCount;
+        }
+    }
+
+    private _searchSequenceIndex(sequenceNodes: Array<string | ISequenceNode>, strIndex: number) {
+        let nodeIndex = 0;
+        for (let i = 0, len = sequenceNodes.length; i < len; i++) {
+            const node = sequenceNodes[i];
+            if (strIndex <= nodeIndex) {
+                return i;
+            }
+            if (typeof node === 'string') {
+                nodeIndex++;
+                continue;
+            }
+
+            const { endIndex } = node;
+
+            nodeIndex = endIndex;
+        }
+
+        return sequenceNodes.length;
+    }
+
+    private async _sycToEditor(sequenceNodes: Array<string | ISequenceNode>, textSelectionOffset: number) {
+        const dataStream = this._generateStringWithSequence(sequenceNodes);
+
+        const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
+
+        this._isSelectionMovingRefSelections = refSelections;
 
         this._updateEditorModel(`=${dataStream}\r\n`, textRuns);
 
@@ -566,26 +886,21 @@ export class PromptController extends Disposable {
 
         const { collapsed, style } = activeRange;
 
+        this._currentInsertRefStringIndex = textSelectionOffset;
+
+        await this._commandService.syncExecuteCommand(SetEditorResizeOperation.id, {
+            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+        });
+
         this._textSelectionManagerService.replace([
             {
-                startOffset: node.endIndex + 2,
-                endOffset: node.endIndex + 2,
+                startOffset: textSelectionOffset + 1,
+                endOffset: textSelectionOffset + 1,
                 collapsed,
                 style,
             },
         ]);
-
-        this._commandService.executeCommand(SetEditorResizeOperation.id, {
-            unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-        });
     }
-
-    /**
-     * When the cursor is on the right side of a formula token, you can add reference text to the formula by drawing a selection.
-     * @param index
-     * @param range
-     */
-    private _insertSequenceRef(index: number, range: Nullable<IRangeWithCoord>) {}
 
     /**
      * Deserialize Sequence to text.
@@ -633,83 +948,63 @@ export class PromptController extends Disposable {
         snapshot.body = newBody;
     }
 
-    private _initialRefSelectionInsertEvent() {
-        this.disposeWithMe(
-            toDisposable(
-                this._selectionRenderService.selectionMoving$.subscribe((control) => {
-                    if (!this._formulaPromptService.isInsertRefString()) {
-                        return;
-                    }
+    private _inertControlSelection(ranges: IRange[]) {
+        const currentRange = ranges[ranges.length - 1];
 
-                    if (control === this._previousControl) {
-                        // No new control is added, the current ref string is still modified.
-                    } else {
-                        // Holding down ctrl causes an addition, requiring the ref string to be increased.
+        if (ranges.length === this._previousRangesCount || this._previousRangesCount === 0) {
+            if (this._previousSequenceNodes == null) {
+                this._previousSequenceNodes = this._lastSequenceNodes;
+            }
 
-                        this._previousControl = control;
-                    }
+            if (this._previousInsertRefStringIndex == null) {
+                this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
+            }
 
-                    // const style = getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString());
-                    // control.updateStyle(style);
-                })
-            )
-        );
+            // No new control is added, the current ref string is still modified.
+            const insertNodes = Tools.deepClone(this._previousSequenceNodes);
+            if (insertNodes == null) {
+                return;
+            }
+
+            this._insertSequenceRef(insertNodes, this._previousInsertRefStringIndex, currentRange);
+
+            this._lastSequenceNodes = insertNodes;
+        } else {
+            // Holding down ctrl causes an addition, requiring the ref string to be increased.
+            const insertNodes = this._lastSequenceNodes;
+
+            if (insertNodes == null) {
+                return;
+            }
+
+            this._insertSequenceString(insertNodes, this._currentInsertRefStringIndex, matchToken.COMMA);
+
+            this._previousSequenceNodes = Tools.deepClone(insertNodes);
+
+            this._previousInsertRefStringIndex = this._currentInsertRefStringIndex + 1;
+
+            this._insertSequenceRef(insertNodes, this._currentInsertRefStringIndex + 1, currentRange);
+
+            this._lastSequenceNodes = insertNodes;
+        }
+
+        this._previousRangesCount = ranges.length;
     }
 
-    private _initialRefSelectionUpdateEvent() {
-        const disposableCollection = new DisposableCollection();
+    private _updateRefSelectionStyle(refSelections: IRefSelection[]) {
+        const controls = this._selectionRenderService.getCurrentControls();
 
-        this.disposeWithMe(
-            toDisposable(
-                this._selectionManagerService.selectionInfo$.subscribe(() => {
-                    // Each range change requires re-listening
-                    disposableCollection.dispose();
+        for (let i = 0, len = controls.length; i < len; i++) {
+            const control = controls[i];
 
-                    const current = this._selectionManagerService.getCurrent();
+            const refSelection = refSelections[i];
 
-                    if (current?.pluginName !== FORMULA_REF_SELECTION_PLUGIN_NAME) {
-                        return;
-                    }
+            const { refIndex, themeColor, token } = refSelection;
 
-                    const selectionControls = this._selectionRenderService.getCurrentControls();
-                    selectionControls.forEach((controlSelection) => {
-                        controlSelection.disableHelperSelection();
+            const style = getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString());
 
-                        disposableCollection.add(
-                            toDisposable(
-                                controlSelection.selectionMoving$.subscribe((toRange) => {
-                                    this._changeControlSelection(toRange, controlSelection);
-                                })
-                            )
-                        );
-
-                        disposableCollection.add(
-                            toDisposable(
-                                controlSelection.selectionScaling$.subscribe((toRange) => {
-                                    this._changeControlSelection(toRange, controlSelection);
-                                })
-                            )
-                        );
-
-                        disposableCollection.add(
-                            toDisposable(
-                                controlSelection.selectionMoved$.subscribe(() => {
-                                    this._isLockedOnSelectionChangeRefString = false;
-                                })
-                            )
-                        );
-
-                        disposableCollection.add(
-                            toDisposable(
-                                controlSelection.selectionScaled$.subscribe(() => {
-                                    this._isLockedOnSelectionChangeRefString = false;
-                                })
-                            )
-                        );
-                    });
-                })
-            )
-        );
+            control.updateStyle(style);
+        }
     }
 
     private _changeControlSelection(toRange: Nullable<IRangeWithCoord>, controlSelection: SelectionShape) {
@@ -725,7 +1020,7 @@ export class PromptController extends Disposable {
             return;
         }
 
-        this._updateSequenceRef(Number(id), toRange);
+        this._updateSequenceRef(this._lastSequenceNodes, Number(id), toRange);
 
         controlSelection.update(toRange);
     }
@@ -799,6 +1094,14 @@ export class PromptController extends Disposable {
                             direction,
                         });
                     }
+
+                    const ranges = this._selectionManagerService.getSelectionRanges();
+
+                    if (ranges == null) {
+                        return;
+                    }
+
+                    this._formulaSelectionMoving$.next(ranges);
                 }
             })
         );

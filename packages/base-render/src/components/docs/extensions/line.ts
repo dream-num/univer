@@ -23,7 +23,7 @@ export class Line extends docExtension {
             return;
         }
 
-        const { asc: maxLineAsc = 0, lineHeight = 0, marginTop = 0 } = line;
+        const { asc: maxLineAsc = 0, contentHeight = 0 } = line;
         const { ts: textStyle, left, width, bBox } = span;
         if (!textStyle) {
             return;
@@ -53,7 +53,7 @@ export class Line extends docExtension {
                 ctx.strokeStyle = color;
                 this._setLineType(ctx, lineType || TextDecoration.SINGLE);
 
-                const startY = fixLineWidthByScale(lineHeight - marginTop + DEFAULT_OFFSET_SPACING - 0.5, scale);
+                const startY = fixLineWidthByScale(contentHeight + DEFAULT_OFFSET_SPACING - 0.5, scale);
 
                 const start = calculateRectRotate(
                     originTranslate.addByPoint(left, startY),

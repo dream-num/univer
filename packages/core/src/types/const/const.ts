@@ -56,15 +56,10 @@ export const DEFAULT_WORKBOOK: IWorkbookData = {
     id: '',
     sheetOrder: [],
     name: '',
-    timeZone: '',
     appVersion: '',
     locale: LocaleType.EN_US,
-    creator: '',
     styles: {},
     sheets: {},
-    lastModifiedBy: '',
-    createdTime: '',
-    modifiedTime: '',
 };
 
 export const DEFAULT_WORKSHEET_ROW_COUNT = 1000;

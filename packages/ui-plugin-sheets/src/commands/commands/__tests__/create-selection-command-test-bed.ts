@@ -62,15 +62,10 @@ export const SELECTION_WITH_EMPTY_CELLS_DATA: IWorkbookData = {
             mergeData: [{ startRow: 0, startColumn: 5, endColumn: 6, endRow: 1 }],
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };
 
 export const SELECTION_WITH_MERGED_CELLS_DATA: IWorkbookData = {
@@ -106,15 +101,10 @@ export const SELECTION_WITH_MERGED_CELLS_DATA: IWorkbookData = {
             mergeData: [{ startRow: 0, startColumn: 1, endRow: 1, endColumn: 1 }],
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };
 
 export const SIMPLE_SELECTION_WORKBOOK_DATA: IWorkbookData = {
@@ -146,13 +136,8 @@ export const SIMPLE_SELECTION_WORKBOOK_DATA: IWorkbookData = {
             columnCount: 20,
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };

@@ -21,18 +21,4 @@ export interface IWorkbookData extends IExtraModelData {
     styles: IKeyType<Nullable<IStyleData>>;
     sheetOrder: string[]; // sheet id order list ['xxxx-sheet3', 'xxxx-sheet1','xxxx-sheet2']
     sheets: { [sheetId: string]: Partial<IWorksheetData> };
-
-    // NOTE@wzhudev: the following properties are not related to worksheet
-    // business field and should be handled by other code.
-
-    /** @deprecated */
-    creator: string;
-    /** @deprecated */
-    createdTime: string;
-    /** @deprecated */
-    modifiedTime: string;
-    /** @deprecated */
-    timeZone: string;
-    /** @deprecated */
-    lastModifiedBy: string;
 }

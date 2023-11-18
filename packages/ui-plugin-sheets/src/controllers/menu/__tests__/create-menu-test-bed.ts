@@ -18,15 +18,10 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };
 
 export function createMenuTestBed() {

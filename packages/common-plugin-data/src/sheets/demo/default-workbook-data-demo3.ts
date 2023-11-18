@@ -40,7 +40,6 @@ const richTextDemo: IDocumentData = {
 export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
     id: 'workbook-01',
     locale: LocaleType.EN_US,
-    creator: 'univer',
     name: 'universheet',
     sheetOrder: ['sheet-0001'],
     styles: {
@@ -1236,11 +1235,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO3: IWorkbookData = {
             },
         },
     },
-    timeZone: 'GMT+8',
-    createdTime: '2021-11-28 12:10:10',
-    modifiedTime: '2021-11-29 12:10:10',
     appVersion: '3.0.0-alpha',
-    lastModifiedBy: 'univer',
     sheets: {
         'sheet-0001': {
             type: SheetTypes.GRID,

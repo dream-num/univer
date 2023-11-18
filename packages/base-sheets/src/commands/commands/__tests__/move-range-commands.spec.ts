@@ -185,15 +185,10 @@ const TEST_ROW_COL_INSERTION_DEMO: IWorkbookData = {
             columnCount: 20,
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };
 
 function createInsertRowColTestBed() {

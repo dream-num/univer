@@ -33,15 +33,10 @@ const WORKBOOK_DATA: IWorkbookData = {
             },
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };
 
 describe('Test SheetInterceptorService', () => {

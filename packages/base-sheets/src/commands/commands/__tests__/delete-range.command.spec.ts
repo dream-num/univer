@@ -134,15 +134,10 @@ const WORKBOOK_DATA_DEMO: IWorkbookData = {
             mergeData,
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };
 
 describe('Test delete range commands', () => {

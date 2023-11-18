@@ -25,15 +25,10 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
             },
         },
     },
-    createdTime: '',
-    creator: '',
-    lastModifiedBy: '',
     locale: LocaleType.EN_US,
-    modifiedTime: '',
     name: '',
     sheetOrder: [],
     styles: {},
-    timeZone: '',
 };
 
 export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {

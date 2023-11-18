@@ -71,36 +71,36 @@ export const EffectRefRangId = {
 } as const;
 
 export enum OperatorType {
-    set = 0,
-    delete,
-    horizontalMove,
-    verticalMove,
-    unknown,
+    Set = 0,
+    Delete,
+    HorizontalMove,
+    VerticalMove,
+    Unknown,
 }
 
 export interface IDeleteOperator {
-    type: OperatorType.delete;
+    type: OperatorType.Delete;
 }
 
 export interface ISetOperator {
-    type: OperatorType.set;
+    type: OperatorType.Set;
     range: IRange;
 }
 
 export interface IHorizontalMoveOperator {
-    type: OperatorType.horizontalMove;
+    type: OperatorType.HorizontalMove;
     step: number;
     length?: number;
 }
 
 export interface IVerticalMoveOperator {
-    type: OperatorType.verticalMove;
+    type: OperatorType.VerticalMove;
     step: number;
     length?: number; // Do the step translation first, then delete from the end
 }
 
 export interface IUnknownOperator {
-    type: OperatorType.unknown;
+    type: OperatorType.Unknown;
     commandInfo: EffectRefRangeParams;
 }
 

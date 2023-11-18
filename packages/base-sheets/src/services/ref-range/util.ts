@@ -27,21 +27,21 @@ export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) =
 
     if (Rectangle.intersects(fromRange, targetRange)) {
         operators.push({
-            type: OperatorType.delete,
+            type: OperatorType.Delete,
         });
         if (Rectangle.contains(fromRange, targetRange)) {
             const relativeRange = Rectangle.getRelativeRange(targetRange, fromRange);
             const positionRange = Rectangle.getPositionRange(relativeRange, toRange);
             return [
                 {
-                    type: OperatorType.set,
+                    type: OperatorType.Set,
                     range: positionRange,
                 },
             ] as IOperator[];
         }
     } else if (Rectangle.intersects(toRange, targetRange)) {
         operators.push({
-            type: OperatorType.delete,
+            type: OperatorType.Delete,
         });
     }
     return operators;
@@ -60,7 +60,7 @@ export const handleIRemoveCol = (param: IRemoveRowColCommand, targetRange: IRang
         const range = ranges[index];
         if (range.endColumn < targetRange.startColumn) {
             const result: IHorizontalMoveOperator = {
-                type: OperatorType.horizontalMove,
+                type: OperatorType.HorizontalMove,
                 step: -(range.endColumn - range.startColumn + 1),
             };
             operators.push(result);
@@ -69,7 +69,7 @@ export const handleIRemoveCol = (param: IRemoveRowColCommand, targetRange: IRang
             (range.startColumn >= targetRange.startColumn && range.endColumn <= targetRange.endColumn)
         ) {
             const result: IDeleteOperator = {
-                type: OperatorType.delete,
+                type: OperatorType.Delete,
             };
             return [result];
         } else if (
@@ -79,7 +79,7 @@ export const handleIRemoveCol = (param: IRemoveRowColCommand, targetRange: IRang
         ) {
             // the targetRange in the range right
             const result: IHorizontalMoveOperator = {
-                type: OperatorType.horizontalMove,
+                type: OperatorType.HorizontalMove,
                 step: -(targetRange.startColumn - range.startColumn),
                 length: -(range.endColumn - targetRange.startColumn + 1),
             };
@@ -91,7 +91,7 @@ export const handleIRemoveCol = (param: IRemoveRowColCommand, targetRange: IRang
             range.endColumn >= targetRange.endColumn
         ) {
             const result: IHorizontalMoveOperator = {
-                type: OperatorType.horizontalMove,
+                type: OperatorType.HorizontalMove,
                 step: 0,
                 length: -(targetRange.endColumn - range.startColumn + 1),
             };
@@ -113,7 +113,7 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
         const range = ranges[index];
         if (range.endRow < targetRange.startRow) {
             const result: IVerticalMoveOperator = {
-                type: OperatorType.verticalMove,
+                type: OperatorType.VerticalMove,
                 step: -(range.endRow - range.startRow + 1),
             };
             operators.push(result);
@@ -122,7 +122,7 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
             (range.startRow >= targetRange.startRow && range.endRow <= targetRange.endRow)
         ) {
             const result: IDeleteOperator = {
-                type: OperatorType.delete,
+                type: OperatorType.Delete,
             };
             return [result];
         } else if (
@@ -132,7 +132,7 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
         ) {
             // the range in the targetRange top
             const result: IVerticalMoveOperator = {
-                type: OperatorType.verticalMove,
+                type: OperatorType.VerticalMove,
                 step: -(targetRange.startRow - range.startRow),
                 length: -(range.endRow - targetRange.startRow + 1),
             };
@@ -144,7 +144,7 @@ export const handleIRemoveRow = (param: IRemoveRowColCommand, targetRange: IRang
         ) {
             // the range in the targetRange bottom
             const result: IVerticalMoveOperator = {
-                type: OperatorType.verticalMove,
+                type: OperatorType.VerticalMove,
                 step: 0,
                 length: -(targetRange.endRow - range.startRow + 1),
             };
@@ -164,14 +164,14 @@ export const handleInsertRow = (param: IInsertRowCommand, targetRange: IRange) =
         (range.startRow <= targetRange.startRow && range.endRow >= targetRange.endRow)
     ) {
         const result: IVerticalMoveOperator = {
-            type: OperatorType.verticalMove,
+            type: OperatorType.VerticalMove,
             step: range.endRow - range.startRow + 1,
         };
         return [result];
     }
     if (range.startRow >= targetRange.startRow && range.endRow <= targetRange.endRow) {
         const result: IVerticalMoveOperator = {
-            type: OperatorType.verticalMove,
+            type: OperatorType.VerticalMove,
             step: 0,
             length: range.endRow - range.startRow + 1,
         };
@@ -180,7 +180,7 @@ export const handleInsertRow = (param: IInsertRowCommand, targetRange: IRange) =
 
     if (Rectangle.intersects({ ...range, endRow: MAX_SAFE_INTEGER }, targetRange)) {
         const result: IDeleteOperator = {
-            type: OperatorType.delete,
+            type: OperatorType.Delete,
         };
         return [result];
     }
@@ -197,14 +197,14 @@ export const handleInsertCol = (param: IInsertColCommand, targetRange: IRange) =
         (range.startColumn <= targetRange.startColumn && range.endColumn >= targetRange.endColumn)
     ) {
         const result: IHorizontalMoveOperator = {
-            type: OperatorType.horizontalMove,
+            type: OperatorType.HorizontalMove,
             step: range.endColumn - range.startColumn + 1,
         };
         return [result];
     }
     if (range.startColumn >= targetRange.startColumn && range.endColumn <= targetRange.endColumn) {
         const result: IHorizontalMoveOperator = {
-            type: OperatorType.horizontalMove,
+            type: OperatorType.HorizontalMove,
             step: 0,
             length: range.endColumn - range.startColumn + 1,
         };
@@ -212,7 +212,7 @@ export const handleInsertCol = (param: IInsertColCommand, targetRange: IRange) =
     }
     if (Rectangle.intersects({ ...range, endColumn: MAX_SAFE_INTEGER }, targetRange)) {
         const result: IDeleteOperator = {
-            type: OperatorType.delete,
+            type: OperatorType.Delete,
         };
         return [result];
     }
@@ -232,7 +232,7 @@ export const handleInsertRangeMoveDown = (param: IInsertRangeMoveDownCommand, ta
     ) {
         if (range.startRow <= targetRange.startRow) {
             const result: IVerticalMoveOperator = {
-                type: OperatorType.verticalMove,
+                type: OperatorType.VerticalMove,
                 step: range.endRow - range.startRow + 1,
             };
             return [result];
@@ -240,7 +240,7 @@ export const handleInsertRangeMoveDown = (param: IInsertRangeMoveDownCommand, ta
     }
     if (Rectangle.intersects({ ...range, endRow: MAX_SAFE_INTEGER }, targetRange)) {
         const result: IDeleteOperator = {
-            type: OperatorType.delete,
+            type: OperatorType.Delete,
         };
         return [result];
     }
@@ -257,7 +257,7 @@ export const handleInsertRangeMoveRight = (param: IInsertRangeMoveRightCommand, 
     if (range.startRow <= targetRange.startRow && range.endRow >= targetRange.endRow) {
         if (range.startColumn <= targetRange.startColumn) {
             const result: IHorizontalMoveOperator = {
-                type: OperatorType.horizontalMove,
+                type: OperatorType.HorizontalMove,
                 step: range.endColumn - range.startColumn + 1,
             };
             return [result];
@@ -265,7 +265,7 @@ export const handleInsertRangeMoveRight = (param: IInsertRangeMoveRightCommand, 
     }
     if (Rectangle.intersects({ ...range, endColumn: MAX_SAFE_INTEGER }, targetRange)) {
         const result: IDeleteOperator = {
-            type: OperatorType.delete,
+            type: OperatorType.Delete,
         };
         return [result];
     }
@@ -283,7 +283,7 @@ export const handleDeleteRangeMoveLeft = (param: IDeleteRangeMoveLeftCommand, ta
     if (range.startRow <= targetRange.startRow && range.endRow >= targetRange.endRow) {
         if (range.endColumn < targetRange.startColumn) {
             const result: IHorizontalMoveOperator = {
-                type: OperatorType.horizontalMove,
+                type: OperatorType.HorizontalMove,
                 step: -(range.endColumn - range.startColumn + 1),
             };
             return [result];
@@ -291,7 +291,7 @@ export const handleDeleteRangeMoveLeft = (param: IDeleteRangeMoveLeftCommand, ta
     }
     if (Rectangle.intersects({ ...range, endColumn: MAX_SAFE_INTEGER }, targetRange)) {
         const result: IDeleteOperator = {
-            type: OperatorType.delete,
+            type: OperatorType.Delete,
         };
         return [result];
     }
@@ -309,7 +309,7 @@ export const handleDeleteRangeMoveUp = (param: IDeleteRangeMoveUpCommand, target
     if (range.startColumn <= targetRange.startColumn && range.endColumn >= targetRange.endColumn) {
         if (range.endRow < targetRange.startRow) {
             const result: IVerticalMoveOperator = {
-                type: OperatorType.verticalMove,
+                type: OperatorType.VerticalMove,
                 step: -(range.endRow - range.startRow + 1),
             };
             return [result];
@@ -317,7 +317,7 @@ export const handleDeleteRangeMoveUp = (param: IDeleteRangeMoveUpCommand, target
     }
     if (Rectangle.intersects({ ...range, endRow: MAX_SAFE_INTEGER }, targetRange)) {
         const result: IDeleteOperator = {
-            type: OperatorType.delete,
+            type: OperatorType.Delete,
         };
         return [result];
     }
@@ -328,11 +328,11 @@ export const runRefRangeMutations = (operators: IOperator[], range: IRange) => {
     let result: Nullable<IRange> = { ...range };
     operators.forEach((operator) => {
         switch (operator.type) {
-            case OperatorType.delete: {
+            case OperatorType.Delete: {
                 result = null;
                 break;
             }
-            case OperatorType.horizontalMove: {
+            case OperatorType.HorizontalMove: {
                 if (!result) {
                     return;
                 }
@@ -340,7 +340,7 @@ export const runRefRangeMutations = (operators: IOperator[], range: IRange) => {
                 result.endColumn += operator.step + (operator.length || 0);
                 break;
             }
-            case OperatorType.verticalMove: {
+            case OperatorType.VerticalMove: {
                 if (!result) {
                     return;
                 }
@@ -348,7 +348,7 @@ export const runRefRangeMutations = (operators: IOperator[], range: IRange) => {
                 result.endRow += operator.step + (operator.length || 0);
                 break;
             }
-            case OperatorType.set: {
+            case OperatorType.Set: {
                 result = operator.range;
                 break;
             }

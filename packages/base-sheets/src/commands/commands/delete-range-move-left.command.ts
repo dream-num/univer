@@ -2,8 +2,8 @@ import {
     CommandType,
     Dimension,
     ICommand,
-    ICommandInfo,
     ICommandService,
+    IMutationInfo,
     IRange,
     IUndoRedoService,
     IUniverInstanceService,
@@ -71,8 +71,8 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
             id: DeleteRangeMoveLeftCommand.id,
             params: { ranges } as DeleteRangeMoveLeftCommandParams,
         });
-        const redos: ICommandInfo[] = [{ id: DeleteRangeMutation.id, params: deleteRangeMutationParams }];
-        const undos: ICommandInfo[] = [{ id: InsertRangeMutation.id, params: insertRangeMutationParams }];
+        const redos: IMutationInfo[] = [{ id: DeleteRangeMutation.id, params: deleteRangeMutationParams }];
+        const undos: IMutationInfo[] = [{ id: InsertRangeMutation.id, params: insertRangeMutationParams }];
         redos.push(...sheetInterceptor.redos);
         undos.push(...sheetInterceptor.undos);
         // execute do mutations and add undo mutations to undo stack if completed

@@ -1,6 +1,6 @@
 import {
     Disposable,
-    ICommandInfo,
+    IMutationInfo,
     IRange,
     IUniverInstanceService,
     LifecycleStages,
@@ -15,8 +15,8 @@ import { SelectionManagerService } from '../selection-manager.service';
 import { EffectRefRangeParams, EffectRefRangId } from './type';
 
 type RefRangCallback = (params: EffectRefRangeParams) => {
-    redos: ICommandInfo[];
-    undos: ICommandInfo[];
+    redos: IMutationInfo[];
+    undos: IMutationInfo[];
 };
 
 /**

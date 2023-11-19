@@ -4,9 +4,9 @@ import {
     Dimension,
     ICellData,
     ICommand,
-    ICommandInfo,
     ICommandService,
     ILogService,
+    IMutationInfo,
     IRange,
     IRowData,
     IUndoRedoService,
@@ -74,8 +74,8 @@ export const InsertRangeMoveDownCommand: ICommand = {
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
-        const redoMutations: ICommandInfo[] = [];
-        const undoMutations: ICommandInfo[] = [];
+        const redoMutations: IMutationInfo[] = [];
+        const undoMutations: IMutationInfo[] = [];
 
         // 1. insert range
         const cellValue = new ObjectMatrix<ICellData>();

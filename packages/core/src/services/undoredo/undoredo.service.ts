@@ -2,7 +2,7 @@ import { createIdentifier, IAccessor, IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../shared/lifecycle';
-import { CommandType, ICommand, ICommandInfo, ICommandService, sequenceExecute } from '../command/command.service';
+import { CommandType, ICommand, ICommandService, IMutationInfo, sequenceExecute } from '../command/command.service';
 import { IUniverInstanceService } from '../instance/instance.service';
 
 // TODO: an undo redo element may be merge-able to another undo redo element
@@ -11,11 +11,11 @@ export interface IUndoRedoItem {
     /** unitID maps to unitId for UniverSheet / UniverDoc / UniverSlide */
     unitID: string;
 
-    undoMutations: ICommandInfo[];
-    redoMutations: ICommandInfo[];
+    undoMutations: IMutationInfo[];
+    redoMutations: IMutationInfo[];
 
-    undo?(mutations: ICommandInfo[]): Promise<boolean> | boolean;
-    redo?(mutations: ICommandInfo[]): Promise<boolean> | boolean;
+    undo?(mutations: IMutationInfo[]): Promise<boolean> | boolean;
+    redo?(mutations: IMutationInfo[]): Promise<boolean> | boolean;
 }
 
 export interface IUndoRedoService {
@@ -33,8 +33,8 @@ export interface IUndoRedoService {
 }
 
 export interface IUndoRedoCommandInfos {
-    undos: ICommandInfo[];
-    redos: ICommandInfo[];
+    undos: IMutationInfo[];
+    redos: IMutationInfo[];
 }
 
 export const IUndoRedoService = createIdentifier<IUndoRedoService>('univer.undo-redo.service');

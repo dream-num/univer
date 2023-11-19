@@ -2,8 +2,8 @@ import {
     CommandType,
     ICellData,
     ICommand,
-    ICommandInfo,
     ICommandService,
+    IMutationInfo,
     IRange,
     IUndoRedoService,
     IUniverInstanceService,
@@ -51,8 +51,8 @@ export const ClearSelectionFormatCommand: ICommand = {
             return false;
         }
 
-        const sequenceExecuteList: ICommandInfo[] = [];
-        const sequenceExecuteUndoList: ICommandInfo[] = [];
+        const sequenceExecuteList: IMutationInfo[] = [];
+        const sequenceExecuteUndoList: IMutationInfo[] = [];
 
         // clear style
         const clearMutationParams: ISetRangeValuesMutationParams = {

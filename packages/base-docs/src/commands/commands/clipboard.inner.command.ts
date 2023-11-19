@@ -1,9 +1,9 @@
 import {
     CommandType,
     ICommand,
-    ICommandInfo,
     ICommandService,
     IDocumentBody,
+    IMutationInfo,
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
@@ -37,7 +37,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const docsModel = currentUniverService.getCurrentUniverDocInstance();
         const unitId = docsModel.getUnitId();
 
-        const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
@@ -120,7 +120,7 @@ export const InnerCutCommand: ICommand<IInnerCutCommandParams> = {
         const docsModel = currentUniverService.getCurrentUniverDocInstance();
         const unitId = docsModel.getUnitId();
 
-        const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,

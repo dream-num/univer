@@ -15,8 +15,8 @@ import {
     CommandType,
     ICellData,
     ICommand,
-    ICommandInfo,
     ICommandService,
+    IMutationInfo,
     IRange,
     IUndoRedoService,
     IUniverInstanceService,
@@ -97,8 +97,8 @@ export const AutoFillCommand: ICommand = {
             worksheetId,
         });
 
-        const undoSeq: ICommandInfo[] = [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }];
-        const redoSeq: ICommandInfo[] = [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }];
+        const undoSeq: IMutationInfo[] = [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }];
+        const redoSeq: IMutationInfo[] = [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }];
 
         let removeMergeResult = true;
         let addMergeResult = true;

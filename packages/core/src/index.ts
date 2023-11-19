@@ -16,6 +16,7 @@ export {
     type IMutation,
     type IMutationInfo,
     type IOperation,
+    type IOperationInfo,
     sequenceExecute,
 } from './services/command/command.service';
 export { IConfigService } from './services/config/config.service';

@@ -14,7 +14,7 @@ export enum PluginType {
  * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
  */
 export abstract class Plugin {
-    static type: PluginType;
+    static type: PluginType = PluginType.Univer;
 
     protected abstract _injector: Injector;
 

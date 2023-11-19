@@ -1,6 +1,8 @@
 export * from './basics';
 export { getEditorObject } from './basics/editor/get-editor-object';
 export { SetCellEditVisibleArrowOperation } from './commands/operations/cell-edit.operation';
+export { SetScrollOperation } from './commands/operations/scroll.operation';
+export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export { RangeSelector } from './components/range-selector/RangeSelector';
 export { whenEditorInputFormulaActivated } from './controllers/shortcuts/utils';
 export {

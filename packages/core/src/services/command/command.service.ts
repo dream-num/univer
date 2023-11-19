@@ -86,6 +86,12 @@ export interface IMutationInfo<T extends object = object> {
     params: T;
 }
 
+export interface IOperationInfo<T extends object = object> {
+    id: string;
+    type?: CommandType.OPERATION;
+    params: T;
+}
+
 export interface IExecutionOptions {
     local?: boolean;
 

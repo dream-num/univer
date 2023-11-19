@@ -5,9 +5,9 @@ import {
     ICellData,
     IColumnData,
     ICommand,
-    ICommandInfo,
     ICommandService,
     ILogService,
+    IMutationInfo,
     IRange,
     IUndoRedoService,
     IUniverInstanceService,
@@ -69,8 +69,8 @@ export const InsertRangeMoveRightCommand: ICommand = {
         const worksheet = workbook.getSheetBySheetId(worksheetId);
         if (!worksheet) return false;
 
-        const redoMutations: ICommandInfo[] = [];
-        const undoMutations: ICommandInfo[] = [];
+        const redoMutations: IMutationInfo[] = [];
+        const undoMutations: IMutationInfo[] = [];
 
         // 1. insert range
         const cellValue = new ObjectMatrix<ICellData>();

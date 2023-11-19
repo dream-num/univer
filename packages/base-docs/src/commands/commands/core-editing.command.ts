@@ -6,6 +6,7 @@ import {
     ICommandService,
     IDocumentBody,
     IDocumentData,
+    IMutationInfo,
     ITextRange,
     IUndoRedoService,
     IUniverInstanceService,
@@ -51,7 +52,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         const { range, segmentId, body, unitId } = params;
         const { startOffset, collapsed } = range;
 
-        const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
@@ -117,7 +118,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const { range, segmentId, unitId } = params;
-        const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
@@ -168,7 +169,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,

@@ -3,9 +3,9 @@ import {
     BooleanNumber,
     CommandType,
     ICommand,
-    ICommandInfo,
     ICommandService,
     IDocumentBody,
+    IMutationInfo,
     IStyleBase,
     ITextDecoration,
     ITextRun,
@@ -128,7 +128,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             }
         }
 
-        const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
+        const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,

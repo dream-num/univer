@@ -2,8 +2,8 @@ import {
     CommandType,
     Dimension,
     ICommand,
-    ICommandInfo,
     ICommandService,
+    IMutationInfo,
     IRange,
     IUndoRedoService,
     IUniverInstanceService,
@@ -70,8 +70,8 @@ export const DeleteRangeMoveUpCommand: ICommand = {
             id: DeleteRangeMoveUpCommand.id,
             params: { ranges } as DeleteRangeMoveUpCommandParams,
         });
-        const redos: ICommandInfo[] = [{ id: DeleteRangeMutation.id, params: deleteRangeMutationParams }];
-        const undos: ICommandInfo[] = [{ id: InsertRangeMutation.id, params: insertRangeMutationParams }];
+        const redos: IMutationInfo[] = [{ id: DeleteRangeMutation.id, params: deleteRangeMutationParams }];
+        const undos: IMutationInfo[] = [{ id: InsertRangeMutation.id, params: insertRangeMutationParams }];
         redos.push(...sheetInterceptor.redos);
         undos.push(...sheetInterceptor.undos);
         const result = await sequenceExecute(redos, commandService).result;

@@ -14,6 +14,7 @@ export { Menu, MenuItem, MenuItemGroup, SubMenu } from './components/menu';
 export { type IMessageMethodOptions, type IMessageProps, Message, MessageType } from './components/message';
 export { type IRadioProps, Radio } from './components/radio';
 export { type IRadioGroupProps, RadioGroup } from './components/radio-group';
+export { type IScrollbarProps, Scrollbar } from './components/scrollbar';
 export { type ISelectProps, Select } from './components/select';
 export { type ISelectListProps, SelectList } from './components/select-list';
 export { type ISliderProps, Slider } from './components/slider';

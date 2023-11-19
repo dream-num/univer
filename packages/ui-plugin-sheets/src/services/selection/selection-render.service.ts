@@ -55,6 +55,8 @@ export interface ISelectionRenderService {
     disableShowPrevious(): void;
     enableRemainLast(): void;
     disableRemainLast(): void;
+    enableSkipRemainLast(): void;
+    disableSkipRemainLast(): void;
 
     addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle): void;
     changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport): void;
@@ -141,6 +143,8 @@ export class SelectionRenderService implements ISelectionRenderService {
     //Used in the formula selection feature, a new selection string is added by drawing a box with the mouse.
     private _isRemainLastEnable: boolean = true;
 
+    private _isSkipRemainLastEnable: boolean = false;
+
     private readonly _selectionRangeWithStyle$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
 
     // When the user draws a selection area in the canvas content area, this event is broadcasted when the drawing ends.
@@ -214,6 +218,14 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._isRemainLastEnable = false;
     }
 
+    enableSkipRemainLast() {
+        this._isSkipRemainLastEnable = true;
+    }
+
+    disableSkipRemainLast() {
+        this._isSkipRemainLastEnable = false;
+    }
+
     getViewPort() {
         return this._activeViewport;
     }
@@ -277,17 +289,17 @@ export class SelectionRenderService implements ISelectionRenderService {
         return this._selectionControls;
     }
 
-    private _getCurrentControl() {
-        const controls = this.getCurrentControls();
-        if (controls && controls.length > 0) {
-            for (const control of controls) {
-                const currentCell = control.model.currentCell;
-                if (currentCell) {
-                    return control;
-                }
-            }
-        }
-    }
+    // private _getCurrentControl() {
+    //     const controls = this.getCurrentControls();
+    //     if (controls && controls.length > 0) {
+    //         for (const control of controls) {
+    //             const currentCell = control.model.currentCell;
+    //             if (currentCell) {
+    //                 return control;
+    //             }
+    //         }
+    //     }
+    // }
 
     private _clearSelectionControls() {
         const curControls = this.getCurrentControls();
@@ -441,7 +453,7 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._startSelectionRange = startSelectionRange;
 
-        let selectionControl: Nullable<SelectionShape> = this._getCurrentControl();
+        let selectionControl: Nullable<SelectionShape> = this.getActiveSelection();
 
         const curControls = this.getCurrentControls();
 
@@ -510,7 +522,13 @@ export class SelectionRenderService implements ISelectionRenderService {
                 this._selectionStyle,
                 currentCell
             );
-        } else if (this._isRemainLastEnable && selectionControl && !evt.ctrlKey && !evt.shiftKey) {
+        } else if (
+            this._isRemainLastEnable &&
+            selectionControl &&
+            !evt.ctrlKey &&
+            !evt.shiftKey &&
+            !this._isSkipRemainLastEnable
+        ) {
             /**
              * Supports the formula ref text selection feature,
              * under the condition of preserving all previous selections, it modifies the position of the latest selection.

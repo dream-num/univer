@@ -223,7 +223,7 @@ export class PromptController extends Disposable {
 
                     this._switchSelectionPlugin();
 
-                    if (this._isLockedOnSelectionChangeRefString || this._isLockedOnSelectionInsertRefString) {
+                    if (this._isLockedOnSelectionChangeRefString) {
                         return;
                     }
                     // TODO@Dushusir: use real text info
@@ -241,6 +241,7 @@ export class PromptController extends Disposable {
                 this._textSelectionRenderManager.onInputBefore$.subscribe(() => {
                     this._previousSequenceNodes = null;
                     this._previousInsertRefStringIndex = null;
+                    this._selectionRenderService.enableSkipRemainLast();
                 })
             )
         );
@@ -394,33 +395,34 @@ export class PromptController extends Disposable {
             return;
         }
 
-        const activeRange = this._textSelectionManagerService.getLast();
+        // const activeRange = this._textSelectionManagerService.getLast();
 
-        if (activeRange == null) {
+        // if (activeRange == null) {
+        //     this._disableForceKeepVisible();
+        //     return;
+        // }
+
+        // const { startOffset } = activeRange;
+
+        // const body = this._getCurrentBody();
+
+        // if (body == null) {
+        //     this._disableForceKeepVisible();
+        //     return;
+        // }
+
+        // const dataStream = body.dataStream;
+
+        const current = this._getCurrentChar();
+
+        if (current == null) {
             this._disableForceKeepVisible();
             return;
         }
 
-        const { startOffset } = activeRange;
+        const { char, startOffset } = current;
 
-        const body = this._getCurrentBody();
-
-        if (body == null) {
-            this._disableForceKeepVisible();
-            return;
-        }
-
-        const dataStream = body.dataStream;
-
-        const char = dataStream[startOffset - 1];
-
-        if (
-            isFormulaLexerToken(char) &&
-            char !== matchToken.CLOSE_BRACES &&
-            char !== matchToken.CLOSE_BRACKET &&
-            char !== matchToken.SINGLE_QUOTATION &&
-            char !== matchToken.DOUBLE_QUOTATION
-        ) {
+        if (this._matchRefDrawToken(char)) {
             this._editorBridgeService.enableForceKeepVisible();
 
             this._isLockedOnSelectionInsertRefString = true;
@@ -430,6 +432,37 @@ export class PromptController extends Disposable {
         } else {
             this._disableForceKeepVisible();
         }
+    }
+
+    private _matchRefDrawToken(char: string) {
+        return (
+            (isFormulaLexerToken(char) &&
+                char !== matchToken.CLOSE_BRACES &&
+                char !== matchToken.CLOSE_BRACKET &&
+                char !== matchToken.SINGLE_QUOTATION &&
+                char !== matchToken.DOUBLE_QUOTATION) ||
+            char === ' '
+        );
+    }
+
+    private _getCurrentChar() {
+        const activeRange = this._textSelectionManagerService.getLast();
+
+        if (activeRange == null) {
+            return;
+        }
+
+        const { startOffset } = activeRange;
+
+        const body = this._getCurrentBody();
+
+        if (body == null) {
+            return;
+        }
+
+        const dataStream = body.dataStream;
+
+        return { char: dataStream[startOffset - 1], startOffset };
     }
 
     private _disableForceKeepVisible() {
@@ -951,7 +984,10 @@ export class PromptController extends Disposable {
     private _inertControlSelection(ranges: IRange[]) {
         const currentRange = ranges[ranges.length - 1];
 
-        if (ranges.length === this._previousRangesCount || this._previousRangesCount === 0) {
+        if (
+            (ranges.length === this._previousRangesCount || this._previousRangesCount === 0) &&
+            this._previousSequenceNodes != null
+        ) {
             if (this._previousSequenceNodes == null) {
                 this._previousSequenceNodes = this._lastSequenceNodes;
             }
@@ -977,15 +1013,29 @@ export class PromptController extends Disposable {
                 return;
             }
 
-            this._insertSequenceString(insertNodes, this._currentInsertRefStringIndex, matchToken.COMMA);
+            const current = this._getCurrentChar();
+
+            if (current == null) {
+                return;
+            }
+
+            const { char } = current;
+
+            this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
+
+            if (!this._matchRefDrawToken(char)) {
+                this._insertSequenceString(insertNodes, this._currentInsertRefStringIndex, matchToken.COMMA);
+
+                this._previousInsertRefStringIndex += 1;
+            }
 
             this._previousSequenceNodes = Tools.deepClone(insertNodes);
 
-            this._previousInsertRefStringIndex = this._currentInsertRefStringIndex + 1;
-
-            this._insertSequenceRef(insertNodes, this._currentInsertRefStringIndex + 1, currentRange);
+            this._insertSequenceRef(insertNodes, this._previousInsertRefStringIndex, currentRange);
 
             this._lastSequenceNodes = insertNodes;
+
+            this._selectionRenderService.disableSkipRemainLast();
         }
 
         this._previousRangesCount = ranges.length;
@@ -998,6 +1048,10 @@ export class PromptController extends Disposable {
             const control = controls[i];
 
             const refSelection = refSelections[i];
+
+            if (refSelection == null) {
+                continue;
+            }
 
             const { refIndex, themeColor, token } = refSelection;
 

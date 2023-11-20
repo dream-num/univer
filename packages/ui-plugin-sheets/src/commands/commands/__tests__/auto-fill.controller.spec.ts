@@ -11,7 +11,6 @@ import {
     CellValueType,
     ICommandService,
     IUniverInstanceService,
-    IWorkbookConfig,
     LocaleType,
     RedoCommand,
     ThemeService,
@@ -29,7 +28,7 @@ const theme = {
     colorBlack: '#35322b',
 };
 
-const TEST_WORKBOOK_DATA: IWorkbookConfig = {
+const TEST_WORKBOOK_DATA = {
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {

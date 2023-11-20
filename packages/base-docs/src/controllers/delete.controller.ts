@@ -31,8 +31,8 @@ import {
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
-@OnLifecycle(LifecycleStages.Rendered, DeleteLeftInputController)
-export class DeleteLeftInputController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, DeleteController)
+export class DeleteController extends Disposable {
     private _onInputSubscription: Nullable<Subscription>;
 
     constructor(
@@ -67,10 +67,10 @@ export class DeleteLeftInputController extends Disposable {
 
                 switch (command.id) {
                     case DeleteLeftCommand.id:
-                        this._deleteLeftFunction();
+                        this._handleDeleteLeft();
                         break;
                     case DeleteRightCommand.id:
-                        this._deleteRightFunction();
+                        this._handleDeleteRight();
                         break;
                     default:
                         throw new Error('Unknown command');
@@ -79,7 +79,7 @@ export class DeleteLeftInputController extends Disposable {
         );
     }
 
-    private _deleteLeftFunction() {
+    private _handleDeleteLeft() {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
 
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
@@ -194,7 +194,7 @@ export class DeleteLeftInputController extends Disposable {
         ]);
     }
 
-    private _deleteRightFunction() {
+    private _handleDeleteRight() {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
 
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;

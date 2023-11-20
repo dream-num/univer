@@ -38,7 +38,7 @@ import { MoveCursorOperation, MoveSelectionOperation } from './commands/operatio
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { DocClipboardController } from './controllers/clipboard.controller';
-import { DeleteLeftInputController } from './controllers/delete-left-input.controller';
+import { DeleteController } from './controllers/delete.controller';
 import { DocRenderController } from './controllers/doc-render.controller';
 import { FloatingObjectController } from './controllers/floating-object.controller';
 import { IMEInputController } from './controllers/ime-input.controller';
@@ -183,7 +183,7 @@ export class DocPlugin extends Plugin {
                 [TextSelectionController],
                 [NormalInputController],
                 [IMEInputController],
-                [DeleteLeftInputController],
+                [DeleteController],
                 [InlineFormatController],
                 [DocClipboardController],
                 [LineBreakInputController],

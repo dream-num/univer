@@ -20,6 +20,7 @@ import {
     RichTextEditingMutation,
 } from '../mutations/core-editing.mutation';
 
+// TODO: @JOCS, do not use command as event bus.
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
     type: CommandType.COMMAND,

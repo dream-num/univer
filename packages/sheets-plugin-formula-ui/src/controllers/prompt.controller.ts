@@ -1,3 +1,4 @@
+import { TextSelectionManagerService } from '@univerjs/base-docs';
 import {
     deserializeRangeWithSheet,
     FormulaEngineService,
@@ -60,7 +61,7 @@ import { Subject } from 'rxjs';
 
 import {
     ISelectEditorFormulaOperationParam,
-    SelectEditorFormluaOperation,
+    SelectEditorFormulaOperation,
 } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
@@ -130,7 +131,8 @@ export class PromptController extends Disposable {
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService,
-        @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService
+        @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
 
@@ -456,7 +458,7 @@ export class PromptController extends Disposable {
 
         const body = this._getCurrentBody();
 
-        if (body == null) {
+        if (body == null || startOffset == null) {
             return;
         }
 
@@ -687,7 +689,7 @@ export class PromptController extends Disposable {
         const selectionWithStyle: ISelectionWithStyle[] = [];
 
         for (const refSelection of refSelections) {
-            const { themeColor, token } = refSelection;
+            const { themeColor, token, refIndex } = refSelection;
 
             const gridRange = deserializeRangeWithSheet(token);
 
@@ -925,7 +927,7 @@ export class PromptController extends Disposable {
             unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
         });
 
-        this._textSelectionManagerService.replace([
+        this._textSelectionManagerService.replaceTextRanges([
             {
                 startOffset: textSelectionOffset + 1,
                 endOffset: textSelectionOffset + 1,
@@ -1101,7 +1103,7 @@ export class PromptController extends Disposable {
 
     private _commandExecutedListener() {
         // Listen to document edits to refresh the size of the editor.
-        const updateCommandList = [SelectEditorFormluaOperation.id];
+        const updateCommandList = [SelectEditorFormulaOperation.id];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {

@@ -1,5 +1,4 @@
 import { LocaleService } from '@univerjs/core';
-import { CheckMarkSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 
 import { ComponentManager } from '../../Common';
@@ -7,8 +6,6 @@ import { IMenuSelectorItem } from '../../services/menu/menu';
 
 export type ICustomLabelProps = {
     value?: string | number | undefined;
-
-    selected?: boolean;
 
     onChange?(v: string | number): void;
 } & Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'title'>;
@@ -19,19 +16,13 @@ export type ICustomLabelProps = {
  * @returns
  */
 export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
-    const { title, icon, label, selected } = props;
+    const { title, icon, label } = props;
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
 
     const nodes = [];
     let index = 0;
-    if (selected) {
-        nodes.push(
-            <span key={index++}>
-                <CheckMarkSingle style={{ color: 'rgb(var(--success-color))' }} />
-            </span>
-        );
-    }
+
     if (icon) {
         const Icon = componentManager.get(icon);
         Icon && nodes.push(<Icon key={index++} extend={{ colorChannel1: 'rgb(var(--primary-color))' }} />);

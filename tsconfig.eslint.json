@@ -4,7 +4,6 @@
     "include": [
         "packages/**/*",
         "examples/**/*",
-        "scripts/**/*",
         ".eslintrc.cjs",
         "./vitest.workspace.ts",
         "./storybook/**/*"

@@ -30,31 +30,37 @@
     }
 
     &-item {
-        color: rgb(var(--grey-600));
-        text-align: center;
-        font-size: 12px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 20px; /* 181.818% */
-        margin-right: 8px;
-        max-width: 96px;
+        cursor: default;
+
         display: flex;
         justify-content: start;
-        cursor: default;
+
+        max-width: 96px;
+        margin-right: 8px;
+
+        font-size: 12px;
+        font-weight: 400;
+        font-style: normal;
+        line-height: 20px; /* 181.818% */
+        color: rgb(var(--grey-600));
+        text-align: center;
     }
 
     &-picker {
+        display: grid;
+        gap: var(--margin-sm);
+        align-items: center;
+
+        box-sizing: border-box;
         width: 196px;
         padding: var(--padding-base);
+
         font-size: var(--font-size-xs);
+
         background-color: rgb(var(--color-white));
         border: 1px solid rgb(var(--border-color));
         border-radius: var(--border-radius-lg);
         box-shadow: var(--box-shadow-lg);
-        box-sizing: border-box;
-        display: grid;
-        align-items: center;
-        gap: var(--margin-sm);
     }
 
     &-picker-item {
@@ -64,14 +70,18 @@
     }
 
     &-more {
-        width: 24px;
-        height: 24px;
-        font-size: 12px;
+        transform: rotate(90deg);
+
         display: flex;
         align-items: center;
         justify-content: center;
+
+        width: 24px;
+        height: 24px;
+
+        font-size: 12px;
+
         border-radius: 4px;
-        transform: rotate(90deg);
 
         &:hover {
             background: rgb(var(--grey-300, #E8E8E8));

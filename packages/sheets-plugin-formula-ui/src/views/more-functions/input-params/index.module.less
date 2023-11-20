@@ -1,11 +1,19 @@
-.formula-input-params {
-    &-list-item{
-        &-name{
-            font-size: var(--font-size-sm);
-        }
+@params-list-height: 364px;
 
-        &-selector{
-            margin: var(--margin-xxs) 0 var(--margin-xs) 0;
+.formula-input-params {
+    &-list {
+        overflow-y: auto;
+        height: @params-list-height;
+
+        &-item {
+            &-name {
+                font-size: var(--font-size-sm);
+            }
+
+            &-selector {
+                margin: var(--margin-xxs) 0 var(--margin-xs) 0;
+            }
         }
     }
+
 }

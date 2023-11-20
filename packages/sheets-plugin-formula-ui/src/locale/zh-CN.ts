@@ -1,18 +1,18 @@
-import arrayZhCN from './function-list/array/zh-CN';
-import compatibilityZhCN from './function-list/compatibility/zh-CN';
-import cubeZhCN from './function-list/cube/zh-CN';
-import databaseZhCN from './function-list/database/zh-CN';
-import dateZhCN from './function-list/date/zh-CN';
-import engineeringZhCN from './function-list/engineering/zh-CN';
-import financialZhCN from './function-list/financial/zh-CN';
-import informationZhCN from './function-list/information/zh-CN';
-import logicalZhCN from './function-list/logical/zh-CN';
-import lookupZhCN from './function-list/lookup/zh-CN';
-import mathZhCN from './function-list/math/zh-CN';
-import statisticalZhCN from './function-list/statistical/zh-CN';
-import textZhCN from './function-list/text/zh-CN';
-import univerZhCN from './function-list/univer/zh-CN';
-import webZhCN from './function-list/web/zh-CN';
+import array from './function-list/array/zh-CN';
+import compatibility from './function-list/compatibility/zh-CN';
+import cube from './function-list/cube/zh-CN';
+import database from './function-list/database/zh-CN';
+import date from './function-list/date/zh-CN';
+import engineering from './function-list/engineering/zh-CN';
+import financial from './function-list/financial/zh-CN';
+import information from './function-list/information/zh-CN';
+import logical from './function-list/logical/zh-CN';
+import lookup from './function-list/lookup/zh-CN';
+import math from './function-list/math/zh-CN';
+import statistical from './function-list/statistical/zh-CN';
+import text from './function-list/text/zh-CN';
+import univer from './function-list/univer/zh-CN';
+import web from './function-list/web/zh-CN';
 
 export default {
     formula: {
@@ -26,21 +26,21 @@ export default {
             more: '更多函数...',
         },
         functionList: {
-            ...financialZhCN,
-            ...dateZhCN,
-            ...mathZhCN,
-            ...statisticalZhCN,
-            ...lookupZhCN,
-            ...databaseZhCN,
-            ...textZhCN,
-            ...logicalZhCN,
-            ...informationZhCN,
-            ...engineeringZhCN,
-            ...cubeZhCN,
-            ...compatibilityZhCN,
-            ...webZhCN,
-            ...arrayZhCN,
-            ...univerZhCN,
+            ...financial,
+            ...date,
+            ...math,
+            ...statistical,
+            ...lookup,
+            ...database,
+            ...text,
+            ...logical,
+            ...information,
+            ...engineering,
+            ...cube,
+            ...compatibility,
+            ...web,
+            ...array,
+            ...univer,
         },
 
         prompt: {

@@ -17,7 +17,7 @@ export interface BaseSheetContainerProps {
 
 export function RenderSheetFooter() {
     return (
-        <section className={styles.sheetContainer}>
+        <section className={styles.sheetContainer} data-range-selector>
             <SheetBar />
             <StatusBar />
             <CountBar />

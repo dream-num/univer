@@ -2,9 +2,9 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "rootDir": "./src",
-        "outDir": "lib",
+        "outDir": "./lib/types",
         "declaration": true,
-        "declarationDir": "./lib",
+        "declarationDir": "./lib/types",
         "declarationMap": true,
         "emitDeclarationOnly": true,
         "isolatedModules": false

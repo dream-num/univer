@@ -30,6 +30,5 @@ export default {
     ],
     entryPoints: ['./src/index.ts'],
     define: { 'process.env.NODE_ENV': '"production"' },
-    format: 'esm',
     packages: 'external',
 };

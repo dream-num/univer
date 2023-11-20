@@ -64,7 +64,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
         const numfmtService = _accessor.get(NumfmtService);
         const univerInstanceService = _accessor.get(IUniverInstanceService);
         const selectionManagerService = _accessor.get(SelectionManagerService);
-        const value$ = new Observable<string>((subscribe) =>
+        const value$ = new Observable((subscribe) =>
             selectionManagerService.selectionInfo$.subscribe((selections) => {
                 if (selections && selections[0]) {
                     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
@@ -106,6 +106,6 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
             group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
             positions: [MenuPosition.TOOLBAR_START],
             value$,
-        } as IMenuButtonItem<any>;
+        } as IMenuButtonItem;
     };
 };

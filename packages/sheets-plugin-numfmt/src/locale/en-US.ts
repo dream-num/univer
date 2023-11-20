@@ -1,0 +1,25 @@
+export const zhCn = {
+    sheet: {
+        numfmt: {
+            title: '数据格式',
+            numfmtType: '格式类型',
+            cancel: '取消',
+            confirm: '确认',
+            general: '常规',
+            accounting: '会计',
+            currency: '货币',
+            date: '日期',
+            thousandthPercentile: '千分为符',
+            preview: '示例',
+            decimalLength: '小数位数',
+            currencyType: '货币类型',
+            currencyDes: '货币格式用于表示一般货币数值。会计格式可以对一列数值进行小数点对齐',
+            accountingDes: '会计数字格式可对一列数值进行货币符号和小数点对齐',
+            dateType: '日期类型',
+            dateDes: '日期格式将日期和时间系列数值品示为日期值。',
+            negType: '负数类型',
+            generalDes: '常规格式不包含任何特定的数字格式。',
+            thousandthPercentileDes: '千分位符格式用于一般数字的表示。货币和会计格式则提供货币值计算的专用格式。',
+        },
+    },
+};

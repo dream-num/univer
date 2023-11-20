@@ -1,4 +1,12 @@
-import { Disposable, ICommandService, LifecycleStages, Nullable, ObjectMatrix, OnLifecycle } from '@univerjs/core';
+import {
+    Disposable,
+    ICellData,
+    ICommandService,
+    LifecycleStages,
+    Nullable,
+    ObjectMatrix,
+    OnLifecycle,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { NumfmtItem } from '../base/types';
@@ -7,7 +15,7 @@ import { SetNumfmtMutation } from '../commands/mutations/set.numfmt.mutation';
 type NumfmtItemWithCache = NumfmtItem & {
     // when change parameters or pattern, the cache is cleared follow mutation execute
     _cache?: {
-        result: any;
+        result: ICellData;
         parameters: number; // The parameter that was last calculated
     };
 };

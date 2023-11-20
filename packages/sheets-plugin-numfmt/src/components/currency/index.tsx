@@ -14,7 +14,7 @@ export const isCurrencyPanel = (pattern: string) => {
     const type = getCurrencyType(pattern);
     return !!type && !pattern.startsWith('_(');
 };
-const useEffectWithoutFirst = (cb: () => () => void, dep: any[]) => {
+const useEffectWithoutFirst = (cb: () => () => void, dep: unknown[]) => {
     const ref = useRef(false);
     useEffect(() => {
         if (!ref.current) {

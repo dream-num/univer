@@ -173,7 +173,8 @@ export class NumfmtController extends Disposable {
             header: { title: localeService.t('sheet.numfmt.title') },
             children: {
                 label: SHEET_NUMFMT_PLUGIN,
-                ...(props as any),
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ...(props as any), // need passthrough to react props.
             },
             onClose: () => {
                 commandService.executeCommand(CloseNumfmtPanelOperator.id);
@@ -698,14 +699,14 @@ export class NumfmtController extends Disposable {
     }
 }
 
-const filterAtr = (obj: Record<any, any>, filterKey: string[]) => {
+const filterAtr = (obj: Record<string, any>, filterKey: string[]) => {
     const keys = Object.keys(obj).filter((key) => !filterKey.includes(key));
     return keys.reduce(
         (pre, cur) => {
             pre[cur] = obj[cur];
             return pre;
         },
-        {} as Record<any, any>
+        {} as Record<string, any>
     );
 };
 

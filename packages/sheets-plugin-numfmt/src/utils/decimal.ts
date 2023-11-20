@@ -25,7 +25,7 @@ export const isPatternEqualWithoutDecimal = (patternA: string, patternB: string)
                 if (pre.isEnd) {
                     return pre;
                 }
-                const str = (cur as any).value || (cur as any).num;
+                const str = cur.value || cur.num;
                 if (cur.type === 'point') {
                     pre.isEnd = true;
                     return pre;

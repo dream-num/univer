@@ -2,7 +2,7 @@ import './index.less';
 
 import { MoreDownSingle } from '@univerjs/icons';
 
-export const MoreNumfmtType = (props: any) => {
+export const MoreNumfmtType = (props: { value?: string }) => {
     const value = props.value ?? '常规';
     return (
         <span className="more-numfmt-type">

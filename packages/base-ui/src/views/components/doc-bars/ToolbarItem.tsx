@@ -114,7 +114,7 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
                 onClick={() => commandService.executeCommand(props.id)}
                 onDoubleClick={() => props.subId && commandService.executeCommand(props.subId)}
             >
-                <CustomLabel icon={icon} />
+                <CustomLabel icon={icon} title={title!} value={value} label={label} />
             </ToolbarButton>
         );
     }

@@ -48,7 +48,7 @@ export class AutoFillController extends Disposable {
         this._init();
     }
 
-    handleFillDrag(sourceRange: IRange, destRange: IRange) {
+    private _handleFillDrag(sourceRange: IRange, destRange: IRange) {
         // situation 1: drag to smaller range, horizontally.
         if (destRange.endColumn < sourceRange.endColumn && destRange.endColumn > sourceRange.startColumn) {
             this._commandService.executeCommand(AutoClearContentCommand.id, {
@@ -132,7 +132,7 @@ export class AutoFillController extends Disposable {
                                         startRow: newStartRow || startRow,
                                         endRow: newEndRow || endRow,
                                     };
-                                    this.handleFillDrag(sourceRange, destRange);
+                                    this._handleFillDrag(sourceRange, destRange);
                                 })
                             )
                         );

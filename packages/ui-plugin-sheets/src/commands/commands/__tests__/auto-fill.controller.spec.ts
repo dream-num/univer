@@ -21,10 +21,9 @@ import {
 import { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { ISelectionRenderService } from '../../..';
 import { AutoFillController } from '../../../controllers/auto-fill.controller';
 import { AutoFillService, IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
-import { SelectionRenderService } from '../../../services/selection/selection-render.service';
+import { ISelectionRenderService, SelectionRenderService } from '../../../services/selection/selection-render.service';
 
 const theme = {
     colorBlack: '#35322b',
@@ -196,7 +195,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test number
-                autoFillController.handleFillDrag(
+                (autoFillController as any)._handleFillDrag(
                     {
                         startRow: 0,
                         startColumn: 0,
@@ -213,7 +212,7 @@ describe('Test auto fill rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(0, 2)?.v).toBe(3);
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(0, 3)?.v).toBe(4);
                 // test number. descending
-                autoFillController.handleFillDrag(
+                (autoFillController as any)._handleFillDrag(
                     {
                         startRow: 1,
                         startColumn: 0,
@@ -237,7 +236,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test extend number
-                autoFillController.handleFillDrag(
+                (autoFillController as any)._handleFillDrag(
                     {
                         startRow: 2,
                         startColumn: 0,
@@ -261,7 +260,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test chinese number
-                autoFillController.handleFillDrag(
+                (autoFillController as any)._handleFillDrag(
                     {
                         startRow: 3,
                         startColumn: 0,
@@ -286,7 +285,7 @@ describe('Test auto fill rules in controller', () => {
                 if (!workbook) throw new Error('This is an error');
 
                 // test chinese week
-                autoFillController.handleFillDrag(
+                (autoFillController as any)._handleFillDrag(
                     {
                         startRow: 4,
                         startColumn: 0,
@@ -310,7 +309,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test loop series
-                autoFillController.handleFillDrag(
+                (autoFillController as any)._handleFillDrag(
                     {
                         startRow: 5,
                         startColumn: 0,
@@ -334,7 +333,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test other string
-                autoFillController.handleFillDrag(
+                (autoFillController as any)._handleFillDrag(
                     {
                         startRow: 6,
                         startColumn: 0,
@@ -358,7 +357,7 @@ describe('Test auto fill rules in controller', () => {
                 const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
                 if (!workbook) throw new Error('This is an error');
                 // test mixed mode
-                autoFillController.handleFillDrag(
+                (autoFillController as any)._handleFillDrag(
                     {
                         startRow: 7,
                         startColumn: 0,

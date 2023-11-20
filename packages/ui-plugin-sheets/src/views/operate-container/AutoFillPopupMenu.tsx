@@ -1,8 +1,10 @@
 import { IRenderManagerService } from '@univerjs/base-render';
+import { SetRangeValuesMutation } from '@univerjs/base-sheets';
 import { ICommandInfo, ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import clsx from 'clsx';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import {
@@ -13,6 +15,7 @@ import {
 import { RefillCommand } from '../../commands/commands/refill.command';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { SetScrollOperation } from '../../commands/operations/scroll.operation';
+import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { getSheetObject } from '../../controllers/utils/component-tools';
 import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
 import { APPLY_TYPE } from '../../services/auto-fill/type';
@@ -50,6 +53,15 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     const [visible, setVisible] = useState(false);
     const [anchor, setAnchor] = useState<IAnchorPoint>({ row: -1, col: -1 });
     const [selected, setSelected] = useState<APPLY_TYPE>(APPLY_TYPE.SERIES);
+    const [isHovered, setHovered] = useState(false);
+
+    const handleMouseEnter = () => {
+        setHovered(true);
+    };
+
+    const handleMouseLeave = () => {
+        setHovered(false);
+    };
     const forceUpdate = useUpdate();
 
     const sheetObject = getSheetObject(currentUniverService, renderManagerService);
@@ -60,6 +72,12 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     const { scene } = sheetObject;
 
     useEffect(() => {
+        const endCommands = [
+            SetCellEditVisibleOperation.id,
+            AutoClearContentCommand.id,
+            SetZoomRatioOperation.id,
+            SetRangeValuesMutation.id,
+        ];
         const disposable = commandService.onCommandExecuted((command: ICommandInfo) => {
             if (command.id === AutoFillCommand.id) {
                 const { endColumn, endRow } = (command?.params as IAutoFillCommandParams).selectionRange;
@@ -68,7 +86,7 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
             if (command.id === SetScrollOperation.id) {
                 forceUpdate();
             }
-            if (command.id === SetCellEditVisibleOperation.id || command.id === AutoClearContentCommand.id) {
+            if (endCommands.includes(command.id)) {
                 setAnchor({ row: -1, col: -1 });
             }
         });
@@ -107,6 +125,7 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     const relativeX = skeleton?.convertTransformToOffsetX(x, scaleX, scrollXY);
     const relativeY = skeleton?.convertTransformToOffsetY(y, scaleY, scrollXY);
 
+    if (relativeX == null || relativeY == null) return null;
     const onVisibleChange = (visible: boolean) => {
         setVisible(visible);
     };
@@ -115,28 +134,35 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
         commandService.executeCommand(RefillCommand.id, { type: item.value });
     };
 
+    const showMore = visible || isHovered;
+
     const availableMenu = menu.filter((item) => !item.disable);
+
     return (
-        <div style={{ left: `${relativeX}px`, top: `${relativeY}px`, position: 'absolute' }}>
+        <div
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            style={{ left: `${relativeX + 2}px`, top: `${relativeY + 2}px`, position: 'absolute' }}
+        >
             <Dropdown
                 placement="bottomLeft"
                 trigger={['click']}
                 overlay={
-                    <ul className={styles.AutoFillPopupMenu} style={{ ...styles }}>
+                    <ul className={styles.autoFillPopupMenu}>
                         {availableMenu.map((item) => (
                             <li
                                 key={item.index}
                                 onClick={() => handleClick(item)}
-                                className={styles.AutoFillPopupMenuItem}
+                                className={styles.autoFillPopupMenuItem}
                             >
-                                <span className={styles.AutoFillPopupMenuItemIcon}>
+                                <span className={styles.autoFillPopupMenuItemIcon}>
                                     {item.value === selected ? (
                                         <CheckMarkSingle style={{ color: 'rgb(var(--green-700, #409f11))' }} />
                                     ) : (
                                         ''
                                     )}
                                 </span>
-                                <span className={styles.AutoFillPopupMenuItemTitle}>{localeService.t(item.label)}</span>
+                                <span className={styles.autoFillPopupMenuItemTitle}>{localeService.t(item.label)}</span>
                             </li>
                         ))}
                     </ul>
@@ -144,12 +170,20 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
                 visible={visible}
                 onVisibleChange={onVisibleChange}
             >
-                <div className={styles.btnContainer}>
+                <div
+                    className={clsx(styles.btnContainer, {
+                        [styles.btnContainerExpand]: visible,
+                    })}
+                >
                     <Autofill
-                        style={{ color: '#35322B', marginRight: '8px' }}
+                        style={{ color: '#35322B' }}
                         extend={{ colorChannel1: 'rgb(var(--green-700, #409f11))' }}
                     ></Autofill>
-                    <MoreDownSingle style={{ color: '#CCCCCC', fontSize: '8px' }}></MoreDownSingle>
+                    {showMore && (
+                        <MoreDownSingle
+                            style={{ color: '#CCCCCC', fontSize: '8px', marginLeft: '8px' }}
+                        ></MoreDownSingle>
+                    )}
                 </div>
             </Dropdown>
         </div>

@@ -15,8 +15,7 @@ import { BooleanNumber, ICommandInfo, ICommandService, IUniverInstanceService, L
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { ISheetBarService } from '../../../services/sheetbar/sheetbar.service';
-import sheetBarStyles from '../index.module.less';
+import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
 import { IBaseSheetBarProps, SheetBarItem } from './SheetBarItem';
 import { IScrollState, SlideTabBar } from './utils/slide-tab-bar';
@@ -28,10 +27,11 @@ export function SheetBarTabs() {
     const [activeKey, setActiveKey] = useState('');
     const [boxShadow, setBoxShadow] = useState('');
     const slideTabBarRef = useRef<{ slideTabBar: SlideTabBar | null }>({ slideTabBar: null });
+    const slideTabBarContainerRef = useRef<HTMLDivElement>(null);
 
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
-    const sheetbarService = useDependency(ISheetBarService);
+    const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
     const confirmService = useDependency(IConfirmService);
 
@@ -68,7 +68,7 @@ export function SheetBarTabs() {
             slideTabBarItemClassName: styles.slideTabItem,
             slideTabBarSpanEditClassName: styles.slideTabSpanEdit,
             slideTabBarItemAutoSort: true,
-            slideTabRootClassName: sheetBarStyles.sheetBar,
+            slideTabBarContainer: slideTabBarContainerRef.current,
             currentIndex: 0,
             onChangeName: (worksheetId: string, worksheetName: string) => {
                 commandService.executeCommand(SetWorksheetNameCommand.id, {
@@ -83,7 +83,7 @@ export function SheetBarTabs() {
                 commandService.executeCommand(SetWorksheetActivateCommand.id, { worksheetId });
             },
             onScroll: (state: IScrollState) => {
-                sheetbarService.setScroll(state);
+                sheetBarService.setScroll(state);
             },
             onEmptyAlert: () => {
                 const id = 'slideTabBarAlert';
@@ -150,22 +150,22 @@ export function SheetBarTabs() {
     };
 
     const setupSubscribeScroll = () =>
-        sheetbarService.scroll$.subscribe((state: IScrollState) => {
+        sheetBarService.scroll$.subscribe((state: IScrollState) => {
             updateScrollButtonState(state);
         });
 
     const setupSubscribeScrollX = () =>
-        sheetbarService.scrollX$.subscribe((x: number) => {
-            slideTabBarRef.current.slideTabBar?.setScroll(x);
+        sheetBarService.scrollX$.subscribe((x: number) => {
+            slideTabBarRef.current.slideTabBar?.flipPage(x);
         });
 
     const setupSubscribeRenameId = () =>
-        sheetbarService.renameId$.subscribe(() => {
+        sheetBarService.renameId$.subscribe(() => {
             slideTabBarRef.current.slideTabBar?.getActiveItem()?.editor();
         });
 
     const setupSubscribeAddSheet = () =>
-        sheetbarService.addSheet$.subscribe(() => {
+        sheetBarService.addSheet$.subscribe(() => {
             slideTabBarRef.current.slideTabBar?.getScrollbar().scrollRight();
         });
 
@@ -187,7 +187,7 @@ export function SheetBarTabs() {
     };
 
     const buttonScroll = (slideTabBar: SlideTabBar) => {
-        sheetbarService.setScroll({
+        sheetBarService.setScroll({
             leftEnd: slideTabBar.isLeftEnd(),
             rightEnd: slideTabBar.isRightEnd(),
         });
@@ -195,7 +195,7 @@ export function SheetBarTabs() {
 
     const resizeInit = (slideTabBar: SlideTabBar) => {
         // Target element
-        const slideTabBarContainer = document.querySelector(`.${styles.slideTabBar}`);
+        const slideTabBarContainer = slideTabBarContainerRef.current?.querySelector(`.${styles.slideTabBar}`);
         if (!slideTabBarContainer) return;
 
         // Create a Resizeobserver
@@ -208,7 +208,7 @@ export function SheetBarTabs() {
     };
 
     return (
-        <div className={styles.slideTabBarContainer}>
+        <div className={styles.slideTabBarContainer} ref={slideTabBarContainerRef}>
             <div className={styles.slideTabBar} style={{ boxShadow }}>
                 {sheetList.map((item) => (
                     <SheetBarItem {...item} key={item.sheetId} selected={activeKey === item.sheetId} />

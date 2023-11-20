@@ -141,10 +141,10 @@ export class PromptController extends Disposable {
 
     override dispose(): void {
         this._formulaRefColors = [];
-        this.resetTemp();
+        this._resetTemp();
     }
 
-    private resetTemp() {
+    private _resetTemp() {
         this._lastSequenceNodes = [];
 
         this._previousSequenceNodes = null;
@@ -210,7 +210,7 @@ export class PromptController extends Disposable {
     private _initialCursorSync() {
         this.disposeWithMe(
             toDisposable(
-                this._textSelectionManagerService.textSelectionInfo$.subscribe(() => {
+                this._textSelectionRenderManager.textSelection$.subscribe(() => {
                     if (this._editorBridgeService.isVisible().visible === false || this._isSelectionMoving === true) {
                         return;
                     }
@@ -280,7 +280,7 @@ export class PromptController extends Disposable {
 
                     this._selectionRenderService.resetStyle();
 
-                    this.resetTemp();
+                    this._resetTemp();
                 })
             )
         );
@@ -448,7 +448,7 @@ export class PromptController extends Disposable {
     }
 
     private _getCurrentChar() {
-        const activeRange = this._textSelectionManagerService.getLast();
+        const activeRange = this._textSelectionRenderManager.getActiveRange();
 
         if (activeRange == null) {
             return;

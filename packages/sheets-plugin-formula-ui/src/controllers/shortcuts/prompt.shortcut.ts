@@ -36,7 +36,7 @@ export function promptSelectionShortcutItemShift() {
     const shortcutList: IShortcutItem[] = [];
     for (const keycode of PROMPT_SELECTION_KEYCODE_ARROW_LIST) {
         shortcutList.push({
-            id: SelectEditorFormluaOperation.id,
+            id: SelectEditorFormulaOperation.id,
             binding: keycode | MetaKeys.SHIFT,
             preconditions: (contextService) => whenEditorInputFormulaActivated(contextService),
             staticParameters: {
@@ -53,7 +53,7 @@ export function promptSelectionShortcutItemCtrl() {
     const shortcutList: IShortcutItem[] = [];
     for (const keycode of PROMPT_SELECTION_KEYCODE_ARROW_LIST) {
         shortcutList.push({
-            id: SelectEditorFormluaOperation.id,
+            id: SelectEditorFormulaOperation.id,
             binding: keycode | MetaKeys.CTRL_COMMAND,
             preconditions: (contextService) => whenEditorInputFormulaActivated(contextService),
             staticParameters: {
@@ -70,7 +70,7 @@ export function promptSelectionShortcutItemCtrlAndShift() {
     const shortcutList: IShortcutItem[] = [];
     for (const keycode of PROMPT_SELECTION_KEYCODE_ARROW_LIST) {
         shortcutList.push({
-            id: SelectEditorFormluaOperation.id,
+            id: SelectEditorFormulaOperation.id,
             binding: keycode | MetaKeys.SHIFT | MetaKeys.CTRL_COMMAND,
             preconditions: (contextService) => whenEditorInputFormulaActivated(contextService),
             staticParameters: {

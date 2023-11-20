@@ -160,17 +160,17 @@ export class EditorBridgeController extends Disposable {
             });
         });
 
-        spreadsheet.onPointerDownObserver.add(this._KeepVisibleHideEditor.bind(this));
-        spreadsheetColumnHeader.onPointerDownObserver.add(this._KeepVisibleHideEditor.bind(this));
-        spreadsheetLeftTopPlaceholder.onPointerDownObserver.add(this._KeepVisibleHideEditor.bind(this));
-        spreadsheetRowHeader.onPointerDownObserver.add(this._KeepVisibleHideEditor.bind(this));
+        spreadsheet.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
+        spreadsheetColumnHeader.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
+        spreadsheetLeftTopPlaceholder.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
+        spreadsheetRowHeader.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
     }
 
     /**
      * In the activated state of formula editing,
      * prohibit closing the editor according to the state to facilitate generating selection reference text.
      */
-    private _KeepVisibleHideEditor() {
+    private _keepVisibleHideEditor() {
         if (this._editorBridgeService.isForceKeepVisible()) {
             return;
         }
@@ -213,7 +213,7 @@ export class EditorBridgeController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetWorksheetActivateMutation.id) {
-                    this._KeepVisibleHideEditor();
+                    this._keepVisibleHideEditor();
                 } else if (updateCommandList.includes(command.id)) {
                     this._hideEditor();
                 }

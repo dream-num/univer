@@ -16,7 +16,7 @@ export default meta;
 
 export const Playground = {
     render() {
-        const [value, setValue] = useState([]);
+        const [value, setValue] = useState<string[]>([]);
 
         const options = [
             {

@@ -54,6 +54,7 @@ export function _createSkeletonWordOrLetter(
         DT.CUSTOM_BLOCK,
     ];
     let streamType = DT.LETTER;
+
     if (skipWidthList.indexOf(content) > -1) {
         return {
             content: '',
@@ -78,6 +79,7 @@ export function _createSkeletonWordOrLetter(
             streamType: content as DT,
         };
     }
+
     if (content === DT.PARAGRAPH) {
         streamType = DT.PARAGRAPH;
     }
@@ -86,6 +88,7 @@ export function _createSkeletonWordOrLetter(
     const { width: contentWidth = 0 } = bBox;
     let width = spanWidth ?? contentWidth;
     let paddingLeft = 0;
+
     if (validationGrid(gridType, snapToGrid)) {
         // 当文字也需要对齐到网格式，进行处理
         // const multiple = Math.ceil(contentWidth / charSpace);
@@ -94,6 +97,7 @@ export function _createSkeletonWordOrLetter(
             paddingLeft = (width - contentWidth) / 2;
         }
     }
+
     return {
         content,
         ts: textStyle,

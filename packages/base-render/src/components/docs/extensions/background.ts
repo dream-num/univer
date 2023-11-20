@@ -20,7 +20,7 @@ export class Background extends docExtension {
             return;
         }
 
-        const { lineHeight = 0 } = line;
+        const { contentHeight = 0 } = line;
         const { ts: textStyle, width, content } = span;
         if (!textStyle) {
             return;
@@ -40,7 +40,7 @@ export class Background extends docExtension {
 
         if (background) {
             ctx.fillStyle = background;
-            ctx.fillRect(spanStartPoint.x - 0.5, spanStartPoint.y, width + 1, lineHeight);
+            ctx.fillRect(spanStartPoint.x - 0.5, spanStartPoint.y, width + 1, contentHeight + 1);
         }
     }
 

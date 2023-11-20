@@ -197,19 +197,19 @@ export class TextRange {
         const convertor = new NodePositionConvertToCursor(_documentOffsetConfig, _docSkeleton);
 
         if (this._isCollapsed()) {
-            const { pointGroup, cursorList } = convertor.getRangePointData(anchor, anchor);
+            const { contentBoxPointGroup, cursorList } = convertor.getRangePointData(anchor, anchor);
 
             this._setCursorList(cursorList);
-            pointGroup.length > 0 && this._createOrUpdateAnchor(pointGroup, docsLeft, docsTop);
+            contentBoxPointGroup.length > 0 && this._createOrUpdateAnchor(contentBoxPointGroup, docsLeft, docsTop);
 
             return;
         }
 
-        const { pointGroup, cursorList } = convertor.getRangePointData(anchor, focus);
+        const { borderBoxPointGroup, cursorList } = convertor.getRangePointData(anchor, focus);
 
         this._setCursorList(cursorList);
 
-        pointGroup.length > 0 && this._createOrUpdateRange(pointGroup, docsLeft, docsTop);
+        borderBoxPointGroup.length > 0 && this._createOrUpdateRange(borderBoxPointGroup, docsLeft, docsTop);
     }
 
     private _isEmpty() {

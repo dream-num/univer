@@ -73,7 +73,7 @@ export class IMEInputController extends Disposable {
             if (activeRange == null) {
                 return;
             }
-            console.log(JSON.stringify(activeRange, null, 2));
+
             this._imeInputManagerService.clearUndoRedoMutationParamsCache();
 
             this._imeInputManagerService.setActiveRange(Tools.deepClone(activeRange));

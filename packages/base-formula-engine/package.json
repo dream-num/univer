@@ -6,7 +6,7 @@
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
     "main": "./src/index.ts",
-    "types": "./lib/index.d.ts",
+    "types": "./lib/index.ts",
     "publishConfig": {
         "access": "public",
         "main": "./lib/index.cjs.js",

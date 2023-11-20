@@ -17,14 +17,26 @@
     margin-right: @margin-right;
 
     background-color: rgb(var(--bg-color));
-}
 
-.sheet-bar-options {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+    &-options {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
 
-    margin: var(--margin-xxs);
+        margin: var(--margin-xxs);
 
-    transition: display .2s;
+        transition: display .2s;
+        
+        &-divider::after {
+            content: "";
+
+            display: block;
+
+            width: 1px;
+            height: 16px;
+            margin: 0 var(--margin-xs);
+
+            background-color: rgb(var(--grey-400));
+        }
+    }
 }

@@ -1,6 +1,5 @@
 import { InsertSheetCommand } from '@univerjs/base-sheets';
 import { ICommandService } from '@univerjs/core';
-import { Divider } from '@univerjs/design';
 import { IncreaseSingle, MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useEffect, useState } from 'react';
@@ -69,14 +68,13 @@ export const SheetBar = () => {
 
             {/* Scroll arrows */}
             {(!leftScrollState || !rightScrollState) && (
-                <div className={styles.sheetBarOptions}>
+                <div className={`${styles.sheetBarOptions} ${styles.sheetBarOptionsDivider}`}>
                     <SheetBarButton disabled={leftScrollState} onClick={handleScrollLeft}>
                         <MoreSingle style={{ transform: 'rotateZ(180deg)' }} />
                     </SheetBarButton>
                     <SheetBarButton disabled={rightScrollState} onClick={handleScrollRight}>
                         <MoreSingle />
                     </SheetBarButton>
-                    <Divider length={16} color="rgb(var(--grey-400))" />
                 </div>
             )}
         </div>

@@ -8,6 +8,10 @@ import {
     Rect,
 } from '@univerjs/base-render';
 import {
+    DeltaColumnWidthCommand,
+    DeltaRowHeightCommand,
+    IDeltaColumnWidthCommandParams,
+    IDeltaRowHeightCommand,
     ISetFrozenMutationParams,
     SelectionManagerService,
     SetFrozenCommand,
@@ -978,6 +982,32 @@ export class FreezeController extends Disposable {
                 }
             })
         );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                const freeze = this._getFreeze();
+                if (
+                    command.id === DeltaRowHeightCommand.id &&
+                    command.params &&
+                    freeze &&
+                    (command.params as IDeltaRowHeightCommand).anchorRow < freeze.startRow
+                ) {
+                    this._refreshCurrent();
+                }
+            })
+        );
+
+        this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            const freeze = this._getFreeze();
+            if (
+                command.id === DeltaColumnWidthCommand.id &&
+                command.params &&
+                freeze &&
+                (command.params as IDeltaColumnWidthCommandParams).anchorCol < freeze.startColumn
+            ) {
+                this._refreshCurrent();
+            }
+        });
     }
 
     private _clearObserverEvent() {

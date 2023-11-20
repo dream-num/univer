@@ -2,6 +2,7 @@ import { ITextRangeWithStyle } from '@univerjs/base-render';
 import { CommandType, ICommand, ICommandInfo, ICommandService, ITextRange, IUndoRedoService } from '@univerjs/core';
 
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
+import { IMEInputManagerService } from '../../services/ime-input-manager.service';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
@@ -25,6 +26,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const imeInputManagerService = accessor.get(IMEInputManagerService);
 
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -68,70 +70,33 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
-        console.log(result);
+        imeInputManagerService.pushUndoRedoMutationParams(result, doMutation.params!);
 
         textSelectionManagerService.replaceTextRanges(textRanges);
 
         if (isCompositionEnd) {
             if (result) {
-                const undoMutationParams: IRichTextEditingMutationParams = {
-                    unitId,
-                    mutations: [],
-                };
+                const historyParams = imeInputManagerService.fetchComposedUndoRedoMutationParams(newText);
 
-                const doMutationParams: IRichTextEditingMutationParams = {
-                    unitId,
-                    mutations: [],
-                };
-
-                if (range.collapsed) {
-                    undoMutationParams.mutations.push({
-                        t: 'r',
-                        len: range.startOffset,
-                        segmentId,
-                    });
-                    doMutationParams.mutations.push({
-                        t: 'r',
-                        len: range.startOffset,
-                        segmentId,
-                    });
-                } else {
-                    undoMutationParams.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
-                    doMutationParams.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
+                if (historyParams == null) {
+                    return false;
                 }
 
-                if (newText.length) {
-                    undoMutationParams.mutations.push({
-                        t: 'd',
-                        len: newText.length,
-                        line: 0,
-                        segmentId,
-                    });
-
-                    doMutationParams.mutations.push({
-                        t: 'i',
-                        body: {
-                            dataStream: newText,
-                        },
-                        len: newText.length,
-                        line: 0,
-                        segmentId,
-                    });
-                }
+                const { undoMutationParams, redoMutationParams, previousActiveRange } = historyParams;
 
                 undoRedoService.pushUndoRedo({
                     unitID: unitId,
                     undoMutations: [{ id: RichTextEditingMutation.id, params: undoMutationParams }],
-                    redoMutations: [{ id: RichTextEditingMutation.id, params: doMutationParams }],
+                    redoMutations: [{ id: RichTextEditingMutation.id, params: redoMutationParams }],
                     undo() {
                         commandService.syncExecuteCommand(RichTextEditingMutation.id, undoMutationParams);
 
-                        textSelectionManagerService.replaceTextRanges([range]);
+                        textSelectionManagerService.replaceTextRanges([previousActiveRange]);
 
                         return true;
                     },
                     redo() {
-                        commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutationParams);
+                        commandService.syncExecuteCommand(RichTextEditingMutation.id, redoMutationParams);
 
                         textSelectionManagerService.replaceTextRanges(textRanges);
 

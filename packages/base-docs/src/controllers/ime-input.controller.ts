@@ -11,6 +11,7 @@ import {
     LifecycleStages,
     Nullable,
     OnLifecycle,
+    Tools,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
@@ -18,6 +19,7 @@ import { Subscription } from 'rxjs';
 import { getDocObject } from '../basics/component-tools';
 import { IMEInputCommand } from '../commands/commands/ime-input.command';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
+import { IMEInputManagerService } from '../services/ime-input-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, IMEInputController)
@@ -38,6 +40,7 @@ export class IMEInputController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(IMEInputManagerService) private readonly _imeInputManagerService: IMEInputManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -70,6 +73,10 @@ export class IMEInputController extends Disposable {
             if (activeRange == null) {
                 return;
             }
+            console.log(JSON.stringify(activeRange, null, 2));
+            this._imeInputManagerService.clearUndoRedoMutationParamsCache();
+
+            this._imeInputManagerService.setActiveRange(Tools.deepClone(activeRange));
 
             this._previousIMERange = activeRange;
         });
@@ -150,6 +157,10 @@ export class IMEInputController extends Disposable {
         this._previousIMEContent = '';
 
         this._previousIMERange = null;
+
+        this._imeInputManagerService.clearUndoRedoMutationParamsCache();
+
+        this._imeInputManagerService.setActiveRange(null);
     }
 
     private _getDocObject() {

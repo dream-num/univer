@@ -48,10 +48,11 @@ import { MoveCursorController } from './controllers/move-cursor.controller';
 import { NormalInputController } from './controllers/normal-input.controller';
 import { PageRenderController } from './controllers/page-render.controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
-import { ZoomController } from './controllers/zoom.cotroller';
+import { ZoomController } from './controllers/zoom.controller';
 import { enUS } from './locale';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
+import { IMEInputManagerService } from './services/ime-input-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
 import {
@@ -164,6 +165,7 @@ export class DocPlugin extends Plugin {
 
                 // services
                 [DocSkeletonManagerService],
+                [IMEInputManagerService],
                 [
                     IDocClipboardService,
                     {

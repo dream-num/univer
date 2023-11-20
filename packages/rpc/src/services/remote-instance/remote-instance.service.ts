@@ -27,6 +27,7 @@ export class RemoteSyncPrimaryService implements IRemoteSyncService {
 
     async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
         return this._commandService.syncExecuteCommand(params.mutationInfo.id, params.mutationInfo.params, {
+            local: true,
             fromSync: true,
         });
     }
@@ -53,6 +54,7 @@ export class RemoteInstanceReplicaService implements IRemoteInstanceService {
 
     async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
         return this._commandService.syncExecuteCommand(params.mutationInfo.id, params.mutationInfo.params, {
+            local: true,
             fromSync: true,
         });
     }

@@ -46,14 +46,12 @@ export function ToolbarItem(props: IDisplayMenuItem<IMenuItem>) {
                 );
         }
 
-        if (props.type === MenuItemType.SELECTOR) {
-            props.value$ &&
-                subscriptions.push(
-                    props.value$.subscribe((value) => {
-                        setValue(value);
-                    })
-                );
-        }
+        props.value$ &&
+            subscriptions.push(
+                props.value$.subscribe((value) => {
+                    setValue(value);
+                })
+            );
 
         return () => {
             subscriptions.forEach((subscription) => {

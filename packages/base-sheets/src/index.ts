@@ -15,6 +15,7 @@ export {
     type IRemoveWorksheetMergeMutationParams,
 } from './basics/interfaces/mutation-interface';
 export {
+    convertPrimaryWithCoordToPrimary,
     convertSelectionDataToRange,
     getNormalSelectionStyle,
     type ISelectionStyle,

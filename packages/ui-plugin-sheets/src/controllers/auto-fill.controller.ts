@@ -1,5 +1,5 @@
 import { getCellInfoInMergeData } from '@univerjs/base-render';
-import { SelectionManagerService } from '@univerjs/base-sheets';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/base-sheets';
 import {
     Direction,
     Disposable,
@@ -94,6 +94,16 @@ export class AutoFillController extends Disposable {
                 this._selectionManagerService.selectionInfo$.subscribe(() => {
                     // Each range change requires re-listening
                     disposableCollection.dispose();
+
+                    const current = this._selectionManagerService.getCurrent();
+
+                    /**
+                     * Auto fill only responds to regular selections;
+                     * it does not apply to selections for features like formulas or charts.
+                     */
+                    if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                        return;
+                    }
 
                     const selectionControls = this._selectionRenderService.getCurrentControls();
                     selectionControls.forEach((controlSelection) => {

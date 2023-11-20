@@ -709,7 +709,10 @@ export function getPrimaryForRange(range: IRange, worksheet: Worksheet): ISelect
     const mergedRange = worksheet.getMergedCell(range.startRow, range.startColumn);
     if (!mergedRange) {
         return {
-            ...range,
+            startRow: range.startRow,
+            startColumn: range.startColumn,
+            endRow: range.startRow,
+            endColumn: range.startColumn,
             actualRow: range.startRow,
             actualColumn: range.startColumn,
             rangeType: RANGE_TYPE.NORMAL,

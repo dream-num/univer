@@ -1,5 +1,10 @@
 import { DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/base-render';
-import { COMMAND_LISTENER_SKELETON_CHANGE, SelectionManagerService } from '@univerjs/base-sheets';
+import {
+    COMMAND_LISTENER_SKELETON_CHANGE,
+    NORMAL_SELECTION_PLUGIN_NAME,
+    SelectionManagerService,
+    SetWorksheetActivateMutation,
+} from '@univerjs/base-sheets';
 import {
     Disposable,
     ICommandInfo,
@@ -51,6 +56,15 @@ export class EditorBridgeController extends Disposable {
 
     private _initialSelectionListener() {
         this._selectionManagerService.selectionInfo$.subscribe((params) => {
+            const current = this._selectionManagerService.getCurrent();
+
+            /**
+             * The editor only responds to regular selections.
+             */
+            if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                return;
+            }
+
             const currentSkeletonManager = this._sheetSkeletonManagerService.getCurrent();
 
             const sheetObject = this._getSheetObject();
@@ -146,34 +160,47 @@ export class EditorBridgeController extends Disposable {
             });
         });
 
-        spreadsheet.onPointerDownObserver.add(this._hideEditor.bind(this));
-        spreadsheetColumnHeader.onPointerDownObserver.add(this._hideEditor.bind(this));
-        spreadsheetLeftTopPlaceholder.onPointerDownObserver.add(this._hideEditor.bind(this));
-        spreadsheetRowHeader.onPointerDownObserver.add(this._hideEditor.bind(this));
+        spreadsheet.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
+        spreadsheetColumnHeader.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
+        spreadsheetLeftTopPlaceholder.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
+        spreadsheetRowHeader.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
+    }
+
+    /**
+     * In the activated state of formula editing,
+     * prohibit closing the editor according to the state to facilitate generating selection reference text.
+     */
+    private _keepVisibleHideEditor() {
+        if (this._editorBridgeService.isForceKeepVisible()) {
+            return;
+        }
+        this._hideEditor();
     }
 
     private _hideEditor() {
-        if (this._editorBridgeService.isVisible().visible === true) {
-            this._selectionManagerService.makeDirty(false);
-            this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
-                visible: false,
-                eventType: DeviceInputEventType.PointerDown,
-            });
-
-            /**
-             * Hiding the editor triggers a SetRangeValuesMutation which saves the content.
-             * This mutation, in turn, triggers a refresh of the skeleton,
-             * causing the selection to update. In most scenarios,
-             * this update is reasonable. However, when clicking on another cell and exiting the edit,
-             * this causes the selection to be reset. Therefore,
-             * a makeDirty method has been added here to block the refresh of selection.
-             * The reason for using setTimeout is that it needs to wait for the process
-             * to finish before allowing the refresh of the selection.
-             */
-            setTimeout(() => {
-                this._selectionManagerService.makeDirty(true);
-            }, 0);
+        if (this._editorBridgeService.isVisible().visible !== true) {
+            return;
         }
+
+        this._selectionManagerService.makeDirty(false);
+        this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
+            visible: false,
+            eventType: DeviceInputEventType.PointerDown,
+        });
+
+        /**
+         * Hiding the editor triggers a SetRangeValuesMutation which saves the content.
+         * This mutation, in turn, triggers a refresh of the skeleton,
+         * causing the selection to update. In most scenarios,
+         * this update is reasonable. However, when clicking on another cell and exiting the edit,
+         * this causes the selection to be reset. Therefore,
+         * a makeDirty method has been added here to block the refresh of selection.
+         * The reason for using setTimeout is that it needs to wait for the process
+         * to finish before allowing the refresh of the selection.
+         */
+        setTimeout(() => {
+            this._selectionManagerService.makeDirty(true);
+        }, 0);
     }
 
     private _getSheetObject() {
@@ -185,7 +212,9 @@ export class EditorBridgeController extends Disposable {
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (updateCommandList.includes(command.id)) {
+                if (command.id === SetWorksheetActivateMutation.id) {
+                    this._keepVisibleHideEditor();
+                } else if (updateCommandList.includes(command.id)) {
                     this._hideEditor();
                 }
             })

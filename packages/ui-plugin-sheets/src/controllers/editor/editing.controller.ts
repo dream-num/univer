@@ -114,7 +114,7 @@ export class EditingController extends Disposable {
 
         console.log(
             'calculate',
-            this._formulaEngineService.calculate('=REDUCE(1, [2sjasdfjdadsf]sheet1!A:B1, LAMBDA(a,b,a+b^2))', false)
+            this._formulaEngineService.calculate(`=REDUCE(1, 'sheeASDF%#@ASDFt-1'!A:B1, LAMBDA(a,b,a+b^2))`, false)
         );
     }
 

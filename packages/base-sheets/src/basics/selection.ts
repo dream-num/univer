@@ -3,6 +3,7 @@ import { getCellInfoInMergeData } from '@univerjs/base-render';
 import {
     IRange,
     ISelection,
+    ISelectionCellWithCoord,
     ISelectionWithCoord,
     makeCellRangeToRangeData,
     Nullable,
@@ -39,6 +40,11 @@ export interface ISelectionWidgetConfig {
  * https://support.microsoft.com/en-us/office/select-cell-contents-in-excel-23f64223-2b6b-453a-8688-248355f10fa9
  */
 export interface ISelectionStyle {
+    /**
+     * Assign an ID to a selection area.
+     * The current scenario is to identify the formula string corresponding to the selection area
+     */
+    id?: string;
     /**
      * The volume of the selection border determines the thickness of the selection border
      */
@@ -175,20 +181,24 @@ export function convertSelectionDataToRange(
         style,
     };
     if (primaryWithCoord != null) {
-        const { actualRow, actualColumn, isMerged, isMergedMainCell } = primaryWithCoord;
-        const { startRow, startColumn, endRow, endColumn } = primaryWithCoord.mergeInfo;
-        result.primary = {
-            actualRow,
-            actualColumn,
-            isMerged,
-            isMergedMainCell,
-            startRow,
-            startColumn,
-            endRow,
-            endColumn,
-        };
+        result.primary = convertPrimaryWithCoordToPrimary(primaryWithCoord);
     }
     return result;
+}
+
+export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ISelectionCellWithCoord) {
+    const { actualRow, actualColumn, isMerged, isMergedMainCell } = primaryWithCoord;
+    const { startRow, startColumn, endRow, endColumn } = primaryWithCoord.mergeInfo;
+    return {
+        actualRow,
+        actualColumn,
+        isMerged,
+        isMergedMainCell,
+        startRow,
+        startColumn,
+        endRow,
+        endColumn,
+    };
 }
 
 /**

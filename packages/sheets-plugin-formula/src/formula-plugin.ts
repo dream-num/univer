@@ -1,4 +1,4 @@
-import { IUniverInstanceService, Plugin, PluginType } from '@univerjs/core';
+import { Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { FORMULA_PLUGIN_NAME } from './common/plugin-name';
@@ -10,9 +10,8 @@ export class FormulaPlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(
-        private _config: IFormulaConfig,
-        @Inject(Injector) override readonly _injector: Injector,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        private _config: IFormulaConfig | undefined,
+        @Inject(Injector) override readonly _injector: Injector
     ) {
         super(FORMULA_PLUGIN_NAME);
     }
@@ -25,7 +24,7 @@ export class FormulaPlugin extends Plugin {
             [FormulaController],
         ];
 
-        if (!this._config.notExecuteFormula) {
+        if (!this._config?.notExecuteFormula) {
             dependencies.push([CalculateController]);
         }
 

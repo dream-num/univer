@@ -7,7 +7,8 @@ import {
     IWorkbookData,
 } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
-import { type } from 'os';
+
+// TODO@wzhudev: add some notes here. Even I cannot understand the code in 10 seconds after days.
 
 export interface IRemoteSyncMutationOptions extends IExecutionOptions {
     /** If this mutation is executed after it was sent from the peer univer instance. */

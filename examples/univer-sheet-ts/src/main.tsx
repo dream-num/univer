@@ -1,4 +1,5 @@
 import { DocPlugin } from '@univerjs/base-docs';
+import { BaseFormulaEnginePlugin } from '@univerjs/base-formula-engine';
 import { RenderEngine } from '@univerjs/base-render';
 import { SheetPlugin } from '@univerjs/base-sheets';
 import { UIPlugin } from '@univerjs/base-ui';
@@ -43,6 +44,7 @@ univer.registerPlugin(SheetUIPlugin);
 univer.registerPlugin(DebuggerPlugin);
 // univer.registerPlugin(NumfmtPlugin);
 // univer.registerPlugin(FindPlugin);
+univer.registerPlugin(BaseFormulaEnginePlugin);
 univer.registerPlugin(FormulaPlugin, {
     notExecuteFormula: true,
 });

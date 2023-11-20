@@ -1,4 +1,3 @@
-import { FormulaEngineService } from '@univerjs/base-formula-engine';
 import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
@@ -77,7 +76,6 @@ export class SheetUIPlugin extends Plugin {
                         useClass: SelectionRenderService,
                     },
                 ],
-                [FormulaEngineService],
                 [IStatusBarService, { useClass: StatusBarService }],
 
                 // controllers

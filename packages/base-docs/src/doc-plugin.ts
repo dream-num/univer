@@ -18,10 +18,10 @@ import {
     DeleteCommand,
     DeleteLeftCommand,
     DeleteRightCommand,
-    IMEInputCommand,
     InsertCommand,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
+import { IMEInputCommand } from './commands/commands/ime-input.command';
 import {
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,

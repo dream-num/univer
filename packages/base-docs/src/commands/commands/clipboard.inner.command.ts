@@ -10,9 +10,9 @@ import {
 } from '@univerjs/core';
 
 import { MemoryCursor } from '../../basics/memory-cursor';
+import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { getRetainAndDeleteFromReplace } from './core-editing.command';
 
 export interface IInnerPasteCommandParams {
     segmentId: string;

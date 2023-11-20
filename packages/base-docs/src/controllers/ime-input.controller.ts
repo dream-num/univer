@@ -16,7 +16,7 @@ import { Inject } from '@wendellhu/redi';
 import { Subscription } from 'rxjs';
 
 import { getDocObject } from '../basics/component-tools';
-import { IMEInputCommand } from '../commands/commands/core-editing.command';
+import { IMEInputCommand } from '../commands/commands/ime-input.command';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 

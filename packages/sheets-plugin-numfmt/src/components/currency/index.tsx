@@ -6,7 +6,6 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BusinessComponentProps } from '../../base/types';
-import { usePatternPreview } from '../../hooks/usePatternPreview';
 import { getCurrencyType } from '../../utils/currency';
 import { getDecimalFromPattern, isPatternEqualWithoutDecimal, setPatternDecimal } from '../../utils/decimal';
 import { getCurrencyFormatOptions, getCurrencyOptions } from '../../utils/options';
@@ -49,8 +48,6 @@ export const CurrencyPanel: FC<BusinessComponentProps> = (props) => {
 
     const resultPattern = useMemo(() => setPatternDecimal(pattern, decimal), [pattern, decimal]);
 
-    const preview = usePatternPreview(resultPattern, props.defaultValue);
-
     const currencyOptions = useMemo(getCurrencyOptions, []);
 
     useEffect(() => {
@@ -64,10 +61,6 @@ export const CurrencyPanel: FC<BusinessComponentProps> = (props) => {
 
     return (
         <div>
-            <div className="m-t-16 label">{t('sheet.numfmt.preview')}</div>
-            <div className="m-t-8 preview" style={{ color: preview.color }}>
-                {preview.result}
-            </div>
             <div className="m-t-16 options ">
                 <div className="option">
                     <div className="label">{t('sheet.numfmt.decimalLength')}</div>

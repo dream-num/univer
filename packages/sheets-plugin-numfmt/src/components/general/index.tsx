@@ -14,8 +14,6 @@ export const GeneralPanel: FC<BusinessComponentProps> = (props) => {
     }, []);
     return (
         <div>
-            <div className="m-t-16 label">{t('sheet.numfmt.preview')}</div>
-            <div className="m-t-8 preview"> {props.defaultValue} </div>
             <div className="describe m-t-14">{t('sheet.numfmt.generalDes')}</div>
         </div>
     );

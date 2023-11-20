@@ -5,8 +5,8 @@ import { IAccessor } from '@wendellhu/redi';
 import { CURRENCYFORMAT } from '../../base/const/FORMATDETAIL';
 import { SetNumfmtCommand, SetNumfmtCommandParams } from './set.numfmt.command';
 
-export const SetCurrencyOperator: ICommand = {
-    id: 'sheet.command.numfmt.set.currency.operator',
+export const SetCurrencyCommand: ICommand = {
+    id: 'sheet.command.numfmt.set.currency',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);

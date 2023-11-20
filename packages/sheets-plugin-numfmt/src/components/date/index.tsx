@@ -29,23 +29,12 @@ export const DatePanel: FC<BusinessComponentProps> = (props) => {
         }
         return options[0].value;
     });
-    const [currentDate] = useState(() => new Date().toLocaleString());
-
-    const preview = useMemo(() => {
-        const res = numfmt.parseDate(String(props.defaultValue) || '') || numfmt.parseDate(currentDate);
-        if (res) {
-            return numfmt.format(suffix, Number(res.v), { locale: 'zh-CN' });
-        }
-        return '';
-    }, [suffix, props.defaultValue]);
 
     useEffect(() => {
         props.onChange(suffix);
     }, [suffix]);
     return (
         <div>
-            <div className="m-t-16 label">{t('sheet.numfmt.preview')}</div>
-            <div className="m-t-8 preview"> {preview} </div>
             <div className="m-t-16 label">{t('sheet.numfmt.dateType')}</div>
             <div className="m-t-8">
                 <SelectList value={suffix} options={options} onChange={suffixSet}></SelectList>

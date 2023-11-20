@@ -29,7 +29,7 @@ export type SetNumfmtMutationParams = {
 };
 
 export const SetNumfmtMutation: ICommand<SetNumfmtMutationParams> = {
-    id: 'sheet.mutation.set-numfmt',
+    id: 'sheet.mutation.set.numfmt',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params) => {
         if (!params) {

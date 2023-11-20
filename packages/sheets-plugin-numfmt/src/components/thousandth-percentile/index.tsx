@@ -2,7 +2,6 @@ import { InputNumber, SelectList } from '@univerjs/design';
 import { FC, useEffect, useMemo, useState } from 'react';
 
 import { BusinessComponentProps } from '../../base/types';
-import { usePatternPreview } from '../../hooks/usePatternPreview';
 import {
     getDecimalFromPattern,
     isPatternEqualWithoutDecimal,
@@ -25,8 +24,6 @@ export const ThousandthPercentilePanel: FC<BusinessComponentProps> = (props) => 
 
     const pattern = useMemo(() => setPatternDecimal(suffix, Number(decimal || 0)), [suffix, decimal]);
 
-    const preview = usePatternPreview(pattern, props.defaultValue);
-
     const isInputDisable = useMemo(() => !isPatternHasDecimal(suffix), [suffix]);
 
     const handleClick = (v: string) => {
@@ -40,10 +37,6 @@ export const ThousandthPercentilePanel: FC<BusinessComponentProps> = (props) => 
 
     return (
         <div>
-            <div className="m-t-16 label">示例</div>
-            <div className="m-t-8 preview" style={{ color: preview.color }}>
-                {preview.result}
-            </div>
             <div className="m-t-16 label">小数位数</div>
             <div className="m-t-8">
                 <InputNumber

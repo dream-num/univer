@@ -4,7 +4,6 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { FC, useEffect, useMemo, useState } from 'react';
 
 import { BusinessComponentProps } from '../../base/types';
-import { usePatternPreview } from '../../hooks/usePatternPreview';
 import { getCurrencyType } from '../../utils/currency';
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
 import { getCurrencyOptions } from '../../utils/options';
@@ -25,7 +24,6 @@ export const AccountingPanel: FC<BusinessComponentProps> = (props) => {
         () => setPatternDecimal(`_("${suffix}"* #,##0${decimal > 0 ? '.0' : ''}_)`, decimal),
         [suffix, decimal]
     );
-    const preview = usePatternPreview(pattern, props.defaultValue);
 
     const currencyOptions = useMemo(getCurrencyOptions, []);
 
@@ -35,11 +33,6 @@ export const AccountingPanel: FC<BusinessComponentProps> = (props) => {
 
     return (
         <div>
-            <div className="m-t-16 label">{t('sheet.numfmt.preview')}</div>
-
-            <div className="m-t-8 preview" style={{ color: preview.color }}>
-                {preview.result}
-            </div>
             <div className="m-t-16 options ">
                 <div className="option">
                     <div className="label">{t('sheet.numfmt.decimalLength')}</div>

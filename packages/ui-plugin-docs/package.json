@@ -5,14 +5,25 @@
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
     "license": "MIT",
-    "main": "./lib/index.ts",
+    "main": "./src/index.ts",
     "types": "./lib/index.d.ts",
     "publishConfig": {
         "access": "public",
+        "main": "./lib/index.cjs.js",
         "exports": {
-            ".": "./lib/index.js",
-            "./*": "./lib/*",
-            "./locale/*": "./lib/locale/*.js"
+            ".": {
+                "import": "./lib/esm/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./*": {
+                "import": "./lib/esm/*",
+                "require": "./lib/cjs/*"
+            },
+            "./locale/*": {
+                "import": "./lib/esm/locale/*.js",
+                "require": "./lib/cjs/locale/*.js"
+            }
         }
     },
     "exports": {

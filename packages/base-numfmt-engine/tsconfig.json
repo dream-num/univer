@@ -5,7 +5,7 @@
         "outDir": "lib",
         "baseUrl": "./",
         "esModuleInterop": true,
-        "types": ["./src/Types/index.d.ts"]
+        "types": ["./src/types/index.d.ts"]
     },
     "include": [
         "src/**/*",

@@ -1,3 +1,4 @@
+// @ts-ignore
 import numfmt from 'numfmt';
 
 import type { Numfmt } from './type';

@@ -27,8 +27,8 @@ export class DesktopSidebarService implements ISidebarService {
             ...this.sidebarOptions,
             visible: false,
         };
-
         this.sidebarOptions$.next(this.sidebarOptions);
+        this.sidebarOptions.onClose && this.sidebarOptions.onClose();
     }
 
     getObservableSidebar() {

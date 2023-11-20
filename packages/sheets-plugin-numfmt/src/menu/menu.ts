@@ -1,17 +1,18 @@
 import { SelectionManagerService } from '@univerjs/base-sheets';
-import { ComponentManager, IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/base-ui';
+import { ComponentManager, IMenuButtonItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/base-ui';
 import { IUniverInstanceService } from '@univerjs/core';
 import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
 import { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
 import { AddDecimalCommand } from '../commands/commands/add.decimal.command';
-import { SetCurrencyOperator } from '../commands/commands/set.currency.command';
+import { SetCurrencyCommand } from '../commands/commands/set.currency.command';
 import { SubtractDecimalCommand } from '../commands/commands/subtract.decimal.command';
 import { OpenNumfmtPanelOperator } from '../commands/operators/open.numfmt.panel.operator';
 import { isAccountingPanel } from '../components/accounting';
 import { isCurrencyPanel } from '../components/currency';
 import { isDatePanel } from '../components/date';
+import { MoreNumfmtType } from '../components/more-numfmt-type/MoreNumfmtType';
 import { isThousandthPercentilePanel } from '../components/thousandth-percentile';
 import { NumfmtService } from '../service/numfmt.service';
 
@@ -21,7 +22,7 @@ export const CurrencyMenuItem = (componentManager: ComponentManager) => {
     componentManager.register('MoreDownSingle', MoreDownSingle);
     return (_accessor: IAccessor) => ({
         icon: iconKey,
-        id: SetCurrencyOperator.id,
+        id: SetCurrencyCommand.id,
         title: 'numfmt.menu.currency',
         tooltip: 'numfmt.menu.currency',
         type: MenuItemType.BUTTON,
@@ -57,51 +58,54 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
     });
 };
 
-export const FactoryOtherMenuItem = (_accessor: IAccessor) => {
-    const numfmtService = _accessor.get(NumfmtService);
-    const univerInstanceService = _accessor.get(IUniverInstanceService);
+export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
+    componentManager.register('sheet.numfmt.moreNumfmtType', MoreNumfmtType);
+    return (_accessor: IAccessor) => {
+        const numfmtService = _accessor.get(NumfmtService);
+        const univerInstanceService = _accessor.get(IUniverInstanceService);
+        const selectionManagerService = _accessor.get(SelectionManagerService);
+        const value$ = new Observable<string>((subscribe) =>
+            selectionManagerService.selectionInfo$.subscribe((selections) => {
+                if (selections && selections[0]) {
+                    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+                    const worksheet = workbook.getActiveSheet();
+                    const range = selections[0].range;
+                    const row = range.startRow;
+                    const col = range.startColumn;
+                    const numfmtValue = numfmtService.getValue(workbook.getUnitId(), worksheet.getSheetId(), row, col);
+                    let value: string = '常规';
 
-    const selectionManagerService = _accessor.get(SelectionManagerService);
-    const value$ = new Observable((subscribe) =>
-        selectionManagerService.selectionInfo$.subscribe((selections) => {
-            if (selections && selections[0]) {
-                const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-                const worksheet = workbook.getActiveSheet();
-                const range = selections[0].range;
-                const row = range.startRow;
-                const col = range.startColumn;
-                const numfmtValue = numfmtService.getValue(workbook.getUnitId(), worksheet.getSheetId(), row, col);
-                let value: string = '常规';
+                    if (numfmtValue) {
+                        const pattern = numfmtValue.pattern;
+                        if (isAccountingPanel(pattern)) {
+                            value = '会计';
+                        }
 
-                if (numfmtValue) {
-                    const pattern = numfmtValue.pattern;
-                    if (isAccountingPanel(pattern)) {
-                        value = '会计';
-                    }
+                        if (isCurrencyPanel(pattern)) {
+                            value = '货币';
+                        }
 
-                    if (isCurrencyPanel(pattern)) {
-                        value = '货币';
+                        if (isDatePanel(pattern)) {
+                            value = '日期';
+                        }
+                        if (isThousandthPercentilePanel(pattern)) {
+                            value = '千分位';
+                        }
                     }
-
-                    if (isDatePanel(pattern)) {
-                        value = '日期';
-                    }
-                    if (isThousandthPercentilePanel(pattern)) {
-                        value = '千分位';
-                    }
+                    subscribe.next(value);
                 }
-                subscribe.next(value);
-            }
-        })
-    );
-    return {
-        icon: 'MoreDownSingle',
-        id: OpenNumfmtPanelOperator.id,
-        title: 'numfmt.menu.preview',
-        tooltip: 'numfmt.menu.preview',
-        type: MenuItemType.BUTTON,
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-        positions: [MenuPosition.TOOLBAR_START],
-        value$,
-    } as IMenuItem;
+            })
+        );
+        return {
+            // icon: 'MoreDownSingle',
+            label: 'sheet.numfmt.moreNumfmtType',
+            id: OpenNumfmtPanelOperator.id,
+            // title: 'numfmt.menu.preview',
+            tooltip: 'numfmt.menu.preview',
+            type: MenuItemType.BUTTON,
+            group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+            positions: [MenuPosition.TOOLBAR_START],
+            value$,
+        } as IMenuButtonItem<any>;
+    };
 };

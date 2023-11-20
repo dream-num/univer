@@ -11,9 +11,9 @@ export const NumfmtOperation: ICommand = {
     handler: async (accessor: IAccessor, params: NumfmtOperationCommandParams) => {
         const confirmService = accessor.get(ICommandService);
         if (params.value === 'open') {
-            confirmService.executeCommand('sheet.open.numfmt.panel.operator');
+            confirmService.executeCommand('sheet.operation.open.numfmt.panel');
         } else {
-            confirmService.executeCommand('sheet.close.numfmt.panel.operator');
+            confirmService.executeCommand('sheet.operation.close.numfmt.panel');
         }
         return true;
     },

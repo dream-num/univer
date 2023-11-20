@@ -3,9 +3,11 @@ import {
     deserializeRangeWithSheet,
     FormulaEngineService,
     IFunctionInfo,
+    includeFormulaLexerToken,
     ISequenceNode,
     isFormulaLexerToken,
     matchToken,
+    normalizeSheetName,
     sequenceNodeType,
     serializeRangeToRefString,
 } from '@univerjs/base-formula-engine';
@@ -16,6 +18,7 @@ import {
     ITextSelectionRenderManager,
 } from '@univerjs/base-render';
 import {
+    convertSelectionDataToRange,
     getNormalSelectionStyle,
     ISelectionWithStyle,
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -57,7 +60,6 @@ import {
     SheetSkeletonManagerService,
 } from '@univerjs/ui-plugin-sheets';
 import { Inject } from '@wendellhu/redi';
-import { Subject } from 'rxjs';
 
 import {
     ISelectEditorFormulaOperationParam,
@@ -115,7 +117,7 @@ export class PromptController extends Disposable {
 
     private _numberColor = '';
 
-    private readonly _formulaSelectionMoving$ = new Subject<IRange[]>();
+    private _insertSelections: ISelectionWithStyle[] = [];
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -228,10 +230,14 @@ export class PromptController extends Disposable {
                     if (this._isLockedOnSelectionChangeRefString) {
                         return;
                     }
-                    // TODO@Dushusir: use real text info
-                    this._setFunctionPanel(dataStream);
 
                     this._highlightFormula(currentBody);
+
+                    if (this._isLockedOnSelectionInsertRefString) {
+                        return;
+                    }
+                    // TODO@Dushusir: use real text info
+                    this._setFunctionPanel(dataStream);
                 })
             )
         );
@@ -243,6 +249,7 @@ export class PromptController extends Disposable {
                 this._textSelectionRenderManager.onInputBefore$.subscribe(() => {
                     this._previousSequenceNodes = null;
                     this._previousInsertRefStringIndex = null;
+
                     this._selectionRenderService.enableSkipRemainLast();
                 })
             )
@@ -252,13 +259,17 @@ export class PromptController extends Disposable {
     private _initialExitEditor() {
         this.disposeWithMe(
             toDisposable(
-                this._editorBridgeService.visible$.subscribe((visibleParam) => {
+                this._editorBridgeService.afterVisible$.subscribe((visibleParam) => {
                     if (visibleParam.visible === true) {
                         const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
 
-                        this._currentUnitId = unitId;
+                        if (this._currentUnitId == null) {
+                            this._currentUnitId = unitId;
+                        }
 
-                        this._currentSheetId = sheetId;
+                        if (this._currentSheetId == null) {
+                            this._currentSheetId = sheetId;
+                        }
 
                         return;
                     }
@@ -268,10 +279,8 @@ export class PromptController extends Disposable {
                      * Here, a delay is added to prevent the loss of content when pressing enter.
                      */
                     if (this._getContextState() === true) {
-                        setTimeout(() => {
-                            this._selectionManagerService.clear();
-                            this._selectionManagerService.changePlugin(NORMAL_SELECTION_PLUGIN_NAME);
-                        }, 0);
+                        this._selectionManagerService.clear();
+                        this._selectionManagerService.changePlugin(NORMAL_SELECTION_PLUGIN_NAME);
                     }
 
                     this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
@@ -354,7 +363,13 @@ export class PromptController extends Disposable {
                         return;
                     }
 
-                    this._formulaSelectionMoving$.next(ranges);
+                    if (!this._isLockedOnSelectionInsertRefString) {
+                        return;
+                    }
+
+                    this._isSelectionMoving = true;
+
+                    this._inertControlSelection(ranges);
                 })
             )
         );
@@ -366,14 +381,6 @@ export class PromptController extends Disposable {
                         return;
                     }
 
-                    this._formulaSelectionMoving$.next(ranges);
-                })
-            )
-        );
-
-        this.disposeWithMe(
-            toDisposable(
-                this._formulaSelectionMoving$.subscribe((ranges) => {
                     if (!this._isLockedOnSelectionInsertRefString) {
                         return;
                     }
@@ -397,38 +404,17 @@ export class PromptController extends Disposable {
             return;
         }
 
-        // const activeRange = this._textSelectionManagerService.getLast();
+        const char = this._getCurrentChar();
 
-        // if (activeRange == null) {
-        //     this._disableForceKeepVisible();
-        //     return;
-        // }
-
-        // const { startOffset } = activeRange;
-
-        // const body = this._getCurrentBody();
-
-        // if (body == null) {
-        //     this._disableForceKeepVisible();
-        //     return;
-        // }
-
-        // const dataStream = body.dataStream;
-
-        const current = this._getCurrentChar();
-
-        if (current == null) {
+        if (char == null) {
             this._disableForceKeepVisible();
             return;
         }
-
-        const { char, startOffset } = current;
 
         if (this._matchRefDrawToken(char)) {
             this._editorBridgeService.enableForceKeepVisible();
 
             this._isLockedOnSelectionInsertRefString = true;
-            this._currentInsertRefStringIndex = startOffset - 1;
 
             this._selectionRenderService.enableRemainLast();
         } else {
@@ -464,7 +450,7 @@ export class PromptController extends Disposable {
 
         const dataStream = body.dataStream;
 
-        return { char: dataStream[startOffset - 1], startOffset };
+        return dataStream[startOffset - 1];
     }
 
     private _disableForceKeepVisible() {
@@ -489,6 +475,16 @@ export class PromptController extends Disposable {
                 this._formulaEngineService.buildSequenceNodes(
                     currentInputValue.replace(/\r/g, '').replace(/\n/g, '')
                 ) || [];
+
+            const activeRange = this._textSelectionRenderManager.getActiveRange();
+
+            if (activeRange == null) {
+                return;
+            }
+
+            const { startOffset } = activeRange;
+
+            this._currentInsertRefStringIndex = startOffset - 1;
         } else {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
             this._isLockedOnSelectionChangeRefString = false;
@@ -569,13 +565,13 @@ export class PromptController extends Disposable {
     private _switchSelectionPlugin() {
         if (this._getContextState() === true) {
             this._selectionManagerService.changePluginNoRefresh(FORMULA_REF_SELECTION_PLUGIN_NAME);
-            const selections = this._selectionManagerService.getSelections();
-            if (selections == null || selections.length === 0) {
-                const selectionData = this._selectionManagerService.getLastByPlugin(NORMAL_SELECTION_PLUGIN_NAME);
-                if (selectionData != null) {
-                    this._selectionManagerService.addNoRefresh([Tools.deepClone(selectionData)]);
-                }
-            }
+            // const selections = this._selectionManagerService.getSelections();
+            // if (selections == null || selections.length === 0) {
+            //     const selectionData = this._selectionManagerService.getLastByPlugin(NORMAL_SELECTION_PLUGIN_NAME);
+            //     if (selectionData != null) {
+            //         this._selectionManagerService.add([Tools.deepClone(selectionData)]);
+            //     }
+            // }
 
             const style = getNormalSelectionStyle(this._themeService);
             style.strokeDash = 8;
@@ -688,7 +684,17 @@ export class PromptController extends Disposable {
 
         const selectionWithStyle: ISelectionWithStyle[] = [];
 
-        for (const refSelection of refSelections) {
+        const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+        const worksheet = workbook?.getSheetBySheetId(sheetId);
+
+        if (worksheet == null) {
+            return;
+        }
+
+        let lastRange: Nullable<ISelectionWithStyle> = null;
+
+        for (let i = 0, len = refSelections.length; i < len; i++) {
+            const refSelection = refSelections[i];
             const { themeColor, token, refIndex } = refSelection;
 
             const gridRange = deserializeRangeWithSheet(token);
@@ -705,11 +711,39 @@ export class PromptController extends Disposable {
                 continue;
             }
 
+            const primary = this._insertSelections.find((selection) => {
+                const { startRow, startColumn, endRow, endColumn } = selection.range;
+                if (
+                    startRow === range.startRow &&
+                    startColumn === range.startColumn &&
+                    endRow === range.endRow &&
+                    endColumn === range.endColumn
+                ) {
+                    return true;
+                }
+
+                return false;
+            })?.primary;
+
+            if (primary != null) {
+                lastRange = {
+                    range,
+                    primary,
+                    style: getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
+                };
+
+                continue;
+            }
+
             selectionWithStyle.push({
                 range,
-                primary: null,
+                primary,
                 style: getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
             });
+        }
+
+        if (lastRange) {
+            selectionWithStyle.push(lastRange);
         }
 
         if (selectionWithStyle.length === 0) {
@@ -722,13 +756,19 @@ export class PromptController extends Disposable {
     private _getSheetIdByName(unitId: string, sheetName: string) {
         const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
 
-        return workbook?.getSheetBySheetName(sheetName)?.getSheetId();
+        return workbook?.getSheetBySheetName(normalizeSheetName(sheetName))?.getSheetId();
     }
 
     private _getSheetNameById(unitId: string, sheetId: string) {
         const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
 
-        return workbook?.getSheetBySheetId(sheetId)?.getName() || '';
+        let sheetName = workbook?.getSheetBySheetId(sheetId)?.getName() || '';
+
+        if (sheetName.length > 0 && includeFormulaLexerToken(sheetName)) {
+            sheetName = `'${sheetName}'`;
+        }
+
+        return sheetName;
     }
 
     private _getCurrentUnitIdAndSheetId() {
@@ -751,6 +791,37 @@ export class PromptController extends Disposable {
         };
     }
 
+    private _getRefString(range: IRange) {
+        const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
+
+        let refUnitId = '';
+        let refSheetName = '';
+
+        if (unitId === this._currentUnitId) {
+            refUnitId = '';
+        } else {
+            refUnitId = unitId;
+        }
+
+        if (sheetId === this._currentSheetId) {
+            refSheetName = '';
+        } else {
+            refSheetName = this._getSheetNameById(unitId, sheetId);
+        }
+
+        const { startRow, endRow, startColumn, endColumn } = range;
+        return serializeRangeToRefString({
+            sheetName: refSheetName,
+            unitId: refUnitId,
+            range: {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+            },
+        });
+    }
+
     /**
      * Synchronize the reference text based on the changes of the selection.
      * @param refIndex
@@ -766,15 +837,11 @@ export class PromptController extends Disposable {
             return;
         }
         const { startRow, endRow, startColumn, endColumn } = rangeWithCoord;
-        const refString = serializeRangeToRefString({
-            sheetName: '',
-            unitId: '',
-            range: {
-                startRow,
-                endRow,
-                startColumn,
-                endColumn,
-            },
+        const refString = this._getRefString({
+            startRow,
+            endRow,
+            startColumn,
+            endColumn,
         });
 
         const node = sequenceNodes[refIndex];
@@ -813,34 +880,36 @@ export class PromptController extends Disposable {
             return;
         }
 
-        const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
+        // const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
 
-        let refUnitId = '';
-        let refSheetName = '';
+        // let refUnitId = '';
+        // let refSheetName = '';
 
-        if (unitId === this._currentUnitId) {
-            refUnitId = '';
-        } else {
-            refUnitId = unitId;
-        }
+        // if (unitId === this._currentUnitId) {
+        //     refUnitId = '';
+        // } else {
+        //     refUnitId = unitId;
+        // }
 
-        if (sheetId === this._currentSheetId) {
-            refSheetName = '';
-        } else {
-            refSheetName = this._getSheetNameById(unitId, sheetId);
-        }
+        // if (sheetId === this._currentSheetId) {
+        //     refSheetName = '';
+        // } else {
+        //     refSheetName = this._getSheetNameById(unitId, sheetId);
+        // }
 
-        const { startRow, endRow, startColumn, endColumn } = range;
-        const refString = serializeRangeToRefString({
-            sheetName: refSheetName,
-            unitId: refUnitId,
-            range: {
-                startRow,
-                endRow,
-                startColumn,
-                endColumn,
-            },
-        });
+        // const { startRow, endRow, startColumn, endColumn } = range;
+        // const refString = serializeRangeToRefString({
+        //     sheetName: refSheetName,
+        //     unitId: refUnitId,
+        //     range: {
+        //         startRow,
+        //         endRow,
+        //         startColumn,
+        //         endColumn,
+        //     },
+        // });
+
+        const refString = this._getRefString(range);
 
         const refStringCount = refString.length;
 
@@ -888,17 +957,18 @@ export class PromptController extends Disposable {
         let nodeIndex = 0;
         for (let i = 0, len = sequenceNodes.length; i < len; i++) {
             const node = sequenceNodes[i];
+
+            if (typeof node === 'string') {
+                nodeIndex++;
+            } else {
+                const { endIndex } = node;
+
+                nodeIndex = endIndex;
+            }
+
             if (strIndex <= nodeIndex) {
                 return i;
             }
-            if (typeof node === 'string') {
-                nodeIndex++;
-                continue;
-            }
-
-            const { endIndex } = node;
-
-            nodeIndex = endIndex;
         }
 
         return sequenceNodes.length;
@@ -983,6 +1053,41 @@ export class PromptController extends Disposable {
         snapshot.body = newBody;
     }
 
+    private _inertControlSelectionReplace(currentRange: IRange) {
+        if (this._previousSequenceNodes == null) {
+            this._previousSequenceNodes = this._lastSequenceNodes;
+        }
+
+        if (this._previousInsertRefStringIndex == null) {
+            this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
+        }
+
+        // No new control is added, the current ref string is still modified.
+        const insertNodes = Tools.deepClone(this._previousSequenceNodes);
+        if (insertNodes == null) {
+            return;
+        }
+
+        this._insertSequenceRef(insertNodes, this._previousInsertRefStringIndex, currentRange);
+
+        this._lastSequenceNodes = insertNodes;
+
+        const selectionDatas = this._selectionRenderService.getSelectionDataWithStyle();
+
+        this._insertSelections = [];
+
+        selectionDatas.forEach((currentSelection) => {
+            const range = convertSelectionDataToRange(currentSelection);
+            this._insertSelections.push(range);
+        });
+
+        // const currentSelection = selectionDatas[selectionDatas.length - 1];
+
+        // if (currentSelection.primaryWithCoord != null) {
+        //     this._lastPrimaryCell = ;
+        // }
+    }
+
     private _inertControlSelection(ranges: IRange[]) {
         const currentRange = ranges[ranges.length - 1];
 
@@ -990,23 +1095,7 @@ export class PromptController extends Disposable {
             (ranges.length === this._previousRangesCount || this._previousRangesCount === 0) &&
             this._previousSequenceNodes != null
         ) {
-            if (this._previousSequenceNodes == null) {
-                this._previousSequenceNodes = this._lastSequenceNodes;
-            }
-
-            if (this._previousInsertRefStringIndex == null) {
-                this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
-            }
-
-            // No new control is added, the current ref string is still modified.
-            const insertNodes = Tools.deepClone(this._previousSequenceNodes);
-            if (insertNodes == null) {
-                return;
-            }
-
-            this._insertSequenceRef(insertNodes, this._previousInsertRefStringIndex, currentRange);
-
-            this._lastSequenceNodes = insertNodes;
+            this._inertControlSelectionReplace(currentRange);
         } else {
             // Holding down ctrl causes an addition, requiring the ref string to be increased.
             const insertNodes = this._lastSequenceNodes;
@@ -1015,13 +1104,11 @@ export class PromptController extends Disposable {
                 return;
             }
 
-            const current = this._getCurrentChar();
+            const char = this._getCurrentChar();
 
-            if (current == null) {
+            if (char == null) {
                 return;
             }
-
-            const { char } = current;
 
             this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
 
@@ -1046,16 +1133,44 @@ export class PromptController extends Disposable {
     private _updateRefSelectionStyle(refSelections: IRefSelection[]) {
         const controls = this._selectionRenderService.getCurrentControls();
 
-        for (let i = 0, len = controls.length; i < len; i++) {
-            const control = controls[i];
+        const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
 
+        for (let i = 0, len = refSelections.length; i < len; i++) {
             const refSelection = refSelections[i];
 
-            if (refSelection == null) {
+            const { refIndex, themeColor, token } = refSelection;
+
+            const rangeWithSheet = deserializeRangeWithSheet(token);
+
+            const { unitId: refUnitId, sheetName, range } = rangeWithSheet;
+
+            if (refUnitId != null && refUnitId.length > 0 && unitId !== refUnitId) {
                 continue;
             }
 
-            const { refIndex, themeColor, token } = refSelection;
+            const refSheetId = this._getSheetIdByName(unitId, sheetName.trim());
+
+            if (refSheetId != null && refSheetId !== sheetId) {
+                continue;
+            }
+
+            const control = controls.find((c) => {
+                const { startRow, startColumn, endRow, endColumn } = c.getRange();
+                if (
+                    startRow === range.startRow &&
+                    startColumn === range.startColumn &&
+                    endRow === range.endRow &&
+                    endColumn === range.endColumn
+                ) {
+                    return true;
+                }
+
+                return false;
+            });
+
+            if (control == null) {
+                continue;
+            }
 
             const style = getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString());
 
@@ -1120,6 +1235,17 @@ export class PromptController extends Disposable {
                         return;
                     }
 
+                    const previousRanges = this._selectionManagerService.getSelectionRanges() || [];
+
+                    if (previousRanges.length === 0) {
+                        const selectionData =
+                            this._selectionManagerService.getLastByPlugin(NORMAL_SELECTION_PLUGIN_NAME);
+                        if (selectionData != null) {
+                            const selectionDataNew = Tools.deepClone(selectionData);
+                            this._selectionManagerService.add([selectionDataNew]);
+                        }
+                    }
+
                     let direction = Direction.DOWN;
                     if (keycode === KeyCode.ARROW_DOWN) {
                         direction = Direction.DOWN;
@@ -1151,13 +1277,11 @@ export class PromptController extends Disposable {
                         });
                     }
 
-                    const ranges = this._selectionManagerService.getSelectionRanges();
+                    const ranges = this._selectionManagerService.getSelectionRanges() || [];
 
-                    if (ranges == null) {
-                        return;
-                    }
+                    const currentRange = ranges[ranges.length - 1];
 
-                    this._formulaSelectionMoving$.next(ranges);
+                    this._inertControlSelectionReplace(currentRange);
                 }
             })
         );

@@ -51,6 +51,9 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
     private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
     readonly visible$ = this._visible$.asObservable();
 
+    private readonly _afterVisible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
+    readonly afterVisible$ = this._afterVisible$.asObservable();
+
     dispose(): void {
         this._state$.complete();
         this._state = null;
@@ -68,7 +71,9 @@ export class EditorBridgeService implements IEditorBridgeService, IDisposable {
 
     changeVisible(param: IEditorBridgeServiceVisibleParam) {
         this._visible = param;
+
         this._visible$.next(this._visible);
+        this._afterVisible$.next(this._visible);
     }
 
     isVisible() {

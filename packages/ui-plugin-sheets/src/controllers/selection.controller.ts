@@ -254,16 +254,25 @@ export class SelectionController extends Disposable {
 
             this._selectionRenderService.changeRuntime(skeleton, scene, viewportMain);
 
+            /**
+             * Features like formulas can select ranges across sub-tables.
+             *  If the current pluginName is not in a normal state,
+             * the current selection will not be refreshed.
+             */
+            const current = this._selectionManagerService.getCurrent();
+            const pluginName = current?.pluginName || NORMAL_SELECTION_PLUGIN_NAME;
             this._selectionManagerService.setCurrentSelection({
-                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                pluginName,
                 unitId,
                 sheetId,
             });
 
-            // If there is no initial selection, add one by default in the top left corner.
-            const last = this._selectionManagerService.getLast();
-            if (last == null) {
-                this._selectionManagerService.add([this._getZeroRange(skeleton)]);
+            if (pluginName === NORMAL_SELECTION_PLUGIN_NAME) {
+                // If there is no initial selection, add one by default in the top left corner.
+                const last = this._selectionManagerService.getLast();
+                if (last == null) {
+                    this._selectionManagerService.add([this._getZeroRange(skeleton)]);
+                }
             }
         });
     }

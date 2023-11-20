@@ -1,11 +1,30 @@
 import { compareToken, matchToken, operatorToken, prefixToken, suffixToken } from './token';
 
+export const FORMULA_LEXER_TOKENS = [
+    ...Object.values(compareToken),
+    ...Object.values(operatorToken),
+    ...Object.values(matchToken),
+    ...Object.values(suffixToken),
+    ...Object.values(prefixToken),
+];
+
 export function isFormulaLexerToken(str: string) {
-    return (
-        Object.values(compareToken).includes(str as compareToken) ||
-        Object.values(operatorToken).includes(str as operatorToken) ||
-        Object.values(matchToken).includes(str as matchToken) ||
-        Object.values(suffixToken).includes(str as suffixToken) ||
-        Object.values(prefixToken).includes(str as prefixToken)
-    );
+    return FORMULA_LEXER_TOKENS.includes(str as compareToken);
+}
+
+export function includeFormulaLexerToken(str: string) {
+    for (const token of FORMULA_LEXER_TOKENS) {
+        if (str.indexOf(token) > -1) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+export function normalizeSheetName(sheetName: string) {
+    if (sheetName[0] === "'" && sheetName[sheetName.length - 1] === "'") {
+        return sheetName.substring(1, sheetName.length - 1);
+    }
+    return sheetName;
 }

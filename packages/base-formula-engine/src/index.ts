@@ -9,7 +9,7 @@ export type {
     IUnitSheetNameMap,
 } from './basics/common';
 export { FUNCTION_NAMES, FunctionType, type IFunctionInfo, type IFunctionParam } from './basics/function';
-export { isFormulaLexerToken } from './basics/match-token';
+export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';
 export {
     deserializeRangeWithSheet,
     serializeRange,

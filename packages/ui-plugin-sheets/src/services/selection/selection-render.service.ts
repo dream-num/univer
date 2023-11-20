@@ -65,6 +65,7 @@ export interface ISelectionRenderService {
     getActiveRangeList(): Nullable<IRange[]>;
     getActiveRange(): Nullable<IRange>;
     getActiveSelection(): Nullable<SelectionShape>;
+    getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[];
     convertSelectionRangeToData(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
     convertRangeDataToSelection(range: IRange): Nullable<IRangeWithCoord>;
     convertCellRangeToInfo(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
@@ -280,7 +281,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._activeViewport = viewport || scene.getViewports()[0];
     }
 
-    getSelectionDataWithStyle() {
+    getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[] {
         const selectionControls = this._selectionControls;
         return selectionControls.map((control) => control.getValue());
     }

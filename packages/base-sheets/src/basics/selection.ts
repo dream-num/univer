@@ -3,6 +3,7 @@ import { getCellInfoInMergeData } from '@univerjs/base-render';
 import {
     IRange,
     ISelection,
+    ISelectionCellWithCoord,
     ISelectionWithCoord,
     makeCellRangeToRangeData,
     Nullable,
@@ -180,20 +181,24 @@ export function convertSelectionDataToRange(
         style,
     };
     if (primaryWithCoord != null) {
-        const { actualRow, actualColumn, isMerged, isMergedMainCell } = primaryWithCoord;
-        const { startRow, startColumn, endRow, endColumn } = primaryWithCoord.mergeInfo;
-        result.primary = {
-            actualRow,
-            actualColumn,
-            isMerged,
-            isMergedMainCell,
-            startRow,
-            startColumn,
-            endRow,
-            endColumn,
-        };
+        result.primary = convertPrimaryWithCoordToPrimary(primaryWithCoord);
     }
     return result;
+}
+
+export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ISelectionCellWithCoord) {
+    const { actualRow, actualColumn, isMerged, isMergedMainCell } = primaryWithCoord;
+    const { startRow, startColumn, endRow, endColumn } = primaryWithCoord.mergeInfo;
+    return {
+        actualRow,
+        actualColumn,
+        isMerged,
+        isMergedMainCell,
+        startRow,
+        startColumn,
+        endRow,
+        endColumn,
+    };
 }
 
 /**

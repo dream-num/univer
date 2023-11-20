@@ -23,7 +23,7 @@ export class NumfmtService extends Disposable {
     }
 
     private _initCommands() {
-        [SetNumfmtMutation].forEach((config) => this._commandService.registerCommand(config));
+        [SetNumfmtMutation].forEach((config) => this.disposeWithMe(this._commandService.registerCommand(config)));
     }
 
     getValue(workbookId: string, worksheetId: string, row: number, col: number) {

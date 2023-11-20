@@ -20,7 +20,7 @@ export const CurrencyMenuItem = (componentManager: ComponentManager) => {
     const iconKey = 'icon-rmbSingle';
     componentManager.register(iconKey, RmbSingle);
     componentManager.register('MoreDownSingle', MoreDownSingle);
-    return (_accessor: IAccessor) => ({
+    return () => ({
         icon: iconKey,
         id: SetCurrencyCommand.id,
         title: 'numfmt.menu.currency',
@@ -34,7 +34,7 @@ export const CurrencyMenuItem = (componentManager: ComponentManager) => {
 export const AddDecimalMenuItem = (componentManager: ComponentManager) => {
     const iconKey = 'icon-addDigitsSingle';
     componentManager.register(iconKey, AddDigitsSingle);
-    return (_accessor: IAccessor) => ({
+    return () => ({
         icon: iconKey,
         id: AddDecimalCommand.id,
         title: 'numfmt.menu.add.decimal',
@@ -47,7 +47,7 @@ export const AddDecimalMenuItem = (componentManager: ComponentManager) => {
 export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
     const iconKey = 'icon-reduceDigitsSingle';
     componentManager.register(iconKey, ReduceDigitsSingle);
-    return (_accessor: IAccessor) => ({
+    return () => ({
         icon: iconKey,
         id: SubtractDecimalCommand.id,
         title: 'numfmt.menu.subtract.decimal',

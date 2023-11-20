@@ -189,7 +189,9 @@ export class NumfmtController extends Disposable {
             OpenNumfmtPanelOperator,
             CloseNumfmtPanelOperator,
             SetNumfmtCommand,
-        ].forEach((config) => this._commandService.registerCommand(config));
+        ].forEach((config) => {
+            this.disposeWithMe(this._commandService.registerCommand(config));
+        });
     }
 
     private initPanel() {
@@ -203,102 +205,106 @@ export class NumfmtController extends Disposable {
         [AddDecimalMenuItem, SubtractDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem]
             .map((factory) => factory(this._componentManager))
             .forEach((configFactory) => {
-                this._menuService.addMenuItem(configFactory(this._injector));
+                this.disposeWithMe(this._menuService.addMenuItem(configFactory(this._injector)));
             });
     }
 
     private _initInterceptorCommands() {
         const self = this;
-        this._sheetInterceptorService.interceptCommand({
-            getMutations(command) {
-                const workbookId = self._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-                const worksheetId = self._univerInstanceService
-                    .getCurrentUniverSheetInstance()
-                    .getActiveSheet()
-                    .getSheetId();
-                switch (command.id) {
-                    case SetRangeValuesCommand.id: {
-                        const list = self._collectEffectMutation.getEffects();
-                        if (!list.length) {
+        this.disposeWithMe(
+            this._sheetInterceptorService.interceptCommand({
+                getMutations(command) {
+                    const workbookId = self._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+                    const worksheetId = self._univerInstanceService
+                        .getCurrentUniverSheetInstance()
+                        .getActiveSheet()
+                        .getSheetId();
+                    switch (command.id) {
+                        case SetRangeValuesCommand.id: {
+                            const list = self._collectEffectMutation.getEffects();
+                            if (!list.length) {
+                                return {
+                                    redos: [],
+                                    undos: [],
+                                };
+                            }
+                            const redos: SetNumfmtMutationParams = {
+                                workbookId,
+                                worksheetId,
+                                values: list.map((item) => ({
+                                    pattern: item.value ? item.value.pattern : '',
+                                    row: item.row,
+                                    col: item.col,
+                                    type: item.value?.type,
+                                })),
+                            };
+                            const undos = factorySetNumfmtUndoMutation(self._injector, redos);
                             return {
-                                redos: [],
-                                undos: [],
+                                redos: [{ id: SetNumfmtMutation.id, params: redos }],
+                                undos: [{ id: SetNumfmtMutation.id, params: undos }],
                             };
                         }
-                        const redos: SetNumfmtMutationParams = {
-                            workbookId,
-                            worksheetId,
-                            values: list.map((item) => ({
-                                pattern: item.value ? item.value.pattern : '',
-                                row: item.row,
-                                col: item.col,
-                                type: item.value?.type,
-                            })),
-                        };
-                        const undos = factorySetNumfmtUndoMutation(self._injector, redos);
-                        return {
-                            redos: [{ id: SetNumfmtMutation.id, params: redos }],
-                            undos: [{ id: SetNumfmtMutation.id, params: undos }],
-                        };
                     }
-                }
-                return {
-                    redos: [],
-                    undos: [],
-                };
-            },
-        });
+                    return {
+                        redos: [],
+                        undos: [],
+                    };
+                },
+            })
+        );
     }
 
     private _initInterceptorCellContent() {
-        this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-            handler: (cell, location, next) => {
-                const workbookId = location.workbookId;
-                const sheetId = location.worksheetId;
-                const numfmtValue = this._numfmtService.getValue(workbookId, sheetId, location.row, location.col);
-                if (!numfmtValue) {
-                    return next(cell);
-                }
-                const originCellValue = location.worksheet.getCellRaw(location.row, location.col);
-                if (!originCellValue) {
-                    return next(cell);
-                }
-                // just handle number
-                if (originCellValue.t !== CellValueType.NUMBER) {
-                    return next(cell);
-                }
-
-                let numfmtRes: string = '';
-                if (numfmtValue._cache && numfmtValue._cache.parameters === originCellValue.v) {
-                    return numfmtValue._cache.result;
-                }
-
-                const info = getPatternPreview(numfmtValue.pattern, Number(originCellValue.v));
-
-                numfmtRes = info.result;
-
-                if (!numfmtRes) {
-                    return next(cell);
-                }
-
-                const res = { ...cell, v: numfmtRes };
-
-                if (info.color) {
-                    const color = this._themeService.getCurrentTheme()[`${info.color}500`];
-
-                    if (color) {
-                        res.s = { cl: { rgb: color } };
+        this.disposeWithMe(
+            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                handler: (cell, location, next) => {
+                    const workbookId = location.workbookId;
+                    const sheetId = location.worksheetId;
+                    const numfmtValue = this._numfmtService.getValue(workbookId, sheetId, location.row, location.col);
+                    if (!numfmtValue) {
+                        return next(cell);
                     }
-                }
+                    const originCellValue = location.worksheet.getCellRaw(location.row, location.col);
+                    if (!originCellValue) {
+                        return next(cell);
+                    }
+                    // just handle number
+                    if (originCellValue.t !== CellValueType.NUMBER) {
+                        return next(cell);
+                    }
 
-                numfmtValue._cache = {
-                    result: res,
-                    parameters: originCellValue.v as number,
-                };
+                    let numfmtRes: string = '';
+                    if (numfmtValue._cache && numfmtValue._cache.parameters === originCellValue.v) {
+                        return numfmtValue._cache.result;
+                    }
 
-                return res;
-            },
-        });
+                    const info = getPatternPreview(numfmtValue.pattern, Number(originCellValue.v));
+
+                    numfmtRes = info.result;
+
+                    if (!numfmtRes) {
+                        return next(cell);
+                    }
+
+                    const res = { ...cell, v: numfmtRes };
+
+                    if (info.color) {
+                        const color = this._themeService.getCurrentTheme()[`${info.color}500`];
+
+                        if (color) {
+                            res.s = { cl: { rgb: color } };
+                        }
+                    }
+
+                    numfmtValue._cache = {
+                        result: res,
+                        parameters: originCellValue.v as number,
+                    };
+
+                    return res;
+                },
+            })
+        );
     }
 
     private _initRealTimeRenderingInterceptor() {
@@ -338,52 +344,55 @@ export class NumfmtController extends Disposable {
                 });
             })
         );
-
-        selectionChangeWithPanelOpen$.subscribe(({ disposableCollection, selectionRanges }) => {
-            this.openPanel();
-            disposableCollection.add(
-                this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-                    priority: 99,
-                    handler: (cell, location, next) => {
-                        const { row, col } = location;
-                        if (
-                            selectionRanges.find(
-                                (range) =>
-                                    range.startColumn <= col &&
-                                    range.endColumn >= col &&
-                                    range.startRow <= row &&
-                                    range.endRow >= row
-                            )
-                        ) {
-                            const rawValue = location.worksheet.getCellRaw(row, col);
-                            const value = rawValue?.v;
-                            const type = rawValue?.t;
-                            if (value === undefined || value === null || type !== CellValueType.NUMBER) {
+        this.disposeWithMe(
+            toDisposable(
+                selectionChangeWithPanelOpen$.subscribe(({ disposableCollection, selectionRanges }) => {
+                    this.openPanel();
+                    disposableCollection.add(
+                        this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                            priority: 99,
+                            handler: (cell, location, next) => {
+                                const { row, col } = location;
+                                if (
+                                    selectionRanges.find(
+                                        (range) =>
+                                            range.startColumn <= col &&
+                                            range.endColumn >= col &&
+                                            range.startRow <= row &&
+                                            range.endRow >= row
+                                    )
+                                ) {
+                                    const rawValue = location.worksheet.getCellRaw(row, col);
+                                    const value = rawValue?.v;
+                                    const type = rawValue?.t;
+                                    if (value === undefined || value === null || type !== CellValueType.NUMBER) {
+                                        return next();
+                                    }
+                                    // const pattern = ''; // todo get
+                                    const info = getPatternPreview(this._previewPattern, value as number);
+                                    if (info.color) {
+                                        const colorMap = this._themeService.getCurrentTheme();
+                                        const color = colorMap[`${info.color}500`];
+                                        return {
+                                            ...cell,
+                                            v: info.result,
+                                            t: CellValueType.STRING,
+                                            s: { cl: { rgb: color } },
+                                        };
+                                    }
+                                    return {
+                                        ...cell,
+                                        v: info.result,
+                                        t: CellValueType.STRING,
+                                    };
+                                }
                                 return next();
-                            }
-                            // const pattern = ''; // todo get
-                            const info = getPatternPreview(this._previewPattern, value as number);
-                            if (info.color) {
-                                const colorMap = this._themeService.getCurrentTheme();
-                                const color = colorMap[`${info.color}500`];
-                                return {
-                                    ...cell,
-                                    v: info.result,
-                                    t: CellValueType.STRING,
-                                    s: { cl: { rgb: color } },
-                                };
-                            }
-                            return {
-                                ...cell,
-                                v: info.result,
-                                t: CellValueType.STRING,
-                            };
-                        }
-                        return next();
-                    },
+                            },
+                        })
+                    );
                 })
-            );
-        });
+            )
+        );
     }
 
     /**
@@ -392,34 +401,36 @@ export class NumfmtController extends Disposable {
      * @memberof NumfmtService
      */
     private _initInterceptorEditorStart() {
-        this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.BEFORE_CELL_EDIT, {
-            handler: (value, context, next) => {
-                const row = context.row;
-                const col = context.col;
-                const numfmtCell = this._numfmtService.getValue(context.workbookId, context.worksheetId, row, col);
-                if (numfmtCell) {
-                    const type = getPatternType(numfmtCell.pattern);
-                    switch (type) {
-                        case 'scientific':
-                        case 'percent':
-                        case 'currency':
-                        case 'grouped':
-                        case 'number': {
-                            // remove the style atr
-                            const cell = context.worksheet.getCellRaw(row, col);
-                            return cell ? filterAtr(cell, ['s']) : cell;
-                        }
-                        case 'date':
-                        case 'time':
-                        case 'datetime':
-                        default: {
-                            return next && next(value);
+        this.disposeWithMe(
+            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.BEFORE_CELL_EDIT, {
+                handler: (value, context, next) => {
+                    const row = context.row;
+                    const col = context.col;
+                    const numfmtCell = this._numfmtService.getValue(context.workbookId, context.worksheetId, row, col);
+                    if (numfmtCell) {
+                        const type = getPatternType(numfmtCell.pattern);
+                        switch (type) {
+                            case 'scientific':
+                            case 'percent':
+                            case 'currency':
+                            case 'grouped':
+                            case 'number': {
+                                // remove the style atr
+                                const cell = context.worksheet.getCellRaw(row, col);
+                                return cell ? filterAtr(cell, ['s']) : cell;
+                            }
+                            case 'date':
+                            case 'time':
+                            case 'datetime':
+                            default: {
+                                return next && next(value);
+                            }
                         }
                     }
-                }
-                return next(value);
-            },
-        });
+                    return next(value);
+                },
+            })
+        );
     }
 
     /**
@@ -428,59 +439,61 @@ export class NumfmtController extends Disposable {
      * @memberof NumfmtService
      */
     private _initInterceptorEditorEnd() {
-        this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.AFTER_CELL_EDIT, {
-            handler: (value, context, next) => {
-                // clear the effect
-                this._collectEffectMutation.clean();
-                const currentNumfmtValue = this._numfmtService.getValue(
-                    context.workbookId,
-                    context.worksheetId,
-                    context.row,
-                    context.col
-                );
-                const clean = () => {
-                    currentNumfmtValue &&
-                        this._collectEffectMutation.add(
-                            context.workbookId,
-                            context.worksheetId,
-                            context.row,
-                            context.col,
-                            null
-                        );
-                };
-                if (!value?.v) {
-                    clean();
-                    return next(value);
-                }
-
-                const content = String(value.v);
-
-                const dateInfo = numfmt.parseDate(content) || numfmt.parseTime(content);
-                const isTranslateDate = !!dateInfo;
-                if (isTranslateDate) {
-                    if (dateInfo && dateInfo.z) {
-                        const v = Number(dateInfo.v);
-                        this._collectEffectMutation.add(
-                            context.workbookId,
-                            context.worksheetId,
-                            context.row,
-                            context.col,
-                            {
-                                type: 'date',
-                                pattern: dateInfo.z,
-                            }
-                        );
-                        return { ...value, v, t: CellValueType.NUMBER };
+        this.disposeWithMe(
+            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.AFTER_CELL_EDIT, {
+                handler: (value, context, next) => {
+                    // clear the effect
+                    this._collectEffectMutation.clean();
+                    const currentNumfmtValue = this._numfmtService.getValue(
+                        context.workbookId,
+                        context.worksheetId,
+                        context.row,
+                        context.col
+                    );
+                    const clean = () => {
+                        currentNumfmtValue &&
+                            this._collectEffectMutation.add(
+                                context.workbookId,
+                                context.worksheetId,
+                                context.row,
+                                context.col,
+                                null
+                            );
+                    };
+                    if (!value?.v) {
+                        clean();
+                        return next(value);
                     }
-                } else if (
-                    ['date', 'time', 'datetime'].includes(currentNumfmtValue?.type || '') ||
-                    !isNumeric(content)
-                ) {
-                    clean();
-                }
-                return next(value);
-            },
-        });
+
+                    const content = String(value.v);
+
+                    const dateInfo = numfmt.parseDate(content) || numfmt.parseTime(content);
+                    const isTranslateDate = !!dateInfo;
+                    if (isTranslateDate) {
+                        if (dateInfo && dateInfo.z) {
+                            const v = Number(dateInfo.v);
+                            this._collectEffectMutation.add(
+                                context.workbookId,
+                                context.worksheetId,
+                                context.row,
+                                context.col,
+                                {
+                                    type: 'date',
+                                    pattern: dateInfo.z,
+                                }
+                            );
+                            return { ...value, v, t: CellValueType.NUMBER };
+                        }
+                    } else if (
+                        ['date', 'time', 'datetime'].includes(currentNumfmtValue?.type || '') ||
+                        !isNumeric(content)
+                    ) {
+                        clean();
+                    }
+                    return next(value);
+                },
+            })
+        );
     }
 
     private _registerRefRange() {

@@ -19,7 +19,7 @@ export function isIndentBySpan(span: Nullable<IDocumentSkeletonSpan>, body?: IDo
     if (paragraph == null) {
         return false;
     }
-    const paragraphStyle = paragraph.paragraphStyle;
+    const { paragraphStyle } = paragraph;
 
     if (paragraphStyle == null) {
         return false;

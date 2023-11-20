@@ -225,6 +225,7 @@ function updateParagraphs(
     }
 
     const removeParagraphs = deleteParagraphs(body, textLength, currentIndex, true);
+
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateParagraphs: IParagraph[] = [];
         for (const updateParagraph of updateDataParagraphs) {
@@ -265,6 +266,7 @@ function updateParagraphs(
 
         updateBody.paragraphs = newUpdateParagraphs;
     }
+
     insertParagraphs(body, updateBody, textLength, currentIndex);
 
     return removeParagraphs;

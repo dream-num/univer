@@ -20,8 +20,15 @@ import {
     RichTextEditingMutation,
 } from '../mutations/core-editing.mutation';
 
+// TODO: @JOCS, do not use command as event bus.
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
+    type: CommandType.COMMAND,
+    handler: async () => true,
+};
+
+export const DeleteRightCommand: ICommand = {
+    id: 'doc.command.delete-right',
     type: CommandType.COMMAND,
     handler: async () => true,
 };
@@ -97,9 +104,15 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
     },
 };
 
+export enum DeleteDirection {
+    LEFT,
+    RIGHT,
+}
+
 export interface IDeleteCommandParams {
     unitId: string;
     range: ITextRange;
+    direction: DeleteDirection;
     segmentId?: string;
 }
 
@@ -117,7 +130,8 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const { range, segmentId, unitId } = params;
+        const { range, segmentId, unitId, direction } = params;
+        const { collapsed, startOffset } = range;
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
@@ -126,7 +140,24 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             },
         };
 
-        doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
+        if (collapsed) {
+            if (startOffset > 0) {
+                doMutation.params!.mutations.push({
+                    t: 'r',
+                    len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
+                    segmentId,
+                });
+            }
+
+            doMutation.params!.mutations.push({
+                t: 'd',
+                len: 1,
+                line: 0,
+                segmentId,
+            });
+        } else {
+            doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
+        }
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,
@@ -155,7 +186,7 @@ export interface IUpdateCommandParams {
 }
 
 /**
- * The command to update text properties.
+ * The command to update text properties, mainly used in BACKSPACE.
  */
 export const UpdateCommand: ICommand<IUpdateCommandParams> = {
     id: 'doc.command.update-text',
@@ -308,11 +339,11 @@ export function getRetainAndDeleteFromReplace(
     segmentId: string = '',
     memoryCursor: number = 0
 ): Array<IRetainMutationParams | IDeleteMutationParams> {
-    const { startOffset, endOffset, collapsed } = range;
+    const { startOffset, endOffset } = range;
     const dos: Array<IRetainMutationParams | IDeleteMutationParams> = [];
 
-    const textStart = startOffset + (collapsed ? -1 : 0) - memoryCursor;
-    const textEnd = endOffset - 1 - memoryCursor;
+    const textStart = startOffset - memoryCursor;
+    const textEnd = endOffset - memoryCursor;
 
     if (textStart > 0) {
         dos.push({
@@ -324,7 +355,7 @@ export function getRetainAndDeleteFromReplace(
 
     dos.push({
         t: 'd',
-        len: textEnd - textStart + 1,
+        len: textEnd - textStart,
         line: 0,
         segmentId,
     });

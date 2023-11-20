@@ -17,6 +17,7 @@ import {
     CoverCommand,
     DeleteCommand,
     DeleteLeftCommand,
+    DeleteRightCommand,
     IMEInputCommand,
     InsertCommand,
     UpdateCommand,
@@ -37,7 +38,7 @@ import { MoveCursorOperation, MoveSelectionOperation } from './commands/operatio
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { DocClipboardController } from './controllers/clipboard.controller';
-import { DeleteLeftInputController } from './controllers/delete-left-input.controller';
+import { DeleteController } from './controllers/delete.controller';
 import { DocRenderController } from './controllers/doc-render.controller';
 import { FloatingObjectController } from './controllers/floating-object.controller';
 import { IMEInputController } from './controllers/ime-input.controller';
@@ -52,7 +53,7 @@ import { enUS } from './locale';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
-import { BreakLineShortcut, DeleteLeftShortcut } from './shortcuts/core-editing.shortcut';
+import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
 import {
     MoveCursorDownShortcut,
     MoveCursorLeftShortcut,
@@ -106,6 +107,7 @@ export class DocPlugin extends Plugin {
                 MoveCursorOperation,
                 MoveSelectionOperation,
                 DeleteLeftCommand,
+                DeleteRightCommand,
                 SetInlineFormatBoldCommand,
                 SetInlineFormatItalicCommand,
                 SetInlineFormatUnderlineCommand,
@@ -139,6 +141,7 @@ export class DocPlugin extends Plugin {
             MoveSelectionLeftShortcut,
             MoveSelectionRightShortcut,
             DeleteLeftShortcut,
+            DeleteRightShortcut,
             BreakLineShortcut,
         ].forEach((shortcut) => {
             this._injector.get(IShortcutService).registerShortcut(shortcut);
@@ -180,7 +183,7 @@ export class DocPlugin extends Plugin {
                 [TextSelectionController],
                 [NormalInputController],
                 [IMEInputController],
-                [DeleteLeftInputController],
+                [DeleteController],
                 [InlineFormatController],
                 [DocClipboardController],
                 [LineBreakInputController],

@@ -23,13 +23,16 @@ export class FormulaPlugin extends Plugin {
             [FormulaDataModel, { useFactory: () => this._injector.createInstance(FormulaDataModel, this._config) }],
             // controllers
             [FormulaController],
-            [CalculateController],
         ];
+
+        if (!this._config.notExecuteFormula) {
+            dependencies.push([CalculateController]);
+        }
 
         dependencies.forEach((dependency) => this._injector.add(dependency));
     }
 
-    override onReady(): void {
+    override onStarting(): void {
         this.initialize();
     }
 }

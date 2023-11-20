@@ -43,7 +43,9 @@ univer.registerPlugin(SheetUIPlugin);
 univer.registerPlugin(DebuggerPlugin);
 // univer.registerPlugin(NumfmtPlugin);
 // univer.registerPlugin(FindPlugin);
-univer.registerPlugin(FormulaPlugin);
+univer.registerPlugin(FormulaPlugin, {
+    notExecuteFormula: true,
+});
 univer.registerPlugin(FormulaUIPlugin);
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',

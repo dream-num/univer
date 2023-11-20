@@ -1,4 +1,9 @@
-import { IRenderManagerService, ITextRangeWithStyle, ITextSelectionRenderManager } from '@univerjs/base-render';
+import {
+    IEditorInputConfig,
+    IRenderManagerService,
+    ITextRangeWithStyle,
+    ITextSelectionRenderManager,
+} from '@univerjs/base-render';
 import {
     Disposable,
     ICommandService,
@@ -38,8 +43,6 @@ export class IMEInputController extends Disposable {
         super();
 
         this._initialize();
-
-        this._commandExecutedListener();
     }
 
     override dispose(): void {
@@ -53,9 +56,7 @@ export class IMEInputController extends Disposable {
 
         this._initialOnCompositionUpdate();
 
-        this._onEndSubscription = this._textSelectionRenderManager.onCompositionend$.subscribe((config) => {
-            this._resetIME();
-        });
+        this._initialOnCompositionend();
     }
 
     private _initialOnCompositionstart() {
@@ -76,58 +77,73 @@ export class IMEInputController extends Disposable {
 
     private _initialOnCompositionUpdate() {
         this._onUpdateSubscription = this._textSelectionRenderManager.onCompositionupdate$.subscribe(async (config) => {
-            const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
+            this._updateContent(config, true);
+        });
+    }
 
-            if (this._previousIMERange == null || config == null || skeleton == null) {
-                return;
-            }
+    private _initialOnCompositionend() {
+        this._onEndSubscription = this._textSelectionRenderManager.onCompositionend$.subscribe((config) => {
+            this._updateContent(config, false);
+        });
+    }
 
-            const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
+    private async _updateContent(config: Nullable<IEditorInputConfig>, isUpdate: boolean) {
+        const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
-            const { event, activeRange } = config;
+        if (this._previousIMERange == null || config == null || skeleton == null) {
+            return;
+        }
 
-            const { startOffset, endOffset, segmentId, style } = this._previousIMERange;
+        const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
 
-            if (skeleton == null || activeRange == null) {
-                return;
-            }
+        const { event, activeRange } = config;
 
-            const e = event as CompositionEvent;
+        const { startOffset, segmentId, style } = this._previousIMERange;
 
-            const content = e.data;
+        if (skeleton == null || activeRange == null) {
+            return;
+        }
 
-            if (content === this._previousIMEContent) {
-                return;
-            }
+        const e = event as CompositionEvent;
 
-            await this._commandService.executeCommand(IMEInputCommand.id, {
-                unitId: documentModel.getUnitId(),
-                newText: content,
-                oldTextLen: this._previousIMEContent.length,
-                range: this._previousIMERange,
-                segmentId,
-            });
+        const content = e.data;
 
-            skeleton.calculate();
+        if (content === this._previousIMEContent && isUpdate) {
+            return;
+        }
 
-            const len = content.length;
+        const len = content.length;
 
-            // move selection
-            this._textSelectionManagerService.replaceTextRanges([
-                {
-                    startOffset: startOffset + len,
-                    endOffset: endOffset + len,
-                    collapsed: true,
-                    style,
-                },
-            ]);
+        const textRanges = [
+            {
+                startOffset: startOffset + len,
+                endOffset: startOffset + len,
+                collapsed: true,
+                style,
+            },
+        ];
 
+        await this._commandService.executeCommand(IMEInputCommand.id, {
+            unitId: documentModel.getUnitId(),
+            newText: content,
+            oldTextLen: this._previousIMEContent.length,
+            range: this._previousIMERange,
+            textRanges,
+            isCompositionEnd: !isUpdate,
+            segmentId,
+        });
+
+        skeleton.calculate();
+
+        if (isUpdate) {
             if (!this._previousIMERange.collapsed) {
                 this._previousIMERange.collapsed = true;
             }
 
             this._previousIMEContent = content;
-        });
+        } else {
+            this._resetIME();
+        }
     }
 
     private _resetIME() {
@@ -135,8 +151,6 @@ export class IMEInputController extends Disposable {
 
         this._previousIMERange = null;
     }
-
-    private _commandExecutedListener() {}
 
     private _getDocObject() {
         return getDocObject(this._currentUniverService, this._renderManagerService);

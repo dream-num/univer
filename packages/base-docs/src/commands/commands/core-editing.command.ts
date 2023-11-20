@@ -1,3 +1,4 @@
+import { ITextRangeWithStyle } from '@univerjs/base-render';
 import {
     CommandType,
     createEmptyDocSnapshot,
@@ -13,6 +14,7 @@ import {
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 
+import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import {
     IDeleteMutationParams,
     IRetainMutationParams,
@@ -43,6 +45,7 @@ export interface IInsertCommandParams {
     unitId: string;
     body: IDocumentBody;
     range: ITextRange;
+    textRanges: ITextRangeWithStyle[];
     segmentId?: string;
 }
 
@@ -55,8 +58,9 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
     handler: async (accessor, params: IInsertCommandParams) => {
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
-        const { range, segmentId, body, unitId } = params;
+        const { range, segmentId, body, unitId, textRanges } = params;
         const { startOffset, collapsed } = range;
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -90,11 +94,27 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
+        textSelectionManagerService.replaceTextRanges(textRanges);
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
                 redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
+                undo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
+
+                    textSelectionManagerService.replaceTextRanges([range]);
+
+                    return true;
+                },
+                redo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
+
+                    textSelectionManagerService.replaceTextRanges(textRanges);
+
+                    return true;
+                },
             });
 
             return true;
@@ -113,6 +133,7 @@ export interface IDeleteCommandParams {
     unitId: string;
     range: ITextRange;
     direction: DeleteDirection;
+    textRanges: ITextRangeWithStyle[];
     segmentId?: string;
 }
 
@@ -121,7 +142,9 @@ export interface IDeleteCommandParams {
  */
 export const DeleteCommand: ICommand<IDeleteCommandParams> = {
     id: 'doc.command.delete-text',
+
     type: CommandType.COMMAND,
+
     handler: async (accessor, params) => {
         if (!params) {
             throw new Error();
@@ -129,8 +152,9 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
 
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
-        const { range, segmentId, unitId, direction } = params;
+        const { range, segmentId, unitId, direction, textRanges } = params;
         const { collapsed, startOffset } = range;
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -164,11 +188,27 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
+        textSelectionManagerService.replaceTextRanges(textRanges);
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
                 redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
+                undo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
+
+                    textSelectionManagerService.replaceTextRanges([range]);
+
+                    return true;
+                },
+                redo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
+
+                    textSelectionManagerService.replaceTextRanges(textRanges);
+
+                    return true;
+                },
             });
             return false;
         }
@@ -182,6 +222,7 @@ export interface IUpdateCommandParams {
     updateBody: IDocumentBody;
     range: ITextRange;
     coverType: UpdateDocsAttributeType;
+    textRanges: ITextRangeWithStyle[];
     segmentId?: string;
 }
 
@@ -190,15 +231,18 @@ export interface IUpdateCommandParams {
  */
 export const UpdateCommand: ICommand<IUpdateCommandParams> = {
     id: 'doc.command.update-text',
+
     type: CommandType.COMMAND,
+
     handler: async (accessor, params) => {
         if (!params) {
             throw new Error();
         }
 
-        const { range, segmentId, updateBody, coverType, unitId } = params;
+        const { range, segmentId, updateBody, coverType, unitId, textRanges } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -229,11 +273,27 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
+        textSelectionManagerService.replaceTextRanges(textRanges);
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
                 redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
+                undo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
+
+                    textSelectionManagerService.replaceTextRanges([range]);
+
+                    return true;
+                },
+                redo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
+
+                    textSelectionManagerService.replaceTextRanges(textRanges);
+
+                    return true;
+                },
             });
 
             return true;
@@ -244,19 +304,25 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
 };
 
 export interface IIMEInputCommandParams {
+    unitId: string;
     newText: string;
     oldTextLen: number;
     range: ITextRange;
+    textRanges: ITextRangeWithStyle[];
+    isCompositionEnd: boolean;
     segmentId?: string;
-    unitId: string;
 }
 
 export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
     id: 'doc.command.ime-input',
+
     type: CommandType.COMMAND,
+
     handler: async (accessor, params: IIMEInputCommandParams) => {
-        const { unitId, newText, oldTextLen, range, segmentId } = params;
+        const { unitId, newText, oldTextLen, range, segmentId, textRanges, isCompositionEnd } = params;
         const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -295,12 +361,89 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             segmentId,
         });
 
-        const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
-        if (!result) {
-            return false;
+        const result = commandService.syncExecuteCommand<
+            IRichTextEditingMutationParams,
+            IRichTextEditingMutationParams
+        >(doMutation.id, doMutation.params);
+
+        console.log(result);
+
+        textSelectionManagerService.replaceTextRanges(textRanges);
+
+        if (isCompositionEnd) {
+            if (result) {
+                const undoMutationParams: IRichTextEditingMutationParams = {
+                    unitId,
+                    mutations: [],
+                };
+
+                const doMutationParams: IRichTextEditingMutationParams = {
+                    unitId,
+                    mutations: [],
+                };
+
+                if (range.collapsed) {
+                    undoMutationParams.mutations.push({
+                        t: 'r',
+                        len: range.startOffset,
+                        segmentId,
+                    });
+                    doMutationParams.mutations.push({
+                        t: 'r',
+                        len: range.startOffset,
+                        segmentId,
+                    });
+                } else {
+                    undoMutationParams.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
+                    doMutationParams.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
+                }
+
+                if (newText.length) {
+                    undoMutationParams.mutations.push({
+                        t: 'd',
+                        len: newText.length,
+                        line: 0,
+                        segmentId,
+                    });
+
+                    doMutationParams.mutations.push({
+                        t: 'i',
+                        body: {
+                            dataStream: newText,
+                        },
+                        len: newText.length,
+                        line: 0,
+                        segmentId,
+                    });
+                }
+
+                undoRedoService.pushUndoRedo({
+                    unitID: unitId,
+                    undoMutations: [{ id: RichTextEditingMutation.id, params: undoMutationParams }],
+                    redoMutations: [{ id: RichTextEditingMutation.id, params: doMutationParams }],
+                    undo() {
+                        commandService.syncExecuteCommand(RichTextEditingMutation.id, undoMutationParams);
+
+                        textSelectionManagerService.replaceTextRanges([range]);
+
+                        return true;
+                    },
+                    redo() {
+                        commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutationParams);
+
+                        textSelectionManagerService.replaceTextRanges(textRanges);
+
+                        return true;
+                    },
+                });
+
+                return true;
+            }
+        } else {
+            return !!result;
         }
 
-        return true;
+        return false;
     },
 };
 
@@ -311,6 +454,7 @@ export interface ICoverCommandParams {
     clearUndoRedoStack?: boolean;
 }
 
+// Cover all content with new snapshot or empty doc, and clear undo redo stack.
 export const CoverCommand: ICommand<ICoverCommandParams> = {
     id: 'doc.command-cover-content',
     type: CommandType.COMMAND,

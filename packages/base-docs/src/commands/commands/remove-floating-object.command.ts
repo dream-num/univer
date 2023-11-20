@@ -18,7 +18,7 @@ export const RemoveDrawingCommand: ICommand = {
             return false;
         }
 
-        const documentId = params.documentId;
+        const { documentId } = params;
 
         const documentModel = univerInstanceService.getUniverDocInstance(documentId);
         if (!documentModel) return false;

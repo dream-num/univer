@@ -181,11 +181,40 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
+        const REFRESH_SELECTION_COMMAND_LIST = [
+            SetInlineFormatBoldCommand.id,
+            SetInlineFormatFontSizeCommand.id,
+            SetInlineFormatFontFamilyCommand.id,
+        ];
+
+        /**
+         * refresh selection.
+         */
+        if (REFRESH_SELECTION_COMMAND_LIST.includes(preCommandId)) {
+            textSelectionManagerService.refreshSelection();
+        }
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
                 redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
+                undo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
+                    if (REFRESH_SELECTION_COMMAND_LIST.includes(preCommandId)) {
+                        textSelectionManagerService.refreshSelection();
+                    }
+
+                    return true;
+                },
+                redo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
+                    if (REFRESH_SELECTION_COMMAND_LIST.includes(preCommandId)) {
+                        textSelectionManagerService.refreshSelection();
+                    }
+
+                    return true;
+                },
             });
 
             return true;

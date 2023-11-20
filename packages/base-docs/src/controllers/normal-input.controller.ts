@@ -66,28 +66,28 @@ export class NormalInputController extends Disposable {
 
             const { startOffset, segmentId, style } = activeRange;
 
-            await this._commandService.executeCommand(InsertCommand.id, {
-                unitId: documentModel.getUnitId(),
-                body: {
-                    dataStream: content,
-                },
-                range: activeRange,
-                segmentId,
-            });
-
-            skeleton.calculate();
-
             const len = content.length;
 
-            // move selection
-            this._textSelectionManagerService.replaceTextRanges([
+            const textRanges = [
                 {
                     startOffset: startOffset + len,
                     endOffset: startOffset + len,
                     collapsed: true,
                     style,
                 },
-            ]);
+            ];
+
+            await this._commandService.executeCommand(InsertCommand.id, {
+                unitId: documentModel.getUnitId(),
+                body: {
+                    dataStream: content,
+                },
+                range: activeRange,
+                textRanges,
+                segmentId,
+            });
+
+            skeleton.calculate();
         });
     }
 

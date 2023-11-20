@@ -17,12 +17,12 @@ export const InsertDrawingCommand: ICommand = {
             return false;
         }
 
-        const documentId = params.documentId;
+        const { documentId } = params;
 
         const documentModel = univerInstanceService.getUniverDocInstance(documentId);
         if (!documentModel) return false;
 
-        const snapshot = documentModel.snapshot;
+        const { snapshot } = documentModel;
         if (snapshot == null || snapshot.drawings == null) return false;
 
         const { objectId, drawing } = params;
@@ -45,6 +45,7 @@ export const InsertDrawingCommand: ICommand = {
                 undoMutations: [{ id: RemoveDrawingMutation.id, params: undoMutationParams }],
                 redoMutations: [{ id: InsertDrawingMutation.id, params: redoMutationParams }],
             });
+
             return true;
         }
 

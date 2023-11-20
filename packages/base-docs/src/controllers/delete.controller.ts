@@ -122,6 +122,8 @@ export class DeleteController extends Disposable {
                 return;
             }
 
+            cursor++;
+
             const paragraphIndex = paragraph?.startIndex;
 
             const updateParagraph: IParagraph = { startIndex: 0 };
@@ -146,6 +148,15 @@ export class DeleteController extends Disposable {
                 }
             }
 
+            const textRanges = [
+                {
+                    startOffset: cursor,
+                    endOffset: cursor,
+                    collapsed: true,
+                    style,
+                },
+            ];
+
             this._commandService.executeCommand(UpdateCommand.id, {
                 unitId: docsModel.getUnitId(),
                 updateBody: {
@@ -157,6 +168,7 @@ export class DeleteController extends Disposable {
                     endOffset: paragraphIndex + 1,
                     collapsed: true,
                 },
+                textRanges,
                 segmentId,
             });
         } else {
@@ -169,29 +181,25 @@ export class DeleteController extends Disposable {
                 }
             }
 
+            const textRanges = [
+                {
+                    startOffset: cursor,
+                    endOffset: cursor,
+                    collapsed: true,
+                    style,
+                },
+            ];
+
             this._commandService.executeCommand(DeleteCommand.id, {
                 unitId: docsModel.getUnitId(),
                 range: activeRange,
                 segmentId,
                 direction: DeleteDirection.LEFT,
+                textRanges,
             });
         }
 
         skeleton?.calculate();
-
-        if (isUpdateParagraph) {
-            cursor++;
-        }
-
-        // move selection
-        this._textSelectionManagerService.replaceTextRanges([
-            {
-                startOffset: cursor,
-                endOffset: cursor,
-                collapsed: true,
-                style,
-            },
-        ]);
     }
 
     private _handleDeleteRight() {
@@ -212,24 +220,24 @@ export class DeleteController extends Disposable {
             return;
         }
 
-        this._commandService.executeCommand(DeleteCommand.id, {
-            unitId: docsModel.getUnitId(),
-            range: activeRange,
-            segmentId,
-            direction: DeleteDirection.RIGHT,
-        });
-
-        skeleton?.calculate();
-
-        // move selection
-        this._textSelectionManagerService.replaceTextRanges([
+        const textRanges = [
             {
                 startOffset,
                 endOffset: startOffset,
                 collapsed: true,
                 style,
             },
-        ]);
+        ];
+
+        this._commandService.executeCommand(DeleteCommand.id, {
+            unitId: docsModel.getUnitId(),
+            range: activeRange,
+            segmentId,
+            direction: DeleteDirection.RIGHT,
+            textRanges,
+        });
+
+        skeleton?.calculate();
     }
 
     private _getDocObject() {

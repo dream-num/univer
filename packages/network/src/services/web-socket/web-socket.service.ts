@@ -2,6 +2,8 @@ import { Disposable, DisposableCollection, Nullable, toDisposable } from '@unive
 import { createIdentifier } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
+export type SocketBodyType = string | ArrayBufferLike | Blob | ArrayBufferView;
+
 /**
  * This service is responsible for establishing bidi-directional connection to a remote server.
  */
@@ -23,7 +25,7 @@ export interface ISocket {
     /**
      * Send a message to the remote server.
      */
-    send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void;
+    send(data: SocketBodyType): void;
 
     close$: Observable<[ISocket, CloseEvent]>;
     error$: Observable<[ISocket, Event]>;
@@ -46,7 +48,7 @@ export class WebSocketService extends Disposable implements ISocketService {
                     connection.close(code, reason);
                     disposables.dispose();
                 },
-                send: (data: string | ArrayBufferLike | Blob | ArrayBufferView) => {
+                send: (data: SocketBodyType) => {
                     connection.send(data);
                 },
                 open$: new Observable((subscriber) => {

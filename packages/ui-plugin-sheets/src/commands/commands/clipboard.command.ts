@@ -24,7 +24,7 @@ export const SheetCutCommand: IMultiCommand = {
     multi: true,
     priority: 1000,
     preconditions: whenEditorNotActivated,
-    handler: async (accessor, params) => {
+    handler: async (accessor) => {
         const sheetClipboardService = accessor.get(ISheetClipboardService);
         return sheetClipboardService.cut();
     },

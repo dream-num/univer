@@ -4,11 +4,13 @@
     "description": "Univer core",
     "keywords": [],
     "author": "DreamNum <developer@univer.ai>",
-    "main": "./src/index.ts",
+    "main": "./lib/cjs/index.js",
+    "module": "./lib/esm/index.js",
     "types": "./lib/index.d.ts",
     "publishConfig": {
         "access": "public",
-        "main": "./lib/index.cjs.js",
+        "main": "./lib/cjs/index.js",
+        "module": "./lib/esm/index.js",
         "exports": {
             ".": {
                 "import": "./lib/esm/index.js",

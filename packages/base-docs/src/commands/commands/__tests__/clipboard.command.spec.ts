@@ -165,6 +165,7 @@ describe('test cases in clipboard', () => {
                         },
                     ],
                 },
+                textRanges: [], // only used to eliminate TS type check error.
             };
 
             await commandService.executeCommand(InnerPasteCommand.id, commandParams);
@@ -184,6 +185,7 @@ describe('test cases in clipboard', () => {
 
             const commandParams: IInnerCutCommandParams = {
                 segmentId: '',
+                textRanges: [], // only used to eliminate TS type check error.
             };
 
             await commandService.executeCommand(InnerCutCommand.id, commandParams);

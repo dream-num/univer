@@ -1,3 +1,4 @@
+import { ITextRangeWithStyle } from '@univerjs/base-render';
 import {
     CommandType,
     ICommand,
@@ -9,20 +10,22 @@ import {
 } from '@univerjs/core';
 
 import { MemoryCursor } from '../../basics/memory-cursor';
+import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { getRetainAndDeleteFromReplace } from './core-editing.command';
 
 export interface IInnerPasteCommandParams {
     segmentId: string;
     body: IDocumentBody;
+    textRanges: ITextRangeWithStyle[];
 }
 
+// Actually, the command is to handle paste event.
 export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
     id: 'doc.command.inner-paste',
     type: CommandType.COMMAND,
     handler: async (accessor, params: IInnerPasteCommandParams) => {
-        const { segmentId, body } = params;
+        const { segmentId, body, textRanges } = params;
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -83,11 +86,27 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
+        textSelectionManagerService.replaceTextRanges(textRanges);
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
                 redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
+                undo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
+
+                    textSelectionManagerService.replaceTextRanges(selections);
+
+                    return true;
+                },
+                redo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
+
+                    textSelectionManagerService.replaceTextRanges(textRanges);
+
+                    return true;
+                },
             });
 
             return true;
@@ -99,13 +118,14 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
 
 export interface IInnerCutCommandParams {
     segmentId: string;
+    textRanges: ITextRangeWithStyle[];
 }
 
 export const InnerCutCommand: ICommand<IInnerCutCommandParams> = {
     id: 'doc.command.inner-cut',
     type: CommandType.COMMAND,
     handler: async (accessor, params: IInnerCutCommandParams) => {
-        const { segmentId } = params;
+        const { segmentId, textRanges } = params;
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -158,11 +178,27 @@ export const InnerCutCommand: ICommand<IInnerCutCommandParams> = {
             IRichTextEditingMutationParams
         >(doMutation.id, doMutation.params);
 
+        textSelectionManagerService.replaceTextRanges(textRanges);
+
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [{ id: RichTextEditingMutation.id, params: result }],
                 redoMutations: [{ id: RichTextEditingMutation.id, params: doMutation.params }],
+                undo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
+
+                    textSelectionManagerService.replaceTextRanges(selections);
+
+                    return true;
+                },
+                redo() {
+                    commandService.syncExecuteCommand(RichTextEditingMutation.id, doMutation.params);
+
+                    textSelectionManagerService.replaceTextRanges(textRanges);
+
+                    return true;
+                },
             });
 
             return true;

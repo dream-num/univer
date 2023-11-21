@@ -73,18 +73,5 @@ export class InlineFormatController extends Disposable {
             preCommandId: command.id,
             ...(command.params ?? {}),
         });
-
-        const REFRESH_SELECTION_COMMAND_LIST = [
-            SetInlineFormatBoldCommand.id,
-            SetInlineFormatFontSizeCommand.id,
-            SetInlineFormatFontFamilyCommand.id,
-        ];
-
-        /**
-         * refresh selection.
-         */
-        if (REFRESH_SELECTION_COMMAND_LIST.includes(command.id)) {
-            this._textSelectionManagerService.refreshSelection();
-        }
     }
 }

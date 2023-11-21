@@ -97,8 +97,6 @@ export class DocClipboardController extends Disposable {
         try {
             const body = await clipboard.queryClipboardData();
 
-            this._commandService.executeCommand(InnerPasteCommand.id, { body, segmentId });
-
             // When doc has multiple selections, the cursor moves to the last pasted content's end.
             let cursor = activeEndOffset;
             for (const range of ranges) {
@@ -113,15 +111,16 @@ export class DocClipboardController extends Disposable {
                 }
             }
 
-            // move selection
-            this._textSelectionManagerService.replaceTextRanges([
+            const textRanges = [
                 {
                     startOffset: cursor,
                     endOffset: cursor,
                     collapsed: true,
                     style,
                 },
-            ]);
+            ];
+
+            this._commandService.executeCommand(InnerPasteCommand.id, { body, segmentId, textRanges });
         } catch (_e) {
             this._logService.error('[DocClipboardController] clipboard is empty');
         }
@@ -243,8 +242,6 @@ export class DocClipboardController extends Disposable {
         this._handleCopy();
 
         try {
-            this._commandService.executeCommand(InnerCutCommand.id, { segmentId });
-
             let cursor = activeEndOffset;
             for (const range of ranges) {
                 const { startOffset, endOffset } = range;
@@ -258,15 +255,16 @@ export class DocClipboardController extends Disposable {
                 }
             }
 
-            // move selection
-            this._textSelectionManagerService.replaceTextRanges([
+            const textRanges = [
                 {
                     startOffset: cursor,
                     endOffset: cursor,
                     collapsed: true,
                     style,
                 },
-            ]);
+            ];
+
+            this._commandService.executeCommand(InnerCutCommand.id, { segmentId, textRanges });
         } catch (e) {
             this._logService.error('[DocClipboardController] cut content failed');
         }

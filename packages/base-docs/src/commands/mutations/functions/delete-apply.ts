@@ -44,7 +44,7 @@ export function DeleteApply(
 
     recoveryBody(bodyModel, body, deleBody); // If the last paragraph in the document is deleted, restore an initial blank document.
 
-    console.log('删除的model打印', bodyModel, body, deleBody);
+    // console.log('删除的model打印', bodyModel, body, deleBody);
 
     return deleBody;
 }

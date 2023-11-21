@@ -17,7 +17,6 @@
         "lib"
     ],
     "private": true,
-    "type": "module",
     "license": "MIT",
     "dependencies": {
         "@univerjs/core": "workspace:*"

@@ -9,7 +9,6 @@
         "lib": "lib"
     },
     "private": true,
-    "type": "module",
     "scripts": {
         "esbuild:demo": "node ./esbuild.config.mjs",
         "dev:demo": "node ./esbuild.config.mjs --watch"

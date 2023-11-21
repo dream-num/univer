@@ -218,13 +218,23 @@ function updateParagraphs(
 ) {
     const { paragraphs } = body;
 
+    console.log(JSON.stringify(paragraphs, null, 2));
+
     const { paragraphs: updateDataParagraphs } = updateBody;
+
+    console.log(JSON.stringify(updateDataParagraphs, null, 2));
+
+    console.log(textLength, currentIndex);
+
+    console.log(coverType);
 
     if (paragraphs == null || updateDataParagraphs == null) {
         return;
     }
 
     const removeParagraphs = deleteParagraphs(body, textLength, currentIndex, true);
+
+    console.log('removeParagraphs', JSON.stringify(removeParagraphs, null, 2));
 
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateParagraphs: IParagraph[] = [];

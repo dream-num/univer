@@ -229,11 +229,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
 
     type: CommandType.COMMAND,
 
-    handler: async (accessor, params) => {
-        if (!params) {
-            throw new Error();
-        }
-
+    handler: async (accessor, params: IUpdateCommandParams) => {
         const { range, segmentId, updateBody, coverType, unitId, textRanges } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);

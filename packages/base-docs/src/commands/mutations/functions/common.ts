@@ -447,32 +447,25 @@ export function deleteParagraphs(
 
     const startIndex = currentIndex;
 
-    const endIndex = currentIndex + textLength - 1;
+    const endIndex = currentIndex + textLength;
     const removeParagraphs: IParagraph[] = [];
     let removeAfterFirstNew: Nullable<IParagraph> = null;
     let isRemove = false;
+
     if (paragraphs) {
         const newParagraphs = [];
         for (let i = 0, len = paragraphs.length; i < len; i++) {
             const paragraph = paragraphs[i];
             const { startIndex: index } = paragraph;
-            // if (startIndex === endIndex && endIndex === index) {
-            //     const nextParagraph = paragraphs[i + 1];
-            //     const isBullet = checkParagraphHasBullet(nextParagraph);
-            //     const isIndent = checkParagraphHasIndent(nextParagraph);
-            //     if (isBullet && nextParagraph != null) {
-            //         delete nextParagraph.bullet;
-            //     } else if (isIndent && nextParagraph != null) {
-            //         delete nextParagraph.paragraphStyle?.hanging;
-            //         delete nextParagraph.paragraphStyle?.indentStart;
-            //     }
-            // } else
+
             if (index >= startIndex && index <= endIndex) {
                 removeParagraphs.push({
                     ...paragraph,
                     startIndex: index - currentIndex,
                 });
+
                 isRemove = true;
+
                 continue;
             } else if (index > endIndex) {
                 paragraph.startIndex -= textLength;

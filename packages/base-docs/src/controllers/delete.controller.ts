@@ -1,7 +1,6 @@
 import {
     getParagraphBySpan,
     hasListSpan,
-    IRenderManagerService,
     isFirstSpan,
     isIndentBySpan,
     isSameLine,
@@ -14,13 +13,11 @@ import {
     IParagraph,
     IUniverInstanceService,
     LifecycleStages,
-    Nullable,
     OnLifecycle,
+    UpdateDocsAttributeType,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { Subscription } from 'rxjs';
 
-import { getDocObject } from '../basics/component-tools';
 import {
     DeleteCommand,
     DeleteDirection,
@@ -33,12 +30,9 @@ import { TextSelectionManagerService } from '../services/text-selection-manager.
 
 @OnLifecycle(LifecycleStages.Rendered, DeleteController)
 export class DeleteController extends Disposable {
-    private _onInputSubscription: Nullable<Subscription>;
-
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
@@ -48,10 +42,6 @@ export class DeleteController extends Disposable {
         this._initialize();
 
         this._commandExecutedListener();
-    }
-
-    override dispose(): void {
-        this._onInputSubscription?.unsubscribe();
     }
 
     private _initialize() {}
@@ -79,6 +69,7 @@ export class DeleteController extends Disposable {
         );
     }
 
+    // Use BACKSPACE to delete left.
     private _handleDeleteLeft() {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
 
@@ -138,9 +129,11 @@ export class DeleteController extends Disposable {
                 }
             } else if (preIsIndent === true) {
                 const bullet = paragraph.bullet;
+
                 if (bullet) {
                     updateParagraph.bullet = bullet;
                 }
+
                 if (paragraphStyle != null) {
                     updateParagraph.paragraphStyle = { ...paragraphStyle };
                     delete updateParagraph.paragraphStyle.hanging;
@@ -164,11 +157,12 @@ export class DeleteController extends Disposable {
                     paragraphs: [{ ...updateParagraph }],
                 },
                 range: {
-                    startOffset: paragraphIndex + 1,
-                    endOffset: paragraphIndex + 1,
+                    startOffset: paragraphIndex,
+                    endOffset: paragraphIndex,
                     collapsed: true,
                 },
                 textRanges,
+                coverType: UpdateDocsAttributeType.REPLACE,
                 segmentId,
             });
         } else {
@@ -202,6 +196,7 @@ export class DeleteController extends Disposable {
         skeleton?.calculate();
     }
 
+    // Use DELETE to delete right.
     private _handleDeleteRight() {
         const activeRange = this._textSelectionRenderManager.getActiveRange();
 
@@ -238,9 +233,5 @@ export class DeleteController extends Disposable {
         });
 
         skeleton?.calculate();
-    }
-
-    private _getDocObject() {
-        return getDocObject(this._currentUniverService, this._renderManagerService);
     }
 }

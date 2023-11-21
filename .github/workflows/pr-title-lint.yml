@@ -46,3 +46,7 @@ jobs:
         run: pnpm install
 
       - run: echo "${{ github.event.pull_request.title }}" | pnpx commitlint -g ./commitlint.config.cjs
+
+      - name: Save PR number
+        if: ${{ always() }}
+        run: echo ${{ github.event.number }} > ./pr-id.txt

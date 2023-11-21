@@ -6,10 +6,6 @@ on:
         types:
             - completed
 
-concurrency:
-    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-    cancel-in-progress: true
-
 permissions:
     contents: read
     pull-requests: write
@@ -60,6 +56,10 @@ jobs:
             - name: 📦 Build demo
               run: pnpm run build:demo
 
+            - name: Save PR id
+              id: pr
+              run: echo "id=$(<pr-id.txt)" >> $GITHUB_OUTPUT
+
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
               id: vercel-demo
@@ -104,8 +104,8 @@ jobs:
                   status: ${{ job.status }}
                   description: |
                       CI Pipeline: Unsuccessful 📛
-                      **[View PR]**
-                      [click here](${{ github.event.pull_request.html_url }})
+                      **[PR ID]**
+                      #${{ steps.pr.outputs.id }}
                   nofail: false
                   nodetail: false
                   color: 0xd63031
@@ -115,7 +115,7 @@ jobs:
               uses: peter-evans/find-comment@v2
               id: fc
               with:
-                  issue-number: ${{ github.event.pull_request.number }}
+                  issue-number: ${{ steps.pr.outputs.id }}
                   comment-author: 'github-actions[bot]'
                   body-includes: View Deployment
 
@@ -123,7 +123,7 @@ jobs:
               uses: peter-evans/create-or-update-comment@v3
               with:
                   comment-id: ${{ steps.fc.outputs.comment-id }}
-                  issue-number: ${{ github.event.pull_request.number }}
+                  issue-number: ${{ steps.pr.outputs.id }}
                   body: |
                       ## View Deployment
                       | 📝 Doc | 📊 Sheet | 📽️ Slide |

@@ -16,10 +16,10 @@ export interface ILogService {
 export const ILogService = createIdentifier<ILogService>('univer.log');
 
 export class DesktopLogService extends Disposable implements ILogService {
-    private logEnabled = true;
+    private _logEnabled = true;
 
     log(...args: any[]): void {
-        if (!this.logEnabled || !args.length) {
+        if (!this._logEnabled || !args.length) {
             return;
         }
 
@@ -33,22 +33,22 @@ export class DesktopLogService extends Disposable implements ILogService {
     }
 
     warn(...args: any[]): void {
-        if (this.logEnabled) {
+        if (this._logEnabled) {
             console.warn(...args);
         }
     }
 
     error(...args: any[]): void {
-        if (this.logEnabled) {
+        if (this._logEnabled) {
             console.error(...args);
         }
     }
 
     toggleLogEnabled(enabled: boolean): void {
-        this.logEnabled = enabled;
+        this._logEnabled = enabled;
     }
 
     getLogEnabled(): boolean {
-        return this.logEnabled;
+        return this._logEnabled;
     }
 }

@@ -1,10 +1,10 @@
 import esbuild from 'esbuild';
 
 // eslint-disable-next-line import/no-relative-packages
-import baseConfig from '../../esbuild.config.mjs';
+import baseConfig, { postBuild } from '../../esbuild.config.mjs';
 
-['cjs', 'esm'].forEach((format) => {
-    esbuild.build({
+['cjs', 'esm'].forEach(async (format) => {
+    await esbuild.build({
         ...baseConfig,
         globalName: 'UniverPluginFormula',
         entryPoints: {
@@ -13,4 +13,6 @@ import baseConfig from '../../esbuild.config.mjs';
         outdir: `./lib/${format}`,
         format,
     });
+
+    await postBuild(format);
 });

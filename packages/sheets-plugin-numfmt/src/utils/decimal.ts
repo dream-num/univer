@@ -57,7 +57,7 @@ export const setPatternDecimal = (patterns: string, decimalLength: number) => {
         if (/0([^0]?)|0$/.test(pattern)) {
             return pattern.replace(
                 /0([^0]+)|0$/,
-                `0${decimalLength > 0 ? '.' : ''}${getDecimalString(Number(decimalLength || 0))}`
+                `0${decimalLength > 0 ? '.' : ''}${getDecimalString(Number(decimalLength || 0))}$1`
             );
         }
 

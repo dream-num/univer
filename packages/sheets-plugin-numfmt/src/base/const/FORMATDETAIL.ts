@@ -94,7 +94,7 @@ export const CURRENCYFORMAT = [
         color: 'red',
     },
     {
-        label: (suffix: string) => `-${suffix}1,235)`,
+        label: (suffix: string) => `-${suffix}1,235`,
         suffix: (suffix: string) => `"${suffix}"#,##0.00_);-"${suffix}"#,##0.00`,
     },
     {

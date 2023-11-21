@@ -1,10 +1,12 @@
 import { ITextRangeWithStyle } from '@univerjs/base-render';
 import {
     CommandType,
+    getDocsUpdateBody,
     ICommand,
     ICommandService,
     IDocumentBody,
     IMutationInfo,
+    ITextRange,
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
@@ -12,7 +14,12 @@ import {
 import { MemoryCursor } from '../../basics/memory-cursor';
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
-import { IRichTextEditingMutationParams, RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import {
+    IDeleteMutationParams,
+    IRetainMutationParams,
+    IRichTextEditingMutationParams,
+    RichTextEditingMutation,
+} from '../mutations/core-editing.mutation';
 
 export interface IInnerPasteCommandParams {
     segmentId: string;
@@ -121,9 +128,11 @@ export interface IInnerCutCommandParams {
     textRanges: ITextRangeWithStyle[];
 }
 
-export const InnerCutCommand: ICommand<IInnerCutCommandParams> = {
+export const InnerCutContentCommand: ICommand<IInnerCutCommandParams> = {
     id: 'doc.command.inner-cut',
+
     type: CommandType.COMMAND,
+
     handler: async (accessor, params: IInnerCutCommandParams) => {
         const { segmentId, textRanges } = params;
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -137,8 +146,15 @@ export const InnerCutCommand: ICommand<IInnerCutCommandParams> = {
             return false;
         }
 
-        const docsModel = currentUniverService.getCurrentUniverDocInstance();
-        const unitId = docsModel.getUnitId();
+        const unitId = currentUniverService.getCurrentUniverDocInstance().getUnitId();
+
+        const documentModel = currentUniverService.getUniverDocInstance(unitId);
+
+        const originBody = getDocsUpdateBody(documentModel!.snapshot, segmentId);
+
+        if (originBody == null) {
+            return false;
+        }
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -165,7 +181,7 @@ export const InnerCutCommand: ICommand<IInnerCutCommandParams> = {
                 });
             } else {
                 doMutation.params!.mutations.push(
-                    ...getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor)
+                    ...getRetainAndDeleteAndExcludeLineBreak(selection, originBody, segmentId, memoryCursor.cursor)
                 );
             }
 
@@ -207,3 +223,67 @@ export const InnerCutCommand: ICommand<IInnerCutCommandParams> = {
         return false;
     },
 };
+
+// If the selection contains line breaks,
+// paragraph information needs to be preserved when performing the CUT operation
+function getRetainAndDeleteAndExcludeLineBreak(
+    range: ITextRange,
+    body: IDocumentBody,
+    segmentId: string = '',
+    memoryCursor: number = 0
+): Array<IRetainMutationParams | IDeleteMutationParams> {
+    const { startOffset, endOffset } = range;
+    const dos: Array<IRetainMutationParams | IDeleteMutationParams> = [];
+
+    const { paragraphs = [] } = body;
+
+    const textStart = startOffset - memoryCursor;
+    const textEnd = endOffset - memoryCursor;
+
+    const paragraphInRange = paragraphs?.find(
+        (p) => p.startIndex - memoryCursor >= textStart && p.startIndex - memoryCursor <= textEnd
+    );
+
+    if (textStart > 0) {
+        dos.push({
+            t: 'r',
+            len: textStart,
+            segmentId,
+        });
+    }
+
+    if (paragraphInRange && paragraphInRange.startIndex - memoryCursor > textStart) {
+        const paragraphIndex = paragraphInRange.startIndex - memoryCursor;
+
+        dos.push({
+            t: 'd',
+            len: paragraphIndex - textStart,
+            line: 0,
+            segmentId,
+        });
+
+        dos.push({
+            t: 'r',
+            len: 1,
+            segmentId,
+        });
+
+        if (textEnd > paragraphIndex + 1) {
+            dos.push({
+                t: 'd',
+                len: textEnd - paragraphIndex - 1,
+                line: 0,
+                segmentId,
+            });
+        }
+    } else {
+        dos.push({
+            t: 'd',
+            len: textEnd - textStart,
+            line: 0,
+            segmentId,
+        });
+    }
+
+    return dos;
+}

@@ -18,6 +18,7 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
+import { InnerCutContentCommand } from '../commands/commands/clipboard.inner.command';
 import {
     DeleteCommand,
     DeleteDirection,
@@ -175,22 +176,31 @@ export class DeleteController extends Disposable {
                 }
             }
 
-            const textRanges = [
-                {
-                    startOffset: cursor,
-                    endOffset: cursor,
-                    collapsed: true,
-                    style,
-                },
-            ];
-
-            this._commandService.executeCommand(DeleteCommand.id, {
-                unitId: docsModel.getUnitId(),
-                range: activeRange,
-                segmentId,
-                direction: DeleteDirection.LEFT,
-                textRanges,
-            });
+            if (collapsed === true) {
+                const textRanges = [
+                    {
+                        startOffset: cursor,
+                        endOffset: cursor,
+                        collapsed: true,
+                        style,
+                    },
+                ];
+                this._commandService.executeCommand(DeleteCommand.id, {
+                    unitId: docsModel.getUnitId(),
+                    range: activeRange,
+                    segmentId,
+                    direction: DeleteDirection.LEFT,
+                    textRanges,
+                });
+            } else {
+                const textRanges = this._getTextRangesWhenDelete();
+                // If the selection is not closed, the effect of Delete and
+                // BACKSPACE is the same as CUT, so the CUT command is executed.
+                this._commandService.executeCommand(InnerCutContentCommand.id, {
+                    segmentId,
+                    textRanges,
+                });
+            }
         }
 
         skeleton?.calculate();
@@ -215,23 +225,63 @@ export class DeleteController extends Disposable {
             return;
         }
 
+        if (collapsed === true) {
+            const textRanges = [
+                {
+                    startOffset,
+                    endOffset: startOffset,
+                    collapsed: true,
+                    style,
+                },
+            ];
+
+            this._commandService.executeCommand(DeleteCommand.id, {
+                unitId: docsModel.getUnitId(),
+                range: activeRange,
+                segmentId,
+                direction: DeleteDirection.RIGHT,
+                textRanges,
+            });
+        } else {
+            const textRanges = this._getTextRangesWhenDelete();
+            // If the selection is not closed, the effect of Delete and
+            // BACKSPACE is the same as CUT, so the CUT command is executed.
+            this._commandService.executeCommand(InnerCutContentCommand.id, {
+                segmentId,
+                textRanges,
+            });
+        }
+
+        skeleton?.calculate();
+    }
+
+    private _getTextRangesWhenDelete() {
+        const activeRange = this._textSelectionRenderManager.getActiveRange()!;
+        const ranges = this._textSelectionRenderManager.getAllTextRanges();
+
+        let cursor = activeRange.endOffset;
+
+        for (const range of ranges) {
+            const { startOffset, endOffset } = range;
+
+            if (startOffset == null || endOffset == null) {
+                continue;
+            }
+
+            if (endOffset <= activeRange.endOffset) {
+                cursor -= endOffset - startOffset;
+            }
+        }
+
         const textRanges = [
             {
-                startOffset,
-                endOffset: startOffset,
+                startOffset: cursor,
+                endOffset: cursor,
                 collapsed: true,
-                style,
+                style: activeRange.style,
             },
         ];
 
-        this._commandService.executeCommand(DeleteCommand.id, {
-            unitId: docsModel.getUnitId(),
-            range: activeRange,
-            segmentId,
-            direction: DeleteDirection.RIGHT,
-            textRanges,
-        });
-
-        skeleton?.calculate();
+        return textRanges;
     }
 }

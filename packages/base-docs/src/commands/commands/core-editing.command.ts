@@ -49,7 +49,9 @@ export interface IInsertCommandParams {
  */
 export const InsertCommand: ICommand<IInsertCommandParams> = {
     id: 'doc.command.insert-text',
+
     type: CommandType.COMMAND,
+
     handler: async (accessor, params: IInsertCommandParams) => {
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
@@ -133,18 +135,14 @@ export interface IDeleteCommandParams {
 }
 
 /**
- * The command to delete text, mainly used in BACKSPACE.
+ * The command to delete text, mainly used in BACKSPACE and DELETE when collapsed is true.
  */
 export const DeleteCommand: ICommand<IDeleteCommandParams> = {
     id: 'doc.command.delete-text',
 
     type: CommandType.COMMAND,
 
-    handler: async (accessor, params) => {
-        if (!params) {
-            throw new Error();
-        }
-
+    handler: async (accessor, params: IDeleteCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -175,6 +173,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
                 segmentId,
             });
         } else {
+            // Already handle in InnerCutContentCommand, these code bellow will delete later?
             doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
         }
 

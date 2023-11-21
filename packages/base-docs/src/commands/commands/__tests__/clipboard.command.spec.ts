@@ -19,7 +19,7 @@ import { RichTextEditingMutation } from '../../mutations/core-editing.mutation';
 import {
     IInnerCutCommandParams,
     IInnerPasteCommandParams,
-    InnerCutCommand,
+    InnerCutContentCommand,
     InnerPasteCommand,
 } from '../clipboard.inner.command';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -115,7 +115,7 @@ describe('test cases in clipboard', () => {
 
         commandService = get(ICommandService);
         commandService.registerCommand(InnerPasteCommand);
-        commandService.registerCommand(InnerCutCommand);
+        commandService.registerCommand(InnerCutContentCommand);
         commandService.registerCommand(RichTextEditingMutation as unknown as ICommand);
 
         const selectionManager = get(TextSelectionManagerService);
@@ -188,7 +188,7 @@ describe('test cases in clipboard', () => {
                 textRanges: [], // only used to eliminate TS type check error.
             };
 
-            await commandService.executeCommand(InnerCutCommand.id, commandParams);
+            await commandService.executeCommand(InnerCutContentCommand.id, commandParams);
 
             expect(getTextByPosition(0, 5)).toBe(`s New`);
 

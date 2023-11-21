@@ -158,7 +158,7 @@ export class DeleteController extends Disposable {
                 },
                 range: {
                     startOffset: paragraphIndex,
-                    endOffset: paragraphIndex,
+                    endOffset: paragraphIndex + 1,
                     collapsed: true,
                 },
                 textRanges,

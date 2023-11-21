@@ -11,14 +11,8 @@ import {
     ITextRun,
     Nullable,
     sortRulesFactory,
+    Tools,
 } from '@univerjs/core';
-
-function hasIntersectionBetweenTextRuns(textRun1: ITextRun, textRun2: ITextRun) {
-    const { st: firstSt, ed: firstEd } = textRun1;
-    const { st: secondSt, ed: secondEd } = textRun2;
-
-    return firstEd >= secondSt && secondEd >= firstSt;
-}
 
 export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
@@ -36,7 +30,10 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
         }
 
         const peak = results.pop()!;
-        if (isSameStyleTextRun(textRun, peak) && hasIntersectionBetweenTextRuns(peak, textRun)) {
+        if (
+            isSameStyleTextRun(textRun, peak) &&
+            Tools.hasIntersectionBetweenTwoRanges(peak.st, peak.ed, textRun.st, textRun.ed)
+        ) {
             results.push({
                 ...textRun,
                 st: peak.st,
@@ -458,7 +455,7 @@ export function deleteParagraphs(
             const paragraph = paragraphs[i];
             const { startIndex: index } = paragraph;
 
-            if (index >= startIndex && index <= endIndex) {
+            if (index >= startIndex && index < endIndex) {
                 removeParagraphs.push({
                     ...paragraph,
                     startIndex: index - currentIndex,
@@ -467,7 +464,7 @@ export function deleteParagraphs(
                 isRemove = true;
 
                 continue;
-            } else if (index > endIndex) {
+            } else if (index >= endIndex) {
                 paragraph.startIndex -= textLength;
             }
 

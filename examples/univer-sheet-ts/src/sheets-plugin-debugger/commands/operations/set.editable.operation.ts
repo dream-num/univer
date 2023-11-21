@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { SheetPermissionService } from '@univerjs/base-sheets';
-import { CommandType, ICommand, UniverPermissionService } from '@univerjs/core';
+import { CommandType, ICommand, IUniverInstanceService, UniverPermissionService } from '@univerjs/core';
 import { IAccessor } from '@wendellhu/redi';
 
 export interface ISetEditableCommandParams {
@@ -17,8 +17,10 @@ export const SetEditable: ICommand = {
             sheetPermissionService.setSheetEditable(!editable);
         } else {
             const univerPermissionService = accessor.get(UniverPermissionService);
-            const editable = univerPermissionService.getEditable();
-            univerPermissionService.setEditable(!editable);
+            const univerInstanceService = accessor.get(IUniverInstanceService);
+            const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+            const editable = univerPermissionService.getEditable(unitId);
+            univerPermissionService.setEditable(unitId, !editable);
         }
         return true;
     },

@@ -1,9 +1,10 @@
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Inject } from '@wendellhu/redi';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { Disposable, PermissionPoint, PermissionStatus } from '../../shared';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
+import { IResourceManagerService } from '../resource-manager/type';
 
 export interface IPermissionService {
     deletePermissionPoint(id: string): void;
@@ -17,33 +18,58 @@ export const IPermissionService = createIdentifier<IPermissionService>('univer.p
 
 @OnLifecycle(LifecycleStages.Starting, PermissionService)
 export class PermissionService extends Disposable implements IPermissionService {
-    constructor(initPermissionConfig: PermissionPoint[] = []) {
+    private _permissionPointMap: Map<string, BehaviorSubject<PermissionPoint>> = new Map();
+
+    constructor(@Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService) {
         super();
-        initPermissionConfig.forEach((item) => {
-            this.permissionPointMap.set(item.id, new BehaviorSubject<PermissionPoint>(item));
+        this._init();
+    }
+
+    private _init() {
+        this._resourceManagerService.registerPluginResource<PermissionPoint[]>('permission', {
+            onChange: (value) => {
+                value.forEach((permissionPoint) => {
+                    this.addPermissionPoint(permissionPoint);
+                });
+            },
+            toJson: () => this._toJson(),
+            parseJson: (json: string) => this._parseJson(json),
         });
     }
 
-    private permissionPointMap: Map<string, BehaviorSubject<PermissionPoint>> = new Map();
+    private _toJson() {
+        const list = [...this._permissionPointMap.keys()].reduce((pre, key) => {
+            const value = this._permissionPointMap.get(key);
+            if (value) {
+                pre.push(value.getValue());
+            }
+            return pre;
+        }, [] as PermissionPoint[]);
+        return JSON.stringify(list);
+    }
+
+    private _parseJson(json: string) {
+        return JSON.parse(json);
+    }
 
     deletePermissionPoint = (id: string) => {
-        const subject = this.permissionPointMap.get(id);
+        const subject = this._permissionPointMap.get(id);
         if (subject) {
             subject.complete();
-            this.permissionPointMap.delete(id);
+            this._permissionPointMap.delete(id);
         }
     };
 
     addPermissionPoint = (item: PermissionPoint) => {
-        if (!this.permissionPointMap.has(item.id)) {
-            this.permissionPointMap.set(item.id, new BehaviorSubject(item));
+        if (!this._permissionPointMap.has(item.id)) {
+            this._permissionPointMap.set(item.id, new BehaviorSubject(item));
             return true;
         }
         return false;
     };
 
     updatePermissionPoint = (permissionId: string, value: any) => {
-        const permissionSubject = this.permissionPointMap.get(permissionId);
+        const permissionSubject = this._permissionPointMap.get(permissionId);
         if (permissionSubject) {
             const subject = permissionSubject.getValue() as PermissionPoint;
             subject.value = value;
@@ -53,7 +79,7 @@ export class PermissionService extends Disposable implements IPermissionService 
     };
 
     getPermissionPoint = (permissionId: string) => {
-        const item = this.permissionPointMap.get(permissionId);
+        const item = this._permissionPointMap.get(permissionId);
         if (item) {
             return item.getValue();
         }
@@ -62,7 +88,7 @@ export class PermissionService extends Disposable implements IPermissionService 
 
     composePermission$(permissionIdList: string[]) {
         const subjectList = permissionIdList.map((id) => {
-            const subject = this.permissionPointMap.get(id);
+            const subject = this._permissionPointMap.get(id);
             if (!subject) {
                 throw new Error(`${id} permissionPoint is not exist`);
             }
@@ -71,7 +97,7 @@ export class PermissionService extends Disposable implements IPermissionService 
         return combineLatest(subjectList).pipe(
             // Check that all permissions exist
             map((list) => {
-                if (list.every((item) => this.permissionPointMap.get(item.id))) {
+                if (list.every((item) => this._permissionPointMap.get(item.id))) {
                     return list;
                 }
                 return list;
@@ -81,7 +107,7 @@ export class PermissionService extends Disposable implements IPermissionService 
 
     composePermission(permissionIdList: string[]) {
         const valueList = permissionIdList.map((id) => {
-            const subject = this.permissionPointMap.get(id);
+            const subject = this._permissionPointMap.get(id);
             if (!subject) {
                 throw new Error(`${id} permissionPoint is not exist`);
             }

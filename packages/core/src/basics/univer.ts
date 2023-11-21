@@ -18,6 +18,8 @@ import { LocaleService } from '../services/locale/locale.service';
 import { DesktopLogService, ILogService } from '../services/log/log.service';
 import { IPermissionService, PermissionService } from '../services/permission/permission.service';
 import { UniverPermissionService } from '../services/permission/univer.permission.service';
+import { ResourceManagerService } from '../services/resource-manager/resource-manager.service';
+import { IResourceManagerService } from '../services/resource-manager/type';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
 import { GenName } from '../shared/gen-name';
@@ -193,6 +195,7 @@ export class Univer {
             [IConfigService, { useClass: ConfigService }],
             [IContextService, { useClass: ContextService }],
             [IFloatingObjectManagerService, { useClass: FloatingObjectManagerService, lazy: true }],
+            [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
         ]);
     }
 

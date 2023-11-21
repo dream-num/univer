@@ -58,6 +58,9 @@ export {
     UniverEditablePermissionPoint,
     UniverPermissionService,
 } from './services/permission';
+export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
+export type { IResourceHook } from './services/resource-manager/type';
+export { IResourceManagerService } from './services/resource-manager/type';
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
 export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 export type { IInterceptor, ISheetLocation } from './services/sheet-interceptor/utils/interceptor';

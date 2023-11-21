@@ -125,5 +125,32 @@ export const SetColumnFrozenCommand: ICommand = {
 export const CancelFrozenCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.cancel-frozen',
-    handler: async () => true,
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const worksheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+
+        const redoMutationParams: ISetFrozenMutationParams = {
+            workbookId,
+            worksheetId,
+            startRow: -1,
+            startColumn: -1,
+            xSplit: 0,
+            ySplit: 0,
+        };
+        const undoMutationParams: ISetFrozenMutationParams = SetFrozenMutationFactory(accessor, redoMutationParams);
+
+        const result = commandService.syncExecuteCommand(SetFrozenMutation.id, redoMutationParams);
+        if (result) {
+            undoRedoService.pushUndoRedo({
+                unitID: workbookId,
+                undoMutations: [{ id: SetFrozenMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetFrozenMutation.id, params: redoMutationParams }],
+            });
+            return true;
+        }
+        return true;
+    },
 };

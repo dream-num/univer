@@ -232,7 +232,7 @@ function updateParagraphs(
         return;
     }
 
-    const removeParagraphs = deleteParagraphs(body, textLength, currentIndex, true);
+    const removeParagraphs = deleteParagraphs(body, textLength, currentIndex);
 
     console.log('removeParagraphs', JSON.stringify(removeParagraphs, null, 2));
 

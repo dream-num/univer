@@ -14,7 +14,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 2,
                 ts: {
                     fs: 24,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(255, 255, 255)',
                     },
@@ -29,7 +29,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 4,
                 ts: {
                     fs: 9,
-                    ff: '"Times New Roman"',
+                    ff: 'Times New Roman',
                     cl: {
                         rgb: 'rgb(255, 255, 255)',
                     },
@@ -44,7 +44,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 6,
                 ts: {
                     fs: 24,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(255, 255, 255)',
                     },
@@ -59,7 +59,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 13,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -70,7 +70,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 15,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -81,7 +81,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 16,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -93,7 +93,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 18,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -104,7 +104,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 19,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -116,7 +116,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 20,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -127,7 +127,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 24,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -138,7 +138,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 33,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -152,7 +152,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 37,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -163,7 +163,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 42,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -181,7 +181,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 47,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(255, 255, 255)',
                     },
@@ -195,7 +195,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 61,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -206,7 +206,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 67,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(255, 192, 0)',
                     },
@@ -221,7 +221,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 87,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -232,7 +232,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 93,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(255, 192, 0)',
                     },
@@ -247,7 +247,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 94,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -258,7 +258,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 126,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -269,7 +269,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 130,
                 ts: {
                     fs: 21,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -281,7 +281,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 136,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -292,7 +292,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 142,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -303,7 +303,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 148,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -314,7 +314,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 154,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -325,7 +325,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 177,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -336,7 +336,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 183,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -351,7 +351,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 185,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -362,7 +362,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 188,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -373,7 +373,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 218,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -384,7 +384,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 222,
                 ts: {
                     fs: 21,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -396,7 +396,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 229,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -407,7 +407,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 243,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -418,7 +418,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 259,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -429,7 +429,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 267,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -445,7 +445,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 268,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -457,7 +457,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 273,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -473,7 +473,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 274,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -485,7 +485,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 277,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -501,7 +501,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 278,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -513,7 +513,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 284,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -529,7 +529,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 285,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -541,7 +541,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 290,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -557,7 +557,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 291,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -568,7 +568,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 318,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -579,7 +579,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 324,
                 ts: {
                     fs: 21,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -591,7 +591,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 337,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -602,7 +602,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 345,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -613,7 +613,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 354,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -624,7 +624,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 362,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -635,7 +635,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 401,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -646,7 +646,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 409,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -657,7 +657,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 492,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -668,7 +668,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 498,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -679,7 +679,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 523,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -690,7 +690,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 527,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },
@@ -701,7 +701,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 ed: 540,
                 ts: {
                     fs: 14,
-                    ff: 'Microsoft YaHei"',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(47, 85, 151)',
                     },

@@ -434,12 +434,7 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
     return removeTextRuns;
 }
 
-export function deleteParagraphs(
-    body: IDocumentBody,
-    textLength: number,
-    currentIndex: number,
-    closeRemoveAfterFirstNew = false
-) {
+export function deleteParagraphs(body: IDocumentBody, textLength: number, currentIndex: number) {
     const { paragraphs } = body;
 
     const startIndex = currentIndex;
@@ -474,23 +469,27 @@ export function deleteParagraphs(
                 removeAfterFirstNew = paragraph;
             }
         }
-        if (removeAfterFirstNew != null && closeRemoveAfterFirstNew === false) {
-            // When deleting a paragraph, the configuration of the paragraph
-            // in the beginning range should be retained. Due to the label design,
-            // the paragraph mark is located after the content, so when deleting,
-            // it will surround the configuration of the end range. A position update is required,
-            // and the undo time should also be considered Restoration of position
-            const removeFirst = removeParagraphs[0];
-            if (removeFirst) {
-                const newInsert = { ...removeFirst };
-                removeParagraphs.push(removeAfterFirstNew);
-                newParagraphs.splice(newParagraphs.indexOf(removeAfterFirstNew), 1, newInsert);
-                newInsert.startIndex = removeAfterFirstNew.startIndex;
-                removeAfterFirstNew.startIndex += textLength - currentIndex;
-            }
-        }
+        // if (removeAfterFirstNew != null && closeRemoveAfterFirstNew === false) {
+        //     // When deleting a paragraph, the configuration of the paragraph
+        //     // in the beginning range should be retained. Due to the label design,
+        //     // the paragraph mark is located after the content, so when deleting,
+        //     // it will surround the configuration of the end range. A position update is required,
+        //     // and the undo time should also be considered Restoration of position
+        //     const removeFirst = removeParagraphs[0];
+
+        //     if (removeFirst) {
+        //         const newInsert = { ...removeFirst };
+        //         removeParagraphs.splice(removeParagraphs.indexOf(removeFirst), 1, removeAfterFirstNew);
+        //         newParagraphs.splice(newParagraphs.indexOf(removeAfterFirstNew), 1, newInsert);
+        //         const tempIndex = newInsert.startIndex;
+        //         newInsert.startIndex = removeAfterFirstNew.startIndex;
+        //         removeAfterFirstNew.startIndex = tempIndex;
+        //     }
+        // }
+
         body.paragraphs = newParagraphs;
     }
+
     return removeParagraphs;
 }
 

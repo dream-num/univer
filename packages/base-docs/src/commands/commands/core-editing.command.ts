@@ -274,7 +274,7 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
                 undo() {
                     commandService.syncExecuteCommand(RichTextEditingMutation.id, result);
 
-                    textSelectionManagerService.replaceTextRanges([range]);
+                    textSelectionManagerService.replaceTextRanges(textRanges);
 
                     return true;
                 },

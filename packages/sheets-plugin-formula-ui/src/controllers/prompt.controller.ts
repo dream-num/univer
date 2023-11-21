@@ -324,6 +324,8 @@ export class PromptController extends Disposable {
                     this._selectionRenderService.resetStyle();
 
                     this._resetTemp();
+
+                    this._hideFunctionPanel();
                 })
             )
         );
@@ -427,117 +429,27 @@ export class PromptController extends Disposable {
         );
     }
 
-    /**
-     * If the cursor is located at a formula token,
-     * it is necessary to prohibit the behavior of closing the editor by clicking on the canvas,
-     * in order to generate reference text for the formula.
-     */
-    private _changeKeepVisibleHideState() {
-        if (this._getContextState() === false) {
-            this._disableForceKeepVisible();
-            return;
-        }
-
-        const char = this._getCurrentChar();
-
-        if (char == null) {
-            this._disableForceKeepVisible();
-            return;
-        }
-
-        if (this._matchRefDrawToken(char)) {
-            this._editorBridgeService.enableForceKeepVisible();
-
-            this._isLockedOnSelectionInsertRefString = true;
-
-            this._selectionRenderService.enableRemainLast();
-
-            if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
-                this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
-            }
-        } else {
-            this._disableForceKeepVisible();
-        }
-    }
-
-    private _matchRefDrawToken(char: string) {
-        return (
-            (isFormulaLexerToken(char) &&
-                char !== matchToken.CLOSE_BRACES &&
-                char !== matchToken.CLOSE_BRACKET &&
-                char !== matchToken.SINGLE_QUOTATION &&
-                char !== matchToken.DOUBLE_QUOTATION) ||
-            char === ' '
+    private _initAcceptFormula() {
+        this.disposeWithMe(
+            toDisposable(
+                this._formulaPromptService.acceptFormulaName$.subscribe((name: string) => {
+                    console.log(`TODO: set ${name} to cell editor`);
+                })
+            )
         );
     }
 
-    private _getCurrentChar() {
-        const activeRange = this._textSelectionRenderManager.getActiveRange();
+    private _showFunctionPanel(dataStream: string) {}
 
-        if (activeRange == null) {
-            return;
-        }
-
-        const { startOffset } = activeRange;
-
-        const body = this._getCurrentBody();
-
-        if (body == null || startOffset == null) {
-            return;
-        }
-
-        const dataStream = body.dataStream;
-
-        return dataStream[startOffset - 1];
-    }
-
-    private _disableForceKeepVisible() {
-        this._editorBridgeService.disableForceKeepVisible();
-
-        this._isLockedOnSelectionInsertRefString = false;
-
-        this._currentInsertRefStringIndex = -1;
-        this._selectionRenderService.disableRemainLast();
-
-        if (this._arrowMoveActionState === ArrowMoveAction.moveRefReady) {
-            this._arrowMoveActionState = ArrowMoveAction.exitInput;
-        }
-    }
-
-    private _getCurrentBody() {
-        const documentModel = this._currentUniverService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-        return documentModel?.snapshot?.body;
-    }
-
-    private _contextSwitch(currentInputValue: string) {
-        if (isFormulaString(currentInputValue)) {
-            this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
-
-            this._lastSequenceNodes =
-                this._formulaEngineService.buildSequenceNodes(
-                    currentInputValue.replace(/\r/g, '').replace(/\n/g, '')
-                ) || [];
-
-            const activeRange = this._textSelectionRenderManager.getActiveRange();
-
-            if (activeRange == null) {
-                return;
-            }
-
-            const { startOffset } = activeRange;
-
-            this._currentInsertRefStringIndex = startOffset - 1;
-        } else {
-            this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-            this._isLockedOnSelectionChangeRefString = false;
-            this._isLockedOnSelectionInsertRefString = false;
-
-            this._lastSequenceNodes = [];
-        }
-    }
-
-    private _getContextState() {
-        return this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA);
+    private _hideFunctionPanel() {
+        this._commandService.executeCommand(SearchFunctionOperation.id, {
+            visible: false,
+            searchText: '',
+        });
+        this._commandService.executeCommand(HelpFunctionOperation.id, {
+            visible: false,
+            paramIndex: -1,
+        });
     }
 
     // TODO@Dushusir: remove after use real text info
@@ -595,10 +507,139 @@ export class PromptController extends Disposable {
         });
     }
 
-    private _initAcceptFormula() {
-        this._formulaPromptService.acceptFormulaName$.subscribe((name: string) => {
-            console.log(`TODO: set ${name} to cell editor`);
-        });
+    /**
+     * If the cursor is located at a formula token,
+     * it is necessary to prohibit the behavior of closing the editor by clicking on the canvas,
+     * in order to generate reference text for the formula.
+     */
+    private _changeKeepVisibleHideState() {
+        if (this._getContextState() === false) {
+            this._disableForceKeepVisible();
+            return;
+        }
+
+        const char = this._getCurrentChar();
+
+        if (char == null) {
+            this._disableForceKeepVisible();
+            return;
+        }
+
+        if (this._matchRefDrawToken(char)) {
+            this._editorBridgeService.enableForceKeepVisible();
+
+            this._isLockedOnSelectionInsertRefString = true;
+
+            this._selectionRenderService.enableRemainLast();
+
+            if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
+                this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
+            }
+        } else {
+            this._disableForceKeepVisible();
+        }
+    }
+
+    /**
+     * Determine whether the character is a token keyword for the formula engine.
+     * @param char
+     * @returns
+     */
+    private _matchRefDrawToken(char: string) {
+        return (
+            (isFormulaLexerToken(char) &&
+                char !== matchToken.CLOSE_BRACES &&
+                char !== matchToken.CLOSE_BRACKET &&
+                char !== matchToken.SINGLE_QUOTATION &&
+                char !== matchToken.DOUBLE_QUOTATION) ||
+            char === ' '
+        );
+    }
+
+    /**
+     *
+     * @returns Return the character under the current cursor in the editor.
+     */
+    private _getCurrentChar() {
+        const activeRange = this._textSelectionRenderManager.getActiveRange();
+
+        if (activeRange == null) {
+            return;
+        }
+
+        const { startOffset } = activeRange;
+
+        const body = this._getCurrentBody();
+
+        if (body == null || startOffset == null) {
+            return;
+        }
+
+        const dataStream = body.dataStream;
+
+        return dataStream[startOffset - 1];
+    }
+
+    /**
+     * Disable the ref string generation mode. In the ref string generation mode,
+     * users can select a certain area using the mouse and arrow keys, and convert the area into a ref string.
+     */
+    private _disableForceKeepVisible() {
+        this._editorBridgeService.disableForceKeepVisible();
+
+        this._isLockedOnSelectionInsertRefString = false;
+
+        this._currentInsertRefStringIndex = -1;
+        this._selectionRenderService.disableRemainLast();
+
+        if (this._arrowMoveActionState === ArrowMoveAction.moveRefReady) {
+            this._arrowMoveActionState = ArrowMoveAction.exitInput;
+        }
+    }
+
+    private _getCurrentBody() {
+        const documentModel = this._currentUniverService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        return documentModel?.snapshot?.body;
+    }
+
+    /**
+     * Detect whether the user's input content is a formula. If it is a formula,
+     * serialize the current input content into a sequenceNode;
+     * otherwise, close the formula panel.
+     * @param currentInputValue The text content entered by the user in the editor.
+     * @returns
+     */
+    private _contextSwitch(currentInputValue: string) {
+        if (isFormulaString(currentInputValue)) {
+            this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
+
+            this._lastSequenceNodes =
+                this._formulaEngineService.buildSequenceNodes(
+                    currentInputValue.replace(/\r/g, '').replace(/\n/g, '')
+                ) || [];
+
+            const activeRange = this._textSelectionRenderManager.getActiveRange();
+
+            if (activeRange == null) {
+                return;
+            }
+
+            const { startOffset } = activeRange;
+
+            this._currentInsertRefStringIndex = startOffset - 1;
+        } else {
+            this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+            this._isLockedOnSelectionChangeRefString = false;
+            this._isLockedOnSelectionInsertRefString = false;
+
+            this._lastSequenceNodes = [];
+
+            this._hideFunctionPanel();
+        }
+    }
+
+    private _getContextState() {
+        return this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA);
     }
 
     /**
@@ -833,6 +874,11 @@ export class PromptController extends Disposable {
         };
     }
 
+    /**
+     * Convert the selection range to a ref string for the formula engine, such as A1:B1
+     * @param range
+     * @returns
+     */
     private _getRefString(range: IRange) {
         const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
 
@@ -921,35 +967,6 @@ export class PromptController extends Disposable {
         if (range == null) {
             return;
         }
-
-        // const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
-
-        // let refUnitId = '';
-        // let refSheetName = '';
-
-        // if (unitId === this._currentUnitId) {
-        //     refUnitId = '';
-        // } else {
-        //     refUnitId = unitId;
-        // }
-
-        // if (sheetId === this._currentSheetId) {
-        //     refSheetName = '';
-        // } else {
-        //     refSheetName = this._getSheetNameById(unitId, sheetId);
-        // }
-
-        // const { startRow, endRow, startColumn, endColumn } = range;
-        // const refString = serializeRangeToRefString({
-        //     sheetName: refSheetName,
-        //     unitId: refUnitId,
-        //     range: {
-        //         startRow,
-        //         endRow,
-        //         startColumn,
-        //         endColumn,
-        //     },
-        // });
 
         const refString = this._getRefString(range);
 

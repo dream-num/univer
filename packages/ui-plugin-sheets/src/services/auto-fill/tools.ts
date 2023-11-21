@@ -30,6 +30,7 @@ export function getEmptyCopyDataPiece(): ICopyDataPiece {
         [DATA_TYPE.CHN_NUMBER]: [],
         [DATA_TYPE.CHN_WEEK2]: [],
         [DATA_TYPE.CHN_WEEK3]: [],
+        [DATA_TYPE.FORMULA]: [],
         [DATA_TYPE.OTHER]: [],
     };
 }
@@ -631,4 +632,87 @@ export function fillLoopSeries(data: Array<Nullable<ICellData>>, len: number, st
     }
 
     return applyData;
+}
+
+// TODO@Dushusir: add step
+export function fillCopyFormula(data: Array<Nullable<ICellData>>, len: number, direction: Direction) {
+    const applyData = [];
+
+    for (let i = 1; i <= len; i++) {
+        const index = (i - 1) % data.length;
+        const d = Tools.deepClone(data[index]);
+
+        if (d) {
+            const originalFormula = data[index]?.f;
+
+            if (originalFormula) {
+                const shiftedFormula = shiftFormula(originalFormula, i, direction);
+                d.f = shiftedFormula;
+                if (direction === Direction.DOWN || direction === Direction.RIGHT) {
+                    applyData.push(d);
+                } else {
+                    applyData.unshift(d);
+                }
+            }
+        }
+    }
+
+    return applyData;
+}
+
+function shiftFormula(originalFormula: string, shift: number, direction: Direction): string {
+    const tokens = tokenizeFormula(originalFormula);
+    const shiftedTokens = [];
+
+    for (const token of tokens) {
+        if (isCellReference(token)) {
+            const shiftedReference = shiftCellReference(token, shift, direction);
+            shiftedTokens.push(shiftedReference);
+        } else {
+            shiftedTokens.push(token);
+        }
+    }
+
+    return shiftedTokens.join('');
+}
+
+function tokenizeFormula(formula: string): string[] {
+    const regex = /([A-Z]+\d+|[A-Z]+|\d+|\S)/g;
+    return formula.match(regex) || [];
+}
+
+function isCellReference(token: string): boolean {
+    const cellReferenceRegex = /^[A-Z]+\d+$/;
+    return cellReferenceRegex.test(token);
+}
+
+function shiftCellReference(cellReference: string, shift: number, direction: Direction): string {
+    const [col, row] = extractColRow(cellReference);
+
+    let shiftedCol = col;
+    let shiftedRow = row;
+
+    if (direction === Direction.DOWN) {
+        shiftedRow += shift;
+    } else if (direction === Direction.RIGHT) {
+        shiftedCol = shiftColumn(col, shift);
+    } else if (direction === Direction.UP) {
+        shiftedRow -= shift;
+    } else if (direction === Direction.LEFT) {
+        shiftedCol = shiftColumn(col, -shift);
+    }
+
+    return shiftedCol + shiftedRow;
+}
+
+function extractColRow(cellReference: string): [string, number] {
+    const col = cellReference.replace(/\d/g, '');
+    const row = parseInt(cellReference.replace(/[A-Z]+/g, ''), 10);
+    return [col, row];
+}
+
+function shiftColumn(col: string, shift: number): string {
+    const currentCharCode = col.charCodeAt(0);
+    const shiftedCharCode = currentCharCode + shift;
+    return String.fromCharCode(shiftedCharCode);
 }

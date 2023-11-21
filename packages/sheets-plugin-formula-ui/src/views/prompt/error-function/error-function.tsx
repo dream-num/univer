@@ -34,7 +34,7 @@ export function ErrorFunction() {
     return visible ? (
         <div className={styles.formulaErrorFunction} style={{ left: position.left, top: position.top }}>
             {/* TODO@Dushusir replace with CellError Component */}
-            CellError
+            {/* CellError */}
         </div>
     ) : null;
 }

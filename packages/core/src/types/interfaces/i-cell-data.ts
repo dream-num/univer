@@ -23,6 +23,9 @@ export interface ICellData {
      * Origin value
      */
     v?: Nullable<ICellV>;
+    /**
+     * @deprecated
+     */
     m?: Nullable<string>; // formatted value
     // Usually the type is automatically determined based on the data, or the user directly specifies
     t?: Nullable<CellValueType>; // 0 string, 1 number, 2 boolean, 3 force string, green icon, set null for cell clear all

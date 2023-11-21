@@ -83,10 +83,11 @@ export class CalculateController extends Disposable {
 
             const formulaString = cell?.f || '';
             const formulaId = cell?.si || '';
+            const formulaValue = cell?.v;
             if (!formulaString && formulaId) {
                 isCalculate = true;
                 cellData.setValue(r, c, { f: formulaId });
-            } else if (arrayFormCellRangeData && formulaString === '') {
+            } else if (arrayFormCellRangeData && Tools.isBlank(formulaValue)) {
                 isArrayFormula = true;
                 isCalculate = true;
 

@@ -150,33 +150,29 @@ export class EndEditController extends Disposable {
                 return;
             }
 
-            if (body.textRuns && body.textRuns.length > 1) {
+            const data = body.dataStream;
+            const lastString = data.substring(data.length - 2, data.length);
+            let newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
+
+            if (isFormulaString(newDataStream)) {
+                if (this._formulaEngineService.checkIfAddBracket(newDataStream)) {
+                    newDataStream += matchToken.CLOSE_BRACKET;
+                }
+
+                cellData.f = newDataStream;
+                cellData.v = null;
+                cellData.p = null;
+            } else if (body.textRuns && body.textRuns.length > 1) {
                 cellData.p = snapshot;
                 cellData.v = null;
                 cellData.f = null;
             } else {
-                const data = body.dataStream;
-                const lastString = data.substring(data.length - 2, data.length);
-                let newDataStream =
-                    lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
-
                 if (newDataStream === cellData.v) {
                     return;
                 }
-
-                if (isFormulaString(newDataStream)) {
-                    if (this._formulaEngineService.checkIfAddBracket(newDataStream)) {
-                        newDataStream += matchToken.CLOSE_BRACKET;
-                    }
-
-                    cellData.f = newDataStream;
-                    cellData.v = null;
-                    cellData.p = null;
-                } else {
-                    cellData.v = newDataStream;
-                    cellData.f = null;
-                    cellData.p = null;
-                }
+                cellData.v = newDataStream;
+                cellData.f = null;
+                cellData.p = null;
             }
 
             this._commandService.executeCommand(SetRangeValuesCommand.id, {

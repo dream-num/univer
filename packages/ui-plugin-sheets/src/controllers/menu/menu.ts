@@ -917,11 +917,20 @@ export function SheetFrozenMenuItemFactory(): IMenuSelectorItem<string> {
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.freeze',
         icon: 'FreezeToSelectedSingle',
-        positions: [
-            MenuPosition.CONTEXT_MENU,
-            SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
-            SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
-        ],
+        positions: [MenuPosition.CONTEXT_MENU],
+    };
+}
+
+export const SHEET_FROZEN_HEADER_MENU_ID = 'sheet.header-menu.sheet-frozen';
+
+export function SheetFrozenHeaderMenuItemFactory(): IMenuSelectorItem<string> {
+    return {
+        id: SHEET_FROZEN_HEADER_MENU_ID,
+        group: MenuGroup.CONTEXT_MENU_LAYOUT,
+        type: MenuItemType.SUBITEMS,
+        title: 'rightClick.freeze',
+        icon: 'FreezeToSelectedSingle',
+        positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
     };
 }
 
@@ -929,43 +938,28 @@ export function FrozenMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetSelectionFrozenCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SHEET_FROZEN_MENU_ID],
-        title: 'rightClick.freezeRowColumn',
+        positions: [SHEET_FROZEN_MENU_ID, SHEET_FROZEN_HEADER_MENU_ID],
+        title: 'rightClick.freeze',
         icon: 'FreezeToSelectedSingle',
     };
 }
 
-export function FrozenRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const selectionManager = accessor.get(SelectionManagerService);
+export function FrozenRowMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetRowFrozenCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SHEET_FROZEN_MENU_ID],
         title: 'rightClick.freezeRow',
-        hidden$: new Observable((observer) => {
-            const selection = selectionManager.getLast();
-            observer.next(
-                selection?.range.rangeType === RANGE_TYPE.COLUMN || selection?.range.rangeType === RANGE_TYPE.ROW
-            );
-        }),
         icon: 'FreezeRowSingle',
     };
 }
 
-export function FrozenColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    const selectionManager = accessor.get(SelectionManagerService);
+export function FrozenColMenuItemFactory(): IMenuButtonItem {
     return {
         id: SetColumnFrozenCommand.id,
         type: MenuItemType.BUTTON,
         positions: [SHEET_FROZEN_MENU_ID],
         title: 'rightClick.freezeCol',
-        hidden$: new Observable((observer) => {
-            const selection = selectionManager.getLast();
-
-            observer.next(
-                selection?.range.rangeType === RANGE_TYPE.COLUMN || selection?.range.rangeType === RANGE_TYPE.ROW
-            );
-        }),
         icon: 'FreezeColumnSingle',
     };
 }
@@ -974,7 +968,7 @@ export function CancelFrozenMenuItemFactory(): IMenuButtonItem {
     return {
         id: CancelFrozenCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SHEET_FROZEN_MENU_ID],
+        positions: [SHEET_FROZEN_MENU_ID, SHEET_FROZEN_HEADER_MENU_ID],
         title: 'rightClick.cancelFreeze',
         icon: 'CancelFreezeSingle',
     };

@@ -117,6 +117,7 @@ import {
     ResetTextColorMenuItemFactory,
     SetColWidthMenuItemFactory,
     SetRowHeightMenuItemFactory,
+    SheetFrozenHeaderMenuItemFactory,
     SheetFrozenMenuItemFactory,
     ShowColMenuItemFactory,
     ShowRowMenuItemFactory,
@@ -293,6 +294,7 @@ export class SheetUIController extends Disposable {
                 FrozenColMenuItemFactory,
                 CancelFrozenMenuItemFactory,
                 SheetFrozenMenuItemFactory,
+                SheetFrozenHeaderMenuItemFactory,
 
                 // toolbar
                 FormatPainterMenuItemFactory,

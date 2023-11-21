@@ -21,4 +21,7 @@ export interface IWorkbookData extends IExtraModelData {
     styles: IKeyType<Nullable<IStyleData>>;
     sheetOrder: string[]; // sheet id order list ['xxxx-sheet3', 'xxxx-sheet1','xxxx-sheet2']
     sheets: { [sheetId: string]: Partial<IWorksheetData> };
+
+    // The type of data depends on how the plug-in is defined
+    resources: Array<{ id: string; name: string; data?: unknown }>;
 }

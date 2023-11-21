@@ -1,9 +1,7 @@
-import path from 'node:path';
-
+import { transformFile } from '@swc/core';
 import cleanPlugin from 'esbuild-plugin-clean';
 import stylePlugin from 'esbuild-style-plugin';
-
-const nodeModules = path.resolve(process.cwd(), './node_modules');
+import { writeFileSync } from 'fs';
 
 /** @type {import('esbuild').BuildOptions} */
 export default {
@@ -20,15 +18,26 @@ export default {
                 localsConvention: 'camelCaseOnly',
                 generateScopedName: 'univer-[local]',
             },
-            renderOptions: {
-                lessOptions: {
-                    rewriteUrls: 'all',
-                    paths: [nodeModules],
-                },
-            },
         }),
     ],
     entryPoints: ['./src/index.ts'],
     define: { 'process.env.NODE_ENV': '"production"' },
     packages: 'external',
 };
+
+export async function postBuild(format) {
+    const transformOptions = {
+        jsc: {
+            parser: { syntax: 'ecmascript', tsx: false },
+            target: 'es5',
+            externalHelpers: false,
+        },
+        module: { type: 'es6' },
+        sourceMaps: false,
+        isModule: true,
+    };
+
+    const { code } = await transformFile(`${process.cwd()}/lib/${format}/index.js`, transformOptions);
+
+    writeFileSync(`${process.cwd()}/lib/${format}/index.js`, code, 'utf-8');
+}

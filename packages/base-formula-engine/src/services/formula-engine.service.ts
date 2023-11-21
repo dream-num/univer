@@ -147,8 +147,8 @@ export class FormulaEngineService extends Disposable {
         return this.lexerTreeBuilder.sequenceNodesBuilder(formulaString);
     }
 
-    getCurrentParamIndex(formulaString: string, index: number) {
-        return this.lexerTreeBuilder.getCurrentParamIndex(formulaString, index);
+    checkIfAddBracket(formulaString: string) {
+        return this.lexerTreeBuilder.checkIfAddBracket(formulaString);
     }
 
     /**
@@ -209,8 +209,6 @@ export class FormulaEngineService extends Disposable {
         console.log('lexerNode', (lexerNode as LexerNode).serialize());
 
         console.log('sequence', this.lexerTreeBuilder.sequenceNodesBuilder(formulaString));
-
-        console.log('index', this.lexerTreeBuilder.getCurrentParamIndex(formulaString, 73));
 
         // this.getObserver('onAfterFormulaLexerObservable')?.notifyObservers(lexerNode);
 

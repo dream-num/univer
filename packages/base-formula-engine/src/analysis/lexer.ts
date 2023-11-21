@@ -45,7 +45,7 @@ export class LexerTreeBuilder extends Disposable {
     private _colonState = false; // :
 
     override dispose(): void {
-        this.resetTemp();
+        this._resetTemp();
         this._currentLexerNode.dispose();
     }
 
@@ -89,8 +89,37 @@ export class LexerTreeBuilder extends Disposable {
         return this._currentLexerNode;
     }
 
-    getCurrentParamIndex(formulaString: string, index: number) {
-        return this._nodeMaker(formulaString, undefined, index);
+    checkIfAddBracket(formulaString: string) {
+        const lastString = formulaString[formulaString.length - 1];
+
+        if (lastString === matchToken.CLOSE_BRACKET) {
+            return false;
+        }
+
+        const current = this._getCurrentParamIndex(formulaString, formulaString.length - 2);
+
+        if (current == null || current === ErrorType.VALUE) {
+            return false;
+        }
+
+        const lexerNode = current[0];
+
+        if (typeof lexerNode === 'string') {
+            return false;
+        }
+
+        let parent = lexerNode.getParent();
+
+        while (parent) {
+            const token = parent.getToken();
+            if (token !== DEFAULT_TOKEN_TYPE_PARAMETER && token !== matchToken.COLON && parent.getStartIndex() !== -1) {
+                return true;
+            }
+
+            parent = parent.getParent();
+        }
+
+        return false;
     }
 
     sequenceNodesBuilder(formulaString: string) {
@@ -105,7 +134,7 @@ export class LexerTreeBuilder extends Disposable {
 
         for (let i = 0, len = sequenceArray.length; i < len; i++) {
             const item = sequenceArray[i];
-            console.log('item', item);
+            // console.log('item', item);
             const preItem = sequenceArray[i - 1];
 
             const { segment, currentString, cur } = item;
@@ -196,17 +225,21 @@ export class LexerTreeBuilder extends Disposable {
 
         const newSequenceNodes = this._mergeSequenceNodeReference(sequenceNodes);
 
-        let sequenceString = '';
-        for (const node of newSequenceNodes) {
-            if (typeof node === 'string') {
-                sequenceString += node;
-            } else {
-                sequenceString += node.token;
-            }
-        }
-        console.log('sequenceString', sequenceString);
+        // let sequenceString = '';
+        // for (const node of newSequenceNodes) {
+        //     if (typeof node === 'string') {
+        //         sequenceString += node;
+        //     } else {
+        //         sequenceString += node.token;
+        //     }
+        // }
+        // console.log('sequenceString', sequenceString);
 
         return newSequenceNodes;
+    }
+
+    private _getCurrentParamIndex(formulaString: string, index: number) {
+        return this._nodeMaker(formulaString, undefined, index);
     }
 
     private _isLastMergeString(str: string) {
@@ -595,7 +628,7 @@ export class LexerTreeBuilder extends Disposable {
         return sequenceArray;
     }
 
-    private resetTemp() {
+    private _resetTemp() {
         this._currentLexerNode = new LexerNode();
 
         this._upLevel = 0;
@@ -623,7 +656,7 @@ export class LexerTreeBuilder extends Disposable {
         const formulaStringArray = formulaString.split('');
         const formulaStringArrayCount = formulaStringArray.length;
         let cur = 0;
-        this.resetTemp();
+        this._resetTemp();
         while (cur < formulaStringArrayCount) {
             const currentString = formulaStringArray[cur];
 

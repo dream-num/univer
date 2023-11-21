@@ -116,10 +116,10 @@ export class EditorBridgeController extends Disposable {
 
             endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
 
-            let documentLayoutObject = skeleton.getCellDocumentModel(startRow, startColumn, true, true);
+            let documentLayoutObject = skeleton.getCellDocumentModelWithFormula(startRow, startColumn);
 
             if (documentLayoutObject == null || documentLayoutObject.documentModel == null) {
-                documentLayoutObject = skeleton.getBlankCellDocumentModel(startRow, startColumn, true);
+                documentLayoutObject = skeleton.getBlankCellDocumentModel(startRow, startColumn);
             }
 
             documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));

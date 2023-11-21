@@ -1,4 +1,5 @@
-import { MoveCursorOperation, TextSelectionManagerService } from '@univerjs/base-docs';
+import { MoveCursorOperation } from '@univerjs/base-docs';
+import { FormulaEngineService, matchToken } from '@univerjs/base-formula-engine';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -6,7 +7,7 @@ import {
     IPointerEvent,
     IRenderManagerService,
 } from '@univerjs/base-render';
-import { SelectionManagerService, SetRangeValuesCommand } from '@univerjs/base-sheets';
+import { SetRangeValuesCommand } from '@univerjs/base-sheets';
 import { KeyCode } from '@univerjs/base-ui';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -64,8 +65,7 @@ export class EndEditController extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @IContextService private readonly _contextService: IContextService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService
     ) {
         super();
 
@@ -152,10 +152,12 @@ export class EndEditController extends Disposable {
 
             if (body.textRuns && body.textRuns.length > 1) {
                 cellData.p = snapshot;
+                cellData.v = null;
+                cellData.f = null;
             } else {
                 const data = body.dataStream;
                 const lastString = data.substring(data.length - 2, data.length);
-                const newDataStream =
+                let newDataStream =
                     lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
 
                 if (newDataStream === cellData.v) {
@@ -163,10 +165,17 @@ export class EndEditController extends Disposable {
                 }
 
                 if (isFormulaString(newDataStream)) {
+                    if (this._formulaEngineService.checkIfAddBracket(newDataStream)) {
+                        newDataStream += matchToken.CLOSE_BRACKET;
+                    }
+
                     cellData.f = newDataStream;
+                    cellData.v = null;
+                    cellData.p = null;
                 } else {
                     cellData.v = newDataStream;
-                    cellData.m = newDataStream;
+                    cellData.f = null;
+                    cellData.p = null;
                 }
             }
 

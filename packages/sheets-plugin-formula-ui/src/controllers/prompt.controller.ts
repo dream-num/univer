@@ -1,4 +1,4 @@
-import { TextSelectionManagerService } from '@univerjs/base-docs';
+import { MoveCursorOperation, TextSelectionManagerService } from '@univerjs/base-docs';
 import {
     deserializeRangeWithSheet,
     FormulaEngineService,
@@ -12,6 +12,7 @@ import {
     serializeRangeToRefString,
 } from '@univerjs/base-formula-engine';
 import {
+    DeviceInputEventType,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IRenderManagerService,
@@ -87,7 +88,15 @@ interface IRefSelection {
     token: string;
 }
 
-@OnLifecycle(LifecycleStages.Starting, PromptController)
+enum ArrowMoveAction {
+    InitialState,
+    moveCursor,
+    moveRefReady,
+    movingRef,
+    exitInput,
+}
+
+@OnLifecycle(LifecycleStages.Steady, PromptController)
 export class PromptController extends Disposable {
     private _formulaRefColors: string[] = [];
 
@@ -110,6 +119,8 @@ export class PromptController extends Disposable {
     private _currentSheetId: Nullable<string>;
 
     private _isSelectionMoving: boolean = false;
+
+    private _arrowMoveActionState: ArrowMoveAction = ArrowMoveAction.InitialState;
 
     private _isSelectionMovingRefSelections: IRefSelection[] = [];
 
@@ -184,6 +195,8 @@ export class PromptController extends Disposable {
         this._initialEditorInputChange();
 
         this._commandExecutedListener();
+
+        this._cursorStateListener();
     }
 
     private _initialFormulaTheme() {
@@ -246,11 +259,24 @@ export class PromptController extends Disposable {
     private _initialEditorInputChange() {
         this.disposeWithMe(
             toDisposable(
-                this._textSelectionRenderManager.onInputBefore$.subscribe(() => {
+                this._textSelectionRenderManager.onInputBefore$.subscribe((param) => {
                     this._previousSequenceNodes = null;
                     this._previousInsertRefStringIndex = null;
 
                     this._selectionRenderService.enableSkipRemainLast();
+
+                    const e = param?.event as KeyboardEvent;
+                    if (e == null) {
+                        return;
+                    }
+                    if (
+                        ![KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT].includes(
+                            e.which
+                        ) &&
+                        this._arrowMoveActionState !== ArrowMoveAction.moveCursor
+                    ) {
+                        this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
+                    }
                 })
             )
         );
@@ -278,14 +304,22 @@ export class PromptController extends Disposable {
                      * Switching the selection of PluginName causes a refresh.
                      * Here, a delay is added to prevent the loss of content when pressing enter.
                      */
-                    if (this._getContextState() === true) {
-                        this._selectionManagerService.clear();
-                        this._selectionManagerService.changePlugin(NORMAL_SELECTION_PLUGIN_NAME);
+
+                    const current = this._selectionManagerService.getCurrent();
+
+                    if (current?.pluginName === NORMAL_SELECTION_PLUGIN_NAME) {
+                        this._disableForceKeepVisible();
+                        return;
                     }
+
+                    this._selectionManagerService.clear();
+                    this._selectionManagerService.changePlugin(NORMAL_SELECTION_PLUGIN_NAME);
+
+                    this._updateEditorModel('\r\n', []);
 
                     this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
 
-                    this._changeKeepVisibleHideState();
+                    this._disableForceKeepVisible();
 
                     this._selectionRenderService.resetStyle();
 
@@ -417,6 +451,10 @@ export class PromptController extends Disposable {
             this._isLockedOnSelectionInsertRefString = true;
 
             this._selectionRenderService.enableRemainLast();
+
+            if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
+                this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
+            }
         } else {
             this._disableForceKeepVisible();
         }
@@ -460,6 +498,10 @@ export class PromptController extends Disposable {
 
         this._currentInsertRefStringIndex = -1;
         this._selectionRenderService.disableRemainLast();
+
+        if (this._arrowMoveActionState === ArrowMoveAction.moveRefReady) {
+            this._arrowMoveActionState = ArrowMoveAction.exitInput;
+        }
     }
 
     private _getCurrentBody() {
@@ -1127,6 +1169,8 @@ export class PromptController extends Disposable {
             this._selectionRenderService.disableSkipRemainLast();
         }
 
+        this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
+
         this._previousRangesCount = ranges.length;
     }
 
@@ -1216,6 +1260,28 @@ export class PromptController extends Disposable {
         documentComponent?.makeDirty();
     }
 
+    private _cursorStateListener() {
+        /**
+         * The user's operations follow the sequence of opening the editor and then moving the cursor.
+         * The logic here predicts the user's first cursor movement behavior based on this rule
+         */
+
+        const editorObject = this._getEditorObject();
+
+        if (editorObject == null) {
+            return;
+        }
+
+        const { document: documentComponent } = editorObject;
+        this.disposeWithMe(
+            toDisposable(
+                documentComponent.onPointerDownObserver.add(() => {
+                    this._arrowMoveActionState = ArrowMoveAction.moveCursor;
+                })
+            )
+        );
+    }
+
     private _commandExecutedListener() {
         // Listen to document edits to refresh the size of the editor.
         const updateCommandList = [SelectEditorFormulaOperation.id];
@@ -1227,12 +1293,43 @@ export class PromptController extends Disposable {
                     const { keycode, metaKey } = params;
 
                     if (keycode === KeyCode.ENTER) {
-                        console.log('ENTER');
+                        this._editorBridgeService.changeVisible({
+                            visible: false,
+                            eventType: DeviceInputEventType.Keyboard,
+                            keycode,
+                        });
+                        this._commandService.executeCommand(MoveSelectionCommand.id, {
+                            direction: Direction.DOWN,
+                        });
                         return;
                     }
                     if (keycode === KeyCode.TAB) {
-                        console.log('TAB');
+                        this._editorBridgeService.changeVisible({
+                            visible: false,
+                            eventType: DeviceInputEventType.Keyboard,
+                            keycode,
+                        });
+                        this._commandService.executeCommand(MoveSelectionCommand.id, {
+                            direction: Direction.RIGHT,
+                        });
                         return;
+                    }
+
+                    if (this._arrowMoveActionState === ArrowMoveAction.moveCursor) {
+                        this._moveInEditor(keycode);
+                        return;
+                    }
+                    if (this._arrowMoveActionState === ArrowMoveAction.exitInput) {
+                        this._editorBridgeService.changeVisible({
+                            visible: false,
+                            eventType: DeviceInputEventType.Keyboard,
+                            keycode,
+                        });
+                        return;
+                    }
+
+                    if (this._arrowMoveActionState === ArrowMoveAction.moveRefReady) {
+                        this._arrowMoveActionState = ArrowMoveAction.movingRef;
                     }
 
                     const previousRanges = this._selectionManagerService.getSelectionRanges() || [];
@@ -1285,6 +1382,24 @@ export class PromptController extends Disposable {
                 }
             })
         );
+    }
+
+    private _moveInEditor(keycode: Nullable<KeyCode>) {
+        if (keycode == null) {
+            return;
+        }
+        let direction = Direction.LEFT;
+        if (keycode === KeyCode.ARROW_DOWN) {
+            direction = Direction.DOWN;
+        } else if (keycode === KeyCode.ARROW_UP) {
+            direction = Direction.UP;
+        } else if (keycode === KeyCode.ARROW_RIGHT) {
+            direction = Direction.RIGHT;
+        }
+
+        this._commandService.executeCommand(MoveCursorOperation.id, {
+            direction,
+        });
     }
 
     private _getEditorObject() {

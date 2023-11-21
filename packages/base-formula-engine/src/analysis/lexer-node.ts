@@ -41,6 +41,10 @@ export class LexerNode {
         this._parent = null;
     }
 
+    getStartIndex() {
+        return this._startIndex;
+    }
+
     getLambdaId() {
         return this._lambdaId;
     }

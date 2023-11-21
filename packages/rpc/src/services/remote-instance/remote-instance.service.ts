@@ -8,20 +8,21 @@ import {
 } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-// TODO@wzhudev: add some notes here. Even I cannot understand the code in 10 seconds after days.
-
 export interface IRemoteSyncMutationOptions extends IExecutionOptions {
     /** If this mutation is executed after it was sent from the peer univer instance. */
     fromSync?: boolean;
 }
 
 export const RemoteSyncServiceName = 'univer.remote-sync-service';
-/** This service is provided by the primary Univer.. */
+/**
+ * This service is provided by the primary Univer.
+ *
+ * Replica Univer could call this service to update mutations back to the primary Univer.
+ */
 export const IRemoteSyncService = createIdentifier<IRemoteSyncService>(RemoteSyncServiceName);
 export interface IRemoteSyncService {
     syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean>;
 }
-
 export class RemoteSyncPrimaryService implements IRemoteSyncService {
     constructor(@ICommandService private readonly _commandService: ICommandService) {}
 
@@ -34,18 +35,18 @@ export class RemoteSyncPrimaryService implements IRemoteSyncService {
 }
 
 export const RemoteInstanceServiceName = 'univer.remote-instance-service';
-/** This service is provided by the replica Univer. */
+/**
+ * This service is provided by the replica Univer.
+ *
+ * Primary univer could call this service to init and dispose univer business instances
+ * and sync mutations to replica univer.
+ */
 export const IRemoteInstanceService = createIdentifier<IRemoteInstanceService>(RemoteInstanceServiceName);
 export interface IRemoteInstanceService {
     createInstance(params: { unitID: string; type: DocumentType; snapshot: IWorkbookData }): Promise<boolean>;
     disposeInstance(params: { unitID: string }): Promise<boolean>;
     syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean>;
 }
-
-/**
- * This service runs on replica Univer and is responsible for syncing data
- * between the replica and the primary Univer.
- */
 export class RemoteInstanceReplicaService implements IRemoteInstanceService {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

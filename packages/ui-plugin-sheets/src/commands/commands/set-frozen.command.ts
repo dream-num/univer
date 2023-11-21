@@ -14,14 +14,24 @@ import {
     IUniverInstanceService,
     RANGE_TYPE,
 } from '@univerjs/core';
-import { IAccessor } from '@wendellhu/redi';
 
 import { ScrollManagerService } from '../../services/scroll-manager.service';
 
-export const SetSelectionFrozenCommand: ICommand = {
+export enum SetSelectionFrozenType {
+    RowColumn = 0,
+    Row = 1,
+    Column = 2,
+}
+
+export type ISetSelectionFrozenCommandParams = {
+    type?: SetSelectionFrozenType;
+};
+
+export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-selection-frozen',
-    handler: async (accessor: IAccessor) => {
+    handler: async (accessor, params) => {
+        const { type } = params || {};
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const workbookId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
@@ -42,13 +52,13 @@ export const SetSelectionFrozenCommand: ICommand = {
         let xSplit;
         const { startRow: selectRow, startColumn: selectColumn, rangeType } = range;
         // Frozen to Row
-        if (rangeType === RANGE_TYPE.ROW) {
+        if (rangeType === RANGE_TYPE.ROW || type === SetSelectionFrozenType.Row) {
             startRow = selectRow;
             ySplit = selectRow - sheetViewStartRow;
             startColumn = -1;
             xSplit = 0;
             // Frozen to Column
-        } else if (rangeType === RANGE_TYPE.COLUMN) {
+        } else if (rangeType === RANGE_TYPE.COLUMN || type === SetSelectionFrozenType.Column) {
             startRow = -1;
             ySplit = 0;
             startColumn = selectColumn;
@@ -84,4 +94,36 @@ export const SetSelectionFrozenCommand: ICommand = {
         }
         return true;
     },
+};
+
+export const SetRowFrozenCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-row-frozen',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        commandService.executeCommand(SetSelectionFrozenCommand.id, {
+            type: SetSelectionFrozenType.Row,
+        });
+
+        return true;
+    },
+};
+
+export const SetColumnFrozenCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-col-frozen',
+    handler: async (accessor) => {
+        const commandService = accessor.get(ICommandService);
+        commandService.executeCommand(SetSelectionFrozenCommand.id, {
+            type: SetSelectionFrozenType.Column,
+        });
+
+        return true;
+    },
+};
+
+export const CancelFrozenCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.cancel-frozen',
+    handler: async () => true,
 };

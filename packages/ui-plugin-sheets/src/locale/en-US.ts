@@ -500,6 +500,10 @@ export default {
         generateNewMatrix: 'Generate new matrix',
         fitContent: 'Fit for data',
         freeze: 'Freeze',
+        freezeCol: 'Freeze column',
+        freezeRow: 'Freeze row',
+        cancelFreeze: 'Cancel freeze',
+        freezeRowColumn: 'Freeze row and column',
     },
     info: {
         tooltip: 'Tooltip',

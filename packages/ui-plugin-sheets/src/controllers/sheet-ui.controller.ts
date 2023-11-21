@@ -35,7 +35,12 @@ import {
     SetInfiniteFormatPainterCommand,
     SetOnceFormatPainterCommand,
 } from '../commands/commands/set-format-painter.command';
-import { SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
+import {
+    CancelFrozenCommand,
+    SetColumnFrozenCommand,
+    SetRowFrozenCommand,
+    SetSelectionFrozenCommand,
+} from '../commands/commands/set-frozen.command';
 import { ScrollCommand, SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
 import {
     ExpandSelectionCommand,
@@ -94,12 +99,15 @@ import {
 import {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
+    CancelFrozenMenuItemFactory,
     CopyMenuItemFactory,
     FitContentMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
     FormatPainterMenuItemFactory,
+    FrozenColMenuItemFactory,
     FrozenMenuItemFactory,
+    FrozenRowMenuItemFactory,
     HideColMenuItemFactory,
     HideRowMenuItemFactory,
     HorizontalAlignMenuItemFactory,
@@ -109,6 +117,7 @@ import {
     ResetTextColorMenuItemFactory,
     SetColWidthMenuItemFactory,
     SetRowHeightMenuItemFactory,
+    SheetFrozenMenuItemFactory,
     ShowColMenuItemFactory,
     ShowRowMenuItemFactory,
     StrikeThroughMenuItemFactory,
@@ -235,6 +244,9 @@ export class SheetUIController extends Disposable {
             SetScrollOperation,
             SetScrollRelativeCommand,
             SetSelectionFrozenCommand,
+            SetRowFrozenCommand,
+            SetColumnFrozenCommand,
+            CancelFrozenCommand,
             SetSelectionsOperation,
             SetUnderlineCommand,
             SetZoomRatioCommand,
@@ -277,6 +289,10 @@ export class SheetUIController extends Disposable {
                 InsertRangeMoveRightMenuItemFactory,
                 InsertRangeMoveDownMenuItemFactory,
                 FrozenMenuItemFactory,
+                FrozenRowMenuItemFactory,
+                FrozenColMenuItemFactory,
+                CancelFrozenMenuItemFactory,
+                SheetFrozenMenuItemFactory,
 
                 // toolbar
                 FormatPainterMenuItemFactory,

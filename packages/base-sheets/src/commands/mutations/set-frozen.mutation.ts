@@ -51,7 +51,6 @@ export const SetFrozenMutation: IMutation<ISetFrozenMutationParams> = {
         const config = worksheet.getConfig();
         const { startRow, startColumn, ySplit, xSplit } = params;
         config.freeze = { startRow, startColumn, ySplit, xSplit };
-
         return true;
     },
 };

@@ -35,7 +35,6 @@
         "lib"
     ],
     "private": false,
-    "type": "module",
     "scripts": {
         "test": "vitest run",
         "test:watch": "vitest",

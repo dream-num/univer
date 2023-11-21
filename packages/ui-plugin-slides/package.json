@@ -24,7 +24,6 @@
         "lib"
     ],
     "private": true,
-    "type": "module",
     "scripts": {
     },
     "dependencies": {

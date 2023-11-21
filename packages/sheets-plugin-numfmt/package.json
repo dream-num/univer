@@ -40,7 +40,6 @@
         "lib"
     ],
     "private": false,
-    "type": "module",
     "scripts": {
         "test": "vitest run",
         "esbuild": "node ./esbuild.config.mjs && tsc -p tsconfig.esbuild.json"

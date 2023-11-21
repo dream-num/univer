@@ -254,7 +254,8 @@ export class AutoFillController extends Disposable {
             }
             isReverse && data.reverse();
             // special rules must provide custom SERIES apply functions, or will be applied as copy
-            return fillCopy(data, len);
+            const copyFunc = customApplyFunctions?.[APPLY_TYPE.COPY] || fillCopy;
+            return copyFunc(data, len, direction);
         }
         if (applyType === APPLY_TYPE.ONLY_FORMAT) {
             const custom = customApplyFunctions?.[APPLY_TYPE.ONLY_FORMAT];
@@ -581,7 +582,10 @@ export class AutoFillController extends Disposable {
     private _hasSeries(copyData: ICopyDataPiece[]) {
         return copyData.some((copyDataPiece) => {
             const res = Object.keys(copyDataPiece).some((type) => {
-                if (copyDataPiece[type as DATA_TYPE]?.length && type !== DATA_TYPE.OTHER) {
+                if (
+                    copyDataPiece[type as DATA_TYPE]?.length &&
+                    ![DATA_TYPE.OTHER, DATA_TYPE.FORMULA].includes(type as DATA_TYPE)
+                ) {
                     return true;
                 }
                 return false;

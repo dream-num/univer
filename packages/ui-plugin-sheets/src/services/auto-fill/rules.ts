@@ -349,6 +349,6 @@ export const formulaRule: IAutoFillRule = {
     },
     applyFunctions: {
         // FIXME@Dushusir: COPY not work
-        [APPLY_TYPE.SERIES]: (data, len, direction) => fillCopyFormula(data, len, direction),
+        [APPLY_TYPE.COPY]: (data, len, direction) => fillCopyFormula(data, len, direction),
     },
 };

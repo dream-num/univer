@@ -15,7 +15,7 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
-import { InnerCutContentCommand, InnerPasteCommand } from '../commands/commands/clipboard.inner.command';
+import { CutContentCommand, InnerPasteCommand } from '../commands/commands/clipboard.inner.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
@@ -40,7 +40,7 @@ export class DocClipboardController extends Disposable {
         [DocCopyCommand, DocCutCommand, DocPasteCommand].forEach((command) =>
             this.disposeWithMe(this._commandService.registerAsMultipleCommand(command))
         );
-        [InnerPasteCommand, InnerCutContentCommand].forEach((command) =>
+        [InnerPasteCommand, CutContentCommand].forEach((command) =>
             this.disposeWithMe(this._commandService.registerCommand(command))
         );
     }
@@ -264,7 +264,7 @@ export class DocClipboardController extends Disposable {
                 },
             ];
 
-            this._commandService.executeCommand(InnerCutContentCommand.id, { segmentId, textRanges });
+            this._commandService.executeCommand(CutContentCommand.id, { segmentId, textRanges });
         } catch (e) {
             this._logService.error('[DocClipboardController] cut content failed');
         }

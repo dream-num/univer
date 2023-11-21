@@ -173,7 +173,7 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
                 segmentId,
             });
         } else {
-            // Already handle in InnerCutContentCommand, these code bellow will delete later?
+            // Already handle in CutContentCommand, these code bellow will delete later?
             doMutation.params!.mutations.push(...getRetainAndDeleteFromReplace(range, segmentId));
         }
 

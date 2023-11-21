@@ -128,7 +128,7 @@ export interface IInnerCutCommandParams {
     textRanges: ITextRangeWithStyle[];
 }
 
-export const InnerCutContentCommand: ICommand<IInnerCutCommandParams> = {
+export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
     id: 'doc.command.inner-cut',
 
     type: CommandType.COMMAND,

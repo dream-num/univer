@@ -18,7 +18,7 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { InnerCutContentCommand } from '../commands/commands/clipboard.inner.command';
+import { CutContentCommand } from '../commands/commands/clipboard.inner.command';
 import {
     DeleteCommand,
     DeleteDirection,
@@ -196,7 +196,7 @@ export class DeleteController extends Disposable {
                 const textRanges = this._getTextRangesWhenDelete();
                 // If the selection is not closed, the effect of Delete and
                 // BACKSPACE is the same as CUT, so the CUT command is executed.
-                this._commandService.executeCommand(InnerCutContentCommand.id, {
+                this._commandService.executeCommand(CutContentCommand.id, {
                     segmentId,
                     textRanges,
                 });
@@ -246,7 +246,7 @@ export class DeleteController extends Disposable {
             const textRanges = this._getTextRangesWhenDelete();
             // If the selection is not closed, the effect of Delete and
             // BACKSPACE is the same as CUT, so the CUT command is executed.
-            this._commandService.executeCommand(InnerCutContentCommand.id, {
+            this._commandService.executeCommand(CutContentCommand.id, {
                 segmentId,
                 textRanges,
             });
@@ -255,6 +255,7 @@ export class DeleteController extends Disposable {
         skeleton?.calculate();
     }
 
+    // get cursor position when BACKSPACE/DELETE excuse the CutContentCommand.
     private _getTextRangesWhenDelete() {
         const activeRange = this._textSelectionRenderManager.getActiveRange()!;
         const ranges = this._textSelectionRenderManager.getAllTextRanges();

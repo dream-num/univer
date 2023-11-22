@@ -61,6 +61,7 @@
         "lint-staged": "^15.1.0",
         "prettier": "^3.1.0",
         "react": "^18.2.0",
+        "react-dom": "^18.2.0",
         "storybook": "^7.5.3",
         "stylelint": "^15.11.0",
         "stylelint-config-clean-order": "^5.2.0",

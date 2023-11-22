@@ -16,9 +16,6 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout
-              uses: actions/checkout@v3
-
             # Get PR ID from artifact
             - name: download pr artifact
               uses: dawidd6/action-download-artifact@v2
@@ -31,8 +28,24 @@ jobs:
               id: pr
               run: echo "id=$(<pr-id.txt)" >> $GITHUB_OUTPUT
 
+            # Get PR branch name from artifact
+            - name: download pr artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  workflow: ${{ github.event.workflow_run.workflow_id }}
+                  run_id: ${{ github.event.workflow_run.id }}
+                  name: pr-branch-name
 
-            - name: Setup pnpm cache
+            - name: save PR branch name
+              id: pr-branch-name
+              run: echo "id=$(<pr-branch-name.txt)" >> $GITHUB_OUTPUT
+
+            - name: Checkout
+              uses: actions/checkout@v3
+              with:
+                  ref: ${{ steps.pr-branch-name.outputs.id }}
+
+            - name: Setup workspace cache
               uses: actions/cache@v3
               with:
                   path: .workspace

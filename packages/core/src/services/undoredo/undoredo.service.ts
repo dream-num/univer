@@ -1,8 +1,11 @@
 import { createIdentifier, IAccessor, IDisposable } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
+import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '../../common/const';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { CommandType, ICommand, ICommandService, IMutationInfo, sequenceExecute } from '../command/command.service';
+import { FOCUSING_EDITOR, FOCUSING_EDITOR_INPUT_FORMULA } from '../context/context';
+import { IContextService } from '../context/context.service';
 import { IUniverInstanceService } from '../instance/instance.service';
 
 // TODO: an undo redo element may be merge-able to another undo redo element
@@ -57,8 +60,9 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     protected readonly _redoStacks = new Map<string, IUndoRedoItem[]>();
 
     constructor(
-        @IUniverInstanceService protected readonly _currentUniverSheet: IUniverInstanceService,
-        @ICommandService protected readonly _commandService: ICommandService
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
+        @ICommandService protected readonly _commandService: ICommandService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
@@ -67,7 +71,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         this.disposeWithMe(this._commandService.registerCommand(UndoCommand));
         this.disposeWithMe(this._commandService.registerCommand(RedoCommand));
         this.disposeWithMe(toDisposable(() => this._undoRedoStatus$.complete()));
-        this.disposeWithMe(toDisposable(this._currentUniverSheet.focused$.subscribe(() => this._updateStatus())));
+        this.disposeWithMe(toDisposable(this._univerInstanceService.focused$.subscribe(() => this._updateStatus())));
     }
 
     pushUndoRedo(item: IUndoRedoItem): void {
@@ -145,7 +149,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     }
 
     protected _updateStatus(): void {
-        const unitID = this._currentUniverSheet.getFocusedUniverInstance()?.getUnitId();
+        const unitID = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId();
         const undos = (unitID && this._undoStacks.get(unitID)?.length) || 0;
         const redos = (unitID && this._redoStacks.get(unitID)?.length) || 0;
 
@@ -180,7 +184,16 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     }
 
     protected _getUndoStackForFocused(): IUndoRedoItem[] {
-        const unitID = this._currentUniverSheet.getFocusedUniverInstance()?.getUnitId();
+        let unitID: string = '';
+
+        if (this._contextService.getContextValue(FOCUSING_EDITOR)) {
+            unitID = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
+        } else if (this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)) {
+            unitID = DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
+        } else {
+            unitID = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId() ?? '';
+        }
+
         if (!unitID) {
             throw new Error('No focused univer instance!');
         }
@@ -189,7 +202,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     }
 
     protected _getRedoStackForFocused(): IUndoRedoItem[] {
-        const unitID = this._currentUniverSheet.getFocusedUniverInstance()?.getUnitId();
+        const unitID = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId();
         if (!unitID) {
             throw new Error('No focused univer instance!');
         }

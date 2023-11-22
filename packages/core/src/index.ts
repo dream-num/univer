@@ -1,5 +1,6 @@
 export * from './basics';
 export { dedupe, remove } from './common/array';
+export { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from './common/const';
 export * from './docs/domain';
 export * from './observer';
 export { Plugin, PluginType } from './plugin/plugin';

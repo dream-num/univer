@@ -1,12 +1,13 @@
+import { Documents, IPageRenderConfig, IRenderManagerService, Rect } from '@univerjs/base-render';
 import {
+    Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    Documents,
-    IPageRenderConfig,
-    IRenderManagerService,
-    Rect,
-} from '@univerjs/base-render';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+    ICommandService,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+} from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';

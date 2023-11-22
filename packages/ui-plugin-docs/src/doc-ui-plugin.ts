@@ -1,5 +1,12 @@
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY } from '@univerjs/base-render';
-import { IUniverInstanceService, LocaleService, Plugin, PluginType, Tools } from '@univerjs/core';
+import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    IUniverInstanceService,
+    LocaleService,
+    Plugin,
+    PluginType,
+    Tools,
+} from '@univerjs/core';
 import { Dependency, Inject, Injector } from '@wendellhu/redi';
 
 import { DefaultDocUiConfig, IDocUIPluginConfig } from './basics';
@@ -55,7 +62,7 @@ export class DocUIPlugin extends Plugin {
         const doc = currentService.getCurrentUniverDocInstance();
         const id = doc.getUnitId();
 
-        if (id !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY && id !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+        if (id !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY && id !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
             currentService.focusUniverInstance(doc.getUnitId());
         }
     }

@@ -13,10 +13,12 @@ import {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
     ISetFrozenMutationParams,
+    ISetWorksheetRowAutoHeightMutationParams,
     SelectionManagerService,
     SetFrozenCommand,
     SetFrozenMutation,
     SetWorksheetActivateMutation,
+    SetWorksheetRowAutoHeightMutation,
 } from '@univerjs/base-sheets';
 import {
     Disposable,
@@ -997,17 +999,39 @@ export class FreezeController extends Disposable {
             })
         );
 
-        this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            const freeze = this._getFreeze();
-            if (
-                command.id === DeltaColumnWidthCommand.id &&
-                command.params &&
-                freeze &&
-                (command.params as IDeltaColumnWidthCommandParams).anchorCol < freeze.startColumn
-            ) {
-                this._refreshCurrent();
-            }
-        });
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                const freeze = this._getFreeze();
+                if (
+                    command.id === DeltaColumnWidthCommand.id &&
+                    command.params &&
+                    freeze &&
+                    (command.params as IDeltaColumnWidthCommandParams).anchorCol < freeze.startColumn
+                ) {
+                    this._refreshCurrent();
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id === SetWorksheetRowAutoHeightMutation.id) {
+                    const params = command.params as ISetWorksheetRowAutoHeightMutationParams;
+                    const freeze = this._getFreeze();
+
+                    if (
+                        freeze &&
+                        freeze.startRow > -1 &&
+                        params.rowsAutoHeightInfo.some((info) => info.row < freeze.startRow)
+                    ) {
+                        const subscription = this._sheetSkeletonManagerService.currentSkeleton$.subscribe(() => {
+                            this._refreshCurrent();
+                            subscription.unsubscribe();
+                        });
+                    }
+                }
+            })
+        );
     }
 
     private _clearObserverEvent() {
@@ -1055,6 +1079,7 @@ export class FreezeController extends Disposable {
 
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
         const position = skeleton?.getNoMergeCellPositionByIndex(row, column, scaleX, scaleY);
+        console.log('===get position', position);
         if (skeleton == null) {
             return;
         }

@@ -1,8 +1,8 @@
-name: 📦 CI Preview
+name: 📤 Preview Deploy
 
 on:
     workflow_run:
-        workflows: ['📌 PR Title Lint']
+        workflows: ['📦 Preview Build']
         types:
             - completed
 
@@ -15,47 +15,11 @@ jobs:
         if: github.repository == 'dream-num/univer'
         runs-on: ubuntu-latest
 
-        env:
-            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-
         steps:
             - name: Checkout
               uses: actions/checkout@v3
 
-            - name: Install Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 16
-
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: 8
-                  run_install: false
-
-            - name: Get pnpm store directory
-              shell: bash
-              run: |
-                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-            - name: Setup pnpm cache
-              uses: actions/cache@v3
-              with:
-                  path: ${{ env.STORE_PATH }}
-                  key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-store-
-
-            - name: Install dependencies
-              run: pnpm install
-
-            - name: 📦 Build
-              run: pnpm run build
-
-            - name: 📦 Build demo
-              run: pnpm run build:demo
-
+            # Get PR ID from artifact
             - name: download pr artifact
               uses: dawidd6/action-download-artifact@v2
               with:
@@ -66,6 +30,15 @@ jobs:
             - name: save PR id
               id: pr
               run: echo "id=$(<pr-id.txt)" >> $GITHUB_OUTPUT
+
+
+            - name: Setup pnpm cache
+              uses: actions/cache@v3
+              with:
+                  path: .workspace
+                  key: ${{ runner.os }}-demo-${{ steps.pr.outputs.id }}
+                  restore-keys: |
+                      ${{ runner.os }}-demo-
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25

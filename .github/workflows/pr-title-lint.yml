@@ -21,7 +21,7 @@ jobs:
             - name: Install Node.js
               uses: actions/setup-node@v3
               with:
-                  node-version: 16
+                  node-version: 18
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -46,18 +46,3 @@ jobs:
               run: pnpm install
 
             - run: echo "${{ github.event.pull_request.title }}" | pnpx commitlint -g ./commitlint.config.cjs
-
-    set-pr-id:
-        name: Set PR ID
-        runs-on: ubuntu-latest
-        steps:
-            - name: Save PR number
-              if: ${{ always() }}
-              run: echo ${{ github.event.pull_request.number }} > ./pr-id.txt
-
-            - name: Upload PR number
-              if: ${{ always() }}
-              uses: actions/upload-artifact@v3
-              with:
-                  name: pr
-                  path: ./pr-id.txt

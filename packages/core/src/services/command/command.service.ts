@@ -115,28 +115,6 @@ export interface ICommandService {
     syncExecuteCommand<P extends object = object, R = boolean>(id: string, params?: P, options?: IExecutionOptions): R;
 
     /**
-     * Register a hook that will be triggered when the
-     *
-     * @param id the command that will be fired.
-     * @param callback the callback function that would be called
-     */
-    onCommandWillExecute<P extends object = object>(
-        id: string,
-        callback: (params?: P) => ICommandInfo[][]
-    ): IDisposable;
-
-    /**
-     * The method that would be trigger when a command is executing. Gather all interceptors and middlewares.
-     * Should return a series of mutations or operations that would be executed as well.
-     *
-     * @param id ID of the command that would be fired
-     * @param params Command parameters
-     *
-     * @returns redo and undo mutations / operations
-     */
-    triggerCommandWillFire<P extends object = object>(id: string, params: P): ICommandInfo[][];
-
-    /**
      * Register a callback function that will be executed when a command is executed.
      */
     onCommandExecuted(listener: CommandListener): IDisposable;
@@ -177,8 +155,6 @@ class CommandRegistry {
 export class CommandService implements ICommandService {
     private readonly _commandRegistry: CommandRegistry;
 
-    private readonly _commandWillExecuteRegistry: Map<string, Set<(params?: object) => ICommandInfo[][]>> = new Map();
-
     private readonly _commandExecutedListeners: CommandListener[] = [];
 
     private _multiCommandDisposables = new Map<string, IDisposable>();
@@ -198,39 +174,6 @@ export class CommandService implements ICommandService {
 
     registerAsMultipleCommand(command: ICommand): IDisposable {
         return this._registerMultiCommand(command);
-    }
-
-    onCommandWillExecute<P extends object = object>(
-        id: string,
-        callback: (params?: P) => ICommandInfo[][]
-    ): IDisposable {
-        const set = !this._commandWillExecuteRegistry.has(id)
-            ? (() => {
-                  const newSet = new Set<(params?: P) => ICommandInfo[][]>();
-                  this._commandWillExecuteRegistry.set(id, newSet as Set<(params?: object) => ICommandInfo[][]>);
-                  return newSet;
-              })()
-            : this._commandWillExecuteRegistry.get(id)!;
-
-        set.add(callback);
-
-        return toDisposable(() => {
-            set.delete(callback);
-            if (set.size === 0) {
-                this._commandWillExecuteRegistry.delete(id);
-            }
-        });
-    }
-
-    triggerCommandWillFire<P extends object = object>(id: string, params: P): ICommandInfo[][] {
-        if (!this._commandWillExecuteRegistry.has(id)) {
-            return [];
-        }
-
-        // TODO: @wzhudev: it may be better to wrap all undo & redos.
-        return Array.from(this._commandWillExecuteRegistry.get(id)!)
-            .map((interceptor) => interceptor(params))
-            .flat();
     }
 
     onCommandExecuted(listener: (commandInfo: ICommandInfo) => void): IDisposable {

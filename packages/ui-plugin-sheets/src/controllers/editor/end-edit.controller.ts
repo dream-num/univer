@@ -1,7 +1,7 @@
-import { MoveCursorOperation, TextSelectionManagerService } from '@univerjs/base-docs';
+import { MoveCursorOperation } from '@univerjs/base-docs';
 import { FormulaEngineService, matchToken } from '@univerjs/base-formula-engine';
 import { IMouseEvent, IPointerEvent, IRenderManagerService } from '@univerjs/base-render';
-import { SelectionManagerService, SetRangeValuesCommand } from '@univerjs/base-sheets';
+import { SetRangeValuesCommand } from '@univerjs/base-sheets';
 import { KeyCode } from '@univerjs/base-ui';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -63,8 +63,6 @@ export class EndEditController extends Disposable {
         @IContextService private readonly _contextService: IContextService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @Inject(FormulaEngineService) private readonly _formulaEngineService: FormulaEngineService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IUndoRedoService private _undoRedoService: IUndoRedoService
     ) {
         super();

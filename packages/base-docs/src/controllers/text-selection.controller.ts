@@ -210,7 +210,7 @@ export class TextSelectionController extends Disposable {
 
             this._textSelectionRenderManager.changeRuntime(skeleton, scene);
 
-            this._textSelectionManagerService.setCurrentSelection({
+            this._textSelectionManagerService.setCurrentSelectionNotRefresh({
                 pluginName: NORMAL_TEXT_SELECTION_PLUGIN_NAME,
                 unitId,
             });

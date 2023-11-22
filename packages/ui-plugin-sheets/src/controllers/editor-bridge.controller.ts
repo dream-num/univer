@@ -128,13 +128,10 @@ export class EditorBridgeController extends Disposable {
                 worksheet.getCell(startRow, startColumn),
                 location
             );
-            if (!cell) {
-                return;
-            }
 
-            let documentLayoutObject = skeleton.getCellDocumentModelWithFormula(cell);
+            let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
 
-            if (documentLayoutObject == null || documentLayoutObject.documentModel == null) {
+            if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
                 documentLayoutObject = skeleton.getBlankCellDocumentModel(cell);
             }
 

@@ -974,7 +974,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     // Only used for cell edit, and no need to rotate text when edit cell content!
-    getBlankCellDocumentModel(cell: ICellData, isFull: boolean = true): IDocumentLayoutObject {
+    getBlankCellDocumentModel(cell: Nullable<ICellData>, isFull: boolean = true): IDocumentLayoutObject {
         const documentModelObject = this._getCellDocumentModel(cell, undefined, undefined, undefined, true);
 
         if (documentModelObject != null) {
@@ -1019,7 +1019,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     private _getCellDocumentModel(
-        cell: ICellData,
+        cell: Nullable<ICellData>,
         isFull: boolean = false,
         isDeepClone: boolean = false,
         formulaFirst: boolean = false,

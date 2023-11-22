@@ -56,6 +56,7 @@ jobs:
             - name: 🩺 Run test
               run: pnpm run coverage
 
+            # TODO: cross fork PR will not trigger this action
             - name: 🧬 Report coverage
               uses: codecov/codecov-action@v3
               env:

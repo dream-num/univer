@@ -78,7 +78,6 @@ jobs:
               if: ${{ always() }}
               run: |
                   echo ${{ github.event.pull_request.number }} > ./pr-id.txt
-                  echo ${{ github.event.ref }} > ./pr-branch-name.txt
 
             - name: Upload PR number
               if: ${{ always() }}
@@ -86,10 +85,3 @@ jobs:
               with:
                   name: pr-id
                   path: ./pr-id.txt
-
-            - name: Upload PR branch name
-              if: ${{ always() }}
-              uses: actions/upload-artifact@v3
-              with:
-                  name: pr-branch-name
-                  path: ./pr-branch-name.txt

@@ -28,29 +28,13 @@ jobs:
               id: pr
               run: echo "id=$(<pr-id.txt)" >> $GITHUB_OUTPUT
 
-            - name: check PR id
-              if: ${{ steps.pr.outputs.id != '' }}
-              run: exit 1
-
-            # Get PR branch name from artifact
-            - name: download pr artifact
-              uses: dawidd6/action-download-artifact@v2
-              with:
-                  workflow: ${{ github.event.workflow_run.workflow_id }}
-                  run_id: ${{ github.event.workflow_run.id }}
-                  name: pr-branch-name
-
-            - name: save PR branch name
-              id: pr-branch-name
-              run: echo "name=$(<pr-branch-name.txt)" >> $GITHUB_OUTPUT
-
             - name: Checkout
+              if: ${{ steps.pr.outputs.id != '' }}
               uses: actions/checkout@v3
-              with:
-                  ref: ${{ steps.pr-branch-name.outputs.name }}
 
             - name: Setup workspace cache
               uses: actions/cache@v3
+              if: ${{ steps.pr.outputs.id != '' }}
               with:
                   path: .workspace
                   key: ${{ runner.os }}-demo-${{ steps.pr.outputs.id }}
@@ -59,6 +43,7 @@ jobs:
 
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
+              if: ${{ steps.pr.outputs.id != '' }}
               id: vercel-demo
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -67,6 +52,7 @@ jobs:
 
             - name: 🚀 Deploy to Vercel (storybook)
               uses: amondnet/vercel-action@v25
+              if: ${{ steps.pr.outputs.id != '' }}
               id: vercel-storybook
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -75,7 +61,7 @@ jobs:
 
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
-              if: ${{ success() }}
+              if: ${{ steps.pr.outputs.id != '' && success() }}
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   status: ${{ job.status }}
@@ -95,7 +81,7 @@ jobs:
 
             - name: 👾 Discord Notification
               uses: sarisia/actions-status-discord@v1
-              if: ${{ failure() }}
+              if: ${{ steps.pr.outputs.id != '' && failure() }}
               with:
                   webhook: ${{ secrets.DISCORD_WEBHOOK }}
                   status: ${{ job.status }}
@@ -110,6 +96,7 @@ jobs:
 
             - name: 🧽 Find And Delete Comment
               uses: peter-evans/find-comment@v2
+              if: ${{ steps.pr.outputs.id != '' }}
               id: fc
               with:
                   issue-number: ${{ steps.pr.outputs.id }}
@@ -118,6 +105,7 @@ jobs:
 
             - name: 📝 Create or update comment
               uses: peter-evans/create-or-update-comment@v3
+              if: ${{ steps.pr.outputs.id != '' }}
               with:
                   comment-id: ${{ steps.fc.outputs.comment-id }}
                   issue-number: ${{ steps.pr.outputs.id }}

@@ -13,6 +13,22 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+              with:
+                  ref: ${{ steps.ref.outputs.ref }}
+
+            - name: Install Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+                  run_install: false
+
             - name: Get pnpm store directory
               shell: bash
               run: |

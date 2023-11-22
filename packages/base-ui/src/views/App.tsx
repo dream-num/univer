@@ -4,10 +4,11 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { ComponentType, useEffect, useMemo, useRef, useState } from 'react';
 
-import { IMessageService } from '..';
 import { IWorkbenchOptions } from '../controllers/ui/ui.controller';
+import { IMessageService } from '../services/message/message.service';
 import { ISidebarService } from '../services/sidebar/sidebar.service';
 import styles from './app.module.less';
+import { ComponentContainer } from './components/ComponentContainer';
 import { ContextMenu } from './components/context-menu/ContextMenu';
 import { MenuBar } from './components/doc-bars/MenuBar';
 import { Toolbar } from './components/doc-bars/Toolbar';
@@ -19,19 +20,8 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     headerComponents?: Set<() => ComponentType>;
     contentComponents?: Set<() => ComponentType>;
     footerComponents?: Set<() => ComponentType>;
-    // sidebarComponents?: Set<() => ComponentType>;
     headerMenuComponents?: Set<() => ComponentType>;
     onRendered?: (container: HTMLElement) => void;
-}
-
-function ComponentContainer(props: { components?: Set<() => ComponentType> }) {
-    const { components } = props;
-
-    if (!components) return null;
-
-    return Array.from(components.values()).map((component, index) =>
-        React.createElement(component(), { key: `${index}` })
-    );
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -98,7 +88,7 @@ export function App(props: IUniverAppProps) {
         <ConfigProvider locale={locale} mountContainer={portalContainer}>
             <section className={styles.appLayout}>
                 {/* header */}
-                <header>{props.toolbar && <MenuBar />}</header>
+                {props.toolbar && <MenuBar headerMenuComponents={headerMenuComponents} />}
 
                 {/* content */}
                 <section className={styles.appContainer}>
@@ -109,8 +99,6 @@ export function App(props: IUniverAppProps) {
                             {props.toolbar && <Toolbar />}
 
                             <ComponentContainer components={headerComponents} />
-
-                            <ComponentContainer components={headerMenuComponents} />
                         </header>
 
                         {/* <ComponentContainer components={sidebarComponents} /> */}

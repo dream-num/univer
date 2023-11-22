@@ -3,7 +3,7 @@ import { IDisposable } from '@wendellhu/redi';
 import { remove } from '../../common/array';
 import { Nullable } from '../../common/type-utils';
 import { Disposable, DisposableCollection, toDisposable } from '../../shared/lifecycle';
-import { Workbook } from '../../sheets/workbook';
+import type { Workbook } from '../../sheets/workbook';
 import { Worksheet } from '../../sheets/worksheet';
 import { ICellData } from '../../types/interfaces/i-cell-data';
 import { ICommandInfo } from '../command/command.service';

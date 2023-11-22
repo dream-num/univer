@@ -1,8 +1,6 @@
 import { forwardRef, Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
-import { INTERCEPTOR_POINT } from '../services/sheet-interceptor/interceptor-const';
-import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import { GenName, Nullable, Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
 import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK, DEFAULT_WORKSHEET } from '../types/const';
@@ -59,8 +57,7 @@ export class Workbook extends Disposable {
     constructor(
         workbookData: Partial<IWorkbookData> = {},
         @Inject(forwardRef(() => GenName)) private readonly _genName: GenName,
-        @Inject(Injector) readonly _injector: Injector,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
+        @Inject(Injector) readonly _injector: Injector
     ) {
         super();
 
@@ -316,13 +313,6 @@ export class Workbook extends Disposable {
     load(config: IWorkbookData) {
         // TODO: new Command
         this._snapshot = config;
-    }
-
-    save(): IWorkbookData {
-        const snapshot =
-            this._sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.SAVE)(this._snapshot, this) ||
-            this._snapshot;
-        return snapshot;
     }
 
     /**

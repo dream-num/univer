@@ -23,5 +23,5 @@ export interface IWorkbookData extends IExtraModelData {
     sheets: { [sheetId: string]: Partial<IWorksheetData> };
 
     // The type of data depends on how the plug-in is defined
-    resources: Array<{ id: string; name: string; data?: unknown }>;
+    resources: Array<{ id?: string; name: string; data?: unknown }>;
 }

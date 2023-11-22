@@ -37,7 +37,11 @@ export class PermissionService extends Disposable implements IPermissionService 
                     this._resourceManagerService.registerPluginResource(workbook.getUnitId(), resourceKey, {
                         onChange: (unitID, value) => {
                             (value as PermissionPoint[]).forEach((permissionPoint) => {
-                                this.addPermissionPoint(unitID, permissionPoint);
+                                if (this.getPermissionPoint(unitID, permissionPoint.id)) {
+                                    this.updatePermissionPoint(unitID, permissionPoint.id, permissionPoint.value);
+                                } else {
+                                    this.addPermissionPoint(unitID, permissionPoint);
+                                }
                             });
                         },
                         toJson: (unitID: string) => this._toJson(unitID),

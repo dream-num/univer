@@ -8,7 +8,7 @@ const CELL_CONTENT = createInterceptorKey<ICellData, ISheetLocation>('CELL_CONTE
 const BEFORE_CELL_EDIT = createInterceptorKey<ICellData, ISheetLocation>('BEFORE_CELL_EDIT');
 const AFTER_CELL_EDIT = createInterceptorKey<ICellData, ISheetLocation>('AFTER_CELL_EDIT');
 const PERMISSION = createInterceptorKey<boolean, ICommandInfo>('PERMISSION');
-const SAVE = createInterceptorKey<IWorkbookData, ISheetLocation['workbook']>('PERMISSION');
+const SAVE = createInterceptorKey<IWorkbookData, ISheetLocation['workbook']>('SAVE');
 
 export const INTERCEPTOR_POINT = {
     CELL_CONTENT,

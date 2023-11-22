@@ -1,0 +1,86 @@
+name: 📦 Preview Build
+
+on:
+    push:
+        branches: [main, dev]
+    pull_request:
+        branches: [main, dev]
+
+permissions:
+    contents: read
+
+jobs:
+    build:
+        if: github.repository == 'dream-num/univer'
+        runs-on: ubuntu-latest
+
+        env:
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Install Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+                  run_install: false
+
+            - name: Get pnpm store directory
+              shell: bash
+              run: |
+                  echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+            - name: Setup pnpm cache
+              uses: actions/cache@v3
+              with:
+                  path: ${{ env.STORE_PATH }}
+                  key: ${{ runner.os }}-demo-${{ hashFiles('**/pnpm-lock.yaml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-demo-
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: 📦 Build
+              run: pnpm run build
+
+            - name: 📦 Build demo
+              run: pnpm run build:demo
+
+            - name: Copy demo to workspace
+              run: |
+                    mkdir .workspace
+                    cp -r ./examples/univer-doc-ts/local .workspace/doc
+                    cp -r ./examples/univer-sheet-ts/local .workspace/sheet
+                    cp -r ./examples/univer-slide-ts/local .workspace/slide
+
+            - name: Setup demo cache
+              uses: actions/cache@v3
+              with:
+                path: .workspace
+                key: ${{ runner.os }}-demo-${{ github.event.pull_request.number }}
+                restore-keys: |
+                    ${{ runner.os }}-demo-
+
+    set-pr-id:
+        name: Set PR ID
+        runs-on: ubuntu-latest
+        steps:
+            - name: Save PR number
+              if: ${{ always() }}
+              run: echo ${{ github.event.pull_request.number }} > ./pr-id.txt
+
+            - name: Upload PR number
+              if: ${{ always() }}
+              uses: actions/upload-artifact@v3
+              with:
+                  name: pr
+                  path: ./pr-id.txt

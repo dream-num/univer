@@ -149,7 +149,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     }
 
     protected _updateStatus(): void {
-        const unitID = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId();
+        const unitID = this._getFocusedUniverInstanceId();
         const undos = (unitID && this._undoStacks.get(unitID)?.length) || 0;
         const redos = (unitID && this._redoStacks.get(unitID)?.length) || 0;
 
@@ -184,6 +184,26 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     }
 
     protected _getUndoStackForFocused(): IUndoRedoItem[] {
+        const unitID = this._getFocusedUniverInstanceId();
+
+        if (!unitID) {
+            throw new Error('No focused univer instance!');
+        }
+
+        return this._getUndoStack(unitID, true);
+    }
+
+    protected _getRedoStackForFocused(): IUndoRedoItem[] {
+        const unitID = this._getFocusedUniverInstanceId();
+
+        if (!unitID) {
+            throw new Error('No focused univer instance!');
+        }
+
+        return this._getRedoStack(unitID, true);
+    }
+
+    private _getFocusedUniverInstanceId() {
         let unitID: string = '';
 
         if (this._contextService.getContextValue(FOCUSING_EDITOR)) {
@@ -194,20 +214,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
             unitID = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId() ?? '';
         }
 
-        if (!unitID) {
-            throw new Error('No focused univer instance!');
-        }
-
-        return this._getUndoStack(unitID, true);
-    }
-
-    protected _getRedoStackForFocused(): IUndoRedoItem[] {
-        const unitID = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId();
-        if (!unitID) {
-            throw new Error('No focused univer instance!');
-        }
-
-        return this._getRedoStack(unitID, true);
+        return unitID;
     }
 }
 

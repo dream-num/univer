@@ -59,15 +59,17 @@ export const SheetNumfmtPanel: FC<SheetNumfmtPanelProps> = (props) => {
     const handleCancel = () => {
         props.onChange({ type: 'cancel', value: pattern.current });
     };
+
     const subProps: BusinessComponentProps = {
         onChange: handleChange,
         defaultValue,
         defaultPattern,
     };
+
     useEffect(() => {
         typeSet(findDefaultType());
-        handleChange('');
     }, [defaultPattern, defaultValue]);
+
     return (
         <div className="numfmt-panel p-b-20">
             <div>

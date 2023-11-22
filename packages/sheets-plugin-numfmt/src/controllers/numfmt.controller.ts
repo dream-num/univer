@@ -39,7 +39,7 @@ import {
 import { SheetSkeletonManagerService } from '@univerjs/ui-plugin-sheets';
 import { IDisposable, Inject, Injector } from '@wendellhu/redi';
 import { combineLatest, Observable } from 'rxjs';
-import { bufferTime, distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
+import { bufferTime, distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
 import { NumfmtItem } from '../base/types';
@@ -346,9 +346,29 @@ export class NumfmtController extends Disposable {
                                         disposableCollection.dispose();
                                     };
                                 })
-                        )
+                        ),
+                        // _previewPattern will be correct by react effect,this is late and causes the render to flash.
+                        // this to fix this problem by preset the correct rendering pattern in advance.
+                        tap(({ selectionRanges }) => {
+                            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+                            const range = selectionRanges[0];
+                            const row = range.startRow;
+                            const col = range.startColumn;
+                            const numfmtValue = this._numfmtService.getValue(
+                                workbook.getUnitId(),
+                                workbook.getActiveSheet().getSheetId(),
+                                row,
+                                col
+                            );
+                            if (numfmtValue) {
+                                this._previewPattern = numfmtValue.pattern;
+                            } else {
+                                this._previewPattern = '';
+                            }
+                        })
                     )
                     .subscribe(({ disposableCollection, selectionRanges }) => {
+                        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
                         this.openPanel();
                         disposableCollection.add(
                             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
@@ -391,6 +411,7 @@ export class NumfmtController extends Disposable {
                                 },
                             })
                         );
+                        this._renderManagerService.getRenderById(workbook.getUnitId())?.mainComponent?.makeDirty();
                     })
             )
         );

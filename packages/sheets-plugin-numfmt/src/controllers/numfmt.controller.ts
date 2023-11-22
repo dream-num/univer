@@ -12,7 +12,6 @@ import {
     handleIRemoveCol,
     handleIRemoveRow,
     handleMoveRange,
-    ISelectionWithStyle,
     RefRangeService,
     runRefRangeMutations,
     SelectionManagerService,
@@ -25,6 +24,7 @@ import {
     DisposableCollection,
     ICommandService,
     INTERCEPTOR_POINT,
+    IRange,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -319,79 +319,84 @@ export class NumfmtController extends Disposable {
                 }
             });
         });
-        const selectionChangeWithPanelOpen$ = isPanelOpenObserver.pipe(
-            switchMap(
-                (isOpen) =>
-                    new Observable<ISelectionWithStyle[]>((subscribe) => {
-                        const subscription =
-                            isOpen &&
-                            this._selectionManagerService.selectionInfo$.subscribe((selectionInfos) => {
-                                isOpen && selectionInfos && subscribe.next(selectionInfos);
-                            });
-                        return () => subscription && subscription.unsubscribe();
-                    })
-            ),
-            switchMap((selectionInfos) => {
-                const selectionRanges = selectionInfos.map((selectionInfo) => selectionInfo.range);
-                return new Observable<{
-                    disposableCollection: DisposableCollection;
-                    selectionRanges: Array<ISelectionWithStyle['range']>;
-                }>((subscribe) => {
-                    const disposableCollection = new DisposableCollection();
-                    subscribe.next({ disposableCollection, selectionRanges });
-                    return () => {
-                        disposableCollection.dispose();
-                    };
-                });
-            })
-        );
         this.disposeWithMe(
             toDisposable(
-                selectionChangeWithPanelOpen$.subscribe(({ disposableCollection, selectionRanges }) => {
-                    this.openPanel();
-                    disposableCollection.add(
-                        this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-                            priority: 99,
-                            handler: (cell, location, next) => {
-                                const { row, col } = location;
-                                if (
-                                    selectionRanges.find(
-                                        (range) =>
-                                            range.startColumn <= col &&
-                                            range.endColumn >= col &&
-                                            range.startRow <= row &&
-                                            range.endRow >= row
-                                    )
-                                ) {
-                                    const rawValue = location.worksheet.getCellRaw(row, col);
-                                    const value = rawValue?.v;
-                                    const type = rawValue?.t;
-                                    if (value === undefined || value === null || type !== CellValueType.NUMBER) {
-                                        return next();
-                                    }
-                                    // const pattern = ''; // todo get
-                                    const info = getPatternPreview(this._previewPattern, value as number);
-                                    if (info.color) {
-                                        const colorMap = this._themeService.getCurrentTheme();
-                                        const color = colorMap[`${info.color}500`];
+                isPanelOpenObserver
+                    .pipe(
+                        distinctUntilChanged(),
+                        switchMap(
+                            (isOpen) =>
+                                new Observable<{
+                                    disposableCollection: DisposableCollection;
+                                    selectionRanges: IRange[];
+                                }>((subscribe) => {
+                                    const disposableCollection = new DisposableCollection();
+                                    isOpen &&
+                                        disposableCollection.add(
+                                            toDisposable(
+                                                this._selectionManagerService.selectionInfo$.subscribe(
+                                                    (selectionInfos) => {
+                                                        const selectionRanges = selectionInfos?.map(
+                                                            (selectionInfo) => selectionInfo.range
+                                                        );
+
+                                                        selectionRanges &&
+                                                            subscribe.next({ disposableCollection, selectionRanges });
+                                                    }
+                                                )
+                                            )
+                                        );
+                                    return () => {
+                                        disposableCollection.dispose();
+                                    };
+                                })
+                        )
+                    )
+                    .subscribe(({ disposableCollection, selectionRanges }) => {
+                        this.openPanel();
+                        disposableCollection.add(
+                            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                                priority: 99,
+                                handler: (cell, location, next) => {
+                                    const { row, col } = location;
+                                    if (
+                                        selectionRanges.find(
+                                            (range) =>
+                                                range.startColumn <= col &&
+                                                range.endColumn >= col &&
+                                                range.startRow <= row &&
+                                                range.endRow >= row
+                                        )
+                                    ) {
+                                        const rawValue = location.worksheet.getCellRaw(row, col);
+                                        const value = rawValue?.v;
+                                        const type = rawValue?.t;
+                                        if (value === undefined || value === null || type !== CellValueType.NUMBER) {
+                                            return next();
+                                        }
+                                        // const pattern = ''; // todo get
+                                        const info = getPatternPreview(this._previewPattern, value as number);
+                                        if (info.color) {
+                                            const colorMap = this._themeService.getCurrentTheme();
+                                            const color = colorMap[`${info.color}500`];
+                                            return {
+                                                ...cell,
+                                                v: info.result,
+                                                t: CellValueType.STRING,
+                                                s: { cl: { rgb: color } },
+                                            };
+                                        }
                                         return {
                                             ...cell,
                                             v: info.result,
                                             t: CellValueType.STRING,
-                                            s: { cl: { rgb: color } },
                                         };
                                     }
-                                    return {
-                                        ...cell,
-                                        v: info.result,
-                                        t: CellValueType.STRING,
-                                    };
-                                }
-                                return next();
-                            },
-                        })
-                    );
-                })
+                                    return next();
+                                },
+                            })
+                        );
+                    })
             )
         );
     }
